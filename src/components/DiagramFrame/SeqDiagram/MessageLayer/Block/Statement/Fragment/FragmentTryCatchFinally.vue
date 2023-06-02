@@ -10,7 +10,7 @@
       </div>
     </div>
     
-    <b-collapse visible :id="`collapse-${uuid}`" class="mt-2">
+    <b-collapse visible :id="`collapse-${uuid}`">
     <div class="segment">
       <!-- fragment-offset set as offsetX - 1 for fragment border     -->
       <block

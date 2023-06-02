@@ -13,7 +13,7 @@
       </div>
       
     </div>
-    <b-collapse visible :id="`collapse-${uuid}`" class="mt-2">
+    <b-collapse visible :id="`collapse-${uuid}`">
     <div class="segment">
       <div class="text-skin-fragment">
         <label class="condition p-1">[{{ condition }}]</label>

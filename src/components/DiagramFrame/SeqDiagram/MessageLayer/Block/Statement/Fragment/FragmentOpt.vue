@@ -7,7 +7,7 @@
         <collapsible-button :element-id="`collapse-${uuid}`" />
       </div>
     </div>
-    <b-collapse visible :id="`collapse-${uuid}`" class="mt-2">
+    <b-collapse visible :id="`collapse-${uuid}`">
       <block
         :style="{ paddingLeft: `${offsetX}px` }"
         :context="opt.braceBlock().block()"
