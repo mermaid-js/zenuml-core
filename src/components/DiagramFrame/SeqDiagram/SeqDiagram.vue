@@ -21,6 +21,9 @@ import {
   FRAGMENT_LEFT_BASE_OFFSET,
   FRAGMENT_RIGHT_BASE_OFFSET,
 } from './MessageLayer/Block/Statement/Fragment/FragmentMixin';
+import {AllMessages} from "../../../positioning/MessageContextListener";
+import WidthProviderOnBrowser from "../../../positioning/WidthProviderFunc";
+import {TextType} from "../../../positioning/Coordinate";
 
 export default {
   name: 'seq-diagram',
@@ -30,8 +33,22 @@ export default {
   },
   computed: {
     ...mapGetters(['rootContext', 'coordinates']),
+    rightParticipant: function () {
+      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
+      return allParticipants.reverse()[0];
+    },
+
     width() {
-      return this.coordinates.getWidth() + 10 * (this.depth + 1) + FRAGMENT_RIGHT_BASE_OFFSET;
+      const allMessages = AllMessages(this.rootContext);
+      // the messages have a structure like {from, signature, type, to}
+      // find all the messages that has from == to == rightParticipant
+      const widths = allMessages
+          .filter((m) => m.from === m.to && m.from === this.rightParticipant)
+          .map((m) => m.signature)
+          .map((s) => WidthProviderOnBrowser(s, TextType.MessageContent));
+
+      let width = Math.max.apply(null, [0, ...widths])
+      return this.coordinates.getWidth() + 10 * (this.depth + 1) + FRAGMENT_RIGHT_BASE_OFFSET + width;
     },
     depth: function () {
       return Depth(this.rootContext);
