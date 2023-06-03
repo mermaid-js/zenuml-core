@@ -93,4 +93,10 @@ export default {
 * {
   border-color: inherit;
 }
+.collapsing {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.35s ease;
+}
 </style>

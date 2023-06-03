@@ -99,8 +99,10 @@ export default {
 * {
   border-color: inherit;
 }
-.collapsed > .when-open,
-.not-collapsed > .when-closed {
-  display: none;
+.collapsing {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.35s ease;
 }
 </style>

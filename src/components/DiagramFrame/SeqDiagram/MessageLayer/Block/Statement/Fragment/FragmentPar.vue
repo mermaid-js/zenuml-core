@@ -58,4 +58,10 @@ export default {
   border-top-width: 1px;
   border-top-style: solid;
 }
+.collapsing {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.35s ease;
+}
 </style>

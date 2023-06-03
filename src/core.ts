@@ -1,5 +1,4 @@
 import parentLogger from './logger/logger';
-import Vue from 'vue';
 import { createApp } from 'vue';
 import { createStore } from 'vuex';
 import Store from './store/Store';
@@ -15,18 +14,9 @@ import './components/Cosmetic-star-uml.scss';
 import './components/theme-blue-river.scss';
 import './themes/theme-dark.css';
 
-// Import Bootstrap and BootstrapVue CSS files (order is important)
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-
 import Block from './components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block.vue';
 import Comment from './components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue';
 const logger = parentLogger.child({ name: 'core' });
-
-// Make BootstrapVue available throughout your project
-Vue.use(BootstrapVue)
-// Optionally install the BootstrapVue icon components plugin
-Vue.use(IconsPlugin)
 
 interface IZenUml {
   get code(): string | undefined;
@@ -50,6 +40,8 @@ export default class ZenUml implements IZenUml {
     this.app.component('Comment', Comment);
     this.app.component('Block', Block);
     this.app.use(this.store);
+    this.app.use(BootstrapVue);
+    this.app.use(IconsPlugin);
     this.app.mount(this.el);
   }
 
