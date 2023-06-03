@@ -1,8 +1,6 @@
-import { Depth, Participants } from '../../../../../../../parser';
-import { mapGetters } from 'vuex';
-import { AllMessages } from '../../../../../../../positioning/MessageContextListener';
-import WidthProviderOnBrowser from '../../../../../../../positioning/WidthProviderFunc';
-import {TextType} from "../../../../../../../positioning/Coordinate";
+import {Depth, Participants} from '../../../../../../../parser';
+import {mapGetters} from 'vuex';
+import {extraWidthDueToSelfMessage} from "../../../../ExtraWidthDueToSelfMessage";
 
 export const FRAGMENT_LEFT_BASE_OFFSET = 30;
 export const FRAGMENT_RIGHT_BASE_OFFSET = 50;
@@ -35,14 +33,7 @@ export default {
       return this.distance2(this.leftParticipant, this.from) + extra + FRAGMENT_LEFT_BASE_OFFSET;
     },
     fragmentStyle: function () {
-      const allMessages = AllMessages(this.context);
-      // the messages have a structure like {from, signature, type, to}
-      // find all the messages that has from == to == rightParticipant
-      const widths = allMessages
-          .filter((m) => m.from === m.to && m.from === this.rightParticipant)
-          .map((m) => m.signature)
-          .map((s) => WidthProviderOnBrowser(s, TextType.MessageContent));
-      let width = Math.max.apply(null, [0, ...widths])
+      let width = extraWidthDueToSelfMessage(this.context, this.rightParticipant);
       return {
         // +1px for the border of the fragment
         transform: 'translateX(' + (this.offsetX + 1) * -1 + 'px)',

@@ -15,15 +15,13 @@
 <script>
 import LifeLineLayer from './LifeLineLayer/LifeLineLayer.vue';
 import MessageLayer from './MessageLayer/MessageLayer.vue';
-import { mapGetters } from 'vuex';
-import { Depth } from '../../../parser';
+import {mapGetters} from 'vuex';
+import {Depth} from '../../../parser';
 import {
   FRAGMENT_LEFT_BASE_OFFSET,
   FRAGMENT_RIGHT_BASE_OFFSET,
 } from './MessageLayer/Block/Statement/Fragment/FragmentMixin';
-import {AllMessages} from "../../../positioning/MessageContextListener";
-import WidthProviderOnBrowser from "../../../positioning/WidthProviderFunc";
-import {TextType} from "../../../positioning/Coordinate";
+import {extraWidthDueToSelfMessage} from "./ExtraWidthDueToSelfMessage";
 
 export default {
   name: 'seq-diagram',
@@ -39,15 +37,7 @@ export default {
     },
 
     width() {
-      const allMessages = AllMessages(this.rootContext);
-      // the messages have a structure like {from, signature, type, to}
-      // find all the messages that has from == to == rightParticipant
-      const widths = allMessages
-          .filter((m) => m.from === m.to && m.from === this.rightParticipant)
-          .map((m) => m.signature)
-          .map((s) => WidthProviderOnBrowser(s, TextType.MessageContent));
-
-      let width = Math.max.apply(null, [0, ...widths])
+      let width = extraWidthDueToSelfMessage(this.rootContext, this.rightParticipant);
       return this.coordinates.getWidth() + 10 * (this.depth + 1) + FRAGMENT_RIGHT_BASE_OFFSET + width;
     },
     depth: function () {
