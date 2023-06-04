@@ -5,7 +5,7 @@
     v-if="entities.length > 0"
     :style="{ left: `${left}px`, width: `${right - left}px` }"
   >
-    <div class="flex flex-col shadow shadow-slate-500/50 flex-grow">
+    <div class="flex flex-col  flex-grow" :class="{ shadow: renderParticipants, 'shadow-slate-500/50': !renderParticipants }">
       <!-- TODO: add group name back later.  -->
       <!--      <div class="h-14 absolute" :class="{'-mt-12': !!name}">-->
       <!--        <label class="block text-center font-semibold">{{name}}</label>-->
@@ -18,6 +18,7 @@
           :ref="entity.name"
           :entity="entity"
           :group-left="left"
+          :renderParticipants="renderParticipants"
         />
       </div>
     </div>
@@ -33,7 +34,7 @@ import { TextType } from '../../../../positioning/Coordinate';
 
 export default {
   name: 'lifeline-group',
-  props: ['context'],
+  props: ['context', 'renderParticipants'],
   computed: {
     ...mapGetters(['centerOf']),
     name() {
