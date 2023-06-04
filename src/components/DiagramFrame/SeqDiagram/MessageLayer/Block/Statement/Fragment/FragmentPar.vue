@@ -1,16 +1,17 @@
 <template>
   <div class="fragment par border-skin-fragment rounded" :style="fragmentStyle">
     <comment v-if="comment" :comment="comment" />
-    <div
-      class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t"
-    >
-      <div class="name font-semibold p-1 border-b"><label>Par</label></div>
+    <div class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t" >
+      <div class="name font-semibold p-1 border-b">
+        <collapse-button label="Par" @click="this.toggle"/>
+      </div>
     </div>
-    <block
-      :style="{ paddingLeft: `${offsetX}px` }"
-      :context="par.braceBlock().block()"
-      :selfCallIndent="selfCallIndent"
-    ></block>
+    <div :class="{hidden: collapsed}">
+      <block
+        :style="{ paddingLeft: `${offsetX}px` }"
+        :context="par.braceBlock().block()"
+        :selfCallIndent="selfCallIndent" ></block>
+    </div>
   </div>
 </template>
 

@@ -1,5 +1,6 @@
 import { Depth, Participants } from '../../../../../../../parser';
 import { mapGetters } from 'vuex';
+import CollapseButton from './CollapseButton.vue';
 
 export const FRAGMENT_LEFT_BASE_OFFSET = 30;
 export const FRAGMENT_RIGHT_BASE_OFFSET = 100;
@@ -44,4 +45,13 @@ export default {
       };
     },
   },
+  data: function() {
+    return {collapsed: false};
+  },
+  methods: {
+    toggle($event, collapsed) {
+      this.collapsed = collapsed;
+    }
+  },
+  components: { CollapseButton },
 };

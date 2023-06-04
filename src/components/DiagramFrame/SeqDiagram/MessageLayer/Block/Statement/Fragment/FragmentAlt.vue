@@ -11,47 +11,46 @@
     </div>
 
     <div :class="{hidden: collapsed}">
-    <div class="segment">
-      <div class="text-skin-fragment">
-        <label class="condition p-1">[{{ condition }}]</label>
-      </div>
-      <block
-        v-if="blockInIfBlock"
-        :style="{ paddingLeft: `${offsetX}px` }"
-        :context="blockInIfBlock"
-        :selfCallIndent="selfCallIndent"
-      ></block>
-    </div>
-    <template v-for="(elseIfBlock, index) in alt.elseIfBlock()" :key="index + 500">
-      <div class="segment mt-2 border-t border-solid">
-        <div class="text-skin-fragment" :key="index + 1000">
-          <label class="else-if hidden">else if</label>
-          <label class="condition p-1">[{{ conditionFromIfElseBlock(elseIfBlock) }}]</label>
+      <div class="segment">
+        <div class="text-skin-fragment">
+          <label class="condition p-1">[{{ condition }}]</label>
         </div>
         <block
+          v-if="blockInIfBlock"
           :style="{ paddingLeft: `${offsetX}px` }"
-          :context="blockInElseIfBlock(elseIfBlock)"
-          :selfCallIndent="selfCallIndent"
-          :key="index + 2000"
-        ></block>
-      </div>
-    </template>
-    <template v-if="elseBlock">
-      <div class="segment mt-2 border-t border-solid">
-        <div class="text-skin-fragment"><label class="p-1">[else]</label></div>
-        <block
-          :style="{ paddingLeft: `${offsetX}px` }"
-          :context="elseBlock"
+          :context="blockInIfBlock"
           :selfCallIndent="selfCallIndent"
         ></block>
       </div>
-    </template>
-  </div>
+      <template v-for="(elseIfBlock, index) in alt.elseIfBlock()" :key="index + 500">
+        <div class="segment mt-2 border-t border-solid">
+          <div class="text-skin-fragment" :key="index + 1000">
+            <label class="else-if hidden">else if</label>
+            <label class="condition p-1">[{{ conditionFromIfElseBlock(elseIfBlock) }}]</label>
+          </div>
+          <block
+            :style="{ paddingLeft: `${offsetX}px` }"
+            :context="blockInElseIfBlock(elseIfBlock)"
+            :selfCallIndent="selfCallIndent"
+            :key="index + 2000"
+          ></block>
+        </div>
+      </template>
+      <template v-if="elseBlock">
+        <div class="segment mt-2 border-t border-solid">
+          <div class="text-skin-fragment"><label class="p-1">[else]</label></div>
+          <block
+            :style="{ paddingLeft: `${offsetX}px` }"
+            :context="elseBlock"
+            :selfCallIndent="selfCallIndent"
+          ></block>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
 <script>
-import CollapseButton from './CollapseButton.vue';
 import fragment from './FragmentMixin';
 
 export default {
@@ -75,9 +74,6 @@ export default {
       return this.alt?.elseBlock()?.braceBlock()?.block();
     },
   },
-  data: function() {
-    return {collapsed: false};
-  },
   methods: {
     conditionFromIfElseBlock(ctx) {
       return ctx?.parExpr()?.condition()?.getFormattedText();
@@ -85,11 +81,7 @@ export default {
     blockInElseIfBlock(ctx) {
       return ctx?.braceBlock()?.block();
     },
-    toggle($event, collapsed) {
-      this.collapsed = collapsed;
-    }
   },
-  components: { CollapseButton },
 };
 </script>
 
