@@ -1,6 +1,6 @@
 import {Depth, Participants} from '../../../../../../../parser';
 import {mapGetters} from 'vuex';
-import {extraWidthDueToSelfMessage} from "../../../../ExtraWidthDueToSelfMessage";
+import {TotalWidth} from "../../../../ExtraWidthDueToSelfMessage";
 
 export const FRAGMENT_LEFT_BASE_OFFSET = 30;
 export const FRAGMENT_RIGHT_BASE_OFFSET = 50;
@@ -33,16 +33,13 @@ export default {
       return this.distance2(this.leftParticipant, this.from) + extra + FRAGMENT_LEFT_BASE_OFFSET;
     },
     fragmentStyle: function () {
-      let width = extraWidthDueToSelfMessage(this.context, this.rightParticipant);
+      const ctx = this.context;
+      const totalWidth = TotalWidth(ctx, this.leftParticipant, this.rightParticipant, this.distance2);
       return {
         // +1px for the border of the fragment
         transform: 'translateX(' + (this.offsetX + 1) * -1 + 'px)',
         width:
-          this.distance2(this.leftParticipant, this.rightParticipant) +
-          20 * this.depth +
-          FRAGMENT_LEFT_BASE_OFFSET +
-          FRAGMENT_RIGHT_BASE_OFFSET +
-          width +
+          totalWidth +
           'px',
       };
     },

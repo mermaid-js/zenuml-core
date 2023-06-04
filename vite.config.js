@@ -2,7 +2,6 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import createVuePlugin from '@vitejs/plugin-vue';
 import { execSync } from 'child_process';
-
 function getCypressHtmlFiles() {
   const cypressFolder = resolve(__dirname, 'cy');
   const strings = execSync(`find ${cypressFolder} -name '*.html'`).toString().split('\n');
@@ -22,6 +21,7 @@ export default defineConfig({
   resolve: {
     alias: {
       vue: '@vue/compat',
+      '@': resolve(__dirname, './src')
     },
   },
   plugins: [

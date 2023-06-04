@@ -1,14 +1,14 @@
 <template>
   <div
     class="zenuml sequence-diagram relative box-border text-left overflow-visible"
-    :style="{ width: `${width}px`, paddingLeft: `${paddingLeft}px` }"
+    :style="{ paddingLeft: `${paddingLeft}px` }"
     ref="diagram"
   >
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
          .bg-skin-base is repeated because .zenuml reset it to default theme.
      -->
     <life-line-layer :context="rootContext.head()" />
-    <message-layer :context="rootContext.block()" />
+    <message-layer :context="rootContext.block()" :style="{width: `${width}px`}"/>
   </div>
 </template>
 
@@ -17,11 +17,7 @@ import LifeLineLayer from './LifeLineLayer/LifeLineLayer.vue';
 import MessageLayer from './MessageLayer/MessageLayer.vue';
 import {mapGetters} from 'vuex';
 import {Depth} from '../../../parser';
-import {
-  FRAGMENT_LEFT_BASE_OFFSET,
-  FRAGMENT_RIGHT_BASE_OFFSET,
-} from './MessageLayer/Block/Statement/Fragment/FragmentMixin';
-import {extraWidthDueToSelfMessage} from "./ExtraWidthDueToSelfMessage";
+import {TotalWidth} from "./ExtraWidthDueToSelfMessage";
 
 export default {
   name: 'seq-diagram',
@@ -30,21 +26,25 @@ export default {
     MessageLayer,
   },
   computed: {
-    ...mapGetters(['rootContext', 'coordinates']),
+    ...mapGetters(['rootContext', 'coordinates', 'distance2']),
     rightParticipant: function () {
       const allParticipants = this.coordinates.participantModels.map((p) => p.name);
       return allParticipants.reverse()[0];
     },
+    leftParticipant: function () {
+      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
+      return allParticipants[0];
+    },
 
     width() {
-      let width = extraWidthDueToSelfMessage(this.rootContext, this.rightParticipant);
-      return this.coordinates.getWidth() + 10 * (this.depth + 1) + FRAGMENT_RIGHT_BASE_OFFSET + width;
+      const ctx = this.rootContext;
+      return TotalWidth(ctx, this.leftParticipant, this.rightParticipant, this.distance2);
     },
     depth: function () {
       return Depth(this.rootContext);
     },
     paddingLeft: function () {
-      return 10 * (this.depth + 1) + FRAGMENT_LEFT_BASE_OFFSET;
+      return 10 * (this.depth);
     },
   },
 };

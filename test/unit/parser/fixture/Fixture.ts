@@ -2,6 +2,9 @@ import { WidthFunc } from '../../../../src/positioning/Coordinate';
 import { RootContext } from '../../../../src/parser/index';
 
 export class Fixture {
+  static rootContext(code: string) {
+    return RootContext(code);
+  }
   static firstStatement(code: string) {
     let rootContext = RootContext(code);
     return rootContext && rootContext.block().stat()[0];
