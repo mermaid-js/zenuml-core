@@ -3,7 +3,7 @@ import {mapGetters} from 'vuex';
 import {TotalWidth} from "../../../../ExtraWidthDueToSelfMessage";
 
 export const FRAGMENT_LEFT_BASE_OFFSET = 30;
-export const FRAGMENT_RIGHT_BASE_OFFSET = 50;
+export const FRAGMENT_RIGHT_BASE_OFFSET = 30;
 
 export default {
   computed: {
@@ -34,7 +34,7 @@ export default {
     },
     fragmentStyle: function () {
       const ctx = this.context;
-      const totalWidth = TotalWidth(ctx, this.leftParticipant, this.rightParticipant, this.distance2);
+      const totalWidth = TotalWidth(ctx, this.coordinates);
       return {
         // +1px for the border of the fragment
         transform: 'translateX(' + (this.offsetX + 1) * -1 + 'px)',

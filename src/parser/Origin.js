@@ -25,3 +25,7 @@ StatContext.prototype.Origin = function () {
   }
   return undefined;
 };
+
+ProgContext.prototype.Origin = function () {
+  return this.Starter();
+}

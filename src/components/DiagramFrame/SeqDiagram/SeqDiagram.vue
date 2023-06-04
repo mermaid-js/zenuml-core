@@ -1,7 +1,7 @@
 <template>
   <div
     class="zenuml sequence-diagram relative box-border text-left overflow-visible"
-    :style="{ paddingLeft: `${paddingLeft}px` }"
+    :style="{ padding: `0 ${paddingX}px` }"
     ref="diagram"
   >
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
@@ -16,7 +16,7 @@
 import LifeLineLayer from './LifeLineLayer/LifeLineLayer.vue';
 import MessageLayer from './MessageLayer/MessageLayer.vue';
 import {mapGetters} from 'vuex';
-import {Depth} from '../../../parser';
+import {Depth} from '@/parser';
 import {TotalWidth} from "./ExtraWidthDueToSelfMessage";
 
 export default {
@@ -35,15 +35,14 @@ export default {
       const allParticipants = this.coordinates.participantModels.map((p) => p.name);
       return allParticipants[0];
     },
-
     width() {
       const ctx = this.rootContext;
-      return TotalWidth(ctx, this.leftParticipant, this.rightParticipant, this.distance2);
+      return TotalWidth(ctx, this.coordinates);
     },
     depth: function () {
       return Depth(this.rootContext);
     },
-    paddingLeft: function () {
+    paddingX: function () {
       return 10 * (this.depth);
     },
   },

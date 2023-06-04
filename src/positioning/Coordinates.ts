@@ -9,7 +9,7 @@ import { OwnableMessage, OwnableMessageType } from './OwnableMessage';
 export class Coordinates {
   private m: Array<Array<number>> = [];
   private readonly widthProvider: WidthFunc;
-  private readonly participantModels: IParticipantModel[];
+  public readonly participantModels: IParticipantModel[];
   private readonly ownableMessages: OwnableMessage[];
 
   constructor(ctx: any, widthProvider: WidthFunc) {
@@ -119,5 +119,9 @@ export class Coordinates {
       this.getPosition(lastParticipant) +
       Coordinates.halfWithMargin(this.widthProvider, lastParticipant);
     return Math.max(calculatedWidth, 200);
+  }
+
+  getWidth2(left: string, right: string) {
+    return this.getPosition(right) - this.getPosition(left);
   }
 }
