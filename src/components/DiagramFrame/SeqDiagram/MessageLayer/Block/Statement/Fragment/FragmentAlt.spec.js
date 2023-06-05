@@ -25,6 +25,7 @@ describe('FragmentAlt', function () {
         context: rootContext.block().stat()[0].message().braceBlock().block().stat()[0],
       },
     });
-    expect(wrapper.vm.fragmentStyle.width).toBe('120px');
+    // 20 * 1(depth) + 30 + 30 + 20
+    expect(wrapper.vm.fragmentStyle.width).toBe('100px');
   })
 });
