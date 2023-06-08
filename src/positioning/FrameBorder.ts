@@ -1,4 +1,4 @@
-interface Frame {
+export interface Frame {
   left: string;
   right: string;
   children?: Frame[];
