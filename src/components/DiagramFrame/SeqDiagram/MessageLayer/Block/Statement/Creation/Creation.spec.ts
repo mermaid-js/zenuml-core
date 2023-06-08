@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { createStore } from 'vuex';
-import { VueSequence } from '../../../../../../../index';
+import { VueSequence } from '@/index';
 import Creation from './Creation.vue';
 import { Fixture } from '../../../../../../../../test/unit/parser/fixture/Fixture';
 
@@ -31,7 +31,7 @@ describe('Creation', () => {
     expect(vm.signature).toBe('«create»');
     expect(vm.assignee).toBe('a');
     expect(vm.distance).toStrictEqual(expect.any(Function));
-    expect(vm.interactionWidth).toBe(70);
+    expect(vm.interactionWidth).toBe(84);
     expect(vm.rightToLeft).toBeFalsy();
   });
 

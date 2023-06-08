@@ -1,6 +1,6 @@
-import { RootContext } from '../parser/index';
+import { RootContext } from '@/parser';
 // max(MIN_GAP, old_g, new_g, w/2 + left-part-w/2 + MARGIN)
-import { ARROW_HEAD_WIDTH, MARGIN, MIN_PARTICIPANT_WIDTH } from '../positioning/Constants';
+import {ARROW_HEAD_WIDTH, MARGIN, MIN_PARTICIPANT_WIDTH, OCCURRENCE_WIDTH} from '@/positioning/Constants';
 import { Coordinates } from './Coordinates';
 import { stubWidthProvider } from '../../test/unit/parser/fixture/Fixture';
 
@@ -41,7 +41,7 @@ describe('get absolute position of a participant', () => {
     let rootContext = RootContext('A1.m800');
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     expect(coordinates.getPosition('_STARTER_')).toBe(10);
-    expect(coordinates.getPosition('A1')).toBe(820);
+    expect(coordinates.getPosition('A1')).toBe(834);
   });
 
   it('should not duplicate participants', () => {
@@ -53,8 +53,8 @@ describe('get absolute position of a participant', () => {
   });
 
   it.each([
-    ['new A1', 'A1', 80],
-    ['new A200', 'A200', 130],
+    ['new A1', 'A1', 94],
+    ['new A200', 'A200', 144],
   ])('creation method: %s', (code, name, pos) => {
     let rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
@@ -76,10 +76,10 @@ describe('get absolute position of a participant', () => {
     expect(coordinates.getPosition('A1')).toBe(positionA); //70
 
     // position is optimised for even distribution
-    expect(coordinates.getPosition('B1')).toBe(475); //190
+    expect(coordinates.getPosition('B1')).toBe(482); //190
 
     // positionC is not impacted by position of B1
-    const positionC = messageLength + positionA + ARROW_HEAD_WIDTH;
+    const positionC = messageLength + positionA + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH;
     expect(coordinates.getPosition('C1')).toBe(positionC);
   });
 });
