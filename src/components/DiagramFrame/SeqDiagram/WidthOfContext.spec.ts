@@ -47,4 +47,12 @@ describe('TotalWidth', function () {
     const ctx = Fixture.firstStatement(code);
     expect(TotalWidth(ctx, coordinates)).toBe(370);
   })
+
+  test('TotalWidth with extra width from self message2', () => {
+    const code = 'if(x) {A1.method; B1.method { s200 } C1.method { s10 }}';
+    let rootContext = RootContext(code);
+    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const ctx = Fixture.firstStatement(code);
+    expect(TotalWidth(ctx, coordinates)).toBe(470);
+  })
 });
