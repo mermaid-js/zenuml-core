@@ -1,7 +1,7 @@
 <template>
   <div
     class="zenuml sequence-diagram relative box-border text-left overflow-visible"
-    :style="{ paddingLeft: `${paddingLeft}px` }"
+    :style="{ padding: `0 ${paddingX}px` }"
     ref="diagram"
   >
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
@@ -31,7 +31,7 @@ export default {
     width() {
       return TotalWidth(this.rootContext, this.coordinates);
     },
-    paddingLeft: function () {
+    paddingX: function () {
       const allParticipants = this.coordinates.orderedParticipantNames();
       let frameBuilder = new FrameBuilder(allParticipants);
       const frame = frameBuilder.getFrame(this.rootContext);
@@ -40,7 +40,7 @@ export default {
       }
       const border = FrameBorder(frame);
 
-      return border.left + 20;
+      return border.left + 10;
     },
   },
 };
