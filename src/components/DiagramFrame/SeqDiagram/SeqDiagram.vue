@@ -32,7 +32,7 @@ export default {
       return TotalWidth(this.rootContext, this.coordinates);
     },
     paddingLeft: function () {
-      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
+      const allParticipants = this.coordinates.orderedParticipantNames();
       let frameBuilder = new FrameBuilder(allParticipants);
       const frame = frameBuilder.getFrame(this.rootContext);
       if (!frame) {

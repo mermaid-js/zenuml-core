@@ -5,16 +5,10 @@ import {Participants} from "@/parser";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder, {Frame} from "@/positioning/FrameBorder";
 import {Coordinates} from "@/positioning/Coordinates";
-import {IParticipantModel} from "@/positioning/ParticipantListener";
 
 export function TotalWidth(ctx: any, coordinates: Coordinates) {
-  const allParticipants = coordinates.participantModels.map((p) => p.name);
-  const localParticipants = [
-    ctx.Origin(),
-    ...Participants(ctx)
-      .ImplicitArray()
-      .map((p: IParticipantModel) => p.name),
-  ]
+  const allParticipants = coordinates.orderedParticipantNames();
+  const localParticipants = [ctx.Origin(),...Participants(ctx).Names()]
   const leftParticipant = allParticipants.find((p) => localParticipants.includes(p)) || '';
   const rightParticipant = allParticipants.reverse().find((p) => localParticipants.includes(p)) || '';
 

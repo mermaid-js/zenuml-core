@@ -19,15 +19,15 @@ export default {
       ];
     },
     leftParticipant: function () {
-      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
+      const allParticipants = this.coordinates.orderedParticipantNames();
       return allParticipants.find((p) => this.localParticipants.includes(p));
     },
     rightParticipant: function () {
-      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
+      const allParticipants = this.coordinates.orderedParticipantNames();
       return allParticipants.reverse().find((p) => this.localParticipants.includes(p));
     },
     offsetX: function () {
-      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
+      const allParticipants = this.coordinates.orderedParticipantNames();
       let frameBuilder = new FrameBuilder(allParticipants);
       const frame = frameBuilder.getFrame(this.context);
       const border = FrameBorder(frame);

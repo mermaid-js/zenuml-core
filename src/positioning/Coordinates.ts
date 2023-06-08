@@ -9,7 +9,7 @@ import { OwnableMessage, OwnableMessageType } from './OwnableMessage';
 export class Coordinates {
   private m: Array<Array<number>> = [];
   private readonly widthProvider: WidthFunc;
-  readonly participantModels: IParticipantModel[];
+  private readonly participantModels: IParticipantModel[];
   private readonly ownableMessages: OwnableMessage[];
 
   constructor(ctx: any, widthProvider: WidthFunc) {
@@ -18,6 +18,10 @@ export class Coordinates {
 
     this.widthProvider = widthProvider;
     this.walkThrough();
+  }
+
+  orderedParticipantNames(): string[] {
+    return this.participantModels.map((p) => p.name);
   }
 
   getPosition(participantName: string | undefined): number {
