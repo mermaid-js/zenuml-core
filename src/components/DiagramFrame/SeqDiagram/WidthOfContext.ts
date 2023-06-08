@@ -22,7 +22,7 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
   const frame = frameBuilder.getFrame(ctx);
   const border = FrameBorder(frame as Frame);
   const extraWidth = widthOfContext(ctx, rightParticipant, coordinates);
-  return coordinates.getWidth2(leftParticipant, rightParticipant) +
+  return coordinates.distance(leftParticipant, rightParticipant) +
     border.left +
     border.right +
     Coordinates.half(WidthProviderOnBrowser, leftParticipant) +
@@ -32,12 +32,8 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
 
 function widthOfContext(ctx: any, rightParticipant: string, coordinates: Coordinates) {
   const allMessages = AllMessages(ctx);
-  console.log('allMessages', allMessages);
-  // the messages have a structure like {from, signature, type, to}
-  // find all the messages that has from == to == rightParticipant
   const widths = allMessages
     .filter((m) => m.from === m.to)
-    .map((s) => WidthProviderOnBrowser(s.signature, TextType.MessageContent) - coordinates.getWidth2(s.from, rightParticipant));
-  console.log('widths', widths);
+    .map((s) => WidthProviderOnBrowser(s.signature, TextType.MessageContent) - coordinates.distance(s.from, rightParticipant));
   return Math.max.apply(null, [0, ...widths]);
 }

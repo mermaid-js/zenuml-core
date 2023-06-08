@@ -121,7 +121,7 @@ export class Coordinates {
     return Math.max(calculatedWidth, 200);
   }
 
-  getWidth2(left: string, right: string) {
+  distance(left: string, right: string) {
     return this.getPosition(right) - this.getPosition(left);
   }
 
