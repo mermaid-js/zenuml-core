@@ -1,12 +1,10 @@
-import { Depth, Participants } from '@/parser';
+import { Participants } from '@/parser';
 import { mapGetters } from 'vuex';
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import {Coordinates} from "@/positioning/Coordinates";
 import WidthProviderOnBrowser from "@/positioning/WidthProviderFunc";
-
-export const FRAGMENT_LEFT_BASE_OFFSET = 30;
-export const FRAGMENT_RIGHT_BASE_OFFSET = 30;
+import {TotalWidth} from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 
 export default {
   computed: {
@@ -28,9 +26,6 @@ export default {
       const allParticipants = this.coordinates.participantModels.map((p) => p.name);
       return allParticipants.reverse().find((p) => this.localParticipants.includes(p));
     },
-    depth: function () {
-      return Depth(this.context);
-    },
     offsetX: function () {
       const allParticipants = this.coordinates.participantModels.map((p) => p.name);
       let frameBuilder = new FrameBuilder(allParticipants);
@@ -39,19 +34,11 @@ export default {
       return this.distance2(this.leftParticipant, this.from) + border.left + Coordinates.half(WidthProviderOnBrowser, this.leftParticipant);
     },
     fragmentStyle: function () {
-      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
-      let frameBuilder = new FrameBuilder(allParticipants);
-      const frame = frameBuilder.getFrame(this.context);
-      const border = FrameBorder(frame);
       return {
         // +1px for the border of the fragment
         transform: 'translateX(' + (this.offsetX + 1) * -1 + 'px)',
         width:
-          this.distance2(this.leftParticipant, this.rightParticipant) +
-          border.left +
-          border.right +
-            Coordinates.half(WidthProviderOnBrowser, this.leftParticipant) +
-            Coordinates.half(WidthProviderOnBrowser, this.rightParticipant) +
+          TotalWidth(this.context, this.coordinates) +
           'px',
       };
     },

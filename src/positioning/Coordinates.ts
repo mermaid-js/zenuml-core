@@ -1,4 +1,4 @@
-import { ARROW_HEAD_WIDTH, MARGIN, MIN_PARTICIPANT_WIDTH, MINI_GAP } from './Constants';
+import {ARROW_HEAD_WIDTH, MARGIN, MIN_PARTICIPANT_WIDTH, MINI_GAP, OCCURRENCE_WIDTH} from './Constants';
 import { TextType, WidthFunc } from './Coordinate';
 import { OrderedParticipants } from './OrderedParticipants';
 import { IParticipantModel } from './ParticipantListener';
@@ -9,7 +9,7 @@ import { OwnableMessage, OwnableMessageType } from './OwnableMessage';
 export class Coordinates {
   private m: Array<Array<number>> = [];
   private readonly widthProvider: WidthFunc;
-  private readonly participantModels: IParticipantModel[];
+  readonly participantModels: IParticipantModel[];
   private readonly ownableMessages: OwnableMessage[];
 
   constructor(ctx: any, widthProvider: WidthFunc) {
@@ -53,7 +53,7 @@ export class Coordinates {
       try {
         let messageWidth = this.getMessageWidth(message);
         this.m[leftIndex][rightIndex] = Math.max(
-          messageWidth + ARROW_HEAD_WIDTH,
+          messageWidth + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH,
           this.m[leftIndex][rightIndex]
         );
       } catch (e) {
@@ -94,7 +94,7 @@ export class Coordinates {
     return this.participantModels[pIndex].label || this.participantModels[pIndex].name;
   }
 
-  private static half(widthProvider: WidthFunc, participantName: string | undefined) {
+  static half(widthProvider: WidthFunc, participantName: string | undefined) {
     if (participantName === '_STARTER_') {
       return MARGIN / 2;
     }
@@ -117,7 +117,12 @@ export class Coordinates {
     const lastParticipant = this.participantModels[this.participantModels.length - 1].name;
     const calculatedWidth =
       this.getPosition(lastParticipant) +
-      Coordinates.halfWithMargin(this.widthProvider, lastParticipant);
+      Coordinates.half(this.widthProvider, lastParticipant);
     return Math.max(calculatedWidth, 200);
   }
+
+  getWidth2(left: string, right: string) {
+    return this.getPosition(right) - this.getPosition(left);
+  }
+
 }

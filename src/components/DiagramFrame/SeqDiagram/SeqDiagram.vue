@@ -18,6 +18,7 @@ import MessageLayer from './MessageLayer/MessageLayer.vue';
 import { mapGetters } from 'vuex';
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
+import {TotalWidth} from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 
 export default {
   name: 'seq-diagram',
@@ -28,11 +29,7 @@ export default {
   computed: {
     ...mapGetters(['rootContext', 'coordinates']),
     width() {
-      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
-      let frameBuilder = new FrameBuilder(allParticipants);
-      const frame = frameBuilder.getFrame(this.rootContext);
-      const border = FrameBorder(frame);
-      return this.coordinates.getWidth() + border.left + border.right + 20;
+      return TotalWidth(this.rootContext, this.coordinates);
     },
     paddingLeft: function () {
       const allParticipants = this.coordinates.participantModels.map((p) => p.name);
