@@ -94,14 +94,11 @@ class FrameBuilder extends sequenceParserListener {
     this.exitFragment();
   };
 
-
-  getFrame(me: any) {
-    return (context: any) => {
-      context.children.map((child: any) => {
-        walker.walk(me, child);
-      });
-      return this.frameRoot;
-    };
+  getFrame(context: any) {
+    context.children.map((child: any) => {
+      walker.walk(this, child);
+    });
+    return this.frameRoot;
   }
 }
 

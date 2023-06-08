@@ -27,6 +27,9 @@ function longestPath(frame: Frame, pathType: PathType): number {
 }
 
 export default function FrameBorder(frame: Frame) {
+  if(!frame) {
+    return { left: 0, right: 0 };
+  }
   return {
     left: 10 * longestPath(frame, PathType.LEFT),
     right: 10 * longestPath(frame, PathType.RIGHT),

@@ -8,11 +8,9 @@ describe('FrameBuilder', () => {
     const frameBuilder = new FrameBuilder(orderedParticipants);
     const context = Fixture.firstStatement('A.method {if(x) {B.method}}');
 
-    const frameFunc = frameBuilder.getFrame(frameBuilder);
-
     // Since there's no children, frameFunc(context) should return an empty frame
     const expectedFrame = { left: 'A', right: 'B', children: [] };
-    expect(frameFunc(context)).toEqual(expectedFrame);
+    expect(frameBuilder.getFrame(context)).toEqual(expectedFrame);
   });
 
   test('getFrame should return a frame', () => {
@@ -32,7 +30,6 @@ describe('FrameBuilder', () => {
       }
     }`);
 
-    const frameFunc = frameBuilder.getFrame(frameBuilder);
 
     // Since there's no children, frameFunc(context) should return an empty frame
     const expectedFrame = {
@@ -53,7 +50,7 @@ describe('FrameBuilder', () => {
       ]
     };
 
-    let rootFrame = frameFunc(context);
+    let rootFrame = frameBuilder.getFrame(context);
     expect(rootFrame).toEqual(expectedFrame);
   });
 

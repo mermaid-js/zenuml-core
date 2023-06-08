@@ -1,8 +1,12 @@
-import { Depth, Participants } from '../../../../../../../parser';
+import { Depth, Participants } from '@/parser';
 import { mapGetters } from 'vuex';
+import FrameBuilder from "@/parser/FrameBuilder";
+import FrameBorder from "@/positioning/FrameBorder";
+import {Coordinates} from "@/positioning/Coordinates";
+import WidthProviderOnBrowser from "@/positioning/WidthProviderFunc";
 
 export const FRAGMENT_LEFT_BASE_OFFSET = 30;
-export const FRAGMENT_RIGHT_BASE_OFFSET = 100;
+export const FRAGMENT_RIGHT_BASE_OFFSET = 30;
 
 export default {
   computed: {
@@ -28,18 +32,26 @@ export default {
       return Depth(this.context);
     },
     offsetX: function () {
-      let extra = 10 * (this.depth + 1);
-      return this.distance2(this.leftParticipant, this.from) + extra + FRAGMENT_LEFT_BASE_OFFSET;
+      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
+      let frameBuilder = new FrameBuilder(allParticipants);
+      const frame = frameBuilder.getFrame(this.context);
+      const border = FrameBorder(frame);
+      return this.distance2(this.leftParticipant, this.from) + border.left + Coordinates.half(WidthProviderOnBrowser, this.leftParticipant);
     },
     fragmentStyle: function () {
+      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
+      let frameBuilder = new FrameBuilder(allParticipants);
+      const frame = frameBuilder.getFrame(this.context);
+      const border = FrameBorder(frame);
       return {
         // +1px for the border of the fragment
         transform: 'translateX(' + (this.offsetX + 1) * -1 + 'px)',
         width:
           this.distance2(this.leftParticipant, this.rightParticipant) +
-          20 * this.depth +
-          FRAGMENT_LEFT_BASE_OFFSET +
-          FRAGMENT_RIGHT_BASE_OFFSET +
+          border.left +
+          border.right +
+            Coordinates.half(WidthProviderOnBrowser, this.leftParticipant) +
+            Coordinates.half(WidthProviderOnBrowser, this.rightParticipant) +
           'px',
       };
     },

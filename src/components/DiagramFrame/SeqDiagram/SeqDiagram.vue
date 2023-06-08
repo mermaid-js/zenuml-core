@@ -1,14 +1,14 @@
 <template>
   <div
     class="zenuml sequence-diagram relative box-border text-left overflow-visible"
-    :style="{ width: `${width}px`, paddingLeft: `${paddingLeft}px` }"
+    :style="{ paddingLeft: `${paddingLeft}px` }"
     ref="diagram"
   >
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
          .bg-skin-base is repeated because .zenuml reset it to default theme.
      -->
     <life-line-layer :context="rootContext.head()" />
-    <message-layer :context="rootContext.block()" />
+    <message-layer :context="rootContext.block()" :style="{width: `${width}px`}"/>
   </div>
 </template>
 
@@ -16,11 +16,8 @@
 import LifeLineLayer from './LifeLineLayer/LifeLineLayer.vue';
 import MessageLayer from './MessageLayer/MessageLayer.vue';
 import { mapGetters } from 'vuex';
-import { Depth } from '../../../parser';
-import {
-  FRAGMENT_LEFT_BASE_OFFSET,
-  FRAGMENT_RIGHT_BASE_OFFSET,
-} from './MessageLayer/Block/Statement/Fragment/FragmentMixin';
+import FrameBuilder from "@/parser/FrameBuilder";
+import FrameBorder from "@/positioning/FrameBorder";
 
 export default {
   name: 'seq-diagram',
@@ -31,13 +28,22 @@ export default {
   computed: {
     ...mapGetters(['rootContext', 'coordinates']),
     width() {
-      return this.coordinates.getWidth() + 10 * (this.depth + 1) + FRAGMENT_RIGHT_BASE_OFFSET;
-    },
-    depth: function () {
-      return Depth(this.rootContext);
+      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
+      let frameBuilder = new FrameBuilder(allParticipants);
+      const frame = frameBuilder.getFrame(this.rootContext);
+      const border = FrameBorder(frame);
+      return this.coordinates.getWidth() + border.left + border.right + 20;
     },
     paddingLeft: function () {
-      return 10 * (this.depth + 1) + FRAGMENT_LEFT_BASE_OFFSET;
+      const allParticipants = this.coordinates.participantModels.map((p) => p.name);
+      let frameBuilder = new FrameBuilder(allParticipants);
+      const frame = frameBuilder.getFrame(this.rootContext);
+      if (!frame) {
+        return 0;
+      }
+      const border = FrameBorder(frame);
+
+      return border.left + 20;
     },
   },
 };
