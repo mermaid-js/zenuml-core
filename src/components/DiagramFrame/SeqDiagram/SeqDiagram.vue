@@ -7,8 +7,9 @@
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
          .bg-skin-base is repeated because .zenuml reset it to default theme.
      -->
-    <life-line-layer :context="rootContext.head()" />
+    <life-line-layer :context="rootContext.head()" :renderParticipants="false" />
     <message-layer :context="rootContext.block()" :style="{width: `${width}px`}"/>
+    <life-line-layer :context="rootContext.head()" :renderParticipants="true" />
   </div>
 </template>
 
@@ -62,5 +63,6 @@ export default {
   min-width: 88px;
   max-width: 250px;
   text-align: center;
+  pointer-events: all;
 }
 </style>

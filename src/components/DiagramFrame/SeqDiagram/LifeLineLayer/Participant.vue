@@ -1,7 +1,7 @@
 <template>
   <div
-    class="participant bg-skin-participant border-skin-participant text-skin-participant rounded text-base leading-4 relative flex flex-col justify-center z-10 h-10"
-    :class="{ selected: selected, 'border-transparent': !!icon }"
+    class="participant bg-skin-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 sticky top-8"
+    :class="{ selected: selected }"
     ref="participant"
     :style="{ backgroundColor: backgroundColor, color: color }"
     @click="onSelect"
@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { brightnessIgnoreAlpha, removeAlpha } from '../../../../utils/Color';
+import { brightnessIgnoreAlpha, removeAlpha } from '@/utils/Color';
 import iconPath from '../../Tutorial/Icons';
 
 export default {

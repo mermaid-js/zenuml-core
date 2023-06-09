@@ -5,8 +5,8 @@
     :style="{ paddingTop: top + 'px', left: left + 'px' }"
   >
     <div v-show="debug">{{centerOf(entity.name)}}</div>
-    <participant :entity="entity" />
-    <div class="line bg-skin-lifeline w0 mx-auto flex-grow w-px"></div>
+    <participant v-if="renderParticipants" :entity="entity" />
+    <div v-else class="line bg-skin-lifeline w0 mx-auto flex-grow w-px"></div>
   </div>
 </template>
 
@@ -18,7 +18,7 @@ const logger = parentLogger.child({ name: 'LifeLine' });
 export default {
   name: 'life-line',
   components: { Participant },
-  props: ['entity', 'context', 'groupLeft', 'inGroup'],
+  props: ['entity', 'context', 'groupLeft', 'inGroup', 'renderParticipants'],
   data: () => {
     return {
       translateX: 0,
