@@ -1,7 +1,7 @@
 <template>
   <div
-    class="life-line-layer lifeline-layer absolute h-full flex flex-col pt-8"
-    :style="{ 'min-width': '200px' }"
+    class="life-line-layer lifeline-layer absolute h-full flex flex-col pt-8 top-0"
+    :style="{ 'min-width': '200px', pointerEvents: renderParticipants ? 'none' : 'all' }"
   >
     <div class="container relative grow">
       <life-line
@@ -9,19 +9,32 @@
         :entity="starterParticipant"
         class="starter"
         :class="{ invisible: invisibleStarter }"
+        :renderParticipants="renderParticipants"
       />
       <template v-for="(child, index) in explicitGroupAndParticipants">
-        <life-line-group :key="index" v-if="child instanceof GroupContext" :context="child" />
+        <life-line-group
+          :key="index"
+          v-if="child instanceof GroupContext"
+          :context="child"
+          :renderParticipants="renderParticipants"
+        />
         <life-line
           :key="index"
           v-if="child instanceof ParticipantContext"
           :entity="getParticipantEntity(child)"
+          :renderParticipants="renderParticipants"
         />
       </template>
-      <life-line v-for="entity in implicitParticipants" :key="entity.name" :entity="entity" />
+      <life-line
+        v-for="entity in implicitParticipants"
+        :key="entity.name"
+        :entity="entity"
+        :renderParticipants="renderParticipants"
+      />
     </div>
   </div>
 </template>
+
 
 <script>
 import parentLogger from '../../../../logger/logger';
@@ -33,7 +46,7 @@ const logger = parentLogger.child({ name: 'LifeLineLayer' });
 
 export default {
   name: 'life-line-layer',
-  props: ['context'],
+  props: ['context', 'renderParticipants'],
   computed: {
     ...mapGetters(['participants', 'GroupContext', 'ParticipantContext', 'centerOf']),
     invisibleStarter() {
