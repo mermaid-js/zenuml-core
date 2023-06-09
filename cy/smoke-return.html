@@ -16,7 +16,7 @@
       <pre class="zenuml">
   Browser->BookController.onPost() {
   BookLibService.Borrow(id) {
-      receipt = process(id)
+      receipt = process(id1)
       if (receipt != null) {
         return receipt
         @return BookController->Browser: receipt
