@@ -8,7 +8,7 @@
         v-if="starterOnTheLeft"
         :entity="starterParticipant"
         class="starter"
-        :class="{ invisible: invisibleStarter }"
+        :class="{ invisible: invisibleStarter && !debug }"
       />
       <template v-for="(child, index) in explicitGroupAndParticipants">
         <life-line-group :key="index" v-if="child instanceof GroupContext" :context="child" />
@@ -36,6 +36,9 @@ export default {
   props: ['context'],
   computed: {
     ...mapGetters(['participants', 'GroupContext', 'ParticipantContext', 'centerOf']),
+    debug() {
+      return !!localStorage.zenumlDebug;
+    },
     invisibleStarter() {
       return this.starterParticipant.name === '_STARTER_';
     },

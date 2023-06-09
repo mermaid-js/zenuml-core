@@ -1,10 +1,10 @@
 import {ARROW_HEAD_WIDTH, MARGIN, MIN_PARTICIPANT_WIDTH, MINI_GAP, OCCURRENCE_WIDTH} from './Constants';
-import { TextType, WidthFunc } from './Coordinate';
-import { OrderedParticipants } from './OrderedParticipants';
-import { IParticipantModel } from './ParticipantListener';
-import { find_optimal } from './david/DavidEisenstat';
-import { AllMessages } from './MessageContextListener';
-import { OwnableMessage, OwnableMessageType } from './OwnableMessage';
+import {TextType, WidthFunc} from './Coordinate';
+import {OrderedParticipants} from './OrderedParticipants';
+import {IParticipantModel} from './ParticipantListener';
+import {find_optimal} from './david/DavidEisenstat';
+import {AllMessages} from './MessageContextListener';
+import {OwnableMessage, OwnableMessageType} from './OwnableMessage';
 
 export class Coordinates {
   private m: Array<Array<number>> = [];
@@ -29,11 +29,10 @@ export class Coordinates {
     if (pIndex === -1) {
       throw Error(`Participant ${participantName} not found`);
     }
-    return (
-      this.getParticipantGap(this.participantModels[0]) +
-      find_optimal(this.m)[pIndex] +
-      ARROW_HEAD_WIDTH
-    );
+    const leftGap = this.getParticipantGap(this.participantModels[0]);
+    const position = leftGap + find_optimal(this.m)[pIndex];
+    console.debug(`Position of ${participantName} is ${position}`);
+    return position;
   }
 
   walkThrough() {

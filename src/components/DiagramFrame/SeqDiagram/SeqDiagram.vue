@@ -1,7 +1,7 @@
 <template>
   <div
     class="zenuml sequence-diagram relative box-border text-left overflow-visible"
-    :style="{ padding: `0 ${paddingX}px` }"
+    :style="{ paddingLeft: `${paddingLeft}px` }"
     ref="diagram"
   >
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
@@ -19,6 +19,7 @@ import { mapGetters } from 'vuex';
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import {TotalWidth} from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
+import {MARGIN} from "@/positioning/Constants";
 
 export default {
   name: 'seq-diagram',
@@ -31,7 +32,7 @@ export default {
     width() {
       return TotalWidth(this.rootContext, this.coordinates);
     },
-    paddingX: function () {
+    paddingLeft: function () {
       const allParticipants = this.coordinates.orderedParticipantNames();
       let frameBuilder = new FrameBuilder(allParticipants);
       const frame = frameBuilder.getFrame(this.rootContext);
@@ -39,8 +40,7 @@ export default {
         return 0;
       }
       const border = FrameBorder(frame);
-
-      return border.left + 10;
+      return border.left + MARGIN;
     },
   },
 };

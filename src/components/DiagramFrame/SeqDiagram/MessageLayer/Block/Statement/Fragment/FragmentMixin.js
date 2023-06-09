@@ -16,7 +16,10 @@ export default {
       const border = FrameBorder(frame);
       const localParticipants = [this.context.Origin(), ...Participants(this.context).Names()]
       const leftParticipant = allParticipants.find((p) => localParticipants.includes(p));
-      return this.coordinates.distance(leftParticipant, this.from) + border.left + Coordinates.half(WidthProviderOnBrowser, leftParticipant);
+      // TODO: consider using this.getParticipantGap(this.participantModels[0])
+      let halfLeftParticipant = Coordinates.half(WidthProviderOnBrowser, leftParticipant);
+      console.debug(`left participant: ${leftParticipant} ${halfLeftParticipant}`);
+      return this.coordinates.distance(leftParticipant, this.from) + border.left + halfLeftParticipant;
     },
     fragmentStyle: function () {
       return {

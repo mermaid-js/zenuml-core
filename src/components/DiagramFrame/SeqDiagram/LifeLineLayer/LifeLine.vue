@@ -4,6 +4,7 @@
     class="lifeline absolute flex flex-col mx-2 transform -translate-x-1/2 h-full"
     :style="{ paddingTop: top + 'px', left: left + 'px' }"
   >
+    <div v-show="debug">{{centerOf(entity.name)}}</div>
     <participant :entity="entity" />
     <div class="line bg-skin-lifeline w0 mx-auto flex-grow w-px"></div>
   </div>
@@ -27,6 +28,9 @@ export default {
   computed: {
     ...mapGetters(['centerOf']),
     ...mapState(['scale']),
+    debug() {
+      return !!localStorage.zenumlDebug;
+    },
     left() {
       return this.centerOf(this.entity.name) - 8 - (this.groupLeft || 0);
     },
