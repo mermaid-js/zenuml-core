@@ -5,7 +5,7 @@
 
       <div class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t" >
         <div class="name font-semibold p-1 border-b">
-          <collapse-button label="Alt" @click="this.toggle"/>
+          <collapse-button label="Alt" :collapsible="!this.hasCreation" @click="this.toggle"/>
         </div>
       </div>
     </div>
@@ -52,6 +52,14 @@
 
 <script>
 import fragment from './FragmentMixin';
+import sequenceParserListener from '../../../../../../../generated-parser/sequenceParserListener';
+import antlr4 from 'antlr4';
+
+class CreationListener extends sequenceParserListener {
+  enterCreation() {
+    console.log('found creation!')
+  }
+}
 
 export default {
   name: 'fragment-alt',
@@ -82,6 +90,11 @@ export default {
       return ctx?.braceBlock()?.block();
     },
   },
+  created: function() {
+    const listener = new CreationListener();
+    const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
+    walker.walk(listener, this.context);
+  }
 };
 </script>
 
