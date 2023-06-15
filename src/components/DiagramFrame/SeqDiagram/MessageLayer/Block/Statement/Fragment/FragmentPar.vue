@@ -6,12 +6,10 @@
         <collapse-button label="Par" :collapsible="!this.hasCreation" @click="this.toggle"/>
       </div>
     </div>
-    <div :class="{hidden: collapsed}">
-      <block
-        :style="{ paddingLeft: `${offsetX}px` }"
-        :context="par.braceBlock().block()"
-        :selfCallIndent="selfCallIndent" ></block>
-    </div>
+    <block :class="{hidden: collapsed}"
+      :style="{ paddingLeft: `${offsetX}px` }"
+      :context="par.braceBlock().block()"
+      :selfCallIndent="selfCallIndent" ></block>
   </div>
 </template>
 

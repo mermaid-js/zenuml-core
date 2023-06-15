@@ -6,12 +6,10 @@
         <collapse-button label="Opt" :collapsible="!this.hasCreation" @click="this.toggle"/>
       </div>
     </div>
-    <div :class="{hidden: collapsed}">
-      <block
-        :style="{ paddingLeft: `${offsetX}px` }"
-        :context="opt.braceBlock().block()"
-        :selfCallIndent="selfCallIndent"></block>
-    </div>
+    <block :class="{hidden: collapsed}"
+      :style="{ paddingLeft: `${offsetX}px` }"
+      :context="opt.braceBlock().block()"
+      :selfCallIndent="selfCallIndent"></block>
   </div>
 </template>
 
