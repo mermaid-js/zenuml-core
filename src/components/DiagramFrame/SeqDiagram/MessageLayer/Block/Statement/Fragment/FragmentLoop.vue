@@ -23,7 +23,6 @@
 
 <script>
 import fragment from './FragmentMixin';
-import CollapseButton from './CollapseButton.vue';
 
 export default {
   name: 'fragment-loop',

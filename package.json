@@ -12,6 +12,7 @@
     "build": "vite build -c vite.config.lib.js",
     "test": "vitest",
     "cy": "cypress run",
+    "cy:update": "cypress run --env updateSnapshots=true",
     "cy:open": "cypress open",
     "cy:smoke": "cypress run --spec cypress/e2e/smoke.spec.js",
     "antlr:setup": "python3 -m pip install antlr4-tools",
