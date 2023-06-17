@@ -29,7 +29,7 @@ export default {
 .collapse-button {
   display: none;
 }
-.collapsible-header:hover .collapse-button.expanded {
+.fragment:hover .collapsible-header .collapse-button.expanded {
   display: inline-block !important;
 }
 </style>
