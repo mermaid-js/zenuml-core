@@ -1,5 +1,5 @@
 <template>
-  <div class="collapsible-header" style="display: flex; width: 100%; justify-content: space-between;" >
+  <div class="collapsible-header">
     <label class="p-0 mb-0">{{ label }}</label>
     <svg width="16px" height="16px" :class="{hidden: collapsed, expanded: !collapsed}" v-if="this.collapsible" @click="this.onClick(); $emit('click', $event, this.collapsed)" class="collapse-button cursor-pointer" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="miter"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><line x1="14" y1="10" x2="21" y2="3"></line><polyline points="20 10 14 10 14 4"></polyline><line x1="3" y1="21" x2="10" y2="14"></line><polyline points="4 14 10 14 10 20"></polyline></g></svg>
 
@@ -23,6 +23,9 @@ export default {
 };
 </script>
 <style scoped>
+.collapsible-header {
+  display: flex; width: 100%; justify-content: space-between;
+}
 .collapse-button {
   display: none;
 }

@@ -1,7 +1,7 @@
 import { Depth, Participants } from '../../../../../../../parser';
 import { mapGetters } from 'vuex';
 import CollapseButton from './CollapseButton.vue';
-import {hasCreation} from './CreationListener';
+import {hasCreationIn} from './CreationListener';
 
 export const FRAGMENT_LEFT_BASE_OFFSET = 30;
 export const FRAGMENT_RIGHT_BASE_OFFSET = 100;
@@ -45,9 +45,12 @@ export default {
           'px',
       };
     },
+    hasCreation() {
+      return hasCreationIn(this.context);
+    },
   },
   data: function() {
-    return {collapsed: false, hasCreation: false};
+    return {collapsed: false};
   },
   methods: {
     toggle($event, collapsed) {
@@ -55,7 +58,4 @@ export default {
     }
   },
   components: { CollapseButton },
-  created: function() {
-    this.hasCreation = hasCreation(this.context);
-  },
 };

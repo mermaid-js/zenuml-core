@@ -13,7 +13,7 @@ class CreationListener extends sequenceParserListener {
   }
 }
 
-export function hasCreation(context: any) {
+export function hasCreationIn(context: any) {
   const listener = new CreationListener();
   const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
   walker.walk(listener, context);

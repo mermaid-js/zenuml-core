@@ -52,14 +52,6 @@
 
 <script>
 import fragment from './FragmentMixin';
-import sequenceParserListener from '../../../../../../../generated-parser/sequenceParserListener';
-import antlr4 from 'antlr4';
-
-class CreationListener extends sequenceParserListener {
-  enterCreation() {
-    console.log('found creation!')
-  }
-}
 
 export default {
   name: 'fragment-alt',
@@ -90,11 +82,6 @@ export default {
       return ctx?.braceBlock()?.block();
     },
   },
-  created: function() {
-    const listener = new CreationListener();
-    const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
-    walker.walk(listener, this.context);
-  }
 };
 </script>
 
