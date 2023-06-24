@@ -4,7 +4,7 @@
     class="interaction return relative"
     v-on:click.stop="onClick"
     :data-signature="signature"
-    :class="{ 'right-to-left': rightToLeft, highlight: isCurrent }"
+    :class="{ 'right-to-left': rightToLeft, highlight: isCurrent, 'return-to-start': isReturnToStart }"
     :style="{ width: width + 'px', left: left + 'px' }"
   >
     <comment v-if="comment" :comment="comment" />
@@ -34,11 +34,12 @@ import { mapGetters } from 'vuex';
 import { CodeRange } from '../../../../../../../parser/CodeRange';
 import WidthProviderOnBrowser from '../../../../../../../positioning/WidthProviderFunc';
 import { TextType } from '../../../../../../../positioning/Coordinate';
+
 export default {
   name: 'return',
   props: ['context', 'comment'],
   computed: {
-    ...mapGetters(['distance', 'cursor', 'onElementClick']),
+    ...mapGetters(['distance', 'cursor', 'onElementClick', 'participants']),
     from: function () {
       return this.context.Origin();
     },
@@ -76,6 +77,9 @@ export default {
     isSelf: function () {
       return this.source === this.target;
     },
+    isReturnToStart() {
+      return this.target === this.participants.Starter().name;
+    }
   },
   methods: {
     onClick() {

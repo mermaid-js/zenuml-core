@@ -61,11 +61,28 @@ export default {
    */
 .interaction {
   /*Keep dashed or solid here otherwise no space is given to the border*/
-  border: dashed transparent;
+  border: dashed transparent 0;
+}
+
+.interaction.sync {
   /* This border width configuration make sure the content width is
        the same as from the source occurrence's right border to target
        occurrence's left boarder (boarder not inclusive).*/
-  border-width: 0 7px;
+  border-right-width: 7px;
+}
+
+.interaction.inited-from-occurrence,
+.interaction.self-invocation {
+  border-left-width: 7px;
+}
+
+.interaction.return {
+  border-left-width: 7px;
+  border-right-width: 7px;
+}
+
+.interaction.return-to-start {
+  border-left-width: 0;
 }
 
 .interaction:hover {
