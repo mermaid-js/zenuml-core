@@ -1,7 +1,8 @@
 import { Depth, Participants } from '../../../../../../../parser';
 import { mapGetters } from 'vuex';
 import CollapseButton from './CollapseButton.vue';
-import {hasCreationIn} from './CreationListener';
+import { hasCreationIn } from './CreationListener';
+import EventBus from '../../../../../../../EventBus';
 
 export const FRAGMENT_LEFT_BASE_OFFSET = 30;
 export const FRAGMENT_RIGHT_BASE_OFFSET = 100;
@@ -55,6 +56,8 @@ export default {
   methods: {
     toggle($event, collapsed) {
       this.collapsed = collapsed;
+
+      EventBus.$emit('participant_set_top');
     }
   },
   components: { CollapseButton },

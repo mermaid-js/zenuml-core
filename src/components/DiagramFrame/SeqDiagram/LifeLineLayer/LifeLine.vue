@@ -68,7 +68,8 @@ export default {
       const escapedName = this.entity.name.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1');
       const $el = this.$root.$refs.diagram.$el;
       const firstMessage = $el.querySelector(`[data-to="${escapedName}"]`);
-      if (firstMessage && firstMessage.attributes['data-type'].value === 'creation' && firstMessage.offsetParent) {
+      const isVisible = firstMessage.offsetParent != null;
+      if (firstMessage && firstMessage.attributes['data-type'].value === 'creation' && isVisible) {
         logger.debug(`First message to ${this.entity.name} is creation`);
         const rootY = this.$el.getBoundingClientRect().y;
         const messageY = firstMessage.getBoundingClientRect().y;

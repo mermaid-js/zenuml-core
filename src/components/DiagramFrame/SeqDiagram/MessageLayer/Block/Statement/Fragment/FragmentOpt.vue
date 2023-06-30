@@ -3,7 +3,7 @@
     <comment v-if="comment" :comment="comment" />
     <div class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4">
       <div class="name font-semibold p-1 border-b">
-        <collapse-button label="Opt" :collapsible="!this.hasCreation" @click="this.toggle"/>
+        <collapse-button label="Opt" @click="this.toggle"/>
       </div>
     </div>
     <block :class="{hidden: collapsed}"

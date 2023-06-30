@@ -4,7 +4,7 @@
       <comment v-if="comment" :comment="comment" />
       <div class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t" >
         <div class="name font-semibold p-1 border-b">
-          <collapse-button label="Try" :collapsible="!this.hasCreation" @click="this.toggle"/>
+          <collapse-button label="Try" @click="this.toggle"/>
         </div>
       </div>
     </div>

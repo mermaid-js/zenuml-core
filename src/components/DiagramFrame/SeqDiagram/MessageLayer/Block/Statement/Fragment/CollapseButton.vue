@@ -8,9 +8,8 @@
 </template>
 
 <script>
-import EventBus from '../../../../../../../EventBus';
 export default {
-  props: ['label', 'collapsible'],
+  props: ['label'],
   emits: ['click'],
   data: function() {
     return {collapsed: false}
@@ -18,8 +17,6 @@ export default {
   methods: {
     onClick() {
       this.collapsed = !this.collapsed;
-
-      EventBus.$emit('participant_set_top');
     }
   }
 };
