@@ -1,7 +1,6 @@
 import { Depth, Participants } from '../../../../../../../parser';
 import { mapGetters } from 'vuex';
 import CollapseButton from './CollapseButton.vue';
-import { hasCreationIn } from './CreationListener';
 import EventBus from '../../../../../../../EventBus';
 
 export const FRAGMENT_LEFT_BASE_OFFSET = 30;
@@ -45,9 +44,6 @@ export default {
           FRAGMENT_RIGHT_BASE_OFFSET +
           'px',
       };
-    },
-    hasCreation() {
-      return hasCreationIn(this.context);
     },
   },
   data: function() {
