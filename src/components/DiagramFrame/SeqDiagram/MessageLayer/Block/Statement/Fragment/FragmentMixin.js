@@ -53,6 +53,9 @@ export default {
     toggle($event, collapsed) {
       this.collapsed = collapsed;
 
+      //update participant top in two cases: 1) has child creation statement 2) has sibling creation statement
+      //e.g. 1): if(a) { new B } 
+      //     2): if(a) { while(b) { A.foo }; new B }
       EventBus.$emit('participant_set_top');
     }
   },
