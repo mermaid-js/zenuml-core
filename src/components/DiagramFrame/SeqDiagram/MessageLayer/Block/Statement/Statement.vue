@@ -8,6 +8,7 @@
     :comment="comment"
     :commentObj="commentObj"
     :selfCallIndent="selfCallIndent"
+    :order="order"
   ></component>
 </template>
 
@@ -26,7 +27,7 @@ import Comment from '../../../../../Comment/Comment';
 
 export default {
   name: 'statement',
-  props: ['context', 'selfCallIndent'],
+  props: ['context', 'selfCallIndent', 'order'],
   computed: {
     comment: function () {
       return this.context.getComment() ? this.context.getComment() : '';

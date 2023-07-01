@@ -26,19 +26,22 @@
       :assignee="assignee"
       :rtl="rightToLeft"
       type="sync"
+      :order="`${order}`"
     ></component>
     <occurrence
       :context="message"
       :participant="to"
       :selfCallIndent="passOnOffset"
       :rtl="rightToLeft"
+      :order="`${order}.1`"
     />
     <message
       class="return transform -translate-y-full"
-      v-if="assignee && !isSelf"
+      v-if="hasReturn"
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
+      :order="increaseOrder(1)"
     />
   </div>
 </template>
@@ -54,7 +57,7 @@ import { ProgContext } from '../../../../../../../parser';
 
 export default {
   name: 'interaction',
-  props: ['context', 'selfCallIndent', 'commentObj'],
+  props: ['context', 'selfCallIndent', 'commentObj', 'order'],
   computed: {
     // add tracker to the mapGetters
     ...mapGetters(['participants', 'distance2', 'cursor', 'onElementClick']),
@@ -137,11 +140,26 @@ export default {
       // return 'Message'
       return this.isSelf ? 'SelfInvocation' : 'Message';
     },
+    hasReturn() {
+      return this.assignee && !this.isSelf
+    },
+    orderPrefix() {
+      return this.order ? `${this.order}.` : ''
+    },
   },
   methods: {
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
     },
+    increaseOrder(value) {
+      if (this.order) {
+        const arr = this.order.split('.')
+        arr[arr.length - 1] = Number(arr[arr.length - 1]) + value
+        return arr.join('.')
+      } else {
+        return String(value)
+      }
+    }
   },
   components: {
     Message,

@@ -4,6 +4,9 @@ import { RootContext, Participants, GroupContext, ParticipantContext } from '../
 import WidthProviderOnBrowser from '../positioning/WidthProviderFunc';
 import { Coordinates } from '../positioning/Coordinates';
 import { CodeRange } from '../parser/CodeRange';
+import { Action } from 'vuex';
+import { ActionContext } from 'vuex';
+import { StoreOptions } from 'vuex';
 
 let storeInitiationTime: number = 0;
 setTimeout(function () {
@@ -25,9 +28,10 @@ export interface StoreState {
   cursor: any;
   showTips: boolean;
   onElementClick: (codeRange: CodeRange) => void;
+  displayOrderNumber: boolean;
 }
 // vuex 101: Deal with sync in mutation, async in actions
-const Store = () => {
+const Store = ():  StoreOptions<StoreState> => {
   storeInitiationTime = now();
   return {
     state: {
@@ -41,6 +45,7 @@ const Store = () => {
       onElementClick: (codeRange: CodeRange) => {
         console.log('Element clicked', codeRange);
       },
+      displayOrderNumber: Boolean(localStorage.getItem(`${location.hostname}-zenuml-orderNumber`)),
     } as StoreState,
     getters: {
       rootContext: (state: any) => {
@@ -97,6 +102,14 @@ const Store = () => {
       cursor: function (state: any, payload: any) {
         state.cursor = payload;
       },
+      toggleOrderNumber(state, payload: boolean) {
+        if (payload) {
+          localStorage.setItem(`${location.hostname}-zenuml-orderNumber`, '1')
+        } else {
+          localStorage.setItem(`${location.hostname}-zenuml-orderNumber`, '')
+        }
+        state.displayOrderNumber = payload
+      }
     },
     actions: {
       // Why debounce is here instead of mutation 'code'?

@@ -12,6 +12,7 @@
         :style="{ paddingLeft: `${offsetX}px` }"
         :context="blockInLoop"
         :selfCallIndent="selfCallIndent"
+        :order="order"
       ></block>
     </div>
   </div>
@@ -22,7 +23,7 @@ import fragment from './FragmentMixin';
 
 export default {
   name: 'fragment-loop',
-  props: ['context', 'comment', 'selfCallIndent'],
+  props: ['context', 'comment', 'selfCallIndent', 'order'],
   mixins: [fragment],
   computed: {
     from: function () {

@@ -17,6 +17,7 @@
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInIfBlock"
           :selfCallIndent="selfCallIndent"
+          :order="`${orderPrefix}1`"
         ></block>
       </div>
     </div>
@@ -31,6 +32,7 @@
           :context="blockInElseIfBlock(elseIfBlock)"
           :selfCallIndent="selfCallIndent"
           :key="index + 2000"
+          :order="`${orderPrefix}${altBlockOrder[index + 1]}`"
         ></block>
       </div>
     </template>
@@ -41,6 +43,7 @@
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="elseBlock"
           :selfCallIndent="selfCallIndent"
+          :order="`${orderPrefix}${altBlockOrder[altBlockOrder.length - 2]}`"
         ></block>
       </div>
     </template>
@@ -52,7 +55,7 @@ import fragment from './FragmentMixin';
 
 export default {
   name: 'fragment-alt',
-  props: ['context', 'comment', 'selfCallIndent', 'commentObj'],
+  props: ['context', 'comment', 'selfCallIndent', 'commentObj', 'order'],
   mixins: [fragment],
   computed: {
     from: function () {
@@ -69,6 +72,22 @@ export default {
     },
     elseBlock: function () {
       return this.alt?.elseBlock()?.braceBlock()?.block();
+    },
+    orderPrefix() {
+      if (this.order) {
+        return this.order.split('.').slice(0, -1).join('.') + '.'
+      }
+      return ''
+    },
+    altBlockOrder() {
+      const orders = [1, this.blockInIfBlock?.stat()?.length + 1]
+      this.alt.elseIfBlock()?.forEach?.((block) => {
+        orders.push(orders[orders.length - 1] + this.blockInElseIfBlock(block).stat().length)
+      })
+      orders.push(orders[orders.length - 1] + this.elseBlock.stat().length)
+
+      console.log(orders);
+      return orders
     },
   },
   methods: {
