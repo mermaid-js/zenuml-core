@@ -50,8 +50,8 @@ export default {
     return {collapsed: false};
   },
   methods: {
-    toggle($event, collapsed) {
-      this.collapsed = collapsed;
+    toggle($event) {
+      this.collapsed = !this.collapsed;
 
       //update participant top in two cases: 1) has child creation statement 2) has sibling creation statement
       //e.g. 1): if(a) { new B } 
@@ -60,4 +60,11 @@ export default {
     }
   },
   components: { CollapseButton },
+  watch: {
+    context(v) {
+      if(this.collapsed) {
+        this.collapsed = false;
+      }
+    }
+  },
 };
