@@ -1,8 +1,8 @@
 # Development
 
 ```
-yarn install
-yarn start
+pnpm install
+pnpm dev
 ```
 
 # 代码结构

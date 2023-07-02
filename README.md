@@ -24,8 +24,8 @@ Please follow the [integration guide](./docs/asciidoc/integration-guide.adoc) fo
 # Development
 
 ```
-yarn install
-yarn start
+pnpm install
+pnpm dev
 ```
 
 ## CI/CD
