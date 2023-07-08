@@ -2,17 +2,21 @@
   <div class="fragment loop border-skin-fragment rounded" :style="fragmentStyle">
     <comment v-if="comment" :comment="comment" />
     <div class="header text-skin-fragment-header bg-skin-fragment-header text-base leading-4">
-      <div class="name font-semibold p-1 border-b"><label class="p-0">Loop</label></div>
-    </div>
-    <div class="segment">
-      <div class="text-skin-fragment">
-        <label class="condition p-1">[{{ condition }}]</label>
+      <div class="name font-semibold p-1 border-b">
+        <collapse-button label="Loop" :collapsed="collapsed" @click="this.toggle"/>
       </div>
-      <block
-        :style="{ paddingLeft: `${offsetX}px` }"
-        :context="blockInLoop"
-        :selfCallIndent="selfCallIndent"
-      ></block>
+    </div>
+    <div :class="{hidden: collapsed}">
+      <div class="segment">
+        <div class="text-skin-fragment">
+          <label class="condition p-1">[{{ condition }}]</label>
+        </div>
+        <block
+          :style="{ paddingLeft: `${offsetX}px` }"
+          :context="blockInLoop"
+          :selfCallIndent="selfCallIndent"
+        ></block>
+      </div>
     </div>
   </div>
 </template>
