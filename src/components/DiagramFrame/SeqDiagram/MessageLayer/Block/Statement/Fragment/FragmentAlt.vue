@@ -3,11 +3,14 @@
     <div class="segment">
       <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
 
-      <div
-        class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t"
-      >
-        <div class="name font-semibold p-1 border-b"><label class="p-0">Alt</label></div>
+      <div class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t" >
+        <div class="name font-semibold p-1 border-b">
+          <collapse-button label="Alt" :collapsed="collapsed" @click="this.toggle"/>
+        </div>
       </div>
+    </div>
+
+    <div :class="{hidden: collapsed}">
       <div class="segment">
         <div class="text-skin-fragment">
           <label class="condition p-1">[{{ condition }}]</label>
@@ -19,31 +22,31 @@
           :selfCallIndent="selfCallIndent"
         ></block>
       </div>
-    </div>
-    <template v-for="(elseIfBlock, index) in alt.elseIfBlock()" :key="index + 500">
-      <div class="segment mt-2 border-t border-solid">
-        <div class="text-skin-fragment" :key="index + 1000">
-          <label class="else-if hidden">else if</label>
-          <label class="condition p-1">[{{ conditionFromIfElseBlock(elseIfBlock) }}]</label>
+      <template v-for="(elseIfBlock, index) in alt.elseIfBlock()" :key="index + 500">
+        <div class="segment mt-2 border-t border-solid">
+          <div class="text-skin-fragment" :key="index + 1000">
+            <label class="else-if hidden">else if</label>
+            <label class="condition p-1">[{{ conditionFromIfElseBlock(elseIfBlock) }}]</label>
+          </div>
+          <block
+            :style="{ paddingLeft: `${offsetX}px` }"
+            :context="blockInElseIfBlock(elseIfBlock)"
+            :selfCallIndent="selfCallIndent"
+            :key="index + 2000"
+          ></block>
         </div>
-        <block
-          :style="{ paddingLeft: `${offsetX}px` }"
-          :context="blockInElseIfBlock(elseIfBlock)"
-          :selfCallIndent="selfCallIndent"
-          :key="index + 2000"
-        ></block>
-      </div>
-    </template>
-    <template v-if="elseBlock">
-      <div class="segment mt-2 border-t border-solid">
-        <div class="text-skin-fragment"><label class="p-1">[else]</label></div>
-        <block
-          :style="{ paddingLeft: `${offsetX}px` }"
-          :context="elseBlock"
-          :selfCallIndent="selfCallIndent"
-        ></block>
-      </div>
-    </template>
+      </template>
+      <template v-if="elseBlock">
+        <div class="segment mt-2 border-t border-solid">
+          <div class="text-skin-fragment"><label class="p-1">[else]</label></div>
+          <block
+            :style="{ paddingLeft: `${offsetX}px` }"
+            :context="elseBlock"
+            :selfCallIndent="selfCallIndent"
+          ></block>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 

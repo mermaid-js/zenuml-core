@@ -1,5 +1,7 @@
 import { Depth, Participants } from '../../../../../../../parser';
 import { mapGetters } from 'vuex';
+import CollapseButton from './CollapseButton.vue';
+import EventBus from '../../../../../../../EventBus';
 
 export const FRAGMENT_LEFT_BASE_OFFSET = 30;
 export const FRAGMENT_RIGHT_BASE_OFFSET = 100;
@@ -43,5 +45,26 @@ export default {
           'px',
       };
     },
+  },
+  data: function() {
+    return {collapsed: false};
+  },
+  methods: {
+    toggle($event) {
+      this.collapsed = !this.collapsed;
+
+      //update participant top in two cases: 1) has child creation statement 2) has sibling creation statement
+      //e.g. 1): if(a) { new B } 
+      //     2): if(a) { while(b) { A.foo }; new B }
+      EventBus.$emit('participant_set_top');
+    }
+  },
+  components: { CollapseButton },
+  watch: {
+    context(v) {
+      if(this.collapsed) {
+        this.collapsed = false;
+      }
+    }
   },
 };
