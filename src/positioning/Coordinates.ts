@@ -1,10 +1,10 @@
-import { ARROW_HEAD_WIDTH, MARGIN, MIN_PARTICIPANT_WIDTH, MINI_GAP } from './Constants';
-import { TextType, WidthFunc } from './Coordinate';
-import { OrderedParticipants } from './OrderedParticipants';
-import { IParticipantModel } from './ParticipantListener';
-import { find_optimal } from './david/DavidEisenstat';
-import { AllMessages } from './MessageContextListener';
-import { OwnableMessage, OwnableMessageType } from './OwnableMessage';
+import {ARROW_HEAD_WIDTH, MARGIN, MIN_PARTICIPANT_WIDTH, MINI_GAP, OCCURRENCE_WIDTH} from './Constants';
+import {TextType, WidthFunc} from './Coordinate';
+import {OrderedParticipants} from './OrderedParticipants';
+import {IParticipantModel} from './ParticipantListener';
+import {find_optimal} from './david/DavidEisenstat';
+import {AllMessages} from './MessageContextListener';
+import {OwnableMessage, OwnableMessageType} from './OwnableMessage';
 
 export class Coordinates {
   private m: Array<Array<number>> = [];
@@ -20,16 +20,19 @@ export class Coordinates {
     this.walkThrough();
   }
 
+  orderedParticipantNames(): string[] {
+    return this.participantModels.map((p) => p.name);
+  }
+
   getPosition(participantName: string | undefined): number {
     const pIndex = this.participantModels.findIndex((p) => p.name === participantName);
     if (pIndex === -1) {
       throw Error(`Participant ${participantName} not found`);
     }
-    return (
-      this.getParticipantGap(this.participantModels[0]) +
-      find_optimal(this.m)[pIndex] +
-      ARROW_HEAD_WIDTH
-    );
+    const leftGap = this.getParticipantGap(this.participantModels[0]);
+    const position = leftGap + find_optimal(this.m)[pIndex];
+    console.debug(`Position of ${participantName} is ${position}`);
+    return position;
   }
 
   walkThrough() {
@@ -53,7 +56,7 @@ export class Coordinates {
       try {
         let messageWidth = this.getMessageWidth(message);
         this.m[leftIndex][rightIndex] = Math.max(
-          messageWidth + ARROW_HEAD_WIDTH,
+          messageWidth + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH,
           this.m[leftIndex][rightIndex]
         );
       } catch (e) {
@@ -94,7 +97,7 @@ export class Coordinates {
     return this.participantModels[pIndex].label || this.participantModels[pIndex].name;
   }
 
-  private static half(widthProvider: WidthFunc, participantName: string | undefined) {
+  static half(widthProvider: WidthFunc, participantName: string | undefined) {
     if (participantName === '_STARTER_') {
       return MARGIN / 2;
     }
@@ -117,7 +120,12 @@ export class Coordinates {
     const lastParticipant = this.participantModels[this.participantModels.length - 1].name;
     const calculatedWidth =
       this.getPosition(lastParticipant) +
-      Coordinates.halfWithMargin(this.widthProvider, lastParticipant);
+      Coordinates.half(this.widthProvider, lastParticipant);
     return Math.max(calculatedWidth, 200);
   }
+
+  distance(left: string, right: string) {
+    return this.getPosition(right) - this.getPosition(left);
+  }
+
 }

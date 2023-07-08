@@ -4,7 +4,7 @@ import sequenceParserListener from '../generated-parser/sequenceParserListener';
 const seqParser = sequenceParser;
 
 export interface IParticipantModel {
-  name?: string;
+  name: string;
   left: string;
   label?: string;
 }

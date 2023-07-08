@@ -30,6 +30,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
+          browser: chrome
           start: pnpm run dev
           command: pnpm run cy
           wait-on: http://127.0.0.1:8080

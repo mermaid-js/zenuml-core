@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { brightnessIgnoreAlpha, removeAlpha } from '../../../../utils/Color';
+import { brightnessIgnoreAlpha, removeAlpha } from '@/utils/Color';
 import iconPath from '../../Tutorial/Icons';
 
 export default {

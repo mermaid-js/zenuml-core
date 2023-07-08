@@ -8,7 +8,7 @@ import './IsCurrent';
 import './Owner';
 import './ProgContext';
 import './RetContext';
-import './StatContext';
+import './Origin';
 import './Divider/DividerContext';
 import './SignatureText';
 import './Messages/MessageContext';

@@ -13,7 +13,6 @@
     <div
       class="name flex-grow text-sm truncate hover:whitespace-normal hover:text-skin-message-hover hover:bg-skin-message-hover"
       :style="{ color: color }"
-      style="padding-left: 5px; float: left"
     >
       {{ content }}
     </div>

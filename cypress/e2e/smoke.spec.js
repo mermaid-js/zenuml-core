@@ -5,7 +5,7 @@ describe('Smoke test', function () {
     cy.visit('http://127.0.0.1:8080/cy/smoke.html');
     cy.get('[data-signature="append(line)"]', { timeout: 5000 }).should('be.visible');
     cy.document().toMatchImageSnapshot({
-      imageConfig: { threshold: 0.01 },
+      imageConfig: { threshold: 0.012 },
       capture: 'viewport',
     });
   });

@@ -22,6 +22,7 @@ export default defineConfig({
   resolve: {
     alias: {
       vue: '@vue/compat',
+      '@': resolve(__dirname, './src')
     },
   },
   plugins: [
