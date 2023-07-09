@@ -9,7 +9,7 @@
      -->
     <debug />
     <div
-      class="zoom-controls bg-skin-base text-skin-control flex justify-between w-28 hide-export bg-slate-50 rounded ml-1"
+      class="zoom-controls bg-skin-base text-skin-control flex justify-between w-28 hide-export ml-1"
     >
       <button class="zoom-in px-3" @click="zoomIn()">+</button>
       <label>{{ Number(scale * 100).toFixed(0) }} %</label>
