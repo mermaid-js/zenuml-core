@@ -9,6 +9,13 @@
      -->
     <debug />
     <div
+      class="zoom-controls bg-skin-base text-skin-control flex justify-between w-28 hide-export bg-slate-50 rounded ml-1"
+    >
+      <button class="zoom-in px-3" @click="zoomIn()">+</button>
+      <label>{{ Number(scale * 100).toFixed(0) }} %</label>
+      <button class="zoom-out px-3" @click="zoomOut()">-</button>
+    </div>
+    <div
       class="frame text-skin-frame bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded"
       :style="{ transform: `scale(${scale})` }"
     >
@@ -63,14 +70,6 @@
             <path d="M541.3 328m-68 0a68 68 0 1 0 136 0 68 68 0 1 0-136 0Z" fill="#2867CE" />
           </svg>
         </button>
-        <div
-          class="zoom-controls bg-skin-base text-skin-control flex justify-between w-28 hide-export"
-          :style="{ transform: `scale(${1 / scale})` }"
-        >
-          <button class="zoom-in px-1" @click="zoomIn()">+</button>
-          <label>{{ Number(scale * 100).toFixed(0) }} %</label>
-          <button class="zoom-out px-1" @click="zoomOut()">-</button>
-        </div>
         <width-provider />
         <a
           target="_blank"
