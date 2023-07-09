@@ -5,7 +5,7 @@
     :data-to="to"
     data-type="interaction"
     :data-signature="signature"
-    :class="{ highlight: isCurrent, self: isSelf }"
+    :class="{ highlight: isCurrent, self: isSelf, 'inited-from-occurrence': isInitedFromOccurrence }"
     :style="{
       width: !isSelf && (interactionWidth + 'px'),
       transform: 'translateX(' + translateX + 'px)',
@@ -136,6 +136,9 @@ export default {
     invocation: function () {
       // return 'Message'
       return this.isSelf ? 'SelfInvocation' : 'Message';
+    },
+    isInitedFromOccurrence: function () {
+      return this.message?.isInitedFromOccurrence(this.from);
     },
   },
   methods: {

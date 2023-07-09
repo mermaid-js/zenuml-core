@@ -9,6 +9,7 @@
       'right-to-left': rightToLeft,
       '-translate-x-full': rightToLeft,
       highlight: isCurrent,
+      'inited-from-occurrence': isInitedFromOccurrence,
     }"
     :style="{ width: interactionWidth + 'px' }"
   >
@@ -96,6 +97,9 @@ export default {
     },
     isCurrent() {
       return this.creation.isCurrent(this.cursor);
+    },
+    isInitedFromOccurrence: function () {
+      return this.creation.isInitedFromOccurrence(this.from);
     },
   },
   mounted() {

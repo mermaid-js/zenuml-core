@@ -3,7 +3,7 @@
     class="interaction async"
     v-on:click.stop="onClick"
     :data-signature="signature"
-    :class="{ 'right-to-left': rightToLeft, highlight: isCurrent }"
+    :class="{ 'right-to-left': rightToLeft, highlight: isCurrent, 'self-invocation': isSelf }"
     :style="{ width: interactionWidth + 'px', transform: 'translateX(' + translateX + 'px)' }"
   >
     <comment v-if="comment" :comment="comment" />
