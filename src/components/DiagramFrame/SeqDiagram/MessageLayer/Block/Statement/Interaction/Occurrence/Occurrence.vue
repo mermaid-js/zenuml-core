@@ -11,6 +11,7 @@
       v-if="this.context.braceBlock()"
       :context="context.braceBlock().block()"
       :selfCallIndent="selfCallIndent"
+      :number="number"
     ></block>
   </div>
 </template>
@@ -20,7 +21,7 @@ import { mapState, mapGetters } from 'vuex';
 
 export default {
   name: 'occurrence',
-  props: ['context', 'selfCallIndent', 'participant', 'rtl'],
+  props: ['context', 'selfCallIndent', 'participant', 'rtl', 'number'],
   data: function () {
     return {
       center: 0,

@@ -4,6 +4,7 @@ import { RootContext, Participants, GroupContext, ParticipantContext } from '../
 import WidthProviderOnBrowser from '../positioning/WidthProviderFunc';
 import { Coordinates } from '../positioning/Coordinates';
 import { CodeRange } from '../parser/CodeRange';
+import { StoreOptions } from 'vuex';
 
 let storeInitiationTime: number = 0;
 setTimeout(function () {
@@ -25,9 +26,10 @@ export interface StoreState {
   cursor: any;
   showTips: boolean;
   onElementClick: (codeRange: CodeRange) => void;
+  numbering: boolean;
 }
 // vuex 101: Deal with sync in mutation, async in actions
-const Store = () => {
+const Store = ():  StoreOptions<StoreState> => {
   storeInitiationTime = now();
   return {
     state: {
@@ -41,6 +43,7 @@ const Store = () => {
       onElementClick: (codeRange: CodeRange) => {
         console.log('Element clicked', codeRange);
       },
+      numbering: Boolean(localStorage.getItem(`${location.hostname}-zenuml-numbering`)),
     } as StoreState,
     getters: {
       rootContext: (state: any) => {
@@ -97,6 +100,14 @@ const Store = () => {
       cursor: function (state: any, payload: any) {
         state.cursor = payload;
       },
+      toggleNumbering(state, payload: boolean) {
+        if (payload) {
+          localStorage.setItem(`${location.hostname}-zenuml-numbering`, '1')
+        } else {
+          localStorage.setItem(`${location.hostname}-zenuml-numbering`, '')
+        }
+        state.numbering = payload
+      }
     },
     actions: {
       // Why debounce is here instead of mutation 'code'?

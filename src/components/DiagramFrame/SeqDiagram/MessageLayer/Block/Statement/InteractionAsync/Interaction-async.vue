@@ -7,7 +7,7 @@
     :style="{ width: interactionWidth + 'px', transform: 'translateX(' + translateX + 'px)' }"
   >
     <comment v-if="comment" :comment="comment" />
-    <component v-bind:is="invocation" :content="signature" :rtl="rightToLeft" type="async" />
+    <component v-bind:is="invocation" :content="signature" :rtl="rightToLeft" type="async" :number="number"/>
   </div>
 </template>
 
@@ -24,7 +24,7 @@ function isNullOrUndefined(value) {
 
 export default {
   name: 'interaction-async',
-  props: ['context', 'comment', 'selfCallIndent'],
+  props: ['context', 'comment', 'selfCallIndent', 'number'],
   computed: {
     ...mapGetters(['distance', 'cursor', 'onElementClick']),
     from: function () {

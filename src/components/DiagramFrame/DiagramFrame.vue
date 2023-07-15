@@ -39,7 +39,8 @@
         <seq-diagram ref="diagram" />
       </div>
       <div class="footer p-1 flex justify-between">
-        <button class="bottom-1 left-1 hide-export" @click="showTipsDialog()">
+        <div class="flex items-center">
+          <button class="bottom-1 left-1 hide-export" @click="showTipsDialog()">
           <svg
             class="filter grayscale"
             style="
@@ -63,6 +64,9 @@
             <path d="M541.3 328m-68 0a68 68 0 1 0 136 0 68 68 0 1 0-136 0Z" fill="#2867CE" />
           </svg>
         </button>
+        <input type="checkbox" id="order-display" class="ml-3 mr-1" :checked="numbering" @input="toggleNumbering(!numbering)">
+        <label for="order-display" title="Numbering the diagram" class="select-none">numbering</label>
+        </div>
         <div
           class="zoom-controls bg-skin-base text-skin-control flex justify-between w-28 hide-export"
           :style="{ transform: `scale(${1 / scale})` }"
@@ -96,7 +100,7 @@ import Debug from './Debug/Debug.vue';
 export default {
   name: 'DiagramFrame',
   computed: {
-    ...mapState(['showTips', 'scale', 'theme']),
+    ...mapState(['showTips', 'scale', 'theme', 'numbering']),
     ...mapGetters(['rootContext']),
     title() {
       if (!this.rootContext) {
@@ -111,7 +115,7 @@ export default {
     this.$el.__vue__ = this;
   },
   methods: {
-    ...mapMutations(['setScale']),
+    ...mapMutations(['setScale', 'toggleNumbering']),
     showTipsDialog() {
       this.$store.state.showTips = true;
 
