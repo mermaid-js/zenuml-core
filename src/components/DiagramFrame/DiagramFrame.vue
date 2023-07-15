@@ -156,7 +156,7 @@ export default {
       });
     },
     zoomIn() {
-      const newScale = this.scale + 0.1 > 1 ? 1 : this.scale + 0.1;
+      const newScale = Math.min(1, this.scale + 0.1);
       this.setScale(newScale);
     },
     zoomOut() {
