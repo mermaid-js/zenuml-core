@@ -6,6 +6,7 @@ import DiagramFrame from './components/DiagramFrame/DiagramFrame.vue';
 import SeqDiagram from './components/DiagramFrame/SeqDiagram/SeqDiagram.vue';
 
 import './assets/tailwind.css';
+import './assets/tailwind-preflight.less';
 import './components/Cosmetic.scss';
 import './components/Cosmetic-blue.scss';
 import './components/Cosmetic-black-white.scss';
