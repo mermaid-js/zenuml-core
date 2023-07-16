@@ -10,7 +10,6 @@
     <debug />
     <div
       class="frame text-skin-frame bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded"
-      :style="{ transform: `scale(${scale})` }"
     >
       <div ref="content">
         <div
@@ -36,7 +35,7 @@
             <TipsDialog />
           </div>
         </div>
-        <seq-diagram ref="diagram" />
+        <seq-diagram ref="diagram" :style="{ transform: `scale(${scale})`}" class="origin-top-left"/>
       </div>
       <div class="footer p-1 flex justify-between">
         <button class="bottom-1 left-1 hide-export" @click="showTipsDialog()">
@@ -65,7 +64,6 @@
         </button>
         <div
           class="zoom-controls bg-skin-base text-skin-control flex justify-between w-28 hide-export"
-          :style="{ transform: `scale(${1 / scale})` }"
         >
           <button class="zoom-in px-1" @click="zoomIn()">+</button>
           <label>{{ Number(scale * 100).toFixed(0) }} %</label>
@@ -158,7 +156,8 @@ export default {
       });
     },
     zoomIn() {
-      this.setScale(this.scale + 0.1);
+      const newScale = Math.min(1, this.scale + 0.1);
+      this.setScale(newScale);
     },
     zoomOut() {
       this.setScale(this.scale - 0.1);
