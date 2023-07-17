@@ -15,7 +15,7 @@ dependencies:
     specifier: ^3.2.45
     version: 3.2.45(vue@3.2.45)
   antlr4:
-    specifier: ^4.11.0
+    specifier: ~4.11.0
     version: 4.11.0
   color-string:
     specifier: ^1.5.5
@@ -65,7 +65,7 @@ devDependencies:
     specifier: ^7.20.2
     version: 7.20.2(@babel/core@7.22.1)
   '@types/antlr4':
-    specifier: ^4.11.2
+    specifier: ~4.11.2
     version: 4.11.2
   '@types/color-string':
     specifier: ^1.5.2

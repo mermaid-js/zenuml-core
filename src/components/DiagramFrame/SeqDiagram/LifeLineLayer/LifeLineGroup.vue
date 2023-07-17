@@ -26,11 +26,11 @@
 </template>
 
 <script>
-import { Participants } from '../../../../parser';
+import { Participants } from '@/parser';
 import LifeLine from './LifeLine.vue';
 import { mapGetters } from 'vuex';
 import WidthProviderOnBrowser from '../../../../positioning/WidthProviderFunc';
-import { TextType } from '../../../../positioning/Coordinate';
+import { TextType } from '@/positioning/Coordinate';
 
 export default {
   name: 'lifeline-group',

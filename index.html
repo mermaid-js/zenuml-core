@@ -29,7 +29,6 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.1/codemirror.min.css"
-      crossorigin="anonymous"
       integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
@@ -73,6 +72,10 @@
         lineNumbers: true,
         singleCursorHeightPerLine: false,
       });
+
+      // Fixing an issue of wrong cursor position
+      // https://github.com/codemirror/codemirror5/issues/5724#issuecomment-470950897
+      document.fonts.ready.then(() => { editor.refresh(); });
 
       // implement a waitUntil function
       function waitUntil(condition, callback) {

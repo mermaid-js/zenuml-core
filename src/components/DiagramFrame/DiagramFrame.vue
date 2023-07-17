@@ -10,7 +10,6 @@
     <debug />
     <div
       class="frame text-skin-frame bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded"
-      :style="{ transform: `scale(${scale})` }"
     >
       <div ref="content">
         <div
@@ -36,10 +35,11 @@
             <TipsDialog />
           </div>
         </div>
-        <seq-diagram ref="diagram" />
+        <seq-diagram ref="diagram" :style="{ transform: `scale(${scale})`}" class="origin-top-left"/>
       </div>
       <div class="footer p-1 flex justify-between">
-        <button class="bottom-1 left-1 hide-export" @click="showTipsDialog()">
+        <div class="flex items-center">
+          <button class="bottom-1 left-1 hide-export" @click="showTipsDialog()">
           <svg
             class="filter grayscale"
             style="
@@ -63,9 +63,11 @@
             <path d="M541.3 328m-68 0a68 68 0 1 0 136 0 68 68 0 1 0-136 0Z" fill="#2867CE" />
           </svg>
         </button>
+        <input type="checkbox" id="order-display" class="ml-3 mr-1" :checked="numbering" @input="toggleNumbering(!numbering)">
+        <label for="order-display" title="Numbering the diagram" class="select-none">numbering</label>
+        </div>
         <div
           class="zoom-controls bg-skin-base text-skin-control flex justify-between w-28 hide-export"
-          :style="{ transform: `scale(${1 / scale})` }"
         >
           <button class="zoom-in px-1" @click="zoomIn()">+</button>
           <label>{{ Number(scale * 100).toFixed(0) }} %</label>
@@ -96,7 +98,7 @@ import Debug from './Debug/Debug.vue';
 export default {
   name: 'DiagramFrame',
   computed: {
-    ...mapState(['showTips', 'scale', 'theme']),
+    ...mapState(['showTips', 'scale', 'theme', 'numbering']),
     ...mapGetters(['rootContext']),
     title() {
       if (!this.rootContext) {
@@ -111,7 +113,7 @@ export default {
     this.$el.__vue__ = this;
   },
   methods: {
-    ...mapMutations(['setScale']),
+    ...mapMutations(['setScale', 'toggleNumbering']),
     showTipsDialog() {
       this.$store.state.showTips = true;
 
@@ -158,7 +160,8 @@ export default {
       });
     },
     zoomIn() {
-      this.setScale(this.scale + 0.1);
+      const newScale = Math.min(1, this.scale + 0.1);
+      this.setScale(newScale);
     },
     zoomOut() {
       this.setScale(this.scale - 0.1);

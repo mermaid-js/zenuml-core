@@ -5,7 +5,7 @@
     :data-to="to"
     data-type="interaction"
     :data-signature="signature"
-    :class="{ highlight: isCurrent, self: isSelf }"
+    :class="{ highlight: isCurrent, self: isSelf, 'inited-from-occurrence': isInitedFromOccurrence }"
     :style="{
       width: !isSelf && (interactionWidth + 'px'),
       transform: 'translateX(' + translateX + 'px)',
@@ -26,12 +26,14 @@
       :assignee="assignee"
       :rtl="rightToLeft"
       type="sync"
+      :number="number"
     ></component>
     <occurrence
       :context="message"
       :participant="to"
       :selfCallIndent="passOnOffset"
       :rtl="rightToLeft"
+      :number="`${number}`"
     />
     <message
       class="return transform -translate-y-full"
@@ -39,6 +41,7 @@
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
+      :number="`${number}.${message.braceBlock()?.block().stat().length + 1}`"
     />
   </div>
 </template>
@@ -54,7 +57,7 @@ import { ProgContext } from '../../../../../../../parser';
 
 export default {
   name: 'interaction',
-  props: ['context', 'selfCallIndent', 'commentObj'],
+  props: ['context', 'selfCallIndent', 'commentObj', 'number'],
   computed: {
     // add tracker to the mapGetters
     ...mapGetters(['participants', 'distance2', 'cursor', 'onElementClick']),
@@ -136,6 +139,9 @@ export default {
     invocation: function () {
       // return 'Message'
       return this.isSelf ? 'SelfInvocation' : 'Message';
+    },
+    isInitedFromOccurrence: function () {
+      return this.message?.isInitedFromOccurrence(this.from);
     },
   },
   methods: {

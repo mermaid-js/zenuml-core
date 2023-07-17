@@ -1,30 +1,40 @@
 <template>
   <div class="fragment loop border-skin-fragment rounded" :style="fragmentStyle">
     <comment v-if="comment" :comment="comment" />
-    <div class="header text-skin-fragment-header bg-skin-fragment-header text-base leading-4">
-      <div class="name font-semibold p-1 border-b"><label class="p-0">Loop</label></div>
-    </div>
-    <div class="segment">
-      <div class="text-skin-fragment">
-        <label class="condition p-1">[{{ condition }}]</label>
+    <div class="header text-skin-fragment-header bg-skin-fragment-header text-base leading-4 relative">
+      <div v-if="numbering" class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 text-sm font-thin leading-6">
+        {{ number }}
       </div>
-      <block
-        :style="{ paddingLeft: `${offsetX}px` }"
-        :context="blockInLoop"
-        :selfCallIndent="selfCallIndent"
-      ></block>
+      <div class="name font-semibold p-1 border-b">
+        <collapse-button label="Loop" :collapsed="collapsed" @click="this.toggle"/>
+      </div>
+    </div>
+    <div :class="{hidden: collapsed}">
+      <div class="segment">
+        <div class="text-skin-fragment">
+          <label class="condition p-1">[{{ condition }}]</label>
+        </div>
+        <block
+          :style="{ paddingLeft: `${offsetX}px` }"
+          :context="blockInLoop"
+          :selfCallIndent="selfCallIndent"
+          :number="number"
+        ></block>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import fragment from './FragmentMixin';
 
 export default {
   name: 'fragment-loop',
-  props: ['context', 'comment', 'selfCallIndent'],
+  props: ['context', 'comment', 'selfCallIndent', 'number'],
   mixins: [fragment],
   computed: {
+    ...mapState(['numbering']),
     from: function () {
       return this.context.Origin();
     },

@@ -8,7 +8,7 @@
         v-if="starterOnTheLeft"
         :entity="starterParticipant"
         class="starter"
-        :class="{ invisible: invisibleStarter }"
+        :class="{ invisible: invisibleStarter && !debug }"
         :renderParticipants="renderParticipants"
       />
       <template v-for="(child, index) in explicitGroupAndParticipants">
@@ -38,7 +38,7 @@
 
 <script>
 import parentLogger from '../../../../logger/logger';
-import { GroupContext, ParticipantContext, Participants } from '../../../../parser';
+import { GroupContext, ParticipantContext, Participants } from '@/parser';
 import { mapGetters, mapMutations } from 'vuex';
 import LifeLine from './LifeLine.vue';
 import LifeLineGroup from './LifeLineGroup.vue';
@@ -49,6 +49,9 @@ export default {
   props: ['context', 'renderParticipants'],
   computed: {
     ...mapGetters(['participants', 'GroupContext', 'ParticipantContext', 'centerOf']),
+    debug() {
+      return !!localStorage.zenumlDebug;
+    },
     invisibleStarter() {
       return this.starterParticipant.name === '_STARTER_';
     },

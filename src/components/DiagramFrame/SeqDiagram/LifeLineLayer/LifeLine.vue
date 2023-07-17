@@ -4,6 +4,7 @@
     class="lifeline absolute flex flex-col mx-2 transform -translate-x-1/2 h-full"
     :style="{ paddingTop: top + 'px', left: left + 'px' }"
   >
+    <div v-show="debug">{{centerOf(entity.name)}}</div>
     <participant v-if="renderParticipants" :entity="entity" />
     <div v-else class="line bg-skin-lifeline w0 mx-auto flex-grow w-px"></div>
   </div>
@@ -11,6 +12,7 @@
 
 <script>
 import parentLogger from '../../../../logger/logger';
+import EventBus from '../../../../EventBus';
 import { mapGetters, mapState } from 'vuex';
 import Participant from './Participant.vue';
 const logger = parentLogger.child({ name: 'LifeLine' });
@@ -27,6 +29,9 @@ export default {
   computed: {
     ...mapGetters(['centerOf']),
     ...mapState(['scale']),
+    debug() {
+      return !!localStorage.zenumlDebug;
+    },
     left() {
       return this.centerOf(this.entity.name) - 8 - (this.groupLeft || 0);
     },
@@ -37,6 +42,9 @@ export default {
       this.setTop();
       logger.debug(`nextTick after updated for ${this.entity.name}`);
     });
+
+    EventBus.$on('participant_set_top', () => this.$nextTick(() => this.setTop()));
+
     // setTimeout( () => {
     //   this.setTop()
     //   this.$emit('rendered')
@@ -64,7 +72,8 @@ export default {
       const escapedName = this.entity.name.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1');
       const $el = this.$root.$refs.diagram.$el;
       const firstMessage = $el.querySelector(`[data-to="${escapedName}"]`);
-      if (firstMessage && firstMessage.attributes['data-type'].value === 'creation') {
+      const isVisible = firstMessage?.offsetParent != null;
+      if (firstMessage && firstMessage.attributes['data-type'].value === 'creation' && isVisible) {
         logger.debug(`First message to ${this.entity.name} is creation`);
         const rootY = this.$el.getBoundingClientRect().y;
         const messageY = firstMessage.getBoundingClientRect().y;
