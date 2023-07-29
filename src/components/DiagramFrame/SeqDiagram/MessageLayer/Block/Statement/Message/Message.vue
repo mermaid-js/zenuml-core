@@ -11,26 +11,30 @@
     :style="{ 'border-bottom-style': borderStyle }"
   >
     <div
-      class="name flex-grow text-sm truncate hover:whitespace-normal hover:text-skin-message-hover hover:bg-skin-message-hover"
+      class="name group flex-grow text-sm hover:whitespace-normal hover:text-skin-message-hover hover:bg-skin-message-hover"
       :style="{ color: color }"
     >
-      {{ content }}
+      <div class="inline-block relative min-h-[1em]">
+        {{ content }}
+        <div class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500" v-if="numbering">{{ number }}</div>
+      </div>
     </div>
     <point class="flex-shrink-0 transform translate-y-1/2 -my-px" :fill="fill" :rtl="rtl" />
   </div>
 </template>
 
 <script type="text/babel">
+import { mapState } from 'vuex';
 import Point from './Point/Point.vue';
-
 // async: open arrow head.
 // sync: filled arrow head.
 // reply: dashed line with either an open or filled arrow head.
 // creation: a dashed line with an open arrow head.
 export default {
   name: 'message',
-  props: ['content', 'rtl', 'type', 'color'],
+  props: ['content', 'rtl', 'type', 'color', 'number'],
   computed: {
+    ...mapState(['numbering']),
     isAsync: function () {
       return this.type === 'async';
     },

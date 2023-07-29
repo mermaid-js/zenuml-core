@@ -16,7 +16,7 @@
 <script>
 import LifeLineLayer from './LifeLineLayer/LifeLineLayer.vue';
 import MessageLayer from './MessageLayer/MessageLayer.vue';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import {TotalWidth} from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
@@ -30,6 +30,7 @@ export default {
   },
   computed: {
     ...mapGetters(['rootContext', 'coordinates']),
+    ...mapState(['numbering']),
     width() {
       return TotalWidth(this.rootContext, this.coordinates);
     },
@@ -41,7 +42,7 @@ export default {
         return 0;
       }
       const border = FrameBorder(frame);
-      return border.left + MARGIN;
+      return border.left + MARGIN + 20;
     },
   },
 };

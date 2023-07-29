@@ -1,24 +1,27 @@
 <template>
   <div class="block">
     <div class="statement-container mt-1" v-for="(stat, index) in statements" :key="index">
-      <statement :context="stat" :selfCallIndent="selfCallIndent" />
+      <Statement :context="stat" :selfCallIndent="selfCallIndent" :number="getNumber(index)" />
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { computed, defineProps } from 'vue';
 import Statement from './Statement/Statement.vue';
+import { increaseNumber } from '@/utils/Numbering';
 
-export default {
-  name: 'block',
-  props: ['context', 'selfCallIndent'],
-  computed: {
-    statements: function () {
-      return this.context?.stat();
-    },
-  },
-  components: {
-    Statement,
-  },
-};
+const props = defineProps<{
+  context?: any;
+  selfCallIndent?: number;
+  number?: string;
+  incremental?: boolean;
+}>()
+const statements = computed(() => props.context?.stat() || [])
+const getNumber = (index: number) => {
+  if (props.number) {
+    return props.incremental ? increaseNumber(props.number, index) : `${props.number}.${index + 1}`
+  }
+  return String(index + 1)
+}
 </script>

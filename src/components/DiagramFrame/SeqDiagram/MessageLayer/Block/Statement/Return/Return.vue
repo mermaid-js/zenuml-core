@@ -21,7 +21,7 @@
       </svg>
       <span class="name text-sm">{{ signature }}</span>
     </div>
-    <Message v-if="!isSelf" :content="signature" :rtl="rightToLeft" type="return" />
+    <Message v-if="!isSelf" :content="signature" :rtl="rightToLeft" type="return" :number="number" />
   </div>
 </template>
 
@@ -30,14 +30,14 @@
 // It is rare that you need the latter format. Probably only when you have two consecutive returns.
 import Comment from '../Comment/Comment.vue';
 import Message from '../Message/Message.vue';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { CodeRange } from '../../../../../../../parser/CodeRange';
 import WidthProviderOnBrowser from '../../../../../../../positioning/WidthProviderFunc';
 import { TextType } from '../../../../../../../positioning/Coordinate';
 
 export default {
   name: 'return',
-  props: ['context', 'comment'],
+  props: ['context', 'comment', 'number'],
   computed: {
     ...mapGetters(['distance', 'cursor', 'onElementClick', 'participants']),
     from: function () {

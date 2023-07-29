@@ -18,7 +18,7 @@
      h-10 fixes the height as the same as participant boxes.-->
     <div
       ref="messageContainer"
-      class="message-container pointer-events-none flex items-center h-10"
+      class="message-container pointer-events-none flex items-center h-10 relative"
       data-type="creation"
       :data-to="to"
       :class="{ 'flex-row-reverse': rightToLeft }"
@@ -29,6 +29,7 @@
         :content="signature"
         :rtl="rightToLeft"
         type="creation"
+        :number="number"
       />
       <div
         ref="participantPlaceHolder"
@@ -37,13 +38,14 @@
         <participant :entity="{ name: to }" />
       </div>
     </div>
-    <occurrence :context="creation" class="pointer-events-auto" :participant="to" />
+    <occurrence :context="creation" class="pointer-events-auto" :participant="to" :number="number" />
     <message
       class="return transform -translate-y-full pointer-events-auto"
       v-if="assignee"
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
+      :number="`${number}.${creation.braceBlock()?.block().stat().length + 1}`"
     />
   </div>
 </template>
@@ -51,7 +53,7 @@
 <script type="text/babel">
 import parentLogger from '../../../../../../../logger/logger';
 
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Comment from '../Comment/Comment.vue';
 import Message from '../Message/Message.vue';
 import Occurrence from '../Interaction/Occurrence/Occurrence.vue';
@@ -62,9 +64,10 @@ const logger = parentLogger.child({ name: 'Creation' });
 
 export default {
   name: 'creation',
-  props: ['context', 'comment', 'selfCallIndent'],
+  props: ['context', 'comment', 'selfCallIndent', 'number'],
   computed: {
     ...mapGetters(['cursor', 'onElementClick', 'distance']),
+    ...mapState(['numbering']),
     from() {
       return this.context.Origin();
     },

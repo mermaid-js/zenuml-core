@@ -1,7 +1,12 @@
 <template>
   <div class="fragment par border-skin-fragment rounded" :style="fragmentStyle">
     <comment v-if="comment" :comment="comment" />
-    <div class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t" >
+    <div
+      class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t relative"
+    >
+      <div v-if="numbering" class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 text-sm font-thin leading-6">
+        {{ number }}
+      </div>
       <div class="name font-semibold p-1 border-b">
         <collapse-button label="Par" :collapsed="collapsed" @click="this.toggle"/>
       </div>
@@ -14,13 +19,15 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import fragment from './FragmentMixin';
 
 export default {
   name: 'fragment-par',
-  props: ['context', 'comment', 'selfCallIndent'],
+  props: ['context', 'comment', 'selfCallIndent', 'number'],
   mixins: [fragment],
   computed: {
+    ...mapState(['numbering']),
     from: function () {
       return this.context.Origin();
     },
