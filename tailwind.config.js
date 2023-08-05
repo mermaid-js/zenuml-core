@@ -92,5 +92,8 @@ module.exports = {
       display: ['group-hover'],
     },
   },
+  corePlugins: {
+    preflight: false
+  },
   plugins: [],
 };

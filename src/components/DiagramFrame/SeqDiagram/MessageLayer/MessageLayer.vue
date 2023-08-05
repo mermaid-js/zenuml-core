@@ -53,7 +53,8 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+.zenuml {
 /* Avoid moving interaction to the left or right with margins.
   We can always assume that an interaction's border is the lifeline.
   Moving content with padding is OK.
@@ -112,5 +113,6 @@ export default {
   border-width: 1px;
   margin: 8px 0 0 0;
   padding-bottom: 10px;
+}
 }
 </style>

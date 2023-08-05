@@ -49,16 +49,16 @@ export default {
 </script>
 
 <style>
-.sequence-diagram * {
+.zenuml .sequence-diagram * {
   box-sizing: inherit;
 }
 
-.sequence-diagram {
+.zenuml .sequence-diagram {
   line-height: normal; /* Reset line-height for the diagram */
 }
 
 /* .participant is shared by MessageLayer and LifeLineLayer */
-.participant {
+.zenuml .participant {
   border-width: 2px; /* don't override */
   padding: 8px 4px;
   min-width: 88px;
