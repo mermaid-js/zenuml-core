@@ -20,10 +20,10 @@ function renderCode(code) {
 
 describe('Statement', () => {
   test.each([
-    ['// comment \n A->B:m', ' comment', undefined],
-    ['// [red] comment \n A->B:m', '  comment', 'red'],
-  ])('code %s', function (code, text, color) {
+    ['// comment \n A->B:m', ' comment', {}],
+    ['// [red] comment \n A->B:m', ' comment', {color: 'red'}],
+  ])('code %s', function (code, text, textStyle) {
     const wrapper = renderCode(code);
-    expect(wrapper.vm.commentObj).toEqual({ text: text, color: color });
+    expect(wrapper.vm.commentObj).toEqual({ text, textStyle, classNames: [] });
   });
 });

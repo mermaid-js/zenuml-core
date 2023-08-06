@@ -1,6 +1,6 @@
 <template>
   <div class="fragment par border-skin-fragment rounded" :style="fragmentStyle">
-    <comment v-if="comment" :comment="comment" />
+    <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
     <div
       class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t relative"
     >
@@ -8,7 +8,7 @@
         {{ number }}
       </div>
       <div class="name font-semibold p-1 border-b">
-        <collapse-button label="Par" :collapsed="collapsed" @click="this.toggle"/>
+        <collapse-button label="Par" :collapsed="collapsed" @click="this.toggle" :style="commentObj.textStyle" :class="commentObj.classNames"/>
       </div>
     </div>
     <block :class="{hidden: collapsed}"
@@ -24,7 +24,7 @@ import fragment from './FragmentMixin';
 
 export default {
   name: 'fragment-par',
-  props: ['context', 'comment', 'selfCallIndent', 'number'],
+  props: ['context', 'comment', 'commentObj', 'selfCallIndent', 'number'],
   mixins: [fragment],
   computed: {
     ...mapState(['numbering']),

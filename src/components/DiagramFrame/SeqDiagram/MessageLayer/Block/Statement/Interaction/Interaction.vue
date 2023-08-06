@@ -21,7 +21,8 @@
     <component
       v-bind:is="invocation"
       class="text-center"
-      :color="color"
+      :textStyle="textStyle"
+      :classNames="classNames"
       :content="signature"
       :assignee="assignee"
       :rtl="rightToLeft"
@@ -62,10 +63,13 @@ export default {
     // add tracker to the mapGetters
     ...mapGetters(['participants', 'distance2', 'cursor', 'onElementClick']),
     hasComment() {
-      return this.commentObj?.text !== '' || this.commentObj?.color !== '';
+      return this.commentObj?.text !== ''
     },
-    color() {
-      return this.commentObj?.color;
+    textStyle() {
+      return this.commentObj?.textStyle;
+    },
+    classNames() {
+      return this.commentObj?.classNames;
     },
     message: function () {
       return this.context?.message();

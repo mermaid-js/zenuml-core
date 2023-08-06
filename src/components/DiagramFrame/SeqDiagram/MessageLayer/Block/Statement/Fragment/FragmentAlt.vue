@@ -8,7 +8,7 @@
         </div>
         <div class="name font-semibold p-1 border-b">
           <label class="p-0">
-            <collapse-button label="Alt" :collapsed="collapsed" @click="this.toggle"/>
+            <collapse-button label="Alt" :collapsed="collapsed" @click="this.toggle" :style="commentObj.textStyle" :class="commentObj.classNames"/>
           </label>
         </div>
       </div>
