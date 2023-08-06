@@ -93,11 +93,17 @@
           () => {
             return window.zenUml;
           },
-          () => {
-            window.zenUml.render(cm.getValue(), 'theme-default').then((r) => {
-              window.parentLogger.child({ name: 'index.html' }).debug('render resolved', r);
-            });
-          }
+          (() => {
+            let timer = 0
+            return () => {
+              clearTimeout(timer)
+              timer = setTimeout(() => {
+                window.zenUml.render(cm.getValue(), 'theme-default').then((r) => {
+                  window.parentLogger.child({ name: 'index.html' }).debug('render resolved', r);
+                });
+              }, 500);
+            }
+          })()
         );
         // write cm.getValue() to localStorage
         localStorage.setItem('zenuml-cm-code', cm.getValue());
