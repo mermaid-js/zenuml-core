@@ -14,7 +14,9 @@
     <block :class="{hidden: collapsed}"
       :style="{ paddingLeft: `${offsetX}px` }"
       :context="par.braceBlock().block()"
-      :selfCallIndent="selfCallIndent" ></block>
+      :selfCallIndent="selfCallIndent"
+      :number="number"
+    ></block>
   </div>
 </template>
 

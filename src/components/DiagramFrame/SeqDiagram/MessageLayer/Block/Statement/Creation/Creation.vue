@@ -45,7 +45,7 @@
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
-      :number="`${number}.${creation.braceBlock()?.block().stat().length + 1}`"
+      :number="`${number}.${(creation.braceBlock()?.block().stat().length || 0) + 1}`"
     />
   </div>
 </template>
