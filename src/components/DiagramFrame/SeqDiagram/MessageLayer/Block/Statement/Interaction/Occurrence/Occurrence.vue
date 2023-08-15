@@ -1,5 +1,4 @@
 <template>
-  <!-- feng -->
   <div
     class="occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full"
     :class="{ 'right-to-left': rtl }"
