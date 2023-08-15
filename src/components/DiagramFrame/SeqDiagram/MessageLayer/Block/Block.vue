@@ -1,7 +1,7 @@
 <template>
   <div class="block">
     <div class="statement-container mt-1" v-for="(stat, index) in statements" :key="index">
-      <Statement :context="stat" :selfCallIndent="selfCallIndent" :number="getNumber(index)" />
+      <Statement :context="stat" :collapsed="collapsed" :selfCallIndent="selfCallIndent" :number="getNumber(index)" />
     </div>
   </div>
 </template>
@@ -16,6 +16,7 @@ const props = defineProps<{
   selfCallIndent?: number;
   number?: string;
   incremental?: boolean;
+  collapsed?:boolean;
 }>()
 const statements = computed(() => props.context?.stat() || [])
 const getNumber = (index: number) => {

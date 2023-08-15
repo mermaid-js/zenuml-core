@@ -1,4 +1,5 @@
 <template>
+  <!-- feng -->
   <div
     class="occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full"
     :class="{ 'right-to-left': rtl }"
@@ -7,24 +8,28 @@
     :data-x-offset="center"
     :data-debug-center-of="computedCenter"
   >
+    <collapse-button v-if="hasAnyStatementsExceptReturn"  :collapsed="collapsed" @click="this.toggle"/>
     <block
       v-if="this.context.braceBlock()"
       :context="context.braceBlock().block()"
       :selfCallIndent="selfCallIndent"
       :number="number"
+      :collapsed="collapsed"
     ></block>
   </div>
 </template>
 
 <script type="text/babel">
 import { mapState, mapGetters } from 'vuex';
-
+import CollapseButton from './CollapseButton.vue';
+import EventBus from '../../../../../../../../EventBus';
 export default {
   name: 'occurrence',
   props: ['context', 'selfCallIndent', 'participant', 'rtl', 'number'],
   data: function () {
     return {
       center: 0,
+      collapsed: false,
     };
   },
   computed: {
@@ -38,12 +43,39 @@ export default {
         return 0;
       }
     },
+    hasAnyStatementsExceptReturn: function () {
+      let braceBlock=this.context.braceBlock();
+      if(!braceBlock)return false;
+      let stats=(braceBlock.block()?.stat() || []);
+      let len=stats.length;
+      if(len>1)return true;
+      //when the only one statement is not the RetContext
+      if(len==1 && stats[0]['ret']()==null)return true;
+      return false;
+    }
   },
   // The following code will cause the Block to be created and mounted AFTER the occurrence (and upto DiagramFrame) is updated.
   // Block must be defined globally to ensure that it is rendered in the same time cycle as the whole diagram.
   // components: {
   //   Block: () => import('../../../Block.vue')
   // },
+  methods: {
+    toggle($event) {
+      this.collapsed = !this.collapsed;
+
+      //update participant top in this cases: has child and sibling creation statement
+      //e.g. : a.call() { b = new B(); b.call() { c = new C() c.call(){return}}}
+      EventBus.$emit('participant_set_top');
+    }
+  },
+  components: { CollapseButton },
+  watch: {
+    context(v) {
+      if(this.collapsed) {
+        this.collapsed = false;
+      }
+    }
+  },
 };
 </script>
 
