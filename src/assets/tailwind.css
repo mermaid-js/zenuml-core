@@ -21,6 +21,66 @@
     --color-bg-occurrence: #dedede;
   }
 
+  .theme-clean-light {
+    --color-text-base: #353748;
+    --color-border-base: #C8C9C9;
+    --color-border-frame: #E5E9F0;
+
+    /* Fragment */
+    --color-text-fragment-header: #368EFF;
+    --color-text-fragment: #368EFF;
+
+    /* Message */
+    --color-text-message: #368EFF;
+    --color-message-arrow: #368EFF;
+    --color-text-message-hover: #FFFFFF;
+    --color-bg-message-hover: #368EFF;
+
+    /* Participant */
+    --color-text-participant: #368EFF;
+    --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
+    --color-bg-participant: #EBF4FF;
+    --color-border-participant: #368EFF;
+
+    /* Occurrence*/
+    --color-bg-occurrence: #FFFFFF;
+    --color-border-occurrence: #368EFF;
+    --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
+
+    /* Bottom control bar */
+    --color-text-control: #333333;
+  }
+
+  .theme-clean-dark {
+    --color-bg-base: #202126;
+    --color-text-base: #368EFF;
+    --color-border-base: #1F3354;
+    --color-border-frame: #1F3354;
+
+    /* Fragment */
+    --color-text-fragment-header: #368EFF;
+    --color-text-fragment: #368EFF;
+
+    /* Message */
+    --color-message-arrow: #368EFF;
+    --color-text-message-hover: #FFFFFF;
+    --color-bg-message-hover: #368EFF;
+
+    /* Participant */
+    --color-text-participant: #368EFF;
+    --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
+    --color-bg-participant: #222C3C;
+    --color-border-participant: #368EFF;
+
+    /* Occurrence */
+    --color-bg-occurrence: #222C3C;
+    --color-border-occurrence: #368EFF;
+    --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
+
+    /* Bottom control bar */
+    --color-text-control: #F3F3F3;
+  }
+
   .theme-mermaid {
     --color-bg-base: #fff;
     --color-text-base: #222;
