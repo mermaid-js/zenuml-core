@@ -8,6 +8,7 @@
     --color-text-base: #000;
     --color-text-secondary: #333;
     --color-border-base: #000;
+    --color-border-primary: #368EFF;
   }
 
   .theme-default {
