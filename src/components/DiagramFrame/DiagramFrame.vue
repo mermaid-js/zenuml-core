@@ -37,8 +37,8 @@
         </div>
         <seq-diagram ref="diagram" :style="{ transform: `scale(${scale})`}" class="origin-top-left"/>
       </div>
-      <div class="footer p-1 flex justify-between">
-        <div class="flex items-center">
+      <div class="footer text-skin-control px-4 py-1 flex justify-between">
+        <div class="flex items-center gap-3 color-base">
           <button class="bottom-1 left-1 hide-export" @click="showTipsDialog()">
             <svg class="filter grayscale w-4 h-4" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -46,11 +46,15 @@
                 fill="currentColor"></path>
             </svg>
           </button>
-          <input type="checkbox" id="order-display" class="ml-3 mr-1" :checked="numbering" @input="toggleNumbering(!numbering)">
-          <label for="order-display" title="Numbering the diagram" class="select-none">numbering</label>
+          <ThemeSelect />
+          <div class="flex items-center">
+            <input type="checkbox" id="order-display" class="mr-1" :checked="numbering"
+                   @input="toggleNumbering(!numbering)">
+            <label for="order-display" title="Numbering the diagram" class="select-none">Numbering</label>
+          </div>
         </div>
         <div
-          class="zoom-controls bg-skin-base text-skin-control flex justify-between w-28 hide-export"
+          class="zoom-controls bg-skin-base flex justify-between w-28 hide-export"
         >
           <button class="zoom-in px-1" @click="zoomIn()">
             <svg class="w-4 h-4" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
@@ -76,7 +80,7 @@
         <a
           target="_blank"
           href="https://zenuml.com"
-          class="brand text-skin-link absolute bottom-1 right-1 text-xs"
+          class="brand absolute bottom-1 right-4 text-xs hover:underline"
         >ZenUML.com</a
         >
       </div>
@@ -85,7 +89,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from 'vuex';
+import {mapState, mapGetters, mapMutations} from 'vuex';
 import Privacy from './Privacy/Privacy.vue';
 import DiagramTitle from './DiagramTitle/DiagramTitle.vue';
 import SeqDiagram from './SeqDiagram/SeqDiagram.vue';
@@ -93,6 +97,7 @@ import TipsDialog from './Tutorial/TipsDialog.vue';
 import WidthProvider from './Positioning/WidthProvider.vue';
 import * as htmlToImage from 'html-to-image';
 import Debug from './Debug/Debug.vue';
+import ThemeSelect from './ThemeSelect.vue';
 
 export default {
   name: 'DiagramFrame',
@@ -215,6 +220,7 @@ export default {
     DiagramTitle,
     SeqDiagram,
     Privacy,
+    ThemeSelect,
   },
 };
 </script>
