@@ -30,6 +30,7 @@ export interface StoreState {
 }
 // vuex 101: Deal with sync in mutation, async in actions
 const Store = ():  StoreOptions<StoreState> => {
+// TODO: remove state any type
   storeInitiationTime = now();
   return {
     state: {
@@ -107,6 +108,9 @@ const Store = ():  StoreOptions<StoreState> => {
           localStorage.setItem(`${location.hostname}-zenuml-numbering`, '')
         }
         state.numbering = payload
+      },
+      setTheme: function (state: any, payload: string) {
+        state.theme = payload;
       }
     },
     actions: {
