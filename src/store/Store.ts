@@ -36,7 +36,7 @@ const Store = ():  StoreOptions<StoreState> => {
     state: {
       warning: undefined,
       code: '',
-      theme: 'naked',
+      theme: localStorage.getItem(`${location.hostname}-zenuml-theme`) || 'theme-default',
       scale: 1,
       selected: [],
       cursor: null,
@@ -110,6 +110,11 @@ const Store = ():  StoreOptions<StoreState> => {
         state.numbering = payload
       },
       setTheme: function (state: any, payload: string) {
+        if (payload) {
+          localStorage.setItem(`${location.hostname}-zenuml-theme`, payload)
+        } else {
+          localStorage.setItem(`${location.hostname}-zenuml-theme`, 'theme-default')
+        }
         state.theme = payload;
       }
     },

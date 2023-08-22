@@ -149,8 +149,8 @@ const themes = [
   },
 ]
 
-const selected = ref(themes[0].id)
 const store = useStore()
+const selected = ref(store.state.theme || themes[0].id)
 
 const closeModal = () => {
   isOpen.value = false
