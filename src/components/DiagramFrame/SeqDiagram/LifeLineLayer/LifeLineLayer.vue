@@ -1,8 +1,10 @@
 <template>
   <div
-    class="life-line-layer lifeline-layer absolute h-full flex flex-col pt-8 top-0"
-    :style="{ 'min-width': '200px', pointerEvents: renderParticipants ? 'none' : 'all' }"
+    class="life-line-layer w-full lifeline-layer z-30 absolute h-full flex grow flex-col top-0"
+    :style="{ 'min-width': '200px', 'width': `calc(100% - ${leftGap}px)`, pointerEvents: renderParticipants ? 'none' : 'all' }"
   >
+    <!--  header sticky blur effect, DON'T remove, gap + participant height = 72px  -->
+    <div class="sticky w-full top-0 pt-8 after:bg-gradient-to-b after:from-frame after:via-frame after:to-frame/0 after:block after:absolute after:top-0 after:w-full after:h-[72px]"></div>
     <div class="container relative grow">
       <life-line
         v-if="starterOnTheLeft"
@@ -46,7 +48,7 @@ const logger = parentLogger.child({ name: 'LifeLineLayer' });
 
 export default {
   name: 'life-line-layer',
-  props: ['context', 'renderParticipants'],
+  props: ['context', 'renderParticipants', 'leftGap'],
   computed: {
     ...mapGetters(['participants', 'GroupContext', 'ParticipantContext', 'centerOf']),
     debug() {

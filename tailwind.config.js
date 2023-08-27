@@ -19,6 +19,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        'frame': 'var(--color-bg-base)'
+      },
       textColor: {
         skin: {
           title: 'var(--color-text-title, var(--color-text-message, var(--color-text-base, #000)))',

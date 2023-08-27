@@ -1,15 +1,16 @@
 <template>
   <div
     class="zenuml sequence-diagram relative box-border text-left overflow-visible"
-    :style="{ paddingLeft: `${paddingLeft}px` }"
     ref="diagram"
   >
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
          .bg-skin-base is repeated because .zenuml reset it to default theme.
      -->
-    <life-line-layer :context="rootContext.head()" :renderParticipants="false" />
-    <message-layer :context="rootContext.block()" :style="{width: `${width}px`}"/>
-    <life-line-layer :context="rootContext.head()" :renderParticipants="true" />
+    <div :style="{ paddingLeft: `${paddingLeft}px` }" class="relative">
+      <life-line-layer :leftGap="paddingLeft" :context="rootContext.head()" :renderParticipants="false" />
+      <message-layer :context="rootContext.block()" :style="{width: `${width}px`}"/>
+      <life-line-layer :leftGap="paddingLeft" :context="rootContext.head()" :renderParticipants="true" />
+    </div>
   </div>
 </template>
 
