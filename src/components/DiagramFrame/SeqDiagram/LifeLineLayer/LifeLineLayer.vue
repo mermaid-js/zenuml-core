@@ -4,7 +4,7 @@
     :style="{ 'min-width': '200px', 'width': `calc(100% - ${leftGap}px)`, pointerEvents: renderParticipants ? 'none' : 'all' }"
   >
     <!--  header sticky blur effect, DON'T remove, gap + participant height = 72px  -->
-    <div class="sticky w-full top-0 pt-8 after:bg-gradient-to-b after:from-frame after:via-frame after:to-frame/0 after:block after:absolute after:top-0 after:w-full after:h-[72px]"></div>
+    <div class="sticky w-full top-0 pt-8 after:bg-gradient-to-b after:from-skin-frame after:via-skin-frame after:to-skin-frame/0 after:block after:absolute after:top-0 after:w-full after:h-[72px]"></div>
     <div class="container relative grow">
       <life-line
         v-if="starterOnTheLeft"

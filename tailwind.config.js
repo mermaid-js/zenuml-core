@@ -20,7 +20,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'frame': 'var(--color-bg-base)'
+        skin: {
+          frame: 'var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, #fff)))'
+        }
       },
       textColor: {
         skin: {
