@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps } from 'vue';
+import { computed } from 'vue';
 import Statement from './Statement/Statement.vue';
 import { increaseNumber } from '@/utils/Numbering';
 
