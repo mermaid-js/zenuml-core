@@ -1,12 +1,12 @@
 <template>
   <div class="fragment loop border-skin-fragment rounded" :style="fragmentStyle">
-    <comment v-if="comment" :comment="comment" />
+    <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
     <div class="header text-skin-fragment-header bg-skin-fragment-header text-base leading-4 relative">
       <div v-if="numbering" class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 text-sm font-thin leading-6">
         {{ number }}
       </div>
       <div class="name font-semibold p-1 border-b">
-        <collapse-button label="Loop" :collapsed="collapsed" @click="this.toggle"/>
+        <collapse-button label="Loop" :collapsed="collapsed" @click="this.toggle" :style="commentObj.textStyle" :class="commentObj.classNames"/>
       </div>
     </div>
     <div :class="{hidden: collapsed}">
@@ -31,7 +31,7 @@ import fragment from './FragmentMixin';
 
 export default {
   name: 'fragment-loop',
-  props: ['context', 'comment', 'selfCallIndent', 'number'],
+  props: ['context', 'comment', 'commentObj', 'selfCallIndent', 'number'],
   mixins: [fragment],
   computed: {
     ...mapState(['numbering']),

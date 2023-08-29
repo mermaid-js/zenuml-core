@@ -1,7 +1,7 @@
 <template>
   <div class="fragment tcf border-skin-fragment rounded" :style="fragmentStyle">
     <div class="segment">
-      <comment v-if="comment" :comment="comment" />
+      <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
       <div
         class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t relative"
       >
@@ -9,7 +9,7 @@
           {{ number }}
         </div>
         <div class="name font-semibold p-1 border-b">
-          <collapse-button label="Try" :collapsed="collapsed" @click="this.toggle"/>
+          <collapse-button label="Try" :collapsed="collapsed" @click="this.toggle" :style="commentObj.textStyle" :class="commentObj.classNames"/>
         </div>
       </div>
     </div>
@@ -67,7 +67,7 @@ import { blockLength } from '@/utils/Numbering';
 
 export default {
   name: 'fragment-tcf',
-  props: ['context', 'comment', 'selfCallIndent', 'number'],
+  props: ['context', 'comment', 'commentObj', 'selfCallIndent', 'number'],
   mixins: [fragment],
   computed: {
     ...mapState(['numbering']),

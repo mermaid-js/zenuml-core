@@ -12,10 +12,11 @@
   >
     <div
       class="name group flex-grow text-sm hover:whitespace-normal hover:text-skin-message-hover hover:bg-skin-message-hover"
-      :style="{ color: color }"
     >
       <div class="inline-block relative min-h-[1em]">
-        {{ content }}
+        <div :style="textStyle" :class="classNames">
+          {{ content }}
+        </div>
         <div class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500" v-if="numbering">{{ number }}</div>
       </div>
     </div>
@@ -32,7 +33,7 @@ import Point from './Point/Point.vue';
 // creation: a dashed line with an open arrow head.
 export default {
   name: 'message',
-  props: ['content', 'rtl', 'type', 'color', 'number'],
+  props: ['content', 'rtl', 'type', 'textStyle', 'classNames', 'number'],
   computed: {
     ...mapState(['numbering']),
     isAsync: function () {

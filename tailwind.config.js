@@ -13,6 +13,9 @@ module.exports = {
     'theme-anz',
     'theme-nab',
     'theme-google',
+    {
+      pattern: /(bg|text)-.*/,
+    },
   ],
   theme: {
     extend: {

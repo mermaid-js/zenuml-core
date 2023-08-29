@@ -1,10 +1,8 @@
 <template>
   <!-- TODO: 12px to align comment with async message, which as padding-left 10px and left 2px -->
   <div
-    class="comments text-skin-comment min-w-[100px] flex justify-around text-left text-sm opacity-50 hover:opacity-100"
-    :style="{ color: color }"
-  >
-    <div v-html="markedComment"></div>
+    class="comments text-skin-comment min-w-[100px] flex justify-around text-left text-sm opacity-50 hover:opacity-100">
+    <div v-html="markedComment" :class="classNames" :style="textStyle"></div>
   </div>
 </template>
 
@@ -65,8 +63,11 @@ export default {
         (this.comment && marked.parse(this.comment))
       );
     },
-    color() {
-      return this.commentObj?.color;
+    textStyle() {
+      return this.commentObj?.textStyle;
+    },
+    classNames() {
+      return this.commentObj?.classNames;
     },
   },
 };
