@@ -3,6 +3,7 @@
        Set text color to text-skin-base for all messages and allow fragments to override it. -->
   <component
     class="text-left text-sm text-skin-message"
+    :class="{ 'hidden': collapsedCheck}"
     v-bind:is="subStatement"
     :context="context"
     :comment="comment"
@@ -27,7 +28,7 @@ import Comment from '../../../../../Comment/Comment';
 
 export default {
   name: 'statement',
-  props: ['context', 'selfCallIndent', 'number'],
+  props: ['context', 'selfCallIndent', 'number','collapsed'],
   computed: {
     comment: function () {
       return this.context.getComment() ? this.context.getComment() : '';
@@ -51,6 +52,9 @@ export default {
       };
       let key = Object.keys(dict).find((x) => that.context[x]() !== null);
       return dict[key];
+    },
+    collapsedCheck:function(){
+       return this.collapsed && this.subStatement!='Return';
     },
   },
   components: {
