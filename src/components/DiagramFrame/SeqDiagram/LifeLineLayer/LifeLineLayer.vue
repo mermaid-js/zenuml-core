@@ -1,6 +1,6 @@
 <template>
   <div
-    class="life-line-layer w-full lifeline-layer z-30 absolute h-full flex grow flex-col top-0"
+    class="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0"
     :style="{ 'min-width': '200px', 'width': `calc(100% - ${leftGap}px)`, pointerEvents: renderParticipants ? 'none' : 'all' }"
   >
     <!--  header sticky blur effect, DON'T remove, gap + participant height = 72px  -->
