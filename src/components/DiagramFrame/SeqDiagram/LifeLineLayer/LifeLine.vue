@@ -5,7 +5,7 @@
     :style="{ paddingTop: top + 'px', left: left + 'px' }"
   >
     <div v-show="debug">{{centerOf(entity.name)}}</div>
-    <participant v-if="renderParticipants" :entity="entity" />
+    <participant v-if="renderParticipants" :entity="entity" :offsetTop="top" />
     <div v-else class="line bg-skin-lifeline w0 mx-auto flex-grow w-px"></div>
   </div>
 </template>

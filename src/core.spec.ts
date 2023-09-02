@@ -1,4 +1,12 @@
 import ZenUml, {VueSequence} from './core';
+
+
+vi.stubGlobal('IntersectionObserver', vi.fn(() => {
+  return {
+    observe() {},
+    disconnect() {}
+  }
+}))
 describe('@ZenUML/core', function () {
   it('should render and cache the code and theme', async () => {
     const el = document.createElement('div');
