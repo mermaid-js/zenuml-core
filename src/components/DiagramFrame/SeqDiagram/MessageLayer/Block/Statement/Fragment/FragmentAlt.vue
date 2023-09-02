@@ -17,7 +17,7 @@
     <div :class="{hidden: collapsed}">
       <div class="segment">
         <div class="text-skin-fragment flex">
-          <label class="condition px-1 text-xs inline-block">[{{ condition }}]</label>
+          <label class="condition px-1 text-sm inline-block">[{{ condition }}]</label>
         </div>
         <block
           v-if="blockInIfBlock"

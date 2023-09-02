@@ -27,8 +27,8 @@
         </block>
       </div>
       <template v-for="(catchBlock, index) in tcf.catchBlock()" :key="index + 500">
-        <div class="segment text-xs mt-2 border-t border-solid">
-          <div class="header inline-block text-skin-participant" :key="index + 1000">
+        <div class="segment text-sm mt-2 border-t border-solid">
+          <div class="header inline-block" :key="index + 1000">
             <label class="keyword catch p-1">catch</label
             ><label class="exception p-1">{{ exception(catchBlock) }}</label>
           </div>
@@ -45,7 +45,7 @@
       <template v-if="finallyBlock">
         <div class="segment mt-2 border-t border-solid">
           <div class="header flex text-skin-fragment finally">
-            <label class="keyword finally px-1 inline-block text-xs">finally</label>
+            <label class="keyword finally px-1 inline-block text-sm">finally</label>
           </div>
           <block
             :style="{ paddingLeft: `${offsetX}px` }"
