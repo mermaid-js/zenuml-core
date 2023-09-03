@@ -1,9 +1,9 @@
 <template>
   <div
-    class="participant bg-skin-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 sticky top-8"
+    class="participant bg-skin-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
     :class="{ selected: selected }"
     ref="participant"
-    :style="{ backgroundColor: backgroundColor, color: color }"
+    :style="{ backgroundColor: backgroundColor, color: color, transform: `translateY(${translate}px)` }"
     @click="onSelect"
   >
     <!-- Set the background and text color with bg-skin-base and text-skin-base.
@@ -33,14 +33,29 @@
 <script>
 import { brightnessIgnoreAlpha, removeAlpha } from '@/utils/Color';
 import iconPath from '../../Tutorial/Icons';
+import useIframePositionInParent from '@/functions/useIframePositionInParent';
+import { computed, ref } from 'vue';
+import useDocumentScroll from '@/functions/useDocumentScroll';
 
 export default {
   name: 'Participant',
+  setup(props) {
+    const participant = ref(null)
+    const [intersectionTop] = useIframePositionInParent()
+    const [scrollTop] = useDocumentScroll()
+    const translate = computed(() => {
+      const top = intersectionTop.value + scrollTop.value
+      if (top < props.offsetTop + 50) return 0
+      return top - props.offsetTop - 50
+    })
+    return { translate, participant }
+  },
   props: {
     entity: {
       type: Object,
       required: true,
     },
+    offsetTop: 0
   },
   data() {
     return {
