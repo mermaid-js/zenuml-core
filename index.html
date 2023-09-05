@@ -76,6 +76,10 @@
         <pre class="zenuml"></pre>
       </div>
     </div>
+    <!--  headlessui protal root hack: https://github.com/tailwindlabs/headlessui/discussions/666#discussioncomment-4966117  -->
+    <div id='headlessui-portal-root' class="zenuml">
+      <div />
+    </div>
     <script>
       const editor = CodeMirror.fromTextArea(document.getElementById('text'), {
         lineNumbers: true,
