@@ -103,7 +103,7 @@
             return () => {
               clearTimeout(timer)
               timer = setTimeout(() => {
-                window.zenUml.render(cm.getValue(), {theme: 'theme-default'}).then((r) => {
+                window.zenUml.render(cm.getValue(), {theme: 'theme-default', stickyOffset: 100}).then((r) => {
                   window.parentLogger.child({ name: 'index.html' }).debug('render resolved', r);
                 });
               }, 500);
@@ -119,6 +119,6 @@
         editor.setValue(code);
       }
     </script>
-    <script type="module" src="./src/main.ts"></script>
+    <script type="module" src="../src/main.ts"></script>
   </body>
 </html>

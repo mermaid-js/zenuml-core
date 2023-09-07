@@ -45,6 +45,9 @@ export default {
       return border.left + MARGIN + 20;
     },
   },
+  mounted: function () {
+    this.$store.state.diagramElement = this.$refs.diagram;
+  },
 };
 </script>
 

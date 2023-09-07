@@ -44,6 +44,8 @@ const Store = ():  StoreOptions<StoreState> => {
         console.log('Element clicked', codeRange);
       },
       numbering: Boolean(localStorage.getItem(`${location.hostname}-zenuml-numbering`)),
+      stickyOffset: 0,
+      diagramElement: null,
     } as StoreState,
     getters: {
       rootContext: (state: any) => {
