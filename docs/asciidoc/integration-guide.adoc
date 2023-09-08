@@ -26,7 +26,7 @@ interface IZenUml {
 // client code
 import ZenUml from '@ZenUML/core'
 const zenUml = new ZenUml(el)
-await zenUml.render('A.method', 'theme-blue')
+await zenUml.render('A.method', {theme: 'theme-blue'})
 ----
 
 ==== When rendering is finished

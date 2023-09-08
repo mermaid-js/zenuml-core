@@ -10,7 +10,7 @@ const code = `"><img src=x onerror=alert(1)>`;
 const zenUml = new ZenUml(elm);
 // @ts-ignore
 window.zenUml = zenUml;
-zenUml.render(code, 'theme-default').then((r) => {
+zenUml.render(code, {theme: 'theme-default'}).then((r) => {
   logger.debug('render resolved', r);
 });
 // @ts-ignore
