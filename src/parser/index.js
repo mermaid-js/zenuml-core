@@ -25,13 +25,49 @@ class SeqErrorListener extends antlr4.error.ErrorListener {
   }
 }
 
-function rootContext(code) {
+function getRootContextTokens(code){
+  var now=new Date();
   const chars = new antlr4.InputStream(code);
+  now=printCostTime("new antlr4.InputStream(code)",now);
   const lexer = new sequenceLexer(chars);
+  now=printCostTime("const lexer = new sequenceLexer(chars);",now);
   const tokens = new antlr4.CommonTokenStream(lexer);
-  const parser = new sequenceParser(tokens);
-  parser.addErrorListener(new SeqErrorListener());
-  return parser._syntaxErrors ? null : parser.prog();
+  now=printCostTime("const tokens = new antlr4.CommonTokenStream(lexer);",now);
+  return tokens;
+}
+
+function printCostTime(methodName,lastTime)
+{
+   var now=new Date().getTime();;
+   var diff = now - lastTime;
+  var seconds = Math.floor(diff / 1000);  // 计算秒数
+  var milliseconds = diff % 1000;  // 计算剩余的毫秒数
+
+  var result = seconds + " s " + milliseconds + " ms";
+    console.log(methodName+" cost: "+result);
+    return new Date().getTime();;
+}
+
+function rootContext(code,tokens) {
+  var now=new Date().getTime();;
+  var tempNow=now;
+  try{
+    if(!tokens){
+      tokens=getRootContextTokens(code);
+      tempNow=printCostTime("tokens=getRootContextTokens(code);",tempNow);
+    }
+    const parser = new sequenceParser(tokens);
+    tempNow=printCostTime("const parser = new sequenceParser(tokens);",tempNow);
+    parser.addErrorListener(new SeqErrorListener());
+    tempNow=printCostTime("parser.addErrorListener(new SeqErrorListener());",tempNow);
+    var r= parser._syntaxErrors ? null : parser.prog();
+    tempNow=printCostTime("var r= parser._syntaxErrors ? null : parser.prog();",tempNow);
+    tempNow=printCostTime("rootContext parser finish",now);
+    return r;
+
+  }catch(ex){
+    console.log(ex);
+  }
 }
 
 antlr4.ParserRuleContext.prototype.getFormattedText = function () {
@@ -63,6 +99,7 @@ antlr4.ParserRuleContext.prototype.returnedValue = function () {
 
 export const ProgContext = sequenceParser.ProgContext;
 export const RootContext = rootContext;
+export const RootContextTokens = getRootContextTokens;
 export const GroupContext = sequenceParser.GroupContext;
 export const ParticipantContext = sequenceParser.ParticipantContext;
 export const Depth = function (ctx) {
@@ -76,6 +113,7 @@ export const Participants = function (ctx, withStarter) {
 
 export default {
   RootContext: rootContext,
+  RootContextTokens: getRootContextTokens,
   ProgContext: sequenceParser.ProgContext,
   GroupContext: sequenceParser.GroupContext,
   ParticipantContext: sequenceParser.ParticipantContext,
