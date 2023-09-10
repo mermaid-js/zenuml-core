@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    rel="preload stylesheet"
-    as="style"
-    href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;700&display=swap"
-  />
-  <!--    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;700&display=swap'>-->
-  <style id="zenumlstyle">
-    /* Prefix your CSS rules with `#diagram` */
-    /*@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap');*/
-    /*!*@import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;700&display=swap");*!*/
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload stylesheet"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;700&display=swap"
+    />
+    <!--    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;700&display=swap'>-->
+    <style id="zenumlstyle">
+      /* Prefix your CSS rules with `#diagram` */
+      /*@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap');*/
+      /*!*@import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;700&display=swap");*!*/
 
       /*#diagram1 .sequence-diagram {*/
       /*    font-family: "Kalam", serif;*/
@@ -40,10 +40,6 @@
         font-family: monospace;
         font-size: 13px;
         height: 800px;
-      }
-      .zenuml .CodeMirror .CodeMirror-cursor {
-        border-color: #000;
-        border-left-width: 1px;
       }
       .grid {
         display: grid;
@@ -77,7 +73,7 @@
         ></textarea>
       </div>
       <div class="col-span-4">
-        <pre class="zenuml" style="margin:0;"></pre>
+        <pre class="zenuml"></pre>
       </div>
     </div>
     <script>
@@ -107,8 +103,7 @@
             return () => {
               clearTimeout(timer)
               timer = setTimeout(() => {
-                const theme = localStorage.getItem(`${location.hostname}-zenuml-theme`) || 'theme-default'
-                window.zenUml.render(cm.getValue(), {theme}).then((r) => {
+                window.zenUml.render(cm.getValue(), {theme: 'theme-default', stickyOffset: 100}).then((r) => {
                   window.parentLogger.child({ name: 'index.html' }).debug('render resolved', r);
                 });
               }, 500);
@@ -124,6 +119,6 @@
         editor.setValue(code);
       }
     </script>
-    <script type="module" src="./src/main.ts"></script>
+    <script type="module" src="../src/main.ts"></script>
   </body>
 </html>

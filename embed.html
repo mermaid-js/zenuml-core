@@ -34,7 +34,7 @@
           if (action === 'eval') {
             try {
               let { code, theme, style, css } = ev.data.args;
-              await zenUml.render(code, theme);
+              await zenUml.render(code, { theme });
               send_ok();
             } catch (e) {
               send_error(e.message, e.stack);
@@ -186,7 +186,7 @@
     </script>
 
     <div id="diagram" class="diagram" style="text-align: center">
-      <pre class="zenuml"></pre>
+      <pre class="zenuml" style="margin: 0;"></pre>
     </div>
     <script type="module" src="src/main.ts"></script>
   </body>

@@ -18,12 +18,16 @@ import Block from './components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block
 import Comment from './components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue';
 const logger = parentLogger.child({ name: 'core' });
 
+interface Config {
+  theme?: string;
+  stickyOffset?: number;
+}
 interface IZenUml {
   get code(): string | undefined;
   get theme(): string | undefined;
   // Resolve after rendering is finished.
   // eslint-disable-next-line no-unused-vars
-  render(code: string | undefined, theme: string | undefined): Promise<IZenUml>;
+  render(code: string | undefined, config: Config | undefined): Promise<IZenUml>;
 }
 
 export default class ZenUml implements IZenUml {
@@ -43,10 +47,11 @@ export default class ZenUml implements IZenUml {
     this.app.mount(this.el);
   }
 
-  async render(code: string | undefined, theme: string | undefined): Promise<IZenUml> {
-    logger.debug('rendering', code, theme);
+  async render(code: string | undefined, config: Config | undefined): Promise<IZenUml> {
+    logger.debug('rendering', code, config);
     this._code = code || this._code;
-    this._theme = theme || this._theme;
+    this._theme = config?.theme || this._theme;
+    this.store.state.stickyOffset = config?.stickyOffset || 0;
     // @ts-ignore
     this.store.state.theme = this._theme || 'default';
     // await dispatch will wait until the diagram is finished rendering.
