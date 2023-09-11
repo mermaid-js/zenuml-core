@@ -6,7 +6,7 @@
   >
     <div v-show="debug">{{centerOf(entity.name)}}</div>
     <participant v-if="renderParticipants" :entity="entity" :offsetTop="top" />
-    <div v-else class="line bg-skin-lifeline w0 mx-auto flex-grow w-px"></div>
+    <div v-else class="line w0 mx-auto flex-grow w-px"></div>
   </div>
 </template>
 
@@ -89,7 +89,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .lifeline .line {
-  /*background: linear-gradient(to bottom, transparent 50%, #223049 50%);*/
-  background-size: 1px 20px;
+  background: linear-gradient(to bottom, transparent 50%, var(--color-border-base) 50%);
+  background-size: 1px 10px;
 }
 </style>

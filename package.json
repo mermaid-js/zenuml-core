@@ -33,6 +33,8 @@
   "module": "./dist/zenuml.esm.mjs",
   "types": "./types/index.d.ts",
   "dependencies": {
+    "@headlessui/tailwindcss": "^0.2.0",
+    "@headlessui/vue": "^1.7.16",
     "@types/assert": "^1.5.4",
     "@types/ramda": "^0.28.0",
     "@vue/compat": "^3.2.45",

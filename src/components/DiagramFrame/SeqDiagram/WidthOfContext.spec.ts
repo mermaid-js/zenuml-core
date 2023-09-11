@@ -21,7 +21,7 @@ describe('TotalWidth', function () {
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     const ctx = Fixture.firstStatement(code);
     // _STARTER_ is taken into account
-    expect(TotalWidth(ctx, coordinates)).toBe(130);
+    expect(TotalWidth(ctx, coordinates)).toBe(170);
   })
 
   test('TotalWidth with depth', () => {
@@ -29,7 +29,7 @@ describe('TotalWidth', function () {
     let rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     const ctx = Fixture.firstStatement(code);
-    expect(TotalWidth(ctx, coordinates)).toBe(150);
+    expect(TotalWidth(ctx, coordinates)).toBe(190);
   })
 
   test('TotalWidth with distance', () => {
@@ -37,7 +37,7 @@ describe('TotalWidth', function () {
     let rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     const ctx = Fixture.firstStatement(code);
-    expect(TotalWidth(ctx, coordinates)).toBe(270);
+    expect(TotalWidth(ctx, coordinates)).toBe(350);
   })
 
   test('TotalWidth with extra width from self message', () => {
@@ -45,7 +45,7 @@ describe('TotalWidth', function () {
     let rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     const ctx = Fixture.firstStatement(code);
-    expect(TotalWidth(ctx, coordinates)).toBe(347);
+    expect(TotalWidth(ctx, coordinates)).toBe(407);
   })
 
   test('TotalWidth with extra width from self message2', () => {
@@ -53,6 +53,6 @@ describe('TotalWidth', function () {
     let rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     const ctx = Fixture.firstStatement(code);
-    expect(TotalWidth(ctx, coordinates)).toBe(447);
+    expect(TotalWidth(ctx, coordinates)).toBe(510);
   })
 });

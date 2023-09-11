@@ -66,6 +66,7 @@ module.exports = {
         },
       },
       borderColor: {
+        primary: 'var(--color-border-primary)',
         skin: {
           frame: 'var(--color-border-frame, var(--color-border-base, #000))',
           participant:
@@ -86,6 +87,10 @@ module.exports = {
           secondary: 'var(--color-bg-secondary)',
         },
       },
+      boxShadow: {
+        participant: 'var(--color-shadow-participant, transparent)',
+        occurrence: 'var(--color-shadow-occurrence, transparent)',
+      }
     },
   },
   variants: {
@@ -98,5 +103,7 @@ module.exports = {
   corePlugins: {
     preflight: false
   },
-  plugins: [],
+  plugins: [
+    require('@headlessui/tailwindcss')
+  ],
 };

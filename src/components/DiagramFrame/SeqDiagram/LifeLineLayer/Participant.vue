@@ -1,6 +1,6 @@
 <template>
   <div
-    class="participant bg-skin-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
+    class="participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
     :class="{ selected: selected }"
     ref="participant"
     :style="{ backgroundColor: backgroundColor, color: color, transform: `translateY(${translate}px)` }"

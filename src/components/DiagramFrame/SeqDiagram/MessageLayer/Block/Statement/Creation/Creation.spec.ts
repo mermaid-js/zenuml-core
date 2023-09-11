@@ -31,7 +31,7 @@ describe('Creation', () => {
     expect(vm.signature).toBe('«create»');
     expect(vm.assignee).toBe('a');
     expect(vm.distance).toStrictEqual(expect.any(Function));
-    expect(vm.interactionWidth).toBe(84);
+    expect(vm.interactionWidth).toBe(104);
     expect(vm.rightToLeft).toBeFalsy();
   });
 
@@ -39,7 +39,7 @@ describe('Creation', () => {
     let creationWrapper = mountCreationWithCode('A.m{B.m{new A}}', Fixture.firstGrandChild);
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();
-    expect(vm.interactionWidth).toBe(120);
+    expect(vm.interactionWidth).toBe(160);
   });
 
   it('right to left within alt fragment', async () => {
@@ -49,6 +49,6 @@ describe('Creation', () => {
     let creationWrapper = mountCreationWithCode('A.m{B.m{if(x){new A}}}', contextLocator);
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();
-    expect(vm.interactionWidth).toBe(120);
+    expect(vm.interactionWidth).toBe(160);
   });
 });

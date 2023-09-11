@@ -4,6 +4,7 @@
       class="tooltip bottom whitespace-normal"
       data-tooltip="We (the vendor) do not have access to your data. The diagram is generated in this browser."
     >
+      <!-- TODO: use Icon component instead -->
       <svg
         class="fill-current h-6 w-6 m-auto"
         xmlns="http://www.w3.org/2000/svg"

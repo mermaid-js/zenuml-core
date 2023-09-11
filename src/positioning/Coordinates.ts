@@ -86,6 +86,7 @@ export class Coordinates {
     let leftNameOrLabel = this.labelOrName(p.left);
     const halfLeft = Coordinates.half(this.widthProvider, leftNameOrLabel);
     const halfSelf = Coordinates.half(this.widthProvider, p.label || p.name);
+    // TODO: convert name to enum type
     const leftIsVisible = p.left && p.left !== '_STARTER_';
     const selfIsVisible = p.name && p.name !== '_STARTER_';
     return ((leftIsVisible && halfLeft) || 0) + ((selfIsVisible && halfSelf) || 0);

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full"
+    class="occurrence shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full"
     :class="{ 'right-to-left': rtl }"
     data-el-type="occurrence"
     :data-belongs-to="participant"

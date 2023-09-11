@@ -30,12 +30,13 @@ export interface StoreState {
 }
 // vuex 101: Deal with sync in mutation, async in actions
 const Store = ():  StoreOptions<StoreState> => {
+// TODO: remove state any type
   storeInitiationTime = now();
   return {
     state: {
       warning: undefined,
       code: '',
-      theme: 'naked',
+      theme: localStorage.getItem(`${location.hostname}-zenuml-theme`) || 'theme-default',
       scale: 1,
       selected: [],
       cursor: null,
@@ -109,6 +110,14 @@ const Store = ():  StoreOptions<StoreState> => {
           localStorage.setItem(`${location.hostname}-zenuml-numbering`, '')
         }
         state.numbering = payload
+      },
+      setTheme: function (state: any, payload: string) {
+        if (payload) {
+          localStorage.setItem(`${location.hostname}-zenuml-theme`, payload)
+        } else {
+          localStorage.setItem(`${location.hostname}-zenuml-theme`, 'theme-default')
+        }
+        state.theme = payload;
       }
     },
     actions: {

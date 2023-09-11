@@ -56,10 +56,10 @@ export default {
 <style lang="scss">
 .zenuml {
 /* Avoid moving interaction to the left or right with margins.
-  We can always assume that an interaction's border is the lifeline.
-  Moving content with padding is OK.
-  Don't move this to the Interaction component. This is also used by Interaction-async
-   */
+We can always assume that an interaction's border is the lifeline.
+Moving content with padding is OK.
+Don't move this to the Interaction component. This is also used by Interaction-async
+ */
 .interaction {
   /*Keep dashed or solid here otherwise no space is given to the border*/
   border: dashed transparent 0;
@@ -67,8 +67,8 @@ export default {
 
 .interaction.sync {
   /* This border width configuration make sure the content width is
-       the same as from the source occurrence's right border to target
-       occurrence's left boarder (boarder not inclusive).*/
+     the same as from the source occurrence's right border to target
+     occurrence's left boarder (boarder not inclusive).*/
   border-right-width: 7px;
 }
 
@@ -113,6 +113,10 @@ export default {
   border-width: 1px;
   margin: 8px 0 0 0;
   padding-bottom: 10px;
+}
+
+.fragment .fragment {
+  margin: 16px 0 0 0;
 }
 }
 </style>

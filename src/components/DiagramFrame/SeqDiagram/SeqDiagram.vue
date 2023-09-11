@@ -63,7 +63,7 @@ export default {
 /* .participant is shared by MessageLayer and LifeLineLayer */
 .zenuml .participant {
   border-width: 2px; /* don't override */
-  padding: 8px 4px;
+  padding: 0 14px;
   min-width: 88px;
   max-width: 250px;
   text-align: center;

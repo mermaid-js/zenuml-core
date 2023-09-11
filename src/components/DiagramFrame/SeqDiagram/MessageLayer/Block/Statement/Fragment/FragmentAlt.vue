@@ -6,7 +6,7 @@
         <div v-if="numbering" class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 text-sm font-thin leading-6">
           {{ number }}
         </div>
-        <div class="name font-semibold p-1 border-b">
+        <div class="name font-semibold p-1 border-b text-sm">
           <label class="p-0">
             <collapse-button label="Alt" :collapsed="collapsed" @click="this.toggle" :style="commentObj.textStyle" :class="commentObj.classNames"/>
           </label>
@@ -16,8 +16,8 @@
 
     <div :class="{hidden: collapsed}">
       <div class="segment">
-        <div class="text-skin-fragment">
-          <label class="condition p-1">[{{ condition }}]</label>
+        <div class="text-skin-fragment flex">
+          <label class="condition px-1 text-sm inline-block">[{{ condition }}]</label>
         </div>
         <block
           v-if="blockInIfBlock"
@@ -32,7 +32,7 @@
         <div class="segment mt-2 border-t border-solid">
           <div class="text-skin-fragment" :key="index + 1000">
             <label class="else-if hidden">else if</label>
-            <label class="condition p-1">[{{ conditionFromIfElseBlock(elseIfBlock) }}]</label>
+            <label class="condition px-1">[{{ conditionFromIfElseBlock(elseIfBlock) }}]</label>
           </div>
           <block
             :style="{ paddingLeft: `${offsetX}px` }"
