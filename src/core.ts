@@ -36,7 +36,7 @@ export default class ZenUml implements IZenUml {
   private _theme: string | undefined;
   private readonly store: any;
   private readonly app: any;
-
+  private currentTimeout: any;
   constructor(el: Element, naked: boolean = false) {
     this.el = el;
     this.store = createStore(Store());
@@ -60,17 +60,36 @@ export default class ZenUml implements IZenUml {
 
   async render(code: string | undefined, config: Config | undefined): Promise<IZenUml> {
     logger.debug('rendering', code, config);
+    if (this.currentTimeout) {
+      console.log('rendering clearTimeout');
+      clearTimeout(this.currentTimeout);
+    }
+    
     this._code = code || this._code;
     this._theme = config?.theme || this._theme;
     this.store.state.stickyOffset = config?.stickyOffset || 0;
     // @ts-ignore
     this.store.state.theme = this._theme || 'default';
-    // await dispatch will wait until the diagram is finished rendering.
-    // It includes the time adjusting the top of participants for creation message.
-    // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
-    // @ts-ignore
-    await this.store.dispatch('updateCode', { code: this._code });
-    return Promise.resolve(this);
+    let that=this;
+    return new Promise(async (resolve) => {
+      that.currentTimeout = setTimeout(async () => {
+          console.log('start rendering');
+          // await dispatch will wait until the diagram is finished rendering.
+          // It includes the time adjusting the top of participants for creation message.
+          // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
+          // @ts-ignore
+          await that.store.dispatch('updateCode', { code: that._code });
+          //await that.store.dispatch('updateCode', { code: that._code,rootContext:rootContext });
+          resolve(that);
+      }, that.calculateDebounceMilliseconds(that._code));
+    });
+  }
+
+  calculateDebounceMilliseconds(code:string | undefined): number  {
+    if(!code) return 0;
+    let length = code.split('\n').length; 
+    if (length < 50) return 200;
+    return 500; 
   }
 
   get code(): string | undefined {
