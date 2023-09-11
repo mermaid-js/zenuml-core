@@ -37,24 +37,26 @@ import { computed, ref } from 'vue';
 import useDocumentScroll from '@/functions/useDocumentScroll';
 import useIntersectionTop from '@/functions/useIntersectionTop';
 import { useStore } from 'vuex';
+import { getElementDistanceToTop } from '@/utils/dom';
 
-const PARTICIPANT_TOP = 50  // the distance of participants from the top of the diagram
 const PARTICIPANT_HEIGHT = 70
-const INTERSECTION_OFFSET = 10 // a threshold for judging whether the participant is intersecting with the viewport
+const INTERSECTION_ERROR_MARGIN = 10 // a threshold for judging whether the participant is intersecting with the viewport
 
 export default {
   name: 'Participant',
   setup(props) {
+    const participantOffsetTop = props.offsetTop || 0
     const store = useStore()
     const participant = ref(null)
     const intersectionTop = useIntersectionTop()
     const [scrollTop] = useDocumentScroll()
     const translate = computed(() => {
       let top = intersectionTop.value + scrollTop.value
-      if (intersectionTop.value > INTERSECTION_OFFSET && store?.state.stickyOffset) top += store?.state.stickyOffset
-      if (top < props.offsetTop + PARTICIPANT_TOP) return 0
-      const diagramHeight = store?.state.diagramElement.clientHeight || 0
-      return Math.min(top - PARTICIPANT_TOP, diagramHeight - PARTICIPANT_HEIGHT) - props.offsetTop
+      if (intersectionTop.value > INTERSECTION_ERROR_MARGIN && store?.state.stickyOffset) top += store?.state.stickyOffset
+      const diagramHeight = store?.state.diagramElement?.clientHeight || 0
+      const diagramTop = store?.state.diagramElement ? getElementDistanceToTop(store?.state.diagramElement) : 0
+      if (top < participantOffsetTop + diagramTop) return 0
+      return Math.min(top - diagramTop, diagramHeight - PARTICIPANT_HEIGHT) - participantOffsetTop
     })
     return { translate, participant }
   },
