@@ -45,12 +45,12 @@ const INTERSECTION_ERROR_MARGIN = 10 // a threshold for judging whether the part
 export default {
   name: 'Participant',
   setup(props) {
-    const participantOffsetTop = props.offsetTop || 0
     const store = useStore()
     const participant = ref(null)
     const intersectionTop = useIntersectionTop()
     const [scrollTop] = useDocumentScroll()
     const translate = computed(() => {
+      const participantOffsetTop = props.offsetTop || 0
       let top = intersectionTop.value + scrollTop.value
       if (intersectionTop.value > INTERSECTION_ERROR_MARGIN && store?.state.stickyOffset) top += store?.state.stickyOffset
       const diagramHeight = store?.state.diagramElement?.clientHeight || 0
