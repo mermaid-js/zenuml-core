@@ -19,6 +19,11 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        skin: {
+          frame: 'var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, #fff)))'
+        }
+      },
       textColor: {
         skin: {
           title: 'var(--color-text-title, var(--color-text-message, var(--color-text-base, #000)))',
