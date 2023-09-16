@@ -45,6 +45,17 @@ export default class ZenUml implements IZenUml {
     this.app.component('Block', Block);
     this.app.use(this.store);
     this.app.mount(this.el);
+    this.addPortalRootElement();
+  }
+
+  // DON'T REMOVE: headlessui portal root hack
+  // ref: https://github.com/tailwindlabs/headlessui/discussions/666#discussioncomment-4966117
+  private addPortalRootElement(): void {
+    const portalRootElement = document.createElement('div');
+    portalRootElement.id = 'headlessui-portal-root';
+    portalRootElement.className = 'zenuml';
+    portalRootElement.append(document.createElement('div'));
+    document.body.append(portalRootElement);
   }
 
   async render(code: string | undefined, config: Config | undefined): Promise<IZenUml> {
