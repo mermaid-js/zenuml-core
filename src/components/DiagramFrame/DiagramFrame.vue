@@ -39,12 +39,8 @@
       </div>
       <div class="footer text-skin-control px-4 py-1 flex justify-between">
         <div class="flex items-center gap-3 color-base">
-          <button class="bottom-1 left-1 hide-export" @click="showTipsDialog()">
-            <svg class="filter grayscale w-4 h-4" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M512 1024C229.248 1024 0 794.752 0 512S229.248 0 512 0s512 229.248 512 512-229.248 512-512 512z m0-938.666667C276.352 85.333333 85.333333 276.352 85.333333 512s191.018667 426.666667 426.666667 426.666667 426.666667-191.018667 426.666667-426.666667A426.666667 426.666667 0 0 0 512 85.333333z m0 682.666667a42.666667 42.666667 0 0 1-42.368-42.666667v-255.573333a42.368 42.368 0 1 1 84.693333 0V725.333333A42.410667 42.410667 0 0 1 512 768z m0-426.666667a42.325333 42.325333 0 1 1-0.085333-84.650666A42.325333 42.325333 0 0 1 512 341.333333z m42.325333-42.666666v0z"
-                fill="currentColor"></path>
-            </svg>
+          <button class="bottom-1 flex items-center left-1 hide-export" @click="showTipsDialog()">
+            <Icon icon-class="filter grayscale w-4 h-4" name="tip"/>
           </button>
           <ThemeSelect />
           <div class="flex items-center">
@@ -57,23 +53,11 @@
           class="zoom-controls bg-skin-base flex justify-between w-28 hide-export"
         >
           <button class="zoom-in px-1" @click="zoomIn()">
-            <svg class="w-4 h-4" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M945.066667 898.133333l-189.866667-189.866666c55.466667-64 87.466667-149.333333 87.466667-241.066667 0-204.8-168.533333-373.333333-373.333334-373.333333S96 264.533333 96 469.333333 264.533333 842.666667 469.333333 842.666667c91.733333 0 174.933333-34.133333 241.066667-87.466667l189.866667 189.866667c6.4 6.4 14.933333 8.533333 23.466666 8.533333s17.066667-2.133333 23.466667-8.533333c8.533333-12.8 8.533333-34.133333-2.133333-46.933334zM469.333333 778.666667C298.666667 778.666667 160 640 160 469.333333S298.666667 160 469.333333 160 778.666667 298.666667 778.666667 469.333333 640 778.666667 469.333333 778.666667z"
-                fill="currentColor"></path>
-              <path
-                d="M597.333333 437.333333h-96V341.333333c0-17.066667-14.933333-32-32-32s-32 14.933333-32 32v96H341.333333c-17.066667 0-32 14.933333-32 32s14.933333 32 32 32h96V597.333333c0 17.066667 14.933333 32 32 32s32-14.933333 32-32v-96H597.333333c17.066667 0 32-14.933333 32-32s-14.933333-32-32-32z"
-                fill="currentColor"></path>
-            </svg>
+            <Icon name="zoom-in" icon-class="w-4 h-4" />
           </button>
           <label>{{ Number(scale * 100).toFixed(0) }} %</label>
           <button class="zoom-out px-1" @click="zoomOut()">
-            <svg class="w-4 h-4" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
-              <path d="M637 443H325c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h312c4.4 0 8-3.6 8-8v-60c0-4.4-3.6-8-8-8z"
-                    fill="currentColor"></path>
-              <path fill="currentColor"
-                    d="M921 867L775 721c122.1-148.9 113.6-369.5-26-509-148-148.1-388.4-148.1-537 0-148.1 148.6-148.1 389 0 537 139.5 139.6 360.1 148.1 509 26l146 146c3.2 2.8 8.3 2.8 11 0l43-43c2.8-2.7 2.8-7.8 0-11zM696 696c-118.8 118.7-311.2 118.7-430 0-118.7-118.8-118.7-311.2 0-430 118.8-118.7 311.2-118.7 430 0 118.7 118.8 118.7 311.2 0 430z"></path>
-            </svg>
+            <Icon name="zoom-out" icon-class="w-4 h-4" />
           </button>
         </div>
         <width-provider />
@@ -98,6 +82,7 @@ import WidthProvider from './Positioning/WidthProvider.vue';
 import * as htmlToImage from 'html-to-image';
 import Debug from './Debug/Debug.vue';
 import ThemeSelect from './ThemeSelect.vue';
+import Icon from "@/components/Icon/Icon.vue";
 
 export default {
   name: 'DiagramFrame',
@@ -214,6 +199,7 @@ export default {
     },
   },
   components: {
+    Icon,
     Debug,
     WidthProvider,
     TipsDialog,

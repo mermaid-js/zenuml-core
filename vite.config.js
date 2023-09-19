@@ -2,6 +2,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import createVuePlugin from '@vitejs/plugin-vue';
 import { execSync } from 'child_process';
+import svgLoader from 'vite-svg-loader';
 
 function getCypressHtmlFiles() {
   const cypressFolder = resolve(__dirname, 'cy');
@@ -35,6 +36,7 @@ export default defineConfig({
         },
       },
     }),
+    svgLoader(),
   ],
   test: {
     environment: 'jsdom',
