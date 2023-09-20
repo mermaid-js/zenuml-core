@@ -55,76 +55,76 @@ export default {
 
 <style lang="scss">
 .zenuml {
-/* Avoid moving interaction to the left or right with margins.
-We can always assume that an interaction's border is the lifeline.
-Moving content with padding is OK.
-Don't move this to the Interaction component. This is also used by Interaction-async
- */
-.interaction {
-  /*Keep dashed or solid here otherwise no space is given to the border*/
-  border: dashed transparent 0;
-}
+  /* Avoid moving interaction to the left or right with margins.
+  We can always assume that an interaction's border is the lifeline.
+  Moving content with padding is OK.
+  Don't move this to the Interaction component. This is also used by Interaction-async
+   */
+  .interaction {
+    /*Keep dashed or solid here otherwise no space is given to the border*/
+    border: dashed transparent 0;
+  }
 
-.interaction.sync {
-  /* This border width configuration make sure the content width is
-     the same as from the source occurrence's right border to target
-     occurrence's left boarder (boarder not inclusive).*/
-  border-right-width: 7px;
-}
+  .interaction.sync {
+    /* This border width configuration make sure the content width is
+       the same as from the source occurrence's right border to target
+       occurrence's left boarder (boarder not inclusive).*/
+    border-right-width: 7px;
+  }
 
-.interaction.sync.right-to-left {
-  /* This border width configuration make sure the content width is
-     the same as from the source occurrence's right border to target
-     occurrence's left boarder (boarder not inclusive).*/
-  border-right-width: 0;
-  border-left-width: 7px;
-}
+  .interaction.sync.right-to-left {
+    /* This border width configuration make sure the content width is
+       the same as from the source occurrence's right border to target
+       occurrence's left boarder (boarder not inclusive).*/
+    border-right-width: 0;
+    border-left-width: 7px;
+  }
 
-.interaction.inited-from-occurrence,
-.interaction.self-invocation {
-  border-left-width: 7px;
-}
+  .interaction.inited-from-occurrence,
+  .interaction.self-invocation {
+    border-left-width: 7px;
+  }
 
-.interaction.return {
-  border-left-width: 7px;
-  border-right-width: 7px;
-}
+  .interaction.return {
+    border-left-width: 7px;
+    border-right-width: 7px;
+  }
 
-.interaction.return-to-start {
-  border-left-width: 0;
-}
+  .interaction.return-to-start {
+    border-left-width: 0;
+  }
 
-.interaction:hover {
-  cursor: pointer;
-}
+  .interaction:hover {
+    cursor: pointer;
+  }
 
-.message {
-  position: relative; /* positioning Point */
-}
+  .message {
+    position: relative; /* positioning Point */
+  }
 
-.message > .name {
-  text-align: center;
-}
+  .message > .name {
+    text-align: center;
+  }
 
-.interaction.right-to-left > .occurrence {
-  /* InteractionBorderWidth + (OccurrenceWidth-1)/2 */
-  left: -14px; /* overlay occurrence bar on the existing bar. */
-}
+  .interaction.right-to-left > .occurrence {
+    /* InteractionBorderWidth + (OccurrenceWidth-1)/2 */
+    left: -14px; /* overlay occurrence bar on the existing bar. */
+  }
 
-.interaction.self > .occurrence {
-  /* width of InteractionBorderWidth 7px + lifeline center 1px */
-  left: -8px; /* overlay occurrence bar on the existing bar. */
-  margin-top: -10px;
-}
+  .interaction.self > .occurrence {
+    /* width of InteractionBorderWidth 7px + lifeline center 1px */
+    left: -8px; /* overlay occurrence bar on the existing bar. */
+    margin-top: -10px;
+  }
 
-.fragment {
-  border-width: 1px;
-  margin: 8px 0 0 0;
-  padding-bottom: 10px;
-}
+  .fragment {
+    border-width: 1px;
+    margin: 8px 0 0 0;
+    padding-bottom: 10px;
+  }
 
-.fragment .fragment {
-  margin: 16px 0 0 0;
-}
+  .fragment .fragment {
+    margin: 16px 0 0 0;
+  }
 }
 </style>
