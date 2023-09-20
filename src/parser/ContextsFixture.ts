@@ -22,6 +22,7 @@ function createParseFunction(parseMethod: (parser: sequenceParser) => any) {
 }
 
 export const ProgContextFixture = createParseFunction((parser) => parser.prog());
+export const TitleContextFixture = createParseFunction((parser) => parser.title());
 export const StatContextFixture = createParseFunction((parser) => parser.stat());
 export const AsyncMessageContextFixture = createParseFunction((parser) => parser.asyncMessage());
 export const DividerContextFixture = createParseFunction((parser) => parser.divider());
