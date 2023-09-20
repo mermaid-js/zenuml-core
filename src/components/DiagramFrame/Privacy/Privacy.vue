@@ -1,9 +1,7 @@
 <template>
   <div>
-    <div
-      class="tooltip bottom whitespace-normal flex items-center"
-      data-tooltip="We (the vendor) do not have access to your data. The diagram is generated in this browser."
-    >
+    <div class="privacy tooltip bottom whitespace-normal flex items-center"
+      data-tooltip="We (the vendor) do not have access to your data. The diagram is generated in this browser.">
       <Icon name="privacy" icon-class="fill-current h-6 w-6 m-auto" />
     </div>
   </div>

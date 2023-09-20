@@ -7,7 +7,7 @@
     "url": "https://github.com/mermaid-js/zenuml-core"
   },
   "scripts": {
-    "dev": "vite dev --port 8080",
+    "dev": "vite dev --port 8080 --host 127.0.0.1",
     "build:site": "vite build",
     "build": "vite build -c vite.config.lib.js",
     "test": "vitest",
