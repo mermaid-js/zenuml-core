@@ -72,6 +72,14 @@ Don't move this to the Interaction component. This is also used by Interaction-a
   border-right-width: 7px;
 }
 
+.interaction.sync.right-to-left {
+  /* This border width configuration make sure the content width is
+     the same as from the source occurrence's right border to target
+     occurrence's left boarder (boarder not inclusive).*/
+  border-right-width: 0;
+  border-left-width: 7px;
+}
+
 .interaction.inited-from-occurrence,
 .interaction.self-invocation {
   border-left-width: 7px;

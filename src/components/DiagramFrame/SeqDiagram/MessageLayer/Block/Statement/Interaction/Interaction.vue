@@ -5,7 +5,7 @@
     :data-to="to"
     data-type="interaction"
     :data-signature="signature"
-    :class="{ highlight: isCurrent, self: isSelf, 'inited-from-occurrence': isInitedFromOccurrence }"
+    :class="{ highlight: isCurrent, self: isSelf, 'inited-from-occurrence': isInitedFromOccurrence, 'right-to-left': rightToLeft }"
     :style="{
       width: !isSelf && (interactionWidth + 'px'),
       transform: 'translateX(' + translateX + 'px)',
