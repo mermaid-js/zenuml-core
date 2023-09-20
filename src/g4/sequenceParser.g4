@@ -12,7 +12,7 @@ prog
  ;
 
 title
- : TITLE TITLE_CONTENT TITLE_END?
+ : TITLE TITLE_CONTENT? TITLE_END?
  ;
 
 head
