@@ -16,6 +16,10 @@ import './themes/theme-dark.css';
 
 import Block from './components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block.vue';
 import Comment from './components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue';
+
+import { clearCache } from "./utils/RenderingCache"
+import {getStartTime, printCostTime,printTotalCostTime } from "./utils/CostTime"
+
 const logger = parentLogger.child({ name: 'core' });
 
 interface Config {
@@ -73,7 +77,9 @@ export default class ZenUml implements IZenUml {
     let that=this;
     return new Promise(async (resolve) => {
       that.currentTimeout = setTimeout(async () => {
-          console.log('start rendering');
+          console.log('rendering start');
+          clearCache();
+          var start=getStartTime();
           // await dispatch will wait until the diagram is finished rendering.
           // It includes the time adjusting the top of participants for creation message.
           // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
@@ -81,6 +87,8 @@ export default class ZenUml implements IZenUml {
           await that.store.dispatch('updateCode', { code: that._code });
           //await that.store.dispatch('updateCode', { code: that._code,rootContext:rootContext });
           resolve(that);
+          printCostTime("rendering end",start);
+          printTotalCostTime(true);
       }, that.calculateDebounceMilliseconds(that._code));
     });
   }

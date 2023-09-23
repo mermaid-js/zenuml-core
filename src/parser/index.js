@@ -17,6 +17,7 @@ import './key/Key';
 import './IsInitedFromOccurrence';
 import './utils/cloest-ancestor/ClosestAncestor';
 import { formatText } from '../utils/StringUtil';
+import { printCostTime,getStartTime } from "./../utils/CostTime"
 
 const errors = [];
 class SeqErrorListener extends antlr4.error.ErrorListener {
@@ -26,12 +27,15 @@ class SeqErrorListener extends antlr4.error.ErrorListener {
 }
 
 function rootContext(code) {
+  let start=getStartTime();
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
   const tokens = new antlr4.CommonTokenStream(lexer);
   const parser = new sequenceParser(tokens);
   parser.addErrorListener(new SeqErrorListener());
-  return parser._syntaxErrors ? null : parser.prog();
+  const r=parser._syntaxErrors ? null : parser.prog();
+  printCostTime("rootContext parser finish",start);
+  return r;
 }
 
 antlr4.ParserRuleContext.prototype.getFormattedText = function () {

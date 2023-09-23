@@ -79,10 +79,11 @@
         ></textarea>
       </div>
       <div class="col-span-4">
-        <pre class="zenuml" style="margin:0;"></pre>
+        <iframe src="embed.html" width="100%" height="100%"></iframe>
       </div>
     </div>
     <script>
+      const iframe = document.querySelector('iframe');
       const editor = CodeMirror.fromTextArea(document.getElementById('text'), {
         lineNumbers: true,
         singleCursorHeightPerLine: false,
@@ -100,32 +101,17 @@
       }
 
       editor.on('change', function (cm) {
-        waitUntil(
-          () => {
-            return window.zenUml;
-          },
-          (() => {
-            let timer = 0
-            return () => {
-              clearTimeout(timer)
-              timer = setTimeout(() => {
-                const theme = localStorage.getItem(`${location.hostname}-zenuml-theme`) || 'theme-default'
-                window.zenUml.render(cm.getValue(), {theme}).then((r) => {
-                  window.parentLogger.child({ name: 'index.html' }).debug('render resolved', r);
-                });
-              }, 500);
-            }
-          })()
-        );
-        // write cm.getValue() to localStorage
-        localStorage.setItem('zenuml-cm-code', cm.getValue());
+        var code=cm.getValue();
+        iframe.contentWindow.postMessage({action: 'eval',args: { code: code}}, '*');
+        localStorage.setItem('zenuml-cm-code', code);
+        console.log('iframe postMessage finish');
       });
-      // read localStorage and set to code mirror
+
       const code = localStorage.getItem('zenuml-cm-code');
       if (code) {
         editor.setValue(code);
       }
     </script>
-    <script type="module" src="./src/main.ts"></script>
+    
   </body>
 </html>

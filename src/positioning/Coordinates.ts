@@ -5,7 +5,8 @@ import {IParticipantModel} from './ParticipantListener';
 import {find_optimal} from './david/DavidEisenstat';
 import {AllMessages} from './MessageContextListener';
 import {OwnableMessage, OwnableMessageType} from './OwnableMessage';
-
+import { printCostTime,getStartTime } from "./../utils/CostTime"
+import { getCache,setCache } from "./../utils/RenderingCache"
 export class Coordinates {
   private m: Array<Array<number>> = [];
   private readonly widthProvider: WidthFunc;
@@ -25,13 +26,22 @@ export class Coordinates {
   }
 
   getPosition(participantName: string | undefined): number {
+    let start=getStartTime();
+    var cachedPosition=getCache(participantName);
+    if(cachedPosition!=null)
+    {
+      printCostTime("getPosition"+" participantName:"+participantName+" position(cached):"+cachedPosition,start);
+      return cachedPosition;
+    }
     const pIndex = this.participantModels.findIndex((p) => p.name === participantName);
     if (pIndex === -1) {
       throw Error(`Participant ${participantName} not found`);
     }
     const leftGap = this.getParticipantGap(this.participantModels[0]);
     const position = leftGap + find_optimal(this.m)[pIndex];
+    setCache(participantName,position);
     console.debug(`Position of ${participantName} is ${position}`);
+    printCostTime("getPosition"+" participantName:"+participantName+" position:"+position,start);
     return position;
   }
 
