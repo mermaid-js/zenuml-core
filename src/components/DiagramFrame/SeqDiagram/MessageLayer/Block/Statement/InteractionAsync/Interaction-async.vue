@@ -7,7 +7,7 @@
     :style="{ width: interactionWidth + 'px', transform: 'translateX(' + translateX + 'px)' }"
   >
     <comment v-if="comment" :comment="comment" />
-    <component v-bind:is="invocation" :content="signature" :rtl="rightToLeft" type="async" :number="number"/>
+    <component v-bind:is="invocation" :context="isSelf ? asyncMessage : undefined" :content="signature" :rtl="rightToLeft" type="async" :number="number"/>
   </div>
 </template>
 

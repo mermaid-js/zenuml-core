@@ -26,6 +26,7 @@
       <message
         ref="messageEl"
         class="invocation w-full transform -translate-y-1/2 pointer-events-auto"
+        :context="creation"
         :content="signature"
         :rtl="rightToLeft"
         type="creation"
@@ -42,6 +43,7 @@
     <message
       class="return transform -translate-y-full pointer-events-auto"
       v-if="assignee"
+      :context="creation.creationBody().assignment()"
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"

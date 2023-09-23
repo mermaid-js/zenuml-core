@@ -23,6 +23,7 @@
       class="text-center"
       :textStyle="textStyle"
       :classNames="classNames"
+      :context="message"
       :content="signature"
       :assignee="assignee"
       :rtl="rightToLeft"
@@ -39,6 +40,7 @@
     <message
       class="return transform -translate-y-full"
       v-if="assignee && !isSelf"
+      :context="message"
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"

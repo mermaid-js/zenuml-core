@@ -21,7 +21,7 @@
       </svg>
       <span class="name text-sm">{{ signature }}</span>
     </div>
-    <Message v-if="!isSelf" :content="signature" :rtl="rightToLeft" type="return" :number="number" />
+    <Message v-if="!isSelf" :context="asyncMessage" :content="signature" :rtl="rightToLeft" type="return" :number="number" />
   </div>
 </template>
 
