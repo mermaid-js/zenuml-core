@@ -1,6 +1,15 @@
 import {TextType} from '@/positioning/Coordinate';
-
+import {getStartTime, printCostTime } from "./../utils/CostTime"
+import { getCache,setCache } from "./../utils/RenderingCache"
 export default function WidthProviderOnBrowser(text: string, type: TextType): number {
+  let start=getStartTime();
+  let cacheKey=text+"_"+type;
+  let cacheValue=getCache(cacheKey);
+  if(cacheValue!=null)
+  {
+    printCostTime("WidthProviderOnBrowser"+" cacheKey:"+cacheKey+" scrollWidth(cached):"+cacheValue,start);
+    return cacheValue;
+  }
   let hiddenDiv = document.querySelector('.textarea-hidden-div') as HTMLDivElement;
   if (!hiddenDiv) {
     const newDiv = document.createElement('div');
@@ -28,5 +37,7 @@ export default function WidthProviderOnBrowser(text: string, type: TextType): nu
 
   hiddenDiv.textContent = text;
   const scrollWidth = hiddenDiv.scrollWidth;
+  setCache(cacheKey,scrollWidth);
+  printCostTime("WidthProviderOnBrowser"+" cacheKey:"+cacheKey+" scrollWidth:"+scrollWidth,start);
   return scrollWidth;
 }

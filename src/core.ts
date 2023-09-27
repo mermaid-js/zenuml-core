@@ -88,7 +88,7 @@ export default class ZenUml implements IZenUml {
           //await that.store.dispatch('updateCode', { code: that._code,rootContext:rootContext });
           resolve(that);
           printCostTime("rendering end",start);
-          printTotalCostTime(true);
+          //printTotalCostTime(true);
       }, that.calculateDebounceMilliseconds(that._code));
     });
   }
