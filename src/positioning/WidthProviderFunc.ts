@@ -7,7 +7,7 @@ export default function WidthProviderOnBrowser(text: string, type: TextType): nu
   let cacheValue=getCache(cacheKey);
   if(cacheValue!=null)
   {
-    printCostTime("WidthProviderOnBrowser"+" cacheKey:"+cacheKey+" scrollWidth(cached):"+cacheValue,start);
+    //printCostTime("WidthProviderOnBrowser"+" cacheKey:"+cacheKey+" scrollWidth(cached):"+cacheValue,start);
     return cacheValue;
   }
   let hiddenDiv = document.querySelector('.textarea-hidden-div') as HTMLDivElement;
@@ -37,7 +37,7 @@ export default function WidthProviderOnBrowser(text: string, type: TextType): nu
 
   hiddenDiv.textContent = text;
   const scrollWidth = hiddenDiv.scrollWidth;
-  setCache(cacheKey,scrollWidth);
-  printCostTime("WidthProviderOnBrowser"+" cacheKey:"+cacheKey+" scrollWidth:"+scrollWidth,start);
+  setCache(cacheKey,scrollWidth,true);
+  //printCostTime("WidthProviderOnBrowser"+" cacheKey:"+cacheKey+" scrollWidth:"+scrollWidth,start);
   return scrollWidth;
 }

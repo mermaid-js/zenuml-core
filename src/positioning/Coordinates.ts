@@ -30,7 +30,7 @@ export class Coordinates {
     var cachedPosition=getCache(participantName);
     if(cachedPosition!=null)
     {
-      printCostTime("getPosition"+" participantName:"+participantName+" position(cached):"+cachedPosition,start);
+      //printCostTime("getPosition"+" participantName:"+participantName+" position(cached):"+cachedPosition,start);
       return cachedPosition;
     }
     const pIndex = this.participantModels.findIndex((p) => p.name === participantName);
@@ -41,7 +41,7 @@ export class Coordinates {
     const position = leftGap + find_optimal(this.m)[pIndex];
     setCache(participantName,position);
     console.debug(`Position of ${participantName} is ${position}`);
-    printCostTime("getPosition"+" participantName:"+participantName+" position:"+position,start);
+    //printCostTime("getPosition"+" participantName:"+participantName+" position:"+position,start);
     return position;
   }
 

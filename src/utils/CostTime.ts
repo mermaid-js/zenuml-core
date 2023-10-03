@@ -29,6 +29,7 @@ export const printCostTime = (processName:string,processStartTime:any) => {
 export const getStartTime = () => {
   if(!isDev())return 0;
   // Performance.now is more accurate than Date.now： https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
+  //return new Date().getTime();
   return performance.now();
 };
 
