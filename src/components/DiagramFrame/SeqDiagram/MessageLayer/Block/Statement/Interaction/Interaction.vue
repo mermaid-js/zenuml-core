@@ -21,8 +21,9 @@
     <component
       v-bind:is="invocation"
       class="text-center"
-      :textStyle="textStyle"
-      :classNames="classNames"
+      :classNames="messageClassNames"
+      :textStyle="messageTextStyle"
+      :context="message"
       :content="signature"
       :assignee="assignee"
       :rtl="rightToLeft"
@@ -39,6 +40,7 @@
     <message
       class="return transform -translate-y-full"
       v-if="assignee && !isSelf"
+      :context="message"
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
@@ -65,10 +67,10 @@ export default {
     hasComment() {
       return this.commentObj?.text !== ''
     },
-    textStyle() {
+    messageTextStyle() {
       return this.commentObj?.textStyle;
     },
-    classNames() {
+    messageClassNames() {
       return this.commentObj?.classNames;
     },
     message: function () {

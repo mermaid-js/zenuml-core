@@ -21,6 +21,7 @@ const logger = parentLogger.child({ name: 'core' });
 interface Config {
   theme?: string;
   stickyOffset?: number;
+  onUpdateEditorContent?: (code: string) => void;
 }
 interface IZenUml {
   get code(): string | undefined;
@@ -59,17 +60,19 @@ export default class ZenUml implements IZenUml {
   }
 
   async render(code: string | undefined, config: Config | undefined): Promise<IZenUml> {
+    const date = Date.now()
     logger.debug('rendering', code, config);
     this._code = code || this._code;
     this._theme = config?.theme || this._theme;
     this.store.state.stickyOffset = config?.stickyOffset || 0;
-    // @ts-ignore
     this.store.state.theme = this._theme || 'default';
+    this.store.commit('onUpdateEditorContent', config?.onUpdateEditorContent || (() => {}));
     // await dispatch will wait until the diagram is finished rendering.
     // It includes the time adjusting the top of participants for creation message.
     // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
     // @ts-ignore
     await this.store.dispatch('updateCode', { code: this._code });
+    console.log(Date.now() - date + 'ms');
     return Promise.resolve(this);
   }
 

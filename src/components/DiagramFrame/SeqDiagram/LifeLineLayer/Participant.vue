@@ -38,8 +38,8 @@ import useDocumentScroll from '@/functions/useDocumentScroll';
 import useIntersectionTop from '@/functions/useIntersectionTop';
 import { useStore } from 'vuex';
 import { getElementDistanceToTop } from '@/utils/dom';
+import { PARTICIPANT_HEIGHT } from '@/positioning/Constants';
 
-const PARTICIPANT_HEIGHT = 70
 const INTERSECTION_ERROR_MARGIN = 10 // a threshold for judging whether the participant is intersecting with the viewport
 
 export default {

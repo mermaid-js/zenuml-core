@@ -41,14 +41,17 @@ const Store = ():  StoreOptions<StoreState> => {
       selected: [],
       cursor: null,
       showTips: false,
-      onElementClick: (codeRange: CodeRange) => {
-        console.log('Element clicked', codeRange);
-      },
       numbering: Boolean(localStorage.getItem(`${location.hostname}-zenuml-numbering`)),
       stickyOffset: 0,
       diagramElement: null,
+      onElementClick: (codeRange: CodeRange) => {
+        console.log('Element clicked', codeRange);
+      },
+      onMessageClick: () => {},
+      onUpdateEditorContent: () => {},
     } as StoreState,
     getters: {
+      code: (state: any) => state.code,
       rootContext: (state: any) => {
         return RootContext(state.code);
       },
@@ -85,6 +88,9 @@ const Store = ():  StoreOptions<StoreState> => {
         return getters.centerOf(to) - getters.centerOf(from);
       },
       onElementClick: (state: any) => state.onElementClick,
+      onMessageClick: (state: any) => state.onMessageClick,
+      diagramElement: (state: any) => state.diagramElement,
+      onUpdateEditorContent: (state: any) => state.onUpdateEditorContent,
     },
     mutations: {
       code: function (state: any, payload: any) {
@@ -118,6 +124,15 @@ const Store = ():  StoreOptions<StoreState> => {
           localStorage.setItem(`${location.hostname}-zenuml-theme`, 'theme-default')
         }
         state.theme = payload;
+      },
+      onMessageClick: function (state: any, payload: any) {
+        state.onMessageClick = payload;
+      },
+      onUpdateEditorContent: function (state: any, payload: any) {
+        state.onUpdateEditorContent = payload;
+      },
+      diagramElement: function (state: any, payload: any) {
+        state.diagramElement = payload;
       }
     },
     actions: {

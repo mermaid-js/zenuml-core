@@ -15,7 +15,9 @@ const store = createStore(storeConfig);
 describe('MessageLayer', () => {
   let messageLayerWrapper = shallowMount(MessageLayer, {
     global: {
-      plugins: [store],
+      provide: {
+        store: store
+      },
     },
     props: {
       context: ProgContextFixture('A->B.method()').block(),

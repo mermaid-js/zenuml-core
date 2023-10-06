@@ -13,23 +13,26 @@
     }"
     :style="{ width: interactionWidth + 'px' }"
   >
-    <comment v-if="comment" :comment="comment" />
+    <comment v-if="comment" :commentObj="commentObj" />
     <!-- flex items-center is an idiom that vertically align items left and right.
      h-10 fixes the height as the same as participant boxes.-->
     <div
       ref="messageContainer"
-      class="message-container pointer-events-none flex items-center h-10 relative"
       data-type="creation"
-      :data-to="to"
+      class="message-container pointer-events-none flex items-center h-10 relative"
       :class="{ 'flex-row-reverse': rightToLeft }"
+      :data-to="to"
     >
       <message
         ref="messageEl"
         class="invocation w-full transform -translate-y-1/2 pointer-events-auto"
+        :context="creation"
         :content="signature"
         :rtl="rightToLeft"
         type="creation"
         :number="number"
+        :classNames="messageClassNames"
+        :textStyle="messageTextStyle"
       />
       <div
         ref="participantPlaceHolder"
@@ -42,6 +45,7 @@
     <message
       class="return transform -translate-y-full pointer-events-auto"
       v-if="assignee"
+      :context="creation.creationBody().assignment()"
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
@@ -64,7 +68,7 @@ const logger = parentLogger.child({ name: 'Creation' });
 
 export default {
   name: 'creation',
-  props: ['context', 'comment', 'selfCallIndent', 'number'],
+  props: ['context', 'comment', 'commentObj', 'selfCallIndent', 'number'],
   computed: {
     ...mapGetters(['cursor', 'onElementClick', 'distance']),
     ...mapState(['numbering']),
@@ -103,6 +107,12 @@ export default {
     },
     isInitedFromOccurrence: function () {
       return this.creation.isInitedFromOccurrence(this.from);
+    },
+    messageTextStyle() {
+      return this.commentObj?.textStyle;
+    },
+    messageClassNames() {
+      return this.commentObj?.classNames;
     },
   },
   mounted() {

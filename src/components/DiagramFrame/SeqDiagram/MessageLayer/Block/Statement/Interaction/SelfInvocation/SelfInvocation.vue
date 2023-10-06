@@ -3,7 +3,9 @@
   <div class="message self text-sm flex items-start flex-col" style="border-width: 0">
     <label class="name group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em]">
       <div class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500" v-if="numbering">{{ number }}</div>
-      <span v-if="assignee">{{ assignee }} = </span> {{ content }}
+      <div :style="textStyle" :class="classNames">
+        <span v-if="assignee">{{ assignee }} = </span> {{ content }}
+      </div>
     </label>
     <svg class="arrow text-skin-message-arrow" width="30" height="24">
       <polyline
@@ -18,14 +20,18 @@
   </div>
 </template>
 
-<script type="text/babel">
-import { mapState } from 'vuex';
+<script setup lang="ts">
+import { useStore } from 'vuex';
+import { computed } from 'vue';
 
-export default {
-  name: 'self-invocation',
-  props: ['content', 'assignee', 'number'],
-  computed: {
-    ...mapState(['numbering']),
-  }
-};
+defineProps<{
+  content: string;
+  assignee?: string;
+  number?: string;
+  textStyle?: Record<string, string | number>;
+  classNames?: any;
+}>();
+
+const store = useStore();
+const numbering = computed(() => store.state.numbering);
 </script>

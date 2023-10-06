@@ -70,7 +70,7 @@ export default {
     setTop() {
       // escape entity name to avoid 'not a valid selector' error.
       const escapedName = this.entity.name.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1');
-      const $el = this.$root.$refs.diagram.$el;
+      const $el = this.$store.getters.diagramElement;
       const firstMessage = $el.querySelector(`[data-to="${escapedName}"]`);
       const isVisible = firstMessage?.offsetParent != null;
       if (firstMessage && firstMessage.attributes['data-type'].value === 'creation' && isVisible) {

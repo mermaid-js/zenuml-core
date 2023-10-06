@@ -3,58 +3,120 @@ TODO: we may need to consider the width of self message on right most participan
 <template>
   <div class="message-layer relative z-30 pt-24 pb-10">
     <block :context="context" :style="{ 'padding-left': paddingLeft + 'px' }" />
+    <FloatVirtual @initial="onInitial" placement="top" :offset="5" shift :flip="{ padding: flipOffset }" zIndex="30">
+      <div class="flex bg-white shadow-md z-10 rounded-md p-1">
+        <div v-for="btn of btns" @click="() => onClick(btn.class)" :key="btn.name">
+          <div :class="btn.class"
+            class="w-6 mx-1 py-1 rounded-md text-black text-center cursor-pointer hover:bg-gray-200">
+            {{ btn.content }}
+          </div>
+        </div>
+      </div>
+    </FloatVirtual>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed, onMounted, onUpdated, ref } from 'vue';
+import { useStore } from 'vuex';
+import { FloatVirtual, FloatVirtualInitialProps, useOutsideClick } from '@headlessui-float/vue'
 import parentLogger from '../../../../logger/logger';
+import { getLineHead, getPrevLine, getPrevLineHead } from '@/utils/String';
+import { PARTICIPANT_HEIGHT } from '@/positioning/Constants';
+import { getElementDistanceToTop } from '@/utils/dom';
 
-import { mapGetters, mapMutations } from 'vuex';
 const logger = parentLogger.child({ name: 'MessageLayer' });
 
-export default {
-  name: 'message-layer',
-  props: ['context'],
-  data() {
-    return {
-      left: 0,
-      right: 0,
-      totalWidth: 0,
-    };
-  },
-  computed: {
-    ...mapGetters(['participants', 'centerOf']),
-    paddingLeft() {
-      if (this.participants.Array().length >= 1) {
-        const first = this.participants.Array().slice(0)[0].name;
-        return this.centerOf(first);
-      }
-      return 0;
-    },
-  },
-  methods: {
-    ...mapMutations(['onMessageLayerMountedOrUpdated']),
+defineProps<{
+  context: any;
+}>()
+const store = useStore()
+const participants = computed(() => store.getters.participants)
+const centerOf = computed(() => store.getters.centerOf)
+const code = computed(() => store.getters.code)
+const onUpdateEditorContent = computed(() => store.getters.onUpdateEditorContent ||( () => {}))
+const flipOffset = computed(() => getElementDistanceToTop(store.getters.diagramElement) + PARTICIPANT_HEIGHT)
+const paddingLeft = computed(() => {
+  if (participants.value.Array().length >= 1) {
+    const first = participants.value.Array().slice(0)[0].name;
+    return centerOf.value(first);
+  }
+  return 0;
+})
 
-    participantNames() {
-      // According to the doc, computed properties are cached.
-      return this.participants.Names();
-    },
+const messageContext = ref<{ value: any }>({ value: null })
+const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
+  store.commit('onMessageClick', (context: any, element: HTMLElement) => {
+    reference.value = {
+      getBoundingClientRect: () => element.getBoundingClientRect()
+    }
+    messageContext.value = context
+    show.value = true
+  })
+  useOutsideClick(floating, () => {
+    show.value = false
+  }, computed(() => show.value))
+}
+
+const btns = [
+  {
+    name: 'bold',
+    content: 'B',
+    class: 'font-bold'
   },
-  // Block is rengered in core.ts. See Occurrence.vue for the reason.
-  // components: {
-  //   Block
-  // },
-  updated() {
-    logger.debug('MessageLayer updated');
+  {
+    name: 'italic',
+    content: 'I',
+    class: 'italic'
   },
-  mounted() {
-    logger.debug('MessageLayer mounted');
+  {
+    name: 'underline',
+    content: 'U',
+    class: 'underline'
   },
-};
+  {
+    name: 'strikethrough',
+    content: 'S',
+    class: 'line-through'
+  }
+]
+const onClick = (style: string) => {
+  if (!messageContext.value.value) return
+  const start = messageContext.value.value.start.start
+  const lineHead = getLineHead(code.value, start)
+  const prevLine = getPrevLine(code.value, start)
+  const leadingSpaces = code.value.slice(lineHead).match(/^\s*/)?.[0] || ''
+  const prevLineIsComment = prevLine.trim().startsWith('//')
+  if (prevLineIsComment) {
+    const trimedPrevLine = prevLine.trimStart().slice(2).trimStart()
+    const styleStart = trimedPrevLine.indexOf('[')
+    const styleEnd = trimedPrevLine.indexOf(']')
+    if (styleStart === 0 && styleEnd) {
+      const existedStyles = trimedPrevLine.slice(styleStart + 1, styleEnd)
+      if (!existedStyles.split(',').map((s) => s.trim()).includes(style)) {
+        onUpdateEditorContent.value(
+          code.value.slice(0, getPrevLineHead(code.value, start)) + `${leadingSpaces}// [${existedStyles}, ${style}]\n` + code.value.slice(lineHead)
+        )
+      }
+    }
+  } else {
+    onUpdateEditorContent.value(
+      code.value.slice(0, lineHead) + `${leadingSpaces}// [${style}]\n` + code.value.slice(lineHead)
+    )
+  }
+}
+
+onMounted(() => {
+  logger.debug('MessageLayer mounted')
+})
+onUpdated(() => {
+  logger.debug('MessageLayer updated')
+})
 </script>
 
 <style lang="scss">
 .zenuml {
+
   /* Avoid moving interaction to the left or right with margins.
   We can always assume that an interaction's border is the lifeline.
   Moving content with padding is OK.
@@ -99,21 +161,24 @@ export default {
   }
 
   .message {
-    position: relative; /* positioning Point */
+    position: relative;
+    /* positioning Point */
   }
 
-  .message > .name {
+  .message>.name {
     text-align: center;
   }
 
-  .interaction.right-to-left > .occurrence {
+  .interaction.right-to-left>.occurrence {
     /* InteractionBorderWidth + (OccurrenceWidth-1)/2 */
-    left: -14px; /* overlay occurrence bar on the existing bar. */
+    left: -14px;
+    /* overlay occurrence bar on the existing bar. */
   }
 
-  .interaction.self > .occurrence {
+  .interaction.self>.occurrence {
     /* width of InteractionBorderWidth 7px + lifeline center 1px */
-    left: -8px; /* overlay occurrence bar on the existing bar. */
+    left: -8px;
+    /* overlay occurrence bar on the existing bar. */
     margin-top: -10px;
   }
 
