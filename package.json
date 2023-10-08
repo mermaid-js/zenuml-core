@@ -27,11 +27,16 @@
     "git:branch:clean:merged": "git branch --merged|egrep -v \"(\\*|master|main|dev|skip_branch_name)\" | xargs git branch -d",
     "git:branch:safe-delete": "echo '> git log --graph --left-right --cherry --oneline another-branch...main'",
     "git:forget": "git rm -r --cached . && git add . && git commit -m \"Forget all ignored files\"",
-    "test:specs": "echo \"Error: test:specs is not supported\""
+    "test:specs": "echo \"Error: test:specs is not supported\"",
+    "prepare": "husky install"
   },
   "main": "./dist/zenuml.js",
   "module": "./dist/zenuml.esm.mjs",
   "types": "./types/index.d.ts",
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown",
+    "*.{js,ts,vue,json,htm,html}": "eslint --fix"
+  },
   "dependencies": {
     "@headlessui/tailwindcss": "^0.2.0",
     "@headlessui/vue": "^1.7.16",
@@ -60,8 +65,8 @@
     "@types/color-string": "^1.5.2",
     "@types/lodash": "^4.14.191",
     "@types/node": "latest",
-    "@typescript-eslint/eslint-plugin": "^5.46.1",
-    "@typescript-eslint/parser": "^5.46.1",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/compiler-sfc": "^3.2.45",
     "@vue/test-utils": "^2.2.7",
@@ -71,12 +76,17 @@
     "cypress": "^10.11.0",
     "cypress-plugin-snapshots": "^1.4.4",
     "eslint": "^8.30.0",
-    "eslint-plugin-vue": "^8.7.1",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-vue": "^9.17.0",
     "global-jsdom": "^8.6.0",
+    "husky": "^8.0.3",
     "jsdom": "^20.0.3",
     "less": "^4.1.3",
     "less-loader": "^11.1.3",
+    "lint-staged": "^14.0.1",
     "node-sass": "^9.0.0",
+    "prettier": "^3.0.3",
     "regenerator-runtime": "^0.13.11",
     "sass": "^1.57.0",
     "svg-url-loader": "^6.0.0",
@@ -87,28 +97,6 @@
     "vite-plugin-css-injected-by-js": "^2.2.0",
     "vite-svg-loader": "^4.0.0",
     "vitest": "^0.26.1"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "@typescript-eslint/parser"
-    },
-    "overrides": [
-      {
-        "files": [
-          "**/__tests__/*.{j,t}s?(x)",
-          "**/*.spec.{j,t}s?(x)"
-        ]
-      }
-    ]
   },
   "postcss": {
     "plugins": {
