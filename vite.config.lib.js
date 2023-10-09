@@ -55,12 +55,5 @@ export default defineConfig({
   ],
   define: {
     'process.env.NODE_ENV': '"production"'
-  },
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    deps: {
-      inline: ['@vue/test-utils'],
-    },
-  },
+  }
 });
