@@ -99,8 +99,8 @@ onUpdated(() => {
 
   .interaction.self > .occurrence {
     /* width of InteractionBorderWidth 7px + lifeline center 1px */
-    left: -8px;
     /* overlay occurrence bar on the existing bar. */
+    left: -8px;
     margin-top: -10px;
   }
 
