@@ -60,7 +60,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     deps: {
-      inline: [''],
+      inline: ['@vue/test-utils'],
     },
   },
 });

@@ -22,7 +22,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      vue: '@vue/compat',
+      'vue': '@vue/compat',
       '@': resolve(__dirname, './src')
     },
   },
@@ -42,7 +42,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     deps: {
-      inline: [''],
+      inline: ['@vue/test-utils'],
     },
   },
 });
+
