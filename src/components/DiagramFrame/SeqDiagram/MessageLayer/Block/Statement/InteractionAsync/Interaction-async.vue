@@ -3,30 +3,46 @@
     class="interaction async"
     v-on:click.stop="onClick"
     :data-signature="signature"
-    :class="{ 'right-to-left': rightToLeft, highlight: isCurrent, 'self-invocation': isSelf }"
-    :style="{ width: interactionWidth + 'px', transform: 'translateX(' + translateX + 'px)' }"
+    :class="{
+      'right-to-left': rightToLeft,
+      highlight: isCurrent,
+      'self-invocation': isSelf,
+    }"
+    :style="{
+      width: interactionWidth + 'px',
+      transform: 'translateX(' + translateX + 'px)',
+    }"
   >
-    <comment v-if="comment" :comment="comment" />
-    <component v-bind:is="invocation" :context="isSelf ? asyncMessage : undefined" :content="signature" :rtl="rightToLeft" type="async" :number="number"/>
+    <comment v-if="comment" :commentObj="commentObj" />
+    <component
+      v-bind:is="invocation"
+      :classNames="messageClassNames"
+      :textStyle="messageTextStyle"
+      :context="asyncMessage"
+      :content="signature"
+      :rtl="rightToLeft"
+      type="async"
+      :number="number"
+    />
   </div>
 </template>
 
 <script type="text/babel">
-import Comment from '../Comment/Comment.vue';
-import SelfInvocationAsync from './SelfInvocationAsync/SelfInvocation-async.vue';
-import Message from '../Message/Message.vue';
-import { mapGetters } from 'vuex';
-import { CodeRange } from '../../../../../../../parser/CodeRange';
+import Comment from "../Comment/Comment.vue";
+import SelfInvocationAsync from "./SelfInvocationAsync/SelfInvocation-async.vue";
+import Message from "../Message/Message.vue";
+import { mapGetters } from "vuex";
+import { CodeRange } from "../../../../../../../parser/CodeRange";
 
 function isNullOrUndefined(value) {
   return value === null || value === undefined;
 }
 
 export default {
-  name: 'interaction-async',
-  props: ['context', 'comment', 'selfCallIndent', 'number'],
+  name: "interaction-async",
+  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
   computed: {
-    ...mapGetters(['distance', 'cursor', 'onElementClick']),
+    ...mapGetters(["distance", "cursor", "onElementClick"]),
     from: function () {
       return this.context.Origin();
     },
@@ -37,7 +53,9 @@ export default {
       if (this.isSelf) {
         const leftOfMessage = 100;
         const averageWidthOfChar = 10;
-        return averageWidthOfChar * (this.signature?.length || 0) + leftOfMessage;
+        return (
+          averageWidthOfChar * (this.signature?.length || 0) + leftOfMessage
+        );
       }
       return Math.abs(this.distance(this.target, this.source));
     },
@@ -63,7 +81,11 @@ export default {
     isCurrent: function () {
       const start = this.asyncMessage.start.start;
       const stop = this.asyncMessage.stop.stop + 1;
-      if (isNullOrUndefined(this.cursor) || isNullOrUndefined(start) || isNullOrUndefined(stop))
+      if (
+        isNullOrUndefined(this.cursor) ||
+        isNullOrUndefined(start) ||
+        isNullOrUndefined(stop)
+      )
         return false;
       return this.cursor >= start && this.cursor <= stop;
     },
@@ -71,7 +93,13 @@ export default {
       return this.source === this.target;
     },
     invocation: function () {
-      return this.isSelf ? 'SelfInvocationAsync' : 'Message';
+      return this.isSelf ? "SelfInvocationAsync" : "Message";
+    },
+    messageTextStyle() {
+      return this.commentObj?.textStyle;
+    },
+    messageClassNames() {
+      return this.commentObj?.classNames;
     },
   },
   methods: {
@@ -83,6 +111,9 @@ export default {
     Comment,
     SelfInvocationAsync,
     Message,
+  },
+  mounted() {
+    console.log(this.commentObj);
   },
 };
 </script>
