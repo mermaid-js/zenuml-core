@@ -78,6 +78,7 @@
     "cypress-plugin-snapshots": "^1.4.4",
     "eslint": "^8.30.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-html": "^7.1.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-vue": "^9.17.0",
     "global-jsdom": "^8.6.0",

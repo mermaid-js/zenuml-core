@@ -1,15 +1,22 @@
-import now from 'lodash/now';
-import { RootContext, Participants, GroupContext, ParticipantContext } from '../parser/index.js';
+import now from "lodash/now";
+import {
+  RootContext,
+  Participants,
+  GroupContext,
+  ParticipantContext,
+} from "../parser/index.js";
 
-import WidthProviderOnBrowser from '../positioning/WidthProviderFunc';
-import { Coordinates } from '../positioning/Coordinates';
-import { CodeRange } from '../parser/CodeRange';
-import { StoreOptions } from 'vuex';
+import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
+import { Coordinates } from "../positioning/Coordinates";
+import { CodeRange } from "../parser/CodeRange";
+import { StoreOptions } from "vuex";
 
 let storeInitiationTime: number = 0;
 setTimeout(function () {
   if (!storeInitiationTime) {
-    console.warn('[vue-sequence] Store is a function and is not initiated in 1 second.');
+    console.warn(
+      "[vue-sequence] Store is a function and is not initiated in 1 second.",
+    );
   }
 }, 1000);
 
@@ -29,26 +36,30 @@ export interface StoreState {
   numbering: boolean;
 }
 // vuex 101: Deal with sync in mutation, async in actions
-const Store = ():  StoreOptions<StoreState> => {
-// TODO: remove state any type
+const Store = (): StoreOptions<StoreState> => {
+  // TODO: remove state any type
   storeInitiationTime = now();
   return {
     state: {
       warning: undefined,
-      code: '',
-      theme: localStorage.getItem(`${location.hostname}-zenuml-theme`) || 'theme-default',
+      code: "",
+      theme:
+        localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
+        "theme-default",
       scale: 1,
       selected: [],
       cursor: null,
       showTips: false,
-      numbering: Boolean(localStorage.getItem(`${location.hostname}-zenuml-numbering`)),
+      numbering: Boolean(
+        localStorage.getItem(`${location.hostname}-zenuml-numbering`),
+      ),
       stickyOffset: 0,
       diagramElement: null,
       onElementClick: (codeRange: CodeRange) => {
-        console.log('Element clicked', codeRange);
+        console.log("Element clicked", codeRange);
       },
       onMessageClick: () => {},
-      onUpdateEditorContent: () => {},
+      onContentChange: () => {},
     } as StoreState,
     getters: {
       code: (state: any) => state.code,
@@ -66,7 +77,7 @@ const Store = ():  StoreOptions<StoreState> => {
       },
       centerOf: (state: any, getters: any) => (entity: any) => {
         if (!entity) {
-          console.error('[vue-sequence] centerOf: entity is undefined');
+          console.error("[vue-sequence] centerOf: entity is undefined");
           return 0;
         }
         try {
@@ -90,7 +101,7 @@ const Store = ():  StoreOptions<StoreState> => {
       onElementClick: (state: any) => state.onElementClick,
       onMessageClick: (state: any) => state.onMessageClick,
       diagramElement: (state: any) => state.diagramElement,
-      onUpdateEditorContent: (state: any) => state.onUpdateEditorContent,
+      onContentChange: (state: any) => state.onContentChange,
     },
     mutations: {
       code: function (state: any, payload: any) {
@@ -111,40 +122,43 @@ const Store = ():  StoreOptions<StoreState> => {
       },
       toggleNumbering(state, payload: boolean) {
         if (payload) {
-          localStorage.setItem(`${location.hostname}-zenuml-numbering`, '1')
+          localStorage.setItem(`${location.hostname}-zenuml-numbering`, "1");
         } else {
-          localStorage.setItem(`${location.hostname}-zenuml-numbering`, '')
+          localStorage.setItem(`${location.hostname}-zenuml-numbering`, "");
         }
-        state.numbering = payload
+        state.numbering = payload;
       },
       setTheme: function (state: any, payload: string) {
         if (payload) {
-          localStorage.setItem(`${location.hostname}-zenuml-theme`, payload)
+          localStorage.setItem(`${location.hostname}-zenuml-theme`, payload);
         } else {
-          localStorage.setItem(`${location.hostname}-zenuml-theme`, 'theme-default')
+          localStorage.setItem(
+            `${location.hostname}-zenuml-theme`,
+            "theme-default",
+          );
         }
         state.theme = payload;
       },
       onMessageClick: function (state: any, payload: any) {
         state.onMessageClick = payload;
       },
-      onUpdateEditorContent: function (state: any, payload: any) {
-        state.onUpdateEditorContent = payload;
+      onContentChange: function (state: any, payload: any) {
+        state.onContentChange = payload;
       },
       diagramElement: function (state: any, payload: any) {
         state.diagramElement = payload;
-      }
+      },
     },
     actions: {
       // Why debounce is here instead of mutation 'code'?
       // Both code and cursor must be mutated together, especially during typing.
-      updateCode: function ({ commit, getters }: any, payload: any) {
-        if (typeof payload === 'string') {
+      updateCode: function ({ commit }: any, payload: any) {
+        if (typeof payload === "string") {
           throw Error(
-            'You are using a old version of vue-sequence. New version requires {code, cursor}.'
+            "You are using a old version of vue-sequence. New version requires {code, cursor}.",
           );
         }
-        commit('code', payload.code);
+        commit("code", payload.code);
       },
     },
     // TODO: Enable strict for development?
