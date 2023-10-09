@@ -2,4 +2,3 @@ node_modules
 dist
 generated-parser
 pnpm-lcok.yaml
-**.spec.js
