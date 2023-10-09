@@ -2,30 +2,18 @@
 TODO: we may need to consider the width of self message on right most participant. -->
 <template>
   <div class="message-layer relative z-30 pt-24 pb-10">
-    <block :context="context" :style="{ 'padding-left': paddingLeft + 'px' }" />
-    <FloatVirtual @initial="onInitial" placement="top" :offset="5" shift :flip="{ padding: flipOffset }" zIndex="30">
-      <div class="flex bg-white shadow-md z-10 rounded-md p-1">
-        <div v-for="btn of btns" @click="() => onClick(btn.class)" :key="btn.name">
-          <div :class="btn.class"
-            class="w-6 mx-1 py-1 rounded-md text-black text-center cursor-pointer hover:bg-gray-200">
-            {{ btn.content }}
-          </div>
-        </div>
-      </div>
-    </FloatVirtual>
+    <block :context="context" :style="{ 'padding-left': paddingLeft + 'px' }"/>
+    <ToolBar/>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUpdated, ref } from 'vue';
-import { useStore } from 'vuex';
-import { FloatVirtual, FloatVirtualInitialProps, useOutsideClick } from '@headlessui-float/vue'
+import {computed, onMounted, onUpdated, defineAsyncComponent} from 'vue';
+import {useStore} from 'vuex';
 import parentLogger from '../../../../logger/logger';
-import { getLineHead, getPrevLine, getPrevLineHead } from '@/utils/String';
-import { PARTICIPANT_HEIGHT } from '@/positioning/Constants';
-import { getElementDistanceToTop } from '@/utils/dom';
+const ToolBar = defineAsyncComponent(() => import("@/components/DiagramFrame/SeqDiagram/MessageLayer/ToolBar.vue"))
 
-const logger = parentLogger.child({ name: 'MessageLayer' });
+const logger = parentLogger.child({name: 'MessageLayer'});
 
 defineProps<{
   context: any;
@@ -33,9 +21,6 @@ defineProps<{
 const store = useStore()
 const participants = computed(() => store.getters.participants)
 const centerOf = computed(() => store.getters.centerOf)
-const code = computed(() => store.getters.code)
-const onUpdateEditorContent = computed(() => store.getters.onUpdateEditorContent ||( () => {}))
-const flipOffset = computed(() => getElementDistanceToTop(store.getters.diagramElement) + PARTICIPANT_HEIGHT)
 const paddingLeft = computed(() => {
   if (participants.value.Array().length >= 1) {
     const first = participants.value.Array().slice(0)[0].name;
@@ -44,67 +29,6 @@ const paddingLeft = computed(() => {
   return 0;
 })
 
-const messageContext = ref<{ value: any }>({ value: null })
-const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
-  store.commit('onMessageClick', (context: any, element: HTMLElement) => {
-    reference.value = {
-      getBoundingClientRect: () => element.getBoundingClientRect()
-    }
-    messageContext.value = context
-    show.value = true
-  })
-  useOutsideClick(floating, () => {
-    show.value = false
-  }, computed(() => show.value))
-}
-
-const btns = [
-  {
-    name: 'bold',
-    content: 'B',
-    class: 'font-bold'
-  },
-  {
-    name: 'italic',
-    content: 'I',
-    class: 'italic'
-  },
-  {
-    name: 'underline',
-    content: 'U',
-    class: 'underline'
-  },
-  {
-    name: 'strikethrough',
-    content: 'S',
-    class: 'line-through'
-  }
-]
-const onClick = (style: string) => {
-  if (!messageContext.value.value) return
-  const start = messageContext.value.value.start.start
-  const lineHead = getLineHead(code.value, start)
-  const prevLine = getPrevLine(code.value, start)
-  const leadingSpaces = code.value.slice(lineHead).match(/^\s*/)?.[0] || ''
-  const prevLineIsComment = prevLine.trim().startsWith('//')
-  if (prevLineIsComment) {
-    const trimedPrevLine = prevLine.trimStart().slice(2).trimStart()
-    const styleStart = trimedPrevLine.indexOf('[')
-    const styleEnd = trimedPrevLine.indexOf(']')
-    if (styleStart === 0 && styleEnd) {
-      const existedStyles = trimedPrevLine.slice(styleStart + 1, styleEnd)
-      if (!existedStyles.split(',').map((s) => s.trim()).includes(style)) {
-        onUpdateEditorContent.value(
-          code.value.slice(0, getPrevLineHead(code.value, start)) + `${leadingSpaces}// [${existedStyles}, ${style}]\n` + code.value.slice(lineHead)
-        )
-      }
-    }
-  } else {
-    onUpdateEditorContent.value(
-      code.value.slice(0, lineHead) + `${leadingSpaces}// [${style}]\n` + code.value.slice(lineHead)
-    )
-  }
-}
 
 onMounted(() => {
   logger.debug('MessageLayer mounted')
@@ -165,17 +89,17 @@ onUpdated(() => {
     /* positioning Point */
   }
 
-  .message>.name {
+  .message > .name {
     text-align: center;
   }
 
-  .interaction.right-to-left>.occurrence {
+  .interaction.right-to-left > .occurrence {
     /* InteractionBorderWidth + (OccurrenceWidth-1)/2 */
     left: -14px;
     /* overlay occurrence bar on the existing bar. */
   }
 
-  .interaction.self>.occurrence {
+  .interaction.self > .occurrence {
     /* width of InteractionBorderWidth 7px + lifeline center 1px */
     left: -8px;
     /* overlay occurrence bar on the existing bar. */

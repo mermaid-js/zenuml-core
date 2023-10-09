@@ -3,6 +3,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "target": "es6",
+    "module": "esnext",
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,

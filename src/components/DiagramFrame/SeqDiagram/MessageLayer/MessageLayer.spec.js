@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount} from '@vue/test-utils';
 import { createStore } from 'vuex';
 import { VueSequence } from '../../../../index';
 import MessageLayer from './MessageLayer.vue';
@@ -33,6 +33,6 @@ describe('MessageLayer', () => {
     expect(messageLayerWrapper.find('.pt-24').exists()).toBeTruthy();
   });
   it('gets participant names', async () => {
-    expect(messageLayerWrapper.vm.participantNames()[0]).toBe('a');
+    expect(messageLayerWrapper.vm.participants.Names()[0]).toBe('a');
   });
 });
