@@ -2,45 +2,43 @@
 TODO: we may need to consider the width of self message on right most participant. -->
 <template>
   <div class="message-layer relative z-30 pt-24 pb-10">
-    <block :context="context" :style="{ 'padding-left': paddingLeft + 'px' }"/>
-    <ToolBar/>
+    <block :context="context" :style="{ 'padding-left': paddingLeft + 'px' }" />
+    <StylePanel />
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, onUpdated, defineAsyncComponent} from 'vue';
-import {useStore} from 'vuex';
-import parentLogger from '../../../../logger/logger';
-const ToolBar = defineAsyncComponent(() => import("@/components/DiagramFrame/SeqDiagram/MessageLayer/ToolBar.vue"))
+import { computed, onMounted, onUpdated, defineAsyncComponent } from "vue";
+import { useStore } from "vuex";
+import parentLogger from "../../../../logger/logger";
+const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
 
-const logger = parentLogger.child({name: 'MessageLayer'});
+const logger = parentLogger.child({ name: "MessageLayer" });
 
 defineProps<{
   context: any;
-}>()
-const store = useStore()
-const participants = computed(() => store.getters.participants)
-const centerOf = computed(() => store.getters.centerOf)
+}>();
+const store = useStore();
+const participants = computed(() => store.getters.participants);
+const centerOf = computed(() => store.getters.centerOf);
 const paddingLeft = computed(() => {
   if (participants.value.Array().length >= 1) {
     const first = participants.value.Array().slice(0)[0].name;
     return centerOf.value(first);
   }
   return 0;
-})
-
+});
 
 onMounted(() => {
-  logger.debug('MessageLayer mounted')
-})
+  logger.debug("MessageLayer mounted");
+});
 onUpdated(() => {
-  logger.debug('MessageLayer updated')
-})
+  logger.debug("MessageLayer updated");
+});
 </script>
 
 <style lang="scss">
 .zenuml {
-
   /* Avoid moving interaction to the left or right with margins.
   We can always assume that an interaction's border is the lifeline.
   Moving content with padding is OK.
