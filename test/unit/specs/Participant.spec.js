@@ -1,4 +1,5 @@
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import {describe, it, expect, vi} from "vitest";
 import { createStore } from 'vuex';
 import { VueSequence } from '../../../src/index';
 import Participant from '../../../src/components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue';
@@ -7,6 +8,12 @@ const storeConfig = VueSequence.Store();
 storeConfig.state.code = 'abc';
 
 const store = createStore(storeConfig);
+vi.stubGlobal('IntersectionObserver', vi.fn(() => {
+  return {
+    observe() {},
+    disconnect() {}
+  }
+}))
 describe('select a participant', () => {
   it('For VM and HTML and store', async () => {
     store.state.firstInvocations = {
@@ -15,7 +22,8 @@ describe('select a participant', () => {
       },
     };
     const props = { entity: { name: 'A' } };
-    let participantWrapper = mount(Participant, { global: { plugins: [store] }, props });
+    let participantWrapper = shallowMount(Participant, { global: { plugins: [store] }, props });
+    await participantWrapper.vm.$nextTick();
     expect(participantWrapper.vm.selected).toBeFalsy();
     expect(participantWrapper.find('.selected').exists()).toBeFalsy();
 
@@ -26,7 +34,6 @@ describe('select a participant', () => {
     expect(store.state.selected).toContain('A');
     // await participantWrapper.vm.$nextTick();
     // expect(participantWrapper.find('.selected').exists()).toBeTruthy();
-
     participantWrapper.find('.participant').trigger('click');
     expect(store.state.selected.includes('A')).toBeFalsy();
     expect(participantWrapper.find('.selected').exists()).toBeFalsy();

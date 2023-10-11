@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import { createStore } from 'vuex';
 import { VueSequence } from '@/index';
 import Creation from './Creation.vue';
@@ -6,6 +6,7 @@ import { Fixture } from '../../../../../../../../test/unit/parser/fixture/Fixtur
 
 function mountCreationWithCode(code: string, contextLocator: Function) {
   const storeConfig = VueSequence.Store();
+  // @ts-ignore
   storeConfig.state.code = code;
   const store = createStore(storeConfig);
 
@@ -15,7 +16,7 @@ function mountCreationWithCode(code: string, contextLocator: Function) {
     fragmentOffset: 100,
   };
 
-  return mount(Creation, { global: { plugins: [store] }, props });
+  return shallowMount(Creation, { global: { plugins: [store] }, props });
 }
 
 describe('Creation', () => {
@@ -38,6 +39,7 @@ describe('Creation', () => {
   it('right to left', async () => {
     let creationWrapper = mountCreationWithCode('A.m{B.m{new A}}', Fixture.firstGrandChild);
     const vm = creationWrapper.vm as any;
+    console.log(creationWrapper)
     expect(vm.rightToLeft).toBeTruthy();
     expect(vm.interactionWidth).toBe(160);
   });

@@ -3,54 +3,38 @@ TODO: we may need to consider the width of self message on right most participan
 <template>
   <div class="message-layer relative z-30 pt-24 pb-10">
     <block :context="context" :style="{ 'padding-left': paddingLeft + 'px' }" />
+    <StylePanel />
   </div>
 </template>
 
-<script>
-import parentLogger from '../../../../logger/logger';
+<script setup lang="ts">
+import { computed, onMounted, onUpdated, defineAsyncComponent } from "vue";
+import { useStore } from "vuex";
+import parentLogger from "../../../../logger/logger";
+const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
 
-import { mapGetters, mapMutations } from 'vuex';
-const logger = parentLogger.child({ name: 'MessageLayer' });
+const logger = parentLogger.child({ name: "MessageLayer" });
 
-export default {
-  name: 'message-layer',
-  props: ['context'],
-  data() {
-    return {
-      left: 0,
-      right: 0,
-      totalWidth: 0,
-    };
-  },
-  computed: {
-    ...mapGetters(['participants', 'centerOf']),
-    paddingLeft() {
-      if (this.participants.Array().length >= 1) {
-        const first = this.participants.Array().slice(0)[0].name;
-        return this.centerOf(first);
-      }
-      return 0;
-    },
-  },
-  methods: {
-    ...mapMutations(['onMessageLayerMountedOrUpdated']),
+defineProps<{
+  context: any;
+}>();
+const store = useStore();
+const participants = computed(() => store.getters.participants);
+const centerOf = computed(() => store.getters.centerOf);
+const paddingLeft = computed(() => {
+  if (participants.value.Array().length >= 1) {
+    const first = participants.value.Array().slice(0)[0].name;
+    return centerOf.value(first);
+  }
+  return 0;
+});
 
-    participantNames() {
-      // According to the doc, computed properties are cached.
-      return this.participants.Names();
-    },
-  },
-  // Block is rengered in core.ts. See Occurrence.vue for the reason.
-  // components: {
-  //   Block
-  // },
-  updated() {
-    logger.debug('MessageLayer updated');
-  },
-  mounted() {
-    logger.debug('MessageLayer mounted');
-  },
-};
+onMounted(() => {
+  logger.debug("MessageLayer mounted");
+});
+onUpdated(() => {
+  logger.debug("MessageLayer updated");
+});
 </script>
 
 <style lang="scss">
@@ -99,7 +83,8 @@ export default {
   }
 
   .message {
-    position: relative; /* positioning Point */
+    position: relative;
+    /* positioning Point */
   }
 
   .message > .name {
@@ -108,12 +93,14 @@ export default {
 
   .interaction.right-to-left > .occurrence {
     /* InteractionBorderWidth + (OccurrenceWidth-1)/2 */
-    left: -14px; /* overlay occurrence bar on the existing bar. */
+    left: -14px;
+    /* overlay occurrence bar on the existing bar. */
   }
 
   .interaction.self > .occurrence {
     /* width of InteractionBorderWidth 7px + lifeline center 1px */
-    left: -8px; /* overlay occurrence bar on the existing bar. */
+    /* overlay occurrence bar on the existing bar. */
+    left: -8px;
     margin-top: -10px;
   }
 

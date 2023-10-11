@@ -10,6 +10,9 @@ module.exports = {
     "plugin:vue/vue3-essential",
     "plugin:prettier/recommended",
   ],
+  globals: {
+    CodeMirror: "readonly",
+  },
   overrides: [
     {
       env: {
@@ -26,7 +29,7 @@ module.exports = {
     parser: "@typescript-eslint/parser",
     sourceType: "module",
   },
-  plugins: ["@typescript-eslint", "vue"],
+  plugins: ["@typescript-eslint", "vue", "html"],
   rules: {
     "vue/multi-word-component-names": "off",
     "@typescript-eslint/ban-ts-comment": "off",
