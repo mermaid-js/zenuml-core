@@ -31,7 +31,7 @@ import {
   useOutsideClick,
 } from "@headlessui-float/vue";
 import { computed, ref } from "vue";
-import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/String";
+import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/StringUtil";
 import { useStore } from "vuex";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
@@ -46,6 +46,10 @@ const flipOffset = computed(
     getElementDistanceToTop(store.getters.diagramElement) + PARTICIPANT_HEIGHT,
 );
 const code = computed(() => store.getters.code);
+const updateCode = (code: string) => {
+  store.commit("updateCode", code);
+  onContentChange.value(code);
+};
 let onClick: (style: string) => void;
 
 const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
@@ -84,7 +88,7 @@ const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
             .map((s) => s.trim())
             .includes(style)
         ) {
-          onContentChange.value(
+          updateCode(
             code.value.slice(0, getPrevLineHead(code.value, start)) +
               `${leadingSpaces}// [${existedStyles}, ${style}]\n` +
               code.value.slice(lineHead),
@@ -92,7 +96,7 @@ const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
         }
       }
     } else {
-      onContentChange.value(
+      updateCode(
         code.value.slice(0, lineHead) +
           `${leadingSpaces}// [${style}]\n` +
           code.value.slice(lineHead),

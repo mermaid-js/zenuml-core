@@ -112,9 +112,6 @@ export default {
     SelfInvocationAsync,
     Message,
   },
-  mounted() {
-    console.log(this.commentObj);
-  },
 };
 </script>
 
