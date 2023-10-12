@@ -16,21 +16,12 @@ export const formatText = pipe(
 
 export const getLineHead = (code: string, position: number) => {
   let i = position;
+  if (code[i] === "\n") i--;
   while (i >= 0) {
     if (code[i] === "\n") return i + 1;
     i--;
   }
   return 0;
-};
-export const getPrevLine = (code: string, position: number) => {
-  const lineHead = getLineHead(code, position);
-  if (lineHead === 0) return "";
-  let i = lineHead - 2;
-  while (i >= 0) {
-    if (code[i] === "\n") return code.slice(i + 1, lineHead);
-    i--;
-  }
-  return code.slice(0, lineHead);
 };
 export const getPrevLineHead = (code: string, position: number) => {
   const lineHead = getLineHead(code, position);
@@ -41,4 +32,10 @@ export const getPrevLineHead = (code: string, position: number) => {
     i--;
   }
   return 0;
+};
+export const getPrevLine = (code: string, position: number) => {
+  const lineHead = getLineHead(code, position);
+  if (lineHead === 0) return "";
+  const prevLineHead = getPrevLineHead(code, position);
+  return code.slice(prevLineHead, lineHead);
 };
