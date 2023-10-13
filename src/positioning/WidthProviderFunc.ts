@@ -7,7 +7,6 @@ export default function WidthProviderOnBrowser(
   const cacheKey = text + "_" + type;
   const cacheValue = getCache(cacheKey);
   if (cacheValue != null) {
-    //printCostTime("WidthProviderOnBrowser"+" cacheKey:"+cacheKey+" scrollWidth(cached):"+cacheValue,start);
     return cacheValue;
   }
   let hiddenDiv = document.querySelector(

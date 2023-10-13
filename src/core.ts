@@ -17,11 +17,7 @@ import "./themes/theme-dark.css";
 import Block from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block.vue";
 import Comment from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue";
 import { clearCache } from "./utils/RenderingCache";
-import {
-  getStartTime,
-  printCostTime,
-  calculateDebounceMilliseconds,
-} from "./utils/CostTime";
+import { getStartTime, calculateCostTime } from "./utils/CostTime";
 const logger = parentLogger.child({ name: "core" });
 
 interface Config {
@@ -47,7 +43,7 @@ export default class ZenUml implements IZenUml {
   private readonly store: any;
   private readonly app: any;
   private currentTimeout: any;
-
+  private lastRenderingCostMilliseconds = 0;
   constructor(el: Element, naked: boolean = false) {
     this.el = el;
     this.store = createStore(Store());
@@ -97,9 +93,19 @@ export default class ZenUml implements IZenUml {
         // @ts-ignore
         await this.store.dispatch("updateCode", { code: this._code });
         resolve(this);
-        printCostTime("rendering end", start);
-      }, calculateDebounceMilliseconds());
+        this.lastRenderingCostMilliseconds = calculateCostTime(
+          "rendering end",
+          start,
+        );
+      }, this.calculateDebounceMilliseconds());
     });
+  }
+
+  calculateDebounceMilliseconds(): number {
+    let delay = this.lastRenderingCostMilliseconds;
+    if (delay > 2000) delay = 2000;
+    console.log("render will delay: " + delay + "ms");
+    return delay;
   }
 
   get code(): string | undefined {
