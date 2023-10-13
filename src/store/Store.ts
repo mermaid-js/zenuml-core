@@ -15,7 +15,7 @@ let storeInitiationTime: number = 0;
 setTimeout(function () {
   if (!storeInitiationTime) {
     console.warn(
-      "[vue-sequence] Store is a function and is not initiated in 1 second.",
+      "[@zenuml/core] Store is a function and is not initiated in 1 second.",
     );
   }
 }, 1000);
@@ -77,7 +77,7 @@ const Store = (): StoreOptions<StoreState> => {
       },
       centerOf: (state: any, getters: any) => (entity: any) => {
         if (!entity) {
-          console.error("[vue-sequence] centerOf: entity is undefined");
+          console.error("[@zenuml/core] centerOf: entity is undefined");
           return 0;
         }
         try {
@@ -158,7 +158,9 @@ const Store = (): StoreOptions<StoreState> => {
             "You are using a old version of vue-sequence. New version requires {code, cursor}.",
           );
         }
-        commit("code", payload.code);
+        if (payload.code !== this.state.code) {
+          commit("code", payload.code);
+        }
       },
     },
     // TODO: Enable strict for development?
