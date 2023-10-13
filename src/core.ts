@@ -18,7 +18,7 @@ import Block from './components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block
 import Comment from './components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue';
 
 import { clearCache } from "./utils/RenderingCache"
-import {getStartTime, printCostTime,printTotalCostTime } from "./utils/CostTime"
+import {getStartTime, printCostTime,calculateDebounceMilliseconds } from "./utils/CostTime"
 
 const logger = parentLogger.child({ name: 'core' });
 
@@ -88,16 +88,8 @@ export default class ZenUml implements IZenUml {
           //await that.store.dispatch('updateCode', { code: that._code,rootContext:rootContext });
           resolve(that);
           printCostTime("rendering end",start);
-          //printTotalCostTime(true);
-      }, that.calculateDebounceMilliseconds(that._code));
+      }, calculateDebounceMilliseconds());
     });
-  }
-
-  calculateDebounceMilliseconds(code:string | undefined): number  {
-    if(!code) return 0;
-    let length = code.split('\n').length; 
-    if (length < 50) return 200;
-    return 500; 
   }
 
   get code(): string | undefined {
