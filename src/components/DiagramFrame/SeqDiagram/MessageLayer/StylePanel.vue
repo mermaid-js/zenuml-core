@@ -47,7 +47,7 @@ const flipOffset = computed(
 );
 const code = computed(() => store.getters.code);
 const updateCode = (code: string) => {
-  store.commit("updateCode", code);
+  store.dispatch("updateCode", { code });
   onContentChange.value(code);
 };
 let onClick: (style: string) => void;

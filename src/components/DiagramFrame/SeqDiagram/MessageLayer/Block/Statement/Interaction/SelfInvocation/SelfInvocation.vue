@@ -1,8 +1,20 @@
 <template>
   <!-- style border-width means not to be overridden. -->
-  <div class="message self text-sm flex items-start flex-col" style="border-width: 0">
-    <label class="name group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em]">
-      <div class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500" v-if="numbering">{{ number }}</div>
+  <div
+    class="message self text-sm flex items-start flex-col"
+    style="border-width: 0"
+    @click="onClick"
+    ref="messageRef"
+  >
+    <label
+      class="name group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em]"
+    >
+      <div
+        class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500"
+        v-if="numbering"
+      >
+        {{ number }}
+      </div>
       <div :style="textStyle" :class="classNames">
         <span v-if="assignee">{{ assignee }} = </span> {{ content }}
       </div>
@@ -21,17 +33,23 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from 'vuex';
-import { computed } from 'vue';
+import { useStore } from "vuex";
+import { computed, ref, toRefs } from "vue";
 
-defineProps<{
+const props = defineProps<{
+  context?: any;
   content: string;
   assignee?: string;
   number?: string;
   textStyle?: Record<string, string | number>;
   classNames?: any;
 }>();
+const { context } = toRefs(props);
 
 const store = useStore();
 const numbering = computed(() => store.state.numbering);
+const messageRef = ref();
+const onClick = () => {
+  store.getters.onMessageClick(context, messageRef.value);
+};
 </script>

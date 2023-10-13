@@ -4,10 +4,14 @@
     class="interaction return relative"
     v-on:click.stop="onClick"
     :data-signature="signature"
-    :class="{ 'right-to-left': rightToLeft, highlight: isCurrent, 'return-to-start': isReturnToStart }"
+    :class="{
+      'right-to-left': rightToLeft,
+      highlight: isCurrent,
+      'return-to-start': isReturnToStart,
+    }"
     :style="{ width: width + 'px', left: left + 'px' }"
   >
-    <comment v-if="comment" :comment="comment" />
+    <comment v-if="comment" :commenObj="commenObj" />
     <div v-if="isSelf" class="flex items-center">
       <svg class="w-3 h-3 flex-shrink-0 fill-current m-1" viewBox="0 0 512 512">
         <path
@@ -21,25 +25,34 @@
       </svg>
       <span class="name text-sm">{{ signature }}</span>
     </div>
-    <Message v-if="!isSelf" :context="asyncMessage" :content="signature" :rtl="rightToLeft" type="return" :number="number" />
+    <Message
+      v-if="!isSelf"
+      :classNames="messageClassNames"
+      :textStyle="messageTextStyle"
+      :context="messageContext"
+      :content="signature"
+      :rtl="rightToLeft"
+      type="return"
+      :number="number"
+    />
   </div>
 </template>
 
 <script type="text/babel">
 // Return is defined with `RETURN expr? SCOL?` or `ANNOTATION_RET asyncMessage EVENT_END?`.
 // It is rare that you need the latter format. Probably only when you have two consecutive returns.
-import Comment from '../Comment/Comment.vue';
-import Message from '../Message/Message.vue';
-import { mapGetters, mapState } from 'vuex';
-import { CodeRange } from '../../../../../../../parser/CodeRange';
-import WidthProviderOnBrowser from '../../../../../../../positioning/WidthProviderFunc';
-import { TextType } from '../../../../../../../positioning/Coordinate';
+import Comment from "../Comment/Comment.vue";
+import Message from "../Message/Message.vue";
+import { mapGetters } from "vuex";
+import { CodeRange } from "../../../../../../../parser/CodeRange";
+import WidthProviderOnBrowser from "../../../../../../../positioning/WidthProviderFunc";
+import { TextType } from "../../../../../../../positioning/Coordinate";
 
 export default {
-  name: 'return',
-  props: ['context', 'comment', 'number'],
+  name: "return",
+  props: ["context", "comment", "commentObj", "number"],
   computed: {
-    ...mapGetters(['distance', 'cursor', 'onElementClick', 'participants']),
+    ...mapGetters(["distance", "cursor", "onElementClick", "participants"]),
     from: function () {
       return this.context.Origin();
     },
@@ -69,7 +82,10 @@ export default {
       return this.asyncMessage?.from()?.getFormattedText() || this.from;
     },
     target: function () {
-      return this.asyncMessage?.to()?.getFormattedText() || this.context?.ret()?.ReturnTo();
+      return (
+        this.asyncMessage?.to()?.getFormattedText() ||
+        this.context?.ret()?.ReturnTo()
+      );
     },
     isCurrent: function () {
       return false;
@@ -79,7 +95,16 @@ export default {
     },
     isReturnToStart() {
       return this.target === this.participants.Starter().name;
-    }
+    },
+    messageTextStyle() {
+      return this.commentObj?.textStyle;
+    },
+    messageClassNames() {
+      return this.commentObj?.classNames;
+    },
+    messageContext() {
+      return this.asyncMessage?.content() || this.context?.ret()?.expr();
+    },
   },
   methods: {
     onClick() {
