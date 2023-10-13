@@ -90,10 +90,18 @@ const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
         ) {
           updateCode(
             code.value.slice(0, getPrevLineHead(code.value, start)) +
-              `${leadingSpaces}// [${existedStyles}, ${style}]\n` +
+              `${leadingSpaces}// [${existedStyles}, ${style}] ${prevLine
+                .slice(2)
+                .trimStart()}` +
               code.value.slice(lineHead),
           );
         }
+      } else {
+        updateCode(
+          code.value.slice(0, getPrevLineHead(code.value, start)) +
+            `${leadingSpaces}// [${style}] ${prevLine.slice(2).trimStart()}` +
+            code.value.slice(lineHead),
+        );
       }
     } else {
       updateCode(
