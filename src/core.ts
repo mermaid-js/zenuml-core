@@ -16,6 +16,12 @@ import "./themes/theme-dark.css";
 
 import Block from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block.vue";
 import Comment from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue";
+import { clearCache } from "./utils/RenderingCache";
+import {
+  getStartTime,
+  printCostTime,
+  calculateDebounceMilliseconds,
+} from "./utils/CostTime";
 const logger = parentLogger.child({ name: "core" });
 
 interface Config {
@@ -40,6 +46,7 @@ export default class ZenUml implements IZenUml {
   private _theme: string | undefined;
   private readonly store: any;
   private readonly app: any;
+  private currentTimeout: any;
 
   constructor(el: Element, naked: boolean = false) {
     this.el = el;
@@ -66,20 +73,33 @@ export default class ZenUml implements IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml> {
-    const date = Date.now();
-    logger.debug("rendering", code, config);
-    this._code = code || this._code;
-    this._theme = config?.theme || this._theme;
-    this.store.state.stickyOffset = config?.stickyOffset || 0;
-    this.store.state.theme = this._theme || "default";
-    this.store.commit("onContentChange", config?.onContentChange || (() => {}));
-    // await dispatch will wait until the diagram is finished rendering.
-    // It includes the time adjusting the top of participants for creation message.
-    // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
-    // @ts-ignore
-    await this.store.dispatch("updateCode", { code: this._code });
-    console.log(Date.now() - date + "ms");
-    return Promise.resolve(this);
+    if (this.currentTimeout) {
+      console.log("rendering clearTimeout");
+      clearTimeout(this.currentTimeout);
+    }
+    return new Promise((resolve) => {
+      this.currentTimeout = setTimeout(async () => {
+        console.log("rendering start");
+        clearCache();
+        const start = getStartTime();
+        logger.debug("rendering", code, config);
+        this._code = code || this._code;
+        this._theme = config?.theme || this._theme;
+        this.store.state.stickyOffset = config?.stickyOffset || 0;
+        this.store.state.theme = this._theme || "default";
+        this.store.commit(
+          "onContentChange",
+          config?.onContentChange || (() => {}),
+        );
+        // await dispatch will wait until the diagram is finished rendering.
+        // It includes the time adjusting the top of participants for creation message.
+        // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
+        // @ts-ignore
+        await this.store.dispatch("updateCode", { code: this._code });
+        resolve(this);
+        printCostTime("rendering end", start);
+      }, calculateDebounceMilliseconds());
+    });
   }
 
   get code(): string | undefined {
