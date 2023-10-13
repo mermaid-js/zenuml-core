@@ -42,8 +42,8 @@ export default class ZenUml implements IZenUml {
   private _theme: string | undefined;
   private readonly store: any;
   private readonly app: any;
-  private currentTimeout: any;
-  private lastRenderingCostMilliseconds = 0;
+  private _currentTimeout: any;
+  private _lastRenderingCostMilliseconds = 0;
   constructor(el: Element, naked: boolean = false) {
     this.el = el;
     this.store = createStore(Store());
@@ -69,12 +69,12 @@ export default class ZenUml implements IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml> {
-    if (this.currentTimeout) {
+    if (this._currentTimeout) {
       console.log("rendering clearTimeout");
-      clearTimeout(this.currentTimeout);
+      clearTimeout(this._currentTimeout);
     }
     return new Promise((resolve) => {
-      this.currentTimeout = setTimeout(async () => {
+      this._currentTimeout = setTimeout(async () => {
         console.log("rendering start");
         clearCache();
         const start = getStartTime();
@@ -93,7 +93,7 @@ export default class ZenUml implements IZenUml {
         // @ts-ignore
         await this.store.dispatch("updateCode", { code: this._code });
         resolve(this);
-        this.lastRenderingCostMilliseconds = calculateCostTime(
+        this._lastRenderingCostMilliseconds = calculateCostTime(
           "rendering end",
           start,
         );
@@ -102,10 +102,10 @@ export default class ZenUml implements IZenUml {
   }
 
   calculateDebounceMilliseconds(): number {
-    let delay = this.lastRenderingCostMilliseconds;
-    if (delay > 2000) delay = 2000;
-    console.log("render will delay: " + delay + "ms");
-    return delay;
+    let debounce = this._lastRenderingCostMilliseconds;
+    if (debounce > 2000) debounce = 2000;
+    console.log("rendering debounce: " + debounce + "ms");
+    return debounce;
   }
 
   get code(): string | undefined {
