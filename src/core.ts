@@ -22,6 +22,7 @@ const logger = parentLogger.child({ name: "core" });
 
 interface Config {
   theme?: string;
+  enableMultiTheme: boolean;
   stickyOffset?: number;
   onContentChange?: (code: string) => void;
 }
@@ -86,6 +87,9 @@ export default class ZenUml implements IZenUml {
         "onContentChange",
         config?.onContentChange || (() => {}),
       );
+      if (config?.enableMultiTheme !== undefined) {
+        this.store.state.enableMultiTheme = config?.enableMultiTheme;
+      }
       // await dispatch will wait until the diagram is finished rendering.
       // It includes the time adjusting the top of participants for creation message.
       // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
