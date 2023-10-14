@@ -70,12 +70,12 @@ export default class ZenUml implements IZenUml {
     config: Config | undefined,
   ): Promise<IZenUml> {
     if (this._currentTimeout) {
-      console.log("rendering clearTimeout");
+      console.debug("rendering clearTimeout");
       clearTimeout(this._currentTimeout);
     }
     return new Promise((resolve) => {
       this._currentTimeout = setTimeout(async () => {
-        console.log("rendering start");
+        console.debug("rendering start");
         clearCache();
         const start = getStartTime();
         logger.debug("rendering", code, config);
