@@ -17,6 +17,7 @@ import "./themes/theme-dark.css";
 import Block from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block.vue";
 import Comment from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue";
 import { getStartTime, calculateCostTime } from "./utils/CostTime";
+import { clearCache } from "./utils/RenderingCache";
 const logger = parentLogger.child({ name: "core" });
 
 interface Config {
@@ -78,7 +79,9 @@ export default class ZenUml implements IZenUml {
     this.store.state.stickyOffset = config?.stickyOffset || 0;
     this.store.state.theme = this._theme || "default";
     this._currentTimeout = setTimeout(async () => {
+      console.debug("rendering start");
       const start = getStartTime();
+      clearCache();
       this.store.commit(
         "onContentChange",
         config?.onContentChange || (() => {}),
