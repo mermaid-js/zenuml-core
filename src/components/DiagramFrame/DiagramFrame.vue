@@ -1,5 +1,10 @@
 <template>
-  <div ref="export" class="zenuml p-1 bg-skin-canvas" style="display: inline-block" :class="theme">
+  <div
+    ref="export"
+    class="zenuml p-1 bg-skin-canvas"
+    style="display: inline-block"
+    :class="theme"
+  >
     <!-- We have enabled important: ".zenuml" for tailwind.
           1. Don't use inline-block as class name here. Other clients may not have .zenuml at ancestor level.
           2. .zenuml is used to make sure tailwind css takes effect.
@@ -35,18 +40,35 @@
             <TipsDialog />
           </div>
         </div>
-        <seq-diagram ref="diagram" :style="{ transform: `scale(${scale})`}" class="origin-top-left"/>
+        <seq-diagram
+          ref="diagram"
+          :style="{ transform: `scale(${scale})` }"
+          class="origin-top-left"
+        />
       </div>
       <div class="footer text-skin-control px-4 py-1 flex justify-between">
         <div class="flex items-center gap-3 color-base">
-          <button class="bottom-1 flex items-center left-1 hide-export" @click="showTipsDialog()">
-            <Icon icon-class="filter grayscale w-4 h-4" name="tip"/>
+          <button
+            class="bottom-1 flex items-center left-1 hide-export"
+            @click="showTipsDialog()"
+          >
+            <Icon icon-class="filter grayscale w-4 h-4" name="tip" />
           </button>
-          <ThemeSelect />
+          <ThemeSelect v-if="enableMultiTheme" />
           <div class="flex items-center">
-            <input type="checkbox" id="order-display" class="mr-1" :checked="numbering"
-                   @input="toggleNumbering(!numbering)">
-            <label for="order-display" title="Numbering the diagram" class="select-none">Numbering</label>
+            <input
+              type="checkbox"
+              id="order-display"
+              class="mr-1"
+              :checked="numbering"
+              @input="toggleNumbering(!numbering)"
+            />
+            <label
+              for="order-display"
+              title="Numbering the diagram"
+              class="select-none"
+              >Numbering</label
+            >
           </div>
         </div>
         <div
@@ -65,7 +87,7 @@
           target="_blank"
           href="https://zenuml.com"
           class="brand absolute bottom-1 right-4 text-xs hover:underline"
-        >ZenUML.com</a
+          >ZenUML.com</a
         >
       </div>
     </div>
@@ -73,78 +95,86 @@
 </template>
 
 <script>
-import {mapState, mapGetters, mapMutations} from 'vuex';
-import Privacy from './Privacy/Privacy.vue';
-import DiagramTitle from './DiagramTitle/DiagramTitle.vue';
-import SeqDiagram from './SeqDiagram/SeqDiagram.vue';
-import TipsDialog from './Tutorial/TipsDialog.vue';
-import WidthProvider from './Positioning/WidthProvider.vue';
-import * as htmlToImage from 'html-to-image';
-import Debug from './Debug/Debug.vue';
-import ThemeSelect from './ThemeSelect.vue';
+import { mapState, mapGetters, mapMutations } from "vuex";
+import Privacy from "./Privacy/Privacy.vue";
+import DiagramTitle from "./DiagramTitle/DiagramTitle.vue";
+import SeqDiagram from "./SeqDiagram/SeqDiagram.vue";
+import TipsDialog from "./Tutorial/TipsDialog.vue";
+import WidthProvider from "./Positioning/WidthProvider.vue";
+import * as htmlToImage from "html-to-image";
+import Debug from "./Debug/Debug.vue";
+import ThemeSelect from "./ThemeSelect.vue";
 import Icon from "@/components/Icon/Icon.vue";
 
 export default {
-  name: 'DiagramFrame',
+  name: "DiagramFrame",
   computed: {
-    ...mapState(['showTips', 'scale', 'theme', 'numbering']),
-    ...mapGetters(['rootContext']),
+    ...mapState([
+      "showTips",
+      "scale",
+      "theme",
+      "numbering",
+      "enableMultiTheme",
+    ]),
+    ...mapGetters(["rootContext"]),
     title() {
       if (!this.rootContext) {
-        console.error('`rootContext` is empty. Please make sure `store` is properly configured.');
+        console.error(
+          "`rootContext` is empty. Please make sure `store` is properly configured.",
+        );
       }
       return this.rootContext?.title();
     },
   },
-  mounted () {
+  mounted() {
     // https://stackoverflow.com/a/64429013/529187
     // Expose component instance so we can access toPng and other methods.
     this.$el.__vue__ = this;
   },
   methods: {
-    ...mapMutations(['setScale', 'toggleNumbering']),
+    ...mapMutations(["setScale", "toggleNumbering"]),
     showTipsDialog() {
       this.$store.state.showTips = true;
 
       try {
-        this.$gtag?.event('view', {
-          event_category: 'help',
-          event_label: 'tips dialog',
+        this.$gtag?.event("view", {
+          event_category: "help",
+          event_label: "tips dialog",
         });
       } catch (e) {
         console.error(e);
       }
     },
     toPng() {
-      return htmlToImage.toPng(this.$refs['export'], {
-        backgroundColor: 'white',
+      return htmlToImage.toPng(this.$refs["export"], {
+        backgroundColor: "white",
         filter: (node) => {
-          return !node?.classList?.contains('hide-export');
+          return !node?.classList?.contains("hide-export");
         },
       });
     },
     toSvg() {
-      return htmlToImage.toSvg(this.$refs['export'], {
-        backgroundColor: 'white',
+      return htmlToImage.toSvg(this.$refs["export"], {
+        backgroundColor: "white",
         filter: (node) => {
-          return !node?.classList?.contains('hide-export');
+          return !node?.classList?.contains("hide-export");
         },
       });
     },
     toBlob() {
-      return htmlToImage.toBlob(this.$refs['export'], {
-        backgroundColor: 'white',
+      return htmlToImage.toBlob(this.$refs["export"], {
+        backgroundColor: "white",
         filter: (node) => {
-          return !node?.classList?.contains('hide-export');
+          return !node?.classList?.contains("hide-export");
         },
       });
     },
     toJpeg() {
       // It does not render the 'User' svg icon.
-      return htmlToImage.toJpeg(this.$refs['export'], {
-        backgroundColor: 'white',
+      return htmlToImage.toJpeg(this.$refs["export"], {
+        backgroundColor: "white",
         filter: (node) => {
-          return !node?.classList?.contains('hide-export');
+          return !node?.classList?.contains("hide-export");
         },
       });
     },
@@ -159,12 +189,12 @@ export default {
       this.theme = theme;
     },
     setStyle(style) {
-      const styleElementId = 'zenuml-style';
+      const styleElementId = "zenuml-style";
       // check if style element exists
       let styleElement = document.getElementById(styleElementId);
       if (!styleElement) {
         // create a style element and inject the content as textContent
-        styleElement = document.createElement('style');
+        styleElement = document.createElement("style");
         // give the element a unique id
         styleElement.id = styleElementId;
         document.head.append(styleElement);
@@ -176,23 +206,30 @@ export default {
 
       // if url is from github, we fetch the raw content and set the style
       // if url contains github.com or githubusercontent.com, we fetch the raw content and set the style
-      if (hostname === 'https://github.com' || hostname === 'https://githubusercontent.com') {
-        fetch(url.replace('github.com', 'raw.githubusercontent.com').replace('blob/', ''))
+      if (
+        hostname === "https://github.com" ||
+        hostname === "https://githubusercontent.com"
+      ) {
+        fetch(
+          url
+            .replace("github.com", "raw.githubusercontent.com")
+            .replace("blob/", ""),
+        )
           .then((response) => response.text())
           .then((text) => {
             this.setStyle(text);
           });
         return;
       }
-      const remoteCssUrlId = 'zenuml-remote-css';
+      const remoteCssUrlId = "zenuml-remote-css";
       // check if remote css element exists
       let remoteCssElement = document.getElementById(remoteCssUrlId);
       if (!remoteCssElement) {
         // create a style element and inject the content as textContent
-        remoteCssElement = document.createElement('link');
+        remoteCssElement = document.createElement("link");
         // give the element a unique id
         remoteCssElement.id = remoteCssUrlId;
-        remoteCssElement.rel = 'stylesheet';
+        remoteCssElement.rel = "stylesheet";
         document.head.append(remoteCssElement);
       }
       remoteCssElement.href = url;
