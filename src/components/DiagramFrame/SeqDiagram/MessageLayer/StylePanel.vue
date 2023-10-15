@@ -63,7 +63,6 @@ const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
   let leadingSpaces: string;
   let prevLineIsComment: boolean;
   let hasStyleBrackets: boolean;
-  let styleString: string;
   store.commit("onMessageClick", (context: any, element: HTMLElement) => {
     start = context.value.start.start;
     lineHead = getLineHead(code.value, start);
@@ -76,10 +75,11 @@ const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
       const styleEnd = trimedPrevLine.indexOf("]");
       hasStyleBrackets = Boolean(styleStart === 0 && styleEnd);
       if (hasStyleBrackets) {
-        styleString = trimedPrevLine.slice(styleStart + 1, styleEnd);
-        existingStyles.value = styleString.split(",").map((s) => s.trim());
+        existingStyles.value = trimedPrevLine
+          .slice(styleStart + 1, styleEnd)
+          .split(",")
+          .map((s) => s.trim());
       } else {
-        styleString = "";
         existingStyles.value = [];
       }
     }
@@ -104,25 +104,17 @@ const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
     if (prevLineIsComment) {
       let newComment = "";
       if (hasStyleBrackets) {
+        let updatedStyles;
+
         if (existingStyles.value.includes(style)) {
-          newComment = `${leadingSpaces}// [${existingStyles.value
-            .filter((s) => s !== style)
-            .join(", ")}] ${prevLine
-            .slice(prevLine.indexOf("]") + 1)
-            .trimStart()}`;
-        } else if (styleString) {
-          newComment = `${leadingSpaces}// [${styleString}, ${style}] ${prevLine
-            .slice(prevLine.indexOf("]") + 1)
-            .trimStart()}`;
+          updatedStyles = existingStyles.value.filter((s) => s !== style);
         } else {
-          newComment = `${leadingSpaces}// [${style}] ${prevLine
-            .slice(prevLine.indexOf("]") + 1)
-            .trimStart()}`;
+          updatedStyles = [...existingStyles.value, style];
         }
-      } else {
-        newComment = `${leadingSpaces}// [${style}] ${prevLine
-          .slice(2)
-          .trimStart()}`;
+
+        newComment = `${leadingSpaces}// [${updatedStyles.join(
+          ", ",
+        )}] ${prevLine.slice(prevLine.indexOf("]") + 1).trimStart()}`;
       }
       if (!newComment.endsWith("\n")) newComment += "\n";
       updateCode(
