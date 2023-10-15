@@ -1,23 +1,24 @@
 /* eslint-env es6 */
-import { resolve } from 'path';
-import { defineConfig } from 'vite';
-import createVuePlugin from '@vitejs/plugin-vue';
-import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
+import { resolve } from "path";
+import { defineConfig } from "vite";
+import createVuePlugin from "@vitejs/plugin-vue";
+import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
+import svgLoader from "vite-svg-loader";
 
 export default defineConfig({
   build: {
     // https://vitejs.dev/guide/build.html#library-mode
     lib: {
-      entry: resolve(__dirname, 'src/core.ts'),
+      entry: resolve(__dirname, "src/core.ts"),
       // https://vitejs.dev/config/build-options.html#build-lib
       // the exposed global variable and is required when formats includes 'umd' or 'iife'.
-      name: 'ZenUML',
-      fileName: 'zenuml',
+      name: "ZenUML",
+      fileName: "zenuml",
     },
     rollupOptions: {
       output: [
         {
-          format: 'esm',
+          format: "esm",
           sourcemap: true,
           // https://rollupjs.org/guide/en/#outputentryfilenames
           // It will use the file name in `build.lib.entry` without extension as `[name]` if `[name].xxx.yyy` is provided.
@@ -27,8 +28,8 @@ export default defineConfig({
           entryFileNames: `zenuml.esm.mjs`,
         },
         {
-          name: 'zenuml', //  it is the global variable name representing your bundle. https://rollupjs.org/guide/en/#outputname
-          format: 'umd',
+          name: "zenuml", //  it is the global variable name representing your bundle. https://rollupjs.org/guide/en/#outputname
+          format: "umd",
           sourcemap: true,
           entryFileNames: `zenuml.js`,
         },
@@ -37,11 +38,12 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      vue: '@vue/compat',
-      '@': resolve(__dirname, './src')
+      vue: "@vue/compat",
+      "@": resolve(__dirname, "./src"),
     },
   },
   plugins: [
+    svgLoader(),
     createVuePlugin({
       template: {
         compilerOptions: {
@@ -54,6 +56,6 @@ export default defineConfig({
     cssInjectedByJsPlugin(),
   ],
   define: {
-    'process.env.NODE_ENV': '"production"'
-  }
+    "process.env.NODE_ENV": '"production"',
+  },
 });
