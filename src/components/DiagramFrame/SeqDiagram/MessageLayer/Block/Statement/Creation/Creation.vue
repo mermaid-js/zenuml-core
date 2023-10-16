@@ -41,7 +41,12 @@
         <participant :entity="{ name: to }" />
       </div>
     </div>
-    <occurrence :context="creation" class="pointer-events-auto" :participant="to" :number="number" />
+    <occurrence
+      :context="creation"
+      class="pointer-events-auto"
+      :participant="to"
+      :number="number"
+    />
     <message
       class="return transform -translate-y-full pointer-events-auto"
       v-if="assignee"
@@ -49,29 +54,33 @@
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
-      :number="`${number}.${(creation.braceBlock()?.block().stat().length || 0) + 1}`"
+      :number="`${number}.${
+        (creation.braceBlock()?.block().stat().length || 0) + 1
+      }`"
+      :classNames="messageClassNames"
+      :textStyle="messageTextStyle"
     />
   </div>
 </template>
 
 <script type="text/babel">
-import parentLogger from '../../../../../../../logger/logger';
+import parentLogger from "../../../../../../../logger/logger";
 
-import { mapGetters, mapState } from 'vuex';
-import Comment from '../Comment/Comment.vue';
-import Message from '../Message/Message.vue';
-import Occurrence from '../Interaction/Occurrence/Occurrence.vue';
-import { CodeRange } from '../../../../../../../parser/CodeRange';
-import Participant from '../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue';
+import { mapGetters, mapState } from "vuex";
+import Comment from "../Comment/Comment.vue";
+import Message from "../Message/Message.vue";
+import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
+import { CodeRange } from "../../../../../../../parser/CodeRange";
+import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
 
-const logger = parentLogger.child({ name: 'Creation' });
+const logger = parentLogger.child({ name: "Creation" });
 
 export default {
-  name: 'creation',
-  props: ['context', 'comment', 'commentObj', 'selfCallIndent', 'number'],
+  name: "creation",
+  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
   computed: {
-    ...mapGetters(['cursor', 'onElementClick', 'distance']),
-    ...mapState(['numbering']),
+    ...mapGetters(["cursor", "onElementClick", "distance"]),
+    ...mapState(["numbering"]),
     from() {
       return this.context.Origin();
     },
@@ -91,13 +100,13 @@ export default {
     },
     assignee() {
       function safeCodeGetter(context) {
-        return (context && context.getFormattedText()) || '';
+        return (context && context.getFormattedText()) || "";
       }
       let assignment = this.creation.creationBody().assignment();
-      if (!assignment) return '';
+      if (!assignment) return "";
       let assignee = safeCodeGetter(assignment.assignee());
       const type = safeCodeGetter(assignment.type());
-      return assignee + (type ? ':' + type : '');
+      return assignee + (type ? ":" + type : "");
     },
     to() {
       return this.creation.Owner();
@@ -126,11 +135,15 @@ export default {
   methods: {
     layoutMessageContainer() {
       let _layoutMessageContainer = () => {
-        if (!this.$refs.participantPlaceHolder || !this.$refs.messageContainer) return;
-        const halfWidthOfPlaceholder = this.$refs['participantPlaceHolder'].offsetWidth / 2;
-        this.$refs['messageContainer'].style.width = `calc(100% + ${halfWidthOfPlaceholder + 6}px`;
+        if (!this.$refs.participantPlaceHolder || !this.$refs.messageContainer)
+          return;
+        const halfWidthOfPlaceholder =
+          this.$refs["participantPlaceHolder"].offsetWidth / 2;
+        this.$refs["messageContainer"].style.width = `calc(100% + ${
+          halfWidthOfPlaceholder + 6
+        }px`;
         if (this.rightToLeft) {
-          this.$refs['messageContainer'].style.transform = `translateX( ${-(
+          this.$refs["messageContainer"].style.transform = `translateX( ${-(
             halfWidthOfPlaceholder + 6
           )}px`;
         }

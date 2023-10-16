@@ -5,9 +5,14 @@
     :data-to="to"
     data-type="interaction"
     :data-signature="signature"
-    :class="{ highlight: isCurrent, self: isSelf, 'inited-from-occurrence': isInitedFromOccurrence, 'right-to-left': rightToLeft }"
+    :class="{
+      highlight: isCurrent,
+      self: isSelf,
+      'inited-from-occurrence': isInitedFromOccurrence,
+      'right-to-left': rightToLeft,
+    }"
     :style="{
-      width: !isSelf && (interactionWidth + 'px'),
+      width: !isSelf && interactionWidth + 'px',
       transform: 'translateX(' + translateX + 'px)',
     }"
   >
@@ -44,28 +49,32 @@
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
-      :number="`${number}.${(message.braceBlock()?.block().stat().length || 0) + 1}`"
+      :number="`${number}.${
+        (message.braceBlock()?.block().stat().length || 0) + 1
+      }`"
+      :classNames="messageClassNames"
+      :textStyle="messageTextStyle"
     />
   </div>
 </template>
 
 <script type="text/babel">
-import Comment from '../Comment/Comment.vue';
-import Occurrence from './Occurrence/Occurrence.vue';
-import Message from '../Message/Message.vue';
-import { mapGetters } from 'vuex';
-import SelfInvocation from './SelfInvocation/SelfInvocation.vue';
-import { CodeRange } from '../../../../../../../parser/CodeRange';
-import { ProgContext } from '../../../../../../../parser';
+import Comment from "../Comment/Comment.vue";
+import Occurrence from "./Occurrence/Occurrence.vue";
+import Message from "../Message/Message.vue";
+import { mapGetters } from "vuex";
+import SelfInvocation from "./SelfInvocation/SelfInvocation.vue";
+import { CodeRange } from "../../../../../../../parser/CodeRange";
+import { ProgContext } from "../../../../../../../parser";
 
 export default {
-  name: 'interaction',
-  props: ['context', 'selfCallIndent', 'commentObj', 'number'],
+  name: "interaction",
+  props: ["context", "selfCallIndent", "commentObj", "number"],
   computed: {
     // add tracker to the mapGetters
-    ...mapGetters(['participants', 'distance2', 'cursor', 'onElementClick']),
+    ...mapGetters(["participants", "distance2", "cursor", "onElementClick"]),
     hasComment() {
-      return this.commentObj?.text !== ''
+      return this.commentObj?.text !== "";
     },
     messageTextStyle() {
       return this.commentObj?.textStyle;
@@ -87,7 +96,7 @@ export default {
     },
     assignee: function () {
       let assignment = this.message?.Assignment();
-      if (!assignment) return '';
+      if (!assignment) return "";
       return assignment.getText();
     },
     signature: function () {
@@ -113,7 +122,7 @@ export default {
       return this.message?.isCurrent(this.cursor);
     },
     showStarter() {
-      return this.participants.Starter().name !== '_STARTER_';
+      return this.participants.Starter().name !== "_STARTER_";
     },
     isRootBlock() {
       return this.context?.parentCtx?.parentCtx instanceof ProgContext;
@@ -144,7 +153,7 @@ export default {
     },
     invocation: function () {
       // return 'Message'
-      return this.isSelf ? 'SelfInvocation' : 'Message';
+      return this.isSelf ? "SelfInvocation" : "Message";
     },
     isInitedFromOccurrence: function () {
       return this.message?.isInitedFromOccurrence(this.from);

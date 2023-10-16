@@ -4,8 +4,8 @@
     @initial="onInitial"
     placement="top"
     :offset="5"
-    shift
     :flip="{ padding: flipOffset }"
+    shift
     zIndex="30"
   >
     <div class="flex bg-white shadow-md z-10 rounded-md p-1">
@@ -15,8 +15,11 @@
         :key="btn.name"
       >
         <div
-          :class="btn.class"
           class="w-6 mx-1 py-1 rounded-md text-black text-center cursor-pointer hover:bg-gray-200"
+          :class="[
+            btn.class,
+            { 'bg-gray-100': existingStyles.includes(btn.class) },
+          ]"
         >
           {{ btn.content }}
         </div>
@@ -50,10 +53,36 @@ const updateCode = (code: string) => {
   store.dispatch("updateCode", { code });
   onContentChange.value(code);
 };
+const existingStyles = ref<string[]>([]);
 let onClick: (style: string) => void;
 
 const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
+  let start: number;
+  let lineHead: number;
+  let prevLine: string;
+  let leadingSpaces: string;
+  let prevLineIsComment: boolean;
+  let hasStyleBrackets: boolean;
   store.commit("onMessageClick", (context: any, element: HTMLElement) => {
+    start = context.value.start.start;
+    lineHead = getLineHead(code.value, start);
+    prevLine = getPrevLine(code.value, start);
+    leadingSpaces = code.value.slice(lineHead).match(/^\s*/)?.[0] || "";
+    prevLineIsComment = prevLine.trim().startsWith("//");
+    if (prevLineIsComment) {
+      const trimedPrevLine = prevLine.trimStart().slice(2).trimStart();
+      const styleStart = trimedPrevLine.indexOf("[");
+      const styleEnd = trimedPrevLine.indexOf("]");
+      hasStyleBrackets = Boolean(styleStart === 0 && styleEnd);
+      if (hasStyleBrackets) {
+        existingStyles.value = trimedPrevLine
+          .slice(styleStart + 1, styleEnd)
+          .split(",")
+          .map((s) => s.trim());
+      } else {
+        existingStyles.value = [];
+      }
+    }
     reference.value = {
       getBoundingClientRect: () => element.getBoundingClientRect(),
     };
@@ -64,6 +93,7 @@ const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
     floating,
     () => {
       show.value = false;
+      existingStyles.value = [];
     },
     computed(() => show.value),
   );
@@ -71,30 +101,27 @@ const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
   onClick = (style: string) => {
     show.value = false;
     if (!messageContext.value.value) return;
-    const start = messageContext.value.value.start.start;
-    const lineHead = getLineHead(code.value, start);
-    const prevLine = getPrevLine(code.value, start);
-    const leadingSpaces = code.value.slice(lineHead).match(/^\s*/)?.[0] || "";
-    const prevLineIsComment = prevLine.trim().startsWith("//");
     if (prevLineIsComment) {
-      const trimedPrevLine = prevLine.trimStart().slice(2).trimStart();
-      const styleStart = trimedPrevLine.indexOf("[");
-      const styleEnd = trimedPrevLine.indexOf("]");
-      if (styleStart === 0 && styleEnd) {
-        const existedStyles = trimedPrevLine.slice(styleStart + 1, styleEnd);
-        if (
-          !existedStyles
-            .split(",")
-            .map((s) => s.trim())
-            .includes(style)
-        ) {
-          updateCode(
-            code.value.slice(0, getPrevLineHead(code.value, start)) +
-              `${leadingSpaces}// [${existedStyles}, ${style}]\n` +
-              code.value.slice(lineHead),
-          );
+      let newComment = "";
+      if (hasStyleBrackets) {
+        let updatedStyles;
+
+        if (existingStyles.value.includes(style)) {
+          updatedStyles = existingStyles.value.filter((s) => s !== style);
+        } else {
+          updatedStyles = [...existingStyles.value, style];
         }
+
+        newComment = `${leadingSpaces}// [${updatedStyles.join(
+          ", ",
+        )}] ${prevLine.slice(prevLine.indexOf("]") + 1).trimStart()}`;
       }
+      if (!newComment.endsWith("\n")) newComment += "\n";
+      updateCode(
+        code.value.slice(0, getPrevLineHead(code.value, start)) +
+          newComment +
+          code.value.slice(lineHead),
+      );
     } else {
       updateCode(
         code.value.slice(0, lineHead) +
