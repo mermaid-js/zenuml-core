@@ -46,6 +46,7 @@ const Store = (): StoreOptions<StoreState> => {
       theme:
         localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
         "theme-default",
+      enableMultiTheme: true,
       scale: 1,
       selected: [],
       cursor: null,
