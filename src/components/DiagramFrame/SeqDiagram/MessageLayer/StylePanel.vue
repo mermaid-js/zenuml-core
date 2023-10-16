@@ -112,9 +112,15 @@ const onInitial = ({ show, reference, floating }: FloatVirtualInitialProps) => {
           updatedStyles = [...existingStyles.value, style];
         }
 
-        newComment = `${leadingSpaces}// [${updatedStyles.join(
-          ", ",
-        )}] ${prevLine.slice(prevLine.indexOf("]") + 1).trimStart()}`;
+        newComment = `${leadingSpaces}// [${updatedStyles
+          .filter(Boolean)
+          .join(", ")}] ${prevLine
+          .slice(prevLine.indexOf("]") + 1)
+          .trimStart()}`;
+      } else {
+        newComment = `${leadingSpaces}// [${style}] ${prevLine
+          .slice((prevLine.match(/\/\/*/)?.index || -2) + 2)
+          .trimStart()}`;
       }
       if (!newComment.endsWith("\n")) newComment += "\n";
       updateCode(
