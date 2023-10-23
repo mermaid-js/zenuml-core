@@ -16,6 +16,8 @@ import "./themes/theme-dark.css";
 
 import Block from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block.vue";
 import Comment from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue";
+import { getStartTime, calculateCostTime } from "./utils/CostTime";
+import { clearCache } from "./utils/RenderingCache";
 const logger = parentLogger.child({ name: "core" });
 
 interface Config {
@@ -41,7 +43,8 @@ export default class ZenUml implements IZenUml {
   private _theme: string | undefined;
   private readonly store: any;
   private readonly app: any;
-
+  private _currentTimeout: any;
+  private _lastRenderingCostMilliseconds = 0;
   constructor(el: Element, naked: boolean = false) {
     this.el = el;
     this.store = createStore(Store());
@@ -67,23 +70,45 @@ export default class ZenUml implements IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml> {
-    const date = Date.now();
+    if (this._currentTimeout) {
+      console.debug("rendering clearTimeout");
+      clearTimeout(this._currentTimeout);
+    }
     logger.debug("rendering", code, config);
     this._code = code || this._code;
     this._theme = config?.theme || this._theme;
     this.store.state.stickyOffset = config?.stickyOffset || 0;
     this.store.state.theme = this._theme || "default";
-    this.store.commit("onContentChange", config?.onContentChange || (() => {}));
-    if (config?.enableMultiTheme !== undefined) {
-      this.store.state.enableMultiTheme = config?.enableMultiTheme;
-    }
-    // await dispatch will wait until the diagram is finished rendering.
-    // It includes the time adjusting the top of participants for creation message.
-    // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
-    // @ts-ignore
-    await this.store.dispatch("updateCode", { code: this._code });
-    console.log(Date.now() - date + "ms");
+    this._currentTimeout = setTimeout(async () => {
+      console.debug("rendering start");
+      const start = getStartTime();
+      clearCache();
+      this.store.commit(
+        "onContentChange",
+        config?.onContentChange || (() => {}),
+      );
+      if (config?.enableMultiTheme !== undefined) {
+        this.store.state.enableMultiTheme = config?.enableMultiTheme;
+      }
+      // await dispatch will wait until the diagram is finished rendering.
+      // It includes the time adjusting the top of participants for creation message.
+      // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
+      // @ts-ignore
+      await this.store.dispatch("updateCode", { code: this._code });
+      this._lastRenderingCostMilliseconds = calculateCostTime(
+        "rendering end",
+        start,
+      );
+    }, this.calculateDebounceMilliseconds());
+
     return Promise.resolve(this);
+  }
+
+  calculateDebounceMilliseconds(): number {
+    let debounce = this._lastRenderingCostMilliseconds;
+    if (debounce > 2000) debounce = 2000;
+    console.debug("rendering debounce: " + debounce + "ms");
+    return debounce;
   }
 
   get code(): string | undefined {
