@@ -1,31 +1,33 @@
 <template>
   <!-- TODO: 12px to align comment with async message, which as padding-left 10px and left 2px -->
   <div
-    class="comments text-skin-comment min-w-[100px] flex justify-around text-left text-sm opacity-50 hover:opacity-100">
+    class="comments text-skin-comment min-w-[100px] flex text-left text-sm opacity-50 hover:opacity-100"
+  >
     <div v-html="markedComment" :class="classNames" :style="textStyle"></div>
   </div>
 </template>
 
 <script type="text/babel">
-import { marked } from 'marked';
-import highlightjs from 'highlight.js/lib/core';
+import { marked } from "marked";
+import highlightjs from "highlight.js/lib/core";
 
 // Languages import
-import plaintext from 'highlight.js/lib/languages/plaintext';
-import javascript from 'highlight.js/lib/languages/javascript';
-import bash from 'highlight.js/lib/languages/bash';
-import yaml from 'highlight.js/lib/languages/yaml';
+import plaintext from "highlight.js/lib/languages/plaintext";
+import javascript from "highlight.js/lib/languages/javascript";
+import bash from "highlight.js/lib/languages/bash";
+import yaml from "highlight.js/lib/languages/yaml";
 
 // Register languages
-highlightjs.registerLanguage('plaintext', plaintext);
-highlightjs.registerLanguage('javascript', javascript);
-highlightjs.registerLanguage('bash', bash);
-highlightjs.registerLanguage('yaml', yaml);
+highlightjs.registerLanguage("plaintext", plaintext);
+highlightjs.registerLanguage("javascript", javascript);
+highlightjs.registerLanguage("bash", bash);
+highlightjs.registerLanguage("yaml", yaml);
 
 // Override function
 const renderer = {
   codespan(code) {
-    const endpointPattern = /(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)\s+(.+)/gi;
+    const endpointPattern =
+      /(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)\s+(.+)/gi;
     // let found = code.match(endpointPattern)
     let found = endpointPattern.exec(code);
     if (found?.length === 3) {
@@ -45,7 +47,9 @@ marked.setOptions({
     if (!language) {
       return highlightjs.highlightAuto(code).value;
     }
-    const validLanguage = highlightjs.getLanguage(language) ? language : 'plaintext';
+    const validLanguage = highlightjs.getLanguage(language)
+      ? language
+      : "plaintext";
     return highlightjs.highlight(validLanguage, code).value;
   },
   breaks: true,
@@ -54,8 +58,8 @@ marked.setOptions({
 marked.use({ renderer });
 
 export default {
-  name: 'comment',
-  props: ['comment', 'commentObj'],
+  name: "comment",
+  props: ["comment", "commentObj"],
   computed: {
     markedComment() {
       return (
