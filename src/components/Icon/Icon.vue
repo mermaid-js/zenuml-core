@@ -1,5 +1,8 @@
 <template>
-  <span :class="['inline-block', iconClass]" @click="$emit('icon-click')" >
+  <span
+    :class="['flex items-center justify-center', iconClass]"
+    @click="$emit('icon-click')"
+  >
     <component :is="icon" />
   </span>
 </template>
@@ -18,8 +21,5 @@ const props = defineProps({
   },
 });
 
-const icon = defineAsyncComponent(() =>
-  import(`./icons/${props.name}.svg`)
-);
-
+const icon = defineAsyncComponent(() => import(`./icons/${props.name}.svg`));
 </script>

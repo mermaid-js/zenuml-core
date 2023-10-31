@@ -52,7 +52,7 @@
             class="bottom-1 flex items-center left-1 hide-export"
             @click="showTipsDialog()"
           >
-            <Icon icon-class="filter grayscale w-4 h-4" name="tip" />
+            <Icon name="tip" icon-class="filter grayscale w-4 h-4" />
           </button>
           <ThemeSelect v-if="enableMultiTheme" />
           <div class="flex items-center">
@@ -67,8 +67,9 @@
               for="order-display"
               title="Numbering the diagram"
               class="select-none"
-              >Numbering</label
             >
+              <Icon name="numbering" icon-class="w-6 h-4" />
+            </label>
           </div>
         </div>
         <div
