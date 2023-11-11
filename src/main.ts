@@ -4,21 +4,20 @@ const logger = parentLogger.child({ name: "main" });
 
 // find the fist element with tag `pre` and class `zenuml`
 const elm = document.querySelector("pre.zenuml");
-// get the code from the element
-const code =
-  elm?.textContent?.trim() ||
-  `
-// comment
-A
-A.method`;
+const code = "ZenUML";
 // @ts-ignore
 const zenUml = new ZenUml(elm);
-console.log("set zenUML to window");
 
 // @ts-ignore
 window.zenUml = zenUml;
-zenUml.render(code, { theme: "theme-default" }).then((r) => {
-  logger.debug("render resolved", r);
-});
+zenUml
+  .render(code, {
+    enableMultiTheme: false,
+    stickyOffset: 0,
+    theme: "theme-default",
+  })
+  .then((r) => {
+    logger.debug("render resolved", r);
+  });
 // @ts-ignore
 window.parentLogger = parentLogger;
