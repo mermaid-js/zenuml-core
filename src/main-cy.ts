@@ -17,7 +17,7 @@ console.log("set zenUML to window");
 
 // @ts-ignore
 window.zenUml = zenUml;
-zenUml.render(code, { theme: "theme-default" }).then((r) => {
+zenUml.render(code, { theme: "theme-nab" }).then((r) => {
   logger.debug("render resolved", r);
 });
 // @ts-ignore
