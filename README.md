@@ -23,9 +23,37 @@ Please follow the [integration guide](./docs/asciidoc/integration-guide.adoc) fo
 
 # Development
 
+## Technical Requirements
+
+These are the tools we use for working with the code and documentation:
+
+- [volta](https://volta.sh/) to manage node versions.
+- [Node.js](https://nodejs.org/en/). `volta install node`
+- [pnpm](https://pnpm.io/) package manager. `volta install pnpm`
+- [npx](https://docs.npmjs.com/cli/v8/commands/npx) the packaged executor in npm. This is needed [to install pnpm.](#install-packages)
+
+Follow the setup steps below to install them and start the development.
+
+### Switch to project
+
+Once you have cloned the repository onto your development machine, change into the `zenuml-core` project folder (the top level directory of the @zenuml/core project repository)
+
+```bash
+cd zenuml-core
 ```
-pnpm install
-pnpm dev
+
+### Install packages
+
+Run `npx pnpm install`. You will need `npx` for this because volta doesn't support it yet.
+
+```bash
+npx pnpm install # npx is required for first install
+```
+
+### Launch
+
+```bash
+npx pnpm run dev
 ```
 
 ## CI/CD
