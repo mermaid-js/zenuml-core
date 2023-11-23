@@ -34,8 +34,8 @@ describe("get absolute position of a participant", () => {
   });
 
   it.each([
-    ["A1 B1", 0, 80, 240],
-    ["A1 group {B1}", 0, 80, 240], // group does not change absolute positions
+    ["A1 B1", 0, 60, 180],
+    ["A1 group {B1}", 0, 60, 180], // group does not change absolute positions
   ])("Use MINI_GAP (100) for %s", (code, posStarter, posA1, posB1) => {
     const rootContext = RootContext(code);
 
@@ -59,12 +59,12 @@ describe("get absolute position of a participant", () => {
     const rootContext = RootContext("A1.a1 A1.a1 B1.a1");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     expect(coordinates.getPosition("_STARTER_")).toBe(0);
-    expect(coordinates.getPosition("A1")).toBe(80);
-    expect(coordinates.getPosition("B1")).toBe(240);
+    expect(coordinates.getPosition("A1")).toBe(60);
+    expect(coordinates.getPosition("B1")).toBe(180);
   });
 
   it.each([
-    ["new A1", "A1", 104],
+    ["new A1", "A1", 84],
     ["new A200", "A200", 134],
   ])("creation method: %s", (code, name, pos) => {
     const rootContext = RootContext(code);
@@ -79,15 +79,15 @@ describe("get absolute position of a participant", () => {
     ["A1->B1: m1\nB1->C1: m1\nC1->A1: m800"], // backwards
     ["A1->B1: m1\nB1->C1: m1\nB1->C1: m1\nC1->A1: m800"], // repeating message B1->C1:m1
   ])("non-adjacent long message: %s", (code: string) => {
-    const messageLength = 820;
+    const messageLength = 800;
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
 
     const positionA = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
-    expect(coordinates.getPosition("A1")).toBe(80); //70
+    expect(coordinates.getPosition("A1")).toBe(positionA); //70
 
     // position is optimised for even distribution
-    expect(coordinates.getPosition("B1")).toBe(492); //190
+    expect(coordinates.getPosition("B1")).toBe(472); //190
 
     // positionC is not impacted by position of B1
     const positionC =
@@ -103,7 +103,7 @@ describe("Let us focus on order", () => {
   it("should add Starter to the left", () => {
     const rootContext = RootContext("A1 B1->A1:m1");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
-    expect(coordinates.getPosition("B1")).toBe(80);
-    expect(coordinates.getPosition("A1")).toBe(240);
+    expect(coordinates.getPosition("B1")).toBe(60);
+    expect(coordinates.getPosition("A1")).toBe(180);
   });
 });
