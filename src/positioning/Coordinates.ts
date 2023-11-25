@@ -32,7 +32,8 @@ export class Coordinates {
   }
 
   getPosition(participantName: string | undefined): number {
-    const cacheKey = `getPosition_${participantName}`;
+    const participantNameOrLabel = this.labelOrName(participantName || "");
+    const cacheKey = `getPosition_${participantNameOrLabel}`;
     const cachedPosition = getCache(cacheKey);
     if (cachedPosition != null) {
       return cachedPosition;
@@ -53,6 +54,28 @@ export class Coordinates {
   walkThrough() {
     this.withParticipantGaps(this.participantModels);
     this.withMessageGaps(this.ownableMessages, this.participantModels);
+  }
+
+  half(participantName: string) {
+    if (participantName === "_STARTER_") {
+      return MARGIN / 2;
+    }
+    const halfLeftParticipantWidth = this.halfWithMargin(
+      this.labelOrName(participantName),
+    );
+    return Math.max(halfLeftParticipantWidth, MINI_GAP / 2);
+  }
+
+  getWidth() {
+    const lastParticipant =
+      this.participantModels[this.participantModels.length - 1].name;
+    const calculatedWidth =
+      this.getPosition(lastParticipant) + this.half(lastParticipant);
+    return Math.max(calculatedWidth, 200);
+  }
+
+  distance(left: string, right: string) {
+    return this.getPosition(right) - this.getPosition(left);
   }
 
   private withMessageGaps(
@@ -85,7 +108,7 @@ export class Coordinates {
   }
 
   private getMessageWidth(message: OwnableMessage) {
-    const halfSelf = Coordinates.half(this.widthProvider, message.to);
+    const halfSelf = this.half(message.to);
     let messageWidth = this.widthProvider(
       message.signature,
       TextType.MessageContent,
@@ -105,9 +128,8 @@ export class Coordinates {
   }
 
   private getParticipantGap(p: IParticipantModel) {
-    const leftNameOrLabel = this.labelOrName(p.left);
-    const halfLeft = Coordinates.half(this.widthProvider, leftNameOrLabel);
-    const halfSelf = Coordinates.half(this.widthProvider, p.label || p.name);
+    const halfLeft = this.half(p.left);
+    const halfSelf = this.half(p.name);
     // TODO: convert name to enum type
     const leftIsVisible = p.left && p.left !== "_STARTER_";
     const selfIsVisible = p.name && p.name !== "_STARTER_";
@@ -125,46 +147,14 @@ export class Coordinates {
     );
   }
 
-  static half(widthProvider: WidthFunc, participantName: string | undefined) {
-    if (participantName === "_STARTER_") {
-      return MARGIN / 2;
-    }
-    const halfLeftParticipantWidth = this.halfWithMargin(
-      widthProvider,
-      participantName,
-    );
-    return Math.max(halfLeftParticipantWidth, MINI_GAP / 2);
+  private halfWithMargin(participant: string | undefined) {
+    return this._getParticipantWidth(participant) / 2 + MARGIN / 2;
   }
 
-  private static halfWithMargin(
-    widthProvider: WidthFunc,
-    participant: string | undefined,
-  ) {
-    return (
-      this._getParticipantWidth(widthProvider, participant) / 2 + MARGIN / 2
-    );
-  }
-
-  private static _getParticipantWidth(
-    widthProvider: WidthFunc,
-    participant: string | undefined,
-  ) {
+  private _getParticipantWidth(participant: string | undefined) {
     return Math.max(
-      widthProvider(participant || "", TextType.ParticipantName),
+      this.widthProvider(participant || "", TextType.ParticipantName),
       MIN_PARTICIPANT_WIDTH,
     );
-  }
-
-  getWidth() {
-    const lastParticipant =
-      this.participantModels[this.participantModels.length - 1].name;
-    const calculatedWidth =
-      this.getPosition(lastParticipant) +
-      Coordinates.half(this.widthProvider, lastParticipant);
-    return Math.max(calculatedWidth, 200);
-  }
-
-  distance(left: string, right: string) {
-    return this.getPosition(right) - this.getPosition(left);
   }
 }
