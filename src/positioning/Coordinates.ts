@@ -32,17 +32,16 @@ export class Coordinates {
   }
 
   getPosition(participantName: string | undefined): number {
-    const participantNameOrLabel = this.labelOrName(participantName || "");
-    const cacheKey = `getPosition_${participantNameOrLabel}`;
-    const cachedPosition = getCache(cacheKey);
-    if (cachedPosition != null) {
-      return cachedPosition;
-    }
     const pIndex = this.participantModels.findIndex(
       (p) => p.name === participantName,
     );
     if (pIndex === -1) {
       throw Error(`Participant ${participantName} not found`);
+    }
+    const cacheKey = `getPosition_${participantName}`;
+    const cachedPosition = getCache(cacheKey);
+    if (cachedPosition != null) {
+      return cachedPosition;
     }
     const leftGap = this.getParticipantGap(this.participantModels[0]);
     const position = leftGap + find_optimal(this.m)[pIndex];
