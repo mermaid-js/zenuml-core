@@ -22,7 +22,8 @@ import lambda from '../../../assets/Architecture-Service-Icons_09172021/Arch_Com
 import lightsail from '../../../assets/Architecture-Service-Icons_09172021/Arch_Compute/16/Arch_Amazon-Lightsail_16.svg?raw';
 import rds from '../../../assets/Architecture-Service-Icons_09172021/Arch_Database/16/Arch_Amazon-RDS_16.svg?raw';
 import redshift from '../../../assets/Architecture-Service-Icons_09172021/Arch_Analytics/Arch_16/Arch_Amazon-Redshift_16.svg?raw';
-import s3 from '../../../assets/Architecture-Service-Icons_09172021/Arch_Storage/16/Arch_Amazon-Simple-Storage-Service_16.svg?raw';
+import s3 from '../../../assets/Architecture-Service-Icons_09172021/Arch_Analytics/Arch_16/Arch_Amazon-Redshift_16.svg?raw';
+//import s3 from '../../../assets/Architecture-Service-Icons_09172021/Arch_Storage/16/Arch_Amazon-Simple-Storage-Service_16.svg?raw';
 import Nagababu from '../../../assets/Architecture-Service-Icons_09172021/Arch_Storage/16/Arch_Amazon-Nagababu_16.svg?raw';
 import sns from '../../../assets/Architecture-Service-Icons_09172021/Arch_App-Integration/Arch_16/Arch_Amazon-Simple-Notification-Service_16.svg?raw';
 import sqs from '../../../assets/Architecture-Service-Icons_09172021/Arch_App-Integration/Arch_16/Arch_Amazon-Simple-Queue-Service_16.svg?raw';
