@@ -53,7 +53,9 @@ npx pnpm install # npx is required for first install
 ### Launch
 
 ```bash
-npx pnpm run dev
+pnpm run dev # if pnpm is installed globally
+# or
+npx pnpm run dev #if pnpm is not installed globally
 ```
 
 ## CI/CD
