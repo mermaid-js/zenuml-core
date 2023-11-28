@@ -7,24 +7,29 @@
     :data-x-offset="center"
     :data-debug-center-of="computedCenter"
   >
-    <collapse-button v-if="hasAnyStatementsExceptReturn"  :collapsed="collapsed" @click="this.toggle"/>
+    <collapse-button
+      v-if="hasAnyStatementsExceptReturn"
+      :collapsed="collapsed"
+      @click="this.toggle"
+    />
     <block
       v-if="this.context.braceBlock()"
       :context="context.braceBlock().block()"
       :selfCallIndent="selfCallIndent"
       :number="number"
       :collapsed="collapsed"
+      :inheritFromOccurrence="true"
     ></block>
   </div>
 </template>
 
 <script type="text/babel">
-import { mapState, mapGetters } from 'vuex';
-import CollapseButton from './CollapseButton.vue';
-import EventBus from '../../../../../../../../EventBus';
+import { mapState, mapGetters } from "vuex";
+import CollapseButton from "./CollapseButton.vue";
+import EventBus from "../../../../../../../../EventBus";
 export default {
-  name: 'occurrence',
-  props: ['context', 'selfCallIndent', 'participant', 'rtl', 'number'],
+  name: "occurrence",
+  props: ["context", "selfCallIndent", "participant", "rtl", "number"],
   data: function () {
     return {
       center: 0,
@@ -32,8 +37,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['centerOf', 'messageLayerLeft']),
-    ...mapState(['code']),
+    ...mapGetters(["centerOf", "messageLayerLeft"]),
+    ...mapState(["code"]),
     computedCenter: function () {
       try {
         return this.centerOf(this.participant);
@@ -43,15 +48,15 @@ export default {
       }
     },
     hasAnyStatementsExceptReturn: function () {
-      let braceBlock=this.context.braceBlock();
-      if(!braceBlock)return false;
-      let stats=(braceBlock.block()?.stat() || []);
-      let len=stats.length;
-      if(len>1)return true;
+      let braceBlock = this.context.braceBlock();
+      if (!braceBlock) return false;
+      let stats = braceBlock.block()?.stat() || [];
+      let len = stats.length;
+      if (len > 1) return true;
       //when the only one statement is not the RetContext
-      if(len==1 && stats[0]['ret']()==null)return true;
+      if (len == 1 && stats[0]["ret"]() == null) return true;
       return false;
-    }
+    },
   },
   // The following code will cause the Block to be created and mounted AFTER the occurrence (and upto DiagramFrame) is updated.
   // Block must be defined globally to ensure that it is rendered in the same time cycle as the whole diagram.
@@ -59,21 +64,21 @@ export default {
   //   Block: () => import('../../../Block.vue')
   // },
   methods: {
-    toggle($event) {
+    toggle() {
       this.collapsed = !this.collapsed;
 
       //update participant top in this cases: has child and sibling creation statement
       //e.g. : a.call() { b = new B(); b.call() { c = new C() c.call(){return}}}
-      EventBus.$emit('participant_set_top');
-    }
+      EventBus.$emit("participant_set_top");
+    },
   },
   components: { CollapseButton },
   watch: {
-    context(v) {
-      if(this.collapsed) {
+    context() {
+      if (this.collapsed) {
         this.collapsed = false;
       }
-    }
+    },
   },
 };
 </script>
@@ -91,7 +96,11 @@ export default {
   transform: translateY(1px);
 }
 
-:deep(> .statement-container:last-child > .interaction.return:last-of-type > .message) {
+:deep(
+    > .statement-container:last-child
+      > .interaction.return:last-of-type
+      > .message
+  ) {
   bottom: -17px; /* Move the absolutely positioned return message to the bottom. -17 to offset the padding of Occurrence. */
   height: 0;
 }

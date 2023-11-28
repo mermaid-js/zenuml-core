@@ -56,6 +56,37 @@ onUpdated(() => {
     border-right-width: 7px;
   }
 
+  .alt,
+  .fragment {
+    .interaction.sync {
+      border-left-width: 7px;
+      //border-right-width: 0;
+    }
+  }
+
+  .occurrence {
+    .occurrence {
+      .interaction.sync,
+      .interaction.async {
+        border-right-width: 7px;
+      }
+    }
+  }
+
+  .occurrence {
+    .interaction.sync,
+    .interaction.async {
+      border-left-width: 7px;
+    }
+    .interaction.sync.right-to-left {
+      border-right-width: 7px;
+    }
+    .interaction.async.right-to-left {
+      border-right-width: 7px;
+      border-left-width: 0;
+    }
+  }
+
   .interaction.sync.right-to-left {
     /* This border width configuration make sure the content width is
        the same as from the source occurrence's right border to target

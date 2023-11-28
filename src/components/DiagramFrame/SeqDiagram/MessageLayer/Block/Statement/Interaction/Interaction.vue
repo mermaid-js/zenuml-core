@@ -8,7 +8,7 @@
     :class="{
       highlight: isCurrent,
       self: isSelf,
-      'inited-from-occurrence': isInitedFromOccurrence,
+      'inited-from-occurrence': inheritFromOccurrence,
       'right-to-left': rightToLeft,
     }"
     :style="{
@@ -64,12 +64,18 @@ import Occurrence from "./Occurrence/Occurrence.vue";
 import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import SelfInvocation from "./SelfInvocation/SelfInvocation.vue";
-import { CodeRange } from "../../../../../../../parser/CodeRange";
-import { ProgContext } from "../../../../../../../parser";
+import { CodeRange } from "@/parser/CodeRange";
+import { ProgContext } from "@/parser";
 
 export default {
   name: "interaction",
-  props: ["context", "selfCallIndent", "commentObj", "number"],
+  props: [
+    "context",
+    "selfCallIndent",
+    "commentObj",
+    "number",
+    "inheritFromOccurrence",
+  ],
   computed: {
     // add tracker to the mapGetters
     ...mapGetters(["participants", "distance2", "cursor", "onElementClick"]),
