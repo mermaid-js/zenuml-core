@@ -16,7 +16,6 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
       .slice()
       .reverse()
       .find((p) => localParticipants.includes(p)) || "";
-  // console.debug(`allParticipants: ${JSON.stringify(allParticipants)}, localParticipants: ${JSON.stringify(localParticipants)}, leftParticipant: ${leftParticipant}, rightParticipant: ${rightParticipant}`);
   const frameBuilder = new FrameBuilder(allParticipants as string[]);
   const frame = frameBuilder.getFrame(ctx);
   const border = FrameBorder(frame as Frame);
@@ -25,13 +24,7 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
     rightParticipant,
     coordinates,
   );
-  console.debug(
-    `frame: ${JSON.stringify(
-      frame,
-    )} extraWidth: ${extraWidth}, leftParticipant: ${leftParticipant}, rightParticipant: ${rightParticipant}, border: ${JSON.stringify(
-      border,
-    )}`,
-  );
+
   return (
     coordinates.distance(leftParticipant, rightParticipant) +
     border.left +
