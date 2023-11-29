@@ -15,17 +15,26 @@ const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
 
 const logger = parentLogger.child({ name: "MessageLayer" });
 
-defineProps<{
+const props = defineProps<{
   context: any;
 }>();
 const store = useStore();
+
 const participants = computed(() => store.getters.participants);
 const centerOf = computed(() => store.getters.centerOf);
+const isSelf = computed(() => {
+  const to = props.context?.stat()[0].message()?.Owner();
+  const providedFrom = props.context?.stat()[0].message()?.ProvidedFrom();
+  const origin = props.context?.Origin();
+  const from = providedFrom || origin;
+  return !to || to === from;
+});
+
 const paddingLeft = computed(() => {
   if (participants.value.Array().length >= 1) {
     const first = participants.value.Array().slice(0)[0].name;
-    // push the message layer to the right by 1px for the dashed line
-    return centerOf.value(first) + 1;
+    // push the message layer to the right by 1px only for self message at root level.
+    return centerOf.value(first) + (isSelf.value ? 1 : 0);
   }
   return 0;
 });
