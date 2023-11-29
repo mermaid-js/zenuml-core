@@ -140,7 +140,9 @@ export default {
       // selfCallIndent is introduced for sync self interaction. Each time we enter a self sync interaction the selfCallIndent
       // increases by 6px (half of the width of an execution bar). However, we set the selfCallIndent back to 0 when
       // it enters a non-self sync interaction.
-      return this.isSelf ? (this.selfCallIndent || 0) + 6 : 0;
+      return this.isSelf && !this.isRootBlock
+        ? (this.selfCallIndent || 0) + 6
+        : 0;
     },
     interactionWidth: function () {
       if (this.context && this.isSelf) {
