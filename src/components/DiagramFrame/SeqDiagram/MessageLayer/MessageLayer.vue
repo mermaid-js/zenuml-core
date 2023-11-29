@@ -24,7 +24,8 @@ const centerOf = computed(() => store.getters.centerOf);
 const paddingLeft = computed(() => {
   if (participants.value.Array().length >= 1) {
     const first = participants.value.Array().slice(0)[0].name;
-    return centerOf.value(first);
+    // push the message layer to the right by 1px for the dashed line
+    return centerOf.value(first) + 1;
   }
   return 0;
 });
