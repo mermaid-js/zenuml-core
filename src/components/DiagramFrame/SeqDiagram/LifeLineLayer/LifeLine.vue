@@ -4,22 +4,22 @@
     class="lifeline absolute flex flex-col mx-2 transform -translate-x-1/2 h-full"
     :style="{ paddingTop: top + 'px', left: left + 'px' }"
   >
-    <div v-show="debug">{{centerOf(entity.name)}}</div>
+    <div v-show="debug">{{ centerOf(entity.name) }}</div>
     <participant v-if="renderParticipants" :entity="entity" :offsetTop="top" />
-    <div v-else class="line w0 mx-auto flex-grow w-px"></div>
+    <div v-else class="line absolute inset-0 w0 mx-auto flex-grow w-px"></div>
   </div>
 </template>
 
 <script>
-import parentLogger from '../../../../logger/logger';
-import EventBus from '../../../../EventBus';
-import { mapGetters, mapState } from 'vuex';
-import Participant from './Participant.vue';
-const logger = parentLogger.child({ name: 'LifeLine' });
+import parentLogger from "../../../../logger/logger";
+import EventBus from "../../../../EventBus";
+import { mapGetters, mapState } from "vuex";
+import Participant from "./Participant.vue";
+const logger = parentLogger.child({ name: "LifeLine" });
 export default {
-  name: 'life-line',
+  name: "life-line",
   components: { Participant },
-  props: ['entity', 'context', 'groupLeft', 'inGroup', 'renderParticipants'],
+  props: ["entity", "context", "groupLeft", "inGroup", "renderParticipants"],
   data: () => {
     return {
       translateX: 0,
@@ -27,8 +27,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['centerOf']),
-    ...mapState(['scale']),
+    ...mapGetters(["centerOf"]),
+    ...mapState(["scale"]),
     debug() {
       return !!localStorage.zenumlDebug;
     },
@@ -43,7 +43,10 @@ export default {
       logger.debug(`nextTick after updated for ${this.entity.name}`);
     });
 
-    EventBus.$on('participant_set_top', () => this.$nextTick(() => this.setTop()));
+    EventBus.$on("participant_set_top", () =>
+      // eslint-disable-next-line vue/valid-next-tick
+      this.$nextTick(() => this.setTop()),
+    );
 
     // setTimeout( () => {
     //   this.setTop()
@@ -65,15 +68,23 @@ export default {
   },
   methods: {
     onSelect() {
-      this.$store.commit('onSelect', this.entity.name);
+      this.$store.commit("onSelect", this.entity.name);
     },
     setTop() {
       // escape entity name to avoid 'not a valid selector' error.
-      const escapedName = this.entity.name.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1');
+      const escapedName = this.entity.name.replace(
+        // eslint-disable-next-line no-useless-escape
+        /([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,
+        "\\$1",
+      );
       const $el = this.$store.getters.diagramElement;
       const firstMessage = $el?.querySelector(`[data-to="${escapedName}"]`);
       const isVisible = firstMessage?.offsetParent != null;
-      if (firstMessage && firstMessage.attributes['data-type'].value === 'creation' && isVisible) {
+      if (
+        firstMessage &&
+        firstMessage.attributes["data-type"].value === "creation" &&
+        isVisible
+      ) {
         logger.debug(`First message to ${this.entity.name} is creation`);
         const rootY = this.$el.getBoundingClientRect().y;
         const messageY = firstMessage.getBoundingClientRect().y;
@@ -89,7 +100,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .lifeline .line {
-  background: linear-gradient(to bottom, transparent 50%, var(--color-border-base) 50%);
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    var(--color-border-base) 50%
+  );
   background-size: 1px 10px;
 }
 </style>

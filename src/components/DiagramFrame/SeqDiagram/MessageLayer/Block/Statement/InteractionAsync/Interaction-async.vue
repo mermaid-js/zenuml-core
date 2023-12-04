@@ -4,6 +4,7 @@
     v-on:click.stop="onClick"
     :data-signature="signature"
     :class="{
+      'to-occurrence': isToOccurrence,
       'right-to-left': rightToLeft,
       highlight: isCurrent,
       'self-invocation': isSelf,
@@ -101,10 +102,33 @@ export default {
     messageClassNames() {
       return this.commentObj?.classNames;
     },
+    isToOccurrence() {
+      return this.parentCtxIncludeMessage(this.asyncMessage);
+    },
   },
   methods: {
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
+    },
+    parentCtxIncludeMessage(current) {
+      const target = current.Owner();
+
+      if (!target) {
+        return false;
+      }
+
+      current = current?.parentCtx;
+
+      while (current) {
+        if (current.To) {
+          if (current.To() === target) {
+            return true;
+          }
+        }
+        current = current.parentCtx;
+      }
+
+      return false;
     },
   },
   components: {

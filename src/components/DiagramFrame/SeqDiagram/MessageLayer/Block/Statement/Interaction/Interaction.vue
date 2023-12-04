@@ -8,6 +8,7 @@
     :class="{
       highlight: isCurrent,
       self: isSelf,
+      'from-no-occurrence': providedFrom && providedFrom !== origin,
       'inited-from-occurrence': inheritFromOccurrence,
       'right-to-left': rightToLeft,
     }"
@@ -164,7 +165,7 @@ export default {
       return this.isSelf ? "SelfInvocation" : "Message";
     },
     isInitedFromOccurrence: function () {
-      return this.message?.isInitedFromOccurrence(this.from);
+      return this.message?.isInitedFromOccurrence(this.context);
     },
   },
   methods: {
