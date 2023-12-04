@@ -6,7 +6,7 @@
   >
     <div v-show="debug">{{ centerOf(entity.name) }}</div>
     <participant v-if="renderParticipants" :entity="entity" :offsetTop="top" />
-    <div v-else class="line absolute inset-0 w0 mx-auto flex-grow w-px"></div>
+    <div v-else class="line w0 mx-auto flex-grow w-px"></div>
   </div>
 </template>
 
