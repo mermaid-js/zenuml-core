@@ -104,25 +104,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
-
-  push-to-zenuml-embed:
-    environment:
-      name: github-pages # use the same environment as publish-to-gh-pages on purpose
-      url: https://github.com/ZenUml/zenuml-embed
-    runs-on: ubuntu-latest
-    needs: build-site
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: zenuml-embed
-          path: ./dist
-      - name: Pushes to another repository
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
-          source-directory: "./dist"
-          destination-github-username: "zenuml"
-          destination-repository-name: "zenuml-embed"
-          user-email: github.bot@zenuml.com
-          target-branch: main
