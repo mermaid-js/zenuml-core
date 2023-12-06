@@ -9,7 +9,7 @@
       highlight: isCurrent,
       self: isSelf,
       'from-no-occurrence': providedFrom && providedFrom !== origin,
-      'inited-from-occurrence': inheritFromOccurrence,
+      'inited-from-occurrence': isInitedFromOccurrence,
       'right-to-left': rightToLeft,
     }"
     :style="{
@@ -75,7 +75,7 @@ export default {
     "selfCallIndent",
     "commentObj",
     "number",
-    "inheritFromOccurrence",
+    // "inheritFromOccurrence",
   ],
   computed: {
     // add tracker to the mapGetters

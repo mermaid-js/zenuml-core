@@ -6,7 +6,9 @@
     :class="{
       'to-occurrence': isToOccurrence,
       'right-to-left': rightToLeft,
+      'from-no-occurrence': providedFrom && providedFrom !== origin,
       highlight: isCurrent,
+      'inited-from-occurrence': isInitedFromOccurrence,
       'self-invocation': isSelf,
     }"
     :style="{
@@ -96,6 +98,12 @@ export default {
     invocation: function () {
       return this.isSelf ? "SelfInvocationAsync" : "Message";
     },
+    providedFrom: function () {
+      return this.context?.asyncMessage()?.From();
+    },
+    origin: function () {
+      return this.context?.Origin();
+    },
     messageTextStyle() {
       return this.commentObj?.textStyle;
     },
@@ -104,6 +112,9 @@ export default {
     },
     isToOccurrence() {
       return this.parentCtxIncludeMessage(this.asyncMessage);
+    },
+    isInitedFromOccurrence: function () {
+      return this.message?.isInitedFromOccurrence(this.context);
     },
   },
   methods: {

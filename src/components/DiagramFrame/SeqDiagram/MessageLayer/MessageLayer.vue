@@ -93,8 +93,21 @@ onUpdated(() => {
     .interaction.sync.from-no-occurrence {
       border-left-width: 0;
     }
+    .interaction.async.from-no-occurrence {
+      border-left-width: 0;
+    }
+    .interaction.async.from-no-occurrence.right-to-left {
+      border-right-width: 0;
+    }
+    .interaction.sync.right-to-left.from-no-occurrence {
+      border-left-width: 7px;
+      border-right-width: 0;
+    }
     .interaction.async.right-to-left.to-occurrence {
       border-left-width: 7px;
+    }
+    .interaction.sync.from-no-occurrence.right-to-left {
+      border-right-width: 0;
     }
   }
   .interaction.sync.right-to-left {
