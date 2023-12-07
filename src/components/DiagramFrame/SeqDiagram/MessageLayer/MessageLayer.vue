@@ -8,7 +8,7 @@ TODO: we may need to consider the width of self message on right most participan
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUpdated, defineAsyncComponent } from "vue";
+import { computed, defineAsyncComponent, onMounted, onUpdated } from "vue";
 import { useStore } from "vuex";
 import parentLogger from "../../../../logger/logger";
 const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
@@ -22,9 +22,13 @@ const store = useStore();
 
 const participants = computed(() => store.getters.participants);
 const centerOf = computed(() => store.getters.centerOf);
-const isSelf = computed(() => {
-  const to = props.context?.stat()[0].message()?.Owner();
-  const providedFrom = props.context?.stat()[0].message()?.ProvidedFrom();
+const isSelfSyncMessage = computed(() => {
+  const syncMessage = props.context?.stat()[0].message();
+  if (!syncMessage) {
+    return false;
+  }
+  const to = syncMessage?.Owner();
+  const providedFrom = syncMessage?.ProvidedFrom();
   const origin = props.context?.Origin();
   const from = providedFrom || origin;
   return !to || to === from;
@@ -34,7 +38,7 @@ const paddingLeft = computed(() => {
   if (participants.value.Array().length >= 1) {
     const first = participants.value.Array().slice(0)[0].name;
     // push the message layer to the right by 1px only for self message at root level.
-    return centerOf.value(first) + (isSelf.value ? 1 : 0);
+    return centerOf.value(first) + (isSelfSyncMessage.value ? 1 : 0);
   }
   return 0;
 });
