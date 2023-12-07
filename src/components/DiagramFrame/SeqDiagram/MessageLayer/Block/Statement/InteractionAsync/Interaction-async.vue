@@ -4,8 +4,11 @@
     v-on:click.stop="onClick"
     :data-signature="signature"
     :class="{
+      'to-occurrence': isToOccurrence,
       'right-to-left': rightToLeft,
+      'from-no-occurrence': providedFrom && providedFrom !== origin,
       highlight: isCurrent,
+      'inited-from-occurrence': isInitedFromOccurrence,
       'self-invocation': isSelf,
     }"
     :style="{
@@ -95,16 +98,48 @@ export default {
     invocation: function () {
       return this.isSelf ? "SelfInvocationAsync" : "Message";
     },
+    providedFrom: function () {
+      return this.context?.asyncMessage()?.From();
+    },
+    origin: function () {
+      return this.context?.Origin();
+    },
     messageTextStyle() {
       return this.commentObj?.textStyle;
     },
     messageClassNames() {
       return this.commentObj?.classNames;
     },
+    isToOccurrence() {
+      return this.parentCtxIncludeMessage(this.asyncMessage);
+    },
+    isInitedFromOccurrence: function () {
+      return this.message?.isInitedFromOccurrence(this.context);
+    },
   },
   methods: {
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
+    },
+    parentCtxIncludeMessage(current) {
+      const target = current.Owner();
+
+      if (!target) {
+        return false;
+      }
+
+      current = current?.parentCtx;
+
+      while (current) {
+        if (current.To) {
+          if (current.To() === target) {
+            return true;
+          }
+        }
+        current = current.parentCtx;
+      }
+
+      return false;
     },
   },
   components: {

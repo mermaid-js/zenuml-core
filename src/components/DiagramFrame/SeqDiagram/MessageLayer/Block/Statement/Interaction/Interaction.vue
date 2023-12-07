@@ -8,6 +8,7 @@
     :class="{
       highlight: isCurrent,
       self: isSelf,
+      'from-no-occurrence': providedFrom && providedFrom !== origin,
       'inited-from-occurrence': isInitedFromOccurrence,
       'right-to-left': rightToLeft,
     }"
@@ -64,12 +65,18 @@ import Occurrence from "./Occurrence/Occurrence.vue";
 import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import SelfInvocation from "./SelfInvocation/SelfInvocation.vue";
-import { CodeRange } from "../../../../../../../parser/CodeRange";
-import { ProgContext } from "../../../../../../../parser";
+import { CodeRange } from "@/parser/CodeRange";
+import { ProgContext } from "@/parser";
 
 export default {
   name: "interaction",
-  props: ["context", "selfCallIndent", "commentObj", "number"],
+  props: [
+    "context",
+    "selfCallIndent",
+    "commentObj",
+    "number",
+    // "inheritFromOccurrence",
+  ],
   computed: {
     // add tracker to the mapGetters
     ...mapGetters(["participants", "distance2", "cursor", "onElementClick"]),
@@ -134,7 +141,9 @@ export default {
       // selfCallIndent is introduced for sync self interaction. Each time we enter a self sync interaction the selfCallIndent
       // increases by 6px (half of the width of an execution bar). However, we set the selfCallIndent back to 0 when
       // it enters a non-self sync interaction.
-      return this.isSelf ? (this.selfCallIndent || 0) + 6 : 0;
+      return this.isSelf && !this.isRootBlock
+        ? (this.selfCallIndent || 0) + 6
+        : 0;
     },
     interactionWidth: function () {
       if (this.context && this.isSelf) {
@@ -156,7 +165,7 @@ export default {
       return this.isSelf ? "SelfInvocation" : "Message";
     },
     isInitedFromOccurrence: function () {
-      return this.message?.isInitedFromOccurrence(this.from);
+      return this.message?.isInitedFromOccurrence(this.context);
     },
   },
   methods: {

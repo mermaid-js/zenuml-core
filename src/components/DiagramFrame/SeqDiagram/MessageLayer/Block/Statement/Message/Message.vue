@@ -19,17 +19,26 @@
         <div :style="textStyle" :class="classNames">
           {{ content }}
         </div>
-        <div class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500" v-if="numbering">{{ number }}</div>
+        <div
+          class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500"
+          v-if="numbering"
+        >
+          {{ number }}
+        </div>
       </div>
     </div>
-    <point class="flex-shrink-0 transform translate-y-1/2 -my-px" :fill="fill" :rtl="rtl" />
+    <point
+      class="flex-shrink-0 transform translate-y-1/2 -my-px"
+      :fill="fill"
+      :rtl="rtl"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useStore } from 'vuex';
-import Point from './Point/Point.vue';
-import { computed, toRefs, ref } from 'vue';
+import { useStore } from "vuex";
+import Point from "./Point/Point.vue";
+import { computed, toRefs, ref } from "vue";
 const props = defineProps<{
   context?: any;
   content: string;
@@ -38,35 +47,36 @@ const props = defineProps<{
   textStyle?: Record<string, string | number>;
   classNames?: any;
   number?: string;
-}>()
-const { context, content, rtl, type, textStyle, classNames, number } = toRefs(props)
-const store = useStore()
-const messageRef = ref()
-const numbering = computed(() => store.state.numbering)
-const isAsync = computed(() => type?.value === 'async')
+}>();
+const { context, content, rtl, type, textStyle, classNames, number } =
+  toRefs(props);
+const store = useStore();
+const messageRef = ref();
+const numbering = computed(() => store.state.numbering);
+const isAsync = computed(() => type?.value === "async");
 const borderStyle = computed(() => {
   switch (type?.value) {
-    case 'sync':
-    case 'async':
-      return 'solid'
-    case 'creation':
-    case 'return':
-      return 'dashed'
+    case "sync":
+    case "async":
+      return "solid";
+    case "creation":
+    case "return":
+      return "dashed";
   }
-  return ''
-})
+  return "";
+});
 const fill = computed(() => {
   switch (type?.value) {
-    case 'sync':
-    case 'async':
-      return true
-    case 'creation':
-    case 'return':
-      return false
+    case "sync":
+    case "async":
+      return true;
+    case "creation":
+    case "return":
+      return false;
   }
-  return false
-})
+  return false;
+});
 const onClick = () => {
-  store.getters.onMessageClick(context, messageRef.value)
-}
+  store.getters.onMessageClick(context, messageRef.value);
+};
 </script>

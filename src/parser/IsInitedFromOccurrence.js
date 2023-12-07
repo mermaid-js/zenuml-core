@@ -1,4 +1,4 @@
-import { default as sequenceParser } from '../generated-parser/sequenceParser';
+import { default as sequenceParser } from "../generated-parser/sequenceParser";
 const seqParser = sequenceParser;
 
 const CreationContext = seqParser.CreationContext;
@@ -18,6 +18,7 @@ MessageContext.prototype.isInitedFromOccurrence = function (from) {
  * say that the message is inited from an occurrence
  **/
 function isInitedFromOccurrence(from) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   let current = this;
   while (current != null) {
     if (current instanceof seqParser.StatContext) {
@@ -37,4 +38,3 @@ function isInitedFromOccurrence(from) {
   }
   return false;
 }
-

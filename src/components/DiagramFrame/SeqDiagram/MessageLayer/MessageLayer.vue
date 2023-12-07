@@ -8,23 +8,37 @@ TODO: we may need to consider the width of self message on right most participan
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUpdated, defineAsyncComponent } from "vue";
+import { computed, defineAsyncComponent, onMounted, onUpdated } from "vue";
 import { useStore } from "vuex";
 import parentLogger from "../../../../logger/logger";
 const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
 
 const logger = parentLogger.child({ name: "MessageLayer" });
 
-defineProps<{
+const props = defineProps<{
   context: any;
 }>();
 const store = useStore();
+
 const participants = computed(() => store.getters.participants);
 const centerOf = computed(() => store.getters.centerOf);
+const isSelfSyncMessage = computed(() => {
+  const syncMessage = props.context?.stat()[0].message();
+  if (!syncMessage) {
+    return false;
+  }
+  const to = syncMessage?.Owner();
+  const providedFrom = syncMessage?.ProvidedFrom();
+  const origin = props.context?.Origin();
+  const from = providedFrom || origin;
+  return !to || to === from;
+});
+
 const paddingLeft = computed(() => {
   if (participants.value.Array().length >= 1) {
     const first = participants.value.Array().slice(0)[0].name;
-    return centerOf.value(first);
+    // push the message layer to the right by 1px only for self message at root level.
+    return centerOf.value(first) + (isSelfSyncMessage.value ? 1 : 0);
   }
   return 0;
 });
@@ -56,6 +70,50 @@ onUpdated(() => {
     border-right-width: 7px;
   }
 
+  .occurrence {
+    .occurrence {
+      .interaction.sync,
+      .interaction.async {
+        border-right-width: 7px;
+      }
+    }
+  }
+
+  .occurrence {
+    .interaction.sync,
+    .interaction.async {
+      border-left-width: 8px;
+    }
+    .interaction.sync.right-to-left {
+      border-right-width: 7px;
+    }
+    .interaction.async.right-to-left {
+      border-right-width: 7px;
+      border-left-width: 7px;
+    }
+    .interaction.async.right-to-left {
+      border-left-width: 0;
+    }
+    .interaction.sync.from-no-occurrence {
+      border-left-width: 0;
+    }
+    .interaction.async.from-no-occurrence {
+      border-left-width: 0;
+    }
+    .interaction.async.from-no-occurrence.right-to-left {
+      border-right-width: 0;
+    }
+    .interaction.sync.right-to-left.from-no-occurrence {
+      border-left-width: 7px;
+      border-right-width: 0;
+    }
+    .interaction.async.right-to-left.to-occurrence {
+      border-left-width: 7px;
+    }
+    .interaction.sync.from-no-occurrence.right-to-left {
+      border-right-width: 0;
+    }
+  }
   .interaction.sync.right-to-left {
     /* This border width configuration make sure the content width is
        the same as from the source occurrence's right border to target
