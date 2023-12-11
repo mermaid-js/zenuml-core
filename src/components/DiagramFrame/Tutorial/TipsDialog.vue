@@ -180,7 +180,6 @@ export default {
         'RDS',
         'Redshift',
         'S3',
-        'Nagababu',
         'SNS',
         'SQS',
         'Sagemaker',

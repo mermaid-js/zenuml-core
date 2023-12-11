@@ -13,7 +13,6 @@ export enum ParticipantType {
   Lambda,
   RDS,
   S3,
-  Nagababu,
   Undefined,
 }
 export class Participant {
@@ -80,8 +79,6 @@ export class Participant {
       case '@rds':
         return ParticipantType.RDS;
       case '@s3':
-        return ParticipantType.S3;
-      case '@Nagababu':
         return ParticipantType.S3;
     }
     return ParticipantType.Undefined;
