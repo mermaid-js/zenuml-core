@@ -11,7 +11,7 @@
     }"
     :style="{ width: width + 'px', left: left + 'px' }"
   >
-    <comment v-if="comment" :commenObj="commenObj" />
+    <comment v-if="comment" :commentObj="commentObj" />
     <div v-if="isSelf" class="flex items-center">
       <svg class="w-3 h-3 flex-shrink-0 fill-current m-1" viewBox="0 0 512 512">
         <path
