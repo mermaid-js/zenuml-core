@@ -46,7 +46,9 @@
           class="origin-top-left"
         />
       </div>
-      <div class="footer text-skin-control px-4 py-1 flex justify-between">
+      <div
+        class="footer text-skin-control px-4 py-1 flex justify-between items-center"
+      >
         <div class="flex items-center gap-3 color-base">
           <button
             class="bottom-1 flex items-center left-1 hide-export"
@@ -68,7 +70,7 @@
               title="Numbering the diagram"
               class="select-none"
             >
-              <Icon name="numbering" icon-class="w-6 h-4" />
+              <Icon name="numbering" icon-class="w-6 h-6" />
             </label>
           </div>
         </div>
