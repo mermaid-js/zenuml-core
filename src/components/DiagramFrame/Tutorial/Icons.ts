@@ -57,6 +57,43 @@ import securityscanner from '../../../assets/google-cloud-icons/cloud_security_s
 import stackdriver from '../../../assets/google-cloud-icons/stackdriver/stackdriver.svg?raw';
 import visionapi from '../../../assets/google-cloud-icons/cloud_vision_api/cloud_vision_api.svg?raw';
 
+// HLD - Generic Architecture
+import client from '../../../assets/HLD-Architecture/client.svg?raw';
+import server from '../../../assets/HLD-Architecture/server.svg?raw';
+import browser from '../../../assets/HLD-Architecture/browser.svg?raw';
+import service from '../../../assets/HLD-Architecture/service.svg?raw';
+import controller from '../../../assets/HLD-Architecture/controller.svg?raw';
+import api from '../../../assets/HLD-Architecture/api.svg?raw';
+import ui from '../../../assets/HLD-Architecture/ui.svg?raw';
+import mobile from '../../../assets/HLD-Architecture/mobile.svg?raw';
+import externalsystem from '../../../assets/HLD-Architecture/external_system.svg?raw';
+
+// secondary participants 
+import application from '../../../assets/HLD-Architecture/application.svg?raw';
+import loadbalancer from '../../../assets/HLD-Architecture/load_balancer.svg?raw';
+import network from '../../../assets/HLD-Architecture/network.svg?raw';
+import cache from '../../../assets/HLD-Architecture/cache.svg?raw';
+import webserver from '../../../assets/HLD-Architecture/web_server.svg?raw';
+import messagequeue from '../../../assets/HLD-Architecture/message_queue.svg?raw';
+import scheduler from '../../../assets/HLD-Architecture/scheduler.svg?raw';
+import gateway from '../../../assets/HLD-Architecture/gateway.svg?raw';
+import authenticationservice from '../../../assets/HLD-Architecture/authentication_service.svg?raw';
+import mailserver from '../../../assets/HLD-Architecture/mail_server.svg?raw';
+
+//common application and services
+import github from '../../../assets/HLD-Architecture/github.svg?raw';
+import docker from '../../../assets/HLD-Architecture/docker.svg?raw';
+import gitlab from '../../../assets/HLD-Architecture/gitlab.svg?raw';
+import jenkins from '../../../assets/HLD-Architecture/jenkins.svg?raw';
+import postgresql from '../../../assets/HLD-Architecture/postgresql.svg?raw';
+import mongodb from '../../../assets/HLD-Architecture/mongodb.svg?raw'
+import kubernetes from '../../../assets/HLD-Architecture/kubernetes.svg?raw';
+import apachekafka from '../../../assets/HLD-Architecture/apachekafka.svg?raw';
+import elasticsearch from '../../../assets/HLD-Architecture/elastic_search.svg?raw';
+import auth0 from '../../../assets/HLD-Architecture/auth0.svg?raw';
+import redis from '../../../assets/HLD-Architecture/redis.svg?raw';
+
+
 export default {
   actor,
   boundary,
@@ -113,4 +150,35 @@ export default {
   securityscanner,
   stackdriver,
   visionapi,
+  client,
+  server,
+  browser,
+  service,
+  controller,
+  api,
+  ui,
+  mobile,
+  externalsystem,
+  application,
+  loadbalancer,
+  network,
+  cache,
+  webserver,
+  messagequeue,
+  scheduler,
+  gateway,
+  authenticationservice,
+  mailserver,
+  github,
+  docker,
+  gitlab,
+  jenkins,
+  postgresql,
+  mongodb,
+  kubernetes,
+  apachekafka,
+  elasticsearch,
+  auth0,
+  redis,
+
 };
