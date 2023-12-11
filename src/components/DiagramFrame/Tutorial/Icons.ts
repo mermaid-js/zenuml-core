@@ -70,14 +70,14 @@ import externalsystem from '../../../assets/HLD-Architecture/external_system.svg
 
 // secondary participants 
 import application from '../../../assets/HLD-Architecture/application.svg?raw';
-import loadbalncer from '../../../assets/HLD-Architecture/load_balancer.svg?raw';
+import loadbalancer from '../../../assets/HLD-Architecture/load_balancer.svg?raw';
 import network from '../../../assets/HLD-Architecture/network.svg?raw';
 import cache from '../../../assets/HLD-Architecture/cache.svg?raw';
 import webserver from '../../../assets/HLD-Architecture/web_server.svg?raw';
 import messagequeue from '../../../assets/HLD-Architecture/message_queue.svg?raw';
 import scheduler from '../../../assets/HLD-Architecture/scheduler.svg?raw';
 import gateway from '../../../assets/HLD-Architecture/gateway.svg?raw';
-import authentictionservice from '../../../assets/HLD-Architecture/authentiction_service.svg?raw';
+import authenticationservice from '../../../assets/HLD-Architecture/authentication_service.svg?raw';
 import mailserver from '../../../assets/HLD-Architecture/mail_server.svg?raw';
 
 //common application and services
@@ -150,35 +150,35 @@ export default {
   securityscanner,
   stackdriver,
   visionapi,
-   client,
- server,
-    browser,
-    service,
-    controller,
-    api,
-    ui,
-    mobile,
-    externalsystem,
-    application,
-    loadbalncer,
-    network,
-    cache,
-    webserver,
-    messagequeue,
-    scheduler,
-    gateway,
-    authentictionservice,
-    mailserver,
-    github,
-    docker,
-    gitlab,
-    jenkins,
-    postgresql,
-    mongodb,
-    kubernetes,
-    apachekafka,
-    elasticsearch,
-    auth0,
-    redis,
+  client,
+  server,
+  browser,
+  service,
+  controller,
+  api,
+  ui,
+  mobile,
+  externalsystem,
+  application,
+  loadbalancer,
+  network,
+  cache,
+  webserver,
+  messagequeue,
+  scheduler,
+  gateway,
+  authenticationservice,
+  mailserver,
+  github,
+  docker,
+  gitlab,
+  jenkins,
+  postgresql,
+  mongodb,
+  kubernetes,
+  apachekafka,
+  elasticsearch,
+  auth0,
+  redis,
 
 };
