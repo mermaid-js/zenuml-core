@@ -148,14 +148,14 @@ export const cssColors = [
   "white",
   "whitesmoke",
   "yellow",
-  "yellowgreen"
+  "yellowgreen",
 ];
 export const fontStyles = ["italic", "oblique"];
 export const fontWeights = ["bold", "bolder", "lighter"];
 export const textDecorations = ["underline", "overline", "line-through"];
 
 export const getStyle = (styles: string[]) => {
-  const textStyle:CSSProperties = {};
+  const textStyle: CSSProperties = {};
   const classNames: string[] = [];
   styles.forEach((value) => {
     switch (true) {
@@ -176,4 +176,4 @@ export const getStyle = (styles: string[]) => {
     }
   });
   return { textStyle, classNames };
-}
+};

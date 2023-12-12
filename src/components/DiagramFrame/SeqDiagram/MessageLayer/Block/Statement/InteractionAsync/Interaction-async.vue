@@ -105,10 +105,10 @@ export default {
       return this.context?.Origin();
     },
     messageTextStyle() {
-      return this.commentObj?.textStyle;
+      return this.commentObj?.messageStyle;
     },
     messageClassNames() {
-      return this.commentObj?.classNames;
+      return this.commentObj?.messageClassNames;
     },
     isToOccurrence() {
       return this.parentCtxIncludeMessage(this.asyncMessage);
