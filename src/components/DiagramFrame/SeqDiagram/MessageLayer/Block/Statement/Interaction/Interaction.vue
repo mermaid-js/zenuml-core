@@ -84,10 +84,10 @@ export default {
       return this.commentObj?.text !== "";
     },
     messageTextStyle() {
-      return this.commentObj?.textStyle;
+      return this.commentObj?.messageStyle;
     },
     messageClassNames() {
-      return this.commentObj?.classNames;
+      return this.commentObj?.messageClassNames;
     },
     message: function () {
       return this.context?.message();

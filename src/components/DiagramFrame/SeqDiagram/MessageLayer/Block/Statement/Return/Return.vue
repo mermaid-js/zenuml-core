@@ -97,10 +97,10 @@ export default {
       return this.target === this.participants.Starter().name;
     },
     messageTextStyle() {
-      return this.commentObj?.textStyle;
+      return this.commentObj?.messageStyle;
     },
     messageClassNames() {
-      return this.commentObj?.classNames;
+      return this.commentObj?.messageClassNames;
     },
     messageContext() {
       return this.asyncMessage?.content() || this.context?.ret()?.expr();

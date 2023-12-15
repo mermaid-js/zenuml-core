@@ -118,10 +118,10 @@ export default {
       return this.creation.isInitedFromOccurrence(this.from);
     },
     messageTextStyle() {
-      return this.commentObj?.textStyle;
+      return this.commentObj?.messageStyle;
     },
     messageClassNames() {
-      return this.commentObj?.classNames;
+      return this.commentObj?.messageClassNames;
     },
   },
   mounted() {

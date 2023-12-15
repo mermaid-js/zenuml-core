@@ -3,7 +3,7 @@
   <div
     class="comments text-skin-comment min-w-[100px] flex text-left text-sm opacity-50 hover:opacity-100"
   >
-    <div v-html="markedComment" :class="classNames" :style="textStyle"></div>
+    <div v-html="markedComment" :class="classNames" :style="commentStyle"></div>
   </div>
 </template>
 
@@ -67,11 +67,11 @@ export default {
         (this.comment && marked.parse(this.comment))
       );
     },
-    textStyle() {
-      return this.commentObj?.textStyle;
+    commentStyle() {
+      return this.commentObj?.commentStyle;
     },
     classNames() {
-      return this.commentObj?.classNames;
+      return this.commentObj?.commentClassNames;
     },
   },
 };
