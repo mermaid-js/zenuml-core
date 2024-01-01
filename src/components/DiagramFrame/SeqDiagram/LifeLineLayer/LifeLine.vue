@@ -1,6 +1,7 @@
 <template>
   <div
     :id="entity.name"
+    :entity-type="entity.type?.toLowerCase()"
     class="lifeline absolute flex flex-col mx-2 transform -translate-x-1/2 h-full"
     :style="{ paddingTop: top + 'px', left: left + 'px' }"
   >
