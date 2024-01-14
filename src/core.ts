@@ -45,6 +45,7 @@ export default class ZenUml implements IZenUml {
   private readonly app: any;
   private _currentTimeout: any;
   private _lastRenderingCostMilliseconds = 0;
+  private initialRender = true;
   constructor(el: Element, naked: boolean = false) {
     this.el = el;
     this.store = createStore(Store());
@@ -79,29 +80,39 @@ export default class ZenUml implements IZenUml {
     this._theme = config?.theme || this._theme;
     this.store.state.stickyOffset = config?.stickyOffset || 0;
     this.store.state.theme = this._theme || "default";
-    this._currentTimeout = setTimeout(async () => {
-      console.debug("rendering start");
-      const start = getStartTime();
-      clearCache();
-      this.store.commit(
-        "onContentChange",
-        config?.onContentChange || (() => {}),
-      );
-      if (config?.enableMultiTheme !== undefined) {
-        this.store.state.enableMultiTheme = config?.enableMultiTheme;
-      }
-      // await dispatch will wait until the diagram is finished rendering.
-      // It includes the time adjusting the top of participants for creation message.
-      // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
-      // @ts-ignore
-      await this.store.dispatch("updateCode", { code: this._code });
-      this._lastRenderingCostMilliseconds = calculateCostTime(
-        "rendering end",
-        start,
-      );
-    }, this.calculateDebounceMilliseconds());
 
-    return Promise.resolve(this);
+    // this.initialRender is used to avoid the first rendering is debounced by setTimeout.
+    // The first rendering should be executed immediately. It fixes the issue that causes the blank screen on mermaid live editor.
+    if (this.initialRender) {
+      this.initialRender = false;
+      await this.doRender(config);
+    } else {
+      this._currentTimeout = setTimeout(
+        async () => await this.doRender(config),
+        this.calculateDebounceMilliseconds(),
+      );
+    }
+
+    return this;
+  }
+
+  async doRender(config: Config | undefined) {
+    console.debug("rendering start");
+    const start = getStartTime();
+    clearCache();
+    this.store.commit("onContentChange", config?.onContentChange || (() => {}));
+    if (config?.enableMultiTheme !== undefined) {
+      this.store.state.enableMultiTheme = config?.enableMultiTheme;
+    }
+    // await dispatch will wait until the diagram is finished rendering.
+    // It includes the time adjusting the top of participants for creation message.
+    // $nextTick is different from setTimeout. The latter will be executed after dispatch has returned.
+    // @ts-ignore
+    await this.store.dispatch("updateCode", { code: this._code });
+    this._lastRenderingCostMilliseconds = calculateCostTime(
+      "rendering end",
+      start,
+    );
   }
 
   calculateDebounceMilliseconds(): number {
