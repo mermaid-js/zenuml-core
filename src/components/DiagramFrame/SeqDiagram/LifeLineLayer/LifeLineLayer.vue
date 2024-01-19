@@ -67,7 +67,7 @@ export default {
       if (intersectionTop.value > INTERSECTION_ERROR_MARGIN && store?.state.stickyOffset) top += store?.state.stickyOffset
       const diagramHeight = store?.state.diagramElement?.clientHeight || 0
       const diagramTop = store?.state.diagramElement ? getElementDistanceToTop(store?.state.diagramElement) : 0
-      if (top < participantOffsetTop + diagramTop) return 0
+      if (top <= participantOffsetTop + diagramTop) return 0
       return Math.min(top - diagramTop, diagramHeight - PARTICIPANT_HEIGHT) - participantOffsetTop
     })
     return { translate }
