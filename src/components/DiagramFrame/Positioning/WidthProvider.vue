@@ -1,17 +1,17 @@
 <template>
-  <div class="invisible">
+  <div class="hidden">
     <message :content="text" rtl="false" type="sync" />
   </div>
 </template>
 
 <script>
-import Message from '../SeqDiagram/MessageLayer/Block/Statement/Message/Message.vue';
+import Message from "../SeqDiagram/MessageLayer/Block/Statement/Message/Message.vue";
 export default {
-  name: 'WidthProvider',
+  name: "WidthProvider",
   components: { Message },
   data: function () {
     return {
-      text: 'abcd',
+      text: "abcd",
     };
   },
   methods: {

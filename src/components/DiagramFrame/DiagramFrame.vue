@@ -47,7 +47,7 @@
         />
       </div>
       <div
-        class="footer text-skin-control px-4 py-1 flex justify-between items-center"
+        class="footer text-skin-control px-4 py-1 flex justify-between items-center gap-3"
       >
         <div class="flex items-center gap-3 color-base">
           <button
@@ -74,25 +74,25 @@
             </label>
           </div>
         </div>
-        <div
-          class="zoom-controls bg-skin-base flex justify-between w-28 hide-export"
-        >
-          <button class="zoom-in px-1" @click="zoomIn()">
+        <div class="zoom-controls bg-skin-base flex hide-export gap-1">
+          <button class="zoom-in" @click="zoomIn()">
             <Icon name="zoom-in" icon-class="w-4 h-4" />
           </button>
-          <label>{{ Number(scale * 100).toFixed(0) }} %</label>
-          <button class="zoom-out px-1" @click="zoomOut()">
+          <label class="w-12 block text-center"
+            >{{ Number(scale * 100).toFixed(0) }}%</label
+          >
+          <button class="zoom-out" @click="zoomOut()">
             <Icon name="zoom-out" icon-class="w-4 h-4" />
           </button>
         </div>
-        <width-provider />
         <a
           target="_blank"
           href="https://zenuml.com"
-          class="brand absolute bottom-1 right-4 text-xs hover:underline"
+          class="brand text-xs hover:underline"
           >ZenUML.com</a
         >
       </div>
+      <width-provider />
     </div>
   </div>
 </template>
