@@ -2,7 +2,7 @@
   <div
     class="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0"
     :style="{
-      'min-width': '200px',
+      'min-width': mode === 'dynamic' ? '200px' : 'auto',
       width: `calc(100% - ${leftGap}px)`,
       pointerEvents: renderParticipants ? 'none' : 'all',
     }"
