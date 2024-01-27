@@ -25,7 +25,7 @@ export interface Warning {
   message: string;
 }
 
-export type VisualizationMode = "static" | "dynamic";
+export type RenderMode = "static" | "dynamic";
 
 export interface StoreState {
   warning: Warning | undefined;
@@ -33,7 +33,7 @@ export interface StoreState {
   scale: number;
   selected: any[];
   cursor: any;
-  mode: VisualizationMode;
+  mode: RenderMode;
   showTips: boolean;
   onElementClick: (codeRange: CodeRange) => void;
   numbering: boolean;

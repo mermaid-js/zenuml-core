@@ -1,7 +1,7 @@
 import parentLogger from "./logger/logger";
 import { createApp } from "vue";
 import { createStore } from "vuex";
-import Store, { VisualizationMode } from "./store/Store";
+import Store, { RenderMode } from "./store/Store";
 import DiagramFrame from "./components/DiagramFrame/DiagramFrame.vue";
 import SeqDiagram from "./components/DiagramFrame/SeqDiagram/SeqDiagram.vue";
 
@@ -25,7 +25,7 @@ interface Config {
   enableMultiTheme?: boolean;
   stickyOffset?: number;
   onContentChange?: (code: string) => void;
-  mode?: VisualizationMode;
+  mode?: RenderMode;
 }
 interface IZenUml {
   get code(): string | undefined;
