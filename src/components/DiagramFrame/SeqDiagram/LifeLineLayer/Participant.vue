@@ -3,7 +3,11 @@
     class="participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
     :class="{ selected: selected }"
     ref="participant"
-    :style="{ backgroundColor: backgroundColor, color: color, transform: `translateY(${translate}px)` }"
+    :style="{
+      backgroundColor: backgroundColor,
+      color: color,
+      transform: `translateY(${translate}px)`,
+    }"
     @click="onSelect"
   >
     <!-- Set the background and text color with bg-skin-base and text-skin-base.
@@ -24,48 +28,64 @@
       >
         {{ comment }}
       </span>
-      <label class="interface leading-4" v-if="stereotype">«{{ stereotype }}»</label>
+      <label class="interface leading-4" v-if="stereotype"
+        >«{{ stereotype }}»</label
+      >
       <label class="name leading-4">{{ entity.label || entity.name }}</label>
     </div>
   </div>
 </template>
 
 <script>
-import { brightnessIgnoreAlpha, removeAlpha } from '@/utils/Color';
-import iconPath from '../../Tutorial/Icons';
-import { computed, ref } from 'vue';
-import useDocumentScroll from '@/functions/useDocumentScroll';
-import useIntersectionTop from '@/functions/useIntersectionTop';
-import { useStore } from 'vuex';
-import { getElementDistanceToTop } from '@/utils/dom';
-import { PARTICIPANT_HEIGHT } from '@/positioning/Constants';
+import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
+import iconPath from "../../Tutorial/Icons";
+import { computed, ref } from "vue";
+import useDocumentScroll from "@/functions/useDocumentScroll";
+import useIntersectionTop from "@/functions/useIntersectionTop";
+import { useStore } from "vuex";
+import { getElementDistanceToTop } from "@/utils/dom";
+import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
 
-const INTERSECTION_ERROR_MARGIN = 10 // a threshold for judging whether the participant is intersecting with the viewport
+const INTERSECTION_ERROR_MARGIN = 10; // a threshold for judging whether the participant is intersecting with the viewport
 
 export default {
-  name: 'Participant',
+  name: "Participant",
   setup(props) {
-    const store = useStore()
-    const participant = ref(null)
-    const intersectionTop = useIntersectionTop()
-    const [scrollTop] = useDocumentScroll()
+    const store = useStore();
+    const participant = ref(null);
+    if (store.state.mode === "static") return { translate: 0, participant };
+
+    const intersectionTop = useIntersectionTop();
+    const [scrollTop] = useDocumentScroll();
     const translate = computed(() => {
-      const participantOffsetTop = props.offsetTop || 0
-      let top = intersectionTop.value + scrollTop.value
-      if (intersectionTop.value > INTERSECTION_ERROR_MARGIN && store?.state.stickyOffset) top += store?.state.stickyOffset
-      const diagramHeight = store?.state.diagramElement?.clientHeight || 0
-      const diagramTop = store?.state.diagramElement ? getElementDistanceToTop(store?.state.diagramElement) : 0
-      if (top < participantOffsetTop + diagramTop) return 0
-      return Math.min(top - diagramTop, diagramHeight - PARTICIPANT_HEIGHT) - participantOffsetTop
-    })
-    return { translate, participant }
+      const participantOffsetTop = props.offsetTop || 0;
+      let top = intersectionTop.value + scrollTop.value;
+      if (
+        intersectionTop.value > INTERSECTION_ERROR_MARGIN &&
+        store?.state.stickyOffset
+      )
+        top += store?.state.stickyOffset;
+      const diagramHeight = store?.state.diagramElement?.clientHeight || 0;
+      const diagramTop = store?.state.diagramElement
+        ? getElementDistanceToTop(store?.state.diagramElement)
+        : 0;
+      if (top < participantOffsetTop + diagramTop) return 0;
+      return (
+        Math.min(top - diagramTop, diagramHeight - PARTICIPANT_HEIGHT) -
+        participantOffsetTop
+      );
+    });
+    return { translate, participant };
   },
   props: {
     entity: {
       type: Object,
       required: true,
     },
-    offsetTop: 0
+    offsetTop: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -112,7 +132,7 @@ export default {
   },
   methods: {
     onSelect() {
-      this.$store.commit('onSelect', this.entity.name);
+      this.$store.commit("onSelect", this.entity.name);
     },
     updateFontColor() {
       // Returning `undefined` so that background-color is not set at all in the style attribute
@@ -121,12 +141,12 @@ export default {
       }
       let bgColor = window
         .getComputedStyle(this.$refs.participant)
-        .getPropertyValue('background-color');
+        .getPropertyValue("background-color");
       if (!bgColor) {
         return undefined;
       }
       let b = brightnessIgnoreAlpha(bgColor);
-      this.color = b > 128 ? '#000' : '#fff';
+      this.color = b > 128 ? "#000" : "#fff";
     },
   },
 };

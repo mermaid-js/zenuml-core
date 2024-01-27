@@ -7,20 +7,36 @@
          .bg-skin-base is repeated because .zenuml reset it to default theme.
      -->
     <div :style="{ paddingLeft: `${paddingLeft}px` }" class="relative">
-      <life-line-layer
-        :leftGap="paddingLeft"
-        :context="rootContext.head()"
-        :renderParticipants="false"
-      />
-      <message-layer
-        :context="rootContext.block()"
-        :style="{ width: `${width}px` }"
-      />
-      <life-line-layer
-        :leftGap="paddingLeft"
-        :context="rootContext.head()"
-        :renderParticipants="true"
-      />
+      <slot v-if="mode === 'dynamic'">
+        <life-line-layer
+          :leftGap="paddingLeft"
+          :context="rootContext.head()"
+          :renderParticipants="false"
+          :renderLifeLine="true"
+        />
+        <message-layer
+          :context="rootContext.block()"
+          :style="{ width: `${width}px` }"
+        />
+        <life-line-layer
+          :leftGap="paddingLeft"
+          :context="rootContext.head()"
+          :renderParticipants="true"
+          :renderLifeLine="false"
+        />
+      </slot>
+      <slot v-if="mode === 'static'">
+        <life-line-layer
+          :leftGap="paddingLeft"
+          :context="rootContext.head()"
+          :renderParticipants="true"
+          :renderLifeLine="true"
+        />
+        <message-layer
+          :context="rootContext.block()"
+          :style="{ width: `${width}px` }"
+        />
+      </slot>
     </div>
   </div>
 </template>
@@ -36,6 +52,7 @@ import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext"
 import { MARGIN } from "@/positioning/Constants";
 
 const store = useStore();
+const mode = computed(() => store.state.mode);
 const rootContext = computed(() => store.getters.rootContext);
 const coordinates = computed(() => store.getters.coordinates);
 const width = computed(() => TotalWidth(rootContext.value, coordinates.value));
