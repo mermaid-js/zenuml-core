@@ -94,7 +94,6 @@
           >
         </slot>
       </div>
-
       <width-provider />
     </div>
   </div>
