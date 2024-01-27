@@ -25,12 +25,15 @@ export interface Warning {
   message: string;
 }
 
+export type VisualizationMode = "static" | "dynamic";
+
 export interface StoreState {
   warning: Warning | undefined;
   code: string;
   scale: number;
   selected: any[];
   cursor: any;
+  mode: VisualizationMode;
   showTips: boolean;
   onElementClick: (codeRange: CodeRange) => void;
   numbering: boolean;
@@ -51,6 +54,7 @@ const Store = (): StoreOptions<StoreState> => {
       selected: [],
       cursor: null,
       showTips: false,
+      mode: "dynamic",
       numbering: Boolean(
         localStorage.getItem(`${location.hostname}-zenuml-numbering`),
       ),
