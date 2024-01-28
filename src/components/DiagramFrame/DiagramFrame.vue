@@ -49,7 +49,7 @@
       <div
         class="footer text-skin-control px-4 py-1 flex justify-between items-center gap-3"
       >
-        <slot v-if="mode === 'dynamic'">
+        <template v-if="mode === 'dynamic'">
           <div class="flex items-center gap-3 color-base">
             <button
               class="bottom-1 flex items-center left-1 hide-export"
@@ -92,7 +92,7 @@
             class="brand text-xs hover:underline"
             >ZenUML.com</a
           >
-        </slot>
+        </template>
       </div>
       <width-provider />
     </div>
