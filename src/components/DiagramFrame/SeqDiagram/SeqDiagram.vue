@@ -7,7 +7,7 @@
          .bg-skin-base is repeated because .zenuml reset it to default theme.
      -->
     <div :style="{ paddingLeft: `${paddingLeft}px` }" class="relative">
-      <template v-if="mode === 'dynamic'">
+      <template v-if="mode === RenderMode.Dynamic">
         <life-line-layer
           :leftGap="paddingLeft"
           :context="rootContext.head()"
@@ -25,7 +25,7 @@
           :renderLifeLine="false"
         />
       </template>
-      <template v-if="mode === 'static'">
+      <template v-if="mode === RenderMode.Static">
         <life-line-layer
           :leftGap="paddingLeft"
           :context="rootContext.head()"
@@ -50,6 +50,7 @@ import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import { MARGIN } from "@/positioning/Constants";
+import { RenderMode } from "@/store/Store";
 
 const store = useStore();
 const mode = computed(() => store.state.mode);

@@ -45,6 +45,7 @@ import useIntersectionTop from "@/functions/useIntersectionTop";
 import { useStore } from "vuex";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
+import { RenderMode } from "@/store/Store";
 
 const INTERSECTION_ERROR_MARGIN = 10; // a threshold for judging whether the participant is intersecting with the viewport
 
@@ -53,7 +54,9 @@ export default {
   setup(props) {
     const store = useStore();
     const participant = ref(null);
-    if (store.state.mode === "static") return { translate: 0, participant };
+    if (store.state.mode === RenderMode.Static) {
+      return { translate: 0, participant };
+    }
 
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();

@@ -25,7 +25,15 @@ export interface Warning {
   message: string;
 }
 
-export type RenderMode = "static" | "dynamic";
+/*
+ * RenderMode
+ * Static: Render once and never update, also disable sticky participants and hide the footer
+ * Dynamic: Render once and update when code changes
+ */
+export const enum RenderMode {
+  Static = "static",
+  Dynamic = "dynamic",
+}
 
 export interface StoreState {
   warning: Warning | undefined;
@@ -54,7 +62,7 @@ const Store = (): StoreOptions<StoreState> => {
       selected: [],
       cursor: null,
       showTips: false,
-      mode: "dynamic",
+      mode: RenderMode.Dynamic,
       numbering: Boolean(
         localStorage.getItem(`${location.hostname}-zenuml-numbering`),
       ),

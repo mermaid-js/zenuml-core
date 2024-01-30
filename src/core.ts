@@ -81,7 +81,7 @@ export default class ZenUml implements IZenUml {
     this._theme = config?.theme || this._theme;
     this.store.state.stickyOffset = config?.stickyOffset || 0;
     this.store.state.theme = this._theme || "default";
-    this.store.state.mode = config?.mode || "dynamic";
+    this.store.state.mode = config?.mode || RenderMode.Dynamic;
 
     // this.initialRender is used to avoid the first rendering is debounced by setTimeout.
     // The first rendering should be executed immediately. It fixes the issue that causes the blank screen on mermaid live editor.

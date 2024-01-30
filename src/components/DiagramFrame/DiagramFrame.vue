@@ -49,7 +49,7 @@
       <div
         class="footer text-skin-control px-4 py-1 flex justify-between items-center gap-3"
       >
-        <template v-if="mode === 'dynamic'">
+        <template v-if="mode === RenderMode.Dynamic">
           <div class="flex items-center gap-3 color-base">
             <button
               class="bottom-1 flex items-center left-1 hide-export"
@@ -110,9 +110,15 @@ import * as htmlToImage from "html-to-image";
 import Debug from "./Debug/Debug.vue";
 import ThemeSelect from "./ThemeSelect.vue";
 import Icon from "@/components/Icon/Icon.vue";
+import { RenderMode } from "@/store/Store";
 
 export default {
   name: "DiagramFrame",
+  setup() {
+    return {
+      RenderMode,
+    };
+  },
   computed: {
     ...mapState([
       "showTips",

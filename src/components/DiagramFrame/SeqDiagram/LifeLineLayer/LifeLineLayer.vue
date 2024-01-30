@@ -2,7 +2,7 @@
   <div
     class="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0"
     :style="{
-      'min-width': mode === 'dynamic' ? '200px' : 'auto',
+      'min-width': mode === RenderMode.Dynamic ? '200px' : 'auto',
       width: `calc(100% - ${leftGap}px)`,
       pointerEvents: renderParticipants ? 'none' : 'all',
     }"
@@ -64,6 +64,7 @@ import { computed } from "vue";
 import useIntersectionTop from "@/functions/useIntersectionTop";
 import useDocumentScroll from "@/functions/useDocumentScroll";
 import { getElementDistanceToTop } from "@/utils/dom";
+import { RenderMode } from "@/store/Store";
 
 export default {
   name: "life-line-layer",
@@ -73,6 +74,9 @@ export default {
     const store = useStore();
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();
+    if (store.state.mode === RenderMode.static)
+      return { translate: 0, RenderMode };
+
     const translate = computed(() => {
       let top = intersectionTop.value + scrollTop.value;
       if (
@@ -90,7 +94,7 @@ export default {
         participantOffsetTop
       );
     });
-    return { translate };
+    return { translate, RenderMode };
   },
   computed: {
     ...mapGetters([
