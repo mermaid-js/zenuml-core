@@ -27,7 +27,7 @@ export interface Warning {
 
 /*
  * RenderMode
- * Static: Render once and never update, also disable sticky participants and hide the footer
+ * Static: Compatible with Mermaid renderind which renders once and never update. It also disables sticky participants and hides the footer
  * Dynamic: Render once and update when code changes
  */
 export const enum RenderMode {
