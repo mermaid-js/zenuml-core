@@ -1,7 +1,7 @@
 import parentLogger from "./logger/logger";
 import { createApp } from "vue";
 import { createStore } from "vuex";
-import Store from "./store/Store";
+import Store, { RenderMode } from "./store/Store";
 import DiagramFrame from "./components/DiagramFrame/DiagramFrame.vue";
 import SeqDiagram from "./components/DiagramFrame/SeqDiagram/SeqDiagram.vue";
 
@@ -22,9 +22,10 @@ const logger = parentLogger.child({ name: "core" });
 
 interface Config {
   theme?: string;
-  enableMultiTheme: boolean;
+  enableMultiTheme?: boolean;
   stickyOffset?: number;
   onContentChange?: (code: string) => void;
+  mode?: RenderMode;
 }
 interface IZenUml {
   get code(): string | undefined;
@@ -80,6 +81,7 @@ export default class ZenUml implements IZenUml {
     this._theme = config?.theme || this._theme;
     this.store.state.stickyOffset = config?.stickyOffset || 0;
     this.store.state.theme = this._theme || "default";
+    this.store.state.mode = config?.mode || RenderMode.Dynamic;
 
     // this.initialRender is used to avoid the first rendering is debounced by setTimeout.
     // The first rendering should be executed immediately. It fixes the issue that causes the blank screen on mermaid live editor.

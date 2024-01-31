@@ -49,48 +49,50 @@
       <div
         class="footer text-skin-control px-4 py-1 flex justify-between items-center gap-3"
       >
-        <div class="flex items-center gap-3 color-base">
-          <button
-            class="bottom-1 flex items-center left-1 hide-export"
-            @click="showTipsDialog()"
-          >
-            <Icon name="tip" icon-class="filter grayscale w-4 h-4" />
-          </button>
-          <ThemeSelect v-if="enableMultiTheme" />
-          <div class="flex items-center">
-            <input
-              type="checkbox"
-              id="order-display"
-              class="mr-1"
-              :checked="numbering"
-              @input="toggleNumbering(!numbering)"
-            />
-            <label
-              for="order-display"
-              title="Numbering the diagram"
-              class="select-none"
+        <template v-if="mode === RenderMode.Dynamic">
+          <div class="flex items-center gap-3 color-base">
+            <button
+              class="bottom-1 flex items-center left-1 hide-export"
+              @click="showTipsDialog()"
             >
-              <Icon name="numbering" icon-class="w-6 h-6" />
-            </label>
+              <Icon name="tip" icon-class="filter grayscale w-4 h-4" />
+            </button>
+            <ThemeSelect v-if="enableMultiTheme" />
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="order-display"
+                class="mr-1"
+                :checked="numbering"
+                @input="toggleNumbering(!numbering)"
+              />
+              <label
+                for="order-display"
+                title="Numbering the diagram"
+                class="select-none"
+              >
+                <Icon name="numbering" icon-class="w-6 h-6" />
+              </label>
+            </div>
           </div>
-        </div>
-        <div class="zoom-controls bg-skin-base flex hide-export gap-1">
-          <button class="zoom-in" @click="zoomIn()">
-            <Icon name="zoom-in" icon-class="w-4 h-4" />
-          </button>
-          <label class="w-12 block text-center"
-            >{{ Number(scale * 100).toFixed(0) }}%</label
+          <div class="zoom-controls bg-skin-base flex hide-export gap-1">
+            <button class="zoom-in" @click="zoomIn()">
+              <Icon name="zoom-in" icon-class="w-4 h-4" />
+            </button>
+            <label class="w-12 block text-center"
+              >{{ Number(scale * 100).toFixed(0) }}%</label
+            >
+            <button class="zoom-out" @click="zoomOut()">
+              <Icon name="zoom-out" icon-class="w-4 h-4" />
+            </button>
+          </div>
+          <a
+            target="_blank"
+            href="https://zenuml.com"
+            class="brand text-xs hover:underline"
+            >ZenUML.com</a
           >
-          <button class="zoom-out" @click="zoomOut()">
-            <Icon name="zoom-out" icon-class="w-4 h-4" />
-          </button>
-        </div>
-        <a
-          target="_blank"
-          href="https://zenuml.com"
-          class="brand text-xs hover:underline"
-          >ZenUML.com</a
-        >
+        </template>
       </div>
       <width-provider />
     </div>
@@ -108,9 +110,15 @@ import * as htmlToImage from "html-to-image";
 import Debug from "./Debug/Debug.vue";
 import ThemeSelect from "./ThemeSelect.vue";
 import Icon from "@/components/Icon/Icon.vue";
+import { RenderMode } from "@/store/Store";
 
 export default {
   name: "DiagramFrame",
+  setup() {
+    return {
+      RenderMode,
+    };
+  },
   computed: {
     ...mapState([
       "showTips",
@@ -118,6 +126,7 @@ export default {
       "theme",
       "numbering",
       "enableMultiTheme",
+      "mode",
     ]),
     ...mapGetters(["rootContext"]),
     title() {

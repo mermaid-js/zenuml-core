@@ -7,20 +7,36 @@
          .bg-skin-base is repeated because .zenuml reset it to default theme.
      -->
     <div :style="{ paddingLeft: `${paddingLeft}px` }" class="relative">
-      <life-line-layer
-        :leftGap="paddingLeft"
-        :context="rootContext.head()"
-        :renderParticipants="false"
-      />
-      <message-layer
-        :context="rootContext.block()"
-        :style="{ width: `${width}px` }"
-      />
-      <life-line-layer
-        :leftGap="paddingLeft"
-        :context="rootContext.head()"
-        :renderParticipants="true"
-      />
+      <template v-if="mode === RenderMode.Dynamic">
+        <life-line-layer
+          :leftGap="paddingLeft"
+          :context="rootContext.head()"
+          :renderParticipants="false"
+          :renderLifeLine="true"
+        />
+        <message-layer
+          :context="rootContext.block()"
+          :style="{ width: `${width}px` }"
+        />
+        <life-line-layer
+          :leftGap="paddingLeft"
+          :context="rootContext.head()"
+          :renderParticipants="true"
+          :renderLifeLine="false"
+        />
+      </template>
+      <template v-if="mode === RenderMode.Static">
+        <life-line-layer
+          :leftGap="paddingLeft"
+          :context="rootContext.head()"
+          :renderParticipants="true"
+          :renderLifeLine="true"
+        />
+        <message-layer
+          :context="rootContext.block()"
+          :style="{ width: `${width}px` }"
+        />
+      </template>
     </div>
   </div>
 </template>
@@ -34,8 +50,10 @@ import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import { MARGIN } from "@/positioning/Constants";
+import { RenderMode } from "@/store/Store";
 
 const store = useStore();
+const mode = computed(() => store.state.mode);
 const rootContext = computed(() => store.getters.rootContext);
 const coordinates = computed(() => store.getters.coordinates);
 const width = computed(() => TotalWidth(rootContext.value, coordinates.value));

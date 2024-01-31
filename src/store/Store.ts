@@ -25,12 +25,23 @@ export interface Warning {
   message: string;
 }
 
+/*
+ * RenderMode
+ * Static: Compatible with Mermaid renderind which renders once and never update. It also disables sticky participants and hides the footer
+ * Dynamic: Render once and update when code changes
+ */
+export const enum RenderMode {
+  Static = "static",
+  Dynamic = "dynamic",
+}
+
 export interface StoreState {
   warning: Warning | undefined;
   code: string;
   scale: number;
   selected: any[];
   cursor: any;
+  mode: RenderMode;
   showTips: boolean;
   onElementClick: (codeRange: CodeRange) => void;
   numbering: boolean;
@@ -51,6 +62,7 @@ const Store = (): StoreOptions<StoreState> => {
       selected: [],
       cursor: null,
       showTips: false,
+      mode: RenderMode.Dynamic,
       numbering: Boolean(
         localStorage.getItem(`${location.hostname}-zenuml-numbering`),
       ),
