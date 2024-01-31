@@ -7,7 +7,7 @@ declare global {
 Array.prototype["until"] = function (
   predicate: (value: any, index: number, array: any[]) => boolean,
 ): any[] {
-  let result: any[] = [];
+  const result: any[] = [];
   for (let i = 0; i < this.length; i++) {
     result.push(this[i]);
     if (predicate(this[i], i, this)) {

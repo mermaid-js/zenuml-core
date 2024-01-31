@@ -4,7 +4,7 @@ function resolver() {
   return (...args: any[]) => args.join("-");
 }
 
-let range = memoize((to: number, from = 0) => {
+const range = memoize((to: number, from = 0) => {
   return Array(to - from)
     .fill(0)
     .map((_, idx) => idx + from);
@@ -30,7 +30,7 @@ function totalGap(
   }, 0);
 }
 
-let final_distance = (
+const final_distance = (
   left: number,
   right: number,
   minDistanceMatrix: Array<Array<number>>,
@@ -42,9 +42,9 @@ let final_distance = (
   }
 };
 
-export let distance = memoize(final_distance, resolver());
+export const distance = memoize(final_distance, resolver());
 
-export let final_pos = (
+export const final_pos = (
   i: number,
   minDistanceMatrix: Array<number>[],
 ): number => {

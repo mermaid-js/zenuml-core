@@ -18,7 +18,7 @@ export class MessageContextListener extends sequenceParserListener {
     if (this.isBlind) {
       return;
     }
-    let from = ctx.From();
+    const from = ctx.From();
     const owner = ctx?.Owner();
     const signature = ctx?.SignatureText();
     this.ownableMessages.push({

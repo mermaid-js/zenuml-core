@@ -38,5 +38,5 @@ function prettify(logger: any): typeof logger {
   return logger;
 }
 
-let rootLogger = prettify(logger);
+const rootLogger = prettify(logger);
 export default rootLogger;

@@ -54,7 +54,7 @@
                         v-for="theme in themes"
                         :key="theme.id"
                         :value="theme.id"
-                        v-slot="{ active, checked }"
+                        v-slot="{ checked }"
                       >
                         <div
                           :class="[

@@ -26,7 +26,7 @@ class FrameBuilder extends sequenceParserListener {
   }
 
   private getLeft(ctx: any): string {
-    let localParticipants = this.getLocalParticipants(ctx);
+    const localParticipants = this.getLocalParticipants(ctx);
     return (
       this._orderedParticipants.find((p) => localParticipants.includes(p)) || ""
     );

@@ -7,7 +7,7 @@ describe("Assignment", function () {
   ])(
     "getText: assignee: %s, type: %s, text: %s",
     function (assignee, type, text) {
-      let assignment = new Assignment(assignee, type);
+      const assignment = new Assignment(assignee, type);
       expect(assignment.getText()).toEqual(text);
     },
   );

@@ -48,7 +48,7 @@ describe("FrameBuilder", () => {
       ],
     };
 
-    let rootFrame = frameBuilder.getFrame(context);
+    const rootFrame = frameBuilder.getFrame(context);
     expect(rootFrame).toEqual(expectedFrame);
   });
 

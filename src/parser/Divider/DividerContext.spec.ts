@@ -11,12 +11,12 @@ describe("Divider", function () {
     ["\n===A, B===", "A,B"], // TODO: should be 'A, B'. Fix is in StringUtil.ts
     // ['a ===A, B===', 'A,B'],  // will throw error
   ])("Divider: code: %s, notes: %s", function (code, note) {
-    let dividerContext = DividerContextFixture(code);
+    const dividerContext = DividerContextFixture(code);
     expect(dividerContext.Note()).toEqual(note);
   });
 
   test("from RootContext", function () {
-    let divider = Fixture.firstStatement("==A, B==").divider();
+    const divider = Fixture.firstStatement("==A, B==").divider();
     expect(divider.Note()).toBe("A,B");
   });
 

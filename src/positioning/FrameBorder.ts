@@ -15,7 +15,7 @@ function longestPath(frame: Frame, pathType: PathType): number {
   }
 
   let maxDepth = 0;
-  for (let child of frame.children) {
+  for (const child of frame.children) {
     if (
       (pathType === PathType.LEFT && child.left !== frame.left) ||
       (pathType === PathType.RIGHT && child.right !== frame.right)
