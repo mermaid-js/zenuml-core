@@ -4,8 +4,8 @@ declare global {
   }
 }
 
-Array.prototype['until'] = function (
-  predicate: (value: any, index: number, array: any[]) => boolean
+Array.prototype["until"] = function (
+  predicate: (value: any, index: number, array: any[]) => boolean,
 ): any[] {
   let result: any[] = [];
   for (let i = 0; i < this.length; i++) {

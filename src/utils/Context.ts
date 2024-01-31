@@ -9,8 +9,8 @@ export const getContextType = (context: any) => {
     message: "Interaction",
     asyncMessage: "InteractionAsync",
     divider: "Divider",
-    ret: "Return"
+    ret: "Return",
   };
-  let key: string = Object.keys(dict).find(x => context[x]() !== null) || '';
+  let key: string = Object.keys(dict).find((x) => context[x]() !== null) || "";
   return dict[key];
 };

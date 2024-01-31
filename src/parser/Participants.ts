@@ -1,4 +1,4 @@
-import mergeWith from 'lodash/mergeWith';
+import mergeWith from "lodash/mergeWith";
 export enum ParticipantType {
   Actor = 1,
   Boundary,
@@ -37,7 +37,7 @@ export class Participant {
     explicit?: boolean,
     type?: string,
     color?: string,
-    comment?: string
+    comment?: string,
   ) {
     this.name = name;
     this.stereotype = stereotype;
@@ -53,32 +53,32 @@ export class Participant {
 
   public Type(): ParticipantType {
     switch (this.type?.toLowerCase()) {
-      case '@actor':
+      case "@actor":
         return ParticipantType.Actor;
-      case '@boundary':
+      case "@boundary":
         return ParticipantType.Boundary;
-      case '@collection':
+      case "@collection":
         return ParticipantType.Collection;
-      case '@control':
+      case "@control":
         return ParticipantType.Control;
-      case '@database':
+      case "@database":
         return ParticipantType.Database;
-      case '@entity':
+      case "@entity":
         return ParticipantType.Entity;
-      case '@queue':
+      case "@queue":
         return ParticipantType.Queue;
 
-      case '@ec2':
+      case "@ec2":
         return ParticipantType.EC2;
-      case '@ecs':
+      case "@ecs":
         return ParticipantType.ECS;
-      case '@iam':
+      case "@iam":
         return ParticipantType.IAM;
-      case '@lambda':
+      case "@lambda":
         return ParticipantType.Lambda;
-      case '@rds':
+      case "@rds":
         return ParticipantType.RDS;
-      case '@s3':
+      case "@s3":
         return ParticipantType.S3;
     }
     return ParticipantType.Undefined;
@@ -97,7 +97,7 @@ export class Participants {
     width?: number,
     groupId?: number | string,
     label?: string,
-    explicit?: boolean
+    explicit?: boolean,
   ): void;
   public Add(
     name: string,
@@ -109,7 +109,7 @@ export class Participants {
     explicit?: boolean,
     type?: string,
     color?: string,
-    comment?: string
+    comment?: string,
   ): void {
     const participant = new Participant(
       name,
@@ -121,11 +121,11 @@ export class Participants {
       explicit,
       type,
       color,
-      comment
+      comment,
     );
     this.participants.set(
       name,
-      mergeWith({}, this.Get(name), participant, (a, b) => a || b)
+      mergeWith({}, this.Get(name), participant, (a, b) => a || b),
     );
   }
 

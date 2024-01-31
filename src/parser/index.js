@@ -1,22 +1,22 @@
-import antlr4 from 'antlr4';
-import { default as sequenceLexer } from '../generated-parser/sequenceLexer';
-import { default as sequenceParser } from '../generated-parser/sequenceParser';
-import ToCollector from './ToCollector';
-import ChildFragmentDetector from './ChildFragmentDetecotr';
-import './TitleContext';
-import './IsCurrent';
-import './Owner';
-import './ProgContext';
-import './RetContext';
-import './Origin';
-import './Divider/DividerContext';
-import './SignatureText';
-import './Messages/MessageContext';
-import './From';
-import './key/Key';
-import './IsInitedFromOccurrence';
-import './utils/cloest-ancestor/ClosestAncestor';
-import { formatText } from '../utils/StringUtil';
+import antlr4 from "antlr4";
+import { default as sequenceLexer } from "../generated-parser/sequenceLexer";
+import { default as sequenceParser } from "../generated-parser/sequenceParser";
+import ToCollector from "./ToCollector";
+import ChildFragmentDetector from "./ChildFragmentDetecotr";
+import "./TitleContext";
+import "./IsCurrent";
+import "./Owner";
+import "./ProgContext";
+import "./RetContext";
+import "./Origin";
+import "./Divider/DividerContext";
+import "./SignatureText";
+import "./Messages/MessageContext";
+import "./From";
+import "./key/Key";
+import "./IsInitedFromOccurrence";
+import "./utils/cloest-ancestor/ClosestAncestor";
+import { formatText } from "../utils/StringUtil";
 
 const errors = [];
 class SeqErrorListener extends antlr4.error.ErrorListener {
@@ -44,16 +44,18 @@ antlr4.ParserRuleContext.prototype.getFormattedText = function () {
 // the content and the style including change of line, indentation, etc.
 antlr4.ParserRuleContext.prototype.getComment = function () {
   let tokenIndex = this.start.tokenIndex;
-  let channel = sequenceLexer.channelNames.indexOf('COMMENT_CHANNEL');
-  if (this.constructor.name === 'BraceBlockContext') {
+  let channel = sequenceLexer.channelNames.indexOf("COMMENT_CHANNEL");
+  if (this.constructor.name === "BraceBlockContext") {
     tokenIndex = this.stop.tokenIndex;
   }
-  let hiddenTokensToLeft = this.parser.getTokenStream().getHiddenTokensToLeft(tokenIndex, channel);
+  let hiddenTokensToLeft = this.parser
+    .getTokenStream()
+    .getHiddenTokensToLeft(tokenIndex, channel);
   return (
     hiddenTokensToLeft &&
     hiddenTokensToLeft
       .map((t) => t.text.substring(2)) // skip '//'
-      .join('')
+      .join("")
   );
 };
 

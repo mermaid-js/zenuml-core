@@ -1,8 +1,8 @@
-import { Participants } from './Participants';
+import { Participants } from "./Participants";
 
-import antlr4 from 'antlr4';
-import { default as sequenceParserListener } from '../generated-parser/sequenceParserListener';
-import { default as sequenceParser } from '../generated-parser/sequenceParser';
+import antlr4 from "antlr4";
+import { default as sequenceParserListener } from "../generated-parser/sequenceParserListener";
+import { default as sequenceParser } from "../generated-parser/sequenceParser";
 const seqParser = sequenceParser;
 const ProgContext = seqParser.ProgContext;
 
@@ -17,10 +17,13 @@ const ToCollector = new sequenceParserListener();
 let onParticipant = function (ctx) {
   // if(!(ctx?.name())) return;
   if (isBlind) return;
-  const type = ctx?.participantType()?.getFormattedText().replace('@', '');
-  const participant = ctx?.name()?.getFormattedText() || 'Missing `Participant`';
+  const type = ctx?.participantType()?.getFormattedText().replace("@", "");
+  const participant =
+    ctx?.name()?.getFormattedText() || "Missing `Participant`";
   const stereotype = ctx.stereotype()?.name()?.getFormattedText();
-  const width = (ctx.width && ctx.width() && Number.parseInt(ctx.width().getText())) || undefined;
+  const width =
+    (ctx.width && ctx.width() && Number.parseInt(ctx.width().getText())) ||
+    undefined;
   const label = ctx.label && ctx.label()?.name()?.getFormattedText();
   const explicit = true;
   const color = ctx.COLOR()?.getText();
@@ -35,7 +38,7 @@ let onParticipant = function (ctx) {
     explicit,
     type,
     color,
-    comment
+    comment,
   );
 };
 ToCollector.enterParticipant = onParticipant;

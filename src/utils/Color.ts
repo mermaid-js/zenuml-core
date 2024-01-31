@@ -1,4 +1,4 @@
-import colorString from 'color-string';
+import colorString from "color-string";
 
 export function brightnessIgnoreAlpha(color: string): number {
   const c = colorString.get.rgb(color);

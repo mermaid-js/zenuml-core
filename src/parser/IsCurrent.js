@@ -1,4 +1,4 @@
-import { default as sequenceParser } from '../generated-parser/sequenceParser';
+import { default as sequenceParser } from "../generated-parser/sequenceParser";
 const seqParser = sequenceParser;
 
 const CreationContext = seqParser.CreationContext;

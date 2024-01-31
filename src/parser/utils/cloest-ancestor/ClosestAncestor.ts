@@ -1,5 +1,5 @@
-import { default as antlr4 } from 'antlr4';
-import { default as sequenceParser } from '../../../generated-parser/sequenceParser';
+import { default as antlr4 } from "antlr4";
+import { default as sequenceParser } from "../../../generated-parser/sequenceParser";
 
 const seqParser = sequenceParser;
 const StatContext = seqParser.StatContext;
@@ -21,7 +21,7 @@ antlr4.ParserRuleContext.prototype.ClosestAncestorBlock = function () {
   if (parentCtx instanceof seqParser.BlockContext) {
     return parentCtx;
   }
-  console.warn('Cannot find closest ancestor block for context:', this);
+  console.warn("Cannot find closest ancestor block for context:", this);
   return undefined;
 };
 

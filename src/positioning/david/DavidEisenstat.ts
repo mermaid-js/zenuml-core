@@ -33,7 +33,10 @@ function DeltaTracker() {
         [x, y] = [y, x];
       }
       if (x.velocity < y.velocity) {
-        this.delta = Math.min(this.delta, (x.position - y.position) / (y.velocity - x.velocity));
+        this.delta = Math.min(
+          this.delta,
+          (x.position - y.position) / (y.velocity - x.velocity),
+        );
       }
       return lessThan;
     },

@@ -9,16 +9,16 @@ let Log4V = {
         // console.log('A component has been created', this.$options.name)
       },
       beforeMount() {
-        console.log('Before mounting a component', this.$options.name);
+        console.log("Before mounting a component", this.$options.name);
       },
       mounted() {
-        console.log('A component has been mounted', this.$options.name, this);
+        console.log("A component has been mounted", this.$options.name, this);
       },
       beforeUpdate() {
-        console.log('Before updating a component', this.$options.name);
+        console.log("Before updating a component", this.$options.name);
       },
       updated() {
-        console.log('A component has been updated', this.$options.name, this);
+        console.log("A component has been updated", this.$options.name, this);
       },
       destroyed() {
         // console.log('A component has been destroyed', this.$options.name, this.$options)

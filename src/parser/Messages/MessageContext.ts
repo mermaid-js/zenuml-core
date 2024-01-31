@@ -1,4 +1,4 @@
-import sequenceParser from '../../generated-parser/sequenceParser';
+import sequenceParser from "../../generated-parser/sequenceParser";
 
 const seqParser = sequenceParser;
 const MessageContext = seqParser.MessageContext;
@@ -14,14 +14,14 @@ export class Assignment implements IAssignment {
   constructor(assignee: string | undefined, type: string | undefined) {
     // check if type is defined, assignee must be defined
     if (type && !assignee) {
-      throw new Error('assignee must be defined if type is defined');
+      throw new Error("assignee must be defined if type is defined");
     }
-    this.assignee = assignee || '';
-    this.type = type || '';
+    this.assignee = assignee || "";
+    this.type = type || "";
   }
 
   getText() {
-    return [this.assignee, this.type].filter(Boolean).join(':');
+    return [this.assignee, this.type].filter(Boolean).join(":");
   }
 }
 

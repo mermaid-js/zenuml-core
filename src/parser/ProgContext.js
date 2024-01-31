@@ -1,14 +1,21 @@
-import { default as sequenceParser } from '../generated-parser/sequenceParser';
+import { default as sequenceParser } from "../generated-parser/sequenceParser";
 const ProgContext = sequenceParser.ProgContext;
 
 ProgContext.prototype.Starter = function () {
-  const declaredStarter = this.head()?.starterExp()?.starter()?.getFormattedText();
+  const declaredStarter = this.head()
+    ?.starterExp()
+    ?.starter()
+    ?.getFormattedText();
   let starterFromStartingMessage;
   let starterFromParticipant;
   let starterFromParticipantGroup;
   const stat = this.block()?.stat();
   if (stat && stat[0]) {
-    const messageFrom = stat[0].message()?.messageBody()?.from()?.getFormattedText();
+    const messageFrom = stat[0]
+      .message()
+      ?.messageBody()
+      ?.from()
+      ?.getFormattedText();
     const asyncMessageFrom = stat[0].asyncMessage()?.from()?.getFormattedText();
     starterFromStartingMessage = messageFrom || asyncMessageFrom;
   } else {
@@ -21,7 +28,9 @@ ProgContext.prototype.Starter = function () {
       if (child instanceof sequenceParser.GroupContext) {
         const participants = child.participant();
         if (participants && participants[0]) {
-          starterFromParticipantGroup = participants[0].name()?.getFormattedText();
+          starterFromParticipantGroup = participants[0]
+            .name()
+            ?.getFormattedText();
         }
       }
     }
@@ -32,6 +41,6 @@ ProgContext.prototype.Starter = function () {
     starterFromStartingMessage ||
     starterFromParticipant ||
     starterFromParticipantGroup ||
-    '_STARTER_'
+    "_STARTER_"
   );
 };

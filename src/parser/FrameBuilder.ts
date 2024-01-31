@@ -1,8 +1,8 @@
-import antlr4 from 'antlr4';
-import sequenceParserListener from '../generated-parser/sequenceParserListener';
-import {Frame} from "@/positioning/FrameBorder";
-import {Participants} from "./index";
-import {Participant} from "@/parser/Participants";
+import antlr4 from "antlr4";
+import sequenceParserListener from "../generated-parser/sequenceParserListener";
+import { Frame } from "@/positioning/FrameBorder";
+import { Participants } from "./index";
+import { Participant } from "@/parser/Participants";
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
@@ -27,17 +27,27 @@ class FrameBuilder extends sequenceParserListener {
 
   private getLeft(ctx: any): string {
     let localParticipants = this.getLocalParticipants(ctx);
-    return this._orderedParticipants.find((p) => localParticipants.includes(p)) || '';
+    return (
+      this._orderedParticipants.find((p) => localParticipants.includes(p)) || ""
+    );
   }
 
   private getRight(ctx: any): string {
-    return this._orderedParticipants.slice().reverse().find((p) => this.getLocalParticipants(ctx).includes(p)) || '';
+    return (
+      this._orderedParticipants
+        .slice()
+        .reverse()
+        .find((p) => this.getLocalParticipants(ctx).includes(p)) || ""
+    );
   }
 
   enterFragment(ctx: any) {
-
     // Create a new frame for the current node
-    const frame: Frame = { left: this.getLeft(ctx), right: this.getRight(ctx), children: [] };
+    const frame: Frame = {
+      left: this.getLeft(ctx),
+      right: this.getRight(ctx),
+      children: [],
+    };
 
     // If there's no root, set the current frame as root
     if (!this.frameRoot) {
@@ -80,19 +90,19 @@ class FrameBuilder extends sequenceParserListener {
 
   exitTcf() {
     this.exitFragment();
-  };
+  }
   exitOpt() {
     this.exitFragment();
-  };
+  }
   exitPar() {
     this.exitFragment();
-  };
+  }
   exitAlt() {
     this.exitFragment();
-  };
+  }
   exitLoop() {
     this.exitFragment();
-  };
+  }
 
   getFrame(context: any) {
     context.children.map((child: any) => {

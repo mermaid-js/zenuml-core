@@ -1,10 +1,10 @@
-import sequenceParser from '../generated-parser/sequenceParser';
+import sequenceParser from "../generated-parser/sequenceParser";
 
 const seqParser = sequenceParser;
 const TitleContext = seqParser.TitleContext;
 TitleContext.prototype.content = function () {
   if (this.children.length < 2) {
-    return '';
+    return "";
   } else {
     return this.children[1].getText().trim();
   }

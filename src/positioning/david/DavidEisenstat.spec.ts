@@ -1,6 +1,6 @@
-import { find_optimal } from './DavidEisenstat';
+import { find_optimal } from "./DavidEisenstat";
 
-describe('DavidEisenstat', () => {
+describe("DavidEisenstat", () => {
   it.each([
     [
       [
@@ -48,7 +48,7 @@ describe('DavidEisenstat', () => {
       ],
       [0, 0, 200, 300],
     ],
-  ])('should find optimal positions', (m, expected) => {
+  ])("should find optimal positions", (m, expected) => {
     expect(find_optimal(m)).toStrictEqual(expected);
   });
 });

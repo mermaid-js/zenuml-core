@@ -11,26 +11,26 @@
 </template>
 
 <script>
-import DiagramFrame from '@/components/DiagramFrame';
-import { saveAs } from 'file-saver';
+import DiagramFrame from "@/components/DiagramFrame";
+import { saveAs } from "file-saver";
 export default {
-  name: 'Demo',
+  name: "Demo",
   methods: {
     async exportPng() {
       const png = await this.$refs.diagram.toPng();
-      saveAs(png, 'diagram.png');
+      saveAs(png, "diagram.png");
     },
     async exportJpeg() {
       const png = await this.$refs.diagram.toJpeg();
-      saveAs(png, 'diagram.jpeg');
+      saveAs(png, "diagram.jpeg");
     },
     async exportBlob() {
       const blob = await this.$refs.diagram.toBlob();
-      saveAs(blob, 'diagram-blob.png');
+      saveAs(blob, "diagram-blob.png");
     },
     async exportSvg() {
       const svg = await this.$refs.diagram.toSvg();
-      saveAs(svg, 'diagram-svg.svg');
+      saveAs(svg, "diagram-svg.svg");
     },
   },
   components: { DiagramFrame },

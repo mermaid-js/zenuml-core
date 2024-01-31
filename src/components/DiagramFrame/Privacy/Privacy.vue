@@ -1,7 +1,9 @@
 <template>
   <div>
-    <div class="privacy tooltip bottom whitespace-normal flex items-center"
-      data-tooltip="We (the vendor) do not have access to your data. The diagram is generated in this browser.">
+    <div
+      class="privacy tooltip bottom whitespace-normal flex items-center"
+      data-tooltip="We (the vendor) do not have access to your data. The diagram is generated in this browser."
+    >
       <Icon name="privacy" icon-class="fill-current h-6 w-6 m-auto" />
     </div>
   </div>
@@ -11,8 +13,8 @@
 import Icon from "@/components/Icon/Icon.vue";
 
 export default {
-  name: 'Privacy',
-  components: {Icon},
+  name: "Privacy",
+  components: { Icon },
 };
 </script>
 
@@ -47,7 +49,9 @@ export default {
 
 .tooltip.bottom:after {
   top: 80%;
-  transition: opacity 0.3s ease 0.3s, top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s;
+  transition:
+    opacity 0.3s ease 0.3s,
+    top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s;
 }
 .tooltip.bottom:hover:after {
   display: block;
