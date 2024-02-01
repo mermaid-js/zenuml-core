@@ -1,7 +1,7 @@
-import antlr4 from 'antlr4';
-import '../parser/index';
-import sequenceLexer from '../generated-parser/sequenceLexer';
-import sequenceParser from '../generated-parser/sequenceParser';
+import antlr4 from "antlr4";
+import "../parser/index";
+import sequenceLexer from "../generated-parser/sequenceLexer";
+import sequenceParser from "../generated-parser/sequenceParser";
 class SeqErrorListener extends antlr4.error.ErrorListener {}
 
 function createParser(code: any) {
@@ -21,11 +21,23 @@ function createParseFunction(parseMethod: (parser: sequenceParser) => any) {
   };
 }
 
-export const ProgContextFixture = createParseFunction((parser) => parser.prog());
-export const TitleContextFixture = createParseFunction((parser) => parser.title());
-export const StatContextFixture = createParseFunction((parser) => parser.stat());
-export const AsyncMessageContextFixture = createParseFunction((parser) => parser.asyncMessage());
-export const DividerContextFixture = createParseFunction((parser) => parser.divider());
-export const CreationContextFixture = createParseFunction((parser) => parser.creation());
+export const ProgContextFixture = createParseFunction((parser) =>
+  parser.prog(),
+);
+export const TitleContextFixture = createParseFunction((parser) =>
+  parser.title(),
+);
+export const StatContextFixture = createParseFunction((parser) =>
+  parser.stat(),
+);
+export const AsyncMessageContextFixture = createParseFunction((parser) =>
+  parser.asyncMessage(),
+);
+export const DividerContextFixture = createParseFunction((parser) =>
+  parser.divider(),
+);
+export const CreationContextFixture = createParseFunction((parser) =>
+  parser.creation(),
+);
 
 export const RetContextFixture = createParseFunction((parser) => parser.ret());

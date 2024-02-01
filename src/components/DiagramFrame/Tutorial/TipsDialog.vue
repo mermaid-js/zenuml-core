@@ -1,12 +1,16 @@
 <template>
-  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block">
+  <div
+    class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block"
+  >
     <div
       class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
       aria-hidden="true"
     ></div>
 
     <!-- This element is to trick the browser into centering the modal contents. -->
-    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"
+    <span
+      class="hidden sm:inline-block sm:align-middle sm:h-screen"
+      aria-hidden="true"
       >&#8203;</span
     >
 
@@ -14,8 +18,13 @@
       class="z-40 inline-block align-bottom bg-white rounded-lg px-4 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:p-2"
     >
       <div>
-        <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6" slot="header">
-          <h3 class="text-xl leading-6 font-medium text-gray-900 inline-block">ZenUML Tips</h3>
+        <div
+          class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6"
+          slot="header"
+        >
+          <h3 class="text-xl leading-6 font-medium text-gray-900 inline-block">
+            ZenUML Tips
+          </h3>
           <button
             type="button"
             @click="closeTipsDialog()"
@@ -32,8 +41,12 @@
               <div class="lg:mx-auto lg:max-w-11/12 lg:px-8">
                 <div class="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1">
                   <div>
-                    <div class="px-4 max-w-full mx-auto sm:px-6 lg:max-w-none lg:mx-0">
-                      <h2 class="mt-4 mb-4 text-lg leading-6 font-medium text-gray-900">
+                    <div
+                      class="px-4 max-w-full mx-auto sm:px-6 lg:max-w-none lg:mx-0"
+                    >
+                      <h2
+                        class="mt-4 mb-4 text-lg leading-6 font-medium text-gray-900"
+                      >
                         Declare Participants
                       </h2>
                       <pre
@@ -50,8 +63,14 @@ group GroupName {  B  C }
 // Use stereotype
 &lt;&lt;servlet&gt;&gt; ServiceX</code></pre>
                     </div>
-                    <div class="px-4 max-w-7xl mx-auto sm:px-6 lg:max-w-none lg:mx-0">
-                      <h2 class="mt-4 mb-4 text-lg leading-6 font-medium text-gray-900">Divider</h2>
+                    <div
+                      class="px-4 max-w-7xl mx-auto sm:px-6 lg:max-w-none lg:mx-0"
+                    >
+                      <h2
+                        class="mt-4 mb-4 text-lg leading-6 font-medium text-gray-900"
+                      >
+                        Divider
+                      </h2>
                       <pre
                         class="text-xs w-full bg-gray-50 text-gray-600 p-2 rounded-lg"
                       ><code>A.method()
@@ -61,7 +80,11 @@ B.method()
                     </div>
                   </div>
                   <div class="px-4 w-full mx-auto lg:max-w-none lg:mx-0">
-                    <h2 class="mt-4 mb-4 text-lg leading-6 font-medium text-gray-900">Fragments</h2>
+                    <h2
+                      class="mt-4 mb-4 text-lg leading-6 font-medium text-gray-900"
+                    >
+                      Fragments
+                    </h2>
                     <pre
                       class="text-xs w-full bg-gray-50 text-gray-600 p-2 rounded-lg"
                     ><code>// Alt (AKA if/else)
@@ -84,7 +107,11 @@ try {} catch() {} finally {}
 </code></pre>
                   </div>
                   <div class="px-4 w-full mx-auto lg:max-w-none lg:mx-0">
-                    <h2 class="mt-4 mb-4 text-lg leading-6 font-medium text-gray-900">Messages</h2>
+                    <h2
+                      class="mt-4 mb-4 text-lg leading-6 font-medium text-gray-900"
+                    >
+                      Messages
+                    </h2>
                     <pre
                       class="text-xs w-full bg-gray-50 text-gray-600 p-2 rounded-lg"
                     ><code>//Creation
@@ -107,8 +134,12 @@ A.method() {
 }</code></pre>
                   </div>
                 </div>
-                <div class="px-4 max-w-7xl mx-auto sm:px-6 lg:max-w-none lg:mx-0">
-                  <h2 class="mt-8 mb-4 text-lg leading-6 font-medium text-gray-900">
+                <div
+                  class="px-4 max-w-7xl mx-auto sm:px-6 lg:max-w-none lg:mx-0"
+                >
+                  <h2
+                    class="mt-8 mb-4 text-lg leading-6 font-medium text-gray-900"
+                  >
                     Builtin Icons
                   </h2>
                   <p class="text-sm text-gray-500">
@@ -136,76 +167,76 @@ A.method() {
 </template>
 
 <script>
-import IconList from './IconList.vue';
+import IconList from "./IconList.vue";
 import Icon from "@/components/Icon/Icon.vue";
 
 export default {
-  name: 'TipsDialog',
-  components: {Icon, IconList },
+  name: "TipsDialog",
+  components: { Icon, IconList },
   computed: {
     standardTypes() {
-      return ['Actor', 'Boundary', 'Control', 'Database', 'Entity'];
+      return ["Actor", "Boundary", "Control", "Database", "Entity"];
     },
     awsServices() {
       return [
-        'CloudWatch',
-        'CloudFront',
-        'Cognito',
-        'DynamoDB',
-        'EBS',
-        'EC2',
-        'ECS',
-        'EFS',
-        'ElastiCache',
-        'ElasticBeantalk',
-        'ElasticFileSystem',
-        'Glacier',
-        'IAM',
-        'Kinesis',
-        'Lambda',
-        'LightSail',
-        'RDS',
-        'Redshift',
-        'S3',
-        'SNS',
-        'SQS',
-        'Sagemaker',
-        'VPC',
+        "CloudWatch",
+        "CloudFront",
+        "Cognito",
+        "DynamoDB",
+        "EBS",
+        "EC2",
+        "ECS",
+        "EFS",
+        "ElastiCache",
+        "ElasticBeantalk",
+        "ElasticFileSystem",
+        "Glacier",
+        "IAM",
+        "Kinesis",
+        "Lambda",
+        "LightSail",
+        "RDS",
+        "Redshift",
+        "S3",
+        "SNS",
+        "SQS",
+        "Sagemaker",
+        "VPC",
       ];
     },
     azureServices() {
       return [
-        'AzureActiveDirectory',
-        'AzureBackup',
-        'AzureCDN',
-        'AzureDataFactory',
-        'AzureDevOps',
-        'AzureFunction',
-        'AzureSQL',
-        'CosmosDB',
-        'LogicApps',
-        'VirtualMachine',
+        "AzureActiveDirectory",
+        "AzureBackup",
+        "AzureCDN",
+        "AzureDataFactory",
+        "AzureDevOps",
+        "AzureFunction",
+        "AzureSQL",
+        "CosmosDB",
+        "LogicApps",
+        "VirtualMachine",
       ];
     },
     googleServices() {
       return [
-        'BigTable',
-        'BigQuery',
-        'CloudCDN',
-        'CloudDNS',
-        'CloudInterconnect',
-        'CloudLoadBalancing',
-        'CloudSQL',
-        'CloudStorage',
-        'DataLab',
-        'DataProc',
-        'GoogleIAM',
-        'GoogleSecurity',
-        'GoogleVPC',
-        'PubSub',
-        'SecurityScanner',
-        'StackDriver',
-        'VisionAPI',
+        "BigTable",
+        "BigQuery",
+        "CloudCDN",
+        "CloudDNS",
+        "CloudInterconnect",
+        "CloudLoadBalancing",
+        "CloudSQL",
+        "CloudStorage",
+        "DataLab",
+        "DataProc",
+        "GoogleIAM",
+        "GoogleSecurity",
+        "GoogleVPC",
+        "PubSub",
+        "SecurityScanner",
+        "StackDriver",
+        "VisionAPI",
       ];
     },
   },
@@ -213,9 +244,9 @@ export default {
     closeTipsDialog() {
       this.$store.state.showTips = false;
       try {
-        this.$gtag?.event('close', {
-          event_category: 'help',
-          event_label: 'tips dialog',
+        this.$gtag?.event("close", {
+          event_category: "help",
+          event_label: "tips dialog",
         });
       } catch (e) {
         console.error(e);

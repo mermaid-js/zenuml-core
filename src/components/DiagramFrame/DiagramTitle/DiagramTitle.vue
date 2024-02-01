@@ -4,8 +4,8 @@
 
 <script>
 export default {
-  name: 'DiagramTitle',
-  props: ['context'],
+  name: "DiagramTitle",
+  props: ["context"],
   computed: {
     title: function () {
       return this.context?.content();

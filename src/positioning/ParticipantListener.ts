@@ -1,5 +1,5 @@
-import sequenceParser from '../generated-parser/sequenceParser';
-import sequenceParserListener from '../generated-parser/sequenceParserListener';
+import sequenceParser from "../generated-parser/sequenceParser";
+import sequenceParserListener from "../generated-parser/sequenceParserListener";
 
 const seqParser = sequenceParser;
 
@@ -11,7 +11,7 @@ export interface IParticipantModel {
 
 export class ParticipantListener extends sequenceParserListener {
   private explicitParticipants: IParticipantModel[] = [];
-  private starter: string = '';
+  private starter: string = "";
   private implicitParticipants: IParticipantModel[] = [];
   private isBlind: boolean = false;
 
@@ -36,9 +36,10 @@ export class ParticipantListener extends sequenceParserListener {
   }
 
   enterParticipant(ctx: any) {
-    const name = ctx?.name()?.getFormattedText() || 'Missing `Participant` name';
+    const name =
+      ctx?.name()?.getFormattedText() || "Missing `Participant` name";
     const label = ctx.label()?.name()?.getFormattedText();
-    const participant = { name, label, left: '' };
+    const participant = { name, label, left: "" };
     this.explicitParticipants.push(participant);
   }
 
@@ -50,7 +51,9 @@ export class ParticipantListener extends sequenceParserListener {
 
     const name = ctx?.getFormattedText();
     if (ctx.ClosestAncestorBlock().parentCtx instanceof seqParser.ProgContext) {
-      if (ctx.ClosestAncestorStat() === ctx.ClosestAncestorBlock().children[0]) {
+      if (
+        ctx.ClosestAncestorStat() === ctx.ClosestAncestorBlock().children[0]
+      ) {
         this.starter = name;
         return;
       }
@@ -70,7 +73,7 @@ export class ParticipantListener extends sequenceParserListener {
     if (this.explicitParticipants.some((p) => p.name === name)) {
       return;
     }
-    const participant = { name, left: '' };
+    const participant = { name, left: "" };
     this.implicitParticipants.push(participant);
   }
 
@@ -86,7 +89,7 @@ export class ParticipantListener extends sequenceParserListener {
     if (this.explicitParticipants.some((p) => p.name === name)) {
       return;
     }
-    const participant = { name, left: '' };
+    const participant = { name, left: "" };
     this.implicitParticipants.push(participant);
   }
 
@@ -101,11 +104,14 @@ export class ParticipantListener extends sequenceParserListener {
   }
 
   private _isStarterExplicitlyPositioned() {
-    return this.starter && this.explicitParticipants.find((p) => p.name === this.starter);
+    return (
+      this.starter &&
+      this.explicitParticipants.find((p) => p.name === this.starter)
+    );
   }
 
   private _getStarter() {
-    return { name: this.starter || '_STARTER_', left: '' };
+    return { name: this.starter || "_STARTER_", left: "" };
   }
 
   private _dedup(array: IParticipantModel[]) {
@@ -121,10 +127,10 @@ export class ParticipantListener extends sequenceParserListener {
   private static _assignLeft(array: IParticipantModel[]) {
     array.reduce(
       (pre: IParticipantModel, curr: IParticipantModel) => {
-        curr.left = pre.name || '';
+        curr.left = pre.name || "";
         return curr;
       },
-      { name: '', left: '' }
+      { name: "", left: "" },
     );
   }
 }

@@ -1,9 +1,9 @@
-import { Fixture } from '../../test/unit/parser/fixture/Fixture';
-import { CodeRange } from './CodeRange';
+import { Fixture } from "../../test/unit/parser/fixture/Fixture";
+import { CodeRange } from "./CodeRange";
 
-describe('CodeRange', () => {
-  it('should have an start and an end', () => {
-    const message = Fixture.firstStatement('A.m').message();
+describe("CodeRange", () => {
+  it("should have an start and an end", () => {
+    const message = Fixture.firstStatement("A.m").message();
     const codeRange = CodeRange.from(message);
     expect(codeRange.start.line).toBe(1);
     expect(codeRange.start.col).toBe(0);
@@ -12,8 +12,8 @@ describe('CodeRange', () => {
     expect(codeRange.stop.col).toBe(3);
   });
 
-  it('should have an start and an end', () => {
-    const m1 = Fixture.firstStatement('A.m1{\n B.m2}').message();
+  it("should have an start and an end", () => {
+    const m1 = Fixture.firstStatement("A.m1{\n B.m2}").message();
     const codeRange1 = CodeRange.from(m1);
     expect(codeRange1.start.line).toBe(1);
     expect(codeRange1.start.col).toBe(0);

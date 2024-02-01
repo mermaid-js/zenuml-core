@@ -1,4 +1,4 @@
-import sequenceParser from '../generated-parser/sequenceParser';
+import sequenceParser from "../generated-parser/sequenceParser";
 
 const seqParser = sequenceParser;
 const CreationContext = seqParser.CreationContext;

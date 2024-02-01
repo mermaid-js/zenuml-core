@@ -18,7 +18,7 @@ const epsilon = Math.sqrt(Number.EPSILON);
 // Compares dual numbers x and y by their position at a time infinitesimally
 // after now.
 function dualLessThan(x: IDual, y: IDual) {
-  let d = x.position - y.position;
+  const d = x.position - y.position;
   return d < -epsilon || (Math.abs(d) <= epsilon && x.velocity < y.velocity);
 }
 
@@ -28,12 +28,15 @@ function DeltaTracker() {
   return {
     delta: Infinity,
     dualLessThan: function (x: IDual, y: IDual) {
-      let lessThan = dualLessThan(x, y);
+      const lessThan = dualLessThan(x, y);
       if (lessThan) {
         [x, y] = [y, x];
       }
       if (x.velocity < y.velocity) {
-        this.delta = Math.min(this.delta, (x.position - y.position) / (y.velocity - x.velocity));
+        this.delta = Math.min(
+          this.delta,
+          (x.position - y.position) / (y.velocity - x.velocity),
+        );
       }
       return lessThan;
     },
@@ -42,7 +45,7 @@ function DeltaTracker() {
 
 // Converts the adjacency matrix to an adjacency list representation.
 function graphFromMatrix(n: number, matrix: Array<Array<number>>) {
-  let graph = Array<any>();
+  const graph = Array<any>();
   for (let j = 0; j < n; j++) {
     graph.push([]);
     for (let i = 0; i < j; i++) {
@@ -56,16 +59,16 @@ function graphFromMatrix(n: number, matrix: Array<Array<number>>) {
 
 // Essentially the usual algorithm for longest path, but tracks delta.
 function longestPathTable(graph: any, gaps: Array<any>): any {
-  let tracker = DeltaTracker();
+  const tracker = DeltaTracker();
   let maximum = Dual(0, 0);
-  let table = [];
+  const table = [];
   for (let j = 0; j < graph.length; j++) {
     let argument = null;
     if (j > 0) {
       maximum = dualPlus(maximum, gaps[j - 1]);
     }
-    for (let edge of graph[j]) {
-      let x = dualPlus(table[edge.i].maximum, edge.length);
+    for (const edge of graph[j]) {
+      const x = dualPlus(table[edge.i].maximum, edge.length);
       if (tracker.dualLessThan(maximum, x)) {
         argument = edge.i;
         maximum = x;
@@ -81,7 +84,7 @@ function longestPathTable(graph: any, gaps: Array<any>): any {
 function freezeCriticalGaps(table: any, graph: any, gaps: Array<any>) {
   let j = table.length - 1;
   while (j > 0) {
-    let argument = table[j].argument;
+    const argument = table[j].argument;
     if (argument !== null) {
       j = argument;
     } else {
@@ -100,8 +103,8 @@ function advanceGaps(gaps: Array<IDual>, delta: number) {
 
 // Extracts the final result from the dynamic program table.
 function positionsFromTable(table: any) {
-  let positions = [];
-  for (let entry of table) {
+  const positions = [];
+  for (const entry of table) {
     positions.push(entry.maximum.position);
   }
   return positions;
@@ -110,14 +113,14 @@ function positionsFromTable(table: any) {
 // Entry point for the layout algorithm.
 function find_optimal(matrix: Array<Array<number>>) {
   const n = matrix.length;
-  let graph = graphFromMatrix(n, matrix);
-  let gaps = [];
+  const graph = graphFromMatrix(n, matrix);
+  const gaps = [];
   for (let j = 1; j < n; j++) {
     gaps.push(Dual(0, 1));
   }
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    let [delta, table] = longestPathTable(graph, gaps);
+    const [delta, table] = longestPathTable(graph, gaps);
     if (delta == Infinity) {
       return positionsFromTable(table);
     }

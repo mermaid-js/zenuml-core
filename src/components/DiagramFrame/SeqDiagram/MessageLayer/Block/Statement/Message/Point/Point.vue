@@ -4,18 +4,24 @@
     :class="{ fill: fill, 'no-fill': !fill, 'right-to-left': rtl }"
   >
     <svg v-if="!rtl" class="arrow stroke-2" height="10" width="10">
-      <polyline class="right head fill-current stroke-current" points="0,0 10,5 0,10"></polyline>
+      <polyline
+        class="right head fill-current stroke-current"
+        points="0,0 10,5 0,10"
+      ></polyline>
     </svg>
     <svg v-if="rtl" class="arrow stroke-2" height="10" width="10">
-      <polyline class="left head fill-current stroke-current" points="10,0 0,5 10,10"></polyline>
+      <polyline
+        class="left head fill-current stroke-current"
+        points="10,0 0,5 10,10"
+      ></polyline>
     </svg>
   </div>
 </template>
 
 <script type="text/babel">
 export default {
-  name: 'point',
-  props: ['fill', 'rtl'],
+  name: "point",
+  props: ["fill", "rtl"],
 };
 </script>
 

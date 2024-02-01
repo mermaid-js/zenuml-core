@@ -5,8 +5,8 @@ export interface Frame {
 }
 
 enum PathType {
-  LEFT = 'LEFT',
-  RIGHT = 'RIGHT',
+  LEFT = "LEFT",
+  RIGHT = "RIGHT",
 }
 
 function longestPath(frame: Frame, pathType: PathType): number {
@@ -15,9 +15,11 @@ function longestPath(frame: Frame, pathType: PathType): number {
   }
 
   let maxDepth = 0;
-  for (let child of frame.children) {
-    if ((pathType === PathType.LEFT && child.left !== frame.left) ||
-      (pathType === PathType.RIGHT && child.right !== frame.right)) {
+  for (const child of frame.children) {
+    if (
+      (pathType === PathType.LEFT && child.left !== frame.left) ||
+      (pathType === PathType.RIGHT && child.right !== frame.right)
+    ) {
       continue;
     }
     maxDepth = Math.max(maxDepth, longestPath(child, pathType));
@@ -27,7 +29,7 @@ function longestPath(frame: Frame, pathType: PathType): number {
 }
 
 export default function FrameBorder(frame: Frame) {
-  if(!frame) {
+  if (!frame) {
     return { left: 0, right: 0 };
   }
   return {

@@ -1,4 +1,4 @@
-import { default as sequenceParser } from '../generated-parser/sequenceParser';
+import { default as sequenceParser } from "../generated-parser/sequenceParser";
 
 const seqParser = sequenceParser;
 const RetContext = seqParser.RetContext;
@@ -14,14 +14,21 @@ RetContext.prototype.ReturnTo = function () {
     return blockParent.Starter();
   } else {
     let ctx = blockParent;
-    while (ctx && !(ctx instanceof MessageContext) && !(ctx instanceof CreationContext)) {
+    while (
+      ctx &&
+      !(ctx instanceof MessageContext) &&
+      !(ctx instanceof CreationContext)
+    ) {
       if (ctx instanceof ProgContext) {
         return ctx.Starter();
       }
       ctx = ctx.parentCtx;
     }
     if (ctx instanceof MessageContext) {
-      return ctx.messageBody()?.from()?.getFormattedText() || ctx.ClosestAncestorStat().Origin();
+      return (
+        ctx.messageBody()?.from()?.getFormattedText() ||
+        ctx.ClosestAncestorStat().Origin()
+      );
     }
     return ctx.ClosestAncestorStat().Origin();
   }

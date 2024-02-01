@@ -1,4 +1,4 @@
-import pino from 'pino';
+import pino from "pino";
 
 /**
  * What do we get from 'pino'?
@@ -6,19 +6,23 @@ import pino from 'pino';
  * - `child` method to create a child logger with a given name. The name is added to the log message with the prettify function.
  */
 const logger = pino({
-  level: 'warn',
+  level: "warn",
 });
 
-const LEVELS = ['log', 'trace', 'debug', 'info', 'warn', 'error'];
+const LEVELS = ["log", "trace", "debug", "info", "warn", "error"];
 
 function bind(logger: any, level: string) {
   // @ts-ignore
-  logger[level] = (console[level] || console['log']).bind(console);
+  logger[level] = (console[level] || console["log"]).bind(console);
 }
 
 function bind2(logger: any, level: string, args: any[]) {
   // @ts-ignore
-  logger[level] = (console[level] || console['log']).bind(console, args[0], args[1]);
+  logger[level] = (console[level] || console["log"]).bind(
+    console,
+    args[0],
+    args[1],
+  );
 }
 
 function prettify(logger: any): typeof logger {
@@ -26,11 +30,13 @@ function prettify(logger: any): typeof logger {
   const childFn = logger.child;
   logger.child = function (opts: any) {
     const child = childFn.call(logger, opts);
-    LEVELS.forEach((level) => bind2(child, level, ['%c' + opts.name || '', 'color: #00f']));
+    LEVELS.forEach((level) =>
+      bind2(child, level, ["%c" + opts.name || "", "color: #00f"]),
+    );
     return child;
   };
   return logger;
 }
 
-let rootLogger = prettify(logger);
+const rootLogger = prettify(logger);
 export default rootLogger;

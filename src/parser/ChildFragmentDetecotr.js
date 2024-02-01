@@ -1,5 +1,5 @@
-import antlr4 from 'antlr4';
-import sequenceParserListener from '../generated-parser/sequenceParserListener';
+import antlr4 from "antlr4";
+import sequenceParserListener from "../generated-parser/sequenceParserListener";
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 

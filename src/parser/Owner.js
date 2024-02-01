@@ -1,4 +1,4 @@
-import { default as sequenceParser } from '../generated-parser/sequenceParser';
+import { default as sequenceParser } from "../generated-parser/sequenceParser";
 
 const seqParser = sequenceParser;
 const CreationContext = seqParser.CreationContext;
@@ -19,7 +19,7 @@ CreationContext.prototype.Constructor = function () {
 // Owner of              m1    m2    m3
 CreationContext.prototype.Owner = function () {
   if (!this.Constructor()) {
-    return 'Missing Constructor';
+    return "Missing Constructor";
   }
   const assignee = this.Assignee();
   const type = this.Constructor();

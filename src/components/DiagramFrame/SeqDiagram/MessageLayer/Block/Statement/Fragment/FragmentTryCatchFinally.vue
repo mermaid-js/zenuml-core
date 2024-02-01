@@ -5,15 +5,22 @@
       <div
         class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t relative"
       >
-        <div v-if="numbering" class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 text-sm font-thin leading-6">
+        <div
+          v-if="numbering"
+          class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 text-sm font-thin leading-6"
+        >
           {{ number }}
         </div>
         <div class="name font-semibold p-1 border-b text-sm">
-          <collapse-button label="Try" :collapsed="collapsed" @click="this.toggle"/>
+          <collapse-button
+            label="Try"
+            :collapsed="collapsed"
+            @click="this.toggle"
+          />
         </div>
       </div>
     </div>
-    <div :class="{hidden: collapsed}">
+    <div :class="{ hidden: collapsed }">
       <div class="segment">
         <!-- fragment-offset set as offsetX - 1 for fragment border     -->
         <block
@@ -26,7 +33,10 @@
         >
         </block>
       </div>
-      <template v-for="(catchBlock, index) in tcf.catchBlock()" :key="index + 500">
+      <template
+        v-for="(catchBlock, index) in tcf.catchBlock()"
+        :key="index + 500"
+      >
         <div class="segment text-sm mt-2 border-t border-solid">
           <div class="header inline-block" :key="index + 1000">
             <label class="keyword catch p-1">catch</label
@@ -45,7 +55,9 @@
       <template v-if="finallyBlock">
         <div class="segment mt-2 border-t border-solid">
           <div class="header flex text-skin-fragment finally">
-            <label class="keyword finally px-1 inline-block text-sm">finally</label>
+            <label class="keyword finally px-1 inline-block text-sm"
+              >finally</label
+            >
           </div>
           <block
             :style="{ paddingLeft: `${offsetX}px` }"
@@ -61,16 +73,16 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import fragment from './FragmentMixin';
-import { blockLength } from '@/utils/Numbering';
+import { mapState } from "vuex";
+import fragment from "./FragmentMixin";
+import { blockLength } from "@/utils/Numbering";
 
 export default {
-  name: 'fragment-tcf',
-  props: ['context', 'comment', 'commentObj', 'selfCallIndent', 'number'],
+  name: "fragment-tcf",
+  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
   mixins: [fragment],
   computed: {
-    ...mapState(['numbering']),
+    ...mapState(["numbering"]),
     from: function () {
       return this.context.Origin();
     },
@@ -84,14 +96,16 @@ export default {
       return this.tcf?.finallyBlock()?.braceBlock()?.block();
     },
     blockLengthAcc() {
-      const acc = [blockLength(this.blockInTryBlock)]
+      const acc = [blockLength(this.blockInTryBlock)];
       if (this.tcf?.catchBlock()) {
-        this.tcf.catchBlock().forEach(block => {
-          acc.push(acc[acc.length - 1] + blockLength(this.blockInCatchBlock(block)))
-        })
+        this.tcf.catchBlock().forEach((block) => {
+          acc.push(
+            acc[acc.length - 1] + blockLength(this.blockInCatchBlock(block)),
+          );
+        });
       }
-      return acc
-    }
+      return acc;
+    },
   },
   methods: {
     exception(ctx) {
