@@ -1,12 +1,21 @@
-import { resolve } from 'path';
-import { defineConfig } from 'vite';
-import createVuePlugin from '@vitejs/plugin-vue';
-import { execSync } from 'child_process';
-import svgLoader from 'vite-svg-loader';
+import { resolve } from "path";
+import { defineConfig } from "vite";
+import createVuePlugin from "@vitejs/plugin-vue";
+import { execSync } from "child_process";
+import svgLoader from "vite-svg-loader";
+
+process.env.VITE_APP_GIT_HASH = execSync("git rev-parse --short HEAD")
+  .toString()
+  .trim();
+process.env.VITE_APP_GIT_BRANCH = execSync("git branch --show-current")
+  .toString()
+  .trim();
 
 function getCypressHtmlFiles() {
-  const cypressFolder = resolve(__dirname, 'cy');
-  const strings = execSync(`find ${cypressFolder} -name '*.html'`).toString().split('\n');
+  const cypressFolder = resolve(__dirname, "cy");
+  const strings = execSync(`find ${cypressFolder} -name '*.html'`)
+    .toString()
+    .split("\n");
   // remove empty string
   strings.pop();
   return strings;
@@ -17,13 +26,13 @@ console.log(cypressHtmlFiles);
 export default defineConfig({
   build: {
     rollupOptions: {
-      input: ['index.html', 'embed.html', ...cypressHtmlFiles],
+      input: ["index.html", "embed.html", ...cypressHtmlFiles],
     },
   },
   resolve: {
     alias: {
-      'vue': '@vue/compat',
-      '@': resolve(__dirname, './src')
+      vue: "@vue/compat",
+      "@": resolve(__dirname, "./src"),
     },
   },
   plugins: [
@@ -39,11 +48,10 @@ export default defineConfig({
     svgLoader(),
   ],
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
     deps: {
-      inline: ['@vue/test-utils'],
+      inline: ["@vue/test-utils"],
     },
   },
 });
-
