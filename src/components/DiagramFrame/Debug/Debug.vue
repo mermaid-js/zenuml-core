@@ -14,8 +14,8 @@
 <script>
 import Icon from "@/components/Icon/Icon.vue";
 
-const commitHash = "process.env.VUE_APP_GIT_HASH";
-const gitBranch = "process.env.VUE_APP_GIT_BRANCH";
+const commitHash = import.meta.env.VITE_APP_GIT_HASH;
+const gitBranch = import.meta.env.VITE_APP_GIT_BRANCH;
 export default {
   name: "Debug",
   components: { Icon },
