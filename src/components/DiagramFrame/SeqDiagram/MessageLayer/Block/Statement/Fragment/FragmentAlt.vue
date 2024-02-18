@@ -31,13 +31,13 @@
           <label
             class="condition px-1 text-sm inline-block"
             :class="{
-              'px-2': editableMap.get(ifBlock),
-              'mx-1': editableMap.get(ifBlock),
+              editable: editableMap.get(ifBlock),
             }"
             :contenteditable="editableMap.get(ifBlock)"
             @dblclick="(e) => handleDblClick.call(ifBlock, e)"
             @blur="(e) => handleBlur.call(ifBlock, e)"
             @keyup="(e) => handleKeyup.call(ifBlock, e)"
+            @keydown="handleKeydown"
           >
             {{
               editableMap.get(ifBlock)
@@ -62,13 +62,13 @@
             <label
               class="condition px-1"
               :class="{
-                'px-2': editableMap.get(elseIfBlock),
-                'mx-1': editableMap.get(elseIfBlock),
+                editable: editableMap.get(elseIfBlock),
               }"
               :contenteditable="editableMap.get(elseIfBlock)"
               @dblclick="(e) => handleDblClick.call(elseIfBlock, e)"
               @blur="(e) => handleBlur.call(elseIfBlock, e)"
               @keyup="(e) => handleKeyup.call(elseIfBlock, e)"
+              @keydown="handleKeydown"
             >
               {{
                 editableMap.get(elseIfBlock)
@@ -199,6 +199,14 @@ export default {
       replaceConditionText(this, e);
     }
 
+    function handleKeydown(e) {
+      // prevent new line
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+
     function handleKeyup(e) {
       if (e.key === "Enter" || e.key === "Escape" || e.key === "Tab") {
         replaceConditionText(this, e);
@@ -248,6 +256,7 @@ export default {
       blockInElseIfBlock,
       increaseNumber,
       blockLength,
+      handleKeydown,
       handleKeyup,
       handleBlur,
       handleDblClick,
@@ -260,5 +269,11 @@ export default {
 /* We need to do this because tailwind 3.2.4 set border-color to #e5e7eb via '*'. */
 * {
   border-color: inherit;
+}
+
+.condition.editable {
+  padding: 2px 6px;
+  margin-left: 4px;
+  cursor: text;
 }
 </style>
