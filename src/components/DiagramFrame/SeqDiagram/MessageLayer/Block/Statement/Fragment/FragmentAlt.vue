@@ -28,9 +28,12 @@
     <div :class="{ hidden: collapsed }">
       <div class="segment">
         <div class="text-skin-fragment flex">
-          <label class="condition px-1 text-sm inline-block"
-            >[{{ condition }}]</label
-          >
+          <EditableLabel
+            :editable="editableMap.get(ifBlock)"
+            :toggleEditable="(bool) => toggleEditable(ifBlock, bool)"
+            :block="ifBlock"
+            :getConditionFromBlock="conditionFromIfElseBlock"
+          />
         </div>
         <block
           v-if="blockInIfBlock"
@@ -41,16 +44,16 @@
           incremental
         ></block>
       </div>
-      <template
-        v-for="(elseIfBlock, index) in alt.elseIfBlock()"
-        :key="index + 500"
-      >
+      <template v-for="(elseIfBlock, index) in elseIfBlocks" :key="index + 500">
         <div class="segment mt-2 border-t border-solid">
           <div class="text-skin-fragment" :key="index + 1000">
             <label class="else-if hidden">else if</label>
-            <label class="condition px-1"
-              >[{{ conditionFromIfElseBlock(elseIfBlock) }}]</label
-            >
+            <EditableLabel
+              :editable="editableMap.get(elseIfBlock)"
+              :toggleEditable="(bool) => toggleEditable(elseIfBlock, bool)"
+              :block="elseIfBlock"
+              :getConditionFromBlock="conditionFromIfElseBlock"
+            />
           </div>
           <block
             :style="{ paddingLeft: `${offsetX}px` }"
@@ -83,52 +86,81 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { computed, ref } from "vue";
+import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
 import { increaseNumber, blockLength } from "@/utils/Numbering";
+import EditableLabel from "../../EditableLabel.vue";
 
 export default {
   name: "fragment-alt",
   props: ["context", "comment", "selfCallIndent", "commentObj", "number"],
   mixins: [fragment],
-  computed: {
-    ...mapState(["numbering"]),
-    from: function () {
-      return this.context.Origin();
-    },
-    alt: function () {
-      return this.context.alt();
-    },
-    blockInIfBlock: function () {
-      return this.alt?.ifBlock()?.braceBlock()?.block();
-    },
-    condition: function () {
-      return this.conditionFromIfElseBlock(this.alt?.ifBlock());
-    },
-    elseBlock: function () {
-      return this.alt?.elseBlock()?.braceBlock()?.block();
-    },
-    blockLengthAcc() {
-      const acc = [blockLength(this.blockInIfBlock)];
-      if (this.alt?.elseIfBlock()) {
-        this.alt.elseIfBlock().forEach((block) => {
+  components: {
+    EditableLabel,
+  },
+  setup(props) {
+    const store = useStore();
+    const editableMap = ref(new Map());
+    const numbering = computed(() => store.state.numbering);
+    const from = computed(() => props.context.Origin());
+    const alt = computed(() => props.context.alt());
+    const ifBlock = computed(() => alt.value?.ifBlock());
+    const elseIfBlocks = computed(() => alt.value?.elseIfBlock());
+    const elseBlock = computed(() =>
+      alt.value?.elseBlock()?.braceBlock()?.block(),
+    );
+    const blockInIfBlock = computed(() =>
+      alt.value?.ifBlock()?.braceBlock()?.block(),
+    );
+    const blockLengthAcc = computed(() => {
+      const acc = [blockLength(blockInIfBlock.value)];
+      if (alt.value?.elseIfBlock()) {
+        alt.value.elseIfBlock().forEach((block) => {
           acc.push(
-            acc[acc.length - 1] + blockLength(this.blockInElseIfBlock(block)),
+            acc[acc.length - 1] + blockLength(blockInElseIfBlock(block)),
           );
         });
       }
       return acc;
-    },
-  },
-  methods: {
-    conditionFromIfElseBlock(ctx) {
-      return ctx?.parExpr()?.condition()?.getFormattedText();
-    },
-    blockInElseIfBlock(ctx) {
-      return ctx?.braceBlock()?.block();
-    },
-    increaseNumber: increaseNumber,
-    blockLength: blockLength,
+    });
+
+    // initialize editableMap
+    editableMap.value.set(ifBlock.value, false);
+    if (elseIfBlocks.value.length > 0) {
+      elseIfBlocks.value.forEach((block) => {
+        editableMap.value.set(block, false);
+      });
+    }
+
+    function conditionFromIfElseBlock(block) {
+      return block?.parExpr()?.condition();
+    }
+
+    function blockInElseIfBlock(block) {
+      return block?.braceBlock()?.block();
+    }
+
+    function toggleEditable(block, editable) {
+      editableMap.value.set(block, editable);
+    }
+
+    return {
+      editableMap,
+      numbering,
+      from,
+      alt,
+      blockInIfBlock,
+      ifBlock,
+      elseIfBlocks,
+      elseBlock,
+      blockLengthAcc,
+      toggleEditable,
+      conditionFromIfElseBlock,
+      blockInElseIfBlock,
+      increaseNumber,
+      blockLength,
+    };
   },
 };
 </script>
@@ -137,5 +169,11 @@ export default {
 /* We need to do this because tailwind 3.2.4 set border-color to #e5e7eb via '*'. */
 * {
   border-color: inherit;
+}
+
+.condition.editable {
+  padding: 2px 6px;
+  margin-left: 4px;
+  cursor: text;
 }
 </style>

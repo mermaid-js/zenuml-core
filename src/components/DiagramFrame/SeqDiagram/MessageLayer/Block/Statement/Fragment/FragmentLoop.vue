@@ -26,7 +26,12 @@
     <div :class="{ hidden: collapsed }">
       <div class="segment">
         <div class="text-skin-fragment">
-          <label class="condition p-1">[{{ condition }}]</label>
+          <EditableLabel
+            :editable="editable"
+            :toggleEditable="toggleEditable"
+            :block="blockInLoop"
+            :getConditionFromBlock="getConditionFromBlock"
+          />
         </div>
         <block
           :style="{ paddingLeft: `${offsetX}px` }"
@@ -40,27 +45,49 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { computed, ref } from "vue";
+import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
+import EditableLabel from "../../EditableLabel.vue";
 
 export default {
   name: "fragment-loop",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
   mixins: [fragment],
-  computed: {
-    ...mapState(["numbering"]),
-    from: function () {
-      return this.context.Origin();
-    },
-    loop: function () {
-      return this.context.loop();
-    },
-    blockInLoop: function () {
-      return this.loop?.braceBlock()?.block();
-    },
-    condition: function () {
-      return this.loop?.parExpr()?.condition()?.getFormattedText();
-    },
+  components: {
+    EditableLabel,
+  },
+  setup(props) {
+    const store = useStore();
+    const numbering = computed(() => store.state.numbering);
+    const from = computed(() => props.context.Origin());
+    const loop = computed(() => props.context.loop());
+    const blockInLoop = computed(() => loop.value?.braceBlock()?.block());
+    const editable = ref(false);
+    const toggleEditable = (_editable) => {
+      editable.value = _editable;
+    };
+
+    // const {
+    //   handleDblClick,
+    //   handleBlur,
+    //   handleKeydown,
+    //   handleKeyup,
+    // } = useConditionEdit({
+    //   blocks: [blockInLoop.value],
+    //   getCondition: () => condition.value,
+    //   getConditionText: () => conditionText.value,
+    // });
+
+    return {
+      numbering,
+      from,
+      loop,
+      blockInLoop,
+      editable,
+      toggleEditable,
+      getConditionFromBlock: () => loop.value?.parExpr()?.condition(),
+    };
   },
 };
 </script>
@@ -68,5 +95,10 @@ export default {
 /* We need to do this because tailwind 3.2.4 set border-color to #e5e7eb via '*'. */
 * {
   border-color: inherit;
+}
+.condition.editable {
+  padding: 2px 6px;
+  margin-left: 4px;
+  cursor: text;
 }
 </style>
