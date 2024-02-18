@@ -210,11 +210,18 @@ export default {
       event.preventDefault();
       event.stopPropagation();
 
-      // Remove all whitespaces and check if the text is empty
-      const newText = event.target.innerText.replace(/\s/g, "").trim();
+      let newText = event.target.innerText.trim();
+
+      // if text is empty, we need to replace it with the original condition text
       if (newText === "") {
         event.target.innerText = conditionTextFromIfElseBlock(this);
         return;
+      }
+
+      // if text has empty spaces, we need to wrap it with double quotes
+      if (newText.includes(" ")) {
+        newText = newText.replace(/"/g, "");
+        newText = `"${newText}"`;
       }
 
       const condition = conditionFromIfElseBlock(block);
