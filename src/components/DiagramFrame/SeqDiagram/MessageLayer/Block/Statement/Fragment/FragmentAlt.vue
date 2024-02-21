@@ -34,9 +34,9 @@
               editable: editableMap.get(ifBlock),
             }"
             :contenteditable="editableMap.get(ifBlock)"
-            @dblclick="(e) => handleDblClick.call(ifBlock, e)"
-            @blur="(e) => handleBlur.call(ifBlock, e)"
-            @keyup="(e) => handleKeyup.call(ifBlock, e)"
+            @dblclick="handleDblClick(ifBlock, $event)"
+            @blur="handleBlur(ifBlock, $event)"
+            @keyup="handleKeyup(ifBlock, $event)"
             @keydown="handleKeydown"
           >
             {{
@@ -65,9 +65,9 @@
                 editable: editableMap.get(elseIfBlock),
               }"
               :contenteditable="editableMap.get(elseIfBlock)"
-              @dblclick="(e) => handleDblClick.call(elseIfBlock, e)"
-              @blur="(e) => handleBlur.call(elseIfBlock, e)"
-              @keyup="(e) => handleKeyup.call(elseIfBlock, e)"
+              @dblclick="handleDblClick(elseIfBlock, $event)"
+              @blur="handleBlur(elseIfBlock, $event)"
+              @keyup="handleKeyup(elseIfBlock, $event)"
               @keydown="handleKeydown"
             >
               {{
@@ -178,10 +178,10 @@ export default {
       onContentChange.value(code);
     }
 
-    async function handleDblClick(e) {
+    async function handleDblClick(block, e) {
       e.preventDefault();
       e.stopPropagation();
-      toggleEditable.call(this, true);
+      toggleEditable.call(block, true);
 
       await nextTick();
       const range = document.createRange();
@@ -192,11 +192,11 @@ export default {
       sel.addRange(range);
     }
 
-    async function handleBlur(e) {
+    async function handleBlur(block, e) {
       // avoid race condition with keyup event
       await nextTick();
-      if (!editableMap.value.get(this)) return;
-      replaceConditionText(this, e);
+      if (!editableMap.value.get(block)) return;
+      replaceConditionText(block, e);
     }
 
     function handleKeydown(e) {
@@ -207,9 +207,9 @@ export default {
       }
     }
 
-    function handleKeyup(e) {
+    function handleKeyup(block, e) {
       if (e.key === "Enter" || e.key === "Escape" || e.key === "Tab") {
-        replaceConditionText(this, e);
+        replaceConditionText(block, e);
       }
     }
 
