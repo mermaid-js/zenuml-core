@@ -26,7 +26,7 @@
     <div :class="{ hidden: collapsed }">
       <div class="segment">
         <div class="text-skin-fragment">
-          <EditableLabel
+          <ConditionLabel
             :editable="editable"
             :toggleEditable="toggleEditable"
             :block="blockInLoop"
@@ -45,17 +45,17 @@
 </template>
 
 <script>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
-import EditableLabel from "../../EditableLabel.vue";
+import ConditionLabel from "./ConditionLabel.vue";
 
 export default {
   name: "fragment-loop",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
   mixins: [fragment],
   components: {
-    EditableLabel,
+    ConditionLabel,
   },
   setup(props) {
     const store = useStore();
@@ -63,18 +63,12 @@ export default {
     const from = computed(() => props.context.Origin());
     const loop = computed(() => props.context.loop());
     const blockInLoop = computed(() => loop.value?.braceBlock()?.block());
-    const editable = ref(false);
-    const toggleEditable = (_editable) => {
-      editable.value = _editable;
-    };
 
     return {
       numbering,
       from,
       loop,
       blockInLoop,
-      editable,
-      toggleEditable,
       getConditionFromBlock: () => loop.value?.parExpr()?.condition(),
     };
   },

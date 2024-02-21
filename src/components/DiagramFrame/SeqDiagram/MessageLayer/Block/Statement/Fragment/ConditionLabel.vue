@@ -14,13 +14,14 @@
   </label>
 </template>
 <script>
-import { computed, nextTick } from "vue";
+import { computed, nextTick, ref } from "vue";
 import { useStore } from "vuex";
 
 export default {
-  name: "EditableLabel",
-  props: ["editable", "block", "toggleEditable", "getConditionFromBlock"],
+  name: "ConditionLabel",
+  props: ["block", "getConditionFromBlock"],
   setup(props) {
+    const editable = ref(false);
     const store = useStore();
     const code = computed(() => store.getters.code);
     const onContentChange = computed(
@@ -31,6 +32,10 @@ export default {
       () => condition.value.getFormattedText() ?? "",
     );
 
+    function toggleEditable(_editable) {
+      editable.value = _editable;
+    }
+
     function updateCode(code) {
       store.dispatch("updateCode", { code });
       onContentChange.value(code);
@@ -39,7 +44,7 @@ export default {
     async function handleDblClick(e) {
       e.preventDefault();
       e.stopPropagation();
-      props.toggleEditable(true);
+      toggleEditable(true);
 
       await nextTick();
       const range = document.createRange();
@@ -56,7 +61,7 @@ export default {
     async function handleBlur(e) {
       // avoid race condition with keyup event
       await nextTick();
-      if (!props.editable) return;
+      if (!editable.value) return;
       replaceConditionText(e);
     }
 
@@ -75,7 +80,7 @@ export default {
     }
 
     function replaceConditionText(e) {
-      props.toggleEditable(false);
+      toggleEditable(false);
       e.preventDefault();
       e.stopPropagation();
 
@@ -96,8 +101,8 @@ export default {
       }
 
       const [start, end] = [
-        condition.value.start?.start,
-        condition.value.stop?.stop,
+        condition.value?.start?.start,
+        condition.value?.stop?.stop,
       ];
       updateCode(
         code.value.slice(0, start) + newText + code.value.slice(end + 1),
@@ -105,6 +110,7 @@ export default {
     }
 
     return {
+      editable,
       conditionText,
       handleBlur,
       handleDblClick,

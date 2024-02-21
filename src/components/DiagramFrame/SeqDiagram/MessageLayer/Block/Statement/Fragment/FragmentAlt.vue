@@ -28,9 +28,7 @@
     <div :class="{ hidden: collapsed }">
       <div class="segment">
         <div class="text-skin-fragment flex">
-          <EditableLabel
-            :editable="editableMap.get(ifBlock)"
-            :toggleEditable="(bool) => toggleEditable(ifBlock, bool)"
+          <ConditionLabel
             :block="ifBlock"
             :getConditionFromBlock="conditionFromIfElseBlock"
           />
@@ -49,8 +47,6 @@
           <div class="text-skin-fragment" :key="index + 1000">
             <label class="else-if hidden">else if</label>
             <EditableLabel
-              :editable="editableMap.get(elseIfBlock)"
-              :toggleEditable="(bool) => toggleEditable(elseIfBlock, bool)"
               :block="elseIfBlock"
               :getConditionFromBlock="conditionFromIfElseBlock"
             />
@@ -86,22 +82,21 @@
 </template>
 
 <script>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
 import { increaseNumber, blockLength } from "@/utils/Numbering";
-import EditableLabel from "../../EditableLabel.vue";
+import ConditionLabel from "./ConditionLabel.vue";
 
 export default {
   name: "fragment-alt",
   props: ["context", "comment", "selfCallIndent", "commentObj", "number"],
   mixins: [fragment],
   components: {
-    EditableLabel,
+    ConditionLabel,
   },
   setup(props) {
     const store = useStore();
-    const editableMap = ref(new Map());
     const numbering = computed(() => store.state.numbering);
     const from = computed(() => props.context.Origin());
     const alt = computed(() => props.context.alt());
@@ -125,14 +120,6 @@ export default {
       return acc;
     });
 
-    // initialize editableMap
-    editableMap.value.set(ifBlock.value, false);
-    if (elseIfBlocks.value.length > 0) {
-      elseIfBlocks.value.forEach((block) => {
-        editableMap.value.set(block, false);
-      });
-    }
-
     function conditionFromIfElseBlock(block) {
       return block?.parExpr()?.condition();
     }
@@ -141,12 +128,7 @@ export default {
       return block?.braceBlock()?.block();
     }
 
-    function toggleEditable(block, editable) {
-      editableMap.value.set(block, editable);
-    }
-
     return {
-      editableMap,
       numbering,
       from,
       alt,
@@ -155,7 +137,6 @@ export default {
       elseIfBlocks,
       elseBlock,
       blockLengthAcc,
-      toggleEditable,
       conditionFromIfElseBlock,
       blockInElseIfBlock,
       increaseNumber,
