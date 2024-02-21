@@ -28,8 +28,7 @@
     <div :class="{ hidden: collapsed }">
       <div class="segment">
         <div class="text-skin-fragment flex">
-          <label
-            class="condition px-1 text-sm inline-block"
+          <!-- <label class="condition px-1 text-sm inline-block"
             :class="{
               editable: editableMap.get(ifBlock),
             }"
@@ -37,14 +36,19 @@
             @dblclick="handleDblClick(ifBlock, $event)"
             @blur="handleBlur(ifBlock, $event)"
             @keyup="handleKeyup(ifBlock, $event)"
-            @keydown="handleKeydown"
-          >
+            @keydown="handleKeydown">
             {{
               editableMap.get(ifBlock)
-                ? conditionTextFromIfElseBlock(ifBlock)
-                : `[${conditionTextFromIfElseBlock(ifBlock)}]`
+              ? conditionTextFromIfElseBlock(ifBlock)
+              : `[${conditionTextFromIfElseBlock(ifBlock)}]`
             }}
-          </label>
+          </label> -->
+          <EditableLabel
+            :editable="editableMap.get(ifBlock)"
+            :toggleEditable="(bool) => toggleEditable(ifBlock, bool)"
+            :block="ifBlock"
+            :getConditionFromBlock="conditionFromIfElseBlock"
+          />
         </div>
         <block
           v-if="blockInIfBlock"
@@ -59,23 +63,12 @@
         <div class="segment mt-2 border-t border-solid">
           <div class="text-skin-fragment" :key="index + 1000">
             <label class="else-if hidden">else if</label>
-            <label
-              class="condition px-1"
-              :class="{
-                editable: editableMap.get(elseIfBlock),
-              }"
-              :contenteditable="editableMap.get(elseIfBlock)"
-              @dblclick="handleDblClick(elseIfBlock, $event)"
-              @blur="handleBlur(elseIfBlock, $event)"
-              @keyup="handleKeyup(elseIfBlock, $event)"
-              @keydown="handleKeydown"
-            >
-              {{
-                editableMap.get(elseIfBlock)
-                  ? conditionTextFromIfElseBlock(elseIfBlock)
-                  : `[${conditionTextFromIfElseBlock(elseIfBlock)}]`
-              }}
-            </label>
+            <EditableLabel
+              :editable="editableMap.get(elseIfBlock)"
+              :toggleEditable="(bool) => toggleEditable(elseIfBlock, bool)"
+              :block="elseIfBlock"
+              :getConditionFromBlock="conditionFromIfElseBlock"
+            />
           </div>
           <block
             :style="{ paddingLeft: `${offsetX}px` }"
@@ -108,18 +101,22 @@
 </template>
 
 <script>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
 import { increaseNumber, blockLength } from "@/utils/Numbering";
-import { useConditionEdit } from "@/functions/useConditionEdit";
+import EditableLabel from "../../EditableLabel.vue";
 
 export default {
   name: "fragment-alt",
   props: ["context", "comment", "selfCallIndent", "commentObj", "number"],
   mixins: [fragment],
+  components: {
+    EditableLabel,
+  },
   setup(props) {
     const store = useStore();
+    const editableMap = ref(new Map());
     const numbering = computed(() => store.state.numbering);
     const from = computed(() => props.context.Origin());
     const alt = computed(() => props.context.alt());
@@ -143,29 +140,25 @@ export default {
       return acc;
     });
 
-    function conditionFromIfElseBlock(block) {
-      return block?.parExpr()?.condition();
+    // initialize editableMap
+    editableMap.value.set(ifBlock.value, false);
+    if (elseIfBlocks.value.length > 0) {
+      elseIfBlocks.value.forEach((block) => {
+        editableMap.value.set(block, false);
+      });
     }
 
-    function conditionTextFromIfElseBlock(block) {
-      return conditionFromIfElseBlock(block)?.getFormattedText();
+    function conditionFromIfElseBlock(block) {
+      return block?.parExpr()?.condition();
     }
 
     function blockInElseIfBlock(block) {
       return block?.braceBlock()?.block();
     }
 
-    const {
-      editableMap,
-      handleDblClick,
-      handleBlur,
-      handleKeydown,
-      handleKeyup,
-    } = useConditionEdit({
-      blocks: [ifBlock.value, ...elseIfBlocks.value, elseBlock.value],
-      getCondition: conditionFromIfElseBlock,
-      getConditionText: conditionTextFromIfElseBlock,
-    });
+    function toggleEditable(block, editable) {
+      editableMap.value.set(block, editable);
+    }
 
     return {
       editableMap,
@@ -177,15 +170,11 @@ export default {
       elseIfBlocks,
       elseBlock,
       blockLengthAcc,
+      toggleEditable,
       conditionFromIfElseBlock,
-      conditionTextFromIfElseBlock,
       blockInElseIfBlock,
       increaseNumber,
       blockLength,
-      handleKeydown,
-      handleKeyup,
-      handleBlur,
-      handleDblClick,
     };
   },
 };

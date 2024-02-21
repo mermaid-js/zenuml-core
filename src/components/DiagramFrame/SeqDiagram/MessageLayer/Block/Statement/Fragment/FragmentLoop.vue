@@ -26,23 +26,12 @@
     <div :class="{ hidden: collapsed }">
       <div class="segment">
         <div class="text-skin-fragment">
-          <label
-            class="condition p-1"
-            :class="{
-              editable: editableMap.get(blockInLoop),
-            }"
-            :contenteditable="editableMap.get(blockInLoop)"
-            @dblclick="handleDblClick(blockInLoop, $event)"
-            @blur="handleBlur(blockInLoop, $event)"
-            @keydown="handleKeydown($event)"
-            @keyup="handleKeyup(blockInLoop, $event)"
-          >
-            {{
-              editableMap.get(blockInLoop)
-                ? conditionText
-                : `[${conditionText}]`
-            }}
-          </label>
+          <EditableLabel
+            :editable="editable"
+            :toggleEditable="toggleEditable"
+            :block="blockInLoop"
+            :getConditionFromBlock="getConditionFromBlock"
+          />
         </div>
         <block
           :style="{ paddingLeft: `${offsetX}px` }"
@@ -56,49 +45,48 @@
 </template>
 
 <script>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
-import { useConditionEdit } from "@/functions/useConditionEdit";
+import EditableLabel from "../../EditableLabel.vue";
 
 export default {
   name: "fragment-loop",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
   mixins: [fragment],
+  components: {
+    EditableLabel,
+  },
   setup(props) {
     const store = useStore();
     const numbering = computed(() => store.state.numbering);
     const from = computed(() => props.context.Origin());
     const loop = computed(() => props.context.loop());
     const blockInLoop = computed(() => loop.value?.braceBlock()?.block());
-    const condition = computed(() => loop.value?.parExpr()?.condition());
-    const conditionText = computed(() =>
-      loop.value?.parExpr()?.condition()?.getFormattedText(),
-    );
+    const editable = ref(false);
+    const toggleEditable = (_editable) => {
+      editable.value = _editable;
+    };
 
-    const {
-      editableMap,
-      handleDblClick,
-      handleBlur,
-      handleKeydown,
-      handleKeyup,
-    } = useConditionEdit({
-      blocks: [blockInLoop.value],
-      getCondition: () => condition.value,
-      getConditionText: () => conditionText.value,
-    });
+    // const {
+    //   handleDblClick,
+    //   handleBlur,
+    //   handleKeydown,
+    //   handleKeyup,
+    // } = useConditionEdit({
+    //   blocks: [blockInLoop.value],
+    //   getCondition: () => condition.value,
+    //   getConditionText: () => conditionText.value,
+    // });
 
     return {
       numbering,
       from,
       loop,
       blockInLoop,
-      conditionText,
-      editableMap,
-      handleDblClick,
-      handleBlur,
-      handleKeydown,
-      handleKeyup,
+      editable,
+      toggleEditable,
+      getConditionFromBlock: () => loop.value?.parExpr()?.condition(),
     };
   },
 };
