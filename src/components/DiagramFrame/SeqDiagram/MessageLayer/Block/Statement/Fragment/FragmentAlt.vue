@@ -149,16 +149,16 @@ export default {
     );
 
     // Set the initial value of the editableMap
-    editableMap.value.set(alt.value, false);
+    editableMap.value.set(ifBlock.value, false);
 
-    if (alt.value?.elseIfBlock()) {
-      alt.value.elseIfBlock().forEach((block) => {
+    if (elseIfBlocks.value.length > 0) {
+      elseIfBlocks.value.forEach((block) => {
         editableMap.value.set(block, false);
       });
     }
 
-    function toggleEditable(_editable) {
-      editableMap.value.set(this, _editable);
+    function toggleEditable(block, editable) {
+      editableMap.value.set(block, editable);
     }
 
     function conditionFromIfElseBlock(ctx) {
@@ -181,7 +181,7 @@ export default {
     async function handleDblClick(block, e) {
       e.preventDefault();
       e.stopPropagation();
-      toggleEditable.call(block, true);
+      toggleEditable(block, true);
 
       await nextTick();
       const range = document.createRange();
@@ -222,7 +222,7 @@ export default {
 
       // if text is empty, we need to replace it with the original condition text
       if (newText === "") {
-        event.target.innerText = conditionTextFromIfElseBlock(this);
+        event.target.innerText = conditionTextFromIfElseBlock(block);
         return;
       }
 
