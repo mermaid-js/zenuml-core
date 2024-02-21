@@ -108,10 +108,11 @@
 </template>
 
 <script>
-import { ref, computed, nextTick } from "vue";
+import { computed } from "vue";
 import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
 import { increaseNumber, blockLength } from "@/utils/Numbering";
+import { useConditionEdit } from "@/functions/useConditionEdit";
 
 export default {
   name: "fragment-alt",
@@ -119,8 +120,6 @@ export default {
   mixins: [fragment],
   setup(props) {
     const store = useStore();
-    const editableMap = ref(new Map());
-    const conditionLabel = ref(null);
     const numbering = computed(() => store.state.numbering);
     const from = computed(() => props.context.Origin());
     const alt = computed(() => props.context.alt());
@@ -143,101 +142,30 @@ export default {
       }
       return acc;
     });
-    const code = computed(() => store.getters.code);
-    const onContentChange = computed(
-      () => store.getters.onContentChange || (() => {}),
-    );
 
-    // Set the initial value of the editableMap
-    editableMap.value.set(ifBlock.value, false);
-
-    if (elseIfBlocks.value.length > 0) {
-      elseIfBlocks.value.forEach((block) => {
-        editableMap.value.set(block, false);
-      });
+    function conditionFromIfElseBlock(block) {
+      return block?.parExpr()?.condition();
     }
 
-    function toggleEditable(block, editable) {
-      editableMap.value.set(block, editable);
+    function conditionTextFromIfElseBlock(block) {
+      return conditionFromIfElseBlock(block)?.getFormattedText();
     }
 
-    function conditionFromIfElseBlock(ctx) {
-      return ctx?.parExpr()?.condition();
+    function blockInElseIfBlock(block) {
+      return block?.braceBlock()?.block();
     }
 
-    function conditionTextFromIfElseBlock(ctx) {
-      return conditionFromIfElseBlock(ctx)?.getFormattedText();
-    }
-
-    function blockInElseIfBlock(ctx) {
-      return ctx?.braceBlock()?.block();
-    }
-
-    function updateCode(code) {
-      store.dispatch("updateCode", { code });
-      onContentChange.value(code);
-    }
-
-    async function handleDblClick(block, e) {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleEditable(block, true);
-
-      await nextTick();
-      const range = document.createRange();
-      const sel = window.getSelection();
-      range.selectNodeContents(e.target);
-      range.collapse(false);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-
-    async function handleBlur(block, e) {
-      // avoid race condition with keyup event
-      await nextTick();
-      if (!editableMap.value.get(block)) return;
-      replaceConditionText(block, e);
-    }
-
-    function handleKeydown(e) {
-      // prevent new line
-      if (e.key === "Enter") {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }
-
-    function handleKeyup(block, e) {
-      if (e.key === "Enter" || e.key === "Escape" || e.key === "Tab") {
-        replaceConditionText(block, e);
-      }
-    }
-
-    function replaceConditionText(block, event) {
-      toggleEditable.call(block, false);
-      event.preventDefault();
-      event.stopPropagation();
-
-      let newText = event.target.innerText.trim();
-
-      // if text is empty, we need to replace it with the original condition text
-      if (newText === "") {
-        event.target.innerText = conditionTextFromIfElseBlock(block);
-        return;
-      }
-
-      // if text has empty spaces, we need to wrap it with double quotes
-      if (newText.includes(" ")) {
-        newText = newText.replace(/"/g, "");
-        newText = `"${newText}"`;
-      }
-
-      const condition = conditionFromIfElseBlock(block);
-      const [start, end] = [condition?.start?.start, condition?.stop?.stop];
-      updateCode(
-        code.value.slice(0, start) + newText + code.value.slice(end + 1),
-      );
-    }
+    const {
+      editableMap,
+      handleDblClick,
+      handleBlur,
+      handleKeydown,
+      handleKeyup,
+    } = useConditionEdit({
+      blocks: [ifBlock.value, ...elseIfBlocks.value, elseBlock.value],
+      getCondition: conditionFromIfElseBlock,
+      getConditionText: conditionTextFromIfElseBlock,
+    });
 
     return {
       editableMap,
@@ -249,8 +177,6 @@ export default {
       elseIfBlocks,
       elseBlock,
       blockLengthAcc,
-      conditionLabel,
-      toggleEditable,
       conditionFromIfElseBlock,
       conditionTextFromIfElseBlock,
       blockInElseIfBlock,

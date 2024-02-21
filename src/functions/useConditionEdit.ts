@@ -1,5 +1,6 @@
 import sequenceParser from "@/generated-parser/sequenceParser";
-import { ComputedRef, nextTick, ref } from "vue";
+import { computed, nextTick, ref } from "vue";
+import { useStore } from "vuex";
 
 type ConditionBlockCtx =
   | typeof sequenceParser.IfBlockContext
@@ -14,19 +15,25 @@ export type Condition = {
 
 type UseConditionEditingProps = {
   blocks: ConditionBlockCtx[];
-  code: ComputedRef<string>;
   getCondition: (block: ConditionBlockCtx) => Condition | null;
   getConditionText: (block: ConditionBlockCtx) => string;
-  updateCode: (code: string) => void;
 };
 
 export function useConditionEdit({
   blocks,
-  code,
   getCondition,
   getConditionText,
-  updateCode,
 }: UseConditionEditingProps) {
+  const store = useStore();
+  const code = computed(() => store.getters.code);
+  const onContentChange = computed(
+    () => store.getters.onContentChange || (() => {}),
+  );
+  function updateCode(code: string) {
+    store.dispatch("updateCode", { code });
+    onContentChange.value(code);
+  }
+
   const editableMap = ref(new Map<ConditionBlockCtx, boolean>());
   blocks.forEach((block) => {
     editableMap.value.set(block, false);
@@ -99,7 +106,9 @@ export function useConditionEdit({
     const condition = getCondition(block);
     if (!condition) return;
     const [start, end] = [condition?.start?.start, condition?.stop?.stop];
-    updateCode(code.value.slice(0, start) + newText + code.value.slice(end));
+    updateCode(
+      code.value.slice(0, start) + newText + code.value.slice(end + 1),
+    );
   }
 
   return {
