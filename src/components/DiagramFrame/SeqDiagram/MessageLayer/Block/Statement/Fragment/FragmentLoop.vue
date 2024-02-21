@@ -68,17 +68,6 @@ export default {
       editable.value = _editable;
     };
 
-    // const {
-    //   handleDblClick,
-    //   handleBlur,
-    //   handleKeydown,
-    //   handleKeyup,
-    // } = useConditionEdit({
-    //   blocks: [blockInLoop.value],
-    //   getCondition: () => condition.value,
-    //   getConditionText: () => conditionText.value,
-    // });
-
     return {
       numbering,
       from,
@@ -95,10 +84,5 @@ export default {
 /* We need to do this because tailwind 3.2.4 set border-color to #e5e7eb via '*'. */
 * {
   border-color: inherit;
-}
-.condition.editable {
-  padding: 2px 6px;
-  margin-left: 4px;
-  cursor: text;
 }
 </style>

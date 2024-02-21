@@ -170,10 +170,4 @@ export default {
 * {
   border-color: inherit;
 }
-
-.condition.editable {
-  padding: 2px 6px;
-  margin-left: 4px;
-  cursor: text;
-}
 </style>
