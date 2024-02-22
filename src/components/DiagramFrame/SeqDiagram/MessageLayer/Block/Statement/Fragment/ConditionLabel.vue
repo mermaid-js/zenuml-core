@@ -29,7 +29,7 @@ export default {
     );
     const condition = computed(() => props.getConditionFromBlock(props.block));
     const conditionText = computed(
-      () => condition.value.getFormattedText() ?? "",
+      () => condition?.value?.getFormattedText() ?? "",
     );
 
     function toggleEditable(_editable) {
@@ -79,6 +79,11 @@ export default {
       }
     }
 
+    function checkSpecialCharacters(text) {
+      const regex = /[!@#$%^&*()+-,.?''":{}|<>/\s]/g;
+      return regex.test(text);
+    }
+
     function replaceConditionText(e) {
       toggleEditable(false);
       e.preventDefault();
@@ -94,9 +99,9 @@ export default {
         return;
       }
 
-      // if text has empty spaces, we need to wrap it with double quotes
-      if (newText.includes(" ")) {
-        newText = newText.replace(/"/g, "");
+      // if text has special characters, we need to wrap it with double quotes
+      if (checkSpecialCharacters(newText)) {
+        newText = newText.replace(/"/g, ""); // remove existing double quotes
         newText = `"${newText}"`;
       }
 
