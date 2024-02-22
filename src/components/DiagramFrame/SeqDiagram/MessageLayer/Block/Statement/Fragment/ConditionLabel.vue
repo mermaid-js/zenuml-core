@@ -2,7 +2,7 @@
   <label
     class="condition px-1"
     :class="{
-      editable: editable,
+      'py-1 px-2 ml-1 cursor-text': editable,
     }"
     :contenteditable="editable"
     @dblclick="handleDblClick"
@@ -32,7 +32,7 @@ export default {
       () => condition?.value?.getFormattedText() ?? "",
     );
 
-    function toggleEditable(_editable) {
+    function setEditable(_editable) {
       editable.value = _editable;
     }
 
@@ -44,7 +44,7 @@ export default {
     async function handleDblClick(e) {
       e.preventDefault();
       e.stopPropagation();
-      toggleEditable(true);
+      setEditable(true);
 
       await nextTick();
       const range = document.createRange();
@@ -85,7 +85,7 @@ export default {
     }
 
     function replaceConditionText(e) {
-      toggleEditable(false);
+      setEditable(false);
       e.preventDefault();
       e.stopPropagation();
 
@@ -126,10 +126,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.condition.editable {
-  padding: 2px 6px;
-  margin-left: 4px;
-  cursor: text;
-}
-</style>
+<style scoped></style>
