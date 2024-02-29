@@ -46,7 +46,7 @@
         <div class="segment mt-2 border-t border-solid">
           <div class="text-skin-fragment" :key="index + 1000">
             <label class="else-if hidden">else if</label>
-            <EditableLabel
+            <ConditionLabel
               :block="elseIfBlock"
               :getConditionFromBlock="conditionFromIfElseBlock"
             />
