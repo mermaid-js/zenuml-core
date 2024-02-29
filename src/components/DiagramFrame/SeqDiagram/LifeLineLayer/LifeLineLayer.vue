@@ -72,10 +72,10 @@ export default {
   setup() {
     const participantOffsetTop = 0;
     const store = useStore();
-    const intersectionTop = useIntersectionTop();
-    const [scrollTop] = useDocumentScroll();
     const mode = computed(() => store.state.mode);
     if (mode.value === RenderMode.static) return { translate: 0, RenderMode };
+    const intersectionTop = useIntersectionTop();
+    const [scrollTop] = useDocumentScroll();
 
     const translate = computed(() => {
       let top = intersectionTop.value + scrollTop.value;
