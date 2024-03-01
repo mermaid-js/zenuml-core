@@ -72,10 +72,12 @@ export default {
   setup() {
     const participantOffsetTop = 0;
     const store = useStore();
+    const mode = computed(() => store.state.mode);
+    if (mode.value === RenderMode.static)
+      return { translate: 0, RenderMode, mode };
+
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();
-    if (store.state.mode === RenderMode.static)
-      return { translate: 0, RenderMode };
 
     const translate = computed(() => {
       let top = intersectionTop.value + scrollTop.value;
@@ -94,7 +96,7 @@ export default {
         participantOffsetTop
       );
     });
-    return { translate, RenderMode };
+    return { translate, RenderMode, mode };
   },
   computed: {
     ...mapGetters([

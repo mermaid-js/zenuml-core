@@ -26,7 +26,12 @@
     <div :class="{ hidden: collapsed }">
       <div class="segment">
         <div class="text-skin-fragment">
-          <label class="condition p-1">[{{ condition }}]</label>
+          <ConditionLabel
+            :editable="editable"
+            :toggleEditable="toggleEditable"
+            :block="blockInLoop"
+            :getConditionFromBlock="getConditionFromBlock"
+          />
         </div>
         <block
           :style="{ paddingLeft: `${offsetX}px` }"
@@ -40,27 +45,32 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { computed } from "vue";
+import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
+import ConditionLabel from "./ConditionLabel.vue";
 
 export default {
   name: "fragment-loop",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
   mixins: [fragment],
-  computed: {
-    ...mapState(["numbering"]),
-    from: function () {
-      return this.context.Origin();
-    },
-    loop: function () {
-      return this.context.loop();
-    },
-    blockInLoop: function () {
-      return this.loop?.braceBlock()?.block();
-    },
-    condition: function () {
-      return this.loop?.parExpr()?.condition()?.getFormattedText();
-    },
+  components: {
+    ConditionLabel,
+  },
+  setup(props) {
+    const store = useStore();
+    const numbering = computed(() => store.state.numbering);
+    const from = computed(() => props.context.Origin());
+    const loop = computed(() => props.context.loop());
+    const blockInLoop = computed(() => loop.value?.braceBlock()?.block());
+
+    return {
+      numbering,
+      from,
+      loop,
+      blockInLoop,
+      getConditionFromBlock: () => loop.value?.parExpr()?.condition(),
+    };
   },
 };
 </script>
