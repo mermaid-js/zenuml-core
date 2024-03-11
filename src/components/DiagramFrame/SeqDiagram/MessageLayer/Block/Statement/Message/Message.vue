@@ -17,8 +17,8 @@
     >
       <div class="inline-block relative min-h-[1em]">
         <div :style="textStyle" :class="classNames">
-          <EditableLabel
-            v-if="isEditable"
+          <MessageLabel
+            v-if="editable"
             :labelText="content"
             :labelPosition="labelPosition"
           />
@@ -43,10 +43,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs, ref } from "vue";
+import { computed, toRefs, ref, ComputedRef } from "vue";
 import { useStore } from "vuex";
 import Point from "./Point/Point.vue";
-import EditableLabel from "../../../EditableLabel.vue";
+import MessageLabel from "../../../MessageLabel.vue";
 
 const props = defineProps<{
   context?: any;
@@ -63,7 +63,7 @@ const store = useStore();
 const messageRef = ref();
 const numbering = computed(() => store.state.numbering);
 const isAsync = computed(() => type?.value === "async");
-const isEditable = computed(() => {
+const editable = computed(() => {
   switch (type?.value) {
     case "sync":
     case "async":
@@ -74,23 +74,33 @@ const isEditable = computed(() => {
       return false;
   }
 });
-const labelPosition = computed(() => {
+const labelPosition: ComputedRef<[number, number]> = computed(() => {
+  let start, stop;
   switch (type?.value) {
-    case "sync": {
-      const signature = context.value?.messageBody()?.func()?.signature()?.[0];
-      return [signature?.start.start, signature?.stop.stop];
-    }
-    case "async": {
-      const content = context.value?.content();
-      return [content?.start.start, content?.stop.stop];
-    }
-    case "return": {
-      const ret = context.value?.atom();
-      return [ret?.start.start, ret?.stop.stop];
-    }
-    default:
-      return [-1, -1];
+    case "sync":
+      {
+        const signature = context?.value
+          ?.messageBody()
+          ?.func()
+          ?.signature()?.[0];
+        [start, stop] = [signature?.start.start, signature?.stop.stop];
+      }
+      break;
+    case "async":
+      {
+        const content = context?.value?.content();
+        [start, stop] = [content?.start.start, content?.stop.stop];
+      }
+      break;
+    case "return":
+      {
+        const ret = context?.value?.atom();
+        [start, stop] = [ret?.start.start, ret?.stop.stop];
+      }
+      break;
   }
+  if (start === undefined || stop === undefined) return [-1, -1];
+  return [start, stop];
 });
 const borderStyle = computed(() => {
   switch (type?.value) {

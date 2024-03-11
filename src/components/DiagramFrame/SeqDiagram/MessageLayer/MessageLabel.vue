@@ -1,7 +1,7 @@
 <template>
   <label
     title="Double click to edit"
-    class="bg-skin-frame/[0.66] condition px-1 cursor-text hover:text-skin-message-hover hover:bg-skin-message-hover"
+    class="px-1 cursor-text hover:text-skin-message-hover hover:bg-skin-message-hover"
     :class="{
       'py-1 px-2 ml-1 cursor-text': editing,
     }"
@@ -11,35 +11,29 @@
     @keyup="handleKeyup"
     @keydown="handleKeydown"
   >
-    {{ editing ? labelText : `[${labelText}]` }}
+    {{ labelText }}
   </label>
 </template>
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, toRefs } from "vue";
 import { useStore } from "vuex";
 import { useEditLabel } from "@/functions/useEditLabel";
 
 const props = defineProps<{
-  block: any;
-  getConditionFromBlock: (block: any) => any;
+  labelText: string;
+  labelPosition: [number, number];
 }>();
 
+const { labelText, labelPosition } = toRefs(props);
 const store = useStore();
 const code = computed(() => store.getters.code);
 const onContentChange = computed(
   () => store.getters.onContentChange || (() => {}),
 );
-const condition = computed(() => props.getConditionFromBlock(props.block));
-const labelText = computed(() => condition?.value?.getFormattedText() ?? "");
 
 function updateCode(code: string) {
   store.dispatch("updateCode", { code });
   onContentChange.value(code);
-}
-
-function checkSpecialCharacters(text: string) {
-  const regex = /[!@#$%^&*()+-,.?''":{}|<>/\s]/g;
-  return regex.test(text);
 }
 
 function replaceLabelText(e: Event) {
@@ -50,22 +44,13 @@ function replaceLabelText(e: Event) {
   if (!(target instanceof HTMLElement)) return;
   let newText = target.innerText.trim() ?? "";
 
-  // if text is empty, we need to replace it with the original condition text
+  // if text is empty, we need to replace it with the original label text
   if (newText === "") {
     target.innerText = labelText.value;
     return;
   }
 
-  // if text has special characters, we need to wrap it with double quotes
-  if (checkSpecialCharacters(newText)) {
-    newText = newText.replace(/"/g, ""); // remove existing double quotes
-    newText = `"${newText}"`;
-  }
-
-  const [start, end] = [
-    condition.value?.start?.start,
-    condition.value?.stop?.stop,
-  ];
+  const [start, end] = labelPosition.value;
   if (start === -1 || end === -1) {
     console.warn("labelPosition is not set");
     return;
