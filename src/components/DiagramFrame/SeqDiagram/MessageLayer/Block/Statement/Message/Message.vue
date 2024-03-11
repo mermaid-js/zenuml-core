@@ -17,7 +17,14 @@
     >
       <div class="inline-block relative min-h-[1em]">
         <div :style="textStyle" :class="classNames">
-          {{ content }}
+          <EditableLabel
+            v-if="isEditable"
+            :labelText="content"
+            :labelPosition="labelPosition"
+          />
+          <template v-else>
+            {{ content }}
+          </template>
         </div>
         <div
           class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500"
@@ -36,9 +43,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed, toRefs, ref } from "vue";
 import { useStore } from "vuex";
 import Point from "./Point/Point.vue";
-import { computed, toRefs, ref } from "vue";
+import EditableLabel from "../../../EditableLabel.vue";
+
 const props = defineProps<{
   context?: any;
   content: string;
@@ -54,6 +63,35 @@ const store = useStore();
 const messageRef = ref();
 const numbering = computed(() => store.state.numbering);
 const isAsync = computed(() => type?.value === "async");
+const isEditable = computed(() => {
+  switch (type?.value) {
+    case "sync":
+    case "async":
+    case "return":
+      return true;
+    case "creation":
+    default:
+      return false;
+  }
+});
+const labelPosition = computed(() => {
+  switch (type?.value) {
+    case "sync": {
+      const signature = context.value?.messageBody()?.func()?.signature()?.[0];
+      return [signature?.start.start, signature?.stop.stop];
+    }
+    case "async": {
+      const content = context.value?.content();
+      return [content?.start.start, content?.stop.stop];
+    }
+    case "return": {
+      const ret = context.value?.atom();
+      return [ret?.start.start, ret?.stop.stop];
+    }
+    default:
+      return [-1, -1];
+  }
+});
 const borderStyle = computed(() => {
   switch (type?.value) {
     case "sync":
