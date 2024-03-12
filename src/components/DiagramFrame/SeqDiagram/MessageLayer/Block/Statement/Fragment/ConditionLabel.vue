@@ -15,21 +15,23 @@
   </label>
 </template>
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, toRefs } from "vue";
 import { useStore } from "vuex";
 import { useEditLabel } from "@/functions/useEditLabel";
 
+const specialCharRegex = /[!@#$%^&*()+-,.?''":{}|<>/\s]/g;
+const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
+
 const props = defineProps<{
-  block: any;
-  getConditionFromBlock: (block: any) => any;
+  condition: any;
 }>();
 
+const { condition } = toRefs(props);
 const store = useStore();
 const code = computed(() => store.getters.code);
 const onContentChange = computed(
   () => store.getters.onContentChange || (() => {}),
 );
-const condition = computed(() => props.getConditionFromBlock(props.block));
 const labelText = computed(() => condition?.value?.getFormattedText() ?? "");
 
 function updateCode(code: string) {
@@ -38,8 +40,7 @@ function updateCode(code: string) {
 }
 
 function checkSpecialCharacters(text: string) {
-  const regex = /[!@#$%^&*()+-,.?''":{}|<>/\s]/g;
-  return regex.test(text);
+  return specialCharRegex.test(text);
 }
 
 function replaceLabelText(e: Event) {
@@ -56,8 +57,9 @@ function replaceLabelText(e: Event) {
     return;
   }
 
-  // if text has special characters, we need to wrap it with double quotes
-  if (checkSpecialCharacters(newText)) {
+  // If text has special characters, we wrap it with double quotes
+  // If text is an equality condition without special characters, we skip wrapping it with double quotes
+  if (checkSpecialCharacters(newText) && !equalityRegex.test(newText)) {
     newText = newText.replace(/"/g, ""); // remove existing double quotes
     newText = `"${newText}"`;
   }

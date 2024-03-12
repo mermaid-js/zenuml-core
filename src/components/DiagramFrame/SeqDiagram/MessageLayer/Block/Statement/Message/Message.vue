@@ -47,6 +47,7 @@ import { computed, toRefs, ref, ComputedRef } from "vue";
 import { useStore } from "vuex";
 import Point from "./Point/Point.vue";
 import MessageLabel from "../../../MessageLabel.vue";
+import sequenceParser from "@/generated-parser/sequenceParser";
 
 const props = defineProps<{
   context?: any;
@@ -79,10 +80,7 @@ const labelPosition: ComputedRef<[number, number]> = computed(() => {
   switch (type?.value) {
     case "sync":
       {
-        const signature = context?.value
-          ?.messageBody()
-          ?.func()
-          ?.signature()?.[0];
+        const signature = context?.value?.messageBody().func().signature()[0];
         [start, stop] = [signature?.start.start, signature?.stop.stop];
       }
       break;
@@ -94,8 +92,15 @@ const labelPosition: ComputedRef<[number, number]> = computed(() => {
       break;
     case "return":
       {
-        const ret = context?.value?.atom();
-        [start, stop] = [ret?.start.start, ret?.stop.stop];
+        if (context?.value instanceof sequenceParser.MessageContext) {
+          const signature = context.value.messageBody().func().signature()?.[0];
+          [start, stop] = [signature?.start.start, signature?.stop.stop];
+        } else if (context?.value instanceof sequenceParser.AtomExprContext) {
+          const ret = context.value.atom();
+          [start, stop] = [ret?.start.start, ret?.stop.stop];
+        } else if (context?.value instanceof sequenceParser.ContentContext) {
+          [start, stop] = [context.value.start.start, context.value.stop.stop];
+        }
       }
       break;
   }

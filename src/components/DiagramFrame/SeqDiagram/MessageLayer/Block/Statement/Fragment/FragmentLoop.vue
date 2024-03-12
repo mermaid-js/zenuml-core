@@ -26,12 +26,7 @@
     <div :class="{ hidden: collapsed }">
       <div class="segment">
         <div class="text-skin-fragment">
-          <ConditionLabel
-            :editable="editable"
-            :toggleEditable="toggleEditable"
-            :block="blockInLoop"
-            :getConditionFromBlock="getConditionFromBlock"
-          />
+          <ConditionLabel :condition="getConditionFromBlock(blockInLoop)" />
         </div>
         <block
           :style="{ paddingLeft: `${offsetX}px` }"
