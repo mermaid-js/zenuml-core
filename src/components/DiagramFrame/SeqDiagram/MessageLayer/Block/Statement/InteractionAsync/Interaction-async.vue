@@ -17,8 +17,15 @@
     }"
   >
     <comment v-if="comment" :commentObj="commentObj" />
-    <component
-      v-bind:is="invocation"
+    <self-invocation-async
+      v-if="isSelf"
+      :classNames="messageClassNames"
+      :textStyle="messageTextStyle"
+      :context="message"
+      :number="`${number}`"
+    />
+    <message
+      v-else
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
       :context="asyncMessage"
@@ -94,9 +101,6 @@ export default {
     },
     isSelf: function () {
       return this.source === this.target;
-    },
-    invocation: function () {
-      return this.isSelf ? "SelfInvocationAsync" : "Message";
     },
     providedFrom: function () {
       return this.context?.asyncMessage()?.From();

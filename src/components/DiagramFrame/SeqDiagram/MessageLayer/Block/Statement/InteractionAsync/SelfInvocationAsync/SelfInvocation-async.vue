@@ -10,7 +10,7 @@
       >
         {{ number }}
       </div>
-      {{ content }}
+      <MessageLabel :labelText="labelText" :labelPosition="labelPosition" />
     </label>
     <svg class="arrow text-skin-message-arrow" width="34" height="34">
       <polyline

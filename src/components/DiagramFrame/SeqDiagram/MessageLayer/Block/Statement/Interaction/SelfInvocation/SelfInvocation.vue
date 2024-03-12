@@ -16,7 +16,7 @@
         {{ number }}
       </div>
       <div :style="textStyle" :class="classNames">
-        <span v-if="assignee">{{ assignee }} = </span> {{ content }}
+        <MessageLabel :labelText="labelText" :labelPosition="labelPosition" />
       </div>
     </label>
     <svg class="arrow text-skin-message-arrow" width="30" height="24">
@@ -34,21 +34,28 @@
 
 <script setup lang="ts">
 import { useStore } from "vuex";
-import { computed, ref, toRefs } from "vue";
+import { ComputedRef, computed, ref, toRefs } from "vue";
+import MessageLabel from "../../../../MessageLabel.vue";
 
 const props = defineProps<{
   context?: any;
-  content: string;
-  assignee?: string;
   number?: string;
   textStyle?: Record<string, string | number>;
   classNames?: any;
 }>();
 const { context } = toRefs(props);
-
 const store = useStore();
+
 const numbering = computed(() => store.state.numbering);
 const messageRef = ref();
+const labelPosition: ComputedRef<[number, number]> = computed(() => {
+  const signature = props.context.messageBody();
+  return [signature.start.start, signature.stop.stop];
+});
+const labelText = computed(() => {
+  return props.context.messageBody().getFormattedText();
+});
+
 const onClick = () => {
   store.getters.onMessageClick(context, messageRef.value);
 };
