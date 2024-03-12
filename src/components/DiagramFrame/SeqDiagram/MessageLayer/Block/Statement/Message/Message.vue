@@ -76,7 +76,8 @@ const editable = computed(() => {
   }
 });
 const labelPosition: ComputedRef<[number, number]> = computed(() => {
-  let start, stop;
+  let start = -1,
+    stop = -1;
   switch (type?.value) {
     case "sync":
       {
@@ -104,7 +105,6 @@ const labelPosition: ComputedRef<[number, number]> = computed(() => {
       }
       break;
   }
-  if (start === undefined || stop === undefined) return [-1, -1];
   return [start, stop];
 });
 const borderStyle = computed(() => {
