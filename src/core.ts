@@ -22,6 +22,7 @@ const logger = parentLogger.child({ name: "core" });
 
 interface Config {
   theme?: string;
+  onThemeChange?: (theme: string) => void;
   enableMultiTheme?: boolean;
   stickyOffset?: number;
   onContentChange?: (code: string) => void;
@@ -103,6 +104,7 @@ export default class ZenUml implements IZenUml {
     const start = getStartTime();
     clearCache();
     this.store.commit("onContentChange", config?.onContentChange || (() => {}));
+    this.store.commit("onThemeChange", config?.onThemeChange || (() => {}));
     if (config?.enableMultiTheme !== undefined) {
       this.store.state.enableMultiTheme = config?.enableMultiTheme;
     }
