@@ -5,7 +5,7 @@
     @click="openModal"
   >
     <Icon name="theme" />
-    <span class="dot" v-if="!themePrompt"></span>
+    <span class="dot" v-if="!themeIconDot"></span>
   </button>
   <TransitionRoot appear :show="isOpen" as="template">
     <Dialog as="div" @close="closeModal" class="relative z-10">
@@ -169,15 +169,15 @@ const themes = [
 
 const store = useStore();
 const selected = ref(store.state.theme || themes[0].id);
-const themePrompt = ref(store.state.themePrompt);
+const themeIconDot = ref(store.state.themeIconDot);
 
 const closeModal = () => {
   isOpen.value = false;
 };
 const openModal = () => {
   isOpen.value = true;
-  themePrompt.value = true;
-  store.commit("setThemePrompt", true);
+  themeIconDot.value = true;
+  store.commit("setThemeIconDot", true);
 };
 
 const updateTheme = (theme) => {

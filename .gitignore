@@ -15,6 +15,7 @@ dist
 reports
 
 node_modules
+node_modules_bak
 
 .DS_Store
 
