@@ -57,6 +57,9 @@ const Store = (): StoreOptions<StoreState> => {
       theme:
         localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
         "theme-default",
+      themePrompt: Boolean(
+        localStorage.getItem(`${location.hostname}-zenuml-theme-prompt`),
+      ),
       enableMultiTheme: true,
       scale: 1,
       selected: [],
@@ -151,6 +154,13 @@ const Store = (): StoreOptions<StoreState> => {
           );
         }
         state.theme = payload;
+      },
+      setThemePrompt: function (state: any, payload: boolean) {
+        localStorage.setItem(
+          `${location.hostname}-zenuml-theme-prompt`,
+          payload ? "1" : "",
+        );
+        state.themePrompt = payload;
       },
       onMessageClick: function (state: any, payload: any) {
         state.onMessageClick = payload;
