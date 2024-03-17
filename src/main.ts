@@ -12,7 +12,7 @@ const zenUml = new ZenUml(elm);
 window.zenUml = zenUml;
 zenUml
   .render(code, {
-    enableMultiTheme: false,
+    enableMultiTheme: true,
     stickyOffset: 0,
     theme: "theme-default",
   })

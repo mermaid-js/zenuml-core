@@ -1,6 +1,11 @@
 <template>
-  <button type="button" class="flex items-center" @click="openModal">
+  <button
+    type="button"
+    class="flex items-center icon-container"
+    @click="openModal"
+  >
     <Icon name="theme" />
+    <span class="dot" v-if="!themeIconDot"></span>
   </button>
   <TransitionRoot appear :show="isOpen" as="template">
     <Dialog as="div" @close="closeModal" class="relative z-10">
@@ -107,6 +112,22 @@
   </TransitionRoot>
 </template>
 
+<style>
+.icon-container {
+  position: relative;
+  display: inline-block;
+}
+.dot {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: red;
+}
+</style>
+
 <script setup>
 import { ref } from "vue";
 import {
@@ -148,12 +169,15 @@ const themes = [
 
 const store = useStore();
 const selected = ref(store.state.theme || themes[0].id);
+const themeIconDot = ref(store.state.themeIconDot);
 
 const closeModal = () => {
   isOpen.value = false;
 };
 const openModal = () => {
   isOpen.value = true;
+  themeIconDot.value = true;
+  store.commit("setThemeIconDot", true);
 };
 
 const updateTheme = (theme) => {
