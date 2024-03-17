@@ -76,6 +76,7 @@ const Store = (): StoreOptions<StoreState> => {
       },
       onMessageClick: () => {},
       onContentChange: () => {},
+      onThemeChange: () => {},
     } as StoreState,
     getters: {
       code: (state: any) => state.code,
@@ -118,6 +119,7 @@ const Store = (): StoreOptions<StoreState> => {
       onMessageClick: (state: any) => state.onMessageClick,
       diagramElement: (state: any) => state.diagramElement,
       onContentChange: (state: any) => state.onContentChange,
+      onThemeChange: (state: any) => state.onThemeChange,
     },
     mutations: {
       code: function (state: any, payload: any) {
@@ -154,6 +156,7 @@ const Store = (): StoreOptions<StoreState> => {
           );
         }
         state.theme = payload;
+        state.onThemeChange?.(payload);
       },
       setThemeIconDot: function (state: any, payload: boolean) {
         localStorage.setItem(
@@ -167,6 +170,9 @@ const Store = (): StoreOptions<StoreState> => {
       },
       onContentChange: function (state: any, payload: any) {
         state.onContentChange = payload;
+      },
+      onThemeChange: function (state: any, payload: any) {
+        state.onThemeChange = payload;
       },
       diagramElement: function (state: any, payload: any) {
         state.diagramElement = payload;
