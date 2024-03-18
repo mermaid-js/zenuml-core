@@ -2,6 +2,7 @@ import { onMounted, onUnmounted, ref } from "vue";
 
 const DETECTOR_COUNT = 10;
 const INTERSECTION_ERROR_MARGIN = 1;
+const SCROLLBAR_WIDTH = 20;
 
 function initializeDetectors() {
   let detectorContainer = document.getElementById(
@@ -35,7 +36,7 @@ function initializeDetectors() {
       left: "0",
       width: "100%",
     });
-    detectorContainer.appendChild(detector);
+    detectorContainer?.appendChild(detector);
     return detector;
   });
   document.body.appendChild(detectorContainer);
@@ -51,7 +52,7 @@ export default function useIntersectionTop() {
     const { detectorContainer, detectors } = initializeDetectors();
 
     const scrollHeight = document.documentElement.scrollHeight;
-    const scrollWidth = document.documentElement.scrollWidth;
+    const scrollWidth = document.documentElement.scrollWidth - SCROLLBAR_WIDTH;
     detectorContainer.style.height = scrollHeight + "px";
     detectorContainer.style.width = scrollWidth + "px";
     const detectorHeight = Math.ceil(
