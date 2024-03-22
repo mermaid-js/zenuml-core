@@ -13,9 +13,9 @@
     ref="messageRef"
   >
     <div
-      class="name group flex-grow text-sm hover:whitespace-normal hover:text-skin-message-hover hover:bg-skin-message-hover"
+      class="name group flex-grow relative text-sm hover:whitespace-normal hover:text-skin-message-hover hover:bg-skin-message-hover"
     >
-      <div class="inline-block relative min-h-[1em]">
+      <div class="inline-block static min-h-[1em]">
         <div :style="textStyle" :class="classNames">
           <MessageLabel
             v-if="editable"

@@ -1,9 +1,10 @@
 <template>
   <label
     title="Double click to edit"
-    class="px-1 cursor-text hover:text-skin-message-hover hover:bg-skin-message-hover"
+    class="px-1 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
     :class="{
-      'py-1 px-2 ml-1 cursor-text': editing,
+      'absolute right-1/2 translate-x-1/2 bottom-0  py-1 px-2 ml-1 cursor-text':
+        editing,
     }"
     :contenteditable="editing"
     @dblclick="handleDblClick"
