@@ -129,7 +129,7 @@
 </style>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
   TransitionRoot,
   TransitionChild,
@@ -168,7 +168,7 @@ const themes = [
 ];
 
 const store = useStore();
-const selected = ref(store.state.theme || themes[0].id);
+const selected = computed(() => store.state.theme || themes[0].id);
 const themeIconDot = ref(store.state.themeIconDot);
 
 const closeModal = () => {
