@@ -51,8 +51,8 @@
                     @update:modelValue="updateTheme"
                   >
                     <RadioGroupLabel class="sr-only"
-                      >Server size</RadioGroupLabel
-                    >
+                      >Server size
+                    </RadioGroupLabel>
                     <div class="space-y-2">
                       <RadioGroupOption
                         as="template"
@@ -117,6 +117,7 @@
   position: relative;
   display: inline-block;
 }
+
 .dot {
   position: absolute;
   top: 0px;
@@ -146,6 +147,7 @@ import Icon from "../Icon/Icon.vue";
 import ThemeLegacy from "../../assets/theme/theme-legacy.svg?raw";
 import ThemeCleanLight from "../../assets/theme/theme-clean-light.svg?raw";
 import ThemeCleanDark from "../../assets/theme/theme-clean-dark.svg?raw";
+import ThemeNeonDark from "../../assets/theme/theme-neon-dark.svg?raw";
 
 const isOpen = ref(false);
 
@@ -156,14 +158,19 @@ const themes = [
     icon: ThemeLegacy,
   },
   {
-    name: "Clean Light",
+    name: "Clear Light",
     id: "theme-clean-light",
     icon: ThemeCleanLight,
   },
   {
-    name: "Clean Dark",
+    name: "Clear Dark",
     id: "theme-clean-dark",
     icon: ThemeCleanDark,
+  },
+  {
+    name: "Neon Dark",
+    id: "theme-neon",
+    icon: ThemeNeonDark,
   },
 ];
 
