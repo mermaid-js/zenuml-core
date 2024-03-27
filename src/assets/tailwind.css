@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    --color-bg-base: #fff;
+    --color-bg-base: 255, 255, 255;
     --color-text-base: #000;
     --color-text-secondary: #333;
     --color-border-base: #000;
-    --color-border-primary: #368EFF;
+    --color-border-primary: #368eff;
   }
 
   .theme-default {
@@ -23,29 +23,30 @@
   }
 
   .theme-clean-light {
+    --color-bg-base: 255, 255, 255;
     --color-text-base: #353748;
-    --color-border-base: #C8C9C9;
-    --color-border-frame: #E5E9F0;
+    --color-border-base: #c8c9c9;
+    --color-border-frame: #e5e9f0;
 
     /* Fragment */
-    --color-text-fragment-header: #368EFF;
-    --color-text-fragment: #368EFF;
+    --color-text-fragment-header: #368eff;
+    --color-text-fragment: #368eff;
 
     /* Message */
-    --color-text-message: #368EFF;
-    --color-message-arrow: #368EFF;
-    --color-text-message-hover: #FFFFFF;
-    --color-bg-message-hover: #368EFF;
+    --color-text-message: #368eff;
+    --color-message-arrow: #368eff;
+    --color-text-message-hover: #ffffff;
+    --color-bg-message-hover: #368eff;
 
     /* Participant */
-    --color-text-participant: #368EFF;
+    --color-text-participant: #368eff;
     --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
-    --color-bg-participant: #EBF4FF;
-    --color-border-participant: #368EFF;
+    --color-bg-participant: #ebf4ff;
+    --color-border-participant: #368eff;
 
     /* Occurrence*/
-    --color-bg-occurrence: #FFFFFF;
-    --color-border-occurrence: #368EFF;
+    --color-bg-occurrence: #ffffff;
+    --color-border-occurrence: #368eff;
     --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
 
     /* Bottom control bar */
@@ -53,33 +54,63 @@
   }
 
   .theme-clean-dark {
-    --color-bg-base: #202126;
-    --color-text-base: #368EFF;
-    --color-border-base: #1F3354;
-    --color-border-frame: #1F3354;
+    --color-bg-base: 17, 22, 41;
+    --color-text-base: #cecfd2;
+    --color-border-base: #cecfd2;
+    --color-border-frame: #cecfd2;
 
     /* Fragment */
-    --color-text-fragment-header: #368EFF;
-    --color-text-fragment: #368EFF;
+    --color-text-fragment-header: #cecfd2;
+    --color-text-fragment: #cecfd2;
 
     /* Message */
-    --color-message-arrow: #368EFF;
-    --color-text-message-hover: #FFFFFF;
-    --color-bg-message-hover: #368EFF;
+    --color-message-arrow: #536fff;
+    --color-text-message-hover: #ffffff;
+    --color-bg-message-hover: #368eff;
 
     /* Participant */
-    --color-text-participant: #368EFF;
+    --color-text-participant: #cecfd2;
     --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
-    --color-bg-participant: #222C3C;
-    --color-border-participant: #368EFF;
+    --color-bg-participant: #536fff;
+    --color-border-participant: #cecfd2;
 
     /* Occurrence */
-    --color-bg-occurrence: #222C3C;
-    --color-border-occurrence: #368EFF;
+    --color-bg-occurrence: #536fff;
+    --color-border-occurrence: #cecfd2;
     --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
 
     /* Bottom control bar */
-    --color-text-control: #F3F3F3;
+    --color-text-control: #f3f3f3;
+  }
+
+  .theme-neon {
+    --color-bg-base: 0, 0, 0;
+    --color-text-base: #8ffc5b;
+    --color-border-base: #60ff33;
+    --color-border-frame: #60ff33;
+
+    /* Fragment */
+    --color-text-fragment-header: #8ffc5b;
+    --color-text-fragment: #8ffc5b;
+
+    /* Message */
+    --color-message-arrow: #8ffc5b;
+    --color-text-message-hover: #ffffff;
+    --color-bg-message-hover: #368eff;
+
+    /* Participant */
+    --color-text-participant: #8ffc5b;
+    --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
+    --color-bg-participant: #000;
+    --color-border-participant: #8ffc5b;
+
+    /* Occurrence */
+    --color-bg-occurrence: #60ff33;
+    --color-border-occurrence: #8ffc5b;
+    --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
+
+    /* Bottom control bar */
+    --color-text-control: #f3f3f3;
   }
 
   .theme-mermaid {
