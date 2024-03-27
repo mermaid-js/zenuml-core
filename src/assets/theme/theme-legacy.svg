@@ -1,14 +1,15 @@
-<svg width="100%" height="100%" viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="200" height="130" fill="white"/>
-  <rect x="21" y="19" width="40" height="16" stroke="#666666" stroke-width="2"/>
-  <rect x="43" y="46" width="65" height="8" transform="rotate(90 43 46)" fill="#D9D9D9" stroke="#666666" stroke-width="2"/>
-  <rect x="104" y="46" width="29" height="8" transform="rotate(90 104 46)" fill="#D9D9D9" stroke="#666666" stroke-width="2"/>
-  <rect x="163" y="82" width="29" height="8" transform="rotate(90 163 82)" fill="#D9D9D9" stroke="#666666" stroke-width="2"/>
-  <rect x="139" y="19" width="40" height="16" stroke="#666666" stroke-width="2"/>
-  <rect x="80" y="19" width="40" height="16" stroke="#666666" stroke-width="2"/>
-  <line x1="44" y1="59" x2="95" y2="59" stroke="#666666" stroke-width="2"/>
-  <line x1="44" y1="96" x2="154" y2="96" stroke="#666666" stroke-width="2"/>
-  <rect x="28" y="25" width="26" height="4" fill="#666666"/>
-  <rect x="88" y="25" width="26" height="4" fill="#666666"/>
-  <rect x="147" y="25" width="26" height="4" fill="#666666"/>
+<svg width="64" height="42" viewBox="0 0 64 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.5" y="0.5" width="63" height="41" rx="3.5" fill="white"/>
+<rect x="0.5" y="0.5" width="63" height="41" rx="3.5" stroke="#E6E7EB"/>
+<rect x="4" y="6" width="16" height="6" fill="#F2F4F7"/>
+<rect x="44" y="6" width="16" height="6" fill="#F2F4F7"/>
+<rect x="24" y="6" width="16" height="6" fill="#F2F4F7"/>
+<path d="M8 8H16V10H8V8Z" fill="#D0D5DD"/>
+<rect x="28" y="8" width="8" height="2" fill="#D0D5DD"/>
+<rect x="48" y="8" width="8" height="2" fill="#D0D5DD"/>
+<rect x="11" y="14" width="2" height="20" fill="#D0D5DD"/>
+<rect x="31" y="14" width="2" height="6" fill="#D0D5DD"/>
+<rect x="51" y="28" width="2" height="6" fill="#D0D5DD"/>
+<line x1="13" y1="16.75" x2="31" y2="16.75" stroke="#98A2B3" stroke-width="0.5"/>
+<line x1="13" y1="30.75" x2="51" y2="30.75" stroke="#98A2B3" stroke-width="0.5"/>
 </svg>
