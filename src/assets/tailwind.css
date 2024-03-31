@@ -18,6 +18,9 @@
     /* Message */
     --color-message-arrow: #000;
 
+    /* Participant */
+    --color-bg-participant: #fff;
+
     /* Occurrence */
     --color-bg-occurrence: #dedede;
   }
