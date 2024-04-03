@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import { computed, toRefs } from "vue";
 import { useStore } from "vuex";
-import { useEditLabel } from "@/functions/useEditLabel";
+import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
 
 const props = defineProps<{
   labelText: string;
@@ -49,6 +49,12 @@ function replaceLabelText(e: Event) {
   if (newText === "") {
     target.innerText = labelText.value;
     return;
+  }
+
+  // If text has special characters, we wrap it with double quotes
+  if (specialCharRegex.test(newText)) {
+    newText = newText.replace(/"/g, ""); // remove existing double quotes
+    newText = `"${newText}"`;
   }
 
   const [start, end] = labelPosition.value;

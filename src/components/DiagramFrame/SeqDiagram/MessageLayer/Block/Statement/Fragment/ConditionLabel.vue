@@ -17,9 +17,8 @@
 <script setup lang="ts">
 import { computed, toRefs } from "vue";
 import { useStore } from "vuex";
-import { useEditLabel } from "@/functions/useEditLabel";
+import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
 
-const specialCharRegex = /[!@#$%^&*()+-,.?''":{}|<>/\s]/g;
 const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
 
 const props = defineProps<{
@@ -39,10 +38,6 @@ function updateCode(code: string) {
   onContentChange.value(code);
 }
 
-function checkSpecialCharacters(text: string) {
-  return specialCharRegex.test(text);
-}
-
 function replaceLabelText(e: Event) {
   e.preventDefault();
   e.stopPropagation();
@@ -59,7 +54,7 @@ function replaceLabelText(e: Event) {
 
   // If text has special characters, we wrap it with double quotes
   // If text is an equality condition without special characters, we skip wrapping it with double quotes
-  if (checkSpecialCharacters(newText) && !equalityRegex.test(newText)) {
+  if (specialCharRegex.test(newText) && !equalityRegex.test(newText)) {
     newText = newText.replace(/"/g, ""); // remove existing double quotes
     newText = `"${newText}"`;
   }
