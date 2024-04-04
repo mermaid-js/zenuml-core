@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: MS Sans Serif;
-  src: url("~@/assets/fonts/MS Sans Serif.ttf") format("truetype");
+  src: url("/fonts/MS Sans Serif.ttf") format("truetype");
 }
 
 .zenuml {
