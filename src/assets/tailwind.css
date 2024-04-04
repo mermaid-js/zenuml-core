@@ -26,11 +26,14 @@
   }
 
   .theme-default {
+    --color-bg-base: 255, 255, 255;
     --color-text-base: #222;
     --color-border-base: #666;
 
     /* Message */
     --color-message-arrow: #000;
+    --color-text-message-hover: #ffffff;
+    --color-bg-message-hover: #000;
 
     /* Participant */
     --color-bg-participant: #fff;
@@ -83,7 +86,7 @@
     /* Message */
     --color-message-arrow: #536fff;
     --color-text-message-hover: #ffffff;
-    --color-bg-message-hover: #368eff;
+    --color-bg-message-hover: #536fff;
 
     /* Participant */
     --color-text-participant: #cecfd2;
@@ -112,8 +115,8 @@
 
     /* Message */
     --color-message-arrow: #8ffc5b;
-    --color-text-message-hover: #ffffff;
-    --color-bg-message-hover: #368eff;
+    --color-text-message-hover: #000;
+    --color-bg-message-hover: #8ffc5b;
 
     /* Participant */
     --color-text-participant: #8ffc5b;
