@@ -1,6 +1,7 @@
 <template>
   <div
     class="zenuml sequence-diagram relative box-border text-left overflow-visible"
+    :class="theme"
     ref="diagramRef"
   >
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
@@ -53,6 +54,7 @@ import { MARGIN } from "@/positioning/Constants";
 import { RenderMode } from "@/store/Store";
 
 const store = useStore();
+const theme = computed(() => store.state.theme);
 const mode = computed(() => store.state.mode);
 const rootContext = computed(() => store.getters.rootContext);
 const coordinates = computed(() => store.getters.coordinates);
