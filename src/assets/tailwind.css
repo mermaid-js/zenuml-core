@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: MS Sans Serif;
+  src: url("~@/assets/fonts/MS Sans Serif.ttf") format("truetype");
+}
+
+.zenuml {
+  font-family: Helvetica, Verdana, serif;
+  font-size: 16px;
+}
+
+.zenuml .theme-neon {
+  font-family: MS Sans Serif;
+}
+
 @layer base {
   :root {
     --color-bg-base: 255, 255, 255;

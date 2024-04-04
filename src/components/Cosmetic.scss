@@ -3,10 +3,8 @@
   // Choose a safe font, or make sure it is available at the target device.
   // https://web.mit.edu/jmorzins/www/fonts.html.
   // https://visme.co/blog/infographic-font/
-  font-family: Helvetica, Verdana, serif;
   // In most modern browsers (all that @zenuml/core supports), the default font size is 16px.
   // We reset it to 16px in case the user has changed it.
-  font-size: 16px;
   .frame {
     .sequence-diagram {
       .comments {
@@ -41,7 +39,7 @@
           li {
             list-style-type: none;
 
-            input[type='checkbox'] {
+            input[type="checkbox"] {
               margin-left: -1em;
             }
           }
