@@ -51,9 +51,9 @@ function replaceLabelText(e: Event) {
     return;
   }
 
-  // If text has special characters, we wrap it with double quotes
-  if (specialCharRegex.test(newText)) {
-    newText = newText.replace(/"/g, ""); // remove existing double quotes
+  // If text has special characters or space, we wrap it with double quotes
+  if (specialCharRegex.test(newText) || newText.includes(" ")) {
+    newText = newText.replace(/[\s"]/g, ""); // remove existing double quotes and empty spaces
     newText = `"${newText}"`;
   }
 
@@ -62,7 +62,9 @@ function replaceLabelText(e: Event) {
     console.warn("labelPosition is not set");
     return;
   }
-  updateCode(code.value.slice(0, start) + newText + code.value.slice(end + 1));
+  const newCode =
+    code.value.slice(0, start) + newText + code.value.slice(end + 1);
+  updateCode(newCode);
 }
 
 const { editing, handleDblClick, handleBlur, handleKeydown, handleKeyup } =

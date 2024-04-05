@@ -94,7 +94,10 @@ const labelPosition: ComputedRef<[number, number]> = computed(() => {
     case "return":
       {
         if (context?.value instanceof sequenceParser.MessageContext) {
-          const signature = context.value.messageBody().func().signature()?.[0];
+          const signature = context.value
+            .messageBody()
+            .func()
+            ?.signature()?.[0];
           [start, stop] = [signature?.start.start, signature?.stop.stop];
         } else if (context?.value instanceof sequenceParser.AtomExprContext) {
           const ret = context.value.atom();
