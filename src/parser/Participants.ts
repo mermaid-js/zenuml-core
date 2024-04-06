@@ -20,7 +20,7 @@ export class Participant {
   private stereotype: string | undefined;
   private width: number | undefined;
   private groupId: number | string | undefined;
-  private explicit: boolean | undefined;
+  explicit: boolean | undefined;
   isStarter: boolean | undefined;
   private label: string | undefined;
   private type: string | undefined;
@@ -85,14 +85,22 @@ export class Participant {
   }
 }
 
+export type PositionStr<
+  A extends number = number,
+  B extends number = number,
+> = `[${A},${B}]`;
+
 export class Participants {
-  private participants = new Map();
+  private participants = new Map<string, Participant>();
+  private participantPositions = new Map<string, Set<PositionStr>>();
 
   public Add(name: string): void;
   public Add(name: string, isStarter: boolean): void;
   public Add(
     name: string,
     isStarter?: boolean,
+    start?: number,
+    end?: number,
     stereotype?: string,
     width?: number,
     groupId?: number | string,
@@ -102,6 +110,8 @@ export class Participants {
   public Add(
     name: string,
     isStarter?: boolean,
+    start?: number,
+    end?: number,
     stereotype?: string,
     width?: number,
     groupId?: number | string,
@@ -127,12 +137,17 @@ export class Participants {
       name,
       mergeWith({}, this.Get(name), participant, (a, b) => a || b),
     );
+    if (start !== undefined && end !== undefined) {
+      this.addPosition(name, start, end);
+    }
   }
 
   // Returns an array of participants that are deduced from messages
   // It does not include the Starter.
   ImplicitArray() {
-    return this.Array().filter((p) => !p.explicit && !p.isStarter);
+    return this.Array().filter(
+      (p) => !this.Get(p.name)?.explicit && !p.isStarter,
+    );
   }
 
   // Items in entries are in the order of entry insertion:
@@ -161,5 +176,19 @@ export class Participants {
     const first = this.First();
     // const type = first.name === 'User' || first.name === 'Actor' ? 'actor' : undefined;
     return first.isStarter ? first : undefined;
+  }
+
+  Positions() {
+    return this.participantPositions;
+  }
+
+  private addPosition(name: string, start: number, end: number) {
+    let positions = this.participantPositions.get(name);
+    if (!positions) {
+      positions = new Set();
+      this.participantPositions.set(name, positions);
+    }
+
+    positions.add(`[${start},${end}]`);
   }
 }

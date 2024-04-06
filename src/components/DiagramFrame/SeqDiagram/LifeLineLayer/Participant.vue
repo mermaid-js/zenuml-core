@@ -31,7 +31,11 @@
       <label class="interface leading-4" v-if="stereotype"
         >«{{ stereotype }}»</label
       >
-      <label class="name leading-4">{{ entity.label || entity.name }}</label>
+      <ParticipantLabel
+        :labelText="entity.label || entity.name"
+        :labelPositions="participantPositions"
+      />
+      <!-- <label class="name leading-4">{{ entity.label || entity.name }}</label> -->
     </div>
   </div>
 </template>
@@ -46,11 +50,15 @@ import { useStore } from "vuex";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
 import { RenderMode } from "@/store/Store";
+import ParticipantLabel from "./ParticipantLabel.vue";
 
 const INTERSECTION_ERROR_MARGIN = 10; // a threshold for judging whether the participant is intersecting with the viewport
 
 export default {
   name: "Participant",
+  components: {
+    ParticipantLabel,
+  },
   setup(props) {
     const store = useStore();
     const participant = ref(null);
@@ -58,6 +66,9 @@ export default {
       return { translate: 0, participant };
     }
 
+    const participantPositions = computed(() =>
+      store.getters.participants.Positions().get(props.entity.name),
+    );
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();
     const translate = computed(() => {
@@ -78,7 +89,7 @@ export default {
         participantOffsetTop
       );
     });
-    return { translate, participant };
+    return { translate, participant, participantPositions };
   },
   props: {
     entity: {

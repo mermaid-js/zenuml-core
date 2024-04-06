@@ -28,9 +28,12 @@ let onParticipant = function (ctx) {
   const explicit = true;
   const color = ctx.COLOR()?.getText();
   const comment = ctx.getComment();
+  const nameCtx = ctx.name();
   participants.Add(
     participant,
     false,
+    nameCtx.start.start,
+    nameCtx.stop.stop + 1,
     stereotype,
     width,
     groupId,
@@ -46,7 +49,7 @@ ToCollector.enterParticipant = onParticipant;
 let onTo = function (ctx) {
   if (isBlind) return;
   let participant = ctx.getFormattedText();
-  participants.Add(participant);
+  participants.Add(participant, false, ctx.start.start, ctx.stop.stop + 1);
 };
 
 ToCollector.enterFrom = onTo;
@@ -54,13 +57,14 @@ ToCollector.enterTo = onTo;
 
 ToCollector.enterStarter = function (ctx) {
   let participant = ctx.getFormattedText();
-  participants.Add(participant, true);
+  participants.Add(participant, true, ctx.start.start, ctx.stop.stop + 1);
 };
 
 ToCollector.enterCreation = function (ctx) {
   if (isBlind) return;
   const participant = ctx.Owner();
-  participants.Add(participant);
+  const ctor = ctx.creationBody().construct();
+  participants.Add(participant, false, ctor.start.start, ctor.stop.stop + 1);
 };
 
 ToCollector.enterParameters = function () {

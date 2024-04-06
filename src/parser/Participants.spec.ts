@@ -48,6 +48,8 @@ describe("Participants", () => {
     participants.Add(
       "A",
       false,
+      1,
+      2,
       undefined,
       undefined,
       undefined,
@@ -61,5 +63,6 @@ describe("Participants", () => {
       width: undefined,
       explicit: true,
     });
+    expect(participants.Positions("A")?.has("[1,2]"));
   });
 });
