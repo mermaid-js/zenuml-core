@@ -52,9 +52,13 @@ function replaceLabelText(e: Event) {
   }
 
   // If text has special characters or space, we wrap it with double quotes
-  if (specialCharRegex.test(newText) || newText.includes(" ")) {
-    newText = newText.replace(/[\s"]/g, ""); // remove existing double quotes and empty spaces
+  if (specialCharRegex.test(newText)) {
+    newText = newText.replace(/"/g, ""); // remove existing double quotes
     newText = `"${newText}"`;
+  }
+
+  if (newText.includes(" ")) {
+    newText = newText.replace(/\s+/g, " "); // remove extra spaces
   }
 
   const [start, end] = labelPosition.value;

@@ -29,10 +29,14 @@
 
 <script type="text/babel">
 import { mapState } from "vuex";
+import MessageLabel from "@/components/DiagramFrame/SeqDiagram/MessageLayer/MessageLabel.vue";
 
 export default {
   name: "self-invocation-async",
   props: ["content", "number"],
+  components: {
+    MessageLabel,
+  },
   computed: {
     ...mapState(["numbering"]),
   },
