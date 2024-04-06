@@ -26,6 +26,7 @@ interface Config {
   enableMultiTheme?: boolean;
   stickyOffset?: number;
   onContentChange?: (code: string) => void;
+  onTrackEvent?: (label: string, action: string, category: string) => void;
   mode?: RenderMode;
 }
 interface IZenUml {
@@ -105,6 +106,7 @@ export default class ZenUml implements IZenUml {
     clearCache();
     this.store.commit("onContentChange", config?.onContentChange || (() => {}));
     this.store.commit("onThemeChange", config?.onThemeChange || (() => {}));
+    this.store.commit("onTrackEvent", config?.onTrackEvent || (() => {}));
     if (config?.enableMultiTheme !== undefined) {
       this.store.state.enableMultiTheme = config?.enableMultiTheme;
     }

@@ -142,6 +142,7 @@ import {
   RadioGroupOption,
 } from "@headlessui/vue";
 import { useStore } from "vuex";
+import { trackEvent } from "../../utils/TrackEvent";
 // TODO: add Icon component, use inline-svg loader instead
 import Icon from "../Icon/Icon.vue";
 import ThemeLegacy from "../../assets/theme/theme-legacy.svg?raw";
@@ -180,15 +181,18 @@ const themeIconDot = ref(store.state.themeIconDot);
 
 const closeModal = () => {
   isOpen.value = false;
+  trackEvent(store, selected.value, "theme_close_modal", "theme");
 };
 const openModal = () => {
   isOpen.value = true;
   themeIconDot.value = true;
   store.commit("setThemeIconDot", true);
+  trackEvent(store, selected.value, "theme_open_modal", "theme");
 };
 
 const updateTheme = (theme) => {
   selected.value = theme;
   store.commit("setTheme", theme);
+  trackEvent(store, selected.value, "theme_selected", "theme");
 };
 </script>
