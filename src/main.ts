@@ -14,7 +14,9 @@ zenUml
   .render(code, {
     enableMultiTheme: true,
     stickyOffset: 0,
-    theme: "theme-default",
+    theme:
+      localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
+      "theme-default",
   })
   .then((r) => {
     logger.debug("render resolved", r);

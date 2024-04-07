@@ -35,74 +35,89 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-              class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+              class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white py-6 text-left align-middle shadow-xl transition-all"
             >
-              <DialogTitle
-                as="h3"
-                class="text-lg font-semibold leading-6 text-gray-900"
-              >
-                Theme
-              </DialogTitle>
-              <p class="text-gray-500 text-sm">Customize your UI theme</p>
-              <div class="mt-4">
-                <div>
-                  <RadioGroup
-                    :model-value="selected"
-                    @update:modelValue="updateTheme"
-                  >
-                    <RadioGroupLabel class="sr-only"
-                      >Server size
-                    </RadioGroupLabel>
-                    <div class="space-y-2">
-                      <RadioGroupOption
-                        as="template"
-                        v-for="theme in themes"
-                        :key="theme.id"
-                        :value="theme.id"
-                        v-slot="{ checked }"
+              <div class="px-6">
+                <DialogTitle
+                  as="h3"
+                  class="text-lg font-semibold leading-6 text-gray-900"
+                >
+                  Theme
+                </DialogTitle>
+                <p class="text-gray-500 text-sm">Customize your UI theme</p>
+                <div class="mt-4 ml-[-0.5rem] px-2 max-h-72 overflow-y-auto">
+                  <div class="pb-4">
+                    <RadioGroup
+                      :model-value="selected"
+                      @update:modelValue="updateTheme"
+                    >
+                      <RadioGroupLabel class="sr-only"
+                        >Server size</RadioGroupLabel
                       >
-                        <div
-                          :class="[
-                            checked
-                              ? 'border-2 text-gray-900 border-primary'
-                              : 'border-2 border-transparent',
-                          ]"
-                          class="relative flex items-center cursor-pointer rounded-lg px-4 py-3 shadow-md"
+                      <div class="space-y-2">
+                        <RadioGroupOption
+                          as="template"
+                          v-for="theme in themes"
+                          :key="theme.id"
+                          :value="theme.id"
+                          v-slot="{ checked }"
                         >
-                          <div class="flex w-full items-center justify-between">
+                          <div
+                            :class="[
+                              checked
+                                ? 'border-2 text-gray-900 border-primary'
+                                : 'border-2 border-transparent',
+                            ]"
+                            class="relative flex items-center cursor-pointer rounded-lg px-4 py-3 shadow-md"
+                          >
                             <div
-                              class="flex items-center text-sm text-gray-900"
+                              class="flex w-full items-center justify-between"
                             >
-                              <Icon
-                                v-if="checked"
-                                name="selected-cycle"
-                                icon-class="h-5 w-5 fill-none"
-                              />
-                              <Icon
-                                v-else
-                                name="non-selected-cycle"
-                                icon-class="h-5 w-5"
-                              />
-                              <RadioGroupLabel
-                                as="p"
-                                :class="
-                                  checked ? 'text-gray-900' : 'text-gray-900'
-                                "
-                                class="font-medium ml-2"
+                              <div
+                                class="flex items-center text-sm text-gray-900"
                               >
-                                {{ theme.name }}
-                              </RadioGroupLabel>
+                                <Icon
+                                  v-if="checked"
+                                  name="selected-cycle"
+                                  icon-class="h-5 w-5 fill-none"
+                                />
+                                <Icon
+                                  v-else
+                                  name="non-selected-cycle"
+                                  icon-class="h-5 w-5"
+                                />
+                                <RadioGroupLabel
+                                  as="p"
+                                  :class="
+                                    checked ? 'text-gray-900' : 'text-gray-900'
+                                  "
+                                  class="font-medium ml-2"
+                                >
+                                  {{ theme.name }}
+                                </RadioGroupLabel>
+                              </div>
                             </div>
+                            <span
+                              class="inline-block w-20 border rounded-md overflow-hidden"
+                              v-html="theme.icon"
+                            />
                           </div>
-                          <span
-                            class="inline-block w-20 border rounded-md overflow-hidden"
-                            v-html="theme.icon"
-                          />
-                        </div>
-                      </RadioGroupOption>
-                    </div>
-                  </RadioGroup>
+                        </RadioGroupOption>
+                      </div>
+                    </RadioGroup>
+                  </div>
                 </div>
+              </div>
+              <div class="pt-6 px-6 border-t flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="scopeTheming"
+                  :checked="scopeThemingChecked"
+                  @change="updateEnablescopeTheming($event.target.checked)"
+                />
+                <label for="scopeTheming" class="select-none"
+                  >Apply to this diagram only</label
+                >
               </div>
             </DialogPanel>
           </TransitionChild>
@@ -176,6 +191,9 @@ const themes = [
 
 const store = useStore();
 const selected = computed(() => store.state.theme || themes[0].id);
+const scopeThemingChecked = computed(
+  () => store.state.scopeThemingChecked || false,
+);
 const themeIconDot = ref(store.state.themeIconDot);
 
 const closeModal = () => {
@@ -190,5 +208,10 @@ const openModal = () => {
 const updateTheme = (theme) => {
   selected.value = theme;
   store.commit("setTheme", theme);
+};
+
+const updateEnablescopeTheming = (checked) => {
+  scopeThemingChecked.value = checked;
+  store.commit("setEnableScopedTheming", checked);
 };
 </script>
