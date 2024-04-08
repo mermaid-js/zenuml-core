@@ -88,7 +88,7 @@ store.commit("diagramElement", diagramRef);
 .zenuml .participant {
   /* don't override */
   border-width: 2px;
-  padding: 0 14px;
+  padding: 0 4px;
   min-width: 88px;
   max-width: 250px;
   text-align: center;
