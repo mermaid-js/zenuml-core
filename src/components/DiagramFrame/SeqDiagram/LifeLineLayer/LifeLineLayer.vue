@@ -29,6 +29,7 @@
           v-if="child instanceof GroupContext"
           :context="child"
           :renderParticipants="renderParticipants"
+          :renderLifeLine="renderLifeLine"
         />
         <life-line
           :key="index"
