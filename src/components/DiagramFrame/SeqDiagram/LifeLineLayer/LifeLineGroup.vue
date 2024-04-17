@@ -24,6 +24,7 @@
           :ref="entity.name"
           :entity="entity"
           :group-left="left"
+          :render-life-line="renderLifeLine"
           :renderParticipants="renderParticipants"
         />
       </div>
@@ -40,7 +41,7 @@ import { TextType } from "@/positioning/Coordinate";
 
 export default {
   name: "lifeline-group",
-  props: ["context", "renderParticipants"],
+  props: ["context", "renderParticipants", "renderLifeLine"],
   computed: {
     ...mapGetters(["centerOf"]),
     name() {
