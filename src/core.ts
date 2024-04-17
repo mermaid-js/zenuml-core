@@ -83,7 +83,7 @@ export default class ZenUml implements IZenUml {
     this._theme = config?.theme || this._theme;
     this.store.state.stickyOffset = config?.stickyOffset || 0;
     this.store.state.theme = this._theme || "default";
-    this.store.star.enableScopedTheming = config?.enableScopedTheming || false;
+    this.store.state.enableScopedTheming = config?.enableScopedTheming || false;
     this.store.state.mode = config?.mode || RenderMode.Dynamic;
 
     // this.initialRender is used to avoid the first rendering is debounced by setTimeout.
