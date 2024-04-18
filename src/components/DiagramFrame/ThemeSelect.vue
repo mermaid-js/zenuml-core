@@ -163,7 +163,7 @@ import ThemeLegacy from "../../assets/theme/theme-legacy.svg?raw";
 import ThemeCleanLight from "../../assets/theme/theme-clean-light.svg?raw";
 import ThemeCleanDark from "../../assets/theme/theme-clean-dark.svg?raw";
 import ThemeNeonDark from "../../assets/theme/theme-neon-dark.svg?raw";
-
+import { CustomEmit } from "@/EventBus";
 const isOpen = ref(false);
 
 const themes = [
@@ -198,20 +198,31 @@ const themeIconDot = ref(store.state.themeIconDot);
 
 const closeModal = () => {
   isOpen.value = false;
+  themeEventEmit("theme-close-modal");
 };
 const openModal = () => {
   isOpen.value = true;
   themeIconDot.value = true;
   store.commit("setThemeIconDot", true);
+  themeEventEmit("theme-open-modal");
 };
 
 const updateTheme = (theme) => {
   selected.value = theme;
   store.commit("setTheme", theme);
+  themeEventEmit("theme-select");
 };
 
 const updateEnablescopeTheming = (checked) => {
   scopeThemingChecked.value = checked;
   store.commit("setEnableScopedTheming", checked);
+  themeEventEmit("theme-enable-scoped");
+};
+
+const themeEventEmit = (event) => {
+  CustomEmit(store, event, {
+    theme: selected.value,
+    enableScopedTheming: scopeThemingChecked.value,
+  });
 };
 </script>
