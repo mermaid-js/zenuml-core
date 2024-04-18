@@ -3,8 +3,8 @@
     title="Double click to edit"
     class="px-1 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
     :class="{
-      'absolute right-1/2 translate-x-1/2 bottom-0  py-1 px-2 ml-1 cursor-text':
-        editing,
+      'py-1 px-2 ml-1 cursor-text': editing,
+      'absolute right-1/2 translate-x-1/2 bottom-0': editing && !isSelfAsync,
     }"
     :contenteditable="editing"
     @dblclick="handleDblClick"
@@ -20,17 +20,26 @@ import { computed, toRefs } from "vue";
 import { useStore } from "vuex";
 import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
 
-const props = defineProps<{
-  labelText: string;
-  labelPosition: [number, number];
-}>();
+const props = withDefaults(
+  defineProps<{
+    labelText: string;
+    labelPosition: [number, number];
+    isAsync?: boolean;
+    isSelf?: boolean;
+  }>(),
+  {
+    isAsync: false,
+    isSelf: false,
+  },
+);
 
-const { labelText, labelPosition } = toRefs(props);
+const { labelText, labelPosition, isAsync, isSelf } = toRefs(props);
 const store = useStore();
 const code = computed(() => store.getters.code);
 const onContentChange = computed(
   () => store.getters.onContentChange || (() => {}),
 );
+const isSelfAsync = computed(() => !!isAsync?.value && !!isSelf?.value);
 
 function updateCode(code: string) {
   store.dispatch("updateCode", { code });
@@ -51,14 +60,16 @@ function replaceLabelText(e: Event) {
     return;
   }
 
-  // If text has special characters or space, we wrap it with double quotes
-  if (specialCharRegex.test(newText)) {
-    newText = newText.replace(/"/g, ""); // remove existing double quotes
-    newText = `"${newText}"`;
-  }
-
   if (newText.includes(" ")) {
     newText = newText.replace(/\s+/g, " "); // remove extra spaces
+  }
+
+  // If text has special characters or space, we wrap it with double quotes
+  // *NOTE*: We don't wrap the text with double quotes if it's an async message
+  if (!isAsync.value && specialCharRegex.test(newText)) {
+    newText = newText.replace(/"/g, ""); // remove existing double quotes
+    newText = `"${newText}"`;
+    specialCharRegex.lastIndex = 0;
   }
 
   const [start, end] = labelPosition.value;
@@ -66,6 +77,11 @@ function replaceLabelText(e: Event) {
     console.warn("labelPosition is not set");
     return;
   }
+  console.log({
+    newText,
+    oldText: target.innerText,
+    originalText: labelText.value,
+  });
   const newCode =
     code.value.slice(0, start) + newText + code.value.slice(end + 1);
   updateCode(newCode);

@@ -21,7 +21,7 @@
       v-if="isSelf"
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
-      :context="message"
+      :context="asyncMessage"
       :number="`${number}`"
     />
     <message

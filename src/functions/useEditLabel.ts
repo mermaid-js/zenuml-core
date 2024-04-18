@@ -1,6 +1,6 @@
 import { ref, nextTick } from "vue";
 
-export const specialCharRegex = /[!@#$%^&*()+-,.?''":{}|<>/\s]/g;
+export const specialCharRegex = /[!@#$%^&*()+-,.?''":{}|<>/\s]/;
 
 export const useEditLabel = (replaceTextFn: (e: Event) => void) => {
   const editing = ref(false);

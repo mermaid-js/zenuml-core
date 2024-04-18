@@ -16,7 +16,11 @@
         {{ number }}
       </div>
       <div :style="textStyle" :class="classNames">
-        <MessageLabel :labelText="labelText" :labelPosition="labelPosition" />
+        <MessageLabel
+          :labelText="labelText"
+          :labelPosition="labelPosition"
+          :isAsync="true"
+        />
       </div>
     </label>
     <svg class="arrow text-skin-message-arrow" width="30" height="24">
@@ -49,11 +53,11 @@ const store = useStore();
 const numbering = computed(() => store.state.numbering);
 const messageRef = ref();
 const labelPosition: ComputedRef<[number, number]> = computed(() => {
-  const signature = props.context.messageBody();
+  const signature = context.value.messageBody();
   return [signature.start.start, signature.stop.stop];
 });
 const labelText = computed(() => {
-  return props.context.messageBody().getFormattedText();
+  return context.value.messageBody().getFormattedText();
 });
 
 const onClick = () => {

@@ -10,7 +10,12 @@
       >
         {{ number }}
       </div>
-      <MessageLabel :labelText="labelText" :labelPosition="labelPosition" />
+      <MessageLabel
+        :labelText="labelText"
+        :labelPosition="labelPosition"
+        :isAsync="true"
+        :isSelf="true"
+      />
     </label>
     <svg class="arrow text-skin-message-arrow" width="34" height="34">
       <polyline
@@ -27,20 +32,29 @@
   </div>
 </template>
 
-<script type="text/babel">
-import { mapState } from "vuex";
+<script setup lang="ts">
+import { useStore } from "vuex";
+import { ComputedRef, computed, toRefs } from "vue";
 import MessageLabel from "@/components/DiagramFrame/SeqDiagram/MessageLayer/MessageLabel.vue";
 
-export default {
-  name: "self-invocation-async",
-  props: ["content", "number"],
-  components: {
-    MessageLabel,
-  },
-  computed: {
-    ...mapState(["numbering"]),
-  },
-};
+const props = defineProps<{
+  context?: any;
+  number?: string;
+  textStyle?: Record<string, string | number>;
+  classNames?: any;
+}>();
+const { context } = toRefs(props);
+const store = useStore();
+
+const numbering = computed(() => store.state.numbering);
+const labelPosition: ComputedRef<[number, number]> = computed(() => {
+  if (!context?.value) return [-1, -1];
+  const content = context?.value.content();
+  return [content.start.start, content.stop.stop];
+});
+const labelText = computed(() => {
+  return context?.value.content().getFormattedText();
+});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

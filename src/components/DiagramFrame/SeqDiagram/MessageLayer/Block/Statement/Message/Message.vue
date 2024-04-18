@@ -21,6 +21,7 @@
             v-if="editable"
             :labelText="content"
             :labelPosition="labelPosition"
+            :isAsync="isAsync"
           />
           <template v-else>
             {{ content }}

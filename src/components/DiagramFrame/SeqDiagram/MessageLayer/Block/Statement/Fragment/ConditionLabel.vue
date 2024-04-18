@@ -52,8 +52,7 @@ function replaceLabelText(e: Event) {
     return;
   }
 
-  // If text has special characters, we wrap it with double quotes
-  // If text is an equality condition without special characters, we skip wrapping it with double quotes
+  // If text has special characters, not an equalitiy condition, we wrap it with double quotes
   if (specialCharRegex.test(newText) && !equalityRegex.test(newText)) {
     newText = newText.replace(/"/g, ""); // remove existing double quotes
     newText = `"${newText}"`;
