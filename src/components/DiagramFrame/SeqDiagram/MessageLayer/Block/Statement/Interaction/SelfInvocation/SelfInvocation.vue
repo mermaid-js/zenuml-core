@@ -19,7 +19,7 @@
         <MessageLabel
           :labelText="labelText"
           :labelPosition="labelPosition"
-          :isAsync="true"
+          :isSelf="true"
         />
       </div>
     </label>
@@ -53,11 +53,11 @@ const store = useStore();
 const numbering = computed(() => store.state.numbering);
 const messageRef = ref();
 const labelPosition: ComputedRef<[number, number]> = computed(() => {
-  const signature = context.value.messageBody();
+  const signature = context?.value.messageBody();
   return [signature.start.start, signature.stop.stop];
 });
 const labelText = computed(() => {
-  return context.value.messageBody().getFormattedText();
+  return context?.value.messageBody().getFormattedText();
 });
 
 const onClick = () => {
