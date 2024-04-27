@@ -12,6 +12,7 @@ describe("StringUtil", () => {
     ['"A .m"', "A.m"],
     ['"A .m"', "A.m"],
     ['"method name"()', '"method name"()'],
+    ["methodName() x", "methodName() x"],
   ])("removes change-lines", (original, formatted) => {
     expect(formatText(original)).toEqual(formatted);
   });
