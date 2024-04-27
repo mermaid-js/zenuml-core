@@ -65,7 +65,7 @@ function replaceLabelText(e: Event) {
   }
 
   // If text has special characters or space, we wrap it with double quotes
-  // *NOTE*: We don't wrap the text with double quotes if it's an async message
+  // *NOTE*: We don't wrap the text with  quotes if it's an async message
   if (!isAsync.value && specialCharRegex.test(newText)) {
     newText = newText.replace(/"/g, ""); // remove existing double quotes
     newText = `"${newText}"`;
@@ -77,11 +77,7 @@ function replaceLabelText(e: Event) {
     console.warn("labelPosition is not set");
     return;
   }
-  console.log({
-    newText,
-    oldText: target.innerText,
-    originalText: labelText.value,
-  });
+
   const newCode =
     code.value.slice(0, start) + newText + code.value.slice(end + 1);
   updateCode(newCode);
