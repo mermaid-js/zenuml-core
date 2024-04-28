@@ -120,6 +120,12 @@
                   .render(cm.getValue(), {
                     theme,
                     onContentChange: (code) => editor.setValue(code),
+                    onThemeChange: ({ theme }) => {
+                      localStorage.setItem(
+                        `${location.hostname}-zenuml-theme`,
+                        theme,
+                      );
+                    },
                   })
                   .then((r) => {
                     window.parentLogger

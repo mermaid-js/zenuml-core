@@ -54,9 +54,8 @@ const Store = (): StoreOptions<StoreState> => {
     state: {
       warning: undefined,
       code: "",
-      theme:
-        localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
-        "theme-default",
+      theme: "theme-default",
+      enableScopedTheming: false,
       themeIconDot: Boolean(
         localStorage.getItem(`${location.hostname}-zenuml-theme-icon-dot`),
       ),
@@ -147,16 +146,11 @@ const Store = (): StoreOptions<StoreState> => {
         state.numbering = payload;
       },
       setTheme: function (state: any, payload: string) {
-        if (payload) {
-          localStorage.setItem(`${location.hostname}-zenuml-theme`, payload);
-        } else {
-          localStorage.setItem(
-            `${location.hostname}-zenuml-theme`,
-            "theme-default",
-          );
-        }
         state.theme = payload;
-        state.onThemeChange?.(payload);
+        state.onThemeChange?.({
+          theme: payload,
+          currentDiagramOnly: Boolean(state.scopeThemingChecked),
+        });
       },
       setThemeIconDot: function (state: any, payload: boolean) {
         localStorage.setItem(
@@ -164,6 +158,13 @@ const Store = (): StoreOptions<StoreState> => {
           payload ? "1" : "",
         );
         state.themeIconDot = payload;
+      },
+      setEnableScopedTheming: function (state: any, payload: boolean) {
+        state.enableScopedTheming = payload;
+        state.onThemeChange?.({
+          theme: state.theme,
+          scoped: payload,
+        });
       },
       onMessageClick: function (state: any, payload: any) {
         state.onMessageClick = payload;
