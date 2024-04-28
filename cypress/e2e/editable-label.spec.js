@@ -45,8 +45,8 @@ describe("Editable Label", function () {
     // Edit the message
     const messageLabel = cy.contains("Hello Bob");
     messageLabel.dblclick();
-    messageLabel.type(", how are you?{enter}");
-    cy.contains("Hello Bob, how are you?").should("be.visible");
+    messageLabel.type(" how are you?{enter}");
+    cy.contains("Hello Bob how are you?").should("be.visible");
     cy.get("body").click();
 
     cy.document().toMatchImageSnapshot({
