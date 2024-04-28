@@ -192,7 +192,7 @@ const themes = [
 const store = useStore();
 const selected = computed(() => store.state.theme || themes[0].id);
 const scopeThemingChecked = computed(
-  () => store.state.scopeThemingChecked || false,
+  () => store.state.enableScopedTheming || false,
 );
 const themeIconDot = ref(store.state.themeIconDot);
 
@@ -208,13 +208,11 @@ const openModal = () => {
 };
 
 const updateTheme = (theme) => {
-  selected.value = theme;
   store.commit("setTheme", theme);
   themeTrackEvent("theme-select");
 };
 
 const updateEnablescopeTheming = (checked) => {
-  scopeThemingChecked.value = checked;
   store.commit("setEnableScopedTheming", checked);
   themeTrackEvent("theme-enable-scoped");
 };
