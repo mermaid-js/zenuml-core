@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import "cypress-plugin-snapshots/commands";
-describe("Smoke test", function () {
-  it("Editable label: Special characters & extra spaces", function () {
+describe("Editable Label", function () {
+  it("Special characters & extra spaces", function () {
     cy.visit("http://127.0.0.1:8080/cy/smoke-editable-label.html");
     // This line is to make sure the privacy icon is loaded
     cy.get(".privacy>span>svg", { timeout: 5000 }).should("be.visible");
@@ -19,7 +19,7 @@ describe("Smoke test", function () {
     });
   });
 
-  it("Editable label: Self message", function () {
+  it("Self message", function () {
     cy.visit("http://127.0.0.1:8080/cy/smoke-editable-label.html");
     // This line is to make sure the privacy icon is loaded
     cy.get(".privacy>span>svg", { timeout: 5000 }).should("be.visible");
@@ -37,7 +37,7 @@ describe("Smoke test", function () {
     });
   });
 
-  it("Editable label: Async message", function () {
+  it("Async message", function () {
     cy.visit("http://127.0.0.1:8080/cy/smoke-editable-label.html");
     // This line is to make sure the privacy icon is loaded
     cy.get(".privacy>span>svg", { timeout: 5000 }).should("be.visible");
