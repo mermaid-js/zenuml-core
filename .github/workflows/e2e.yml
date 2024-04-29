@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [16] # Dosn't work with 18. https://github.com/cypress-io/github-action/issues/534#issuecomment-1115947632
+        node-version: [18] # Work with 18. https://github.com/cypress-io/github-action/issues/534#issuecomment-1115947632
     steps:
       - uses: actions/checkout@v3
 
