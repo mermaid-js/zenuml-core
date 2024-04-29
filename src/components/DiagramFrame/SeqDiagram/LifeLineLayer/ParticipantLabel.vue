@@ -3,8 +3,7 @@
     title="Double click to edit"
     class="name leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
     :class="{
-      'absolute right-1/2 translate-x-1/2 bottom-0  py-1 px-2 ml-1 cursor-text':
-        editing,
+      'py-1 px-2 cursor-text': editing,
     }"
     :contenteditable="editing"
     @dblclick="handleDblClick"
@@ -51,10 +50,15 @@ function replaceLabelText(e: Event) {
     return;
   }
 
+  if (newText.includes(" ")) {
+    newText = newText.replace(/\s+/g, " "); // remove extra spaces
+  }
+
   // If text has special characters or space, we wrap it with double quotes
-  if (specialCharRegex.test(newText) || newText.includes(" ")) {
-    newText = newText.replace(/[\s"]/g, ""); // remove existing double quotes and empty spaces
+  if (specialCharRegex.test(newText)) {
+    newText = newText.replace(/"/g, ""); // remove existing double quotes
     newText = `"${newText}"`;
+    specialCharRegex.lastIndex = 0;
   }
 
   if (!labelPositions?.value) return;
