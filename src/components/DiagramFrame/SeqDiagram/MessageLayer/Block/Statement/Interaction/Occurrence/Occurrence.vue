@@ -102,7 +102,7 @@ export default {
       > .message
   ) {
   bottom: -17px; /* Move the absolutely positioned return message to the bottom. -17 to offset the padding of Occurrence. */
-  height: 0;
+  /* height: 0; */
 }
 
 .right-to-left.occurrence {

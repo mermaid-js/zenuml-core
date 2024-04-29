@@ -24,18 +24,24 @@
       :class="{ 'right-to-left': rightToLeft }"
     ></div>
     <comment v-if="hasComment" :commentObj="commentObj" />
-    <component
-      v-bind:is="invocation"
+    <self-invocation
+      v-if="isSelf"
+      :classNames="messageClassNames"
+      :textStyle="messageTextStyle"
+      :context="message"
+      :number="`${number}`"
+    />
+    <message
+      v-else
       class="text-center"
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
       :context="message"
       :content="signature"
-      :assignee="assignee"
       :rtl="rightToLeft"
       type="sync"
       :number="number"
-    ></component>
+    />
     <occurrence
       :context="message"
       :participant="to"
@@ -44,8 +50,8 @@
       :number="`${number}`"
     />
     <message
-      class="return transform -translate-y-full"
       v-if="assignee && !isSelf"
+      class="return transform -translate-y-full"
       :context="message"
       :content="assignee"
       :rtl="!rightToLeft"
@@ -159,10 +165,6 @@ export default {
     isSelf: function () {
       // this.to === undefined if it is a self interaction and root message.
       return !this.to || this.to === this.from;
-    },
-    invocation: function () {
-      // return 'Message'
-      return this.isSelf ? "SelfInvocation" : "Message";
     },
     isInitedFromOccurrence: function () {
       return this.message?.isInitedFromOccurrence(this.context);

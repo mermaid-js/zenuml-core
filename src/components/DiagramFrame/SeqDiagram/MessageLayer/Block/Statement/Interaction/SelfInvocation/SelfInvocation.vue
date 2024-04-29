@@ -7,7 +7,7 @@
     ref="messageRef"
   >
     <label
-      class="name group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em]"
+      class="name group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em] w-full"
     >
       <div
         class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500"
@@ -16,7 +16,11 @@
         {{ number }}
       </div>
       <div :style="textStyle" :class="classNames">
-        <span v-if="assignee">{{ assignee }} = </span> {{ content }}
+        <MessageLabel
+          :labelText="labelText"
+          :labelPosition="labelPosition"
+          :isSelf="true"
+        />
       </div>
     </label>
     <svg class="arrow text-skin-message-arrow" width="30" height="24">
@@ -34,21 +38,28 @@
 
 <script setup lang="ts">
 import { useStore } from "vuex";
-import { computed, ref, toRefs } from "vue";
+import { ComputedRef, computed, ref, toRefs } from "vue";
+import MessageLabel from "../../../../MessageLabel.vue";
 
 const props = defineProps<{
   context?: any;
-  content: string;
-  assignee?: string;
   number?: string;
   textStyle?: Record<string, string | number>;
   classNames?: any;
 }>();
 const { context } = toRefs(props);
-
 const store = useStore();
+
 const numbering = computed(() => store.state.numbering);
 const messageRef = ref();
+const labelPosition: ComputedRef<[number, number]> = computed(() => {
+  const signature = context?.value.messageBody();
+  return [signature.start.start, signature.stop.stop];
+});
+const labelText = computed(() => {
+  return context?.value.messageBody().getFormattedText();
+});
+
 const onClick = () => {
   store.getters.onMessageClick(context, messageRef.value);
 };
