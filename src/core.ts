@@ -17,7 +17,7 @@ import "./themes/theme-dark.css";
 import Block from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block.vue";
 import Comment from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue";
 import { getStartTime, calculateCostTime } from "./utils/CostTime";
-import { clearCache } from "./utils/RenderingCache";
+
 const logger = parentLogger.child({ name: "core" });
 
 interface Config {
@@ -104,7 +104,6 @@ export default class ZenUml implements IZenUml {
   async doRender(config: Config | undefined) {
     console.debug("rendering start");
     const start = getStartTime();
-    clearCache();
     this.store.commit("onContentChange", config?.onContentChange || (() => {}));
     this.store.commit("onThemeChange", config?.onThemeChange || (() => {}));
     if (config?.enableMultiTheme !== undefined) {
