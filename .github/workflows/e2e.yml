@@ -11,16 +11,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [16] # Dosn't work with 18. https://github.com/cypress-io/github-action/issues/534#issuecomment-1115947632
+        node-version: [20] # Work with 18. https://github.com/cypress-io/github-action/issues/534#issuecomment-1115947632
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          sudo -H pip install setuptools
+
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           cache: pnpm
           node-version: ${{ matrix.node-version }}
@@ -28,15 +38,15 @@ jobs:
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6.6.1
         with:
           browser: chrome
           start: pnpm run dev
           command: pnpm run cy
           wait-on: http://127.0.0.1:8080
-      - name: Upload artifacts  # Find artifacts under actions/jobs
+      - name: Upload artifacts # Find artifacts under actions/jobs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snapshots
           path: ./cypress/

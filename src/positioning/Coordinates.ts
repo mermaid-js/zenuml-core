@@ -11,7 +11,7 @@ import { IParticipantModel } from "./ParticipantListener";
 import { find_optimal } from "./david/DavidEisenstat";
 import { AllMessages } from "./MessageContextListener";
 import { OwnableMessage, OwnableMessageType } from "./OwnableMessage";
-import { getCache, setCache } from "./../utils/RenderingCache";
+import { clearCache, getCache, setCache } from "@/utils/RenderingCache";
 
 export class Coordinates {
   private m: Array<Array<number>> = [];
@@ -20,6 +20,7 @@ export class Coordinates {
   private readonly ownableMessages: OwnableMessage[];
 
   constructor(ctx: any, widthProvider: WidthFunc) {
+    clearCache();
     this.participantModels = OrderedParticipants(ctx);
     this.ownableMessages = AllMessages(ctx);
 

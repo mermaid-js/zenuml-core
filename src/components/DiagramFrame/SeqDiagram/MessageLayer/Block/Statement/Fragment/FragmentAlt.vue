@@ -28,10 +28,7 @@
     <div :class="{ hidden: collapsed }">
       <div class="segment">
         <div class="text-skin-fragment flex">
-          <ConditionLabel
-            :block="ifBlock"
-            :getConditionFromBlock="conditionFromIfElseBlock"
-          />
+          <ConditionLabel :condition="conditionFromIfElseBlock(ifBlock)" />
         </div>
         <block
           v-if="blockInIfBlock"
@@ -47,8 +44,7 @@
           <div class="text-skin-fragment" :key="index + 1000">
             <label class="else-if hidden">else if</label>
             <ConditionLabel
-              :block="elseIfBlock"
-              :getConditionFromBlock="conditionFromIfElseBlock"
+              :condition="conditionFromIfElseBlock(elseIfBlock)"
             />
           </div>
           <block
