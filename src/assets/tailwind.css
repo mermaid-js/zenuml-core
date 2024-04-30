@@ -370,11 +370,11 @@
   }
 
   .theme-nab {
-    /* Frame */
-    --color-bg-canvas: #f2f4f6;
+    --color-bg-base: 242, 244, 246;
+    --color-bg-canvas: 242, 244, 246;
 
     /* Participant */
-    --color-bg-participant: #c30000;
+    --color-bg-participant: 195, 0, 0;
     --color-text-participant: #ffffff; /* Participant name, stereotype */
     --color-border-participant: #c30000; /* Participant border and Lifeline */
 
