@@ -35,7 +35,6 @@
         :labelText="entity.label || entity.name"
         :labelPositions="participantPositions"
       />
-      <!-- <label class="name leading-4">{{ entity.label || entity.name }}</label> -->
     </div>
   </div>
 </template>
