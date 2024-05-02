@@ -63,6 +63,6 @@ describe("Participants", () => {
       width: undefined,
       explicit: true,
     });
-    expect(participants.Positions("A")?.has("[1,2]"));
+    expect(participants.GetPositions("A")?.has("[1,2]"));
   });
 });

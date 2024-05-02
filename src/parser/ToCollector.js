@@ -32,8 +32,8 @@ let onParticipant = function (ctx) {
   participants.Add(
     participant,
     false,
-    nameCtx.start.start,
-    nameCtx.stop.stop + 1,
+    nameCtx?.start.start,
+    (nameCtx?.stop.stop ?? 0) + 1,
     stereotype,
     width,
     groupId,

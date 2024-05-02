@@ -182,6 +182,10 @@ export class Participants {
     return this.participantPositions;
   }
 
+  GetPositions(name: string) {
+    return this.participantPositions.get(name);
+  }
+
   private addPosition(name: string, start: number, end: number) {
     let positions = this.participantPositions.get(name);
     if (!positions) {
