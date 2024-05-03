@@ -76,6 +76,7 @@ const Store = (): StoreOptions<StoreState> => {
       onMessageClick: () => {},
       onContentChange: () => {},
       onThemeChange: () => {},
+      onEventEmit: () => {},
     } as StoreState,
     getters: {
       code: (state: any) => state.code,
@@ -119,6 +120,7 @@ const Store = (): StoreOptions<StoreState> => {
       diagramElement: (state: any) => state.diagramElement,
       onContentChange: (state: any) => state.onContentChange,
       onThemeChange: (state: any) => state.onThemeChange,
+      onEventEmit: (state: any) => state.onEventEmit,
     },
     mutations: {
       code: function (state: any, payload: any) {
@@ -165,6 +167,12 @@ const Store = (): StoreOptions<StoreState> => {
           theme: state.theme,
           scoped: payload,
         });
+      },
+      eventEmit: function (state: any, payload: any) {
+        state.onEventEmit?.(payload.event, payload.data);
+      },
+      onEventEmit: function (state: any, payload: any) {
+        state.onEventEmit = payload;
       },
       onMessageClick: function (state: any, payload: any) {
         state.onMessageClick = payload;

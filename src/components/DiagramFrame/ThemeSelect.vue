@@ -163,7 +163,7 @@ import ThemeLegacy from "../../assets/theme/theme-legacy.svg?raw";
 import ThemeCleanLight from "../../assets/theme/theme-clean-light.svg?raw";
 import ThemeCleanDark from "../../assets/theme/theme-clean-dark.svg?raw";
 import ThemeNeonDark from "../../assets/theme/theme-neon-dark.svg?raw";
-
+import { TrackEvent } from "@/EventBus";
 const isOpen = ref(false);
 
 const themes = [
@@ -192,26 +192,40 @@ const themes = [
 const store = useStore();
 const selected = computed(() => store.state.theme || themes[0].id);
 const scopeThemingChecked = computed(
-  () => store.state.scopeThemingChecked || false,
+  () => store.state.enableScopedTheming || false,
 );
 const themeIconDot = ref(store.state.themeIconDot);
 
 const closeModal = () => {
   isOpen.value = false;
+  themeTrackEvent("theme-close-modal");
 };
 const openModal = () => {
   isOpen.value = true;
   themeIconDot.value = true;
   store.commit("setThemeIconDot", true);
+  themeTrackEvent("theme-open-modal");
 };
 
 const updateTheme = (theme) => {
-  selected.value = theme;
   store.commit("setTheme", theme);
+  themeTrackEvent("theme-select");
 };
 
 const updateEnablescopeTheming = (checked) => {
-  scopeThemingChecked.value = checked;
   store.commit("setEnableScopedTheming", checked);
+  themeTrackEvent("theme-enable-scoped");
+};
+
+const themeTrackEvent = (action) => {
+  TrackEvent(
+    store,
+    {
+      theme: selected.value,
+      enableScopedTheming: scopeThemingChecked.value,
+    },
+    action,
+    "sequence",
+  );
 };
 </script>
