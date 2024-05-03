@@ -82,7 +82,7 @@ const labelPosition: ComputedRef<[number, number]> = computed(() => {
   switch (type?.value) {
     case "sync":
       {
-        const signature = context?.value?.messageBody().func().signature()[0];
+        const signature = context?.value?.messageBody().func()?.signature()[0];
         [start, stop] = [signature?.start.start, signature?.stop.stop];
       }
       break;

@@ -24,16 +24,31 @@ let onParticipant = function (ctx) {
   const width =
     (ctx.width && ctx.width() && Number.parseInt(ctx.width().getText())) ||
     undefined;
-  const label = ctx.label && ctx.label()?.name()?.getFormattedText();
+  const labelCtx = ctx.label && ctx.label();
+  const label = labelCtx?.name()?.getFormattedText();
   const explicit = true;
   const color = ctx.COLOR()?.getText();
   const comment = ctx.getComment();
   const nameCtx = ctx.name();
+  let start, stop;
+
+  // When label is present, it means we edit label in diagram and update its code regardless of the occurrence of the participant name
+  if (labelCtx) {
+    const labelNameCtx = labelCtx.name();
+    if (labelNameCtx) {
+      start = labelNameCtx.start.start;
+      stop = labelNameCtx.stop.stop + 1;
+    }
+  } else if (nameCtx) {
+    start = nameCtx.start.start;
+    stop = nameCtx.stop.stop + 1;
+  }
+
   participants.Add(
     participant,
     false,
-    nameCtx?.start.start,
-    (nameCtx?.stop.stop ?? 0) + 1,
+    start,
+    stop,
     stereotype,
     width,
     groupId,
@@ -49,7 +64,14 @@ ToCollector.enterParticipant = onParticipant;
 let onTo = function (ctx) {
   if (isBlind) return;
   let participant = ctx.getFormattedText();
-  participants.Add(participant, false, ctx.start.start, ctx.stop.stop + 1);
+  const participantInstance = participants.Get(participant);
+
+  // Skip adding participant position if label is present
+  if (participantInstance?.label) {
+    participants.Add(participant, false);
+  } else {
+    participants.Add(participant, false, ctx.start.start, ctx.stop.stop + 1);
+  }
 };
 
 ToCollector.enterFrom = onTo;

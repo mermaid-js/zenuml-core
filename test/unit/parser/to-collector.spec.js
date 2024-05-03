@@ -3,6 +3,7 @@ import { Fixture } from "./fixture/Fixture";
 import { RootContext } from "../../../src/parser/index";
 
 import ToCollector from "../../../src/parser/ToCollector";
+import { expect } from "vitest";
 test("smoke test2", () => {
   const code = `
     C
@@ -106,6 +107,10 @@ describe("with label", () => {
     expect(participants.Get("A").name).toBe("A");
     expect(participants.Get("A").label).toBe(label);
   });
+  test("participant position with label", () => {
+    let participants = getParticipants("A as AA A.method", true);
+    expect(participants.GetPositions("A")).toEqual(new Set(["[5,7]"]));
+  });
 });
 
 describe("with participantType", () => {
@@ -134,6 +139,7 @@ describe("Add Starter to participants", () => {
     expect(participants.Size()).toBe(1);
     expect(participants.Get("_STARTER_").name).toBe("_STARTER_");
     expect(participants.Get("_STARTER_").isStarter).toBeTruthy();
+    expect(participants.GetPositions("_STARTER_")).toBeUndefined();
   });
 
   test("A B->A.m", () => {
@@ -167,6 +173,7 @@ describe("implicit", () => {
       let participants = getParticipants("a = new A()", true);
       expect(participants.Size()).toBe(2);
       expect(participants.Get("a:A").width).toBeUndefined();
+      expect(participants.GetPositions("a:A")).toEqual(new Set(["[8,9]"]));
     });
     test("seqDsl should treat creation as a participant - assignment with type", () => {
       // We need @Starter, otherwise IA becomes a participant declaration
@@ -174,11 +181,15 @@ describe("implicit", () => {
       expect(participants.Size()).toBe(2);
       expect(participants.Get("X").width).toBeUndefined();
       expect(participants.Get("a:A").width).toBeUndefined();
+      expect(participants.GetPositions("X").size).toBe(1);
+      expect(participants.GetPositions("X")).toEqual(new Set(["[9,10]"]));
+      expect(participants.GetPositions("a:A")).toEqual(new Set(["[23,24]"]));
     });
     test("seqDsl should treat method call as a participant - creation & assignment", () => {
       let participants = getParticipants("a = new A()", true);
       expect(participants.Size()).toBe(2);
       expect(participants.Get("a:A").width).toBeUndefined();
+      expect(participants.GetPositions("a:A")).toEqual(new Set(["[8,9]"]));
     });
   });
 
@@ -202,15 +213,19 @@ describe("implicit", () => {
       let participants = getParticipants('"b:B".method(x.m)', true);
       expect(participants.Size()).toBe(2);
       expect(participants.Get("b:B").width).toBeUndefined();
+      expect(participants.GetPositions("b:B")).toEqual(new Set(["[0,5]"]));
     });
     test("seqDsl should get all participants but ignore parameters - creation", () => {
       let participants = getParticipants('"b:B".method(new X())', true);
       expect(participants.Size()).toBe(2);
       expect(participants.Get("b:B").width).toBeUndefined();
+      expect(participants.GetPositions("b:B")).toEqual(new Set(["[0,5]"]));
     });
     test("seqDsl should get all participants including from", () => {
       let participants = getParticipants("A->B.m", true);
       expect(participants.Size()).toBe(2);
+      expect(participants.GetPositions("A")).toEqual(new Set(["[0,1]"]));
+      expect(participants.GetPositions("B")).toEqual(new Set(["[3,4]"]));
     });
   });
 
@@ -236,6 +251,7 @@ describe("implicit", () => {
         "B",
         "A",
       ]);
+      expect(participants.Positions().size).toEqual(2);
     });
 
     test("seqDsl should get all participants from a node of the root context", () => {
@@ -258,6 +274,7 @@ describe("implicit", () => {
         "D",
         "C",
       ]);
+      expect(participants.Positions().size).toEqual(0);
     });
   });
 });
