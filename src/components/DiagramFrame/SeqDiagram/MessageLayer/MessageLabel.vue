@@ -6,7 +6,7 @@
       'py-1 px-2 ml-1 cursor-text': editing,
       'absolute right-1/2 translate-x-1/2 bottom-0': editing && !isSelfAsync,
     }"
-    :contenteditable="editing"
+    :contenteditable="editing && mode === RenderMode.Dynamic"
     @dblclick="handleDblClick"
     @blur="handleBlur"
     @keyup="handleKeyup"
@@ -18,6 +18,7 @@
 <script setup lang="ts">
 import { computed, toRefs } from "vue";
 import { useStore } from "vuex";
+import { RenderMode } from "@/store/Store";
 import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
 
 const props = withDefaults(
@@ -35,6 +36,7 @@ const props = withDefaults(
 
 const { labelText, labelPosition, isAsync, isSelf } = toRefs(props);
 const store = useStore();
+const mode = computed(() => store.state.mode);
 const code = computed(() => store.getters.code);
 const onContentChange = computed(
   () => store.getters.onContentChange || (() => {}),

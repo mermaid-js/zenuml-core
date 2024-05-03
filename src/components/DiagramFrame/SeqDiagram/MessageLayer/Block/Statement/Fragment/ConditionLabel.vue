@@ -5,7 +5,7 @@
     :class="{
       'py-1 px-2 ml-1 cursor-text': editing,
     }"
-    :contenteditable="editing"
+    :contenteditable="editing && mode === RenderMode.Dynamic"
     @dblclick="handleDblClick"
     @blur="handleBlur"
     @keyup="handleKeyup"
@@ -18,6 +18,7 @@
 import { computed, toRefs } from "vue";
 import { useStore } from "vuex";
 import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
+import { RenderMode } from "@/store/Store";
 
 const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
 
@@ -27,6 +28,7 @@ const props = defineProps<{
 
 const { condition } = toRefs(props);
 const store = useStore();
+const mode = computed(() => store.state.mode);
 const code = computed(() => store.getters.code);
 const onContentChange = computed(
   () => store.getters.onContentChange || (() => {}),
