@@ -19,6 +19,7 @@
 @layer base {
   :root {
     --color-bg-base: 255, 255, 255;
+    --color-backup-white: 255, 255, 255;
     --color-text-base: #000;
     --color-text-secondary: #333;
     --color-border-base: #000;
@@ -32,14 +33,14 @@
 
     /* Message */
     --color-message-arrow: #000;
-    --color-text-message-hover: #ffffff;
+    --color-text-message-hover: 255, 255, 255;
     --color-bg-message-hover: #000;
 
     /* Participant */
-    --color-bg-participant: #fff;
+    --color-bg-participant: 255, 255, 255;
 
     /* Occurrence */
-    --color-bg-occurrence: #dedede;
+    --color-bg-occurrence: 222, 222, 222;
   }
 
   .theme-clean-light {
@@ -55,17 +56,17 @@
     /* Message */
     --color-text-message: #368eff;
     --color-message-arrow: #368eff;
-    --color-text-message-hover: #ffffff;
+    --color-text-message-hover: 255, 255, 255;
     --color-bg-message-hover: #368eff;
 
     /* Participant */
     --color-text-participant: #368eff;
     --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
-    --color-bg-participant: #ebf4ff;
+    --color-bg-participant: 237, 244, 254;
     --color-border-participant: #368eff;
 
     /* Occurrence*/
-    --color-bg-occurrence: #ffffff;
+    --color-bg-occurrence: 255, 255, 255;
     --color-border-occurrence: #368eff;
     --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
 
@@ -85,17 +86,17 @@
 
     /* Message */
     --color-message-arrow: #536fff;
-    --color-text-message-hover: #ffffff;
+    --color-text-message-hover: 255, 255, 255;
     --color-bg-message-hover: #536fff;
 
     /* Participant */
     --color-text-participant: #cecfd2;
     --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
-    --color-bg-participant: #536fff;
+    --color-bg-participant: 89, 110, 246;
     --color-border-participant: #cecfd2;
 
     /* Occurrence */
-    --color-bg-occurrence: #536fff;
+    --color-bg-occurrence: 89, 110, 246;
     --color-border-occurrence: #cecfd2;
     --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
 
@@ -115,17 +116,17 @@
 
     /* Message */
     --color-message-arrow: #8ffc5b;
-    --color-text-message-hover: #000;
+    --color-text-message-hover: 0, 0, 0;
     --color-bg-message-hover: #8ffc5b;
 
     /* Participant */
     --color-text-participant: #8ffc5b;
     --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
-    --color-bg-participant: #000;
+    --color-bg-participant: 0, 0, 0;
     --color-border-participant: #8ffc5b;
 
     /* Occurrence */
-    --color-bg-occurrence: #60ff33;
+    --color-bg-occurrence: 143, 252, 91;
     --color-border-occurrence: #8ffc5b;
     --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
 
@@ -370,11 +371,11 @@
   }
 
   .theme-nab {
-    /* Frame */
-    --color-bg-canvas: #f2f4f6;
+    --color-bg-base: 242, 244, 246;
+    --color-bg-canvas: 242, 244, 246;
 
     /* Participant */
-    --color-bg-participant: #c30000;
+    --color-bg-participant: 195, 0, 0;
     --color-text-participant: #ffffff; /* Participant name, stereotype */
     --color-border-participant: #c30000; /* Participant border and Lifeline */
 

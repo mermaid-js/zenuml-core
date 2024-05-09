@@ -22,7 +22,7 @@ module.exports = {
       colors: {
         skin: {
           frame:
-            "var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, #fff)))",
+            "rgb(var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, --color-backup-white))))",
         },
       },
       textColor: {
@@ -35,7 +35,7 @@ module.exports = {
           "message-arrow":
             "var(--color-message-arrow, var(--color-border-frame, var(--color-border-base, #000)))", // message arrow head
           "message-hover":
-            "var(--color-text-message-hover, var(--color-bg-base, #fff))",
+            "rgb(var(--color-text-message-hover, var(--color-bg-base, --color-backup-white)))",
           comment:
             "var(--color-text-comment, var(--color-text-secondary, var(--color-text-base, #000)))",
           "fragment-header":
@@ -55,13 +55,14 @@ module.exports = {
       },
       backgroundColor: {
         skin: {
-          canvas: "var(--color-bg-canvas, var(--color-bg-base, #fff))",
+          canvas:
+            "rgb(var(--color-bg-canvas, var(--color-bg-base, --color-backup-white))",
           frame:
-            "rgba(var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, #fff))), <alpha-value>)",
+            "rgba(var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, --color-backup-white))), <alpha-value>)",
           title:
-            "var(--color-bg-title, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, #fff))))",
+            "rgb(var(--color-bg-title, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, --color-backup-white)))))",
           participant:
-            "var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, #fff))))",
+            "rgb(var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, --color-backup-white)))))",
           lifeline:
             "var(--color-border-participant, var(--color-border-participant, var(--color-border-frame, var(--color-border-base, #000))))",
           divider:
@@ -70,8 +71,8 @@ module.exports = {
             "var(--color-bg-message-hover, var(--color-text-base, #000))",
           "fragment-header": "var(--color-bg-fragment-header, transparent)",
           occurrence:
-            "var(--color-bg-occurrence, var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, #fff)))))",
-          base: "var(--color-bg-base)",
+            "rgb(var(--color-bg-occurrence, var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base,--color-backup-white))))))",
+          base: "rgb(var(--color-bg-base))",
           secondary: "var(--color-bg-secondary)",
           hover: "var(--color-bg-hover)",
           fill: "var(--color-bg-fill)",
@@ -95,7 +96,7 @@ module.exports = {
       },
       gradientColorStops: {
         skin: {
-          base: "var(--color-bg-base)",
+          base: "rgb(var(--color-bg-base))",
           secondary: "var(--color-bg-secondary)",
         },
       },
