@@ -85,8 +85,14 @@ ToCollector.enterStarter = function (ctx) {
 ToCollector.enterCreation = function (ctx) {
   if (isBlind) return;
   const participant = ctx.Owner();
-  const ctor = ctx.creationBody().construct();
-  participants.Add(participant, false, ctor.start.start, ctor.stop.stop + 1);
+  const ctor = ctx?.creationBody()?.construct();
+  const participantInstance = participants.Get(participant);
+  // Skip adding participant constructor position if label is present
+  if (ctor && !participantInstance?.label) {
+    participants.Add(participant, false, ctor.start.start, ctor.stop.stop + 1);
+  } else {
+    participants.Add(participant, false);
+  }
 };
 
 ToCollector.enterParameters = function () {
