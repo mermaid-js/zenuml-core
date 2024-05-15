@@ -56,8 +56,9 @@ function replaceLabelText(e: Event) {
   if (!(target instanceof HTMLElement)) return;
   let newText = target.innerText.trim() ?? "";
 
-  // if text is empty, we need to replace it with the original label text
-  if (newText === "") {
+  // If text is empty or same as the original label text,
+  // we replace it with the original label text and bail out early
+  if (newText === "" || newText === labelText.value) {
     target.innerText = labelText.value;
     return;
   }
