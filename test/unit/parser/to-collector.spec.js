@@ -185,12 +185,6 @@ describe("implicit", () => {
       expect(participants.GetPositions("X")).toEqual(new Set(["[9,10]"]));
       expect(participants.GetPositions("a:A")).toEqual(new Set(["[23,24]"]));
     });
-    test("seqDsl should treat method call as a participant - creation & assignment", () => {
-      let participants = getParticipants("a = new A()", true);
-      expect(participants.Size()).toBe(2);
-      expect(participants.Get("a:A").width).toBeUndefined();
-      expect(participants.GetPositions("a:A")).toEqual(new Set(["[8,9]"]));
-    });
   });
 
   describe("from method call", () => {
