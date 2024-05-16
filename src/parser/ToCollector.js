@@ -30,34 +30,33 @@ let onParticipant = function (ctx) {
   const color = ctx.COLOR()?.getText();
   const comment = ctx.getComment();
   const nameCtx = ctx.name();
-  let start, stop;
+  let start, end;
 
   // When label is present, it means we edit label in diagram and update its code regardless of the occurrence of the participant name
   if (labelCtx) {
     const labelNameCtx = labelCtx.name();
     if (labelNameCtx) {
       start = labelNameCtx.start.start;
-      stop = labelNameCtx.stop.stop + 1;
+      end = labelNameCtx.stop.stop + 1;
     }
   } else if (nameCtx) {
     start = nameCtx.start.start;
-    stop = nameCtx.stop.stop + 1;
+    end = nameCtx.stop.stop + 1;
   }
 
-  participants.Add(
-    participant,
-    false,
+  participants.Add(participant, {
+    isStarter: false,
     start,
-    stop,
+    end,
+    type,
     stereotype,
     width,
     groupId,
     label,
     explicit,
-    type,
     color,
     comment,
-  );
+  });
 };
 ToCollector.enterParticipant = onParticipant;
 
@@ -68,9 +67,13 @@ let onTo = function (ctx) {
 
   // Skip adding participant position if label is present
   if (participantInstance?.label) {
-    participants.Add(participant, false);
+    participants.Add(participant, { isStarter: false });
   } else {
-    participants.Add(participant, false, ctx.start.start, ctx.stop.stop + 1);
+    participants.Add(participant, {
+      isStarter: false,
+      start: ctx.start.start,
+      end: ctx.stop.stop + 1,
+    });
   }
 };
 
@@ -79,7 +82,11 @@ ToCollector.enterTo = onTo;
 
 ToCollector.enterStarter = function (ctx) {
   let participant = ctx.getFormattedText();
-  participants.Add(participant, true, ctx.start.start, ctx.stop.stop + 1);
+  participants.Add(participant, {
+    isStarter: true,
+    start: ctx.start.start,
+    end: ctx.stop.stop + 1,
+  });
 };
 
 ToCollector.enterCreation = function (ctx) {
@@ -89,9 +96,13 @@ ToCollector.enterCreation = function (ctx) {
   const participantInstance = participants.Get(participant);
   // Skip adding participant constructor position if label is present
   if (ctor && !participantInstance?.label) {
-    participants.Add(participant, false, ctor.start.start, ctor.stop.stop + 1);
+    participants.Add(participant, {
+      isStarter: false,
+      start: ctor.start.start,
+      end: ctor.stop.stop + 1,
+    });
   } else {
-    participants.Add(participant, false);
+    participants.Add(participant, { isStarter: false });
   }
 };
 
@@ -134,7 +145,7 @@ const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 ToCollector.getParticipants = function (context, withStarter) {
   participants = new Participants();
   if (withStarter && context instanceof ProgContext) {
-    participants.Add(context.Starter(), true);
+    participants.Add(context.Starter(), { isStarter: true });
   }
   walker.walk(this, context);
   return participants;

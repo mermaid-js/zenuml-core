@@ -38,24 +38,19 @@ describe("Participants", () => {
 
   test("Get Starter", () => {
     const participants = new Participants();
-    participants.Add("A", true);
+    participants.Add("A", { isStarter: true });
     expect(participants.Starter()).toEqual({
       name: "A",
       isStarter: true,
       stereotype: undefined,
       width: undefined,
     });
-    participants.Add(
-      "A",
-      false,
-      1,
-      2,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      true,
-    );
+    participants.Add("A", {
+      isStarter: false,
+      start: 1,
+      end: 2,
+      explicit: true,
+    });
     expect(participants.Starter()).toEqual({
       name: "A",
       isStarter: true,

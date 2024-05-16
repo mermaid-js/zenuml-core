@@ -15,6 +15,21 @@ export enum ParticipantType {
   S3,
   Undefined,
 }
+
+interface ParticipantOptions {
+  isStarter?: boolean;
+  start?: number;
+  end?: number;
+  stereotype?: string;
+  width?: number;
+  groupId?: number | string;
+  label?: string;
+  explicit?: boolean;
+  type?: string;
+  color?: string;
+  comment?: string;
+}
+
 export class Participant {
   name: string;
   private stereotype: string | undefined;
@@ -27,19 +42,19 @@ export class Participant {
   private color: string | undefined;
   private comment: string | undefined;
 
-  constructor(
-    name: string,
-    isStarter?: boolean,
-    stereotype?: string,
-    width?: number,
-    groupId?: number | string,
-    label?: string,
-    explicit?: boolean,
-    type?: string,
-    color?: string,
-    comment?: string,
-  ) {
+  constructor(name: string, options: ParticipantOptions) {
     this.name = name;
+    const {
+      stereotype,
+      width,
+      groupId,
+      label,
+      explicit,
+      isStarter,
+      type,
+      color,
+      comment,
+    } = options;
     this.stereotype = stereotype;
     this.width = width;
     this.groupId = groupId;
@@ -94,49 +109,13 @@ export class Participants {
   private participants = new Map<string, Participant>();
   private participantPositions = new Map<string, Set<PositionStr>>();
 
-  public Add(name: string): void;
-  public Add(name: string, isStarter: boolean): void;
-  public Add(
-    name: string,
-    isStarter?: boolean,
-    start?: number,
-    end?: number,
-    stereotype?: string,
-    width?: number,
-    groupId?: number | string,
-    label?: string,
-    explicit?: boolean,
-  ): void;
-  public Add(
-    name: string,
-    isStarter?: boolean,
-    start?: number,
-    end?: number,
-    stereotype?: string,
-    width?: number,
-    groupId?: number | string,
-    label?: string,
-    explicit?: boolean,
-    type?: string,
-    color?: string,
-    comment?: string,
-  ): void {
-    const participant = new Participant(
-      name,
-      isStarter,
-      stereotype,
-      width,
-      groupId,
-      label,
-      explicit,
-      type,
-      color,
-      comment,
-    );
+  public Add(name: string, options: ParticipantOptions = {}): void {
+    const participant = new Participant(name, options);
     this.participants.set(
       name,
       mergeWith({}, this.Get(name), participant, (a, b) => a || b),
     );
+    const { start, end } = options;
     if (start !== undefined && end !== undefined) {
       this.addPosition(name, start, end);
     }
