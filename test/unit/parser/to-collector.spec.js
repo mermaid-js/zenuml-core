@@ -1,9 +1,8 @@
 import { Fixture } from "./fixture/Fixture";
-
 import { RootContext } from "../../../src/parser/index";
-
 import ToCollector from "../../../src/parser/ToCollector";
 import { expect } from "vitest";
+
 test("smoke test2", () => {
   const code = `
     C
@@ -184,6 +183,18 @@ describe("implicit", () => {
       expect(participants.GetPositions("X").size).toBe(1);
       expect(participants.GetPositions("X")).toEqual(new Set(["[9,10]"]));
       expect(participants.GetPositions("a:A")).toEqual(new Set(["[23,24]"]));
+    });
+
+    test("seqDsl should treat creation as a participant - assignment & method call ", () => {
+      let participants = getParticipants(
+        `ret = new A() "ret:A".method()`,
+        true,
+      );
+      expect(participants.Size()).toBe(2);
+      expect(participants.Get("ret:A").width).toBeUndefined();
+      expect(participants.GetPositions("ret:A")).toEqual(
+        new Set(["[10,11]", "[19,20]"]),
+      );
     });
   });
 

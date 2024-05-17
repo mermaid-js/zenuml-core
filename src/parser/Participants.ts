@@ -28,6 +28,7 @@ interface ParticipantOptions {
   type?: string;
   color?: string;
   comment?: string;
+  assignee?: string;
 }
 
 export class Participant {
@@ -41,6 +42,7 @@ export class Participant {
   private type: string | undefined;
   private color: string | undefined;
   private comment: string | undefined;
+  private assignee: string | undefined;
 
   constructor(name: string, options: ParticipantOptions) {
     this.name = name;
@@ -54,6 +56,7 @@ export class Participant {
       type,
       color,
       comment,
+      assignee,
     } = options;
     this.stereotype = stereotype;
     this.width = width;
@@ -64,6 +67,7 @@ export class Participant {
     this.type = type;
     this.color = color;
     this.comment = comment;
+    this.assignee = assignee;
   }
 
   public Type(): ParticipantType {

@@ -68,6 +68,15 @@ let onTo = function (ctx) {
   // Skip adding participant position if label is present
   if (participantInstance?.label) {
     participants.Add(participant, { isStarter: false });
+  } else if (participantInstance?.assignee) {
+    // If the participant has an assignee, calculate the position of the ctor and store it only.
+    // Let's say the participant name is `"${assignee}:${type}"`, we need to get the position of ${type}
+    const start = ctx.start.start + participantInstance.assignee.length + 2;
+    participants.Add(participant, {
+      isStarter: false,
+      start: start,
+      end: ctx.stop.stop,
+    });
   } else {
     participants.Add(participant, {
       isStarter: false,
@@ -96,10 +105,12 @@ ToCollector.enterCreation = function (ctx) {
   const participantInstance = participants.Get(participant);
   // Skip adding participant constructor position if label is present
   if (ctor && !participantInstance?.label) {
+    const assignee = ctx.Assignee();
     participants.Add(participant, {
       isStarter: false,
       start: ctor.start.start,
       end: ctor.stop.stop + 1,
+      assignee: assignee,
     });
   } else {
     participants.Add(participant, { isStarter: false });

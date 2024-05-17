@@ -1,18 +1,23 @@
 <template>
-  <label
-    title="Double click to edit"
-    class="name leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
-    :class="{
-      'py-1 px-2 cursor-text': editing,
-    }"
-    :contenteditable="editing && mode === RenderMode.Dynamic"
-    @dblclick="handleDblClick"
-    @blur="handleBlur"
-    @keyup="handleKeyup"
-    @keydown="handleKeydown"
-  >
-    {{ labelText }}
-  </label>
+  <div class="flex items-center justify-center">
+    <template v-if="assignee">
+      <label class="name leading-4">{{ assignee }}:</label>
+    </template>
+    <label
+      title="Double click to edit"
+      class="name leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
+      :class="{
+        'py-1 px-2 cursor-text': editing,
+      }"
+      :contenteditable="editing && mode === RenderMode.Dynamic"
+      @dblclick="handleDblClick"
+      @blur="handleBlur"
+      @keyup="handleKeyup"
+      @keydown="handleKeydown"
+    >
+      {{ labelText }}
+    </label>
+  </div>
 </template>
 <script setup lang="ts">
 import { computed, toRefs } from "vue";
@@ -23,12 +28,14 @@ import { RenderMode } from "@/store/Store";
 const props = defineProps<{
   labelText: string;
   labelPositions?: Set<string>;
+  assignee?: string;
 }>();
 
 const { labelText, labelPositions } = toRefs(props);
 const store = useStore();
 const mode = computed(() => store.state.mode);
 const code = computed(() => store.getters.code);
+
 const onContentChange = computed(
   () => store.getters.onContentChange || (() => {}),
 );
@@ -46,8 +53,9 @@ function replaceLabelText(e: Event) {
   if (!(target instanceof HTMLElement)) return;
   let newText = target.innerText.trim() ?? "";
 
-  // if text is empty, we need to replace it with the original label text
-  if (newText === "") {
+  // If text is empty or same as the original label text,
+  // we replace it with the original label text and bail out early
+  if (newText === "" || newText === labelText.value) {
     target.innerText = labelText.value;
     return;
   }

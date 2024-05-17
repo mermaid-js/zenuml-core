@@ -32,8 +32,9 @@
         >«{{ stereotype }}»</label
       >
       <ParticipantLabel
-        :labelText="entity.label || entity.name"
-        :labelPositions="participantPositions"
+        :labelText="labelText"
+        :labelPositions="labelPositions"
+        :assignee="entity.assignee"
       />
     </div>
   </div>
@@ -65,7 +66,7 @@ export default {
       return { translate: 0, participant };
     }
 
-    const participantPositions = computed(() =>
+    const labelPositions = computed(() =>
       store.getters.participants.Positions().get(props.entity.name),
     );
     const intersectionTop = useIntersectionTop();
@@ -88,7 +89,7 @@ export default {
         participantOffsetTop
       );
     });
-    return { translate, participant, participantPositions };
+    return { translate, participant, labelPositions };
   },
   props: {
     entity: {
@@ -117,6 +118,11 @@ export default {
     },
     stereotype() {
       return this.entity.stereotype;
+    },
+    labelText() {
+      return this.entity.assignee
+        ? this.entity.name.split(":")[1]
+        : this.entity.label || this.entity.name;
     },
     comment() {
       return this.entity.comment;
