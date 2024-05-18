@@ -151,7 +151,7 @@ const Store = (): StoreOptions<StoreState> => {
         state.theme = payload;
         state.onThemeChange?.({
           theme: payload,
-          currentDiagramOnly: Boolean(state.scopeThemingChecked),
+          scoped: Boolean(state.enableScopedTheming),
         });
       },
       setThemeIconDot: function (state: any, payload: boolean) {
