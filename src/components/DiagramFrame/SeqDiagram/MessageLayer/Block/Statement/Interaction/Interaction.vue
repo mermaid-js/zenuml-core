@@ -32,6 +32,7 @@
       :participant="to"
       :selfCallIndent="passOnOffset"
       :rtl="rightToLeft"
+      v-if="!collapsed"
     />
     <message
       class="return transform -translate-y-full"
@@ -55,6 +56,9 @@ import { ProgContext } from '../../../../../../../parser';
 export default {
   name: 'interaction',
   props: ['context', 'selfCallIndent', 'commentObj'],
+  data: () => ({
+    collapsed: false,
+  }),
   computed: {
     // add tracker to the mapGetters
     ...mapGetters(['participants', 'distance2', 'cursor', 'onElementClick']),
@@ -140,6 +144,8 @@ export default {
   },
   methods: {
     onClick() {
+      console.log('Interaction onClick', this.context, this.signature)
+      this.collapsed = !this.collapsed;
       this.onElementClick(CodeRange.from(this.context));
     },
   },
