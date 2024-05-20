@@ -3,8 +3,8 @@
     title="Double click to edit"
     class="px-1 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
     :class="{
-      'py-1 px-2 ml-1 cursor-text': editing,
-      'absolute right-1/2 translate-x-1/2 bottom-0': editing && !isSelfAsync,
+      'cursor-text': editing,
+      '': editing && !isSelfAsync,
     }"
     :contenteditable="editing && mode === RenderMode.Dynamic"
     @dblclick="handleDblClick"
