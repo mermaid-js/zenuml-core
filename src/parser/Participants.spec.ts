@@ -38,22 +38,19 @@ describe("Participants", () => {
 
   test("Get Starter", () => {
     const participants = new Participants();
-    participants.Add("A", true);
+    participants.Add("A", { isStarter: true });
     expect(participants.Starter()).toEqual({
       name: "A",
       isStarter: true,
       stereotype: undefined,
       width: undefined,
     });
-    participants.Add(
-      "A",
-      false,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      true,
-    );
+    participants.Add("A", {
+      isStarter: false,
+      start: 1,
+      end: 2,
+      explicit: true,
+    });
     expect(participants.Starter()).toEqual({
       name: "A",
       isStarter: true,
@@ -61,5 +58,6 @@ describe("Participants", () => {
       width: undefined,
       explicit: true,
     });
+    expect(participants.GetPositions("A")?.has("[1,2]"));
   });
 });
