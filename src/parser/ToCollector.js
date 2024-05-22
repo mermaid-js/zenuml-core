@@ -24,29 +24,66 @@ let onParticipant = function (ctx) {
   const width =
     (ctx.width && ctx.width() && Number.parseInt(ctx.width().getText())) ||
     undefined;
-  const label = ctx.label && ctx.label()?.name()?.getFormattedText();
+  const labelCtx = ctx.label && ctx.label();
+  const label = labelCtx?.name()?.getFormattedText();
   const explicit = true;
   const color = ctx.COLOR()?.getText();
   const comment = ctx.getComment();
-  participants.Add(
-    participant,
-    false,
+  const nameCtx = ctx.name();
+  let start, end;
+
+  // When label is present, it means we edit label in diagram and update its code regardless of the occurrence of the participant name
+  if (labelCtx) {
+    const labelNameCtx = labelCtx.name();
+    if (labelNameCtx) {
+      start = labelNameCtx.start.start;
+      end = labelNameCtx.stop.stop + 1;
+    }
+  } else if (nameCtx) {
+    start = nameCtx.start.start;
+    end = nameCtx.stop.stop + 1;
+  }
+
+  participants.Add(participant, {
+    isStarter: false,
+    start,
+    end,
+    type,
     stereotype,
     width,
     groupId,
     label,
     explicit,
-    type,
     color,
     comment,
-  );
+  });
 };
 ToCollector.enterParticipant = onParticipant;
 
 let onTo = function (ctx) {
   if (isBlind) return;
   let participant = ctx.getFormattedText();
-  participants.Add(participant);
+  const participantInstance = participants.Get(participant);
+
+  // Skip adding participant position if label is present
+  if (participantInstance?.label) {
+    participants.Add(participant, { isStarter: false });
+  } else if (participantInstance?.assignee) {
+    // If the participant has an assignee, calculate the position of the ctor and store it only.
+    // Let's say the participant name is `"${assignee}:${type}"`, we need to get the position of ${type}
+    const start = ctx.start.start + participantInstance.assignee.length + 2;
+    participants.Add(participant, {
+      isStarter: false,
+      start: start,
+      end: ctx.stop.stop,
+    });
+  } else {
+    participants.Add(participant, {
+      isStarter: false,
+      start: ctx.start.start,
+      end: ctx.stop.stop + 1,
+    });
+  }
 };
 
 ToCollector.enterFrom = onTo;
@@ -54,13 +91,30 @@ ToCollector.enterTo = onTo;
 
 ToCollector.enterStarter = function (ctx) {
   let participant = ctx.getFormattedText();
-  participants.Add(participant, true);
+  participants.Add(participant, {
+    isStarter: true,
+    start: ctx.start.start,
+    end: ctx.stop.stop + 1,
+  });
 };
 
 ToCollector.enterCreation = function (ctx) {
   if (isBlind) return;
   const participant = ctx.Owner();
-  participants.Add(participant);
+  const ctor = ctx?.creationBody()?.construct();
+  const participantInstance = participants.Get(participant);
+  // Skip adding participant constructor position if label is present
+  if (ctor && !participantInstance?.label) {
+    const assignee = ctx.Assignee();
+    participants.Add(participant, {
+      isStarter: false,
+      start: ctor.start.start,
+      end: ctor.stop.stop + 1,
+      assignee: assignee,
+    });
+  } else {
+    participants.Add(participant, { isStarter: false });
+  }
 };
 
 ToCollector.enterParameters = function () {
@@ -102,7 +156,7 @@ const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 ToCollector.getParticipants = function (context, withStarter) {
   participants = new Participants();
   if (withStarter && context instanceof ProgContext) {
-    participants.Add(context.Starter(), true);
+    participants.Add(context.Starter(), { isStarter: true });
   }
   walker.walk(this, context);
   return participants;

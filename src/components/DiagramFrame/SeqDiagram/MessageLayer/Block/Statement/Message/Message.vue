@@ -46,6 +46,7 @@
 <script setup lang="ts">
 import { computed, toRefs, ref, ComputedRef } from "vue";
 import { useStore } from "vuex";
+import { RenderMode } from "@/store/Store";
 import Point from "./Point/Point.vue";
 import MessageLabel from "../../../MessageLabel.vue";
 import sequenceParser from "@/generated-parser/sequenceParser";
@@ -65,7 +66,9 @@ const store = useStore();
 const messageRef = ref();
 const numbering = computed(() => store.state.numbering);
 const isAsync = computed(() => type?.value === "async");
+const mode = computed(() => store.state.mode);
 const editable = computed(() => {
+  if (mode.value === RenderMode.Static) return false;
   switch (type?.value) {
     case "sync":
     case "async":
@@ -82,7 +85,7 @@ const labelPosition: ComputedRef<[number, number]> = computed(() => {
   switch (type?.value) {
     case "sync":
       {
-        const signature = context?.value?.messageBody().func().signature()[0];
+        const signature = context?.value?.messageBody().func()?.signature()[0];
         [start, stop] = [signature?.start.start, signature?.stop.stop];
       }
       break;
@@ -134,6 +137,7 @@ const fill = computed(() => {
   return false;
 });
 const onClick = () => {
+  if (!editable.value) return;
   store.getters.onMessageClick(context, messageRef.value);
 };
 </script>
