@@ -14,7 +14,7 @@
      -->
     <debug />
     <div
-      class="frame text-skin-frame bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded"
+      class="frame text-skin-base bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded"
     >
       <div ref="content">
         <div

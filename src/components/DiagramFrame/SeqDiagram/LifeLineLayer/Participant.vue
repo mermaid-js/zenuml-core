@@ -17,7 +17,7 @@
     <div
       v-if="!!icon"
       v-html="icon"
-      class="absolute left-1/2 transform -translate-x-1/2 -translate-y-full h-8 [&>svg]:w-full [&>svg]:h-full"
+      class="absolute bg-skin-participant px-1 left-1/2 transform -translate-x-1/2 -translate-y-full h-8 [&>svg]:w-full [&>svg]:h-full"
       :alt="`icon for ${entity.name}`"
     ></div>
     <!-- Put in a div to give it a fixed height, because stereotype is dynamic. -->
