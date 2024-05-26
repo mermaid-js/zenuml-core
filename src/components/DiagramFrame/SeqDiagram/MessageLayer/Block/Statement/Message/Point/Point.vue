@@ -1,18 +1,20 @@
 <template>
   <div
     class="point text-skin-message-arrow"
-    :class="{ fill: fill, 'no-fill': !fill, 'right-to-left': rtl }"
+    :class="{ filled: fill, open: !fill, 'right-to-left': rtl }"
   >
     <svg v-if="!rtl" class="arrow stroke-2" height="10" width="10">
       <polyline
-        class="right head fill-current stroke-current"
+        class="right head stroke-current"
         points="0,0 10,5 0,10"
+        :fill="fill ? 'currentColor' : 'none'"
       ></polyline>
     </svg>
     <svg v-if="rtl" class="arrow stroke-2" height="10" width="10">
       <polyline
-        class="left head fill-current stroke-current"
+        class="left head stroke-current"
         points="10,0 0,5 10,10"
+        :fill="fill ? 'currentColor' : 'none'"
       ></polyline>
     </svg>
   </div>
@@ -24,27 +26,3 @@ export default {
   props: ["fill", "rtl"],
 };
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.no-fill svg.arrow polyline {
-  fill: none !important;
-}
-
-.right-to-left.point {
-  left: 0;
-  right: auto;
-}
-
-.right-to-left.point > svg > polyline.right {
-  display: none;
-}
-
-.right-to-left.point > svg > polyline.left {
-  display: inline;
-}
-
-.point > svg > polyline.left {
-  display: none;
-}
-</style>
