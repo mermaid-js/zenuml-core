@@ -140,11 +140,11 @@ export default {
         const halfWidthOfPlaceholder =
           this.$refs["participantPlaceHolder"].offsetWidth / 2;
         this.$refs["messageContainer"].style.width = `calc(100% + ${
-          halfWidthOfPlaceholder + 6
+          halfWidthOfPlaceholder + 7
         }px`;
         if (this.rightToLeft) {
           this.$refs["messageContainer"].style.transform = `translateX( ${-(
-            halfWidthOfPlaceholder + 6
+            halfWidthOfPlaceholder + 7
           )}px`;
         }
       };
