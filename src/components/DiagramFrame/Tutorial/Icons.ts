@@ -5,22 +5,10 @@ import database from "../../../assets/database.svg?raw";
 import entity from "../../../assets/Robustness_Diagram_Entity.svg?raw";
 // AWS
 import cognito from "../../../assets/Architecture-Service-Icons_09172021/Arch_Security-Identity-Compliance/16/Arch_Amazon-Cognito_16.svg?raw";
-import efs from "../../../assets/Architecture-Service-Icons_09172021/Arch_Storage/16/Arch_Amazon-Elastic-File-System_16.svg?raw";
-import elasticache from "../../../assets/Architecture-Service-Icons_09172021/Arch_Database/16/Arch_Amazon-ElastiCache_16.svg?raw";
 import elasticbeantalk from "../../../assets/Architecture-Service-Icons_09172021/Arch_Compute/16/Arch_AWS-Elastic-Beanstalk_16.svg?raw";
-import elasticfilesystem from "../../../assets/Architecture-Service-Icons_09172021/Arch_Storage/16/Arch_Amazon-Elastic-File-System_16.svg?raw";
-import glacier from "../../../assets/Architecture-Service-Icons_09172021/Arch_Storage/16/Arch_Amazon-Simple-Storage-Service-Glacier_16.svg?raw";
-import iam from "../../../assets/Architecture-Service-Icons_09172021/Arch_Security-Identity-Compliance/16/Arch_AWS-Identity-and-Access-Management_16.svg?raw";
 import kinesis from "../../../assets/Architecture-Service-Icons_09172021/Arch_Analytics/Arch_16/Arch_Amazon-Kinesis_16.svg?raw";
-import lambda from "../../../assets/Architecture-Service-Icons_09172021/Arch_Compute/16/Arch_AWS-Lambda_16.svg?raw";
 import lightsail from "../../../assets/Architecture-Service-Icons_09172021/Arch_Compute/16/Arch_Amazon-Lightsail_16.svg?raw";
-import rds from "../../../assets/Architecture-Service-Icons_09172021/Arch_Database/16/Arch_Amazon-RDS_16.svg?raw";
-import redshift from "../../../assets/Architecture-Service-Icons_09172021/Arch_Analytics/Arch_16/Arch_Amazon-Redshift_16.svg?raw";
-import s3 from "../../../assets/Architecture-Service-Icons_09172021/Arch_Storage/16/Arch_Amazon-Simple-Storage-Service_16.svg?raw";
-import sns from "../../../assets/Architecture-Service-Icons_09172021/Arch_App-Integration/Arch_16/Arch_Amazon-Simple-Notification-Service_16.svg?raw";
-import sqs from "../../../assets/Architecture-Service-Icons_09172021/Arch_App-Integration/Arch_16/Arch_Amazon-Simple-Queue-Service_16.svg?raw";
 import sagemaker from "../../../assets/Architecture-Service-Icons_09172021/Arch_Machine-Learning/16/Arch_Amazon-SageMaker_16.svg?raw";
-import vpc from "../../../assets/Architecture-Service-Icons_09172021/Arch_Networking-Content-Delivery/16/Arch_Amazon-Virtual-Private-Cloud_16.svg?raw";
 import awsiotlora from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_IoT/Res_AWS-IoT_LoRaWAN-Protocol_48.svg?raw";
 import awsiotgreengrasscomponent from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_IoT/Res_AWS-IoT-Greengrass_Component_48.svg?raw";
 import awsiotthingcoffeepot from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_IoT/Res_AWS-IoT_Thing_Coffee-Pot_48.svg?raw";
@@ -128,6 +116,7 @@ import amazonredshiftra3 from "@/assets/AWS-Asset-Package_02062024/Resource-Icon
 import amazonredshiftstreaming from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Analytics/Res_Amazon-Redshift_Streaming-Ingestion_48.svg?raw";
 import amazonemrengine from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Analytics/Res_Amazon-EMR_EMR-Engine_48.svg?raw";
 import amazonredshiftqueryeditor from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Analytics/Res_Amazon-Redshift_Query-Editor-v2.0_48.svg?raw";
+import redshift from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Analytics/Res_Amazon-Redshift_Query-Editor-v2.0_48.svg?raw";
 import amazonehrhdfscluster from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Analytics/Res_Amazon-EMR_HDFS-Cluster_48.svg?raw";
 import amazonmskconnect from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Analytics/Res_Amazon-MSK_Amazon-MSK-Connect_48.svg?raw";
 import awsgluedatacatalog from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Analytics/Res_AWS-Glue_Data-Catalog_48.svg?raw";
@@ -180,6 +169,7 @@ import awswaffilteringrule from "@/assets/AWS-Asset-Package_02062024/Resource-Ic
 import awswafbot from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Security-Identity-Compliance/Res_AWS-WAF_Bot_48.svg?raw";
 import awsshieldadvanced from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Security-Identity-Compliance/Res_AWS-Shield_AWS-Shield-Advanced_48.svg?raw";
 import awsidentityaccessanalyzer from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Security-Identity-Compliance/Res_AWS-Identity-Access-Management_IAM-Access-Analyzer_48.svg?raw";
+import iam from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Security-Identity-Compliance/Res_AWS-Identity-Access-Management_IAM-Access-Analyzer_48.svg?raw";
 import awswafbotcontrol from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Security-Identity-Compliance/Res_AWS-WAF_Bot-Control_48.svg?raw";
 import awsidentityaccessrolesanywhere from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Security-Identity-Compliance/Res_AWS-Identity-Access-Management_IAM-Roles-Anywhere_48.svg?raw";
 import awsidentityaccessdataencryptionkey from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Security-Identity-Compliance/Res_AWS-Identity-Access-Management_Data-Encryption-Key_48.svg?raw";
@@ -200,9 +190,11 @@ import amazoneventbridgerule from "@/assets/AWS-Asset-Package_02062024/Resource-
 import amazonapigatewayendpoint from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-API-Gateway_Endpoint_48.svg?raw";
 import amazoneventbridgescheduler from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-EventBridge_Scheduler_48.svg?raw";
 import amazonsqsqueue from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-Simple-Queue-Service_Queue_48.svg?raw";
+import sqs from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-Simple-Queue-Service_Queue_48.svg?raw";
 import amazonsqsmessage from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-Simple-Queue-Service_Message_48.svg?raw";
 import amazoneventbridgecustomeventbus from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-EventBridge_Custom-Event-Bus_48.svg?raw";
 import amazonsnstopic from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-Simple-Notification-Service_Topic_48.svg?raw";
+import sns from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-Simple-Notification-Service_Topic_48.svg?raw";
 import awsssmpatchmanager from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Management-Governance/Res_AWS-Systems-Manager_Patch-Manager_48.svg?raw";
 import awscloudformationtemplate from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Management-Governance/Res_AWS-CloudFormation_Template_48.svg?raw";
 import awsopsworkslayers from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Management-Governance/Res_AWS-OpsWorks_Layers_48.svg?raw";
@@ -289,6 +281,7 @@ import awsdirectconnectgateway from "@/assets/AWS-Asset-Package_02062024/Resourc
 import amazonvpcnetworkaccessanalyzer from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Networking-Content-Delivery/Res_Amazon-VPC_Network-Access-Analyzer_48.svg?raw";
 import elasticlbapp from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Networking-Content-Delivery/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg?raw";
 import amazonvpcvpc from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Networking-Content-Delivery/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg?raw";
+import vpc from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Networking-Content-Delivery/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg?raw";
 import amazonvpccarriergateway from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Networking-Content-Delivery/Res_Amazon-VPC_Carrier-Gateway_48.svg?raw";
 import amazoneaelasticnetworkinterface from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Networking-Content-Delivery/Res_Amazon-VPC_Elastic-Network-Interface_48.svg?raw";
 import awscloudwanrouteattachment from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Networking-Content-Delivery/Res_AWS-Cloud-WAN_Transit-Gateway-Route-Table-Attachment_48.svg?raw";
@@ -306,7 +299,10 @@ import amazons3onezone from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_
 import awsbackuplegalhold from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_AWS-Backup_Legal-Hold_48.svg?raw";
 import awsstoragegateaway from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_AWS-Storage-Gateway_Noncached-Volume_48.svg?raw";
 import amazonefsstandard from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Elastic-File-System_EFS-Standard_48.svg?raw";
+import efs from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Elastic-File-System_EFS-Standard_48.svg?raw";
+import elasticfilesystem from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Elastic-File-System_EFS-Standard_48.svg?raw";
 import amazons3bucket from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Simple-Storage-Service_Bucket-With-Objects_48.svg?raw";
+import s3 from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Simple-Storage-Service_Bucket-With-Objects_48.svg?raw";
 import awsstoragegateawayfile from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_AWS-Storage-Gateway_File-Gateway_48.svg?raw";
 import awsfsxfile from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_AWS-Storage-Gateway_Amazon-FSx-File-Gateway_48.svg?raw";
 import amazons3glacierinstant from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Simple-Storage-Service_S3-Glacier-Instant-Retrieval_48.svg?raw";
@@ -365,6 +361,8 @@ import amazonebssnapshot from "@/assets/AWS-Asset-Package_02062024/Resource-Icon
 import awsbackupdatabase from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_AWS-Backup_Database_48.svg?raw";
 import awsbackupfsx from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_AWS-Backup_AWS-Backup-support-for-Amazon-FSx-for-NetApp-ONTAP_48.svg?raw";
 import amazons3glacierflex from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Simple-Storage-Service_S3-Glacier-Flexible-Retrieval_48.svg?raw";
+import glacier from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Simple-Storage-Service_S3-Glacier-Flexible-Retrieval_48.svg?raw";
+import s3glacier from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Simple-Storage-Service_S3-Glacier-Flexible-Retrieval_48.svg?raw";
 import amazons3bucketobject from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Simple-Storage-Service_Bucket_48.svg?raw";
 import amazonebsvolume from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Elastic-Block-Store_Volume_48.svg?raw";
 import ebs from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Storage/Res_Amazon-Elastic-Block-Store_Volume_48.svg?raw";
@@ -384,6 +382,7 @@ import amazonec2extractor from "@/assets/AWS-Asset-Package_02062024/Resource-Ico
 import amazonec2ami from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_Amazon-EC2_AMI_48.svg?raw";
 import awselasticbeanstalkdeployment from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_AWS-Elastic-Beanstalk_Deployment_48.svg?raw";
 import awslambdafunction from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_AWS-Lambda_Lambda-Function_48.svg?raw";
+import lambda from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_AWS-Lambda_Lambda-Function_48.svg?raw";
 import amazonec2instance from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_Amazon-EC2_Instance_48.svg?raw";
 import ec2 from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_Amazon-EC2_Instance_48.svg?raw";
 import amazonec2autoscaling from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_Amazon-EC2_Auto-Scaling_48.svg?raw";
@@ -405,6 +404,7 @@ import amazondynamodbitems from "@/assets/AWS-Asset-Package_02062024/Resource-Ic
 import amazonrdsauroraalternate from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-Aurora_Amazon-Aurora-Instance-alternate_48.svg?raw";
 import amazonrdsaurorasqlalt from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-Aurora-SQL-Server-Instance-Alternate_48.svg?raw";
 import amazonrdsinstance from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-Aurora_Amazon-RDS-Instance_48.svg?raw";
+import rds from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-Aurora_Amazon-RDS-Instance_48.svg?raw";
 import amazonrdsmultiaz from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-RDS_Multi-AZ_48.svg?raw";
 import amazondocdbelasticclusters from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-DocumentDB_Elastic-Clusters_48.svg?raw";
 import amazonrdstrustedextpgsql from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-RDS_Trusted-Language-Extensions-for-PostgreSQL_48.svg?raw";
@@ -416,6 +416,7 @@ import amazondynamodbstream from "@/assets/AWS-Asset-Package_02062024/Resource-I
 import amazonrdstrustedpgsql from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-Aurora_Trusted-Language-Extensions-for-PostgreSQL_48.svg?raw";
 import amazondax from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-DynamoDB_Amazon-DynamoDB-Accelerator_48.svg?raw";
 import amazonelasticache4redis from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-ElastiCache_ElastiCache-for-Redis_48.svg?raw";
+import elasticache from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-ElastiCache_ElastiCache-for-Redis_48.svg?raw";
 import amazonrdsproxy from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-RDS-Proxy-Instance_48.svg?raw";
 import amazondynamodbaccesstable from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-DynamoDB_Standard-Infrequent-Access-Table-Class_48.svg?raw";
 import amazonrdsauroramysql from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Database/Res_Amazon-Aurora-MySQL-Instance_48.svg?raw";
@@ -552,6 +553,7 @@ export default {
   elasticbeantalk,
   elasticfilesystem,
   glacier,
+  s3glacier,
   iam,
   kinesis,
   lambda,
