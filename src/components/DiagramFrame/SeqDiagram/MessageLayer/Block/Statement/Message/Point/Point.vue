@@ -31,14 +31,11 @@ export default {
   fill: none !important;
 }
 
-.async > .message > .point > svg.arrow > polyline {
-  fill: none;
-}
-
 .right-to-left.point {
   left: 0;
   right: auto;
 }
+
 .right-to-left.point > svg > polyline.right {
   display: none;
 }
