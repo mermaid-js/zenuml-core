@@ -10,14 +10,10 @@
     }"
     @click="onSelect"
   >
-    <!-- Set the background and text color with bg-skin-base and text-skin-base.
-         Override background color if it is defined in participant declaration (e.g. A #FFFFFF).
-         TODO: Add a default .selected style
-     -->
     <div
       v-if="!!icon"
       v-html="icon"
-      class="absolute bg-skin-participant px-1 left-1/2 transform -translate-x-1/2 -translate-y-full h-8 [&>svg]:w-full [&>svg]:h-full"
+      class="absolute bg-skin-frame px-1 left-1/2 transform -translate-x-1/2 -translate-y-full h-8 [&>svg]:w-full [&>svg]:h-full"
       :alt="`icon for ${entity.name}`"
     ></div>
     <!-- Put in a div to give it a fixed height, because stereotype is dynamic. -->
