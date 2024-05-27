@@ -22,12 +22,13 @@
     ></div>
     <!-- Put in a div to give it a fixed height, because stereotype is dynamic. -->
     <div class="h-5 group flex flex-col justify-center">
-      <span
-        v-if="!!comment"
-        class="absolute hidden rounded-lg transform -translate-y-8 bg-gray-400 px-2 py-1 text-center text-sm text-white group-hover:flex"
-      >
-        {{ comment }}
-      </span>
+      <!-- TODO: create a better solution for participant comments -->
+      <!--      <span-->
+      <!--        v-if="!!comment"-->
+      <!--        class="absolute hidden rounded-lg transform -translate-y-8 bg-gray-400 px-2 py-1 text-center text-sm text-white group-hover:flex"-->
+      <!--      >-->
+      <!--        {{ comment }}-->
+      <!--      </span>-->
       <label class="interface leading-4" v-if="stereotype"
         >«{{ stereotype }}»</label
       >
