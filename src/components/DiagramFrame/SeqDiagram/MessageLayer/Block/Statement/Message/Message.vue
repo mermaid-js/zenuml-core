@@ -128,13 +128,13 @@ const borderStyle = computed(() => {
 const fill = computed(() => {
   switch (type?.value) {
     case "sync":
-    case "async":
       return true;
+    case "async":
     case "creation":
     case "return":
+    default:
       return false;
   }
-  return false;
 });
 const onClick = () => {
   if (!editable.value) return;
