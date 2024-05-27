@@ -9,7 +9,7 @@
       class="col-span-1 flex flex-col shadow-sm rounded-md"
     >
       <div
-        class="h-12 flex items-center justify-center bg-gray-50 text-white text-sm font-medium rounded-t-md"
+        class="h-12 flex items-center justify-center bg-gray-50 text-sm font-medium rounded-t-md"
       >
         <i
           v-if="!!icon"
