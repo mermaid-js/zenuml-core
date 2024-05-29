@@ -173,8 +173,8 @@ assignment
  ;
 
 asyncMessage
- : (from ARROW)? to COL content
- | from (MINUS | ARROW) to?
+ : (from ARROW)? to COL content? // A -> B:. Incomplete async message.
+ | from (MINUS | ARROW) to? // A - B. This is an intermediate state when user add 'from'.
  ;
 
 content
