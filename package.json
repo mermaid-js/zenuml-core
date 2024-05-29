@@ -75,7 +75,6 @@
     "@vue/compiler-sfc": "^3.2.45",
     "@vue/test-utils": "^2.2.7",
     "autoprefixer": "^10.4.13",
-    "babel-eslint": "^10.1.0",
     "concurrently": "^7.6.0",
     "cypress": "^10.11.0",
     "cypress-plugin-snapshots": "^1.4.4",
