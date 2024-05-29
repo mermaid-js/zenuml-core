@@ -38,7 +38,7 @@ import LifeLine from "./LifeLine.vue";
 import { mapGetters } from "vuex";
 import WidthProviderOnBrowser from "../../../../positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
-
+const PARTICIPANT_MARGIN = 8;
 export default {
   name: "lifeline-group",
   props: ["context", "renderParticipants", "renderLifeLine"],
@@ -47,27 +47,21 @@ export default {
     name() {
       return this.context?.name()?.getFormattedText();
     },
-    offset() {
-      return 0;
-    },
     left() {
       const first = this.entities[0].name;
-      const width = Math.max(
+      const widthOfFirst = Math.max(
         WidthProviderOnBrowser(first, TextType.ParticipantName),
-        "100",
+        100,
       );
-      return this.centerOf(first) - width / 2 - 8;
+      return this.centerOf(first) - widthOfFirst / 2 - PARTICIPANT_MARGIN;
     },
     right() {
-      const width = Math.max(
-        WidthProviderOnBrowser(
-          this.entities.slice(-1).name,
-          TextType.ParticipantName,
-        ),
-        "100",
-      );
       const last = this.entities.slice(0).pop().name;
-      return this.centerOf(last) + width / 2 + 20;
+      const widthOfLast = Math.max(
+        WidthProviderOnBrowser(last, TextType.ParticipantName),
+        100,
+      );
+      return this.centerOf(last) + widthOfLast / 2 + PARTICIPANT_MARGIN;
     },
     entities() {
       return Participants(this.context).Array();
