@@ -13,7 +13,7 @@
       'right-to-left': rightToLeft,
     }"
     :style="{
-      width: !isSelf && interactionWidth + 'px',
+      width: isSelf ? undefined : interactionWidth + 'px',
       transform: 'translateX(' + translateX + 'px)',
     }"
   >
