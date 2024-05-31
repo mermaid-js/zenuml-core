@@ -1,14 +1,20 @@
+<!--A Interaction-async component is to render:
+1. A->B: non-self async message
+2. A->A: self async message
+-->
 <template>
   <div
     class="interaction async"
     v-on:click.stop="onClick"
     :data-signature="signature"
     :class="{
-      'to-occurrence': isToOccurrence,
+      'to-occurrence': pointingToOccurrenceBar,
+      'pointing-to-line': !pointingToOccurrenceBar,
+      'left-to-right': !rightToLeft,
       'right-to-left': rightToLeft,
-      'from-no-occurrence': providedFrom && providedFrom !== origin,
+      'from-no-occurrence': !isTailAttachedToOccurrenceBar,
       highlight: isCurrent,
-      'inited-from-occurrence': isInitedFromOccurrence,
+      'inited-from-occurrence': isTailAttachedToOccurrenceBar,
       'self-invocation': isSelf,
     }"
     :style="{
@@ -42,7 +48,7 @@ import Comment from "../Comment/Comment.vue";
 import SelfInvocationAsync from "./SelfInvocationAsync/SelfInvocation-async.vue";
 import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
-import { CodeRange } from "../../../../../../../parser/CodeRange";
+import { CodeRange } from "@/parser/CodeRange";
 
 function isNullOrUndefined(value) {
   return value === null || value === undefined;
@@ -114,11 +120,11 @@ export default {
     messageClassNames() {
       return this.commentObj?.messageClassNames;
     },
-    isToOccurrence() {
+    pointingToOccurrenceBar() {
       return this.parentCtxIncludeMessage(this.asyncMessage);
     },
-    isInitedFromOccurrence: function () {
-      return this.message?.isInitedFromOccurrence(this.context);
+    isTailAttachedToOccurrenceBar: function () {
+      return this.asyncMessage?.isInitedFromOccurrence(this.source);
     },
   },
   methods: {
@@ -158,6 +164,22 @@ export default {
 <style scoped>
 .interaction .invisible-occurrence {
   height: 20px;
+}
+
+.interaction.pointing-to-line.left-to-right {
+  border-right-width: 0;
+}
+
+.interaction.pointing-to-line.right-to-left {
+  border-left-width: 0;
+}
+
+.interaction.to-occurrence.left-to-right {
+  border-right-width: 7px;
+}
+
+.interaction.to-occurrence.right-to-left {
+  border-left-width: 7px;
 }
 
 .interaction.async :deep(.message) {

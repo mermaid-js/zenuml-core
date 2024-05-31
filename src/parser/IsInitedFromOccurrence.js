@@ -13,6 +13,11 @@ MessageContext.prototype.isInitedFromOccurrence = function (from) {
   return isInitedFromOccurrence.bind(this)(from);
 };
 
+const AsyncMessageContext = seqParser.AsyncMessageContext;
+AsyncMessageContext.prototype.isInitedFromOccurrence = function (from) {
+  return isInitedFromOccurrence.bind(this)(from);
+};
+
 /**
  * if a message is sent from a participant who is also a target of a message, we can
  * say that the message is inited from an occurrence
@@ -27,10 +32,10 @@ function isInitedFromOccurrence(from) {
         participant = current.message().Owner();
       } else if (current.creation && current.creation()) {
         participant = current.creation().Owner();
-      } else if (current.asyncMessage && current.asyncMessage()) {
-        participant = current.asyncMessage().to().getFormattedText();
       }
+      console.log("!!!", participant, from);
       if (participant === from) {
+        console.log("!!! true");
         return true;
       }
     }

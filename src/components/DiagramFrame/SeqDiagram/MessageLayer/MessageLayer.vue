@@ -72,16 +72,14 @@ onUpdated(() => {
 
   .occurrence {
     .occurrence {
-      .interaction.sync,
-      .interaction.async {
+      .interaction.sync {
         border-right-width: 7px;
       }
     }
   }
 
   .occurrence {
-    .interaction.sync,
-    .interaction.async {
+    .interaction.sync {
       border-left-width: 8px;
     }
     .interaction.sync.right-to-left {
@@ -95,9 +93,6 @@ onUpdated(() => {
       border-left-width: 0;
     }
     .interaction.sync.from-no-occurrence {
-      border-left-width: 0;
-    }
-    .interaction.async.from-no-occurrence {
       border-left-width: 0;
     }
     .interaction.async.from-no-occurrence.right-to-left {
