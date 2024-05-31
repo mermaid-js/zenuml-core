@@ -45,15 +45,14 @@ const props = defineProps<{
 }>();
 const { context } = toRefs(props);
 const store = useStore();
-
+const content = computed(() => context?.value.content());
 const numbering = computed(() => store.state.numbering);
 const labelPosition: ComputedRef<[number, number]> = computed(() => {
-  if (!context?.value) return [-1, -1];
-  const content = context?.value.content();
-  return [content.start.start, content.stop.stop];
+  if (!content.value) return [-1, -1];
+  return [content.value.start.start, content.value.stop.stop];
 });
 const labelText = computed(() => {
-  return context?.value.content().getFormattedText();
+  return content.value?.getFormattedText();
 });
 </script>
 
