@@ -7,6 +7,12 @@
     :data-x-offset="center"
     :data-debug-center-of="computedCenter"
   >
+    <div
+      v-if="debug"
+      class="absolute w-full left-0 bg-amber-700 h-3 -top-2 flex justify-center items-center"
+    >
+      <div class="w-px h-full bg-black"></div>
+    </div>
     <collapse-button
       v-if="hasAnyStatementsExceptReturn"
       :collapsed="collapsed"
@@ -39,6 +45,9 @@ export default {
   computed: {
     ...mapGetters(["centerOf", "messageLayerLeft"]),
     ...mapState(["code"]),
+    debug() {
+      return !!localStorage.zenumlDebug;
+    },
     computedCenter: function () {
       try {
         return this.centerOf(this.participant);
