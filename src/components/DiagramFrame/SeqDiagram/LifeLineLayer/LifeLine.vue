@@ -2,10 +2,10 @@
   <div
     :id="entity.name"
     :entity-type="entity.type?.toLowerCase()"
-    class="lifeline absolute flex flex-col mx-2 transform -translate-x-1/2 h-full"
+    class="lifeline absolute flex flex-col mx-2 h-full"
+    :class="{ 'transform -translate-x-1/2': renderParticipants }"
     :style="{ paddingTop: top + 'px', left: left + 'px' }"
   >
-    <div v-show="debug">{{ centerOf(entity.name) }}</div>
     <participant v-if="renderParticipants" :entity="entity" :offsetTop="top" />
     <div v-if="renderLifeLine" class="line w0 mx-auto flex-grow w-px"></div>
   </div>
