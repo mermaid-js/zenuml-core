@@ -15,30 +15,15 @@ const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
 
 const logger = parentLogger.child({ name: "MessageLayer" });
 
-const props = defineProps<{
-  context: any;
-}>();
 const store = useStore();
 
 const participants = computed(() => store.getters.participants);
 const centerOf = computed(() => store.getters.centerOf);
-const isSelfSyncMessage = computed(() => {
-  const syncMessage = props.context?.stat()[0].message();
-  if (!syncMessage) {
-    return false;
-  }
-  const to = syncMessage?.Owner();
-  const providedFrom = syncMessage?.ProvidedFrom();
-  const origin = props.context?.Origin();
-  const from = providedFrom || origin;
-  return !to || to === from;
-});
 
 const paddingLeft = computed(() => {
   if (participants.value.Array().length >= 1) {
     const first = participants.value.Array().slice(0)[0].name;
-    // push the message layer to the right by 1px only for self message at root level.
-    return centerOf.value(first) + (isSelfSyncMessage.value ? 1 : 0);
+    return centerOf.value(first) + 1;
   }
   return 0;
 });
@@ -80,7 +65,7 @@ onUpdated(() => {
 
   .occurrence {
     .interaction.sync {
-      border-left-width: 8px;
+      border-left-width: 7px;
     }
     .interaction.sync.right-to-left {
       border-right-width: 7px;
@@ -146,7 +131,7 @@ onUpdated(() => {
 
   .interaction.right-to-left > .occurrence {
     /* InteractionBorderWidth + (OccurrenceWidth-1)/2 */
-    left: -14px;
+    left: -15px;
     /* overlay occurrence bar on the existing bar. */
   }
 
