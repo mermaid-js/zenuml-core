@@ -11,8 +11,8 @@ describe("Editable Label", function () {
     messageLabel.dblclick();
     messageLabel.type("  $@%^{enter}");
     cy.contains("method() $@%^").should("be.visible");
-    cy.get("body").click();
-
+    cy.get(".header").click();
+    cy.wait(1000);
     cy.document().toMatchImageSnapshot({
       imageConfig: { threshold: 0.01 },
       capture: "viewport",
@@ -29,7 +29,8 @@ describe("Editable Label", function () {
     messageLabel.dblclick();
     messageLabel.type(" n{backspace}n{enter}");
     cy.contains("SelfMessage n").should("be.visible");
-    cy.get("body").click();
+    cy.get(".header").click();
+    cy.wait(1000);
 
     cy.document().toMatchImageSnapshot({
       imageConfig: { threshold: 0.01 },
@@ -47,7 +48,8 @@ describe("Editable Label", function () {
     messageLabel.dblclick();
     messageLabel.type(" how are you?{enter}");
     cy.contains("Hello Bob how are you?").should("be.visible");
-    cy.get("body").click();
+    cy.get(".header").click();
+    cy.wait(1000);
 
     cy.document().toMatchImageSnapshot({
       imageConfig: { threshold: 0.01 },
