@@ -14,7 +14,11 @@ import parentLogger from "../../../../logger/logger";
 const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
 
 const logger = parentLogger.child({ name: "MessageLayer" });
-
+// @typescript-eslint/no-unused-vars for `context`
+// eslint-disable-next-line
+const props = defineProps<{
+  context: any;
+}>();
 const store = useStore();
 
 const participants = computed(() => store.getters.participants);

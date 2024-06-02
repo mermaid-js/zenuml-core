@@ -34,8 +34,8 @@ describe("Creation", () => {
     expect(vm.from).toBe("_STARTER_");
     expect(vm.signature).toBe("«create»");
     expect(vm.assignee).toBe("a");
-    expect(vm.distance).toStrictEqual(expect.any(Function));
-    expect(vm.interactionWidth).toBe(84);
+    expect(vm.distance2).toStrictEqual(expect.any(Function));
+    expect(vm.interactionWidth).toBe(83);
     expect(vm.rightToLeft).toBeFalsy();
   });
 
@@ -47,7 +47,7 @@ describe("Creation", () => {
     const vm = creationWrapper.vm as any;
     console.log(creationWrapper);
     expect(vm.rightToLeft).toBeTruthy();
-    expect(vm.interactionWidth).toBe(120);
+    expect(vm.interactionWidth).toBe(119);
   });
 
   it("right to left within alt fragment", async () => {
@@ -65,6 +65,6 @@ describe("Creation", () => {
     );
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();
-    expect(vm.interactionWidth).toBe(120);
+    expect(vm.interactionWidth).toBe(119);
   });
 });
