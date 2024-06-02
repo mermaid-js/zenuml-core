@@ -4,7 +4,10 @@ import { VueSequence } from "@/index";
 import Creation from "./Creation.vue";
 import { Fixture } from "../../../../../../../../test/unit/parser/fixture/Fixture";
 
-function mountCreationWithCode(code: string, contextLocator: () => void) {
+function mountCreationWithCode(
+  code: string,
+  contextLocator: (code: string) => any,
+) {
   const storeConfig = VueSequence.Store();
   // @ts-ignore
   storeConfig.state.code = code;

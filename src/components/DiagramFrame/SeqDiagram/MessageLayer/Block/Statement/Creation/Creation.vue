@@ -88,10 +88,6 @@ export default {
       return this.context.creation();
     },
     interactionWidth() {
-      if (this.context && this.isSelf) {
-        return 0;
-      }
-
       let safeOffset = this.selfCallIndent || 0;
       return Math.abs(this.distance2(this.from, this.to) - safeOffset) - 1;
     },

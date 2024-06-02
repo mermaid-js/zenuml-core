@@ -14,8 +14,11 @@
   <body>
     <div id="diagram" class="diagram">
       <pre class="zenuml" style="margin: 0">
-@Starter(A)
-new B()
+selfSync() {
+  A.method {
+    B.method
+  }
+}
       </pre>
     </div>
 

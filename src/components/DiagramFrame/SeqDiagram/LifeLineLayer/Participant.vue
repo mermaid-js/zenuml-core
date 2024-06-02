@@ -69,7 +69,7 @@ export default {
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();
     const translate = computed(() => {
-      const participantOffsetTop = props.offsetTop || 0;
+      const participantOffsetTop = props.offsetTop2 || 0;
       let top = intersectionTop.value + scrollTop.value;
       if (
         intersectionTop.value > INTERSECTION_ERROR_MARGIN &&
@@ -93,7 +93,8 @@ export default {
       type: Object,
       required: true,
     },
-    offsetTop: {
+    // offsetTop is a standard HTML property, so we use offsetTop2.
+    offsetTop2: {
       type: Number,
       default: 0,
     },

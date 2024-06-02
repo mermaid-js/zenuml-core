@@ -6,7 +6,7 @@
     :class="{ 'transform -translate-x-1/2': renderParticipants }"
     :style="{ paddingTop: top + 'px', left: left + 'px' }"
   >
-    <participant v-if="renderParticipants" :entity="entity" :offsetTop="top" />
+    <participant v-if="renderParticipants" :entity="entity" :offsetTop2="top" />
     <div v-if="renderLifeLine" class="line w0 mx-auto flex-grow w-px"></div>
   </div>
 </template>
