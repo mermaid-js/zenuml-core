@@ -1,7 +1,7 @@
 import { shallowMount } from "@vue/test-utils";
 import { createStore } from "vuex";
 import Statement from "./Statement.vue";
-import { VueSequence } from "../../../../../../index";
+import { VueSequence } from "@/index";
 
 function renderCode(code: string) {
   const storeConfig = VueSequence.Store();
