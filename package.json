@@ -45,7 +45,7 @@
     "@headlessui/vue": "^1.7.16",
     "@types/assert": "^1.5.6",
     "@types/ramda": "^0.28.20",
-    "@vue/compat": "^3.2.45",
+    "@vue/compat": "^3.4.27",
     "antlr4": "~4.11.0",
     "color-string": "^1.5.5",
     "dom-to-image-more": "^2.13.0",
@@ -58,7 +58,7 @@
     "postcss": "^8.4.31",
     "ramda": "^0.28.0",
     "tailwindcss": "^3.2.4",
-    "vue": "^3.2.45",
+    "vue": "^3.4.27",
     "vuex": "^4.1.0"
   },
   "devDependencies": {
@@ -71,8 +71,8 @@
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "@vitejs/plugin-vue": "^4.0.0",
-    "@vue/compiler-dom": "^3.3.8",
-    "@vue/compiler-sfc": "^3.2.45",
+    "@vue/compiler-dom": "^3.4.27",
+    "@vue/compiler-sfc": "^3.4.27",
     "@vue/test-utils": "^2.2.7",
     "autoprefixer": "^10.4.13",
     "concurrently": "^7.6.0",
