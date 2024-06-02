@@ -129,7 +129,8 @@ export default {
       return dist + fragmentOff - indent;
     },
     rightToLeft: function () {
-      return this.distance2(this.from, this.to) < 0;
+      // suppress warning of ATTR_FALSE_VALUE
+      return this.distance2(this.from, this.to) < 0 ? true : "no";
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
