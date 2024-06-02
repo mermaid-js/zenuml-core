@@ -33,9 +33,7 @@ function isInitedFromOccurrence(from) {
       } else if (current.creation && current.creation()) {
         participant = current.creation().Owner();
       }
-      console.log("!!!", participant, from);
       if (participant === from) {
-        console.log("!!! true");
         return true;
       }
     }
