@@ -48,7 +48,6 @@ describe("Creation", () => {
       Fixture.firstGrandChild,
     );
     const vm = creationWrapper.vm as any;
-    console.log(creationWrapper);
     expect(vm.rightToLeft).toBeTruthy();
     expect(vm.interactionWidth).toBe(119);
   });

@@ -83,7 +83,9 @@ export default {
         : this.distance(this.source, this.from);
     },
     rightToLeft: function () {
-      return this.distance(this.target, this.source) < 0;
+      // to suppress  ATTR_FALSE_VALUE warning
+      // Details: https://v3-migration.vuejs.org/breaking-changes/attribute-coercion.html
+      return this.distance(this.target, this.source) < 0 ? true : null;
     },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();

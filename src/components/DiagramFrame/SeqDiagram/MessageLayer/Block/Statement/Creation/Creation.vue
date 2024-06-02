@@ -92,7 +92,9 @@ export default {
       return Math.abs(this.distance2(this.from, this.to) - safeOffset) - 1;
     },
     rightToLeft() {
-      return this.distance2(this.from, this.to) < 0;
+      // to suppress  ATTR_FALSE_VALUE warning
+      // Details: https://v3-migration.vuejs.org/breaking-changes/attribute-coercion.html
+      return this.distance2(this.from, this.to) < 0 ? true : null;
     },
     signature() {
       return this.creation.SignatureText();
