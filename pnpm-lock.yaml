@@ -17,7 +17,7 @@ dependencies:
     specifier: ^0.28.20
     version: 0.28.20
   "@vue/compat":
-    specifier: ^3.3.13
+    specifier: ^3.4.27
     version: 3.4.27(vue@3.4.27)
   antlr4:
     specifier: ~4.11.0
@@ -56,7 +56,7 @@ dependencies:
     specifier: ^3.2.4
     version: 3.2.4(postcss@8.4.31)(ts-node@10.9.1)
   vue:
-    specifier: ^3.3.13
+    specifier: ^3.4.27
     version: 3.4.27(typescript@4.9.4)
   vuex:
     specifier: ^4.1.0
