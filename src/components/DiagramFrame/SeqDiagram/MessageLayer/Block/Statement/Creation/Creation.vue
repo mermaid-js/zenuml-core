@@ -70,7 +70,7 @@ import { mapGetters, mapState } from "vuex";
 import Comment from "../Comment/Comment.vue";
 import Message from "../Message/Message.vue";
 import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
-import { CodeRange } from "../../../../../../../parser/CodeRange";
+import { CodeRange } from "@/parser/CodeRange";
 import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
 
 const logger = parentLogger.child({ name: "Creation" });
@@ -79,7 +79,7 @@ export default {
   name: "creation",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
   computed: {
-    ...mapGetters(["cursor", "onElementClick", "distance"]),
+    ...mapGetters(["cursor", "onElementClick", "distance2"]),
     ...mapState(["numbering"]),
     from() {
       return this.context.Origin();
@@ -88,12 +88,15 @@ export default {
       return this.context.creation();
     },
     interactionWidth() {
-      let distance = Math.abs(this.distance(this.to, this.from));
+      if (this.context && this.isSelf) {
+        return 0;
+      }
+
       let safeOffset = this.selfCallIndent || 0;
-      return distance + (this.rightToLeft ? safeOffset : -safeOffset);
+      return Math.abs(this.distance2(this.from, this.to) - safeOffset) - 1;
     },
     rightToLeft() {
-      return this.distance(this.to, this.from) < 0;
+      return this.distance2(this.from, this.to) < 0;
     },
     signature() {
       return this.creation.SignatureText();

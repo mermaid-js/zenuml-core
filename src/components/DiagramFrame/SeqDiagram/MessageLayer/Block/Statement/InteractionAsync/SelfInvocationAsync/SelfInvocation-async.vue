@@ -58,8 +58,7 @@ const labelText = computed(() => {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.message.self {
-  /* InteractionBorderWidth */
-  transform: translateX(-5px);
+.from-no-occurrence > .message.self {
+  transform: translateX(-7px);
 }
 </style>

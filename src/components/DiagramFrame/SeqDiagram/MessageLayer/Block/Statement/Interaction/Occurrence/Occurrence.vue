@@ -9,7 +9,13 @@
   >
     <div
       v-if="debug"
-      class="absolute w-full left-0 bg-amber-700 h-3 -top-2 flex justify-center items-center"
+      class="absolute w-full left-0 bg-amber-700 h-3 -top-1 flex justify-center items-center"
+    >
+      <div class="w-px h-full bg-black"></div>
+    </div>
+    <div
+      v-if="debug"
+      class="absolute w-full left-0 bg-amber-700 h-3 -bottom-1 flex justify-center items-center"
     >
       <div class="w-px h-full bg-black"></div>
     </div>
@@ -95,8 +101,8 @@ export default {
 <style scoped>
 .occurrence {
   width: 15px;
-  /* 5 = (OccurrenceWidth(15)-1)/2 - OccurrenceBorderWidth(2)*/
-  padding: 16px 0 16px 5px;
+  /* 6 = (OccurrenceWidth(15)+1)/2 - OccurrenceBorderWidth(2)*/
+  padding: 16px 0 16px 6px;
 }
 
 :deep(> .statement-container:last-child > .interaction.return:last-of-type) {

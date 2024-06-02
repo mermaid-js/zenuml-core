@@ -148,7 +148,7 @@ export default {
       // increases by 6px (half of the width of an execution bar). However, we set the selfCallIndent back to 0 when
       // it enters a non-self sync interaction.
       return this.isSelf && !this.isRootBlock
-        ? (this.selfCallIndent || 0) + 6
+        ? (this.selfCallIndent || 0) + 7
         : 0;
     },
     interactionWidth: function () {
@@ -157,7 +157,7 @@ export default {
       }
 
       let safeOffset = this.outOfBand ? 0 : this.selfCallIndent || 0;
-      return Math.abs(this.distance2(this.from, this.to) - safeOffset);
+      return Math.abs(this.distance2(this.from, this.to) - safeOffset) - 1;
     },
     to: function () {
       return this.context?.message()?.Owner();
