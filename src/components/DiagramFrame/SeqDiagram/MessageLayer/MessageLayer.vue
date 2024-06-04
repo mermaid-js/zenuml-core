@@ -129,10 +129,6 @@ onUpdated(() => {
     /* positioning Point */
   }
 
-  .message > .name {
-    text-align: center;
-  }
-
   .interaction.right-to-left > .occurrence {
     /* InteractionBorderWidth + (OccurrenceWidth-1)/2 */
     left: -15px;
