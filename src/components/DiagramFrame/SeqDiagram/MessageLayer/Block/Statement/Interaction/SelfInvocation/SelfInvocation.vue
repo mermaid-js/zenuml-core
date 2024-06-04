@@ -15,13 +15,13 @@
       >
         {{ number }}
       </div>
-      <div :style="textStyle" :class="classNames">
-        <MessageLabel
-          :labelText="labelText"
-          :labelPosition="labelPosition"
-          :isSelf="true"
-        />
-      </div>
+      <MessageLabel
+        :style="textStyle"
+        :class="classNames"
+        :labelText="labelText"
+        :labelPosition="labelPosition"
+        :isSelf="true"
+      />
     </label>
     <svg class="arrow text-skin-message-arrow" width="30" height="24">
       <polyline
