@@ -5,15 +5,13 @@
       'flex-row-reverse': rtl,
       return: type === 'return',
       'right-to-left': rtl,
-      'text-left': isAsync,
-      'text-center': !isAsync,
     }"
     :style="{ 'border-bottom-style': borderStyle || undefined }"
     @click="onClick"
     ref="messageRef"
   >
     <div
-      class="name group flex-grow relative hover:text-skin-message-hover hover:bg-skin-message-hover"
+      class="name group text-center flex-grow relative hover:text-skin-message-hover hover:bg-skin-message-hover"
     >
       <div class="inline-block static min-h-[1em]">
         <div :style="textStyle" :class="classNames">
