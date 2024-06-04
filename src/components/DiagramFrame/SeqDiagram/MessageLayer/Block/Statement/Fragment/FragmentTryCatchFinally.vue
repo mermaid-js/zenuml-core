@@ -3,15 +3,15 @@
     <div class="segment">
       <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
       <div
-        class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t relative"
+        class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative"
       >
         <div
           v-if="numbering"
-          class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 text-sm font-thin leading-6"
+          class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 font-thin leading-6"
         >
           {{ number }}
         </div>
-        <div class="name font-semibold p-1 border-b text-sm">
+        <div class="name font-semibold p-1 border-b">
           <collapse-button
             label="Try"
             :collapsed="collapsed"
@@ -37,7 +37,7 @@
         v-for="(catchBlock, index) in tcf.catchBlock()"
         :key="index + 500"
       >
-        <div class="segment text-sm mt-2 border-t border-solid">
+        <div class="segment mt-2 border-t border-solid">
           <div
             class="header inline-block bg-skin-frame/[0.66]"
             :key="index + 1000"
@@ -59,7 +59,7 @@
         <div class="segment mt-2 border-t border-solid">
           <div class="header flex text-skin-fragment finally">
             <label
-              class="keyword finally bg-skin-frame/[0.66] px-1 inline-block text-sm"
+              class="keyword finally bg-skin-frame/[0.66] px-1 inline-block"
               >finally</label
             >
           </div>

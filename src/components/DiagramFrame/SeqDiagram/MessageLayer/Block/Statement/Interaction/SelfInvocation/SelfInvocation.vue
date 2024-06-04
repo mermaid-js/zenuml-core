@@ -1,13 +1,13 @@
 <template>
   <!-- style border-width means not to be overridden. -->
   <div
-    class="message self text-sm flex items-start flex-col"
+    class="self-invocation message self flex items-start flex-col"
     style="border-width: 0"
     @click="onClick"
     ref="messageRef"
   >
     <label
-      class="name group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em] w-full"
+      class="name text-left group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em] w-full"
     >
       <div
         class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500"
