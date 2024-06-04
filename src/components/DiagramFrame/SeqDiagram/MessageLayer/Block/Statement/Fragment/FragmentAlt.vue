@@ -3,15 +3,15 @@
     <div class="segment">
       <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
       <div
-        class="header bg-skin-fragment-header text-skin-fragment-header text-base leading-4 rounded-t relative"
+        class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative"
       >
         <div
           v-if="numbering"
-          class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 text-sm font-thin leading-6"
+          class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 font-thin leading-6"
         >
           {{ number }}
         </div>
-        <div class="name font-semibold p-1 border-b text-sm">
+        <div class="name font-semibold p-1 border-b">
           <label class="p-0">
             <collapse-button
               label="Alt"

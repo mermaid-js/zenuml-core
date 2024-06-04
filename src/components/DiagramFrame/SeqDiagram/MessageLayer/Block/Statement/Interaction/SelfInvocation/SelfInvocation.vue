@@ -1,7 +1,7 @@
 <template>
   <!-- style border-width means not to be overridden. -->
   <div
-    class="self-invocation message self text-sm flex items-start flex-col"
+    class="self-invocation message self flex items-start flex-col"
     style="border-width: 0"
     @click="onClick"
     ref="messageRef"
