@@ -78,6 +78,8 @@ NEW:        'new';
 PAR :       'par';
 GROUP:      'group';
 OPT:        'opt';
+CRITICAL:   'critical';
+SECTION:    'section' | 'frame';
 AS:         'as';
 TRY:        'try';
 CATCH:      'catch';
