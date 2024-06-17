@@ -105,9 +105,11 @@ export default {
     };
   },
   mounted() {
+    console.log("!!! Participant mounted");
     this.updateFontColor();
   },
   updated() {
+    console.log("!!! Participant updated");
     this.updateFontColor();
   },
   computed: {
@@ -134,13 +136,7 @@ export default {
         if (!this.entity.color) {
           return undefined;
         }
-        // TODO: review this decision later; tinycolor2 should be considered as recommended by openai
-        // Remove alpha for such a case:
-        // 1. Background color for parent has low brightness (e.g. #000)
-        // 2. Alpha is low (e.g. 0.1)
-        // 3. Entity background has high brightness (e.g. #fff)
-        // If we do not remove alpha, the computed background color will be bright while the perceived brightness is low.
-        // This will cause issue when calculating font color.
+        // removing alpha is a compromise to simplify the logic of determining the background color and font color
         return this.entity.color && removeAlpha(this.entity.color);
       } catch (e) {
         return undefined;
@@ -152,15 +148,16 @@ export default {
       this.$store.commit("onSelect", this.entity.name);
     },
     updateFontColor() {
-      // Returning `undefined` so that background-color is not set at all in the style attribute
       if (!this.backgroundColor) {
-        return undefined;
+        this.color = "inherit";
+        return;
       }
       let bgColor = window
         .getComputedStyle(this.$refs.participant)
         .getPropertyValue("background-color");
       if (!bgColor) {
-        return undefined;
+        this.color = "inherit";
+        return;
       }
       let b = brightnessIgnoreAlpha(bgColor);
       this.color = b > 128 ? "#000" : "#fff";
