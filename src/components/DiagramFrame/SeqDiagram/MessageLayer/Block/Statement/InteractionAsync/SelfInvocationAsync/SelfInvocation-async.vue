@@ -11,6 +11,8 @@
         {{ number }}
       </div>
       <MessageLabel
+        :style="textStyle"
+        :class="classNames"
         :labelText="labelText"
         :labelPosition="labelPosition"
         :isAsync="true"

@@ -4,7 +4,6 @@
     class="px-1 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
     :class="{
       'cursor-text': editing,
-      'absolute right-1/2 translate-x-1/2 bottom-0': editing && !isSelfAsync,
     }"
     :contenteditable="editing && mode === RenderMode.Dynamic"
     @dblclick="handleDblClick"
@@ -34,14 +33,13 @@ const props = withDefaults(
   },
 );
 
-const { labelText, labelPosition, isAsync, isSelf } = toRefs(props);
+const { labelText, labelPosition, isAsync } = toRefs(props);
 const store = useStore();
 const mode = computed(() => store.state.mode);
 const code = computed(() => store.getters.code);
 const onContentChange = computed(
   () => store.getters.onContentChange || (() => {}),
 );
-const isSelfAsync = computed(() => !!isAsync?.value && !!isSelf?.value);
 
 function updateCode(code: string) {
   store.dispatch("updateCode", { code });
