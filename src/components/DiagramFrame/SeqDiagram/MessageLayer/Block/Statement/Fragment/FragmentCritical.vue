@@ -1,12 +1,12 @@
 <template>
   <div
-    class="fragment critical border-skin-fragment rounded border-2"
+    class="fragment critical border-skin-fragment rounded relative"
     :style="fragmentStyle"
   >
     <div class="segment">
       <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
       <div
-        class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative border-b-2"
+        class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative"
       >
         <div
           v-if="numbering"
@@ -82,5 +82,25 @@ export default {
 /* We need to do this because tailwind 3.2.4 set border-color to #e5e7eb via '*'. */
 * {
   border-color: inherit;
+}
+
+.critical::before {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border: 1px solid;
+}
+
+.critical .header::before {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid;
 }
 </style>
