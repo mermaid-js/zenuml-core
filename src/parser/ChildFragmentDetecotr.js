@@ -3,10 +3,10 @@ import sequenceParserListener from "../generated-parser/sequenceParserListener";
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
-var ChildFragmentDetector = new sequenceParserListener();
+let ChildFragmentDetector = new sequenceParserListener();
 
-var cursor = 0;
-var max = 0;
+let cursor = 0;
+let max = 0;
 
 ChildFragmentDetector.enterTcf = function () {
   cursor++;
@@ -21,6 +21,12 @@ ChildFragmentDetector.enterAlt = function () {
   cursor++;
 };
 ChildFragmentDetector.enterLoop = function () {
+  cursor++;
+};
+ChildFragmentDetector.enterSection = function () {
+  cursor++;
+};
+ChildFragmentDetector.enterCritical = function () {
   cursor++;
 };
 
@@ -41,6 +47,14 @@ ChildFragmentDetector.exitAlt = function () {
   cursor--;
 };
 ChildFragmentDetector.exitLoop = function () {
+  max = Math.max(max, cursor);
+  cursor--;
+};
+ChildFragmentDetector.exitSection = function () {
+  max = Math.max(max, cursor);
+  cursor--;
+};
+ChildFragmentDetector.exitCritical = function () {
   max = Math.max(max, cursor);
   cursor--;
 };

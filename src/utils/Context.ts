@@ -4,6 +4,8 @@ export const getContextType = (context: any) => {
     alt: "FragmentAlt",
     par: "FragmentPar",
     opt: "FragmentOpt",
+    section: "FragmentSection",
+    critical: "FragmentCritical",
     tcf: "FragmentTryCatchFinally",
     creation: "Creation",
     message: "Interaction",
