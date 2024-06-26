@@ -49,6 +49,7 @@
     "antlr4": "~4.11.0",
     "color-string": "^1.5.5",
     "dom-to-image-more": "^2.13.0",
+    "dompurify": "^3.1.5",
     "file-saver": "^2.0.5",
     "highlight.js": "^10.7.3",
     "html-to-image": "^1.11.3",

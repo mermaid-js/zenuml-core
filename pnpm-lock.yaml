@@ -28,6 +28,9 @@ dependencies:
   dom-to-image-more:
     specifier: ^2.13.0
     version: 2.13.0
+  dompurify:
+    specifier: ^3.1.5
+    version: 3.1.5
   file-saver:
     specifier: ^2.0.5
     version: 2.0.5
@@ -80,7 +83,7 @@ devDependencies:
     version: 4.14.191
   "@types/node":
     specifier: latest
-    version: 20.13.0
+    version: 20.14.9
   "@typescript-eslint/eslint-plugin":
     specifier: ^6.7.4
     version: 6.7.4(@typescript-eslint/parser@6.7.4)(eslint@8.30.0)(typescript@4.9.4)
@@ -161,13 +164,13 @@ devDependencies:
     version: 3.1.0(webpack@5.91.0)
   ts-node:
     specifier: ^10.9.1
-    version: 10.9.1(@types/node@20.13.0)(typescript@4.9.4)
+    version: 10.9.1(@types/node@20.14.9)(typescript@4.9.4)
   typescript:
     specifier: ^4.9.4
     version: 4.9.4
   vite:
     specifier: ^3.2.10
-    version: 3.2.10(@types/node@20.13.0)(less@4.1.3)(sass@1.57.0)
+    version: 3.2.10(@types/node@20.14.9)(less@4.1.3)(sass@1.57.0)
   vite-plugin-css-injected-by-js:
     specifier: ^2.2.0
     version: 2.2.0(vite@3.2.10)
@@ -2962,10 +2965,10 @@ packages:
       }
     dev: true
 
-  /@types/node@20.13.0:
+  /@types/node@20.14.9:
     resolution:
       {
-        integrity: sha512-FM6AOb3khNkNIXPnHFDYaHerSv8uN22C91z098AnGccVu+Pcdhi+pNUFDi0iLmPIsVE0JBD0KVS7mzUYt4nRzQ==,
+        integrity: sha512-06OCtnTXtWOZBJlRApleWndH4JsRVs1pDCc8dLSQp+7PpUpX3ePdHyeNSFTeSe7FtKyQkrlPvHwJOW3SLd8Oyg==,
       }
     dependencies:
       undici-types: 5.26.5
@@ -3007,7 +3010,7 @@ packages:
       }
     requiresBuild: true
     dependencies:
-      "@types/node": 20.13.0
+      "@types/node": 20.14.9
     dev: true
     optional: true
 
@@ -3176,7 +3179,7 @@ packages:
       vite: ^4.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 3.2.10(@types/node@20.13.0)(less@4.1.3)(sass@1.57.0)
+      vite: 3.2.10(@types/node@20.14.9)(less@4.1.3)(sass@1.57.0)
       vue: 3.4.27(typescript@4.9.4)
     dev: true
 
@@ -5085,6 +5088,13 @@ packages:
       domelementtype: 2.3.0
     dev: true
 
+  /dompurify@3.1.5:
+    resolution:
+      {
+        integrity: sha512-lwG+n5h8QNpxtyrJW/gJWckL+1/DQiYMX8f7t8Z2AZTPw1esVrqjI63i7Zc2Gz0aKzLVMYC1V1PL/ky+aY/NgA==,
+      }
+    dev: false
+
   /domutils@3.1.0:
     resolution:
       {
@@ -6933,7 +6943,7 @@ packages:
       }
     engines: { node: ">= 10.13.0" }
     dependencies:
-      "@types/node": 20.13.0
+      "@types/node": 20.14.9
       merge-stream: 2.0.0
       supports-color: 7.2.0
     dev: true
@@ -6945,7 +6955,7 @@ packages:
       }
     engines: { node: ">= 10.13.0" }
     dependencies:
-      "@types/node": 20.13.0
+      "@types/node": 20.14.9
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: true
@@ -8365,7 +8375,7 @@ packages:
     dependencies:
       lilconfig: 2.0.6
       postcss: 8.4.31
-      ts-node: 10.9.1(@types/node@20.13.0)(typescript@4.9.4)
+      ts-node: 10.9.1(@types/node@20.14.9)(typescript@4.9.4)
       yaml: 1.10.2
     dev: false
 
@@ -9731,7 +9741,7 @@ packages:
       typescript: 4.9.4
     dev: true
 
-  /ts-node@10.9.1(@types/node@20.13.0)(typescript@4.9.4):
+  /ts-node@10.9.1(@types/node@20.14.9)(typescript@4.9.4):
     resolution:
       {
         integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==,
@@ -9753,7 +9763,7 @@ packages:
       "@tsconfig/node12": 1.0.11
       "@tsconfig/node14": 1.0.3
       "@tsconfig/node16": 1.0.3
-      "@types/node": 20.13.0
+      "@types/node": 20.14.9
       acorn: 8.8.1
       acorn-walk: 8.2.0
       arg: 4.1.3
@@ -10063,7 +10073,7 @@ packages:
       extsprintf: 1.3.0
     dev: true
 
-  /vite-node@0.26.1(@types/node@20.13.0)(less@4.1.3)(sass@1.57.0):
+  /vite-node@0.26.1(@types/node@20.14.9)(less@4.1.3)(sass@1.57.0):
     resolution:
       {
         integrity: sha512-5FJSKZZJz48zFRKHE55WyevZe61hLMQEsqGn+ungfd60kxEztFybZ3yG9ToGFtOWNCCy7Vn5EVuXD8bdeHOSdw==,
@@ -10076,7 +10086,7 @@ packages:
       pathe: 0.2.0
       source-map: 0.6.1
       source-map-support: 0.5.21
-      vite: 3.2.10(@types/node@20.13.0)(less@4.1.3)(sass@1.57.0)
+      vite: 3.2.10(@types/node@20.14.9)(less@4.1.3)(sass@1.57.0)
     transitivePeerDependencies:
       - "@types/node"
       - less
@@ -10095,7 +10105,7 @@ packages:
     peerDependencies:
       vite: ">2.0.0-0"
     dependencies:
-      vite: 3.2.10(@types/node@20.13.0)(less@4.1.3)(sass@1.57.0)
+      vite: 3.2.10(@types/node@20.14.9)(less@4.1.3)(sass@1.57.0)
     dev: true
 
   /vite-svg-loader@4.0.0:
@@ -10108,7 +10118,7 @@ packages:
       svgo: 3.0.2
     dev: true
 
-  /vite@3.2.10(@types/node@20.13.0)(less@4.1.3)(sass@1.57.0):
+  /vite@3.2.10(@types/node@20.14.9)(less@4.1.3)(sass@1.57.0):
     resolution:
       {
         integrity: sha512-Dx3olBo/ODNiMVk/cA5Yft9Ws+snLOXrhLtrI3F4XLt4syz2Yg8fayZMWScPKoz12v5BUv7VEmQHnsfpY80fYw==,
@@ -10136,7 +10146,7 @@ packages:
       terser:
         optional: true
     dependencies:
-      "@types/node": 20.13.0
+      "@types/node": 20.14.9
       esbuild: 0.15.18
       less: 4.1.3
       postcss: 8.4.31
@@ -10174,7 +10184,7 @@ packages:
     dependencies:
       "@types/chai": 4.3.4
       "@types/chai-subset": 1.3.3
-      "@types/node": 20.13.0
+      "@types/node": 20.14.9
       acorn: 8.8.1
       acorn-walk: 8.2.0
       chai: 4.3.7
@@ -10186,8 +10196,8 @@ packages:
       tinybench: 2.3.1
       tinypool: 0.3.0
       tinyspy: 1.0.2
-      vite: 3.2.10(@types/node@20.13.0)(less@4.1.3)(sass@1.57.0)
-      vite-node: 0.26.1(@types/node@20.13.0)(less@4.1.3)(sass@1.57.0)
+      vite: 3.2.10(@types/node@20.14.9)(less@4.1.3)(sass@1.57.0)
+      vite-node: 0.26.1(@types/node@20.14.9)(less@4.1.3)(sass@1.57.0)
     transitivePeerDependencies:
       - less
       - sass
