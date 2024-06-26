@@ -2,8 +2,8 @@ lockfileVersion: "6.0"
 
 dependencies:
   "@headlessui-float/vue":
-    specifier: ^0.11.4
-    version: 0.11.4(vue@3.4.27)
+    specifier: ^0.14.0
+    version: 0.14.0(@headlessui/vue@1.7.16)(vue@3.4.27)
   "@headlessui/tailwindcss":
     specifier: ^0.2.0
     version: 0.2.0(tailwindcss@3.2.4)
@@ -690,12 +690,28 @@ packages:
       "@babel/types": 7.24.6
     dev: true
 
+  /@babel/helper-string-parser@7.21.5:
+    resolution:
+      {
+        integrity: sha512-5pTUx3hAJaZIdW99sJ6ZUUgWq/Y+Hja7TowEnLNMm1VivRgZQL3vpBY3qUACVsvw+yQU6+YgfBVmcbLaZtrA1w==,
+      }
+    engines: { node: ">=6.9.0" }
+    dev: true
+
   /@babel/helper-string-parser@7.24.6:
     resolution:
       {
         integrity: sha512-WdJjwMEkmBicq5T9fm/cHND3+UlFa2Yj8ALLgmoSQAJZysYbBjw+azChSGPN4DSPLXOcooGRvDwZWMcF/mLO2Q==,
       }
     engines: { node: ">=6.9.0" }
+
+  /@babel/helper-validator-identifier@7.19.1:
+    resolution:
+      {
+        integrity: sha512-awrNfaMtnHUr653GgGEs++LlAvW6w+DcPrOliSMXWCKo597CwL5Acf/wWdNkf/tfEQE3mjkeD1YOVZOUV/od1w==,
+      }
+    engines: { node: ">=6.9.0" }
+    dev: true
 
   /@babel/helper-validator-identifier@7.24.6:
     resolution:
@@ -1480,7 +1496,7 @@ packages:
       "@babel/helper-hoist-variables": 7.18.6
       "@babel/helper-module-transforms": 7.20.2
       "@babel/helper-plugin-utils": 7.20.2
-      "@babel/helper-validator-identifier": 7.24.6
+      "@babel/helper-validator-identifier": 7.19.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1791,7 +1807,7 @@ packages:
       "@babel/helper-plugin-utils": 7.20.2
       "@babel/plugin-proposal-unicode-property-regex": 7.18.6(@babel/core@7.24.6)
       "@babel/plugin-transform-dotall-regex": 7.18.6(@babel/core@7.24.6)
-      "@babel/types": 7.24.6
+      "@babel/types": 7.22.4
       esutils: 2.0.3
     dev: true
 
@@ -1887,6 +1903,18 @@ packages:
     resolution:
       {
         integrity: sha512-c9fst/h2/dcF7H+MJKZ2T0KjEQ8hY/BNnDk/H3XY8C4Aw/eWQXWn/lWntHF9ooUBnGmEvbfGrTgLWc+um0YDUg==,
+      }
+    engines: { node: ">=6.9.0" }
+    dependencies:
+      "@babel/helper-string-parser": 7.21.5
+      "@babel/helper-validator-identifier": 7.19.1
+      to-fast-properties: 2.0.0
+    dev: true
+
+  /@babel/types@7.22.4:
+    resolution:
+      {
+        integrity: sha512-Tx9x3UBHTTsMSW85WB2kphxYQVvrZ/t1FxD88IpSgIjiUJlCm9z+xWIDwyo1vffTwSqteqyznB8ZE9vYYk16zA==,
       }
     engines: { node: ">=6.9.0" }
     dependencies:
@@ -2055,21 +2083,18 @@ packages:
       }
     dev: false
 
-  /@floating-ui/vue@0.2.1(vue@3.4.27):
+  /@floating-ui/vue@1.0.6(vue@3.4.27):
     resolution:
       {
-        integrity: sha512-HE+EIeakID7wI6vUwF0yMpaW48bNaPj8QtnQaRMkaQFhQReVBA4bY6fmJ3J7X+dqVgDbMhyfCG0fBJfdQMdWxQ==,
+        integrity: sha512-EdrOljjkpkkqZnrpqUcPoz9NvHxuTjUtSInh6GMv3+Mcy+giY2cE2pHh9rpacRcZ2eMSCxel9jWkWXTjLmY55w==,
       }
-    peerDependencies:
-      "@vue/composition-api": ^1.0.0-rc.1
-      vue: ^2.0.0 || >=3.0.0
-    peerDependenciesMeta:
-      "@vue/composition-api":
-        optional: true
     dependencies:
       "@floating-ui/dom": 1.6.5
-      vue: 3.4.27(typescript@4.9.4)
+      "@floating-ui/utils": 0.2.2
       vue-demi: 0.13.11(vue@3.4.27)
+    transitivePeerDependencies:
+      - "@vue/composition-api"
+      - vue
     dev: false
 
   /@gar/promisify@1.1.3:
@@ -2079,17 +2104,19 @@ packages:
       }
     dev: true
 
-  /@headlessui-float/vue@0.11.4(vue@3.4.27):
+  /@headlessui-float/vue@0.14.0(@headlessui/vue@1.7.16)(vue@3.4.27):
     resolution:
       {
-        integrity: sha512-hNGQTT3trknSB78ZI3usvnJACLyEUmacvk5Q8JQizJ8k+8GYLvhKklGIhJVO1E3litEzW6yyjPgfg6aEJ+1p6g==,
+        integrity: sha512-hx0IkJ7JPcwDeimco6fe0+IknknL1gUYIGu11OCn0JWlOoSAmO6sx2DxPwSEz1Wsq34X6Z8BwCwcPVuphZ1zMg==,
       }
     peerDependencies:
+      "@headlessui/vue": ^1.0.0
       vue: ^3.0.0
     dependencies:
       "@floating-ui/core": 1.6.2
       "@floating-ui/dom": 1.6.5
-      "@floating-ui/vue": 0.2.1(vue@3.4.27)
+      "@floating-ui/vue": 1.0.6(vue@3.4.27)
+      "@headlessui/vue": 1.7.16(vue@3.4.27)
       vue: 3.4.27(typescript@4.9.4)
     transitivePeerDependencies:
       - "@vue/composition-api"
