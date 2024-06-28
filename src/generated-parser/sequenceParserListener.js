@@ -176,6 +176,24 @@ export default class sequenceParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by sequenceParser#critical.
+	enterCritical(ctx) {
+	}
+
+	// Exit a parse tree produced by sequenceParser#critical.
+	exitCritical(ctx) {
+	}
+
+
+	// Enter a parse tree produced by sequenceParser#section.
+	enterSection(ctx) {
+	}
+
+	// Exit a parse tree produced by sequenceParser#section.
+	exitSection(ctx) {
+	}
+
+
 	// Enter a parse tree produced by sequenceParser#creation.
 	enterCreation(ctx) {
 	}

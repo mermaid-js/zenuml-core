@@ -88,6 +88,14 @@ class FrameBuilder extends sequenceParserListener {
     this.enterFragment(ctx);
   }
 
+  enterSection(ctx: any): void {
+    this.enterFragment(ctx);
+  }
+
+  enterCritical(ctx: any): void {
+    this.enterFragment(ctx);
+  }
+
   exitTcf() {
     this.exitFragment();
   }
@@ -101,6 +109,12 @@ class FrameBuilder extends sequenceParserListener {
     this.exitFragment();
   }
   exitLoop() {
+    this.exitFragment();
+  }
+  exitSection() {
+    this.exitFragment();
+  }
+  exitCritical() {
     this.exitFragment();
   }
 

@@ -97,6 +97,8 @@ stat
  : alt
  | par
  | opt
+ | critical
+ | section
  | loop
  | creation
  | message
@@ -118,6 +120,16 @@ opt
  : OPT braceBlock
  | OPT
  ;
+
+critical
+  : CRITICAL (OPAR atom? CPAR)? braceBlock
+  | CRITICAL
+  ;
+
+section
+  : SECTION (OPAR atom? CPAR)? braceBlock
+  | SECTION
+  ;
 
 creation
  : creationBody (SCOL | braceBlock)?
