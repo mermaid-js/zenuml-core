@@ -15,13 +15,19 @@
       >
         {{ number }}
       </div>
-      <MessageLabel
-        :style="textStyle"
-        :class="classNames"
-        :labelText="labelText"
-        :labelPosition="labelPosition"
-        :isSelf="true"
-      />
+      <div class="label">
+        <span v-if="assignee">
+          <span class="assignee px-1">{{ assignee }}</span>
+          <span>=</span>
+        </span>
+        <MessageLabel
+          :style="textStyle"
+          :class="classNames"
+          :labelText="signature"
+          :labelPosition="labelPosition"
+          :isSelf="true"
+        />
+      </div>
     </label>
     <svg class="arrow text-skin-message-arrow" width="30" height="24">
       <polyline
@@ -53,13 +59,19 @@ const store = useStore();
 const numbering = computed(() => store.state.numbering);
 const messageRef = ref();
 const labelPosition: ComputedRef<[number, number]> = computed(() => {
-  const signature = context?.value.messageBody();
-  return [signature.start.start, signature.stop.stop];
-});
-const labelText = computed(() => {
-  return context?.value.messageBody().getFormattedText();
+  // do not use .signature(). Multiple signatures are allowed, e.g. method().method1().method2()
+  const func = context?.value.messageBody().func();
+  return [func.start.start, func.stop.stop];
 });
 
+const assignee = computed(() => {
+  let assignment = context?.value.Assignment();
+  if (!assignment) return "";
+  return assignment.getText();
+});
+const signature = computed(() => {
+  return context?.value.SignatureText();
+});
 const onClick = () => {
   store.getters.onMessageClick(context, messageRef.value);
 };
