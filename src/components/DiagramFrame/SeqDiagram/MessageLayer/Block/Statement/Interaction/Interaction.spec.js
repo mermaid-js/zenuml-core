@@ -1,3 +1,4 @@
+import { configureCompat } from "vue";
 import { shallowMount } from "@vue/test-utils";
 import { createStore } from "vuex";
 import Interaction from "./Interaction.vue";
@@ -5,6 +6,16 @@ import Store from "@/store/Store";
 import { ProgContextFixture } from "@/parser/ContextsFixture";
 
 describe("Highlight current interact based on position of cursor", () => {
+  beforeEach(() => {
+    configureCompat({
+      ATTR_FALSE_VALUE: false,
+      RENDER_FUNCTION: false,
+    });
+  });
+  // afterEach(() => {
+  //   Vue.configureCompat({ MODE: 3 });
+  // });
+
   test.each([
     ["A.bc", null, false],
     ["A.bc", undefined, false],
@@ -18,6 +29,9 @@ describe("Highlight current interact based on position of cursor", () => {
   ])(
     "Interaction: for code: `%s` if cursor is %s then isCurrent will be %s ",
     (code, cursor, isCurrent) => {
+      configureCompat({
+        RENDER_FUNCTION: false,
+      });
       const storeConfig = Store();
       const store = createStore(storeConfig);
       store.state.cursor = cursor;
