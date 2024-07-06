@@ -18,10 +18,7 @@
       class="z-40 inline-block align-bottom bg-white rounded-lg px-4 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:p-2"
     >
       <div>
-        <div
-          class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6"
-          slot="header"
-        >
+        <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
           <h3 class="text-xl leading-6 font-medium text-gray-900 inline-block">
             ZenUML Tips
           </h3>
@@ -35,7 +32,7 @@
             <Icon name="close" icon-class="h-6 w-6" />
           </button>
         </div>
-        <div slot="body">
+        <div>
           <div class="relative bg-white pb-32 mt-4 overflow-hidden">
             <div class="relative">
               <div class="lg:mx-auto lg:max-w-11/12 lg:px-8">
@@ -59,6 +56,9 @@
 
 // Use 'group' keyword
 group GroupName {  B  C }
+
+// Use alias
+S as Service
 
 // Use stereotype
 &lt;&lt;servlet&gt;&gt; ServiceX</code></pre>
@@ -101,6 +101,12 @@ opt {}
 
 // Par
 par {}
+
+// Section
+section(ID) {} / frame(ID) {};
+
+// Critical
+critical {}
 
 // Try Catch Finally
 try {} catch() {} finally {}
