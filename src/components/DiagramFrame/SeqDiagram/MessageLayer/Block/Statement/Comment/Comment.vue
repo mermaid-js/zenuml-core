@@ -8,6 +8,8 @@
 
 <script type="text/babel">
 import { marked } from "marked";
+import DOMPurify from "dompurify";
+
 import highlightjs from "highlight.js/lib/core";
 
 // Languages import
@@ -61,10 +63,10 @@ export default {
   props: ["comment", "commentObj"],
   computed: {
     markedComment() {
-      return (
+      const dirtyHTML =
         (this.commentObj?.text && marked.parse(this.commentObj?.text)) ||
-        (this.comment && marked.parse(this.comment))
-      );
+        (this.comment && marked.parse(this.comment));
+      return DOMPurify.sanitize(dirtyHTML);
     },
     commentStyle() {
       return this.commentObj?.commentStyle;

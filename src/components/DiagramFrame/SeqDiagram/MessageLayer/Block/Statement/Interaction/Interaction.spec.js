@@ -1,10 +1,21 @@
+import { configureCompat } from "vue";
 import { shallowMount } from "@vue/test-utils";
 import { createStore } from "vuex";
 import Interaction from "./Interaction.vue";
-import { VueSequence } from "../../../../../../../index";
-import { ProgContextFixture } from "../../../../../../../parser/ContextsFixture";
+import Store from "@/store/Store";
+import { ProgContextFixture } from "@/parser/ContextsFixture";
 
 describe("Highlight current interact based on position of cursor", () => {
+  beforeEach(() => {
+    configureCompat({
+      ATTR_FALSE_VALUE: false,
+      RENDER_FUNCTION: false,
+    });
+  });
+  // afterEach(() => {
+  //   Vue.configureCompat({ MODE: 3 });
+  // });
+
   test.each([
     ["A.bc", null, false],
     ["A.bc", undefined, false],
@@ -18,9 +29,12 @@ describe("Highlight current interact based on position of cursor", () => {
   ])(
     "Interaction: for code: `%s` if cursor is %s then isCurrent will be %s ",
     (code, cursor, isCurrent) => {
-      const storeConfig = VueSequence.Store();
-      storeConfig.state.cursor = cursor;
+      configureCompat({
+        RENDER_FUNCTION: false,
+      });
+      const storeConfig = Store();
       const store = createStore(storeConfig);
+      store.state.cursor = cursor;
       store.state.code = code;
       const rootContext = store.getters.rootContext;
       const wrapper = shallowMount(Interaction, {
@@ -45,7 +59,7 @@ describe("Interaction width", () => {
     "If selfCallIndent is %s and distance is %s, interactionWidth should be %s",
     (selfCallIndent, a, b, width) => {
       Interaction.computed.to = () => "B";
-      const storeConfig = VueSequence.Store();
+      const storeConfig = Store();
       storeConfig.getters.centerOf = () => (participant) => {
         if (participant === "A") return a;
         if (participant === "B") return b;
@@ -72,7 +86,7 @@ describe("Translate X", () => {
     Interaction.computed.providedFrom = () => "A";
     Interaction.computed.origin = () => "B";
     Interaction.computed.to = () => "C";
-    const storeConfig = VueSequence.Store();
+    const storeConfig = Store();
     storeConfig.getters.centerOf = () => (participant) => {
       if (participant === "A") return 10;
       if (participant === "B") return 25;
@@ -95,7 +109,7 @@ describe("Translate X", () => {
     Interaction.computed.providedFrom = () => "B";
     Interaction.computed.origin = () => "C";
     Interaction.computed.to = () => "A";
-    const storeConfig = VueSequence.Store();
+    const storeConfig = Store();
     storeConfig.getters.centerOf = () => (participant) => {
       if (participant === "A") return 10;
       if (participant === "B") return 25;

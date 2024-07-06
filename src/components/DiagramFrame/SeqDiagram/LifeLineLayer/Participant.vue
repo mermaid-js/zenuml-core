@@ -105,11 +105,9 @@ export default {
     };
   },
   mounted() {
-    console.log("!!! Participant mounted");
     this.updateFontColor();
   },
   updated() {
-    console.log("!!! Participant updated");
     this.updateFontColor();
   },
   computed: {

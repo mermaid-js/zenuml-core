@@ -3,6 +3,7 @@ import { createStore } from "vuex";
 import { VueSequence } from "@/index";
 import Creation from "./Creation.vue";
 import { Fixture } from "../../../../../../../../test/unit/parser/fixture/Fixture";
+import { configureCompat } from "vue";
 
 function mountCreationWithCode(
   code: string,
@@ -21,7 +22,11 @@ function mountCreationWithCode(
 
   return shallowMount(Creation, { global: { plugins: [store] }, props });
 }
-
+beforeEach(() => {
+  configureCompat({
+    RENDER_FUNCTION: false,
+  });
+});
 describe("Creation", () => {
   it("data , props and computed properties", async () => {
     /**
