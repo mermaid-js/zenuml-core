@@ -1,10 +1,11 @@
+import { configureCompat } from "vue";
 import { shallowMount } from "@vue/test-utils";
 import { createStore } from "vuex";
+import Store from "@/store/Store";
 import InteractionAsync from "./Interaction-async.vue";
-import { VueSequence } from "../../../../../../../index";
 
 function renderCode(code) {
-  const storeConfig = VueSequence.Store();
+  const storeConfig = Store();
   storeConfig.state.code = code;
   const store = createStore(storeConfig);
   return shallowMount(InteractionAsync, {
@@ -18,6 +19,12 @@ function renderCode(code) {
 }
 
 describe("Async Call", () => {
+  beforeEach(() => {
+    configureCompat({
+      ATTR_FALSE_VALUE: false,
+      RENDER_FUNCTION: false,
+    });
+  });
   // A -> B: m
   test.each([
     // A --- ?px ---> B

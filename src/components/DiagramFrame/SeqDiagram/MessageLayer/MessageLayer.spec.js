@@ -1,16 +1,24 @@
 import { shallowMount } from "@vue/test-utils";
+import { configureCompat } from "vue";
 import { createStore } from "vuex";
-import { VueSequence } from "../../../../index";
+import Store from "@/store/Store";
 import MessageLayer from "./MessageLayer.vue";
 import Block from "./Block/Block.vue";
 import { ProgContextFixture } from "../../../../parser/ContextsFixture";
-const storeConfig = VueSequence.Store();
+const storeConfig = Store();
 storeConfig.state.code = "a";
 storeConfig.getters.centerOf = function () {
   return (p) => (p === "a" ? 100 : NaN);
 };
 
 const store = createStore(storeConfig);
+
+beforeEach(() => {
+  configureCompat({
+    ATTR_FALSE_VALUE: false,
+    RENDER_FUNCTION: false,
+  });
+});
 
 describe("MessageLayer", () => {
   let messageLayerWrapper = shallowMount(MessageLayer, {

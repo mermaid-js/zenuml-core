@@ -22,6 +22,11 @@ function renderCode(code: string) {
 }
 
 describe("Statement", () => {
+  beforeEach(() => {
+    VueSequence.Vue.configureCompat({
+      RENDER_FUNCTION: false,
+    });
+  });
   test.each([
     ["// comment \n A->B:m", "comment", {}, {}],
     [

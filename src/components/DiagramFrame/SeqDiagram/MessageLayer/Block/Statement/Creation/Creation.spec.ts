@@ -1,15 +1,22 @@
 import { shallowMount } from "@vue/test-utils";
+import { configureCompat } from "vue";
 import { createStore } from "vuex";
-import { VueSequence } from "@/index";
+import Store from "@/store/Store";
 import Creation from "./Creation.vue";
 import { Fixture } from "../../../../../../../../test/unit/parser/fixture/Fixture";
-import { configureCompat } from "vue";
+
+beforeEach(() => {
+  configureCompat({
+    ATTR_FALSE_VALUE: false,
+    RENDER_FUNCTION: false,
+  });
+});
 
 function mountCreationWithCode(
   code: string,
   contextLocator: (code: string) => any,
 ) {
-  const storeConfig = VueSequence.Store();
+  const storeConfig = Store();
   // @ts-ignore
   storeConfig.state.code = code;
   const store = createStore(storeConfig);
@@ -22,13 +29,9 @@ function mountCreationWithCode(
 
   return shallowMount(Creation, { global: { plugins: [store] }, props });
 }
-beforeEach(() => {
-  configureCompat({
-    RENDER_FUNCTION: false,
-  });
-});
+
 describe("Creation", () => {
-  it("data , props and computed properties", async () => {
+  it("data, props and computed properties", async () => {
     /**
      * Known limitations:
      * 1. `IA a = new A()` cannot be the first statement in the file. `IA` will be recognised as a Participant.

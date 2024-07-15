@@ -5,13 +5,14 @@ import Interaction from "./Interaction.vue";
 import Store from "@/store/Store";
 import { ProgContextFixture } from "@/parser/ContextsFixture";
 
-describe("Highlight current interact based on position of cursor", () => {
-  beforeEach(() => {
-    configureCompat({
-      ATTR_FALSE_VALUE: false,
-      RENDER_FUNCTION: false,
-    });
+beforeEach(() => {
+  configureCompat({
+    ATTR_FALSE_VALUE: false,
+    RENDER_FUNCTION: false,
   });
+});
+
+describe("Highlight current interact based on position of cursor", () => {
   // afterEach(() => {
   //   Vue.configureCompat({ MODE: 3 });
   // });
