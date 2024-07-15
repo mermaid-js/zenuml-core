@@ -27,7 +27,7 @@
         ref="messageEl"
         class="invocation w-full transform -translate-y-1/2 pointer-events-auto"
         :context="creation"
-        :content="signature"
+        :content="signature ?? ''"
         :rtl="rightToLeft"
         type="creation"
         :number="number"
@@ -51,7 +51,7 @@
       class="return transform -translate-y-full pointer-events-auto"
       v-if="assignee"
       :context="creation.creationBody().assignment()"
-      :content="assignee"
+      :content="assignee ?? ''"
       :rtl="!rightToLeft"
       type="return"
       :number="`${number}.${
@@ -72,12 +72,17 @@ import Message from "../Message/Message.vue";
 import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
 import { CodeRange } from "@/parser/CodeRange";
 import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
+import { getCurrentInstance } from "vue";
 
 const logger = parentLogger.child({ name: "Creation" });
 
 export default {
   name: "creation",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  setup() {
+    const instance = getCurrentInstance();
+    return { instance };
+  },
   computed: {
     ...mapGetters(["cursor", "onElementClick", "distance2"]),
     ...mapState(["numbering"]),

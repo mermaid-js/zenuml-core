@@ -37,7 +37,7 @@
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
       :context="message"
-      :content="signature"
+      :content="signature ?? ''"
       :rtl="rightToLeft"
       type="sync"
       :number="number"
@@ -53,7 +53,7 @@
       v-if="assignee && !isSelf"
       class="return transform -translate-y-full"
       :context="message"
-      :content="assignee"
+      :content="assignee ?? ''"
       :rtl="!rightToLeft"
       type="return"
       :number="`${number}.${

@@ -1,10 +1,11 @@
 import { shallowMount } from "@vue/test-utils";
 import { createStore } from "vuex";
 import Statement from "./Statement.vue";
-import { VueSequence } from "../../../../../../index";
+import { configureCompat } from "vue";
+import Store from "@/store/Store";
 
 function renderCode(code: string) {
-  const storeConfig = VueSequence.Store();
+  const storeConfig = Store();
   if (!storeConfig.state) return;
   // @ts-ignore
   storeConfig.state.code = code;
@@ -23,7 +24,7 @@ function renderCode(code: string) {
 
 describe("Statement", () => {
   beforeEach(() => {
-    VueSequence.Vue.configureCompat({
+    configureCompat({
       RENDER_FUNCTION: false,
     });
   });

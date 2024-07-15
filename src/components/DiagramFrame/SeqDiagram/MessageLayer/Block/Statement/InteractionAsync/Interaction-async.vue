@@ -35,7 +35,7 @@
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
       :context="asyncMessage"
-      :content="signature"
+      :content="signature ?? ''"
       :rtl="rightToLeft"
       type="async"
       :number="number"
