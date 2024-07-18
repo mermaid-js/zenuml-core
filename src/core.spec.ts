@@ -9,6 +9,12 @@ vi.stubGlobal(
     };
   }),
 );
+
+// Fixed  "document is not defined" error in WidthProviderOnBrowser function
+vi.mock("@/positioning/WidthProviderOnBrowser", () => ({
+  default: vi.fn().mockReturnValue(100),
+}));
+
 describe("@ZenUML/core", function () {
   it("should render and cache the code and theme", async () => {
     const el = document.createElement("div");

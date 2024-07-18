@@ -1,4 +1,3 @@
-import { vi } from "vitest";
 import EventEmitter from "events";
 import { EventBus, CustomEmit, TrackEvent } from "./EventBus";
 
