@@ -3,8 +3,8 @@ import { mapGetters } from "vuex";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
+import { EventBus } from "@/EventBus";
 import CollapseButton from "./CollapseButton.vue";
-import EventBus from "../../../../../../../EventBus";
 
 export default {
   computed: {
