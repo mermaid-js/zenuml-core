@@ -12,8 +12,8 @@
 </template>
 
 <script>
-import parentLogger from "../../../../logger/logger";
-import EventBus from "../../../../EventBus";
+import parentLogger from "@/logger/logger";
+import { EventBus } from "@/EventBus";
 import { mapGetters, mapState } from "vuex";
 import Participant from "./Participant.vue";
 const logger = parentLogger.child({ name: "LifeLine" });
@@ -51,7 +51,7 @@ export default {
       logger.debug(`nextTick after updated for ${this.entity.name}`);
     });
 
-    EventBus.$on("participant_set_top", () =>
+    EventBus.on("participant_set_top", () =>
       // eslint-disable-next-line vue/valid-next-tick
       this.$nextTick(() => this.setTop()),
     );
