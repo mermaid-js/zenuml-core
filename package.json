@@ -100,7 +100,7 @@
     "vite": "^3.2.10",
     "vite-plugin-css-injected-by-js": "^2.2.0",
     "vite-svg-loader": "^4.0.0",
-    "vitest": "^2.0.3"
+    "vitest": "^0.26.1"
   },
   "postcss": {
     "plugins": {
