@@ -11,7 +11,7 @@ vi.stubGlobal(
 );
 
 // Fixed  "document is not defined" error in WidthProviderOnBrowser function
-vi.mock("@/positioning/WidthProviderOnBrowser", () => ({
+vi.mock("./positioning/WidthProviderOnBrowser", () => ({
   default: vi.fn().mockReturnValue(100),
 }));
 
