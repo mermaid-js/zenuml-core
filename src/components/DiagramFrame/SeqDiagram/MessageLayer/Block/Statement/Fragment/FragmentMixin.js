@@ -4,7 +4,7 @@ import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import CollapseButton from "./CollapseButton.vue";
-import EventBus from "../../../../../../../EventBus";
+import { EventBus } from "@/EventBus";
 
 export default {
   computed: {

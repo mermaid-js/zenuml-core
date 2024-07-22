@@ -38,7 +38,7 @@
 <script type="text/babel">
 import { mapState, mapGetters } from "vuex";
 import CollapseButton from "./CollapseButton.vue";
-import EventBus from "../../../../../../../../EventBus";
+import { EventBus } from "@/EventBus";
 export default {
   name: "occurrence",
   props: ["context", "selfCallIndent", "participant", "rtl", "number"],
@@ -116,7 +116,8 @@ export default {
       > .interaction.return:last-of-type
       > .message
   ) {
-  bottom: -17px; /* Move the absolutely positioned return message to the bottom. -17 to offset the padding of Occurrence. */
+  bottom: -17px;
+  /* Move the absolutely positioned return message to the bottom. -17 to offset the padding of Occurrence. */
   /* height: 0; */
 }
 
@@ -127,6 +128,7 @@ export default {
 
 <style>
 .occurrence {
-  margin-top: -2px; /* To offset Message's border-bottom width */
+  margin-top: -2px;
+  /* To offset Message's border-bottom width */
 }
 </style>
