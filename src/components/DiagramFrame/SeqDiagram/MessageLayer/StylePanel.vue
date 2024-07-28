@@ -1,5 +1,6 @@
 <template>
   <FloatVirtual
+    vue-transition
     key="tool"
     @initial="onInitial"
     placement="top"
