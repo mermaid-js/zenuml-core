@@ -56,4 +56,16 @@ describe("Editable Label", function () {
       capture: "viewport",
     });
   });
+
+  it("Creation message", function () {
+    cy.visit("http://127.0.0.1:8080/cy/smoke-editable-label.html");
+    // This line is to make sure the privacy icon is loaded
+    cy.get(".privacy>span>svg", { timeout: 5000 }).should("be.visible");
+
+    // Edit the message
+    const messageLabel = cy.contains("create");
+    messageLabel.dblclick();
+    messageLabel.type("1");
+    cy.contains("create1").should("be.visible");
+  });
 });
