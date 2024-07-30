@@ -9,6 +9,6 @@ describe("Smoke test", function () {
     // get element whose class is message and it has text content 'm'
     const messageLabel = cy.get(".message").contains("m");
     messageLabel.click();
-    cy.get("#style-panel").should("be.visible");
+    cy.get("#style-panel", { timeout: 1000 }).should("be.visible");
   });
 });
