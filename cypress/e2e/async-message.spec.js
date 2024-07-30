@@ -2,9 +2,10 @@
 import "cypress-plugin-snapshots/commands";
 describe("Rendering", function () {
   it("Async message - 1", function () {
+    Cypress.config("pageLoadTimeout", 20000);
     cy.visit("http://127.0.0.1:8080/cy/async-message-1.html");
-    // This is the first e2e test, it will take a while to load the privacy icon
-    cy.get(".privacy>span>svg", { timeout: 20000 }).should("be.visible");
+    // This line is to make sure the privacy icon is loaded
+    cy.get(".privacy>span>svg", { timeout: 5000 }).should("be.visible");
     cy.document().toMatchImageSnapshot({
       imageConfig: { threshold: 0.01 },
       capture: "viewport",
