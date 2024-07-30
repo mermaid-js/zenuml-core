@@ -84,6 +84,18 @@ const editable = computed(() => {
       return false;
   }
 });
+const stylable = computed(() => {
+  if (mode.value === RenderMode.Static) return false;
+  switch (type?.value) {
+    case "sync":
+    case "async":
+    case "return":
+    case "creation":
+      return true;
+    default:
+      return false;
+  }
+});
 const creationRegex = /«([^»]+)»/;
 const labelText = computed(() => {
   switch (type?.value) {
@@ -161,7 +173,7 @@ const fill = computed(() => {
   }
 });
 const onClick = () => {
-  if (!editable.value) return;
+  if (!stylable.value) return;
   store.getters.onMessageClick(context, messageRef.value);
 };
 </script>
