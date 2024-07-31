@@ -41,7 +41,8 @@ jobs:
         uses: cypress-io/github-action@v6.6.1
         with:
           browser: chrome
-          start: pnpm run dev
+          build: pnpm build:site
+          start: pnpm preview
           command: pnpm run cy
           wait-on: http://127.0.0.1:8080
           auto-cancel-after-failures: 2
