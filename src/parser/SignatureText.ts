@@ -29,3 +29,8 @@ CreationContext.prototype.SignatureText = function () {
     params?.parameter()?.length > 0 ? params.getFormattedText() : "create";
   return "«" + text + "»";
 };
+
+// @ts-ignore
+CreationContext.prototype.isParamValid = function () {
+  return this.creationBody().parameters()?.parameter()?.length > 0;
+};

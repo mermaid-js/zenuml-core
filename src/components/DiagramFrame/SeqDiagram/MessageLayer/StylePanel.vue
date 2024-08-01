@@ -1,5 +1,7 @@
 <template>
   <FloatVirtual
+    vue-transition
+    id="style-panel"
     key="tool"
     @initial="onInitial"
     placement="top"

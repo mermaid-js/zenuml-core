@@ -95,7 +95,7 @@ export default {
       return this.distance2(this.from, this.to) < 0;
     },
     signature() {
-      return this.creation.SignatureText();
+      return this.creation.SignatureText(false);
     },
     assignee() {
       function safeCodeGetter(context) {

@@ -15,12 +15,15 @@
     >
       <div class="inline-block static min-h-[1em]">
         <div :style="textStyle" :class="classNames">
-          <MessageLabel
-            v-if="editable"
-            :labelText="content"
-            :labelPosition="labelPosition"
-            :isAsync="isAsync"
-          />
+          <template v-if="editable">
+            <span v-show="type === 'creation'">«</span>
+            <MessageLabel
+              :labelText="labelText"
+              :labelPosition="labelPosition"
+              :isAsync="isAsync"
+            />
+            <span v-show="type === 'creation'">»</span>
+          </template>
           <template v-else>
             {{ content }}
           </template>
@@ -72,9 +75,38 @@ const editable = computed(() => {
     case "async":
     case "return":
       return true;
-    case "creation":
+    case "creation": {
+      // Avoid editing "«create»" label for invalid creations
+      const isValid = context?.value?.isParamValid() > 0;
+      return isValid;
+    }
     default:
       return false;
+  }
+});
+const stylable = computed(() => {
+  if (mode.value === RenderMode.Static) return false;
+  switch (type?.value) {
+    case "sync":
+    case "async":
+    case "return":
+    case "creation":
+      return true;
+    default:
+      return false;
+  }
+});
+const creationRegex = /«([^»]+)»/;
+const labelText = computed(() => {
+  switch (type?.value) {
+    case "creation":
+      // Extract the creation name from the content
+      return content?.value.match(creationRegex)?.[1];
+    case "sync":
+    case "async":
+    case "return":
+    default:
+      return content?.value;
   }
 });
 const labelPosition: ComputedRef<[number, number]> = computed(() => {
@@ -91,6 +123,12 @@ const labelPosition: ComputedRef<[number, number]> = computed(() => {
       {
         const content = context?.value?.content();
         [start, stop] = [content?.start.start, content?.stop.stop];
+      }
+      break;
+    case "creation":
+      {
+        const signature = context?.value?.creationBody()?.parameters();
+        [start, stop] = [signature?.start.start, signature?.stop.stop];
       }
       break;
     case "return":
@@ -135,7 +173,7 @@ const fill = computed(() => {
   }
 });
 const onClick = () => {
-  if (!editable.value) return;
+  if (!stylable.value) return;
   store.getters.onMessageClick(context, messageRef.value);
 };
 </script>
