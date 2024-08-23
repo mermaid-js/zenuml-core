@@ -90,6 +90,31 @@ tunnels for this.
 3. You will be given a command that install a service locally. Run it.
 4. Your localhost:8080 will be available at `air.zenuml.com`.
 
+### Docker
+
+To run the application using Docker, follow these steps:
+
+1. **Build the Docker image**:
+   Navigate to the root directory of the project and run the following command to build the Docker image:
+
+   ```bash
+   docker build -t zenuml-core .
+   ```
+
+2. **Run the Docker container**:
+   After building the image, you can run the Docker container with the following command:
+
+   ```bash
+   docker run -p 8080:8080 zenuml-core
+   ```
+
+   This will start the application and map port 8080 of the container to port 8080 on your local machine.
+
+3. **Access the application**:
+   Open your web browser and navigate to `http://localhost:8080` to access the application.
+
+Make sure Docker is installed and running on your machine before executing these commands.
+
 # Code Structure
 
 This repository contains both the DSL parser and the renderer.
