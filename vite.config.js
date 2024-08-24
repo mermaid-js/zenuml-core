@@ -4,12 +4,12 @@ import createVuePlugin from "@vitejs/plugin-vue";
 import { execSync } from "child_process";
 import svgLoader from "vite-svg-loader";
 
-process.env.VITE_APP_GIT_HASH = execSync("git rev-parse --short HEAD")
-  .toString()
-  .trim();
-process.env.VITE_APP_GIT_BRANCH = execSync("git branch --show-current")
-  .toString()
-  .trim();
+process.env.VITE_APP_GIT_HASH = process.env.DOCKER
+  ? ""
+  : execSync("git rev-parse --short HEAD").toString().trim();
+process.env.VITE_APP_GIT_BRANCH = process.env.DOCKER
+  ? ""
+  : execSync("git branch --show-current").toString().trim();
 
 function getCypressHtmlFiles() {
   const cypressFolder = resolve(__dirname, "cy");

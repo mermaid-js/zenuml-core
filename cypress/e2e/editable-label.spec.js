@@ -63,7 +63,7 @@ describe("Editable Label", function () {
     cy.get(".privacy>span>svg", { timeout: 5000 }).should("be.visible");
 
     // Edit the message
-    const messageLabel = cy.contains("create");
+    const messageLabel = cy.contains("label", "create");
     messageLabel.dblclick();
     messageLabel.type("1");
     cy.contains("create1").should("be.visible");
