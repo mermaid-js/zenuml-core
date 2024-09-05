@@ -115,7 +115,7 @@ export default {
   },
   methods: {
     exception(ctx) {
-      return ctx?.invocation()?.parameters().getText();
+      return ctx?.invocation()?.parameters().getFormattedText();
     },
     blockInCatchBlock(ctx) {
       return ctx?.braceBlock()?.block();

@@ -61,7 +61,7 @@ export default {
     const from = computed(() => props.context.Origin());
     const section = computed(() => props.context.section());
     const braceBlock = computed(() => section.value?.braceBlock());
-    const atom = computed(() => section.value?.atom()?.getText());
+    const atom = computed(() => section.value?.atom()?.getFormattedText());
     const blockInSection = computed(() => braceBlock.value?.block());
 
     const label = computed(
