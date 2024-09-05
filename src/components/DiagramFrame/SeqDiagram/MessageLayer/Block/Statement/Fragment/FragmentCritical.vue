@@ -60,7 +60,7 @@ export default {
     const from = computed(() => props.context.Origin());
     const critical = computed(() => props.context.critical());
     const braceBlock = computed(() => critical.value?.braceBlock());
-    const atom = computed(() => critical.value?.atom()?.getText());
+    const atom = computed(() => critical.value?.atom()?.getFormattedText());
     const blockInCritical = computed(() => braceBlock.value?.block());
 
     const label = computed(() =>
