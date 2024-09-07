@@ -51,7 +51,8 @@ export default function useIntersectionTop() {
   onMounted(() => {
     const { detectorContainer, detectors } = initializeDetectors();
 
-    const scrollHeight = document.documentElement.scrollHeight;
+    const scrollHeight =
+      document.documentElement.scrollHeight - SCROLLBAR_WIDTH;
     const scrollWidth = document.documentElement.scrollWidth - SCROLLBAR_WIDTH;
     detectorContainer.style.height = scrollHeight + "px";
     detectorContainer.style.width = scrollWidth + "px";
