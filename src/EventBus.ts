@@ -6,14 +6,14 @@ class EventEmitter {
     if (!this.events[event]) {
       this.events[event] = new Set<Callback>();
     }
-    console.log(`Event ${event} ${callback} added`);
-    console.log(this.events);
+    console.debug(`Event ${event} ${callback} added`);
+    console.debug(this.events);
     this.events[event].add(callback);
   }
 
   off(event: string, callback: Callback) {
-    console.log(`Event ${event} ${callback} removed`);
-    console.log(this.events);
+    console.debug(`Event ${event} ${callback} removed`);
+    console.debug(this.events);
     this.events[event]?.delete(callback);
   }
 
