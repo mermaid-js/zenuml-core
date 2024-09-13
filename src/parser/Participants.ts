@@ -1,4 +1,3 @@
-import mergeWith from "lodash/mergeWith";
 export enum ParticipantType {
   Actor = 1,
   Boundary,
@@ -16,6 +15,13 @@ export enum ParticipantType {
   Undefined,
 }
 
+export type Position = [number, number];
+
+export type PositionStr<
+  A extends number = number,
+  B extends number = number,
+> = `[${A},${B}]`;
+
 interface ParticipantOptions {
   isStarter?: boolean;
   start?: number;
@@ -29,6 +35,7 @@ interface ParticipantOptions {
   color?: string;
   comment?: string;
   assignee?: string;
+  assigneePosition?: Position;
 }
 
 export class Participant {
@@ -43,9 +50,15 @@ export class Participant {
   private color: string | undefined;
   private comment: string | undefined;
   private assignee: string | undefined;
+  positions: Set<PositionStr> = new Set();
+  assigneePosition: Position | undefined;
 
   constructor(name: string, options: ParticipantOptions) {
     this.name = name;
+    this.mergeOptions(options);
+  }
+
+  public mergeOptions(options: ParticipantOptions) {
     const {
       stereotype,
       width,
@@ -58,16 +71,17 @@ export class Participant {
       comment,
       assignee,
     } = options;
-    this.stereotype = stereotype;
-    this.width = width;
-    this.groupId = groupId;
-    this.explicit = explicit;
-    this.isStarter = isStarter;
-    this.label = label;
-    this.type = type;
-    this.color = color;
-    this.comment = comment;
-    this.assignee = assignee;
+    this.stereotype ??= stereotype;
+    this.width ??= width;
+    this.groupId ??= groupId;
+    this.explicit ??= explicit;
+    this.isStarter ??= isStarter;
+    this.label ??= label;
+    this.type ??= type;
+    this.color ??= color;
+    this.comment ??= comment;
+    this.assignee ??= assignee;
+    this.assigneePosition ??= options.assigneePosition;
   }
 
   public Type(): ParticipantType {
@@ -104,21 +118,17 @@ export class Participant {
   }
 }
 
-export type PositionStr<
-  A extends number = number,
-  B extends number = number,
-> = `[${A},${B}]`;
-
 export class Participants {
   private participants = new Map<string, Participant>();
-  private participantPositions = new Map<string, Set<PositionStr>>();
 
   public Add(name: string, options: ParticipantOptions = {}): void {
-    const participant = new Participant(name, options);
-    this.participants.set(
-      name,
-      mergeWith({}, this.Get(name), participant, (a, b) => a || b),
-    );
+    const participant = this.Get(name);
+    if (!participant) {
+      this.participants.set(name, new Participant(name, options));
+    } else {
+      participant?.mergeOptions(options);
+    }
+
     const { start, end } = options;
     if (start !== undefined && end !== undefined) {
       this.addPosition(name, start, end);
@@ -158,24 +168,31 @@ export class Participants {
   Starter() {
     const first = this.First();
     // const type = first.name === 'User' || first.name === 'Actor' ? 'actor' : undefined;
-    return first.isStarter ? first : undefined;
+    return first?.isStarter ? first : undefined;
   }
 
   Positions() {
-    return this.participantPositions;
+    const positions = new Map<string, Set<PositionStr>>();
+    Array.from(this.participants.values()).forEach((participant) => {
+      positions.set(participant.name, participant.positions);
+    });
+    return positions;
   }
 
   GetPositions(name: string) {
-    return this.participantPositions.get(name);
+    return this.participants.get(name)?.positions;
+  }
+
+  GetAssigneePosition(name: string) {
+    return this.participants.get(name)?.assigneePosition;
   }
 
   private addPosition(name: string, start: number, end: number) {
-    let positions = this.participantPositions.get(name);
-    if (!positions) {
-      positions = new Set();
-      this.participantPositions.set(name, positions);
+    const participant = this.participants.get(name);
+    if (!participant) return;
+    if (!participant.positions) {
+      participant.positions = new Set();
     }
-
-    positions.add(`[${start},${end}]`);
+    participant.positions.add(`[${start},${end}]`);
   }
 }

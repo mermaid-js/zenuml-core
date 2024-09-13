@@ -24,8 +24,8 @@ AsyncMessageContext.prototype.SignatureText = function () {
 // @ts-ignore
 CreationContext.prototype.SignatureText = function () {
   const params = this.creationBody().parameters();
-  // @ts-ignore
   const text =
+    // @ts-ignore
     params?.parameter()?.length > 0 ? params.getFormattedText() : "create";
   return "«" + text + "»";
 };

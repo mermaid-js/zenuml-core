@@ -1,8 +1,8 @@
 import { Participants } from "./Participants";
-
 import antlr4 from "antlr4";
 import { default as sequenceParserListener } from "../generated-parser/sequenceParserListener";
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
+
 const seqParser = sequenceParser;
 const ProgContext = seqParser.ProgContext;
 
@@ -14,7 +14,7 @@ const ToCollector = new sequenceParserListener();
 // Rules:
 // 1. Later declaration win
 // 2. Participant declaration overwrite cannot be overwritten by To or Starter
-let onParticipant = function (ctx) {
+const onParticipant = function (ctx) {
   // if(!(ctx?.name())) return;
   if (isBlind) return;
   const type = ctx?.participantType()?.getFormattedText().replace("@", "");
@@ -60,7 +60,7 @@ let onParticipant = function (ctx) {
 };
 ToCollector.enterParticipant = onParticipant;
 
-let onTo = function (ctx) {
+const onTo = function (ctx) {
   if (isBlind) return;
   let participant = ctx.getFormattedText();
   const participantInstance = participants.Get(participant);
@@ -106,11 +106,13 @@ ToCollector.enterCreation = function (ctx) {
   // Skip adding participant constructor position if label is present
   if (ctor && !participantInstance?.label) {
     const assignee = ctx.Assignee();
+    const assigneePosition = ctx.AssigneePosition();
     participants.Add(participant, {
       isStarter: false,
       start: ctor.start.start,
       end: ctor.stop.stop + 1,
       assignee: assignee,
+      assigneePosition: assigneePosition,
     });
   } else {
     participants.Add(participant, { isStarter: false });
