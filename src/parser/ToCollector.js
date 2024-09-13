@@ -1,8 +1,8 @@
 import { Participants } from "./Participants";
-
 import antlr4 from "antlr4";
 import { default as sequenceParserListener } from "../generated-parser/sequenceParserListener";
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
+
 const seqParser = sequenceParser;
 const ProgContext = seqParser.ProgContext;
 
@@ -14,7 +14,7 @@ const ToCollector = new sequenceParserListener();
 // Rules:
 // 1. Later declaration win
 // 2. Participant declaration overwrite cannot be overwritten by To or Starter
-let onParticipant = function (ctx) {
+const onParticipant = function (ctx) {
   // if(!(ctx?.name())) return;
   if (isBlind) return;
   const type = ctx?.participantType()?.getFormattedText().replace("@", "");
@@ -46,8 +46,6 @@ let onParticipant = function (ctx) {
 
   participants.Add(participant, {
     isStarter: false,
-    start,
-    end,
     type,
     stereotype,
     width,
@@ -56,11 +54,12 @@ let onParticipant = function (ctx) {
     explicit,
     color,
     comment,
+    position: [start, end],
   });
 };
 ToCollector.enterParticipant = onParticipant;
 
-let onTo = function (ctx) {
+const onTo = function (ctx) {
   if (isBlind) return;
   let participant = ctx.getFormattedText();
   const participantInstance = participants.Get(participant);
@@ -71,17 +70,22 @@ let onTo = function (ctx) {
   } else if (participantInstance?.assignee) {
     // If the participant has an assignee, calculate the position of the ctor and store it only.
     // Let's say the participant name is `"${assignee}:${type}"`, we need to get the position of ${type}
+    // e.g. ret = new A() "ret:A".method()
     const start = ctx.start.start + participantInstance.assignee.length + 2;
+    const position = [start, ctx.stop.stop];
+    const assigneePosition = [
+      ctx.start.start + 1,
+      ctx.start.start + participantInstance.assignee.length + 1,
+    ];
     participants.Add(participant, {
       isStarter: false,
-      start: start,
-      end: ctx.stop.stop,
+      position: position,
+      assigneePosition: assigneePosition,
     });
   } else {
     participants.Add(participant, {
       isStarter: false,
-      start: ctx.start.start,
-      end: ctx.stop.stop + 1,
+      position: [ctx.start.start, ctx.stop.stop + 1],
     });
   }
 };
@@ -93,8 +97,7 @@ ToCollector.enterStarter = function (ctx) {
   let participant = ctx.getFormattedText();
   participants.Add(participant, {
     isStarter: true,
-    start: ctx.start.start,
-    end: ctx.stop.stop + 1,
+    position: [ctx.start.start, ctx.stop.stop + 1],
   });
 };
 
@@ -106,14 +109,17 @@ ToCollector.enterCreation = function (ctx) {
   // Skip adding participant constructor position if label is present
   if (ctor && !participantInstance?.label) {
     const assignee = ctx.Assignee();
+    const assigneePosition = ctx.AssigneePosition();
     participants.Add(participant, {
       isStarter: false,
-      start: ctor.start.start,
-      end: ctor.stop.stop + 1,
+      position: [ctor.start.start, ctor.stop.stop + 1],
       assignee: assignee,
+      assigneePosition: assigneePosition,
     });
   } else {
-    participants.Add(participant, { isStarter: false });
+    participants.Add(participant, {
+      isStarter: false,
+    });
   }
 };
 
