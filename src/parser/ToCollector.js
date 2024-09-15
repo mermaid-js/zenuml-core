@@ -46,8 +46,6 @@ const onParticipant = function (ctx) {
 
   participants.Add(participant, {
     isStarter: false,
-    start,
-    end,
     type,
     stereotype,
     width,
@@ -56,6 +54,7 @@ const onParticipant = function (ctx) {
     explicit,
     color,
     comment,
+    position: [start, end],
   });
 };
 ToCollector.enterParticipant = onParticipant;
@@ -71,17 +70,22 @@ const onTo = function (ctx) {
   } else if (participantInstance?.assignee) {
     // If the participant has an assignee, calculate the position of the ctor and store it only.
     // Let's say the participant name is `"${assignee}:${type}"`, we need to get the position of ${type}
+    // e.g. ret = new A() "ret:A".method()
     const start = ctx.start.start + participantInstance.assignee.length + 2;
+    const position = [start, ctx.stop.stop];
+    const assigneePosition = [
+      ctx.start.start + 1,
+      ctx.start.start + participantInstance.assignee.length + 1,
+    ];
     participants.Add(participant, {
       isStarter: false,
-      start: start,
-      end: ctx.stop.stop,
+      position: position,
+      assigneePosition: assigneePosition,
     });
   } else {
     participants.Add(participant, {
       isStarter: false,
-      start: ctx.start.start,
-      end: ctx.stop.stop + 1,
+      position: [ctx.start.start, ctx.stop.stop + 1],
     });
   }
 };
@@ -93,8 +97,7 @@ ToCollector.enterStarter = function (ctx) {
   let participant = ctx.getFormattedText();
   participants.Add(participant, {
     isStarter: true,
-    start: ctx.start.start,
-    end: ctx.stop.stop + 1,
+    position: [ctx.start.start, ctx.stop.stop + 1],
   });
 };
 
@@ -109,13 +112,14 @@ ToCollector.enterCreation = function (ctx) {
     const assigneePosition = ctx.AssigneePosition();
     participants.Add(participant, {
       isStarter: false,
-      start: ctor.start.start,
-      end: ctor.stop.stop + 1,
+      position: [ctor.start.start, ctor.stop.stop + 1],
       assignee: assignee,
       assigneePosition: assigneePosition,
     });
   } else {
-    participants.Add(participant, { isStarter: false });
+    participants.Add(participant, {
+      isStarter: false,
+    });
   }
 };
 

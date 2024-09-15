@@ -17,15 +17,8 @@ export enum ParticipantType {
 
 export type Position = [number, number];
 
-export type PositionStr<
-  A extends number = number,
-  B extends number = number,
-> = `[${A},${B}]`;
-
 interface ParticipantOptions {
   isStarter?: boolean;
-  start?: number;
-  end?: number;
   stereotype?: string;
   width?: number;
   groupId?: number | string;
@@ -35,8 +28,24 @@ interface ParticipantOptions {
   color?: string;
   comment?: string;
   assignee?: string;
+  position?: Position;
   assigneePosition?: Position;
 }
+
+export const blankParticipant = {
+  color: undefined,
+  comment: undefined,
+  explicit: undefined,
+  groupId: undefined,
+  isStarter: undefined,
+  label: undefined,
+  stereotype: undefined,
+  type: undefined,
+  width: undefined,
+  assignee: undefined,
+  positions: new Set(),
+  assigneePositions: new Set(),
+};
 
 export class Participant {
   name: string;
@@ -50,8 +59,8 @@ export class Participant {
   private color: string | undefined;
   private comment: string | undefined;
   private assignee: string | undefined;
-  positions: Set<PositionStr> = new Set();
-  assigneePosition: Position | undefined;
+  positions: Set<Position> = new Set();
+  assigneePositions: Set<Position> = new Set();
 
   constructor(name: string, options: ParticipantOptions) {
     this.name = name;
@@ -71,17 +80,16 @@ export class Participant {
       comment,
       assignee,
     } = options;
-    this.stereotype ??= stereotype;
-    this.width ??= width;
-    this.groupId ??= groupId;
-    this.explicit ??= explicit;
-    this.isStarter ??= isStarter;
-    this.label ??= label;
-    this.type ??= type;
-    this.color ??= color;
-    this.comment ??= comment;
-    this.assignee ??= assignee;
-    this.assigneePosition ??= options.assigneePosition;
+    this.stereotype ||= stereotype;
+    this.width ||= width;
+    this.groupId ||= groupId;
+    this.explicit ||= explicit;
+    this.isStarter ||= isStarter;
+    this.label ||= label;
+    this.type ||= type;
+    this.color ||= color;
+    this.comment ||= comment;
+    this.assignee ||= assignee;
   }
 
   public Type(): ParticipantType {
@@ -116,22 +124,49 @@ export class Participant {
     }
     return ParticipantType.Undefined;
   }
+
+  public AddPosition(position: Position) {
+    this.positions.add(position);
+  }
+
+  public ToValue() {
+    return {
+      name: this.name,
+      stereotype: this.stereotype,
+      width: this.width,
+      groupId: this.groupId,
+      explicit: this.explicit,
+      isStarter: this.isStarter,
+      label: this.label,
+      type: this.type,
+      color: this.color,
+      comment: this.comment,
+      assignee: this.assignee,
+      positions: this.positions,
+      assigneePositions: this.assigneePositions,
+    };
+  }
 }
 
 export class Participants {
   private participants = new Map<string, Participant>();
 
   public Add(name: string, options: ParticipantOptions = {}): void {
-    const participant = this.Get(name);
+    let participant = this.Get(name);
     if (!participant) {
-      this.participants.set(name, new Participant(name, options));
+      participant = new Participant(name, options);
+      this.participants.set(name, participant);
     } else {
       participant?.mergeOptions(options);
     }
 
-    const { start, end } = options;
-    if (start !== undefined && end !== undefined) {
-      this.addPosition(name, start, end);
+    // Add positions
+    const { position, assigneePosition } = options;
+    if (position) {
+      participant.AddPosition(position);
+    }
+    if (assigneePosition) {
+      participant.assigneePositions.add(assigneePosition);
     }
   }
 
@@ -171,28 +206,11 @@ export class Participants {
     return first?.isStarter ? first : undefined;
   }
 
-  Positions() {
-    const positions = new Map<string, Set<PositionStr>>();
-    Array.from(this.participants.values()).forEach((participant) => {
-      positions.set(participant.name, participant.positions);
-    });
-    return positions;
-  }
-
   GetPositions(name: string) {
     return this.participants.get(name)?.positions;
   }
 
-  GetAssigneePosition(name: string) {
-    return this.participants.get(name)?.assigneePosition;
-  }
-
-  private addPosition(name: string, start: number, end: number) {
-    const participant = this.participants.get(name);
-    if (!participant) return;
-    if (!participant.positions) {
-      participant.positions = new Set();
-    }
-    participant.positions.add(`[${start},${end}]`);
+  GetAssigneePositions(name: string) {
+    return this.participants.get(name)?.assigneePositions;
   }
 }

@@ -1,15 +1,13 @@
-import { Participants } from "../parser/Participants";
+import { blankParticipant, Participants } from "../parser/Participants";
 
 describe("Participants", () => {
   test("Get implicitly declared participants", () => {
     const participants = new Participants();
     participants.Add("A");
-    expect(participants.ImplicitArray()).toEqual([
+    expect(participants.ImplicitArray().map((p) => p.ToValue())).toEqual([
       {
+        ...blankParticipant,
         name: "A",
-        isStarter: undefined,
-        stereotype: undefined,
-        width: undefined,
       },
     ]);
     expect(participants.Starter()).toBeUndefined();
@@ -21,16 +19,12 @@ describe("Participants", () => {
     participants.Add("A");
     expect(participants.ImplicitArray()).toEqual([
       {
+        ...blankParticipant,
         name: "B",
-        isStarter: undefined,
-        stereotype: undefined,
-        width: undefined,
       },
       {
+        ...blankParticipant,
         name: "A",
-        isStarter: undefined,
-        stereotype: undefined,
-        width: undefined,
       },
     ]);
     expect(participants.Starter()).toBeUndefined();
@@ -40,24 +34,22 @@ describe("Participants", () => {
     const participants = new Participants();
     participants.Add("A", { isStarter: true });
     expect(participants.Starter()).toEqual({
+      ...blankParticipant,
       name: "A",
       isStarter: true,
-      stereotype: undefined,
-      width: undefined,
     });
     participants.Add("A", {
+      ...blankParticipant,
       isStarter: false,
-      start: 1,
-      end: 2,
+      position: [1, 2],
       explicit: true,
     });
     expect(participants.Starter()).toEqual({
+      ...blankParticipant,
       name: "A",
       isStarter: true,
-      stereotype: undefined,
-      width: undefined,
       explicit: true,
+      positions: new Set([[1, 2]]),
     });
-    expect(participants.GetPositions("A")?.has("[1,2]"));
   });
 });

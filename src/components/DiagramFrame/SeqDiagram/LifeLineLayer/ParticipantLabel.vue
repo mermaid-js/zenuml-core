@@ -25,7 +25,9 @@
         'py-1 cursor-text': participantLabelHandler.editing,
       }"
       :contenteditable="
-        participantLabelHandler.editing && mode === RenderMode.Dynamic
+        participantLabelHandler.editing &&
+        mode === RenderMode.Dynamic &&
+        InvalidText.indexOf(labelText) === -1
       "
       @dblclick="participantLabelHandler.handleDblClick"
       @blur="participantLabelHandler.handleBlur"
@@ -43,14 +45,16 @@ import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
 import { RenderMode } from "@/store/Store";
 import { Position } from "@/parser/Participants";
 
+const InvalidText = ["Missing Constructor"];
+
 const props = defineProps<{
   labelText: string;
   labelPositions?: Array<[number, number]>;
   assignee?: string;
-  assigneePosition?: [number, number];
+  assigneePositions?: Array<[number, number]>;
 }>();
 
-const { labelText, labelPositions = [], assigneePosition = [-1, -1] } = props;
+const { labelText, labelPositions = [], assigneePositions = [] } = props;
 const store = useStore();
 const mode = computed(() => store.state.mode);
 const code = computed(() => store.getters.code);
@@ -106,6 +110,6 @@ const participantLabelHandler = useEditLabel(
   replaceLabelTextWithaPositions(labelPositions),
 );
 const assigneeLabelHandler = useEditLabel(
-  replaceLabelTextWithaPositions([assigneePosition]),
+  replaceLabelTextWithaPositions(assigneePositions),
 );
 </script>

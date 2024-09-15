@@ -32,7 +32,7 @@
         :labelText="labelText"
         :labelPositions="labelPositions"
         :assignee="entity.assignee"
-        :assigneePosition="assigneePosition"
+        :assigneePositions="assigneePositions"
       />
     </div>
   </div>
@@ -68,12 +68,17 @@ export default {
       const positions = store.getters.participants.GetPositions(
         props.entity.name,
       );
-      // Sort the label positions in descending order to avoid index shifting
-      const positionArray = Array.from(positions || []).map(JSON.parse);
+      // Sort the label positions in descending order to avoid index shifting when updating code
+      const positionArray = Array.from(positions ?? []);
       return positionArray.sort((a, b) => b[0] - a[0]);
     });
-    const assigneePosition = computed(() => {
-      return store.getters.participants.GetAssigneePosition(props.entity.name);
+    const assigneePositions = computed(() => {
+      // Sort the label positions in descending order to avoid index shifting when updating code
+      const assigneePositions = store.getters.participants.GetAssigneePositions(
+        props.entity.name,
+      );
+      const positionArray = Array.from(assigneePositions ?? []);
+      return positionArray.sort((a, b) => b[0] - a[0]);
     });
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();
@@ -95,7 +100,7 @@ export default {
         participantOffsetTop
       );
     });
-    return { translate, participant, labelPositions, assigneePosition };
+    return { translate, participant, labelPositions, assigneePositions };
   },
   props: {
     entity: {
@@ -106,10 +111,6 @@ export default {
     offsetTop2: {
       type: Number,
       default: 0,
-    },
-    context: {
-      type: Object,
-      required: false,
     },
   },
   data() {
