@@ -27,7 +27,7 @@
       :contenteditable="
         participantLabelHandler.editing &&
         mode === RenderMode.Dynamic &&
-        InvalidText.indexOf(labelText) === -1
+        UneditableText.indexOf(labelText) === -1
       "
       @dblclick="participantLabelHandler.handleDblClick"
       @blur="participantLabelHandler.handleBlur"
@@ -45,7 +45,7 @@ import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
 import { RenderMode } from "@/store/Store";
 import { Position } from "@/parser/Participants";
 
-const InvalidText = ["Missing Constructor"];
+const UneditableText = ["Missing Constructor", "ZenUML"];
 
 const props = defineProps<{
   labelText: string;
