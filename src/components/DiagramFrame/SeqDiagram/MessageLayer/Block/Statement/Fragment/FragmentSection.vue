@@ -38,7 +38,7 @@
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInSection"
           :selfCallIndent="selfCallIndent"
-          :number="`number`"
+          :number="number"
         ></block>
       </div>
     </div>
