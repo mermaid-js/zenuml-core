@@ -9,14 +9,6 @@ CreationContext.prototype.Assignee = function () {
   return this.creationBody()?.assignment()?.assignee()?.getFormattedText();
 };
 
-CreationContext.prototype.AssigneePosition = function () {
-  const assignee = this.creationBody()?.assignment()?.assignee();
-  if (!assignee) {
-    return undefined;
-  }
-  return [assignee.start.start, assignee.stop.stop + 1];
-};
-
 CreationContext.prototype.Constructor = function () {
   return this.creationBody()?.construct()?.getFormattedText();
 };

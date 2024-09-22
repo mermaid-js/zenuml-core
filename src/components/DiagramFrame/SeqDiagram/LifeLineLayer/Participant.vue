@@ -32,7 +32,6 @@
         :labelText="labelText"
         :labelPositions="labelPositions"
         :assignee="entity.assignee"
-        :assigneePositions="assigneePositions"
       />
     </div>
   </div>
@@ -64,22 +63,9 @@ export default {
       return { translate: 0, participant };
     }
 
-    const labelPositions = computed(() => {
-      const positions = store.getters.participants.GetPositions(
-        props.entity.name,
-      );
-      // Sort the label positions in descending order to avoid index shifting when updating code
-      const positionArray = Array.from(positions ?? []);
-      return positionArray.sort((a, b) => b[0] - a[0]);
-    });
-    const assigneePositions = computed(() => {
-      // Sort the label positions in descending order to avoid index shifting when updating code
-      const assigneePositions = store.getters.participants.GetAssigneePositions(
-        props.entity.name,
-      );
-      const positionArray = Array.from(assigneePositions ?? []);
-      return positionArray.sort((a, b) => b[0] - a[0]);
-    });
+    const labelPositions = computed(() =>
+      store.getters.participants.Positions().get(props.entity.name),
+    );
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();
     const translate = computed(() => {
@@ -100,7 +86,7 @@ export default {
         participantOffsetTop
       );
     });
-    return { translate, participant, labelPositions, assigneePositions };
+    return { translate, participant, labelPositions };
   },
   props: {
     entity: {

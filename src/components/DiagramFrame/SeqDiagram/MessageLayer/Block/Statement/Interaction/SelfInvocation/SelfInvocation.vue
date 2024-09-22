@@ -61,7 +61,6 @@ const messageRef = ref();
 const labelPosition: ComputedRef<[number, number]> = computed(() => {
   // do not use .signature(). Multiple signatures are allowed, e.g. method().method1().method2()
   const func = context?.value.messageBody().func();
-  if (!func) return [-1, -1];
   return [func.start.start, func.stop.stop];
 });
 
