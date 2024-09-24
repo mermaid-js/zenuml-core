@@ -49,7 +49,7 @@
 import { computed } from "vue";
 import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
-import { capitalize } from "lodash";
+import capitalize from "lodash/capitalize";
 
 export default {
   name: "fragment-section",
@@ -68,9 +68,6 @@ export default {
       () => atom.value ?? capitalize(section.value.SECTION()),
     );
 
-    console.log({
-      sectionCtx: props.context,
-    });
     return {
       numbering,
       from,

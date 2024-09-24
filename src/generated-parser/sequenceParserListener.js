@@ -203,6 +203,15 @@ export default class sequenceParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by sequenceParser#ref.
+	enterRef(ctx) {
+	}
+
+	// Exit a parse tree produced by sequenceParser#ref.
+	exitRef(ctx) {
+	}
+
+
 	// Enter a parse tree produced by sequenceParser#creationBody.
 	enterCreationBody(ctx) {
 	}

@@ -80,6 +80,7 @@ GROUP:      'group';
 OPT:        'opt';
 CRITICAL:   'critical';
 SECTION:    'section' | 'frame';
+REF:        'ref';
 AS:         'as';
 TRY:        'try';
 CATCH:      'catch';

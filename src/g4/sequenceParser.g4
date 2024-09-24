@@ -99,6 +99,7 @@ stat
  | opt
  | critical
  | section
+ | ref
  | loop
  | creation
  | message
@@ -133,6 +134,10 @@ section
 
 creation
  : creationBody (SCOL | braceBlock)?
+ ;
+
+ref
+ : REF OPAR ID COMMA participant (COMMA participant)+ CPAR SCOL?
  ;
 
 // [Perf tuning] By removing alternative rules

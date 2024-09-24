@@ -24,6 +24,7 @@ import FragmentLoop from "./Fragment/FragmentLoop.vue";
 import FragmentOpt from "./Fragment/FragmentOpt.vue";
 import FragmentSection from "./Fragment/FragmentSection.vue";
 import FragmentCritical from "./Fragment/FragmentCritical.vue";
+import FragmentRef from "./Fragment/FragmentRef.vue";
 import FragmentTryCatchFinally from "./Fragment/FragmentTryCatchFinally.vue";
 import Return from "./Return/Return.vue";
 import Divider from "./Divider/Divider.vue";
@@ -56,6 +57,7 @@ export default {
         section: "FragmentSection",
         critical: "FragmentCritical",
         tcf: "FragmentTryCatchFinally",
+        ref: "FragmentRef",
         creation: "Creation",
         message: "Interaction",
         asyncMessage: "InteractionAsync",
@@ -78,6 +80,7 @@ export default {
     FragmentOpt,
     FragmentSection,
     FragmentCritical,
+    FragmentRef,
     FragmentTryCatchFinally,
     FragmentLoop,
     Divider,

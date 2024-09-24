@@ -18,7 +18,7 @@
           <template v-if="editable">
             <span v-show="type === 'creation'">«</span>
             <MessageLabel
-              :labelText="labelText"
+              :labelText="labelText ?? ''"
               :labelPosition="labelPosition"
               :isAsync="isAsync"
             />
