@@ -101,12 +101,12 @@ const labelText = computed(() => {
   switch (type?.value) {
     case "creation":
       // Extract the creation name from the content
-      return content?.value.match(creationRegex)?.[1];
+      return content?.value.match(creationRegex)?.[1] || "";
     case "sync":
     case "async":
     case "return":
     default:
-      return content?.value;
+      return content?.value || "";
   }
 });
 const labelPosition: ComputedRef<[number, number]> = computed(() => {
@@ -144,6 +144,9 @@ const labelPosition: ComputedRef<[number, number]> = computed(() => {
           [start, stop] = [ret?.start.start, ret?.stop.stop];
         } else if (context?.value instanceof sequenceParser.ContentContext) {
           [start, stop] = [context.value.start.start, context.value.stop.stop];
+        } else if (context?.value instanceof sequenceParser.AssignmentContext) {
+          const assignee = context.value.assignee();
+          [start, stop] = [assignee.start.start, assignee.stop.stop];
         }
       }
       break;
