@@ -1,4 +1,3 @@
-import mergeWith from "lodash/mergeWith";
 export enum ParticipantType {
   Actor = 1,
   Boundary,
@@ -16,10 +15,10 @@ export enum ParticipantType {
   Undefined,
 }
 
+export type Position = [number, number];
+
 interface ParticipantOptions {
   isStarter?: boolean;
-  start?: number;
-  end?: number;
   stereotype?: string;
   width?: number;
   groupId?: number | string;
@@ -29,7 +28,24 @@ interface ParticipantOptions {
   color?: string;
   comment?: string;
   assignee?: string;
+  position?: Position;
+  assigneePosition?: Position;
 }
+
+export const blankParticipant = {
+  color: undefined,
+  comment: undefined,
+  explicit: undefined,
+  groupId: undefined,
+  isStarter: undefined,
+  label: undefined,
+  stereotype: undefined,
+  type: undefined,
+  width: undefined,
+  assignee: undefined,
+  positions: new Set(),
+  assigneePositions: new Set(),
+};
 
 export class Participant {
   name: string;
@@ -43,9 +59,15 @@ export class Participant {
   private color: string | undefined;
   private comment: string | undefined;
   private assignee: string | undefined;
+  positions: Set<Position> = new Set();
+  assigneePositions: Set<Position> = new Set();
 
   constructor(name: string, options: ParticipantOptions) {
     this.name = name;
+    this.mergeOptions(options);
+  }
+
+  public mergeOptions(options: ParticipantOptions) {
     const {
       stereotype,
       width,
@@ -58,16 +80,16 @@ export class Participant {
       comment,
       assignee,
     } = options;
-    this.stereotype = stereotype;
-    this.width = width;
-    this.groupId = groupId;
-    this.explicit = explicit;
-    this.isStarter = isStarter;
-    this.label = label;
-    this.type = type;
-    this.color = color;
-    this.comment = comment;
-    this.assignee = assignee;
+    this.stereotype ||= stereotype;
+    this.width ||= width;
+    this.groupId ||= groupId;
+    this.explicit ||= explicit;
+    this.isStarter ||= isStarter;
+    this.label ||= label;
+    this.type ||= type;
+    this.color ||= color;
+    this.comment ||= comment;
+    this.assignee ||= assignee;
   }
 
   public Type(): ParticipantType {
@@ -102,26 +124,49 @@ export class Participant {
     }
     return ParticipantType.Undefined;
   }
-}
 
-export type PositionStr<
-  A extends number = number,
-  B extends number = number,
-> = `[${A},${B}]`;
+  public AddPosition(position: Position) {
+    this.positions.add(position);
+  }
+
+  public ToValue() {
+    return {
+      name: this.name,
+      stereotype: this.stereotype,
+      width: this.width,
+      groupId: this.groupId,
+      explicit: this.explicit,
+      isStarter: this.isStarter,
+      label: this.label,
+      type: this.type,
+      color: this.color,
+      comment: this.comment,
+      assignee: this.assignee,
+      positions: this.positions,
+      assigneePositions: this.assigneePositions,
+    };
+  }
+}
 
 export class Participants {
   private participants = new Map<string, Participant>();
-  private participantPositions = new Map<string, Set<PositionStr>>();
 
   public Add(name: string, options: ParticipantOptions = {}): void {
-    const participant = new Participant(name, options);
-    this.participants.set(
-      name,
-      mergeWith({}, this.Get(name), participant, (a, b) => a || b),
-    );
-    const { start, end } = options;
-    if (start !== undefined && end !== undefined) {
-      this.addPosition(name, start, end);
+    let participant = this.Get(name);
+    if (!participant) {
+      participant = new Participant(name, options);
+      this.participants.set(name, participant);
+    } else {
+      participant?.mergeOptions(options);
+    }
+
+    // Add positions
+    const { position, assigneePosition } = options;
+    if (position) {
+      participant.AddPosition(position);
+    }
+    if (assigneePosition) {
+      participant.assigneePositions.add(assigneePosition);
     }
   }
 
@@ -158,24 +203,14 @@ export class Participants {
   Starter() {
     const first = this.First();
     // const type = first.name === 'User' || first.name === 'Actor' ? 'actor' : undefined;
-    return first.isStarter ? first : undefined;
-  }
-
-  Positions() {
-    return this.participantPositions;
+    return first?.isStarter ? first : undefined;
   }
 
   GetPositions(name: string) {
-    return this.participantPositions.get(name);
+    return this.participants.get(name)?.positions;
   }
 
-  private addPosition(name: string, start: number, end: number) {
-    let positions = this.participantPositions.get(name);
-    if (!positions) {
-      positions = new Set();
-      this.participantPositions.set(name, positions);
-    }
-
-    positions.add(`[${start},${end}]`);
+  GetAssigneePositions(name: string) {
+    return this.participants.get(name)?.assigneePositions;
   }
 }

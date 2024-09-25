@@ -28,7 +28,7 @@
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
       :context="asyncMessage"
-      :number="`${number}`"
+      :number="number"
     />
     <message
       v-else

@@ -29,7 +29,7 @@
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
       :context="message"
-      :number="`${number}`"
+      :number="number"
     />
     <message
       v-else
@@ -47,7 +47,7 @@
       :participant="to"
       :selfCallIndent="passOnOffset"
       :rtl="rightToLeft"
-      :number="`${number}`"
+      :number="number"
     />
     <message
       v-if="assignee && !isSelf"
