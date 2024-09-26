@@ -288,3 +288,66 @@ describe("Invalid input", () => {
     expect(participants.First().name).toBe("Missing `Participant`");
   });
 });
+
+describe("enterRef", () => {
+  test("should add participants from ref statement with multiple participants", () => {
+    let participants = getParticipants("ref(someId, A, B)", false);
+    expect(participants.Size()).toBe(2);
+    expect(participants.Get("A")).toBeDefined();
+    expect(participants.Get("B")).toBeDefined();
+    expect(participants.Get("someId")).toBeUndefined();
+  });
+
+  test("should not add any participants for empty ref", () => {
+    let participants = getParticipants("ref()", false);
+    expect(participants.Size()).toBe(0);
+  });
+
+  test("should not add any participants for ref with only ID", () => {
+    let participants = getParticipants("ref(someId)", false);
+    expect(participants.Size()).toBe(0);
+  });
+
+  test("should add one participant for ref with ID and one participant", () => {
+    let participants = getParticipants("ref(someId, A,)", false);
+    expect(participants.Size()).toBe(1);
+    expect(participants.Get("A")).toBeDefined();
+  });
+
+  test("should set correct positions for participants in ref", () => {
+    let participants = getParticipants("ref(someId, A, B)", false);
+    expect(participants.GetPositions("A")).toEqual(new Set(["[12,13]"]));
+    expect(participants.GetPositions("B")).toEqual(new Set(["[15,16]"]));
+  });
+
+  test("should not affect existing participants", () => {
+    let participants = getParticipants("A\nB\nref(someId, B, C)", false);
+    expect(participants.Size()).toBe(3);
+    expect(participants.Get("A")).toBeDefined();
+    expect(participants.Get("B")).toBeDefined();
+    expect(participants.Get("C")).toBeDefined();
+    expect(participants.GetPositions("B")).toEqual(
+      new Set(["[2,3]", "[16,17]"]),
+    );
+  });
+
+  test("should handle multiple ref statements", () => {
+    let participants = getParticipants("ref(id1, A, B)\nref(id2, C, D)", false);
+    expect(participants.Size()).toBe(4);
+    expect(participants.Get("A")).toBeDefined();
+    expect(participants.Get("B")).toBeDefined();
+    expect(participants.Get("C")).toBeDefined();
+    expect(participants.Get("D")).toBeDefined();
+  });
+
+  test("should not add ID as participant if it matches an existing participant", () => {
+    let participants = getParticipants("A\nref(A, B, C)", false);
+    expect(participants.Size()).toBe(3);
+    expect(participants.Get("A")).toBeDefined();
+    expect(participants.Get("B")).toBeDefined();
+    expect(participants.Get("C")).toBeDefined();
+    expect(participants.GetPositions("A")).toEqual(new Set(["[0,1]"]));
+    expect(participants.GetPositions("B")).toEqual(new Set(["[9,10]"]));
+    expect(participants.GetPositions("C")).toEqual(new Set(["[13,14]"]));
+  });
+});

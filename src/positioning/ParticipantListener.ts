@@ -93,6 +93,17 @@ export class ParticipantListener extends sequenceParserListener {
     this.implicitParticipants.push(participant);
   }
 
+  enterRef(ctx: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_id, ...newParticipants] = ctx.ID();
+    newParticipants.forEach((participant: any) => {
+      this.implicitParticipants.push({
+        name: participant.getText(),
+        left: "",
+      });
+    });
+  }
+
   result(): IParticipantModel[] {
     let result = [...this.explicitParticipants, ...this.implicitParticipants];
     if (!this._isStarterExplicitlyPositioned()) {

@@ -1,11 +1,12 @@
 <template>
   <div
-    class="fragment bg-skin-frame border-skin-fragment relative rounded py-6 px-6"
+    class="fragment bg-skin-frame border-skin-fragment relative rounded min-w-[140px] w-max py-4 px-2 flex justify-center items-center"
+    :class="fragmentClass"
     :style="fragmentStyle"
   >
     <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
     <div
-      class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative top-0 left-0"
+      class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t absolute top-0 left-0"
     >
       <div
         v-if="numbering"
@@ -13,7 +14,7 @@
       >
         {{ number }}
       </div>
-      <div class="text-skin-fragment absolute top-0 left-0 w-[51px] h-[31px]">
+      <div class="text-skin-fragment w-12 absolute -top-[1px] -left-[1px]">
         <svg viewBox="0 0 51 31" xmlns="http://www.w3.org/2000/svg">
           <polygon
             points="0,0 50.5,0 50.5,20.5 40.5,30.5 0,30.5"
@@ -36,7 +37,12 @@
         </svg>
       </div>
     </div>
-    <label class="text-skin-title font-bold">{{ label }}</label>
+    <!-- <label class="text-skin-title">{{ label }}</label> -->
+    <MessageLabel
+      class="text-skin-title"
+      :labelText="idLabel"
+      :labelPosition="idPosition"
+    />
   </div>
 </template>
 
@@ -44,22 +50,37 @@
 import { computed } from "vue";
 import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
+import MessageLabel from "../../../MessageLabel.vue";
 
 export default {
   name: "fragment-section",
   props: ["context", "comment", "selfCallIndent", "commentObj", "number"],
+  components: {
+    MessageLabel,
+  },
   mixins: [fragment],
   setup(props) {
     const store = useStore();
     const numbering = computed(() => store.state.numbering);
     const from = computed(() => props.context.Origin());
     const ref = computed(() => props.context.ref());
-    const label = computed(() => ref.value.ID().getText());
+    const params = computed(() => ref.value.ID());
+    const id = computed(() => params.value[0]);
+    const idLabel = computed(() => id?.value.getText() ?? "");
+    const idPosition = computed(() => [
+      id.value.symbol.start,
+      id.value.symbol.stop,
+    ]);
+    const fragmentClass = computed(() => ({
+      "pt-7": idLabel.value.length > 7 && params.value.length === 1, // lower the ref label to avoid collision with the header
+    }));
 
     return {
       numbering,
       from,
-      label,
+      idLabel,
+      idPosition,
+      fragmentClass,
     };
   },
 };

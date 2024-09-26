@@ -123,6 +123,18 @@ ToCollector.enterCreation = function (ctx) {
   }
 };
 
+ToCollector.enterRef = function (ctx) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_id, ...newParticipants] = ctx.ID();
+  newParticipants.forEach((participant) => {
+    participants.Add(participant.getText(), {
+      isStarter: false,
+      start: participant.symbol.start,
+      end: participant.symbol.stop + 1,
+    });
+  });
+};
+
 ToCollector.enterParameters = function () {
   isBlind = true;
 };
