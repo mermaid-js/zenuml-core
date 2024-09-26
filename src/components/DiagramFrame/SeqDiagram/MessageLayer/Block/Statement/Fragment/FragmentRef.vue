@@ -65,11 +65,11 @@ export default {
     const from = computed(() => props.context.Origin());
     const ref = computed(() => props.context.ref());
     const params = computed(() => ref.value.ID());
-    const id = computed(() => params.value[0]);
-    const idLabel = computed(() => id?.value.getText() ?? "");
+    const id = computed(() => params.value?.[0]);
+    const idLabel = computed(() => id.value?.getText() ?? "");
     const idPosition = computed(() => [
-      id.value.symbol.start,
-      id.value.symbol.stop,
+      id.value?.symbol.start,
+      id.value?.symbol.stop,
     ]);
     const fragmentClass = computed(() => ({
       "pt-7": idLabel.value.length > 7 && params.value.length === 1, // lower the ref label to avoid collision with the header

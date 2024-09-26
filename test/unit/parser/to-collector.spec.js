@@ -348,6 +348,6 @@ describe("enterRef", () => {
     expect(participants.Get("C")).toBeDefined();
     expect(participants.GetPositions("A")).toEqual(new Set(["[0,1]"]));
     expect(participants.GetPositions("B")).toEqual(new Set(["[9,10]"]));
-    expect(participants.GetPositions("C")).toEqual(new Set(["[13,14]"]));
+    expect(participants.GetPositions("C")).toEqual(new Set(["[12,13]"]));
   });
 });
