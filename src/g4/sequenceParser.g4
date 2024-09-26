@@ -137,7 +137,7 @@ creation
  ;
 
 ref
- : REF OPAR ID COMMA participant (COMMA participant)+ CPAR SCOL?
+ : REF OPAR (ID (COMMA ID*)*) CPAR SCOL?
  ;
 
 // [Perf tuning] By removing alternative rules
