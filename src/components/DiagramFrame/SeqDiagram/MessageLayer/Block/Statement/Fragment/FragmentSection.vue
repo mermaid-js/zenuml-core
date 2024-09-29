@@ -4,7 +4,11 @@
     :style="fragmentStyle"
   >
     <div class="segment">
-      <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
+      <comment
+        v-if="commentObj.text"
+        :comment="comment"
+        :commentObj="commentObj"
+      />
       <div
         class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative"
       >

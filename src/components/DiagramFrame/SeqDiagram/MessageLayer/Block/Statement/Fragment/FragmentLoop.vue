@@ -3,7 +3,11 @@
     class="fragment loop border-skin-fragment rounded"
     :style="fragmentStyle"
   >
-    <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
+    <comment
+      v-if="commentObj.text"
+      :comment="comment"
+      :commentObj="commentObj"
+    />
     <div
       class="header text-skin-fragment-header bg-skin-fragment-header leading-4 relative"
     >
