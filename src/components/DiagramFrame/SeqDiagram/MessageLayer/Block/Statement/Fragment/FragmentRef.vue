@@ -34,18 +34,16 @@
         </div>
       </div>
     </div>
-    <div ref="messageRef" @click.stop="onClick">
-      <MessageLabel
-        class="text-skin-title"
-        :labelText="idLabel"
-        :labelPosition="idPosition"
-      />
-    </div>
+    <MessageLabel
+      class="text-skin-title"
+      :labelText="idLabel"
+      :labelPosition="idPosition"
+    />
   </div>
 </template>
 
 <script>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
 import MessageLabel from "../../../MessageLabel.vue";
@@ -71,7 +69,6 @@ export default {
     const fragmentClass = computed(() => ({
       "pt-7": idLabel.value.length > 7 && params.value.length === 1, // lower the ref label to avoid collision with the header
     }));
-    const messageRef = ref();
 
     return {
       store,
@@ -80,14 +77,7 @@ export default {
       idLabel,
       idPosition,
       fragmentClass,
-      messageRef,
     };
-  },
-  methods: {
-    onClick: function () {
-      const ctx = computed(() => this.$props.context);
-      this.store.getters.onMessageClick(ctx, this.messageRef);
-    },
   },
 };
 </script>
