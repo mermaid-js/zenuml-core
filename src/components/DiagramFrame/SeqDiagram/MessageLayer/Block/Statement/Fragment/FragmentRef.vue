@@ -13,44 +13,28 @@
       >
         {{ number }}
       </div>
-      <div class="text-skin-fragment w-12 absolute -top-[1px] -left-[1px]">
-        <svg viewBox="0 0 51 31" xmlns="http://www.w3.org/2000/svg">
-          <polygon
-            points="0,0 50.5,0 50.5,20.5 40.5,30.5 0,30.5"
-            fill="transparent"
-            stroke="currentColor"
-            stroke-width="1"
-          />
-          <text
-            x="25"
-            y="15"
-            font-family="Arial, sans-serif"
-            font-size="14"
-            font-weight="bold"
-            text-anchor="middle"
-            dominant-baseline="middle"
-            fill="currentColor"
+      <comment
+        v-if="commentObj.text"
+        class="absolute -top-4 left-0"
+        :comment="comment"
+        :commentObj="commentObj"
+      />
+      <div class="text-skin-fragment relative w-9 h-8 -top-[1px] -left-[1px]">
+        <div class="polygon-border absolute inset-0"></div>
+        <div
+          class="polygon-content bg-skin-frame absolute inset-[1px] flex flex-col items-center justify-center"
+        >
+          <span
+            class="text-skin-fragment-header flex items-center justify-center font-semibold"
             :style="commentObj.messageStyle"
             :class="commentObj.messageClassNames"
           >
             Ref
-          </text>
-        </svg>
+          </span>
+        </div>
       </div>
     </div>
-    <!-- <label class="text-skin-title">{{ label }}</label> -->
-    <comment
-      v-if="commentObj.text"
-      class="justify-center"
-      :comment="comment"
-      :commentObj="commentObj"
-    />
-    <div
-      ref="messageRef"
-      :style="commentObj.messageStyle"
-      :class="commentObj.messageClassNames"
-      @click.stop="onClick"
-    >
+    <div ref="messageRef" @click.stop="onClick">
       <MessageLabel
         class="text-skin-title"
         :labelText="idLabel"
@@ -124,5 +108,19 @@ export default {
   border-style: solid;
   border-width: 0 0 12px 12px;
   border-color: transparent transparent #ffffff transparent;
+}
+
+.polygon-border {
+  /* This will be your border color */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 66%, 80% 100%, 0% 100%);
+  background-color: var(
+    --color-border-fragment,
+    var(--color-border-frame, var(--color-border-base, #000))
+  );
+}
+
+.polygon-content {
+  /* This creates the border thickness */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 66%, 80% 100%, 0% 100%);
 }
 </style>
