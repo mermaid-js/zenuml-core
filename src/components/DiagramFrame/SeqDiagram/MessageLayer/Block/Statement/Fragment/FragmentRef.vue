@@ -22,10 +22,10 @@
       <div class="text-skin-fragment relative w-9 h-8 -top-[1px] -left-[1px]">
         <div class="polygon-border absolute inset-0"></div>
         <div
-          class="polygon-content bg-skin-frame absolute inset-[1px] flex flex-col items-center justify-center"
+          class="polygon-content bg-skin-frame text-skin-fragment-header absolute inset-[1px] flex flex-col items-center justify-center"
         >
           <span
-            class="text-skin-fragment-header flex items-center justify-center font-semibold"
+            class="flex items-center justify-center font-semibold"
             :style="commentObj.messageStyle"
             :class="commentObj.messageClassNames"
           >
