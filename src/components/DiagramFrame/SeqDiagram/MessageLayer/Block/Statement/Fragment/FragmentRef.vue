@@ -1,7 +1,6 @@
 <template>
   <div
     class="fragment bg-skin-frame border-skin-fragment relative rounded min-w-[140px] w-max py-4 px-2 flex justify-center items-center flex-col"
-    :class="fragmentClass"
     :style="fragmentStyle"
   >
     <div
@@ -35,7 +34,7 @@
       </div>
     </div>
     <MessageLabel
-      class="text-skin-title"
+      class="text-skin-title mt-3 mb-2"
       :labelText="contentLabel"
       :labelPosition="contentPosition"
     />
@@ -59,16 +58,12 @@ export default {
     const store = useStore();
     const numbering = computed(() => store.state.numbering);
     const from = computed(() => props.context.Origin());
-    const params = computed(() => props.context.ref().name());
     const content = computed(() => props.context.ref().Content());
     const contentLabel = computed(() => content.value?.getFormattedText());
     const contentPosition = computed(() => [
       content.value?.start.start,
       content.value?.stop.stop,
     ]);
-    const fragmentClass = computed(() => ({
-      "pt-7": contentLabel.value.length > 7 && params.value.length === 1, // lower the ref label to avoid collision with the header
-    }));
 
     return {
       store,
@@ -76,7 +71,6 @@ export default {
       numbering,
       contentLabel,
       contentPosition,
-      fragmentClass,
     };
   },
 };
