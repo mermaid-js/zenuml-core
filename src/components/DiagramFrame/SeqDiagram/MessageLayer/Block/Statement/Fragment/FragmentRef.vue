@@ -61,9 +61,7 @@ export default {
     const from = computed(() => props.context.Origin());
     const params = computed(() => props.context.ref().name());
     const content = computed(() => props.context.ref().Content());
-    const contentLabel = computed(
-      () => content.value?.getText()?.replaceAll('"', "") ?? "",
-    );
+    const contentLabel = computed(() => content.value?.getFormattedText());
     const contentPosition = computed(() => [
       content.value?.start.start,
       content.value?.stop.stop,
