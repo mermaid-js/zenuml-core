@@ -124,8 +124,8 @@ const serializedATN = [4,1,68,605,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 310,1,0,0,0,310,311,1,0,0,0,311,314,3,98,49,0,312,314,5,46,0,0,313,303,1,
 0,0,0,313,312,1,0,0,0,314,41,1,0,0,0,315,318,3,46,23,0,316,319,5,27,0,0,
 317,319,3,98,49,0,318,316,1,0,0,0,318,317,1,0,0,0,318,319,1,0,0,0,319,43,
-1,0,0,0,320,321,5,47,0,0,321,322,5,30,0,0,322,332,5,57,0,0,323,327,5,28,
-0,0,324,326,5,57,0,0,325,324,1,0,0,0,326,329,1,0,0,0,327,325,1,0,0,0,327,
+1,0,0,0,320,321,5,47,0,0,321,322,5,30,0,0,322,332,3,20,10,0,323,327,5,28,
+0,0,324,326,3,20,10,0,325,324,1,0,0,0,326,329,1,0,0,0,327,325,1,0,0,0,327,
 328,1,0,0,0,328,331,1,0,0,0,329,327,1,0,0,0,330,323,1,0,0,0,331,334,1,0,
 0,0,332,330,1,0,0,0,332,333,1,0,0,0,333,335,1,0,0,0,334,332,1,0,0,0,335,
 337,5,31,0,0,336,338,5,27,0,0,337,336,1,0,0,0,337,338,1,0,0,0,338,45,1,0,
@@ -1469,7 +1469,7 @@ export default class sequenceParser extends antlr4.Parser {
 	        this.match(sequenceParser.OPAR);
 
 	        this.state = 322;
-	        this.match(sequenceParser.ID);
+	        this.name();
 	        this.state = 332;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
@@ -1479,9 +1479,9 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.state = 327;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
-	            while(_la===57) {
+	            while(_la===57 || _la===60) {
 	                this.state = 324;
-	                this.match(sequenceParser.ID);
+	                this.name();
 	                this.state = 329;
 	                this._errHandler.sync(this);
 	                _la = this._input.LA(1);
@@ -4261,17 +4261,16 @@ class RefContext extends antlr4.ParserRuleContext {
 	    return this.getToken(sequenceParser.CPAR, 0);
 	};
 
-	ID = function(i) {
-		if(i===undefined) {
-			i = null;
-		}
+	name = function(i) {
+	    if(i===undefined) {
+	        i = null;
+	    }
 	    if(i===null) {
-	        return this.getTokens(sequenceParser.ID);
+	        return this.getTypedRuleContexts(NameContext);
 	    } else {
-	        return this.getToken(sequenceParser.ID, i);
+	        return this.getTypedRuleContext(NameContext,i);
 	    }
 	};
-
 
 	SCOL() {
 	    return this.getToken(sequenceParser.SCOL, 0);

@@ -316,8 +316,8 @@ describe("enterRef", () => {
 
   test("should set correct positions for participants in ref", () => {
     let participants = getParticipants("ref(someId, A, B)", false);
-    expect(participants.GetPositions("A")).toEqual(new Set(["[12,13]"]));
-    expect(participants.GetPositions("B")).toEqual(new Set(["[15,16]"]));
+    expect(participants.GetPositions("A")).toEqual(new Set([[12, 13]]));
+    expect(participants.GetPositions("B")).toEqual(new Set([[15, 16]]));
   });
 
   test("should not affect existing participants", () => {
@@ -327,7 +327,10 @@ describe("enterRef", () => {
     expect(participants.Get("B")).toBeDefined();
     expect(participants.Get("C")).toBeDefined();
     expect(participants.GetPositions("B")).toEqual(
-      new Set(["[2,3]", "[16,17]"]),
+      new Set([
+        [2, 3],
+        [16, 17],
+      ]),
     );
   });
 
@@ -346,8 +349,8 @@ describe("enterRef", () => {
     expect(participants.Get("A")).toBeDefined();
     expect(participants.Get("B")).toBeDefined();
     expect(participants.Get("C")).toBeDefined();
-    expect(participants.GetPositions("A")).toEqual(new Set(["[0,1]"]));
-    expect(participants.GetPositions("B")).toEqual(new Set(["[9,10]"]));
-    expect(participants.GetPositions("C")).toEqual(new Set(["[12,13]"]));
+    expect(participants.GetPositions("A")).toEqual(new Set([[0, 1]]));
+    expect(participants.GetPositions("B")).toEqual(new Set([[9, 10]]));
+    expect(participants.GetPositions("C")).toEqual(new Set([[12, 13]]));
   });
 });

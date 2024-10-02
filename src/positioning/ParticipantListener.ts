@@ -94,9 +94,7 @@ export class ParticipantListener extends sequenceParserListener {
   }
 
   enterRef(ctx: any) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_id, ...newParticipants] = ctx.ID();
-    newParticipants.forEach((participant: any) => {
+    ctx.Participants().forEach((participant: any) => {
       this.implicitParticipants.push({
         name: participant.getText(),
         left: "",

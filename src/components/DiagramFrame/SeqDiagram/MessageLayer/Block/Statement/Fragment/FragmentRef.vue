@@ -36,8 +36,8 @@
     </div>
     <MessageLabel
       class="text-skin-title"
-      :labelText="idLabel"
-      :labelPosition="idPosition"
+      :labelText="contentLabel"
+      :labelPosition="contentPosition"
     />
   </div>
 </template>
@@ -59,23 +59,23 @@ export default {
     const store = useStore();
     const numbering = computed(() => store.state.numbering);
     const from = computed(() => props.context.Origin());
-    const params = computed(() => props.context.ref().ID());
-    const id = computed(() => params.value?.[0]);
-    const idLabel = computed(() => id.value?.getText() ?? "");
-    const idPosition = computed(() => [
-      id.value?.symbol.start,
-      id.value?.symbol.stop,
+    const params = computed(() => props.context.ref().name());
+    const content = computed(() => props.context.ref().Content());
+    const contentLabel = computed(() => content.value?.getText() ?? "");
+    const contentPosition = computed(() => [
+      content.value?.start.start,
+      content.value?.stop.stop,
     ]);
     const fragmentClass = computed(() => ({
-      "pt-7": idLabel.value.length > 7 && params.value.length === 1, // lower the ref label to avoid collision with the header
+      "pt-7": contentLabel.value.length > 7 && params.value.length === 1, // lower the ref label to avoid collision with the header
     }));
 
     return {
       store,
-      numbering,
       from,
-      idLabel,
-      idPosition,
+      numbering,
+      contentLabel,
+      contentPosition,
       fragmentClass,
     };
   },
