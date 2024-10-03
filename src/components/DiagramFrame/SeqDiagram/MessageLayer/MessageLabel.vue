@@ -11,7 +11,7 @@
     @keyup="handleKeyup"
     @keydown="handleKeydown"
   >
-    {{ labelText }}
+    {{ fomattedLabelText }}
   </label>
 </template>
 <script setup lang="ts">
@@ -19,6 +19,7 @@ import { computed, toRefs } from "vue";
 import { useStore } from "vuex";
 import { RenderMode } from "@/store/Store";
 import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
+import { formatText } from "@/utils/StringUtil";
 
 const props = withDefaults(
   defineProps<{
@@ -40,6 +41,7 @@ const code = computed(() => store.getters.code);
 const onContentChange = computed(
   () => store.getters.onContentChange || (() => {}),
 );
+const fomattedLabelText = computed(() => formatText(labelText.value));
 
 function updateCode(code: string) {
   store.dispatch("updateCode", { code });
