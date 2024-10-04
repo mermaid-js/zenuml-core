@@ -27,10 +27,15 @@ statement
     | gotoStatement
     | swimlane
     | ARROW
+    | connectStatement
     ;
 
 activity
     : COLOR_ANNOTATION? ACTIVITY_CONTENT
+    ;
+
+connectStatement
+    : CONNECT
     ;
 
 ifStatement
