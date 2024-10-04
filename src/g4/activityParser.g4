@@ -3,11 +3,16 @@ parser grammar activityParser;
 options { tokenVocab=activityLexer; }
 
 activityDiagram
-    : STARTUML? START? (statement | STOP)* END? ENDUML?
+    : STARTUML?
+      (statement)*
+      ENDUML?
     ;
 
 statement
     : activity
+    | START
+    | STOP
+    | END
     | ifStatement
     | switchStatement
     | repeatStatement
@@ -21,45 +26,20 @@ statement
     | killStatement
     | gotoStatement
     | swimlane
-    | STOP
-    | KILL
-    | DETACH
+    | ARROW
     ;
 
 activity
     : COLOR_ANNOTATION? ACTIVITY_CONTENT
-    | (ARROW | REVERSE_ARROW | DOUBLE_ARROW) ACTIVITY_LABEL
     ;
 
 ifStatement
     : IF condition
       (EQUALS condition)?
-      THEN? branchLabel? (statement | STOP | KILL | DETACH)*
-      (branchLabel? ELSEIF condition (EQUALS condition)? THEN? branchLabel? (statement | STOP | KILL | DETACH)*)*
-      (branchLabel? ELSE branchLabel? (statement | STOP | KILL | DETACH)*)?
+      THEN? branchLabel? (statement | ARROW)*
+      (branchLabel? ELSEIF condition (EQUALS condition)? THEN? branchLabel? (statement | ARROW)*)*
+      (branchLabel? ELSE branchLabel? (statement | ARROW)*)?
       ENDIF
-    ;
-
-condition
-    : LPAREN (ACTIVITY_LABEL | ACTIVITY_CONTENT) RPAREN
-    ;
-
-branchLabel
-    : LPAREN ACTIVITY_LABEL RPAREN
-    ;
-
-repeatStatement
-    : REPEAT
-      statement*
-      (BACKWARD activity)?
-      REPEAT_WHILE condition
-      (IS branchLabel NOT branchLabel)?
-    ;
-
-whileStatement
-    : WHILE condition
-      statement*
-      ENDWHILE (LPAREN ACTIVITY_LABEL RPAREN)?
     ;
 
 switchStatement
@@ -69,37 +49,52 @@ switchStatement
     ;
 
 caseStatement
-    : CASE condition (statement | STOP)*
+    : CASE condition (statement | ARROW)*
     ;
+
+repeatStatement
+    : REPEAT
+      (statement | ARROW)*
+      (BACKWARD activity)?
+      REPEAT_WHILE condition
+      (IS branchLabel NOT branchLabel)?
+    ;
+
+whileStatement
+    : WHILE condition
+      (statement | ARROW)*
+      ENDWHILE (LPAREN ACTIVITY_LABEL RPAREN)?
+    ;
+
 forkStatement
     : FORK
-      statement*
-      (FORK_AGAIN statement*)*
+      (statement | ARROW)*
+      (FORK_AGAIN (statement | ARROW)*)*
       (END_FORK | END_MERGE) (LBRACE ACTIVITY_LABEL RBRACE)?
     ;
 
 splitStatement
     : SPLIT
-      statement*
-      (SPLIT_AGAIN statement*)*
+      (statement | ARROW)*
+      (SPLIT_AGAIN (statement | ARROW)*)*
       END_SPLIT
     ;
 
 noteStatement
     : NOTE (FLOATING)? (LEFT | RIGHT)? ACTIVITY_LABEL
-      statement*
+      (statement | ARROW)*
       END_NOTE?
     ;
 
 partitionStatement
     : PARTITION ACTIVITY_LABEL? LBRACE
-      statement*
+      (statement | ARROW)*
       RBRACE
     ;
 
 groupStatement
     : (GROUP | PACKAGE | RECTANGLE | CARD) ACTIVITY_LABEL?
-      statement*
+      (statement | ARROW)*
       END
     ;
 
@@ -116,7 +111,15 @@ gotoStatement
     ;
 
 swimlane
-    : PIPE (LBRACKET COLOR PIPE RBRACKET)? IDENTIFIER? PIPE ACTIVITY_LABEL?
+    : PIPE (LBRACKET COLOR_ANNOTATION PIPE RBRACKET)? IDENTIFIER? PIPE ACTIVITY_LABEL?
+    ;
+
+condition
+    : LPAREN (ACTIVITY_LABEL | ACTIVITY_CONTENT) RPAREN
+    ;
+
+branchLabel
+    : LPAREN ACTIVITY_LABEL RPAREN
     ;
 
 stereotypeActivity
