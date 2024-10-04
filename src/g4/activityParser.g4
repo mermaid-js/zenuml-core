@@ -3,11 +3,13 @@ parser grammar activityParser;
 options { tokenVocab=activityLexer; }
 
 activityDiagram
-    : START? (statement | STOP)* END?
+    : STARTUML? START? (statement | STOP)* END? ENDUML?
     ;
+
 statement
     : activity
     | ifStatement
+    | switchStatement
     | repeatStatement
     | whileStatement
     | forkStatement
@@ -19,19 +21,22 @@ statement
     | killStatement
     | gotoStatement
     | swimlane
+    | STOP
+    | KILL
+    | DETACH
     ;
 
 activity
-    : ACTIVITY_CONTENT
+    : COLOR_ANNOTATION? ACTIVITY_CONTENT
     | (ARROW | REVERSE_ARROW | DOUBLE_ARROW) ACTIVITY_LABEL
     ;
 
 ifStatement
     : IF condition
       (EQUALS condition)?
-      THEN? branchLabel? (statement | STOP)*
-      (branchLabel? ELSEIF condition (EQUALS condition)? THEN? branchLabel? (statement | STOP)*)*
-      (branchLabel? ELSE branchLabel? (statement | STOP)*)?
+      THEN? branchLabel? (statement | STOP | KILL | DETACH)*
+      (branchLabel? ELSEIF condition (EQUALS condition)? THEN? branchLabel? (statement | STOP | KILL | DETACH)*)*
+      (branchLabel? ELSE branchLabel? (statement | STOP | KILL | DETACH)*)?
       ENDIF
     ;
 
@@ -56,6 +61,15 @@ whileStatement
       ENDWHILE (LPAREN ACTIVITY_LABEL RPAREN)?
     ;
 
+switchStatement
+    : SWITCH condition
+      (caseStatement)*
+      ENDSWITCH
+    ;
+
+caseStatement
+    : CASE condition (statement | STOP)*
+    ;
 forkStatement
     : FORK
       statement*

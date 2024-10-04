@@ -1,6 +1,8 @@
 lexer grammar activityLexer;
 
 // Keywords
+STARTUML: '@startuml';
+ENDUML: '@enduml';
 START: 'start';
 STOP: 'stop';
 END: 'end';
@@ -15,6 +17,9 @@ REPEAT: 'repeat';
 REPEAT_WHILE: 'repeat while';
 WHILE: 'while';
 ENDWHILE: 'endwhile';
+SWITCH: 'switch';
+CASE: 'case';
+ENDSWITCH: 'endswitch';
 FORK: 'fork';
 FORK_AGAIN: 'fork again';
 END_FORK: 'end fork';
