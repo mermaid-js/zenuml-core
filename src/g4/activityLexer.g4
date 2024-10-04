@@ -64,7 +64,7 @@ ACTIVITY_LABEL: [a-zA-Z0-9]+ ([a-zA-Z0-9 \t]* [a-zA-Z0-9]+)? '?'?;
 
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
 
-NEWLINE: '\r'? '\n';
+NEWLINE: '\r'? '\n' ->skip;
 WS: [ \t]+ -> skip;
 
 OTHER: .;
