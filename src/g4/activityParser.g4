@@ -3,9 +3,8 @@ parser grammar activityParser;
 options { tokenVocab=activityLexer; }
 
 activityDiagram
-    : START? statement* (STOP | END)?
+    : START? (statement | STOP)* END?
     ;
-
 statement
     : activity
     | ifStatement
@@ -30,9 +29,9 @@ activity
 ifStatement
     : IF condition
       (EQUALS condition)?
-      THEN? branchLabel? statement*
-      (ELSEIF condition (EQUALS condition)? THEN? branchLabel? statement*)*
-      (ELSE branchLabel? statement*)?
+      THEN? branchLabel? (statement | STOP)*
+      (branchLabel? ELSEIF condition (EQUALS condition)? THEN? branchLabel? (statement | STOP)*)*
+      (branchLabel? ELSE branchLabel? (statement | STOP)*)?
       ENDIF
     ;
 
