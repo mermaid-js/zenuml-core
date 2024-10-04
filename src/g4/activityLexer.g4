@@ -39,6 +39,7 @@ LABEL: 'label';
 FLOATING: 'floating';
 IS: 'is';
 AS: 'as';
+EQUALS: 'equals';
 
 // Symbols
 LPAREN: '(';

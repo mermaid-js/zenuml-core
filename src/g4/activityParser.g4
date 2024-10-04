@@ -28,14 +28,16 @@ activity
     ;
 
 ifStatement
-    : IF condition THEN? branchLabel? statement*
-      (ELSEIF condition THEN? branchLabel? statement*)*
+    : IF condition
+      (EQUALS condition)?
+      THEN? branchLabel? statement*
+      (ELSEIF condition (EQUALS condition)? THEN? branchLabel? statement*)*
       (ELSE branchLabel? statement*)?
       ENDIF
     ;
 
 condition
-    : LPAREN ACTIVITY_LABEL RPAREN
+    : LPAREN (ACTIVITY_LABEL | ACTIVITY_CONTENT) RPAREN
     ;
 
 branchLabel
