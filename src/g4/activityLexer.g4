@@ -20,6 +20,7 @@ ENDWHILE: 'endwhile';
 SWITCH: 'switch';
 CASE: 'case';
 ENDSWITCH: 'endswitch';
+NOT: 'not';
 FORK: 'fork';
 FORK_AGAIN: 'fork again';
 END_FORK: 'end fork';

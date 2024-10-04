@@ -53,6 +53,7 @@ repeatStatement
       statement*
       (BACKWARD activity)?
       REPEAT_WHILE condition
+      (IS branchLabel NOT branchLabel)?
     ;
 
 whileStatement
