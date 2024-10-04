@@ -23,8 +23,7 @@ statement
     ;
 
 activity
-    : COLON ACTIVITY_LABEL SEMICOLON
-    | COLON MULTILINE_STRING SEMICOLON
+    : ACTIVITY_CONTENT
     | (ARROW | REVERSE_ARROW | DOUBLE_ARROW) ACTIVITY_LABEL
     ;
 
@@ -77,7 +76,7 @@ noteStatement
     ;
 
 partitionStatement
-    : PARTITION STRING? LBRACE
+    : PARTITION ACTIVITY_LABEL? LBRACE
       statement*
       RBRACE
     ;

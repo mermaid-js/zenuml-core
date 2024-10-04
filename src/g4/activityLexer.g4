@@ -41,8 +41,6 @@ IS: 'is';
 AS: 'as';
 
 // Symbols
-COLON: ':';
-SEMICOLON: ';';
 LPAREN: '(';
 RPAREN: ')';
 LBRACE: '{';
@@ -57,15 +55,16 @@ PIPE: '|';
 COLOR: '#' [a-fA-F0-9]+;
 STEREOTYPE: '<<' .*? '>>';
 
-STRING: '"' .*? '"';
-MULTILINE_STRING: '"""' .*? '"""';
+fragment COLON: ':';
+fragment SEMICOLON: ';';
 
-// Update ACTIVITY_LABEL to allow for '?' at the end
+ACTIVITY_CONTENT: COLON .*? SEMICOLON;
+
 ACTIVITY_LABEL: [a-zA-Z0-9]+ ([a-zA-Z0-9 \t]* [a-zA-Z0-9]+)? '?'?;
+
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
 
-NEWLINE: '\r'? '\n' -> skip;
+NEWLINE: '\r'? '\n';
 WS: [ \t]+ -> skip;
 
-// Catch-all for any other character
 OTHER: .;
