@@ -98,9 +98,9 @@ partitionStatement
     ;
 
 groupStatement
-    : (GROUP | PACKAGE | RECTANGLE | CARD) ACTIVITY_LABEL?
-      (statement | ARROW)*
-      END
+    : GROUP
+      statement*
+      END_GROUP
     ;
 
 detachStatement

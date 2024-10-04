@@ -38,6 +38,7 @@ NOTE: 'note';
 END_NOTE: 'end note';
 PARTITION: 'partition';
 GROUP: 'group';
+END_GROUP: 'end group';
 PACKAGE: 'package';
 RECTANGLE: 'rectangle';
 CARD: 'card';
