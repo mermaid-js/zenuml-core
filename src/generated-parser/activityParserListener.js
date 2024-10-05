@@ -104,6 +104,24 @@ export default class activityParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by activityParser#isBranch.
+	enterIsBranch(ctx) {
+	}
+
+	// Exit a parse tree produced by activityParser#isBranch.
+	exitIsBranch(ctx) {
+	}
+
+
+	// Enter a parse tree produced by activityParser#notBranch.
+	enterNotBranch(ctx) {
+	}
+
+	// Exit a parse tree produced by activityParser#notBranch.
+	exitNotBranch(ctx) {
+	}
+
+
 	// Enter a parse tree produced by activityParser#whileStatement.
 	enterWhileStatement(ctx) {
 	}

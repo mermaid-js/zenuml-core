@@ -71,7 +71,15 @@ repeatStatement
       (statement | ARROW)*
       (BACKWARD activity)?
       REPEAT_WHILE condition
-      (IS branchLabel NOT branchLabel)?
+      (isBranch notBranch)?
+    ;
+
+isBranch
+    : IS branchLabel
+    ;
+
+notBranch
+    : NOT branchLabel
     ;
 
 whileStatement
