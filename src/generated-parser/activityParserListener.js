@@ -41,6 +41,33 @@ export default class activityParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by activityParser#ifBlock.
+	enterIfBlock(ctx) {
+	}
+
+	// Exit a parse tree produced by activityParser#ifBlock.
+	exitIfBlock(ctx) {
+	}
+
+
+	// Enter a parse tree produced by activityParser#elseIfBlock.
+	enterElseIfBlock(ctx) {
+	}
+
+	// Exit a parse tree produced by activityParser#elseIfBlock.
+	exitElseIfBlock(ctx) {
+	}
+
+
+	// Enter a parse tree produced by activityParser#elseBlock.
+	enterElseBlock(ctx) {
+	}
+
+	// Exit a parse tree produced by activityParser#elseBlock.
+	exitElseBlock(ctx) {
+	}
+
+
 	// Enter a parse tree produced by activityParser#switchStatement.
 	enterSwitchStatement(ctx) {
 	}

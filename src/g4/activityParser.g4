@@ -34,12 +34,23 @@ activity
     ;
 
 ifStatement
-    : IF condition
-      (THEN? branchLabel? (statement | ARROW)*
-      (branchLabel? ELSEIF condition THEN? branchLabel? (statement | ARROW)*)*
-      (branchLabel? ELSE branchLabel? (statement | ARROW)*)?)
+    : ifBlock
+      elseIfBlock*
+      elseBlock?
       ENDIF
     ;
+
+ifBlock
+   : IF condition THEN? branchLabel? (statement | ARROW)*
+   ;
+
+elseIfBlock
+   : ELSEIF condition THEN? branchLabel? (statement | ARROW)*
+   ;
+
+elseBlock
+   : (ELSE branchLabel? (statement | ARROW)*)
+   ;
 
 switchStatement
     : SWITCH condition
