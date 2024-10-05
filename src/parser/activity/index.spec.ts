@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import activityParser from "./index";
 
 describe("Activity Parser", () => {
