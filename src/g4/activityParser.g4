@@ -53,9 +53,13 @@ elseBlock
    ;
 
 switchStatement
-    : SWITCH condition
+    : switchBlock
       (caseStatement)*
       ENDSWITCH
+    ;
+
+switchBlock
+    : SWITCH condition
     ;
 
 caseStatement
