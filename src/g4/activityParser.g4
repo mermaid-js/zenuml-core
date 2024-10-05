@@ -45,11 +45,11 @@ ifBlock
    ;
 
 elseIfBlock
-   : ELSEIF condition THEN? branchLabel? (statement | ARROW)*
+   : inboundBranchLabel? ELSEIF condition THEN? branchLabel? (statement | ARROW)*
    ;
 
 elseBlock
-   : (ELSE branchLabel? (statement | ARROW)*)
+   : inboundBranchLabel? ELSE branchLabel? (statement | ARROW)*
    ;
 
 switchStatement
@@ -135,6 +135,10 @@ comparisonOperator
 
 conditionContent
     : (ACTIVITY_LABEL | ACTIVITY_CONTENT)+
+    ;
+
+inboundBranchLabel
+    : LPAREN ACTIVITY_LABEL RPAREN
     ;
 
 branchLabel

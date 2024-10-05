@@ -212,6 +212,15 @@ export default class activityParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by activityParser#inboundBranchLabel.
+	enterInboundBranchLabel(ctx) {
+	}
+
+	// Exit a parse tree produced by activityParser#inboundBranchLabel.
+	exitInboundBranchLabel(ctx) {
+	}
+
+
 	// Enter a parse tree produced by activityParser#branchLabel.
 	enterBranchLabel(ctx) {
 	}
