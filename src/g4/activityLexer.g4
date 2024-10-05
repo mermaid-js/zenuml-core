@@ -61,8 +61,6 @@ LBRACKET: '[';
 RBRACKET: ']';
 PIPE: '|';
 
-CONNECT: '(' [A-Za-z0-9]+ ')';
-
 // Colors and stereotypes
 COLOR: '#' [a-fA-F0-9]+;
 COLOR_ANNOTATION: '#' [a-zA-Z0-9]+;

@@ -27,23 +27,17 @@ statement
     | gotoStatement
     | swimlane
     | ARROW
-    | connectStatement
     ;
 
 activity
     : COLOR_ANNOTATION? ACTIVITY_CONTENT
     ;
 
-connectStatement
-    : CONNECT
-    ;
-
 ifStatement
     : IF condition
-      (EQUALS condition)?
-      THEN? branchLabel? (statement | ARROW)*
-      (branchLabel? ELSEIF condition (EQUALS condition)? THEN? branchLabel? (statement | ARROW)*)*
-      (branchLabel? ELSE branchLabel? (statement | ARROW)*)?
+      (THEN? branchLabel? (statement | ARROW)*
+      (branchLabel? ELSEIF condition THEN? branchLabel? (statement | ARROW)*)*
+      (branchLabel? ELSE branchLabel? (statement | ARROW)*)?)
       ENDIF
     ;
 
@@ -120,7 +114,16 @@ swimlane
     ;
 
 condition
-    : LPAREN (ACTIVITY_LABEL | ACTIVITY_CONTENT) RPAREN
+    : LPAREN conditionContent RPAREN (comparisonOperator LPAREN conditionContent RPAREN)?
+    ;
+
+comparisonOperator
+    : IS
+    | EQUALS
+    ;
+
+conditionContent
+    : (ACTIVITY_LABEL | ACTIVITY_CONTENT)+
     ;
 
 branchLabel
