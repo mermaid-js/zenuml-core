@@ -194,6 +194,15 @@ export default class activityParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by activityParser#labelStatement.
+	enterLabelStatement(ctx) {
+	}
+
+	// Exit a parse tree produced by activityParser#labelStatement.
+	exitLabelStatement(ctx) {
+	}
+
+
 	// Enter a parse tree produced by activityParser#gotoStatement.
 	enterGotoStatement(ctx) {
 	}

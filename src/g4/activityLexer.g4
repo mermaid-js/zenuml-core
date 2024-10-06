@@ -33,7 +33,6 @@ END_SPLIT: 'end split';
 DETACH: 'detach';
 KILL: 'kill';
 BACKWARD: 'backward';
-GOTO: 'goto';
 NOTE: 'note';
 END_NOTE: 'end note';
 PARTITION: 'partition';
@@ -44,7 +43,6 @@ RECTANGLE: 'rectangle';
 CARD: 'card';
 
 // Other tokens
-LABEL: 'label';
 FLOATING: 'floating';
 IS: 'is';
 AS: 'as';
@@ -79,9 +77,17 @@ DOUBLE_ARROW: '<->';
 
 ACTIVITY_CONTENT: COLON .*? SEMICOLON;
 
-ACTIVITY_LABEL: [a-zA-Z0-9]+ ([a-zA-Z0-9 \t]* [a-zA-Z0-9]+)? '?'?;
+fragment LABEL: 'label';
+LABEL_STATEMENT: LABEL [ \t]+ IDENTIFIER;
 
+fragment GOTO: 'goto';
+GOTO_STATEMENT: GOTO [ \t]+ IDENTIFIER;
+
+// IDENTIFIER should come before ACTIVITY_LABEL
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
+
+// Modified ACTIVITY_LABEL to match both single-word and multi-word labels
+ACTIVITY_LABEL: [a-zA-Z0-9]+ ([a-zA-Z0-9 \t]+ [a-zA-Z0-9]+)* '?'?;
 
 // Whitespace and comments
 NEWLINE: '\r'? '\n' -> skip;

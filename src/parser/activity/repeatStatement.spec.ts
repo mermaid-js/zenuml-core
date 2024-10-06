@@ -27,8 +27,8 @@ stop
     );
 
     const isBranch = repeatStatement.isBranch();
-    expect(isBranch.branchLabel().ACTIVITY_LABEL().getText()).toBe("yes");
+    expect(isBranch.branchLabel().IDENTIFIER().getText()).toBe("yes");
     const notBranch = repeatStatement.notBranch();
-    expect(notBranch.branchLabel().ACTIVITY_LABEL().getText()).toBe("no");
+    expect(notBranch.branchLabel().IDENTIFIER().getText()).toBe("no");
   });
 });

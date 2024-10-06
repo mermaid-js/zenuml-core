@@ -1,5 +1,9 @@
 # Understanding ANTLR4's Optional Block Warning
 
+## TL;DR
+
+Don't have `(A? B?)?` in your ANTLR4 grammar.
+
 ## The Warning
 
 ANTLR4 may produce the following warning:

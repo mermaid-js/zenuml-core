@@ -24,6 +24,7 @@ statement
     | groupStatement
     | detachStatement
     | killStatement
+    | labelStatement
     | gotoStatement
     | swimlane
     | ARROW
@@ -128,8 +129,12 @@ killStatement
     : KILL
     ;
 
+labelStatement
+    : LABEL_STATEMENT
+    ;
+
 gotoStatement
-    : GOTO IDENTIFIER
+    : GOTO_STATEMENT
     ;
 
 swimlane
@@ -154,7 +159,7 @@ inboundBranchLabel
     ;
 
 branchLabel
-    : LPAREN ACTIVITY_LABEL RPAREN
+    : LPAREN (IDENTIFIER | ACTIVITY_LABEL) RPAREN
     ;
 
 stereotypeActivity

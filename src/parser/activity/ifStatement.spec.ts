@@ -27,7 +27,7 @@ stop
     );
 
     const activityLabel = ifBlock.branchLabel();
-    expect(activityLabel.ACTIVITY_LABEL().getText()).toBe("yes1");
+    expect(activityLabel.IDENTIFIER().getText()).toBe("yes1");
     const elseIfBlock = ifStatement.elseIfBlock()[0];
     const elseIfCondition = elseIfBlock.condition();
     expect(elseIfCondition.conditionContent()[0].getFormattedText()).toBe(
@@ -40,7 +40,7 @@ stop
 
     const elseBlock = ifStatement.elseBlock();
     const branchLabel = elseBlock.branchLabel();
-    const elseLabel = branchLabel.ACTIVITY_LABEL();
+    const elseLabel = branchLabel.IDENTIFIER();
     expect(elseLabel.getText()).toBe("no3");
     const elseInboundLabel = elseBlock.inboundBranchLabel();
     expect(elseInboundLabel.ACTIVITY_LABEL().getText()).toBe("inbound label3");
