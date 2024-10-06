@@ -4,7 +4,11 @@
     :style="fragmentStyle"
   >
     <div class="segment">
-      <comment v-if="comment" :comment="comment" :commentObj="commentObj" />
+      <comment
+        v-if="commentObj.text"
+        :comment="comment"
+        :commentObj="commentObj"
+      />
       <div
         class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative"
       >
@@ -49,7 +53,7 @@
 import { computed } from "vue";
 import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
-import { capitalize } from "lodash";
+import capitalize from "lodash/capitalize";
 
 export default {
   name: "fragment-section",
@@ -68,9 +72,6 @@ export default {
       () => atom.value ?? capitalize(section.value.SECTION()),
     );
 
-    console.log({
-      sectionCtx: props.context,
-    });
     return {
       numbering,
       from,

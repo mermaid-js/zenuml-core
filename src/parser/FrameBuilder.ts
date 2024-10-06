@@ -96,6 +96,10 @@ class FrameBuilder extends sequenceParserListener {
     this.enterFragment(ctx);
   }
 
+  enterRef(ctx: any) {
+    this.enterFragment(ctx);
+  }
+
   exitTcf() {
     this.exitFragment();
   }
@@ -115,6 +119,9 @@ class FrameBuilder extends sequenceParserListener {
     this.exitFragment();
   }
   exitCritical() {
+    this.exitFragment();
+  }
+  exitRef() {
     this.exitFragment();
   }
 

@@ -123,6 +123,15 @@ ToCollector.enterCreation = function (ctx) {
   }
 };
 
+ToCollector.enterRef = function (ctx) {
+  ctx.Participants().forEach((participant) => {
+    participants.Add(participant.getText(), {
+      isStarter: false,
+      position: [participant.start.start, participant.stop.stop + 1],
+    });
+  });
+};
+
 ToCollector.enterParameters = function () {
   isBlind = true;
 };
