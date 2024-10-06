@@ -61,7 +61,7 @@ PIPE: '|';
 
 // Colors and stereotypes
 COLOR: '#' [a-fA-F0-9]+;
-COLOR_ANNOTATION: '#' [a-zA-Z0-9]+;
+COLOR_NAME: '#' [a-zA-Z0-9]+;
 STEREOTYPE: '<<' .*? '>>';
 
 // Simplified arrow

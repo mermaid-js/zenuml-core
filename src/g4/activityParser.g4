@@ -26,12 +26,12 @@ statement
     | killStatement
     | labelStatement
     | gotoStatement
-    | swimlane
+    | swimlane     // The first swimlane statement must be the first statement. TODO: add validation.
     | ARROW
     ;
 
 activity
-    : COLOR_ANNOTATION? ACTIVITY_CONTENT
+    : COLOR_NAME? ACTIVITY_CONTENT
     ;
 
 ifStatement
@@ -138,7 +138,20 @@ gotoStatement
     ;
 
 swimlane
-    : PIPE (LBRACKET COLOR_ANNOTATION PIPE RBRACKET)? IDENTIFIER? PIPE ACTIVITY_LABEL?
+    : PIPE swimlaneColor? swimlaneName PIPE
+    ;
+
+swimlaneColor
+    : color PIPE
+    ;
+
+color
+    : COLOR | COLOR_NAME
+    ;
+
+swimlaneName
+    : IDENTIFIER
+    | ACTIVITY_LABEL
     ;
 
 condition
@@ -151,11 +164,11 @@ comparisonOperator
     ;
 
 conditionContent
-    : (ACTIVITY_LABEL | ACTIVITY_CONTENT)+
+    : (IDENTIFIER | ACTIVITY_LABEL | ACTIVITY_CONTENT)+
     ;
 
 inboundBranchLabel
-    : LPAREN ACTIVITY_LABEL RPAREN
+    : LPAREN (IDENTIFIER | ACTIVITY_LABEL) RPAREN
     ;
 
 branchLabel

@@ -221,6 +221,33 @@ export default class activityParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by activityParser#swimlaneColor.
+	enterSwimlaneColor(ctx) {
+	}
+
+	// Exit a parse tree produced by activityParser#swimlaneColor.
+	exitSwimlaneColor(ctx) {
+	}
+
+
+	// Enter a parse tree produced by activityParser#color.
+	enterColor(ctx) {
+	}
+
+	// Exit a parse tree produced by activityParser#color.
+	exitColor(ctx) {
+	}
+
+
+	// Enter a parse tree produced by activityParser#swimlaneName.
+	enterSwimlaneName(ctx) {
+	}
+
+	// Exit a parse tree produced by activityParser#swimlaneName.
+	exitSwimlaneName(ctx) {
+	}
+
+
 	// Enter a parse tree produced by activityParser#condition.
 	enterCondition(ctx) {
 	}

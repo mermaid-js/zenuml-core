@@ -247,7 +247,7 @@ export default class activityLexer extends antlr4.Lexer {
                           "END_GROUP", "PACKAGE", "RECTANGLE", "CARD", "FLOATING", 
                           "IS", "AS", "OF", "ON", "EQUALS", "LPAREN", "RPAREN", 
                           "LBRACE", "RBRACE", "LBRACKET", "RBRACKET", "PIPE", 
-                          "COLOR", "COLOR_ANNOTATION", "STEREOTYPE", "ARROW", 
+                          "COLOR", "COLOR_NAME", "STEREOTYPE", "ARROW", 
                           "REVERSE_ARROW", "DOUBLE_ARROW", "ACTIVITY_CONTENT", 
                           "LABEL_STATEMENT", "GOTO_STATEMENT", "IDENTIFIER", 
                           "ACTIVITY_LABEL", "NEWLINE", "WS", "COMMENT", 
@@ -261,7 +261,7 @@ export default class activityLexer extends antlr4.Lexer {
                       "PARTITION", "GROUP", "END_GROUP", "PACKAGE", "RECTANGLE", 
                       "CARD", "FLOATING", "IS", "AS", "OF", "ON", "EQUALS", 
                       "LPAREN", "RPAREN", "LBRACE", "RBRACE", "LBRACKET", 
-                      "RBRACKET", "PIPE", "COLOR", "COLOR_ANNOTATION", "STEREOTYPE", 
+                      "RBRACKET", "PIPE", "COLOR", "COLOR_NAME", "STEREOTYPE", 
                       "COLON", "SEMICOLON", "ARROW_STYLE", "ARROW_TEXT", 
                       "ARROW", "REVERSE_ARROW", "DOUBLE_ARROW", "ACTIVITY_CONTENT", 
                       "LABEL", "LABEL_STATEMENT", "GOTO", "GOTO_STATEMENT", 
@@ -331,7 +331,7 @@ activityLexer.LBRACKET = 49;
 activityLexer.RBRACKET = 50;
 activityLexer.PIPE = 51;
 activityLexer.COLOR = 52;
-activityLexer.COLOR_ANNOTATION = 53;
+activityLexer.COLOR_NAME = 53;
 activityLexer.STEREOTYPE = 54;
 activityLexer.ARROW = 55;
 activityLexer.REVERSE_ARROW = 56;
