@@ -15,7 +15,7 @@ let storeInitiationTime: number = 0;
 setTimeout(function () {
   if (!storeInitiationTime) {
     console.warn(
-      "[@zenuml/core] Store is a function and is not initiated in 1 second.",
+      "[@zenuml/core] Store initialization took longer than one second.",
     );
   }
 }, 1000);
