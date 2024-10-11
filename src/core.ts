@@ -3,7 +3,8 @@ import { createApp } from "vue";
 import { createStore } from "vuex";
 import Store, { RenderMode } from "./store/Store";
 import DiagramFrame from "./components/DiagramFrame/DiagramFrame.vue";
-import SeqDiagram from "./components/DiagramFrame/SeqDiagram/SeqDiagram.vue";
+// import SeqDiagram from "./components/DiagramFrame/SeqDiagram/SeqDiagram.vue";
+import ActivityDiagram from "./components/ActivityDiagram/ActivityDiagram.vue";
 
 import "./assets/tailwind.css";
 import "./assets/tailwind-preflight.less";
@@ -50,10 +51,10 @@ export default class ZenUml implements IZenUml {
   private _currentTimeout: any;
   private _lastRenderingCostMilliseconds = 0;
   private initialRender = true;
-  constructor(el: Element, naked: boolean = false) {
+  constructor(el: Element, naked: boolean = true) {
     this.el = el;
     this.store = createStore(Store());
-    this.app = createApp(naked ? SeqDiagram : DiagramFrame);
+    this.app = createApp(naked ? ActivityDiagram : DiagramFrame);
     this.app.component("Comment", Comment);
     this.app.component("Block", Block);
     this.app.use(this.store);
@@ -148,6 +149,6 @@ export const VueSequence = {
   createApp,
   createStore,
   Store,
-  SeqDiagram,
+  ActivityDiagram,
   DiagramFrame,
 };

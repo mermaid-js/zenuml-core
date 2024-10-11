@@ -2,8 +2,8 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "target": "es6",
-    "module": "esnext",
+    "target": "ESNext",
+    "module": "ESNext",
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
@@ -12,18 +12,27 @@
     "importHelpers": true,
     "moduleResolution": "node",
     "allowJs": true,
+    "checkJs": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": ["webpack-env", "jest", "vitest/globals"],
+    "types": ["vitest/globals"],
     "paths": {
       "@/*": ["src/*"]
     },
     "lib": ["es2019", "es2016", "dom", "dom.iterable", "scripthost"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx"],
-  "exclude": ["node_modules"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "src/parser/activity/index.js",
+    "src/activityDiagram.ts"
+  ],
+  "exclude": ["node_modules", "**/*.js"],
   "files": ["types/index.d.ts", "types/svg.d.ts"]
 }

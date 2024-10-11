@@ -41,6 +41,7 @@
     "*.{js,ts,vue,json,htm,html}": "eslint --fix"
   },
   "dependencies": {
+    "@antv/g6": "^5.0.25",
     "@headlessui-float/vue": "^0.14.0",
     "@headlessui/tailwindcss": "^0.2.0",
     "@headlessui/vue": "^1.7.16",

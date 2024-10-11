@@ -1,13 +1,6 @@
 import now from "lodash/now";
-import {
-  RootContext,
-  Participants,
-  GroupContext,
-  ParticipantContext,
-} from "../parser/index.js";
+import { RootContext } from "../parser/activity/index.js";
 
-import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
-import { Coordinates } from "../positioning/Coordinates";
 import { CodeRange } from "../parser/CodeRange";
 import { StoreOptions } from "vuex";
 
@@ -86,12 +79,6 @@ const Store = (): StoreOptions<StoreState> => {
       title: (state: any, getters: any) => {
         return getters.rootContext?.title()?.content();
       },
-      participants: (state: any, getters: any) => {
-        return Participants(getters.rootContext, true);
-      },
-      coordinates: (state: any, getters: any) => {
-        return new Coordinates(getters.rootContext, WidthProviderOnBrowser);
-      },
       centerOf: (state: any, getters: any) => (entity: any) => {
         if (!entity) {
           console.error("[@zenuml/core] centerOf: entity is undefined");
@@ -103,17 +90,6 @@ const Store = (): StoreOptions<StoreState> => {
           console.error(e);
           return 0;
         }
-      },
-      GroupContext: () => GroupContext,
-      ParticipantContext: () => ParticipantContext,
-      cursor: (state: any) => state.cursor,
-      // deprecated, use distances that returns centerOf(to) - centerOf(from)
-      distance: (state: any, getters: any) => (from: any, to: any) => {
-        return getters.centerOf(from) - getters.centerOf(to);
-      },
-      distance2: (state: any, getters: any) => (from: any, to: any) => {
-        if (!from || !to) return 0;
-        return getters.centerOf(to) - getters.centerOf(from);
       },
       onElementClick: (state: any) => state.onElementClick,
       onMessageClick: (state: any) => state.onMessageClick,

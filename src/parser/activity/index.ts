@@ -19,6 +19,4 @@ antlr4.ParserRuleContext.prototype.getFormattedText = function () {
   return formatText(code);
 };
 
-export default {
-  RootContext: rootContext,
-};
+export const RootContext = rootContext;
