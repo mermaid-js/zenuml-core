@@ -3,11 +3,11 @@ import {
   Participants,
   GroupContext,
   ParticipantContext,
-} from "../parser/index.js";
+} from "@/parser";
 
 import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
-import { Coordinates } from "../positioning/Coordinates";
-import { CodeRange } from "../parser/CodeRange";
+import { Coordinates } from "@/positioning/Coordinates";
+import { CodeRange } from "@/parser/CodeRange";
 import { StoreOptions } from "vuex";
 
 export interface Warning {
