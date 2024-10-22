@@ -1,4 +1,3 @@
-import now from "lodash/now";
 import {
   RootContext,
   Participants,
@@ -10,15 +9,6 @@ import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "../positioning/Coordinates";
 import { CodeRange } from "../parser/CodeRange";
 import { StoreOptions } from "vuex";
-
-let storeInitiationTime: number = 0;
-setTimeout(function () {
-  if (!storeInitiationTime) {
-    console.warn(
-      "[@zenuml/core] Store is a function and is not initiated in 1 second.",
-    );
-  }
-}, 1000);
 
 export interface Warning {
   title: string;
@@ -48,8 +38,6 @@ export interface StoreState {
 }
 // vuex 101: Deal with sync in mutation, async in actions
 const Store = (): StoreOptions<StoreState> => {
-  // TODO: remove state any type
-  storeInitiationTime = now();
   return {
     state: {
       warning: undefined,
