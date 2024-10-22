@@ -10,11 +10,6 @@ import { Coordinates } from "@/positioning/Coordinates";
 import { CodeRange } from "@/parser/CodeRange";
 import { StoreOptions } from "vuex";
 
-export interface Warning {
-  title: string;
-  message: string;
-}
-
 /*
  * RenderMode
  * Static: Compatible with Mermaid renderind which renders once and never update. It also disables sticky participants and hides the footer
@@ -26,7 +21,6 @@ export const enum RenderMode {
 }
 
 export interface StoreState {
-  warning: Warning | undefined;
   code: string;
   scale: number;
   selected: any[];
@@ -40,7 +34,6 @@ export interface StoreState {
 const Store = (): StoreOptions<StoreState> => {
   return {
     state: {
-      warning: undefined,
       code: "",
       theme: "theme-default",
       enableScopedTheming: false,
