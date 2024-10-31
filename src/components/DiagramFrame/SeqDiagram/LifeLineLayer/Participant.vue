@@ -163,6 +163,7 @@ export default {
       if (!this.backgroundColor) {
         this.color = "inherit";
       }
+      console.log("temp for testing only", this.$refs.participant);
       let bgColor = window
         .getComputedStyle(this.$refs.participant)
         .getPropertyValue("background-color");
