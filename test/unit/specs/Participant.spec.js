@@ -41,14 +41,17 @@ describe("select a participant", () => {
     expect(participantWrapper.vm.selected).toBeFalsy();
     expect(participantWrapper.find(".selected").exists()).toBeFalsy();
 
-    participantWrapper.find(".participant").trigger("click");
+    const participantElement = participantWrapper.find(".participant");
+    expect(participantElement.exists()).toBeTruthy();
+
+    await participantElement.trigger("click");
     // TODO: we need to be able to verify that the computed property `selected` is true
     // But it seems that it does not re-evaluate the computed property in test.
     // expect(participantWrapper.vm.selected).toBeTruthy();
     expect(store.state.selected).toContain("A");
     // await participantWrapper.vm.$nextTick();
     // expect(participantWrapper.find('.selected').exists()).toBeTruthy();
-    participantWrapper.find(".participant").trigger("click");
+    await participantElement.trigger("click");
     expect(store.state.selected.includes("A")).toBeFalsy();
     expect(participantWrapper.find(".selected").exists()).toBeFalsy();
   });
