@@ -45,9 +45,9 @@
 import Comment from "../Comment/Comment.vue";
 import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
-import { CodeRange } from "../../../../../../../parser/CodeRange";
+import { CodeRange } from "@/parser/CodeRange";
 import WidthProviderOnBrowser from "../../../../../../../positioning/WidthProviderFunc";
-import { TextType } from "../../../../../../../positioning/Coordinate";
+import { TextType } from "@/positioning/Coordinate";
 
 export default {
   name: "return",
