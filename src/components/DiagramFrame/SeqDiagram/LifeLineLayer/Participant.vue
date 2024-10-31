@@ -160,45 +160,30 @@ export default {
       this.$store.commit("onSelect", this.entity.name);
     },
     updateFontColor() {
-      const getBackgroundColor = () => {
-        // Try getting color from props first
-        if (this.backgroundColor) {
-          return this.backgroundColor;
-        }
-
-        // Try getting computed style if no prop
-        return window
-          .getComputedStyle(this.$refs.participant)
-          .getPropertyValue("background-color");
-      };
-
-      const setInheritColor = (reason) => {
+      if (!this.backgroundColor) {
         this.color = "inherit";
         console.debug(
-          `[${this.labelText}] ${reason}, defaulting to inherit (returning)`,
+          `[${this.labelText}] No background color in DSL, defaulting to inherit (continuing)`,
         );
-      };
+      }
 
-      const calculateFontColor = (bgColor) => {
-        const brightness = brightnessIgnoreAlpha(bgColor);
-        const color = brightness > 128 ? "#000" : "#fff";
-
-        console.debug(
-          `[${this.labelText}] Set font color to ${color} (bg: ${bgColor}, brightness: ${brightness})`,
-        );
-
-        return color;
-      };
-
-      // Main logic
-      const bgColor = getBackgroundColor();
+      let bgColor = window
+        .getComputedStyle(this.$refs.participant)
+        .getPropertyValue("background-color");
 
       if (!bgColor) {
-        setInheritColor("No background color found");
+        this.color = "inherit";
+        console.debug(
+          `[${this.labelText}] No computed background color, defaulting to inherit (returning)`,
+        );
         return;
       }
 
-      this.color = calculateFontColor(bgColor);
+      let b = brightnessIgnoreAlpha(bgColor);
+      this.color = b > 128 ? "#000" : "#fff";
+      console.debug(
+        `[${this.labelText}] Set font color to ${this.color} (bg: ${bgColor}, brightness: ${b})`,
+      );
     },
   },
 };
