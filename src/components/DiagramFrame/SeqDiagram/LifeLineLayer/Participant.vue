@@ -162,7 +162,6 @@ export default {
     updateFontColor() {
       if (!this.backgroundColor) {
         this.color = "inherit";
-        return;
       }
       let bgColor = window
         .getComputedStyle(this.$refs.participant)
