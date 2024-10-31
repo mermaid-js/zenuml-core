@@ -160,19 +160,45 @@ export default {
       this.$store.commit("onSelect", this.entity.name);
     },
     updateFontColor() {
-      if (!this.backgroundColor) {
+      const getBackgroundColor = () => {
+        // Try getting color from props first
+        if (this.backgroundColor) {
+          return this.backgroundColor;
+        }
+
+        // Try getting computed style if no prop
+        return window
+          .getComputedStyle(this.$refs.participant)
+          .getPropertyValue("background-color");
+      };
+
+      const setInheritColor = (reason) => {
         this.color = "inherit";
-        return;
-      }
-      let bgColor = window
-        .getComputedStyle(this.$refs.participant)
-        .getPropertyValue("background-color");
+        console.debug(
+          `[${this.labelText}] ${reason}, defaulting to inherit (returning)`,
+        );
+      };
+
+      const calculateFontColor = (bgColor) => {
+        const brightness = brightnessIgnoreAlpha(bgColor);
+        const color = brightness > 128 ? "#000" : "#fff";
+
+        console.debug(
+          `[${this.labelText}] Set font color to ${color} (bg: ${bgColor}, brightness: ${brightness})`,
+        );
+
+        return color;
+      };
+
+      // Main logic
+      const bgColor = getBackgroundColor();
+
       if (!bgColor) {
-        this.color = "inherit";
+        setInheritColor("No background color found");
         return;
       }
-      let b = brightnessIgnoreAlpha(bgColor);
-      this.color = b > 128 ? "#000" : "#fff";
+
+      this.color = calculateFontColor(bgColor);
     },
   },
 };
