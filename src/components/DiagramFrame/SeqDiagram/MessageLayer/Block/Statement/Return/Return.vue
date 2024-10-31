@@ -6,8 +6,9 @@
     :data-signature="signature"
     :class="{
       'right-to-left': rightToLeft,
+      'bare-source': bareSource,
+      'bare-target': bareTarget,
       highlight: isCurrent,
-      'return-to-start': isReturnToStart,
     }"
     :style="{ width: width + 'px', left: left + 'px' }"
   >
@@ -66,8 +67,8 @@ export default {
     },
     left: function () {
       return this.rightToLeft
-        ? this.distance(this.target, this.from) + 2
-        : this.distance(this.source, this.from) + 2;
+        ? this.distance(this.target, this.from)
+        : this.distance(this.source, this.from);
     },
     rightToLeft: function () {
       return this.distance(this.target, this.source) < 0;
@@ -87,14 +88,45 @@ export default {
         this.context?.ret()?.ReturnTo()
       );
     },
+    bareSource: function () {
+      let localCtx = this.context;
+      while (
+        localCtx.parentCtx &&
+        (!localCtx?.Owner ||
+          (localCtx?.Owner && localCtx.Owner() !== this.source))
+      ) {
+        localCtx = localCtx.parentCtx;
+      }
+      console.log(
+        "bareSource",
+        localCtx.constructor.name,
+        this.source,
+        this.signature,
+      );
+      return localCtx.constructor.name !== "MessageContext";
+    },
+    bareTarget: function () {
+      let localCtx = this.context;
+      while (
+        localCtx.parentCtx &&
+        (!localCtx?.Owner ||
+          (localCtx?.Owner && localCtx.Owner() !== this.target))
+      ) {
+        localCtx = localCtx.parentCtx;
+      }
+      console.log(
+        "bareTarget",
+        localCtx.constructor.name,
+        this.target,
+        this.signature,
+      );
+      return localCtx.constructor.name !== "MessageContext";
+    },
     isCurrent: function () {
       return false;
     },
     isSelf: function () {
       return this.source === this.target;
-    },
-    isReturnToStart() {
-      return this.target === this.participants.Starter().name;
     },
     messageTextStyle() {
       return this.commentObj?.messageStyle;
@@ -117,3 +149,22 @@ export default {
   },
 };
 </script>
+<style scoped>
+.bare-source.return.right-to-left {
+  border-right-width: 0;
+}
+.bare-target.return.right-to-left {
+  border-left-width: 0;
+}
+.bare-source.return:not(.right-to-left) {
+  border-left-width: 0;
+}
+.bare-target.return:not(.right-to-left) {
+  border-right-width: 0;
+}
+
+.interaction.return {
+  border-left-width: 7px;
+  border-right-width: 7px;
+}
+</style>

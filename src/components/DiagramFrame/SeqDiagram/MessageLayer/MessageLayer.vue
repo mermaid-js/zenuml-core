@@ -111,15 +111,6 @@ onUpdated(() => {
     border-left-width: 7px;
   }
 
-  .interaction.return {
-    border-left-width: 7px;
-    border-right-width: 7px;
-  }
-
-  .interaction.return-to-start {
-    border-left-width: 0;
-  }
-
   .interaction:hover {
     cursor: pointer;
   }
