@@ -48,11 +48,12 @@ import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
 import WidthProviderOnBrowser from "@/positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
-import sequenceParser from "@/generated-parser/sequenceParser";
+import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 
 export default {
   name: "return",
   props: ["context", "comment", "commentObj", "number"],
+  mixins: [ArrowMixin],
   computed: {
     ...mapGetters(["distance", "cursor", "onElementClick", "participants"]),
     from: function () {
@@ -89,22 +90,6 @@ export default {
         this.context?.ret()?.ReturnTo()
       );
     },
-    borderWidth: function () {
-      const border = {
-        borderLeftWidth: "7px",
-        borderRightWidth: "7px",
-      };
-      const endSide = this.rightToLeft ? "Left" : "Right";
-      const startSide = this.rightToLeft ? "Right" : "Left";
-
-      if (!this.isJointOccurrence(this.source)) {
-        border[`border${startSide}Width`] = "0px";
-      }
-      if (!this.isJointOccurrence(this.target)) {
-        border[`border${endSide}Width`] = "0px";
-      }
-      return border;
-    },
     isCurrent: function () {
       return false;
     },
@@ -124,38 +109,6 @@ export default {
   methods: {
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
-    },
-    isJointOccurrence(participant) {
-      let ancestorContextForParticipant = this.findOwningContext(participant);
-
-      // If no owning context found, it means this is a bare connection
-      if (!ancestorContextForParticipant) {
-        return false;
-      }
-
-      // Check if the owning context creates an occurrence point
-      return (
-        ancestorContextForParticipant instanceof
-          sequenceParser.MessageContext ||
-        ancestorContextForParticipant instanceof sequenceParser.CreationContext
-      );
-    },
-    findOwningContext(participant) {
-      let currentContext = this.context;
-
-      while (currentContext) {
-        if (!currentContext.Owner) {
-          currentContext = currentContext.parentCtx;
-          continue;
-        }
-
-        if (currentContext.Owner() === participant) {
-          return currentContext;
-        }
-
-        currentContext = currentContext.parentCtx;
-      }
-      return null;
     },
   },
   components: {
