@@ -43,6 +43,10 @@ export default {
       if (messageContext && messageContext.Owner() === participant) {
         return messageContext;
       }
+      const creationContext = this.context.creation();
+      if (creationContext && creationContext.Owner() === participant) {
+        return creationContext;
+      }
       while (currentContext) {
         if (!currentContext.Owner) {
           currentContext = currentContext.parentCtx;

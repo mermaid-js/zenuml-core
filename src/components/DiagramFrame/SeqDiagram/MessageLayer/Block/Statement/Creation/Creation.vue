@@ -9,9 +9,8 @@
       'right-to-left': rightToLeft,
       '-translate-x-full': rightToLeft,
       highlight: isCurrent,
-      'inited-from-occurrence': isInitedFromOccurrence,
     }"
-    :style="{ width: interactionWidth + 'px' }"
+    :style="{ ...borderWidth, width: interactionWidth + 'px' }"
   >
     <comment v-if="comment" :commentObj="commentObj" />
     <!-- flex items-center is an idiom that vertically align items left and right.
@@ -72,24 +71,32 @@ import Message from "../Message/Message.vue";
 import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
 import { CodeRange } from "@/parser/CodeRange";
 import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
+import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 
 const logger = parentLogger.child({ name: "Creation" });
 
 export default {
   name: "creation",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  mixins: [ArrowMixin],
   computed: {
     ...mapGetters(["cursor", "onElementClick", "distance2"]),
     ...mapState(["numbering"]),
     from() {
       return this.context.Origin();
     },
+    source() {
+      return this.from;
+    },
+    target() {
+      return this.to;
+    },
     creation() {
       return this.context.creation();
     },
     interactionWidth() {
       let safeOffset = this.selfCallIndent || 0;
-      return Math.abs(this.distance2(this.from, this.to) - safeOffset) - 1;
+      return Math.abs(this.distance2(this.from, this.to) - safeOffset);
     },
     rightToLeft() {
       return this.distance2(this.from, this.to) < 0;
