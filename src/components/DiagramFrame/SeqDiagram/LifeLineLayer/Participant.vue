@@ -160,9 +160,6 @@ export default {
       this.$store.commit("onSelect", this.entity.name);
     },
     updateFontColor() {
-      if (!this.backgroundColor) {
-        this.color = "inherit";
-      }
       let bgColor = window
         .getComputedStyle(this.$refs.participant)
         .getPropertyValue("background-color");
