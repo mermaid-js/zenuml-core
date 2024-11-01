@@ -1,3 +1,10 @@
+/**
+ * Owner is the receiver of the message.
+ * For example, in `S -> A.m1 {B.m2 {C.m3}} D->E:m4`,
+ *                       |     |     |         |
+ * Owner of              m1    m2    m3        m4
+ */
+
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
 
 const seqParser = sequenceParser;
@@ -25,10 +32,6 @@ CreationContext.prototype.To = function () {
   return this.Constructor();
 };
 
-// Owner is essentially the 'to' or receiver of a message.
-// For example, in `S -> A.m1 {B.m2 {C.m3}}`,
-//                       |     |     |
-// Owner of              m1    m2    m3
 CreationContext.prototype.Owner = function () {
   if (!this.Constructor()) {
     return "Missing Constructor";
