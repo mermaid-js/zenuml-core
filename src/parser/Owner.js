@@ -21,6 +21,10 @@ CreationContext.prototype.Constructor = function () {
   return this.creationBody()?.construct()?.getFormattedText();
 };
 
+CreationContext.prototype.To = function () {
+  return this.Constructor();
+};
+
 // Owner is essentially the 'to' or receiver of a message.
 // For example, in `S -> A.m1 {B.m2 {C.m3}}`,
 //                       |     |     |
