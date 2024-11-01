@@ -15,7 +15,6 @@ import "./SignatureText";
 import "./Messages/MessageContext";
 import "./From";
 import "./key/Key";
-import "./IsInitedFromOccurrence";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import { formatText } from "../utils/StringUtil";
 

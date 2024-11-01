@@ -120,9 +120,6 @@ export default {
     isCurrent() {
       return this.creation.isCurrent(this.cursor);
     },
-    isInitedFromOccurrence: function () {
-      return this.creation.isInitedFromOccurrence(this.from);
-    },
     messageTextStyle() {
       return this.commentObj?.messageStyle;
     },
