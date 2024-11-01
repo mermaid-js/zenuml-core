@@ -10,7 +10,7 @@
       'bare-target': bareTarget,
       highlight: isCurrent,
     }"
-    :style="{ width: width + 'px', left: left + 'px' }"
+    :style="{ ...borderWidth, width: width + 'px', left: left + 'px' }"
   >
     <comment v-if="comment" :commentObj="commentObj" />
     <div v-if="isSelf" class="flex items-center">
@@ -46,8 +46,9 @@ import Comment from "../Comment/Comment.vue";
 import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
-import WidthProviderOnBrowser from "../../../../../../../positioning/WidthProviderFunc";
+import WidthProviderOnBrowser from "@/positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
+import sequenceParser from "@/generated-parser/sequenceParser";
 
 export default {
   name: "return",
@@ -88,39 +89,21 @@ export default {
         this.context?.ret()?.ReturnTo()
       );
     },
-    bareSource: function () {
-      let localCtx = this.context;
-      while (
-        localCtx.parentCtx &&
-        (!localCtx?.Owner ||
-          (localCtx?.Owner && localCtx.Owner() !== this.source))
-      ) {
-        localCtx = localCtx.parentCtx;
+    borderWidth: function () {
+      const border = {
+        borderLeftWidth: "7px",
+        borderRightWidth: "7px",
+      };
+      const endSide = this.rightToLeft ? "Left" : "Right";
+      const startSide = this.rightToLeft ? "Right" : "Left";
+
+      if (!this.isJointOccurrence(this.source)) {
+        border[`border${startSide}Width`] = "0px";
       }
-      console.log(
-        "bareSource",
-        localCtx.constructor.name,
-        this.source,
-        this.signature,
-      );
-      return localCtx.constructor.name !== "MessageContext";
-    },
-    bareTarget: function () {
-      let localCtx = this.context;
-      while (
-        localCtx.parentCtx &&
-        (!localCtx?.Owner ||
-          (localCtx?.Owner && localCtx.Owner() !== this.target))
-      ) {
-        localCtx = localCtx.parentCtx;
+      if (!this.isJointOccurrence(this.target)) {
+        border[`border${endSide}Width`] = "0px";
       }
-      console.log(
-        "bareTarget",
-        localCtx.constructor.name,
-        this.target,
-        this.signature,
-      );
-      return localCtx.constructor.name !== "MessageContext";
+      return border;
     },
     isCurrent: function () {
       return false;
@@ -142,6 +125,38 @@ export default {
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
     },
+    isJointOccurrence(participant) {
+      let ancestorContextForParticipant = this.findOwningContext(participant);
+
+      // If no owning context found, it means this is a bare connection
+      if (!ancestorContextForParticipant) {
+        return false;
+      }
+
+      // Check if the owning context creates an occurrence point
+      return (
+        ancestorContextForParticipant instanceof
+          sequenceParser.MessageContext ||
+        ancestorContextForParticipant instanceof sequenceParser.CreationContext
+      );
+    },
+    findOwningContext(participant) {
+      let currentContext = this.context;
+
+      while (currentContext) {
+        if (!currentContext.Owner) {
+          currentContext = currentContext.parentCtx;
+          continue;
+        }
+
+        if (currentContext.Owner() === participant) {
+          return currentContext;
+        }
+
+        currentContext = currentContext.parentCtx;
+      }
+      return null;
+    },
   },
   components: {
     Comment,
@@ -149,22 +164,3 @@ export default {
   },
 };
 </script>
-<style scoped>
-.bare-source.return.right-to-left {
-  border-right-width: 0;
-}
-.bare-target.return.right-to-left {
-  border-left-width: 0;
-}
-.bare-source.return:not(.right-to-left) {
-  border-left-width: 0;
-}
-.bare-target.return:not(.right-to-left) {
-  border-right-width: 0;
-}
-
-.interaction.return {
-  border-left-width: 7px;
-  border-right-width: 7px;
-}
-</style>
