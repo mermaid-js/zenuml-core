@@ -8,16 +8,13 @@
     v-on:click.stop="onClick"
     :data-signature="signature"
     :class="{
-      'to-occurrence': pointingToOccurrenceBar,
-      'pointing-to-line': !pointingToOccurrenceBar,
       'left-to-right': !rightToLeft,
       'right-to-left': rightToLeft,
-      'from-no-occurrence': !isTailAttachedToOccurrenceBar,
       highlight: isCurrent,
-      'inited-from-occurrence': isTailAttachedToOccurrenceBar,
       'self-invocation': isSelf,
     }"
     :style="{
+      ...borderWidth,
       width: interactionWidth + 'px',
       transform: 'translateX(' + translateX + 'px)',
     }"
@@ -49,6 +46,7 @@ import SelfInvocationAsync from "./SelfInvocationAsync/SelfInvocation-async.vue"
 import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
+import sequenceParser from "@/generated-parser/sequenceParser";
 
 function isNullOrUndefined(value) {
   return value === null || value === undefined;
@@ -94,6 +92,22 @@ export default {
     target: function () {
       return this.asyncMessage?.to()?.getFormattedText();
     },
+    borderWidth: function () {
+      const border = {
+        borderLeftWidth: "7px",
+        borderRightWidth: "7px",
+      };
+      const endSide = this.rightToLeft ? "Left" : "Right";
+      const startSide = this.rightToLeft ? "Right" : "Left";
+
+      if (!this.isJointOccurrence(this.source)) {
+        border[`border${startSide}Width`] = "0px";
+      }
+      if (!this.isJointOccurrence(this.target)) {
+        border[`border${endSide}Width`] = "0px";
+      }
+      return border;
+    },
     isCurrent: function () {
       const start = this.asyncMessage.start.start;
       const stop = this.asyncMessage.stop.stop + 1;
@@ -108,9 +122,6 @@ export default {
     isSelf: function () {
       return this.source === this.target;
     },
-    providedFrom: function () {
-      return this.context?.asyncMessage()?.From();
-    },
     origin: function () {
       return this.context?.Origin();
     },
@@ -120,36 +131,42 @@ export default {
     messageClassNames() {
       return this.commentObj?.messageClassNames;
     },
-    pointingToOccurrenceBar() {
-      return this.parentCtxIncludeMessage(this.asyncMessage);
-    },
-    isTailAttachedToOccurrenceBar: function () {
-      return this.asyncMessage?.isInitedFromOccurrence(this.source);
-    },
   },
   methods: {
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
     },
-    parentCtxIncludeMessage(current) {
-      const target = current.Owner();
+    isJointOccurrence(participant) {
+      let ancestorContextForParticipant = this.findOwningContext(participant);
 
-      if (!target) {
+      // If no owning context found, it means this is a bare connection
+      if (!ancestorContextForParticipant) {
         return false;
       }
 
-      current = current?.parentCtx;
+      // Check if the owning context creates an occurrence point
+      return (
+        ancestorContextForParticipant instanceof
+          sequenceParser.MessageContext ||
+        ancestorContextForParticipant instanceof sequenceParser.CreationContext
+      );
+    },
+    findOwningContext(participant) {
+      let currentContext = this.context;
 
-      while (current) {
-        if (current.To) {
-          if (current.To() === target) {
-            return true;
-          }
+      while (currentContext) {
+        if (!currentContext.Owner) {
+          currentContext = currentContext.parentCtx;
+          continue;
         }
-        current = current.parentCtx;
-      }
 
-      return false;
+        if (currentContext.Owner() === participant) {
+          return currentContext;
+        }
+
+        currentContext = currentContext.parentCtx;
+      }
+      return null;
     },
   },
   components: {
@@ -164,22 +181,6 @@ export default {
 <style scoped>
 .interaction .invisible-occurrence {
   height: 20px;
-}
-
-.interaction.pointing-to-line.left-to-right {
-  border-right-width: 0;
-}
-
-.interaction.pointing-to-line.right-to-left {
-  border-left-width: 0;
-}
-
-.interaction.to-occurrence.left-to-right {
-  border-right-width: 7px;
-}
-
-.interaction.to-occurrence.right-to-left {
-  border-left-width: 7px;
 }
 
 .interaction.async :deep(.message) {
