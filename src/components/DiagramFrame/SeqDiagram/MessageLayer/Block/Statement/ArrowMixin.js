@@ -38,12 +38,15 @@ export default {
     },
     // Input `participant` is the receiver. This method
     findContextForReceiver(participant) {
+      if (!this.context) {
+        return null;
+      }
       let currentContext = this.context;
-      const messageContext = this.context.message();
+      const messageContext = this.context.message && this.context.message();
       if (messageContext && messageContext.Owner() === participant) {
         return messageContext;
       }
-      const creationContext = this.context.creation();
+      const creationContext = this.context.creation && this.context.creation();
       if (creationContext && creationContext.Owner() === participant) {
         return creationContext;
       }

@@ -143,11 +143,11 @@ export default {
         const halfWidthOfPlaceholder =
           this.$refs["participantPlaceHolder"].offsetWidth / 2;
         this.$refs["messageContainer"].style.width = `calc(100% + ${
-          halfWidthOfPlaceholder + 7
+          halfWidthOfPlaceholder + 6
         }px`;
         if (this.rightToLeft) {
           this.$refs["messageContainer"].style.transform = `translateX( ${-(
-            halfWidthOfPlaceholder + 7
+            halfWidthOfPlaceholder + 8
           )}px`;
         }
       };
@@ -166,3 +166,15 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.interaction {
+  background-color: green;
+  border-color: greenyellow;
+  .message-container {
+    background-color: red;
+    .message {
+      background-color: purple;
+    }
+  }
+}
+</style>
