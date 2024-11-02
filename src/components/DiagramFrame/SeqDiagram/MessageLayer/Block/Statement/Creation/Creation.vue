@@ -166,15 +166,3 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-.interaction {
-  background-color: green;
-  border-color: greenyellow;
-  .message-container {
-    background-color: red;
-    .message {
-      background-color: purple;
-    }
-  }
-}
-</style>
