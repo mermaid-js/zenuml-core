@@ -8,11 +8,10 @@
     :class="{
       highlight: isCurrent,
       self: isSelf,
-      'from-no-occurrence': providedFrom && providedFrom !== origin,
-      'inited-from-occurrence': isInitedFromOccurrence,
       'right-to-left': rightToLeft,
     }"
     :style="{
+      ...borderWidth,
       width: isSelf ? undefined : interactionWidth + 'px',
       transform: 'translateX(' + translateX + 'px)',
     }"
@@ -73,6 +72,7 @@ import { mapGetters } from "vuex";
 import SelfInvocation from "./SelfInvocation/SelfInvocation.vue";
 import { CodeRange } from "@/parser/CodeRange";
 import { ProgContext } from "@/parser";
+import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 
 export default {
   name: "interaction",
@@ -83,6 +83,7 @@ export default {
     "number",
     // "inheritFromOccurrence",
   ],
+  mixins: [ArrowMixin],
   computed: {
     // add tracker to the mapGetters
     ...mapGetters(["participants", "distance2", "cursor", "onElementClick"]),
@@ -103,6 +104,13 @@ export default {
     },
     from: function () {
       return this.providedFrom || this.origin;
+    },
+    // used by ArrowMixin
+    source: function () {
+      return this.from;
+    },
+    target: function () {
+      return this.to;
     },
     outOfBand: function () {
       return !!this.providedFrom && this.providedFrom !== this.origin;
@@ -165,9 +173,6 @@ export default {
     isSelf: function () {
       // this.to === undefined if it is a self interaction and root message.
       return !this.to || this.to === this.from;
-    },
-    isInitedFromOccurrence: function () {
-      return this.message?.isInitedFromOccurrence(this.context);
     },
   },
   methods: {

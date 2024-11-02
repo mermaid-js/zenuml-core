@@ -21,8 +21,9 @@ export default {
   },
   methods: {
     isJointOccurrence(participant) {
-      let ancestorContextForParticipant = this.findOwningContext(participant);
-
+      let ancestorContextForParticipant =
+        this.findContextForReceiver(participant);
+      console.debug("owning context", ancestorContextForParticipant);
       // If no owning context found, it means this is a bare connection
       if (!ancestorContextForParticipant) {
         return false;
@@ -35,9 +36,20 @@ export default {
         ancestorContextForParticipant instanceof sequenceParser.CreationContext
       );
     },
-    findOwningContext(participant) {
+    // Input `participant` is the receiver. This method
+    findContextForReceiver(participant) {
+      if (!this.context) {
+        return null;
+      }
       let currentContext = this.context;
-
+      const messageContext = this.context.message && this.context.message();
+      if (messageContext && messageContext.Owner() === participant) {
+        return messageContext;
+      }
+      const creationContext = this.context.creation && this.context.creation();
+      if (creationContext && creationContext.Owner() === participant) {
+        return creationContext;
+      }
       while (currentContext) {
         if (!currentContext.Owner) {
           currentContext = currentContext.parentCtx;

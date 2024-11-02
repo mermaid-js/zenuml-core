@@ -7,11 +7,10 @@
     :data-signature="signature"
     :class="{
       'right-to-left': rightToLeft,
-      '-translate-x-full': rightToLeft,
+      '-translate-x-full-minus-1': rightToLeft,
       highlight: isCurrent,
-      'inited-from-occurrence': isInitedFromOccurrence,
     }"
-    :style="{ width: interactionWidth + 'px' }"
+    :style="{ ...borderWidth, width: interactionWidth + 'px' }"
   >
     <comment v-if="comment" :commentObj="commentObj" />
     <!-- flex items-center is an idiom that vertically align items left and right.
@@ -72,24 +71,42 @@ import Message from "../Message/Message.vue";
 import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
 import { CodeRange } from "@/parser/CodeRange";
 import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
+import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 
 const logger = parentLogger.child({ name: "Creation" });
+
+const OCCURRENCE_BAR_SIDE_WIDTH = 7; // Width of each side of the occurrence bar
+const LIFELINE_WIDTH = 1;
 
 export default {
   name: "creation",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  mixins: [ArrowMixin],
   computed: {
     ...mapGetters(["cursor", "onElementClick", "distance2"]),
     ...mapState(["numbering"]),
     from() {
       return this.context.Origin();
     },
+    source() {
+      return this.from;
+    },
+    target() {
+      return this.to;
+    },
     creation() {
       return this.context.creation();
     },
     interactionWidth() {
       let safeOffset = this.selfCallIndent || 0;
-      return Math.abs(this.distance2(this.from, this.to) - safeOffset) - 1;
+      // Explanation of the formula:
+      // px: 0 1 2 3 4 5 6 7 8
+      // L     a           b
+      // gap between a and b is [(b - a) - 1]
+      return (
+        Math.abs(this.distance2(this.from, this.to) - safeOffset) -
+        LIFELINE_WIDTH
+      );
     },
     rightToLeft() {
       return this.distance2(this.from, this.to) < 0;
@@ -113,9 +130,6 @@ export default {
     isCurrent() {
       return this.creation.isCurrent(this.cursor);
     },
-    isInitedFromOccurrence: function () {
-      return this.creation.isInitedFromOccurrence(this.from);
-    },
     messageTextStyle() {
       return this.commentObj?.messageStyle;
     },
@@ -138,17 +152,19 @@ export default {
           return;
         const halfWidthOfPlaceholder =
           this.$refs["participantPlaceHolder"].offsetWidth / 2;
+        // 100% width does not consider of the borders.
         this.$refs["messageContainer"].style.width = `calc(100% + ${
-          halfWidthOfPlaceholder + 7
+          halfWidthOfPlaceholder + OCCURRENCE_BAR_SIDE_WIDTH
         }px`;
         if (this.rightToLeft) {
           this.$refs["messageContainer"].style.transform = `translateX( ${-(
-            halfWidthOfPlaceholder + 7
+            halfWidthOfPlaceholder +
+            OCCURRENCE_BAR_SIDE_WIDTH +
+            LIFELINE_WIDTH
           )}px`;
         }
       };
       _layoutMessageContainer();
-      // setTimeout(_layoutMessageContainer)
     },
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
@@ -162,3 +178,8 @@ export default {
   },
 };
 </script>
+<style scoped>
+.-translate-x-full-minus-1 {
+  transform: translateX(calc(-100% - 1px));
+}
+</style>
