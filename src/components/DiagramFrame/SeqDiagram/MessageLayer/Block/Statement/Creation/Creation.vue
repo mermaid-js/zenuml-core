@@ -7,7 +7,7 @@
     :data-signature="signature"
     :class="{
       'right-to-left': rightToLeft,
-      '-translate-x-full': rightToLeft,
+      '-translate-x-full-minus-1': rightToLeft,
       highlight: isCurrent,
     }"
     :style="{ ...borderWidth, width: interactionWidth + 'px' }"
@@ -75,6 +75,9 @@ import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/
 
 const logger = parentLogger.child({ name: "Creation" });
 
+const OCCURRENCE_BAR_SIDE_WIDTH = 7; // Width of each side of the occurrence bar
+const LIFELINE_WIDTH = 1;
+
 export default {
   name: "creation",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
@@ -96,7 +99,14 @@ export default {
     },
     interactionWidth() {
       let safeOffset = this.selfCallIndent || 0;
-      return Math.abs(this.distance2(this.from, this.to) - safeOffset);
+      // Explanation of the formula:
+      // px: 0 1 2 3 4 5 6 7 8
+      // L     a           b
+      // gap between a and b is [(b - a) - 1]
+      return (
+        Math.abs(this.distance2(this.from, this.to) - safeOffset) -
+        LIFELINE_WIDTH
+      );
     },
     rightToLeft() {
       return this.distance2(this.from, this.to) < 0;
@@ -142,17 +152,19 @@ export default {
           return;
         const halfWidthOfPlaceholder =
           this.$refs["participantPlaceHolder"].offsetWidth / 2;
+        // 100% width does not consider of the borders.
         this.$refs["messageContainer"].style.width = `calc(100% + ${
-          halfWidthOfPlaceholder + 6
+          halfWidthOfPlaceholder + OCCURRENCE_BAR_SIDE_WIDTH
         }px`;
         if (this.rightToLeft) {
           this.$refs["messageContainer"].style.transform = `translateX( ${-(
-            halfWidthOfPlaceholder + 8
+            halfWidthOfPlaceholder +
+            OCCURRENCE_BAR_SIDE_WIDTH +
+            LIFELINE_WIDTH
           )}px`;
         }
       };
       _layoutMessageContainer();
-      // setTimeout(_layoutMessageContainer)
     },
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
@@ -166,3 +178,8 @@ export default {
   },
 };
 </script>
+<style scoped>
+.-translate-x-full-minus-1 {
+  transform: translateX(calc(-100% - 1px));
+}
+</style>
