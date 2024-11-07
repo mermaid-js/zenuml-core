@@ -19,8 +19,9 @@ export class Assignment implements IAssignment {
     this.assignee = assignee || "";
     this.type = type || "";
   }
-
-  getText() {
+  // The assignment label that is rendered in the diagram.
+  // For example, for `Type t = new Class()`, the label is `t:Type`.
+  getLabel() {
     return [this.assignee, this.type].filter(Boolean).join(":");
   }
 }

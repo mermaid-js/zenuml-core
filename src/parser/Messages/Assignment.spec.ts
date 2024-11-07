@@ -8,7 +8,7 @@ describe("Assignment", function () {
     "getText: assignee: %s, type: %s, text: %s",
     function (assignee, type, text) {
       const assignment = new Assignment(assignee, type);
-      expect(assignment.getText()).toEqual(text);
+      expect(assignment.getLabel()).toEqual(text);
     },
   );
 

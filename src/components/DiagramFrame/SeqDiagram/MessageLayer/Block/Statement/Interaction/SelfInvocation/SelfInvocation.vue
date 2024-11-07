@@ -68,7 +68,7 @@ const labelPosition: ComputedRef<[number, number]> = computed(() => {
 const assignee = computed(() => {
   let assignment = context?.value.Assignment();
   if (!assignment) return "";
-  return assignment.getText();
+  return assignment.getLabel();
 });
 const signature = computed(() => {
   return context?.value.SignatureText();
