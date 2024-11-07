@@ -38,3 +38,18 @@ MessageContext.prototype.Assignment = function () {
   }
   return undefined;
 };
+
+// @ts-ignore
+MessageContext.prototype.isSimpleAssignment = function () {
+  // A simple assignment is an assignment that does not have a block.
+  // For example, `a = b` is a simple assignment and `a = b { ... }` is not.
+  const hasAssignment = this.messageBody().assignment() !== undefined;
+  const func = this.messageBody().func();
+  const signatures = func.signature();
+  // @ts-ignore
+  const hasInvocation =
+    signatures?.some((signature) => signature.invocation()) ?? false;
+  const hasBraceBlock = !!this.braceBlock();
+  const hasTo = !!this.messageBody().to();
+  return hasAssignment && !hasTo && !hasInvocation && !hasBraceBlock;
+};
