@@ -32,7 +32,7 @@ function rootContext(code) {
   const tokens = new antlr4.CommonTokenStream(lexer);
   const parser = new sequenceParser(tokens);
   parser.addErrorListener(new SeqErrorListener());
-  return parser._syntaxErrors ? null : parser.prog();
+  return parser.prog();
 }
 
 antlr4.ParserRuleContext.prototype.getFormattedText = function () {
