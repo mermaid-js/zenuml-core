@@ -1,6 +1,7 @@
 import antlr4 from "antlr4";
 import { MessageContextListener } from "./MessageContextListener";
 import { RootContext } from "@/parser/index";
+import { OwnableMessageType } from "@/parser/OwnableMessage";
 
 describe("MessageListener", () => {
   it("can handle Message and Creation", () => {
@@ -24,28 +25,28 @@ describe("MessageListener", () => {
         label: "method(E.m)",
         signature: "method(E.m)",
         to: "A",
-        type: 0,
+        type: OwnableMessageType.SyncMessage,
       },
       {
         from: "B",
         label: "method",
         signature: "method",
         to: "C",
-        type: 0,
+        type: OwnableMessageType.SyncMessage,
       },
       {
         from: "_STARTER_",
         label: "«create»",
         signature: "«create»",
         to: "B",
-        type: 2,
+        type: OwnableMessageType.CreationMessage,
       },
       {
         from: "C",
         label: " message",
         signature: " message",
         to: "D",
-        type: 1,
+        type: OwnableMessageType.AsyncMessage,
       },
     ]);
   });
