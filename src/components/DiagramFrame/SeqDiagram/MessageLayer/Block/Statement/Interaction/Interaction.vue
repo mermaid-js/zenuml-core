@@ -25,8 +25,12 @@
     <comment v-if="hasComment" :commentObj="commentObj" />
     <div
       v-if="isSimpleAssignment"
-      class="border-skin-participant underline decoration-double leading-4 flex flex-col justify-center p-1"
+      class="relative inline-block p-2 pr-6 mx-auto bg-gray-100 text-gray-700 rounded-bl-md rounded-tl-md rounded-br-md overflow-hidden"
     >
+      <!-- Corner element -->
+      <div
+        class="absolute top-0 right-0 w-0 h-0 border-8 border-t-white border-r-white border-b-gray-200 border-l-gray-200 shadow-sm"
+      ></div>
       {{ simpleAssignmentLabel }}
     </div>
     <self-invocation
