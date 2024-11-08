@@ -25,14 +25,13 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
     coordinates,
   );
 
-  return Math.max(
+  return (
     coordinates.distance(leftParticipant, rightParticipant) +
-      border.left +
-      border.right +
-      coordinates.half(leftParticipant) +
-      coordinates.half(rightParticipant) +
-      extraWidth,
-    350,
+    border.left +
+    border.right +
+    coordinates.half(leftParticipant) +
+    coordinates.half(rightParticipant) +
+    extraWidth
   );
 }
 
@@ -42,15 +41,17 @@ function extraWidthDueToSelfMessage(
   coordinates: Coordinates,
 ) {
   const allMessages = AllMessages(ctx);
+  console.log("allMessages", allMessages);
   const widths = allMessages
     .filter((m) => m.from === m.to)
     // 37 is arrow width (30) + half occurrence width(7)
     .map(
       (s) =>
-        WidthProviderOnBrowser(s.signature, TextType.MessageContent) +
+        WidthProviderOnBrowser(s.label, TextType.MessageContent) +
         37 -
         coordinates.distance(s.from, rightParticipant) -
         coordinates.half(rightParticipant),
     );
+  console.debug("extraWidthDueToSelfMessage", widths);
   return Math.max.apply(null, [0, ...widths]);
 }

@@ -12,6 +12,7 @@ import "./RefContext";
 import "./Origin";
 import "./Divider/DividerContext";
 import "./SignatureText";
+import "./MessageLabel";
 import "./Messages/MessageContext";
 import "./From";
 import "./key/Key";

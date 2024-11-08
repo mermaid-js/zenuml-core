@@ -151,7 +151,4 @@ export default {
 * {
   border-color: inherit;
 }
-.fragment {
-  min-width: 200px;
-}
 </style>
