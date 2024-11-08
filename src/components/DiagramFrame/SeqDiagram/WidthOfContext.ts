@@ -25,13 +25,14 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
     coordinates,
   );
 
-  return (
+  return Math.max(
     coordinates.distance(leftParticipant, rightParticipant) +
-    border.left +
-    border.right +
-    coordinates.half(leftParticipant) +
-    coordinates.half(rightParticipant) +
-    extraWidth
+      border.left +
+      border.right +
+      coordinates.half(leftParticipant) +
+      coordinates.half(rightParticipant) +
+      extraWidth,
+    350,
   );
 }
 

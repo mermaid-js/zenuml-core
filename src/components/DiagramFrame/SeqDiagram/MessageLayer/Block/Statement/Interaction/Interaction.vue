@@ -23,8 +23,14 @@
       :class="{ 'right-to-left': rightToLeft }"
     ></div>
     <comment v-if="hasComment" :commentObj="commentObj" />
+    <div
+      v-if="isSimpleAssignment"
+      class="border-skin-participant underline decoration-double leading-4 flex flex-col justify-center p-1"
+    >
+      {{ simpleAssignmentLabel }}
+    </div>
     <self-invocation
-      v-if="isSelf"
+      v-else-if="!isSimpleAssignment && isSelf"
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
       :context="message"
@@ -42,6 +48,7 @@
       :number="number"
     />
     <occurrence
+      v-if="!isSimpleAssignment"
       :context="message"
       :participant="to"
       :selfCallIndent="passOnOffset"
@@ -49,7 +56,7 @@
       :number="number"
     />
     <message
-      v-if="assignee && !isSelf"
+      v-if="assignee && !isSimpleAssignment && !isSelf"
       class="return transform -translate-y-full"
       :context="message"
       :content="assignee"
@@ -118,7 +125,7 @@ export default {
     assignee: function () {
       let assignment = this.message?.Assignment();
       if (!assignment) return "";
-      return assignment.getText();
+      return assignment.getLabel();
     },
     signature: function () {
       return this.message?.SignatureText();
@@ -173,6 +180,12 @@ export default {
     isSelf: function () {
       // this.to === undefined if it is a self interaction and root message.
       return !this.to || this.to === this.from;
+    },
+    isSimpleAssignment: function () {
+      return this.message?.isSimpleAssignment();
+    },
+    simpleAssignmentLabel: function () {
+      return this.isSimpleAssignment && this.message.getFormattedText();
     },
   },
   methods: {

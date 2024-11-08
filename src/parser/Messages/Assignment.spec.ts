@@ -24,6 +24,7 @@ describe("Assignment", function () {
 describe("MessageContext - isSimpleAssignment", () => {
   test.each([
     ["a = b", true],
+    ["a", false],
     ["a = b.m", false],
     ["a = b()", false],
     ["a = b(c)", false],
