@@ -1,6 +1,6 @@
 import antlr4 from "antlr4";
-import { MessageContextListener } from "../../../src/positioning/MessageContextListener";
-import { RootContext } from "../../../src/parser/index";
+import { MessageContextListener } from "./MessageContextListener";
+import { RootContext } from "@/parser";
 
 describe("MessageListener", () => {
   it("can handle Message and Creation", () => {
@@ -15,6 +15,7 @@ describe("MessageListener", () => {
     const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
     const messageContextListener = new MessageContextListener();
+    // @ts-ignore
     walker.walk(messageContextListener, rootContext);
 
     expect(messageContextListener.result()).toStrictEqual([
@@ -56,6 +57,7 @@ describe("MessageListener", () => {
     const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
     const messageContextListener = new MessageContextListener();
+    // @ts-ignore
     walker.walk(messageContextListener, rootContext);
 
     expect(messageContextListener.result()).toStrictEqual([
@@ -75,6 +77,7 @@ describe("MessageListener", () => {
     const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
     const messageContextListener = new MessageContextListener();
+    // @ts-ignore
     walker.walk(messageContextListener, rootContext);
 
     expect(messageContextListener.result()).toStrictEqual([
