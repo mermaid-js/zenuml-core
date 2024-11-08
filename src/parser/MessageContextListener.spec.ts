@@ -1,6 +1,6 @@
 import antlr4 from "antlr4";
 import { MessageContextListener } from "./MessageContextListener";
-import { RootContext } from "@/parser";
+import { RootContext } from "@/parser/index";
 
 describe("MessageListener", () => {
   it("can handle Message and Creation", () => {

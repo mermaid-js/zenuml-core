@@ -1,4 +1,4 @@
-import { AllMessages } from "@/positioning/MessageContextListener";
+import { AllMessages } from "@/parser/MessageContextListener";
 import WidthProviderOnBrowser from "../../../positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
 import { Participants } from "@/parser";
