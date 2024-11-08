@@ -83,7 +83,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Build the site for demo page and embed view
-        run: pnpm build:site
+        run: pnpm build:gh-pages
       - name: Upload artifact for pages # upload zipped artifact named 'gh-pages' for actions/deploy-pages@v1
         uses: actions/upload-pages-artifact@v1
         with:
