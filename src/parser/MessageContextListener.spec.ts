@@ -6,9 +6,10 @@ import { OwnableMessageType } from "@/parser/OwnableMessage";
 describe("MessageListener", () => {
   it("can handle Message and Creation", () => {
     const code = `
-    A.method(E.m) {
+    res = A.method(E.m) {
       B->C.method
     }
+    var = res
     new B
     C->D: message
     `;
@@ -32,6 +33,13 @@ describe("MessageListener", () => {
         label: "method",
         signature: "method",
         to: "C",
+        type: OwnableMessageType.SyncMessage,
+      },
+      {
+        from: "_STARTER_",
+        label: "var=res",
+        signature: "res",
+        to: "_STARTER_",
         type: OwnableMessageType.SyncMessage,
       },
       {
