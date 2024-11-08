@@ -13,11 +13,13 @@ group "B C" {@EC2 B @ECS C}
 "bg color" #FF0000
 @Starter("OptionalStarter")
 new B
+var = val
 ReturnType ret = ParticipantName.methodA(a, b) {
   // Customised style for RESTFul API - \`POST /order\` <br>
   ReturnType ret2 = selfCall() {
     B.syncCallWithinSelfCall() {
-      ParticipantName.rightToLeftCall()
+      result = ParticipantName.rightToLeftCall()
+      var = result
       return B
     }
     "space in name"->"bg color".syncMethod(from, to)
@@ -47,7 +49,7 @@ ReturnType ret = ParticipantName.methodA(a, b) {
         return C
       }
     } finally {
-      C: async call from implied source  
+      C: async call from implied source
     }
     =====divider can be anywhere=====
   } else if ("another condition") {
