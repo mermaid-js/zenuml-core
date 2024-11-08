@@ -10,6 +10,7 @@
     "dev": "vite dev --port 8080 --host 0.0.0.0",
     "preview": "vite preview --port 8080 --host",
     "build:site": "vite build",
+    "build:gh-pages": "vite build --mode gh-pages",
     "build": "vite build -c vite.config.lib.js",
     "test": "vitest",
     "cy": "cypress run",
