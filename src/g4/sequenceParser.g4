@@ -159,7 +159,6 @@ message
 
 messageBody
  : assignment? ((from ARROW)? to DOT)? func
- | assignment
  | (from ARROW)? to DOT   // A->B. or B.
  ;
 
