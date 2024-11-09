@@ -1,11 +1,11 @@
 <template>
+  <!-- #207 adding pl-5 to push the _STARTER_ participant to the right, so we can render the root level self messages.  -->
   <div
-    class="zenuml sequence-diagram relative box-border text-left overflow-visible"
+    class="zenuml sequence-diagram relative box-border text-left overflow-visible px-5"
     :class="theme"
     ref="diagramRef"
   >
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
-         .bg-skin-base is repeated because .zenuml reset it to default theme.
      -->
     <div :style="{ paddingLeft: `${paddingLeft}px` }" class="relative">
       <template v-if="mode === RenderMode.Dynamic">
