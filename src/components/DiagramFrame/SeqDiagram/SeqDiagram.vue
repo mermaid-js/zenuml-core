@@ -50,7 +50,7 @@ import MessageLayer from "./MessageLayer/MessageLayer.vue";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
-import { MARGIN } from "@/positioning/Constants";
+import { MIN_PARTICIPANT_WIDTH } from "@/positioning/Constants";
 import { RenderMode } from "@/store/Store";
 
 const store = useStore();
@@ -64,10 +64,10 @@ const paddingLeft = computed(() => {
   let frameBuilder = new FrameBuilder(allParticipants);
   const frame = frameBuilder.getFrame(rootContext.value);
   if (!frame) {
-    return 0;
+    return MIN_PARTICIPANT_WIDTH / 2;
   }
   const border = FrameBorder(frame);
-  return border.left + MARGIN + 20;
+  return border.left + MIN_PARTICIPANT_WIDTH / 2;
 });
 
 const diagramRef = ref(null);
