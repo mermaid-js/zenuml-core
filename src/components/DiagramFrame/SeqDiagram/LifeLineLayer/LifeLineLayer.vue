@@ -110,7 +110,7 @@ export default {
       return !!localStorage.zenumlDebug;
     },
     invisibleStarter() {
-      return this.starterParticipant.name === "_STARTER_";
+      return false;
     },
     starterParticipant() {
       return this.participants.Starter();
