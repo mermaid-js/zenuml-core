@@ -3,40 +3,64 @@
 2. A->A: self async message
 -->
 <template>
-  <div
-    class="interaction async"
-    v-on:click.stop="onClick"
-    :data-signature="signature"
-    :class="{
-      'left-to-right': !rightToLeft,
-      'right-to-left': rightToLeft,
-      highlight: isCurrent,
-      'self-invocation': isSelf,
-    }"
-    :style="{
-      ...borderWidth,
-      width: interactionWidth + 'px',
-      transform: 'translateX(' + translateX + 'px)',
-    }"
-  >
-    <comment v-if="comment" :commentObj="commentObj" />
-    <self-invocation-async
-      v-if="isSelf"
-      :classNames="messageClassNames"
-      :textStyle="messageTextStyle"
-      :context="asyncMessage"
-      :number="number"
-    />
-    <message
-      v-else
-      :classNames="messageClassNames"
-      :textStyle="messageTextStyle"
-      :context="asyncMessage"
-      :content="signature"
-      :rtl="rightToLeft"
-      type="async"
-      :number="number"
-    />
+  <div>
+    <div v-if="target === 'UNKNOWN'">
+      <div class="bg-white shadow-sm">
+        <div class="font-mono text-base">
+          <span class="relative group">
+            <span
+              class="italic text-gray-500 bg-gray-50 px-2 py-0.5 rounded cursor-help"
+            >
+              specify target
+            </span>
+            <!-- Tooltip -->
+            <span
+              class="invisible group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap"
+            >
+              Async Message: <code>source->target:message</code><br />
+              Sync Message: <code>source->target.message</code>
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div v-else>
+      <div
+        class="interaction async"
+        v-on:click.stop="onClick"
+        :data-signature="signature"
+        :class="{
+          'left-to-right': !rightToLeft,
+          'right-to-left': rightToLeft,
+          highlight: isCurrent,
+          'self-invocation': isSelf,
+        }"
+        :style="{
+          ...borderWidth,
+          width: interactionWidth + 'px',
+          transform: 'translateX(' + translateX + 'px)',
+        }"
+      >
+        <comment v-if="comment" :commentObj="commentObj" />
+        <self-invocation-async
+          v-if="isSelf"
+          :classNames="messageClassNames"
+          :textStyle="messageTextStyle"
+          :context="asyncMessage"
+          :number="number"
+        />
+        <message
+          v-else
+          :classNames="messageClassNames"
+          :textStyle="messageTextStyle"
+          :context="asyncMessage"
+          :content="signature"
+          :rtl="rightToLeft"
+          type="async"
+          :number="number"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -85,13 +109,13 @@ export default {
       return this.distance(this.target, this.source) < 0;
     },
     signature: function () {
-      return this.asyncMessage?.content()?.getFormattedText();
+      return this.asyncMessage?.content()?.getFormattedText() || "";
     },
     source: function () {
       return this.asyncMessage?.from()?.getFormattedText() || this.from;
     },
     target: function () {
-      return this.asyncMessage?.to()?.getFormattedText();
+      return this.asyncMessage?.to()?.getFormattedText() || "UNKNOWN";
     },
     isCurrent: function () {
       const start = this.asyncMessage.start.start;
