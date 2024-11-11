@@ -61,13 +61,10 @@ const coordinates = computed(() => store.getters.coordinates);
 const width = computed(() => TotalWidth(rootContext.value, coordinates.value));
 const paddingLeft = computed(() => {
   const allParticipants = coordinates.value.orderedParticipantNames();
-  let frameBuilder = new FrameBuilder(allParticipants);
+  const frameBuilder = new FrameBuilder(allParticipants);
   const frame = frameBuilder.getFrame(rootContext.value);
-  if (!frame) {
-    return MIN_PARTICIPANT_WIDTH / 2;
-  }
-  const border = FrameBorder(frame);
-  return border.left + MIN_PARTICIPANT_WIDTH / 2;
+  const leftPadding = frame ? FrameBorder(frame).left : 0;
+  return leftPadding + MIN_PARTICIPANT_WIDTH / 2;
 });
 
 const diagramRef = ref(null);
