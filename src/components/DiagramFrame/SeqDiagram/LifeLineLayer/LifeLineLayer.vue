@@ -19,7 +19,6 @@
         v-if="starterOnTheLeft"
         :entity="starterParticipant"
         class="starter"
-        :class="{ invisible: invisibleStarter && !debug }"
         :renderParticipants="renderParticipants"
         :renderLifeLine="renderLifeLine"
       />
@@ -108,9 +107,6 @@ export default {
     ]),
     debug() {
       return !!localStorage.zenumlDebug;
-    },
-    invisibleStarter() {
-      return false;
     },
     starterParticipant() {
       return this.participants.Starter();
