@@ -5,24 +5,31 @@
 <template>
   <div>
     <div v-if="target === 'UNKNOWN'">
-      <div class="bg-white shadow-sm">
-        <div class="font-mono text-base">
-          <span class="relative group">
-            <span
-              class="italic text-gray-500 bg-gray-50 px-2 py-0.5 rounded cursor-help"
-            >
-              specify target
-            </span>
-            <!-- Tooltip -->
-            <span
-              class="invisible group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap"
-            >
-              Async Message: <code>source->target:message</code><br />
-              Sync Message: <code>source->target.message</code>
-            </span>
-          </span>
-        </div>
-      </div>
+      <diagnostic
+        message="Unknown target"
+        severity="info"
+        class="interaction async"
+      >
+        target not specified
+        <template #tooltip>
+          <div class="space-y-1 font-mono">
+            <div>
+              <span class="inline-block w-28">Async Message:</span>
+              <code class="px-1 bg-gray-700 rounded">
+                source-><span class="text-yellow-400">target</span
+                ><span class="text-red-400">:</span>message
+              </code>
+            </div>
+            <div>
+              <span class="inline-block w-28">Sync Message:</span>
+              <code class="px-1 bg-gray-700 rounded">
+                source-><span class="text-yellow-400">target</span
+                ><span class="text-red-400">.</span>message
+              </code>
+            </div>
+          </div>
+        </template>
+      </diagnostic>
     </div>
     <div v-else>
       <div
@@ -71,6 +78,7 @@ import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
+import Diagnostic from "@/components/DiagramFrame/SeqDiagram/Diagnostic.vue";
 
 function isNullOrUndefined(value) {
   return value === null || value === undefined;
@@ -147,6 +155,7 @@ export default {
     },
   },
   components: {
+    Diagnostic,
     Comment,
     SelfInvocationAsync,
     Message,
