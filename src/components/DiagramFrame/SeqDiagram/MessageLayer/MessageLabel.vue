@@ -11,7 +11,7 @@
     @keyup="handleKeyup"
     @keydown="handleKeydown"
   >
-    {{ fomattedLabelText }}
+    {{ formattedLabelText }}
   </label>
 </template>
 <script setup lang="ts">
@@ -29,6 +29,7 @@ const props = withDefaults(
     isSelf?: boolean;
   }>(),
   {
+    labelText: "",
     isAsync: false,
     isSelf: false,
   },
@@ -41,7 +42,7 @@ const code = computed(() => store.getters.code);
 const onContentChange = computed(
   () => store.getters.onContentChange || (() => {}),
 );
-const fomattedLabelText = computed(() => formatText(labelText.value));
+const formattedLabelText = computed(() => formatText(labelText.value));
 
 function updateCode(code: string) {
   store.dispatch("updateCode", { code });
