@@ -6,11 +6,11 @@ import {
   OCCURRENCE_WIDTH,
 } from "./Constants";
 import { TextType, WidthFunc } from "./Coordinate";
-import { OrderedParticipants } from "./OrderedParticipants";
-import { IParticipantModel } from "./ParticipantListener";
+import { OrderedParticipants } from "../parser/OrderedParticipants";
+import { IParticipantModel } from "../parser/ParticipantListener";
 import { find_optimal } from "./david/DavidEisenstat";
-import { AllMessages } from "./MessageContextListener";
-import { OwnableMessage, OwnableMessageType } from "./OwnableMessage";
+import { AllMessages } from "../parser/MessageContextListener";
+import { OwnableMessage, OwnableMessageType } from "../parser/OwnableMessage";
 import { clearCache, getCache, setCache } from "@/utils/RenderingCache";
 
 export class Coordinates {

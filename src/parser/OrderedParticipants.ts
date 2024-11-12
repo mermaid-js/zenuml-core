@@ -1,5 +1,5 @@
 import antlr4 from "antlr4";
-import { ParticipantListener } from "../positioning/ParticipantListener";
+import { ParticipantListener } from "./ParticipantListener";
 
 export function OrderedParticipants(rootContext: any) {
   const listener = new ParticipantListener();
