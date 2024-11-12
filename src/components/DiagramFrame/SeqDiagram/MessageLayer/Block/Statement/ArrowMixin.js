@@ -42,13 +42,20 @@ export default {
         return null;
       }
       let currentContext = this.context;
-      const messageContext = this.context.message && this.context.message();
-      if (messageContext && messageContext.Owner() === participant) {
-        return messageContext;
-      }
-      const creationContext = this.context.creation && this.context.creation();
-      if (creationContext && creationContext.Owner() === participant) {
-        return creationContext;
+      /**
+       * Case 1: a()
+       * Case 2: A.method() { C->C.method }
+       */
+      if (this.source !== this.target) {
+        const messageContext = this.context.message && this.context.message();
+        if (messageContext && messageContext.Owner() === participant) {
+          return messageContext;
+        }
+        const creationContext =
+          this.context.creation && this.context.creation();
+        if (creationContext && creationContext.Owner() === participant) {
+          return creationContext;
+        }
       }
       while (currentContext) {
         if (!currentContext.Owner) {

@@ -11,6 +11,9 @@ TODO: we may need to consider the width of self message on right most participan
 import { computed, defineAsyncComponent, onMounted, onUpdated } from "vue";
 import { useStore } from "vuex";
 import parentLogger from "../../../../logger/logger";
+import { AllMessages } from "@/positioning/MessageContextListener";
+
+// @ts-ignore
 const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
 
 const logger = parentLogger.child({ name: "MessageLayer" });
@@ -21,15 +24,22 @@ const props = defineProps<{
 }>();
 const store = useStore();
 
-const participants = computed(() => store.getters.participants);
 const centerOf = computed(() => store.getters.centerOf);
-
-const paddingLeft = computed(() => {
-  if (participants.value.Array().length >= 1) {
-    const first = participants.value.Array().slice(0)[0].name;
-    return centerOf.value(first) + 1;
+const firstMessage = computed(() => {
+  if (!props.context) {
+    return null;
   }
-  return 0;
+  const allMessages = AllMessages(props.context);
+  if (allMessages.length === 0) {
+    return null;
+  }
+  return allMessages[0];
+});
+const paddingLeft = computed(() => {
+  if (firstMessage.value === null) {
+    return 0;
+  }
+  return centerOf.value(firstMessage.value.from) + 1;
 });
 
 onMounted(() => {
