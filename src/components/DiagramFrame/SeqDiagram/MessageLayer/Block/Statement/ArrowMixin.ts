@@ -21,7 +21,7 @@ export default {
   },
   methods: {
     isJointOccurrence(participant) {
-      let ancestorContextForParticipant =
+      const ancestorContextForParticipant =
         this.findContextForReceiver(participant);
       console.debug("owning context", ancestorContextForParticipant);
       // If no owning context found, it means this is a bare connection
