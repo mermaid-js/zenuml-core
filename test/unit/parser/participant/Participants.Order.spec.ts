@@ -35,8 +35,8 @@
  * A B @Starter(C) C.m    => C, A, B
  * A B @Starter(B) C.m    => A, B, C
  */
-import { RootContext } from "../../../../src/parser/index";
-import { OrderedParticipants } from "../../../../src/parser/OrderedParticipants";
+import { RootContext } from "../../../../src/parser";
+import { OrderedParticipants } from "../../../../src/positioning/OrderedParticipants";
 
 function getFlattenedParticipants(code: string) {
   const rootContext = RootContext(code);
@@ -55,16 +55,16 @@ describe("Participants.Order", () => {
 
   it("should return the order of participants - Starter", () => {
     expect(getFlattenedParticipants("A B @Starter(C) C.m")).toEqual([
-      { name: "C", left: "" },
-      { name: "A", left: "C" },
-      { name: "B", left: "A" },
+      { name: "A", left: "", label: undefined },
+      { name: "B", left: "A", label: undefined },
+      { name: "C", left: "B", label: undefined },
     ]);
 
     expect(getFlattenedParticipants("A B->A.m C->D.m")).toEqual([
-      { name: "B", left: "" },
-      { name: "A", left: "B" },
-      { name: "C", left: "A" },
-      { name: "D", left: "C" },
+      { name: "A", left: "", label: undefined },
+      { name: "B", left: "A", label: undefined },
+      { name: "C", left: "B", label: undefined },
+      { name: "D", left: "C", label: undefined },
     ]);
   });
 

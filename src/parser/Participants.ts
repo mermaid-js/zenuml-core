@@ -150,9 +150,12 @@ export class Participants {
   }
 
   Starter() {
-    const first = this.First();
-    // const type = first.name === 'User' || first.name === 'Actor' ? 'actor' : undefined;
-    return first?.isStarter ? first : undefined;
+    for (const participant of this.participants.values()) {
+      if (participant.isStarter) {
+        return participant;
+      }
+    }
+    return undefined;
   }
 
   GetPositions(name: string) {

@@ -170,10 +170,29 @@ const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
 ToCollector.getParticipants = function (context, withStarter) {
   participants = new Participants();
-  if (withStarter && context instanceof ProgContext) {
-    participants.Add(context.Starter(), { isStarter: true });
-  }
   walker.walk(this, context);
+  if (withStarter && context instanceof ProgContext) {
+    const participantsMap = participants.participants;
+    const starterKey = context.Starter();
+    if (participantsMap.has(starterKey)) {
+      // Update existing starter
+      const existingParticipant = participantsMap.get(starterKey);
+      existingParticipant.isStarter = true;
+    } else {
+      // Create new starter participant
+      const starterParticipant = {
+        name: starterKey,
+        isStarter: true,
+        positions: new Set(),
+        assigneePositions: new Set(),
+      };
+
+      participants.participants = new Map([
+        [starterKey, starterParticipant],
+        ...participantsMap,
+      ]);
+    }
+  }
   return participants;
 };
 
