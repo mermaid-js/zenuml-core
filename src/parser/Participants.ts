@@ -1,20 +1,3 @@
-export enum ParticipantType {
-  Actor = 1,
-  Boundary,
-  Collection,
-  Control,
-  Database,
-  Entity,
-  Queue,
-  EC2,
-  ECS,
-  IAM,
-  Lambda,
-  RDS,
-  S3,
-  Undefined,
-}
-
 export type Position = [number, number];
 
 interface ParticipantOptions {
@@ -91,40 +74,6 @@ export class Participant {
     this.comment ||= comment;
     this.assignee ||= assignee;
   }
-
-  public Type(): ParticipantType {
-    switch (this.type?.toLowerCase()) {
-      case "@actor":
-        return ParticipantType.Actor;
-      case "@boundary":
-        return ParticipantType.Boundary;
-      case "@collection":
-        return ParticipantType.Collection;
-      case "@control":
-        return ParticipantType.Control;
-      case "@database":
-        return ParticipantType.Database;
-      case "@entity":
-        return ParticipantType.Entity;
-      case "@queue":
-        return ParticipantType.Queue;
-
-      case "@ec2":
-        return ParticipantType.EC2;
-      case "@ecs":
-        return ParticipantType.ECS;
-      case "@iam":
-        return ParticipantType.IAM;
-      case "@lambda":
-        return ParticipantType.Lambda;
-      case "@rds":
-        return ParticipantType.RDS;
-      case "@s3":
-        return ParticipantType.S3;
-    }
-    return ParticipantType.Undefined;
-  }
-
   public AddPosition(position: Position) {
     this.positions.add(position);
   }
