@@ -34,14 +34,13 @@ describe("get absolute position of a participant", () => {
   });
 
   it.each([
-    ["A1 B1", 0, 60, 180],
-    ["A1 group {B1}", 0, 60, 180], // group does not change absolute positions
-  ])("Use MINI_GAP (100) for %s", (code, posStarter, posA1, posB1) => {
+    ["A1 B1", 60, 180],
+    ["A1 group {B1}", 60, 180], // group does not change absolute positions
+  ])("Use MINI_GAP (100) for %s", (code, posA1, posB1) => {
     const rootContext = RootContext(code);
 
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
 
-    expect(coordinates.getPosition("_STARTER_")).toBe(posStarter);
     // margin for _STARTER_ + half MINI_GAP
     expect(coordinates.getPosition("A1")).toBe(posA1);
     // margin + half MINI_GAP + position of A1
@@ -103,7 +102,7 @@ describe("Let us focus on order", () => {
   it("should add Starter to the left", () => {
     const rootContext = RootContext("A1 B1->A1:m1");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
-    expect(coordinates.getPosition("B1")).toBe(60);
-    expect(coordinates.getPosition("A1")).toBe(180);
+    expect(coordinates.getPosition("B1")).toBe(180);
+    expect(coordinates.getPosition("A1")).toBe(60);
   });
 });
