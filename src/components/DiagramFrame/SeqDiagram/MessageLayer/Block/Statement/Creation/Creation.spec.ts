@@ -6,11 +6,9 @@ import Creation from "./Creation.vue";
 import { Fixture } from "../../../../../../../../test/unit/parser/fixture/Fixture";
 import { configureCompat } from "vue";
 import {
-  ARROW_HEAD_WIDTH,
   LIFELINE_WIDTH,
   MARGIN,
   MIN_PARTICIPANT_WIDTH,
-  OCCURRENCE_WIDTH,
 } from "@/positioning/Constants";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
@@ -37,7 +35,7 @@ beforeEach(() => {
   });
 });
 describe("Creation", () => {
-  it("data , props and computed properties", async () => {
+  it("data, props and computed properties", async () => {
     /**
      * Known limitations:
      * 1. `IA a = new A()` cannot be the first statement in the file. `IA` will be recognised as a Participant.
@@ -56,12 +54,13 @@ describe("Creation", () => {
     // In the above demonstration,
     // `-` is for margin and `=` is for participant width.
     // `---xxx--->` is for message arrow and `[]` is for occurrence.
-    const gapCausedByMessage =
+    // TODO: add a test case where the width is caused by the message
+    const gapCausedByParticipant =
       MIN_PARTICIPANT_WIDTH / 2 +
       MARGIN / 2 +
-      ARROW_HEAD_WIDTH +
-      OCCURRENCE_WIDTH; // 75
-    const expected = gapCausedByMessage - LIFELINE_WIDTH; // 79
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2; // 100
+    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
     expect(vm.interactionWidth).toBe(expected);
     expect(vm.rightToLeft).toBeFalsy();
   });

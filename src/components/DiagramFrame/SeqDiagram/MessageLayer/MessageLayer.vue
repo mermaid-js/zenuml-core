@@ -13,6 +13,7 @@ import { useStore } from "vuex";
 import parentLogger from "../../../../logger/logger";
 import { AllMessages } from "@/parser/MessageContextListener";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { blankParticipant } from "@/parser/Participants";
 
 // @ts-ignore
 const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
@@ -24,7 +25,7 @@ const props = defineProps<{
   context: any;
 }>();
 const store = useStore();
-
+const coordinates = computed(() => store.getters.coordinates);
 const centerOf = computed(() => store.getters.centerOf);
 const firstMessage = computed(() => {
   if (!props.context) {
@@ -37,7 +38,25 @@ const firstMessage = computed(() => {
   return allMessages[0];
 });
 const paddingLeft = computed(() => {
-  return centerOf.value(firstMessage.value?.from || _STARTER_) + 1;
+  if (!firstMessage.value) {
+    return 0;
+  }
+  return centerOf.value(starterParticipant.value?.name) + 1;
+});
+
+const starterParticipant = computed(() => {
+  const names = coordinates.value.orderedParticipantNames();
+  if (names.length === 0) return null;
+  const firstName = names[0];
+  if (firstName === _STARTER_) {
+    return {
+      ...blankParticipant,
+      name: _STARTER_,
+      explicit: false,
+      isStarter: true,
+    };
+  }
+  return null;
 });
 
 onMounted(() => {

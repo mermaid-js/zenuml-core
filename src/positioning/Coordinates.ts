@@ -44,6 +44,7 @@ export class Coordinates {
       return cachedPosition;
     }
     const leftGap = this.getParticipantGap(this.participantModels[0]);
+    // const leftGap = 0;
     const position = leftGap + find_optimal(this.m)[pIndex];
     setCache(cacheKey, position);
     console.debug(`Position of ${participantName} is ${position}`);
@@ -56,13 +57,7 @@ export class Coordinates {
   }
 
   half(participantName: string) {
-    if (participantName === _STARTER_) {
-      return MARGIN / 2;
-    }
-    const halfLeftParticipantWidth = this.halfWithMargin(
-      this.labelOrName(participantName),
-    );
-    return halfLeftParticipantWidth;
+    return this.halfWithMargin(this.labelOrName(participantName));
   }
 
   getWidth() {
@@ -133,8 +128,8 @@ export class Coordinates {
     const halfLeft = this.half(p.left);
     const halfSelf = this.half(p.name);
     // TODO: convert name to enum type
-    const leftIsVisible = p.left && p.left !== _STARTER_;
-    const selfIsVisible = p.name && p.name !== _STARTER_;
+    const leftIsVisible = true;
+    const selfIsVisible = true;
     return (
       ((leftIsVisible && halfLeft) || 0) + ((selfIsVisible && halfSelf) || 0)
     );
@@ -150,10 +145,16 @@ export class Coordinates {
   }
 
   private halfWithMargin(participant: string | undefined) {
+    if (!participant) {
+      return 0;
+    }
     return this._getParticipantWidth(participant) / 2 + MARGIN / 2;
   }
 
   private _getParticipantWidth(participant: string | undefined) {
+    if (!participant) {
+      return 0;
+    }
     return Math.max(
       this.widthProvider(participant || "", TextType.ParticipantName),
       MIN_PARTICIPANT_WIDTH,

@@ -19,6 +19,12 @@ describe("get absolute position of a participant", () => {
     clearCache();
   });
 
+  it("One short participant", () => {
+    const rootContext = RootContext("A1");
+    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    expect(coordinates.getPosition("A1")).toBe(50);
+  });
+
   it("One wide participant", () => {
     const rootContext = RootContext("A300");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
@@ -58,17 +64,19 @@ describe("get absolute position of a participant", () => {
   it("wide method", () => {
     const rootContext = RootContext("A1.m800");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
-    expect(coordinates.getPosition(_STARTER_)).toBe(0);
+    const posStarter = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
+    expect(coordinates.getPosition(_STARTER_)).toBe(posStarter);
     expect(coordinates.getPosition("A1")).toBe(
-      800 + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH,
+      posStarter + 800 + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH,
     );
   });
 
   it("should not duplicate participants", () => {
     const rootContext = RootContext("A1.a1 A1.a1 B1.a1");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
-    expect(coordinates.getPosition(_STARTER_)).toBe(0);
-    const posA1 = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
+    const posStarter = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
+    expect(coordinates.getPosition(_STARTER_)).toBe(posStarter);
+    const posA1 = posStarter + MIN_PARTICIPANT_WIDTH + MARGIN;
     const posB1 =
       posA1 + MIN_PARTICIPANT_WIDTH / 2 + MARGIN + MIN_PARTICIPANT_WIDTH / 2;
 
@@ -94,12 +102,13 @@ describe("get absolute position of a participant", () => {
         ARROW_HEAD_WIDTH +
         OCCURRENCE_WIDTH,
     ],
-  ])("creation method: %s", (code, name, pos) => {
+  ])("creation method: %s", (code, name, offset) => {
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
-    expect(coordinates.getPosition(_STARTER_)).toBe(0);
+    const posStarter = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
+    expect(coordinates.getPosition(_STARTER_)).toBe(posStarter);
     // half participant width + Starter Position + margin
-    expect(coordinates.getPosition(name)).toBe(pos);
+    expect(coordinates.getPosition(name)).toBe(posStarter + offset);
   });
 
   it.each([
