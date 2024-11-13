@@ -1,5 +1,5 @@
 import { AllMessages } from "@/parser/MessageContextListener";
-import WidthProviderOnBrowser from "../../../positioning/WidthProviderFunc";
+import WidthProviderOnBrowser from "@/positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
 import { Participants } from "@/parser";
 import FrameBuilder from "@/parser/FrameBuilder";
@@ -49,8 +49,7 @@ function extraWidthDueToSelfMessage(
     // 37 is arrow width (30) + half occurrence width(7)
     .map(
       (s) =>
-        WidthProviderOnBrowser(s.signature, TextType.MessageContent) +
-        37 -
+        WidthProviderOnBrowser(s.signature, TextType.MessageContent) -
         coordinates.distance(s.from, rightParticipant) -
         coordinates.half(rightParticipant),
     );

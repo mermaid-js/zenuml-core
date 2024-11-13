@@ -86,7 +86,7 @@ store.commit("diagramElement", diagramRef);
   /* don't override */
   border-width: 2px;
   padding: 0 4px;
-  min-width: 88px;
+  min-width: 80px;
   max-width: 250px;
   text-align: center;
   pointer-events: all;

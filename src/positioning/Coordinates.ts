@@ -2,15 +2,14 @@ import {
   ARROW_HEAD_WIDTH,
   MARGIN,
   MIN_PARTICIPANT_WIDTH,
-  MINI_GAP,
   OCCURRENCE_WIDTH,
 } from "./Constants";
 import { TextType, WidthFunc } from "./Coordinate";
-import { OrderedParticipants } from "../parser/OrderedParticipants";
-import { IParticipantModel } from "../parser/ParticipantListener";
+import { OrderedParticipants } from "@/parser/OrderedParticipants";
+import { IParticipantModel } from "@/parser/ParticipantListener";
 import { find_optimal } from "./david/DavidEisenstat";
-import { AllMessages } from "../parser/MessageContextListener";
-import { OwnableMessage, OwnableMessageType } from "../parser/OwnableMessage";
+import { AllMessages } from "@/parser/MessageContextListener";
+import { OwnableMessage, OwnableMessageType } from "@/parser/OwnableMessage";
 import { clearCache, getCache, setCache } from "@/utils/RenderingCache";
 
 export class Coordinates {
@@ -63,7 +62,7 @@ export class Coordinates {
     const halfLeftParticipantWidth = this.halfWithMargin(
       this.labelOrName(participantName),
     );
-    return Math.max(halfLeftParticipantWidth, MINI_GAP / 2);
+    return halfLeftParticipantWidth;
   }
 
   getWidth() {

@@ -3,6 +3,11 @@ import { Fixture } from "../../../../test/unit/parser/fixture/Fixture";
 import { Coordinates } from "@/positioning/Coordinates";
 import { stubWidthProvider } from "@/../test/unit/parser/fixture/Fixture";
 import { RootContext } from "@/parser";
+import {
+  FRAGMENT_PADDING_X,
+  MARGIN,
+  MIN_PARTICIPANT_WIDTH,
+} from "@/positioning/Constants";
 
 vi.mock("@/positioning/WidthProviderFunc", () => {
   return {
@@ -19,8 +24,8 @@ describe("TotalWidth", function () {
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     const ctx = Fixture.firstStatement(code);
-    // _STARTER_ is taken into account
-    expect(TotalWidth(ctx, coordinates)).toBe(110);
+    // -====A====-
+    expect(TotalWidth(ctx, coordinates)).toBe(100);
   });
 
   test("TotalWidth with depth", () => {
@@ -28,7 +33,9 @@ describe("TotalWidth", function () {
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     const ctx = Fixture.firstStatement(code);
-    expect(TotalWidth(ctx, coordinates)).toBe(130);
+    //  -====A====-  # participants
+    // [           ] # alt fragment
+    expect(TotalWidth(ctx, coordinates)).toBe(120);
   });
 
   test("TotalWidth with distance", () => {
@@ -36,7 +43,9 @@ describe("TotalWidth", function () {
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     const ctx = Fixture.firstStatement(code);
-    expect(TotalWidth(ctx, coordinates)).toBe(240);
+    // -====A====--====B====-  # participants
+    //[                      ] # fragment
+    expect(TotalWidth(ctx, coordinates)).toBe(220);
   });
 
   test("TotalWidth with extra width from self message", () => {
@@ -44,7 +53,18 @@ describe("TotalWidth", function () {
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     const ctx = Fixture.firstStatement(code);
-    expect(TotalWidth(ctx, coordinates)).toBe(322);
+    // -====A====--====B====-
+    //[     --------->  -self-<]
+    const widthA = MIN_PARTICIPANT_WIDTH + MARGIN;
+    const widthB = MIN_PARTICIPANT_WIDTH + MARGIN;
+    const messageWidth = 100;
+    const expected =
+      FRAGMENT_PADDING_X +
+      widthA +
+      widthB / 2 +
+      messageWidth +
+      FRAGMENT_PADDING_X;
+    expect(TotalWidth(ctx, coordinates)).toBe(expected);
   });
 
   test("TotalWidth with extra width from self message2", () => {
@@ -52,6 +72,13 @@ describe("TotalWidth", function () {
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     const ctx = Fixture.firstStatement(code);
-    expect(TotalWidth(ctx, coordinates)).toBe(422);
+    // -====A====--====B====--====C====-
+    //[     --------->  -self---------------------<]
+    const widthA = MIN_PARTICIPANT_WIDTH + MARGIN;
+    const widthB = MIN_PARTICIPANT_WIDTH + MARGIN;
+    const s200Width = 200;
+    const expected =
+      FRAGMENT_PADDING_X + widthA + widthB / 2 + s200Width + FRAGMENT_PADDING_X;
+    expect(TotalWidth(ctx, coordinates)).toBe(expected);
   });
 });

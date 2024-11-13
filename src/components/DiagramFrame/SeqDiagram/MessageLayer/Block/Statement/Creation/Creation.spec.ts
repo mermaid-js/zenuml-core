@@ -1,9 +1,17 @@
 import { shallowMount } from "@vue/test-utils";
 import { createStore } from "vuex";
 import { VueSequence } from "@/index";
+// @ts-ignore
 import Creation from "./Creation.vue";
 import { Fixture } from "../../../../../../../../test/unit/parser/fixture/Fixture";
 import { configureCompat } from "vue";
+import {
+  ARROW_HEAD_WIDTH,
+  LIFELINE_WIDTH,
+  MARGIN,
+  MIN_PARTICIPANT_WIDTH,
+  OCCURRENCE_WIDTH,
+} from "@/positioning/Constants";
 
 function mountCreationWithCode(
   code: string,
@@ -42,8 +50,18 @@ describe("Creation", () => {
     expect(vm.from).toBe("_STARTER_");
     expect(vm.signature).toBe("«create»");
     expect(vm.assignee).toBe("a");
-    expect(vm.distance2).toStrictEqual(expect.any(Function));
-    expect(vm.interactionWidth).toBe(78);
+    // -------------==a:A==-
+    // --<<create>>-->[]
+    // In the above demonstration,
+    // `-` is for margin and `=` is for participant width.
+    // `---xxx--->` is for message arrow and `[]` is for occurrence.
+    const gapCausedByMessage =
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2 +
+      ARROW_HEAD_WIDTH +
+      OCCURRENCE_WIDTH; // 75
+    const expected = gapCausedByMessage - LIFELINE_WIDTH; // 79
+    expect(vm.interactionWidth).toBe(expected);
     expect(vm.rightToLeft).toBeFalsy();
   });
 
@@ -53,9 +71,18 @@ describe("Creation", () => {
       Fixture.firstGrandChild,
     );
     const vm = creationWrapper.vm as any;
-    console.log(creationWrapper);
     expect(vm.rightToLeft).toBeTruthy();
-    expect(vm.interactionWidth).toBe(109);
+    // -====A====--====B====-
+    //      []<--<<c>>--
+    // There is enough space for the message arrow and occurrence.
+    const gapCausedByParticipant =
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2 +
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2; // 100
+    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
+
+    expect(vm.interactionWidth).toBe(expected);
   });
 
   it("right to left within alt fragment", async () => {
@@ -73,6 +100,15 @@ describe("Creation", () => {
     );
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();
-    expect(vm.interactionWidth).toBe(109);
+    // -====A====--====B====-
+    //      --<<c>>-->[]
+    // There is enough space for the message and occurrence.
+    const gapCausedByParticipant =
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2 +
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2; // 100
+    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
+    expect(vm.interactionWidth).toBe(expected);
   });
 });
