@@ -1,4 +1,4 @@
-import { AllMessages } from "@/positioning/MessageContextListener";
+import { AllMessages } from "@/parser/MessageContextListener";
 import WidthProviderOnBrowser from "../../../positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
 import { Participants } from "@/parser";
@@ -41,15 +41,17 @@ function extraWidthDueToSelfMessage(
   coordinates: Coordinates,
 ) {
   const allMessages = AllMessages(ctx);
+  console.log("allMessages", allMessages);
   const widths = allMessages
     .filter((m) => m.from === m.to)
     // 37 is arrow width (30) + half occurrence width(7)
     .map(
       (s) =>
-        WidthProviderOnBrowser(s.signature, TextType.MessageContent) +
+        WidthProviderOnBrowser(s.label, TextType.MessageContent) +
         37 -
         coordinates.distance(s.from, rightParticipant) -
         coordinates.half(rightParticipant),
     );
+  console.debug("extraWidthDueToSelfMessage", widths);
   return Math.max.apply(null, [0, ...widths]);
 }

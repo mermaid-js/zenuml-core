@@ -19,8 +19,9 @@ export class Assignment implements IAssignment {
     this.assignee = assignee || "";
     this.type = type || "";
   }
-
-  getText() {
+  // The assignment label that is rendered in the diagram.
+  // For example, for `Type t = new Class()`, the label is `t:Type`.
+  getLabel() {
     return [this.assignee, this.type].filter(Boolean).join(":");
   }
 }
@@ -36,4 +37,19 @@ MessageContext.prototype.Assignment = function () {
     return new Assignment(assignee, type);
   }
   return undefined;
+};
+
+// @ts-ignore
+MessageContext.prototype.isSimpleAssignment = function () {
+  // A simple assignment is an assignment that does not have a block.
+  // For example, `a = b` is a simple assignment and `a = b { ... }` is not.
+  const hasAssignment = !!this.messageBody().assignment();
+  const signatures = this.messageBody()?.func()?.signature() || [];
+  // @ts-ignore
+  const hasInvocation =
+    signatures?.some((signature: any): boolean => signature.invocation()) ??
+    false;
+  const hasBraceBlock = !!this.braceBlock();
+  const hasTo = !!this.messageBody().to();
+  return hasAssignment && !hasTo && !hasInvocation && !hasBraceBlock;
 };

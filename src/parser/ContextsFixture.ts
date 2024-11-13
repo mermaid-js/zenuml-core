@@ -33,6 +33,11 @@ export const StatContextFixture = createParseFunction((parser) =>
 export const AsyncMessageContextFixture = createParseFunction((parser) =>
   parser.asyncMessage(),
 );
+
+export const MessageContextFixture = createParseFunction((parser) =>
+  parser.message(),
+);
+
 export const DividerContextFixture = createParseFunction((parser) =>
   parser.divider(),
 );

@@ -12,11 +12,12 @@ import "./RefContext";
 import "./Origin";
 import "./Divider/DividerContext";
 import "./SignatureText";
+import "./MessageLabel";
 import "./Messages/MessageContext";
 import "./From";
 import "./key/Key";
 import "./utils/cloest-ancestor/ClosestAncestor";
-import { formatText } from "../utils/StringUtil";
+import { formatText } from "@/utils/StringUtil";
 
 const errors = [];
 class SeqErrorListener extends antlr4.error.ErrorListener {
@@ -31,7 +32,7 @@ function rootContext(code) {
   const tokens = new antlr4.CommonTokenStream(lexer);
   const parser = new sequenceParser(tokens);
   parser.addErrorListener(new SeqErrorListener());
-  return parser._syntaxErrors ? null : parser.prog();
+  return parser.prog();
 }
 
 antlr4.ParserRuleContext.prototype.getFormattedText = function () {

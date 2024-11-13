@@ -7,12 +7,28 @@ export default {
         borderLeftWidth: "7px",
         borderRightWidth: "7px",
       };
+      // e.g. A->A.method()
+      // const isSelfMessage = this.source === this.target;
+      // if(isSelfMessage) {
+      //   border.borderLeftWidth = "0px";
+      //   border.borderRightWidth = "0px";
+      //   return border;
+      // }
       const endSide = this.rightToLeft ? "Left" : "Right";
       const startSide = this.rightToLeft ? "Right" : "Left";
 
-      if (!this.isJointOccurrence(this.source)) {
+      // e.g.
+      // A.method() {
+      //   B.method() <- for this method, source is A, and it has an occurrence
+      // }
+      const sourceHasOccurrence = this.isJointOccurrence(this.source);
+      if (!sourceHasOccurrence) {
         border[`border${startSide}Width`] = "0px";
       }
+      // e.g.
+      // A.method() {
+      //   B.method() <- for this method, target is B, and it has an occurrence
+      // }
       if (!this.isJointOccurrence(this.target)) {
         border[`border${endSide}Width`] = "0px";
       }
@@ -23,7 +39,11 @@ export default {
     isJointOccurrence(participant) {
       let ancestorContextForParticipant =
         this.findContextForReceiver(participant);
-      console.debug("owning context", ancestorContextForParticipant);
+      console.debug(
+        "owning context",
+        participant,
+        ancestorContextForParticipant,
+      );
       // If no owning context found, it means this is a bare connection
       if (!ancestorContextForParticipant) {
         return false;
@@ -42,13 +62,16 @@ export default {
         return null;
       }
       let currentContext = this.context;
-      const messageContext = this.context.message && this.context.message();
-      if (messageContext && messageContext.Owner() === participant) {
-        return messageContext;
-      }
-      const creationContext = this.context.creation && this.context.creation();
-      if (creationContext && creationContext.Owner() === participant) {
-        return creationContext;
+      if (this.source !== this.target) {
+        const messageContext = this.context.message && this.context.message();
+        if (messageContext && messageContext.Owner() === participant) {
+          return messageContext;
+        }
+        const creationContext =
+          this.context.creation && this.context.creation();
+        if (creationContext && creationContext.Owner() === participant) {
+          return creationContext;
+        }
       }
       while (currentContext) {
         if (!currentContext.Owner) {

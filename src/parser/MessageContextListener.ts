@@ -18,14 +18,13 @@ export class MessageContextListener extends sequenceParserListener {
     if (this.isBlind) {
       return;
     }
-    const from = ctx.From();
     const owner = ctx?.Owner();
-    const signature = ctx?.SignatureText();
     this.ownableMessages.push({
-      from: from,
-      signature: signature,
+      from: ctx.From(),
+      signature: ctx?.SignatureText(),
+      label: ctx?.Label(),
       type,
-      to: owner,
+      to: owner || ctx.From(),
     });
   };
 

@@ -1,4 +1,5 @@
 import { Assignment } from "../../parser/Messages/MessageContext";
+import { MessageContextFixture } from "@/parser/ContextsFixture";
 
 describe("Assignment", function () {
   test.each([
@@ -8,7 +9,7 @@ describe("Assignment", function () {
     "getText: assignee: %s, type: %s, text: %s",
     function (assignee, type, text) {
       const assignment = new Assignment(assignee, type);
-      expect(assignment.getText()).toEqual(text);
+      expect(assignment.getLabel()).toEqual(text);
     },
   );
 
@@ -17,5 +18,19 @@ describe("Assignment", function () {
     expect(() => new Assignment(undefined, "B")).toThrow(
       "assignee must be defined if type is defined",
     );
+  });
+});
+
+describe("MessageContext - isSimpleAssignment", () => {
+  test.each([
+    ["a = b", true],
+    ["a", false],
+    ["a = b.m", false],
+    ["a = b()", false],
+    ["a = b(c)", false],
+    ["a = b { ... }", false],
+  ])("Check if `%s` is a simple assignment: %s", (code, expected) => {
+    const isSimpleAssignment = MessageContextFixture(code).isSimpleAssignment();
+    expect(isSimpleAssignment).toBe(expected);
   });
 });
