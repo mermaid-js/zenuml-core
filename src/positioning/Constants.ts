@@ -1,4 +1,5 @@
 export const FRAGMENT_PADDING_X = 10;
+export const FRAGMENT_MIN_WIDTH = 200;
 export const MINI_GAP = 0;
 export const MARGIN = 20;
 export const ARROW_HEAD_WIDTH = 10;

@@ -5,6 +5,7 @@ import FrameBorder from "@/positioning/FrameBorder";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import CollapseButton from "./CollapseButton.vue";
 import { EventBus } from "@/EventBus";
+import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 
 export default {
   computed: {
@@ -39,6 +40,7 @@ export default {
         // +1px for the border of the fragment
         transform: "translateX(" + (this.offsetX + 1) * -1 + "px)",
         width: TotalWidth(this.context, this.coordinates) + "px",
+        minWidth: FRAGMENT_MIN_WIDTH + "px",
       };
     },
   },
