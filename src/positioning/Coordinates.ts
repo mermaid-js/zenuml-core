@@ -77,6 +77,19 @@ export class Coordinates {
     return this.getPosition(right) - this.getPosition(left);
   }
 
+  getMessageWidth(message: OwnableMessage) {
+    const halfSelf = this.half(message.to);
+    let messageWidth = this.widthProvider(
+      message.signature,
+      TextType.MessageContent,
+    );
+    // hack for creation message
+    if (message.type === OwnableMessageType.CreationMessage) {
+      messageWidth += halfSelf;
+    }
+    return messageWidth;
+  }
+
   private withMessageGaps(
     ownableMessages: OwnableMessage[],
     participantModels: IParticipantModel[],
@@ -107,19 +120,6 @@ export class Coordinates {
         );
       }
     });
-  }
-
-  private getMessageWidth(message: OwnableMessage) {
-    const halfSelf = this.half(message.to);
-    let messageWidth = this.widthProvider(
-      message.signature,
-      TextType.MessageContent,
-    );
-    // hack for creation message
-    if (message.type === OwnableMessageType.CreationMessage) {
-      messageWidth += halfSelf;
-    }
-    return messageWidth;
   }
   private withParticipantGaps(participantModels: IParticipantModel[]) {
     this.m = participantModels.map((_, i) => {
