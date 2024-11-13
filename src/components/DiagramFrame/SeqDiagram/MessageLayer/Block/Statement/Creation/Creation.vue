@@ -86,7 +86,7 @@ export default {
     ...mapGetters(["cursor", "onElementClick", "distance2"]),
     ...mapState(["numbering"]),
     from() {
-      return this.context.Origin();
+      return this.context.Origin() || "_STARTER_";
     },
     source() {
       return this.from;

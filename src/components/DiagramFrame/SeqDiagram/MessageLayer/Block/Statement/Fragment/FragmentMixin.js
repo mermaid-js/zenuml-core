@@ -15,7 +15,7 @@ export default {
       const frame = frameBuilder.getFrame(this.context);
       const border = FrameBorder(frame);
       const localParticipants = [
-        this.context.Origin(),
+        this.context.Origin() || "_STARTER_",
         ...Participants(this.context).Names(),
       ];
       const leftParticipant = allParticipants.find((p) =>
@@ -27,7 +27,9 @@ export default {
         `left participant: ${leftParticipant} ${halfLeftParticipant}`,
       );
       return (
-        this.coordinates.distance(leftParticipant, this.from) +
+        (this.from
+          ? this.coordinates.distance(leftParticipant, this.from)
+          : 0) +
         border.left +
         halfLeftParticipant
       );

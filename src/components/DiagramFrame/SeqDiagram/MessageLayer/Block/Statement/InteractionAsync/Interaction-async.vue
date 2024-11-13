@@ -77,6 +77,9 @@ export default {
     // Both 'left' and 'translateX' can be used to move the element horizontally.
     // Change it to use translate according to https://stackoverflow.com/a/53892597/529187.
     translateX: function () {
+      if (!this.from) {
+        return 0;
+      }
       return this.rightToLeft
         ? this.distance(this.target, this.from)
         : this.distance(this.source, this.from);

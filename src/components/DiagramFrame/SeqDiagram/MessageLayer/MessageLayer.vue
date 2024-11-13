@@ -11,7 +11,7 @@ TODO: we may need to consider the width of self message on right most participan
 import { computed, defineAsyncComponent, onMounted, onUpdated } from "vue";
 import { useStore } from "vuex";
 import parentLogger from "../../../../logger/logger";
-import { AllMessages } from "@/positioning/MessageContextListener";
+import { AllMessages } from "@/parser/MessageContextListener";
 
 // @ts-ignore
 const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
@@ -36,10 +36,7 @@ const firstMessage = computed(() => {
   return allMessages[0];
 });
 const paddingLeft = computed(() => {
-  if (firstMessage.value === null) {
-    return 0;
-  }
-  return centerOf.value(firstMessage.value.from) + 1;
+  return centerOf.value(firstMessage.value?.from || "_STARTER_") + 1;
 });
 
 onMounted(() => {

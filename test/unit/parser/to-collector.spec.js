@@ -4,6 +4,12 @@ import ToCollector from "../../../src/parser/ToCollector";
 import { expect } from "vitest";
 import { blankParticipant } from "../../../src/parser/Participants";
 
+test("if block", () => {
+  let participants = getParticipants("if(x) { A->B.m }");
+  expect(participants.Size()).toBe(2);
+  expect(participants.First().name).toBe("A");
+});
+
 test("smoke test2", () => {
   const code = `
     C
@@ -36,7 +42,7 @@ describe("Plain participants", () => {
     "get participant with width and stereotype undefined",
     (code) => {
       // `A` will be parsed as a participant which matches `participant EOF`
-      let participants = getParticipants(code, true);
+      let participants = getParticipants(code);
       expect(participants.Size()).toBe(1);
       expect(participants.Get("A").width).toBeUndefined();
       expect(participants.Get("A").stereotype).toBeUndefined();
@@ -50,7 +56,7 @@ describe("with width", () => {
     ["A 1024\nA 1025", 1024],
   ])("code:%s => width:%s", (code, width) => {
     // `A` will be parsed as a participant which matches `participant EOF`
-    let participants = getParticipants(code, true);
+    let participants = getParticipants(code);
     expect(participants.Size()).toBe(1);
     expect(participants.First().name).toBe("A");
     expect(participants.Get("A").name).toBe("A");
@@ -65,7 +71,7 @@ describe("with interface", () => {
     ["<<A>> X\n<<B>> X", "A"],
   ])("code:%s => width:%s", (code, stereotype) => {
     // `A` will be parsed as a participant which matches `participant EOF`
-    let participants = getParticipants(code, true);
+    let participants = getParticipants(code);
     expect(participants.Size()).toBe(1);
     expect(participants.Get("X").name).toBe("X");
     expect(participants.Get("X").stereotype).toBe(stereotype);
@@ -80,7 +86,7 @@ describe("with group", () => {
     ['group "group 2" { A } group "group 3" { A }', "A", "group 2"],
   ])("code:%s => participant:%s", (code, participant, groupId) => {
     // `A` will be parsed as a participant which matches `participant EOF`
-    let participants = getParticipants(code, true);
+    let participants = getParticipants(code);
     expect(participants.Size()).toBe(1);
     expect(participants.Get("A").name).toBe(participant);
     expect(participants.Get("A").groupId).toBe(groupId);
@@ -89,11 +95,11 @@ describe("with group", () => {
 
 describe("without starter", () => {
   test.each([
-    ["A.method", "A", 2],
+    ["A.method", "A", 1],
     ["@Starter(A)", "A", 1],
   ])("code:%s => participant:%s", (code, participant, numberOfParticipants) => {
     // `A` will be parsed as a participant which matches `participant EOF`
-    let participants = getParticipants(code, true);
+    let participants = getParticipants(code);
     expect(participants.Size()).toBe(numberOfParticipants);
     expect(participants.Get("A").name).toBe(participant);
   });
@@ -104,13 +110,13 @@ describe("with label", () => {
     ["A as AA", "AA"],
     ['A as "AA"', "AA"],
   ])("code:%s => label:%s", (code, label) => {
-    let participants = getParticipants(code, true);
+    let participants = getParticipants(code);
     expect(participants.Size()).toBe(1);
     expect(participants.Get("A").name).toBe("A");
     expect(participants.Get("A").label).toBe(label);
   });
   test("participant position with label", () => {
-    let participants = getParticipants("A as AA A.method", true);
+    let participants = getParticipants("A as AA A.method");
     expect(participants.GetPositions("A")).toEqual(new Set([[5, 7]]));
   });
 });
@@ -122,42 +128,38 @@ describe("with participantType", () => {
     ["@Actor A", "Actor"],
     ["@database A", "database"],
   ])("code:%s => participantType:%s", (code, participantType) => {
-    let participants = getParticipants(code, true);
+    let participants = getParticipants(code);
     expect(participants.Size()).toBe(1);
     expect(participants.Get("A").name).toBe("A");
     expect(participants.Get("A").type).toBe(participantType);
   });
 });
 
-function getParticipants(code, withStarter) {
+function getParticipants(code) {
   let rootContext = RootContext(code);
-  return ToCollector.getParticipants(rootContext, withStarter);
+  return ToCollector.getParticipants(rootContext);
 }
 
 describe("Add Starter to participants", () => {
   test("Empty context", () => {
     let rootContext = RootContext("");
-    const participants = ToCollector.getParticipants(rootContext, true);
-    expect(participants.Size()).toBe(1);
-    expect(participants.Get("_STARTER_").name).toBe("_STARTER_");
-    expect(participants.Get("_STARTER_").isStarter).toBeTruthy();
-    expect(participants.GetPositions("_STARTER_")).toEqual(new Set());
+    const participants = ToCollector.getParticipants(rootContext);
+    expect(participants.Size()).toBe(0);
   });
 
   test("A B->A.m", () => {
     let rootContext = RootContext("A B B->A.m");
-    const participants = ToCollector.getParticipants(rootContext, true);
+    const participants = ToCollector.getParticipants(rootContext);
     expect(participants.Size()).toBe(2);
-    expect(participants.Get("_STARTER_")).toBeUndefined();
-    expect(participants.Get("B").isStarter).toBeTruthy();
-    expect(participants.Names()).toStrictEqual(["B", "A"]);
+    expect(participants.Get("B").isStarter).toBeFalsy();
+    expect(participants.Names()).toStrictEqual(["A", "B"]);
   });
 });
 
 describe("implicit", () => {
   describe("from new", () => {
     test("from new", () => {
-      let participants = getParticipants("new A()", true);
+      let participants = getParticipants("new A()");
       const participant = participants.Get("A");
       expect(participant.ToValue()).toEqual({
         ...blankParticipant,
@@ -167,14 +169,14 @@ describe("implicit", () => {
       });
     });
     test("seqDsl should treat creation as a participant - assignment", () => {
-      let participants = getParticipants("a = new A()", true);
-      expect(participants.Size()).toBe(2);
+      let participants = getParticipants("a = new A()");
+      expect(participants.Size()).toBe(1);
       expect(participants.Get("a:A").width).toBeUndefined();
       expect(participants.GetPositions("a:A")).toEqual(new Set([[8, 9]]));
     });
     test("seqDsl should treat creation as a participant - assignment with type", () => {
       // We need @Starter, otherwise IA becomes a participant declaration
-      let participants = getParticipants("@Starter(X) IA a = new A()", true);
+      let participants = getParticipants("@Starter(X) IA a = new A()");
       expect(participants.Size()).toBe(2);
       expect(participants.Get("X").width).toBeUndefined();
       expect(participants.Get("a:A").width).toBeUndefined();
@@ -184,11 +186,8 @@ describe("implicit", () => {
     });
 
     test("seqDsl should treat creation as a participant - assignment & method call ", () => {
-      let participants = getParticipants(
-        `ret = new A() "ret:A".method()`,
-        true,
-      );
-      expect(participants.Size()).toBe(2);
+      let participants = getParticipants(`ret = new A() "ret:A".method()`);
+      expect(participants.Size()).toBe(1);
       expect(participants.Get("ret:A").width).toBeUndefined();
       expect(participants.GetPositions("ret:A")).toEqual(
         new Set([
@@ -201,7 +200,7 @@ describe("implicit", () => {
 
   describe("from method call", () => {
     test("get participants", () => {
-      const participants = getParticipants("A.method", true);
+      const participants = getParticipants("A.method");
       const participant = participants.Get("A");
       expect(participant.ToValue()).toEqual({
         ...blankParticipant,
@@ -211,19 +210,19 @@ describe("implicit", () => {
       });
     });
     test("seqDsl should get all participants but ignore parameters - method call", () => {
-      let participants = getParticipants('"b:B".method(x.m)', true);
-      expect(participants.Size()).toBe(2);
+      let participants = getParticipants('"b:B".method(x.m)');
+      expect(participants.Size()).toBe(1);
       expect(participants.Get("b:B").width).toBeUndefined();
       expect(participants.GetPositions("b:B")).toEqual(new Set([[0, 5]]));
     });
     test("seqDsl should get all participants but ignore parameters - creation", () => {
-      let participants = getParticipants('"b:B".method(new X())', true);
-      expect(participants.Size()).toBe(2);
+      let participants = getParticipants('"b:B".method(new X())');
+      expect(participants.Size()).toBe(1);
       expect(participants.Get("b:B").width).toBeUndefined();
       expect(participants.GetPositions("b:B")).toEqual(new Set([[0, 5]]));
     });
     test("seqDsl should get all participants including from", () => {
-      let participants = getParticipants("A->B.m", true);
+      let participants = getParticipants("A->B.m");
       expect(participants.Size()).toBe(2);
       expect(participants.GetPositions("A")).toEqual(new Set([[0, 1]]));
       expect(participants.GetPositions("B")).toEqual(new Set([[3, 4]]));
@@ -247,7 +246,7 @@ describe("implicit", () => {
         .braceBlock()
         .block()
         .stat()[0];
-      const participants = ToCollector.getParticipants(ifBlock, false);
+      const participants = ToCollector.getParticipants(ifBlock);
       expect(participants.ImplicitArray().map((p) => p.name)).toStrictEqual([
         "B",
         "A",
@@ -271,7 +270,7 @@ describe("implicit", () => {
         .braceBlock()
         .block()
         .stat()[0];
-      const participants = ToCollector.getParticipants(ifBlock, false);
+      const participants = ToCollector.getParticipants(ifBlock);
       expect(participants.ImplicitArray().map((p) => p.name)).toStrictEqual([
         "D",
         "C",
@@ -284,14 +283,14 @@ describe("implicit", () => {
 
 describe("Invalid input", () => {
   test("<<", () => {
-    let participants = getParticipants("<<", false);
+    let participants = getParticipants("<<");
     expect(participants.First().name).toBe("Missing `Participant`");
   });
 });
 
 describe("enterRef", () => {
   test("should add participants from ref statement with multiple participants", () => {
-    let participants = getParticipants("ref(someId, A, B)", false);
+    let participants = getParticipants("ref(someId, A, B)");
     expect(participants.Size()).toBe(2);
     expect(participants.Get("A")).toBeDefined();
     expect(participants.Get("B")).toBeDefined();
@@ -299,29 +298,29 @@ describe("enterRef", () => {
   });
 
   test("should not add any participants for empty ref", () => {
-    let participants = getParticipants("ref()", false);
+    let participants = getParticipants("ref()");
     expect(participants.Size()).toBe(0);
   });
 
   test("should not add any participants for ref with only ID", () => {
-    let participants = getParticipants("ref(someId)", false);
+    let participants = getParticipants("ref(someId)");
     expect(participants.Size()).toBe(0);
   });
 
   test("should add one participant for ref with ID and one participant", () => {
-    let participants = getParticipants("ref(someId, A,)", false);
+    let participants = getParticipants("ref(someId, A,)");
     expect(participants.Size()).toBe(1);
     expect(participants.Get("A")).toBeDefined();
   });
 
   test("should set correct positions for participants in ref", () => {
-    let participants = getParticipants("ref(someId, A, B)", false);
+    let participants = getParticipants("ref(someId, A, B)");
     expect(participants.GetPositions("A")).toEqual(new Set([[12, 13]]));
     expect(participants.GetPositions("B")).toEqual(new Set([[15, 16]]));
   });
 
   test("should not affect existing participants", () => {
-    let participants = getParticipants("A\nB\nref(someId, B, C)", false);
+    let participants = getParticipants("A\nB\nref(someId, B, C)");
     expect(participants.Size()).toBe(3);
     expect(participants.Get("A")).toBeDefined();
     expect(participants.Get("B")).toBeDefined();
@@ -335,7 +334,7 @@ describe("enterRef", () => {
   });
 
   test("should handle multiple ref statements", () => {
-    let participants = getParticipants("ref(id1, A, B)\nref(id2, C, D)", false);
+    let participants = getParticipants("ref(id1, A, B)\nref(id2, C, D)");
     expect(participants.Size()).toBe(4);
     expect(participants.Get("A")).toBeDefined();
     expect(participants.Get("B")).toBeDefined();
@@ -344,7 +343,7 @@ describe("enterRef", () => {
   });
 
   test("should not add ID as participant if it matches an existing participant", () => {
-    let participants = getParticipants("A\nref(A, B, C)", false);
+    let participants = getParticipants("A\nref(A, B, C)");
     expect(participants.Size()).toBe(3);
     expect(participants.Get("A")).toBeDefined();
     expect(participants.Get("B")).toBeDefined();

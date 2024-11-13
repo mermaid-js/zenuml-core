@@ -103,7 +103,7 @@ export default {
       return this.context?.message()?.ProvidedFrom();
     },
     from: function () {
-      return this.providedFrom || this.origin;
+      return this.providedFrom || this.origin || "_STARTER_";
     },
     // used by ArrowMixin
     source: function () {
@@ -143,7 +143,7 @@ export default {
       return this.message?.isCurrent(this.cursor);
     },
     showStarter() {
-      return this.participants.Starter().name !== "_STARTER_";
+      return this.participants.Starter()?.name !== "_STARTER_";
     },
     isRootBlock() {
       return this.context?.parentCtx?.parentCtx instanceof ProgContext;

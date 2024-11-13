@@ -83,6 +83,9 @@ export class Coordinates {
     participantModels: IParticipantModel[],
   ) {
     ownableMessages.forEach((message) => {
+      if (!message.from) {
+        message.from = "_STARTER_";
+      }
       const indexFrom = participantModels.findIndex(
         (p) => p.name === message.from,
       );

@@ -16,6 +16,7 @@ interface ParticipantOptions {
 }
 
 export const blankParticipant = {
+  name: "",
   color: undefined,
   comment: undefined,
   explicit: undefined,

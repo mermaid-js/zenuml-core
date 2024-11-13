@@ -65,6 +65,7 @@ import useIntersectionTop from "@/functions/useIntersectionTop";
 import useDocumentScroll from "@/functions/useDocumentScroll";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { RenderMode } from "@/store/Store";
+import { blankParticipant } from "@/parser/Participants";
 
 export default {
   name: "life-line-layer",
@@ -100,6 +101,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      "coordinates",
       "participants",
       "GroupContext",
       "ParticipantContext",
@@ -109,10 +111,21 @@ export default {
       return !!localStorage.zenumlDebug;
     },
     starterParticipant() {
-      return this.participants.Starter();
+      const names = this.coordinates.orderedParticipantNames();
+      if (names.length === 0) return null;
+      const firstName = names[0];
+      if (firstName === "_STARTER_") {
+        return {
+          ...blankParticipant,
+          name: "_STARTER_",
+          explicit: false,
+          isStarter: true,
+        };
+      }
+      return null;
     },
     starterOnTheLeft() {
-      return !this.starterParticipant.explicit;
+      return !!this.starterParticipant && !this.starterParticipant?.explicit;
     },
     implicitParticipants() {
       return this.participants.ImplicitArray();

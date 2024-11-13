@@ -24,7 +24,9 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
     rightParticipant,
     coordinates,
   );
-
+  if (leftParticipant === "" || rightParticipant === "") {
+    return 0;
+  }
   return (
     coordinates.distance(leftParticipant, rightParticipant) +
     border.left +
@@ -42,6 +44,7 @@ function extraWidthDueToSelfMessage(
 ) {
   const allMessages = AllMessages(ctx);
   const widths = allMessages
+    .filter((m) => !!m.from && !!m.to)
     .filter((m) => m.from === m.to)
     // 37 is arrow width (30) + half occurrence width(7)
     .map(

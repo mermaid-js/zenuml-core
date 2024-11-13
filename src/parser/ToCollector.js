@@ -1,10 +1,6 @@
 import { Participants } from "./Participants";
 import antlr4 from "antlr4";
 import { default as sequenceParserListener } from "../generated-parser/sequenceParserListener";
-import { default as sequenceParser } from "../generated-parser/sequenceParser";
-
-const seqParser = sequenceParser;
-const ProgContext = seqParser.ProgContext;
 
 let participants = undefined;
 let isBlind = false;
@@ -168,31 +164,9 @@ ToCollector.enterRet = function (ctx) {
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
-ToCollector.getParticipants = function (context, withStarter) {
+ToCollector.getParticipants = function (context) {
   participants = new Participants();
   walker.walk(this, context);
-  if (withStarter && context instanceof ProgContext) {
-    const participantsMap = participants.participants;
-    const starterKey = context.Starter();
-    if (participantsMap.has(starterKey)) {
-      // Update existing starter
-      const existingParticipant = participantsMap.get(starterKey);
-      existingParticipant.isStarter = true;
-    } else {
-      // Create new starter participant
-      const starterParticipant = {
-        name: starterKey,
-        isStarter: true,
-        positions: new Set(),
-        assigneePositions: new Set(),
-      };
-
-      participants.participants = new Map([
-        [starterKey, starterParticipant],
-        ...participantsMap,
-      ]);
-    }
-  }
   return participants;
 };
 

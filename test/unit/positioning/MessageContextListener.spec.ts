@@ -19,7 +19,7 @@ describe("MessageListener", () => {
 
     expect(messageContextListener.result()).toStrictEqual([
       {
-        from: "_STARTER_",
+        from: undefined,
         signature: "method(E.m)",
         to: "A",
         type: 0,
@@ -31,7 +31,7 @@ describe("MessageListener", () => {
         type: 0,
       },
       {
-        from: "_STARTER_",
+        from: undefined,
         signature: "«create»",
         to: "B",
         type: 2,
@@ -56,7 +56,7 @@ describe("MessageListener", () => {
 
     expect(messageContextListener.result()).toStrictEqual([
       {
-        from: "_STARTER_",
+        from: undefined,
         signature: "m(new B,C.m)",
         to: "A",
         type: 0,
@@ -74,7 +74,7 @@ describe("MessageListener", () => {
 
     expect(messageContextListener.result()).toStrictEqual([
       {
-        from: "_STARTER_",
+        from: undefined,
         signature: "m",
         to: "B",
         type: 0,

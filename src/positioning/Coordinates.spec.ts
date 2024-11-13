@@ -3,11 +3,14 @@ import { RootContext } from "@/parser";
 import {
   ARROW_HEAD_WIDTH,
   MARGIN,
-  MIN_PARTICIPANT_WIDTH,
+  MINI_GAP,
   OCCURRENCE_WIDTH,
 } from "@/positioning/Constants";
 import { Coordinates } from "./Coordinates";
-import { stubWidthProvider } from "../../test/unit/parser/fixture/Fixture";
+import {
+  MOCK_CREATE_MESSAGE_WIDTH,
+  stubWidthProvider,
+} from "../../test/unit/parser/fixture/Fixture";
 import { clearCache } from "@/utils/RenderingCache";
 describe("get absolute position of a participant", () => {
   beforeEach(() => {
@@ -34,14 +37,13 @@ describe("get absolute position of a participant", () => {
   });
 
   it.each([
-    ["A1 B1", 60, 180],
-    ["A1 group {B1}", 60, 180], // group does not change absolute positions
-  ])("Use MINI_GAP (100) for %s", (code, posA1, posB1) => {
+    ["A1 B1", MINI_GAP / 2, MINI_GAP + MINI_GAP / 2],
+    ["A1 group {B1}", MINI_GAP / 2, MINI_GAP + MINI_GAP / 2], // group does not change absolute positions
+  ])(`Use MINI_GAP ${MINI_GAP} for %s`, (code, posA1, posB1) => {
     const rootContext = RootContext(code);
 
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
 
-    // margin for _STARTER_ + half MINI_GAP
     expect(coordinates.getPosition("A1")).toBe(posA1);
     // margin + half MINI_GAP + position of A1
     expect(coordinates.getPosition("B1")).toBe(posB1);
@@ -58,13 +60,27 @@ describe("get absolute position of a participant", () => {
     const rootContext = RootContext("A1.a1 A1.a1 B1.a1");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
     expect(coordinates.getPosition("_STARTER_")).toBe(0);
-    expect(coordinates.getPosition("A1")).toBe(60);
-    expect(coordinates.getPosition("B1")).toBe(180);
+    expect(coordinates.getPosition("A1")).toBe(MINI_GAP / 2);
+    expect(coordinates.getPosition("B1")).toBe(MINI_GAP + MINI_GAP / 2);
   });
 
   it.each([
-    ["new A1", "A1", 84],
-    ["new A200", "A200", 134],
+    [
+      "new A1",
+      "A1",
+      MOCK_CREATE_MESSAGE_WIDTH +
+        MINI_GAP / 2 +
+        ARROW_HEAD_WIDTH +
+        OCCURRENCE_WIDTH,
+    ],
+    [
+      "new A200",
+      "A200",
+      MOCK_CREATE_MESSAGE_WIDTH +
+        (200 + MARGIN) / 2 +
+        ARROW_HEAD_WIDTH +
+        OCCURRENCE_WIDTH,
+    ],
   ])("creation method: %s", (code, name, pos) => {
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
@@ -82,11 +98,11 @@ describe("get absolute position of a participant", () => {
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
 
-    const positionA = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
-    expect(coordinates.getPosition("A1")).toBe(positionA); //70
+    const positionA = MINI_GAP / 2;
+    expect(coordinates.getPosition("A1")).toBe(positionA);
 
     // position is optimised for even distribution
-    expect(coordinates.getPosition("B1")).toBe(472); //190
+    expect(coordinates.getPosition("B1")).toBe(467);
 
     // positionC is not impacted by position of B1
     const positionC =
@@ -102,7 +118,7 @@ describe("Let us focus on order", () => {
   it("should add Starter to the left", () => {
     const rootContext = RootContext("A1 B1->A1:m1");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
-    expect(coordinates.getPosition("B1")).toBe(180);
-    expect(coordinates.getPosition("A1")).toBe(60);
+    expect(coordinates.getPosition("B1")).toBe(165);
+    expect(coordinates.getPosition("A1")).toBe(MINI_GAP / 2);
   });
 });

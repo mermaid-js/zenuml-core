@@ -29,14 +29,8 @@
  * the participants back in the flow and a fixed flow decided by itself.
  */
 
-/**
- * Examples:
- * A B C.m                => _STARTER_(invisible), A, B, C
- * A B @Starter(C) C.m    => C, A, B
- * A B @Starter(B) C.m    => A, B, C
- */
 import { RootContext } from "../../../../src/parser";
-import { OrderedParticipants } from "../../../../src/positioning/OrderedParticipants";
+import { OrderedParticipants } from "../../../../src/parser/OrderedParticipants";
 
 function getFlattenedParticipants(code: string) {
   const rootContext = RootContext(code);

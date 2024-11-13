@@ -71,9 +71,9 @@ export const Depth = function (ctx) {
   const childFragmentDetector = ChildFragmentDetector;
   return childFragmentDetector.depth(childFragmentDetector)(ctx);
 };
-export const Participants = function (ctx, withStarter) {
+export const Participants = function (ctx) {
   const toCollector = ToCollector;
-  return toCollector.getParticipants(ctx, withStarter);
+  return toCollector.getParticipants(ctx);
 };
 
 export default {
@@ -81,9 +81,9 @@ export default {
   ProgContext: sequenceParser.ProgContext,
   GroupContext: sequenceParser.GroupContext,
   ParticipantContext: sequenceParser.ParticipantContext,
-  Participants: function (ctx, withStarter) {
+  Participants: function (ctx) {
     const toCollector = ToCollector;
-    return toCollector.getParticipants(ctx, withStarter);
+    return toCollector.getParticipants(ctx);
   },
   Errors: errors,
   /**
