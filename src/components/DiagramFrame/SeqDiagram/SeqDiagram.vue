@@ -1,6 +1,6 @@
 <template>
   <div
-    class="zenuml sequence-diagram relative box-border text-left overflow-visible"
+    class="zenuml sequence-diagram relative box-border text-left overflow-visible px-2.5"
     :class="theme"
     ref="diagramRef"
   >
