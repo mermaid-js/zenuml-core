@@ -5,7 +5,7 @@ import {
   OCCURRENCE_WIDTH,
 } from "./Constants";
 import { TextType, WidthFunc } from "./Coordinate";
-import { OrderedParticipants } from "@/parser/OrderedParticipants";
+import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { IParticipantModel } from "@/parser/ParticipantListener";
 import { find_optimal } from "./david/DavidEisenstat";
 import { AllMessages } from "@/parser/MessageContextListener";
@@ -56,7 +56,7 @@ export class Coordinates {
   }
 
   half(participantName: string) {
-    if (participantName === "_STARTER_") {
+    if (participantName === _STARTER_) {
       return MARGIN / 2;
     }
     const halfLeftParticipantWidth = this.halfWithMargin(
@@ -96,7 +96,7 @@ export class Coordinates {
   ) {
     ownableMessages.forEach((message) => {
       if (!message.from) {
-        message.from = "_STARTER_";
+        message.from = _STARTER_;
       }
       const indexFrom = participantModels.findIndex(
         (p) => p.name === message.from,
@@ -133,8 +133,8 @@ export class Coordinates {
     const halfLeft = this.half(p.left);
     const halfSelf = this.half(p.name);
     // TODO: convert name to enum type
-    const leftIsVisible = p.left && p.left !== "_STARTER_";
-    const selfIsVisible = p.name && p.name !== "_STARTER_";
+    const leftIsVisible = p.left && p.left !== _STARTER_;
+    const selfIsVisible = p.name && p.name !== _STARTER_;
     return (
       ((leftIsVisible && halfLeft) || 0) + ((selfIsVisible && halfSelf) || 0)
     );

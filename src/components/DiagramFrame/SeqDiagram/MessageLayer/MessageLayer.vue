@@ -12,6 +12,7 @@ import { computed, defineAsyncComponent, onMounted, onUpdated } from "vue";
 import { useStore } from "vuex";
 import parentLogger from "../../../../logger/logger";
 import { AllMessages } from "@/parser/MessageContextListener";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 // @ts-ignore
 const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
@@ -36,7 +37,7 @@ const firstMessage = computed(() => {
   return allMessages[0];
 });
 const paddingLeft = computed(() => {
-  return centerOf.value(firstMessage.value?.from || "_STARTER_") + 1;
+  return centerOf.value(firstMessage.value?.from || _STARTER_) + 1;
 });
 
 onMounted(() => {

@@ -12,6 +12,7 @@ import {
   MIN_PARTICIPANT_WIDTH,
   OCCURRENCE_WIDTH,
 } from "@/positioning/Constants";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 function mountCreationWithCode(
   code: string,
@@ -47,7 +48,7 @@ describe("Creation", () => {
     );
 
     const vm = creationWrapper.vm as any;
-    expect(vm.from).toBe("_STARTER_");
+    expect(vm.from).toBe(_STARTER_);
     expect(vm.signature).toBe("«create»");
     expect(vm.assignee).toBe("a");
     // -------------==a:A==-

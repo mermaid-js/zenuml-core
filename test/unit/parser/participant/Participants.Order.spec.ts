@@ -30,7 +30,10 @@
  */
 
 import { RootContext } from "../../../../src/parser";
-import { OrderedParticipants } from "../../../../src/parser/OrderedParticipants";
+import {
+  _STARTER_,
+  OrderedParticipants,
+} from "../../../../src/parser/OrderedParticipants";
 
 function getFlattenedParticipants(code: string) {
   const rootContext = RootContext(code);
@@ -40,8 +43,8 @@ function getFlattenedParticipants(code: string) {
 describe("Participants.Order", () => {
   it("should return the order of participants", () => {
     expect(getFlattenedParticipants("A as A1 B C.m")).toEqual([
-      { name: "_STARTER_", left: "" },
-      { name: "A", label: "A1", left: "_STARTER_" },
+      { name: _STARTER_, left: "" },
+      { name: "A", label: "A1", left: _STARTER_ },
       { name: "B", label: undefined, left: "A" },
       { name: "C", left: "B" },
     ]);
@@ -75,22 +78,22 @@ describe("Participants.Order", () => {
 
   it("should return the order of participants", () => {
     expect(getFlattenedParticipants("A.m")).toEqual([
-      { left: "", name: "_STARTER_" },
-      { left: "_STARTER_", name: "A" },
+      { left: "", name: _STARTER_ },
+      { left: _STARTER_, name: "A" },
     ]);
   });
 
   it("should return the order of participants - ignore expression in parameters", () => {
     expect(getFlattenedParticipants("A.m(B.m)")).toEqual([
-      { left: "", name: "_STARTER_" },
-      { left: "_STARTER_", name: "A" },
+      { left: "", name: _STARTER_ },
+      { left: _STARTER_, name: "A" },
     ]);
   });
 
   it("should return the order of participants - ignore expression in condition", () => {
     expect(getFlattenedParticipants("if(B.m1){A.m2}")).toEqual([
-      { left: "", name: "_STARTER_" },
-      { left: "_STARTER_", name: "A" },
+      { left: "", name: _STARTER_ },
+      { left: _STARTER_, name: "A" },
     ]);
   });
 });

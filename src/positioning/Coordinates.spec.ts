@@ -13,6 +13,7 @@ import {
   stubWidthProvider,
 } from "../../test/unit/parser/fixture/Fixture";
 import { clearCache } from "@/utils/RenderingCache";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 describe("get absolute position of a participant", () => {
   beforeEach(() => {
     clearCache();
@@ -57,7 +58,7 @@ describe("get absolute position of a participant", () => {
   it("wide method", () => {
     const rootContext = RootContext("A1.m800");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
-    expect(coordinates.getPosition("_STARTER_")).toBe(0);
+    expect(coordinates.getPosition(_STARTER_)).toBe(0);
     expect(coordinates.getPosition("A1")).toBe(
       800 + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH,
     );
@@ -66,7 +67,7 @@ describe("get absolute position of a participant", () => {
   it("should not duplicate participants", () => {
     const rootContext = RootContext("A1.a1 A1.a1 B1.a1");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
-    expect(coordinates.getPosition("_STARTER_")).toBe(0);
+    expect(coordinates.getPosition(_STARTER_)).toBe(0);
     const posA1 = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
     const posB1 =
       posA1 + MIN_PARTICIPANT_WIDTH / 2 + MARGIN + MIN_PARTICIPANT_WIDTH / 2;
@@ -96,7 +97,7 @@ describe("get absolute position of a participant", () => {
   ])("creation method: %s", (code, name, pos) => {
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
-    expect(coordinates.getPosition("_STARTER_")).toBe(0);
+    expect(coordinates.getPosition(_STARTER_)).toBe(0);
     // half participant width + Starter Position + margin
     expect(coordinates.getPosition(name)).toBe(pos);
   });

@@ -73,6 +73,7 @@ import SelfInvocation from "./SelfInvocation/SelfInvocation.vue";
 import { CodeRange } from "@/parser/CodeRange";
 import { ProgContext } from "@/parser";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export default {
   name: "interaction",
@@ -103,7 +104,7 @@ export default {
       return this.context?.message()?.ProvidedFrom();
     },
     from: function () {
-      return this.providedFrom || this.origin || "_STARTER_";
+      return this.providedFrom || this.origin || _STARTER_;
     },
     // used by ArrowMixin
     source: function () {
@@ -143,7 +144,7 @@ export default {
       return this.message?.isCurrent(this.cursor);
     },
     showStarter() {
-      return this.participants.Starter()?.name !== "_STARTER_";
+      return this.participants.Starter()?.name !== _STARTER_;
     },
     isRootBlock() {
       return this.context?.parentCtx?.parentCtx instanceof ProgContext;

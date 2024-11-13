@@ -55,6 +55,8 @@ import { GroupContext, ParticipantContext, Participants } from "@/parser";
 import { mapGetters, mapMutations, useStore } from "vuex";
 import LifeLine from "./LifeLine.vue";
 import LifeLineGroup from "./LifeLineGroup.vue";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
+
 const logger = parentLogger.child({ name: "LifeLineLayer" });
 
 // TODO: remove the same logic
@@ -114,10 +116,10 @@ export default {
       const names = this.coordinates.orderedParticipantNames();
       if (names.length === 0) return null;
       const firstName = names[0];
-      if (firstName === "_STARTER_") {
+      if (firstName === _STARTER_) {
         return {
           ...blankParticipant,
-          name: "_STARTER_",
+          name: _STARTER_,
           explicit: false,
           isStarter: true,
         };

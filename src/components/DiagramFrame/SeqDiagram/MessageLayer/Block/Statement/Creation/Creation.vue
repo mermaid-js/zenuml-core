@@ -72,6 +72,7 @@ import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
 import { CodeRange } from "@/parser/CodeRange";
 import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 const logger = parentLogger.child({ name: "Creation" });
 
@@ -86,7 +87,7 @@ export default {
     ...mapGetters(["cursor", "onElementClick", "distance2"]),
     ...mapState(["numbering"]),
     from() {
-      return this.context.Origin() || "_STARTER_";
+      return this.context.Origin() || _STARTER_;
     },
     source() {
       return this.from;

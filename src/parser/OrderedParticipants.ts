@@ -2,6 +2,7 @@ import ToCollector from "@/parser/ToCollector";
 import { AllMessages } from "@/parser/MessageContextListener";
 import { blankParticipant } from "@/parser/Participants";
 
+export const _STARTER_ = "_STARTER_";
 export function OrderedParticipants(rootContext: any) {
   // @ts-ignore
   const participants = ToCollector.getParticipants(rootContext, true);
@@ -14,8 +15,8 @@ export function OrderedParticipants(rootContext: any) {
   const participantEntries = Array.from(participants.participants.entries());
   if (needDefaultStarter) {
     participantEntries.unshift([
-      "_STARTER_",
-      { ...blankParticipant, name: "_STARTER_", isStarter: true },
+      _STARTER_,
+      { ...blankParticipant, name: _STARTER_, isStarter: true },
     ]);
   }
   return participantEntries.map((entry, index) => {
