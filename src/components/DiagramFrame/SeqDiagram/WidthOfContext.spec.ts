@@ -18,29 +18,30 @@ describe("TotalWidth", () => {
   const getParticipantWidth = () => MIN_PARTICIPANT_WIDTH + MARGIN;
 
   test("calculates width for simple method call", () => {
-    // -====A====-
-    expect(getTotalWidth("A.method")).toBe(100);
+    // -====S====--====A====-
+    expect(getTotalWidth("A.method")).toBe(200);
   });
 
   test("calculates width with nested depth", () => {
-    //  -====A====-  # participants
+    //  -====S====--====A====-  # participants
     // [           ] # alt fragment
-    expect(getTotalWidth("if(x) {A.method}")).toBe(120);
+    expect(getTotalWidth("if(x) {A.method}")).toBe(220);
   });
 
   test("calculates width with multiple participants", () => {
-    // -====A====--====B====-  # participants
+    // -====S====--====A====--====B====-  # participants
     //[                      ] # fragment
-    expect(getTotalWidth("if(x) {A.method; B.method}")).toBe(220);
+    expect(getTotalWidth("if(x) {A.method; B.method}")).toBe(320);
   });
 
   describe("self message width calculations", () => {
     test("includes extra width from single self message", () => {
-      // -====A====--====B====-
+      // -====S====--====A====--====B====-
       //[     --------->  -self-<]
       const totalWidth = getTotalWidth("if(x) {A.method; B.method { s100 }}");
-
+      const starterWidth = getParticipantWidth();
       const expectedWidth =
+        starterWidth +
         FRAGMENT_PADDING_X +
         getParticipantWidth() +
         getParticipantWidth() / 2 +
@@ -51,13 +52,14 @@ describe("TotalWidth", () => {
     });
 
     test("uses widest self message for total width", () => {
-      // -====A====--====B====--====C====-
-      //[     --------->  -self---------------------<]
+      // -====S====--====A====--====B====--====C====-
+      //[                --------->  -self---------------------<]
       const totalWidth = getTotalWidth(
         "if(x) {A1.method; B1.method { s200 } C1.method { s10 }}",
       );
-
+      const starterWidth = getParticipantWidth();
       const expectedWidth =
+        starterWidth +
         FRAGMENT_PADDING_X +
         getParticipantWidth() +
         getParticipantWidth() / 2 +

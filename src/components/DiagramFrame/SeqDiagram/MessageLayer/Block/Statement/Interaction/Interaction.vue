@@ -150,7 +150,7 @@ export default {
       return this.context?.parentCtx?.parentCtx instanceof ProgContext;
     },
     origin: function () {
-      return this.context?.Origin();
+      return this.origin1;
     },
     passOnOffset: function () {
       // selfCallIndent is introduced for sync self interaction. Each time we enter a self sync interaction the selfCallIndent

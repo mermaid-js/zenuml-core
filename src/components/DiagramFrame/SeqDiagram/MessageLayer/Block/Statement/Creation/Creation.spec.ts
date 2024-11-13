@@ -15,6 +15,7 @@ import { _STARTER_ } from "@/parser/OrderedParticipants";
 function mountCreationWithCode(
   code: string,
   contextLocator: (code: string) => any,
+  origin1 = "",
 ) {
   const storeConfig = VueSequence.Store();
   // @ts-ignore
@@ -24,6 +25,7 @@ function mountCreationWithCode(
   const creationContext = contextLocator(code);
   const props = {
     context: creationContext,
+    origin1,
     fragmentOffset: 100,
   };
 
@@ -43,10 +45,10 @@ describe("Creation", () => {
     const creationWrapper = mountCreationWithCode(
       "a = new A",
       Fixture.firstStatement,
+      _STARTER_,
     );
 
     const vm = creationWrapper.vm as any;
-    expect(vm.from).toBe(_STARTER_);
     expect(vm.signature).toBe("«create»");
     expect(vm.assignee).toBe("a");
     // -------------==a:A==-
@@ -69,6 +71,7 @@ describe("Creation", () => {
     const creationWrapper = mountCreationWithCode(
       "A.m{B.m{new A}}",
       Fixture.firstGrandChild,
+      "B",
     );
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();
@@ -97,6 +100,7 @@ describe("Creation", () => {
     const creationWrapper = mountCreationWithCode(
       "A.m{B.m{if(x){new A}}}",
       contextLocator,
+      "B",
     );
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();

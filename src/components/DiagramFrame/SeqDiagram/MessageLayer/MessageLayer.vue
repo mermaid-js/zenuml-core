@@ -2,7 +2,11 @@
 TODO: we may need to consider the width of self message on right most participant. -->
 <template>
   <div class="message-layer relative z-30 pt-24 pb-10">
-    <block :context="context" :style="{ 'padding-left': paddingLeft + 'px' }" />
+    <block
+      :context="context"
+      :style="{ 'padding-left': paddingLeft + 'px' }"
+      :origin1="firstParticipantName"
+    />
     <StylePanel />
   </div>
 </template>
@@ -12,8 +16,6 @@ import { computed, defineAsyncComponent, onMounted, onUpdated } from "vue";
 import { useStore } from "vuex";
 import parentLogger from "../../../../logger/logger";
 import { AllMessages } from "@/parser/MessageContextListener";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { blankParticipant } from "@/parser/Participants";
 
 // @ts-ignore
 const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
@@ -41,22 +43,13 @@ const paddingLeft = computed(() => {
   if (!firstMessage.value) {
     return 0;
   }
-  return centerOf.value(starterParticipant.value?.name) + 1;
+  return centerOf.value(firstParticipantName.value) + 1;
 });
 
-const starterParticipant = computed(() => {
+const firstParticipantName = computed(() => {
   const names = coordinates.value.orderedParticipantNames();
   if (names.length === 0) return null;
-  const firstName = names[0];
-  if (firstName === _STARTER_) {
-    return {
-      ...blankParticipant,
-      name: _STARTER_,
-      explicit: false,
-      isStarter: true,
-    };
-  }
-  return null;
+  return names[0];
 });
 
 onMounted(() => {

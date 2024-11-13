@@ -35,6 +35,7 @@
           <ConditionLabel :condition="conditionFromIfElseBlock(ifBlock)" />
         </div>
         <block
+          :origin1="origin1"
           v-if="blockInIfBlock"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInIfBlock"
@@ -52,6 +53,7 @@
             />
           </div>
           <block
+            :origin1="origin1"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="blockInElseIfBlock(elseIfBlock)"
             :selfCallIndent="selfCallIndent"
@@ -67,6 +69,7 @@
             <label class="p-1">[else]</label>
           </div>
           <block
+            :origin1="origin1"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="elseBlock"
             :selfCallIndent="selfCallIndent"

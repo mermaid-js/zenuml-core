@@ -9,6 +9,7 @@ import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export default {
+  props: ["origin1"],
   computed: {
     ...mapGetters(["coordinates"]),
     offsetX: function () {

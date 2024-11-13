@@ -72,7 +72,6 @@ import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
 import { CodeRange } from "@/parser/CodeRange";
 import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 const logger = parentLogger.child({ name: "Creation" });
 
@@ -86,11 +85,8 @@ export default {
   computed: {
     ...mapGetters(["cursor", "onElementClick", "distance2"]),
     ...mapState(["numbering"]),
-    from() {
-      return this.context.Origin() || _STARTER_;
-    },
     source() {
-      return this.from;
+      return this.origin1;
     },
     target() {
       return this.to;
@@ -105,12 +101,12 @@ export default {
       // L     a           b
       // gap between a and b is [(b - a) - 1]
       return (
-        Math.abs(this.distance2(this.from, this.to) - safeOffset) -
+        Math.abs(this.distance2(this.origin1, this.to) - safeOffset) -
         LIFELINE_WIDTH
       );
     },
     rightToLeft() {
-      return this.distance2(this.from, this.to) < 0;
+      return this.distance2(this.origin1, this.to) < 0;
     },
     signature() {
       return this.creation.SignatureText(false);

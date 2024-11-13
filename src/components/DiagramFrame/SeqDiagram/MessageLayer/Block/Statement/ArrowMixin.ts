@@ -1,6 +1,7 @@
 import sequenceParser from "@/generated-parser/sequenceParser";
 
 export default {
+  props: ["origin1"],
   computed: {
     borderWidth: function () {
       const border = {

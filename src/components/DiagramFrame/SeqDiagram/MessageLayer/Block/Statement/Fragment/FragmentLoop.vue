@@ -33,6 +33,7 @@
           <ConditionLabel :condition="getConditionFromBlock(blockInLoop)" />
         </div>
         <block
+          :origin1="origin1"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInLoop"
           :selfCallIndent="selfCallIndent"

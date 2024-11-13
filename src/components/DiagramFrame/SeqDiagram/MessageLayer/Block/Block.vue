@@ -6,6 +6,7 @@
       :key="index"
     >
       <Statement
+        :origin1="origin1"
         :inheritFromOccurrence="inheritFromOccurrence"
         :context="stat"
         :collapsed="collapsed"
@@ -22,6 +23,7 @@ import Statement from "./Statement/Statement.vue";
 import { increaseNumber } from "@/utils/Numbering";
 
 const props = defineProps<{
+  origin1?: string;
   context?: any;
   selfCallIndent?: number;
   number?: string;
