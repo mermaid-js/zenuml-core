@@ -38,7 +38,7 @@ export class Participant {
   private groupId: number | string | undefined;
   explicit: boolean | undefined;
   isStarter: boolean | undefined;
-  private label: string | undefined;
+  label: string | undefined;
   private type: string | undefined;
   private color: string | undefined;
   private comment: string | undefined;
