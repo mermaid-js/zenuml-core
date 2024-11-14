@@ -4,6 +4,7 @@ import { Frame } from "@/positioning/FrameBorder";
 import { Participants } from "./index";
 import { Participant } from "@/parser/Participants";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
@@ -28,7 +29,7 @@ class FrameBuilder extends sequenceParserListener {
   }
 
   private getLeft(ctx: any): string {
-    const localParticipants = this.getLocalParticipants(ctx);
+    const localParticipants = getLocalParticipantNames(ctx);
     return (
       this._orderedParticipants.find((p) => localParticipants.includes(p)) || ""
     );
@@ -39,7 +40,7 @@ class FrameBuilder extends sequenceParserListener {
       this._orderedParticipants
         .slice()
         .reverse()
-        .find((p) => this.getLocalParticipants(ctx).includes(p)) || ""
+        .find((p) => getLocalParticipantNames(ctx).includes(p)) || ""
     );
   }
 

@@ -1,17 +1,13 @@
 import { AllMessages } from "@/parser/MessageContextListener";
-import { Participants } from "@/parser";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder, { Frame } from "@/positioning/FrameBorder";
 import { Coordinates } from "@/positioning/Coordinates";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
+import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 
 export function TotalWidth(ctx: any, coordinates: Coordinates) {
   const allParticipants = coordinates.orderedParticipantNames();
-  const localParticipants = [
-    ctx.Origin() || _STARTER_,
-    ...Participants(ctx).Names(),
-  ];
+  const localParticipants = getLocalParticipantNames(ctx);
   const leftParticipant =
     allParticipants.find((p) => localParticipants.includes(p)) || "";
   const rightParticipant =

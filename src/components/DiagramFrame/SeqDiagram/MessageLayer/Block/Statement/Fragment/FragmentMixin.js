@@ -1,4 +1,3 @@
-import { Participants } from "@/parser";
 import { mapGetters } from "vuex";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
@@ -6,6 +5,7 @@ import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext"
 import CollapseButton from "./CollapseButton.vue";
 import { EventBus } from "@/EventBus";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
+import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 
 export default {
   props: ["origin1"],
@@ -13,10 +13,7 @@ export default {
     ...mapGetters(["coordinates"]),
     leftParticipant: function () {
       const allParticipants = this.coordinates.orderedParticipantNames();
-      const localParticipants = [
-        this.origin1,
-        ...Participants(this.context).Names(),
-      ];
+      const localParticipants = getLocalParticipantNames(this.context);
       return allParticipants.find((p) => localParticipants.includes(p));
     },
     border: function () {
