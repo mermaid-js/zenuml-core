@@ -125,6 +125,7 @@ export default {
     },
     interactionWidth: function () {
       if (this.isSelf) {
+        // TODO: do we need to calculate the width of the self call? If we do, we should use WidthProvider.
         const leftOfMessage = 100;
         const averageWidthOfChar = 10;
         return (
