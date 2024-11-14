@@ -6,32 +6,32 @@ import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext"
 import CollapseButton from "./CollapseButton.vue";
 import { EventBus } from "@/EventBus";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export default {
   props: ["origin1"],
   computed: {
     ...mapGetters(["coordinates"]),
+    leftParticipant: function () {
+      const allParticipants = this.coordinates.orderedParticipantNames();
+      const localParticipants = [
+        this.origin1,
+        ...Participants(this.context).Names(),
+      ];
+      return allParticipants.find((p) => localParticipants.includes(p));
+    },
     offsetX: function () {
       const allParticipants = this.coordinates.orderedParticipantNames();
       let frameBuilder = new FrameBuilder(allParticipants);
       const frame = frameBuilder.getFrame(this.context);
       const border = FrameBorder(frame);
-      const localParticipants = [
-        this.context.Origin() || _STARTER_,
-        ...Participants(this.context).Names(),
-      ];
-      const leftParticipant = allParticipants.find((p) =>
-        localParticipants.includes(p),
-      );
       // TODO: consider using this.getParticipantGap(this.participantModels[0])
-      let halfLeftParticipant = this.coordinates.half(leftParticipant);
+      let halfLeftParticipant = this.coordinates.half(this.leftParticipant);
       console.debug(
-        `left participant: ${leftParticipant} ${halfLeftParticipant}`,
+        `left participant: ${this.leftParticipant} ${halfLeftParticipant}`,
       );
       return (
         (this.from
-          ? this.coordinates.distance(leftParticipant, this.from)
+          ? this.coordinates.distance(this.leftParticipant, this.from)
           : 0) +
         border.left +
         halfLeftParticipant

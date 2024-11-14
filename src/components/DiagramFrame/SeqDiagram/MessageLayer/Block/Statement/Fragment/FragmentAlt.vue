@@ -1,5 +1,11 @@
 <template>
-  <div class="fragment alt border-skin-fragment rounded" :style="fragmentStyle">
+  <div
+    :data-origin="origin1"
+    :data-from="from"
+    :data-left-participant="leftParticipant"
+    class="fragment alt border-skin-fragment rounded"
+    :style="fragmentStyle"
+  >
     <div class="segment">
       <comment
         v-if="commentObj.text"
@@ -101,7 +107,7 @@ export default {
   setup(props) {
     const store = useStore();
     const numbering = computed(() => store.state.numbering);
-    const from = computed(() => props.context.Origin());
+    const from = computed(() => props.origin1);
     const alt = computed(() => props.context.alt());
     const ifBlock = computed(() => alt.value?.ifBlock());
     const elseIfBlocks = computed(() => alt.value?.elseIfBlock());

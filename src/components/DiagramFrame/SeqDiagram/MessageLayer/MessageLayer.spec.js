@@ -3,7 +3,7 @@ import { createStore } from "vuex";
 import { VueSequence } from "../../../../index";
 import MessageLayer from "./MessageLayer.vue";
 import Block from "./Block/Block.vue";
-import { ProgContextFixture } from "@/parser/ContextsFixture";
+
 const storeConfig = VueSequence.Store();
 storeConfig.state.code = "a";
 storeConfig.getters.centerOf = function () {
@@ -19,9 +19,7 @@ describe("MessageLayer", () => {
         store: store,
       },
     },
-    props: {
-      context: ProgContextFixture("A B C->C.method()").block(),
-    },
+    props: {},
     components: {
       Block,
     },
@@ -33,6 +31,6 @@ describe("MessageLayer", () => {
     expect(messageLayerWrapper.find(".pt-24").exists()).toBeTruthy();
   });
   it("gets participant names", async () => {
-    expect(messageLayerWrapper.vm.firstMessage.from).toBe("C");
+    expect(messageLayerWrapper.vm.firstParticipantName).toBe("a");
   });
 });
