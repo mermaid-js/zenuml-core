@@ -4,6 +4,7 @@ import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder, { Frame } from "@/positioning/FrameBorder";
 import { Coordinates } from "@/positioning/Coordinates";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 
 export function TotalWidth(ctx: any, coordinates: Coordinates) {
   const allParticipants = coordinates.orderedParticipantNames();
@@ -26,15 +27,17 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
     rightParticipant,
     coordinates,
   );
-  if (leftParticipant === "" || rightParticipant === "") {
-    return 0;
-  }
-  return (
+  // if (leftParticipant === "" || rightParticipant === "") {
+  //   return 0;
+  // }
+  const participantWidth =
     coordinates.distance(leftParticipant, rightParticipant) +
+    coordinates.half(leftParticipant) +
+    coordinates.half(rightParticipant);
+  return (
+    Math.max(participantWidth, FRAGMENT_MIN_WIDTH) +
     border.left +
     border.right +
-    coordinates.half(leftParticipant) +
-    coordinates.half(rightParticipant) +
     extraWidth
   );
 }

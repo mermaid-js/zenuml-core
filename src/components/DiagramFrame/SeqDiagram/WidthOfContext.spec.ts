@@ -28,6 +28,15 @@ describe("TotalWidth", () => {
     expect(getTotalWidth("if(x) {A.method}")).toBe(220);
   });
 
+  test("calculates width with nested depth", () => {
+    //  -====S====-  # participants
+    // [                ] # alt fragment, min-width takes effect
+    expect(getTotalWidth("if(x) {}")).toBe(220);
+    //  -====S====-  # participants
+    // [                ] # alt fragment, min-width takes effect
+    expect(getTotalWidth("if(x) { if(y() {}}")).toBe(240);
+  });
+
   test("calculates width with multiple participants", () => {
     // -====S====--====A====--====B====-  # participants
     //[                      ] # fragment
