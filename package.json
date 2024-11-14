@@ -69,6 +69,7 @@
     "@babel/preset-env": "^7.20.2",
     "@types/antlr4": "~4.11.2",
     "@types/color-string": "^1.5.2",
+    "@types/jest": "^29.5.14",
     "@types/lodash": "^4.14.191",
     "@types/node": "latest",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
