@@ -49,11 +49,12 @@ import { CodeRange } from "@/parser/CodeRange";
 import WidthProviderOnBrowser from "@/positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
+import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 
 export default {
   name: "return",
   props: ["context", "comment", "commentObj", "number"],
-  mixins: [ArrowMixin],
+  mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["distance", "cursor", "onElementClick", "participants"]),
     from: function () {
@@ -71,9 +72,6 @@ export default {
       return this.rightToLeft
         ? this.distance(this.target, this.from)
         : this.distance(this.source, this.from);
-    },
-    rightToLeft: function () {
-      return this.distance(this.target, this.source) < 0;
     },
     signature: function () {
       return (

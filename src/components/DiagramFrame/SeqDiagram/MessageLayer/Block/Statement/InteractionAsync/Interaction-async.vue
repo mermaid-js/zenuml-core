@@ -50,6 +50,7 @@ import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import { LIFELINE_WIDTH } from "@/positioning/Constants";
+import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 
 function isNullOrUndefined(value) {
   return value === null || value === undefined;
@@ -113,7 +114,7 @@ function isNullOrUndefined(value) {
 export default {
   name: "interaction-async",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
-  mixins: [ArrowMixin],
+  mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["distance", "cursor", "onElementClick"]),
     asyncMessage: function () {
@@ -148,9 +149,6 @@ export default {
       return this.rightToLeft
         ? this.distance(this.target, this.origin) - safeOffset
         : this.distance(this.source, this.origin) - safeOffset;
-    },
-    rightToLeft: function () {
-      return this.distance(this.target, this.source) < 0;
     },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();

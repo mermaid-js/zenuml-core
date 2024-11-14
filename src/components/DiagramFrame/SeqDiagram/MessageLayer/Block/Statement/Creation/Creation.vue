@@ -75,11 +75,12 @@ import {
   LIFELINE_WIDTH,
   OCCURRENCE_BAR_SIDE_WIDTH,
 } from "@/positioning/Constants";
+import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 
 export default {
   name: "creation",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
-  mixins: [ArrowMixin],
+  mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["cursor", "onElementClick", "distance2"]),
     ...mapState(["numbering"]),
@@ -102,9 +103,6 @@ export default {
         Math.abs(this.distance2(this.origin, this.target) - safeOffset) -
         LIFELINE_WIDTH
       );
-    },
-    rightToLeft() {
-      return this.distance2(this.origin, this.target) < 0;
     },
     signature() {
       return this.creation.SignatureText(false);
