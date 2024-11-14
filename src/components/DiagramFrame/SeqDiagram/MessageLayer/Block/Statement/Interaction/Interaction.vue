@@ -2,6 +2,7 @@
   <div
     class="interaction sync inline-block"
     v-on:click.stop="onClick"
+    :data-origin="origin"
     :data-to="target"
     data-type="interaction"
     :data-signature="signature"
