@@ -2,6 +2,7 @@
   <!-- .point-events-none allows hover over the participant underneath (from lifeline layer)
        .point-events-auto allows hover over the messages (from message layer, default behaviour) -->
   <div
+    :data-origin="origin1"
     class="interaction creation sync text-center transform"
     v-on:click.stop="onClick"
     :data-signature="signature"

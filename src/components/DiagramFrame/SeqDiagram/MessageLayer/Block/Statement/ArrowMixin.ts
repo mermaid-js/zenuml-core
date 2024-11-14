@@ -1,4 +1,5 @@
 import sequenceParser from "@/generated-parser/sequenceParser";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export default {
   props: ["origin1"],
@@ -63,7 +64,10 @@ export default {
           continue;
         }
 
-        if (currentContext.Owner() === participant) {
+        if (
+          currentContext.Owner() === participant ||
+          (!currentContext.Owner() && participant === _STARTER_)
+        ) {
           return currentContext;
         }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="block">
+  <div class="block" :data-origin="origin1">
     <div
       class="statement-container mt-1"
       v-for="(stat, index) in statements"

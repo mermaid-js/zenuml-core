@@ -71,7 +71,6 @@ import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import SelfInvocation from "./SelfInvocation/SelfInvocation.vue";
 import { CodeRange } from "@/parser/CodeRange";
-import { ProgContext } from "@/parser";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
@@ -147,7 +146,8 @@ export default {
       return this.participants.Starter()?.name !== _STARTER_;
     },
     isRootBlock() {
-      return this.context?.parentCtx?.parentCtx instanceof ProgContext;
+      // TODO: Add support for nested brace structures like { b { c.m() } }.
+      return this.to === _STARTER_;
     },
     origin: function () {
       return this.origin1;
@@ -169,7 +169,7 @@ export default {
       return Math.abs(this.distance2(this.from, this.to) - safeOffset) - 1;
     },
     to: function () {
-      return this.context?.message()?.Owner();
+      return this.context?.message()?.Owner() || _STARTER_;
     },
     isSelf: function () {
       // this.to === undefined if it is a self interaction and root message.
