@@ -50,10 +50,66 @@ import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import { LIFELINE_WIDTH } from "@/positioning/Constants";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 function isNullOrUndefined(value) {
   return value === null || value === undefined;
 }
+/**
+ * source, target, from, to, provided from, origin
+ *
+ * # target
+ * "Message" is the core concept of the sequence diagram. It is a message that is sent from one participant to another.
+ *
+ * `target` is the participant that receives the message. When target is not in the DSL, it is not a valid message.
+ *
+ * # origin/source/from
+ *
+ * When the `target` receives a sync message, it automatically becomes the `origin` of child messages. By default,
+ * the `origin` is the `source` or `from` of the child messages.
+ *
+ * There are two special cases:
+ * a. Messages at root level do not have an `origin` specified in DSL. Their `origin` is always _STARTER_.
+ * b. Messages can also have arbitrarily specified `source` in the DSL. This is called "provided from".
+ *    This does not change the `origin`. If origin != source, the message is called "out-of-band".
+ *
+ * `source` and `from` are the same.
+ *
+ * origin = ctx.Origin() || _STARTER_
+ * source = providedSource || origin
+ * target = target
+ *
+ * outOfBand = source != origin
+ *
+ * ## common cases
+ * code                               | source/from    | target/to  | provided source | origin     | out-of-band
+ * A.method()                           _STARTER_        A            null            _STARTER_
+ * A->B.method()                        A                B            A               A
+ * A->B: message                        A                B            A               A
+ * A.method() {
+ *   B.method()                         A                B            null            A
+ * }
+ *
+ * a()                                 _STARTER_         _STARTER_    null            _STARTER_
+ * a() {                               _STARTER_         _STARTER_    null            _STARTER_
+ *   b()                               _STARTER_         _STARTER_    null            _STARTER_
+ *   A.method()                        _STARTER_         A            null            _STARTER_
+ * }
+ *
+ * if(x) {
+ *   a()                               _STARTER_         _STARTER_    null            _STARTER_
+ * }
+ *
+ * A.method() {
+ *   self() {
+ *     B.method()                         A                B            null           A
+ *     B->B.method()                      B                B            B              A            true
+ *     B->B: message                      B                B            B              A            true
+ *     B->C.method()                      B                C            B              A            true
+ *     B->C: message                      B                C            B              A            true
+ *   }
+ * }
+ */
 
 export default {
   name: "interaction-async",
@@ -61,9 +117,6 @@ export default {
   mixins: [ArrowMixin],
   computed: {
     ...mapGetters(["distance", "cursor", "onElementClick"]),
-    from: function () {
-      return this.context.Origin();
-    },
     asyncMessage: function () {
       return this.context?.asyncMessage();
     },
@@ -88,13 +141,13 @@ export default {
     // Both 'left' and 'translateX' can be used to move the element horizontally.
     // Change it to use translate according to https://stackoverflow.com/a/53892597/529187.
     translateX: function () {
-      if (!this.from) {
+      if (!this.outOfBand) {
         return 0;
       }
-      let safeOffset = this.outOfBand ? this.selfCallIndent || 0 : 0;
+      let safeOffset = this.selfCallIndent || 0;
       return this.rightToLeft
-        ? this.distance(this.target, this.from)
-        : this.distance(this.source, this.from) - safeOffset;
+        ? this.distance(this.target, this.origin)
+        : this.distance(this.source, this.origin) - safeOffset;
     },
     rightToLeft: function () {
       return this.distance(this.target, this.source) < 0;
@@ -102,8 +155,14 @@ export default {
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();
     },
+    origin: function () {
+      return this.context?.Origin() || _STARTER_;
+    },
+    providedSource: function () {
+      return this.asyncMessage?.ProvidedFrom();
+    },
     source: function () {
-      return this.asyncMessage?.from()?.getFormattedText() || this.from;
+      return this.providedSource || this.origin;
     },
     target: function () {
       return this.asyncMessage?.to()?.getFormattedText();
@@ -121,9 +180,6 @@ export default {
     },
     isSelf: function () {
       return this.source === this.target;
-    },
-    origin: function () {
-      return this.context?.Origin();
     },
     messageTextStyle() {
       return this.commentObj?.messageStyle;
