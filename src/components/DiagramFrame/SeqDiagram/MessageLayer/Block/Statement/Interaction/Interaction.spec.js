@@ -82,9 +82,6 @@ describe("Translate X", () => {
   // A          B           C
   // provided   inherited   to
   it("when left to right", function () {
-    Interaction.computed.providedSource = () => "A";
-    Interaction.computed.origin = () => "B";
-    Interaction.computed.target = () => "C";
     const storeConfig = Store();
     storeConfig.getters.centerOf = () => (participant) => {
       if (participant === "A") return 10;
@@ -93,7 +90,12 @@ describe("Translate X", () => {
     };
 
     const store = createStore(storeConfig);
+    Interaction.computed.providedSource = () => "A";
+    Interaction.computed.target = () => "C";
     const wrapper = shallowMount(Interaction, {
+      props: {
+        origin: "B",
+      },
       global: {
         plugins: [store],
       },
@@ -105,18 +107,25 @@ describe("Translate X", () => {
   // A      B      C
   // to   real     from
   it("when right to left", function () {
-    Interaction.computed.providedSource = () => "B";
-    Interaction.props.origin = "C";
-    Interaction.computed.target = () => "A";
     const storeConfig = Store();
     storeConfig.getters.centerOf = () => (participant) => {
+      // A B C
+      // C.m { B->A.m }
+      // -====A====--====B====--====C====-
+      //
       if (participant === "A") return 10;
       if (participant === "B") return 25;
       if (participant === "C") return 35;
     };
 
     const store = createStore(storeConfig);
+
+    Interaction.computed.providedSource = () => "B";
+    Interaction.computed.target = () => "A";
     const wrapper = shallowMount(Interaction, {
+      props: {
+        origin: "C",
+      },
       global: {
         plugins: [store],
       },
