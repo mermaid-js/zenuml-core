@@ -1,6 +1,6 @@
 <template>
   <div
-    :data-origin="origin1"
+    :data-origin="origin"
     :data-from="from"
     :data-left-participant="leftParticipant"
     :data-frame-padding-left="border.left"
@@ -43,7 +43,7 @@
           <ConditionLabel :condition="conditionFromIfElseBlock(ifBlock)" />
         </div>
         <block
-          :origin1="origin1"
+          :origin="origin"
           v-if="blockInIfBlock"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInIfBlock"
@@ -61,7 +61,7 @@
             />
           </div>
           <block
-            :origin1="origin1"
+            :origin="origin"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="blockInElseIfBlock(elseIfBlock)"
             :selfCallIndent="selfCallIndent"
@@ -77,7 +77,7 @@
             <label class="p-1">[else]</label>
           </div>
           <block
-            :origin1="origin1"
+            :origin="origin"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="elseBlock"
             :selfCallIndent="selfCallIndent"
@@ -109,7 +109,7 @@ export default {
   setup(props) {
     const store = useStore();
     const numbering = computed(() => store.state.numbering);
-    const from = computed(() => props.origin1);
+    const from = computed(() => props.origin);
     const alt = computed(() => props.context.alt());
     const ifBlock = computed(() => alt.value?.ifBlock());
     const elseIfBlocks = computed(() => alt.value?.elseIfBlock());

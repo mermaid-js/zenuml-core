@@ -1,7 +1,7 @@
 <template>
   <div
     class="divider"
-    :data-origin="origin1"
+    :data-origin="origin"
     :style="{
       width: width + 'px',
       transform: 'translateX(' + (-1 * centerOfOrigin + 10) + 'px)',
@@ -25,7 +25,7 @@ import { mapGetters } from "vuex";
 
 export default {
   name: "divider",
-  props: ["context", "origin1"],
+  props: ["context", "origin"],
   computed: {
     ...mapGetters(["participants", "centerOf"]),
     /* Dividers have the same width as the lifeline layer */
@@ -36,7 +36,7 @@ export default {
       return this.centerOf(rearParticipant) + 10;
     },
     centerOfOrigin() {
-      return this.centerOf(this.origin1);
+      return this.centerOf(this.origin);
     },
     note: function () {
       return this.context.divider().Note();

@@ -15,7 +15,7 @@ import { _STARTER_ } from "@/parser/OrderedParticipants";
 function mountCreationWithCode(
   code: string,
   contextLocator: (code: string) => any,
-  origin1 = "",
+  origin = "",
 ) {
   const storeConfig = VueSequence.Store();
   // @ts-ignore
@@ -25,7 +25,7 @@ function mountCreationWithCode(
   const creationContext = contextLocator(code);
   const props = {
     context: creationContext,
-    origin1,
+    origin,
     fragmentOffset: 100,
   };
 

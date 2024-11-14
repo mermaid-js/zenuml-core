@@ -1,12 +1,13 @@
 <template>
-  <div class="block" :data-origin="origin1">
+  <div class="block" :data-origin="origin">
     <div
       class="statement-container mt-1"
+      :data-origin="origin"
       v-for="(stat, index) in statements"
       :key="index"
     >
       <Statement
-        :origin1="origin1"
+        :origin="origin"
         :inheritFromOccurrence="inheritFromOccurrence"
         :context="stat"
         :collapsed="collapsed"
@@ -23,7 +24,7 @@ import Statement from "./Statement/Statement.vue";
 import { increaseNumber } from "@/utils/Numbering";
 
 const props = defineProps<{
-  origin1?: string;
+  origin?: string;
   context?: any;
   selfCallIndent?: number;
   number?: string;

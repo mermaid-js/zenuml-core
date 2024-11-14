@@ -100,9 +100,6 @@ export default {
     message: function () {
       return this.context?.message();
     },
-    origin: function () {
-      return this.origin1;
-    },
     providedSource: function () {
       return this.context?.message()?.ProvidedFrom();
     },

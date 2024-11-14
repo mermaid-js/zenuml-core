@@ -2,7 +2,7 @@
   <!-- .point-events-none allows hover over the participant underneath (from lifeline layer)
        .point-events-auto allows hover over the messages (from message layer, default behaviour) -->
   <div
-    :data-origin="origin1"
+    :data-origin="origin"
     class="interaction creation sync text-center transform"
     v-on:click.stop="onClick"
     :data-signature="signature"
@@ -83,9 +83,6 @@ export default {
   computed: {
     ...mapGetters(["cursor", "onElementClick", "distance2"]),
     ...mapState(["numbering"]),
-    origin: function () {
-      return this.origin1;
-    },
     source() {
       return this.origin;
     },

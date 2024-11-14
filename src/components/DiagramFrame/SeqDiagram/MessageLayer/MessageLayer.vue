@@ -5,7 +5,7 @@ TODO: we may need to consider the width of self message on right most participan
     <block
       :context="context"
       :style="{ 'padding-left': paddingLeft + 'px' }"
-      :origin1="firstParticipantName"
+      :origin="firstParticipantName"
     />
     <StylePanel />
   </div>

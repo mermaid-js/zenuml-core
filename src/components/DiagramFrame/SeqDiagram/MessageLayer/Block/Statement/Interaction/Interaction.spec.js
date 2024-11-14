@@ -106,7 +106,7 @@ describe("Translate X", () => {
   // to   real     from
   it("when right to left", function () {
     Interaction.computed.providedSource = () => "B";
-    Interaction.computed.origin = () => "C";
+    Interaction.props.origin = "C";
     Interaction.computed.target = () => "A";
     const storeConfig = Store();
     storeConfig.getters.centerOf = () => (participant) => {

@@ -30,7 +30,7 @@
       <div class="segment">
         <!-- fragment-offset set as offsetX - 1 for fragment border     -->
         <block
-          :origin1="origin1"
+          :origin="origin"
           v-if="blockInTryBlock"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInTryBlock"
@@ -53,7 +53,7 @@
             ><label class="exception p-1">{{ exception(catchBlock) }}</label>
           </div>
           <block
-            :origin1="origin1"
+            :origin="origin"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="blockInCatchBlock(catchBlock)"
             :selfCallIndent="selfCallIndent"
@@ -72,7 +72,7 @@
             >
           </div>
           <block
-            :origin1="origin1"
+            :origin="origin"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="finallyBlock"
             :selfCallIndent="selfCallIndent"

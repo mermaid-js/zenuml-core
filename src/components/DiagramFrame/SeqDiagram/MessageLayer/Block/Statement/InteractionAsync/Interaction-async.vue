@@ -50,7 +50,6 @@ import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import { LIFELINE_WIDTH } from "@/positioning/Constants";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 function isNullOrUndefined(value) {
   return value === null || value === undefined;
@@ -155,9 +154,6 @@ export default {
     },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();
-    },
-    origin: function () {
-      return this.context?.Origin() || _STARTER_;
     },
     providedSource: function () {
       return this.asyncMessage?.ProvidedFrom();

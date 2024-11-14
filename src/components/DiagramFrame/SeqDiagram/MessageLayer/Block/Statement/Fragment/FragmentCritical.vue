@@ -38,7 +38,7 @@
           <!-- Value -->
         </div>
         <block
-          :origin1="origin1"
+          :origin="origin"
           v-if="blockInCritical"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInCritical"

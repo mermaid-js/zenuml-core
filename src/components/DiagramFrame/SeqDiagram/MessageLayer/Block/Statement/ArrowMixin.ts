@@ -2,7 +2,7 @@ import sequenceParser from "@/generated-parser/sequenceParser";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export default {
-  props: ["origin1"],
+  props: ["origin"],
   computed: {
     borderWidth: function () {
       const border = {

@@ -41,7 +41,7 @@
           <!-- Value -->
         </div>
         <block
-          :origin1="origin1"
+          :origin="origin"
           v-if="blockInSection"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInSection"

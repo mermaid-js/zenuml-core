@@ -8,7 +8,7 @@ import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 
 export default {
-  props: ["origin1"],
+  props: ["origin"],
   computed: {
     ...mapGetters(["coordinates"]),
     leftParticipant: function () {
