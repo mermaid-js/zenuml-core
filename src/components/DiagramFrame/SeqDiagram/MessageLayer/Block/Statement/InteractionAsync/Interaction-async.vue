@@ -77,7 +77,7 @@ function isNullOrUndefined(value) {
  *
  * origin = ctx.Origin() || _STARTER_
  * source = providedSource || origin
- * target = target
+ * target = ctx.to() || origin
  *
  * outOfBand = source != origin
  *

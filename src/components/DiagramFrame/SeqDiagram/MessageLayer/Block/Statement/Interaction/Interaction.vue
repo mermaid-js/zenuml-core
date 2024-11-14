@@ -2,7 +2,7 @@
   <div
     class="interaction sync inline-block"
     v-on:click.stop="onClick"
-    :data-to="to"
+    :data-to="target"
     data-type="interaction"
     :data-signature="signature"
     :class="{
@@ -43,7 +43,7 @@
     />
     <occurrence
       :context="message"
-      :participant="to"
+      :participant="target"
       :selfCallIndent="passOnOffset"
       :rtl="rightToLeft"
       :number="number"
@@ -99,21 +99,21 @@ export default {
     message: function () {
       return this.context?.message();
     },
-    providedFrom: function () {
-      return this.context?.message()?.ProvidedFrom();
+    origin: function () {
+      return this.origin1;
     },
-    from: function () {
-      return this.providedFrom || this.origin || _STARTER_;
+    providedSource: function () {
+      return this.context?.message()?.ProvidedFrom();
     },
     // used by ArrowMixin
     source: function () {
-      return this.from;
+      return this.providedSource || this.origin;
     },
     target: function () {
-      return this.to;
+      return this.context?.message()?.Owner() || this.origin;
     },
     outOfBand: function () {
-      return !!this.providedFrom && this.providedFrom !== this.origin;
+      return !!this.providedSource && this.providedSource !== this.origin;
     },
     assignee: function () {
       let assignment = this.message?.Assignment();
@@ -131,13 +131,13 @@ export default {
         return fragmentOff;
       }
 
-      const moveTo = !this.rightToLeft ? this.providedFrom : this.to;
+      const moveTo = !this.rightToLeft ? this.providedSource : this.target;
       const dist = this.distance2(this.origin, moveTo);
       const indent = this.selfCallIndent || 0;
       return dist + fragmentOff - indent;
     },
     rightToLeft: function () {
-      return this.distance2(this.from, this.to) < 0;
+      return this.distance2(this.source, this.target) < 0;
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
@@ -147,10 +147,7 @@ export default {
     },
     isRootBlock() {
       // TODO: Add support for nested brace structures like { b { c.m() } }.
-      return this.to === _STARTER_;
-    },
-    origin: function () {
-      return this.origin1;
+      return this.target === _STARTER_;
     },
     passOnOffset: function () {
       // selfCallIndent is introduced for sync self interaction. Each time we enter a self sync interaction the selfCallIndent
@@ -166,14 +163,13 @@ export default {
       }
 
       let safeOffset = this.outOfBand ? 0 : this.selfCallIndent || 0;
-      return Math.abs(this.distance2(this.from, this.to) - safeOffset) - 1;
-    },
-    to: function () {
-      return this.context?.message()?.Owner() || _STARTER_;
+      return (
+        Math.abs(this.distance2(this.source, this.target) - safeOffset) - 1
+      );
     },
     isSelf: function () {
       // this.to === undefined if it is a self interaction and root message.
-      return !this.to || this.to === this.from;
+      return !this.target || this.target === this.source;
     },
   },
   methods: {

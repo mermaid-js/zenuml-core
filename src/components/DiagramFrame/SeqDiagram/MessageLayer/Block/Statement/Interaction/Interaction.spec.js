@@ -42,7 +42,6 @@ describe("Highlight current interact based on position of cursor", () => {
           plugins: [store],
         },
         props: {
-          from: "A",
           context: rootContext.block().stat()[0],
         },
       });
@@ -58,7 +57,7 @@ describe("Interaction width", () => {
   ])(
     "If selfCallIndent is %s and distance is %s, interactionWidth should be %s",
     (selfCallIndent, a, b, width) => {
-      Interaction.computed.to = () => "B";
+      Interaction.computed.target = () => "B";
       const storeConfig = Store();
       storeConfig.getters.centerOf = () => (participant) => {
         if (participant === "A") return a;
@@ -83,9 +82,9 @@ describe("Translate X", () => {
   // A          B           C
   // provided   inherited   to
   it("when left to right", function () {
-    Interaction.computed.providedFrom = () => "A";
+    Interaction.computed.providedSource = () => "A";
     Interaction.computed.origin = () => "B";
-    Interaction.computed.to = () => "C";
+    Interaction.computed.target = () => "C";
     const storeConfig = Store();
     storeConfig.getters.centerOf = () => (participant) => {
       if (participant === "A") return 10;
@@ -106,9 +105,9 @@ describe("Translate X", () => {
   // A      B      C
   // to   real     from
   it("when right to left", function () {
-    Interaction.computed.providedFrom = () => "B";
+    Interaction.computed.providedSource = () => "B";
     Interaction.computed.origin = () => "C";
-    Interaction.computed.to = () => "A";
+    Interaction.computed.target = () => "A";
     const storeConfig = Store();
     storeConfig.getters.centerOf = () => (participant) => {
       if (participant === "A") return 10;
