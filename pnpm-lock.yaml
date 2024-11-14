@@ -67,6 +67,9 @@ importers:
       vue:
         specifier: ^3.2.45
         version: 3.2.45
+      vue-property-decorator:
+        specifier: ^9.1.2
+        version: 9.1.2(vue-class-component@7.2.6(vue@3.2.45))(vue@3.2.45)
       vuex:
         specifier: ^4.1.0
         version: 4.1.0(vue@3.2.45)
@@ -1927,10 +1930,10 @@ packages:
         integrity: sha512-06OCtnTXtWOZBJlRApleWndH4JsRVs1pDCc8dLSQp+7PpUpX3ePdHyeNSFTeSe7FtKyQkrlPvHwJOW3SLd8Oyg==,
       }
 
-  "@types/node@22.7.3":
+  "@types/node@22.9.0":
     resolution:
       {
-        integrity: sha512-qXKfhXXqGTyBskvWEzJZPUxSslAiLaB6JGP1ic/XTH9ctGgzdgYguuLP1C601aRTSDNlLb0jbKqXjZ48GNraSA==,
+        integrity: sha512-vuyHg81vvWA1Z1ELfvLko2c8f34gyA0zaic0+Rllc5lbCnbSyuvb2Oxpm6TAUAC/2xZN3QGqxBNggD1nNR2AfQ==,
       }
 
   "@types/ramda@0.28.20":
@@ -2296,6 +2299,7 @@ packages:
       {
         integrity: sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA==,
       }
+    deprecated: package has been renamed to acorn-import-attributes
     peerDependencies:
       acorn: ^8
 
@@ -7099,6 +7103,14 @@ packages:
       jsdom:
         optional: true
 
+  vue-class-component@7.2.6:
+    resolution:
+      {
+        integrity: sha512-+eaQXVrAm/LldalI272PpDe3+i4mPis0ORiMYxF6Ae4hyuCh15W8Idet7wPUEs4N4YptgFHGys4UrgNQOMyO6w==,
+      }
+    peerDependencies:
+      vue: ^2.0.0
+
   vue-demi@0.13.11:
     resolution:
       {
@@ -7121,6 +7133,15 @@ packages:
     engines: { node: ^14.17.0 || >=16.0.0 }
     peerDependencies:
       eslint: ">=6.0.0"
+
+  vue-property-decorator@9.1.2:
+    resolution:
+      {
+        integrity: sha512-xYA8MkZynPBGd/w5QFJ2d/NM0z/YeegMqYTphy7NJQXbZcuU6FC6AOdUAcy4SXP+YnkerC6AfH+ldg7PDk9ESQ==,
+      }
+    peerDependencies:
+      vue: "*"
+      vue-class-component: "*"
 
   vue@3.2.45:
     resolution:
@@ -8794,7 +8815,7 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
-  "@types/node@22.7.3":
+  "@types/node@22.9.0":
     dependencies:
       undici-types: 6.19.8
 
@@ -10510,7 +10531,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      "@types/node": 22.7.3
+      "@types/node": 22.9.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -11846,6 +11867,10 @@ snapshots:
       - supports-color
       - terser
 
+  vue-class-component@7.2.6(vue@3.2.45):
+    dependencies:
+      vue: 3.2.45
+
   vue-demi@0.13.11(vue@3.2.45):
     dependencies:
       vue: 3.2.45
@@ -11862,6 +11887,11 @@ snapshots:
       semver: 7.5.4
     transitivePeerDependencies:
       - supports-color
+
+  vue-property-decorator@9.1.2(vue-class-component@7.2.6(vue@3.2.45))(vue@3.2.45):
+    dependencies:
+      vue: 3.2.45
+      vue-class-component: 7.2.6(vue@3.2.45)
 
   vue@3.2.45:
     dependencies:

@@ -75,6 +75,8 @@ import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
+import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/directionMixin";
+
 export default {
   name: "interaction",
   props: [
@@ -84,7 +86,7 @@ export default {
     "number",
     // "inheritFromOccurrence",
   ],
-  mixins: [ArrowMixin],
+  mixins: [ArrowMixin, DirectionMixin],
   computed: {
     // add tracker to the mapGetters
     ...mapGetters(["participants", "distance2", "cursor", "onElementClick"]),
@@ -122,20 +124,16 @@ export default {
       return this.message?.SignatureText();
     },
     translateX: function () {
-      const fragmentOff = 0 || 0;
-      // ** Starting point is always the center of 'origin' **
       // Normal flow
       if (!this.rightToLeft && !this.outOfBand) {
-        return fragmentOff;
+        return 0 || 0;
       }
 
+      // ** Starting point is always the center of 'origin' **
       const moveTo = !this.rightToLeft ? this.providedSource : this.target;
       const dist = this.distance2(this.origin, moveTo);
       const indent = this.selfCallIndent || 0;
-      return dist + fragmentOff - indent;
-    },
-    rightToLeft: function () {
-      return this.distance2(this.source, this.target) < 0;
+      return dist - indent;
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
