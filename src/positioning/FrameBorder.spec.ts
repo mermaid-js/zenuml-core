@@ -13,6 +13,21 @@ describe("FrameBorder", function () {
     expect(FrameBorder(frame)).toEqual({ left: 20, right: 20 });
   });
 
+  it("1 point 2 groups", function () {
+    const frame = {
+      left: "_STARTER_",
+      right: "d",
+      children: [
+        {
+          left: "_STARTER_",
+          right: "_STARTER_",
+          children: [],
+        },
+      ],
+    };
+    expect(FrameBorder(frame)).toEqual({ left: 20, right: 10 });
+  });
+
   it("2 points 2 groups", function () {
     const frame = {
       left: "a",

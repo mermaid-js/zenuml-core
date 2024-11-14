@@ -3,6 +3,8 @@
     :data-origin="origin1"
     :data-from="from"
     :data-left-participant="leftParticipant"
+    :data-frame-padding-left="border.left"
+    :data-frame-padding-right="border.right"
     class="fragment alt border-skin-fragment rounded"
     :style="fragmentStyle"
   >

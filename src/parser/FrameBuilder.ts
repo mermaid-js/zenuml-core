@@ -3,6 +3,7 @@ import sequenceParserListener from "../generated-parser/sequenceParserListener";
 import { Frame } from "@/positioning/FrameBorder";
 import { Participants } from "./index";
 import { Participant } from "@/parser/Participants";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
@@ -16,9 +17,10 @@ class FrameBuilder extends sequenceParserListener {
     this._orderedParticipants = orderedParticipants;
   }
 
+  // TODO: extract a module to get local participants
   private getLocalParticipants(ctx: any): string[] {
     return [
-      ctx.Origin(),
+      ctx.Origin() || _STARTER_,
       ...Participants(ctx)
         .ImplicitArray()
         .map((p: Participant) => p.name),
@@ -41,9 +43,10 @@ class FrameBuilder extends sequenceParserListener {
     );
   }
 
-  enterFragment(ctx: any) {
+  enterFragment(ctx: any, type: string) {
     // Create a new frame for the current node
     const frame: Frame = {
+      type,
       left: this.getLeft(ctx),
       right: this.getRight(ctx),
       children: [],
@@ -69,35 +72,35 @@ class FrameBuilder extends sequenceParserListener {
   }
 
   enterTcf(ctx: any) {
-    this.enterFragment(ctx);
+    this.enterFragment(ctx, "tcf");
   }
 
   enterOpt(ctx: any) {
-    this.enterFragment(ctx);
+    this.enterFragment(ctx, "opt");
   }
 
   enterPar(ctx: any) {
-    this.enterFragment(ctx);
+    this.enterFragment(ctx, "par");
   }
 
   enterAlt(ctx: any) {
-    this.enterFragment(ctx);
+    this.enterFragment(ctx, "alt");
   }
 
   enterLoop(ctx: any) {
-    this.enterFragment(ctx);
+    this.enterFragment(ctx, "loop");
   }
 
   enterSection(ctx: any): void {
-    this.enterFragment(ctx);
+    this.enterFragment(ctx, "section");
   }
 
   enterCritical(ctx: any): void {
-    this.enterFragment(ctx);
+    this.enterFragment(ctx, "critical");
   }
 
   enterRef(ctx: any) {
-    this.enterFragment(ctx);
+    this.enterFragment(ctx, "ref");
   }
 
   exitTcf() {

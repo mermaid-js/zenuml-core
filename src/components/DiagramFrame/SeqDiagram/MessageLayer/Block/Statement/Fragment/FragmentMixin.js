@@ -19,11 +19,13 @@ export default {
       ];
       return allParticipants.find((p) => localParticipants.includes(p));
     },
-    offsetX: function () {
+    border: function () {
       const allParticipants = this.coordinates.orderedParticipantNames();
       let frameBuilder = new FrameBuilder(allParticipants);
       const frame = frameBuilder.getFrame(this.context);
-      const border = FrameBorder(frame);
+      return FrameBorder(frame);
+    },
+    offsetX: function () {
       // TODO: consider using this.getParticipantGap(this.participantModels[0])
       let halfLeftParticipant = this.coordinates.half(this.leftParticipant);
       console.debug(
@@ -33,7 +35,7 @@ export default {
         (this.from
           ? this.coordinates.distance(this.leftParticipant, this.from)
           : 0) +
-        border.left +
+        this.border.left +
         halfLeftParticipant
       );
     },
