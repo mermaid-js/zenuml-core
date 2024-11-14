@@ -3,6 +3,7 @@ import { Coordinates } from "@/positioning/Coordinates";
 import { stubWidthProvider } from "@/../test/unit/parser/fixture/Fixture";
 import { RootContext } from "@/parser";
 import {
+  FRAGMENT_MIN_WIDTH,
   FRAGMENT_PADDING_X,
   MARGIN,
   MIN_PARTICIPANT_WIDTH,
@@ -31,10 +32,14 @@ describe("TotalWidth", () => {
   test("calculates width with nested depth", () => {
     //  -====S====-  # participants
     // [                ] # alt fragment, min-width takes effect
-    expect(getTotalWidth("if(x) {}")).toBe(220);
+    expect(getTotalWidth("if(x) {}")).toBe(
+      FRAGMENT_MIN_WIDTH + FRAGMENT_PADDING_X * 2,
+    );
     //  -====S====-  # participants
     // [                ] # alt fragment, min-width takes effect
-    expect(getTotalWidth("if(x) { if(y() {}}")).toBe(240);
+    expect(getTotalWidth("if(x) { if(y() {}}")).toBe(
+      FRAGMENT_MIN_WIDTH + FRAGMENT_PADDING_X * 4,
+    );
   });
 
   test("calculates width with multiple participants", () => {

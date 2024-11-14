@@ -4,6 +4,7 @@
     :style="fragmentStyle"
     :data-frame-padding-left="border.left"
     :data-frame-padding-right="border.right"
+    :data-left-participant="leftParticipant"
   >
     <div class="segment">
       <comment
