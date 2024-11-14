@@ -4,7 +4,6 @@ import {
   ARROW_HEAD_WIDTH,
   MARGIN,
   MIN_PARTICIPANT_WIDTH,
-  MINI_GAP,
   OCCURRENCE_WIDTH,
 } from "@/positioning/Constants";
 import { Coordinates } from "./Coordinates";
@@ -49,7 +48,7 @@ describe("get absolute position of a participant", () => {
     // In the above demonstration, `-` is for margin, `=` is for participant width
     ["A1 B1"],
     ["A1 group {B1}"], // group does not change absolute positions
-  ])(`Use MINI_GAP ${MINI_GAP} for %s`, (code) => {
+  ])(`getPosition for %s`, (code) => {
     const rootContext = RootContext(code);
 
     const coordinates = new Coordinates(rootContext, stubWidthProvider);

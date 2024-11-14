@@ -73,11 +73,11 @@ import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
 import { CodeRange } from "@/parser/CodeRange";
 import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
-
+import {
+  LIFELINE_WIDTH,
+  OCCURRENCE_BAR_SIDE_WIDTH,
+} from "@/positioning/Constants";
 const logger = parentLogger.child({ name: "Creation" });
-
-const OCCURRENCE_BAR_SIDE_WIDTH = 7; // Width of each side of the occurrence bar
-const LIFELINE_WIDTH = 1;
 
 export default {
   name: "creation",
