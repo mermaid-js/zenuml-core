@@ -25,6 +25,7 @@
       </div>
     </div>
     <block
+      v-if="!!par.braceBlock()"
       :origin="origin"
       :class="{ hidden: collapsed }"
       :style="{ paddingLeft: `${offsetX}px` }"

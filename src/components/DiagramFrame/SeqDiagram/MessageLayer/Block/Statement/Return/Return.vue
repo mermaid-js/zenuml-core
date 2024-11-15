@@ -57,8 +57,17 @@ export default {
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["distance", "cursor", "onElementClick", "participants"]),
+    /**
+     * ret
+     *  : RETURN expr? SCOL?
+     *  | ANNOTATION_RET asyncMessage EVENT_END?
+     *  ;
+     */
+    ret: function () {
+      return this.context?.ret();
+    },
     asyncMessage: function () {
-      return this.context?.ret().asyncMessage();
+      return this.ret?.asyncMessage();
     },
     width: function () {
       return this.isSelf
@@ -77,10 +86,11 @@ export default {
       );
     },
     source: function () {
-      return this.context?.From();
+      return this.context?.ret()?.From();
     },
     target: function () {
       return (
+        // TODO: move this logic to the parser (ReturnTo)
         this.asyncMessage?.to()?.getFormattedText() ||
         this.context?.ret()?.ReturnTo()
       );

@@ -70,7 +70,7 @@ export default {
       return dict[key];
     },
     collapsedCheck: function () {
-      return this.collapsed && this.subStatement != "Return";
+      return this.collapsed && this.subStatement !== "Return";
     },
   },
   components: {
