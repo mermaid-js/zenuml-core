@@ -34,9 +34,7 @@ describe("get absolute position of a participant", () => {
     const rootContext = RootContext("A200 group {B300} C400");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
 
-    expect(() => coordinates.getPosition("NotExist")).toThrow(
-      "Participant NotExist not found",
-    );
+    expect(coordinates.getPosition("NotExist")).toBe(0);
     expect(coordinates.getPosition("A200")).toBe(110);
     expect(coordinates.getPosition("B300")).toBe(380);
     expect(coordinates.getPosition("C400")).toBe(750);

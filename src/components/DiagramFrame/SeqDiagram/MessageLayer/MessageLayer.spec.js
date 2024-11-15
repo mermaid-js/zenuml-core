@@ -31,7 +31,6 @@ describe("MessageLayer", () => {
     expect(messageLayerWrapper.find(".pt-24").exists()).toBeTruthy();
   });
   it("gets participant names", async () => {
-    expect(messageLayerWrapper.vm.firstParticipantName).toBe("a");
-    expect(messageLayerWrapper.vm.origin).toBe("_STARTER_");
+    expect(messageLayerWrapper.vm.origin).toBeNull();
   });
 });

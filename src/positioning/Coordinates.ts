@@ -36,7 +36,8 @@ export class Coordinates {
       (p) => p.name === participantName,
     );
     if (pIndex === -1) {
-      throw Error(`Participant ${participantName} not found`);
+      console.error(`Participant ${participantName} not found`);
+      return 0;
     }
     const cacheKey = `getPosition_${participantName}`;
     const cachedPosition = getCache(cacheKey);
