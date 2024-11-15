@@ -4,6 +4,8 @@
     v-on:click.stop="onClick"
     :data-origin="origin"
     :data-to="target"
+    :data-source="source"
+    :data-target="target"
     data-type="interaction"
     :data-signature="signature"
     :class="{
@@ -107,13 +109,13 @@ export default {
     },
     // used by ArrowMixin
     source: function () {
-      return this.providedSource || this.origin;
+      return this.providedSource || this.context?.Origin() || _STARTER_;
     },
     target: function () {
-      return this.context?.message()?.Owner() || this.origin;
+      return this.context?.message()?.Owner() || _STARTER_;
     },
     outOfBand: function () {
-      return !!this.providedSource && this.providedSource !== this.origin;
+      return !!this.source && this.source !== this.origin;
     },
     assignee: function () {
       let assignment = this.message?.Assignment();
@@ -130,7 +132,7 @@ export default {
       }
 
       // ** Starting point is always the center of 'origin' **
-      const moveTo = !this.rightToLeft ? this.providedSource : this.target;
+      const moveTo = !this.rightToLeft ? this.source : this.target;
       const dist = this.distance2(this.origin, moveTo);
       const indent = this.selfCallIndent || 0;
       return dist - indent;

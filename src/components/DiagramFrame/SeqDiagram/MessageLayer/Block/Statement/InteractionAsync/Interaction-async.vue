@@ -109,6 +109,14 @@ function isNullOrUndefined(value) {
  *     B->C: message                      B                C            B              A            true
  *   }
  * }
+ *
+ * The following is a good example that shows `origin` and `out-of-band` are pure rendering time concepts.
+ * Those are decided during the mounting phase. So passing origin at component level is proper.
+ * if(x) {
+ *   A->A.method()
+ *   self()                              _STARTER_         _STARTER_    null           A            true
+ * }
+ *
  */
 
 export default {
