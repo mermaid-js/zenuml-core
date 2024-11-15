@@ -104,12 +104,8 @@ export default {
     message: function () {
       return this.context?.message();
     },
-    providedSource: function () {
-      return this.context?.message()?.ProvidedFrom();
-    },
-    // used by ArrowMixin
     source: function () {
-      return this.providedSource || this.context?.Origin() || _STARTER_;
+      return this.message?.From() || _STARTER_;
     },
     target: function () {
       return this.context?.message()?.Owner() || _STARTER_;
@@ -128,7 +124,7 @@ export default {
     translateX: function () {
       // Normal flow
       if (!this.rightToLeft && !this.outOfBand) {
-        return 0 || 0;
+        return 0;
       }
 
       // ** Starting point is always the center of 'origin' **

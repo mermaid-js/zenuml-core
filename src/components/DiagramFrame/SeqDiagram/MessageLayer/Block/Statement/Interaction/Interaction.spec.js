@@ -90,7 +90,7 @@ describe("Translate X", () => {
     };
 
     const store = createStore(storeConfig);
-    Interaction.computed.providedSource = () => "A";
+    Interaction.computed.source = () => "A";
     Interaction.computed.target = () => "C";
     const wrapper = shallowMount(Interaction, {
       props: {
@@ -120,7 +120,7 @@ describe("Translate X", () => {
 
     const store = createStore(storeConfig);
 
-    Interaction.computed.providedSource = () => "B";
+    Interaction.computed.source = () => "B";
     Interaction.computed.target = () => "A";
     const wrapper = shallowMount(Interaction, {
       props: {
