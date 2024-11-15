@@ -1,6 +1,7 @@
 <template>
   <div
     class="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0"
+    :data-participant-names="participantNames"
     :style="{
       'min-width': mode === RenderMode.Dynamic ? '200px' : 'auto',
       width: `calc(100% - ${leftGap}px)`,
@@ -78,7 +79,6 @@ export default {
     const mode = computed(() => store.state.mode);
     if (mode.value === RenderMode.static)
       return { translate: 0, RenderMode, mode };
-
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();
 
@@ -109,6 +109,9 @@ export default {
       "ParticipantContext",
       "centerOf",
     ]),
+    participantNames() {
+      return this.participants.Names();
+    },
     debug() {
       return !!localStorage.zenumlDebug;
     },

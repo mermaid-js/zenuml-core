@@ -102,6 +102,9 @@ export class Participants {
   private participants = new Map<string, Participant>();
 
   public Add(name: string, options: ParticipantOptions = {}): void {
+    if (!name) {
+      throw new Error("Participant name is required");
+    }
     let participant = this.Get(name);
     if (!participant) {
       participant = new Participant(name, options);

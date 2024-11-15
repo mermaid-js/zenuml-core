@@ -156,10 +156,13 @@ ToCollector.exitGroup = function () {
 
 ToCollector.enterRet = function (ctx) {
   if (ctx.asyncMessage()) {
+    // it will visit the asyncMessage later
     return;
   }
-  participants.Add(ctx.From());
-  participants.Add(ctx.ReturnTo());
+  const returnFrom = ctx.From();
+  returnFrom && participants.Add(returnFrom);
+  const returnTo = ctx.ReturnTo();
+  returnTo && participants.Add(returnTo);
 };
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;

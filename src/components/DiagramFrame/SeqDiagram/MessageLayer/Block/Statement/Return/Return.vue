@@ -50,6 +50,7 @@ import WidthProviderOnBrowser from "@/positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export default {
   name: "return",
@@ -92,7 +93,8 @@ export default {
       return (
         // TODO: move this logic to the parser (ReturnTo)
         this.asyncMessage?.to()?.getFormattedText() ||
-        this.context?.ret()?.ReturnTo()
+        this.context?.ret()?.ReturnTo() ||
+        _STARTER_
       );
     },
     isCurrent: function () {

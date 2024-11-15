@@ -119,4 +119,17 @@ A.mA {
       { left: _STARTER_, name: "A" },
     ]);
   });
+
+  it("should return the order of participants - return", () => {
+    expect(
+      getFlattenedParticipants(`
+A.method(){
+  return x
+}
+`),
+    ).toEqual([
+      { left: "", name: _STARTER_ },
+      { left: _STARTER_, name: "A" },
+    ]);
+  });
 });
