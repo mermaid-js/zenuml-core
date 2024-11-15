@@ -1,4 +1,4 @@
-import { AllMessages } from "@/parser/MessageContextListener";
+import { AllMessages } from "@/parser/MessageCollector";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder, { Frame } from "@/positioning/FrameBorder";
 import { Coordinates } from "@/positioning/Coordinates";

@@ -16,7 +16,7 @@ TODO: we may need to consider the width of self message on right most participan
 import { computed, defineAsyncComponent, onMounted, onUpdated } from "vue";
 import { useStore } from "vuex";
 import parentLogger from "../../../../logger/logger";
-import { AllMessages } from "@/parser/MessageContextListener";
+import { AllMessages } from "@/parser/MessageCollector";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 // @ts-ignore

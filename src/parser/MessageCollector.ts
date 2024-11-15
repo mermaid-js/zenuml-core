@@ -3,7 +3,7 @@ import antlr4 from "antlr4";
 
 import sequenceParserListener from "../generated-parser/sequenceParserListener";
 
-export class MessageContextListener extends sequenceParserListener {
+export class MessageCollector extends sequenceParserListener {
   private isBlind = false;
   private ownableMessages: Array<OwnableMessage> = [];
 
@@ -46,7 +46,7 @@ export class MessageContextListener extends sequenceParserListener {
 export function AllMessages(ctx: any) {
   const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
-  const listener = new MessageContextListener();
+  const listener = new MessageCollector();
   walker.walk(listener, ctx);
   return listener.result();
 }

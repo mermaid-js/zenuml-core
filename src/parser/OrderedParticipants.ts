@@ -1,5 +1,5 @@
 import ToCollector from "@/parser/ToCollector";
-import { AllMessages } from "@/parser/MessageContextListener";
+import { AllMessages } from "@/parser/MessageCollector";
 import { blankParticipant } from "@/parser/Participants";
 
 export const _STARTER_ = "_STARTER_";

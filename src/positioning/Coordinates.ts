@@ -8,7 +8,7 @@ import { TextType, WidthFunc } from "./Coordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { IParticipantModel } from "@/parser/ParticipantListener";
 import { find_optimal } from "./david/DavidEisenstat";
-import { AllMessages } from "@/parser/MessageContextListener";
+import { AllMessages } from "@/parser/MessageCollector";
 import { OwnableMessage, OwnableMessageType } from "@/parser/OwnableMessage";
 import { clearCache, getCache, setCache } from "@/utils/RenderingCache";
 
