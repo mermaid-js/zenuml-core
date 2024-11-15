@@ -3,7 +3,11 @@
   <div
     class="interaction return relative"
     v-on:click.stop="onClick"
+    data-type="return"
     :data-signature="signature"
+    :data-to="target"
+    :data-source="source"
+    :data-target="target"
     :class="{
       'right-to-left': rightToLeft,
       'bare-source': bareSource,
@@ -87,7 +91,7 @@ export default {
       );
     },
     source: function () {
-      return this.context?.ret()?.From();
+      return this.asyncMessage?.From() || this.ret?.From();
     },
     target: function () {
       return (
