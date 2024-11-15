@@ -18,6 +18,14 @@ describe("TotalWidth", () => {
 
   const getParticipantWidth = () => MIN_PARTICIPANT_WIDTH + MARGIN;
 
+  test("self call at root level", () => {
+    expect(getTotalWidth("a300")).toBe(320);
+  });
+
+  test("self call at root level 2", () => {
+    expect(getTotalWidth("if(x) {a300}")).toBe(370);
+  });
+
   test("calculates width for simple method call", () => {
     // -====S====--====A====-
     expect(getTotalWidth("A.method")).toBe(200);

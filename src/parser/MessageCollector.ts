@@ -22,7 +22,14 @@ export class MessageCollector extends sequenceParserListener {
     }
     const from = ctx.From();
     const owner = ctx?.Owner();
-    const signature = ctx?.SignatureText();
+    let signature = ctx?.SignatureText();
+    if (from === owner && ctx.Assignment) {
+      // @ts-ignore
+      const assignment = ctx.Assignment();
+      if (assignment) {
+        signature = `${assignment.getText()} = ${signature}`;
+      }
+    }
     this.ownableMessages.push({
       from: from,
       signature: signature,
