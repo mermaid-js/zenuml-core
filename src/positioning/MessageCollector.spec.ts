@@ -1,20 +1,32 @@
-import antlr4 from "antlr4";
-import { MessageCollector } from "@/parser/MessageCollector";
+import { AllMessages } from "@/parser/MessageCollector";
 import { RootContext } from "@/parser";
+import { OwnableMessageType } from "@/parser/OwnableMessage";
 
 describe("MessageCollector", () => {
-  let messageCollector: MessageCollector;
-  let walker: typeof antlr4.tree.ParseTreeWalker.DEFAULT;
-
-  // Helper function to parse code and collect messages
   const collectMessages = (code: string) => {
     const rootContext = RootContext(code);
-    walker = antlr4.tree.ParseTreeWalker.DEFAULT;
-    messageCollector = new MessageCollector();
-    // @ts-ignore
-    walker.walk(messageCollector, rootContext);
-    return messageCollector.result();
+    if (!rootContext) {
+      return [];
+    }
+    return AllMessages(rootContext);
   };
+
+  describe("Return", () => {
+    it("should handle one return message", () => {
+      const code = `
+        return result
+      `;
+
+      expect(collectMessages(code)).toStrictEqual([
+        {
+          from: undefined,
+          signature: "result",
+          to: undefined,
+          type: OwnableMessageType.ReturnMessage,
+        },
+      ]);
+    });
+  });
 
   describe("message collection", () => {
     it("should collect messages with starter annotation", () => {

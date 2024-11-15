@@ -91,7 +91,7 @@ export default {
       );
     },
     source: function () {
-      return this.asyncMessage?.From() || this.ret?.From();
+      return this.asyncMessage?.From() || this.ret?.From() || _STARTER_;
     },
     target: function () {
       return (

@@ -5,6 +5,7 @@ const seqParser = sequenceParser;
 const MessageContext = seqParser.MessageContext;
 const AsyncMessageContext = seqParser.AsyncMessageContext;
 const CreationContext = seqParser.CreationContext;
+const RetContext = seqParser.RetContext;
 
 // @ts-ignore
 MessageContext.prototype.SignatureText = function () {
@@ -33,4 +34,12 @@ CreationContext.prototype.SignatureText = function () {
 // @ts-ignore
 CreationContext.prototype.isParamValid = function () {
   return this.creationBody().parameters()?.parameter()?.length > 0;
+};
+
+// @ts-ignore
+RetContext.prototype.SignatureText = function () {
+  return (
+    this.asyncMessage()?.content()?.getFormattedText() ||
+    this.expr()?.getFormattedText()
+  );
 };
