@@ -1,68 +1,10 @@
 import sequenceParser from "../generated-parser/sequenceParser";
-
-// Define interfaces for the parser contexts to properly type them
-interface BaseContext {
-  getFormattedText(): string;
-}
-
-interface Parameter extends BaseContext {
-  length: number;
-}
-
-interface Parameters extends BaseContext {
-  parameter(): Parameter[];
-}
-
-interface Signature extends BaseContext {
-  getFormattedText(): string;
-}
-
-interface Func {
-  signature(): Signature[];
-}
-
-interface MessageBody {
-  func(): Func;
-}
-
-interface Content extends BaseContext {
-  getFormattedText(): string;
-}
-
-interface CreationBody {
-  parameters(): Parameters;
-}
-
-interface AsyncMessage {
-  content(): Content;
-}
-
-interface Expression extends BaseContext {
-  getFormattedText(): string;
-}
-
-// Extend the base interfaces to include our new methods
-interface MessageContext extends BaseContext {
-  messageBody(): MessageBody;
-  SignatureText(): string; // Add the new method to the interface
-}
-
-interface AsyncMessageContext extends BaseContext {
-  content(): Content;
-  SignatureText(): string; // Add the new method to the interface
-}
-
-interface CreationContext extends BaseContext {
-  creationBody(): CreationBody;
-  SignatureText(): string; // Add the new method to the interface
-  isParamValid(): boolean; // Add the new method to the interface
-}
-
-interface RetContext extends BaseContext {
-  asyncMessage(): AsyncMessage;
-  expr(): Expression;
-  SignatureText(): string; // Add the new method to the interface
-}
+import type {
+  MessageContext,
+  AsyncMessageContext,
+  CreationContext,
+  RetContext,
+} from "./Parser.types";
 
 // Get the parser contexts and assert their types
 const MessageContext = sequenceParser.MessageContext as any as {
