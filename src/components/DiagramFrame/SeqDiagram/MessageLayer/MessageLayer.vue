@@ -5,7 +5,7 @@ TODO: we may need to consider the width of self message on right most participan
     <block
       :context="context"
       :style="{ 'padding-left': paddingLeft + 'px' }"
-      :origin="firstParticipantName"
+      :origin="origin"
     />
     <StylePanel />
   </div>
@@ -15,6 +15,7 @@ TODO: we may need to consider the width of self message on right most participan
 import { computed, defineAsyncComponent, onMounted, onUpdated } from "vue";
 import { useStore } from "vuex";
 import parentLogger from "../../../../logger/logger";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 // @ts-ignore
 const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
@@ -28,8 +29,14 @@ const props = defineProps<{
 const store = useStore();
 const coordinates = computed(() => store.getters.coordinates);
 const centerOf = computed(() => store.getters.centerOf);
+const rootContext = computed(() => store.getters.rootContext);
 const paddingLeft = computed(() => {
   return centerOf.value(firstParticipantName.value) + 1;
+});
+
+const origin = computed(() => {
+  const declaredStarter = rootContext.value.Starter();
+  return declaredStarter || _STARTER_;
 });
 
 const firstParticipantName = computed(() => {

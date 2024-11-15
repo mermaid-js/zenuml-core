@@ -123,9 +123,7 @@ export class Participants {
   // Returns an array of participants that are deduced from messages
   // It does not include the Starter.
   ImplicitArray() {
-    return this.Array().filter(
-      (p) => !this.Get(p.name)?.explicit && !p.isStarter,
-    );
+    return this.Array().filter((p) => !this.Get(p.name)?.explicit);
   }
 
   // Items in entries are in the order of entry insertion:

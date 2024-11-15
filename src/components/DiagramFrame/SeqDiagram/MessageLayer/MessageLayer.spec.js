@@ -32,5 +32,6 @@ describe("MessageLayer", () => {
   });
   it("gets participant names", async () => {
     expect(messageLayerWrapper.vm.firstParticipantName).toBe("a");
+    expect(messageLayerWrapper.vm.origin).toBe("_STARTER_");
   });
 });

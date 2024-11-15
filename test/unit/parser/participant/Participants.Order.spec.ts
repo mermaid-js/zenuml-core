@@ -51,6 +51,29 @@ describe("Participants.Order", () => {
   });
 
   it("should return the order of participants - Starter", () => {
+    expect(getFlattenedParticipants("@Starter(A)")).toEqual([
+      { name: "A", left: "", label: undefined },
+    ]);
+
+    expect(getFlattenedParticipants("A @Starter(B)")).toEqual([
+      { name: "A", left: "", label: undefined },
+      { name: "B", left: "A", label: undefined },
+    ]);
+
+    expect(
+      getFlattenedParticipants(`A
+@Starter("B")
+A.mA {
+   self() {
+    C.mB()
+  }
+}`),
+    ).toEqual([
+      { name: "A", left: "", label: undefined },
+      { name: "B", left: "A", label: undefined },
+      { name: "C", left: "B", label: undefined },
+    ]);
+
     expect(getFlattenedParticipants("A B @Starter(C) C.m")).toEqual([
       { name: "A", left: "", label: undefined },
       { name: "B", left: "A", label: undefined },

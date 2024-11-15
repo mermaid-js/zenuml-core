@@ -3,6 +3,42 @@ import { MessageContextListener } from "../../../src/parser/MessageContextListen
 import { RootContext } from "../../../src/parser/index";
 
 describe("MessageListener", () => {
+  it("with starter", () => {
+    const code = `A
+@Starter("B")
+A.mA {
+   self() {
+    C.mB()
+  }
+}`;
+    const rootContext = RootContext(code);
+    const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
+
+    const messageContextListener = new MessageContextListener();
+    walker.walk(messageContextListener, rootContext);
+
+    expect(messageContextListener.result()).toStrictEqual([
+      {
+        from: "B",
+        signature: "mA",
+        to: "A",
+        type: 0,
+      },
+      {
+        from: "A",
+        signature: "self()",
+        to: "A",
+        type: 0,
+      },
+      {
+        from: "A",
+        signature: "mB()",
+        to: "C",
+        type: 0,
+      },
+    ]);
+  });
+
   it("can handle Message and Creation", () => {
     const code = `
     A.method(E.m) {
