@@ -75,9 +75,9 @@ function isNullOrUndefined(value) {
  *
  * `source` and `from` are the same.
  *
- * origin = ctx.Origin() || _STARTER_
- * source = providedSource || origin
- * target = ctx.to() || origin
+ * origin = root ? ownableMessages[0].from || _STARTER_ : passed on from parent # rendering concept
+ * source = providedSource || ctx.Origin() || _STARTER_                         # parsing concept
+ * target = ctx.to() || ctx.Owner()                                             # parsing concept
  *
  * outOfBand = source != origin
  *
