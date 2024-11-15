@@ -7,10 +7,13 @@
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
          .bg-skin-base is repeated because .zenuml reset it to default theme.
      -->
-    <div :style="{ paddingLeft: `${paddingLeft}px` }" class="relative">
+    <div
+      :style="{ paddingLeft: `${frameBorderLeft}px` }"
+      class="relative container"
+    >
       <template v-if="mode === RenderMode.Dynamic">
         <life-line-layer
-          :leftGap="paddingLeft"
+          :leftGap="frameBorderLeft"
           :context="rootContext.head()"
           :renderParticipants="false"
           :renderLifeLine="true"
@@ -20,7 +23,7 @@
           :style="{ width: `${width}px` }"
         />
         <life-line-layer
-          :leftGap="paddingLeft"
+          :leftGap="frameBorderLeft"
           :context="rootContext.head()"
           :renderParticipants="true"
           :renderLifeLine="false"
@@ -28,7 +31,7 @@
       </template>
       <template v-if="mode === RenderMode.Static">
         <life-line-layer
-          :leftGap="paddingLeft"
+          :leftGap="frameBorderLeft"
           :context="rootContext.head()"
           :renderParticipants="true"
           :renderLifeLine="true"
@@ -57,8 +60,15 @@ const theme = computed(() => store.state.theme);
 const mode = computed(() => store.state.mode);
 const rootContext = computed(() => store.getters.rootContext);
 const coordinates = computed(() => store.getters.coordinates);
-const width = computed(() => TotalWidth(rootContext.value, coordinates.value));
-const paddingLeft = computed(() => {
+
+const width = computed(() => {
+  const contextWidth = TotalWidth(rootContext.value, coordinates.value);
+  //   [MessageLayer width] <- contextWidth
+  //  [Frame width        ]
+  // || <- frameBorderLeft extra width provided by container
+  return contextWidth - frameBorderLeft.value;
+});
+const frameBorderLeft = computed(() => {
   const allParticipants = coordinates.value.orderedParticipantNames();
   const frameBuilder = new FrameBuilder(allParticipants);
   const frame = frameBuilder.getFrame(rootContext.value);
