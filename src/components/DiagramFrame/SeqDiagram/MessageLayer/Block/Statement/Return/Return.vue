@@ -57,9 +57,6 @@ export default {
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["distance", "cursor", "onElementClick", "participants"]),
-    from: function () {
-      return this.context.Origin();
-    },
     asyncMessage: function () {
       return this.context?.ret().asyncMessage();
     },
@@ -70,8 +67,8 @@ export default {
     },
     left: function () {
       return this.rightToLeft
-        ? this.distance(this.target, this.from)
-        : this.distance(this.source, this.from);
+        ? this.distance(this.target, this.origin)
+        : this.distance(this.source, this.origin);
     },
     signature: function () {
       return (
@@ -80,7 +77,7 @@ export default {
       );
     },
     source: function () {
-      return this.asyncMessage?.from()?.getFormattedText() || this.from;
+      return this.context?.From();
     },
     target: function () {
       return (
