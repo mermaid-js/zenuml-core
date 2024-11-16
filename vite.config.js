@@ -23,7 +23,9 @@ function getCypressHtmlFiles() {
 
 const cypressHtmlFiles = getCypressHtmlFiles();
 console.log(cypressHtmlFiles);
-export default defineConfig({
+
+export default defineConfig(({ mode }) => ({
+  base: mode === "gh-pages" ? "/zenuml-core/" : "/",
   build: {
     rollupOptions: {
       input: ["index.html", "embed.html", ...cypressHtmlFiles],
@@ -54,4 +56,4 @@ export default defineConfig({
       inline: ["@vue/test-utils"],
     },
   },
-});
+}));
