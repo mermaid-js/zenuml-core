@@ -2,7 +2,10 @@
   <div
     class="interaction sync inline-block"
     v-on:click.stop="onClick"
-    :data-to="to"
+    :data-origin="origin"
+    :data-to="target"
+    :data-source="source"
+    :data-target="target"
     data-type="interaction"
     :data-signature="signature"
     :class="{
@@ -43,7 +46,7 @@
     />
     <occurrence
       :context="message"
-      :participant="to"
+      :participant="target"
       :selfCallIndent="passOnOffset"
       :rtl="rightToLeft"
       :number="number"
@@ -71,8 +74,10 @@ import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import SelfInvocation from "./SelfInvocation/SelfInvocation.vue";
 import { CodeRange } from "@/parser/CodeRange";
-import { ProgContext } from "@/parser";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
+
+import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 
 export default {
   name: "interaction",
@@ -83,7 +88,7 @@ export default {
     "number",
     // "inheritFromOccurrence",
   ],
-  mixins: [ArrowMixin],
+  mixins: [ArrowMixin, DirectionMixin],
   computed: {
     // add tracker to the mapGetters
     ...mapGetters(["participants", "distance2", "cursor", "onElementClick"]),
@@ -99,21 +104,14 @@ export default {
     message: function () {
       return this.context?.message();
     },
-    providedFrom: function () {
-      return this.context?.message()?.ProvidedFrom();
-    },
-    from: function () {
-      return this.providedFrom || this.origin;
-    },
-    // used by ArrowMixin
     source: function () {
-      return this.from;
+      return this.message?.From() || _STARTER_;
     },
     target: function () {
-      return this.to;
+      return this.context?.message()?.Owner() || _STARTER_;
     },
     outOfBand: function () {
-      return !!this.providedFrom && this.providedFrom !== this.origin;
+      return !!this.source && this.source !== this.origin;
     },
     assignee: function () {
       let assignment = this.message?.Assignment();
@@ -124,32 +122,26 @@ export default {
       return this.message?.SignatureText();
     },
     translateX: function () {
-      const fragmentOff = 0 || 0;
-      // ** Starting point is always the center of 'origin' **
       // Normal flow
       if (!this.rightToLeft && !this.outOfBand) {
-        return fragmentOff;
+        return 0;
       }
 
-      const moveTo = !this.rightToLeft ? this.providedFrom : this.to;
+      // ** Starting point is always the center of 'origin' **
+      const moveTo = !this.rightToLeft ? this.source : this.target;
       const dist = this.distance2(this.origin, moveTo);
       const indent = this.selfCallIndent || 0;
-      return dist + fragmentOff - indent;
-    },
-    rightToLeft: function () {
-      return this.distance2(this.from, this.to) < 0;
+      return dist - indent;
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
     },
     showStarter() {
-      return this.participants.Starter().name !== "_STARTER_";
+      return this.participants.Starter()?.name !== _STARTER_;
     },
     isRootBlock() {
-      return this.context?.parentCtx?.parentCtx instanceof ProgContext;
-    },
-    origin: function () {
-      return this.context?.Origin();
+      // TODO: Add support for nested brace structures like { b { c.m() } }.
+      return this.target === _STARTER_;
     },
     passOnOffset: function () {
       // selfCallIndent is introduced for sync self interaction. Each time we enter a self sync interaction the selfCallIndent
@@ -165,14 +157,13 @@ export default {
       }
 
       let safeOffset = this.outOfBand ? 0 : this.selfCallIndent || 0;
-      return Math.abs(this.distance2(this.from, this.to) - safeOffset) - 1;
-    },
-    to: function () {
-      return this.context?.message()?.Owner();
+      return (
+        Math.abs(this.distance2(this.source, this.target) - safeOffset) - 1
+      );
     },
     isSelf: function () {
       // this.to === undefined if it is a self interaction and root message.
-      return !this.to || this.to === this.from;
+      return !this.target || this.target === this.source;
     },
   },
   methods: {

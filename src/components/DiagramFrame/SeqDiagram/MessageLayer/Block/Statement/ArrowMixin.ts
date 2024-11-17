@@ -1,6 +1,8 @@
 import sequenceParser from "@/generated-parser/sequenceParser";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export default {
+  props: ["origin"],
   computed: {
     borderWidth: function () {
       const border = {
@@ -21,9 +23,8 @@ export default {
   },
   methods: {
     isJointOccurrence(participant) {
-      let ancestorContextForParticipant =
+      const ancestorContextForParticipant =
         this.findContextForReceiver(participant);
-      console.debug("owning context", ancestorContextForParticipant);
       // If no owning context found, it means this is a bare connection
       if (!ancestorContextForParticipant) {
         return false;
@@ -42,13 +43,20 @@ export default {
         return null;
       }
       let currentContext = this.context;
-      const messageContext = this.context.message && this.context.message();
-      if (messageContext && messageContext.Owner() === participant) {
-        return messageContext;
-      }
-      const creationContext = this.context.creation && this.context.creation();
-      if (creationContext && creationContext.Owner() === participant) {
-        return creationContext;
+      /**
+       * Case 1: a()
+       * Case 2: A.method() { C->C.method }
+       */
+      if (this.source !== this.target) {
+        const messageContext = this.context.message && this.context.message();
+        if (messageContext && messageContext.Owner() === participant) {
+          return messageContext;
+        }
+        const creationContext =
+          this.context.creation && this.context.creation();
+        if (creationContext && creationContext.Owner() === participant) {
+          return creationContext;
+        }
       }
       while (currentContext) {
         if (!currentContext.Owner) {
@@ -56,7 +64,10 @@ export default {
           continue;
         }
 
-        if (currentContext.Owner() === participant) {
+        if (
+          currentContext.Owner() === participant ||
+          (!currentContext.Owner() && participant === _STARTER_)
+        ) {
           return currentContext;
         }
 

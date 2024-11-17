@@ -1,10 +1,6 @@
 import { Participants } from "./Participants";
 import antlr4 from "antlr4";
 import { default as sequenceParserListener } from "../generated-parser/sequenceParserListener";
-import { default as sequenceParser } from "../generated-parser/sequenceParser";
-
-const seqParser = sequenceParser;
-const ProgContext = seqParser.ProgContext;
 
 let participants = undefined;
 let isBlind = false;
@@ -160,19 +156,19 @@ ToCollector.exitGroup = function () {
 
 ToCollector.enterRet = function (ctx) {
   if (ctx.asyncMessage()) {
+    // it will visit the asyncMessage later
     return;
   }
-  participants.Add(ctx.From());
-  participants.Add(ctx.ReturnTo());
+  const returnFrom = ctx.From();
+  returnFrom && participants.Add(returnFrom);
+  const returnTo = ctx.ReturnTo();
+  returnTo && participants.Add(returnTo);
 };
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
-ToCollector.getParticipants = function (context, withStarter) {
+ToCollector.getParticipants = function (context) {
   participants = new Participants();
-  if (withStarter && context instanceof ProgContext) {
-    participants.Add(context.Starter(), { isStarter: true });
-  }
   walker.walk(this, context);
   return participants;
 };

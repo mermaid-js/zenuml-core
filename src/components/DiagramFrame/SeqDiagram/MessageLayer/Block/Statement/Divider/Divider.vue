@@ -1,9 +1,10 @@
 <template>
   <div
     class="divider"
+    :data-origin="origin"
     :style="{
       width: width + 'px',
-      transform: 'translateX(' + (-1 * centerOfFrom + 10) + 'px)',
+      transform: 'translateX(' + (-1 * centerOfOrigin + 10) + 'px)',
     }"
   >
     <div class="left bg-skin-divider"></div>
@@ -24,7 +25,7 @@ import { mapGetters } from "vuex";
 
 export default {
   name: "divider",
-  props: ["context"],
+  props: ["context", "origin"],
   computed: {
     ...mapGetters(["participants", "centerOf"]),
     /* Dividers have the same width as the lifeline layer */
@@ -34,11 +35,8 @@ export default {
       // 20px for the right margin of the participant
       return this.centerOf(rearParticipant) + 10;
     },
-    from: function () {
-      return this.context.Origin();
-    },
-    centerOfFrom() {
-      return this.centerOf(this.from);
+    centerOfOrigin() {
+      return this.centerOf(this.origin);
     },
     note: function () {
       return this.context.divider().Note();

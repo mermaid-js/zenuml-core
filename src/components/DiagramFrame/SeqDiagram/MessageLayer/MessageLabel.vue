@@ -29,6 +29,7 @@ const props = withDefaults(
     isSelf?: boolean;
   }>(),
   {
+    labelText: "",
     isAsync: false,
     isSelf: false,
   },

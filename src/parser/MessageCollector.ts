@@ -3,7 +3,7 @@ import antlr4 from "antlr4";
 
 import sequenceParserListener from "../generated-parser/sequenceParserListener";
 
-export class MessageContextListener extends sequenceParserListener {
+export class MessageCollector extends sequenceParserListener {
   private isBlind = false;
   private ownableMessages: Array<OwnableMessage> = [];
 
@@ -13,6 +13,8 @@ export class MessageContextListener extends sequenceParserListener {
     this._addOwnedMessage(OwnableMessageType.AsyncMessage)(ctx);
   enterCreation = (ctx: any) =>
     this._addOwnedMessage(OwnableMessageType.CreationMessage)(ctx);
+  enterRet = (ctx: any) =>
+    this._addOwnedMessage(OwnableMessageType.ReturnMessage)(ctx);
 
   private _addOwnedMessage = (type: OwnableMessageType) => (ctx: any) => {
     if (this.isBlind) {
@@ -20,7 +22,14 @@ export class MessageContextListener extends sequenceParserListener {
     }
     const from = ctx.From();
     const owner = ctx?.Owner();
-    const signature = ctx?.SignatureText();
+    let signature = ctx?.SignatureText();
+    if (from === owner && ctx.Assignment) {
+      // @ts-ignore
+      const assignment = ctx.Assignment();
+      if (assignment) {
+        signature = `${assignment.getText()} = ${signature}`;
+      }
+    }
     this.ownableMessages.push({
       from: from,
       signature: signature,
@@ -46,7 +55,7 @@ export class MessageContextListener extends sequenceParserListener {
 export function AllMessages(ctx: any) {
   const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
-  const listener = new MessageContextListener();
+  const listener = new MessageCollector();
   walker.walk(listener, ctx);
   return listener.result();
 }

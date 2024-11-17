@@ -1,5 +1,13 @@
 <template>
-  <div class="fragment alt border-skin-fragment rounded" :style="fragmentStyle">
+  <div
+    :data-origin="origin"
+    :data-from="from"
+    :data-left-participant="leftParticipant"
+    :data-frame-padding-left="border.left"
+    :data-frame-padding-right="border.right"
+    class="fragment alt border-skin-fragment rounded"
+    :style="fragmentStyle"
+  >
     <div class="segment">
       <comment
         v-if="commentObj.text"
@@ -35,6 +43,7 @@
           <ConditionLabel :condition="conditionFromIfElseBlock(ifBlock)" />
         </div>
         <block
+          :origin="origin"
           v-if="blockInIfBlock"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInIfBlock"
@@ -52,6 +61,7 @@
             />
           </div>
           <block
+            :origin="origin"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="blockInElseIfBlock(elseIfBlock)"
             :selfCallIndent="selfCallIndent"
@@ -67,6 +77,7 @@
             <label class="p-1">[else]</label>
           </div>
           <block
+            :origin="origin"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="elseBlock"
             :selfCallIndent="selfCallIndent"
@@ -98,7 +109,7 @@ export default {
   setup(props) {
     const store = useStore();
     const numbering = computed(() => store.state.numbering);
-    const from = computed(() => props.context.Origin());
+    const from = computed(() => props.origin);
     const alt = computed(() => props.context.alt());
     const ifBlock = computed(() => alt.value?.ifBlock());
     const elseIfBlocks = computed(() => alt.value?.elseIfBlock());

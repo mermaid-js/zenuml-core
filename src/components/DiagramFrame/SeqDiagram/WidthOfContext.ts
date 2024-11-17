@@ -1,14 +1,14 @@
-import { AllMessages } from "@/positioning/MessageContextListener";
-import WidthProviderOnBrowser from "../../../positioning/WidthProviderFunc";
-import { TextType } from "@/positioning/Coordinate";
-import { Participants } from "@/parser";
+import { AllMessages } from "@/parser/MessageCollector";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder, { Frame } from "@/positioning/FrameBorder";
 import { Coordinates } from "@/positioning/Coordinates";
+import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
+import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export function TotalWidth(ctx: any, coordinates: Coordinates) {
   const allParticipants = coordinates.orderedParticipantNames();
-  const localParticipants = [ctx.Origin(), ...Participants(ctx).Names()];
+  const localParticipants = getLocalParticipantNames(ctx);
   const leftParticipant =
     allParticipants.find((p) => localParticipants.includes(p)) || "";
   const rightParticipant =
@@ -24,13 +24,17 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
     rightParticipant,
     coordinates,
   );
-
-  return (
+  // if (leftParticipant === "" || rightParticipant === "") {
+  //   return 0;
+  // }
+  const participantWidth =
     coordinates.distance(leftParticipant, rightParticipant) +
+    coordinates.half(leftParticipant) +
+    coordinates.half(rightParticipant);
+  return (
+    Math.max(participantWidth, FRAGMENT_MIN_WIDTH) +
     border.left +
     border.right +
-    coordinates.half(leftParticipant) +
-    coordinates.half(rightParticipant) +
     extraWidth
   );
 }
@@ -45,10 +49,9 @@ function extraWidthDueToSelfMessage(
     .filter((m) => m.from === m.to)
     // 37 is arrow width (30) + half occurrence width(7)
     .map(
-      (s) =>
-        WidthProviderOnBrowser(s.signature, TextType.MessageContent) +
-        37 -
-        coordinates.distance(s.from, rightParticipant) -
+      (m) =>
+        coordinates.getMessageWidth(m) -
+        coordinates.distance(m.from || _STARTER_, rightParticipant) -
         coordinates.half(rightParticipant),
     );
   return Math.max.apply(null, [0, ...widths]);

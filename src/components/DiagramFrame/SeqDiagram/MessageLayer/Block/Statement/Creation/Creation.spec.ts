@@ -1,13 +1,21 @@
 import { shallowMount } from "@vue/test-utils";
 import { createStore } from "vuex";
 import { VueSequence } from "@/index";
+// @ts-ignore
 import Creation from "./Creation.vue";
 import { Fixture } from "../../../../../../../../test/unit/parser/fixture/Fixture";
 import { configureCompat } from "vue";
+import {
+  LIFELINE_WIDTH,
+  MARGIN,
+  MIN_PARTICIPANT_WIDTH,
+} from "@/positioning/Constants";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 function mountCreationWithCode(
   code: string,
   contextLocator: (code: string) => any,
+  origin = "",
 ) {
   const storeConfig = VueSequence.Store();
   // @ts-ignore
@@ -17,6 +25,7 @@ function mountCreationWithCode(
   const creationContext = contextLocator(code);
   const props = {
     context: creationContext,
+    origin,
     fragmentOffset: 100,
   };
 
@@ -28,7 +37,7 @@ beforeEach(() => {
   });
 });
 describe("Creation", () => {
-  it("data , props and computed properties", async () => {
+  it("data, props and computed properties", async () => {
     /**
      * Known limitations:
      * 1. `IA a = new A()` cannot be the first statement in the file. `IA` will be recognised as a Participant.
@@ -36,14 +45,25 @@ describe("Creation", () => {
     const creationWrapper = mountCreationWithCode(
       "a = new A",
       Fixture.firstStatement,
+      _STARTER_,
     );
 
     const vm = creationWrapper.vm as any;
-    expect(vm.from).toBe("_STARTER_");
     expect(vm.signature).toBe("«create»");
     expect(vm.assignee).toBe("a");
-    expect(vm.distance2).toStrictEqual(expect.any(Function));
-    expect(vm.interactionWidth).toBe(83);
+    // -------------==a:A==-
+    // --<<create>>-->[]
+    // In the above demonstration,
+    // `-` is for margin and `=` is for participant width.
+    // `---xxx--->` is for message arrow and `[]` is for occurrence.
+    // TODO: add a test case where the width is caused by the message
+    const gapCausedByParticipant =
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2 +
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2; // 100
+    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
+    expect(vm.interactionWidth).toBe(expected);
     expect(vm.rightToLeft).toBeFalsy();
   });
 
@@ -51,11 +71,21 @@ describe("Creation", () => {
     const creationWrapper = mountCreationWithCode(
       "A.m{B.m{new A}}",
       Fixture.firstGrandChild,
+      "B",
     );
     const vm = creationWrapper.vm as any;
-    console.log(creationWrapper);
     expect(vm.rightToLeft).toBeTruthy();
-    expect(vm.interactionWidth).toBe(119);
+    // -====A====--====B====-
+    //      []<--<<c>>--
+    // There is enough space for the message arrow and occurrence.
+    const gapCausedByParticipant =
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2 +
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2; // 100
+    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
+
+    expect(vm.interactionWidth).toBe(expected);
   });
 
   it("right to left within alt fragment", async () => {
@@ -70,9 +100,19 @@ describe("Creation", () => {
     const creationWrapper = mountCreationWithCode(
       "A.m{B.m{if(x){new A}}}",
       contextLocator,
+      "B",
     );
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();
-    expect(vm.interactionWidth).toBe(119);
+    // -====A====--====B====-
+    //      --<<c>>-->[]
+    // There is enough space for the message and occurrence.
+    const gapCausedByParticipant =
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2 +
+      MIN_PARTICIPANT_WIDTH / 2 +
+      MARGIN / 2; // 100
+    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
+    expect(vm.interactionWidth).toBe(expected);
   });
 });

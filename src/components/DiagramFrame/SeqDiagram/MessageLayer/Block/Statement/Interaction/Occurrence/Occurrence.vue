@@ -25,6 +25,7 @@
       @click="this.toggle"
     />
     <block
+      :origin="participant"
       v-if="this.context.braceBlock()"
       :context="context.braceBlock().block()"
       :selfCallIndent="selfCallIndent"

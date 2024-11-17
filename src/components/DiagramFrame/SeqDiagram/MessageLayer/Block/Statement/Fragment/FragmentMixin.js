@@ -1,34 +1,38 @@
-import { Participants } from "@/parser";
 import { mapGetters } from "vuex";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import CollapseButton from "./CollapseButton.vue";
 import { EventBus } from "@/EventBus";
+import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
+import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 
 export default {
+  props: ["origin"],
   computed: {
     ...mapGetters(["coordinates"]),
-    offsetX: function () {
+    leftParticipant: function () {
+      const allParticipants = this.coordinates.orderedParticipantNames();
+      const localParticipants = getLocalParticipantNames(this.context);
+      return allParticipants.find((p) => localParticipants.includes(p));
+    },
+    border: function () {
       const allParticipants = this.coordinates.orderedParticipantNames();
       let frameBuilder = new FrameBuilder(allParticipants);
       const frame = frameBuilder.getFrame(this.context);
-      const border = FrameBorder(frame);
-      const localParticipants = [
-        this.context.Origin(),
-        ...Participants(this.context).Names(),
-      ];
-      const leftParticipant = allParticipants.find((p) =>
-        localParticipants.includes(p),
-      );
+      return FrameBorder(frame);
+    },
+    offsetX: function () {
       // TODO: consider using this.getParticipantGap(this.participantModels[0])
-      let halfLeftParticipant = this.coordinates.half(leftParticipant);
+      let halfLeftParticipant = this.coordinates.half(this.leftParticipant);
       console.debug(
-        `left participant: ${leftParticipant} ${halfLeftParticipant}`,
+        `left participant: ${this.leftParticipant} ${halfLeftParticipant}`,
       );
       return (
-        this.coordinates.distance(leftParticipant, this.from) +
-        border.left +
+        (this.from
+          ? this.coordinates.distance(this.leftParticipant, this.from)
+          : 0) +
+        this.border.left +
         halfLeftParticipant
       );
     },
@@ -37,6 +41,7 @@ export default {
         // +1px for the border of the fragment
         transform: "translateX(" + (this.offsetX + 1) * -1 + "px)",
         width: TotalWidth(this.context, this.coordinates) + "px",
+        minWidth: FRAGMENT_MIN_WIDTH + "px",
       };
     },
   },

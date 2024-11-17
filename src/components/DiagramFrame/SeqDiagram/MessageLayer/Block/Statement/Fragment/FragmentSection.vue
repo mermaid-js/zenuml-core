@@ -2,6 +2,9 @@
   <div
     class="fragment section border-skin-fragment rounded"
     :style="fragmentStyle"
+    :data-frame-padding-left="border.left"
+    :data-frame-padding-right="border.right"
+    :data-left-participant="leftParticipant"
   >
     <div class="segment">
       <comment
@@ -38,6 +41,7 @@
           <!-- Value -->
         </div>
         <block
+          :origin="origin"
           v-if="blockInSection"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInSection"

@@ -2,6 +2,7 @@
   <!-- .point-events-none allows hover over the participant underneath (from lifeline layer)
        .point-events-auto allows hover over the messages (from message layer, default behaviour) -->
   <div
+    :data-origin="origin"
     class="interaction creation sync text-center transform"
     v-on:click.stop="onClick"
     :data-signature="signature"
@@ -20,7 +21,7 @@
       data-type="creation"
       class="message-container pointer-events-none flex items-center h-10 relative"
       :class="{ 'flex-row-reverse': rightToLeft }"
-      :data-to="to"
+      :data-to="target"
     >
       <message
         ref="messageEl"
@@ -37,13 +38,13 @@
         ref="participantPlaceHolder"
         class="invisible right-0 flex flex-col justify-center flex-shrink-0"
       >
-        <participant :entity="{ name: to }" />
+        <participant :entity="{ name: target }" />
       </div>
     </div>
     <occurrence
       :context="creation"
       class="pointer-events-auto"
-      :participant="to"
+      :participant="target"
       :number="number"
     />
     <message
@@ -63,8 +64,6 @@
 </template>
 
 <script type="text/babel">
-import parentLogger from "../../../../../../../logger/logger";
-
 import { mapGetters, mapState } from "vuex";
 import Comment from "../Comment/Comment.vue";
 import Message from "../Message/Message.vue";
@@ -72,27 +71,24 @@ import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
 import { CodeRange } from "@/parser/CodeRange";
 import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
-
-const logger = parentLogger.child({ name: "Creation" });
-
-const OCCURRENCE_BAR_SIDE_WIDTH = 7; // Width of each side of the occurrence bar
-const LIFELINE_WIDTH = 1;
+import {
+  LIFELINE_WIDTH,
+  OCCURRENCE_BAR_SIDE_WIDTH,
+} from "@/positioning/Constants";
+import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 
 export default {
   name: "creation",
   props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
-  mixins: [ArrowMixin],
+  mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["cursor", "onElementClick", "distance2"]),
     ...mapState(["numbering"]),
-    from() {
-      return this.context.Origin();
-    },
     source() {
-      return this.from;
+      return this.origin;
     },
     target() {
-      return this.to;
+      return this.context?.creation()?.Owner();
     },
     creation() {
       return this.context.creation();
@@ -104,12 +100,9 @@ export default {
       // L     a           b
       // gap between a and b is [(b - a) - 1]
       return (
-        Math.abs(this.distance2(this.from, this.to) - safeOffset) -
+        Math.abs(this.distance2(this.origin, this.target) - safeOffset) -
         LIFELINE_WIDTH
       );
-    },
-    rightToLeft() {
-      return this.distance2(this.from, this.to) < 0;
     },
     signature() {
       return this.creation.SignatureText(false);
@@ -124,9 +117,6 @@ export default {
       const type = safeCodeGetter(assignment.type());
       return assignee + (type ? ":" + type : "");
     },
-    to() {
-      return this.creation.Owner();
-    },
     isCurrent() {
       return this.creation.isCurrent(this.cursor);
     },
@@ -139,11 +129,9 @@ export default {
   },
   mounted() {
     this.layoutMessageContainer();
-    logger.log(`mounted for ${this.to}`);
   },
   updated() {
     this.layoutMessageContainer();
-    logger.debug(`mounted for ${this.to}`);
   },
   methods: {
     layoutMessageContainer() {

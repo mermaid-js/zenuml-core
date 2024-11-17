@@ -42,7 +42,6 @@ describe("Highlight current interact based on position of cursor", () => {
           plugins: [store],
         },
         props: {
-          from: "A",
           context: rootContext.block().stat()[0],
         },
       });
@@ -53,12 +52,12 @@ describe("Highlight current interact based on position of cursor", () => {
 describe("Interaction width", () => {
   test.each([
     // A --- ?px ---> B
-    [1, 10, 25, 13],
-    [1, 25, 10, 15],
+    [1, 10, 25, 14],
+    [1, 25, 10, 14],
   ])(
     "If selfCallIndent is %s and distance is %s, interactionWidth should be %s",
     (selfCallIndent, a, b, width) => {
-      Interaction.computed.to = () => "B";
+      Interaction.computed.target = () => "B";
       const storeConfig = Store();
       storeConfig.getters.centerOf = () => (participant) => {
         if (participant === "A") return a;
@@ -83,9 +82,6 @@ describe("Translate X", () => {
   // A          B           C
   // provided   inherited   to
   it("when left to right", function () {
-    Interaction.computed.providedFrom = () => "A";
-    Interaction.computed.origin = () => "B";
-    Interaction.computed.to = () => "C";
     const storeConfig = Store();
     storeConfig.getters.centerOf = () => (participant) => {
       if (participant === "A") return 10;
@@ -94,7 +90,12 @@ describe("Translate X", () => {
     };
 
     const store = createStore(storeConfig);
+    Interaction.computed.source = () => "A";
+    Interaction.computed.target = () => "C";
     const wrapper = shallowMount(Interaction, {
+      props: {
+        origin: "B",
+      },
       global: {
         plugins: [store],
       },
@@ -106,18 +107,25 @@ describe("Translate X", () => {
   // A      B      C
   // to   real     from
   it("when right to left", function () {
-    Interaction.computed.providedFrom = () => "B";
-    Interaction.computed.origin = () => "C";
-    Interaction.computed.to = () => "A";
     const storeConfig = Store();
     storeConfig.getters.centerOf = () => (participant) => {
+      // A B C
+      // C.m { B->A.m }
+      // -====A====--====B====--====C====-
+      //
       if (participant === "A") return 10;
       if (participant === "B") return 25;
       if (participant === "C") return 35;
     };
 
     const store = createStore(storeConfig);
+
+    Interaction.computed.source = () => "B";
+    Interaction.computed.target = () => "A";
     const wrapper = shallowMount(Interaction, {
+      props: {
+        origin: "C",
+      },
       global: {
         plugins: [store],
       },

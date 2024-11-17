@@ -29,13 +29,15 @@ MessageContext.prototype.From = function () {
 };
 
 // @ts-ignore
-AsyncMessageContext.prototype.From = function () {
-  if (this.from()) {
-    // @ts-ignore
-    return this.from().getFormattedText();
-  }
+AsyncMessageContext.prototype.ProvidedFrom = function () {
   // @ts-ignore
-  return this.ClosestAncestorStat().Origin();
+  return this.from()?.getFormattedText();
+};
+
+// @ts-ignore
+AsyncMessageContext.prototype.From = function () {
+  // @ts-ignore
+  return this.ProvidedFrom() || this.ClosestAncestorStat().Origin();
 };
 
 // @ts-ignore

@@ -16,6 +16,7 @@ interface ParticipantOptions {
 }
 
 export const blankParticipant = {
+  name: "",
   color: undefined,
   comment: undefined,
   explicit: undefined,
@@ -37,7 +38,7 @@ export class Participant {
   private groupId: number | string | undefined;
   explicit: boolean | undefined;
   isStarter: boolean | undefined;
-  private label: string | undefined;
+  label: string | undefined;
   private type: string | undefined;
   private color: string | undefined;
   private comment: string | undefined;
@@ -101,6 +102,9 @@ export class Participants {
   private participants = new Map<string, Participant>();
 
   public Add(name: string, options: ParticipantOptions = {}): void {
+    if (!name) {
+      throw new Error("Participant name is required");
+    }
     let participant = this.Get(name);
     if (!participant) {
       participant = new Participant(name, options);
@@ -122,9 +126,7 @@ export class Participants {
   // Returns an array of participants that are deduced from messages
   // It does not include the Starter.
   ImplicitArray() {
-    return this.Array().filter(
-      (p) => !this.Get(p.name)?.explicit && !p.isStarter,
-    );
+    return this.Array().filter((p) => !this.Get(p.name)?.explicit);
   }
 
   // Items in entries are in the order of entry insertion:
@@ -150,9 +152,12 @@ export class Participants {
   }
 
   Starter() {
-    const first = this.First();
-    // const type = first.name === 'User' || first.name === 'Actor' ? 'actor' : undefined;
-    return first?.isStarter ? first : undefined;
+    for (const participant of this.participants.values()) {
+      if (participant.isStarter) {
+        return participant;
+      }
+    }
+    return undefined;
   }
 
   GetPositions(name: string) {

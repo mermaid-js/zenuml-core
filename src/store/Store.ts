@@ -68,7 +68,7 @@ const Store = (): StoreOptions<StoreState> => {
         return getters.rootContext?.title()?.content();
       },
       participants: (state: any, getters: any) => {
-        return Participants(getters.rootContext, true);
+        return Participants(getters.rootContext);
       },
       coordinates: (state: any, getters: any) => {
         return new Coordinates(getters.rootContext, WidthProviderOnBrowser);

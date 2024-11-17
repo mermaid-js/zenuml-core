@@ -1,16 +1,19 @@
 <template>
   <div
-    class="zenuml sequence-diagram relative box-border text-left overflow-visible"
+    class="zenuml sequence-diagram relative box-border text-left overflow-visible px-2.5"
     :class="theme"
     ref="diagramRef"
   >
     <!-- .zenuml is used to make sure tailwind css takes effect when naked == true;
          .bg-skin-base is repeated because .zenuml reset it to default theme.
      -->
-    <div :style="{ paddingLeft: `${paddingLeft}px` }" class="relative">
+    <div
+      :style="{ paddingLeft: `${frameBorderLeft}px` }"
+      class="relative container"
+    >
       <template v-if="mode === RenderMode.Dynamic">
         <life-line-layer
-          :leftGap="paddingLeft"
+          :leftGap="frameBorderLeft"
           :context="rootContext.head()"
           :renderParticipants="false"
           :renderLifeLine="true"
@@ -20,7 +23,7 @@
           :style="{ width: `${width}px` }"
         />
         <life-line-layer
-          :leftGap="paddingLeft"
+          :leftGap="frameBorderLeft"
           :context="rootContext.head()"
           :renderParticipants="true"
           :renderLifeLine="false"
@@ -28,7 +31,7 @@
       </template>
       <template v-if="mode === RenderMode.Static">
         <life-line-layer
-          :leftGap="paddingLeft"
+          :leftGap="frameBorderLeft"
           :context="rootContext.head()"
           :renderParticipants="true"
           :renderLifeLine="true"
@@ -50,7 +53,6 @@ import MessageLayer from "./MessageLayer/MessageLayer.vue";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
-import { MARGIN } from "@/positioning/Constants";
 import { RenderMode } from "@/store/Store";
 
 const store = useStore();
@@ -58,16 +60,19 @@ const theme = computed(() => store.state.theme);
 const mode = computed(() => store.state.mode);
 const rootContext = computed(() => store.getters.rootContext);
 const coordinates = computed(() => store.getters.coordinates);
-const width = computed(() => TotalWidth(rootContext.value, coordinates.value));
-const paddingLeft = computed(() => {
+
+const width = computed(() => {
+  const contextWidth = TotalWidth(rootContext.value, coordinates.value);
+  //   [MessageLayer width] <- contextWidth
+  //  [Frame width        ]
+  // || <- frameBorderLeft extra width provided by container
+  return contextWidth - frameBorderLeft.value;
+});
+const frameBorderLeft = computed(() => {
   const allParticipants = coordinates.value.orderedParticipantNames();
-  let frameBuilder = new FrameBuilder(allParticipants);
+  const frameBuilder = new FrameBuilder(allParticipants);
   const frame = frameBuilder.getFrame(rootContext.value);
-  if (!frame) {
-    return 0;
-  }
-  const border = FrameBorder(frame);
-  return border.left + MARGIN + 20;
+  return frame ? FrameBorder(frame).left : 0;
 });
 
 const diagramRef = ref(null);
@@ -89,7 +94,7 @@ store.commit("diagramElement", diagramRef);
   /* don't override */
   border-width: 2px;
   padding: 0 4px;
-  min-width: 88px;
+  min-width: 80px;
   max-width: 250px;
   text-align: center;
   pointer-events: all;

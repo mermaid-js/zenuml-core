@@ -25,6 +25,7 @@
       </div>
     </div>
     <block
+      :origin="origin"
       :class="{ hidden: collapsed }"
       :style="{ paddingLeft: `${offsetX}px` }"
       :context="opt.braceBlock().block()"

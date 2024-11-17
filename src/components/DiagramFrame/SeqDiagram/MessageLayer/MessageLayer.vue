@@ -2,7 +2,12 @@
 TODO: we may need to consider the width of self message on right most participant. -->
 <template>
   <div class="message-layer relative z-30 pt-24 pb-10">
-    <block :context="context" :style="{ 'padding-left': paddingLeft + 'px' }" />
+    <block
+      v-if="!!origin"
+      :context="context"
+      :style="{ 'padding-left': paddingLeft + 'px' }"
+      :origin="origin"
+    />
     <StylePanel />
   </div>
 </template>
@@ -11,25 +16,27 @@ TODO: we may need to consider the width of self message on right most participan
 import { computed, defineAsyncComponent, onMounted, onUpdated } from "vue";
 import { useStore } from "vuex";
 import parentLogger from "../../../../logger/logger";
+import { AllMessages } from "@/parser/MessageCollector";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
+
+// @ts-ignore
 const StylePanel = defineAsyncComponent(() => import("./StylePanel.vue"));
 
 const logger = parentLogger.child({ name: "MessageLayer" });
-// @typescript-eslint/no-unused-vars for `context`
-// eslint-disable-next-line
-const props = defineProps<{
+defineProps<{
   context: any;
 }>();
 const store = useStore();
-
-const participants = computed(() => store.getters.participants);
 const centerOf = computed(() => store.getters.centerOf);
-
+const rootContext = computed(() => store.getters.rootContext);
 const paddingLeft = computed(() => {
-  if (participants.value.Array().length >= 1) {
-    const first = participants.value.Array().slice(0)[0].name;
-    return centerOf.value(first) + 1;
-  }
-  return 0;
+  return centerOf.value(origin.value) + 1;
+});
+
+const origin = computed(() => {
+  const ownableMessages = AllMessages(rootContext.value);
+  if (ownableMessages.length === 0) return null;
+  return ownableMessages[0].from || _STARTER_;
 });
 
 onMounted(() => {

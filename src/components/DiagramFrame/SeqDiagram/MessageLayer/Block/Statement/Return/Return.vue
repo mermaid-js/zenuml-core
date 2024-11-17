@@ -3,7 +3,11 @@
   <div
     class="interaction return relative"
     v-on:click.stop="onClick"
+    data-type="return"
     :data-signature="signature"
+    :data-to="target"
+    :data-source="source"
+    :data-target="target"
     :class="{
       'right-to-left': rightToLeft,
       'bare-source': bareSource,
@@ -49,18 +53,26 @@ import { CodeRange } from "@/parser/CodeRange";
 import WidthProviderOnBrowser from "@/positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
+import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export default {
   name: "return",
   props: ["context", "comment", "commentObj", "number"],
-  mixins: [ArrowMixin],
+  mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["distance", "cursor", "onElementClick", "participants"]),
-    from: function () {
-      return this.context.Origin();
+    /**
+     * ret
+     *  : RETURN expr? SCOL?
+     *  | ANNOTATION_RET asyncMessage EVENT_END?
+     *  ;
+     */
+    ret: function () {
+      return this.context?.ret();
     },
     asyncMessage: function () {
-      return this.context?.ret().asyncMessage();
+      return this.ret?.asyncMessage();
     },
     width: function () {
       return this.isSelf
@@ -69,11 +81,8 @@ export default {
     },
     left: function () {
       return this.rightToLeft
-        ? this.distance(this.target, this.from)
-        : this.distance(this.source, this.from);
-    },
-    rightToLeft: function () {
-      return this.distance(this.target, this.source) < 0;
+        ? this.distance(this.target, this.origin)
+        : this.distance(this.source, this.origin);
     },
     signature: function () {
       return (
@@ -82,12 +91,14 @@ export default {
       );
     },
     source: function () {
-      return this.asyncMessage?.from()?.getFormattedText() || this.from;
+      return this.asyncMessage?.From() || this.ret?.From() || _STARTER_;
     },
     target: function () {
       return (
+        // TODO: move this logic to the parser (ReturnTo)
         this.asyncMessage?.to()?.getFormattedText() ||
-        this.context?.ret()?.ReturnTo()
+        this.context?.ret()?.ReturnTo() ||
+        _STARTER_
       );
     },
     isCurrent: function () {

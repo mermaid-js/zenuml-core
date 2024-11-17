@@ -1,4 +1,7 @@
+import { FRAGMENT_PADDING_X } from "@/positioning/Constants";
+
 export interface Frame {
+  type?: string;
   left: string;
   right: string;
   children?: Frame[];
@@ -33,7 +36,8 @@ export default function FrameBorder(frame: Frame) {
     return { left: 0, right: 0 };
   }
   return {
-    left: 10 * longestPath(frame, PathType.LEFT),
-    right: 10 * longestPath(frame, PathType.RIGHT),
+    type: frame.type,
+    left: FRAGMENT_PADDING_X * longestPath(frame, PathType.LEFT),
+    right: FRAGMENT_PADDING_X * longestPath(frame, PathType.RIGHT),
   };
 }

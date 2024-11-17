@@ -1,6 +1,7 @@
 <template>
   <div
     class="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0"
+    :data-participant-names="participantNames"
     :style="{
       'min-width': mode === RenderMode.Dynamic ? '200px' : 'auto',
       width: `calc(100% - ${leftGap}px)`,
@@ -19,7 +20,6 @@
         v-if="starterOnTheLeft"
         :entity="starterParticipant"
         class="starter"
-        :class="{ invisible: invisibleStarter && !debug }"
         :renderParticipants="renderParticipants"
         :renderLifeLine="renderLifeLine"
       />
@@ -56,6 +56,8 @@ import { GroupContext, ParticipantContext, Participants } from "@/parser";
 import { mapGetters, mapMutations, useStore } from "vuex";
 import LifeLine from "./LifeLine.vue";
 import LifeLineGroup from "./LifeLineGroup.vue";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
+
 const logger = parentLogger.child({ name: "LifeLineLayer" });
 
 // TODO: remove the same logic
@@ -66,6 +68,7 @@ import useIntersectionTop from "@/functions/useIntersectionTop";
 import useDocumentScroll from "@/functions/useDocumentScroll";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { RenderMode } from "@/store/Store";
+import { blankParticipant } from "@/parser/Participants";
 
 export default {
   name: "life-line-layer",
@@ -76,7 +79,6 @@ export default {
     const mode = computed(() => store.state.mode);
     if (mode.value === RenderMode.static)
       return { translate: 0, RenderMode, mode };
-
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();
 
@@ -101,22 +103,34 @@ export default {
   },
   computed: {
     ...mapGetters([
+      "coordinates",
       "participants",
       "GroupContext",
       "ParticipantContext",
       "centerOf",
     ]),
+    participantNames() {
+      return this.participants.Names();
+    },
     debug() {
       return !!localStorage.zenumlDebug;
     },
-    invisibleStarter() {
-      return this.starterParticipant.name === "_STARTER_";
-    },
     starterParticipant() {
-      return this.participants.Starter();
+      const names = this.coordinates.orderedParticipantNames();
+      if (names.length === 0) return null;
+      const firstName = names[0];
+      if (firstName === _STARTER_) {
+        return {
+          ...blankParticipant,
+          name: _STARTER_,
+          explicit: false,
+          isStarter: true,
+        };
+      }
+      return null;
     },
     starterOnTheLeft() {
-      return !this.starterParticipant.explicit;
+      return !!this.starterParticipant && !this.starterParticipant?.explicit;
     },
     implicitParticipants() {
       return this.participants.ImplicitArray();
