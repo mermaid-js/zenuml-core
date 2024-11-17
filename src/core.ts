@@ -4,6 +4,7 @@ import { createStore } from "vuex";
 import Store, { RenderMode } from "./store/Store";
 import DiagramFrame from "./components/DiagramFrame/DiagramFrame.vue";
 import SeqDiagram from "./components/DiagramFrame/SeqDiagram/SeqDiagram.vue";
+import SwimLaneDiagram from "./components/SwimLaneDiagram/SwimLaneDiagram.vue";
 
 import "./assets/tailwind.css";
 import "./assets/tailwind-preflight.less";
@@ -53,7 +54,8 @@ export default class ZenUml implements IZenUml {
   constructor(el: Element, naked: boolean = false) {
     this.el = el;
     this.store = createStore(Store());
-    this.app = createApp(naked ? SeqDiagram : DiagramFrame);
+    // this.app = createApp(naked ? SeqDiagram : DiagramFrame);
+    this.app = createApp(SwimLaneDiagram);
     this.app.component("Comment", Comment);
     this.app.component("Block", Block);
     this.app.use(this.store);
