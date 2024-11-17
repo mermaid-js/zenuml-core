@@ -2,7 +2,9 @@ import parentLogger from "./logger/logger";
 import { createApp } from "vue";
 import { createStore } from "vuex";
 import Store, { RenderMode } from "./store/Store";
+// @ts-ignore
 import DiagramFrame from "./components/DiagramFrame/DiagramFrame.vue";
+// @ts-ignore
 import SeqDiagram from "./components/DiagramFrame/SeqDiagram/SeqDiagram.vue";
 
 import "./assets/tailwind.css";
@@ -14,7 +16,9 @@ import "./components/Cosmetic-star-uml.scss";
 import "./components/theme-blue-river.scss";
 import "./themes/theme-dark.css";
 
+// @ts-ignore
 import Block from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block.vue";
+// @ts-ignore
 import Comment from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue";
 import { getStartTime, calculateCostTime } from "./utils/CostTime";
 import { clearCache } from "./utils/RenderingCache";
@@ -80,7 +84,7 @@ export default class ZenUml implements IZenUml {
       clearTimeout(this._currentTimeout);
     }
     logger.debug("rendering", code, config);
-    this._code = code || this._code;
+    this._code = code;
     this._theme = config?.theme || this._theme;
     this.store.state.stickyOffset = config?.stickyOffset || 0;
     this.store.state.theme = this._theme || "default";

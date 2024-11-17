@@ -1,7 +1,7 @@
 <template>
   <!-- pb-2 to show the shadow -->
   <div
-    class="container absolute flex flex-col h-full"
+    class="lifeline-group-container absolute flex flex-col h-full"
     v-if="entities.length > 0"
     :style="{ left: `${left}px`, width: `${right - left}px` }"
   >
