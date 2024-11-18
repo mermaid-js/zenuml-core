@@ -2,11 +2,9 @@
   <div
     v-if="isDefaultStarter"
     class="participant bg-skin-participant shadow-participant border-transparent text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
-    :class="{ selected: selected }"
+    :class="{ selected }"
     ref="participant"
-    :style="{
-      transform: `translateY(${translate}px)`,
-    }"
+    :style="themeStyles"
     @click="onSelect"
   >
     <div
@@ -18,13 +16,9 @@
   <div v-else>
     <div
       class="participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
-      :class="{ selected: selected }"
+      :class="{ selected }"
       ref="participant"
-      :style="{
-        backgroundColor: backgroundColor,
-        color: color,
-        transform: `translateY(${translate}px)`,
-      }"
+      :style="themeStyles"
       @click="onSelect"
     >
       <div
@@ -33,7 +27,6 @@
         class="text-skin-base bg-skin-frame px-1 absolute rounded left-1/2 transform -translate-x-1/2 -translate-y-full h-8 [&>svg]:w-full [&>svg]:h-full"
         :aria-description="`icon for ${entity.name}`"
       ></div>
-      <!-- Put in a div to give it a fixed height, because stereotype is dynamic. -->
       <div class="h-5 group flex flex-col justify-center">
         <!-- TODO: create a better solution for participant comments -->
         <!--      <span-->
@@ -59,7 +52,7 @@
 <script>
 import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
 import iconPath from "../../Tutorial/Icons";
-import { computed, ref } from "vue";
+import { computed, ref, nextTick } from "vue";
 import useDocumentScroll from "@/functions/useDocumentScroll";
 import useIntersectionTop from "@/functions/useIntersectionTop";
 import { useStore } from "vuex";
@@ -76,11 +69,23 @@ export default {
   components: {
     ParticipantLabel,
   },
+  props: {
+    entity: {
+      type: Object,
+      required: true,
+    },
+    offsetTop2: {
+      type: Number,
+      default: 0,
+    },
+  },
   setup(props) {
     const store = useStore();
     const participant = ref(null);
+    const color = ref("inherit");
+
     if (store.state.mode === RenderMode.Static) {
-      return { translate: 0, participant };
+      return { translate: 0, participant, color };
     }
 
     const labelPositions = computed(() => {
@@ -91,6 +96,7 @@ export default {
       const positionArray = Array.from(positions ?? []);
       return positionArray.sort((a, b) => b[0] - a[0]);
     });
+
     const assigneePositions = computed(() => {
       // Sort the label positions in descending order to avoid index shifting when updating code
       const assigneePositions = store.getters.participants.GetAssigneePositions(
@@ -99,8 +105,10 @@ export default {
       const positionArray = Array.from(assigneePositions ?? []);
       return positionArray.sort((a, b) => b[0] - a[0]);
     });
+
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();
+
     const translate = computed(() => {
       const participantOffsetTop = props.offsetTop2 || 0;
       let top = intersectionTop.value + scrollTop.value;
@@ -119,29 +127,14 @@ export default {
         participantOffsetTop
       );
     });
-    return { translate, participant, labelPositions, assigneePositions };
-  },
-  props: {
-    entity: {
-      type: Object,
-      required: true,
-    },
-    // offsetTop is a standard HTML property, so we use offsetTop2.
-    offsetTop2: {
-      type: Number,
-      default: 0,
-    },
-  },
-  data() {
+
     return {
-      color: undefined,
+      translate,
+      participant,
+      labelPositions,
+      assigneePositions,
+      color,
     };
-  },
-  mounted() {
-    this.updateFontColor();
-  },
-  updated() {
-    this.updateFontColor();
   },
   computed: {
     isDefaultStarter() {
@@ -168,16 +161,21 @@ export default {
       return iconPath[this.entity.type?.toLowerCase()];
     },
     backgroundColor() {
-      // Returning `undefined` so that background-color is not set at all in the style attribute
       try {
         if (!this.entity.color) {
           return undefined;
         }
-        // removing alpha is a compromise to simplify the logic of determining the background color and font color
         return this.entity.color && removeAlpha(this.entity.color);
       } catch (e) {
         return undefined;
       }
+    },
+    themeStyles() {
+      return {
+        backgroundColor: this.backgroundColor,
+        color: this.color,
+        transform: `translateY(${this.translate}px)`,
+      };
     },
   },
   methods: {
@@ -185,16 +183,40 @@ export default {
       this.$store.commit("onSelect", this.entity.name);
     },
     updateFontColor() {
-      let bgColor = window
-        .getComputedStyle(this.$refs.participant)
-        .getPropertyValue("background-color");
-      if (!bgColor) {
-        this.color = "inherit";
-        return;
-      }
-      let b = brightnessIgnoreAlpha(bgColor);
-      this.color = b > 128 ? "#000" : "#fff";
+      nextTick(() => {
+        if (!this.$refs.participant) return;
+        let bgColor = window
+          .getComputedStyle(this.$refs.participant)
+          .getPropertyValue("background-color");
+
+        if (!bgColor) {
+          this.color = "inherit";
+          return;
+        }
+
+        let b = brightnessIgnoreAlpha(bgColor);
+        this.color = b > 128 ? "#000" : "#fff";
+      });
     },
+  },
+  watch: {
+    // watcher handles explicit color changes through the entity.color property
+    backgroundColor: {
+      handler() {
+        this.updateFontColor();
+      },
+      immediate: true,
+    },
+    // watcher handles theme changes that come through CSS classes and custom properties (CSS variables)
+    "$attrs.class": {
+      handler() {
+        this.updateFontColor();
+      },
+      immediate: true,
+    },
+  },
+  mounted() {
+    this.updateFontColor();
   },
 };
 </script>

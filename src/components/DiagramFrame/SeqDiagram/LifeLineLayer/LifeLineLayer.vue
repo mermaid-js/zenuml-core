@@ -15,7 +15,7 @@
       }"
       class="pt-8 after:bg-gradient-to-b after:from-skin-frame after:via-skin-frame after:to-skin-frame/0 after:block after:absolute after:top-0 after:w-full after:h-[72px]"
     ></div>
-    <div class="container relative grow">
+    <div class="z-lifeline-container relative grow">
       <life-line
         v-if="starterOnTheLeft"
         :entity="starterParticipant"
