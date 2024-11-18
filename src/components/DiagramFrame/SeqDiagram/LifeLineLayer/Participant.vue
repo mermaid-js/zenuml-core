@@ -183,8 +183,9 @@ export default {
       this.$store.commit("onSelect", this.entity.name);
     },
     updateFontColor() {
+      if (!this.$refs.participant) return;
+
       nextTick(() => {
-        if (!this.$refs.participant) return;
         let bgColor = window
           .getComputedStyle(this.$refs.participant)
           .getPropertyValue("background-color");
