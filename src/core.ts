@@ -84,7 +84,7 @@ export default class ZenUml implements IZenUml {
       clearTimeout(this._currentTimeout);
     }
     logger.debug("rendering", code, config);
-    this._code = code;
+    this._code = code === undefined ? this._code : code;
     this._theme = config?.theme || this._theme;
     this.store.state.stickyOffset = config?.stickyOffset || 0;
     this.store.state.theme = this._theme || "default";
