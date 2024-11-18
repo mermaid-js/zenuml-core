@@ -11,7 +11,7 @@
   >
     <div
       v-html="icon"
-      class="text-skin-base bg-skin-frame px-1 absolute rounded left-1/2 transform -translate-x-1/2 h-8 [&>svg]:w-full [&>svg]:h-full"
+      class="text-skin-base bg-skin-participant px-1 absolute rounded left-1/2 transform -translate-x-1/2 h-8 [&>svg]:w-full [&>svg]:h-full"
       :aria-description="`icon for ${entity.name}`"
     ></div>
   </div>
@@ -30,7 +30,7 @@
       <div
         v-if="!!icon"
         v-html="icon"
-        class="text-skin-base bg-skin-frame px-1 absolute rounded left-1/2 transform -translate-x-1/2 -translate-y-full h-8 [&>svg]:w-full [&>svg]:h-full"
+        class="text-skin-base bg-skin-participant px-1 absolute rounded left-1/2 transform -translate-x-1/2 -translate-y-full h-8 [&>svg]:w-full [&>svg]:h-full"
         :aria-description="`icon for ${entity.name}`"
       ></div>
       <!-- Put in a div to give it a fixed height, because stereotype is dynamic. -->
