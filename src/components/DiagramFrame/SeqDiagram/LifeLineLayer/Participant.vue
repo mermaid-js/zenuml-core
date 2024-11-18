@@ -138,9 +138,11 @@ export default {
     };
   },
   mounted() {
+    // Not triggered during theme change
     this.updateFontColor();
   },
   updated() {
+    // Not triggered during theme change
     this.updateFontColor();
   },
   computed: {
@@ -185,6 +187,10 @@ export default {
       this.$store.commit("onSelect", this.entity.name);
     },
     updateFontColor() {
+      if (!this.entity.color) {
+        this.color = "inherit";
+        return;
+      }
       let bgColor = window
         .getComputedStyle(this.$refs.participant)
         .getPropertyValue("background-color");
