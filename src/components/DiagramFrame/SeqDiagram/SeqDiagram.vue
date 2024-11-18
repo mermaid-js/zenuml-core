@@ -9,7 +9,7 @@
      -->
     <div
       :style="{ paddingLeft: `${frameBorderLeft}px` }"
-      class="relative container"
+      class="relative z-container"
     >
       <template v-if="mode === RenderMode.Dynamic">
         <life-line-layer
