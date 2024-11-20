@@ -78,6 +78,7 @@ import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
+import sequenceParser from "@/generated-parser/sequenceParser";
 
 export default {
   name: "interaction",
@@ -130,7 +131,7 @@ export default {
       // ** Starting point is always the center of 'origin' **
       const moveTo = !this.rightToLeft ? this.source : this.target;
       const dist = this.distance2(this.origin, moveTo);
-      const indent = this.selfCallIndent || 0;
+      const indent = 0;
       return dist - indent;
     },
     isCurrent: function () {
@@ -140,25 +141,67 @@ export default {
       return this.participants.Starter()?.name !== _STARTER_;
     },
     isRootBlock() {
-      // TODO: Add support for nested brace structures like { b { c.m() } }.
-      return this.target === _STARTER_;
+      return this.borderWidth.borderLeftWidth === "0px";
     },
     passOnOffset: function () {
-      // selfCallIndent is introduced for sync self interaction. Each time we enter a self sync interaction the selfCallIndent
-      // increases by 6px (half of the width of an execution bar). However, we set the selfCallIndent back to 0 when
-      // it enters a non-self sync interaction.
-      return this.isSelf && !this.isRootBlock
-        ? (this.selfCallIndent || 0) + 7
-        : 0;
+      /**
+       * The offset is to make sure the sub-occurrence bar is not fully layered
+       * on top of the main occurrence bar. To achieve this, whenever a participant
+       * is re-entered, the offset increases by 7px.
+       *
+       * There are two ways to re-enter a participant:
+       *
+       * 1. A.m { s }
+       * 2. B A A.m { B->A.m }
+       *
+       * #1 is the most common case.
+       *
+       * If each Interaction keeps a stack of participants, we would be able to know
+       * the depth of the stack on one given participant. This would allow us to
+       * calculate the offset.
+       * For example,
+       *
+       *                          stack       offset S     offset A         offset B
+       * A.m                      [A]         0            0                NA
+       * A->B.m                   [B]         NA           NA               7
+       * A.m { s }                [A A]       0            7                NA
+       * A.m { s { s } }          [A A A]     0            14               NA
+       * A.m { s { B.m } }        [A A B]     0            14               7
+       * A.m { B->A.m }           [A A]       0            14               NA
+       * A.m { B.m { A.m } }      [A B A]     0            14               7
+       * B A A.m { B->A.m }       [A A]       0            14               NA
+       *
+       * If offset is NA, it is effectively 0.
+       *
+       * There are two ways to implement this:
+       * 1. Keep a stack of participants in the Interaction component.
+       * 2. Calculate the stack depth from the context.
+       *
+       * The latter is more testable.
+       *
+       * The API should be like this:
+       * const n: number = this.context?.stackDepth(this.source);
+       */
+      return 0;
+    },
+    offset: function () {
+      const length = this.context.getAncestors((ctx) => {
+        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
+        if (isMessageContext) {
+          return ctx.Owner() === this.source;
+        }
+        return false;
+      }).length;
+      if (length === 0) return 0;
+      return (length - 1) * 7;
     },
     interactionWidth: function () {
       if (this.context && this.isSelf) {
         return 0;
       }
 
-      let safeOffset = this.outOfBand ? 0 : this.selfCallIndent || 0;
       return (
-        Math.abs(this.distance2(this.source, this.target) - safeOffset) - 1
+        Math.abs(this.distance2(this.source, this.target)) - this.offset - 1
       );
     },
     isSelf: function () {

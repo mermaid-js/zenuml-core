@@ -16,6 +16,7 @@ import "./Messages/MessageContext";
 import "./From";
 import "./key/Key";
 import "./utils/cloest-ancestor/ClosestAncestor";
+import "./AncestorPath";
 import { formatText } from "../utils/StringUtil";
 
 const errors = [];
