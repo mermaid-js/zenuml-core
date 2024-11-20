@@ -132,6 +132,9 @@ export default {
       const moveTo = !this.rightToLeft ? this.source : this.target;
       const dist = this.distance2(this.origin, moveTo);
       const indent = this.targetOffset;
+      if (this.rightToLeft) {
+        return dist - this.sourceOffset + this.targetOffset;
+      }
       return dist + indent;
     },
     isCurrent: function () {
@@ -187,7 +190,8 @@ export default {
     sourceOffset: function () {
       const length = this.context.getAncestors((ctx) => {
         const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        if (isMessageContext) {
+        const isCreationContext = ctx instanceof sequenceParser.CreationContext;
+        if (isMessageContext || isCreationContext) {
           return ctx.Owner() === this.source;
         }
         return false;
@@ -198,7 +202,8 @@ export default {
     targetOffset: function () {
       const length = this.context.getAncestors((ctx) => {
         const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        if (isMessageContext) {
+        const isCreationContext = ctx instanceof sequenceParser.CreationContext;
+        if (isMessageContext || isCreationContext) {
           return ctx.Owner() === this.target;
         }
         return false;
@@ -210,6 +215,14 @@ export default {
         return 0;
       }
 
+      if (this.rightToLeft) {
+        return (
+          Math.abs(this.distance2(this.source, this.target)) +
+          this.sourceOffset -
+          this.targetOffset -
+          1
+        );
+      }
       return (
         Math.abs(this.distance2(this.source, this.target)) -
         this.sourceOffset -
