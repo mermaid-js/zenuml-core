@@ -131,8 +131,8 @@ export default {
       // ** Starting point is always the center of 'origin' **
       const moveTo = !this.rightToLeft ? this.source : this.target;
       const dist = this.distance2(this.origin, moveTo);
-      const indent = 0;
-      return dist - indent;
+      const indent = this.targetOffset;
+      return dist + indent;
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
@@ -184,7 +184,7 @@ export default {
        */
       return 0;
     },
-    offset: function () {
+    sourceOffset: function () {
       const length = this.context.getAncestors((ctx) => {
         const isMessageContext = ctx instanceof sequenceParser.MessageContext;
         if (isMessageContext) {
@@ -195,13 +195,26 @@ export default {
       if (length === 0) return 0;
       return (length - 1) * 7;
     },
+    targetOffset: function () {
+      const length = this.context.getAncestors((ctx) => {
+        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
+        if (isMessageContext) {
+          return ctx.Owner() === this.target;
+        }
+        return false;
+      }).length;
+      return length * 7;
+    },
     interactionWidth: function () {
       if (this.context && this.isSelf) {
         return 0;
       }
 
       return (
-        Math.abs(this.distance2(this.source, this.target)) - this.offset - 1
+        Math.abs(this.distance2(this.source, this.target)) -
+        this.sourceOffset -
+        this.targetOffset -
+        1
       );
     },
     isSelf: function () {
