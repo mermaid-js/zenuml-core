@@ -1,11 +1,51 @@
+import { defineComponent } from "vue";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
-export default {
-  props: ["origin"],
+// Define interfaces for your properties
+interface BorderWidthStyle {
+  borderLeftWidth: string;
+  borderRightWidth: string;
+}
+
+// Define the context type
+interface Context {
+  message?: () => MessageContext;
+  creation?: () => CreationContext;
+  Owner?: () => any;
+  parentCtx: Context | null;
+}
+
+interface MessageContext extends Context {
+  Owner: () => any;
+}
+
+interface CreationContext extends Context {
+  Owner: () => any;
+}
+
+// Component properties interface
+interface ComponentProps {
+  rightToLeft: boolean;
+  source: any;
+  target: any;
+  context: Context;
+  origin: any;
+  isJointOccurrence: (participant: any) => boolean;
+  findContextForReceiver: (participant: any) => Context | null;
+}
+
+export default defineComponent({
+  props: {
+    origin: {
+      type: null,
+      required: true,
+    },
+  },
+
   computed: {
-    borderWidth: function () {
-      const border = {
+    borderWidth(this: ComponentProps): BorderWidthStyle {
+      const border: BorderWidthStyle = {
         borderLeftWidth: "7px",
         borderRightWidth: "7px",
       };
@@ -21,46 +61,46 @@ export default {
       return border;
     },
   },
+
   methods: {
-    isJointOccurrence(participant) {
+    isJointOccurrence(this: ComponentProps, participant: any): boolean {
       const ancestorContextForParticipant =
         this.findContextForReceiver(participant);
-      // If no owning context found, it means this is a bare connection
       if (!ancestorContextForParticipant) {
         return false;
       }
 
-      // Check if the owning context creates an occurrence point
       return (
         ancestorContextForParticipant instanceof
           sequenceParser.MessageContext ||
         ancestorContextForParticipant instanceof sequenceParser.CreationContext
       );
     },
-    // Input `participant` is the receiver. This method
-    findContextForReceiver(participant) {
+
+    findContextForReceiver(
+      this: ComponentProps,
+      participant: any,
+    ): Context | MessageContext | CreationContext | null {
       if (!this.context) {
         return null;
       }
-      let currentContext = this.context;
-      /**
-       * Case 1: a()
-       * Case 2: A.method() { C->C.method }
-       */
+      let currentContext: Context = this.context;
+
       if (this.source !== this.target) {
-        const messageContext = this.context.message && this.context.message();
+        const messageContext =
+          currentContext.message && currentContext.message();
         if (messageContext && messageContext.Owner() === participant) {
           return messageContext;
         }
         const creationContext =
-          this.context.creation && this.context.creation();
+          currentContext.creation && currentContext.creation();
         if (creationContext && creationContext.Owner() === participant) {
           return creationContext;
         }
       }
       while (currentContext) {
         if (!currentContext.Owner) {
-          currentContext = currentContext.parentCtx;
+          currentContext = currentContext.parentCtx!;
           continue;
         }
 
@@ -71,9 +111,9 @@ export default {
           return currentContext;
         }
 
-        currentContext = currentContext.parentCtx;
+        currentContext = currentContext.parentCtx!;
       }
       return null;
     },
   },
-};
+});
