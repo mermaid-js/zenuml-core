@@ -1,14 +1,14 @@
 import { Fixture } from "../../test/unit/parser/fixture/Fixture";
 import { expect } from "vitest";
 import sequenceParser from "@/generated-parser/sequenceParser";
+import antlr4 from "antlr4";
 
 describe("Ancestor", () => {
   it("should return the ancestor path", () => {
     const firstChild = Fixture.firstChild("A.method() { C->C.method }");
     expect(firstChild.getFormattedText()).toBe("C->C.method");
 
-    // @ts-ignore
-    function predict(ctx) {
+    function predict(ctx: antlr4.ParserRuleContext) {
       return ctx instanceof sequenceParser.MessageContext;
     }
 
