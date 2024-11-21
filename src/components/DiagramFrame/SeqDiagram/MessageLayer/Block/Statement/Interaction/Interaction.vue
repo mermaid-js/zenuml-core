@@ -79,6 +79,7 @@ import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 import sequenceParser from "@/generated-parser/sequenceParser";
+import Anchor from "@/positioning/Anchor";
 
 export default {
   name: "interaction",
@@ -92,7 +93,13 @@ export default {
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
     // add tracker to the mapGetters
-    ...mapGetters(["participants", "distance2", "cursor", "onElementClick"]),
+    ...mapGetters([
+      "participants",
+      "distance2",
+      "cursor",
+      "onElementClick",
+      "centerOf",
+    ]),
     hasComment() {
       return this.commentObj?.text !== "";
     },
@@ -122,19 +129,20 @@ export default {
     signature: function () {
       return this.message?.SignatureText();
     },
+    anchorOrigin: function () {
+      return new Anchor(this.centerOf(this.origin), this.originOffset);
+    },
+    anchorSource: function () {
+      return new Anchor(this.centerOf(this.source), this.sourceOffset);
+    },
+    anchorTarget: function () {
+      return new Anchor(this.centerOf(this.target), this.targetOffset);
+    },
     translateX: function () {
-      // Normal flow
-      if (!this.rightToLeft && !this.outOfBand) {
-        return 0;
-      }
-
-      const moveTo = this.rightToLeft ? this.target : this.source;
-      // ** Starting point is always the center of 'origin' **
-      const dist = this.distance2(this.origin, moveTo);
-      if (this.rightToLeft) {
-        return dist - this.originOffset + this.targetOffset;
-      }
-      return dist - this.originOffset + this.sourceOffset;
+      const destination = !this.rightToLeft
+        ? this.anchorSource
+        : this.anchorTarget;
+      return this.anchorOrigin.calculateEdgeOffset(destination);
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
