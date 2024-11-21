@@ -76,7 +76,6 @@ import {
   OCCURRENCE_BAR_SIDE_WIDTH,
 } from "@/positioning/Constants";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
-import sequenceParser from "@/generated-parser/sequenceParser";
 
 export default {
   name: "creation",
@@ -94,30 +93,9 @@ export default {
     creation() {
       return this.context.creation();
     },
-    sourceOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-        if (isMessageContext || isCreationContext) {
-          return ctx.Owner() === this.source;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-      return (length - 1) * 7;
-    },
     targetOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-        if (isMessageContext || isCreationContext) {
-          return ctx.Owner() === this.target;
-        }
-        return false;
-      }).length;
-      return length * 7;
+      return 0;
     },
-
     signature() {
       return this.creation.SignatureText(false);
     },
