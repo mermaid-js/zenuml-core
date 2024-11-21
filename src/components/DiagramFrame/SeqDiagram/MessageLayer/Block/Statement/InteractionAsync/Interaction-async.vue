@@ -51,7 +51,7 @@ import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import { LIFELINE_WIDTH } from "@/positioning/Constants";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
-import sequenceParser from "@/generated-parser/sequenceParser";
+import Anchor from "@/positioning/Anchor";
 
 function isNullOrUndefined(value) {
   return value === null || value === undefined;
@@ -125,17 +125,36 @@ export default {
   props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
-    ...mapGetters(["distance", "cursor", "onElementClick"]),
+    ...mapGetters(["distance", "centerOf", "cursor", "onElementClick"]),
     asyncMessage: function () {
       return this.context?.asyncMessage();
     },
     outOfBand: function () {
       return this.source !== this.origin;
     },
+    anchorOrigin: function () {
+      return new Anchor(this.centerOf(this.origin), this.originOffset);
+    },
+    anchorSource: function () {
+      return new Anchor(this.centerOf(this.source), this.sourceOffset);
+    },
+    anchorTarget: function () {
+      return new Anchor(this.centerOf(this.target), this.targetOffset);
+    },
+
+    originOffset: function () {
+      const length = this.context.getAncestors((ctx) => {
+        if (this.isSync(ctx)) {
+          return ctx.Owner() === this.origin;
+        }
+        return false;
+      }).length;
+      if (length === 0) return 0;
+      return (length - 1) * 7;
+    },
     sourceOffset: function () {
       const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        if (isMessageContext) {
+        if (this.isSync(ctx)) {
           return ctx.Owner() === this.source;
         }
         return false;
@@ -145,8 +164,7 @@ export default {
     },
     targetOffset: function () {
       const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        if (isMessageContext) {
+        if (this.isSync(ctx)) {
           return ctx.Owner() === this.target;
         }
         return false;
@@ -155,32 +173,19 @@ export default {
 
       return (length - 1) * 7;
     },
-
     interactionWidth: function () {
-      if (this.isSelf) {
-        // TODO: do we need to calculate the width of the self call? If we do, we should use WidthProvider.
-        const leftOfMessage = 100;
-        const averageWidthOfChar = 10;
-        return (
-          averageWidthOfChar * (this.signature?.length || 0) + leftOfMessage
-        );
-      }
       return (
-        Math.abs(this.distance(this.target, this.source)) -
-        this.sourceOffset -
-        this.targetOffset -
+        Math.abs(this.anchorSource.calculateEdgeOffset(this.anchorTarget)) -
         LIFELINE_WIDTH
       );
     },
     // Both 'left' and 'translateX' can be used to move the element horizontally.
     // Change it to use translate according to https://stackoverflow.com/a/53892597/529187.
     translateX: function () {
-      if (!this.outOfBand && !this.rightToLeft) {
-        return 0;
-      }
-      return this.rightToLeft
-        ? this.distance(this.target, this.origin)
-        : this.distance(this.source, this.origin);
+      const destination = !this.rightToLeft
+        ? this.anchorSource
+        : this.anchorTarget;
+      return this.anchorOrigin.calculateEdgeOffset(destination);
     },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();

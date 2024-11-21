@@ -19,12 +19,6 @@
       transform: 'translateX(' + translateX + 'px)',
     }"
   >
-    <!--Known limitation: `if(x) { m }` not showing source occurrence. -->
-    <div
-      v-if="(showStarter && isRootBlock) || outOfBand"
-      class="occurrence source border-2"
-      :class="{ 'right-to-left': rightToLeft }"
-    ></div>
     <comment v-if="hasComment" :commentObj="commentObj" />
     <self-invocation
       v-if="isSelf"
@@ -77,28 +71,16 @@ import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
-import sequenceParser from "@/generated-parser/sequenceParser";
 import Anchor from "@/positioning/Anchor";
 import { LIFELINE_WIDTH } from "@/positioning/Constants";
 
 export default {
   name: "interaction",
-  props: [
-    "context",
-    "commentObj",
-    "number",
-    // "inheritFromOccurrence",
-  ],
+  props: ["context", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
     // add tracker to the mapGetters
-    ...mapGetters([
-      "participants",
-      "distance2",
-      "cursor",
-      "onElementClick",
-      "centerOf",
-    ]),
+    ...mapGetters(["participants", "cursor", "onElementClick", "centerOf"]),
     hasComment() {
       return this.commentObj?.text !== "";
     },
@@ -116,9 +98,6 @@ export default {
     },
     target: function () {
       return this.context?.message()?.Owner() || _STARTER_;
-    },
-    outOfBand: function () {
-      return !!this.source && this.source !== this.origin;
     },
     assignee: function () {
       let assignment = this.message?.Assignment();
@@ -145,12 +124,6 @@ export default {
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
-    },
-    showStarter() {
-      return this.participants.Starter()?.name !== _STARTER_;
-    },
-    isRootBlock() {
-      return this.borderWidth.borderLeftWidth === "0px";
     },
     /**
      * The offset is to make sure the sub-occurrence bar is not fully layered
@@ -233,11 +206,6 @@ export default {
   methods: {
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
-    },
-    isSync(ctx) {
-      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-      return isMessageContext || isCreationContext;
     },
   },
   components: {

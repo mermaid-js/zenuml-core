@@ -63,6 +63,12 @@ export default defineComponent({
   },
 
   methods: {
+    isSync(ctx: any) {
+      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
+      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
+      return isMessageContext || isCreationContext;
+    },
+
     isJointOccurrence(this: ComponentProps, participant: any): boolean {
       const ancestorContextForParticipant =
         this.findContextForReceiver(participant);
