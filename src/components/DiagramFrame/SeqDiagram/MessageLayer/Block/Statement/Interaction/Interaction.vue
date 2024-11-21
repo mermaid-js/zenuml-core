@@ -71,6 +71,7 @@ import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
+import { OCCURRENCE_BAR_SIDE_WIDTH } from "@/positioning/Constants";
 
 export default {
   name: "interaction",
@@ -98,14 +99,9 @@ export default {
       return this.context?.message()?.Owner() || _STARTER_;
     },
     targetOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
-        if (this.isSync(ctx)) {
-          return ctx.Owner() === this.target;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-      return length * 7;
+      const depth = this.depthOnParticipant(this.target);
+      if (depth === 0) return 0;
+      return (depth + 1) * OCCURRENCE_BAR_SIDE_WIDTH;
     },
     assignee: function () {
       let assignment = this.message?.Assignment();
