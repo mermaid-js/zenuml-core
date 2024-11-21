@@ -45,7 +45,6 @@
           v-if="blockInSection"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInSection"
-          :selfCallIndent="selfCallIndent"
           :number="number"
         ></block>
       </div>
@@ -61,7 +60,7 @@ import capitalize from "lodash/capitalize";
 
 export default {
   name: "fragment-section",
-  props: ["context", "comment", "selfCallIndent", "commentObj", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [fragment],
   setup(props) {
     const store = useStore();

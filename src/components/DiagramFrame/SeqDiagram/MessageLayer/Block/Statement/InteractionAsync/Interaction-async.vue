@@ -5,6 +5,12 @@
 <template>
   <div
     :data-origin="origin"
+    :data-to="target"
+    :data-source="source"
+    :data-target="target"
+    :data-origin-offset="originOffset"
+    :data-source-offset="sourceOffset"
+    :data-target-offset="targetOffset"
     :data-out-of-band="outOfBand"
     class="interaction async"
     v-on:click.stop="onClick"
@@ -49,9 +55,8 @@ import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
-import { LIFELINE_WIDTH } from "@/positioning/Constants";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
-import sequenceParser from "@/generated-parser/sequenceParser";
+import Anchor from "@/positioning/Anchor";
 
 function isNullOrUndefined(value) {
   return value === null || value === undefined;
@@ -122,66 +127,32 @@ function isNullOrUndefined(value) {
 
 export default {
   name: "interaction-async",
-  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
-    ...mapGetters(["distance", "cursor", "onElementClick"]),
+    ...mapGetters(["distance", "centerOf", "cursor", "onElementClick"]),
     asyncMessage: function () {
       return this.context?.asyncMessage();
     },
     outOfBand: function () {
       return this.source !== this.origin;
     },
-    sourceOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        if (isMessageContext) {
-          return ctx.Owner() === this.source;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-      return (length - 1) * 7;
+    anchorOrigin: function () {
+      return new Anchor(this.centerOf(this.origin), this.originOffset);
     },
-    targetOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        if (isMessageContext) {
-          return ctx.Owner() === this.target;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-
-      return (length - 1) * 7;
+    anchorSource: function () {
+      return new Anchor(this.centerOf(this.source), this.sourceOffset);
     },
-
-    interactionWidth: function () {
-      if (this.isSelf) {
-        // TODO: do we need to calculate the width of the self call? If we do, we should use WidthProvider.
-        const leftOfMessage = 100;
-        const averageWidthOfChar = 10;
-        return (
-          averageWidthOfChar * (this.signature?.length || 0) + leftOfMessage
-        );
-      }
-      return (
-        Math.abs(this.distance(this.target, this.source)) -
-        this.sourceOffset -
-        this.targetOffset -
-        LIFELINE_WIDTH
-      );
+    anchorTarget: function () {
+      return new Anchor(this.centerOf(this.target), this.targetOffset);
     },
     // Both 'left' and 'translateX' can be used to move the element horizontally.
     // Change it to use translate according to https://stackoverflow.com/a/53892597/529187.
     translateX: function () {
-      if (!this.outOfBand && !this.rightToLeft) {
-        return 0;
-      }
-      let safeOffset = this.selfCallIndent || 0;
-      return this.rightToLeft
-        ? this.distance(this.target, this.origin) - safeOffset
-        : this.distance(this.source, this.origin) - safeOffset;
+      const destination = !this.rightToLeft
+        ? this.anchorSource
+        : this.anchorTarget;
+      return this.anchorOrigin.calculateEdgeOffset(destination);
     },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();

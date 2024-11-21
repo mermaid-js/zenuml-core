@@ -80,10 +80,10 @@ import sequenceParser from "@/generated-parser/sequenceParser";
 
 export default {
   name: "creation",
-  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
-    ...mapGetters(["cursor", "onElementClick", "distance2"]),
+    ...mapGetters(["cursor", "onElementClick", "distance2", "centerOf"]),
     ...mapState(["numbering"]),
     source() {
       return this.origin;
@@ -118,18 +118,6 @@ export default {
       return length * 7;
     },
 
-    interactionWidth() {
-      // Explanation of the formula:
-      // px: 0 1 2 3 4 5 6 7 8
-      // L     a           b
-      // gap between a and b is [(b - a) - 1]
-      return (
-        Math.abs(this.distance2(this.origin, this.target)) -
-        this.sourceOffset -
-        this.targetOffset -
-        LIFELINE_WIDTH
-      );
-    },
     signature() {
       return this.creation.SignatureText(false);
     },

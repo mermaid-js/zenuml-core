@@ -2,10 +2,13 @@
   <div
     class="interaction sync inline-block"
     v-on:click.stop="onClick"
-    :data-origin="origin"
     :data-to="target"
+    :data-origin="origin"
     :data-source="source"
     :data-target="target"
+    :data-origin-offset="originOffset"
+    :data-source-offset="sourceOffset"
+    :data-target-offset="targetOffset"
     data-type="interaction"
     :data-signature="signature"
     :class="{
@@ -19,12 +22,6 @@
       transform: 'translateX(' + translateX + 'px)',
     }"
   >
-    <!--Known limitation: `if(x) { m }` not showing source occurrence. -->
-    <div
-      v-if="(showStarter && isRootBlock) || outOfBand"
-      class="occurrence source border-2"
-      :class="{ 'right-to-left': rightToLeft }"
-    ></div>
     <comment v-if="hasComment" :commentObj="commentObj" />
     <self-invocation
       v-if="isSelf"
@@ -47,7 +44,6 @@
     <occurrence
       :context="message"
       :participant="target"
-      :selfCallIndent="passOnOffset"
       :rtl="rightToLeft"
       :number="number"
     />
@@ -78,21 +74,14 @@ import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
-import sequenceParser from "@/generated-parser/sequenceParser";
 
 export default {
   name: "interaction",
-  props: [
-    "context",
-    "selfCallIndent",
-    "commentObj",
-    "number",
-    // "inheritFromOccurrence",
-  ],
+  props: ["context", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
     // add tracker to the mapGetters
-    ...mapGetters(["participants", "distance2", "cursor", "onElementClick"]),
+    ...mapGetters(["participants", "cursor", "onElementClick", "centerOf"]),
     hasComment() {
       return this.commentObj?.text !== "";
     },
@@ -111,8 +100,15 @@ export default {
     target: function () {
       return this.context?.message()?.Owner() || _STARTER_;
     },
-    outOfBand: function () {
-      return !!this.source && this.source !== this.origin;
+    targetOffset: function () {
+      const length = this.context.getAncestors((ctx) => {
+        if (this.isSync(ctx)) {
+          return ctx.Owner() === this.target;
+        }
+        return false;
+      }).length;
+      if (length === 0) return 0;
+      return length * 7;
     },
     assignee: function () {
       let assignment = this.message?.Assignment();
@@ -123,112 +119,15 @@ export default {
       return this.message?.SignatureText();
     },
     translateX: function () {
-      // Normal flow
-      if (!this.rightToLeft && !this.outOfBand) {
-        return 0;
-      }
-
-      // ** Starting point is always the center of 'origin' **
-      const moveTo = !this.rightToLeft ? this.source : this.target;
-      const dist = this.distance2(this.origin, moveTo);
-      if (this.rightToLeft) {
-        return dist - this.sourceOffset + this.targetOffset;
-      }
-      return dist - this.sourceOffset + this.targetOffset;
+      const destination = !this.rightToLeft
+        ? this.anchorSource
+        : this.anchorTarget;
+      return this.anchorOrigin.calculateEdgeOffset(destination);
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
     },
-    showStarter() {
-      return this.participants.Starter()?.name !== _STARTER_;
-    },
-    isRootBlock() {
-      return this.borderWidth.borderLeftWidth === "0px";
-    },
-    passOnOffset: function () {
-      /**
-       * The offset is to make sure the sub-occurrence bar is not fully layered
-       * on top of the main occurrence bar. To achieve this, whenever a participant
-       * is re-entered, the offset increases by 7px.
-       *
-       * There are two ways to re-enter a participant:
-       *
-       * 1. A.m { s }
-       * 2. B A A.m { B->A.m }
-       *
-       * #1 is the most common case.
-       *
-       * If each Interaction keeps a stack of participants, we would be able to know
-       * the depth of the stack on one given participant. This would allow us to
-       * calculate the offset.
-       * For example,
-       *
-       *                          stack       offset S     offset A         offset B
-       * A.m                      [A]         0            0                NA
-       * A->B.m                   [B]         NA           NA               7
-       * A.m { s }                [A A]       0            7                NA
-       * A.m { s { s } }          [A A A]     0            14               NA
-       * A.m { s { B.m } }        [A A B]     0            14               7
-       * A.m { B->A.m }           [A A]       0            14               NA
-       * A.m { B.m { A.m } }      [A B A]     0            14               7
-       * B A A.m { B->A.m }       [A A]       0            14               NA
-       *
-       * If offset is NA, it is effectively 0.
-       *
-       * There are two ways to implement this:
-       * 1. Keep a stack of participants in the Interaction component.
-       * 2. Calculate the stack depth from the context.
-       *
-       * The latter is more testable.
-       *
-       * The API should be like this:
-       * const n: number = this.context?.stackDepth(this.source);
-       */
-      return 0;
-    },
-    sourceOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-        if (isMessageContext || isCreationContext) {
-          return ctx.Owner() === this.source;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-      return (length - 1) * 7;
-    },
-    targetOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-        if (isMessageContext || isCreationContext) {
-          return ctx.Owner() === this.target;
-        }
-        return false;
-      }).length;
-      return length * 7;
-    },
-    interactionWidth: function () {
-      if (this.context && this.isSelf) {
-        return 0;
-      }
 
-      if (this.rightToLeft) {
-        return (
-          Math.abs(this.distance2(this.source, this.target)) +
-          this.sourceOffset -
-          this.targetOffset -
-          1
-        );
-      }
-      return (
-        Math.abs(this.distance2(this.source, this.target)) -
-        this.sourceOffset -
-        this.targetOffset -
-        1
-      );
-    },
     isSelf: function () {
       // this.to === undefined if it is a self interaction and root message.
       return !this.target || this.target === this.source;

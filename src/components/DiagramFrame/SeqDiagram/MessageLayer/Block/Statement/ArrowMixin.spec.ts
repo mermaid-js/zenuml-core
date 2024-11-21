@@ -3,6 +3,10 @@ import { createStore } from "vuex";
 import { VueSequence } from "@/index";
 // @ts-ignore
 import Interaction from "./Interaction/Interaction.vue";
+// @ts-ignore
+import Return from "./Return/Return.vue";
+// @ts-ignore
+import InteractionAsync from "./InteractionAsync/Interaction-async.vue";
 import { Fixture } from "../../../../../../../test/unit/parser/fixture/Fixture";
 import { configureCompat } from "vue";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
@@ -27,13 +31,103 @@ function mountInteractionWithCode(
 
   return shallowMount(Interaction, { global: { plugins: [store] }, props });
 }
+
+function mountInteractionAsyncWithCode(
+  code: string,
+  contextLocator: (code: string) => any,
+  origin = "",
+) {
+  const storeConfig = VueSequence.Store();
+  // @ts-ignore
+  storeConfig.state.code = code;
+  const store = createStore(storeConfig);
+
+  const context = contextLocator(code);
+  const props = {
+    context,
+    origin,
+    fragmentOffset: 100,
+  };
+
+  return shallowMount(InteractionAsync, {
+    global: { plugins: [store] },
+    props,
+  });
+}
+
+function mountReturnWithCode(
+  code: string,
+  contextLocator: (code: string) => any,
+  origin = "",
+) {
+  const storeConfig = VueSequence.Store();
+  // @ts-ignore
+  storeConfig.state.code = code;
+  const store = createStore(storeConfig);
+
+  const context = contextLocator(code);
+  const props = {
+    context,
+    origin,
+    fragmentOffset: 100,
+  };
+
+  return shallowMount(Return, { global: { plugins: [store] }, props });
+}
+
 beforeEach(() => {
   configureCompat({
     RENDER_FUNCTION: false,
   });
 });
 describe("ArrowMixin", () => {
-  it("findContextForReceiver", async () => {
+  describe("targetOffset", () => {
+    it("sync message", async () => {
+      const creationWrapper = mountInteractionWithCode(
+        "A.method() { B.method() }",
+        Fixture.firstChild,
+        "A",
+      );
+
+      const vm = creationWrapper.vm as any;
+      expect(vm.target).toBe("B");
+      expect(vm.originOffset).toBe(0);
+      expect(vm.sourceOffset).toBe(0);
+      expect(vm.targetOffset).toBe(0);
+    });
+
+    it("async message", async () => {
+      const creationWrapper = mountInteractionAsyncWithCode(
+        "A.method() { B.method() { B->A: async } }",
+        Fixture.firstGrandChild,
+        "A",
+      );
+
+      const vm = creationWrapper.vm as any;
+      expect(vm.target).toBe("A");
+      expect(vm.originOffset).toBe(0);
+      expect(vm.sourceOffset).toBe(0);
+      expect(vm.targetOffset).toBe(0);
+    });
+
+    it("return message", async () => {
+      const creationWrapper = mountReturnWithCode(
+        "A.method() { B.method() { return r } }",
+        Fixture.firstGrandChild,
+        "B",
+      );
+
+      const vm = creationWrapper.vm as any;
+      expect(vm.context.getFormattedText()).toBe("return r");
+      expect(vm.context.ret().ReturnTo()).toBe("A");
+      expect(vm.target).toBe("A");
+      expect(vm.originOffset).toBe(0);
+      expect(vm.sourceOffset).toBe(0);
+      expect(vm.targetOffset).toBe(0);
+    });
+  });
+
+  it("isJointOccurrence", async () => {
     const creationWrapper = mountInteractionWithCode(
       "A.method() { B.method() }",
       Fixture.firstChild,
@@ -41,18 +135,10 @@ describe("ArrowMixin", () => {
     );
 
     const vm = creationWrapper.vm as any;
-    expect(vm.findContextForReceiver("C")).toBe(null);
-    expect(vm.findContextForReceiver("B").getFormattedText()).toBe(
-      "B.method()",
-    );
-    expect(vm.findContextForReceiver("A").getFormattedText()).toBe(
-      "A.method() { B.method() }",
-    );
+    expect(vm.isJointOccurrence("A")).toBe(true);
   });
 
-  // findContextForReceiver search for Ancestors only for self messages
-  // and does not include the current context
-  it("findContextForReceiver self message 1", async () => {
+  it("self message 1", async () => {
     const interaction = mountInteractionWithCode(
       "self()",
       Fixture.firstStatement,
@@ -60,12 +146,10 @@ describe("ArrowMixin", () => {
     );
 
     const vm = interaction.vm as any;
-    expect(vm.findContextForReceiver(_STARTER_).getFormattedText()).toBe(
-      "self()",
-    );
+    expect(vm.isJointOccurrence(_STARTER_)).toBeFalsy();
   });
 
-  it("findContextForReceiver sync message 1", async () => {
+  it("sync message 1", async () => {
     const interaction = mountInteractionWithCode(
       "A.m()",
       Fixture.firstStatement,
@@ -73,10 +157,11 @@ describe("ArrowMixin", () => {
     );
 
     const vm = interaction.vm as any;
-    expect(vm.findContextForReceiver("A").getFormattedText()).toBe("A.m()");
+    expect(vm.isJointOccurrence(_STARTER_)).toBeFalsy();
+    expect(vm.isJointOccurrence("A")).toBeTruthy();
   });
 
-  it("findContextForReceiver creation message 1", async () => {
+  it("creation message 1", async () => {
     const interaction = mountInteractionWithCode(
       "A.m() { new B }",
       Fixture.firstChild,
@@ -84,6 +169,7 @@ describe("ArrowMixin", () => {
     );
 
     const vm = interaction.vm as any;
-    expect(vm.findContextForReceiver("B").getFormattedText()).toBe("new B");
+    expect(vm.isJointOccurrence("A")).toBeTruthy();
+    expect(vm.isJointOccurrence("B")).toBeTruthy();
   });
 });

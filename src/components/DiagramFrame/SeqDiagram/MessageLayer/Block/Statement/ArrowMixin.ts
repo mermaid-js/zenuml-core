@@ -1,7 +1,11 @@
 import { defineComponent } from "vue";
 import sequenceParser from "@/generated-parser/sequenceParser";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
-
+import {
+  LIFELINE_WIDTH,
+  OCCURRENCE_BAR_SIDE_WIDTH,
+} from "@/positioning/Constants";
+import Anchor from "@/positioning/Anchor";
+import { mapGetters } from "vuex";
 // Define interfaces for your properties
 interface BorderWidthStyle {
   borderLeftWidth: string;
@@ -44,6 +48,70 @@ export default defineComponent({
   },
 
   computed: {
+    ...mapGetters(["centerOf"]),
+    anchorOrigin: function (): Anchor {
+      return new Anchor(this.centerOf(this.origin), this.originOffset);
+    },
+    anchorSource: function (): Anchor {
+      return new Anchor(this.centerOf(this.source), this.sourceOffset);
+    },
+    anchorTarget: function (): Anchor {
+      return new Anchor(this.centerOf(this.target), this.targetOffset);
+    },
+
+    interactionWidth: function (): number {
+      return (
+        Math.abs(this.anchorSource.calculateEdgeOffset(this.anchorTarget)) -
+        LIFELINE_WIDTH
+      );
+    },
+    /**
+     * The offset is to make sure the sub-occurrence bar is not fully layered
+     * on top of the main occurrence bar. To achieve this, whenever a participant
+     * is re-entered, the offset increases by 7px.
+     *
+     * There are two ways to re-enter a participant:
+     *
+     * 1. A.m { s }
+     * 2. B A A.m { B->A.m }
+     *
+     * #1 is the most common case.
+     *
+     * If each Interaction keeps a stack of participants, we would be able to know
+     * the depth of the stack on one given participant. This would allow us to
+     * calculate the offset.
+     * For example,
+     *
+     *                          stack       offset S     offset A         offset B
+     * A.m                      [A]         0            0                NA
+     * A->B.m                   [B]         NA           NA               7
+     * A.m { s }                [A A]       0            7                NA
+     * A.m { s { s } }          [A A A]     0            14               NA
+     * A.m { s { B.m } }        [A A B]     0            14               7
+     * A.m { B->A.m }           [A A]       0            14               NA
+     * A.m { B.m { A.m } }      [A B A]     0            14               7
+     * B A A.m { B->A.m }       [A A]       0            14               NA
+     *
+     * If offset is NA, it is effectively 0.
+     *
+     * There are two ways to implement this:
+     * 1. Keep a stack of participants in the Interaction component.
+     * 2. Calculate the stack depth from the context.
+     *
+     * The latter is more testable.
+     *
+     * The API should be like this:
+     * const n: number = this.context?.stackDepth(this.source);
+     */
+    originOffset: function (): any {
+      return this.depthOnParticipant(this.origin) * OCCURRENCE_BAR_SIDE_WIDTH;
+    },
+    sourceOffset: function (): any {
+      return this.depthOnParticipant(this.source) * OCCURRENCE_BAR_SIDE_WIDTH;
+    },
+    targetOffset: function (): any {
+      return this.depthOnParticipant(this.target) * OCCURRENCE_BAR_SIDE_WIDTH;
+    },
     borderWidth(this: ComponentProps): BorderWidthStyle {
       const border: BorderWidthStyle = {
         borderLeftWidth: "7px",
@@ -63,62 +131,42 @@ export default defineComponent({
   },
 
   methods: {
-    isJointOccurrence(this: ComponentProps, participant: any): boolean {
-      const ancestorContextForParticipant =
-        this.findContextForReceiver(participant);
-      if (!ancestorContextForParticipant) {
+    depthOnParticipant(participant: any): number {
+      const length = this.context.getAncestors((ctx) => {
+        if (this.isSync(ctx)) {
+          return ctx.Owner() === participant;
+        }
         return false;
+      }).length;
+      if (length === 0) return 0;
+      return length - 1;
+    },
+    depthOnParticipant4Stat(participant: any): number {
+      if (!(this.context instanceof sequenceParser.StatContext)) {
+        return 0;
       }
 
-      return (
-        ancestorContextForParticipant instanceof
-          sequenceParser.MessageContext ||
-        ancestorContextForParticipant instanceof sequenceParser.CreationContext
-      );
+      const child = this.context?.children?.[0];
+      if (!child) {
+        return 0;
+      }
+      const length = child.getAncestors((ctx) => {
+        if (this.isSync(ctx)) {
+          return ctx.Owner() === participant;
+        }
+        return false;
+      }).length;
+
+      return length;
+    },
+    isSync(ctx: any) {
+      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
+      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
+      return isMessageContext || isCreationContext;
     },
 
-    findContextForReceiver(
-      this: ComponentProps,
-      participant: any,
-    ): Context | MessageContext | CreationContext | null {
-      if (!this.context) {
-        return null;
-      }
-      let currentContext: Context = this.context;
-
-      const messageContext = currentContext.message && currentContext.message();
-      if (
-        messageContext &&
-        (messageContext.Owner() === participant ||
-          (!messageContext.Owner() && participant === _STARTER_))
-      ) {
-        return messageContext;
-      }
-      const creationContext =
-        currentContext.creation && currentContext.creation();
-      if (
-        creationContext &&
-        (creationContext.Owner() === participant ||
-          (!creationContext.Owner() && participant === _STARTER_))
-      ) {
-        return creationContext;
-      }
-      while (currentContext) {
-        if (!currentContext.Owner) {
-          currentContext = currentContext.parentCtx!;
-          continue;
-        }
-
-        if (
-          currentContext.Owner() === participant ||
-          (!currentContext.Owner() && participant === _STARTER_)
-        ) {
-          return currentContext;
-        }
-
-        currentContext = currentContext.parentCtx!;
-      }
-      return null;
+    isJointOccurrence(this: ComponentProps, participant: any): boolean {
+      return this.depthOnParticipant4Stat(participant) > 0;
     },
   },
 });

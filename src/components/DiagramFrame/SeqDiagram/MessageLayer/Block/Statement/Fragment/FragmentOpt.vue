@@ -29,7 +29,6 @@
       :class="{ hidden: collapsed }"
       :style="{ paddingLeft: `${offsetX}px` }"
       :context="opt.braceBlock().block()"
-      :selfCallIndent="selfCallIndent"
       :number="number"
     ></block>
   </div>
@@ -41,7 +40,7 @@ import fragment from "./FragmentMixin";
 
 export default {
   name: "fragment-opt",
-  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [fragment],
   computed: {
     ...mapState(["numbering"]),

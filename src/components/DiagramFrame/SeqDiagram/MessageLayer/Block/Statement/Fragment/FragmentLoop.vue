@@ -36,7 +36,6 @@
           :origin="origin"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInLoop"
-          :selfCallIndent="selfCallIndent"
           :number="number"
         ></block>
       </div>
@@ -52,7 +51,7 @@ import ConditionLabel from "./ConditionLabel.vue";
 
 export default {
   name: "fragment-loop",
-  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [fragment],
   components: {
     ConditionLabel,
