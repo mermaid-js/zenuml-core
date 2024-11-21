@@ -80,6 +80,7 @@ import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import Anchor from "@/positioning/Anchor";
+import { LIFELINE_WIDTH } from "@/positioning/Constants";
 
 export default {
   name: "interaction",
@@ -230,23 +231,9 @@ export default {
       return length * 7;
     },
     interactionWidth: function () {
-      if (this.context && this.isSelf) {
-        return 0;
-      }
-
-      if (this.rightToLeft) {
-        return (
-          Math.abs(this.distance2(this.source, this.target)) +
-          this.sourceOffset -
-          this.targetOffset -
-          1
-        );
-      }
       return (
-        Math.abs(this.distance2(this.source, this.target)) -
-        this.sourceOffset +
-        this.targetOffset -
-        1
+        Math.abs(this.anchorSource.calculateEdgeOffset(this.anchorTarget)) -
+        LIFELINE_WIDTH
       );
     },
     isSelf: function () {
