@@ -107,7 +107,6 @@ export default {
         }
         return false;
       }).length;
-      if (length === 0) return 0;
       return length * 7;
     },
     assignee: function () {
