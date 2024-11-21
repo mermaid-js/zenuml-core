@@ -4,6 +4,7 @@ import { createStore } from "vuex";
 import Interaction from "./Interaction.vue";
 import Store from "@/store/Store";
 import { ProgContextFixture } from "@/parser/ContextsFixture";
+import { OCCURRENCE_BAR_SIDE_WIDTH } from "@/positioning/Constants";
 
 describe("Highlight current interact based on position of cursor", () => {
   beforeEach(() => {
@@ -78,20 +79,36 @@ describe("Interaction width", () => {
   );
 });
 
+/**
+ * TranslateX is decided by the following factors:
+ *
+ */
 describe("Translate X", () => {
-  // A          B           C
-  // provided   inherited   to
-  it("when left to right", function () {
-    const storeConfig = Store();
-    storeConfig.getters.centerOf = () => (participant) => {
-      if (participant === "A") return 10;
-      if (participant === "B") return 25;
-      if (participant === "C") return 35;
-    };
+  // Prepare participants
+  const storeConfig = Store();
+  let A = 10;
+  let B = 25;
+  let C = 35;
+  storeConfig.getters.centerOf = () => (participant) => {
+    if (participant === "A") return A;
+    if (participant === "B") return B;
+    if (participant === "C") return C;
+  };
 
-    const store = createStore(storeConfig);
+  const store = createStore(storeConfig);
+
+  /**
+   * A B C
+   * B.m {
+   *   self {
+   *     A->C.method
+   *   }
+   * }
+   */
+  it("Left to Right", function () {
     Interaction.computed.source = () => "A";
     Interaction.computed.target = () => "C";
+    Interaction.computed.originOffset = () => OCCURRENCE_BAR_SIDE_WIDTH;
     Interaction.computed.sourceOffset = () => 0;
     Interaction.computed.targetOffset = () => 0;
     const wrapper = shallowMount(Interaction, {
@@ -102,28 +119,23 @@ describe("Translate X", () => {
         plugins: [store],
       },
     });
-    expect(wrapper.vm.translateX).toBe(-15);
+    const expected = A - B - OCCURRENCE_BAR_SIDE_WIDTH;
+    expect(wrapper.vm.translateX).toBe(expected);
     expect(wrapper.find(".right-to-left").exists()).toBeFalsy();
   });
 
-  // A      B      C
-  // to   real     from
-  it("when right to left", function () {
-    const storeConfig = Store();
-    storeConfig.getters.centerOf = () => (participant) => {
-      // A B C
-      // C.m { B->A.m }
-      // -====A====--====B====--====C====-
-      //
-      if (participant === "A") return 10;
-      if (participant === "B") return 25;
-      if (participant === "C") return 35;
-    };
-
-    const store = createStore(storeConfig);
-
+  /**
+   * A B C
+   * C.m {
+   *   self {
+   *     B->A.met <---- this method
+   *   }
+   * }
+   */
+  it("Right to Left", function () {
     Interaction.computed.source = () => "B";
     Interaction.computed.target = () => "A";
+    Interaction.computed.originOffset = () => OCCURRENCE_BAR_SIDE_WIDTH;
     Interaction.computed.sourceOffset = () => 0;
     Interaction.computed.targetOffset = () => 0;
     const wrapper = shallowMount(Interaction, {
@@ -134,7 +146,8 @@ describe("Translate X", () => {
         plugins: [store],
       },
     });
-    expect(wrapper.vm.translateX).toBe(-25);
+    const expected = A - C - OCCURRENCE_BAR_SIDE_WIDTH;
+    expect(wrapper.vm.translateX).toBe(expected);
     expect(wrapper.find(".right-to-left").exists()).toBeTruthy();
   });
 });
