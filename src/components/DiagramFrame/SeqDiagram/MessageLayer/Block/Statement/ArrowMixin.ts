@@ -10,6 +10,8 @@ import { mapGetters } from "vuex";
 interface BorderWidthStyle {
   borderLeftWidth: string;
   borderRightWidth: string;
+  borderSourceWidth: number;
+  borderTargetWidth: number;
 }
 
 // Define the context type
@@ -116,15 +118,19 @@ export default defineComponent({
       const border: BorderWidthStyle = {
         borderLeftWidth: "7px",
         borderRightWidth: "7px",
+        borderSourceWidth: 7,
+        borderTargetWidth: 7,
       };
       const endSide = this.rightToLeft ? "Left" : "Right";
       const startSide = this.rightToLeft ? "Right" : "Left";
 
       if (!this.isJointOccurrence(this.source)) {
         border[`border${startSide}Width`] = "0px";
+        border.borderSourceWidth = 0;
       }
       if (!this.isJointOccurrence(this.target)) {
         border[`border${endSide}Width`] = "0px";
+        border.borderTargetWidth = 0;
       }
       return border;
     },
