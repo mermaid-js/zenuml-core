@@ -92,6 +92,8 @@ describe("Translate X", () => {
     const store = createStore(storeConfig);
     Interaction.computed.source = () => "A";
     Interaction.computed.target = () => "C";
+    Interaction.computed.sourceOffset = () => 0;
+    Interaction.computed.targetOffset = () => 0;
     const wrapper = shallowMount(Interaction, {
       props: {
         origin: "B",
@@ -122,6 +124,8 @@ describe("Translate X", () => {
 
     Interaction.computed.source = () => "B";
     Interaction.computed.target = () => "A";
+    Interaction.computed.sourceOffset = () => 0;
+    Interaction.computed.targetOffset = () => 0;
     const wrapper = shallowMount(Interaction, {
       props: {
         origin: "C",

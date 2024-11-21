@@ -9,6 +9,10 @@ export class Fixture {
     return rootContext && rootContext.block().stat()[0];
   }
 
+  static firstMessage(code: string) {
+    return Fixture.firstStatement(code).message();
+  }
+
   static firstChild(code: string) {
     return Fixture.firstStatement(code)
       .children[0].braceBlock()

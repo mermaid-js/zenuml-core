@@ -86,17 +86,22 @@ export default defineComponent({
       }
       let currentContext: Context = this.context;
 
-      if (this.source !== this.target) {
-        const messageContext =
-          currentContext.message && currentContext.message();
-        if (messageContext && messageContext.Owner() === participant) {
-          return messageContext;
-        }
-        const creationContext =
-          currentContext.creation && currentContext.creation();
-        if (creationContext && creationContext.Owner() === participant) {
-          return creationContext;
-        }
+      const messageContext = currentContext.message && currentContext.message();
+      if (
+        messageContext &&
+        (messageContext.Owner() === participant ||
+          (!messageContext.Owner() && participant === _STARTER_))
+      ) {
+        return messageContext;
+      }
+      const creationContext =
+        currentContext.creation && currentContext.creation();
+      if (
+        creationContext &&
+        (creationContext.Owner() === participant ||
+          (!creationContext.Owner() && participant === _STARTER_))
+      ) {
+        return creationContext;
       }
       while (currentContext) {
         if (!currentContext.Owner) {
