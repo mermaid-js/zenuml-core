@@ -1,6 +1,5 @@
 import { defineComponent } from "vue";
 import sequenceParser from "@/generated-parser/sequenceParser";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 import {
   LIFELINE_WIDTH,
   OCCURRENCE_BAR_SIDE_WIDTH,
@@ -142,6 +141,24 @@ export default defineComponent({
       if (length === 0) return 0;
       return length - 1;
     },
+    depthOnParticipant4Stat(participant: any): number {
+      if (!(this.context instanceof sequenceParser.StatContext)) {
+        return 0;
+      }
+
+      const child = this.context?.children?.[0];
+      if (!child) {
+        return 0;
+      }
+      const length = child.getAncestors((ctx) => {
+        if (this.isSync(ctx)) {
+          return ctx.Owner() === participant;
+        }
+        return false;
+      }).length;
+
+      return length;
+    },
     isSync(ctx: any) {
       const isMessageContext = ctx instanceof sequenceParser.MessageContext;
       const isCreationContext = ctx instanceof sequenceParser.CreationContext;
@@ -149,61 +166,7 @@ export default defineComponent({
     },
 
     isJointOccurrence(this: ComponentProps, participant: any): boolean {
-      const ancestorContextForParticipant =
-        this.findContextForReceiver(participant);
-      if (!ancestorContextForParticipant) {
-        return false;
-      }
-
-      return (
-        ancestorContextForParticipant instanceof
-          sequenceParser.MessageContext ||
-        ancestorContextForParticipant instanceof sequenceParser.CreationContext
-      );
-    },
-
-    findContextForReceiver(
-      this: ComponentProps,
-      participant: any,
-    ): Context | MessageContext | CreationContext | null {
-      if (!this.context) {
-        return null;
-      }
-      let currentContext: Context = this.context;
-
-      const messageContext = currentContext.message && currentContext.message();
-      if (
-        messageContext &&
-        (messageContext.Owner() === participant ||
-          (!messageContext.Owner() && participant === _STARTER_))
-      ) {
-        return messageContext;
-      }
-      const creationContext =
-        currentContext.creation && currentContext.creation();
-      if (
-        creationContext &&
-        (creationContext.Owner() === participant ||
-          (!creationContext.Owner() && participant === _STARTER_))
-      ) {
-        return creationContext;
-      }
-      while (currentContext) {
-        if (!currentContext.Owner) {
-          currentContext = currentContext.parentCtx!;
-          continue;
-        }
-
-        if (
-          currentContext.Owner() === participant ||
-          (!currentContext.Owner() && participant === _STARTER_)
-        ) {
-          return currentContext;
-        }
-
-        currentContext = currentContext.parentCtx!;
-      }
-      return null;
+      return this.depthOnParticipant4Stat(participant) > 0;
     },
   },
 });
