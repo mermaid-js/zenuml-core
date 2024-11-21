@@ -56,7 +56,6 @@ import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
-import Anchor from "@/positioning/Anchor";
 
 function isNullOrUndefined(value) {
   return value === null || value === undefined;
@@ -136,15 +135,6 @@ export default {
     },
     outOfBand: function () {
       return this.source !== this.origin;
-    },
-    anchorOrigin: function () {
-      return new Anchor(this.centerOf(this.origin), this.originOffset);
-    },
-    anchorSource: function () {
-      return new Anchor(this.centerOf(this.source), this.sourceOffset);
-    },
-    anchorTarget: function () {
-      return new Anchor(this.centerOf(this.target), this.targetOffset);
     },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();
