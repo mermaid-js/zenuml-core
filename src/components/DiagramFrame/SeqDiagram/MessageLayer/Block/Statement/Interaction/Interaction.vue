@@ -111,12 +111,6 @@ export default {
     signature: function () {
       return this.message?.SignatureText();
     },
-    translateX: function () {
-      const destination = !this.rightToLeft
-        ? this.anchorSource
-        : this.anchorTarget;
-      return this.anchorOrigin.calculateEdgeOffset(destination);
-    },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
     },

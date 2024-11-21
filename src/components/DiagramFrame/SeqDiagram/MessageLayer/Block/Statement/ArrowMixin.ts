@@ -59,7 +59,14 @@ export default defineComponent({
     anchorTarget: function (): Anchor {
       return new Anchor(this.centerOf(this.target), this.targetOffset);
     },
-
+    // Both 'left' and 'translateX' can be used to move the element horizontally.
+    // Change it to use translate according to https://stackoverflow.com/a/53892597/529187.
+    translateX: function () {
+      const destination = !this.rightToLeft
+        ? this.anchorSource
+        : this.anchorTarget;
+      return this.anchorOrigin.calculateEdgeOffset(destination);
+    },
     interactionWidth: function (): number {
       return (
         Math.abs(this.anchorSource.calculateEdgeOffset(this.anchorTarget)) -

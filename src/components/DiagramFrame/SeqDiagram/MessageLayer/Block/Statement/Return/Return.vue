@@ -80,12 +80,6 @@ export default {
     asyncMessage: function () {
       return this.ret?.asyncMessage();
     },
-    translateX: function () {
-      const destination = !this.rightToLeft
-        ? this.anchorSource
-        : this.anchorTarget;
-      return this.anchorOrigin.calculateEdgeOffset(destination);
-    },
     left: function () {
       return this.rightToLeft
         ? this.distance(this.target, this.origin)
