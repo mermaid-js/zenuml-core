@@ -49,7 +49,6 @@ import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
-import { LIFELINE_WIDTH } from "@/positioning/Constants";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 import Anchor from "@/positioning/Anchor";
 
@@ -172,12 +171,6 @@ export default {
       if (length === 0) return 0;
 
       return (length - 1) * 7;
-    },
-    interactionWidth: function () {
-      return (
-        Math.abs(this.anchorSource.calculateEdgeOffset(this.anchorTarget)) -
-        LIFELINE_WIDTH
-      );
     },
     // Both 'left' and 'translateX' can be used to move the element horizontally.
     // Change it to use translate according to https://stackoverflow.com/a/53892597/529187.

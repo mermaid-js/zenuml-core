@@ -71,7 +71,6 @@ import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
-import { LIFELINE_WIDTH } from "@/positioning/Constants";
 
 export default {
   name: "interaction",
@@ -116,12 +115,6 @@ export default {
       return this.message?.isCurrent(this.cursor);
     },
 
-    interactionWidth: function () {
-      return (
-        Math.abs(this.anchorSource.calculateEdgeOffset(this.anchorTarget)) -
-        LIFELINE_WIDTH
-      );
-    },
     isSelf: function () {
       // this.to === undefined if it is a self interaction and root message.
       return !this.target || this.target === this.source;

@@ -14,7 +14,11 @@
       'bare-target': bareTarget,
       highlight: isCurrent,
     }"
-    :style="{ ...borderWidth, width: width + 'px', left: left + 'px' }"
+    :style="{
+      ...borderWidth,
+      width: interactionWidth + 'px',
+      left: left + 'px',
+    }"
   >
     <comment v-if="comment" :commentObj="commentObj" />
     <div v-if="isSelf" class="flex items-center">
@@ -50,8 +54,6 @@ import Comment from "../Comment/Comment.vue";
 import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
-import WidthProviderOnBrowser from "@/positioning/WidthProviderFunc";
-import { TextType } from "@/positioning/Coordinate";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
@@ -73,11 +75,6 @@ export default {
     },
     asyncMessage: function () {
       return this.ret?.asyncMessage();
-    },
-    width: function () {
-      return this.isSelf
-        ? WidthProviderOnBrowser(this.signature, TextType.MessageContent)
-        : Math.abs(this.distance(this.target, this.source));
     },
     left: function () {
       return this.rightToLeft
