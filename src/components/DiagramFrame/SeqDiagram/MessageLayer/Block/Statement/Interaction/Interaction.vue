@@ -197,9 +197,7 @@ export default {
     },
     originOffset: function () {
       const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-        if (isMessageContext || isCreationContext) {
+        if (this.isSync(ctx)) {
           return ctx.Owner() === this.origin;
         }
         return false;
@@ -209,9 +207,7 @@ export default {
     },
     sourceOffset: function () {
       const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-        if (isMessageContext || isCreationContext) {
+        if (this.isSync(ctx)) {
           return ctx.Owner() === this.source;
         }
         return false;
@@ -221,9 +217,7 @@ export default {
     },
     targetOffset: function () {
       const length = this.context.getAncestors((ctx) => {
-        const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-        const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-        if (isMessageContext || isCreationContext) {
+        if (this.isSync(ctx)) {
           return ctx.Owner() === this.target;
         }
         return false;
@@ -244,6 +238,11 @@ export default {
   methods: {
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
+    },
+    isSync(ctx) {
+      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
+      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
+      return isMessageContext || isCreationContext;
     },
   },
   components: {
