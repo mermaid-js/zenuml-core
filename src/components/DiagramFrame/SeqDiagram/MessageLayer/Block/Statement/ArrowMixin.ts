@@ -128,7 +128,8 @@ export default defineComponent({
         }
         return false;
       }).length;
-      return length * 7;
+      if (length === 0) return 0;
+      return (length - 1) * 7;
     },
     borderWidth(this: ComponentProps): BorderWidthStyle {
       const border: BorderWidthStyle = {

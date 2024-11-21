@@ -5,6 +5,12 @@
 <template>
   <div
     :data-origin="origin"
+    :data-to="target"
+    :data-source="source"
+    :data-target="target"
+    :data-origin-offset="originOffset"
+    :data-source-offset="sourceOffset"
+    :data-target-offset="targetOffset"
     :data-out-of-band="outOfBand"
     class="interaction async"
     v-on:click.stop="onClick"
@@ -139,38 +145,6 @@ export default {
     },
     anchorTarget: function () {
       return new Anchor(this.centerOf(this.target), this.targetOffset);
-    },
-
-    originOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
-        if (this.isSync(ctx)) {
-          return ctx.Owner() === this.origin;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-      return (length - 1) * 7;
-    },
-    sourceOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
-        if (this.isSync(ctx)) {
-          return ctx.Owner() === this.source;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-      return (length - 1) * 7;
-    },
-    targetOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
-        if (this.isSync(ctx)) {
-          return ctx.Owner() === this.target;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-
-      return (length - 1) * 7;
     },
     // Both 'left' and 'translateX' can be used to move the element horizontally.
     // Change it to use translate according to https://stackoverflow.com/a/53892597/529187.

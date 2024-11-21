@@ -5,9 +5,13 @@
     v-on:click.stop="onClick"
     data-type="return"
     :data-signature="signature"
+    :data-origin="origin"
     :data-to="target"
     :data-source="source"
     :data-target="target"
+    :data-origin-offset="originOffset"
+    :data-source-offset="sourceOffset"
+    :data-target-offset="targetOffset"
     :class="{
       'right-to-left': rightToLeft,
       'bare-source': bareSource,
@@ -17,7 +21,7 @@
     :style="{
       ...borderWidth,
       width: interactionWidth + 'px',
-      left: left + 'px',
+      transform: 'translateX(' + translateX + 'px)',
     }"
   >
     <comment v-if="comment" :commentObj="commentObj" />
@@ -75,6 +79,12 @@ export default {
     },
     asyncMessage: function () {
       return this.ret?.asyncMessage();
+    },
+    translateX: function () {
+      const destination = !this.rightToLeft
+        ? this.anchorSource
+        : this.anchorTarget;
+      return this.anchorOrigin.calculateEdgeOffset(destination);
     },
     left: function () {
       return this.rightToLeft
