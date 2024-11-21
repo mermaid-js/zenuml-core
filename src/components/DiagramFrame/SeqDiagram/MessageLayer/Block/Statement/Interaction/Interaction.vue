@@ -2,10 +2,13 @@
   <div
     class="interaction sync inline-block"
     v-on:click.stop="onClick"
-    :data-origin="origin"
     :data-to="target"
+    :data-origin="origin"
     :data-source="source"
     :data-target="target"
+    :data-origin-offset="originOffset"
+    :data-source-offset="sourceOffset"
+    :data-target-offset="targetOffset"
     data-type="interaction"
     :data-signature="signature"
     :class="{
