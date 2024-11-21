@@ -131,11 +131,10 @@ export default {
       // ** Starting point is always the center of 'origin' **
       const moveTo = !this.rightToLeft ? this.source : this.target;
       const dist = this.distance2(this.origin, moveTo);
-      const indent = this.targetOffset;
       if (this.rightToLeft) {
         return dist - this.sourceOffset + this.targetOffset;
       }
-      return dist + indent;
+      return dist - this.sourceOffset + this.targetOffset;
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
