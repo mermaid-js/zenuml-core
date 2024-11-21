@@ -90,7 +90,7 @@ export default {
       const isVisible = firstMessage?.offsetParent != null;
       if (
         firstMessage &&
-        firstMessage.attributes["data-type"].value === "creation" &&
+        firstMessage.attributes["data-type"]?.value === "creation" &&
         isVisible
       ) {
         logger.debug(`First message to ${this.entity.name} is creation`);
