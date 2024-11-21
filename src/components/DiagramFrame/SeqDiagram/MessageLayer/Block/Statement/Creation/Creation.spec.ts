@@ -9,6 +9,7 @@ import {
   LIFELINE_WIDTH,
   MARGIN,
   MIN_PARTICIPANT_WIDTH,
+  OCCURRENCE_BAR_SIDE_WIDTH,
 } from "@/positioning/Constants";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
@@ -76,14 +77,15 @@ describe("Creation", () => {
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();
     // -====A====--====B====-
-    //      []<--<<c>>--
+    //      []]<--<<c>>--
     // There is enough space for the message arrow and occurrence.
     const gapCausedByParticipant =
       MIN_PARTICIPANT_WIDTH / 2 +
       MARGIN / 2 +
       MIN_PARTICIPANT_WIDTH / 2 +
       MARGIN / 2; // 100
-    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
+    const expected =
+      gapCausedByParticipant - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH; // 92
 
     expect(vm.interactionWidth).toBe(expected);
   });
@@ -105,14 +107,15 @@ describe("Creation", () => {
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();
     // -====A====--====B====-
-    //      --<<c>>-->[]
+    //      []]--<<c>>--
     // There is enough space for the message and occurrence.
     const gapCausedByParticipant =
       MIN_PARTICIPANT_WIDTH / 2 +
       MARGIN / 2 +
       MIN_PARTICIPANT_WIDTH / 2 +
       MARGIN / 2; // 100
-    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
+    const expected =
+      gapCausedByParticipant - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH; // 92
     expect(vm.interactionWidth).toBe(expected);
   });
 });
