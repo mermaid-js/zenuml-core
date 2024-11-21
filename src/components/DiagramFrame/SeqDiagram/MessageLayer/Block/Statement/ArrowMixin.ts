@@ -1,7 +1,10 @@
 import { defineComponent } from "vue";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { LIFELINE_WIDTH } from "@/positioning/Constants";
+import {
+  LIFELINE_WIDTH,
+  OCCURRENCE_BAR_SIDE_WIDTH,
+} from "@/positioning/Constants";
 import Anchor from "@/positioning/Anchor";
 import { mapGetters } from "vuex";
 // Define interfaces for your properties
@@ -102,34 +105,13 @@ export default defineComponent({
      * const n: number = this.context?.stackDepth(this.source);
      */
     originOffset: function (): any {
-      const length = this.context.getAncestors((ctx) => {
-        if (this.isSync(ctx)) {
-          return ctx.Owner() === this.origin;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-      return (length - 1) * 7;
+      return this.depthOnParticipant(this.origin) * OCCURRENCE_BAR_SIDE_WIDTH;
     },
     sourceOffset: function (): any {
-      const length = this.context.getAncestors((ctx) => {
-        if (this.isSync(ctx)) {
-          return ctx.Owner() === this.source;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-      return (length - 1) * 7;
+      return this.depthOnParticipant(this.source) * OCCURRENCE_BAR_SIDE_WIDTH;
     },
     targetOffset: function (): any {
-      const length = this.context.getAncestors((ctx) => {
-        if (this.isSync(ctx)) {
-          return ctx.Owner() === this.target;
-        }
-        return false;
-      }).length;
-      if (length === 0) return 0;
-      return (length - 1) * 7;
+      return this.depthOnParticipant(this.target) * OCCURRENCE_BAR_SIDE_WIDTH;
     },
     borderWidth(this: ComponentProps): BorderWidthStyle {
       const border: BorderWidthStyle = {
@@ -150,6 +132,16 @@ export default defineComponent({
   },
 
   methods: {
+    depthOnParticipant(participant: any): number {
+      const length = this.context.getAncestors((ctx) => {
+        if (this.isSync(ctx)) {
+          return ctx.Owner() === participant;
+        }
+        return false;
+      }).length;
+      if (length === 0) return 0;
+      return length - 1;
+    },
     isSync(ctx: any) {
       const isMessageContext = ctx instanceof sequenceParser.MessageContext;
       const isCreationContext = ctx instanceof sequenceParser.CreationContext;
