@@ -3,6 +3,7 @@ import sequenceParser from "@/generated-parser/sequenceParser";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { LIFELINE_WIDTH } from "@/positioning/Constants";
 import Anchor from "@/positioning/Anchor";
+import { mapGetters } from "vuex";
 // Define interfaces for your properties
 interface BorderWidthStyle {
   borderLeftWidth: string;
@@ -45,6 +46,7 @@ export default defineComponent({
   },
 
   computed: {
+    ...mapGetters(["centerOf"]),
     anchorOrigin: function (): Anchor {
       return new Anchor(this.centerOf(this.origin), this.originOffset);
     },
