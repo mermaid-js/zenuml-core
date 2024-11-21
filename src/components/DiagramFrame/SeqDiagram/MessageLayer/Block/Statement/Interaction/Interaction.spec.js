@@ -53,30 +53,26 @@ describe("Highlight current interact based on position of cursor", () => {
 describe("Interaction width", () => {
   test.each([
     // A --- ?px ---> B
-    [1, 10, 25, 14],
-    [1, 25, 10, 14],
-  ])(
-    "If selfCallIndent is %s and distance is %s, interactionWidth should be %s",
-    (selfCallIndent, a, b, width) => {
-      Interaction.computed.target = () => "B";
-      const storeConfig = Store();
-      storeConfig.getters.centerOf = () => (participant) => {
-        if (participant === "A") return a;
-        if (participant === "B") return b;
-      };
-      const store = createStore(storeConfig);
-      const wrapper = shallowMount(Interaction, {
-        global: {
-          plugins: [store],
-        },
-        props: {
-          selfCallIndent: selfCallIndent,
-          context: ProgContextFixture("A->B.method()").block().stat()[0],
-        },
-      });
-      expect(wrapper.vm.interactionWidth).toBe(width);
-    },
-  );
+    [10, 25, 14],
+    [25, 10, 14],
+  ])("If A %s, B %s, interactionWidth should be %s", (a, b, width) => {
+    Interaction.computed.target = () => "B";
+    const storeConfig = Store();
+    storeConfig.getters.centerOf = () => (participant) => {
+      if (participant === "A") return a;
+      if (participant === "B") return b;
+    };
+    const store = createStore(storeConfig);
+    const wrapper = shallowMount(Interaction, {
+      global: {
+        plugins: [store],
+      },
+      props: {
+        context: ProgContextFixture("A->B.method()").block().stat()[0],
+      },
+    });
+    expect(wrapper.vm.interactionWidth).toBe(width);
+  });
 });
 
 /**

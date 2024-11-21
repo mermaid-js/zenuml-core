@@ -28,7 +28,6 @@
       :origin="participant"
       v-if="this.context.braceBlock()"
       :context="context.braceBlock().block()"
-      :selfCallIndent="selfCallIndent"
       :number="number"
       :collapsed="collapsed"
       :inheritFromOccurrence="true"
@@ -42,7 +41,7 @@ import CollapseButton from "./CollapseButton.vue";
 import { EventBus } from "@/EventBus";
 export default {
   name: "occurrence",
-  props: ["context", "selfCallIndent", "participant", "rtl", "number"],
+  props: ["context", "participant", "rtl", "number"],
   data: function () {
     return {
       center: 0,

@@ -122,7 +122,7 @@ function isNullOrUndefined(value) {
 
 export default {
   name: "interaction-async",
-  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["distance", "cursor", "onElementClick"]),
@@ -178,10 +178,9 @@ export default {
       if (!this.outOfBand && !this.rightToLeft) {
         return 0;
       }
-      let safeOffset = this.selfCallIndent || 0;
       return this.rightToLeft
-        ? this.distance(this.target, this.origin) - safeOffset
-        : this.distance(this.source, this.origin) - safeOffset;
+        ? this.distance(this.target, this.origin)
+        : this.distance(this.source, this.origin);
     },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();

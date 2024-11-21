@@ -80,7 +80,7 @@ import sequenceParser from "@/generated-parser/sequenceParser";
 
 export default {
   name: "creation",
-  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["cursor", "onElementClick", "distance2"]),

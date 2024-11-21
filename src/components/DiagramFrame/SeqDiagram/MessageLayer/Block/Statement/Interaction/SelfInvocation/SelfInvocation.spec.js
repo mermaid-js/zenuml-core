@@ -15,7 +15,7 @@ describe("SelfInvocation", () => {
     },
   });
 
-  test("If selfCallIndent is %s and distance is %s, interactionWidth should be %s", () => {
+  test("assignment", () => {
     expect(selfInvocationWrapper.vm.assignee).toBe("ret");
     expect(selfInvocationWrapper.vm.signature).toBe("method2()");
     expect(selfInvocationWrapper.find(".self-invocation>label").text()).toBe(

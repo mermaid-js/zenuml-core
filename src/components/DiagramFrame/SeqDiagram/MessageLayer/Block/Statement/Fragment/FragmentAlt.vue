@@ -47,7 +47,6 @@
           v-if="blockInIfBlock"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInIfBlock"
-          :selfCallIndent="selfCallIndent"
           :number="`${number}.1`"
           incremental
         ></block>
@@ -64,7 +63,6 @@
             :origin="origin"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="blockInElseIfBlock(elseIfBlock)"
-            :selfCallIndent="selfCallIndent"
             :key="index + 2000"
             :number="`${number}.${blockLengthAcc[index] + 1}`"
             incremental
@@ -80,7 +78,6 @@
             :origin="origin"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="elseBlock"
-            :selfCallIndent="selfCallIndent"
             :number="`${number}.${
               blockLengthAcc[blockLengthAcc.length - 1] + 1
             }`"
@@ -101,7 +98,7 @@ import ConditionLabel from "./ConditionLabel.vue";
 
 export default {
   name: "fragment-alt",
-  props: ["context", "comment", "selfCallIndent", "commentObj", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [fragment],
   components: {
     ConditionLabel,
