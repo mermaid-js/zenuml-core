@@ -2,6 +2,7 @@ import { defineComponent } from "vue";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { mapGetters } from "vuex";
 import Anchor2 from "@/positioning/Anchor2";
+
 // Define the context type
 interface Context {
   message?: () => MessageContext;
@@ -16,17 +17,6 @@ interface MessageContext extends Context {
 
 interface CreationContext extends Context {
   Owner: () => any;
-}
-
-// Component properties interface
-interface ComponentProps {
-  rightToLeft: boolean;
-  source: any;
-  target: any;
-  context: Context;
-  origin: any;
-  isJointOccurrence: (participant: any) => boolean;
-  findContextForReceiver: (participant: any) => Context | null;
 }
 
 export default defineComponent({
@@ -72,7 +62,6 @@ export default defineComponent({
         }
         return false;
       }).length;
-      if (length === 0) return 0;
       return length;
     },
     depthOnParticipant4Stat(participant: any): number {
@@ -84,23 +73,17 @@ export default defineComponent({
       if (!child) {
         return 0;
       }
-      const length = child.getAncestors((ctx) => {
+      return child.getAncestors((ctx) => {
         if (this.isSync(ctx)) {
           return ctx.Owner() === participant;
         }
         return false;
       }).length;
-
-      return length;
     },
     isSync(ctx: any) {
       const isMessageContext = ctx instanceof sequenceParser.MessageContext;
       const isCreationContext = ctx instanceof sequenceParser.CreationContext;
       return isMessageContext || isCreationContext;
-    },
-
-    isJointOccurrence(this: ComponentProps, participant: any): boolean {
-      return this.depthOnParticipant4Stat(participant) > 0;
     },
   },
 });

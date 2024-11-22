@@ -7,6 +7,7 @@ import { Fixture } from "../../../../../../../test/unit/parser/fixture/Fixture";
 import { configureCompat } from "vue";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { expect } from "vitest";
+import Anchor2 from "@/positioning/Anchor2";
 
 function mountInteractionWithCode(
   code: string,
@@ -33,17 +34,6 @@ beforeEach(() => {
   });
 });
 describe("ArrowMixin", () => {
-  it("isJointOccurrence", async () => {
-    const creationWrapper = mountInteractionWithCode(
-      "A.method() { B.method() }",
-      Fixture.firstChild,
-      _STARTER_,
-    );
-
-    const vm = creationWrapper.vm as any;
-    expect(vm.isJointOccurrence("A")).toBe(true);
-  });
-
   it("self message 1", async () => {
     const interaction = mountInteractionWithCode(
       "self()",
@@ -52,7 +42,7 @@ describe("ArrowMixin", () => {
     );
 
     const vm = interaction.vm as any;
-    expect(vm.isJointOccurrence(_STARTER_)).toBeFalsy();
+    expect(vm.anchor2Origin).toStrictEqual(new Anchor2(50, 0));
   });
 
   it("sync message 1", async () => {
@@ -63,8 +53,7 @@ describe("ArrowMixin", () => {
     );
 
     const vm = interaction.vm as any;
-    expect(vm.isJointOccurrence(_STARTER_)).toBeFalsy();
-    expect(vm.isJointOccurrence("A")).toBeTruthy();
+    expect(vm.anchor2Origin).toStrictEqual(new Anchor2(50, 0));
   });
 
   it("creation message 1", async () => {
@@ -75,7 +64,8 @@ describe("ArrowMixin", () => {
     );
 
     const vm = interaction.vm as any;
-    expect(vm.isJointOccurrence("A")).toBeTruthy();
-    expect(vm.isJointOccurrence("B")).toBeTruthy();
+    expect(vm.anchor2Origin).toStrictEqual(new Anchor2(50, 0));
+    expect(vm.anchor2Source).toStrictEqual(new Anchor2(50, 0));
+    expect(vm.anchor2Target).toStrictEqual(new Anchor2(50, 0));
   });
 });
