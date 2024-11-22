@@ -4,6 +4,7 @@ import { createStore } from "vuex";
 import Interaction from "./Interaction.vue";
 import Store from "@/store/Store";
 import { ProgContextFixture } from "@/parser/ContextsFixture";
+import Anchor2 from "@/positioning/Anchor2";
 
 describe("Highlight current interact based on position of cursor", () => {
   beforeEach(() => {
@@ -52,46 +53,60 @@ describe("Highlight current interact based on position of cursor", () => {
 describe("Interaction width", () => {
   test.each([
     // A --- ?px ---> B
-    [1, 10, 25, 14],
-    [1, 25, 10, 14],
-  ])(
-    "If selfCallIndent is %s and distance is %s, interactionWidth should be %s",
-    (selfCallIndent, a, b, width) => {
-      Interaction.computed.target = () => "B";
-      const storeConfig = Store();
-      storeConfig.getters.centerOf = () => (participant) => {
-        if (participant === "A") return a;
-        if (participant === "B") return b;
-      };
-      const store = createStore(storeConfig);
-      const wrapper = shallowMount(Interaction, {
-        global: {
-          plugins: [store],
-        },
-        props: {
-          selfCallIndent: selfCallIndent,
-          context: ProgContextFixture("A->B.method()").block().stat()[0],
-        },
-      });
-      expect(wrapper.vm.interactionWidth).toBe(width);
-    },
-  );
-});
-
-describe("Translate X", () => {
-  // A          B           C
-  // provided   inherited   to
-  it("when left to right", function () {
+    [100, 200, 92],
+    [200, 100, 92],
+  ])("If A %s, B %s, interactionWidth should be %s", (a, b, width) => {
+    Interaction.computed.target = () => "B";
     const storeConfig = Store();
     storeConfig.getters.centerOf = () => (participant) => {
-      if (participant === "A") return 10;
-      if (participant === "B") return 25;
-      if (participant === "C") return 35;
+      if (participant === "A") return a;
+      if (participant === "B") return b;
     };
-
     const store = createStore(storeConfig);
+    const wrapper = shallowMount(Interaction, {
+      global: {
+        plugins: [store],
+      },
+      props: {
+        context: ProgContextFixture("A->B.method()").block().stat()[0],
+      },
+    });
+    expect(wrapper.vm.interactionWidth).toBe(width);
+  });
+});
+
+/**
+ * TranslateX is decided by the following factors:
+ *
+ */
+describe("Translate X", () => {
+  // Prepare participants
+  const storeConfig = Store();
+  let A = 10;
+  let B = 25;
+  let C = 35;
+  storeConfig.getters.centerOf = () => (participant) => {
+    if (participant === "A") return A;
+    if (participant === "B") return B;
+    if (participant === "C") return C;
+  };
+
+  const store = createStore(storeConfig);
+
+  /**
+   * A B C
+   * B.m {
+   *   self {
+   *     A->C.method
+   *   }
+   * }
+   */
+  it("Left to Right", function () {
     Interaction.computed.source = () => "A";
     Interaction.computed.target = () => "C";
+    Interaction.computed.anchor2Origin = () => new Anchor2(25, 0);
+    Interaction.computed.anchor2Source = () => new Anchor2(10, 0);
+    Interaction.computed.anchor2Target = () => new Anchor2(35, 0);
     const wrapper = shallowMount(Interaction, {
       props: {
         origin: "B",
@@ -100,28 +115,25 @@ describe("Translate X", () => {
         plugins: [store],
       },
     });
-    expect(wrapper.vm.translateX).toBe(-15);
+    const expected = A - B;
+    expect(wrapper.vm.translateX).toBe(expected);
     expect(wrapper.find(".right-to-left").exists()).toBeFalsy();
   });
 
-  // A      B      C
-  // to   real     from
-  it("when right to left", function () {
-    const storeConfig = Store();
-    storeConfig.getters.centerOf = () => (participant) => {
-      // A B C
-      // C.m { B->A.m }
-      // -====A====--====B====--====C====-
-      //
-      if (participant === "A") return 10;
-      if (participant === "B") return 25;
-      if (participant === "C") return 35;
-    };
-
-    const store = createStore(storeConfig);
-
+  /**
+   * A B C
+   * C.m {
+   *   self {
+   *     B->A.met <---- this method
+   *   }
+   * }
+   */
+  it("Right to Left", function () {
     Interaction.computed.source = () => "B";
     Interaction.computed.target = () => "A";
+    Interaction.computed.anchor2Origin = () => new Anchor2(35, 0);
+    Interaction.computed.anchor2Source = () => new Anchor2(25, 0);
+    Interaction.computed.anchor2Target = () => new Anchor2(10, 0);
     const wrapper = shallowMount(Interaction, {
       props: {
         origin: "C",
@@ -130,7 +142,8 @@ describe("Translate X", () => {
         plugins: [store],
       },
     });
-    expect(wrapper.vm.translateX).toBe(-25);
+    const expected = A - C;
+    expect(wrapper.vm.translateX).toBe(expected);
     expect(wrapper.find(".right-to-left").exists()).toBeTruthy();
   });
 });

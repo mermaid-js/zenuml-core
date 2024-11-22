@@ -5,12 +5,8 @@ import { VueSequence } from "@/index";
 import Creation from "./Creation.vue";
 import { Fixture } from "../../../../../../../../test/unit/parser/fixture/Fixture";
 import { configureCompat } from "vue";
-import {
-  LIFELINE_WIDTH,
-  MARGIN,
-  MIN_PARTICIPANT_WIDTH,
-} from "@/positioning/Constants";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import Anchor2 from "@/positioning/Anchor2";
 
 function mountCreationWithCode(
   code: string,
@@ -57,12 +53,9 @@ describe("Creation", () => {
     // `-` is for margin and `=` is for participant width.
     // `---xxx--->` is for message arrow and `[]` is for occurrence.
     // TODO: add a test case where the width is caused by the message
-    const gapCausedByParticipant =
-      MIN_PARTICIPANT_WIDTH / 2 +
-      MARGIN / 2 +
-      MIN_PARTICIPANT_WIDTH / 2 +
-      MARGIN / 2; // 100
-    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
+    const anchorStarter = new Anchor2(100, 0);
+    const anchorA = new Anchor2(200, 1);
+    const expected = anchorStarter.edgeOffset(anchorA);
     expect(vm.interactionWidth).toBe(expected);
     expect(vm.rightToLeft).toBeFalsy();
   });
@@ -76,15 +69,11 @@ describe("Creation", () => {
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();
     // -====A====--====B====-
-    //      []<--<<c>>--
+    //      []]<--<<c>>--
     // There is enough space for the message arrow and occurrence.
-    const gapCausedByParticipant =
-      MIN_PARTICIPANT_WIDTH / 2 +
-      MARGIN / 2 +
-      MIN_PARTICIPANT_WIDTH / 2 +
-      MARGIN / 2; // 100
-    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
-
+    const anchorA = new Anchor2(100, 2);
+    const anchorB = new Anchor2(200, 1);
+    const expected = anchorA.edgeOffset(anchorB);
     expect(vm.interactionWidth).toBe(expected);
   });
 
@@ -105,14 +94,11 @@ describe("Creation", () => {
     const vm = creationWrapper.vm as any;
     expect(vm.rightToLeft).toBeTruthy();
     // -====A====--====B====-
-    //      --<<c>>-->[]
+    //      []]--<<c>>--
     // There is enough space for the message and occurrence.
-    const gapCausedByParticipant =
-      MIN_PARTICIPANT_WIDTH / 2 +
-      MARGIN / 2 +
-      MIN_PARTICIPANT_WIDTH / 2 +
-      MARGIN / 2; // 100
-    const expected = gapCausedByParticipant - LIFELINE_WIDTH; // 99
+    const anchorA = new Anchor2(100, 2);
+    const anchorB = new Anchor2(200, 1);
+    const expected = anchorA.edgeOffset(anchorB);
     expect(vm.interactionWidth).toBe(expected);
   });
 });

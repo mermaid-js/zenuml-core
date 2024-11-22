@@ -4,6 +4,12 @@ import ToCollector from "../../../src/parser/ToCollector";
 import { expect } from "vitest";
 import { blankParticipant } from "../../../src/parser/Participants";
 
+test("@return", () => {
+  let participants = getParticipants("@return A->B.m");
+  expect(participants.Size()).toBe(2);
+  expect(participants.First().name).toBe("A");
+});
+
 test("if block", () => {
   let participants = getParticipants("if(x) { A->B.m }");
   expect(participants.Size()).toBe(2);

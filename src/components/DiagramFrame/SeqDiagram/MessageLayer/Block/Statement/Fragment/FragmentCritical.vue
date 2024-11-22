@@ -42,7 +42,6 @@
           v-if="blockInCritical"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInCritical"
-          :selfCallIndent="selfCallIndent"
           :number="number"
         ></block>
       </div>
@@ -57,7 +56,7 @@ import fragment from "./FragmentMixin";
 
 export default {
   name: "fragment-section",
-  props: ["context", "comment", "selfCallIndent", "commentObj", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [fragment],
   setup(props) {
     const store = useStore();

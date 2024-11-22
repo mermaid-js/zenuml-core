@@ -11,7 +11,6 @@
         :inheritFromOccurrence="inheritFromOccurrence"
         :context="stat"
         :collapsed="collapsed"
-        :selfCallIndent="selfCallIndent"
         :number="getNumber(index)"
       />
     </div>
@@ -26,7 +25,6 @@ import { increaseNumber } from "@/utils/Numbering";
 const props = defineProps<{
   origin?: string;
   context?: any;
-  selfCallIndent?: number;
   number?: string;
   incremental?: boolean;
   collapsed?: boolean;

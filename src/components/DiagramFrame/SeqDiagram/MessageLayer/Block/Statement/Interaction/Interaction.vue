@@ -2,10 +2,13 @@
   <div
     class="interaction sync inline-block"
     v-on:click.stop="onClick"
-    :data-origin="origin"
     :data-to="target"
+    :data-origin="origin"
     :data-source="source"
     :data-target="target"
+    :data-origin-layers="originLayers"
+    :data-source-layers="sourceLayers"
+    :data-target-layers="targetLayers"
     data-type="interaction"
     :data-signature="signature"
     :class="{
@@ -14,17 +17,10 @@
       'right-to-left': rightToLeft,
     }"
     :style="{
-      ...borderWidth,
       width: isSelf ? undefined : interactionWidth + 'px',
       transform: 'translateX(' + translateX + 'px)',
     }"
   >
-    <!--Known limitation: `if(x) { m }` not showing source occurrence. -->
-    <div
-      v-if="(showStarter && isRootBlock) || outOfBand"
-      class="occurrence source border-2"
-      :class="{ 'right-to-left': rightToLeft }"
-    ></div>
     <comment v-if="hasComment" :commentObj="commentObj" />
     <self-invocation
       v-if="isSelf"
@@ -47,7 +43,6 @@
     <occurrence
       :context="message"
       :participant="target"
-      :selfCallIndent="passOnOffset"
       :rtl="rightToLeft"
       :number="number"
     />
@@ -81,17 +76,11 @@ import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLaye
 
 export default {
   name: "interaction",
-  props: [
-    "context",
-    "selfCallIndent",
-    "commentObj",
-    "number",
-    // "inheritFromOccurrence",
-  ],
+  props: ["context", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
     // add tracker to the mapGetters
-    ...mapGetters(["participants", "distance2", "cursor", "onElementClick"]),
+    ...mapGetters(["participants", "cursor", "onElementClick", "centerOf"]),
     hasComment() {
       return this.commentObj?.text !== "";
     },
@@ -110,9 +99,6 @@ export default {
     target: function () {
       return this.context?.message()?.Owner() || _STARTER_;
     },
-    outOfBand: function () {
-      return !!this.source && this.source !== this.origin;
-    },
     assignee: function () {
       let assignment = this.message?.Assignment();
       if (!assignment) return "";
@@ -121,49 +107,8 @@ export default {
     signature: function () {
       return this.message?.SignatureText();
     },
-    translateX: function () {
-      // Normal flow
-      if (!this.rightToLeft && !this.outOfBand) {
-        return 0;
-      }
-
-      // ** Starting point is always the center of 'origin' **
-      const moveTo = !this.rightToLeft ? this.source : this.target;
-      const dist = this.distance2(this.origin, moveTo);
-      const indent = this.selfCallIndent || 0;
-      return dist - indent;
-    },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
-    },
-    showStarter() {
-      return this.participants.Starter()?.name !== _STARTER_;
-    },
-    isRootBlock() {
-      // TODO: Add support for nested brace structures like { b { c.m() } }.
-      return this.target === _STARTER_;
-    },
-    passOnOffset: function () {
-      // selfCallIndent is introduced for sync self interaction. Each time we enter a self sync interaction the selfCallIndent
-      // increases by 6px (half of the width of an execution bar). However, we set the selfCallIndent back to 0 when
-      // it enters a non-self sync interaction.
-      return this.isSelf && !this.isRootBlock
-        ? (this.selfCallIndent || 0) + 7
-        : 0;
-    },
-    interactionWidth: function () {
-      if (this.context && this.isSelf) {
-        return 0;
-      }
-
-      let safeOffset = this.outOfBand ? 0 : this.selfCallIndent || 0;
-      return (
-        Math.abs(this.distance2(this.source, this.target) - safeOffset) - 1
-      );
-    },
-    isSelf: function () {
-      // this.to === undefined if it is a self interaction and root message.
-      return !this.target || this.target === this.source;
     },
   },
   methods: {

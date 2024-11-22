@@ -11,7 +11,11 @@
       '-translate-x-full-minus-1': rightToLeft,
       highlight: isCurrent,
     }"
-    :style="{ ...borderWidth, width: interactionWidth + 'px' }"
+    :style="{
+      transform: 'translateX(' + translateX + 'px)',
+
+      width: interactionWidth + 'px',
+    }"
   >
     <comment v-if="comment" :commentObj="commentObj" />
     <!-- flex items-center is an idiom that vertically align items left and right.
@@ -79,46 +83,35 @@ import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLaye
 
 export default {
   name: "creation",
-  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
-    ...mapGetters(["cursor", "onElementClick", "distance2"]),
+    ...mapGetters(["cursor", "onElementClick", "distance2", "centerOf"]),
     ...mapState(["numbering"]),
     source() {
       return this.origin;
     },
     target() {
-      return this.context?.creation()?.Owner();
+      return this.creation?.Owner();
     },
     creation() {
-      return this.context.creation();
-    },
-    interactionWidth() {
-      let safeOffset = this.selfCallIndent || 0;
-      // Explanation of the formula:
-      // px: 0 1 2 3 4 5 6 7 8
-      // L     a           b
-      // gap between a and b is [(b - a) - 1]
-      return (
-        Math.abs(this.distance2(this.origin, this.target) - safeOffset) -
-        LIFELINE_WIDTH
-      );
+      return this.context?.creation();
     },
     signature() {
-      return this.creation.SignatureText(false);
+      return this.creation?.SignatureText();
     },
     assignee() {
       function safeCodeGetter(context) {
         return (context && context.getFormattedText()) || "";
       }
-      let assignment = this.creation.creationBody().assignment();
+      let assignment = this.creation?.creationBody().assignment();
       if (!assignment) return "";
       let assignee = safeCodeGetter(assignment.assignee());
       const type = safeCodeGetter(assignment.type());
       return assignee + (type ? ":" + type : "");
     },
     isCurrent() {
-      return this.creation.isCurrent(this.cursor);
+      return this.creation?.isCurrent(this.cursor);
     },
     messageTextStyle() {
       return this.commentObj?.messageStyle;

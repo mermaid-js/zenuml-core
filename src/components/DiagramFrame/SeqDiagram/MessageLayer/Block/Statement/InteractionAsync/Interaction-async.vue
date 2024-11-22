@@ -5,7 +5,9 @@
 <template>
   <div
     :data-origin="origin"
-    :data-out-of-band="outOfBand"
+    :data-to="target"
+    :data-source="source"
+    :data-target="target"
     class="interaction async"
     v-on:click.stop="onClick"
     :data-signature="signature"
@@ -16,7 +18,6 @@
       'self-invocation': isSelf,
     }"
     :style="{
-      ...borderWidth,
       width: interactionWidth + 'px',
       transform: 'translateX(' + translateX + 'px)',
     }"
@@ -49,7 +50,6 @@ import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
-import { LIFELINE_WIDTH } from "@/positioning/Constants";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 
 function isNullOrUndefined(value) {
@@ -121,42 +121,12 @@ function isNullOrUndefined(value) {
 
 export default {
   name: "interaction-async",
-  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
-    ...mapGetters(["distance", "cursor", "onElementClick"]),
+    ...mapGetters(["distance", "centerOf", "cursor", "onElementClick"]),
     asyncMessage: function () {
       return this.context?.asyncMessage();
-    },
-    outOfBand: function () {
-      return this.source !== this.origin;
-    },
-    interactionWidth: function () {
-      if (this.isSelf) {
-        // TODO: do we need to calculate the width of the self call? If we do, we should use WidthProvider.
-        const leftOfMessage = 100;
-        const averageWidthOfChar = 10;
-        return (
-          averageWidthOfChar * (this.signature?.length || 0) + leftOfMessage
-        );
-      }
-      let safeOffset = this.outOfBand ? 0 : this.selfCallIndent || 0;
-
-      return (
-        Math.abs(this.distance(this.target, this.source) - safeOffset) -
-        LIFELINE_WIDTH
-      );
-    },
-    // Both 'left' and 'translateX' can be used to move the element horizontally.
-    // Change it to use translate according to https://stackoverflow.com/a/53892597/529187.
-    translateX: function () {
-      if (!this.outOfBand && !this.rightToLeft) {
-        return 0;
-      }
-      let safeOffset = this.selfCallIndent || 0;
-      return this.rightToLeft
-        ? this.distance(this.target, this.origin) - safeOffset
-        : this.distance(this.source, this.origin) - safeOffset;
     },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();
@@ -180,9 +150,6 @@ export default {
       )
         return false;
       return this.cursor >= start && this.cursor <= stop;
-    },
-    isSelf: function () {
-      return this.source === this.target;
     },
     messageTextStyle() {
       return this.commentObj?.messageStyle;

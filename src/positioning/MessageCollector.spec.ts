@@ -12,6 +12,18 @@ describe("MessageCollector", () => {
   };
 
   describe("Return", () => {
+    it("@return A->B:m", () => {
+      const code = `@return A->B:m`;
+
+      expect(collectMessages(code)).toStrictEqual([
+        {
+          from: "A",
+          signature: "m",
+          to: "B",
+          type: OwnableMessageType.AsyncMessage,
+        },
+      ]);
+    });
     it("should handle one return message", () => {
       const code = `
         return result

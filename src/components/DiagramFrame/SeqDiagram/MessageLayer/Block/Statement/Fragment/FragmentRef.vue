@@ -49,7 +49,7 @@ import MessageLabel from "../../../MessageLabel.vue";
 
 export default {
   name: "fragment-section",
-  props: ["context", "comment", "selfCallIndent", "commentObj", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   components: {
     MessageLabel,
   },

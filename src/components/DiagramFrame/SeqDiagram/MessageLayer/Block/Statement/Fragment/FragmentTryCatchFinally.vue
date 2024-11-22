@@ -34,7 +34,6 @@
           v-if="blockInTryBlock"
           :style="{ paddingLeft: `${offsetX}px` }"
           :context="blockInTryBlock"
-          :selfCallIndent="selfCallIndent"
           :number="`${number}.1`"
           incremental
         >
@@ -56,7 +55,6 @@
             :origin="origin"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="blockInCatchBlock(catchBlock)"
-            :selfCallIndent="selfCallIndent"
             :key="index + 2000"
             :number="`${number}.${blockLengthAcc[index] + 1}`"
             incremental
@@ -75,7 +73,6 @@
             :origin="origin"
             :style="{ paddingLeft: `${offsetX}px` }"
             :context="finallyBlock"
-            :selfCallIndent="selfCallIndent"
             :number="`${number}.${
               blockLengthAcc[blockLengthAcc.length - 1] + 1
             }`"
@@ -94,7 +91,7 @@ import { blockLength } from "@/utils/Numbering";
 
 export default {
   name: "fragment-tcf",
-  props: ["context", "comment", "commentObj", "selfCallIndent", "number"],
+  props: ["context", "comment", "commentObj", "number"],
   mixins: [fragment],
   computed: {
     ...mapState(["numbering"]),

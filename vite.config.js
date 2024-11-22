@@ -50,8 +50,13 @@ export default defineConfig(({ mode }) => ({
     svgLoader(),
   ],
   test: {
+    // used by vitest: https://vitest.dev/guide/#configuring-vitest
     environment: "jsdom",
+    reportOnFailure: true,
     globals: true,
+    coverage: {
+      provider: "v8", // or 'v8'
+    },
     deps: {
       inline: ["@vue/test-utils"],
     },

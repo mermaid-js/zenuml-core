@@ -373,6 +373,7 @@
   .theme-nab {
     --color-bg-base: 242, 244, 246;
     --color-bg-canvas: 242, 244, 246;
+    --color-text-base: #ffffff;
 
     /* Participant */
     --color-bg-participant: 195, 0, 0;

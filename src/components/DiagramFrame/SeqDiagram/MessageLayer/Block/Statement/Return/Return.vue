@@ -5,16 +5,18 @@
     v-on:click.stop="onClick"
     data-type="return"
     :data-signature="signature"
+    :data-origin="origin"
     :data-to="target"
     :data-source="source"
     :data-target="target"
     :class="{
       'right-to-left': rightToLeft,
-      'bare-source': bareSource,
-      'bare-target': bareTarget,
       highlight: isCurrent,
     }"
-    :style="{ ...borderWidth, width: width + 'px', left: left + 'px' }"
+    :style="{
+      width: interactionWidth + 'px',
+      transform: 'translateX(' + translateX + 'px)',
+    }"
   >
     <comment v-if="comment" :commentObj="commentObj" />
     <div v-if="isSelf" class="flex items-center">
@@ -50,8 +52,6 @@ import Comment from "../Comment/Comment.vue";
 import Message from "../Message/Message.vue";
 import { mapGetters } from "vuex";
 import { CodeRange } from "@/parser/CodeRange";
-import WidthProviderOnBrowser from "@/positioning/WidthProviderFunc";
-import { TextType } from "@/positioning/Coordinate";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
@@ -61,7 +61,7 @@ export default {
   props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
-    ...mapGetters(["distance", "cursor", "onElementClick", "participants"]),
+    ...mapGetters(["cursor", "onElementClick"]),
     /**
      * ret
      *  : RETURN expr? SCOL?
@@ -73,16 +73,6 @@ export default {
     },
     asyncMessage: function () {
       return this.ret?.asyncMessage();
-    },
-    width: function () {
-      return this.isSelf
-        ? WidthProviderOnBrowser(this.signature, TextType.MessageContent)
-        : Math.abs(this.distance(this.target, this.source));
-    },
-    left: function () {
-      return this.rightToLeft
-        ? this.distance(this.target, this.origin)
-        : this.distance(this.source, this.origin);
     },
     signature: function () {
       return (
@@ -103,9 +93,6 @@ export default {
     },
     isCurrent: function () {
       return false;
-    },
-    isSelf: function () {
-      return this.source === this.target;
     },
     messageTextStyle() {
       return this.commentObj?.messageStyle;

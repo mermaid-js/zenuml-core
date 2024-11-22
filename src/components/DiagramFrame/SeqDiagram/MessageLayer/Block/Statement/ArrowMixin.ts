@@ -1,79 +1,80 @@
+import { defineComponent } from "vue";
 import sequenceParser from "@/generated-parser/sequenceParser";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { mapGetters } from "vuex";
+import Anchor2 from "@/positioning/Anchor2";
 
-export default {
-  props: ["origin"],
+export default defineComponent({
+  props: {
+    origin: {
+      type: null,
+      required: true,
+    },
+    context: {
+      type: null,
+      required: true,
+    },
+  },
+
   computed: {
-    borderWidth: function () {
-      const border = {
-        borderLeftWidth: "7px",
-        borderRightWidth: "7px",
-      };
-      const endSide = this.rightToLeft ? "Left" : "Right";
-      const startSide = this.rightToLeft ? "Right" : "Left";
+    ...mapGetters(["centerOf"]),
+    isSelf: function (): boolean {
+      return this.source === this.target;
+    },
+    originLayers: function (): number {
+      return this.depthOnParticipant(this.context, this.origin);
+    },
+    sourceLayers: function (): number {
+      return this.depthOnParticipant(this.context, this.source);
+    },
+    targetLayers: function (): number {
+      return this.depthOnParticipant4Stat(this.target);
+    },
 
-      if (!this.isJointOccurrence(this.source)) {
-        border[`border${startSide}Width`] = "0px";
-      }
-      if (!this.isJointOccurrence(this.target)) {
-        border[`border${endSide}Width`] = "0px";
-      }
-      return border;
+    anchor2Origin: function (): Anchor2 {
+      return new Anchor2(this.centerOf(this.origin), this.originLayers);
+    },
+    anchor2Source: function (): Anchor2 {
+      return new Anchor2(this.centerOf(this.source), this.sourceLayers);
+    },
+    anchor2Target: function (): Anchor2 {
+      return new Anchor2(this.centerOf(this.target), this.targetLayers);
+    },
+
+    interactionWidth: function (): number {
+      return Math.abs(this.anchor2Source.edgeOffset(this.anchor2Target));
+    },
+    translateX: function () {
+      const destination = !this.rightToLeft
+        ? this.anchor2Source
+        : this.anchor2Target;
+      return this.anchor2Origin.centerToEdge(destination);
     },
   },
+
   methods: {
-    isJointOccurrence(participant) {
-      const ancestorContextForParticipant =
-        this.findContextForReceiver(participant);
-      // If no owning context found, it means this is a bare connection
-      if (!ancestorContextForParticipant) {
+    depthOnParticipant(context: any, participant: any): number {
+      return context?.getAncestors((ctx) => {
+        if (this.isSync(ctx)) {
+          return ctx.Owner() === participant;
+        }
         return false;
-      }
-
-      // Check if the owning context creates an occurrence point
-      return (
-        ancestorContextForParticipant instanceof
-          sequenceParser.MessageContext ||
-        ancestorContextForParticipant instanceof sequenceParser.CreationContext
-      );
+      }).length;
     },
-    // Input `participant` is the receiver. This method
-    findContextForReceiver(participant) {
-      if (!this.context) {
-        return null;
+    depthOnParticipant4Stat(participant: any): number {
+      if (!(this.context instanceof sequenceParser.StatContext)) {
+        return 0;
       }
-      let currentContext = this.context;
-      /**
-       * Case 1: a()
-       * Case 2: A.method() { C->C.method }
-       */
-      if (this.source !== this.target) {
-        const messageContext = this.context.message && this.context.message();
-        if (messageContext && messageContext.Owner() === participant) {
-          return messageContext;
-        }
-        const creationContext =
-          this.context.creation && this.context.creation();
-        if (creationContext && creationContext.Owner() === participant) {
-          return creationContext;
-        }
-      }
-      while (currentContext) {
-        if (!currentContext.Owner) {
-          currentContext = currentContext.parentCtx;
-          continue;
-        }
 
-        if (
-          currentContext.Owner() === participant ||
-          (!currentContext.Owner() && participant === _STARTER_)
-        ) {
-          return currentContext;
-        }
-
-        currentContext = currentContext.parentCtx;
+      const child = this.context?.children?.[0];
+      if (!child) {
+        return 0;
       }
-      return null;
+      return this.depthOnParticipant(child, participant);
+    },
+    isSync(ctx: any) {
+      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
+      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
+      return isMessageContext || isCreationContext;
     },
   },
-};
+});
