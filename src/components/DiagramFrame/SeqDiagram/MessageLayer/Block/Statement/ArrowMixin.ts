@@ -1,7 +1,6 @@
 import { defineComponent } from "vue";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { OCCURRENCE_BAR_SIDE_WIDTH } from "@/positioning/Constants";
-import Anchor from "@/positioning/Anchor";
 import { mapGetters } from "vuex";
 import Anchor2 from "@/positioning/Anchor2";
 // Define the context type
@@ -41,15 +40,6 @@ export default defineComponent({
 
   computed: {
     ...mapGetters(["centerOf"]),
-    anchorOrigin: function (): Anchor {
-      return new Anchor(this.centerOf(this.origin), this.originOffset);
-    },
-    anchorSource: function (): Anchor {
-      return new Anchor(this.centerOf(this.source), this.sourceOffset);
-    },
-    anchorTarget: function (): Anchor {
-      return new Anchor(this.centerOf(this.target), this.targetOffset);
-    },
     originLayers: function (): number {
       return this.depthOnParticipant(this.origin);
     },
