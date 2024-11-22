@@ -1,3 +1,7 @@
+import {
+  OCCURRENCE_BAR_SIDE_WIDTH,
+  LIFELINE_WIDTH,
+} from "@/positioning/Constants";
 export default class Anchor2 {
   constructor(
     private position: number,
@@ -20,6 +24,9 @@ export default class Anchor2 {
     return otherRightEdge - thisCenter;
   }
 
+  /**
+   * edgeOffset is used for interactionWidth calculations.
+   */
   edgeOffset(other: Anchor2): number {
     const samePosition = other.position === this.position;
     if (samePosition) {
@@ -37,26 +44,26 @@ export default class Anchor2 {
       rightAnchor = other;
     }
 
-    const rightEdgeOfLeftAnchor = leftAnchor.position + 7 * leftAnchor.layers;
-    const leftEdgeOfRightAnchor =
-      rightAnchor.layers === 0
-        ? rightAnchor.position
-        : rightAnchor.position - 7 + 7 * (rightAnchor.layers - 1);
-    const distance = leftEdgeOfRightAnchor - rightEdgeOfLeftAnchor - 1;
+    const rightEdgeOfLeftAnchor = leftAnchor.rightEdgeOfRightWall();
+    const leftEdgeOfRightAnchor = rightAnchor.leftEdgeOfRightWall();
+    const distance =
+      leftEdgeOfRightAnchor - rightEdgeOfLeftAnchor - LIFELINE_WIDTH;
     return isRightToLeft ? distance * -1 : distance;
   }
 
   centerOfRightWall(): number {
     return this.layers <= 1
       ? this.position
-      : this.position + 7 * (this.layers - 1);
+      : this.position + OCCURRENCE_BAR_SIDE_WIDTH * (this.layers - 1);
   }
 
   rightEdgeOfRightWall() {
-    return this.position + 7 * this.layers;
+    return this.position + OCCURRENCE_BAR_SIDE_WIDTH * this.layers;
   }
 
   leftEdgeOfRightWall() {
-    return this.layers === 0 ? this.position : this.centerOfRightWall() - 7;
+    return this.layers === 0
+      ? this.position
+      : this.centerOfRightWall() - OCCURRENCE_BAR_SIDE_WIDTH;
   }
 }
