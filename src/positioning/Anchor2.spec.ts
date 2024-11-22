@@ -182,91 +182,82 @@ describe("Anchor2", () => {
         name: "0 layer anchors",
         anchor1: { position: 100, layers: 0 },
         anchor2: { position: 200, layers: 0 },
-        expectedLtr: 99,
-        expectedRtl: -99,
+        expected: 99,
         explanation: "200 - 100 - 1",
       },
       {
         name: "0 layer at left 1",
         anchor1: { position: 100, layers: 0 },
         anchor2: { position: 200, layers: 1 },
-        expectedLtr: 92,
-        expectedRtl: -92,
+        expected: 92,
         explanation: "(200 - 7 * 1) - 100 - 1",
       },
       {
         name: "0 layer at left",
         anchor1: { position: 100, layers: 0 },
         anchor2: { position: 200, layers: 2 },
-        expectedLtr: 99,
-        expectedRtl: -99,
-        explanation: "(200 - 7 + 7 + (2-1)) - 100 - 1",
+        expected: 99,
+        explanation: "(200 - 7 + 7 * (2-1)) - 100 - 1",
       },
       {
         name: "0 layer at right",
         anchor1: { position: 100, layers: 1 },
         anchor2: { position: 200, layers: 0 },
-        expectedLtr: 92,
-        expectedRtl: -92,
+        expected: 92,
         explanation: "200 - (100 + 7 * 1) - 1",
       },
       {
         name: "single layer anchors",
         anchor1: { position: 100, layers: 1 },
         anchor2: { position: 200, layers: 1 },
-        expectedLtr: 85,
-        expectedRtl: -85,
+        expected: 85,
         explanation: "200 - 7 - (100 + 7) - 1",
       },
       {
         name: "multiple layers on first anchor",
         anchor1: { position: 100, layers: 2 },
         anchor2: { position: 200, layers: 1 },
-        expectedLtr: 78,
-        expectedRtl: -78,
+        expected: 78,
         explanation: "200 - 7 - (100 + 7 * 2) - 1",
       },
       {
         name: "multiple layers on first anchor",
         anchor1: { position: 100, layers: 3 },
         anchor2: { position: 200, layers: 1 },
-        expectedLtr: 71,
-        expectedRtl: -71,
+        expected: 71,
         explanation: "(200 - 7 + 7 * (1 - 1) - (100 + 7 * 3) - 1",
       },
       {
         name: "multiple layers on second anchor",
         anchor1: { position: 100, layers: 1 },
         anchor2: { position: 200, layers: 2 },
-        expectedLtr: 92,
-        expectedRtl: -92,
+        expected: 92,
         explanation: "(200 - 7 + 7 * (2 - 1)) - (100 + 7) - 1",
       },
       {
         name: "multiple layers on both anchors",
         anchor1: { position: 100, layers: 3 },
         anchor2: { position: 200, layers: 2 },
-        expectedLtr: 78,
-        expectedRtl: -78,
+        expected: 78,
         explanation: "(200 - 7 + 7 * (2 - 1)) - (100 + 7 * 3) - 1",
-      },
-      {
-        name: "minimum gap when close",
-        anchor1: { position: 100, layers: 2 },
-        anchor2: { position: 100, layers: 2 },
-        expectedLtr: 0,
-        expectedRtl: 0,
-        explanation: "walls would overlap, return minimum gap of 0",
       },
     ])(
       "$name => $explanation = $expected",
-      ({ anchor1, anchor2, expectedLtr, expectedRtl }) => {
+      ({ anchor1, anchor2, expected }) => {
         const a1 = new Anchor2(anchor1.position, anchor1.layers);
         const a2 = new Anchor2(anchor2.position, anchor2.layers);
 
-        expect(a1.edgeOffset(a2)).toBe(expectedLtr);
-        expect(a2.edgeOffset(a1)).toBe(expectedRtl);
+        expect(a1.edgeOffset(a2)).toBe(expected);
+        expect(a2.edgeOffset(a1)).toBe(expected * -1);
       },
     );
+
+    test("Same anchor", () => {
+      const a1 = new Anchor2(100, 2);
+      const a2 = new Anchor2(100, 2);
+
+      expect(a1.edgeOffset(a2)).toBe(-15);
+      expect(a2.edgeOffset(a1)).toBe(-15);
+    });
   });
 });

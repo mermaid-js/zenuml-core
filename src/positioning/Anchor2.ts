@@ -20,10 +20,6 @@ export default class Anchor2 {
    * edgeOffset is used for interactionWidth calculations.
    */
   edgeOffset(other: Anchor2): number {
-    const samePosition = other.position === this.position;
-    if (samePosition) {
-      return 0; // TODO: Check if this is correct
-    }
     const isRightToLeft = other.position < this.position;
 
     let leftAnchor: Anchor2;
