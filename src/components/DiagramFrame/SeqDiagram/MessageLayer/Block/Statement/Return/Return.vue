@@ -11,8 +11,6 @@
     :data-target="target"
     :class="{
       'right-to-left': rightToLeft,
-      'bare-source': bareSource,
-      'bare-target': bareTarget,
       highlight: isCurrent,
     }"
     :style="{
