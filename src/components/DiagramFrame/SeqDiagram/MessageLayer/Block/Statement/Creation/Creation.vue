@@ -92,26 +92,26 @@ export default {
       return this.origin;
     },
     target() {
-      return this.context?.creation()?.Owner();
+      return this.creation?.Owner();
     },
     creation() {
-      return this.context.creation();
+      return this.context?.creation();
     },
     signature() {
-      return this.creation.SignatureText(false);
+      return this.creation?.SignatureText();
     },
     assignee() {
       function safeCodeGetter(context) {
         return (context && context.getFormattedText()) || "";
       }
-      let assignment = this.creation.creationBody().assignment();
+      let assignment = this.creation?.creationBody().assignment();
       if (!assignment) return "";
       let assignee = safeCodeGetter(assignment.assignee());
       const type = safeCodeGetter(assignment.type());
       return assignee + (type ? ":" + type : "");
     },
     isCurrent() {
-      return this.creation.isCurrent(this.cursor);
+      return this.creation?.isCurrent(this.cursor);
     },
     messageTextStyle() {
       return this.commentObj?.messageStyle;
