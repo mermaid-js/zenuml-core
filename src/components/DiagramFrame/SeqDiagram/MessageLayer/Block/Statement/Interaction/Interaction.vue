@@ -9,9 +9,6 @@
     :data-origin-layers="originLayers"
     :data-source-layers="sourceLayers"
     :data-target-layers="targetLayers"
-    :data-origin-offset="originOffset"
-    :data-source-offset="sourceOffset"
-    :data-target-offset="targetOffset"
     data-type="interaction"
     :data-signature="signature"
     :class="{
@@ -101,15 +98,6 @@ export default {
     },
     target: function () {
       return this.context?.message()?.Owner() || _STARTER_;
-    },
-    targetOffset: function () {
-      const length = this.context?.getAncestors((ctx) => {
-        if (this.isSync(ctx)) {
-          return ctx.Owner() === this.target;
-        }
-        return false;
-      }).length;
-      return length * 7;
     },
     assignee: function () {
       let assignment = this.message?.Assignment();

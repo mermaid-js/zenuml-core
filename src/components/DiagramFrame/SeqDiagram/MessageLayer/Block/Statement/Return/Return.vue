@@ -9,9 +9,6 @@
     :data-to="target"
     :data-source="source"
     :data-target="target"
-    :data-origin-offset="originOffset"
-    :data-source-offset="sourceOffset"
-    :data-target-offset="targetOffset"
     :class="{
       'right-to-left': rightToLeft,
       'bare-source': bareSource,
