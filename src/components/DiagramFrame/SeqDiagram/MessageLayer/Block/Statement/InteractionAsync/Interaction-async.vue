@@ -22,7 +22,6 @@
       'self-invocation': isSelf,
     }"
     :style="{
-      ...borderWidth,
       width: interactionWidth + 'px',
       transform: 'translateX(' + translateX + 'px)',
     }"

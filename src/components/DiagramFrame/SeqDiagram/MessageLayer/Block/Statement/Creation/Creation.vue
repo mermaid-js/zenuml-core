@@ -12,7 +12,6 @@
       highlight: isCurrent,
     }"
     :style="{
-      ...borderWidth,
       transform: 'translateX(' + translateX + 'px)',
 
       width: interactionWidth + 'px',

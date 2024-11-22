@@ -59,65 +59,6 @@ onUpdated(() => {
     border: dashed transparent 0;
   }
 
-  .interaction.sync {
-    /* This border width configuration make sure the content width is
-       the same as from the source occurrence's right border to target
-       occurrence's left boarder (boarder not inclusive).*/
-    //border-right-width: 7px;
-  }
-
-  .occurrence {
-    .occurrence {
-      .interaction.sync {
-        //border-right-width: 7px;
-      }
-    }
-  }
-
-  .occurrence {
-    .interaction.sync {
-      //border-left-width: 7px;
-    }
-    .interaction.sync.right-to-left {
-      //border-right-width: 7px;
-    }
-    .interaction.async.right-to-left {
-      border-right-width: 7px;
-      //border-left-width: 7px;
-    }
-    .interaction.async.right-to-left {
-      border-left-width: 0;
-    }
-    .interaction.sync.from-no-occurrence {
-      border-left-width: 0;
-    }
-    .interaction.async.from-no-occurrence.right-to-left {
-      border-right-width: 0;
-    }
-    .interaction.sync.right-to-left.from-no-occurrence {
-      //border-left-width: 7px;
-      border-right-width: 0;
-    }
-    .interaction.async.right-to-left.to-occurrence {
-      //border-left-width: 7px;
-    }
-    .interaction.sync.from-no-occurrence.right-to-left {
-      border-right-width: 0;
-    }
-  }
-  .interaction.sync.right-to-left {
-    /* This border width configuration make sure the content width is
-       the same as from the source occurrence's right border to target
-       occurrence's left boarder (boarder not inclusive).*/
-    border-right-width: 0;
-    //border-left-width: 7px;
-  }
-
-  .interaction.inited-from-occurrence,
-  .interaction.self-invocation {
-    border-left-width: 7px;
-  }
-
   .interaction:hover {
     cursor: pointer;
   }

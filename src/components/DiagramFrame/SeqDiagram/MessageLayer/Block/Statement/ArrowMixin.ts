@@ -4,14 +4,6 @@ import { OCCURRENCE_BAR_SIDE_WIDTH } from "@/positioning/Constants";
 import Anchor from "@/positioning/Anchor";
 import { mapGetters } from "vuex";
 import Anchor2 from "@/positioning/Anchor2";
-// Define interfaces for your properties
-interface BorderWidthStyle {
-  borderLeftWidth: string;
-  borderRightWidth: string;
-  borderSourceWidth: number;
-  borderTargetWidth: number;
-}
-
 // Define the context type
 interface Context {
   message?: () => MessageContext;
@@ -127,26 +119,6 @@ export default defineComponent({
     },
     targetOffset: function (): any {
       return this.depthOnParticipant(this.target) * OCCURRENCE_BAR_SIDE_WIDTH;
-    },
-    borderWidth(this: ComponentProps): BorderWidthStyle {
-      const border: BorderWidthStyle = {
-        borderLeftWidth: "0px",
-        borderRightWidth: "0px",
-        borderSourceWidth: 7,
-        borderTargetWidth: 7,
-      };
-      const endSide = this.rightToLeft ? "Left" : "Right";
-      const startSide = this.rightToLeft ? "Right" : "Left";
-
-      if (!this.isJointOccurrence(this.source)) {
-        border[`border${startSide}Width`] = "0px";
-        border.borderSourceWidth = 0;
-      }
-      if (!this.isJointOccurrence(this.target)) {
-        border[`border${endSide}Width`] = "0px";
-        border.borderTargetWidth = 0;
-      }
-      return border;
     },
   },
 
