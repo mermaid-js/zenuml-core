@@ -3,25 +3,13 @@ import sequenceParser from "@/generated-parser/sequenceParser";
 import { mapGetters } from "vuex";
 import Anchor2 from "@/positioning/Anchor2";
 
-// Define the context type
-interface Context {
-  message?: () => MessageContext;
-  creation?: () => CreationContext;
-  Owner?: () => any;
-  parentCtx: Context | null;
-}
-
-interface MessageContext extends Context {
-  Owner: () => any;
-}
-
-interface CreationContext extends Context {
-  Owner: () => any;
-}
-
 export default defineComponent({
   props: {
     origin: {
+      type: null,
+      required: true,
+    },
+    context: {
       type: null,
       required: true,
     },
@@ -33,10 +21,10 @@ export default defineComponent({
       return this.source === this.target;
     },
     originLayers: function (): number {
-      return this.depthOnParticipant(this.origin);
+      return this.depthOnParticipant(this.context, this.origin);
     },
     sourceLayers: function (): number {
-      return this.depthOnParticipant(this.source);
+      return this.depthOnParticipant(this.context, this.source);
     },
     targetLayers: function (): number {
       return this.depthOnParticipant4Stat(this.target);
@@ -64,14 +52,13 @@ export default defineComponent({
   },
 
   methods: {
-    depthOnParticipant(participant: any): number {
-      const length = this.context?.getAncestors((ctx) => {
+    depthOnParticipant(context: any, participant: any): number {
+      return context?.getAncestors((ctx) => {
         if (this.isSync(ctx)) {
           return ctx.Owner() === participant;
         }
         return false;
       }).length;
-      return length;
     },
     depthOnParticipant4Stat(participant: any): number {
       if (!(this.context instanceof sequenceParser.StatContext)) {
@@ -82,12 +69,7 @@ export default defineComponent({
       if (!child) {
         return 0;
       }
-      return child.getAncestors((ctx) => {
-        if (this.isSync(ctx)) {
-          return ctx.Owner() === participant;
-        }
-        return false;
-      }).length;
+      return this.depthOnParticipant(child, participant);
     },
     isSync(ctx: any) {
       const isMessageContext = ctx instanceof sequenceParser.MessageContext;
