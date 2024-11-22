@@ -97,12 +97,6 @@ export default {
     creation() {
       return this.context.creation();
     },
-    translateX: function () {
-      const destination = !this.rightToLeft
-        ? this.anchor2Source
-        : this.anchor2Target;
-      return this.anchor2Origin.centerToEdge(destination);
-    },
     signature() {
       return this.creation.SignatureText(false);
     },

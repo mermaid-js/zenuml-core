@@ -76,12 +76,6 @@ export default {
     asyncMessage: function () {
       return this.ret?.asyncMessage();
     },
-    translateX: function () {
-      const destination = !this.rightToLeft
-        ? this.anchor2Source
-        : this.anchor2Target;
-      return this.anchor2Origin.centerToEdge(destination);
-    },
     left: function () {
       return this.rightToLeft
         ? this.distance(this.target, this.origin)

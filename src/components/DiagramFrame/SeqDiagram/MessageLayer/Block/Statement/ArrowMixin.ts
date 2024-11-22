@@ -52,6 +52,12 @@ export default defineComponent({
     interactionWidth: function (): number {
       return Math.abs(this.anchor2Source.edgeOffset(this.anchor2Target));
     },
+    translateX: function () {
+      const destination = !this.rightToLeft
+        ? this.anchor2Source
+        : this.anchor2Target;
+      return this.anchor2Origin.centerToEdge(destination);
+    },
   },
 
   methods: {

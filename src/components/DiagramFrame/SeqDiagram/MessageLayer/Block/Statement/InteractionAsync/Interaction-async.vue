@@ -132,14 +132,6 @@ export default {
     outOfBand: function () {
       return this.source !== this.origin;
     },
-    // Both 'left' and 'translateX' can be used to move the element horizontally.
-    // Change it to use translate according to https://stackoverflow.com/a/53892597/529187.
-    translateX: function () {
-      const destination = !this.rightToLeft
-        ? this.anchor2Source
-        : this.anchor2Target;
-      return this.anchor2Origin.centerToEdge(destination);
-    },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();
     },

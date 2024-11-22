@@ -107,12 +107,6 @@ export default {
     signature: function () {
       return this.message?.SignatureText();
     },
-    translateX: function () {
-      const destination = !this.rightToLeft
-        ? this.anchor2Source
-        : this.anchor2Target;
-      return this.anchor2Origin.centerToEdge(destination);
-    },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
     },
