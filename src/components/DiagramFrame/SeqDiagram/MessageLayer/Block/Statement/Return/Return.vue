@@ -61,7 +61,7 @@ export default {
   props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
-    ...mapGetters(["distance", "cursor", "onElementClick", "participants"]),
+    ...mapGetters(["cursor", "onElementClick"]),
     /**
      * ret
      *  : RETURN expr? SCOL?
