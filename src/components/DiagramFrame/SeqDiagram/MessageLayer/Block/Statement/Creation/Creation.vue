@@ -11,7 +11,12 @@
       '-translate-x-full-minus-1': rightToLeft,
       highlight: isCurrent,
     }"
-    :style="{ ...borderWidth, width: interactionWidth + 'px' }"
+    :style="{
+      ...borderWidth,
+      transform: 'translateX(' + translateX + 'px)',
+
+      width: interactionWidth + 'px',
+    }"
   >
     <comment v-if="comment" :commentObj="commentObj" />
     <!-- flex items-center is an idiom that vertically align items left and right.
@@ -117,7 +122,12 @@ export default {
       }).length;
       return length * 7;
     },
-
+    translateX: function () {
+      const destination = !this.rightToLeft
+        ? this.anchor2Source
+        : this.anchor2Target;
+      return this.anchor2Origin.centerToEdge(destination);
+    },
     signature() {
       return this.creation.SignatureText(false);
     },

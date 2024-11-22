@@ -91,8 +91,8 @@ describe("ArrowMixin", () => {
 
       const vm = creationWrapper.vm as any;
       expect(vm.target).toBe("B");
-      expect(vm.originOffset).toBe(0);
-      expect(vm.sourceOffset).toBe(0);
+      expect(vm.originOffset).toBe(7);
+      expect(vm.sourceOffset).toBe(7);
       expect(vm.targetOffset).toBe(0);
     });
 
@@ -105,9 +105,9 @@ describe("ArrowMixin", () => {
 
       const vm = creationWrapper.vm as any;
       expect(vm.target).toBe("A");
-      expect(vm.originOffset).toBe(0);
-      expect(vm.sourceOffset).toBe(0);
-      expect(vm.targetOffset).toBe(0);
+      expect(vm.originOffset).toBe(7);
+      expect(vm.sourceOffset).toBe(7);
+      expect(vm.targetOffset).toBe(7);
     });
 
     it("return message", async () => {
@@ -121,9 +121,9 @@ describe("ArrowMixin", () => {
       expect(vm.context.getFormattedText()).toBe("return r");
       expect(vm.context.ret().ReturnTo()).toBe("A");
       expect(vm.target).toBe("A");
-      expect(vm.originOffset).toBe(0);
-      expect(vm.sourceOffset).toBe(0);
-      expect(vm.targetOffset).toBe(0);
+      expect(vm.originOffset).toBe(7);
+      expect(vm.sourceOffset).toBe(7);
+      expect(vm.targetOffset).toBe(7);
     });
   });
 

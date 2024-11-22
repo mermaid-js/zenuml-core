@@ -4,7 +4,7 @@ import { createStore } from "vuex";
 import Interaction from "./Interaction.vue";
 import Store from "@/store/Store";
 import { ProgContextFixture } from "@/parser/ContextsFixture";
-import { OCCURRENCE_BAR_SIDE_WIDTH } from "@/positioning/Constants";
+import Anchor2 from "@/positioning/Anchor2";
 
 describe("Highlight current interact based on position of cursor", () => {
   beforeEach(() => {
@@ -53,8 +53,8 @@ describe("Highlight current interact based on position of cursor", () => {
 describe("Interaction width", () => {
   test.each([
     // A --- ?px ---> B
-    [10, 25, 14],
-    [25, 10, 14],
+    [100, 200, 92],
+    [200, 100, 92],
   ])("If A %s, B %s, interactionWidth should be %s", (a, b, width) => {
     Interaction.computed.target = () => "B";
     const storeConfig = Store();
@@ -104,9 +104,9 @@ describe("Translate X", () => {
   it("Left to Right", function () {
     Interaction.computed.source = () => "A";
     Interaction.computed.target = () => "C";
-    Interaction.computed.originOffset = () => OCCURRENCE_BAR_SIDE_WIDTH;
-    Interaction.computed.sourceOffset = () => 0;
-    Interaction.computed.targetOffset = () => 0;
+    Interaction.computed.anchor2Origin = () => new Anchor2(25, 0);
+    Interaction.computed.anchor2Source = () => new Anchor2(10, 0);
+    Interaction.computed.anchor2Target = () => new Anchor2(35, 0);
     const wrapper = shallowMount(Interaction, {
       props: {
         origin: "B",
@@ -115,7 +115,7 @@ describe("Translate X", () => {
         plugins: [store],
       },
     });
-    const expected = A - B - OCCURRENCE_BAR_SIDE_WIDTH;
+    const expected = A - B;
     expect(wrapper.vm.translateX).toBe(expected);
     expect(wrapper.find(".right-to-left").exists()).toBeFalsy();
   });
@@ -131,9 +131,9 @@ describe("Translate X", () => {
   it("Right to Left", function () {
     Interaction.computed.source = () => "B";
     Interaction.computed.target = () => "A";
-    Interaction.computed.originOffset = () => OCCURRENCE_BAR_SIDE_WIDTH;
-    Interaction.computed.sourceOffset = () => 0;
-    Interaction.computed.targetOffset = () => 0;
+    Interaction.computed.anchor2Origin = () => new Anchor2(35, 0);
+    Interaction.computed.anchor2Source = () => new Anchor2(25, 0);
+    Interaction.computed.anchor2Target = () => new Anchor2(10, 0);
     const wrapper = shallowMount(Interaction, {
       props: {
         origin: "C",
@@ -142,7 +142,7 @@ describe("Translate X", () => {
         plugins: [store],
       },
     });
-    const expected = A - C - OCCURRENCE_BAR_SIDE_WIDTH;
+    const expected = A - C;
     expect(wrapper.vm.translateX).toBe(expected);
     expect(wrapper.find(".right-to-left").exists()).toBeTruthy();
   });

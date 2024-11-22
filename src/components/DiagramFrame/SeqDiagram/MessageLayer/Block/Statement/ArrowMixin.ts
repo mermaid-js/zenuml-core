@@ -1,11 +1,9 @@
 import { defineComponent } from "vue";
 import sequenceParser from "@/generated-parser/sequenceParser";
-import {
-  LIFELINE_WIDTH,
-  OCCURRENCE_BAR_SIDE_WIDTH,
-} from "@/positioning/Constants";
+import { OCCURRENCE_BAR_SIDE_WIDTH } from "@/positioning/Constants";
 import Anchor from "@/positioning/Anchor";
 import { mapGetters } from "vuex";
+import Anchor2 from "@/positioning/Anchor2";
 // Define interfaces for your properties
 interface BorderWidthStyle {
   borderLeftWidth: string;
@@ -60,12 +58,28 @@ export default defineComponent({
     anchorTarget: function (): Anchor {
       return new Anchor(this.centerOf(this.target), this.targetOffset);
     },
+    originLayers: function (): number {
+      return this.depthOnParticipant(this.origin);
+    },
+    sourceLayers: function (): number {
+      return this.depthOnParticipant(this.source);
+    },
+    targetLayers: function (): number {
+      return this.depthOnParticipant4Stat(this.target);
+    },
+
+    anchor2Origin: function (): Anchor2 {
+      return new Anchor2(this.centerOf(this.origin), this.originLayers);
+    },
+    anchor2Source: function (): Anchor2 {
+      return new Anchor2(this.centerOf(this.source), this.sourceLayers);
+    },
+    anchor2Target: function (): Anchor2 {
+      return new Anchor2(this.centerOf(this.target), this.targetLayers);
+    },
 
     interactionWidth: function (): number {
-      return (
-        Math.abs(this.anchorSource.calculateEdgeOffset(this.anchorTarget)) -
-        LIFELINE_WIDTH
-      );
+      return Math.abs(this.anchor2Source.edgeOffset(this.anchor2Target));
     },
     /**
      * The offset is to make sure the sub-occurrence bar is not fully layered
@@ -116,8 +130,8 @@ export default defineComponent({
     },
     borderWidth(this: ComponentProps): BorderWidthStyle {
       const border: BorderWidthStyle = {
-        borderLeftWidth: "7px",
-        borderRightWidth: "7px",
+        borderLeftWidth: "0px",
+        borderRightWidth: "0px",
         borderSourceWidth: 7,
         borderTargetWidth: 7,
       };
@@ -138,14 +152,14 @@ export default defineComponent({
 
   methods: {
     depthOnParticipant(participant: any): number {
-      const length = this.context.getAncestors((ctx) => {
+      const length = this.context?.getAncestors((ctx) => {
         if (this.isSync(ctx)) {
           return ctx.Owner() === participant;
         }
         return false;
       }).length;
       if (length === 0) return 0;
-      return length - 1;
+      return length;
     },
     depthOnParticipant4Stat(participant: any): number {
       if (!(this.context instanceof sequenceParser.StatContext)) {

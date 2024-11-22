@@ -82,9 +82,9 @@ export default {
     },
     translateX: function () {
       const destination = !this.rightToLeft
-        ? this.anchorSource
-        : this.anchorTarget;
-      return this.anchorOrigin.calculateEdgeOffset(destination);
+        ? this.anchor2Source
+        : this.anchor2Target;
+      return this.anchor2Origin.centerToEdge(destination);
     },
     left: function () {
       return this.rightToLeft

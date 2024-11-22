@@ -150,9 +150,9 @@ export default {
     // Change it to use translate according to https://stackoverflow.com/a/53892597/529187.
     translateX: function () {
       const destination = !this.rightToLeft
-        ? this.anchorSource
-        : this.anchorTarget;
-      return this.anchorOrigin.calculateEdgeOffset(destination);
+        ? this.anchor2Source
+        : this.anchor2Target;
+      return this.anchor2Origin.centerToEdge(destination);
     },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();

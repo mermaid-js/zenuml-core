@@ -6,6 +6,9 @@
     :data-origin="origin"
     :data-source="source"
     :data-target="target"
+    :data-origin-layers="originLayers"
+    :data-source-layers="sourceLayers"
+    :data-target-layers="targetLayers"
     :data-origin-offset="originOffset"
     :data-source-offset="sourceOffset"
     :data-target-offset="targetOffset"
@@ -17,7 +20,6 @@
       'right-to-left': rightToLeft,
     }"
     :style="{
-      ...borderWidth,
       width: isSelf ? undefined : interactionWidth + 'px',
       transform: 'translateX(' + translateX + 'px)',
     }"
@@ -101,7 +103,7 @@ export default {
       return this.context?.message()?.Owner() || _STARTER_;
     },
     targetOffset: function () {
-      const length = this.context.getAncestors((ctx) => {
+      const length = this.context?.getAncestors((ctx) => {
         if (this.isSync(ctx)) {
           return ctx.Owner() === this.target;
         }
@@ -119,9 +121,9 @@ export default {
     },
     translateX: function () {
       const destination = !this.rightToLeft
-        ? this.anchorSource
-        : this.anchorTarget;
-      return this.anchorOrigin.calculateEdgeOffset(destination);
+        ? this.anchor2Source
+        : this.anchor2Target;
+      return this.anchor2Origin.centerToEdge(destination);
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
