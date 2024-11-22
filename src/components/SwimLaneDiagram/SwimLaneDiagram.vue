@@ -9,7 +9,6 @@ import { SwimLaneDiagram } from "@/parser/SwimLane/Diagram";
 import { computed } from "vue";
 import { useStore } from "vuex";
 import SwimLaneLayer from "./SwimLaneLayer.vue";
-import { ref } from "vue";
 
 const store = useStore();
 const rootContext = computed(() => store.getters.rootContext);

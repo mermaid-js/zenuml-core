@@ -64,9 +64,9 @@ class SwimLaneCollector extends sequenceParserListener {
 
     const fromLane = this.swimLanes.getLane(from);
     const toLane = this.swimLanes.getLane(to);
-    const outBoundNode = fromLane.lastNode();
-    toLane.setInBoundNode(outBoundNode);
-    new Node(message, toLane, outBoundNode.rank);
+    const outboundNode = fromLane.lastNode();
+    toLane.setInboundNode(outboundNode);
+    new Node(message, toLane, outboundNode.rank);
     this.previousLane = toLane;
   }
 
@@ -79,7 +79,7 @@ class SwimLaneCollector extends sequenceParserListener {
     const toLane = this.swimLanes.getLane(toName);
     if (this.previousLane && this.previousLane.name !== toName) {
       const outBoundNode = this.previousLane?.lastNode();
-      toLane.setInBoundNode(outBoundNode);
+      toLane.setInboundNode(outBoundNode);
       new Node(message, toLane, outBoundNode.rank);
     } else {
       new Node(message, toLane);

@@ -13,7 +13,7 @@ export class SwimLane implements Shape {
     this.name = name;
   }
 
-  setInBoundNode(node: Node) {
+  setInboundNode(node: Node) {
     this.inBoundNode = node;
   }
 

@@ -1,9 +1,10 @@
 <template>
   <div
-    class="grid gap-0 w-full border"
+    class="relative grid gap-0 w-full border"
     :style="{
       gridTemplateColumns: `repeat(${swimLanes.length}, minmax(0, 1fr))`,
     }"
+    ref="containerRef"
   >
     <!-- first row -->
     <div
@@ -15,23 +16,31 @@
     </div>
     <template v-for="(row, rowIndex) in gridItems" :key="rowIndex">
       <template v-for="(item, colIndex) in row" :key="colIndex">
-        <div class="border-r p-4">
+        <div class="border-r p-4 z-10">
           <div
             v-if="Object.keys(item).length > 0"
             class="p-2 border w-fit mx-auto"
+            :id="item.id"
           >
             {{ item.name }}
           </div>
         </div>
       </template>
     </template>
+
+    <connection-layer :connections="connections" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { NodeModel, SwimLaneModel } from "@/parser/SwimLane/types";
-import { watchEffect } from "vue";
-import { computed } from "vue";
+import {
+  ConnectionModel,
+  NodeModel,
+  SwimLaneModel,
+  NodePositionModel,
+} from "@/parser/SwimLane/types";
+import { ref, watchEffect, computed, onUpdated } from "vue";
+import ConnectionLayer from "./ConnectionLayer.vue";
 
 interface Props {
   swimLanes: SwimLaneModel[];
@@ -39,6 +48,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const containerRef = ref<HTMLDivElement>();
 
 watchEffect(() => {
   console.log(props.swimLanes);
@@ -58,8 +69,6 @@ const gridItems = computed(() => {
     Array.from({ length: cols }, () => ({}) as NodeModel),
   );
 
-  console.log(items);
-
   props.swimLanes.forEach((swimLane, index) => {
     swimLane.nodes.forEach((node) => {
       items[node.rank][index] = node;
@@ -68,11 +77,68 @@ const gridItems = computed(() => {
   return items;
 });
 
+const nodes = computed(() => {
+  return props.swimLanes.flatMap((swimLane) => swimLane.nodes);
+});
+
+const nodePositions = ref<NodePositionModel[]>([]);
+
+const edges = computed(() => {
+  return props.swimLanes.flatMap((swimLane) => swimLane.edges);
+});
+
+const connections = computed(() => {
+  return edges.value
+    .map((edge) => ({
+      id: edge.id,
+      source: nodePositions.value.find((node) => node.id === edge.source),
+      target: nodePositions.value.find((node) => node.id === edge.target),
+    }))
+    .filter(
+      (connection) => connection.source && connection.target,
+    ) as ConnectionModel[];
+});
+
+const getNodePositions = () => {
+  if (!containerRef.value) {
+    return [];
+  }
+  const nodePositions = nodes.value
+    .map((node) => {
+      const element = document.getElementById(node.id);
+      if (!element) {
+        return null;
+      }
+      const rect = element.getBoundingClientRect();
+      const domRect = new DOMRect(
+        rect.left - containerRef.value!.offsetLeft,
+        rect.top - containerRef.value!.offsetTop,
+        rect.width,
+        rect.height,
+      );
+      return {
+        id: node.id,
+        rect: domRect,
+        rank: node.rank,
+        swimLane: node.swimLane,
+      };
+    })
+    .filter((position) => position !== null);
+
+  return nodePositions;
+};
+
+onUpdated(() => {
+  nodePositions.value = getNodePositions();
+});
+
 watchEffect(() => {
   console.log({
     swimLanes: props.swimLanes,
     maxRank: props.maxRank,
     gridItems: gridItems.value,
+    nodePositions: nodePositions.value,
+    connections: connections.value,
   });
 });
 </script>

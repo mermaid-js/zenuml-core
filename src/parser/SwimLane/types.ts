@@ -20,3 +20,16 @@ export interface SwimLaneModel {
   nodes: NodeModel[];
   edges: EdgeModel[];
 }
+
+export interface NodePositionModel {
+  id: string;
+  rect: DOMRect;
+  rank: number;
+  swimLane: string;
+}
+
+export interface ConnectionModel {
+  id: string;
+  source: NodePositionModel;
+  target: NodePositionModel;
+}
