@@ -34,6 +34,7 @@ import {
   _STARTER_,
   OrderedParticipants,
 } from "../../../../src/parser/OrderedParticipants";
+import { expect } from "vitest";
 
 function getFlattenedParticipants(code: string) {
   const rootContext = RootContext(code);
@@ -41,6 +42,12 @@ function getFlattenedParticipants(code: string) {
 }
 
 describe("Participants.Order", () => {
+  it("@return", () => {
+    expect(getFlattenedParticipants("@return A->B:m")).toEqual([
+      { name: "A", left: "" },
+      { name: "B", left: "A" },
+    ]);
+  });
   it("should return the order of participants", () => {
     expect(getFlattenedParticipants("A as A1 B C.m")).toEqual([
       { name: _STARTER_, left: "" },
