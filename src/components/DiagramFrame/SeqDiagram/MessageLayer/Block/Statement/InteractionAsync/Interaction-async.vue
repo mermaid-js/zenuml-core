@@ -8,7 +8,6 @@
     :data-to="target"
     :data-source="source"
     :data-target="target"
-    :data-out-of-band="outOfBand"
     class="interaction async"
     v-on:click.stop="onClick"
     :data-signature="signature"
@@ -128,9 +127,6 @@ export default {
     ...mapGetters(["distance", "centerOf", "cursor", "onElementClick"]),
     asyncMessage: function () {
       return this.context?.asyncMessage();
-    },
-    outOfBand: function () {
-      return this.source !== this.origin;
     },
     signature: function () {
       return this.asyncMessage?.content()?.getFormattedText();
