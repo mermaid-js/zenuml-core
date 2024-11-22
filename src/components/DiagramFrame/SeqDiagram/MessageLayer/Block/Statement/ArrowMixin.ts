@@ -29,6 +29,9 @@ export default defineComponent({
 
   computed: {
     ...mapGetters(["centerOf"]),
+    isSelf: function (): boolean {
+      return this.source === this.target;
+    },
     originLayers: function (): number {
       return this.depthOnParticipant(this.origin);
     },

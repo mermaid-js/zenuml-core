@@ -155,9 +155,6 @@ export default {
         return false;
       return this.cursor >= start && this.cursor <= stop;
     },
-    isSelf: function () {
-      return this.source === this.target;
-    },
     messageTextStyle() {
       return this.commentObj?.messageStyle;
     },

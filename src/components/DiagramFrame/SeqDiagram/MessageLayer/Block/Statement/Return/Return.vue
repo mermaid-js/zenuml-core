@@ -96,9 +96,6 @@ export default {
     isCurrent: function () {
       return false;
     },
-    isSelf: function () {
-      return this.source === this.target;
-    },
     messageTextStyle() {
       return this.commentObj?.messageStyle;
     },

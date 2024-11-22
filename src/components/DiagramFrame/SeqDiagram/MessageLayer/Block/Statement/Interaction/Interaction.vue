@@ -110,11 +110,6 @@ export default {
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
     },
-
-    isSelf: function () {
-      // this.to === undefined if it is a self interaction and root message.
-      return !this.target || this.target === this.source;
-    },
   },
   methods: {
     onClick() {
