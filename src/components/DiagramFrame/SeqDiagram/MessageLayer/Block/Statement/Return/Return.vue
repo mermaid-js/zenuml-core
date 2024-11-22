@@ -76,11 +76,6 @@ export default {
     asyncMessage: function () {
       return this.ret?.asyncMessage();
     },
-    left: function () {
-      return this.rightToLeft
-        ? this.distance(this.target, this.origin)
-        : this.distance(this.source, this.origin);
-    },
     signature: function () {
       return (
         this.asyncMessage?.content()?.getFormattedText() ||
