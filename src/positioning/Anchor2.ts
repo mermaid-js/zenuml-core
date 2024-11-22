@@ -1,7 +1,8 @@
 import {
-  OCCURRENCE_BAR_SIDE_WIDTH,
   LIFELINE_WIDTH,
+  OCCURRENCE_BAR_SIDE_WIDTH,
 } from "@/positioning/Constants";
+
 export default class Anchor2 {
   constructor(
     private position: number,
@@ -12,16 +13,7 @@ export default class Anchor2 {
    * centerToEdge is used for translateX calculations.
    */
   centerToEdge(other: Anchor2): number {
-    // Step 1: Get center of this anchor
-    const thisCenter = this.centerOfRightWall();
-
-    // Step 2: Get edge of other anchor based on direction
-    const otherRightEdge = other.rightEdgeOfRightWall();
-    const isSamePosition = other.position === this.position;
-    if (isSamePosition) {
-      return otherRightEdge - thisCenter;
-    }
-    return otherRightEdge - thisCenter;
+    return other.rightEdgeOfRightWall() - this.centerOfRightWall();
   }
 
   /**
