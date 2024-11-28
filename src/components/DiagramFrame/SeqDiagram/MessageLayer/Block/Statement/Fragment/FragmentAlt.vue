@@ -16,12 +16,7 @@
       <div
         class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative"
       >
-        <div
-          v-if="numbering"
-          class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 font-thin leading-6"
-        >
-          {{ number }}
-        </div>
+        <Numbering :number="number" />
         <div class="name font-semibold p-1 border-b">
           <label class="p-0">
             <collapse-button
@@ -90,10 +85,10 @@
 
 <script>
 import { computed } from "vue";
-import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
 import { increaseNumber, blockLength } from "@/utils/Numbering";
 import ConditionLabel from "./ConditionLabel.vue";
+import Numbering from "../../../Numbering.vue";
 
 export default {
   name: "fragment-alt",
@@ -101,10 +96,9 @@ export default {
   mixins: [fragment],
   components: {
     ConditionLabel,
+    Numbering,
   },
   setup(props) {
-    const store = useStore();
-    const numbering = computed(() => store.state.numbering);
     const alt = computed(() => props.context.alt());
     const ifBlock = computed(() => alt.value?.ifBlock());
     const elseIfBlocks = computed(() => alt.value?.elseIfBlock());
@@ -135,7 +129,6 @@ export default {
     }
 
     return {
-      numbering,
       alt,
       blockInIfBlock,
       ifBlock,

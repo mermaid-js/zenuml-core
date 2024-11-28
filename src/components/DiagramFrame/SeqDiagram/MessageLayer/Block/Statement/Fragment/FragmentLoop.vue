@@ -15,12 +15,7 @@
     <div
       class="header text-skin-fragment-header bg-skin-fragment-header leading-4 relative"
     >
-      <div
-        v-if="numbering"
-        class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 font-thin leading-6"
-      >
-        {{ number }}
-      </div>
+      <Numbering :number="number" />
       <div class="name font-semibold p-1 border-b">
         <collapse-button
           label="Loop"
@@ -49,9 +44,9 @@
 
 <script>
 import { computed } from "vue";
-import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
 import ConditionLabel from "./ConditionLabel.vue";
+import Numbering from "../../../Numbering.vue";
 
 export default {
   name: "fragment-loop",
@@ -59,17 +54,13 @@ export default {
   mixins: [fragment],
   components: {
     ConditionLabel,
+    Numbering,
   },
   setup(props) {
-    const store = useStore();
-    const numbering = computed(() => store.state.numbering);
-    const from = computed(() => props.context.Origin());
     const loop = computed(() => props.context.loop());
     const blockInLoop = computed(() => loop.value?.braceBlock()?.block());
 
     return {
-      numbering,
-      from,
       loop,
       blockInLoop,
       getConditionFromBlock: () => loop.value?.parExpr()?.condition(),
