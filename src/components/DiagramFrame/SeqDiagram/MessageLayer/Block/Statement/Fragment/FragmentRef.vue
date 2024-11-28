@@ -1,5 +1,9 @@
 <template>
   <div
+    :data-origin="origin"
+    :data-left-participant="leftParticipant"
+    :data-frame-padding-left="border.left"
+    :data-frame-padding-right="border.right"
     class="fragment bg-skin-frame border-skin-fragment relative rounded min-w-[140px] w-max py-4 px-2 flex justify-center items-center flex-col"
     :style="fragmentStyle"
   >

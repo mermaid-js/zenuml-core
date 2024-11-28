@@ -1,5 +1,9 @@
 <template>
   <div
+    :data-origin="origin"
+    :data-left-participant="leftParticipant"
+    :data-frame-padding-left="border.left"
+    :data-frame-padding-right="border.right"
     class="fragment loop border-skin-fragment rounded"
     :style="fragmentStyle"
   >

@@ -1,7 +1,6 @@
 <template>
   <div
     :data-origin="origin"
-    :data-from="origin"
     :data-left-participant="leftParticipant"
     :data-frame-padding-left="border.left"
     :data-frame-padding-right="border.right"

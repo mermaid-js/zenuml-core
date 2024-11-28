@@ -1,5 +1,12 @@
 <template>
-  <div class="fragment tcf border-skin-fragment rounded" :style="fragmentStyle">
+  <div
+    :data-origin="origin"
+    :data-left-participant="leftParticipant"
+    :data-frame-padding-left="border.left"
+    :data-frame-padding-right="border.right"
+    class="fragment tcf border-skin-fragment rounded"
+    :style="fragmentStyle"
+  >
     <div class="segment">
       <comment
         v-if="commentObj.text"

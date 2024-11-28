@@ -1,10 +1,11 @@
 <template>
   <div
-    class="fragment section border-skin-fragment rounded"
-    :style="fragmentStyle"
+    :data-origin="origin"
+    :data-left-participant="leftParticipant"
     :data-frame-padding-left="border.left"
     :data-frame-padding-right="border.right"
-    :data-left-participant="leftParticipant"
+    class="fragment section border-skin-fragment rounded"
+    :style="fragmentStyle"
   >
     <div class="segment">
       <comment
