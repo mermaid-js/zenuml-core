@@ -1,7 +1,7 @@
 <template>
   <div
     :data-origin="origin"
-    :data-from="from"
+    :data-from="origin"
     :data-left-participant="leftParticipant"
     :data-frame-padding-left="border.left"
     :data-frame-padding-right="border.right"
@@ -106,7 +106,6 @@ export default {
   setup(props) {
     const store = useStore();
     const numbering = computed(() => store.state.numbering);
-    const from = computed(() => props.origin);
     const alt = computed(() => props.context.alt());
     const ifBlock = computed(() => alt.value?.ifBlock());
     const elseIfBlocks = computed(() => alt.value?.elseIfBlock());
@@ -138,7 +137,6 @@ export default {
 
     return {
       numbering,
-      from,
       alt,
       blockInIfBlock,
       ifBlock,

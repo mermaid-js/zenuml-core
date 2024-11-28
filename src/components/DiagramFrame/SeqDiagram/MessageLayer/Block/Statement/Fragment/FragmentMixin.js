@@ -29,8 +29,8 @@ export default {
         `left participant: ${this.leftParticipant} ${halfLeftParticipant}`,
       );
       return (
-        (this.from
-          ? this.coordinates.distance(this.leftParticipant, this.from)
+        (this.origin
+          ? this.coordinates.distance(this.leftParticipant, this.origin)
           : 0) +
         this.border.left +
         halfLeftParticipant
