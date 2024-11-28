@@ -28,12 +28,7 @@
             {{ content }}
           </template>
         </div>
-        <div
-          class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500"
-          v-if="numbering"
-        >
-          {{ number }}
-        </div>
+        <Numbering :number="number" />
       </div>
     </div>
     <point
@@ -50,6 +45,7 @@ import { useStore } from "vuex";
 import { RenderMode } from "@/store/Store";
 import Point from "./Point/Point.vue";
 import MessageLabel from "../../../MessageLabel.vue";
+import Numbering from "../../../Numbering.vue";
 import sequenceParser from "@/generated-parser/sequenceParser";
 
 const props = defineProps<{
@@ -65,7 +61,6 @@ const { context, content, rtl, type, textStyle, classNames, number } =
   toRefs(props);
 const store = useStore();
 const messageRef = ref();
-const numbering = computed(() => store.state.numbering);
 const isAsync = computed(() => type?.value === "async");
 const mode = computed(() => store.state.mode);
 const editable = computed(() => {
