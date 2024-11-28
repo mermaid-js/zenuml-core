@@ -1,3 +1,4 @@
+import { JSDOM } from "jsdom";
 import ZenUml, { VueSequence } from "./core";
 
 vi.stubGlobal(
@@ -10,27 +11,18 @@ vi.stubGlobal(
   }),
 );
 describe("@ZenUML/core", function () {
-  let hiddenDiv: HTMLDivElement;
-
   beforeEach(() => {
-    // Create the hidden div before each test
-    hiddenDiv = document.createElement("div");
-    hiddenDiv.className = "textarea-hidden-div";
-    hiddenDiv.style.fontSize = "1rem";
-    hiddenDiv.style.fontFamily = "Helvetica, Verdana, serif";
-    hiddenDiv.style.display = "inline";
-    hiddenDiv.style.whiteSpace = "nowrap";
-    hiddenDiv.style.visibility = "hidden";
-    hiddenDiv.style.position = "absolute";
-    hiddenDiv.style.top = "0";
-    hiddenDiv.style.left = "0";
-    hiddenDiv.style.overflow = "hidden";
-    hiddenDiv.style.width = "0px";
-    hiddenDiv.style.paddingLeft = "0px";
-    hiddenDiv.style.paddingRight = "0px";
-    hiddenDiv.style.margin = "0px";
-    hiddenDiv.style.border = "0px";
-    document.body.appendChild(hiddenDiv);
+    // Create a new JSDOM instance
+    const dom = new JSDOM(
+      '<!DOCTYPE html><div class="textarea-hidden-div"></div>',
+      {
+        url: "http://localhost",
+      },
+    );
+
+    // Set up global objects that would normally be available in the browser
+    global.document = dom.window.document;
+    global.window = dom.window as unknown as Window & typeof globalThis;
   });
 
   afterEach(() => {
