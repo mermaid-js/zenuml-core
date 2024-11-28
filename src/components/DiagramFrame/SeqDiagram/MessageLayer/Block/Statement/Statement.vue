@@ -10,7 +10,6 @@
     :comment="comment"
     :commentObj="commentObj"
     :number="number"
-    :inheritFromOccurrence="inheritFromOccurrence"
   ></component>
 </template>
 
@@ -32,7 +31,7 @@ import Comment from "../../../../../Comment/Comment";
 
 export default {
   name: "statement",
-  props: ["orgin", "context", "number", "collapsed", "inheritFromOccurrence"],
+  props: ["origin", "context", "number", "collapsed"],
   computed: {
     comment: function () {
       return this.context.getComment() ? this.context.getComment() : "";

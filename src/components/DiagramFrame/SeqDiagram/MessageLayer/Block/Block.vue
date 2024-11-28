@@ -8,7 +8,6 @@
     >
       <Statement
         :origin="origin"
-        :inheritFromOccurrence="inheritFromOccurrence"
         :context="stat"
         :collapsed="collapsed"
         :number="getNumber(index)"
@@ -28,7 +27,6 @@ const props = defineProps<{
   number?: string;
   incremental?: boolean;
   collapsed?: boolean;
-  inheritFromOccurrence?: boolean;
 }>();
 const statements = computed(() => props.context?.stat() || []);
 const getNumber = (index: number) => {

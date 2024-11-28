@@ -14,13 +14,15 @@ group "B C" {@EC2 B @ECS C}
 @Starter("OptionalStarter")
 new B
 ReturnType ret = ParticipantName.methodA(a, b) {
-  // Customised style for RESTFul API - \`POST /order\` <br>
-  ReturnType ret2 = selfCall() {
-    B.syncCallWithinSelfCall() {
-      ParticipantName.rightToLeftCall()
-      return B
+  critical("This is a critical message") {
+    // Customised style for RESTFul API - \`POST /order\` <br>
+    ReturnType ret2 = selfCall() {
+      B.syncCallWithinSelfCall() {
+        ParticipantName.rightToLeftCall()
+        return B
+      }
+      "space in name"->"bg color".syncMethod(from, to)
     }
-    "space in name"->"bg color".syncMethod(from, to)
   }
   // A comment for alt
   if (condition) {

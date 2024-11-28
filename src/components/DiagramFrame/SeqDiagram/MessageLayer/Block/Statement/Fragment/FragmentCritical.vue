@@ -1,5 +1,9 @@
 <template>
   <div
+    :data-origin="origin"
+    :data-left-participant="leftParticipant"
+    :data-frame-padding-left="border.left"
+    :data-frame-padding-right="border.right"
     class="fragment critical border-skin-fragment rounded relative"
     :style="fragmentStyle"
   >
@@ -12,12 +16,7 @@
       <div
         class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative"
       >
-        <div
-          v-if="numbering"
-          class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 font-thin leading-6"
-        >
-          {{ number }}
-        </div>
+        <Numbering :number="number" />
         <div class="name font-semibold p-1 border-b">
           <label class="p-0">
             <collapse-button
@@ -51,17 +50,15 @@
 
 <script>
 import { computed } from "vue";
-import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
+import Numbering from "../../../Numbering.vue";
 
 export default {
   name: "fragment-section",
+  components: { Numbering },
   props: ["context", "comment", "commentObj", "number"],
   mixins: [fragment],
   setup(props) {
-    const store = useStore();
-    const numbering = computed(() => store.state.numbering);
-    const from = computed(() => props.context.Origin());
     const critical = computed(() => props.context.critical());
     const braceBlock = computed(() => critical.value?.braceBlock());
     const atom = computed(() => critical.value?.atom()?.getFormattedText());
@@ -72,8 +69,6 @@ export default {
     );
 
     return {
-      numbering,
-      from,
       label,
       braceBlock,
       blockInCritical,

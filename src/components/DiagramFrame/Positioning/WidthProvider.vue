@@ -1,6 +1,6 @@
 <template>
   <div class="hidden">
-    <message :content="text" rtl="false" type="sync" />
+    <message :content="text" :rtl="false" type="sync" />
   </div>
 </template>
 

@@ -89,6 +89,9 @@ importers:
       "@types/jest":
         specifier: ^29.5.14
         version: 29.5.14
+      "@types/jsdom":
+        specifier: ^21.1.7
+        version: 21.1.7
       "@types/lodash":
         specifier: ^4.14.191
         version: 4.14.191
@@ -2330,6 +2333,12 @@ packages:
         integrity: sha512-ZN+4sdnLUbo8EVvVc2ao0GFW6oVrQRPn4K2lglySj7APvSrgzxHiNNK99us4WDMi57xxA2yggblIAMNhXOotLQ==,
       }
 
+  "@types/jsdom@21.1.7":
+    resolution:
+      {
+        integrity: sha512-yOriVnggzrnQ3a9OKOCxaVuSug3w3/SbOj5i7VwXWZEyUNl3bLF9V3MfxGbZKuwqJOQyRfqXyROBB1CoZLFWzA==,
+      }
+
   "@types/json-schema@7.0.11":
     resolution:
       {
@@ -2366,16 +2375,16 @@ packages:
         integrity: sha512-06OCtnTXtWOZBJlRApleWndH4JsRVs1pDCc8dLSQp+7PpUpX3ePdHyeNSFTeSe7FtKyQkrlPvHwJOW3SLd8Oyg==,
       }
 
+  "@types/node@22.10.0":
+    resolution:
+      {
+        integrity: sha512-XC70cRZVElFHfIUB40FgZOBbgJYFKKMa5nb9lxcwYstFG/Mi+/Y0bGS+rs6Dmhmkpq4pnNiLiuZAbc02YCOnmA==,
+      }
+
   "@types/node@22.9.0":
     resolution:
       {
         integrity: sha512-vuyHg81vvWA1Z1ELfvLko2c8f34gyA0zaic0+Rllc5lbCnbSyuvb2Oxpm6TAUAC/2xZN3QGqxBNggD1nNR2AfQ==,
-      }
-
-  "@types/node@22.9.1":
-    resolution:
-      {
-        integrity: sha512-p8Yy/8sw1caA8CdRIQBG5tiLHmxtQKObCijiAa9Ez+d4+PRffM4054xbju0msf+cvhJpnFEeNjxmVT/0ipktrg==,
       }
 
   "@types/ramda@0.28.20":
@@ -2406,6 +2415,12 @@ packages:
     resolution:
       {
         integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==,
+      }
+
+  "@types/tough-cookie@4.0.5":
+    resolution:
+      {
+        integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==,
       }
 
   "@types/yargs-parser@21.0.3":
@@ -7643,6 +7658,12 @@ packages:
         integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==,
       }
 
+  undici-types@6.20.0:
+    resolution:
+      {
+        integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==,
+      }
+
   unicode-canonical-property-names-ecmascript@2.0.0:
     resolution:
       {
@@ -9773,6 +9794,12 @@ snapshots:
       expect: 29.7.0
       pretty-format: 29.7.0
 
+  "@types/jsdom@21.1.7":
+    dependencies:
+      "@types/node": 22.10.0
+      "@types/tough-cookie": 4.0.5
+      parse5: 7.1.2
+
   "@types/json-schema@7.0.11": {}
 
   "@types/json-schema@7.0.13": {}
@@ -9787,11 +9814,11 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
-  "@types/node@22.9.0":
+  "@types/node@22.10.0":
     dependencies:
-      undici-types: 6.19.8
+      undici-types: 6.20.0
 
-  "@types/node@22.9.1":
+  "@types/node@22.9.0":
     dependencies:
       undici-types: 6.19.8
 
@@ -9806,6 +9833,8 @@ snapshots:
   "@types/sizzle@2.3.3": {}
 
   "@types/stack-utils@2.0.3": {}
+
+  "@types/tough-cookie@4.0.5": {}
 
   "@types/yargs-parser@21.0.3": {}
 
@@ -11703,7 +11732,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      "@types/node": 22.9.1
+      "@types/node": 22.10.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -12956,6 +12985,8 @@ snapshots:
   undici-types@5.26.5: {}
 
   undici-types@6.19.8: {}
+
+  undici-types@6.20.0: {}
 
   unicode-canonical-property-names-ecmascript@2.0.0: {}
 

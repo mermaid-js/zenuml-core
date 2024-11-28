@@ -4,12 +4,7 @@
     <label
       class="name group px-px hover:text-skin-message-hover hover:bg-skin-message-hover min-h-[1em]"
     >
-      <div
-        class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500"
-        v-if="numbering"
-      >
-        {{ number }}
-      </div>
+      <Numbering :number="number" />
       <MessageLabel
         :style="textStyle"
         :class="classNames"
@@ -35,9 +30,9 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from "vuex";
 import { ComputedRef, computed, toRefs } from "vue";
 import MessageLabel from "@/components/DiagramFrame/SeqDiagram/MessageLayer/MessageLabel.vue";
+import Numbering from "../../../../Numbering.vue";
 
 const props = defineProps<{
   context?: any;
@@ -46,9 +41,7 @@ const props = defineProps<{
   classNames?: any;
 }>();
 const { context } = toRefs(props);
-const store = useStore();
 const content = computed(() => context?.value.content());
-const numbering = computed(() => store.state.numbering);
 const labelPosition: ComputedRef<[number, number]> = computed(() => {
   if (!content.value) return [-1, -1];
   return [content.value.start.start, content.value.stop.stop];

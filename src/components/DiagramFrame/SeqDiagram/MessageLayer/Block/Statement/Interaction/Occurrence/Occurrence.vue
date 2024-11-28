@@ -30,7 +30,6 @@
       :context="context.braceBlock().block()"
       :number="number"
       :collapsed="collapsed"
-      :inheritFromOccurrence="true"
     ></block>
   </div>
 </template>

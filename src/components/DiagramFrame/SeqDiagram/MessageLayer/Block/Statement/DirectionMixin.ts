@@ -1,7 +1,7 @@
-import Vue from "vue";
+import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-export const DirectionMixin = Vue.extend({
+export const DirectionMixin = defineComponent({
   computed: {
     ...mapGetters(["distance2"]),
     rightToLeft(): boolean {

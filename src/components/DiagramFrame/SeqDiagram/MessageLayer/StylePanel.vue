@@ -35,11 +35,14 @@ import {
   FloatVirtualInitialProps,
   useOutsideClick,
 } from "@headlessui-float/vue";
-import { computed, ref } from "vue";
+import { computed, configureCompat, ref } from "vue";
 import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/StringUtil";
 import { useStore } from "vuex";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
+
+// for the FloatVirtual component
+configureCompat({ WATCH_ARRAY: false });
 
 const messageContext = ref<{ value: any }>({ value: null });
 const store = useStore();

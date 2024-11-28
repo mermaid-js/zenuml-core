@@ -1,17 +1,16 @@
 <template>
   <div
+    :data-origin="origin"
+    :data-left-participant="leftParticipant"
+    :data-frame-padding-left="border.left"
+    :data-frame-padding-right="border.right"
     class="fragment bg-skin-frame border-skin-fragment relative rounded min-w-[140px] w-max py-4 px-2 flex justify-center items-center flex-col"
     :style="fragmentStyle"
   >
     <div
       class="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t absolute top-0 left-0"
     >
-      <div
-        v-if="numbering"
-        class="absolute right-full top-0 pr-1 group-hover:hidden text-gray-500 font-thin leading-6"
-      >
-        {{ number }}
-      </div>
+      <Numbering :number="number" />
       <comment
         v-if="commentObj.text"
         class="absolute -top-4 left-0"
@@ -43,21 +42,19 @@
 
 <script>
 import { computed } from "vue";
-import { useStore } from "vuex";
 import fragment from "./FragmentMixin";
 import MessageLabel from "../../../MessageLabel.vue";
+import Numbering from "../../../Numbering.vue";
 
 export default {
   name: "fragment-section",
   props: ["context", "comment", "commentObj", "number"],
   components: {
     MessageLabel,
+    Numbering,
   },
   mixins: [fragment],
   setup(props) {
-    const store = useStore();
-    const numbering = computed(() => store.state.numbering);
-    const from = computed(() => props.context.Origin());
     const content = computed(() => props.context.ref().Content());
     const contentLabel = computed(() => content.value?.getFormattedText());
     const contentPosition = computed(() => [
@@ -66,9 +63,6 @@ export default {
     ]);
 
     return {
-      store,
-      from,
-      numbering,
       contentLabel,
       contentPosition,
     };

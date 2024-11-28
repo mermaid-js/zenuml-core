@@ -9,12 +9,7 @@
     <label
       class="name text-left group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em] w-full"
     >
-      <div
-        class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500"
-        v-if="numbering"
-      >
-        {{ number }}
-      </div>
+      <Numbering :number="number" />
       <div class="label">
         <span v-if="assignee">
           <span class="assignee px-1">{{ assignee }}</span>
@@ -46,6 +41,7 @@
 import { useStore } from "vuex";
 import { ComputedRef, computed, ref, toRefs } from "vue";
 import MessageLabel from "../../../../MessageLabel.vue";
+import Numbering from "../../../../Numbering.vue";
 
 const props = defineProps<{
   context?: any;
@@ -56,7 +52,6 @@ const props = defineProps<{
 const { context } = toRefs(props);
 const store = useStore();
 
-const numbering = computed(() => store.state.numbering);
 const messageRef = ref();
 const labelPosition: ComputedRef<[number, number]> = computed(() => {
   // do not use .signature(). Multiple signatures are allowed, e.g. method().method1().method2()
