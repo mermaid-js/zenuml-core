@@ -30,7 +30,7 @@
       :origin="origin"
       :class="{ hidden: collapsed }"
       :style="{ paddingLeft: `${offsetX}px` }"
-      :context="opt.braceBlock().block()"
+      :context="opt?.braceBlock()?.block()"
       :number="number"
     ></block>
   </div>
