@@ -1,8 +1,9 @@
 import ParserRuleContext from "antlr4/context/ParserRuleContext";
-import { isBlockStatement, IStatement } from "./types";
+import { IStatement, Tile } from "./types";
 import { BaseStatement } from "./Statement";
 import { SwimLanes } from "./SwimLane";
 import { BaseNode, MessageNode } from "./Nodes";
+import { Edge } from "./Edge";
 
 export class MessageStatement extends BaseStatement {
   constructor(
@@ -13,25 +14,45 @@ export class MessageStatement extends BaseStatement {
     super(ctx, swimLanes, previousStatement);
   }
 
-  createBlock() {
-    if (!this.previousStatement) {
-      throw new Error("No previous statement");
-    }
+  private createNodes(_inboundNode?: BaseNode) {
+    const inboundNode =
+      _inboundNode ?? this.previousStatement?.getOutboundNode() ?? null;
 
     // @ts-ignore
     const messageBodyCtx = this.ctx.messageBody();
-    const to = messageBodyCtx.to();
+    const toName = messageBodyCtx.to().getText();
     const message = messageBodyCtx.func().signature()[0].getFormattedText();
-    const toName = to.getText();
-    const toLane = this.swimLanes.getLane(toName);
-    const outboundNode = this.previousStatement.getOutboundNode();
+    const swimLane = this.swimLanes.getLane(toName);
+    const fromName = inboundNode?.swimLane.name;
+    const fromSwimLaneMaxRank = fromName
+      ? this.swimLanes.getLane(fromName).maxRank
+      : 0;
 
-    // Otherwise create a new node and set connections
-    const node = new MessageNode(message, toLane, outboundNode?.rank);
+    // TODO: optimize rank calculation
+    const rank =
+      inboundNode?.rank && fromName !== toName
+        ? Math.max(swimLane.maxRank + 1, fromSwimLaneMaxRank + 1)
+        : swimLane.maxRank + 1;
 
-    if (outboundNode) {
-      this.addInboundNode(outboundNode);
+    const node = new MessageNode(message, swimLane, rank);
+
+    this.addNode(node);
+    this.connectNodes(inboundNode, node);
+  }
+
+  private createEdges() {
+    if (this.inboundNode && this.outboundNode) {
+      const edge = new Edge(this.inboundNode, this.outboundNode);
+      this.addEdge(edge);
     }
-    this.setOutboundNode(node);
+  }
+
+  getTile(inboundNode?: BaseNode): Tile {
+    this.createNodes(inboundNode);
+    this.createEdges();
+    return {
+      nodes: Array.from(this.nodes.values()),
+      edges: Array.from(this.edges.values()),
+    };
   }
 }

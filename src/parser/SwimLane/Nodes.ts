@@ -53,6 +53,7 @@ export class MessageNode extends BaseNode {
 
   constructor(name: string, swimLane: SwimLane, rank?: number) {
     super(name, swimLane, rank);
+    this.addToSwimLane(swimLane, rank);
   }
 
   addToSwimLane(swimLane: SwimLane, rank?: number) {
@@ -65,7 +66,7 @@ export class MessageNode extends BaseNode {
     } else {
       this.rank = swimLane.maxRank + 1;
     }
-    swimLane.addNode(this);
+    swimLane.addNodes([this]);
   }
 }
 
@@ -79,8 +80,8 @@ export class EmptyMessageNode extends MessageNode {
 export class IfElseNode extends BaseNode {
   type: NodeType = "ifelse";
 
-  constructor(name: string, swimLane: SwimLane) {
-    super(name, swimLane);
+  constructor(name: string, swimLane: SwimLane, rank: number) {
+    super(name, swimLane, rank);
   }
 }
 

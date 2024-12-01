@@ -4,22 +4,22 @@ import sequenceParser from "@/generated-parser/sequenceParser";
 import antlr4 from "antlr4";
 import sequenceLexer from "@/generated-parser/sequenceLexer";
 import { formatText } from "@/utils/StringUtil";
-import { EndIfNode } from "./Nodes";
 import { IStatement } from "./types";
 import { AltStatement } from "./AltStatement";
 import { MessageStatement } from "./MessageStatement";
+import { AsyncMessageStatement } from "./AsyncMessageStatement";
 
-const statementContextMethods = [
-  "message",
-  "alt",
-  "par",
-  "opt",
-  "critical",
-  "section",
-  "ref",
-  "loop",
-  "creation",
-];
+// const statementContextMethods = [
+//   "message",
+//   "alt",
+//   "par",
+//   "opt",
+//   "critical",
+//   "section",
+//   "ref",
+//   "loop",
+//   "creation",
+// ];
 
 // @ts-ignore
 antlr4.ParserRuleContext.prototype.getFormattedText = function () {
@@ -95,6 +95,15 @@ class SwimLaneCollector extends sequenceParserListener {
     this.setCurrentStatement(parent);
   }
 
+  enterAsyncMessage(ctx: any): void {
+    const asyncMessageStatement = new AsyncMessageStatement(
+      ctx,
+      this.swimLanes,
+      this.swimLanes.currentStatement,
+    );
+    this.setCurrentStatement(asyncMessageStatement);
+  }
+
   /*   enterAsyncMessage(ctx: any): void {
       const from = ctx.from();
       const to = ctx.to();
@@ -155,19 +164,24 @@ class SwimLaneCollector extends sequenceParserListener {
 }
 
 export class SwimLaneDiagram {
-  private collector: SwimLaneCollector;
   private walker = antlr4.tree.ParseTreeWalker.DEFAULT;
-  swimLanes: SwimLanes = new SwimLanes();
+  private swimLanes: SwimLanes | null = null;
 
-  constructor() {
-    this.collector = new SwimLaneCollector(this.swimLanes);
+  constructor(input: string | ReturnType<typeof rootContext>) {
+    this.parse(input);
   }
 
   getSwimLanes() {
+    if (!this.swimLanes) {
+      throw new Error("SwimLanes not initialized");
+    }
     return this.swimLanes.lanes;
   }
 
   getMaxRank() {
+    if (!this.swimLanes) {
+      throw new Error("SwimLanes not initialized");
+    }
     return this.swimLanes.maxRank;
   }
 
@@ -178,12 +192,22 @@ export class SwimLaneDiagram {
     } else {
       context = input;
     }
-    this.swimLanes = new SwimLanes();
-    this.swimLanes.initializeRootStatement(context);
-    this.walker.walk(this.collector, context);
+    this.swimLanes = new SwimLanes(context);
+    const collector = new SwimLaneCollector(this.swimLanes);
+    this.walker.walk(collector, context);
   }
 
   toJson() {
+    if (!this.swimLanes) {
+      throw new Error("SwimLanes not initialized");
+    }
     return this.swimLanes.toJson();
+  }
+
+  createDiagram() {
+    if (!this.swimLanes) {
+      throw new Error("SwimLanes not initialized");
+    }
+    return this.swimLanes.createDiagram();
   }
 }

@@ -2,17 +2,17 @@
   <div
     class="relative grid gap-0 w-full border"
     :style="{
-      gridTemplateColumns: `repeat(${swimLanes.length}, minmax(0, 1fr))`,
+      gridTemplateColumns: `repeat(${diagramModel.swimLanes.length}, minmax(0, 1fr))`,
     }"
     ref="containerRef"
   >
     <!-- first row -->
     <div
-      v-for="swimLane in swimLanes"
-      :key="swimLane.name"
+      v-for="swimLane in diagramModel.swimLanes"
+      :key="swimLane"
       class="text-center min-w-[48px] border-b"
     >
-      {{ swimLane.name }}
+      {{ swimLane }}
     </div>
     <template v-for="(row, rowIndex) in gridItems" :key="rowIndex">
       <template v-for="(item, colIndex) in row" :key="colIndex">
@@ -36,59 +36,57 @@
 import {
   ConnectionModel,
   NodeModel,
-  SwimLaneModel,
+  SwimLaneDiagramModel,
   NodePositionModel,
 } from "@/parser/SwimLane/types";
-import { ref, watchEffect, computed, onUpdated } from "vue";
+import { ref, watchEffect, computed, onMounted, onBeforeUnmount } from "vue";
 import ConnectionLayer from "./ConnectionLayer.vue";
+import { debounce } from "lodash";
+import { watch } from "vue";
 
 interface Props {
-  swimLanes: SwimLaneModel[];
-  maxRank: number;
+  diagramModel: SwimLaneDiagramModel;
 }
 
 const props = defineProps<Props>();
 
 const containerRef = ref<HTMLDivElement>();
+const resizeObserver = ref<ResizeObserver>();
 
 watchEffect(() => {
-  console.log(props.swimLanes);
+  // console.log(props.diagramModel);
 });
 
 const gridItems = computed(() => {
-  if (props.swimLanes.length === 0) {
+  if (props.diagramModel.swimLanes.length === 0) {
     return [];
   }
 
   // Add 1 to maxRank since ranks are 0-based
-  const rows = props.maxRank + 1;
-  const cols = props.swimLanes.length;
+  const rows = props.diagramModel.maxRank + 1;
+  const cols = props.diagramModel.swimLanes.length;
 
   // Create 2D array using Array.from
   const items = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({}) as NodeModel),
   );
 
-  props.swimLanes.forEach((swimLane, index) => {
-    swimLane.nodes.forEach((node) => {
-      items[node.rank][index] = node;
-    });
+  props.diagramModel.nodes.forEach((node) => {
+    const swimLaneIndex = props.diagramModel.swimLanes.indexOf(node.swimLane);
+    items[node.rank][swimLaneIndex] = node;
   });
-  return items;
-});
 
-const nodes = computed(() => {
-  return props.swimLanes.flatMap((swimLane) => swimLane.nodes);
+  return items;
 });
 
 const nodePositions = ref<NodePositionModel[]>([]);
 
-const edges = computed(() => {
-  return props.swimLanes.flatMap((swimLane) => swimLane.edges);
-});
-
 const connections = computed(() => {
-  return edges.value
+  console.log({
+    nodePositions: nodePositions.value,
+    edges: props.diagramModel.edges,
+  });
+  return props.diagramModel.edges
     .map((edge) => ({
       id: edge.id,
       source: nodePositions.value.find((node) => node.id === edge.source),
@@ -103,7 +101,7 @@ const getNodePositions = () => {
   if (!containerRef.value) {
     return [];
   }
-  const nodePositions = nodes.value
+  const nodePositions = props.diagramModel.nodes
     .map((node) => {
       const element = document.getElementById(node.id);
       if (!element) {
@@ -128,17 +126,40 @@ const getNodePositions = () => {
   return nodePositions;
 };
 
-onUpdated(() => {
+// Debounced version of position update
+const updateNodePositions = debounce(() => {
   nodePositions.value = getNodePositions();
+}, 100);
+
+// Set up resize observer
+onMounted(() => {
+  if (containerRef.value) {
+    resizeObserver.value = new ResizeObserver(updateNodePositions);
+    resizeObserver.value.observe(containerRef.value);
+  }
 });
 
-watchEffect(() => {
-  console.log({
-    swimLanes: props.swimLanes,
-    maxRank: props.maxRank,
-    gridItems: gridItems.value,
-    nodePositions: nodePositions.value,
-    connections: connections.value,
-  });
+// Clean up
+onBeforeUnmount(() => {
+  resizeObserver.value?.disconnect();
 });
+
+// // Keep existing onUpdated hook
+// onUpdated(() => {
+//   updateNodePositions();
+// });
+
+watch(props.diagramModel, () => {
+  updateNodePositions();
+});
+
+// watchEffect(() => {
+//   console.log({
+//     swimLanes: props.diagramModel.swimLanes,
+//     maxRank: props.diagramModel.maxRank,
+//     gridItems: gridItems.value,
+//     nodePositions: nodePositions.value,
+//     connections: connections.value,
+//   });
+// });
 </script>

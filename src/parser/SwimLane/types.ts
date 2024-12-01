@@ -1,3 +1,4 @@
+import { Edge } from "./Edge";
 import { BaseNode } from "./Nodes";
 import { SwimLane } from "./SwimLane";
 
@@ -11,18 +12,21 @@ export interface Shape extends JSONable {
   addToSwimLane(swimLane: SwimLane, rank?: number): void;
 }
 
+export type Tile = { nodes: BaseNode[]; edges: Edge[] };
+
 export interface IStatement {
-  addInboundNode(node: BaseNode): void;
+  setInboundNode(node: BaseNode): void;
   getInboundNode(): BaseNode | null;
   setOutboundNode(node: BaseNode): void;
   getOutboundNode(): BaseNode | null;
   setNext(statement: IStatement): void;
   getNext(): IStatement | null;
   getParent(): IStatement | null;
-  createBlock(): void;
+  getTile(node?: BaseNode | null): Tile;
 }
 
 export interface IBlockStatement extends IStatement {
+  createBlock(node?: BaseNode | null): Tile;
   appendChild(statement: IStatement): void;
   setFinished(): void;
   isFinished(): boolean;
@@ -31,14 +35,16 @@ export interface IBlockStatement extends IStatement {
 export function isBlockStatement(
   statement: IStatement,
 ): statement is IBlockStatement {
-  return statement.createBlock !== undefined;
+  return "createBlock" in statement;
 }
+
+export type SwimLaneId = string;
 
 export interface NodeModel {
   id: string;
   name: string;
   rank: number;
-  swimLane: string;
+  swimLane: SwimLaneId;
 }
 
 export interface EdgeModel {
@@ -47,8 +53,10 @@ export interface EdgeModel {
   target: string;
 }
 
-export interface SwimLaneModel {
+export interface SwimLaneDiagramModel {
   name: string;
+  swimLanes: SwimLaneId[];
+  maxRank: number;
   nodes: NodeModel[];
   edges: EdgeModel[];
 }

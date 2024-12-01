@@ -145,7 +145,7 @@ const findClosestEdgeInterSwimLane = (
     }
   }
 
-  console.log({ sourceEdges, targetEdges });
+  // console.log({ sourceEdges, targetEdges });
 
   let minDist = Infinity;
   let closestEdges: [Edge, Edge] = ["top", "top"];
@@ -179,12 +179,12 @@ const calculatePoints = (
     startNode.swimLane === endNode.swimLane
       ? findClosestEdgeIntraSwimLane(startNode, endNode)
       : findClosestEdgeInterSwimLane(startNode, endNode);
-  console.log({
-    startEdge,
-    startEdgePoint,
-    endEdge,
-    endEdgePoint,
-  });
+  // console.log({
+  //   startEdge,
+  //   startEdgePoint,
+  //   endEdge,
+  //   endEdgePoint,
+  // });
 
   const midX = (startEdgePoint.x + endEdgePoint.x) / 2;
   const midY = (startEdgePoint.y + endEdgePoint.y) / 2;

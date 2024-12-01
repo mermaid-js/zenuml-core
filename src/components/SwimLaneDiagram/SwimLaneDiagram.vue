@@ -1,6 +1,6 @@
 <template>
   <div id="swimlane-diagram" ref="diagramRef" class="h-screen">
-    <swim-lane-layer :swimLanes="swimLanes" :maxRank="data.maxRank" />
+    <swim-lane-layer :diagramModel="diagramModel" />
   </div>
 </template>
 
@@ -9,18 +9,26 @@ import { SwimLaneDiagram } from "@/parser/SwimLane/Diagram";
 import { computed } from "vue";
 import { useStore } from "vuex";
 import SwimLaneLayer from "./SwimLaneLayer.vue";
+import { SwimLaneDiagramModel } from "@/parser/SwimLane/types";
 
 const store = useStore();
 const rootContext = computed(() => store.getters.rootContext);
 
-const data = computed(() => {
-  const diagram = new SwimLaneDiagram();
-  diagram.parse(rootContext.value);
-  return {
-    swimLanes: diagram.toJson(),
-    maxRank: diagram.getMaxRank(),
-  };
-});
+const diagramModel = computed(() => {
+  const diagram = new SwimLaneDiagram(rootContext.value);
+  const diagramData = diagram.toJson();
+  const swimLanes = Array.from(diagram.getSwimLanes().values()).map(
+    (swimLane) => {
+      return swimLane.id;
+    },
+  );
 
-const swimLanes = computed(() => Object.values(data.value.swimLanes));
+  return {
+    name: "test",
+    swimLanes,
+    nodes: diagramData.nodes,
+    edges: diagramData.edges,
+    maxRank: diagram.getMaxRank(),
+  } as SwimLaneDiagramModel;
+});
 </script>
