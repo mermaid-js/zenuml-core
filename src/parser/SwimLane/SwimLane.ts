@@ -1,19 +1,21 @@
+import { BaseNode, EmptyMessageNode } from "./Nodes";
+import { RootStatement } from "./Statement";
+import { IStatement, JSONable } from "./types";
+import { rootContext } from "./Diagram";
 import { Edge } from "./Edge";
-import { Node } from "./Node";
-import { Shape } from "./types";
 
-export class SwimLane implements Shape {
+export class SwimLane implements JSONable {
   id: string;
   name: string;
-  nodes: Node[] = [];
-  inBoundNode: Node | null = null;
+  nodes: BaseNode[] = [];
+  inBoundNode: BaseNode | null = null;
 
   constructor(name: string) {
     this.id = crypto.randomUUID();
     this.name = name;
   }
 
-  setInboundNode(node: Node) {
+  setInboundNode(node: BaseNode) {
     this.inBoundNode = node;
   }
 
@@ -21,14 +23,31 @@ export class SwimLane implements Shape {
     return this.nodes[this.nodes.length - 1];
   }
 
-  addNode(node: Node) {
+  addNode(node: BaseNode) {
     if (this.inBoundNode) {
       node.setPrevNode(this.inBoundNode);
       this.inBoundNode = null;
-    } else if (this.lastNode()) {
-      node.setPrevNode(this.lastNode());
+      this.nodes.push(node);
+      return;
     }
-    this.nodes.push(node);
+
+    const lastNode = this.lastNode();
+    if (lastNode) {
+      if (lastNode instanceof EmptyMessageNode) {
+        if (lastNode.prevNode) {
+          node.setPrevNode(lastNode.prevNode);
+        }
+        node.setRank(lastNode.rank);
+        this.nodes.splice(-1, 1, node);
+        return;
+      } else {
+        node.setPrevNode(lastNode);
+        this.nodes.push(node);
+        return;
+      }
+    } else {
+      this.nodes.push(node);
+    }
   }
 
   get maxRank() {
@@ -56,7 +75,18 @@ export class SwimLane implements Shape {
 
 export class SwimLanes {
   lanes: Map<string, SwimLane> = new Map();
-  rank: number = 0;
+  rootStatement: RootStatement | null = null;
+  currentStatement: IStatement | null = null;
+
+  constructor() { }
+
+  initializeRootStatement(ctx: ReturnType<typeof rootContext>) {
+    this.rootStatement = new RootStatement(ctx, this);
+  }
+
+  setCurrentStatement(statement: IStatement) {
+    this.currentStatement = statement;
+  }
 
   getLane(lane: string): SwimLane {
     if (lane === "") {
@@ -71,7 +101,7 @@ export class SwimLanes {
     }
   }
 
-  getMaxRank() {
+  get maxRank() {
     return Math.max(
       0,
       ...Array.from(this.lanes.values()).map((lane) => lane.maxRank),

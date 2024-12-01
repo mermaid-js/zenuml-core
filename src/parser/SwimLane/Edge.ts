@@ -1,14 +1,15 @@
-import { Node } from "./Node";
-import { Shape } from "./types";
+import { BaseNode } from "./Node";
+import { JSONable } from "./types";
 
-export class Edge implements Shape {
-  source: Node;
-  target: Node;
+export class Edge implements JSONable {
+  source: BaseNode;
+  target: BaseNode;
 
-  constructor(source: Node, target: Node) {
+  constructor(source: BaseNode, target: BaseNode) {
     this.source = source;
     this.target = target;
   }
+
   toJSON() {
     return {
       id: `${this.source.id}-${this.target.id}`,

@@ -1,10 +1,25 @@
 import sequenceParserListener from "@/generated-parser/sequenceParserListener";
 import { SwimLane, SwimLanes } from "./SwimLane";
-import { Node } from "./Node";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import antlr4 from "antlr4";
 import sequenceLexer from "@/generated-parser/sequenceLexer";
 import { formatText } from "@/utils/StringUtil";
+import { EndIfNode } from "./Nodes";
+import { IStatement } from "./types";
+import { AltStatement } from "./AltStatement";
+import { MessageStatement } from "./MessageStatement";
+
+const statementContextMethods = [
+  "message",
+  "alt",
+  "par",
+  "opt",
+  "critical",
+  "section",
+  "ref",
+  "loop",
+  "creation",
+];
 
 // @ts-ignore
 antlr4.ParserRuleContext.prototype.getFormattedText = function () {
@@ -28,7 +43,7 @@ class SeqErrorListener extends antlr4.error.ErrorListener {
   }
 }
 
-function rootContext(code: string) {
+export function rootContext(code: string) {
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
   const tokens = new antlr4.CommonTokenStream(lexer);
@@ -47,6 +62,10 @@ class SwimLaneCollector extends sequenceParserListener {
     this.swimLanes = swimLanes;
   }
 
+  setCurrentStatement(stat: IStatement) {
+    this.swimLanes.setCurrentStatement(stat);
+  }
+
   // Implement enter/exit methods for the nodes you want to collect
   enterParticipant(ctx: any) {
     // Add participant to swim lanes
@@ -54,48 +73,85 @@ class SwimLaneCollector extends sequenceParserListener {
     this.swimLanes.getLane(participant);
   }
 
-  // enterGroup(ctx: any) {
-  //   // Handle group information
-  // }
-  enterAsyncMessage(ctx: any): void {
-    const from = ctx.from();
-    const to = ctx.to();
-    const message = ctx.content().getFormattedText();
+  enterAlt(ctx: any): void {
+    const statement = new AltStatement(
+      ctx,
+      this.swimLanes,
+      this.swimLanes.currentStatement,
+    );
+    this.setCurrentStatement(statement);
+  }
 
-    const fromLane = this.swimLanes.getLane(from);
-    const toLane = this.swimLanes.getLane(to);
-    const outboundNode = fromLane.lastNode();
-    toLane.setInboundNode(outboundNode);
-    new Node(message, toLane, outboundNode.rank);
-    this.previousLane = toLane;
+  exitAlt(): void {
+    if (!(this.swimLanes.currentStatement instanceof AltStatement)) {
+      throw new Error("Current statement is not an AltStatement");
+    }
+
+    this.swimLanes.currentStatement.setFinished();
+    const parent = this.swimLanes.currentStatement.getParent();
+    if (!parent) {
+      throw new Error("No parent statement");
+    }
+    this.setCurrentStatement(parent);
+  }
+
+  /*   enterAsyncMessage(ctx: any): void {
+      const from = ctx.from();
+      const to = ctx.to();
+      const message = ctx.content().getFormattedText();
+
+      const fromName = from.getFormattedText();
+      const toName = to.getFormattedText();
+      const fromLane = this.swimLanes.getLane(fromName);
+      const toLane = this.swimLanes.getLane(toName);
+      const lastNode = fromLane.lastNode();
+      // if (lastNode) {
+      //   toLane.setInboundNode(lastNode);
+      //   new MessageNode(message, toLane, lastNode.rank);
+      // } else {
+      // const emptyNode = new EmptyMessageNode(fromLane);
+      //   toLane.setInboundNode(emptyNode);
+      //   new MessageNode(message, toLane, emptyNode.rank);
+      // }
+
+      new MessageNode(message, fromLane);
+      this.previousLane = fromLane;
+
+      if (this.previousLane && this.previousLane.name !== toName) {
+        const outBoundNode = this.previousLane?.lastNode();
+        toLane.setInboundNode(outBoundNode);
+        new EmptyMessageNode(toLane, outBoundNode?.rank);
+      } else {
+        new EmptyMessageNode(toLane);
+      }
+      this.previousLane = toLane;
+    } */
+
+  enterMessage(ctx: any): void {
+    const messageStatement = new MessageStatement(
+      ctx,
+      this.swimLanes,
+      this.swimLanes.currentStatement,
+    );
+    this.setCurrentStatement(messageStatement);
   }
 
   // Add other enter/exit methods as needed
-  enterMessageBody(ctx: any) {
-    const to = ctx.to();
-    const message = ctx.func().signature()[0].getFormattedText();
+  /*   enterMessageBody(ctx: any) {
+      const to = ctx.to();
+      const message = ctx.func().signature()[0].getFormattedText();
 
-    const toName = to.getFormattedText();
-    const toLane = this.swimLanes.getLane(toName);
-    if (this.previousLane && this.previousLane.name !== toName) {
-      const outBoundNode = this.previousLane?.lastNode();
-      toLane.setInboundNode(outBoundNode);
-      new Node(message, toLane, outBoundNode.rank);
-    } else {
-      new Node(message, toLane);
-    }
-    this.previousLane = toLane;
-    // } else {
-    //   const fromLane = this.swimLanes.getLane(from);
-    //   const toLane = this.swimLanes.getLane(to);
-    //   if (this.previousLane && this.previousLane.name !== to) {
-    //     const outBoundNode = this.previousLane?.lastNode();
-    //     toLane.setInBoundNode(outBoundNode);
-    //   }
-    //   new Node(message, fromLane);
-    //   this.previousLane = toLane;
-    // }
-  }
+      const toName = to.getFormattedText();
+      const toLane = this.swimLanes.getLane(toName);
+      if (this.previousLane && this.previousLane.name !== toName) {
+        const outBoundNode = this.previousLane?.lastNode();
+        toLane.setInboundNode(outBoundNode);
+        new MessageNode(message, toLane, outBoundNode?.rank);
+      } else {
+        new MessageNode(message, toLane);
+      }
+      this.previousLane = toLane;
+    } */
 }
 
 export class SwimLaneDiagram {
@@ -112,16 +168,18 @@ export class SwimLaneDiagram {
   }
 
   getMaxRank() {
-    return this.swimLanes.getMaxRank();
+    return this.swimLanes.maxRank;
   }
 
-  parse(input: string | typeof rootContext) {
-    let context;
+  parse(input: string | ReturnType<typeof rootContext>) {
+    let context: ReturnType<typeof rootContext>;
     if (typeof input === "string") {
       context = rootContext(input);
     } else {
       context = input;
     }
+    this.swimLanes = new SwimLanes();
+    this.swimLanes.initializeRootStatement(context);
     this.walker.walk(this.collector, context);
   }
 
