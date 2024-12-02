@@ -1,5 +1,5 @@
 <template>
-  <div class="absolute top-0 left-0 w-full h-full z-10">
+  <div class="absolute top-0 left-0 w-full h-full z-1">
     <connection
       v-for="connection in connections"
       :key="connection.id"

@@ -1,6 +1,6 @@
 import { BaseNode } from "./Nodes";
 import { RootStatement } from "./Statement";
-import { IStatement, SwimLaneId } from "./types";
+import { IBlockStatement, SwimLaneId } from "./types";
 import { rootContext } from "./Diagram";
 
 export class SwimLane {
@@ -25,7 +25,7 @@ export class SwimLane {
 export class SwimLanes {
   lanes: Map<SwimLaneId, SwimLane> = new Map();
   rootStatement: RootStatement | null = null;
-  currentStatement: IStatement | null = null;
+  currentBlockStatement: IBlockStatement | null = null;
 
   constructor(ctx: ReturnType<typeof rootContext>) {
     this.initializeRootStatement(ctx);
@@ -33,11 +33,11 @@ export class SwimLanes {
 
   initializeRootStatement(ctx: ReturnType<typeof rootContext>) {
     this.rootStatement = new RootStatement(ctx, this);
-    this.setCurrentStatement(this.rootStatement);
+    this.setCurrentBlockStatement(this.rootStatement);
   }
 
-  setCurrentStatement(statement: IStatement) {
-    this.currentStatement = statement;
+  setCurrentBlockStatement(statement: IBlockStatement) {
+    this.currentBlockStatement = statement;
   }
 
   getLane(lane: SwimLaneId): SwimLane {

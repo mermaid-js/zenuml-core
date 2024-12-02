@@ -10,20 +10,28 @@
     <div
       v-for="swimLane in diagramModel.swimLanes"
       :key="swimLane"
-      class="text-center min-w-[48px] border-b"
+      class="text-center min-w-[48px] border-b border-r last:border-r-0"
+      :class="{
+        'border-r-0':
+          swimLane ===
+          diagramModel.swimLanes[diagramModel.swimLanes.length - 1],
+      }"
     >
       {{ swimLane }}
     </div>
     <template v-for="(row, rowIndex) in gridItems" :key="rowIndex">
-      <template v-for="(item, colIndex) in row" :key="colIndex">
-        <div class="border-r p-4 z-10">
-          <div
-            v-if="Object.keys(item).length > 0"
-            class="p-2 border w-fit mx-auto"
-            :id="item.id"
-          >
-            {{ item.name }}
-          </div>
+      <template v-for="(items, colIndex) in row" :key="colIndex">
+        <div
+          class="border-r p-4 z-10 flex flex-row gap-8"
+          :class="{
+            'border-r-0': colIndex === row.length - 1,
+            'justify-center': items.length === 1,
+            'justify-between': items.length > 1,
+          }"
+        >
+          <template v-for="item in items" :key="item.id">
+            <component :is="NodeComponents[item.type]" :node="item" />
+          </template>
         </div>
       </template>
     </template>
@@ -38,11 +46,15 @@ import {
   NodeModel,
   SwimLaneDiagramModel,
   NodePositionModel,
+  NodeType,
 } from "@/parser/SwimLane/types";
 import { ref, watchEffect, computed, onMounted, onBeforeUnmount } from "vue";
 import ConnectionLayer from "./ConnectionLayer.vue";
 import { debounce } from "lodash";
 import { watch } from "vue";
+import MessageNode from "./MessageNode.vue";
+import ConditionalNode from "./ConditionalNode.vue";
+import { onUpdated } from "vue";
 
 interface Props {
   diagramModel: SwimLaneDiagramModel;
@@ -68,12 +80,12 @@ const gridItems = computed(() => {
 
   // Create 2D array using Array.from
   const items = Array.from({ length: rows }, () =>
-    Array.from({ length: cols }, () => ({}) as NodeModel),
+    Array.from({ length: cols }, () => [] as NodeModel[]),
   );
 
   props.diagramModel.nodes.forEach((node) => {
     const swimLaneIndex = props.diagramModel.swimLanes.indexOf(node.swimLane);
-    items[node.rank][swimLaneIndex] = node;
+    items[node.rank][swimLaneIndex].push(node);
   });
 
   return items;
@@ -85,6 +97,7 @@ const connections = computed(() => {
   console.log({
     nodePositions: nodePositions.value,
     edges: props.diagramModel.edges,
+    nodes: props.diagramModel.nodes,
   });
   return props.diagramModel.edges
     .map((edge) => ({
@@ -144,14 +157,14 @@ onBeforeUnmount(() => {
   resizeObserver.value?.disconnect();
 });
 
-// // Keep existing onUpdated hook
+// Keep existing onUpdated hook
 // onUpdated(() => {
 //   updateNodePositions();
 // });
 
-watch(props.diagramModel, () => {
-  updateNodePositions();
-});
+// watch(props.diagramModel, () => {
+//   updateNodePositions();
+// });
 
 // watchEffect(() => {
 //   console.log({
@@ -162,4 +175,11 @@ watch(props.diagramModel, () => {
 //     connections: connections.value,
 //   });
 // });
+
+// Register components for dynamic rendering
+const NodeComponents: Record<NodeType, any> = {
+  message: MessageNode,
+  ifelse: ConditionalNode,
+  endif: ConditionalNode,
+};
 </script>

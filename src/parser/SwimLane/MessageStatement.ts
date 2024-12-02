@@ -1,5 +1,5 @@
 import ParserRuleContext from "antlr4/context/ParserRuleContext";
-import { IStatement, Tile } from "./types";
+import { IBlockStatement, Tile } from "./types";
 import { BaseStatement } from "./Statement";
 import { SwimLanes } from "./SwimLane";
 import { BaseNode, MessageNode } from "./Nodes";
@@ -9,15 +9,12 @@ export class MessageStatement extends BaseStatement {
   constructor(
     ctx: ParserRuleContext,
     swimLanes: SwimLanes,
-    previousStatement: IStatement | null,
+    parentStatement: IBlockStatement | null,
   ) {
-    super(ctx, swimLanes, previousStatement);
+    super(ctx, swimLanes, parentStatement);
   }
 
-  private createNodes(_inboundNode?: BaseNode) {
-    const inboundNode =
-      _inboundNode ?? this.previousStatement?.getOutboundNode() ?? null;
-
+  private createNodes(inboundNode: BaseNode) {
     // @ts-ignore
     const messageBodyCtx = this.ctx.messageBody();
     const toName = messageBodyCtx.to().getText();
@@ -47,7 +44,7 @@ export class MessageStatement extends BaseStatement {
     }
   }
 
-  getTile(inboundNode?: BaseNode): Tile {
+  getTile(inboundNode: BaseNode): Tile {
     this.createNodes(inboundNode);
     this.createEdges();
     return {

@@ -1,80 +1,63 @@
 import ParserRuleContext from "antlr4/context/ParserRuleContext";
-import { SwimLane } from "./SwimLane";
 import { IStatement, Tile } from "./types";
 import { BaseNode, IfElseNode } from "./Nodes";
 import { Edge } from "./Edge";
+import { OrderedMap } from "./OrderMap";
 
 export class Branch {
   private ctx: ParserRuleContext;
-  private defaultSwimLane: SwimLane;
-  private rootStatement: IStatement | null = null;
-  private lastNode: BaseNode | null = null;
-  private firstNode: BaseNode | null = null;
-  private nodes: Map<string, BaseNode> = new Map();
-  private edges: Map<string, Edge> = new Map();
+  private statements: IStatement[] = [];
+  private nodes: OrderedMap<string, BaseNode> = new OrderedMap();
+  private edges: OrderedMap<string, Edge> = new OrderedMap();
 
-  constructor(ctx: ParserRuleContext, swimLane: SwimLane, rank: number) {
+  constructor(ctx: ParserRuleContext) {
     this.ctx = ctx;
-    this.defaultSwimLane = swimLane;
-    // get condition expression
-    const conditionExpr = this.ctx.getText();
-
-    // else branch does not have condition expression so we can skip creating the node
-    if (conditionExpr) {
-      this.initializeNodes(new IfElseNode(conditionExpr, swimLane, rank));
-    }
-  }
-
-  initializeNodes(node: BaseNode) {
-    this.firstNode = node;
-    this.lastNode = node;
+    // get condition expression    this.conditionExpr = this.ctx.getText();
   }
 
   getFirstNode() {
-    return this.firstNode;
+    return Array.from(this.nodes.values())[0];
   }
 
   getLastNode() {
-    return this.lastNode;
-  }
-
-  getDefaultSwimLane() {
-    return this.defaultSwimLane;
+    return Array.from(this.nodes.values())[this.nodes.size - 1];
   }
 
   add(statement: IStatement) {
-    if (this.rootStatement) {
-      this.rootStatement.setNext(statement);
-    } else {
-      this.rootStatement = statement;
-    }
+    this.statements.push(statement);
   }
 
-  getTile(inboundNode: BaseNode | null): Tile {
-    return this.createBlock(inboundNode);
+  getTile(inboundNode: BaseNode, rank: number): Tile {
+    return this.createBlock(inboundNode, rank);
   }
 
-  createBlock(inboundNode: BaseNode | null): Tile {
-    if (!this.firstNode && inboundNode) {
-      this.initializeNodes(inboundNode);
-    }
+  createBlock(inboundNode: BaseNode, rank: number): Tile {
+    // @ts-ignore
+    const conditionExpr = this.ctx.parExpr?.().condition().getFormattedText();
+    // @ts-ignore
+    const isIf = "IF" in this.ctx && !("ELSE" in this.ctx);
 
-    if (inboundNode && this.lastNode) {
-      this.lastNode.setPrevNode(inboundNode);
-    }
+    const swimlane = inboundNode.swimLane;
+    const firstNode: BaseNode | null = conditionExpr
+      ? new IfElseNode(conditionExpr, swimlane, rank)
+      : new IfElseNode("else", swimlane, rank);
 
-    let currentStatement = this.rootStatement;
-    while (currentStatement) {
-      const block = currentStatement.getTile(this.lastNode);
+    this.nodes.set(firstNode.id, firstNode);
+    firstNode.setPrevNode(inboundNode);
+
+    for (let i = 0; i < this.statements.length; i++) {
+      const statement = this.statements[i];
+      const block = statement.getTile(this.getLastNode());
+
       block.nodes.forEach((node) => this.nodes.set(node.id, node));
       block.edges.forEach((edge) => this.edges.set(edge.id, edge));
 
-      const outboundNode = currentStatement.getOutboundNode();
-      if (outboundNode) {
-        this.lastNode = outboundNode;
+      if (!isIf && i === 0) {
+        firstNode.setSwimLane(block.nodes[0].swimLane);
       }
 
-      currentStatement = currentStatement.getNext();
+      this.addNodes(block.nodes);
+      this.addEdges(block.edges);
     }
 
     return {
@@ -83,7 +66,17 @@ export class Branch {
     };
   }
 
+  addNodes(nodes: BaseNode[]) {
+    nodes.forEach((node) => this.nodes.set(node.id, node));
+  }
+
+  addEdges(edges: Edge[]) {
+    edges.forEach((edge) => this.edges.set(edge.id, edge));
+  }
+
   getMaxRank() {
-    return this.lastNode?.rank ?? 0;
+    return Math.max(
+      ...Array.from(this.nodes.values()).map((node) => node.rank),
+    );
   }
 }

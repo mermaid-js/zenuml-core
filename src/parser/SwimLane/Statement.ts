@@ -9,8 +9,6 @@ export class BaseStatement implements IStatement {
   protected ctx: ParserRuleContext;
   protected swimLanes: SwimLanes;
   protected firstChild: IStatement | null = null;
-  protected previousStatement: IStatement | null = null;
-  protected nextStatement: IStatement | null = null;
   protected parent: IBlockStatement | null = null;
   protected nodes: Map<string, BaseNode> = new Map();
   protected edges: Map<string, Edge> = new Map();
@@ -20,21 +18,14 @@ export class BaseStatement implements IStatement {
   constructor(
     ctx: ParserRuleContext,
     swimLanes: SwimLanes,
-    previousStatement: IStatement | null,
+    parentStatement: IBlockStatement | null,
   ) {
     this.ctx = ctx;
     this.swimLanes = swimLanes;
-    this.previousStatement = previousStatement;
 
-    if (
-      previousStatement &&
-      isBlockStatement(previousStatement) &&
-      !previousStatement.isFinished()
-    ) {
-      this.parent = previousStatement;
+    this.parent = parentStatement;
+    if (this.parent) {
       this.parent.appendChild(this);
-    } else {
-      this.previousStatement?.setNext(this);
     }
   }
 
@@ -51,14 +42,6 @@ export class BaseStatement implements IStatement {
 
   addEdge(edge: Edge) {
     this.edges.set(edge.id, edge);
-  }
-
-  setNext(statement: IStatement): void {
-    this.nextStatement = statement;
-  }
-
-  getNext(): IStatement | null {
-    return this.nextStatement;
   }
 
   setParent(parent: IBlockStatement | null): void {
@@ -122,8 +105,7 @@ export class BlockStatement extends BaseStatement implements IBlockStatement {
 
 export class RootStatement implements IBlockStatement {
   private ctx: ParserRuleContext;
-  private firstChild: IStatement | null = null;
-  private nextStatement: IStatement | null = null;
+  private statements: IStatement[] = [];
   private swimLanes: SwimLanes;
   private nodes: Map<string, BaseNode> = new Map();
   private edges: Map<string, Edge> = new Map();
@@ -159,38 +141,20 @@ export class RootStatement implements IBlockStatement {
   }
 
   appendChild(statement: IStatement): void {
-    if (this.firstChild === null) {
-      this.firstChild = statement;
-    } else {
-      let current = this.firstChild;
-      while (current?.getNext() !== null) {
-        current = current.getNext()!;
-      }
-      current.setNext(statement);
-    }
+    this.statements.push(statement);
   }
 
   getInboundNode(): BaseNode | null {
     return null;
   }
 
-  setNext(statement: IStatement): void {
-    this.nextStatement = statement;
-  }
-
-  getNext(): IStatement | null {
-    return this.nextStatement;
-  }
-
   createBlock(): Tile {
-    let currentStatement = this.firstChild;
-
-    while (currentStatement) {
-      const tile = currentStatement.getTile();
+    let inboundNode: BaseNode | null = null;
+    for (const statement of this.statements) {
+      const tile = statement.getTile(inboundNode);
       tile.nodes.forEach((node) => this.nodes.set(node.id, node));
       tile.edges.forEach((edge) => this.edges.set(edge.id, edge));
-
-      currentStatement = currentStatement.getNext()!;
+      inboundNode = statement.getOutboundNode();
     }
 
     return {

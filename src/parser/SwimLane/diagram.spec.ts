@@ -25,7 +25,7 @@ describe("SwimLaneDiagram", () => {
   //   console.log(JSON.stringify(diagram.toJson(), null, 2));
   // });
 
-  test("should parse empty diagram", () => {
+  test("should parse message", () => {
     const code = `
     A.method() {
       B.method()
@@ -52,6 +52,21 @@ describe("SwimLaneDiagram", () => {
   test("should parse async message", () => {
     const code = `
       A -> B: message
+    `;
+
+    const diagram = new SwimLaneDiagram(code);
+    console.log(JSON.stringify(diagram.createDiagram(), null, 2));
+  });
+
+  test("should parse alt statement", () => {
+    const code = `
+      A.method() {
+        if (x) {
+          B.method()
+        } else {
+          C.method()
+        }
+      }
     `;
 
     const diagram = new SwimLaneDiagram(code);

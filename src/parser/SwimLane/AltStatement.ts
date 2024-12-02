@@ -1,49 +1,42 @@
 import ParserRuleContext from "antlr4/context/ParserRuleContext";
-import { Tile, IStatement } from "./types";
+import { Tile, IStatement, IBlockStatement } from "./types";
 import { Branch } from "./Branch";
-import { SwimLane, SwimLanes } from "./SwimLane";
+import { SwimLanes } from "./SwimLane";
 import { BlockStatement } from "./Statement";
 import { Edge } from "./Edge";
-import { EndIfNode } from "./Nodes";
+import { BaseNode, EndIfNode } from "./Nodes";
 
 export class AltStatement extends BlockStatement {
   private ifElseBranches: Branch[] = [];
   private elseBranch: Branch | null = null;
   private current: Branch | null = null;
-  private initialRank: number = 0;
   private endIfNode: EndIfNode | null = null;
+  private initialRank: number = 0;
 
   constructor(
     ctx: ParserRuleContext,
     swimLanes: SwimLanes,
-    previousStatement: IStatement | null,
+    parentStatement: IBlockStatement | null,
   ) {
-    super(ctx, swimLanes, previousStatement);
+    super(ctx, swimLanes, parentStatement);
   }
 
-  getDefaultSwimLane() {
-    if (this.ifElseBranches.length === 0) {
-      throw new Error("No if branch");
-    }
-    return this.ifElseBranches[0].getDefaultSwimLane();
-  }
-
-  if(ctx: ParserRuleContext, swimLane: SwimLane) {
-    this.initialRank = swimLane.maxRank + 1;
-    const newBranch = new Branch(ctx, swimLane, this.initialRank);
+  if(ctx: ParserRuleContext) {
+    const newBranch = new Branch(ctx);
     this.ifElseBranches.push(newBranch);
     this.current = newBranch;
   }
 
-  elseIf(ctx: ParserRuleContext, swimLane: SwimLane) {
-    const newBranch = new Branch(ctx, swimLane, this.initialRank);
+  elseIf(ctx: ParserRuleContext) {
+    const newBranch = new Branch(ctx);
     this.ifElseBranches.push(newBranch);
     this.current = newBranch;
   }
 
-  else(ctx: ParserRuleContext, swimLane: SwimLane) {
-    this.elseBranch = new Branch(ctx, swimLane, this.initialRank);
-    this.setFinished();
+  else(ctx: ParserRuleContext) {
+    const newBranch = new Branch(ctx);
+    this.elseBranch = newBranch;
+    this.current = newBranch;
   }
 
   appendChild(statement: IStatement) {
@@ -53,24 +46,28 @@ export class AltStatement extends BlockStatement {
     this.current.add(statement);
   }
 
-  createBlock(): Tile {
-    if (!this.previousStatement) {
-      throw new Error("No previous statement");
-    }
-    const prevOutboundNode = this.previousStatement.getOutboundNode();
-    if (prevOutboundNode) {
-      this.setInboundNode(prevOutboundNode);
-    }
+  getTile(inboundNode: BaseNode | null): Tile {
+    return this.createBlock(inboundNode);
+  }
+
+  createBlock(inboundNode: BaseNode | null): Tile {
     if (this.ifElseBranches.length === 0) {
       throw new Error("No if branch");
     }
 
     // create nodes for each branch conditions
-    for (let i = 0; i < this.ifElseBranches.length; i++) {
-      const branch = this.ifElseBranches[i];
-      const inboundNode =
-        i === 0 ? this.inboundNode : this.ifElseBranches[i - 1].getLastNode();
-      const tile = branch.createBlock(inboundNode);
+    const branches = [...this.ifElseBranches, this.elseBranch].filter(
+      (branch): branch is Branch => branch !== null,
+    );
+    this.initialRank = inboundNode ? inboundNode.rank + 1 : 0;
+    for (let i = 0; i < branches.length; i++) {
+      const branch = branches[i];
+      const branchInboundNode =
+        i === 0 ? inboundNode : branches[i - 1].getFirstNode();
+      if (!branchInboundNode) {
+        throw new Error("No inbound node");
+      }
+      const tile = branch.createBlock(branchInboundNode, this.initialRank);
       this.addTile(tile);
     }
 
@@ -79,8 +76,10 @@ export class AltStatement extends BlockStatement {
       this.elseBranch?.getMaxRank() ?? 0,
     ].reduce((max, rank) => Math.max(max, rank), 0);
 
-    this.endIfNode = new EndIfNode(this.getDefaultSwimLane(), maxRank + 1);
+    const swimlane = this.ifElseBranches[0].getFirstNode()?.swimLane;
+    this.endIfNode = new EndIfNode(swimlane, maxRank + 1);
     this.addNode(this.endIfNode);
+    this.connectNodes(inboundNode, this.endIfNode);
 
     this.createEdges();
 
@@ -96,9 +95,27 @@ export class AltStatement extends BlockStatement {
     }
     // create edges between the previous condition node and the current branch condition node
     // and between the last node of the current branch and the end if node
-    for (let i = 1; i < this.ifElseBranches.length; i++) {
-      const prevBranch = this.ifElseBranches[i - 1];
-      const curBranch = this.ifElseBranches[i];
+    const branches = [...this.ifElseBranches, this.elseBranch].filter(
+      (branch): branch is Branch => branch !== null,
+    );
+
+    const firstBranch = branches[0];
+    if (!firstBranch) {
+      throw new Error("No first branch");
+    }
+    if (this.inboundNode) {
+      const inboundEdge = new Edge(
+        this.inboundNode,
+        firstBranch.getFirstNode(),
+      );
+      this.addEdge(inboundEdge);
+    }
+    const edge = new Edge(firstBranch.getLastNode(), this.endIfNode);
+    this.addEdge(edge);
+
+    for (let i = 1; i < branches.length; i++) {
+      const prevBranch = branches[i - 1];
+      const curBranch = branches[i];
       const prevFirstNode = prevBranch.getFirstNode();
       const curFirstNode = curBranch.getFirstNode();
       if (prevFirstNode && curFirstNode) {

@@ -4,7 +4,7 @@ import sequenceParser from "@/generated-parser/sequenceParser";
 import antlr4 from "antlr4";
 import sequenceLexer from "@/generated-parser/sequenceLexer";
 import { formatText } from "@/utils/StringUtil";
-import { IStatement } from "./types";
+import { IBlockStatement } from "./types";
 import { AltStatement } from "./AltStatement";
 import { MessageStatement } from "./MessageStatement";
 import { AsyncMessageStatement } from "./AsyncMessageStatement";
@@ -62,8 +62,12 @@ class SwimLaneCollector extends sequenceParserListener {
     this.swimLanes = swimLanes;
   }
 
-  setCurrentStatement(stat: IStatement) {
-    this.swimLanes.setCurrentStatement(stat);
+  getCurrentBlockStatement() {
+    return this.swimLanes.currentBlockStatement;
+  }
+
+  setCurrentBlockStatement(statement: IBlockStatement) {
+    this.swimLanes.setCurrentBlockStatement(statement);
   }
 
   // Implement enter/exit methods for the nodes you want to collect
@@ -77,90 +81,59 @@ class SwimLaneCollector extends sequenceParserListener {
     const statement = new AltStatement(
       ctx,
       this.swimLanes,
-      this.swimLanes.currentStatement,
+      this.getCurrentBlockStatement(),
     );
-    this.setCurrentStatement(statement);
+    this.setCurrentBlockStatement(statement);
+  }
+
+  enterIfBlock(ctx: any): void {
+    const currentStatement = this.getCurrentBlockStatement();
+    if (!(currentStatement instanceof AltStatement)) {
+      throw new Error("Current statement is not an AltStatement");
+    }
+    currentStatement.if(ctx);
+  }
+
+  enterElseIfBlock(ctx: any): void {
+    const currentStatement = this.getCurrentBlockStatement();
+    if (!(currentStatement instanceof AltStatement)) {
+      throw new Error("Parent statement is not an AltStatement");
+    }
+
+    currentStatement.elseIf(ctx);
+  }
+
+  enterElseBlock(ctx: any): void {
+    const currentStatement = this.getCurrentBlockStatement();
+    if (!(currentStatement instanceof AltStatement)) {
+      throw new Error("Current statement is not an AltStatement");
+    }
+    currentStatement.else(ctx);
   }
 
   exitAlt(): void {
-    if (!(this.swimLanes.currentStatement instanceof AltStatement)) {
+    const currentStatement = this.getCurrentBlockStatement();
+    if (!(currentStatement instanceof AltStatement)) {
       throw new Error("Current statement is not an AltStatement");
     }
 
-    this.swimLanes.currentStatement.setFinished();
-    const parent = this.swimLanes.currentStatement.getParent();
-    if (!parent) {
-      throw new Error("No parent statement");
+    currentStatement.setFinished();
+    const parentStatement = currentStatement.getParent();
+    if (!parentStatement) {
+      throw new Error("Parent statement is null");
     }
-    this.setCurrentStatement(parent);
+    this.setCurrentBlockStatement(parentStatement);
   }
 
   enterAsyncMessage(ctx: any): void {
-    const asyncMessageStatement = new AsyncMessageStatement(
-      ctx,
-      this.swimLanes,
-      this.swimLanes.currentStatement,
-    );
-    this.setCurrentStatement(asyncMessageStatement);
+    const curBlockStatement = this.getCurrentBlockStatement();
+    new AsyncMessageStatement(ctx, this.swimLanes, curBlockStatement);
   }
-
-  /*   enterAsyncMessage(ctx: any): void {
-      const from = ctx.from();
-      const to = ctx.to();
-      const message = ctx.content().getFormattedText();
-
-      const fromName = from.getFormattedText();
-      const toName = to.getFormattedText();
-      const fromLane = this.swimLanes.getLane(fromName);
-      const toLane = this.swimLanes.getLane(toName);
-      const lastNode = fromLane.lastNode();
-      // if (lastNode) {
-      //   toLane.setInboundNode(lastNode);
-      //   new MessageNode(message, toLane, lastNode.rank);
-      // } else {
-      // const emptyNode = new EmptyMessageNode(fromLane);
-      //   toLane.setInboundNode(emptyNode);
-      //   new MessageNode(message, toLane, emptyNode.rank);
-      // }
-
-      new MessageNode(message, fromLane);
-      this.previousLane = fromLane;
-
-      if (this.previousLane && this.previousLane.name !== toName) {
-        const outBoundNode = this.previousLane?.lastNode();
-        toLane.setInboundNode(outBoundNode);
-        new EmptyMessageNode(toLane, outBoundNode?.rank);
-      } else {
-        new EmptyMessageNode(toLane);
-      }
-      this.previousLane = toLane;
-    } */
 
   enterMessage(ctx: any): void {
-    const messageStatement = new MessageStatement(
-      ctx,
-      this.swimLanes,
-      this.swimLanes.currentStatement,
-    );
-    this.setCurrentStatement(messageStatement);
+    const curBlockStatement = this.getCurrentBlockStatement();
+    new MessageStatement(ctx, this.swimLanes, curBlockStatement);
   }
-
-  // Add other enter/exit methods as needed
-  /*   enterMessageBody(ctx: any) {
-      const to = ctx.to();
-      const message = ctx.func().signature()[0].getFormattedText();
-
-      const toName = to.getFormattedText();
-      const toLane = this.swimLanes.getLane(toName);
-      if (this.previousLane && this.previousLane.name !== toName) {
-        const outBoundNode = this.previousLane?.lastNode();
-        toLane.setInboundNode(outBoundNode);
-        new MessageNode(message, toLane, outBoundNode?.rank);
-      } else {
-        new MessageNode(message, toLane);
-      }
-      this.previousLane = toLane;
-    } */
 }
 
 export class SwimLaneDiagram {

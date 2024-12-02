@@ -18,12 +18,16 @@ export class BaseNode implements Shape {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  addToSwimLane(_swimLane: SwimLane, _rank?: number) {
-    throw new Error("Method not implemented.");
+  addToSwimLane(_rank?: number) {
+    this.swimLane.addNodes([this]);
   }
 
   setRank(rank: number) {
     this.rank = rank;
+  }
+
+  setSwimLane(swimLane: SwimLane) {
+    this.swimLane = swimLane;
   }
 
   setPrevNode(node: BaseNode) {
@@ -44,6 +48,7 @@ export class BaseNode implements Shape {
       name: this.name,
       rank: this.rank,
       swimLane: this.swimLane.name,
+      type: this.type,
     };
   }
 }
@@ -53,20 +58,20 @@ export class MessageNode extends BaseNode {
 
   constructor(name: string, swimLane: SwimLane, rank?: number) {
     super(name, swimLane, rank);
-    this.addToSwimLane(swimLane, rank);
+    this.addToSwimLane(rank);
   }
 
-  addToSwimLane(swimLane: SwimLane, rank?: number) {
+  addToSwimLane(rank?: number) {
     if (rank) {
-      if (this.rank > swimLane.maxRank) {
+      if (this.rank > this.swimLane.maxRank) {
         this.rank = rank;
       } else {
-        this.rank = swimLane.maxRank + 1;
+        this.rank = this.swimLane.maxRank + 1;
       }
     } else {
-      this.rank = swimLane.maxRank + 1;
+      this.rank = this.swimLane.maxRank + 1;
     }
-    swimLane.addNodes([this]);
+    this.swimLane.addNodes([this]);
   }
 }
 
@@ -82,13 +87,15 @@ export class IfElseNode extends BaseNode {
 
   constructor(name: string, swimLane: SwimLane, rank: number) {
     super(name, swimLane, rank);
+    this.addToSwimLane(rank);
   }
 }
 
 export class EndIfNode extends BaseNode {
   type: NodeType = "endif";
 
-  constructor(swimLane: SwimLane, rank?: number) {
-    super("END IF", swimLane, rank);
+  constructor(swimLane: SwimLane, rank: number) {
+    super("endif", swimLane, rank);
+    this.addToSwimLane(rank);
   }
 }

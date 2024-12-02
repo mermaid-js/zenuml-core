@@ -1,5 +1,5 @@
 import ParserRuleContext from "antlr4/context/ParserRuleContext";
-import { IStatement } from "./types";
+import { IBlockStatement } from "./types";
 import { BaseStatement } from "./Statement";
 import { SwimLanes } from "./SwimLane";
 import { Edge } from "./Edge";
@@ -9,9 +9,9 @@ export class AsyncMessageStatement extends BaseStatement {
   constructor(
     ctx: ParserRuleContext,
     swimLanes: SwimLanes,
-    previousStatement: IStatement | null,
+    currentBlockStatement: IBlockStatement | null,
   ) {
-    super(ctx, swimLanes, previousStatement);
+    super(ctx, swimLanes, currentBlockStatement);
   }
 
   createNodes() {
