@@ -181,5 +181,6 @@ const NodeComponents: Record<NodeType, any> = {
   message: MessageNode,
   ifelse: ConditionalNode,
   endif: ConditionalNode,
+  loop: ConditionalNode,
 };
 </script>

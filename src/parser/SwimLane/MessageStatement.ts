@@ -26,9 +26,26 @@ export class MessageStatement extends BaseStatement {
       : 0;
 
     // TODO: optimize rank calculation
+    // const rank =
+    //   this.parent && fromName === toName
+    //     ? Math.max(this.parent.getMaxRank() + 1, fromSwimLaneMaxRank + 1)
+    //     : this.parent.getMaxRank()
+    // let rank = 0;
+    // if (this.parent) {
+    //   const parentMaxRank = this.parent.getMaxRank();
+    //   rank =
+    //     fromName === toName
+    //       ? Math.max(parentMaxRank + 1, fromSwimLaneMaxRank + 1)
+    //       : parentMaxRank;
+    // } else {
+    //   rank =
+    //     inboundNode?.rank && fromName !== toName
+    //       ? Math.max(swimLane.maxRank + 1, fromSwimLaneMaxRank + 1)
+    //       : swimLane.maxRank + 1;
+    // }
     const rank =
       inboundNode?.rank && fromName !== toName
-        ? Math.max(swimLane.maxRank + 1, fromSwimLaneMaxRank + 1)
+        ? Math.max(swimLane.maxRank + 1, fromSwimLaneMaxRank)
         : swimLane.maxRank + 1;
 
     const node = new MessageNode(message, swimLane, rank);

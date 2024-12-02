@@ -80,10 +80,11 @@ export class BaseStatement implements IStatement {
 }
 
 export class BlockStatement extends BaseStatement implements IBlockStatement {
+  protected finished: boolean = false;
+
   createBlock(node?: BaseNode | null): Tile {
     throw new Error("Method not implemented.");
   }
-  protected finished: boolean = false;
 
   appendChild(statement: IStatement): void {
     throw new Error("Method not implemented.");
@@ -101,6 +102,12 @@ export class BlockStatement extends BaseStatement implements IBlockStatement {
     tile.nodes.forEach((node) => this.nodes.set(node.id, node));
     tile.edges.forEach((edge) => this.edges.set(edge.id, edge));
   }
+
+  getMaxRank(): number {
+    return Math.max(
+      ...Array.from(this.nodes.values()).map((node) => node.rank),
+    );
+  }
 }
 
 export class RootStatement implements IBlockStatement {
@@ -114,6 +121,9 @@ export class RootStatement implements IBlockStatement {
   constructor(ctx: ParserRuleContext, swimLanes: SwimLanes) {
     this.ctx = ctx;
     this.swimLanes = swimLanes;
+  }
+  getMaxRank(): number {
+    throw new Error("Method not implemented.");
   }
 
   getFirstSwimLane(): SwimLane {
@@ -161,6 +171,12 @@ export class RootStatement implements IBlockStatement {
       nodes: Array.from(this.nodes.values()),
       edges: Array.from(this.edges.values()),
     };
+  }
+
+  getMaxRank(): number {
+    return Math.max(
+      ...Array.from(this.nodes.values()).map((node) => node.rank),
+    );
   }
 
   getParent() {

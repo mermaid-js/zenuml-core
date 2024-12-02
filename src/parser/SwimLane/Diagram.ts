@@ -8,6 +8,7 @@ import { IBlockStatement } from "./types";
 import { AltStatement } from "./AltStatement";
 import { MessageStatement } from "./MessageStatement";
 import { AsyncMessageStatement } from "./AsyncMessageStatement";
+import { LoopStatement } from "./LoopStatement";
 
 // const statementContextMethods = [
 //   "message",
@@ -117,6 +118,28 @@ class SwimLaneCollector extends sequenceParserListener {
       throw new Error("Current statement is not an AltStatement");
     }
 
+    currentStatement.setFinished();
+    const parentStatement = currentStatement.getParent();
+    if (!parentStatement) {
+      throw new Error("Parent statement is null");
+    }
+    this.setCurrentBlockStatement(parentStatement);
+  }
+
+  enterLoop(ctx: any): void {
+    const currentStatement = new LoopStatement(
+      ctx,
+      this.swimLanes,
+      this.getCurrentBlockStatement(),
+    );
+    this.setCurrentBlockStatement(currentStatement);
+  }
+
+  exitLoop(): void {
+    const currentStatement = this.getCurrentBlockStatement();
+    if (!(currentStatement instanceof LoopStatement)) {
+      throw new Error("Current statement is not an LoopStatement");
+    }
     currentStatement.setFinished();
     const parentStatement = currentStatement.getParent();
     if (!parentStatement) {

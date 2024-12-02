@@ -1,15 +1,17 @@
 import { BaseNode } from "./Nodes";
-import { JSONable } from "./types";
+import { EdgeType, JSONable } from "./types";
 
 export class Edge implements JSONable {
   id: string;
   source: BaseNode;
   target: BaseNode;
+  type: EdgeType;
 
-  constructor(source: BaseNode, target: BaseNode) {
+  constructor(source: BaseNode, target: BaseNode, type?: EdgeType) {
     this.id = `${source.id}-${target.id}`;
     this.source = source;
     this.target = target;
+    this.type = type ?? "normal";
   }
 
   toJSON() {
@@ -17,6 +19,7 @@ export class Edge implements JSONable {
       id: this.id,
       source: this.source.id,
       target: this.target.id,
+      type: this.type,
     };
   }
 }

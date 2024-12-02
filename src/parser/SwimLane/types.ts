@@ -1,7 +1,8 @@
 import { Edge } from "./Edge";
 import { BaseNode } from "./Nodes";
 
-export type NodeType = "message" | "ifelse" | "endif";
+export type NodeType = "message" | "ifelse" | "endif" | "loop";
+export type EdgeType = "normal" | "loop";
 
 export interface JSONable {
   toJSON(): Record<string, any>;
@@ -25,6 +26,7 @@ export interface IStatement {
 export interface IBlockStatement extends IStatement {
   createBlock(node?: BaseNode | null): Tile;
   appendChild(statement: IStatement): void;
+  getMaxRank(): number;
   setFinished(): void;
   isFinished(): boolean;
 }
@@ -36,9 +38,11 @@ export function isBlockStatement(
 }
 
 export type SwimLaneId = string;
+export type NodeId = string;
+export type EdgeId = string;
 
 export interface NodeModel {
-  id: string;
+  id: NodeId;
   name: string;
   type: NodeType;
   rank: number;
@@ -46,9 +50,10 @@ export interface NodeModel {
 }
 
 export interface EdgeModel {
-  id: string;
-  source: string;
-  target: string;
+  id: EdgeId;
+  source: NodeId;
+  target: NodeId;
+  type: EdgeType;
 }
 
 export interface SwimLaneDiagramModel {

@@ -99,3 +99,12 @@ export class EndIfNode extends BaseNode {
     this.addToSwimLane(rank);
   }
 }
+
+export class LoopNode extends BaseNode {
+  type: NodeType = "loop";
+
+  constructor(name: string, swimLane: SwimLane, rank: number) {
+    super(name, swimLane, rank);
+    this.addToSwimLane(rank);
+  }
+}
