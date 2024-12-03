@@ -2,7 +2,7 @@
   <div
     class="relative grid gap-0 w-full border"
     :style="{
-      gridTemplateColumns: `repeat(${diagramModel.swimLanes.length}, minmax(0, 1fr))`,
+      gridTemplateColumns: `repeat(${diagramModel.swimLanes.length}, minmax(min-content, 1fr))`,
     }"
     ref="containerRef"
   >

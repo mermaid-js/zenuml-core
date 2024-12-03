@@ -59,7 +59,6 @@ export class AltStatement extends BlockStatement {
     const branches = [...this.ifElseBranches, this.elseBranch].filter(
       (branch): branch is Branch => branch !== null,
     );
-    this.initialRank = inboundNode ? inboundNode.rank + 1 : 0;
     for (let i = 0; i < branches.length; i++) {
       const branch = branches[i];
       const branchInboundNode =
@@ -67,7 +66,8 @@ export class AltStatement extends BlockStatement {
       if (!branchInboundNode) {
         throw new Error("No inbound node");
       }
-      const tile = branch.createBlock(branchInboundNode, this.initialRank);
+      const rank = branchInboundNode.rank + i + 1;
+      const tile = branch.createBlock(branchInboundNode, rank);
       this.addTile(tile);
     }
 

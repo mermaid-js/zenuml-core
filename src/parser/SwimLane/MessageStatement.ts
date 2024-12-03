@@ -45,7 +45,7 @@ export class MessageStatement extends BaseStatement {
     // }
     const rank =
       inboundNode?.rank && fromName !== toName
-        ? Math.max(swimLane.maxRank + 1, fromSwimLaneMaxRank)
+        ? Math.max(swimLane.maxRank + 1, fromSwimLaneMaxRank + 1)
         : swimLane.maxRank + 1;
 
     const node = new MessageNode(message, swimLane, rank);
