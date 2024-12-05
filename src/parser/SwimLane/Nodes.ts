@@ -11,7 +11,7 @@ export class BaseNode implements Shape {
   type: NodeType | undefined;
 
   constructor(name: string, swimLane: SwimLane, rank?: number) {
-    this.id = `${swimLane.name}-${name}`;
+    this.id = `${swimLane.name}.${name}`;
     this.name = name;
     this.swimLane = swimLane;
     this.rank = rank ?? -1;
@@ -63,13 +63,9 @@ export class MessageNode extends BaseNode {
 
   addToSwimLane(rank?: number) {
     if (rank) {
-      if (this.rank > this.swimLane.maxRank) {
-        this.rank = rank;
-      } else {
-        this.rank = this.swimLane.maxRank + 1;
-      }
+      this.rank = rank;
     } else {
-      this.rank = this.swimLane.maxRank + 1;
+      this.rank = this.swimLane.swimLanes.maxRank + 1;
     }
     this.swimLane.addNodes([this]);
   }

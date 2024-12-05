@@ -13,7 +13,7 @@
       </marker>
     </defs>
     <polyline
-      :points="points"
+      :points="path"
       fill="none"
       stroke="black"
       stroke-width="2"
@@ -25,9 +25,11 @@
 <script setup lang="ts">
 import { ConnectionModel, NodePositionModel } from "@/parser/SwimLane/types";
 import { computed } from "vue";
+import { NodeEdges } from "./types";
 
 interface Props {
   connection: ConnectionModel;
+  nodeEdges: NodeEdges;
 }
 
 const props = defineProps<Props>();
@@ -39,17 +41,15 @@ type Point = {
   y: number;
 };
 
-type BoxPoints = {
-  center: Point;
+type RectPoints = {
   top: Point;
   right: Point;
   bottom: Point;
   left: Point;
 };
 
-const getPoints = (rect: DOMRect) => {
+const getPoints = (rect: DOMRect): RectPoints => {
   return {
-    center: { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 },
     top: { x: rect.x + rect.width / 2, y: rect.y },
     right: { x: rect.x + rect.width, y: rect.y + rect.height / 2 },
     bottom: { x: rect.x + rect.width / 2, y: rect.y + rect.height },
@@ -57,59 +57,7 @@ const getPoints = (rect: DOMRect) => {
   };
 };
 
-const findEdgeCenter = (source: BoxPoints, target: BoxPoints) => {
-  // Calculate distances to each edge center
-  const edges: Record<
-    Exclude<keyof BoxPoints, "center">,
-    { x: number; y: number; dist: number }
-  > = {
-    top: { ...source.top, dist: 0 },
-    right: { ...source.right, dist: 0 },
-    bottom: { ...source.bottom, dist: 0 },
-    left: { ...source.left, dist: 0 },
-  };
-
-  // Calculate distance from target to each edge center
-  Object.values(edges).forEach((edge) => {
-    edge.dist = Math.sqrt(
-      Math.pow(target.center.x - edge.x, 2) +
-        Math.pow(target.center.y - edge.y, 2),
-    );
-  });
-
-  // Return the coordinates of the closest edge center
-  const closestEdge = (Object.keys(edges) as Array<Edge>).reduce(
-    (closest, current) =>
-      edges[current].dist < edges[closest].dist ? current : closest,
-  );
-  const closestEdgePoint: Point = {
-    x: edges[closestEdge].x,
-    y: edges[closestEdge].y,
-  };
-
-  return [closestEdge, closestEdgePoint] as const;
-};
-
-const findClosestEdgeIntraSwimLane = (
-  source: NodePositionModel,
-  target: NodePositionModel,
-) => {
-  const sourcePoints = getPoints(source.rect);
-  const targetPoints = getPoints(target.rect);
-
-  const [startEdge, startEdgePoint] = findEdgeCenter(
-    sourcePoints,
-    targetPoints,
-  );
-  const [endEdge, endEdgePoint] = findEdgeCenter(targetPoints, sourcePoints);
-
-  return [
-    { edge: startEdge, point: startEdgePoint },
-    { edge: endEdge, point: endEdgePoint },
-  ] as const;
-};
-
-const findClosestEdgeInterSwimLane = (
+const findEdgeIntraSwimLane = (
   source: NodePositionModel,
   target: NodePositionModel,
 ) => {
@@ -118,11 +66,20 @@ const findClosestEdgeInterSwimLane = (
   let sourceEdges = Object.entries(sourcePoints).map(([k, p]) => ({
     key: k as Edge,
     point: p,
+    precedence: 100,
   }));
   let targetEdges = Object.entries(targetPoints).map(([k, v]) => ({
     key: k as Edge,
     point: v,
+    precedence: 100,
   }));
+
+  sourceEdges = sourceEdges.filter(
+    (edge) => !props.nodeEdges.targetEdges.has(`${source.id}.${edge.key}`),
+  );
+  targetEdges = targetEdges.filter(
+    (edge) => !props.nodeEdges.sourceEdges.has(`${target.id}.${edge.key}`),
+  );
 
   if (source.rank === target.rank) {
     sourceEdges = sourceEdges.filter(
@@ -131,21 +88,13 @@ const findClosestEdgeInterSwimLane = (
     targetEdges = targetEdges.filter(
       (edge) => edge.key === "left" || edge.key === "right",
     );
+  } else if (source.rank > target.rank) {
+    sourceEdges = sourceEdges.filter((edge) => edge.key === "top");
+    targetEdges = targetEdges.filter((edge) => edge.key === "bottom");
   } else {
-    if (source.rank > target.rank) {
-      sourceEdges = sourceEdges.filter(
-        (edge) => edge.key === "left" || edge.key === "right",
-      );
-      targetEdges = targetEdges.filter((edge) => edge.key === "bottom");
-    } else {
-      sourceEdges = sourceEdges.filter((edge) => edge.key === "bottom");
-      targetEdges = targetEdges.filter(
-        (edge) => edge.key === "left" || edge.key === "right",
-      );
-    }
+    sourceEdges = sourceEdges.filter((edge) => edge.key === "bottom");
+    targetEdges = targetEdges.filter((edge) => edge.key === "top");
   }
-
-  // console.log({ sourceEdges, targetEdges });
 
   let minDist = Infinity;
   let closestEdges: [Edge, Edge] = ["top", "top"];
@@ -168,56 +117,292 @@ const findClosestEdgeInterSwimLane = (
   ] as const;
 };
 
-const calculatePoints = (
-  startNode: NodePositionModel,
-  endNode: NodePositionModel,
+const findEdgeInterSwimLane = (
+  source: NodePositionModel,
+  target: NodePositionModel,
 ) => {
-  const [
-    { edge: startEdge, point: startEdgePoint },
-    { edge: endEdge, point: endEdgePoint },
-  ] =
-    startNode.swimLane === endNode.swimLane
-      ? findClosestEdgeIntraSwimLane(startNode, endNode)
-      : findClosestEdgeInterSwimLane(startNode, endNode);
-  // console.log({
-  //   startEdge,
-  //   startEdgePoint,
-  //   endEdge,
-  //   endEdgePoint,
-  // });
+  const sourcePoints = getPoints(source.rect);
+  const targetPoints = getPoints(target.rect);
+  let sourceEdges = Object.entries(sourcePoints).map(([k, p]) => ({
+    key: k as Edge,
+    point: p,
+    weight: 100,
+  }));
+  let targetEdges = Object.entries(targetPoints).map(([k, v]) => ({
+    key: k as Edge,
+    point: v,
+    weight: 100,
+  }));
 
-  const midX = (startEdgePoint.x + endEdgePoint.x) / 2;
-  const midY = (startEdgePoint.y + endEdgePoint.y) / 2;
+  sourceEdges.forEach((edge) => {
+    if (props.nodeEdges.targetEdges.has(`${source.id}.${edge.key}`)) {
+      // If the edge already has incoming connections, reduce its weight
+      edge.weight -= 20;
+    }
 
+    if (props.nodeEdges.sourceEdges.has(`${source.id}.${edge.key}`)) {
+      // If the edge already has outgoing connections, reduce its weight
+      edge.weight -= 5;
+      if (source.type === "ifelse") {
+        // If the source is an ifelse node, reduce the weight of the edge
+        edge.weight -= 10;
+      }
+    }
+
+    if (source.rank === target.rank) {
+      // If the source and target are adjacent, increase the weight of the left/right edges
+      if (edge.key === "left" || edge.key === "right") {
+        edge.weight += 10;
+      }
+    } else if (source.rank > target.rank) {
+      // source is below target
+      if (target.type === "loop") {
+        if (edge.key === "left" || edge.key === "right") {
+          edge.weight += 10;
+        }
+        if (
+          source.swimLaneIndex < target.swimLaneIndex ||
+          edge.key === "right"
+        ) {
+          edge.weight += 5;
+        }
+      }
+      if (edge.key === "top") {
+        edge.weight += 5;
+      }
+      if (edge.key === "bottom") {
+        edge.weight -= 10;
+      }
+    } else {
+      // source is above target
+      if (edge.key === "bottom") {
+        edge.weight += 5;
+      }
+      if (edge.key === "top") {
+        edge.weight -= 10;
+      }
+    }
+
+    if (source.swimLaneIndex < target.swimLaneIndex) {
+      // If the source is to the left of the target, increase the weight of the right edge
+      if (edge.key === "right") {
+        edge.weight += 3;
+      }
+      if (edge.key === "left") {
+        edge.weight -= 3;
+      }
+    } else if (source.swimLaneIndex > target.swimLaneIndex) {
+      // If the source is to the right of the target, increase the weight of the left edge
+      if (edge.key === "left") {
+        edge.weight += 3;
+      }
+      if (edge.key === "right") {
+        edge.weight -= 3;
+      }
+    }
+  });
+
+  targetEdges.forEach((edge) => {
+    if (props.nodeEdges.sourceEdges.has(`${target.id}.${edge.key}`)) {
+      // If the edge already has outgoing connections, reduce its weight
+      edge.weight -= 30;
+    }
+
+    if (props.nodeEdges.targetEdges.has(`${target.id}.${edge.key}`)) {
+      // If the edge already has incoming connections, reduce its weight
+      edge.weight -= 5;
+    }
+
+    if (source.rank === target.rank) {
+      // If the source and target are adjacent, increase the weight of the left/right edges
+      if (edge.key === "left" || edge.key === "right") {
+        edge.weight += 10;
+      }
+    } else if (source.rank > target.rank) {
+      // source is below target
+      if (target.type === "loop") {
+        if (edge.key === "left" || edge.key === "right") {
+          edge.weight += 10;
+        }
+      }
+      // source is above target
+      if (edge.key === "bottom") {
+        edge.weight += 5;
+      }
+      if (edge.key === "top") {
+        edge.weight -= 10;
+      }
+    } else {
+      // source is above target
+      if (edge.key === "top") {
+        edge.weight += 5;
+      }
+      if (edge.key === "bottom") {
+        edge.weight -= 10;
+      }
+    }
+
+    if (source.swimLaneIndex > target.swimLaneIndex) {
+      if (edge.key === "right") {
+        // If the target is to the left of the source, increase the weight of the right edge
+        edge.weight += 3;
+      }
+      if (edge.key === "left") {
+        edge.weight -= 5;
+      }
+    } else if (source.swimLaneIndex < target.swimLaneIndex) {
+      if (edge.key === "left") {
+        // If the target is to the right of the source, increase the weight of the left edge
+        edge.weight += 3;
+      }
+      if (edge.key === "right") {
+        edge.weight -= 5;
+      }
+    }
+  });
+
+  const sourceEdge = sourceEdges.reduce((prev, curr) =>
+    prev.weight > curr.weight ? prev : curr,
+  );
+
+  const targetEdge = targetEdges.reduce((prev, curr) =>
+    prev.weight > curr.weight ? prev : curr,
+  );
+
+  console.log({
+    srcId: source.id,
+    sourceEdges,
+    srcEdge: sourceEdge,
+    tgtId: target.id,
+    targetEdges,
+    tgtEdge: targetEdge,
+  });
+
+  props.nodeEdges.sourceEdges?.add(`${source.id}.${sourceEdge.key}`);
+  props.nodeEdges.targetEdges?.add(`${target.id}.${targetEdge.key}`);
+
+  return [
+    { edge: sourceEdge.key, point: sourcePoints[sourceEdge.key] },
+    { edge: targetEdge.key, point: targetPoints[targetEdge.key] },
+  ] as const;
+};
+
+const findPath = (
+  start: { point: Point; edge: Edge; node: NodePositionModel },
+  end: { point: Point; edge: Edge; node: NodePositionModel },
+) => {
+  const { point: startPoint, edge: startEdge, node: startNode } = start;
+  const { point: endPoint, edge: endEdge, node: endNode } = end;
+
+  const minRectWidth = Math.min(startNode.rect.width, endNode.rect.width);
+
+  const minRectHeight = Math.min(startNode.rect.height, endNode.rect.height);
+
+  const deltaX = Math.max(30, minRectWidth * 0.5);
+  const deltaY = Math.max(30, minRectHeight * 0.5);
+
+  const generatePath = (points: Array<{ x: number; y: number }>) => {
+    return points.map((p) => `${p.x},${p.y}`).join("  ");
+  };
+
+  // Both edges are top/bottom
   if (
-    (startEdge === "top" && endEdge === "bottom") ||
-    (startEdge === "bottom" && endEdge === "top")
-  ) {
-    return `${startEdgePoint.x},${startEdgePoint.y} ${startEdgePoint.x},${midY} ${endEdgePoint.x},${midY} ${endEdgePoint.x},${endEdgePoint.y}`;
-  }
-  if (
-    (startEdge === "left" || startEdge === "right") &&
+    (startEdge === "top" || startEdge === "bottom") &&
     (endEdge === "top" || endEdge === "bottom")
   ) {
-    return `${startEdgePoint.x},${startEdgePoint.y} ${endEdgePoint.x},${startEdgePoint.y} ${endEdgePoint.x},${endEdgePoint.y}`;
+    const startY =
+      startEdge === "top" ? startPoint.y - deltaY : startPoint.y + deltaY;
+    const endY = endEdge === "top" ? endPoint.y - deltaY : endPoint.y + deltaY;
+
+    return generatePath([
+      { x: startPoint.x, y: startPoint.y },
+      { x: startPoint.x, y: startY },
+      { x: endPoint.x, y: startY },
+      { x: endPoint.x, y: endY },
+      { x: endPoint.x, y: endPoint.y },
+    ]);
   }
+
+  // Both edges are left/right
+  if (
+    (startEdge === "left" || startEdge === "right") &&
+    (endEdge === "left" || endEdge === "right")
+  ) {
+    const startX =
+      startEdge === "left" ? startPoint.x - deltaX : startPoint.x + deltaX;
+    const endX = endEdge === "left" ? endPoint.x - deltaX : endPoint.x + deltaX;
+
+    return generatePath([
+      { x: startPoint.x, y: startPoint.y },
+      { x: startX, y: startPoint.y },
+      { x: startX, y: endPoint.y },
+      { x: endX, y: endPoint.y },
+      { x: endPoint.x, y: endPoint.y },
+    ]);
+  }
+
+  // Start is top/bottom, end is left/right
   if (
     (startEdge === "top" || startEdge === "bottom") &&
     (endEdge === "left" || endEdge === "right")
   ) {
-    return `${startEdgePoint.x},${startEdgePoint.y} ${startEdgePoint.x},${endEdgePoint.y} ${endEdgePoint.x},${endEdgePoint.y}`;
+    const startY =
+      startEdge === "top" ? startPoint.y - deltaY : startPoint.y + deltaY;
+    const endX = endEdge === "left" ? endPoint.x - deltaX : endPoint.x + deltaX;
+
+    return generatePath([
+      { x: startPoint.x, y: startPoint.y },
+      { x: startPoint.x, y: startY },
+      { x: startPoint.x, y: endPoint.y },
+      { x: endX, y: endPoint.y },
+      { x: endPoint.x, y: endPoint.y },
+    ]);
   }
+
+  // Start is left/right, end is top/bottom
   if (
-    (startEdge === "left" && endEdge === "right") ||
-    (startEdge === "right" && endEdge === "left")
+    (startEdge === "left" || startEdge === "right") &&
+    (endEdge === "top" || endEdge === "bottom")
   ) {
-    return `${startEdgePoint.x},${startEdgePoint.y} ${midX},${startEdgePoint.y} ${midX},${endEdgePoint.y} ${endEdgePoint.x},${endEdgePoint.y}`;
+    const startX =
+      startEdge === "left" ? startPoint.x - deltaX : startPoint.x + deltaX;
+    const endY = endEdge === "top" ? endPoint.y - deltaY : endPoint.y + deltaY;
+
+    return generatePath([
+      { x: startPoint.x, y: startPoint.y },
+      { x: startX, y: startPoint.y },
+      { x: startX, y: endY },
+      { x: endPoint.x, y: endY },
+      { x: endPoint.x, y: endPoint.y },
+    ]);
   }
 
   return "";
 };
 
-const points = computed(() => {
-  return calculatePoints(props.connection.source, props.connection.target);
+const connection = computed(() => {
+  const [
+    { edge: startEdge, point: startEdgePoint },
+    { edge: endEdge, point: endEdgePoint },
+  ] =
+    props.connection.source.swimLaneId === props.connection.target.swimLaneId
+      ? findEdgeIntraSwimLane(props.connection.source, props.connection.target)
+      : findEdgeInterSwimLane(props.connection.source, props.connection.target);
+  return { startEdge, startEdgePoint, endEdge, endEdgePoint };
+});
+
+const path = computed(() => {
+  return findPath(
+    {
+      point: connection.value.startEdgePoint,
+      edge: connection.value.startEdge,
+      node: props.connection.source,
+    },
+    {
+      point: connection.value.endEdgePoint,
+      edge: connection.value.endEdge,
+      node: props.connection.target,
+    },
+  );
 });
 </script>

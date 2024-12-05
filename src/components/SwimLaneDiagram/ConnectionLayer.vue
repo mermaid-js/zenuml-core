@@ -4,6 +4,7 @@
       v-for="connection in connections"
       :key="connection.id"
       :connection="connection"
+      :nodeEdges="nodeEdges"
     />
   </div>
 </template>
@@ -11,7 +12,8 @@
 <script setup lang="ts">
 import { ConnectionModel } from "@/parser/SwimLane/types";
 import Connection from "./Connection.vue";
-import { watchEffect } from "vue";
+import { ref, watch } from "vue";
+import { NodeEdges } from "./types";
 
 interface Props {
   connections: ConnectionModel[];
@@ -19,7 +21,13 @@ interface Props {
 
 const props = defineProps<Props>();
 
-watchEffect(() => {
-  console.log({ connections: props.connections });
+const nodeEdges = ref<NodeEdges>({
+  sourceEdges: new Set(),
+  targetEdges: new Set(),
+});
+
+watch(props.connections, () => {
+  nodeEdges.value.sourceEdges.clear();
+  nodeEdges.value.targetEdges.clear();
 });
 </script>

@@ -7,10 +7,12 @@ export class SwimLane {
   id: SwimLaneId;
   name: string;
   nodes: BaseNode[] = [];
+  swimLanes: SwimLanes;
 
-  constructor(name: string) {
+  constructor(name: string, swimLanes: SwimLanes) {
     this.id = name;
     this.name = name;
+    this.swimLanes = swimLanes;
   }
 
   addNodes(nodes: BaseNode[]) {
@@ -47,7 +49,7 @@ export class SwimLanes {
     if (this.lanes.has(lane)) {
       return this.lanes.get(lane)!;
     } else {
-      const swimLane = new SwimLane(lane);
+      const swimLane = new SwimLane(lane, this);
       this.lanes.set(lane, swimLane);
       return swimLane;
     }

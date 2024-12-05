@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { IBlockStatement, isBlockStatement, IStatement, Tile } from "./types";
+import { IBlockStatement, IStatement, Tile } from "./types";
 import { BaseNode } from "./Nodes";
 import ParserRuleContext from "antlr4/context/ParserRuleContext";
 import { SwimLane, SwimLanes } from "./SwimLane";
 import { Edge } from "./Edge";
+import { OrderedMap } from "./OrderMap";
 
 export class BaseStatement implements IStatement {
   protected ctx: ParserRuleContext;
   protected swimLanes: SwimLanes;
   protected firstChild: IStatement | null = null;
   protected parent: IBlockStatement | null = null;
-  protected nodes: Map<string, BaseNode> = new Map();
-  protected edges: Map<string, Edge> = new Map();
+  protected nodes: OrderedMap<string, BaseNode> = new OrderedMap();
+  protected edges: OrderedMap<string, Edge> = new OrderedMap();
   protected outboundNode: BaseNode | null = null;
   protected inboundNode: BaseNode | null = null;
 
@@ -114,16 +115,13 @@ export class RootStatement implements IBlockStatement {
   private ctx: ParserRuleContext;
   private statements: IStatement[] = [];
   private swimLanes: SwimLanes;
-  private nodes: Map<string, BaseNode> = new Map();
-  private edges: Map<string, Edge> = new Map();
+  private nodes: OrderedMap<string, BaseNode> = new OrderedMap();
+  private edges: OrderedMap<string, Edge> = new OrderedMap();
   private finished: boolean = false;
 
   constructor(ctx: ParserRuleContext, swimLanes: SwimLanes) {
     this.ctx = ctx;
     this.swimLanes = swimLanes;
-  }
-  getMaxRank(): number {
-    throw new Error("Method not implemented.");
   }
 
   getFirstSwimLane(): SwimLane {
@@ -174,9 +172,7 @@ export class RootStatement implements IBlockStatement {
   }
 
   getMaxRank(): number {
-    return Math.max(
-      ...Array.from(this.nodes.values()).map((node) => node.rank),
-    );
+    return Math.max(...this.nodes.values().map((node) => node.getRank()));
   }
 
   getParent() {

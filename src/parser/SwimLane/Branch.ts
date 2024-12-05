@@ -16,48 +16,67 @@ export class Branch {
   }
 
   getFirstNode() {
-    return Array.from(this.nodes.values())[0];
+    return this.nodes.getByIndex(0);
   }
 
   getLastNode() {
-    return Array.from(this.nodes.values())[this.nodes.size - 1];
+    return this.nodes.getByIndex(this.nodes.size - 1);
   }
 
   add(statement: IStatement) {
     this.statements.push(statement);
   }
 
-  getTile(inboundNode: BaseNode, rank: number): Tile {
+  getTile(inboundNode: BaseNode, rank?: number): Tile {
     return this.createBlock(inboundNode, rank);
   }
 
-  createBlock(inboundNode: BaseNode, rank: number): Tile {
+  createBlock(inboundNode: BaseNode, rank?: number): Tile {
+    const initialRank = rank ?? inboundNode.rank;
     // @ts-ignore
     const conditionExpr = this.ctx.parExpr?.().condition().getFormattedText();
     // @ts-ignore
     const isIf = "IF" in this.ctx && !("ELSE" in this.ctx);
+    // @ts-ignore
+    const isElseIf = "IF" in this.ctx && "ELSE" in this.ctx;
+    // @ts-ignore
+    const isElse = !("IF" in this.ctx) && "ELSE" in this.ctx;
+    const firstNodeRank = initialRank + 1;
 
     const swimlane = inboundNode.swimLane;
-    const firstNode: BaseNode | null = conditionExpr
-      ? new IfElseNode(conditionExpr, swimlane, rank)
-      : new IfElseNode("else", swimlane, rank);
+    const firstNode: BaseNode | null =
+      isIf || isElseIf
+        ? new IfElseNode(conditionExpr, swimlane, firstNodeRank)
+        : new IfElseNode("else", swimlane, firstNodeRank);
 
     this.nodes.set(firstNode.id, firstNode);
     firstNode.setPrevNode(inboundNode);
 
     for (let i = 0; i < this.statements.length; i++) {
       const statement = this.statements[i];
-      const block = statement.getTile(this.getLastNode());
 
-      block.nodes.forEach((node) => this.nodes.set(node.id, node));
-      block.edges.forEach((edge) => this.edges.set(edge.id, edge));
+      const lastNode = this.getLastNode();
+      const tile = statement.getTile(
+        lastNode,
+        isElse && i === 0 ? firstNodeRank + 1 : undefined,
+      );
 
+      // backtrack and update first node's swimlane of ifElse/else branch
       if (!isIf && i === 0) {
-        firstNode.setSwimLane(block.nodes[0].swimLane);
+        const updatedFirstNode = new IfElseNode(
+          isElse ? "else" : conditionExpr,
+          tile.nodes[0].swimLane,
+          firstNodeRank,
+        );
+        this.nodes.setByIndex(0, updatedFirstNode.id, updatedFirstNode);
+        tile.edges[0].source = updatedFirstNode;
       }
 
-      this.addNodes(block.nodes);
-      this.addEdges(block.edges);
+      tile.nodes.forEach((node) => this.nodes.set(node.id, node));
+      tile.edges.forEach((edge) => this.edges.set(edge.id, edge));
+
+      this.addNodes(tile.nodes);
+      this.addEdges(tile.edges);
     }
 
     return {
