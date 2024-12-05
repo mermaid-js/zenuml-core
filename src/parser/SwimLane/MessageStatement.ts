@@ -20,7 +20,7 @@ export class MessageStatement extends BaseStatement {
     const toName = messageBodyCtx.to().getText();
     const message = messageBodyCtx.func().signature()[0].getFormattedText();
     const swimLane = this.swimLanes.getLane(toName);
-    const fromName = inboundNode?.swimLane.name;
+    const fromName = inboundNode?.swimLane?.name;
     const fromSwimLaneMaxRank = fromName
       ? this.swimLanes.getLane(fromName).maxRank
       : 0;

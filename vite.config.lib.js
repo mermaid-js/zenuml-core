@@ -20,6 +20,7 @@ export default defineConfig({
         {
           format: "esm",
           sourcemap: true,
+          exports: "named",
           // https://rollupjs.org/guide/en/#outputentryfilenames
           // It will use the file name in `build.lib.entry` without extension as `[name]` if `[name].xxx.yyy` is provided.
           // So we hard code as zenuml. We may consider rename `core.ts` to `zenuml.ts`.
@@ -31,6 +32,7 @@ export default defineConfig({
           name: "zenuml", //  it is the global variable name representing your bundle. https://rollupjs.org/guide/en/#outputname
           format: "umd",
           sourcemap: true,
+          exports: "named",
           entryFileNames: `zenuml.js`,
         },
       ],

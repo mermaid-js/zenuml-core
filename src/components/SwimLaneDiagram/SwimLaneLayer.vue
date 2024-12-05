@@ -51,10 +51,8 @@ import {
 import { ref, watchEffect, computed, onMounted, onBeforeUnmount } from "vue";
 import ConnectionLayer from "./ConnectionLayer.vue";
 import { debounce } from "lodash";
-import { watch } from "vue";
 import MessageNode from "./MessageNode.vue";
 import ConditionalNode from "./ConditionalNode.vue";
-import { onUpdated } from "vue";
 
 interface Props {
   diagramModel: SwimLaneDiagramModel;
@@ -85,7 +83,7 @@ const gridItems = computed(() => {
 
   props.diagramModel.nodes.forEach((node) => {
     const swimLaneIndex = props.diagramModel.swimLanes.indexOf(node.swimLane);
-    items[node.rank][swimLaneIndex].push(node);
+    items[node.rank][swimLaneIndex]?.push(node);
   });
 
   return items;

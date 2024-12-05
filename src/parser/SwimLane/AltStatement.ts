@@ -64,7 +64,8 @@ export class AltStatement extends BlockStatement {
       const branchInboundNode =
         i === 0 ? inboundNode : branches[i - 1].getFirstNode();
       if (!branchInboundNode) {
-        throw new Error("No inbound node");
+        // throw new Error("No inbound node");
+        continue;
       }
       const rank = branchInboundNode.rank + i + 1;
       const tile = branch.createBlock(branchInboundNode, rank);
