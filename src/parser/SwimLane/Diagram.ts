@@ -89,20 +89,20 @@ class SwimLaneCollector extends sequenceParserListener {
   }
 
   enterIfBlock(ctx: any): void {
-    const currentStatement = this.getCurrentBlockStatement();
-    if (!(currentStatement instanceof AltStatement)) {
+    const blkStatement = this.getCurrentBlockStatement();
+    if (!(blkStatement instanceof AltStatement)) {
       throw new Error("Current statement is not an AltStatement");
     }
-    currentStatement.if(ctx);
+    blkStatement.if(ctx);
   }
 
   enterElseIfBlock(ctx: any): void {
-    const currentStatement = this.getCurrentBlockStatement();
-    if (!(currentStatement instanceof AltStatement)) {
+    const blkStatement = this.getCurrentBlockStatement();
+    if (!(blkStatement instanceof AltStatement)) {
       throw new Error("Parent statement is not an AltStatement");
     }
 
-    currentStatement.elseIf(ctx);
+    blkStatement.elseIf(ctx);
   }
 
   enterElseBlock(ctx: any): void {
@@ -196,7 +196,7 @@ export class SwimLaneDiagram {
     if (!this.swimLanes) {
       throw new Error("SwimLanes not initialized");
     }
-    return this.swimLanes.toJson;
+    return this.swimLanes.toJson();
   }
 
   createDiagram() {

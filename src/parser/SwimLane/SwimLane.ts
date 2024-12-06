@@ -63,10 +63,13 @@ export class SwimLanes {
   }
 
   toJson() {
-    const { nodes, edges } = this.rootStatement?.getTile() ?? {};
+    const { nodes, edges } = this.rootStatement?.getTile() ?? {
+      nodes: [],
+      edges: [],
+    };
     return {
-      nodes: nodes?.map((node) => node.toJSON()),
-      edges: edges?.map((edge) => edge.toJSON()),
+      nodes: nodes.map((node) => node.toJSON()),
+      edges: edges.map((edge) => edge.toJSON()),
     };
   }
 
