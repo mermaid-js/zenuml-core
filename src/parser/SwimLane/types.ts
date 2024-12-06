@@ -20,7 +20,7 @@ export interface IStatement {
   setOutboundNode(node: BaseNode): void;
   getOutboundNode(): BaseNode | null;
   getParent(): IBlockStatement | null;
-  getTile(node?: BaseNode | null): Tile;
+  getTile(node?: BaseNode | null, rank?: number): Tile;
 }
 
 export interface IBlockStatement extends IStatement {
@@ -68,7 +68,9 @@ export interface NodePositionModel {
   id: string;
   rect: DOMRect;
   rank: number;
-  swimLane: string;
+  swimLaneId: string;
+  swimLaneIndex: number;
+  type: NodeType;
 }
 
 export interface ConnectionModel {

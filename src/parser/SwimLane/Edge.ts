@@ -8,7 +8,7 @@ export class Edge implements JSONable {
   type: EdgeType;
 
   constructor(source: BaseNode, target: BaseNode, type?: EdgeType) {
-    this.id = `${source?.id}-${target?.id}`;
+    this.id = `${source?.id}->${target?.id}`;
     this.source = source;
     this.target = target;
     this.type = type ?? "normal";

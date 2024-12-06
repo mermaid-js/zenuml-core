@@ -22,7 +22,7 @@
     <template v-for="(row, rowIndex) in gridItems" :key="rowIndex">
       <template v-for="(items, colIndex) in row" :key="colIndex">
         <div
-          class="border-r p-4 z-10 flex flex-row gap-8"
+          class="border-r px-4 py-6 z-10 flex flex-row gap-4"
           :class="{
             'border-r-0': colIndex === row.length - 1,
             'justify-center': items.length === 1,
@@ -48,11 +48,12 @@ import {
   NodePositionModel,
   NodeType,
 } from "@/parser/SwimLane/types";
-import { ref, watchEffect, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import ConnectionLayer from "./ConnectionLayer.vue";
 import { debounce } from "lodash";
 import MessageNode from "./MessageNode.vue";
 import ConditionalNode from "./ConditionalNode.vue";
+import { watch } from "vue";
 
 interface Props {
   diagramModel: SwimLaneDiagramModel;
@@ -62,10 +63,6 @@ const props = defineProps<Props>();
 
 const containerRef = ref<HTMLDivElement>();
 const resizeObserver = ref<ResizeObserver>();
-
-watchEffect(() => {
-  // console.log(props.diagramModel);
-});
 
 const gridItems = computed(() => {
   if (props.diagramModel.swimLanes.length === 0) {
@@ -81,7 +78,7 @@ const gridItems = computed(() => {
     Array.from({ length: cols }, () => [] as NodeModel[]),
   );
 
-  props.diagramModel.nodes.forEach((node) => {
+  props.diagramModel.nodes?.forEach((node) => {
     const swimLaneIndex = props.diagramModel.swimLanes.indexOf(node.swimLane);
     items[node.rank][swimLaneIndex]?.push(node);
   });
@@ -92,20 +89,20 @@ const gridItems = computed(() => {
 const nodePositions = ref<NodePositionModel[]>([]);
 
 const connections = computed(() => {
-  console.log({
-    nodePositions: nodePositions.value,
-    edges: props.diagramModel.edges,
-    nodes: props.diagramModel.nodes,
-  });
   return props.diagramModel.edges
-    .map((edge) => ({
+    ?.map((edge) => ({
       id: edge.id,
       source: nodePositions.value.find((node) => node.id === edge.source),
       target: nodePositions.value.find((node) => node.id === edge.target),
     }))
-    .filter(
-      (connection) => connection.source && connection.target,
-    ) as ConnectionModel[];
+    .filter((connection) => connection.source && connection.target)
+    .sort((a, b) => {
+      return (
+        a.source!.rank * 2 +
+        a.source!.swimLaneIndex -
+        (b.source!.rank * 2 + b.source!.swimLaneIndex)
+      );
+    }) as ConnectionModel[];
 });
 
 const getNodePositions = () => {
@@ -113,7 +110,7 @@ const getNodePositions = () => {
     return [];
   }
   const nodePositions = props.diagramModel.nodes
-    .map((node) => {
+    ?.map((node) => {
       const element = document.getElementById(node.id);
       if (!element) {
         return null;
@@ -129,7 +126,9 @@ const getNodePositions = () => {
         id: node.id,
         rect: domRect,
         rank: node.rank,
-        swimLane: node.swimLane,
+        swimLaneId: node.swimLane,
+        swimLaneIndex: props.diagramModel.swimLanes.indexOf(node.swimLane),
+        type: node.type,
       };
     })
     .filter((position) => position !== null);
@@ -140,7 +139,7 @@ const getNodePositions = () => {
 // Debounced version of position update
 const updateNodePositions = debounce(() => {
   nodePositions.value = getNodePositions();
-}, 100);
+}, 500);
 
 // Set up resize observer
 onMounted(() => {
@@ -148,6 +147,10 @@ onMounted(() => {
     resizeObserver.value = new ResizeObserver(updateNodePositions);
     resizeObserver.value.observe(containerRef.value);
   }
+});
+
+watch(props.diagramModel, () => {
+  updateNodePositions();
 });
 
 // Clean up
@@ -158,20 +161,6 @@ onBeforeUnmount(() => {
 // Keep existing onUpdated hook
 // onUpdated(() => {
 //   updateNodePositions();
-// });
-
-// watch(props.diagramModel, () => {
-//   updateNodePositions();
-// });
-
-// watchEffect(() => {
-//   console.log({
-//     swimLanes: props.diagramModel.swimLanes,
-//     maxRank: props.diagramModel.maxRank,
-//     gridItems: gridItems.value,
-//     nodePositions: nodePositions.value,
-//     connections: connections.value,
-//   });
 // });
 
 // Register components for dynamic rendering

@@ -14,7 +14,7 @@ export class MessageStatement extends BaseStatement {
     super(ctx, swimLanes, parentStatement);
   }
 
-  private createNodes(inboundNode: BaseNode) {
+  private createNodes(inboundNode: BaseNode, rank?: number) {
     // @ts-ignore
     const messageBodyCtx = this.ctx.messageBody();
     const toName = messageBodyCtx.to().getText();
@@ -43,12 +43,16 @@ export class MessageStatement extends BaseStatement {
     //       ? Math.max(swimLane.maxRank + 1, fromSwimLaneMaxRank + 1)
     //       : swimLane.maxRank + 1;
     // }
-    const rank =
-      inboundNode?.rank && fromName !== toName
-        ? Math.max(swimLane.maxRank + 1, fromSwimLaneMaxRank + 1)
-        : swimLane.maxRank + 1;
+    const parentMaxRank = this.parent ? this.parent.getMaxRank() : -1;
+    const newRank = rank
+      ? rank
+      : Math.max(
+          swimLane.maxRank + 1,
+          parentMaxRank + 1,
+          fromSwimLaneMaxRank + 1,
+        );
 
-    const node = new MessageNode(message, swimLane, rank);
+    const node = new MessageNode(message, swimLane, newRank);
 
     this.addNode(node);
     this.connectNodes(inboundNode, node);
@@ -61,8 +65,8 @@ export class MessageStatement extends BaseStatement {
     }
   }
 
-  getTile(inboundNode: BaseNode): Tile {
-    this.createNodes(inboundNode);
+  getTile(inboundNode: BaseNode, rank?: number): Tile {
+    this.createNodes(inboundNode, rank);
     this.createEdges();
     return {
       nodes: Array.from(this.nodes.values()),

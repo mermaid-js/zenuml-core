@@ -9,6 +9,7 @@ import { AltStatement } from "./AltStatement";
 import { MessageStatement } from "./MessageStatement";
 import { AsyncMessageStatement } from "./AsyncMessageStatement";
 import { LoopStatement } from "./LoopStatement";
+import { BlockStatement } from "./Statement";
 
 // const statementContextMethods = [
 //   "message",
@@ -79,12 +80,12 @@ class SwimLaneCollector extends sequenceParserListener {
   }
 
   enterAlt(ctx: any): void {
-    const statement = new AltStatement(
+    const blkStatement = new AltStatement(
       ctx,
       this.swimLanes,
       this.getCurrentBlockStatement(),
     );
-    this.setCurrentBlockStatement(statement);
+    this.setCurrentBlockStatement(blkStatement);
   }
 
   enterIfBlock(ctx: any): void {
@@ -113,49 +114,47 @@ class SwimLaneCollector extends sequenceParserListener {
   }
 
   exitAlt(): void {
-    const currentStatement = this.getCurrentBlockStatement();
-    if (!(currentStatement instanceof AltStatement)) {
-      throw new Error("Current statement is not an AltStatement");
-    }
-
-    currentStatement.setFinished();
-    const parentStatement = currentStatement.getParent();
-    if (!parentStatement) {
-      throw new Error("Parent statement is null");
-    }
-    this.setCurrentBlockStatement(parentStatement);
+    this.exitBlockStatement(AltStatement, "AltStatement");
   }
 
   enterLoop(ctx: any): void {
-    const currentStatement = new LoopStatement(
+    const blkStatement = new LoopStatement(
       ctx,
       this.swimLanes,
       this.getCurrentBlockStatement(),
     );
-    this.setCurrentBlockStatement(currentStatement);
+    this.setCurrentBlockStatement(blkStatement);
   }
 
   exitLoop(): void {
+    this.exitBlockStatement(LoopStatement, "LoopStatement");
+  }
+
+  enterAsyncMessage(ctx: any): void {
+    const blkStatement = this.getCurrentBlockStatement();
+    new AsyncMessageStatement(ctx, this.swimLanes, blkStatement);
+  }
+
+  enterMessage(ctx: any): void {
+    const blkStatement = this.getCurrentBlockStatement();
+    new MessageStatement(ctx, this.swimLanes, blkStatement);
+  }
+
+  private exitBlockStatement<T extends BlockStatement>(
+    StatementType: new (...args: any[]) => T,
+    statementName: string,
+  ): void {
     const currentStatement = this.getCurrentBlockStatement();
-    if (!(currentStatement instanceof LoopStatement)) {
-      throw new Error("Current statement is not an LoopStatement");
+    if (!(currentStatement instanceof StatementType)) {
+      throw new Error(`Current statement is not a ${statementName}`);
     }
+
     currentStatement.setFinished();
     const parentStatement = currentStatement.getParent();
     if (!parentStatement) {
       throw new Error("Parent statement is null");
     }
     this.setCurrentBlockStatement(parentStatement);
-  }
-
-  enterAsyncMessage(ctx: any): void {
-    const curBlockStatement = this.getCurrentBlockStatement();
-    new AsyncMessageStatement(ctx, this.swimLanes, curBlockStatement);
-  }
-
-  enterMessage(ctx: any): void {
-    const curBlockStatement = this.getCurrentBlockStatement();
-    new MessageStatement(ctx, this.swimLanes, curBlockStatement);
   }
 }
 
@@ -197,7 +196,7 @@ export class SwimLaneDiagram {
     if (!this.swimLanes) {
       throw new Error("SwimLanes not initialized");
     }
-    return this.swimLanes.toJson();
+    return this.swimLanes.toJson;
   }
 
   createDiagram() {

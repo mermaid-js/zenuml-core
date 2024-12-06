@@ -67,8 +67,8 @@ export class AltStatement extends BlockStatement {
         // throw new Error("No inbound node");
         continue;
       }
-      const rank = branchInboundNode.rank + i + 1;
-      const tile = branch.createBlock(branchInboundNode, rank);
+      const rank = i === 0 ? inboundNode?.rank : branches[i - 1].getMaxRank();
+      const tile = branch.getTile(branchInboundNode, rank);
       this.addTile(tile);
     }
 
@@ -78,6 +78,9 @@ export class AltStatement extends BlockStatement {
     ].reduce((max, rank) => Math.max(max, rank), 0);
 
     const swimlane = this.ifElseBranches[0].getFirstNode()?.swimLane;
+    if (!swimlane) {
+      throw new Error("No swimlane");
+    }
     this.endIfNode = new EndIfNode(swimlane, maxRank + 1);
     this.addNode(this.endIfNode);
     this.connectNodes(inboundNode, this.endIfNode);
@@ -104,14 +107,16 @@ export class AltStatement extends BlockStatement {
     if (!firstBranch) {
       throw new Error("No first branch");
     }
-    if (this.inboundNode) {
-      const inboundEdge = new Edge(
-        this.inboundNode,
-        firstBranch.getFirstNode(),
-      );
+    const firstNode = firstBranch.getFirstNode();
+    if (this.inboundNode && firstNode) {
+      const inboundEdge = new Edge(this.inboundNode, firstNode);
       this.addEdge(inboundEdge);
     }
-    const edge = new Edge(firstBranch.getLastNode(), this.endIfNode);
+    const lastNode = firstBranch.getLastNode();
+    if (!lastNode) {
+      throw new Error("No last node");
+    }
+    const edge = new Edge(lastNode, this.endIfNode);
     this.addEdge(edge);
 
     for (let i = 1; i < branches.length; i++) {
