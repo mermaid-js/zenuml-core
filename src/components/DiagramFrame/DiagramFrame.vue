@@ -47,7 +47,7 @@
         />
       </div>
       <div
-        class="footer text-skin-control px-4 py-1 flex justify-between items-center gap-3"
+        class="footer text-skin-control bg-skin-title px-4 py-1 flex justify-between items-center gap-3"
       >
         <template v-if="mode === RenderMode.Dynamic">
           <div class="flex items-center gap-3 color-base">
@@ -75,7 +75,7 @@
               </label>
             </div>
           </div>
-          <div class="zoom-controls bg-skin-base flex hide-export gap-1">
+          <div class="zoom-controls flex hide-export gap-1">
             <button class="zoom-in" @click="zoomIn()">
               <Icon name="zoom-in" icon-class="w-4 h-4" />
             </button>
