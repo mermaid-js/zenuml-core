@@ -16,7 +16,7 @@ zenUml
     stickyOffset: 0,
     theme:
       localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
-      "theme-default",
+      "theme-idle-afternoon",
   })
   .then((r) => {
     logger.debug("render resolved", r);

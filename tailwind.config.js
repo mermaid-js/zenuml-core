@@ -13,6 +13,7 @@ module.exports = {
     "theme-anz",
     "theme-nab",
     "theme-google",
+    "theme-diagramly",
     {
       pattern: /(bg|text)-.*/,
     },
