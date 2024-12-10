@@ -67,9 +67,6 @@ importers:
       vue:
         specifier: ^3.2.45
         version: 3.2.45
-      vue-property-decorator:
-        specifier: ^9.1.2
-        version: 9.1.2(vue-class-component@7.2.6(vue@3.2.45))(vue@3.2.45)
       vuex:
         specifier: ^4.1.0
         version: 4.1.0(vue@3.2.45)
@@ -7918,14 +7915,6 @@ packages:
       jsdom:
         optional: true
 
-  vue-class-component@7.2.6:
-    resolution:
-      {
-        integrity: sha512-+eaQXVrAm/LldalI272PpDe3+i4mPis0ORiMYxF6Ae4hyuCh15W8Idet7wPUEs4N4YptgFHGys4UrgNQOMyO6w==,
-      }
-    peerDependencies:
-      vue: ^2.0.0
-
   vue-demi@0.13.11:
     resolution:
       {
@@ -7948,15 +7937,6 @@ packages:
     engines: { node: ^14.17.0 || >=16.0.0 }
     peerDependencies:
       eslint: ">=6.0.0"
-
-  vue-property-decorator@9.1.2:
-    resolution:
-      {
-        integrity: sha512-xYA8MkZynPBGd/w5QFJ2d/NM0z/YeegMqYTphy7NJQXbZcuU6FC6AOdUAcy4SXP+YnkerC6AfH+ldg7PDk9ESQ==,
-      }
-    peerDependencies:
-      vue: "*"
-      vue-class-component: "*"
 
   vue@3.2.45:
     resolution:
@@ -13146,10 +13126,6 @@ snapshots:
       - supports-color
       - terser
 
-  vue-class-component@7.2.6(vue@3.2.45):
-    dependencies:
-      vue: 3.2.45
-
   vue-demi@0.13.11(vue@3.2.45):
     dependencies:
       vue: 3.2.45
@@ -13166,11 +13142,6 @@ snapshots:
       semver: 7.5.4
     transitivePeerDependencies:
       - supports-color
-
-  vue-property-decorator@9.1.2(vue-class-component@7.2.6(vue@3.2.45))(vue@3.2.45):
-    dependencies:
-      vue: 3.2.45
-      vue-class-component: 7.2.6(vue@3.2.45)
 
   vue@3.2.45:
     dependencies:
