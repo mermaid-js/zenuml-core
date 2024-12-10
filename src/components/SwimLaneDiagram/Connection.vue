@@ -217,14 +217,13 @@ const findEdgeInterSwimLane = (
     } else if (source.rank > target.rank) {
       // source is below target
       if (target.type === "loop") {
-        if (edge.key === "left" || edge.key === "right") {
-          edge.weight += 10;
-        }
+        // If the target is a loop, increase the weight of the outer source edge of the loop
         if (
-          source.swimLaneIndex < target.swimLaneIndex ||
-          edge.key === "right"
+          (source.swimLaneIndex > target.swimLaneIndex &&
+            edge.key === "right") ||
+          (source.swimLaneIndex < target.swimLaneIndex && edge.key === "left")
         ) {
-          edge.weight += 5;
+          edge.weight += 10;
         }
       }
       if (edge.key === "top") {
