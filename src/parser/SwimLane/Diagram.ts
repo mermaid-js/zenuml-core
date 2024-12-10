@@ -93,7 +93,7 @@ class SwimLaneCollector extends sequenceParserListener {
     if (!(blkStatement instanceof AltStatement)) {
       throw new Error("Current statement is not an AltStatement");
     }
-    blkStatement.if(ctx);
+    blkStatement.switchToIfBranch(ctx);
   }
 
   enterElseIfBlock(ctx: any): void {
@@ -102,7 +102,7 @@ class SwimLaneCollector extends sequenceParserListener {
       throw new Error("Parent statement is not an AltStatement");
     }
 
-    blkStatement.elseIf(ctx);
+    blkStatement.switchToElseIfBranch(ctx);
   }
 
   enterElseBlock(ctx: any): void {
@@ -110,7 +110,7 @@ class SwimLaneCollector extends sequenceParserListener {
     if (!(currentStatement instanceof AltStatement)) {
       throw new Error("Current statement is not an AltStatement");
     }
-    currentStatement.else(ctx);
+    currentStatement.switchToElseBranch(ctx);
   }
 
   exitAlt(): void {

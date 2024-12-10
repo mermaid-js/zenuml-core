@@ -35,12 +35,15 @@
 <script setup lang="ts">
 import { NodeModel } from "@/parser/SwimLane/types";
 import { computed, ref, onMounted } from "vue";
+import { useNodeRegistration } from "./useNodeRegistration";
 
 interface Props {
   node: NodeModel;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+useNodeRegistration(props.node.id);
 
 const textRef = ref<SVGTextElement | null>(null);
 const textWidth = ref(0);

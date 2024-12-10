@@ -48,12 +48,11 @@ import {
   NodePositionModel,
   NodeType,
 } from "@/parser/SwimLane/types";
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onBeforeUnmount, onUpdated, watch, provide } from "vue";
 import ConnectionLayer from "./ConnectionLayer.vue";
-import { debounce } from "lodash";
 import MessageNode from "./MessageNode.vue";
 import ConditionalNode from "./ConditionalNode.vue";
-import { watch } from "vue";
+import { RegisterMountKey, UnregisterMountKey } from "./types";
 
 interface Props {
   diagramModel: SwimLaneDiagramModel;
@@ -109,6 +108,7 @@ const getNodePositions = () => {
   if (!containerRef.value) {
     return [];
   }
+
   const nodePositions = props.diagramModel.nodes
     .map((node) => {
       const element = document.getElementById(node.id);
@@ -136,22 +136,55 @@ const getNodePositions = () => {
   return nodePositions;
 };
 
-// Debounced version of position update
-const updateNodePositions = debounce(() => {
+// Remove debounce from updateNodePositions
+const pendingMounts = ref(new Set());
+const isFullyMounted = ref(false);
+const updateNodePositions = () => {
   nodePositions.value = getNodePositions();
-}, 500);
+};
 
-// Set up resize observer
-onMounted(() => {
-  if (containerRef.value) {
-    resizeObserver.value = new ResizeObserver(updateNodePositions);
-    resizeObserver.value.observe(containerRef.value);
+// Add a flag to track if update is pending
+// Provide mounting registration method to children
+provide(RegisterMountKey, (id: string) => {
+  pendingMounts.value.add(id);
+});
+
+provide(UnregisterMountKey, (id: string) => {
+  pendingMounts.value.delete(id);
+  if (pendingMounts.value.size === 0) {
+    isFullyMounted.value = true;
   }
 });
 
-watch(props.diagramModel, () => {
-  updateNodePositions();
+// Debounced version of triggerUpdate
+// const triggerUpdate = debounce(() => {
+//   if (!isUpdatePending.value) {
+//     isUpdatePending.value = true;
+//     // Use nextTick to ensure DOM is updated
+//     nextTick(() => {
+//       updateNodePositions();
+//       isUpdatePending.value = false;
+//     });
+//   }
+// }, 1000);
+
+// Modified ResizeObserver setup
+watch(isFullyMounted, () => {
+  if (isFullyMounted.value && containerRef.value) {
+    resizeObserver.value = new ResizeObserver(() => {
+      console.log("resizeObserver");
+      updateNodePositions();
+    });
+    resizeObserver.value.observe(containerRef.value);
+    updateNodePositions();
+  }
 });
+
+// Replace watch with watchEffect to handle all reactive dependencies
+// watch(props.diagramModel, () => {
+//   // Access diagram data to track changes
+//   triggerUpdate();
+// });
 
 // Clean up
 onBeforeUnmount(() => {
@@ -159,9 +192,9 @@ onBeforeUnmount(() => {
 });
 
 // Keep existing onUpdated hook
-// onUpdated(() => {
-//   updateNodePositions();
-// });
+onUpdated(() => {
+  updateNodePositions();
+});
 
 // Register components for dynamic rendering
 const NodeComponents: Record<NodeType, any> = {

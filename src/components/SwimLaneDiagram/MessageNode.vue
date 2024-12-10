@@ -10,10 +10,13 @@
 
 <script setup lang="ts">
 import { NodeModel } from "@/parser/SwimLane/types";
+import { useNodeRegistration } from "./useNodeRegistration";
 
 interface Props {
   node: NodeModel;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+useNodeRegistration(props.node.id);
 </script>

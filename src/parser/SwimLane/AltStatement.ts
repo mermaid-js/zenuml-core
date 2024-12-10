@@ -11,7 +11,6 @@ export class AltStatement extends BlockStatement {
   private elseBranch: Branch | null = null;
   private current: Branch | null = null;
   private endIfNode: EndIfNode | null = null;
-  private initialRank: number = 0;
 
   constructor(
     ctx: ParserRuleContext,
@@ -21,19 +20,19 @@ export class AltStatement extends BlockStatement {
     super(ctx, swimLanes, parentStatement);
   }
 
-  if(ctx: ParserRuleContext) {
+  switchToIfBranch(ctx: ParserRuleContext) {
     const newBranch = new Branch(ctx);
     this.ifElseBranches.push(newBranch);
     this.current = newBranch;
   }
 
-  elseIf(ctx: ParserRuleContext) {
+  switchToElseIfBranch(ctx: ParserRuleContext) {
     const newBranch = new Branch(ctx);
     this.ifElseBranches.push(newBranch);
     this.current = newBranch;
   }
 
-  else(ctx: ParserRuleContext) {
+  switchToElseBranch(ctx: ParserRuleContext) {
     const newBranch = new Branch(ctx);
     this.elseBranch = newBranch;
     this.current = newBranch;
