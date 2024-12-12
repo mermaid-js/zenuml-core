@@ -17,8 +17,17 @@ export class MessageStatement extends BaseStatement {
   private createNodes(inboundNode: BaseNode, rank?: number) {
     // @ts-ignore
     const messageBodyCtx = this.ctx.messageBody();
+    if (!messageBodyCtx || !messageBodyCtx.to()) {
+      // @ts-ignore
+      console.warn(
+        'Message body or "to" participant is missing',
+        this.ctx.getFormattedText(),
+      );
+      return;
+    }
     const toName = messageBodyCtx.to().getText();
-    const message = messageBodyCtx.func().signature()[0].getFormattedText();
+    const message =
+      messageBodyCtx.func()?.signature()?.[0]?.getFormattedText() || "";
     const swimLane = this.swimLanes.getLane(toName);
     const fromName = inboundNode?.swimLane.name;
     const fromSwimLaneMaxRank = fromName
