@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="Object.keys(node).length > 0"
-    class="p-2 border w-fit mx-auto bg-white"
+    class="p-2 border w-fit mx-auto bg-white rounded"
     :id="node.id"
   >
     {{ node.name }}

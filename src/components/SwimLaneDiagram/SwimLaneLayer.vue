@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative grid gap-0 w-full border"
+    class="relative grid gap-0 w-full border rounded"
     :style="{
       gridTemplateColumns: `repeat(${diagramModel.swimLanes.length}, minmax(min-content, 1fr))`,
     }"
