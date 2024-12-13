@@ -199,7 +199,7 @@ export class SwimLaneDiagram {
     return this.swimLanes.toJson();
   }
 
-  createDiagram() {
+  create() {
     if (!this.swimLanes) {
       throw new Error("SwimLanes not initialized");
     }

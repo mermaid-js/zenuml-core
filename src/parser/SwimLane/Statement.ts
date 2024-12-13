@@ -69,7 +69,7 @@ export class BaseStatement implements IStatement {
     throw new Error("Method not implemented.");
   }
 
-  protected connectNodes(
+  protected setBoundNodes(
     inboundNode: BaseNode | null,
     outboundNode: BaseNode,
   ): void {

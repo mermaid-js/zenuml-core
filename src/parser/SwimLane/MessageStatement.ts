@@ -55,7 +55,7 @@ export class MessageStatement extends BaseStatement {
     const node = new MessageNode(message, swimLane, newRank);
 
     this.addNode(node);
-    this.connectNodes(inboundNode, node);
+    this.setBoundNodes(inboundNode, node);
   }
 
   private createEdges() {

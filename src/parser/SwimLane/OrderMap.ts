@@ -10,6 +10,36 @@ export class OrderedMap<K, V> {
     return this;
   }
 
+  unshift(key: K, value: V) {
+    this.keys.unshift(key);
+    this.map.set(key, value);
+    return this;
+  }
+
+  shift() {
+    const key = this.keys.shift();
+    if (!key) {
+      throw new Error("No key");
+    }
+    this.map.delete(key);
+    return key;
+  }
+
+  push(key: K, value: V) {
+    this.keys.push(key);
+    this.map.set(key, value);
+    return this;
+  }
+
+  pop() {
+    const key = this.keys.pop();
+    if (!key) {
+      throw new Error("No key");
+    }
+    this.map.delete(key);
+    return key;
+  }
+
   get(key: K) {
     return this.map.get(key);
   }

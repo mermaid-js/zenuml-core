@@ -62,11 +62,12 @@ export class AltStatement extends BlockStatement {
       const branch = branches[i];
       const branchInboundNode =
         i === 0 ? inboundNode : branches[i - 1].getFirstNode();
-      if (!branchInboundNode) {
-        throw new Error("No inbound node");
-      }
-      const rank = i === 0 ? inboundNode?.rank : branches[i - 1].getMaxRank();
-      const tile = branch.getTile(branchInboundNode, rank);
+
+      const previousBranch = branches[i - 1];
+      const tile = branch.getTile(
+        previousBranch,
+        branchInboundNode ?? undefined,
+      );
       this.addTile(tile);
     }
 
@@ -81,7 +82,7 @@ export class AltStatement extends BlockStatement {
     }
     this.endIfNode = new EndIfNode(swimlane, maxRank + 1);
     this.addNode(this.endIfNode);
-    this.connectNodes(inboundNode, this.endIfNode);
+    this.setBoundNodes(inboundNode, this.endIfNode);
 
     this.createEdges();
 
@@ -118,14 +119,7 @@ export class AltStatement extends BlockStatement {
     this.addEdge(edge);
 
     for (let i = 1; i < branches.length; i++) {
-      const prevBranch = branches[i - 1];
       const curBranch = branches[i];
-      const prevFirstNode = prevBranch.getFirstNode();
-      const curFirstNode = curBranch.getFirstNode();
-      if (prevFirstNode && curFirstNode) {
-        const edge = new Edge(prevFirstNode, curFirstNode);
-        this.addEdge(edge);
-      }
 
       const lastNode = curBranch.getLastNode();
       if (lastNode) {

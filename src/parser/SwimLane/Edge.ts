@@ -23,3 +23,19 @@ export class Edge implements JSONable {
     };
   }
 }
+
+export class LabeledEdge extends Edge {
+  label: string;
+
+  constructor(source: BaseNode, target: BaseNode, label: string) {
+    super(source, target);
+    this.label = label;
+  }
+
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      label: this.label,
+    };
+  }
+}

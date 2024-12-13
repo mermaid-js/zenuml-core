@@ -23,6 +23,8 @@ const diagramModel = computed(() => {
     },
   );
 
+  console.log(diagramData);
+
   return {
     name: "test",
     swimLanes,

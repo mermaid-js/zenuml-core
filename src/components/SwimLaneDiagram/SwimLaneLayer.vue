@@ -48,11 +48,12 @@ import {
   NodePositionModel,
   NodeType,
 } from "@/parser/SwimLane/types";
-import { ref, computed, onBeforeUnmount, onUpdated, watch, provide } from "vue";
+import { ref, computed, onBeforeUnmount, watch, provide } from "vue";
 import ConnectionLayer from "./ConnectionLayer.vue";
 import MessageNode from "./MessageNode.vue";
 import ConditionalNode from "./ConditionalNode.vue";
 import { RegisterMountKey, UnregisterMountKey } from "./types";
+import { debounce } from "lodash";
 
 interface Props {
   diagramModel: SwimLaneDiagramModel;
@@ -93,14 +94,23 @@ const connections = computed(() => {
       id: edge.id,
       source: nodePositions.value.find((node) => node.id === edge.source),
       target: nodePositions.value.find((node) => node.id === edge.target),
+      label: edge.label,
     }))
     .filter((connection) => connection.source && connection.target)
     .sort((a, b) => {
-      return (
-        a.source!.rank * 2 +
-        a.source!.swimLaneIndex -
-        (b.source!.rank * 2 + b.source!.swimLaneIndex)
-      );
+      if (a.source!.id !== b.source!.id) {
+        return (
+          a.source!.rank * 2 +
+          a.source!.swimLaneIndex -
+          (b.source!.rank * 2 + b.source!.swimLaneIndex)
+        );
+      } else {
+        return (
+          a.target!.rank * 2 +
+          a.target!.swimLaneIndex -
+          (b.target!.rank * 2 + b.target!.swimLaneIndex)
+        );
+      }
     }) as ConnectionModel[];
 });
 
@@ -139,9 +149,9 @@ const getNodePositions = () => {
 // Remove debounce from updateNodePositions
 const pendingMounts = ref(new Set());
 const isFullyMounted = ref(false);
-const updateNodePositions = () => {
+const updateNodePositions = debounce(() => {
   nodePositions.value = getNodePositions();
-};
+}, 500);
 
 // Add a flag to track if update is pending
 // Provide mounting registration method to children
@@ -192,8 +202,10 @@ onBeforeUnmount(() => {
 });
 
 // Keep existing onUpdated hook
-onUpdated(() => {
-  updateNodePositions();
+watch(props.diagramModel, () => {
+  if (isFullyMounted.value) {
+    updateNodePositions();
+  }
 });
 
 // Register components for dynamic rendering

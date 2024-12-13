@@ -1,5 +1,5 @@
 <template>
-  <div class="absolute top-0 left-0 w-full h-full z-1">
+  <div ref="container" class="absolute top-0 left-0 w-full h-full z-1">
     <connection
       v-for="connection in connections"
       :key="connection.id"
@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { ConnectionModel } from "@/parser/SwimLane/types";
 import Connection from "./Connection.vue";
-import { ref, watch } from "vue";
+import { watch } from "vue";
 import { NodeEdges } from "./types";
 
 interface Props {
@@ -21,13 +21,16 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const nodeEdges = ref<NodeEdges>({
+const nodeEdges: NodeEdges = {
   sourceEdges: new Set(),
   targetEdges: new Set(),
-});
+};
 
-watch(props.connections, () => {
-  nodeEdges.value.sourceEdges.clear();
-  nodeEdges.value.targetEdges.clear();
-});
+watch(
+  () => props.connections,
+  () => {
+    nodeEdges.sourceEdges.clear();
+    nodeEdges.targetEdges.clear();
+  },
+);
 </script>

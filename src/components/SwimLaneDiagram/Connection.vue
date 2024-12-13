@@ -19,6 +19,27 @@
       stroke-width="2"
       marker-end="url(#arrowhead)"
     />
+    <g v-if="connection.label">
+      <!-- Background rectangle -->
+      <rect
+        :x="labelPosition.x - 20"
+        :y="labelPosition.y - 10"
+        width="40"
+        height="20"
+        fill="white"
+        rx="4"
+      />
+      <!-- Text -->
+      <text
+        text-anchor="middle"
+        dominant-baseline="middle"
+        class="text-xs fill-current"
+        :x="labelPosition.x"
+        :y="labelPosition.y"
+      >
+        {{ connection.label }}
+      </text>
+    </g>
   </svg>
 </template>
 
@@ -58,7 +79,7 @@ const getPoints = (rect: DOMRect): RectPoints => {
   };
 };
 
-const findEdgeIntraSwimLane = (
+const findEdgeWithinSwimLane = (
   source: NodePositionModel,
   target: NodePositionModel,
 ) => {
@@ -92,7 +113,7 @@ const findEdgeIntraSwimLane = (
 
     if (source.rank === target.rank) {
       // If the source and target are adjacent, increase the weight of the left/right edges
-      if (edge.key === "left" || edge.key === "right") {
+      if (edge.key === "right") {
         edge.weight += 10;
       }
     } else if (source.rank > target.rank) {
@@ -121,12 +142,14 @@ const findEdgeIntraSwimLane = (
 
     if (props.nodeEdges.targetEdges.has(`${target.id}.${edge.key}`)) {
       // If the edge already has incoming connections, reduce its weight
-      edge.weight -= 5;
+      if (Math.abs(source.rank - target.rank) > 1) {
+        edge.weight -= 5;
+      }
     }
 
     if (source.rank === target.rank) {
       // If the source and target are adjacent, increase the weight of the left/right edges
-      if (edge.key === "left" || edge.key === "right") {
+      if (edge.key === "left") {
         edge.weight += 10;
       }
     } else if (source.rank > target.rank) {
@@ -169,6 +192,7 @@ const findEdgeIntraSwimLane = (
     tgtId: target.id,
     targetEdges,
     tgtEdge: targetEdge,
+    nodeEdges: props.nodeEdges,
   });
 
   return [
@@ -177,7 +201,7 @@ const findEdgeIntraSwimLane = (
   ] as const;
 };
 
-const findEdgeInterSwimLane = (
+const findEdgeAcrossSwimLanes = (
   source: NodePositionModel,
   target: NodePositionModel,
 ) => {
@@ -335,6 +359,7 @@ const findEdgeInterSwimLane = (
     tgtId: target.id,
     targetEdges,
     tgtEdge: targetEdge,
+    nodeEdges: props.nodeEdges,
   });
 
   return [
@@ -355,14 +380,20 @@ const findPath = (
   const minRectHeight = Math.min(startNode.rect.height, endNode.rect.height);
 
   const deltaX = Math.max(30, minRectWidth * 0.5);
-  const deltaY = Math.max(10, minRectHeight * 0.2);
+  const deltaY = Math.max(25, minRectHeight * 0.2);
 
   // Get window scroll position
   const scrollLeft = window.scrollX || 0;
   const scrollTop = window.scrollY || 0;
 
   const generatePath = (points: Array<{ x: number; y: number }>) => {
-    return points.map((p) => `${p.x},${p.y}`).join("  ");
+    // Remove consecutive duplicate points
+    const uniquePoints = points.filter((point, index, array) => {
+      if (index === 0) return true;
+      const prev = array[index - 1];
+      return prev.x !== point.x || prev.y !== point.y;
+    });
+    return uniquePoints.map((p) => `${p.x},${p.y}`).join("  ");
   };
 
   // Both edges are top/bottom
@@ -388,9 +419,17 @@ const findPath = (
     (startEdge === "left" || startEdge === "right") &&
     (endEdge === "left" || endEdge === "right")
   ) {
-    const startX =
-      startEdge === "left" ? startPoint.x - deltaX : startPoint.x + deltaX;
-    const endX = endEdge === "left" ? endPoint.x - deltaX : endPoint.x + deltaX;
+    const minX = Math.min(startPoint.x, endPoint.x);
+    const maxX = Math.max(startPoint.x, endPoint.x);
+    let startX, endX;
+    if (startNode.swimLaneId === endNode.swimLaneId) {
+      startX = startEdge === "left" ? minX - deltaX : maxX + deltaX;
+      endX = endEdge === "left" ? minX - deltaX : maxX + deltaX;
+    } else {
+      startX =
+        startEdge === "left" ? startPoint.x - deltaX : startPoint.x + deltaX;
+      endX = endEdge === "left" ? endPoint.x - deltaX : endPoint.x + deltaX;
+    }
 
     return generatePath([
       { x: startPoint.x + scrollLeft, y: startPoint.y + scrollTop },
@@ -446,8 +485,11 @@ const edge = computed(() => {
     { edge: endEdge, point: endEdgePoint },
   ] =
     props.connection.source.swimLaneId === props.connection.target.swimLaneId
-      ? findEdgeIntraSwimLane(props.connection.source, props.connection.target)
-      : findEdgeInterSwimLane(props.connection.source, props.connection.target);
+      ? findEdgeWithinSwimLane(props.connection.source, props.connection.target)
+      : findEdgeAcrossSwimLanes(
+          props.connection.source,
+          props.connection.target,
+        );
   return { startEdge, startEdgePoint, endEdge, endEdgePoint };
 });
 
@@ -464,6 +506,32 @@ const path = computed(() => {
       node: props.connection.target,
     },
   );
+});
+
+const labelPosition = computed(() => {
+  if (!props.connection.label) {
+    return null;
+  }
+  const points = path.value.split("  ").map((p) => p.split(",").map(Number));
+  // find the longest line
+  let maxDistance = -Infinity;
+  let maxDistanceIndex = -1;
+  for (let i = 1; i < points.length; i++) {
+    const distance =
+      Math.pow(Math.abs(points[i][0] - points[i - 1][0]), 2) +
+      Math.pow(Math.abs(points[i][1] - points[i - 1][1]), 2);
+    if (distance > maxDistance) {
+      maxDistance = distance;
+      maxDistanceIndex = i;
+    }
+  }
+
+  const startIndex = maxDistanceIndex - 1;
+  const endIndex = maxDistanceIndex;
+  return {
+    x: (points[startIndex][0] + points[endIndex][0]) / 2,
+    y: (points[startIndex][1] + points[endIndex][1]) / 2,
+  };
 });
 
 watch(

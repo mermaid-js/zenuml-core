@@ -54,6 +54,7 @@ export interface EdgeModel {
   source: NodeId;
   target: NodeId;
   type: EdgeType;
+  label?: string;
 }
 
 export interface SwimLaneDiagramModel {
@@ -77,4 +78,5 @@ export interface ConnectionModel {
   id: string;
   source: NodePositionModel;
   target: NodePositionModel;
+  label?: string;
 }
