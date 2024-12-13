@@ -449,13 +449,24 @@ const findPath = (
       startEdge === "top" ? startPoint.y - deltaY : startPoint.y + deltaY;
     const endX = endEdge === "left" ? endPoint.x - deltaX : endPoint.x + deltaX;
 
-    return generatePath([
-      { x: startPoint.x + scrollLeft, y: startPoint.y + scrollTop },
-      { x: startPoint.x + scrollLeft, y: startY + scrollTop },
-      { x: startPoint.x + scrollLeft, y: endPoint.y + scrollTop },
-      { x: endX + scrollLeft, y: endPoint.y + scrollTop },
-      { x: endPoint.x + scrollLeft, y: endPoint.y + scrollTop },
-    ]);
+    if (
+      (startNode.rank > endNode.rank && startEdge === "top") ||
+      (startNode.rank < endNode.rank && startEdge === "bottom")
+    ) {
+      return generatePath([
+        { x: startPoint.x + scrollLeft, y: startPoint.y + scrollTop },
+        { x: startPoint.x + scrollLeft, y: endPoint.y + scrollTop },
+        { x: endPoint.x + scrollLeft, y: endPoint.y + scrollTop },
+      ]);
+    } else {
+      return generatePath([
+        { x: startPoint.x + scrollLeft, y: startPoint.y + scrollTop },
+        { x: startPoint.x + scrollLeft, y: startY + scrollTop },
+        { x: startPoint.x + scrollLeft, y: endPoint.y + scrollTop },
+        { x: endX + scrollLeft, y: endPoint.y + scrollTop },
+        { x: endPoint.x + scrollLeft, y: endPoint.y + scrollTop },
+      ]);
+    }
   }
 
   // Start is left/right, end is top/bottom
@@ -467,13 +478,21 @@ const findPath = (
       startEdge === "left" ? startPoint.x - deltaX : startPoint.x + deltaX;
     const endY = endEdge === "top" ? endPoint.y - deltaY : endPoint.y + deltaY;
 
-    return generatePath([
-      { x: startPoint.x + scrollLeft, y: startPoint.y + scrollTop },
-      { x: startX + scrollLeft, y: startPoint.y + scrollTop },
-      { x: startX + scrollLeft, y: endY + scrollTop },
-      { x: endPoint.x + scrollLeft, y: endY + scrollTop },
-      { x: endPoint.x + scrollLeft, y: endPoint.y + scrollTop },
-    ]);
+    if (startNode.rank < endNode.rank) {
+      return generatePath([
+        { x: startPoint.x + scrollLeft, y: startPoint.y + scrollTop },
+        { x: endPoint.x + scrollLeft, y: startPoint.y + scrollTop },
+        { x: endPoint.x + scrollLeft, y: endPoint.y + scrollTop },
+      ]);
+    } else {
+      return generatePath([
+        { x: startPoint.x + scrollLeft, y: startPoint.y + scrollTop },
+        { x: startX + scrollLeft, y: startPoint.y + scrollTop },
+        { x: startX + scrollLeft, y: endY + scrollTop },
+        { x: endPoint.x + scrollLeft, y: endY + scrollTop },
+        { x: endPoint.x + scrollLeft, y: endPoint.y + scrollTop },
+      ]);
+    }
   }
 
   return "";
@@ -510,7 +529,10 @@ const path = computed(() => {
 
 const labelPosition = computed(() => {
   if (!props.connection.label) {
-    return null;
+    return {
+      x: 0,
+      y: 0,
+    };
   }
   const points = path.value.split("  ").map((p) => p.split(",").map(Number));
   // find the longest line
