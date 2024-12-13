@@ -100,7 +100,7 @@ ID
  ;
 
 NUMBER_UNIT
- : INT UNIT
+ : (INT | FLOAT) UNIT
  ;
 
 fragment UNIT
