@@ -599,6 +599,24 @@ export default class sequenceParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by sequenceParser#numberUnitAtom.
+	enterNumberUnitAtom(ctx) {
+	}
+
+	// Exit a parse tree produced by sequenceParser#numberUnitAtom.
+	exitNumberUnitAtom(ctx) {
+	}
+
+
+	// Enter a parse tree produced by sequenceParser#moneyAtom.
+	enterMoneyAtom(ctx) {
+	}
+
+	// Exit a parse tree produced by sequenceParser#moneyAtom.
+	exitMoneyAtom(ctx) {
+	}
+
+
 	// Enter a parse tree produced by sequenceParser#booleanAtom.
 	enterBooleanAtom(ctx) {
 	}

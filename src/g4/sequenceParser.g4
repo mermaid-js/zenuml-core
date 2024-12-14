@@ -125,12 +125,12 @@ opt
 critical
   : CRITICAL (OPAR atom? CPAR)? braceBlock
   | CRITICAL
-  ;
+ ;
 
 section
   : SECTION (OPAR atom? CPAR)? braceBlock
   | SECTION
-  ;
+ ;
 
 creation
  : creationBody (SCOL | braceBlock)?
@@ -291,9 +291,10 @@ expr
  | assignment expr                      #assignmentExpr
  ;
 
-// [Perf tuning] Merging below tokens does not help.
 atom
  : (INT | FLOAT)  #numberAtom
+ | NUMBER_UNIT    #numberUnitAtom
+ | MONEY          #moneyAtom
  | (TRUE | FALSE) #booleanAtom
  | ID             #idAtom
  | STRING         #stringAtom

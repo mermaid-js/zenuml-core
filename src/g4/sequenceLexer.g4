@@ -34,7 +34,6 @@ ARROW
  : '->'
  ;
 
-// Tokens
 fragment HEX
     : [0-9a-fA-F]
     ;
@@ -99,13 +98,29 @@ ID
  : [a-zA-Z_] [a-zA-Z_0-9]*
  ;
 
+fragment UNIT
+ : [a-zA-Z]+
+ ;
+
+fragment DIGIT
+    : [0-9]
+    ;
+
 INT
- : [0-9]+
+ : DIGIT+
  ;
 
 FLOAT
- : [0-9]+ '.' [0-9]*
- | '.' [0-9]+
+ : DIGIT+ '.' DIGIT*
+ | '.' DIGIT+
+ ;
+
+MONEY
+    : '$' (INT | FLOAT)
+    ;
+
+NUMBER_UNIT
+ : (INT | FLOAT) UNIT
  ;
 
 // As long as the text starts with double quotes, we treat it as a string before a closing double quote or change line
