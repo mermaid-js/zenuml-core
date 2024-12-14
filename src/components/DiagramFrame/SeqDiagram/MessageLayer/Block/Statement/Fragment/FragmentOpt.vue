@@ -20,7 +20,7 @@
         <div class="name font-semibold p-1 border-b">
           <label class="p-0">
             <collapse-button
-              :label="label"
+              label="Opt"
               :collapsed="collapsed"
               @click="this.toggle"
               :style="commentObj.messageStyle"
@@ -65,13 +65,7 @@ export default {
     const atom = computed(() => opt.value?.atom());
     const blockInOpt = computed(() => braceBlock.value?.block());
 
-    const label = computed(() => {
-      const text = atom.value?.getFormattedText();
-      return text ? `Opt:${text}` : "Opt";
-    });
-
     return {
-      label,
       braceBlock,
       blockInOpt,
       condition: atom,
