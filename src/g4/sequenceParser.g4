@@ -294,6 +294,7 @@ expr
 atom
  : (INT | FLOAT)  #numberAtom
  | NUMBER_UNIT    #numberUnitAtom
+ | MONEY          #moneyAtom
  | (TRUE | FALSE) #booleanAtom
  | ID             #idAtom
  | STRING         #stringAtom
