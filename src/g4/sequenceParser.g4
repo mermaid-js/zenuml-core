@@ -118,7 +118,7 @@ par
  ;
 
 opt
- : OPT braceBlock
+ : OPT (OPAR atom? CPAR)? braceBlock
  | OPT
  ;
 
