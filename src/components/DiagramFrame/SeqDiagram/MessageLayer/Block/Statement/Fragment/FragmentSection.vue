@@ -67,9 +67,7 @@ export default {
     const atom = computed(() => section.value?.atom()?.getFormattedText());
     const blockInSection = computed(() => braceBlock.value?.block());
 
-    const label = computed(
-      () => atom.value ?? capitalize(section.value.SECTION()),
-    );
+    const label = computed(() => atom.value ?? capitalize("section"));
 
     return {
       label,
