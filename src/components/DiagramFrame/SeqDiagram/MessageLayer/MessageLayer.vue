@@ -3,7 +3,6 @@ TODO: we may need to consider the width of self message on right most participan
 <template>
   <div class="message-layer relative z-30 pt-24 pb-10">
     <block
-      v-if="!!origin"
       :context="context"
       :style="{ 'padding-left': paddingLeft + 'px' }"
       :origin="origin"
@@ -35,7 +34,7 @@ const paddingLeft = computed(() => {
 
 const origin = computed(() => {
   const ownableMessages = AllMessages(rootContext.value);
-  if (ownableMessages.length === 0) return null;
+  if (ownableMessages.length === 0) return _STARTER_;
   return ownableMessages[0].from || _STARTER_;
 });
 

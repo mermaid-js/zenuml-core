@@ -115,7 +115,7 @@
               timer = setTimeout(() => {
                 const theme =
                   localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
-                  "theme-idle-afternoon";
+                  "theme-default";
                 window.zenUml
                   .render(cm.getValue(), {
                     theme,

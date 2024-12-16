@@ -127,9 +127,11 @@ critical
   | CRITICAL
  ;
 
+// section(name) {}
 section
   : SECTION (OPAR atom? CPAR)? braceBlock
-  | SECTION
+  | braceBlock    // allows anonymous section. This is mostly for error tolerance (e.g. ref(x) { m1 }).
+  | SECTION       // Error tolerance for incomplete section
  ;
 
 creation
