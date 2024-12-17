@@ -22,7 +22,7 @@ permissions:
 jobs:
   # Test
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -42,7 +42,7 @@ jobs:
         run: pnpm test
 
   npm-publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: test
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/publish'
     steps:
@@ -86,7 +86,7 @@ jobs:
 
   # Build the site for embed view and other demo
   build-site:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: test
     steps:
       - name: Checkout
@@ -104,23 +104,24 @@ jobs:
         run: pnpm install
       - name: Build the site for demo page and embed view
         run: pnpm build:gh-pages
-      - name: Upload artifact for pages # upload zipped artifact named 'gh-pages' for actions/deploy-pages@v1
-        uses: actions/upload-pages-artifact@v1
+      - name: Upload artifact for pages
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./dist
-      - name: Upload artifact for embed view # upload unzipped artifact named 'zenuml-embed' for cpina/github-action-push-to-another-repository@main
-        uses: actions/upload-artifact@v3
+      - name: Upload artifact for embed view
+        uses: actions/upload-artifact@v4
         with:
           name: zenuml-embed
           path: ./dist
+
   # Single deploy job since we're just deploying
   publish-to-gh-pages:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-site
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
