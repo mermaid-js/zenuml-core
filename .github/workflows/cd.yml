@@ -75,6 +75,14 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git tag "v${{ steps.bump.outputs.version }}"
           git push origin "v${{ steps.bump.outputs.version }}"
+      - name: Add version to job summary
+        run: |
+          echo "# Published Version" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Version | Tag |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| @zenuml/core | v${{ steps.bump.outputs.version }} | [v${{ steps.bump.outputs.version }}](https://github.com/mermaid-js/zenuml-core/releases/tag/v${{ steps.bump.outputs.version }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[View on npm](https://www.npmjs.com/package/@zenuml/core/v/${{ steps.bump.outputs.version }})" >> $GITHUB_STEP_SUMMARY
 
   # Build the site for embed view and other demo
   build-site:
