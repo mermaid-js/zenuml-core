@@ -37,11 +37,12 @@
           <!-- Value -->
         </div>
         <block
-          :origin="origin"
+          :origin="leftParticipant"
           v-if="blockInCritical"
-          :style="{ paddingLeft: `${offsetX}px` }"
+          :style="{ paddingLeft: `${paddingLeft}px` }"
           :context="blockInCritical"
-          :number="number"
+          :number="`${number}.1`"
+          incremental
         ></block>
       </div>
     </div>

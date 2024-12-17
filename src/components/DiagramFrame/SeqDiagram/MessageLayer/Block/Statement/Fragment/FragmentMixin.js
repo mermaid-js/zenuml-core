@@ -36,6 +36,10 @@ export default {
         halfLeftParticipant
       );
     },
+    paddingLeft: function () {
+      let halfLeftParticipant = this.coordinates.half(this.leftParticipant);
+      return this.border.left + halfLeftParticipant;
+    },
     fragmentStyle: function () {
       return {
         // +1px for the border of the fragment

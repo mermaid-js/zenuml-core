@@ -28,11 +28,12 @@
     </div>
     <block
       v-if="!!par.braceBlock()"
-      :origin="origin"
+      :origin="leftParticipant"
       :class="{ hidden: collapsed }"
-      :style="{ paddingLeft: `${offsetX}px` }"
+      :style="{ paddingLeft: `${paddingLeft}px` }"
       :context="par.braceBlock().block()"
-      :number="number"
+      :number="`${number}.1`"
+      incremental
     ></block>
   </div>
 </template>

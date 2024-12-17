@@ -32,9 +32,9 @@
       <div class="segment">
         <!-- fragment-offset set as offsetX - 1 for fragment border     -->
         <block
-          :origin="origin"
+          :origin="leftParticipant"
           v-if="blockInTryBlock"
-          :style="{ paddingLeft: `${offsetX}px` }"
+          :style="{ paddingLeft: `${paddingLeft}px` }"
           :context="blockInTryBlock"
           :number="`${number}.1`"
           incremental
@@ -54,8 +54,8 @@
             ><label class="exception p-1">{{ exception(catchBlock) }}</label>
           </div>
           <block
-            :origin="origin"
-            :style="{ paddingLeft: `${offsetX}px` }"
+            :origin="leftParticipant"
+            :style="{ paddingLeft: `${paddingLeft}px` }"
             :context="blockInCatchBlock(catchBlock)"
             :key="index + 2000"
             :number="`${number}.${blockLengthAcc[index] + 1}`"
@@ -72,8 +72,8 @@
             >
           </div>
           <block
-            :origin="origin"
-            :style="{ paddingLeft: `${offsetX}px` }"
+            :origin="leftParticipant"
+            :style="{ paddingLeft: `${paddingLeft}px` }"
             :context="finallyBlock"
             :number="`${number}.${
               blockLengthAcc[blockLengthAcc.length - 1] + 1

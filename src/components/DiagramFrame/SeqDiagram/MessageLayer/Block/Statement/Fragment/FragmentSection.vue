@@ -37,9 +37,9 @@
           <!-- Value -->
         </div>
         <block
-          :origin="origin"
+          :origin="leftParticipant"
           v-if="blockInSection"
-          :style="{ paddingLeft: `${offsetX}px` }"
+          :style="{ paddingLeft: `${paddingLeft}px` }"
           :context="blockInSection"
           :number="number"
         ></block>
