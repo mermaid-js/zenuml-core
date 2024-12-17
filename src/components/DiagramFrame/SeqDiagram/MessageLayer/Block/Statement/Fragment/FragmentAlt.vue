@@ -37,9 +37,9 @@
           <ConditionLabel :condition="conditionFromIfElseBlock(ifBlock)" />
         </div>
         <block
-          :origin="origin"
+          :origin="leftParticipant"
           v-if="blockInIfBlock"
-          :style="{ paddingLeft: `${offsetX}px` }"
+          :style="{ paddingLeft: `${paddingLeft}px` }"
           :context="blockInIfBlock"
           :number="`${number}.1`"
           incremental

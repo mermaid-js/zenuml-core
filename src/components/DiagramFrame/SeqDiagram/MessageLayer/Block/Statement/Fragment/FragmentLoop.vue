@@ -32,10 +32,11 @@
           <ConditionLabel :condition="getConditionFromBlock(blockInLoop)" />
         </div>
         <block
-          :origin="origin"
-          :style="{ paddingLeft: `${offsetX}px` }"
+          :origin="leftParticipant"
+          :style="{ paddingLeft: `${paddingLeft}px` }"
           :context="blockInLoop"
-          :number="number"
+          :number="`${number}.1`"
+          incremental
         ></block>
       </div>
     </div>
