@@ -105,7 +105,7 @@ jobs:
       - name: Build the site for demo page and embed view
         run: pnpm build:gh-pages
       - name: Upload artifact for pages
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
       - name: Upload artifact for embed view
