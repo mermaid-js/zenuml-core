@@ -54,8 +54,8 @@
             />
           </div>
           <block
-            :origin="origin"
-            :style="{ paddingLeft: `${offsetX}px` }"
+            :origin="leftParticipant"
+            :style="{ paddingLeft: `${paddingLeft}px` }"
             :context="blockInElseIfBlock(elseIfBlock)"
             :key="index + 2000"
             :number="`${number}.${blockLengthAcc[index] + 1}`"
@@ -69,8 +69,8 @@
             <label class="p-1">[else]</label>
           </div>
           <block
-            :origin="origin"
-            :style="{ paddingLeft: `${offsetX}px` }"
+            :origin="leftParticipant"
+            :style="{ paddingLeft: `${paddingLeft}px` }"
             :context="elseBlock"
             :number="`${number}.${
               blockLengthAcc[blockLengthAcc.length - 1] + 1
