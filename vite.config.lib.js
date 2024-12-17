@@ -63,7 +63,6 @@ export default defineConfig({
   ],
   define: {
     "process.env.NODE_ENV": '"production"',
-    // Replace version placeholder during build
-    "import.meta.env.PACKAGE_VERSION": JSON.stringify(packageJson.version),
+    "process.env.VITE_VERSION": JSON.stringify(packageJson.version),
   },
 });

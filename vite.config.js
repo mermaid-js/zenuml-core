@@ -56,7 +56,9 @@ export default defineConfig(({ mode }) => ({
     svgLoader(),
   ],
   define: {
-    "import.meta.env.PACKAGE_VERSION": JSON.stringify(packageJson.version),
+    "process.env.NODE_ENV": JSON.stringify(mode),
+    "process.env.VITE_BUILD_TIME": JSON.stringify(new Date().toISOString()),
+    "process.env.VITE_VERSION": JSON.stringify(packageJson.version),
   },
   test: {
     // used by vitest: https://vitest.dev/guide/#configuring-vitest
