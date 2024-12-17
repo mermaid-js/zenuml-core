@@ -6,6 +6,7 @@ import Store, { RenderMode } from "./store/Store";
 import DiagramFrame from "./components/DiagramFrame/DiagramFrame.vue";
 // @ts-ignore
 import SeqDiagram from "./components/DiagramFrame/SeqDiagram/SeqDiagram.vue";
+import { VERSION } from "./version";
 
 import "./assets/tailwind.css";
 import "./assets/tailwind-preflight.less";
@@ -46,6 +47,8 @@ interface IZenUml {
 }
 
 export default class ZenUml implements IZenUml {
+  static readonly version = VERSION;
+
   private readonly el: Element;
   private _code: string | undefined;
   private _theme: string | undefined;

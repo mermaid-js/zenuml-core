@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import createVuePlugin from "@vitejs/plugin-vue";
 import { execSync } from "child_process";
 import svgLoader from "vite-svg-loader";
+import { readFileSync } from "fs";
 
 process.env.VITE_APP_GIT_HASH = process.env.DOCKER
   ? ""
@@ -10,6 +11,11 @@ process.env.VITE_APP_GIT_HASH = process.env.DOCKER
 process.env.VITE_APP_GIT_BRANCH = process.env.DOCKER
   ? ""
   : execSync("git branch --show-current").toString().trim();
+
+// Read version from package.json
+const packageJson = JSON.parse(
+  readFileSync(resolve(__dirname, "package.json"), "utf-8"),
+);
 
 function getCypressHtmlFiles() {
   const cypressFolder = resolve(__dirname, "cy");
@@ -49,6 +55,9 @@ export default defineConfig(({ mode }) => ({
     }),
     svgLoader(),
   ],
+  define: {
+    "import.meta.env.PACKAGE_VERSION": JSON.stringify(packageJson.version),
+  },
   test: {
     // used by vitest: https://vitest.dev/guide/#configuring-vitest
     environment: "jsdom",

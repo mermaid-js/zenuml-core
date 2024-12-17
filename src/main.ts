@@ -8,6 +8,9 @@ const elm = document.querySelector("pre.zenuml");
 // @ts-ignore
 const zenUml = new ZenUml(elm);
 
+// Expose ZenUML version to window for easy access in developer console
+// @ts-ignore
+window.ZENUML_VERSION = ZenUml.version;
 // @ts-ignore
 window.zenUml = zenUml;
 zenUml
@@ -20,6 +23,7 @@ zenUml
   })
   .then((r) => {
     logger.debug("render resolved", r);
+    console.log("ZenUML Core Version:", ZenUml.version);
   });
 // @ts-ignore
 window.parentLogger = parentLogger;
