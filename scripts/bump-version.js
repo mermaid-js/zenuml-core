@@ -102,13 +102,9 @@ const run = async () => {
       JSON.stringify(pkg, null, 2) + "\n",
     );
 
-    // Create git tag
-    execSync(`git tag v${newVersion}`);
-    console.log(`\nCreated git tag: v${newVersion}`);
-
     // Set output for GitHub Actions
     if (process.env.GITHUB_ACTIONS) {
-      fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=v${newVersion}\n`);
+      fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${newVersion}\n`);
     }
   } else {
     console.log("\nDRY RUN: No changes were made");
