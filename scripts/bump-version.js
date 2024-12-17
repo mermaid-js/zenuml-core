@@ -5,18 +5,20 @@ const path = require("path");
 
 const getCurrentVersion = () => {
   try {
-    // Get latest version from npm
     const pkg = require("../package.json");
-    const npmVersion = execSync(`npm view ${pkg.name} version`)
+    const npmVersion = execSync(`npm view ${pkg.name} version`, {
+      stdio: ["pipe", "pipe", "pipe"],
+    })
       .toString()
       .trim();
     console.log(`Latest version on npm: ${npmVersion}`);
     return npmVersion;
-  } catch (e) {
-    // Package not published yet, use package.json as fallback
-    const pkg = require("../package.json");
-    console.log("Package not found on npm, using version from package.json");
-    return pkg.version;
+  } catch (error) {
+    console.error(
+      "Failed to get npm version. Please ensure you have npm registry access.",
+    );
+    console.error("Error:", error.message);
+    process.exit(1);
   }
 };
 

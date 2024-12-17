@@ -35,6 +35,7 @@ jobs:
         with:
           node-version: "18"
           cache: pnpm
+          registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
         run: pnpm install
       - name: Run tests
@@ -55,6 +56,7 @@ jobs:
         with:
           node-version: "18"
           cache: pnpm
+          registry-url: "https://registry.npmjs.org"
       - run: pnpm install
       - name: Bump Version
         id: bump
@@ -83,6 +85,7 @@ jobs:
         with:
           node-version: "18"
           cache: pnpm
+          registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
         run: pnpm install
       - name: Build the site for demo page and embed view
