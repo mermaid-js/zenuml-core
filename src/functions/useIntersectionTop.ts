@@ -59,9 +59,9 @@ export default function useIntersectionTop() {
     const detectorHeight = Math.ceil(
       document.documentElement.scrollHeight / DETECTOR_COUNT,
     );
-    const threshold = [...Array(detectorHeight + 1).keys()].map(
-      (i) => i / detectorHeight,
-    );
+    const threshold = [...Array(detectorHeight + 1).keys()]
+      .map((i) => i / detectorHeight)
+      .filter((i) => i >= 0 && i <= 1);
     detectors.forEach((detector, index) => {
       (detector as HTMLElement).style.top = index * detectorHeight + "px";
       (detector as HTMLElement).style.height = detectorHeight + "px";
@@ -84,7 +84,7 @@ export default function useIntersectionTop() {
     });
   });
   onUnmounted(() => {
-    observer.disconnect();
+    observer?.disconnect();
   });
   return top;
 }
