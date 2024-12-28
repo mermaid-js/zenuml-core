@@ -108,7 +108,7 @@ export class Branch {
 
     for (let i = 1; i < this.nodes.size; i++) {
       const node = this.nodes.getByIndex(i)!;
-      node.setRank(node.rank + initialRank + 1);
+      node.setRank(initialRank + i);
       this.nodes.set(node.id, node);
     }
 

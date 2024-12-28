@@ -4,7 +4,7 @@ import sequenceParser from "@/generated-parser/sequenceParser";
 import antlr4 from "antlr4";
 import sequenceLexer from "@/generated-parser/sequenceLexer";
 import { formatText } from "@/utils/StringUtil";
-import { IBlockStatement } from "./types";
+import { EdgeModel, IBlockStatement, NodeModel } from "./types";
 import { AltStatement } from "./AltStatement";
 import { MessageStatement } from "./MessageStatement";
 import { AsyncMessageStatement } from "./AsyncMessageStatement";
@@ -192,7 +192,10 @@ export class SwimLaneDiagram {
     this.walker.walk(collector, context);
   }
 
-  toJson() {
+  toJson(): {
+    nodes: NodeModel[];
+    edges: EdgeModel[];
+  } {
     if (!this.swimLanes) {
       throw new Error("SwimLanes not initialized");
     }

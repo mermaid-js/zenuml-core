@@ -185,16 +185,6 @@ const findEdgeWithinSwimLane = (
     prev.weight > curr.weight ? prev : curr,
   );
 
-  console.log({
-    srcId: source.id,
-    sourceEdges,
-    srcEdge: sourceEdge,
-    tgtId: target.id,
-    targetEdges,
-    tgtEdge: targetEdge,
-    nodeEdges: props.nodeEdges,
-  });
-
   return [
     { edge: sourceEdge.key, point: sourcePoints[sourceEdge.key] },
     { edge: targetEdge.key, point: targetPoints[targetEdge.key] },
@@ -351,16 +341,6 @@ const findEdgeAcrossSwimLanes = (
   const targetEdge = targetEdges.reduce((prev, curr) =>
     prev.weight > curr.weight ? prev : curr,
   );
-
-  console.log({
-    srcId: source.id,
-    sourceEdges,
-    srcEdge: sourceEdge,
-    tgtId: target.id,
-    targetEdges,
-    tgtEdge: targetEdge,
-    nodeEdges: props.nodeEdges,
-  });
 
   return [
     { edge: sourceEdge.key, point: sourcePoints[sourceEdge.key] },

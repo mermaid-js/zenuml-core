@@ -1,5 +1,5 @@
 import { SwimLane } from "./SwimLane";
-import { NodeType, Shape } from "./types";
+import { NodeModel, NodeType, Shape } from "./types";
 
 export class BaseNode implements Shape {
   id: string;
@@ -42,13 +42,13 @@ export class BaseNode implements Shape {
     return this.rank;
   }
 
-  toJSON() {
+  toJSON(): NodeModel {
     return {
       id: this.id,
       name: this.name,
       rank: this.rank,
       swimLane: this.swimLane.name,
-      type: this.type,
+      type: this.type as NodeType,
     };
   }
 }

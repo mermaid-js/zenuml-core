@@ -1,6 +1,6 @@
 import { BaseNode } from "./Nodes";
 import { RootStatement } from "./Statement";
-import { IBlockStatement, SwimLaneId } from "./types";
+import { IBlockStatement, SwimLaneId, NodeModel, EdgeModel } from "./types";
 import { rootContext } from "./Diagram";
 
 export class SwimLane {
@@ -62,7 +62,10 @@ export class SwimLanes {
     );
   }
 
-  toJson() {
+  toJson(): {
+    nodes: NodeModel[];
+    edges: EdgeModel[];
+  } {
     const { nodes, edges } = this.rootStatement?.getTile() ?? {
       nodes: [],
       edges: [],
