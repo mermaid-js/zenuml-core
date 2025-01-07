@@ -101,7 +101,8 @@ export default {
 .occurrence {
   width: 15px;
   /* 6 = (OccurrenceWidth(15)+1)/2 - OccurrenceBorderWidth(2)*/
-  padding: 16px 0 16px 6px;
+  padding: 16px 0 8px 6px;
+  margin-bottom: 8px;
 }
 
 :deep(> .statement-container:last-child > .interaction.return:last-of-type) {
@@ -115,9 +116,9 @@ export default {
       > .interaction.return:last-of-type
       > .message
   ) {
-  bottom: -17px;
+  bottom: -10px;
   /* Move the absolutely positioned return message to the bottom. -17 to offset the padding of Occurrence. */
-  /* height: 0; */
+  height: 0;
 }
 
 .right-to-left.occurrence {
