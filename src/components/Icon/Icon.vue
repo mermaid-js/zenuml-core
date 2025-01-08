@@ -3,7 +3,7 @@
     :class="['flex items-center justify-center', iconClass]"
     @click="$emit('icon-click')"
   >
-    <component class="w-full h-full" :is="icon" />
+    <component :is="icon" />
   </span>
 </template>
 
