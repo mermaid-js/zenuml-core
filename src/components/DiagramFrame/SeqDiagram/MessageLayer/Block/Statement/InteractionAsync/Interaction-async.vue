@@ -8,7 +8,7 @@
     :data-to="target"
     :data-source="source"
     :data-target="target"
-    class="interaction async"
+    class="interaction async mb-4"
     v-on:click.stop="onClick"
     :data-signature="signature"
     :class="{
