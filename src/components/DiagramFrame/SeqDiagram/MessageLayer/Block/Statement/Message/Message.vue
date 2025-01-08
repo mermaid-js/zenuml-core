@@ -1,6 +1,6 @@
 <template>
   <div
-    class="message border-skin-message-arrow border-b-2 flex items-end"
+    class="message leading-none border-skin-message-arrow border-b-2 flex items-end"
     :class="{
       'flex-row-reverse': rtl,
       return: type === 'return',
