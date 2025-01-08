@@ -1,6 +1,6 @@
 <template>
   <div
-    class="occurrence shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full"
+    class="occurrence min-h-6 shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full"
     :class="{ 'right-to-left': rtl }"
     data-el-type="occurrence"
     :data-belongs-to="participant"
@@ -68,8 +68,7 @@ export default {
       let len = stats.length;
       if (len > 1) return true;
       //when the only one statement is not the RetContext
-      if (len == 1 && stats[0]["ret"]() == null) return true;
-      return false;
+      return len === 1 && stats[0]["ret"]() == null;
     },
   },
   // The following code will cause the Block to be created and mounted AFTER the occurrence (and upto DiagramFrame) is updated.
@@ -101,8 +100,8 @@ export default {
 .occurrence {
   width: 15px;
   /* 6 = (OccurrenceWidth(15)+1)/2 - OccurrenceBorderWidth(2)*/
-  padding: 16px 0 8px 6px;
-  margin-bottom: 8px;
+  padding: 0 0 0 6px;
+  //margin-bottom: 8px;
 }
 
 :deep(> .statement-container:last-child > .interaction.return:last-of-type) {
@@ -116,7 +115,7 @@ export default {
       > .interaction.return:last-of-type
       > .message
   ) {
-  bottom: -10px;
+  bottom: -18px;
   /* Move the absolutely positioned return message to the bottom. -17 to offset the padding of Occurrence. */
   height: 0;
 }
