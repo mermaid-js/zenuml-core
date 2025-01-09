@@ -115,3 +115,13 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.interaction.return {
+  /* It pulls up the parent's (.statement-container) bottom margin. The purpose is to impact only when return is
+     the last statement. It wouldn't cause an issue if we apply to all return elements, because the following
+     statements will have a margin-top:16px. */
+  margin-bottom: -16px;
+  bottom: -2px; /* The width of the border of the Occurrence */
+}
+</style>

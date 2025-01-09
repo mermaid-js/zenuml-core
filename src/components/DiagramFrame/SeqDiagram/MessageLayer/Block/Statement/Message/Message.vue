@@ -28,7 +28,6 @@
             {{ content }}
           </template>
         </div>
-        <Numbering :number="number" />
       </div>
     </div>
     <point
@@ -36,6 +35,7 @@
       :fill="fill"
       :rtl="rtl"
     />
+    <Numbering :number="number" />
   </div>
 </template>
 
