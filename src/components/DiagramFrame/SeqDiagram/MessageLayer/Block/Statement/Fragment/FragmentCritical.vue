@@ -4,7 +4,7 @@
     :data-left-participant="leftParticipant"
     :data-frame-padding-left="border.left"
     :data-frame-padding-right="border.right"
-    class="fragment critical border-skin-fragment rounded relative"
+    class="fragment critical border-skin-fragment rounded"
     :style="fragmentStyle"
   >
     <div class="segment">
@@ -55,7 +55,7 @@ import fragment from "./FragmentMixin";
 import Numbering from "../../../Numbering.vue";
 
 export default {
-  name: "fragment-section",
+  name: "fragment-critical",
   components: { Numbering },
   props: ["context", "comment", "commentObj", "number"],
   mixins: [fragment],
@@ -92,6 +92,7 @@ export default {
   bottom: 0;
   left: 0;
   border: 1px solid;
+  pointer-events: none;
 }
 
 .critical .header::before {
@@ -102,5 +103,6 @@ export default {
   bottom: 0;
   left: 0;
   border-bottom: 2px solid;
+  pointer-events: none;
 }
 </style>
