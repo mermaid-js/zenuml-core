@@ -115,3 +115,11 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.occurrence > .block > .statement-container:last-child > .interaction.return {
+  /* It pulls up the parent's (.statement-container) bottom margin. */
+  margin-bottom: -16px;
+  bottom: -2px; /* The width of the border of the Occurrence */
+}
+</style>

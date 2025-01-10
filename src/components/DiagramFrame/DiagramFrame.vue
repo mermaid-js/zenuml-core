@@ -47,7 +47,7 @@
         />
       </div>
       <div
-        class="footer text-skin-control bg-skin-title px-4 py-1 flex justify-between items-center gap-3"
+        class="footer rounded text-skin-control bg-skin-title px-4 py-1 flex justify-between items-center gap-3"
       >
         <template v-if="mode === RenderMode.Dynamic">
           <div class="flex items-center gap-3 color-base">

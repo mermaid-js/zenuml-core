@@ -1,6 +1,6 @@
 <template>
   <div
-    class="occurrence shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full"
+    class="occurrence min-h-6 shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full"
     :class="{ 'right-to-left': rtl }"
     data-el-type="occurrence"
     :data-belongs-to="participant"
@@ -68,8 +68,7 @@ export default {
       let len = stats.length;
       if (len > 1) return true;
       //when the only one statement is not the RetContext
-      if (len == 1 && stats[0]["ret"]() == null) return true;
-      return false;
+      return len === 1 && stats[0]["ret"]() == null;
     },
   },
   // The following code will cause the Block to be created and mounted AFTER the occurrence (and upto DiagramFrame) is updated.
@@ -100,34 +99,15 @@ export default {
 <style scoped>
 .occurrence {
   width: 15px;
+  /* To offset Message's border-bottom width.
+  Use margin-top with relative set to save 2px at the bottom of the Occurrence.
+  If we use `top: -2px`, the 2px will still be occupied. It would have just shift the occurrence up. */
+  margin-top: -2px;
   /* 6 = (OccurrenceWidth(15)+1)/2 - OccurrenceBorderWidth(2)*/
-  padding: 16px 0 16px 6px;
-}
-
-:deep(> .statement-container:last-child > .interaction.return:last-of-type) {
-  margin-bottom: 0;
-  border-bottom: 0;
-  transform: translateY(1px);
-}
-
-:deep(
-    > .statement-container:last-child
-      > .interaction.return:last-of-type
-      > .message
-  ) {
-  bottom: -17px;
-  /* Move the absolutely positioned return message to the bottom. -17 to offset the padding of Occurrence. */
-  /* height: 0; */
+  padding-left: 6px;
 }
 
 .right-to-left.occurrence {
   left: -14px;
-}
-</style>
-
-<style>
-.occurrence {
-  margin-top: -2px;
-  /* To offset Message's border-bottom width */
 }
 </style>

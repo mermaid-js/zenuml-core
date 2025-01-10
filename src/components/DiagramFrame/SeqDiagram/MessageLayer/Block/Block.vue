@@ -1,7 +1,7 @@
 <template>
   <div class="block" :data-origin="origin">
     <div
-      class="statement-container mt-1"
+      class="statement-container my-4"
       :data-origin="origin"
       v-for="(stat, index) in statements"
       :key="index"
