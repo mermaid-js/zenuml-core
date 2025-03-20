@@ -188,14 +188,14 @@ export default {
     },
     updateFontColor() {
       if (!this.entity.color) {
-        this.color = "inherit";
+        this.color = undefined;
         return;
       }
       let bgColor = window
         .getComputedStyle(this.$refs.participant)
         .getPropertyValue("background-color");
       if (!bgColor) {
-        this.color = "inherit";
+        this.color = undefined;
         return;
       }
       let b = brightnessIgnoreAlpha(bgColor);

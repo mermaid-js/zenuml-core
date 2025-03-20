@@ -434,4 +434,44 @@
     /* Other */
     --color-text-note: #000000;
   }
+
+  .theme-creately {
+    /* Colors */
+    --color-bg-base-rgb: 255, 255, 255;
+    --color-text-base: #222;
+    --color-border-base: #666;
+
+    /* Frame */
+    --color-bg-canvas-rgb: 246, 238, 222; /* Beige background */
+    --color-bg-frame-rgb: 246, 238, 222; /* Beige frame */
+    --color-border-frame: #d3c6a6; /* Light brown border */
+
+    /* Title */
+    --color-bg-title-rgb: 246, 238, 222; /* Beige title background */
+    --color-text-title: #333333; /* Dark text for title */
+
+    /* Participant */
+    --color-bg-participant-rgb: 51, 51, 51; /* Dark gray participant boxes */
+    --color-text-participant: #ffffff; /* White text for participant */
+    --color-border-participant: #222222; /* Darker border for participant */
+
+    /* Messages */
+    --color-text-message: #333333; /* Dark text for messages */
+    --color-message-arrow: #333333; /* Dark arrow for messages */
+    --color-bg-message-hover: #4caf50; /* Green hover background */
+    --color-text-message-hover-rgb: 255, 255, 255; /* White text on hover */
+    --color-text-comment: #333333; /* Dark text for comments */
+
+    /* Fragment */
+    --color-bg-fragment-header-rgb: 246, 238, 222; /* Beige fragment header to match background */
+    --color-text-fragment: #333333; /* Dark text for fragment */
+    --color-border-fragment: #333333; /* Dark border for fragment */
+
+    /* Occurrence */
+    --color-bg-occurrence-rgb: 242, 199, 68; /* Yellow activation/occurrence boxes */
+    --color-border-occurrence: #e6b800; /* Darker yellow border for occurrence */
+
+    /* Other */
+    --color-text-note: #333333; /* Dark text for notes */
+  }
 }
