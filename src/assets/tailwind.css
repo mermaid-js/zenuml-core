@@ -18,8 +18,8 @@
 
 @layer base {
   :root {
-    --color-bg-base: 255, 255, 255;
-    --color-backup-white: 255, 255, 255;
+    --color-bg-base-rgb: 255, 255, 255;
+    --color-backup-white-rgb: 255, 255, 255;
     --color-text-base: #000;
     --color-text-secondary: #333;
     --color-border-base: #000;
@@ -27,20 +27,20 @@
   }
 
   .theme-default {
-    --color-bg-base: 255, 255, 255;
+    --color-bg-base-rgb: 255, 255, 255;
     --color-text-base: #222;
     --color-border-base: #666;
 
     /* Message */
     --color-message-arrow: #000;
-    --color-text-message-hover: 255, 255, 255;
+    --color-text-message-hover-rgb: 255, 255, 255;
     --color-bg-message-hover: #000;
 
     /* Participant */
-    --color-bg-participant: 255, 255, 255;
+    --color-bg-participant-rgb: 255, 255, 255;
 
     /* Occurrence */
-    --color-bg-occurrence: 222, 222, 222;
+    --color-bg-occurrence-rgb: 222, 222, 222;
   }
 
   .theme-clean-light {
@@ -56,17 +56,17 @@
     /* Message */
     --color-text-message: #368eff;
     --color-message-arrow: #368eff;
-    --color-text-message-hover: 255, 255, 255;
+    --color-text-message-hover-rgb: 255, 255, 255;
     --color-bg-message-hover: #368eff;
 
     /* Participant */
     --color-text-participant: #368eff;
     --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
-    --color-bg-participant: 237, 244, 254;
+    --color-bg-participant-rgb: 237, 244, 254;
     --color-border-participant: #368eff;
 
     /* Occurrence*/
-    --color-bg-occurrence: 255, 255, 255;
+    --color-bg-occurrence-rgb: 255, 255, 255;
     --color-border-occurrence: #368eff;
     --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
 
@@ -75,7 +75,7 @@
   }
 
   .theme-clean-dark {
-    --color-bg-base: 17, 22, 41;
+    --color-bg-base-rgb: 17, 22, 41;
     --color-text-base: #cecfd2;
     --color-border-base: #cecfd2;
     --color-border-frame: #cecfd2;
@@ -86,17 +86,17 @@
 
     /* Message */
     --color-message-arrow: #536fff;
-    --color-text-message-hover: 255, 255, 255;
+    --color-text-message-hover-rgb: 255, 255, 255;
     --color-bg-message-hover: #536fff;
 
     /* Participant */
     --color-text-participant: #cecfd2;
     --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
-    --color-bg-participant: 89, 110, 246;
+    --color-bg-participant-rgb: 89, 110, 246;
     --color-border-participant: #cecfd2;
 
     /* Occurrence */
-    --color-bg-occurrence: 89, 110, 246;
+    --color-bg-occurrence-rgb: 89, 110, 246;
     --color-border-occurrence: #cecfd2;
     --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
 
@@ -105,7 +105,7 @@
   }
 
   .theme-neon {
-    --color-bg-base: 0, 0, 0;
+    --color-bg-base-rgb: 0, 0, 0;
     --color-text-base: #8ffc5b;
     --color-border-base: #60ff33;
     --color-border-frame: #60ff33;
@@ -116,17 +116,17 @@
 
     /* Message */
     --color-message-arrow: #8ffc5b;
-    --color-text-message-hover: 0, 0, 0;
+    --color-text-message-hover-rgb: 0, 0, 0;
     --color-bg-message-hover: #8ffc5b;
 
     /* Participant */
     --color-text-participant: #8ffc5b;
     --color-shadow-participant: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
-    --color-bg-participant: 0, 0, 0;
+    --color-bg-participant-rgb: 0, 0, 0;
     --color-border-participant: #8ffc5b;
 
     /* Occurrence */
-    --color-bg-occurrence: 143, 252, 91;
+    --color-bg-occurrence-rgb: 143, 252, 91;
     --color-border-occurrence: #8ffc5b;
     --color-shadow-occurrence: 0px 2px 6px 2px rgba(58, 130, 237, 0.1);
 
@@ -135,11 +135,11 @@
   }
 
   .theme-mermaid {
-    --color-bg-base: #fff;
+    --color-bg-base-rgb: 255, 255, 255;
     --color-text-base: #222;
     --color-border-base: #666;
     /* Occurrence */
-    --color-bg-occurrence: #dedede;
+    --color-bg-occurrence-rgb: 222, 222, 222;
   }
 
   .theme-mermaid .footer {
@@ -148,33 +148,33 @@
 
   .theme-darcula {
     /* Frame */
-    --color-bg-canvas: #ffffff;
-    --color-bg-frame: #2b2b2b;
+    --color-bg-canvas-rgb: 255, 255, 255;
+    --color-bg-frame-rgb: 43, 43, 43;
     --color-border-frame: #cccccc;
 
     /* Title */
-    --color-bg-title: #2b2b2b;
+    --color-bg-title-rgb: 43, 43, 43;
     --color-text-title: #f8f8f2;
 
     /* Participant */
-    --color-bg-participant: 68, 71, 90;
+    --color-bg-participant-rgb: 68, 71, 90;
     --color-text-participant: #f8f8f2; /* Participant name, stereotype */
     --color-border-participant: #cccccc;
 
     /* Messages */
     --color-text-message: #ffb86c;
     --color-message-arrow: #cccccc;
-    --color-bg-message-hover: #a6d2ff;
-    --color-text-message-hover: #174ad4;
+    --color-bg-message-hover-rgb: 255, 255, 255;
+    --color-text-message-hover-rgb: 23, 74, 212;
     --color-text-comment: #666666;
 
     /* Fragment */
-    --color-bg-fragment-header: #44475a;
+    --color-bg-fragment-header-rgb: 68, 71, 90;
     --color-text-fragment: #8be9fd; /* Fragment Headers and conditions */
     --color-border-fragment: #cccccc;
 
     /* Occurrence */
-    --color-bg-occurrence: #44475a;
+    --color-bg-occurrence-rgb: 68, 71, 90;
     --color-border-occurrence: #555555;
 
     /* Other */
@@ -184,33 +184,33 @@
 
   .theme-sky {
     /* Frame */
-    --color-bg-canvas: #ffffff;
-    --color-bg-frame: #ffffff;
+    --color-bg-canvas-rgb: 255, 255, 255;
+    --color-bg-frame-rgb: 255, 255, 255;
     --color-border-frame: #cccccc;
 
     /* Title */
-    --color-bg-title: #deecfb;
+    --color-bg-title-rgb: 222, 236, 251;
     --color-text-title: #032c72;
 
     /* Participant */
-    --color-bg-participant: 222, 236, 251;
+    --color-bg-participant-rgb: 222, 236, 251;
     --color-text-participant: #032c72; /* Participant name, stereotype */
     --color-border-participant: #032c72; /* Participant border and Lifeline */
 
     /* Messages */
     --color-text-message: #032c72;
     --color-message-arrow: #032c72;
-    --color-bg-message-hover: #a6d2ff;
-    --color-text-message-hover: #174ad4;
+    --color-bg-message-hover-rgb: 255, 255, 255;
+    --color-text-message-hover-rgb: 23, 74, 212;
     --color-text-comment: #666666;
 
     /* Fragment */
-    --color-bg-fragment-header: #f0f0f0;
+    --color-bg-fragment-header-rgb: 240, 240, 240;
     --color-text-fragment: #032c72; /* Fragment Headers and conditions */
     --color-border-fragment: #032c72;
 
     /* Occurrence */
-    --color-bg-occurrence: #deecfb;
+    --color-bg-occurrence-rgb: 222, 236, 251;
     --color-border-occurrence: #555555;
 
     /* Other */
@@ -220,33 +220,33 @@
 
   .theme-idle-afternoon {
     /* Frame */
-    --color-bg-canvas: #d8dad9;
-    --color-bg-frame: #d8dad9;
+    --color-bg-canvas-rgb: 216, 218, 217;
+    --color-bg-frame-rgb: 216, 218, 217;
     --color-border-frame: #324939;
 
     /* Title */
-    --color-bg-title: #d8dad9;
+    --color-bg-title-rgb: 216, 218, 217;
     --color-text-title: #182e27;
 
     /* Participant */
-    --color-bg-participant: 243, 245, 247;
+    --color-bg-participant-rgb: 243, 245, 247;
     --color-text-participant: #182e27; /* Participant name, stereotype */
     --color-border-participant: #182e27; /* Participant border and Lifeline */
 
     /* Messages */
     --color-text-message: #030809;
     --color-message-arrow: #324939;
-    --color-bg-message-hover: #aea690;
-    --color-text-message-hover: #000000;
+    --color-bg-message-hover-rgb: 255, 255, 255;
+    --color-text-message-hover-rgb: 0, 0, 0;
     --color-text-comment: #030809;
 
     /* Fragment */
-    --color-bg-fragment-header: #f0f0f0;
+    --color-bg-fragment-header-rgb: 240, 240, 240;
     --color-text-fragment: #182e27; /* Fragment Headers and conditions */
     --color-border-fragment: #344337;
 
     /* Occurrence */
-    --color-bg-occurrence: #f3f5f7;
+    --color-bg-occurrence-rgb: 243, 245, 247;
     --color-border-occurrence: #344337;
 
     /* Other */
@@ -256,33 +256,33 @@
 
   .theme-coles {
     /* Frame */
-    --color-bg-canvas: #ffffff;
-    --color-bg-frame: #ffde00;
+    --color-bg-canvas-rgb: 255, 255, 255;
+    --color-bg-frame-rgb: 255, 222, 0;
     --color-border-frame: #ee141f;
 
     /* Title */
-    --color-bg-title: #ffffff;
+    --color-bg-title-rgb: 255, 255, 255;
     --color-text-title: #182e27;
 
     /* Participant */
-    --color-bg-participant: 243, 245, 247;
+    --color-bg-participant-rgb: 243, 245, 247;
     --color-text-participant: #000000; /* Participant name, stereotype */
     --color-border-participant: #344337; /* Participant border and Lifeline */
 
     /* Messages */
     --color-text-message: #000000;
     --color-message-arrow: #000000;
-    --color-bg-message-hover: #ee141f;
-    --color-text-message-hover: #ffffff;
+    --color-bg-message-hover-rgb: 255, 255, 255;
+    --color-text-message-hover-rgb: 255, 255, 255;
     --color-text-comment: #000000;
 
     /* Fragment */
-    --color-bg-fragment-header: #ee141f;
+    --color-bg-fragment-header-rgb: 238, 20, 31;
     --color-text-fragment: #ffffff; /* Fragment Headers and conditions */
     --color-border-fragment: #ee141f;
 
     /* Occurrence */
-    --color-bg-occurrence: #f3f5f7;
+    --color-bg-occurrence-rgb: 243, 245, 247;
     --color-border-occurrence: #344337;
 
     /* Other */
@@ -296,33 +296,33 @@
 
   .theme-woolworths {
     /* Frame */
-    --color-bg-canvas: #e6eaf3;
-    --color-bg-frame: #e6eaf3;
+    --color-bg-canvas-rgb: 230, 234, 243;
+    --color-bg-frame-rgb: 230, 234, 243;
     --color-border-frame: #049e50;
 
     /* Title */
-    --color-bg-title: #ffffff;
+    --color-bg-title-rgb: 255, 255, 255;
     --color-text-title: #12522f;
 
     /* Participant */
-    --color-bg-participant: 170, 203, 81;
+    --color-bg-participant-rgb: 170, 203, 81;
     --color-text-participant: #000000; /* Participant name, stereotype */
     --color-border-participant: #344337; /* Participant border and Lifeline */
 
     /* Messages */
     --color-text-message: #12522f;
     --color-message-arrow: #049e50;
-    --color-bg-message-hover: #fffefb;
-    --color-text-message-hover: #ffffff;
+    --color-bg-message-hover-rgb: 255, 255, 255;
+    --color-text-message-hover-rgb: 255, 255, 255;
     --color-text-comment: #000000;
 
     /* Fragment */
-    --color-bg-fragment-header: #aacb51;
+    --color-bg-fragment-header-rgb: 170, 203, 81;
     --color-text-fragment: #12522f; /* Fragment Headers and conditions */
     --color-border-fragment: #049e50;
 
     /* Occurrence */
-    --color-bg-occurrence: #aacb51;
+    --color-bg-occurrence-rgb: 170, 203, 81;
     --color-border-occurrence: #344337;
 
     /* Other */
@@ -332,33 +332,33 @@
 
   .theme-anz {
     /* Frame */
-    --color-bg-canvas: #ffffff;
-    --color-bg-frame: #ffffff;
+    --color-bg-canvas-rgb: 255, 255, 255;
+    --color-bg-frame-rgb: 255, 255, 255;
     --color-border-frame: #089fd8;
 
     /* Title */
-    --color-bg-title: #ffffff;
+    --color-bg-title-rgb: 255, 255, 255;
     --color-text-title: #006e9c;
 
     /* Participant */
-    --color-bg-participant: 252, 253, 248;
+    --color-bg-participant-rgb: 252, 253, 248;
     --color-text-participant: #00abd8; /* Participant name, stereotype */
     --color-border-participant: #00abd8; /* Participant border and Lifeline */
 
     /* Messages */
     --color-text-message: #42a4e0;
     --color-message-arrow: #089fd8;
-    --color-bg-message-hover: #006e9c;
-    --color-text-message-hover: #ffffff;
+    --color-bg-message-hover-rgb: 255, 255, 255;
+    --color-text-message-hover-rgb: 255, 255, 255;
     --color-text-comment: #000000;
 
     /* Fragment */
-    --color-bg-fragment-header: #42a4e0;
+    --color-bg-fragment-header-rgb: 66, 164, 224;
     --color-text-fragment: #006e9c; /* Fragment Headers and conditions */
     --color-border-fragment: #089fd8;
 
     /* Occurrence */
-    --color-bg-occurrence: #fcfdf8;
+    --color-bg-occurrence-rgb: 252, 253, 248;
     --color-border-occurrence: #006e9c;
 
     /* Other */
@@ -371,12 +371,12 @@
   }
 
   .theme-nab {
-    --color-bg-base: 242, 244, 246;
-    --color-bg-canvas: 242, 244, 246;
+    --color-bg-base-rgb: 242, 244, 246;
+    --color-bg-canvas-rgb: 242, 244, 246;
     --color-text-base: #ffffff;
 
     /* Participant */
-    --color-bg-participant: 195, 0, 0;
+    --color-bg-participant-rgb: 195, 0, 0;
     --color-text-participant: #ffffff; /* Participant name, stereotype */
     --color-border-participant: #c30000; /* Participant border and Lifeline */
 
@@ -384,49 +384,54 @@
     --color-text-message: #c30000;
 
     /* Fragment */
-    --color-bg-fragment-header: #c30000; /* Fragment Headers */
+    --color-bg-fragment-header-rgb: #c30000; /* Fragment Headers */
     --color-text-fragment-header: #ffffff; /* Fragment Headers */
   }
 
   .theme-google {
+    /* Colors */
     --color-white: #ffffff;
     --color-red-google: #db4437;
     --color-blue-google: #4285f4;
     --color-green-google: #0f9d58;
     --color-yellow-google: #f4b400;
+    --color-white-rgb: 255, 255, 255;
+    --color-red-google-rgb: 219, 68, 55;
+    --color-blue-google-rgb: 66, 133, 244;
+    --color-green-google-rgb: 15, 157, 88;
+    --color-yellow-google-rgb: 244, 180, 0;
 
     /* Frame */
-    --color-bg-canvas: var(--color-white);
-    --color-bg-frame: #f2f4f6;
+    --color-bg-canvas-rgb: 255, 255, 255;
+    --color-bg-frame-rgb: 242, 244, 246;
     --color-border-frame: #4285f4;
 
     /* Title */
-    --color-bg-title: #4285f4;
+    --color-bg-title-rgb: 66, 133, 244;
     --color-text-title: #ffffff;
 
     /* Participant */
-    --color-bg-participant: var(--color-red-google);
+    --color-bg-participant-rgb: 219, 68, 55;
     --color-text-participant: #ffffff; /* Participant name, stereotype */
     --color-border-participant: #4285f4; /* Participant border and Lifeline */
 
     /* Messages */
-    --color-text-message: var(--color-red-google);
-    --color-message-arrow: var(--color-red-google);
+    --color-text-message: #db4437;
+    --color-message-arrow: #db4437;
     --color-bg-message-hover: #fffefb;
-    --color-text-message-hover: #ffffff;
+    --color-text-message-hover-rgb: 255, 255, 255;
     --color-text-comment: #000000;
 
     /* Fragment */
-    --color-bg-fragment-header: var(--color-green-google);
+    --color-bg-fragment-header-rgb: 15, 157, 88;
     --color-text-fragment: #ffffff; /* Fragment Headers and conditions */
     --color-border-fragment: #4285f4;
 
     /* Occurrence */
-    --color-bg-occurrence: #f4b400;
+    --color-bg-occurrence-rgb: 244, 180, 0;
     --color-border-occurrence: #4285f4;
 
     /* Other */
-    --color-text-link: #c9d8e7;
-    --color-text-control: #335c80;
+    --color-text-note: #000000;
   }
 }
