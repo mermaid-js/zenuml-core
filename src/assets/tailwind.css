@@ -384,7 +384,7 @@
     --color-text-message: #c30000;
 
     /* Fragment */
-    --color-bg-fragment-header-rgb: #c30000; /* Fragment Headers */
+    --color-bg-fragment-header-rgb: 195, 0, 0; /* Fragment Headers */
     --color-text-fragment-header: #ffffff; /* Fragment Headers */
   }
 

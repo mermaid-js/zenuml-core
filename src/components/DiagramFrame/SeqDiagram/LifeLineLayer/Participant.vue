@@ -1,57 +1,46 @@
 <template>
   <div
-    v-if="isDefaultStarter"
-    class="participant bg-skin-participant shadow-participant border-transparent text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
+    class="participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
     :class="{ selected: selected }"
     ref="participant"
     :style="{
+      backgroundColor: isDefaultStarter ? undefined : backgroundColor,
+      color: isDefaultStarter ? undefined : color,
       transform: `translateY(${translate}px)`,
     }"
     @click="onSelect"
   >
     <div
+      v-if="!!icon"
       v-html="icon"
-      class="text-skin-base bg-skin-frame px-1 absolute rounded left-1/2 transform -translate-x-1/2 h-8 [&>svg]:w-full [&>svg]:h-full"
+      class="px-1 absolute rounded left-1/2 transform -translate-x-1/2 h-8 [&>svg]:w-full [&>svg]:h-full"
+      :class="{
+        '-translate-y-full': !isDefaultStarter,
+        'bg-skin-frame': !isDefaultStarter,
+      }"
       :aria-description="`icon for ${entity.name}`"
     ></div>
-  </div>
-  <div v-else>
+
     <div
-      class="participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
-      :class="{ selected: selected }"
-      ref="participant"
-      :style="{
-        backgroundColor: backgroundColor,
-        color: color,
-        transform: `translateY(${translate}px)`,
-      }"
-      @click="onSelect"
+      v-if="!isDefaultStarter"
+      class="h-5 group flex flex-col justify-center"
     >
-      <div
-        v-if="!!icon"
-        v-html="icon"
-        class="text-skin-base bg-skin-frame px-1 absolute rounded left-1/2 transform -translate-x-1/2 -translate-y-full h-8 [&>svg]:w-full [&>svg]:h-full"
-        :aria-description="`icon for ${entity.name}`"
-      ></div>
-      <!-- Put in a div to give it a fixed height, because stereotype is dynamic. -->
-      <div class="h-5 group flex flex-col justify-center">
-        <!-- TODO: create a better solution for participant comments -->
-        <!--      <span-->
-        <!--        v-if="!!comment"-->
-        <!--        class="absolute hidden rounded-lg transform -translate-y-8 bg-gray-400 px-2 py-1 text-center text-sm text-white group-hover:flex"-->
-        <!--      >-->
-        <!--        {{ comment }}-->
-        <!--      </span>-->
-        <label class="interface leading-4" v-if="stereotype"
-          >«{{ stereotype }}»</label
-        >
-        <ParticipantLabel
-          :labelText="labelText"
-          :labelPositions="labelPositions"
-          :assignee="entity.assignee"
-          :assigneePositions="assigneePositions"
-        />
-      </div>
+      <!-- TODO: create a better solution for participant comments -->
+      <!--      <span-->
+      <!--        v-if="!!comment"-->
+      <!--        class="absolute hidden rounded-lg transform -translate-y-8 bg-gray-400 px-2 py-1 text-center text-sm text-white group-hover:flex"-->
+      <!--      >-->
+      <!--        {{ comment }}-->
+      <!--      </span>-->
+      <label class="interface leading-4" v-if="stereotype"
+        >«{{ stereotype }}»</label
+      >
+      <ParticipantLabel
+        :labelText="labelText"
+        :labelPositions="labelPositions"
+        :assignee="entity.assignee"
+        :assigneePositions="assigneePositions"
+      />
     </div>
   </div>
 </template>
