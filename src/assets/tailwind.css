@@ -474,4 +474,57 @@
     /* Other */
     --color-text-note: #333333; /* Dark text for notes */
   }
+
+  .theme-purple {
+    /* Colors */
+    --color-bg-base-rgb: 255, 255, 255;
+    --color-text-base: #666666;
+    --color-border-base: #dddddd;
+    --color-backup-white-rgb: 255, 255, 255;
+
+    /* Frame */
+    --color-bg-canvas-rgb: 250, 250, 250; /* Light gray background */
+    --color-bg-frame-rgb: 250, 250, 250; /* Light gray frame */
+    --color-border-frame: #dddddd; /* Light border */
+
+    /* Title */
+    --color-bg-title-rgb: 250, 250, 250; /* Light gray title background */
+    --color-text-title: #666666; /* Medium gray text for title */
+
+    /* Participant */
+    --color-bg-participant-rgb: 233, 225, 240; /* #E9E1F0 - Exact light purple from CSS */
+    --color-text-participant: #8254ac; /* Exact purple text color from CSS */
+    --color-border-participant: #8153ad; /* Exact purple border from CSS */
+    --color-shadow-participant: 0px 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+
+    /* Messages */
+    --color-text-message: #666666; /* Medium gray text for messages */
+    --color-message-arrow: #8254ac; /* Purple arrow for messages */
+    --color-bg-message-hover: #f3eef8; /* Very light purple hover background */
+    --color-text-message-hover-rgb: 130, 84, 172; /* #8254AC - Purple text on hover */
+    --color-text-comment: #999999; /* Light gray text for comments */
+
+    /* Fragment */
+    --color-bg-fragment-header-rgb: 233, 225, 240; /* #E9E1F0 - Light purple fragment header */
+    --color-text-fragment: #8254ac; /* Purple text for fragment */
+    --color-border-fragment: #8153ad; /* Purple border for fragment */
+
+    /* Occurrence */
+    --color-bg-occurrence-rgb: 233, 225, 240; /* #E9E1F0 - Same light purple as participants */
+    --color-border-occurrence: #8153ad; /* Same purple border as participants */
+    --color-shadow-occurrence: 0px 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+
+    /* Other */
+    --color-text-note: #666666; /* Medium gray text for notes */
+    --color-bg-note: #fff9c4; /* Light yellow note background */
+    --color-border-note: #fff176; /* Yellow note border */
+
+    /* Special Elements */
+    /* For elements like the red Authentication box */
+    --color-error-rgb: 239, 83, 80;
+    /* For elements like the orange Database box */
+    --color-warning-rgb: 255, 183, 77;
+    /* For elements like the light purple Middleware box */
+    --color-info-rgb: 233, 225, 240; /* #E9E1F0 - Exact light purple from CSS */
+  }
 }

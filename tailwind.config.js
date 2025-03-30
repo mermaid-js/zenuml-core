@@ -15,6 +15,7 @@ module.exports = {
     "theme-google",
     "theme-diagramly",
     "theme-creately",
+    "theme-purple",
     {
       pattern: /(bg|text)-.*/,
     },
