@@ -10,37 +10,35 @@
     }"
     @click="onSelect"
   >
-    <div
-      v-if="!!icon"
-      v-html="icon"
-      class="px-1 absolute rounded left-1/2 transform -translate-x-1/2 h-8 [&>svg]:w-full [&>svg]:h-full"
-      :class="{
-        '-translate-y-full': !isDefaultStarter,
-        'bg-skin-frame': !isDefaultStarter,
-      }"
-      :aria-description="`icon for ${entity.name}`"
-    ></div>
+    <div class="flex items-center justify-center">
+      <div
+        v-if="!!icon"
+        v-html="icon"
+        class="h-6 w-6 mr-1 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full"
+        :aria-description="`icon for ${entity.name}`"
+      ></div>
 
-    <div
-      v-if="!isDefaultStarter"
-      class="h-5 group flex flex-col justify-center"
-    >
-      <!-- TODO: create a better solution for participant comments -->
-      <!--      <span-->
-      <!--        v-if="!!comment"-->
-      <!--        class="absolute hidden rounded-lg transform -translate-y-8 bg-gray-400 px-2 py-1 text-center text-sm text-white group-hover:flex"-->
-      <!--      >-->
-      <!--        {{ comment }}-->
-      <!--      </span>-->
-      <label class="interface leading-4" v-if="stereotype"
-        >«{{ stereotype }}»</label
+      <div
+        v-if="!isDefaultStarter"
+        class="h-5 group flex flex-col justify-center"
       >
-      <ParticipantLabel
-        :labelText="labelText"
-        :labelPositions="labelPositions"
-        :assignee="entity.assignee"
-        :assigneePositions="assigneePositions"
-      />
+        <!-- TODO: create a better solution for participant comments -->
+        <!--      <span-->
+        <!--        v-if="!!comment"-->
+        <!--        class="absolute hidden rounded-lg transform -translate-y-8 bg-gray-400 px-2 py-1 text-center text-sm text-white group-hover:flex"-->
+        <!--      >-->
+        <!--        {{ comment }}-->
+        <!--      </span>-->
+        <label class="interface leading-4" v-if="stereotype"
+          >«{{ stereotype }}»</label
+        >
+        <ParticipantLabel
+          :labelText="labelText"
+          :labelPositions="labelPositions"
+          :assignee="entity.assignee"
+          :assigneePositions="assigneePositions"
+        />
+      </div>
     </div>
   </div>
 </template>

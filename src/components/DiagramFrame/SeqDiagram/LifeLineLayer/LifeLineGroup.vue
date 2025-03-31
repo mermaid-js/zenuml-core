@@ -3,19 +3,26 @@
   <div
     class="lifeline-group-container absolute flex flex-col h-full"
     v-if="entities.length > 0"
-    :style="{ left: `${left}px`, width: `${right - left}px` }"
+    :style="{
+      left: `${left}px`,
+      width: `${right - left}px`,
+      marginTop: renderParticipants && name ? '-24px' : '0',
+    }"
   >
     <div
-      class="flex flex-col flex-grow"
-      :class="{
-        shadow: !renderParticipants,
-        'shadow-slate-500/50': !renderParticipants,
-      }"
+      class="flex flex-col flex-grow relative"
+      :class="[
+        renderParticipants ? 'border-2 border-dotted border-skin-frame/30' : '',
+      ]"
     >
-      <!-- TODO: add group name back later.  -->
-      <!--      <div class="h-14 absolute" :class="{'-mt-12': !!name}">-->
-      <!--        <label class="block text-center font-semibold">{{name}}</label>-->
-      <!--      </div>-->
+      <!-- Group name with icon styling similar to participant icons -->
+      <div
+        class="z-10 flex items-center justify-center bg-skin-frame"
+        v-if="renderParticipants && name"
+      >
+        <span class="font-semibold text-skin-primary">{{ name }}</span>
+      </div>
+
       <div class="lifeline-group relative flex-grow">
         <life-line
           v-for="entity in entities"
@@ -49,22 +56,45 @@ export default {
     },
     left() {
       const first = this.entities[0].name;
+      // Check if the participant has an icon
+      const hasIcon = first && this.hasParticipantIcon(first);
+      const iconWidth = hasIcon ? 24 : 0; // Width of icon (without margin)
+
       const widthOfFirst = Math.max(
-        WidthProviderOnBrowser(first, TextType.ParticipantName),
+        WidthProviderOnBrowser(first, TextType.ParticipantName) + iconWidth,
         100,
       );
-      return this.centerOf(first) - widthOfFirst / 2 - PARTICIPANT_MARGIN;
+      return this.centerOf(first) - widthOfFirst / 2 - PARTICIPANT_MARGIN - 3;
     },
     right() {
       const last = this.entities.slice(0).pop().name;
+      // Check if the participant has an icon
+      const hasIcon = last && this.hasParticipantIcon(last);
+      const iconWidth = hasIcon ? 24 : 0; // Width of icon (without margin)
+
       const widthOfLast = Math.max(
-        WidthProviderOnBrowser(last, TextType.ParticipantName),
+        WidthProviderOnBrowser(last, TextType.ParticipantName) + iconWidth,
         100,
       );
-      return this.centerOf(last) + widthOfLast / 2 + PARTICIPANT_MARGIN;
+      return this.centerOf(last) + widthOfLast / 2 + PARTICIPANT_MARGIN - 11;
     },
     entities() {
       return Participants(this.context).Array();
+    },
+  },
+  methods: {
+    // Helper method to determine if a participant has an icon
+    hasParticipantIcon(participantName) {
+      // Skip the starter participant
+      if (participantName === "_STARTER_") {
+        return false;
+      }
+
+      // Find the participant in the entities
+      const participant = this.entities.find((p) => p.name === participantName);
+
+      // Only participants with a defined type property have icons
+      return participant && participant.type !== undefined;
     },
   },
   components: {
