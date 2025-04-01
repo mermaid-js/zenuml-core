@@ -8,8 +8,6 @@ describe("Smoke test", function () {
     );
     // This line is to make sure the privacy icon is loaded
     cy.get(".privacy>span>svg", { timeout: 5000 }).should("be.visible");
-    // Take a snapshot and save it directly to the screenshots folder
-    cy.screenshot({ capture: "viewport" });
 
     cy.document().toMatchImageSnapshot({
       imageConfig: { threshold: 0.012 },
