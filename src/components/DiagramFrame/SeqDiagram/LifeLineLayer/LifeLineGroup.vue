@@ -1,8 +1,13 @@
 <template>
-  <!-- pb-2 to show the shadow -->
+  <!-- Merged the outer and middle divs while preserving all functionality -->
   <div
-    class="lifeline-group-container absolute flex flex-col"
+    class="lifeline-group-container absolute flex flex-col flex-grow"
     v-if="entities.length > 0"
+    :class="[
+      renderParticipants
+        ? 'outline outline-2 outline-dashed outline-skin-primary'
+        : '',
+    ]"
     :style="{
       left: `${left}px`,
       width: `${right - left}px`,
@@ -10,37 +15,28 @@
       marginTop: renderParticipants && name ? '-20px' : '0',
     }"
   >
+    <!-- Group name with icon styling similar to participant icons -->
     <div
-      class="flex flex-col flex-grow relative"
-      :class="[
-        renderParticipants
-          ? 'outline outline-2 outline-dashed outline-skin-primary'
-          : '',
-      ]"
+      class="z-10 flex items-center justify-center bg-skin-frame"
+      v-if="renderParticipants && name"
     >
-      <!-- Group name with icon styling similar to participant icons -->
-      <div
-        class="z-10 flex items-center justify-center bg-skin-frame"
-        v-if="renderParticipants && name"
-      >
-        <span class="font-semibold text-skin-lifeline-group-name">{{
-          name
-        }}</span>
-      </div>
+      <span class="font-semibold text-skin-lifeline-group-name">{{
+        name
+      }}</span>
+    </div>
 
-      <div class="lifeline-group relative flex-grow">
-        <life-line
-          v-for="entity in entities"
-          inGroup="true"
-          :key="entity.name"
-          :ref="entity.name"
-          :entity="entity"
-          :group-left="left"
-          :render-life-line="renderLifeLine"
-          :renderParticipants="renderParticipants"
-          :style="{ height: 'calc(100% - 24px)' }"
-        />
-      </div>
+    <div class="lifeline-group relative flex-grow">
+      <life-line
+        v-for="entity in entities"
+        inGroup="true"
+        :key="entity.name"
+        :ref="entity.name"
+        :entity="entity"
+        :group-left="left"
+        :render-life-line="renderLifeLine"
+        :renderParticipants="renderParticipants"
+        :style="{ height: 'calc(100% - 24px)' }"
+      />
     </div>
   </div>
 </template>
