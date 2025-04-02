@@ -1,18 +1,21 @@
 <template>
   <!-- pb-2 to show the shadow -->
   <div
-    class="lifeline-group-container absolute flex flex-col h-full"
+    class="lifeline-group-container absolute flex flex-col"
     v-if="entities.length > 0"
     :style="{
       left: `${left}px`,
       width: `${right - left}px`,
-      marginTop: renderParticipants && name ? '-24px' : '0',
+      height: `calc(100% + 24px)`,
+      marginTop: renderParticipants && name ? '-20px' : '0',
     }"
   >
     <div
       class="flex flex-col flex-grow relative"
       :class="[
-        renderParticipants ? 'border-2 border-dotted border-skin-frame/30' : '',
+        renderParticipants
+          ? 'outline outline-2 outline-dashed outline-skin-primary'
+          : '',
       ]"
     >
       <!-- Group name with icon styling similar to participant icons -->
@@ -20,7 +23,9 @@
         class="z-10 flex items-center justify-center bg-skin-frame"
         v-if="renderParticipants && name"
       >
-        <span class="font-semibold text-skin-primary">{{ name }}</span>
+        <span class="font-semibold text-skin-lifeline-group-name">{{
+          name
+        }}</span>
       </div>
 
       <div class="lifeline-group relative flex-grow">
@@ -33,6 +38,7 @@
           :group-left="left"
           :render-life-line="renderLifeLine"
           :renderParticipants="renderParticipants"
+          :style="{ height: 'calc(100% - 24px)' }"
         />
       </div>
     </div>
@@ -45,7 +51,6 @@ import LifeLine from "./LifeLine.vue";
 import { mapGetters } from "vuex";
 import WidthProviderOnBrowser from "../../../../positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
-const PARTICIPANT_MARGIN = 8;
 export default {
   name: "lifeline-group",
   props: ["context", "renderParticipants", "renderLifeLine"],
@@ -64,7 +69,7 @@ export default {
         WidthProviderOnBrowser(first, TextType.ParticipantName) + iconWidth,
         100,
       );
-      return this.centerOf(first) - widthOfFirst / 2 - PARTICIPANT_MARGIN - 3;
+      return this.centerOf(first) - widthOfFirst / 2 + 5;
     },
     right() {
       const last = this.entities.slice(0).pop().name;
@@ -76,7 +81,7 @@ export default {
         WidthProviderOnBrowser(last, TextType.ParticipantName) + iconWidth,
         100,
       );
-      return this.centerOf(last) + widthOfLast / 2 + PARTICIPANT_MARGIN - 11;
+      return this.centerOf(last) + widthOfLast / 2 - 5;
     },
     entities() {
       return Participants(this.context).Array();
@@ -102,5 +107,3 @@ export default {
   },
 };
 </script>
-
-<style scoped></style>
