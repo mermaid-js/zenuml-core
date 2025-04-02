@@ -13,7 +13,7 @@
       :style="{
         transform: `translateY(${translate > 0 ? translate - 1 : translate}px)`,
       }"
-      class="pt-8 after:bg-gradient-to-b after:from-[#ffffff] after:via-[#ffffff] after:to-[#ffffff00] after:block after:absolute after:top-0 after:w-full after:h-[72px]"
+      class="pt-8 after:bg-gradient-to-b after:from-skin-frame after:via-skin-frame after:to-skin-frame/0 after:block after:absolute after:top-0 after:w-full after:h-[72px]"
     ></div>
     <div class="z-lifeline-container relative grow">
       <life-line

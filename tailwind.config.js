@@ -22,6 +22,11 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        skin: {
+          frame: "var(--color-bg-frame)", // it will generate from/via/to-skin-frame. see lifeline layer
+        },
+      },
       textColor: {
         skin: {
           title:
