@@ -17,7 +17,7 @@
         // This sample is carefully crafted. It shows a known issues: fragment stretched to
         // svc (should not), because parser thinks the return statement returns to svc.
         group Backend {@VPC svc @RDS rep}
-        group Frontend { Client }
+        group { Client }
 Client->SGW."Get order by id" {
   svc.Get(id) {
     rep."load order" {

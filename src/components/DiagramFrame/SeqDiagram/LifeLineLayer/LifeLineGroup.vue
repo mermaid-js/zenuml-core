@@ -1,23 +1,16 @@
 <template>
   <!-- Merged the outer and middle divs while preserving all functionality -->
   <div
-    class="lifeline-group-container absolute flex flex-col flex-grow"
+    class="lifeline-group-container absolute flex flex-col flex-grow h-full outline-dashed outline-skin-primary"
     v-if="entities.length > 0"
-    :class="[
-      renderParticipants
-        ? 'outline outline-2 outline-dashed outline-skin-primary'
-        : '',
-    ]"
     :style="{
       left: `${left}px`,
       width: `${right - left}px`,
-      height: `calc(100% + 24px)`,
-      marginTop: renderParticipants && name ? '-20px' : '0',
     }"
   >
     <!-- Group name with icon styling similar to participant icons -->
     <div
-      class="z-10 flex items-center justify-center bg-skin-frame"
+      class="z-10 absolute flex items-center justify-center w-full bg-skin-frame"
       v-if="renderParticipants && name"
     >
       <span class="font-semibold text-skin-lifeline-group-name">{{
@@ -35,7 +28,6 @@
         :group-left="left"
         :render-life-line="renderLifeLine"
         :renderParticipants="renderParticipants"
-        :style="{ height: 'calc(100% - 24px)' }"
       />
     </div>
   </div>
