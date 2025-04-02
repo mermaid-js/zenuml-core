@@ -2,7 +2,7 @@
   <div
     :id="entity.name"
     :entity-type="entity.type?.toLowerCase()"
-    class="lifeline absolute flex flex-col mx-2 h-full"
+    class="lifeline absolute flex flex-col h-full"
     :class="{ 'transform -translate-x-1/2': renderParticipants }"
     :style="{ paddingTop: top + 24 + 'px', left: left + 'px' }"
   >
@@ -41,7 +41,7 @@ export default {
       return !!localStorage.zenumlDebug;
     },
     left() {
-      return this.centerOf(this.entity.name) - 8 - (this.groupLeft || 0);
+      return this.centerOf(this.entity.name) - (this.groupLeft || 0);
     },
   },
   mounted() {

@@ -39,6 +39,10 @@ import LifeLine from "./LifeLine.vue";
 import { mapGetters } from "vuex";
 import WidthProviderOnBrowser from "../../../../positioning/WidthProviderFunc";
 import { TextType } from "@/positioning/Coordinate";
+
+// Constants
+const LIFELINE_GROUP_OUTLINE_MARGIN = 2; // Small margin for group outline positioning
+
 export default {
   name: "lifeline-group",
   props: ["context", "renderParticipants", "renderLifeLine"],
@@ -57,7 +61,9 @@ export default {
         WidthProviderOnBrowser(first, TextType.ParticipantName) + iconWidth,
         100,
       );
-      return this.centerOf(first) - widthOfFirst / 2 + 5;
+      return (
+        this.centerOf(first) - widthOfFirst / 2 + LIFELINE_GROUP_OUTLINE_MARGIN
+      );
     },
     right() {
       const last = this.entities.slice(0).pop().name;
@@ -69,7 +75,9 @@ export default {
         WidthProviderOnBrowser(last, TextType.ParticipantName) + iconWidth,
         100,
       );
-      return this.centerOf(last) + widthOfLast / 2 - 5;
+      return (
+        this.centerOf(last) + widthOfLast / 2 - LIFELINE_GROUP_OUTLINE_MARGIN
+      );
     },
     entities() {
       return Participants(this.context).Array();
