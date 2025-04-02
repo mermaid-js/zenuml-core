@@ -4,6 +4,7 @@
 
 @font-face {
   font-family: MS Sans Serif;
+  /*noinspection CssUnknownTarget*/
   src: url("/fonts/MS Sans Serif.ttf") format("truetype");
 }
 
@@ -13,7 +14,9 @@
 }
 
 .zenuml .theme-neon {
-  font-family: MS Sans Serif;
+  font-family:
+    MS Sans Serif,
+    serif;
 }
 
 @layer base {
