@@ -37,8 +37,6 @@
 import { Participants } from "@/parser";
 import LifeLine from "./LifeLine.vue";
 import { mapGetters } from "vuex";
-import WidthProviderOnBrowser from "../../../../positioning/WidthProviderFunc";
-import { TextType } from "@/positioning/Coordinate";
 
 // Constants
 const LIFELINE_GROUP_OUTLINE_MARGIN = 2; // Small margin for group outline positioning
@@ -47,37 +45,23 @@ export default {
   name: "lifeline-group",
   props: ["context", "renderParticipants", "renderLifeLine"],
   computed: {
-    ...mapGetters(["centerOf"]),
+    ...mapGetters(["centerOf", "coordinates"]),
     name() {
       return this.context?.name()?.getFormattedText();
     },
     left() {
       const first = this.entities[0].name;
-      // Check if the participant has an icon
-      const hasIcon = first && this.hasParticipantIcon(first);
-      const iconWidth = hasIcon ? 24 : 0; // Width of icon (without margin)
 
-      const widthOfFirst = Math.max(
-        WidthProviderOnBrowser(first, TextType.ParticipantName) + iconWidth,
-        100,
-      );
+      const widthOfFirst = this.coordinates.half(first);
       return (
-        this.centerOf(first) - widthOfFirst / 2 + LIFELINE_GROUP_OUTLINE_MARGIN
+        this.centerOf(first) - widthOfFirst + LIFELINE_GROUP_OUTLINE_MARGIN
       );
     },
     right() {
       const last = this.entities.slice(0).pop().name;
-      // Check if the participant has an icon
-      const hasIcon = last && this.hasParticipantIcon(last);
-      const iconWidth = hasIcon ? 24 : 0; // Width of icon (without margin)
 
-      const widthOfLast = Math.max(
-        WidthProviderOnBrowser(last, TextType.ParticipantName) + iconWidth,
-        100,
-      );
-      return (
-        this.centerOf(last) + widthOfLast / 2 - LIFELINE_GROUP_OUTLINE_MARGIN
-      );
+      const widthOfLast = this.coordinates.half(last);
+      return this.centerOf(last) + widthOfLast - LIFELINE_GROUP_OUTLINE_MARGIN;
     },
     entities() {
       return Participants(this.context).Array();

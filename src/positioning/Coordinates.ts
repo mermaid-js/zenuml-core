@@ -195,6 +195,9 @@ export class Coordinates {
     );
 
     setCache(cacheKey, participantWidth);
+    console.debug(
+      `Width of ${participant} is ${participantWidth}; labelWidth: ${labelWidth}`,
+    );
     return participantWidth;
   }
 }
