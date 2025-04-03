@@ -58,7 +58,8 @@ export class Coordinates {
   }
 
   half(participantName: string) {
-    return this.halfWithMargin(this.labelOrName(participantName));
+    const participant = this.labelOrName(participantName);
+    return participant ? this._getParticipantWidth(participant) / 2 : 0;
   }
 
   getWidth() {
@@ -161,13 +162,6 @@ export class Coordinates {
     );
   }
 
-  private halfWithMargin(participant: string | undefined) {
-    if (!participant) {
-      return 0;
-    }
-    return this._getParticipantWidth(participant) / 2 + MARGIN / 2;
-  }
-
   private _getParticipantWidth(participant: string | undefined) {
     if (!participant) {
       return 0;
@@ -189,10 +183,8 @@ export class Coordinates {
       participant || "",
       TextType.ParticipantName,
     );
-    const participantWidth = Math.max(
-      labelWidth + iconWidth,
-      MIN_PARTICIPANT_WIDTH,
-    );
+    const participantWidth =
+      Math.max(labelWidth + iconWidth, MIN_PARTICIPANT_WIDTH) + MARGIN;
 
     setCache(cacheKey, participantWidth);
     console.debug(
