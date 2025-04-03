@@ -4,6 +4,7 @@
 
 @font-face {
   font-family: MS Sans Serif;
+  /*noinspection CssUnknownTarget*/
   src: url("/fonts/MS Sans Serif.ttf") format("truetype");
 }
 
@@ -13,7 +14,9 @@
 }
 
 .zenuml .theme-neon {
-  font-family: MS Sans Serif;
+  font-family:
+    MS Sans Serif,
+    serif;
 }
 
 @layer base {
@@ -23,13 +26,16 @@
     --color-text-base: #000;
     --color-text-secondary: #333;
     --color-border-base: #000;
-    --color-border-primary: #368eff;
+    --color-border-primary: #000;
+    --color-outline-primary: #000;
   }
 
   .theme-default {
     --color-bg-base: #ffffff;
     --color-text-base: #222;
     --color-border-base: #666;
+
+    --color-outline-primary: #666;
 
     /* Message */
     --color-message-arrow: #000;
@@ -368,6 +374,7 @@
     --color-bg-canvas: #ffffff;
     --color-bg-frame: #f2f4f6;
     --color-text-base: #ffffff;
+    --color-outline-primary: #666;
 
     /* Participant */
     --color-bg-participant: #c30000;

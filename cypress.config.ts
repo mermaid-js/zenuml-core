@@ -13,13 +13,4 @@ export default defineConfig({
     excludeSpecPattern: ["**/__snapshots__/*", "**/__image_snapshots__/*"],
     specPattern: "cypress/e2e/**/*.{js,jsx,ts,tsx}",
   },
-  env: {
-    "cypress-plugin-snapshots": {
-      imageConfig: {
-        keepSaved: true, // Keep actual screenshots even when they match the expected ones
-        threshold: 0.01, // Threshold for pixel difference
-        thresholdType: "percent", // Type of threshold
-      },
-    },
-  },
 });

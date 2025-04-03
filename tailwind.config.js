@@ -17,17 +17,24 @@ module.exports = {
     "theme-creately",
     "theme-purple",
     {
-      pattern: /(bg|text)-.*/,
+      pattern: /(bg|text|outline)-.*/,
     },
   ],
   theme: {
     extend: {
+      colors: {
+        skin: {
+          frame: "var(--color-bg-frame)", // it will generate from/via/to-skin-frame. see lifeline layer
+        },
+      },
       textColor: {
         skin: {
           title:
             "var(--color-text-title, var(--color-text-message, var(--color-text-base, #000)))",
           participant:
             "var(--color-text-participant, var(--color-text-message, var(--color-text-base, #000)))",
+          "lifeline-group-name":
+            "var(--color-text-message, var(--color-text-base, #000))",
           message: "var(--color-text-message, var(--color-text-base, #000))",
           "message-arrow":
             "var(--color-message-arrow, var(--color-border-frame, var(--color-border-base, #000)))", // message arrow head
@@ -90,6 +97,11 @@ module.exports = {
             "var(--color-border-occurrence, var(--color-border-frame,  var(--color-border-base, #000)))",
           base: "var(--color-border-base)",
           secondary: "var(--color-border-secondary)",
+        },
+      },
+      outlineColor: {
+        skin: {
+          primary: "var(--color-outline-primary)",
         },
       },
       gradientColorStops: {
