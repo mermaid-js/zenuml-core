@@ -90,7 +90,7 @@ export class Coordinates {
     ownableMessages: OwnableMessage[],
     participantModels: IParticipantModel[],
   ) {
-    ownableMessages.forEach((message) => {
+    for (const message of ownableMessages) {
       if (!message.from) {
         message.from = _STARTER_;
       }
@@ -100,7 +100,7 @@ export class Coordinates {
       const indexTo = participantModels.findIndex((p) => p.name === message.to);
       if (indexFrom === -1 || indexTo === -1) {
         console.warn(`Participant ${message.from} or ${message.to} not found`);
-        return;
+        continue;
       }
       const leftIndex = Math.min(indexFrom, indexTo);
       const rightIndex = Math.max(indexFrom, indexTo);
@@ -115,7 +115,7 @@ export class Coordinates {
           `Could not set message gap between ${message.from} and ${message.to}`,
         );
       }
-    });
+    }
   }
   private withParticipantGaps(participantModels: IParticipantModel[]) {
     this.m = participantModels.map((_, i) => {
