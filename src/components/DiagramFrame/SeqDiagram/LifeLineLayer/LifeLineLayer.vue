@@ -8,14 +8,14 @@
       pointerEvents: renderParticipants ? 'none' : 'all',
     }"
   >
-    <!--  header sticky blur effect, DON'T remove, gap + participant height = 72px  -->
+    <!--  header sticky blur effect -->
     <div
       :style="{
         transform: `translateY(${translate > 0 ? translate - 1 : translate}px)`,
       }"
-      class="pt-8 after:bg-gradient-to-b after:from-skin-frame after:via-skin-frame after:to-skin-frame/0 after:block after:absolute after:top-0 after:w-full after:h-[72px]"
+      class="pt-2 after:bg-gradient-to-b after:from-skin-frame after:via-skin-frame after:to-skin-frame/0 after:block after:absolute after:top-0 after:w-full after:h-[72px]"
     ></div>
-    <div class="z-lifeline-container relative grow" style="margin-top: -24px">
+    <div class="z-lifeline-container relative grow">
       <life-line
         v-if="starterOnTheLeft"
         :entity="starterParticipant"

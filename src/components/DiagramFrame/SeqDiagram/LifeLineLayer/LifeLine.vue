@@ -4,7 +4,7 @@
     :entity-type="entity.type?.toLowerCase()"
     class="lifeline absolute flex flex-col h-full"
     :class="{ 'transform -translate-x-1/2': renderParticipants }"
-    :style="{ paddingTop: top + 24 + 'px', left: left + 'px' }"
+    :style="{ paddingTop: top + 'px', left: left + 'px' }"
   >
     <participant v-if="renderParticipants" :entity="entity" :offsetTop2="top" />
     <div v-if="renderLifeLine" class="line w0 mx-auto flex-grow w-px"></div>
@@ -31,7 +31,7 @@ export default {
   data: () => {
     return {
       translateX: 0,
-      top: 0,
+      top: 24,
     };
   },
   computed: {
@@ -97,8 +97,6 @@ export default {
         const rootY = this.$el.getBoundingClientRect().y;
         const messageY = firstMessage.getBoundingClientRect().y;
         this.top = (messageY - rootY) / this.scale;
-      } else {
-        this.top = 0;
       }
     },
   },
