@@ -30,6 +30,7 @@ export function OrderedParticipants(rootContext: any) {
       name: participant.name,
       left: previousName,
       label: participant.label,
+      type: participant.type,
     };
   });
 }
