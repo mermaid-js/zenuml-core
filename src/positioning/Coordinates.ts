@@ -173,18 +173,28 @@ export class Coordinates {
       return 0;
     }
 
+    const cacheKey = `getParticipantWidth_${participant}`;
+    const cachedWidth = getCache(cacheKey);
+    if (cachedWidth != null) {
+      return cachedWidth;
+    }
+
     // Calculate base width from participant name or minimum width
     // Add icon width if the participant has an icon
     // Icon's total width is 32px (24px for icon + 8px for margin)
     const hasIcon = this.hasIcon(participant);
     const iconWidth = hasIcon ? 40 : 0;
 
-    const baseWidth = Math.max(
-      this.widthProvider(participant || "", TextType.ParticipantName) +
-        iconWidth,
+    const labelWidth = this.widthProvider(
+      participant || "",
+      TextType.ParticipantName,
+    );
+    const participantWidth = Math.max(
+      labelWidth + iconWidth,
       MIN_PARTICIPANT_WIDTH,
     );
 
-    return baseWidth;
+    setCache(cacheKey, participantWidth);
+    return participantWidth;
   }
 }
