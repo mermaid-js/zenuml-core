@@ -128,12 +128,28 @@ export class Coordinates {
   private getParticipantGap(p: IParticipantModel) {
     const halfLeft = this.half(p.left);
     const halfSelf = this.half(p.name);
-    // TODO: convert name to enum type
     const leftIsVisible = true;
     const selfIsVisible = true;
+
     return (
       ((leftIsVisible && halfLeft) || 0) + ((selfIsVisible && halfSelf) || 0)
     );
+  }
+
+  private hasIcon(participantName: string): boolean {
+    // Skip the starter participant as it doesn't show an icon on the left
+    if (participantName === _STARTER_) {
+      return false;
+    }
+
+    // Find the participant in the models
+    const participant = this.participantModels.find(
+      (p) => p.name === participantName,
+    );
+
+    // Only participants with a defined type property have icons
+    // This matches the behavior in Participant.vue where icons are rendered based on entity.type
+    return !!participant && participant.type !== undefined;
   }
 
   private labelOrName(name: string) {
@@ -156,9 +172,19 @@ export class Coordinates {
     if (!participant) {
       return 0;
     }
-    return Math.max(
-      this.widthProvider(participant || "", TextType.ParticipantName),
+
+    // Calculate base width from participant name or minimum width
+    // Add icon width if the participant has an icon
+    // Icon's total width is 32px (24px for icon + 8px for margin)
+    const hasIcon = this.hasIcon(participant);
+    const iconWidth = hasIcon ? 40 : 0;
+
+    const baseWidth = Math.max(
+      this.widthProvider(participant || "", TextType.ParticipantName) +
+        iconWidth,
       MIN_PARTICIPANT_WIDTH,
     );
+
+    return baseWidth;
   }
 }

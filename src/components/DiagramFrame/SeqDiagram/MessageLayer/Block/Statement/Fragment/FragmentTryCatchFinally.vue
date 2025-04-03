@@ -47,7 +47,7 @@
       >
         <div class="segment mt-2 border-t border-solid">
           <div
-            class="header inline-block bg-skin-frame/[0.66]"
+            class="header inline-block bg-skin-frame opacity-65"
             :key="index + 1000"
           >
             <label class="keyword catch p-1">catch</label
@@ -67,7 +67,7 @@
         <div class="segment mt-2 border-t border-solid">
           <div class="header flex text-skin-fragment finally">
             <label
-              class="keyword finally bg-skin-frame/[0.66] px-1 inline-block"
+              class="keyword finally bg-skin-frame opacity-65 px-1 inline-block"
               >finally</label
             >
           </div>

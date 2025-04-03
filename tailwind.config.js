@@ -1,6 +1,6 @@
 module.exports = {
   important: ".zenuml",
-  content: ["./**/*.html", "./src/**/*.vue"],
+  content: ["./src/**/*.{js,jsx,ts,tsx,vue}", "./index.html"],
   safelist: [
     // add classes from tailwind.css
     "theme-default",
@@ -14,16 +14,17 @@ module.exports = {
     "theme-nab",
     "theme-google",
     "theme-diagramly",
+    "theme-creately",
+    "theme-purple",
     {
-      pattern: /(bg|text)-.*/,
+      pattern: /(bg|text|outline)-.*/,
     },
   ],
   theme: {
     extend: {
       colors: {
         skin: {
-          frame:
-            "rgb(var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, --color-backup-white))))",
+          frame: "var(--color-bg-frame)", // it will generate from/via/to-skin-frame. see lifeline layer
         },
       },
       textColor: {
@@ -32,11 +33,13 @@ module.exports = {
             "var(--color-text-title, var(--color-text-message, var(--color-text-base, #000)))",
           participant:
             "var(--color-text-participant, var(--color-text-message, var(--color-text-base, #000)))",
+          "lifeline-group-name":
+            "var(--color-text-message, var(--color-text-base, #000))",
           message: "var(--color-text-message, var(--color-text-base, #000))",
           "message-arrow":
             "var(--color-message-arrow, var(--color-border-frame, var(--color-border-base, #000)))", // message arrow head
           "message-hover":
-            "rgb(var(--color-text-message-hover, var(--color-bg-base, --color-backup-white)))",
+            "var(--color-text-message-hover, var(--color-bg-base, var(--color-backup-white, #ffffff)))",
           comment:
             "var(--color-text-comment, var(--color-text-secondary, var(--color-text-base, #000)))",
           "fragment-header":
@@ -57,23 +60,24 @@ module.exports = {
       backgroundColor: {
         skin: {
           canvas:
-            "rgb(var(--color-bg-canvas, var(--color-bg-base, --color-backup-white))",
+            "var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))",
           frame:
-            "rgba(var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, --color-backup-white))), <alpha-value>)",
+            "var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff))))",
           title:
-            "rgb(var(--color-bg-title, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, --color-backup-white)))))",
+            "var(--color-bg-title, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
           participant:
-            "rgb(var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, --color-backup-white)))))",
+            "var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
           lifeline:
             "var(--color-border-participant, var(--color-border-participant, var(--color-border-frame, var(--color-border-base, #000))))",
           divider:
             "var(--color-border-participant, var(--color-border-frame, var(--color-border-base, #000)))",
           "message-hover":
             "var(--color-bg-message-hover, var(--color-text-base, #000))",
-          "fragment-header": "var(--color-bg-fragment-header, transparent)",
+          "fragment-header":
+            "var(--color-bg-fragment-header, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
           occurrence:
-            "rgb(var(--color-bg-occurrence, var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base,--color-backup-white))))))",
-          base: "rgb(var(--color-bg-base))",
+            "var(--color-bg-occurrence, var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff))))))",
+          base: "var(--color-bg-base)",
           secondary: "var(--color-bg-secondary)",
           hover: "var(--color-bg-hover)",
           fill: "var(--color-bg-fill)",
@@ -95,9 +99,14 @@ module.exports = {
           secondary: "var(--color-border-secondary)",
         },
       },
+      outlineColor: {
+        skin: {
+          primary: "var(--color-outline-primary)",
+        },
+      },
       gradientColorStops: {
         skin: {
-          base: "rgb(var(--color-bg-base))",
+          base: "var(--color-bg-base)",
           secondary: "var(--color-bg-secondary)",
         },
       },
