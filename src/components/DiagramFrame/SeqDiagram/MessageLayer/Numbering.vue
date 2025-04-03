@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="numbering"
-    class="absolute right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 font-thin leading-6"
+    class="absolute text-xs right-[100%] top-0 pr-1 group-hover:hidden text-gray-500 font-thin"
   >
     {{ number }}
   </div>
