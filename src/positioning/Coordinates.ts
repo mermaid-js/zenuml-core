@@ -127,14 +127,7 @@ export class Coordinates {
   }
 
   private getParticipantGap(p: IParticipantModel) {
-    const halfLeft = this.half(p.left);
-    const halfSelf = this.half(p.name);
-    const leftIsVisible = true;
-    const selfIsVisible = true;
-
-    return (
-      ((leftIsVisible && halfLeft) || 0) + ((selfIsVisible && halfSelf) || 0)
-    );
+    return this.half(p.left) + this.half(p.name);
   }
 
   private hasIcon(participantName: string): boolean {
