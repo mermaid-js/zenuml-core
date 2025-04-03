@@ -12,6 +12,9 @@
       class="relative z-container"
     >
       <template v-if="mode === RenderMode.Dynamic">
+        <!-- Why do we have two `life-line-layer`s? This is introduced when we add support of
+              floating participant. Essentially, the Participant labels must be on the top
+              of message layer and the lines of lifelines must be under the message layer.-->
         <life-line-layer
           :leftGap="frameBorderLeft"
           :context="rootContext.head()"

@@ -2,7 +2,7 @@
   <div
     :id="entity.name"
     :entity-type="entity.type?.toLowerCase()"
-    class="lifeline absolute flex flex-col mx-2 h-full"
+    class="lifeline absolute flex flex-col h-full"
     :class="{ 'transform -translate-x-1/2': renderParticipants }"
     :style="{ paddingTop: top + 'px', left: left + 'px' }"
   >
@@ -31,7 +31,7 @@ export default {
   data: () => {
     return {
       translateX: 0,
-      top: 0,
+      top: 24,
     };
   },
   computed: {
@@ -41,7 +41,7 @@ export default {
       return !!localStorage.zenumlDebug;
     },
     left() {
-      return this.centerOf(this.entity.name) - 8 - (this.groupLeft || 0);
+      return this.centerOf(this.entity.name) - (this.groupLeft || 0);
     },
   },
   mounted() {
@@ -97,8 +97,6 @@ export default {
         const rootY = this.$el.getBoundingClientRect().y;
         const messageY = firstMessage.getBoundingClientRect().y;
         this.top = (messageY - rootY) / this.scale;
-      } else {
-        this.top = 0;
       }
     },
   },

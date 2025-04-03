@@ -1,7 +1,7 @@
 <template>
   <label
     title="Double click to edit"
-    class="bg-skin-frame/[0.66] condition px-1 cursor-text hover:text-skin-message-hover hover:bg-skin-message-hover"
+    class="bg-skin-frame opacity-65 condition px-1 cursor-text hover:text-skin-message-hover hover:bg-skin-message-hover"
     :class="{
       'py-1 px-2 ml-1 cursor-text': editing,
     }"
@@ -74,3 +74,5 @@ function replaceLabelText(e: Event) {
 const { editing, handleDblClick, handleBlur, handleKeydown, handleKeyup } =
   useEditLabel(replaceLabelText);
 </script>
+
+<style scoped></style>
