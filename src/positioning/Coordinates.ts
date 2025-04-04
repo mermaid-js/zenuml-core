@@ -57,12 +57,20 @@ export class Coordinates {
     this.withMessageGaps(this.ownableMessages, this.participantModels);
   }
 
-  half(participantName: string) {
+  half(participantName: string): number {
     const participant = this.labelOrName(participantName);
     return participant ? this._getParticipantWidth(participant) / 2 : 0;
   }
 
-  getWidth() {
+  left(participantName: string): number {
+    return this.getPosition(participantName) - this.half(participantName);
+  }
+
+  right(participantName: string): number {
+    return this.getPosition(participantName) + this.half(participantName);
+  }
+
+  getWidth(): number {
     const lastParticipant =
       this.participantModels[this.participantModels.length - 1].name;
     const calculatedWidth =

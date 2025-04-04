@@ -383,6 +383,8 @@
 
     /* Messages */
     --color-text-message: #c30000;
+    --color-bg-message-hover: #fff;
+    --color-text-message-hover: #c30000;
 
     /* Fragment */
     --color-bg-fragment-header: #c30000; /* Fragment Headers */

@@ -1,9 +1,10 @@
 <template>
+  <label>[</label>
   <label
     title="Double click to edit"
     class="bg-skin-frame opacity-65 condition px-1 cursor-text hover:text-skin-message-hover hover:bg-skin-message-hover"
     :class="{
-      'py-1 px-2 ml-1 cursor-text': editing,
+      'cursor-text': editing,
     }"
     :contenteditable="editing && mode === RenderMode.Dynamic"
     @dblclick="handleDblClick"
@@ -11,8 +12,9 @@
     @keyup="handleKeyup"
     @keydown="handleKeydown"
   >
-    {{ editing ? labelText : `[${labelText}]` }}
+    {{ labelText }}
   </label>
+  <label>]</label>
 </template>
 <script setup lang="ts">
 import { computed, toRefs } from "vue";
