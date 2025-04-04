@@ -1,6 +1,6 @@
 <template>
   <div
-    class="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0"
+    class="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0 pt-2"
     :data-participant-names="participantNames"
     :style="{
       'min-width': mode === RenderMode.Dynamic ? '200px' : 'auto',
@@ -8,13 +8,13 @@
       pointerEvents: renderParticipants ? 'none' : 'all',
     }"
   >
-    <!--  header sticky blur effect -->
-    <div
+    <!-- TODO: add back header sticky blur effect -->
+    <!-- <div
       :style="{
         transform: `translateY(${translate > 0 ? translate - 1 : translate}px)`,
       }"
       class="pt-2 after:bg-gradient-to-b after:from-skin-frame after:via-skin-frame after:to-skin-frame/0 after:block after:absolute after:top-0 after:w-full after:h-[72px]"
-    ></div>
+    ></div> -->
     <div class="z-lifeline-container relative grow">
       <life-line
         v-if="starterOnTheLeft"

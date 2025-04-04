@@ -1,7 +1,8 @@
 <template>
   <!-- Merged the outer and middle divs while preserving all functionality -->
   <div
-    class="lifeline-group-container absolute flex flex-col flex-grow h-full outline-dashed outline-skin-primary"
+    class="lifeline-group-container absolute flex flex-col flex-grow h-full"
+    :class="{ 'outline-dashed outline-skin-primary': renderLifeLine }"
     v-if="entities.length > 0"
     :style="{
       left: `${left}px`,
