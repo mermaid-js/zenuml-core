@@ -4,12 +4,14 @@ import {
   MIN_PARTICIPANT_WIDTH,
   OCCURRENCE_WIDTH,
 } from "./Constants";
-import { TextType, WidthFunc } from "./Coordinate";
+import { TextType } from "./Coordinate";
+import type { WidthFunc } from "./Coordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
-import { IParticipantModel } from "@/parser/ParticipantListener";
+import type { IParticipantModel } from "@/parser/ParticipantListener";
 import { find_optimal } from "./david/DavidEisenstat";
 import { AllMessages } from "@/parser/MessageCollector";
-import { OwnableMessage, OwnableMessageType } from "@/parser/OwnableMessage";
+import { OwnableMessageType } from "@/parser/OwnableMessage";
+import type { OwnableMessage } from "@/parser/OwnableMessage";
 import { clearCache, getCache, setCache } from "@/utils/RenderingCache";
 
 export class Coordinates {
