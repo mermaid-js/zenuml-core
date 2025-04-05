@@ -34,6 +34,7 @@ import {
   _STARTER_,
   OrderedParticipants,
 } from "../../../../src/parser/OrderedParticipants";
+import type { IParticipantModel } from "../../../../src/parser/ParticipantListener";
 import { expect } from "vitest";
 
 function getFlattenedParticipants(code: string) {
@@ -41,15 +42,35 @@ function getFlattenedParticipants(code: string) {
   return OrderedParticipants(rootContext);
 }
 
+// Helper function to convert participant models to simplified objects for testing
+function participantsForTest(
+  participants: IParticipantModel[],
+): Array<Record<string, any>> {
+  return participants.map((p) => {
+    const result: Record<string, any> = {
+      name: p.name,
+      left: p.left,
+    };
+    if (p.label !== undefined) {
+      result.label = p.label;
+    }
+    return result;
+  });
+}
+
+function getTestParticipants(code: string) {
+  return participantsForTest(getFlattenedParticipants(code));
+}
+
 describe("Participants.Order", () => {
   it("@return", () => {
-    expect(getFlattenedParticipants("@return A->B:m")).toEqual([
+    expect(getTestParticipants("@return A->B:m")).toEqual([
       { name: "A", left: "" },
       { name: "B", left: "A" },
     ]);
   });
   it("should return the order of participants", () => {
-    expect(getFlattenedParticipants("A as A1 B C.m")).toEqual([
+    expect(getTestParticipants("A as A1 B C.m")).toEqual([
       { name: _STARTER_, left: "" },
       { name: "A", label: "A1", left: _STARTER_ },
       { name: "B", label: undefined, left: "A" },
@@ -58,17 +79,17 @@ describe("Participants.Order", () => {
   });
 
   it("should return the order of participants - Starter", () => {
-    expect(getFlattenedParticipants("@Starter(A)")).toEqual([
+    expect(getTestParticipants("@Starter(A)")).toEqual([
       { name: "A", left: "", label: undefined },
     ]);
 
-    expect(getFlattenedParticipants("A @Starter(B)")).toEqual([
+    expect(getTestParticipants("A @Starter(B)")).toEqual([
       { name: "A", left: "", label: undefined },
       { name: "B", left: "A", label: undefined },
     ]);
 
     expect(
-      getFlattenedParticipants(`A
+      getTestParticipants(`A
 @Starter("B")
 A.mA {
    self() {
@@ -81,13 +102,13 @@ A.mA {
       { name: "C", left: "B", label: undefined },
     ]);
 
-    expect(getFlattenedParticipants("A B @Starter(C) C.m")).toEqual([
+    expect(getTestParticipants("A B @Starter(C) C.m")).toEqual([
       { name: "A", left: "", label: undefined },
       { name: "B", left: "A", label: undefined },
       { name: "C", left: "B", label: undefined },
     ]);
 
-    expect(getFlattenedParticipants("A B->A.m C->D.m")).toEqual([
+    expect(getTestParticipants("A B->A.m C->D.m")).toEqual([
       { name: "A", left: "", label: undefined },
       { name: "B", left: "A", label: undefined },
       { name: "C", left: "B", label: undefined },
@@ -96,10 +117,8 @@ A.mA {
   });
 
   it("should return the order of participants", () => {
-    const flattenedParticipants = getFlattenedParticipants(
-      "A B @Starter(B) A.m C.m",
-    );
-    expect(flattenedParticipants).toEqual([
+    const testParticipants = getTestParticipants("A B @Starter(B) A.m C.m");
+    expect(testParticipants).toEqual([
       { name: "A", left: "" },
       { name: "B", left: "A" },
       { name: "C", left: "B" },
@@ -107,21 +126,21 @@ A.mA {
   });
 
   it("should return the order of participants", () => {
-    expect(getFlattenedParticipants("A.m")).toEqual([
+    expect(getTestParticipants("A.m")).toEqual([
       { left: "", name: _STARTER_ },
       { left: _STARTER_, name: "A" },
     ]);
   });
 
   it("should return the order of participants - ignore expression in parameters", () => {
-    expect(getFlattenedParticipants("A.m(B.m)")).toEqual([
+    expect(getTestParticipants("A.m(B.m)")).toEqual([
       { left: "", name: _STARTER_ },
       { left: _STARTER_, name: "A" },
     ]);
   });
 
   it("should return the order of participants - ignore expression in condition", () => {
-    expect(getFlattenedParticipants("if(B.m1){A.m2}")).toEqual([
+    expect(getTestParticipants("if(B.m1){A.m2}")).toEqual([
       { left: "", name: _STARTER_ },
       { left: _STARTER_, name: "A" },
     ]);
@@ -129,7 +148,7 @@ A.mA {
 
   it("should return the order of participants - return", () => {
     expect(
-      getFlattenedParticipants(`
+      getTestParticipants(`
 A.method(){
   return x
 }
