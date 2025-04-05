@@ -29,12 +29,9 @@
  * the participants back in the flow and a fixed flow decided by itself.
  */
 
-import { RootContext } from "../../../../src/parser";
-import {
-  _STARTER_,
-  OrderedParticipants,
-} from "../../../../src/parser/OrderedParticipants";
-import type { IParticipantModel } from "../../../../src/parser/ParticipantListener";
+import { RootContext } from "./index";
+import { _STARTER_, OrderedParticipants } from "./OrderedParticipants";
+import type { IParticipantModel } from "./IParticipantModel";
 import { expect } from "vitest";
 
 function getFlattenedParticipants(code: string) {

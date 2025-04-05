@@ -7,7 +7,7 @@ import {
 import { TextType } from "./Coordinate";
 import type { WidthFunc } from "./Coordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
-import type { IParticipantModel } from "@/parser/ParticipantListener";
+import type { IParticipantModel } from "@/parser/IParticipantModel";
 import { find_optimal } from "./david/DavidEisenstat";
 import { AllMessages } from "@/parser/MessageCollector";
 import { OwnableMessageType } from "@/parser/OwnableMessage";

@@ -1,18 +1,18 @@
 import ToCollector from "@/parser/ToCollector";
 import { AllMessages } from "@/parser/MessageCollector";
 import { blankParticipant } from "@/parser/Participants";
-import type { IParticipantModel } from "@/parser/ParticipantListener";
+import type { IParticipantModel } from "@/parser/IParticipantModel";
 
 export const _STARTER_ = "_STARTER_";
 
 // Define a class that implements IParticipantModel
 class Participant implements IParticipantModel {
   name: string;
-  left?: string;
+  left: string;
   label?: string;
   type?: string;
 
-  constructor(name: string, left?: string, label?: string, type?: string) {
+  constructor(name: string, left: string, label?: string, type?: string) {
     this.name = name;
     this.left = left;
     this.label = label;
