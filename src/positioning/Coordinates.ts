@@ -4,12 +4,14 @@ import {
   MIN_PARTICIPANT_WIDTH,
   OCCURRENCE_WIDTH,
 } from "./Constants";
-import { TextType, WidthFunc } from "./Coordinate";
+import { TextType } from "./Coordinate";
+import type { WidthFunc } from "./Coordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
-import { IParticipantModel } from "@/parser/ParticipantListener";
+import type { IParticipantModel } from "@/parser/IParticipantModel";
 import { find_optimal } from "./david/DavidEisenstat";
 import { AllMessages } from "@/parser/MessageCollector";
-import { OwnableMessage, OwnableMessageType } from "@/parser/OwnableMessage";
+import { OwnableMessageType } from "@/parser/OwnableMessage";
+import type { OwnableMessage } from "@/parser/OwnableMessage";
 import { clearCache, getCache, setCache } from "@/utils/RenderingCache";
 
 export class Coordinates {
@@ -32,18 +34,23 @@ export class Coordinates {
   }
 
   getPosition(participantName: string | undefined): number {
-    const pIndex = this.participantModels.findIndex(
-      (p) => p.name === participantName,
-    );
-    if (pIndex === -1) {
+    if (!participantName) return 0;
+
+    const participant = this.getParticipantModel(participantName);
+    if (!participant) {
       console.error(`Participant ${participantName} not found`);
       return 0;
     }
+
     const cacheKey = `getPosition_${participantName}`;
     const cachedPosition = getCache(cacheKey);
     if (cachedPosition != null) {
       return cachedPosition;
     }
+
+    const pIndex = this.participantModels.findIndex(
+      (p) => p.name === participantName,
+    );
     const leftGap = this.getParticipantGap(this.participantModels[0]);
     // const leftGap = 0;
     const position = leftGap + find_optimal(this.m)[pIndex];
@@ -58,7 +65,7 @@ export class Coordinates {
   }
 
   half(participantName: string): number {
-    const participant = this.labelOrName(participantName);
+    const participant = this.getParticipantModel(participantName);
     return participant ? this._getParticipantWidth(participant) / 2 : 0;
   }
 
@@ -138,50 +145,25 @@ export class Coordinates {
     return this.half(p.left) + this.half(p.name);
   }
 
-  private hasIcon(participantName: string): boolean {
-    // Skip the starter participant as it doesn't show an icon on the left
-    if (participantName === _STARTER_) {
-      return false;
-    }
-
-    // Find the participant in the models
-    const participant = this.participantModels.find(
-      (p) => p.name === participantName,
-    );
-
-    // Only participants with a defined type property have icons
-    // This matches the behavior in Participant.vue where icons are rendered based on entity.type
-    return !!participant && participant.type !== undefined;
+  private getParticipantModel(name: string): IParticipantModel | undefined {
+    return this.participantModels.find((p) => p.name === name);
   }
 
-  private labelOrName(name: string) {
-    const pIndex = this.participantModels.findIndex((p) => p.name === name);
-    if (pIndex === -1) return "";
-    return (
-      this.participantModels[pIndex].label ||
-      this.participantModels[pIndex].name
-    );
-  }
-
-  private _getParticipantWidth(participant: string | undefined) {
-    if (!participant) {
-      return 0;
-    }
-
-    const cacheKey = `getParticipantWidth_${participant}`;
+  private _getParticipantWidth(participant: IParticipantModel) {
+    const cacheKey = `getParticipantWidth_${participant.name}`;
     const cachedWidth = getCache(cacheKey);
     if (cachedWidth != null) {
       return cachedWidth;
     }
 
-    // Calculate base width from participant name or minimum width
+    // Calculate base width from participant display name or minimum width
     // Add icon width if the participant has an icon
     // Icon's total width is 32px (24px for icon + 8px for margin)
-    const hasIcon = this.hasIcon(participant);
+    const hasIcon = participant.hasIcon();
     const iconWidth = hasIcon ? 40 : 0;
 
     const labelWidth = this.widthProvider(
-      participant || "",
+      participant.getDisplayName(),
       TextType.ParticipantName,
     );
     const participantWidth =
@@ -189,7 +171,7 @@ export class Coordinates {
 
     setCache(cacheKey, participantWidth);
     console.debug(
-      `Width of ${participant} is ${participantWidth}; labelWidth: ${labelWidth}`,
+      `Width of ${participant.name} is ${participantWidth}; labelWidth: ${labelWidth}`,
     );
     return participantWidth;
   }

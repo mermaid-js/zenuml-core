@@ -1,6 +1,9 @@
+/**
+ * Interface representing a participant in a sequence diagram
+ */
 export interface IParticipantModel {
   name: string;
-  left?: string;
+  left: string;
   label?: string;
   type?: string;
 
@@ -14,4 +17,3 @@ export interface IParticipantModel {
    */
   hasIcon(): boolean;
 }
-export default {};
