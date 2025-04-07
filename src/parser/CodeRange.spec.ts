@@ -20,7 +20,7 @@ describe("CodeRange", () => {
     // for '}'
     expect(codeRange1.stop.line).toBe(2);
     expect(codeRange1.stop.col).toBe(6);
-    const m2 = m1.braceBlock().block().stat()[0].message();
+    const m2 = m1.Statements()[0].message();
     const codeRange2 = CodeRange.from(m2);
     expect(codeRange2.start.line).toBe(2);
     expect(codeRange2.start.col).toBe(1);

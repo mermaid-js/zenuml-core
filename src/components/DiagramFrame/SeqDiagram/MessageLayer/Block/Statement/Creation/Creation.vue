@@ -58,9 +58,7 @@
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
-      :number="`${number}.${
-        (creation.braceBlock()?.block().stat().length || 0) + 1
-      }`"
+      :number="`${number}.${creation.Statements().length + 1}`"
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
     />

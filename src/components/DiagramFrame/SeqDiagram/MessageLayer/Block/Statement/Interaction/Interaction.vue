@@ -53,7 +53,7 @@
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
-      :number="`${number}.${statements + 1}`"
+      :number="`${number}.${statements.length + 1}`"
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
     />
