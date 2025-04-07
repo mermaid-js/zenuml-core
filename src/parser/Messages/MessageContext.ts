@@ -37,3 +37,8 @@ MessageContext.prototype.Assignment = function () {
   }
   return undefined;
 };
+
+// @ts-ignore
+MessageContext.prototype.Statements = function () {
+  return this.braceBlock()?.block()?.stat() || [];
+};

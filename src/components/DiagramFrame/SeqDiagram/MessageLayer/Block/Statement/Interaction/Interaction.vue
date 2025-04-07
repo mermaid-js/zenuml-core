@@ -53,9 +53,7 @@
       :content="assignee"
       :rtl="!rightToLeft"
       type="return"
-      :number="`${number}.${
-        (message.braceBlock()?.block().stat().length || 0) + 1
-      }`"
+      :number="`${number}.${statements + 1}`"
       :classNames="messageClassNames"
       :textStyle="messageTextStyle"
     />
@@ -92,6 +90,9 @@ export default {
     },
     message: function () {
       return this.context?.message();
+    },
+    statements: function () {
+      return this.message.Statements();
     },
     source: function () {
       return this.message?.From() || _STARTER_;
