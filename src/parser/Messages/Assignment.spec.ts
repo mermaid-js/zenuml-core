@@ -1,4 +1,4 @@
-import { Assignment } from "../../parser/Messages/MessageContext";
+import { Assignment } from "./MessageContext";
 
 describe("Assignment", function () {
   test.each([
