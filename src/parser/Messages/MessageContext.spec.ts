@@ -1,4 +1,7 @@
-import { AsyncMessageContextFixture } from "../ContextsFixture";
+import {
+  AsyncMessageContextFixture,
+  SyncMessageContextFixture,
+} from "../ContextsFixture";
 
 describe("Messages", () => {
   it("Async Message", () => {
@@ -20,5 +23,20 @@ describe("Messages", () => {
     );
     expect(message.getFormattedText()).toBe("Alice -> Bob: Hello World");
     expect(message.getComment()).toBe(" comment1 \n comment2 \n");
+  });
+});
+
+// Tests
+describe("MessageContext.prototype.Statements", () => {
+  it("should return empty array if no statements", () => {
+    const ctx = SyncMessageContextFixture("A.method");
+    expect(ctx.Statements()).toEqual([]);
+  });
+
+  it("should return array of statements if present", () => {
+    const ctx = SyncMessageContextFixture("A.method { m1 m2 }");
+    expect(ctx.Statements().length).toEqual(2);
+    expect(ctx.Statements()[0].getText()).toEqual("m1");
+    expect(ctx.Statements()[1].getText()).toEqual("m2");
   });
 });

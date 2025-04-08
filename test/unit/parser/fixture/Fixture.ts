@@ -21,7 +21,7 @@ export class Fixture {
   }
 
   static firstGrandChild(code: string) {
-    return Fixture.firstChild(code).children[0].braceBlock().block().stat()[0];
+    return Fixture.firstChild(code).children[0].Statements()[0];
   }
 }
 
