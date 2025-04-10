@@ -50,7 +50,7 @@
 <script>
 import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
 import iconPath from "../../Tutorial/Icons";
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import useDocumentScroll from "@/functions/useDocumentScroll";
 import useIntersectionTop from "@/functions/useIntersectionTop";
 import { useStore } from "vuex";
@@ -123,12 +123,12 @@ export default {
         participantOffsetTop
       );
     });
-    watch(
-      () => participantColor.value,
-      (newColor) => {
-        this.updateFontColor(newColor);
-      },
-    );
+    // watch(
+    //   () => participantColor.value,
+    //   (newColor) => {
+    //     this.updateFontColor(newColor);
+    //   },
+    // );
     return {
       translate,
       participant,

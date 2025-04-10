@@ -9,6 +9,7 @@ import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "@/positioning/Coordinates";
 import { CodeRange } from "@/parser/CodeRange";
 import { StoreOptions } from "vuex";
+import { Participant } from "@/parser/Participants";
 
 /*
  * RenderMode
@@ -173,7 +174,7 @@ const Store = (): StoreOptions<StoreState> => {
           name,
           color,
           participant,
-        }: { name: string; color: string; participant: any },
+        }: { name: string; color: string; participant: Participant },
       ) {
         console.log("updateParticipantColor mutation called", { name, color });
 
@@ -186,7 +187,13 @@ const Store = (): StoreOptions<StoreState> => {
         }
 
         // Get the position of the explicit declaration
-        const position = participant.position;
+        const positions = Array.from(participant.positions);
+        const position =
+          positions.length > 0
+            ? positions.reduce((prev, current) =>
+                prev[0] < current[0] ? prev : current,
+              )
+            : undefined;
         console.log("position:", position);
         if (!position || !Array.isArray(position)) {
           console.warn(`No valid position found for participant: ${name}`);
@@ -214,7 +221,7 @@ const Store = (): StoreOptions<StoreState> => {
           state.code.substring(end);
 
         // Notify of content change
-        state.onContentChange?.();
+        state.onContentChange?.(state.code);
       },
     },
     actions: {
