@@ -150,6 +150,25 @@ const Store = (): StoreOptions<StoreState> => {
           scoped: payload,
         });
       },
+      updateParticipant: function (
+        state: any,
+        payload: { participant: Participant; color?: string },
+      ) {
+        const { participant, color } = payload;
+        // Get the original text range
+        const range = participant.getRange();
+        if (!range) return;
+
+        // Get the text content and update it with the new color
+        const originalText = state.code.substring(range.start, range.end);
+        const updatedText = updateParticipantColorInText(originalText, color);
+
+        // Replace the text in the code
+        state.code =
+          state.code.substring(0, range.start) +
+          updatedText +
+          state.code.substring(range.end);
+      },
       eventEmit: function (state: any, payload: any) {
         state.onEventEmit?.(payload.event, payload.data);
       },
@@ -174,7 +193,7 @@ const Store = (): StoreOptions<StoreState> => {
           name,
           color,
           participant,
-        }: { name: string; color: string; participant: Participant },
+        }: { name: string; color?: string; participant: Participant },
       ) {
         console.log("updateParticipantColor mutation called", { name, color });
 
@@ -186,42 +205,49 @@ const Store = (): StoreOptions<StoreState> => {
           return;
         }
 
-        // Get the position of the explicit declaration
-        const positions = Array.from(participant.positions);
-        const position =
-          positions.length > 0
-            ? positions.reduce((prev, current) =>
-                prev[0] < current[0] ? prev : current,
-              )
-            : undefined;
-        console.log("position:", position);
-        if (!position || !Array.isArray(position)) {
-          console.warn(`No valid position found for participant: ${name}`);
+        // Get the declaration and its position
+        const declaration = participant.declaration;
+        if (!declaration?.name?.position) {
+          console.warn(`No valid declaration found for participant: ${name}`);
           return;
         }
 
-        // Extract the start and end positions
+        // Extract the start and end positions from the declaration
+        const position =
+          declaration.label?.position || declaration.name.position;
         const [start, end] = position;
 
         // Get the participant declaration text
         const declarationText = state.code.substring(start, end);
         console.log("declarationText:", declarationText);
 
-        // Create updated text with color
-        const updatedText = updateParticipantColorInText(
+        // Update the color in the code
+        const beforeCode = state.code.substring(0, start);
+        const afterCode = state.code.substring(end);
+        const updatedDeclarationText = updateParticipantColorInText(
           declarationText,
           color,
         );
-        console.log("updatedText:", updatedText);
+        state.code = beforeCode + updatedDeclarationText + afterCode;
 
-        // Replace the declaration in the code
-        state.code =
-          state.code.substring(0, start) +
-          updatedText +
-          state.code.substring(end);
+        // Update the participant's color property
+        participant.mergeOptions({ color });
 
-        // Notify of content change
-        state.onContentChange?.(state.code);
+        // Update the declaration's color field
+        if (color) {
+          participant.declaration = {
+            ...declaration,
+            color: {
+              rawText: color,
+              position: [end, end + color.length],
+            },
+          };
+        } else {
+          // Remove color from declaration if color is being removed
+          const { color: color, ...rest } = declaration;
+          console.debug("Removing color from declaration:", color);
+          participant.declaration = rest;
+        }
       },
     },
     actions: {

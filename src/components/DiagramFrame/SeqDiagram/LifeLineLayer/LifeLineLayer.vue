@@ -34,6 +34,7 @@
         <life-line
           :key="index"
           v-if="child instanceof ParticipantContext"
+          :context="child"
           :entity="getParticipantEntity(child)"
           :renderParticipants="renderParticipants"
           :renderLifeLine="renderLifeLine"

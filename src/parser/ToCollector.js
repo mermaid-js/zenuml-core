@@ -11,33 +11,69 @@ const ToCollector = new sequenceParserListener();
 // 1. Later declaration win
 // 2. Participant declaration overwrite cannot be overwritten by To or Starter
 const onParticipant = function (ctx) {
-  // if(!(ctx?.name())) return;
   if (isBlind) return;
-  const type = ctx?.participantType()?.getFormattedText().replace("@", "");
-  const participant =
-    ctx?.name()?.getFormattedText() || "Missing `Participant`";
-  const stereotype = ctx.stereotype()?.name()?.getFormattedText();
-  const width =
-    (ctx.width && ctx.width() && Number.parseInt(ctx.width().getText())) ||
-    undefined;
+  const typeCtx = ctx?.participantType();
+  const type = typeCtx?.getFormattedText().replace("@", "");
+  const nameCtx = ctx?.name();
+  const participant = nameCtx?.getFormattedText() || "Missing `Participant`";
+  const stereotypeCtx = ctx.stereotype()?.name();
+  const stereotype = stereotypeCtx?.getFormattedText();
+  const widthCtx = ctx.width && ctx.width();
+  const width = widthCtx && Number.parseInt(widthCtx.getText());
   const labelCtx = ctx.label && ctx.label();
   const label = labelCtx?.name()?.getFormattedText();
   const explicit = true;
   const color = ctx.COLOR()?.getText();
   const comment = ctx.getComment();
-  const nameCtx = ctx.name();
-  let start, end;
 
-  // When label is present, it means we edit label in diagram and update its code regardless of the occurrence of the participant name
+  const declaration = {
+    name: {
+      rawText: nameCtx?.getText() || "Missing `Participant`",
+      position: nameCtx
+        ? [nameCtx.start.start, nameCtx.stop.stop + 1]
+        : undefined,
+    },
+  };
+
+  if (typeCtx) {
+    declaration.participantType = {
+      rawText: typeCtx.getText(),
+      position: [typeCtx.start.start, typeCtx.stop.stop + 1],
+    };
+  }
+
+  if (stereotypeCtx) {
+    declaration.stereotype = {
+      rawText: stereotypeCtx.getText(),
+      position: [stereotypeCtx.start.start, stereotypeCtx.stop.stop + 1],
+    };
+  }
+
+  if (widthCtx) {
+    declaration.width = {
+      rawText: widthCtx.getText(),
+      position: [widthCtx.start.start, widthCtx.stop.stop + 1],
+    };
+  }
+
   if (labelCtx) {
     const labelNameCtx = labelCtx.name();
     if (labelNameCtx) {
-      start = labelNameCtx.start.start;
-      end = labelNameCtx.stop.stop + 1;
+      declaration.label = {
+        rawText: labelNameCtx.getText(),
+        position: [labelNameCtx.start.start, labelNameCtx.stop.stop + 1],
+      };
     }
-  } else if (nameCtx) {
-    start = nameCtx.start.start;
-    end = nameCtx.stop.stop + 1;
+  }
+
+  if (color) {
+    declaration.color = {
+      rawText: color,
+      position: [
+        ctx.COLOR().symbol.start.start,
+        ctx.COLOR().symbol.stop.stop + 1,
+      ],
+    };
   }
 
   participants.Add(participant, {
@@ -50,7 +86,10 @@ const onParticipant = function (ctx) {
     explicit,
     color,
     comment,
-    position: [start, end],
+    declaration,
+    position: declaration.label
+      ? declaration.label.position
+      : declaration.name.position,
   });
 };
 ToCollector.enterParticipant = onParticipant;

@@ -58,7 +58,7 @@ export default {
     const isOpen = ref(false);
     const colors = [
       "#006837",
-      "#00A651",
+      "#00c875",
       "#BFB41B",
       "#FFC20E",
       "#F15A24",
