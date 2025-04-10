@@ -169,11 +169,14 @@ const Store = (): StoreOptions<StoreState> => {
       },
       updateParticipantColor: function (
         state,
-        { name, color }: { name: string; color: string },
+        {
+          name,
+          color,
+          participant,
+        }: { name: string; color: string; participant: any },
       ) {
         console.log("updateParticipantColor mutation called", { name, color });
-        // Get the participant from the store
-        const participant = state.getters.participants.Get(name);
+
         console.log("participant:", participant);
 
         // Only update color if the participant was explicitly declared

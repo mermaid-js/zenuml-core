@@ -78,6 +78,7 @@ export default {
         store.commit("updateParticipantColor", {
           name: props.entity.name,
           color: value,
+          participant: store.getters.participants.Get(props.entity.name),
         });
       },
     });

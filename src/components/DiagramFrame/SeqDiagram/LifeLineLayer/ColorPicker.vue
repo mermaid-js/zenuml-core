@@ -53,7 +53,7 @@ export default {
       default: "",
     },
   },
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "input"],
   setup(props, { emit }) {
     const isOpen = ref(false);
     const colors = [
@@ -104,6 +104,7 @@ export default {
     const selectColor = (color) => {
       console.log("Selected color:", color);
       emit("update:modelValue", color);
+      emit("input", color);
       closePicker();
     };
 
