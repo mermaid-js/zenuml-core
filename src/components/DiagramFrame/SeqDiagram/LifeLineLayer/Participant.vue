@@ -22,6 +22,10 @@
         v-if="!isDefaultStarter"
         class="h-5 group flex flex-col justify-center"
       >
+        <ColorPicker
+          v-model="participantColor"
+          class="absolute -left-8 top-1/2 transform -translate-y-1/2"
+        />
         <!-- TODO: create a better solution for participant comments -->
         <!--      <span-->
         <!--        v-if="!!comment"-->
@@ -46,7 +50,7 @@
 <script>
 import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
 import iconPath from "../../Tutorial/Icons";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import useDocumentScroll from "@/functions/useDocumentScroll";
 import useIntersectionTop from "@/functions/useIntersectionTop";
 import { useStore } from "vuex";
@@ -55,6 +59,7 @@ import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
 import { RenderMode } from "@/store/Store";
 import ParticipantLabel from "./ParticipantLabel.vue";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import ColorPicker from "./ColorPicker.vue";
 
 const INTERSECTION_ERROR_MARGIN = 10; // a threshold for judging whether the participant is intersecting with the viewport
 
@@ -62,10 +67,21 @@ export default {
   name: "Participant",
   components: {
     ParticipantLabel,
+    ColorPicker,
   },
   setup(props) {
     const store = useStore();
     const participant = ref(null);
+    const participantColor = computed({
+      get: () => props.entity.color,
+      set: (value) => {
+        store.commit("updateParticipantColor", {
+          name: props.entity.name,
+          color: value,
+        });
+      },
+    });
+
     if (store.state.mode === RenderMode.Static) {
       return { translate: 0, participant };
     }
@@ -106,7 +122,19 @@ export default {
         participantOffsetTop
       );
     });
-    return { translate, participant, labelPositions, assigneePositions };
+    watch(
+      () => participantColor.value,
+      (newColor) => {
+        this.updateFontColor(newColor);
+      },
+    );
+    return {
+      translate,
+      participant,
+      labelPositions,
+      assigneePositions,
+      participantColor,
+    };
   },
   props: {
     entity: {
@@ -173,8 +201,8 @@ export default {
     onSelect() {
       this.$store.commit("onSelect", this.entity.name);
     },
-    updateFontColor() {
-      if (!this.entity.color) {
+    updateFontColor(newColor) {
+      if (!newColor) {
         this.color = undefined;
         return;
       }

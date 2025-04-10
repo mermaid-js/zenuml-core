@@ -167,6 +167,52 @@ const Store = (): StoreOptions<StoreState> => {
       diagramElement: function (state: any, payload: any) {
         state.diagramElement = payload;
       },
+      updateParticipantColor: function (
+        state,
+        { name, color }: { name: string; color: string },
+      ) {
+        console.log("updateParticipantColor mutation called", { name, color });
+        // Get the participant from the store
+        const participant = state.getters.participants.Get(name);
+        console.log("participant:", participant);
+
+        // Only update color if the participant was explicitly declared
+        if (!participant?.explicit) {
+          console.warn(`Cannot update color for implicit participant: ${name}`);
+          return;
+        }
+
+        // Get the position of the explicit declaration
+        const position = participant.position;
+        console.log("position:", position);
+        if (!position || !Array.isArray(position)) {
+          console.warn(`No valid position found for participant: ${name}`);
+          return;
+        }
+
+        // Extract the start and end positions
+        const [start, end] = position;
+
+        // Get the participant declaration text
+        const declarationText = state.code.substring(start, end);
+        console.log("declarationText:", declarationText);
+
+        // Create updated text with color
+        const updatedText = updateParticipantColorInText(
+          declarationText,
+          color,
+        );
+        console.log("updatedText:", updatedText);
+
+        // Replace the declaration in the code
+        state.code =
+          state.code.substring(0, start) +
+          updatedText +
+          state.code.substring(end);
+
+        // Notify of content change
+        state.onContentChange?.();
+      },
     },
     actions: {
       // Why debounce is here instead of mutation 'code'?
@@ -186,4 +232,14 @@ const Store = (): StoreOptions<StoreState> => {
     strict: false,
   };
 };
+
+// Helper function to update color in participant declaration text
+function updateParticipantColorInText(text: string, color?: string): string {
+  // Remove any existing color (format: #RRGGBB)
+  const baseText = text.replace(/\s+#[0-9a-fA-F]{6}\b/, "");
+
+  // Add new color if provided
+  return color ? `${baseText} ${color}` : baseText;
+}
+
 export default Store;

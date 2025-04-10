@@ -49,6 +49,7 @@
     "@types/ramda": "^0.28.20",
     "@vue/compat": "^3.2.45",
     "antlr4": "~4.11.0",
+    "click-outside-vue3": "^4.0.1",
     "color-string": "^1.5.5",
     "dom-to-image-more": "^2.13.0",
     "dompurify": "^3.1.5",
