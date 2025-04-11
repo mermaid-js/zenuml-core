@@ -56,7 +56,7 @@ export class Participant {
   isStarter: boolean | undefined;
   label: string | undefined;
   private type: string | undefined;
-  private color: string | undefined;
+  color: string | undefined;
   private comment: string | undefined;
   private assignee: string | undefined;
   positions: Set<Position> = new Set();

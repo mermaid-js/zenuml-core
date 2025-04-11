@@ -69,10 +69,7 @@ const onParticipant = function (ctx) {
   if (color) {
     declaration.color = {
       rawText: color,
-      position: [
-        ctx.COLOR().symbol.start.start,
-        ctx.COLOR().symbol.stop.stop + 1,
-      ],
+      position: [ctx.COLOR().symbol.start, ctx.COLOR().symbol.stop + 1],
     };
   }
 

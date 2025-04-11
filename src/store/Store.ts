@@ -187,7 +187,7 @@ const Store = (): StoreOptions<StoreState> => {
       diagramElement: function (state: any, payload: any) {
         state.diagramElement = payload;
       },
-      updateParticipantColor: function (
+      updateParticipantColor(
         state,
         {
           name,
@@ -196,7 +196,6 @@ const Store = (): StoreOptions<StoreState> => {
         }: { name: string; color?: string; participant: Participant },
       ) {
         console.log("updateParticipantColor mutation called", { name, color });
-
         console.log("participant:", participant);
 
         // Only update color if the participant was explicitly declared
@@ -212,18 +211,25 @@ const Store = (): StoreOptions<StoreState> => {
           return;
         }
 
-        // Extract the start and end positions from the declaration
-        const position =
+        // Find the end of the declaration (either current color position or name position)
+        const currentColorPos = declaration.color?.position;
+        const namePos =
           declaration.label?.position || declaration.name.position;
-        const [start, end] = position;
+        const declarationEnd = currentColorPos
+          ? currentColorPos[1]
+          : namePos[1];
+        const declarationStart = namePos[0];
 
-        // Get the participant declaration text
-        const declarationText = state.code.substring(start, end);
+        // Get the full declaration text including any existing color
+        const declarationText = state.code.substring(
+          declarationStart,
+          declarationEnd,
+        );
         console.log("declarationText:", declarationText);
 
         // Update the color in the code
-        const beforeCode = state.code.substring(0, start);
-        const afterCode = state.code.substring(end);
+        const beforeCode = state.code.substring(0, declarationStart);
+        const afterCode = state.code.substring(declarationEnd);
         const updatedDeclarationText = updateParticipantColorInText(
           declarationText,
           color,
@@ -231,23 +237,26 @@ const Store = (): StoreOptions<StoreState> => {
         state.code = beforeCode + updatedDeclarationText + afterCode;
 
         // Update the participant's color property
-        participant.mergeOptions({ color });
+        participant.color = color;
 
         // Update the declaration's color field
         if (color) {
+          const newColorStart =
+            declarationStart + updatedDeclarationText.lastIndexOf(color);
           participant.declaration = {
             ...declaration,
             color: {
               rawText: color,
-              position: [end, end + color.length],
+              position: [newColorStart, newColorStart + color.length],
             },
           };
         } else {
           // Remove color from declaration if color is being removed
-          const { color: color, ...rest } = declaration;
-          console.debug("Removing color from declaration:", color);
+          const { color: _, ...rest } = declaration;
+          console.debug("Removing color from declaration:", _);
           participant.declaration = rest;
         }
+        state.onContentChange?.(state.code);
       },
     },
     actions: {
@@ -270,9 +279,12 @@ const Store = (): StoreOptions<StoreState> => {
 };
 
 // Helper function to update color in participant declaration text
-function updateParticipantColorInText(text: string, color?: string): string {
-  // Remove any existing color (format: #RRGGBB)
-  const baseText = text.replace(/\s+#[0-9a-fA-F]{6}\b/, "");
+export function updateParticipantColorInText(
+  text: string,
+  color?: string,
+): string {
+  // Remove any existing color (format: #RRGGBB) and trailing whitespace/newlines
+  const baseText = text.replace(/#[0-9a-fA-F]{6}/g, "").trim();
 
   // Add new color if provided
   return color ? `${baseText} ${color}` : baseText;
