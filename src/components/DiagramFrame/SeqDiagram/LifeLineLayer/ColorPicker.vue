@@ -1,5 +1,5 @@
 <template>
-  <div class="relative inline-block">
+  <div class="inline-block">
     <button
       @click.stop="togglePicker"
       class="w-6 h-6 rounded border border-gray-300 flex items-center justify-center hover:ring-2 hover:ring-blue-200 transition-all"
