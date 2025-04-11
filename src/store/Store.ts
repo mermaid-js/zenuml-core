@@ -9,6 +9,7 @@ import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "@/positioning/Coordinates";
 import { CodeRange } from "@/parser/CodeRange";
 import { StoreOptions } from "vuex";
+import { Participant } from "@/parser/Participants";
 
 /*
  * RenderMode
@@ -149,6 +150,25 @@ const Store = (): StoreOptions<StoreState> => {
           scoped: payload,
         });
       },
+      updateParticipant: function (
+        state: any,
+        payload: { participant: Participant; color?: string },
+      ) {
+        const { participant, color } = payload;
+        // Get the original text range
+        const range = participant.getRange();
+        if (!range) return;
+
+        // Get the text content and update it with the new color
+        const originalText = state.code.substring(range.start, range.end);
+        const updatedText = updateParticipantColorInText(originalText, color);
+
+        // Replace the text in the code
+        state.code =
+          state.code.substring(0, range.start) +
+          updatedText +
+          state.code.substring(range.end);
+      },
       eventEmit: function (state: any, payload: any) {
         state.onEventEmit?.(payload.event, payload.data);
       },
@@ -169,6 +189,44 @@ const Store = (): StoreOptions<StoreState> => {
       },
     },
     actions: {
+      updateParticipantColor(
+        { commit, state },
+        { color, participant }: { color?: string; participant: Participant },
+      ) {
+        console.log("participant:", participant);
+
+        // Only update color if the participant was explicitly declared
+        if (!participant?.explicit || !participant?.declaration) {
+          return;
+        }
+
+        // Get the declaration and its position
+        const declaration = participant.declaration;
+
+        // Find the end of the declaration (either current color position or name position)
+        const declarationStart = declaration.start;
+        const declarationEnd = declaration.stop;
+
+        // Get the full declaration text including any existing color
+        const declarationText = state.code.substring(
+          declarationStart,
+          declarationEnd,
+        );
+        console.log("declarationText:", declarationText);
+
+        // Update the color in the code
+        const beforeCode = state.code.substring(0, declarationStart);
+        const afterCode = state.code.substring(declarationEnd);
+        const updatedDeclarationText = updateParticipantColorInText(
+          declarationText,
+          color,
+        );
+        const newCode = beforeCode + updatedDeclarationText + afterCode;
+
+        // Update code through mutation
+        commit("code", newCode);
+        state.onContentChange?.(newCode);
+      },
       // Why debounce is here instead of mutation 'code'?
       // Both code and cursor must be mutated together, especially during typing.
       updateCode: function ({ commit }: any, payload: any) {
@@ -186,4 +244,17 @@ const Store = (): StoreOptions<StoreState> => {
     strict: false,
   };
 };
+
+// Helper function to update color in participant declaration text
+export function updateParticipantColorInText(
+  text: string,
+  color?: string,
+): string {
+  // Remove any existing color (format: #RRGGBB) and trailing whitespace/newlines
+  const baseText = text.replace(/#[0-9a-fA-F]{6}/g, "").trim();
+
+  // Add new color if provided
+  return color ? `${baseText} ${color}` : baseText;
+}
+
 export default Store;

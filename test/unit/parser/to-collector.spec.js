@@ -40,6 +40,20 @@ test("smoke test2", () => {
       [32, 37],
       [56, 61],
     ]),
+    declaration: {
+      name: {
+        rawText: '"B 1"',
+        position: [32, 37],
+      },
+      stereotype: {
+        rawText: "A",
+        position: [28, 29],
+      },
+      width: {
+        rawText: "1024",
+        position: [38, 42],
+      },
+    },
   });
 });
 
@@ -50,11 +64,29 @@ describe("Plain participants", () => {
       // `A` will be parsed as a participant which matches `participant EOF`
       let participants = getParticipants(code);
       expect(participants.Size()).toBe(1);
-      expect(participants.Get("A").width).toBeUndefined();
+      expect(participants.Get("A").width).toBeNull();
       expect(participants.Get("A").stereotype).toBeUndefined();
     },
   );
 });
+
+describe("With color", () => {
+  test.each(["A #000000", "A   #000000", "<<s>> A #000000"])(
+    "get participant with color and declaration",
+    (code) => {
+      let participants = getParticipants(code);
+      const participant = participants.Get("A");
+      expect(participant.color).toBe("#000000");
+      expect(participant.declaration).toBeDefined();
+      expect(participant.declaration.name.rawText).toBe("A");
+      expect(participant.declaration.color.rawText).toBe("#000000");
+      if (code.includes("<<s>>")) {
+        expect(participant.declaration.stereotype.rawText).toBe("s");
+      }
+    },
+  );
+});
+
 describe("with width", () => {
   test.each([
     ["A 1024", 1024],
@@ -133,32 +165,38 @@ describe("with participantType", () => {
     ["@actor A\nA", "actor"],
     ["@Actor A", "Actor"],
     ["@database A", "database"],
-  ])("code:%s => participantType:%s", (code, participantType) => {
+  ])("code:%s => type:%s", (code, type) => {
     let participants = getParticipants(code);
     expect(participants.Size()).toBe(1);
     expect(participants.Get("A").name).toBe("A");
-    expect(participants.Get("A").type).toBe(participantType);
+    expect(participants.Get("A").type).toBe(type);
   });
 });
 
-function getParticipants(code) {
-  let rootContext = RootContext(code);
-  return ToCollector.getParticipants(rootContext);
-}
-
-describe("Add Starter to participants", () => {
-  test("Empty context", () => {
-    let rootContext = RootContext("");
-    const participants = ToCollector.getParticipants(rootContext);
-    expect(participants.Size()).toBe(0);
+describe("with participantType and declaration", () => {
+  test.each([
+    ["@actor A", "actor"],
+    ["@actor A\nA", "actor"],
+    ["@Actor A", "Actor"],
+  ])("code:%s => type:%s", (code, type) => {
+    let participants = getParticipants(code);
+    const participant = participants.Get("A");
+    expect(participant.type).toBe(type);
+    expect(participant.declaration).toBeDefined();
+    expect(participant.declaration.participantType.rawText).toBe("@" + type);
+    expect(participant.declaration.name.rawText).toBe("A");
   });
+});
 
-  test("A B->A.m", () => {
-    let rootContext = RootContext("A B B->A.m");
-    const participants = ToCollector.getParticipants(rootContext);
-    expect(participants.Size()).toBe(2);
-    expect(participants.Get("B").isStarter).toBeFalsy();
-    expect(participants.Names()).toStrictEqual(["A", "B"]);
+describe("without starter", () => {
+  test.each([
+    ["A.method", "A", 1],
+    ["@Starter(A)", "A", 1],
+  ])("code:%s => participant:%s", (code, participant, numberOfParticipants) => {
+    // `A` will be parsed as a participant which matches `participant EOF`
+    let participants = getParticipants(code);
+    expect(participants.Size()).toBe(numberOfParticipants);
+    expect(participants.Get("A").name).toBe(participant);
   });
 });
 
@@ -357,5 +395,26 @@ describe("enterRef", () => {
     expect(participants.GetPositions("A")).toEqual(new Set([[0, 1]]));
     expect(participants.GetPositions("B")).toEqual(new Set([[9, 10]]));
     expect(participants.GetPositions("C")).toEqual(new Set([[12, 13]]));
+  });
+});
+
+function getParticipants(code) {
+  let rootContext = RootContext(code);
+  return ToCollector.getParticipants(rootContext);
+}
+
+describe("Add Starter to participants", () => {
+  test("Empty context", () => {
+    let rootContext = RootContext("");
+    const participants = ToCollector.getParticipants(rootContext);
+    expect(participants.Size()).toBe(0);
+  });
+
+  test("A B->A.m", () => {
+    let rootContext = RootContext("A B B->A.m");
+    const participants = ToCollector.getParticipants(rootContext);
+    expect(participants.Size()).toBe(2);
+    expect(participants.Get("B").isStarter).toBeFalsy();
+    expect(participants.Names()).toStrictEqual(["A", "B"]);
   });
 });
