@@ -24,27 +24,26 @@ describe("Store", () => {
         onElementClick: vi.fn(),
       };
 
-      // Get the store mutations
-      const { mutations } = Store();
+      // Get the store actions
+      const { actions } = Store();
+      const context = {
+        state,
+        commit: (type: string, payload: any) => {
+          if (type === "code") {
+            state.code = payload;
+          }
+        },
+      };
 
       // Update color
-      mutations.updateParticipantColor(state, {
+      actions.updateParticipantColor(context, {
         name: "A",
         color: "#111111",
         participant,
       });
 
-      // Check code was updated
+      // Only check code was updated - participant updates happen through re-parsing
       expect(state.code).toBe("A #111111");
-
-      // Check participant properties were updated
-      expect(participant.color).toBe("#111111");
-
-      // Check declaration structure was updated
-      expect(participant.declaration).toBeDefined();
-      expect(participant.declaration.name.rawText).toBe("A");
-      expect(participant.declaration.color.rawText).toBe("#111111");
-      expect(participant.declaration.color.position).toEqual([2, 9]);
     });
 
     test("should remove color when color parameter is undefined", () => {
@@ -65,26 +64,26 @@ describe("Store", () => {
         onElementClick: vi.fn(),
       };
 
-      // Get the store mutations
-      const { mutations } = Store();
+      // Get the store actions
+      const { actions } = Store();
+      const context = {
+        state,
+        commit: (type: string, payload: any) => {
+          if (type === "code") {
+            state.code = payload;
+          }
+        },
+      };
 
       // Remove color
-      mutations.updateParticipantColor(state, {
+      actions.updateParticipantColor(context, {
         name: "A",
         color: undefined,
         participant,
       });
 
-      // Check code was updated
+      // Only check code was updated - participant updates happen through re-parsing
       expect(state.code).toBe("A");
-
-      // Check participant properties were updated
-      expect(participant.color).toBeUndefined();
-
-      // Check declaration structure was updated
-      expect(participant.declaration).toBeDefined();
-      expect(participant.declaration.name.rawText).toBe("A");
-      expect(participant.declaration.color).toBeUndefined();
     });
 
     test("should not update color for implicit participant", () => {
@@ -105,11 +104,19 @@ describe("Store", () => {
         onElementClick: vi.fn(),
       };
 
-      // Get the store mutations
-      const { mutations } = Store();
+      // Get the store actions
+      const { actions } = Store();
+      const context = {
+        state,
+        commit: (type: string, payload: any) => {
+          if (type === "code") {
+            state.code = payload;
+          }
+        },
+      };
 
       // Try to update color of implicit participant
-      mutations.updateParticipantColor(state, {
+      actions.updateParticipantColor(context, {
         name: "B",
         color: "#111111",
         participant,
@@ -117,10 +124,6 @@ describe("Store", () => {
 
       // Check code wasn't modified
       expect(state.code).toBe("A->B");
-
-      // Check participant wasn't modified
-      expect(participant.color).toBeUndefined();
-      expect(participant.explicit).toBeFalsy();
     });
 
     test("should handle participant with label", () => {
@@ -141,26 +144,26 @@ describe("Store", () => {
         onElementClick: vi.fn(),
       };
 
-      // Get the store mutations
-      const { mutations } = Store();
+      // Get the store actions
+      const { actions } = Store();
+      const context = {
+        state,
+        commit: (type: string, payload: any) => {
+          if (type === "code") {
+            state.code = payload;
+          }
+        },
+      };
 
       // Update color
-      mutations.updateParticipantColor(state, {
+      actions.updateParticipantColor(context, {
         name: "User A",
         color: "#111111",
         participant,
       });
 
-      // Check code was updated
+      // Only check code was updated - participant updates happen through re-parsing
       expect(state.code).toBe('"User A" #111111');
-
-      // Check participant properties were updated
-      expect(participant.color).toBe("#111111");
-
-      // Check declaration structure was updated
-      expect(participant.declaration).toBeDefined();
-      expect(participant.declaration.name.rawText).toBe('"User A"');
-      expect(participant.declaration.color.rawText).toBe("#111111");
     });
   });
 

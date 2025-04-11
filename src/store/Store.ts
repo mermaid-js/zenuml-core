@@ -187,38 +187,25 @@ const Store = (): StoreOptions<StoreState> => {
       diagramElement: function (state: any, payload: any) {
         state.diagramElement = payload;
       },
+    },
+    actions: {
       updateParticipantColor(
-        state,
-        {
-          name,
-          color,
-          participant,
-        }: { name: string; color?: string; participant: Participant },
+        { commit, state },
+        { color, participant }: { color?: string; participant: Participant },
       ) {
-        console.log("updateParticipantColor mutation called", { name, color });
         console.log("participant:", participant);
 
         // Only update color if the participant was explicitly declared
-        if (!participant?.explicit) {
-          console.warn(`Cannot update color for implicit participant: ${name}`);
+        if (!participant?.explicit || !participant?.declaration) {
           return;
         }
 
         // Get the declaration and its position
         const declaration = participant.declaration;
-        if (!declaration?.name?.position) {
-          console.warn(`No valid declaration found for participant: ${name}`);
-          return;
-        }
 
         // Find the end of the declaration (either current color position or name position)
-        const currentColorPos = declaration.color?.position;
-        const namePos =
-          declaration.label?.position || declaration.name.position;
-        const declarationEnd = currentColorPos
-          ? currentColorPos[1]
-          : namePos[1];
-        const declarationStart = namePos[0];
+        const declarationStart = declaration.start;
+        const declarationEnd = declaration.stop;
 
         // Get the full declaration text including any existing color
         const declarationText = state.code.substring(
@@ -234,32 +221,12 @@ const Store = (): StoreOptions<StoreState> => {
           declarationText,
           color,
         );
-        state.code = beforeCode + updatedDeclarationText + afterCode;
+        const newCode = beforeCode + updatedDeclarationText + afterCode;
 
-        // Update the participant's color property
-        participant.color = color;
-
-        // Update the declaration's color field
-        if (color) {
-          const newColorStart =
-            declarationStart + updatedDeclarationText.lastIndexOf(color);
-          participant.declaration = {
-            ...declaration,
-            color: {
-              rawText: color,
-              position: [newColorStart, newColorStart + color.length],
-            },
-          };
-        } else {
-          // Remove color from declaration if color is being removed
-          const { color: _, ...rest } = declaration;
-          console.debug("Removing color from declaration:", _);
-          participant.declaration = rest;
-        }
-        state.onContentChange?.(state.code);
+        // Update code through mutation
+        commit("code", newCode);
+        state.onContentChange?.(newCode);
       },
-    },
-    actions: {
       // Why debounce is here instead of mutation 'code'?
       // Both code and cursor must be mutated together, especially during typing.
       updateCode: function ({ commit }: any, payload: any) {

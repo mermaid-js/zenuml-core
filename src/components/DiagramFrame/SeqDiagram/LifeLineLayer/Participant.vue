@@ -75,8 +75,7 @@ export default {
     const participantColor = computed({
       get: () => props.entity.color,
       set: (value) => {
-        store.commit("updateParticipantColor", {
-          name: props.entity.name,
+        store.dispatch("updateParticipantColor", {
           color: value,
           participant: store.getters.participants.Get(props.entity.name),
         });

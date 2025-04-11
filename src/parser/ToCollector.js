@@ -29,9 +29,7 @@ const onParticipant = function (ctx) {
   const declaration = {
     name: {
       rawText: nameCtx?.getText() || "Missing `Participant`",
-      position: nameCtx
-        ? [nameCtx.start.start, nameCtx.stop.stop + 1]
-        : undefined,
+      position: [nameCtx?.start.start, nameCtx?.stop.stop + 1],
     },
   };
 
@@ -72,6 +70,10 @@ const onParticipant = function (ctx) {
       position: [ctx.COLOR().symbol.start, ctx.COLOR().symbol.stop + 1],
     };
   }
+
+  declaration.start = ctx.start.start;
+
+  declaration.stop = ctx.stop.stop + 1;
 
   participants.Add(participant, {
     isStarter: false,

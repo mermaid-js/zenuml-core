@@ -12,6 +12,8 @@ interface ParticipantDeclaration {
   width?: FieldDeclaration;
   label?: FieldDeclaration;
   color?: FieldDeclaration;
+  start?: number;
+  stop?: number;
 }
 
 interface ParticipantOptions {
