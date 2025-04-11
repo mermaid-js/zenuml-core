@@ -14,7 +14,7 @@
       <div
         v-if="!!icon"
         v-html="icon"
-        class="h-6 w-6 mr-1 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full"
+        class="h-6 w-6 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full"
         :aria-description="`icon for ${entity.name}`"
       ></div>
 
@@ -22,10 +22,6 @@
         v-if="!isDefaultStarter"
         class="h-5 group flex flex-col justify-center"
       >
-        <ColorPicker
-          v-model="participantColor"
-          class="absolute -left-8 top-1/2 transform -translate-y-1/2"
-        />
         <!-- TODO: create a better solution for participant comments -->
         <!--      <span-->
         <!--        v-if="!!comment"-->
@@ -43,6 +39,11 @@
           :assigneePositions="assigneePositions"
         />
       </div>
+      <ColorPicker
+        v-if="!isDefaultStarter"
+        v-model="participantColor"
+        class="absolute top-full transform -translate-y-1/2"
+      />
     </div>
   </div>
 </template>
