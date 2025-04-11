@@ -10,7 +10,7 @@
     }"
     @click="onSelect"
   >
-    <div class="flex items-center justify-center">
+    <div class="flex items-center justify-center group">
       <div
         v-if="!!icon"
         v-html="icon"
@@ -42,7 +42,7 @@
       <ColorPicker
         v-if="!isDefaultStarter"
         v-model="participantColor"
-        class="absolute top-full transform -translate-y-1/2"
+        class="absolute top-full transform -translate-y-1/2 invisible group-hover:visible"
       />
     </div>
   </div>

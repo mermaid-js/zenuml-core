@@ -22,7 +22,7 @@
     <div
       v-if="isOpen"
       v-click-outside="closePicker"
-      class="absolute z-50 mt-1 p-2 bg-white rounded-lg shadow-lg border border-gray-200 w-40"
+      class="absolute z-50 transform left-1/2 -translate-x-1/2 p-2 bg-white rounded-lg shadow-lg border border-gray-200 w-40"
     >
       <div class="grid grid-cols-4 gap-2">
         <button
