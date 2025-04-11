@@ -2,34 +2,40 @@
   <div class="inline-block">
     <button
       @click.stop="togglePicker"
-      class="w-6 h-6 rounded border border-gray-300 flex items-center justify-center hover:ring-2 hover:ring-blue-200 transition-all"
-      :style="{ backgroundColor: modelValue }"
+      class="w-6 h-6 rounded border border-gray-300 flex items-center justify-center"
+      :style="{ backgroundColor: modelValue, color: white }"
     >
       <svg
         v-if="!modelValue"
         xmlns="http://www.w3.org/2000/svg"
         class="h-4 w-4 text-gray-500"
-        viewBox="0 0 20 20"
+        viewBox="-4 -4 24 24"
         fill="currentColor"
+        role="presentation"
       >
         <path
+          fill="white"
           fill-rule="evenodd"
-          d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z"
+          d="M5.655.095 13.78 8.22a.75.75 0 0 1 0 1.06l-5.616 5.617a2 2 0 0 1-2.828 0L.604 10.164a2 2 0 0 1 0-2.828L5.689 2.25 4.595 1.155zM6.75 3.31 2.06 8h9.38zm4.69 6.19H2.06l4.336 4.335a.5.5 0 0 0 .708 0z"
           clip-rule="evenodd"
+        />
+        <path
+          fill="white"
+          d="M14.5 12a.75.75 0 0 0-.654.383v.002l-.003.003-.007.013-.026.046a16 16 0 0 0-.36.695 8 8 0 0 0-.283.642c-.068.176-.167.457-.167.716a1.5 1.5 0 0 0 3 0c0-.259-.1-.54-.167-.716a8 8 0 0 0-.284-.642 16 16 0 0 0-.36-.695l-.025-.046-.007-.013-.002-.004-.001-.001A.75.75 0 0 0 14.5 12"
         />
       </svg>
     </button>
     <div
       v-if="isOpen"
       v-click-outside="closePicker"
-      class="absolute z-50 transform left-1/2 -translate-x-1/2 p-2 bg-white rounded-lg shadow-lg border border-gray-200 w-40"
+      class="absolute z-50 transform left-1/2 -translate-x-1/2 p-2 bg-white rounded border border-gray-200 w-40"
     >
       <div class="grid grid-cols-4 gap-2">
         <button
           v-for="color in colors"
           :key="color"
           @click.stop="selectColor(color)"
-          class="w-8 h-8 rounded hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-8 h-8 rounded"
           :style="{ backgroundColor: color }"
           :title="color"
         ></button>

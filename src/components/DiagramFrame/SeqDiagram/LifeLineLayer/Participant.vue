@@ -1,16 +1,17 @@
 <template>
   <div
-    class="participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
+    class="participant flex items-center bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex-col justify-center z-10 h-10 top-8 group"
     :class="{ selected: selected }"
     ref="participant"
     :style="{
       backgroundColor: isDefaultStarter ? undefined : backgroundColor,
+      borderColor: backgroundColor,
       color: isDefaultStarter ? undefined : color,
       transform: `translateY(${translate}px)`,
     }"
     @click="onSelect"
   >
-    <div class="flex items-center justify-center group">
+    <div class="flex items-center justify-center">
       <div
         v-if="!!icon"
         v-html="icon"
@@ -39,12 +40,12 @@
           :assigneePositions="assigneePositions"
         />
       </div>
-      <ColorPicker
-        v-if="!isDefaultStarter"
-        v-model="participantColor"
-        class="absolute top-full transform -translate-y-1/2 invisible group-hover:visible"
-      />
     </div>
+    <ColorPicker
+      v-if="!isDefaultStarter"
+      v-model="participantColor"
+      class="absolute rounded top-full transform -translate-y-1/2 invisible group-hover:visible bg-inherit"
+    />
   </div>
 </template>
 
