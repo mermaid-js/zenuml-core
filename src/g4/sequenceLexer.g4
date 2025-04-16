@@ -1,10 +1,30 @@
 lexer grammar sequenceLexer;
 channels {
   COMMENT_CHANNEL,
-  MODIFIER_CHANNEL
+  MODIFIER_CHANNEL,
+  INLINE_DECORATOR_CHANNEL
 }
 
 WS: [ \t] -> channel(HIDDEN);
+
+// Color or Emoji marker token. e.g.
+// \red, :unicorn:, #0ff\
+// Why we landed at `\xxx``?
+// `[xxx]` looks to much like array
+// `/xxx/` - if users types `//` it confuses the parser with normal comments
+// `/*xxx*/` - is a little bit too long
+COLOR_OR_EMOJI_MARKER
+    : '\\' COLOR_OR_EMOJI_VALUE '\\' -> channel(INLINE_DECORATOR_CHANNEL)
+    ;
+
+fragment COLOR_OR_EMOJI_VALUE
+    : [a-zA-Z0-9]+ // Named colors like 'red' or emoji names like 'unicorn'
+    | '#' HEX_DIGIT HEX_DIGIT HEX_DIGIT (HEX_DIGIT HEX_DIGIT HEX_DIGIT)? // Hex colors: #rgb or #rrggbb
+    ;
+
+fragment HEX_DIGIT
+    : [0-9a-fA-F]
+    ;
 
 // variable modifiers
 CONSTANT:   'const' -> channel(MODIFIER_CHANNEL);
