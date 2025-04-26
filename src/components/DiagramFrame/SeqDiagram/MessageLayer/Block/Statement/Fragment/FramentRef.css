@@ -1,0 +1,30 @@
+/* We need to do this because tailwind 3.2.4 set border-color to #e5e7eb via '*'. */
+.fragment-ref * {
+  border-color: inherit;
+}
+
+.fragment-ref [data-id="ref-label"]::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 12px 12px;
+  border-color: transparent transparent #ffffff transparent;
+}
+
+.fragment-ref .polygon-border {
+  /* This will be your border color */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 66%, 80% 100%, 0% 100%);
+  background-color: var(
+    --color-border-fragment,
+    var(--color-border-frame, var(--color-border-base, #000))
+  );
+}
+
+.fragment-ref .polygon-content {
+  /* This creates the border thickness */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 66%, 80% 100%, 0% 100%);
+}

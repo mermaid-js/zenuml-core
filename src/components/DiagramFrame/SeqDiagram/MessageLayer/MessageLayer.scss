@@ -1,0 +1,43 @@
+.zenuml {
+  /* Avoid moving interaction to the left or right with margins.
+  We can always assume that an interaction's border is the lifeline.
+  Moving content with padding is OK.
+  Don't move this to the Interaction component. This is also used by Interaction-async
+   */
+  .interaction {
+    /*Keep dashed or solid here otherwise no space is given to the border*/
+    border: dashed transparent 0;
+  }
+
+  .interaction:hover {
+    cursor: pointer;
+  }
+
+  .message {
+    position: relative;
+    /* positioning Point */
+  }
+
+  .interaction.right-to-left > .occurrence {
+    /* InteractionBorderWidth + (OccurrenceWidth-1)/2 */
+    left: -15px;
+    /* overlay occurrence bar on the existing bar. */
+  }
+
+  .interaction.self > .occurrence {
+    /* width of InteractionBorderWidth 7px + lifeline center 1px */
+    /* overlay occurrence bar on the existing bar. */
+    left: -8px;
+    margin-top: -10px;
+  }
+
+  .fragment {
+    border-width: 1px;
+    margin: 8px 0 0 0;
+    padding-bottom: 10px;
+  }
+
+  .fragment .fragment {
+    margin: 16px 0 0 0;
+  }
+}

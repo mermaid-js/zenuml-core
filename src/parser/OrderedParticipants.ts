@@ -30,7 +30,7 @@ class Participant implements IParticipantModel {
 }
 
 export function OrderedParticipants(rootContext: any): IParticipantModel[] {
-  // @ts-ignore
+  // @ts-expect-error type
   const participants = ToCollector.getParticipants(rootContext);
   const participantEntries = Array.from(participants.participants.entries());
 
