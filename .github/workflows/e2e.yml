@@ -8,6 +8,8 @@ permissions:
 jobs:
   build:
     runs-on: macos-latest
+    env:
+      CYPRESS_CACHE_FOLDER: /Users/runner/Library/Caches/Cypress
     strategy:
       fail-fast: false
       matrix:
@@ -35,23 +37,22 @@ jobs:
           cache: pnpm
           node-version: ${{ matrix.node-version }}
 
+      # Install project dependencies including Cypress
+      - name: Install project dependencies
+        run: pnpm install
+
+      # Create Cypress cache directory
+      - name: Create Cypress cache directory
+        run: mkdir -p $CYPRESS_CACHE_FOLDER
+
       # Cache Cypress binary
       - name: Cache Cypress binary
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.cache/Cypress
-            ~/Library/Caches/Cypress
+          path: ${{ env.CYPRESS_CACHE_FOLDER }}
           key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             cypress-binary-${{ runner.os }}-
-
-      # Explicitly install Cypress binary
-      - name: Install Cypress binary
-        run: |
-          pnpm dlx cypress install
-          npx cypress verify
-          npx cypress cache list
 
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
