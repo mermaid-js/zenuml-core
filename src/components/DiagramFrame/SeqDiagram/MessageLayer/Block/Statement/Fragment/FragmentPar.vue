@@ -17,13 +17,19 @@
     >
       <Numbering :number="number" />
       <div class="name font-semibold p-1 border-b">
-        <collapse-button
-          label="Par"
-          :collapsed="collapsed"
-          @click="this.toggle"
-          :style="commentObj.messageStyle"
-          :class="commentObj.messageClassNames"
-        />
+        <label class="p-0 flex items-center">
+          <Icon
+            name="par-fragment"
+            icon-class="w-5 h-5 mr-1 text-skin-fragment-header"
+          />
+          <collapse-button
+            label="Par"
+            :collapsed="collapsed"
+            @click="this.toggle"
+            :style="commentObj.messageStyle"
+            :class="commentObj.messageClassNames"
+          />
+        </label>
       </div>
     </div>
     <block
@@ -41,6 +47,7 @@
 <script>
 import fragment from "./FragmentMixin";
 import Numbering from "../../../Numbering.vue";
+import Icon from "@/components/Icon/Icon.vue";
 
 export default {
   name: "fragment-par",
@@ -53,6 +60,7 @@ export default {
   },
   components: {
     Numbering,
+    Icon,
   },
 };
 </script>

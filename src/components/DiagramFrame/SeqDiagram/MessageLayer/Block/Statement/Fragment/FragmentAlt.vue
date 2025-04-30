@@ -18,7 +18,11 @@
       >
         <Numbering :number="number" />
         <div class="name font-semibold p-1 border-b">
-          <label class="p-0">
+          <label class="p-0 flex items-center">
+            <Icon
+              name="alt-fragment"
+              icon-class="w-5 h-5 mr-1 text-skin-fragment-header"
+            />
             <collapse-button
               label="Alt"
               :collapsed="collapsed"
@@ -89,6 +93,7 @@ import fragment from "./FragmentMixin";
 import { increaseNumber, blockLength } from "@/utils/Numbering";
 import ConditionLabel from "./ConditionLabel.vue";
 import Numbering from "../../../Numbering.vue";
+import Icon from "@/components/Icon/Icon.vue";
 
 export default {
   name: "fragment-alt",
@@ -97,6 +102,7 @@ export default {
   components: {
     ConditionLabel,
     Numbering,
+    Icon,
   },
   setup(props) {
     const alt = computed(() => props.context.alt());
