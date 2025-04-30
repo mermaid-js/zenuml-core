@@ -17,13 +17,19 @@
     >
       <Numbering :number="number" />
       <div class="name font-semibold p-1 border-b">
-        <collapse-button
-          label="Loop"
-          :collapsed="collapsed"
-          @click="this.toggle"
-          :style="commentObj.messageStyle"
-          :class="commentObj.messageClassNames"
-        />
+        <label class="p-0 flex items-center">
+          <Icon
+            name="loop-fragment"
+            icon-class="w-5 h-5 mr-1 text-skin-fragment-header"
+          />
+          <collapse-button
+            label="Loop"
+            :collapsed="collapsed"
+            @click="this.toggle"
+            :style="commentObj.messageStyle"
+            :class="commentObj.messageClassNames"
+          />
+        </label>
       </div>
     </div>
     <div :class="{ hidden: collapsed }">
@@ -48,6 +54,7 @@ import { computed } from "vue";
 import fragment from "./FragmentMixin";
 import ConditionLabel from "./ConditionLabel.vue";
 import Numbering from "../../../Numbering.vue";
+import Icon from "@/components/Icon/Icon.vue";
 
 export default {
   name: "fragment-loop",
@@ -56,6 +63,7 @@ export default {
   components: {
     ConditionLabel,
     Numbering,
+    Icon,
   },
   setup(props) {
     const loop = computed(() => props.context.loop());
