@@ -35,6 +35,17 @@ jobs:
           cache: pnpm
           node-version: ${{ matrix.node-version }}
 
+      # Cache Cypress binary
+      - name: Cache Cypress binary
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/Cypress
+            ~/Library/Caches/Cypress
+          key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            cypress-binary-${{ runner.os }}-
+
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
