@@ -38,7 +38,7 @@ jobs:
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
-        uses: cypress-io/github-action@v6.6.1
+        uses: cypress-io/github-action@v6.7.16
         with:
           browser: chrome
           build: pnpm build:site
@@ -46,7 +46,6 @@ jobs:
           command: pnpm run cy
           wait-on: http://127.0.0.1:8080
           auto-cancel-after-failures: 2
-          install-command: pnpm install
 
       - name: Upload artifacts # Find artifacts under actions/jobs
         if: always()
