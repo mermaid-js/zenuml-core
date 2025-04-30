@@ -39,6 +39,8 @@ jobs:
       # and run all Cypress tests
       - name: Cypress run
         uses: cypress-io/github-action@v6.7.16
+        env:
+          npm_config_side_effects_cache: false # Disable pnpm side effects cache: https://github.com/cypress-io/github-action/issues/1363
         with:
           browser: chrome
           build: pnpm build:site
