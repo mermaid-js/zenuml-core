@@ -8,8 +8,6 @@ permissions:
 jobs:
   build:
     runs-on: macos-latest
-    env:
-      CYPRESS_CACHE_FOLDER: /Users/runner/Library/Caches/Cypress
     strategy:
       fail-fast: false
       matrix:
@@ -37,23 +35,6 @@ jobs:
           cache: pnpm
           node-version: ${{ matrix.node-version }}
 
-      # Install project dependencies including Cypress
-      - name: Install project dependencies
-        run: pnpm install
-
-      # Create Cypress cache directory
-      - name: Create Cypress cache directory
-        run: mkdir -p $CYPRESS_CACHE_FOLDER
-
-      # Cache Cypress binary
-      - name: Cache Cypress binary
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CYPRESS_CACHE_FOLDER }}
-          key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            cypress-binary-${{ runner.os }}-
-
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
@@ -65,6 +46,8 @@ jobs:
           command: pnpm run cy
           wait-on: http://127.0.0.1:8080
           auto-cancel-after-failures: 2
+          install-command: pnpm install
+
       - name: Upload artifacts # Find artifacts under actions/jobs
         if: always()
         uses: actions/upload-artifact@v4
