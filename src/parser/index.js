@@ -60,6 +60,24 @@ antlr4.ParserRuleContext.prototype.getComment = function () {
   );
 };
 
+// Comment is where users have the most flexibility. The parser should make minimal assumptions about
+// the content and the style including change of line, indentation, etc.
+antlr4.ParserRuleContext.prototype.getDecorator = function () {
+  let tokenIndex = this.start.tokenIndex;
+  let channel = sequenceLexer.channelNames.indexOf("INLINE_DECORATOR_CHANNEL");
+
+  let hiddenTokensToLeft = this.parser
+    .getTokenStream()
+    .getHiddenTokensToLeft(tokenIndex, channel);
+  return (
+    hiddenTokensToLeft &&
+    hiddenTokensToLeft
+      .map((t) => t.text.substring(1)) // skip '//'
+      .map((t) => t.substring(0, t.length - 1)) // skip '//'
+      .join("")
+  );
+};
+
 antlr4.ParserRuleContext.prototype.returnedValue = function () {
   return this.braceBlock().block().ret().value();
 };

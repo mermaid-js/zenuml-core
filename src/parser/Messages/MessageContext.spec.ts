@@ -17,6 +17,14 @@ describe("Messages", () => {
     expect(message.getComment()).toBe(" comment \n");
   });
 
+  it("Async Message with Decorator", () => {
+    const message = AsyncMessageContextFixture(
+      "\\red\\\nAlice -> Bob: Hello World",
+    );
+    expect(message.getFormattedText()).toBe("Alice -> Bob: Hello World");
+    expect(message.getDecorator()).toBe("red");
+  });
+
   it("Async Message with multiline Comment", () => {
     const message = AsyncMessageContextFixture(
       "// comment1 \n// comment2 \nAlice -> Bob: Hello World",
