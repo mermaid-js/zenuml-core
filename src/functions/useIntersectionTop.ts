@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted, ref } from "vue";
+import { useEffect, useRef, useState } from "react";
 
 const DETECTOR_COUNT = 10;
 const INTERSECTION_ERROR_MARGIN = 1;
@@ -45,10 +45,10 @@ function initializeDetectors() {
 }
 
 export default function useIntersectionTop() {
-  const top = ref(0);
-  let observer: IntersectionObserver;
+  const [top, setTop] = useState(0);
+  const ob = useRef<IntersectionObserver | null>(null);
 
-  onMounted(() => {
+  useEffect(() => {
     const { detectorContainer, detectors } = initializeDetectors();
 
     const scrollHeight =
@@ -66,13 +66,13 @@ export default function useIntersectionTop() {
       (detector as HTMLElement).style.top = index * detectorHeight + "px";
       (detector as HTMLElement).style.height = detectorHeight + "px";
     });
-    observer = new IntersectionObserver(
+    ob.current = new IntersectionObserver(
       ([entry]) => {
         const isTopIntersection =
           entry.intersectionRect.top - entry.boundingClientRect.top >
             INTERSECTION_ERROR_MARGIN || entry.target === detectors[0];
         if (isTopIntersection) {
-          top.value = entry.intersectionRect.top;
+          setTop(entry.intersectionRect.top);
         }
       },
       {
@@ -80,11 +80,13 @@ export default function useIntersectionTop() {
       },
     );
     detectors.forEach((detector) => {
-      observer.observe(detector);
+      if (ob.current) {
+        ob.current.observe(detector);
+      }
     });
-  });
-  onUnmounted(() => {
-    observer?.disconnect();
-  });
+    return () => {
+      ob.current?.disconnect();
+    };
+  }, []);
   return top;
 }

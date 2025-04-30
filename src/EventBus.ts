@@ -1,3 +1,5 @@
+import store, { onEventEmitAtom } from "./store/Store";
+
 type Callback = (...args: any[]) => any;
 class EventEmitter {
   private events: { [key: string]: Set<Callback> } = {};
@@ -27,18 +29,15 @@ class EventEmitter {
 
 export const EventBus = new EventEmitter();
 
-export function CustomEmit(store: any, event: string, data: any) {
-  store.commit("eventEmit", { event, data });
+export function CustomEmit(event: string, data: any) {
+  const onEventEmit = store.get(onEventEmitAtom);
+  onEventEmit("eventEmit", { event, data });
   EventBus.emit(event, data);
 }
 
-export function TrackEvent(
-  store: any,
-  label: any,
-  action: string,
-  category: string,
-) {
+export function TrackEvent(label: any, action: string, category: string) {
   const trackData = { label: JSON.stringify(label), action, category };
-  store.commit("eventEmit", { event: "trackEvent", data: trackData });
+  const onEventEmit = store.get(onEventEmitAtom);
+  onEventEmit("eventEmit", { event: "trackEvent", data: trackData });
   EventBus.emit("trackEvent", trackData);
 }

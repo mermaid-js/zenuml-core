@@ -1,0 +1,26 @@
+/* We need to do this because tailwind 3.2.4 set border-color to #e5e7eb via '*'. */
+.fragment-critical * {
+  border-color: inherit;
+}
+
+.fragment-critical::before {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border: 1px solid;
+  pointer-events: none;
+}
+
+.fragment-critical .header::before {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid;
+  pointer-events: none;
+}
