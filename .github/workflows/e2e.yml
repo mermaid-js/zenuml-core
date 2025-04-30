@@ -46,6 +46,14 @@ jobs:
           restore-keys: |
             cypress-binary-${{ runner.os }}-
 
+      # Explicitly install Cypress binary
+      - name: Install Cypress binary
+        run: |
+          pnpm install cypress@10.11.0 --no-save
+          npx cypress install
+          npx cypress verify
+          npx cypress cache list
+
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
