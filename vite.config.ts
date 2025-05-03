@@ -15,26 +15,25 @@ const packageJson = JSON.parse(
   readFileSync(resolve(__dirname, "package.json"), "utf-8"),
 );
 
-// function getCypressHtmlFiles() {
-//   const cypressFolder = resolve(__dirname, "cy");
-//   const strings = execSync(`find ${cypressFolder} -name '*.html'`)
-//     .toString()
-//     .split("\n");
-//   // remove empty string
-//   strings.pop();
-//   return strings;
-// }
+function getCypressHtmlFiles() {
+  const cypressFolder = resolve(__dirname, "cy");
+  const strings = execSync(`find ${cypressFolder} -name '*.html'`)
+    .toString()
+    .split("\n");
+  // remove empty string
+  strings.pop();
+  return strings;
+}
 
-// const cypressHtmlFiles = getCypressHtmlFiles();
-// console.log(cypressHtmlFiles);
+const cypressHtmlFiles = getCypressHtmlFiles();
 
 export default defineConfig(({ mode }) => ({
   base: mode === "gh-pages" ? "/zenuml-core/" : "/",
-  // build: {
-  //   rollupOptions: {
-  //     input: ["index.html", "embed.html", ...cypressHtmlFiles],
-  //   },
-  // },
+  build: {
+    rollupOptions: {
+      input: ["index.html", "embed.html", ...cypressHtmlFiles],
+    },
+  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),

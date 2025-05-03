@@ -8,17 +8,17 @@ export default defineConfig({
   build: {
     // https://vitejs.dev/guide/build.html#library-mode
     lib: {
-      entry: resolve(__dirname, "src/core.ts"),
+      entry: resolve(__dirname, "src/core.tsx"),
       // https://vitejs.dev/config/build-options.html#build-lib
       // the exposed global variable and is required when formats includes 'umd' or 'iife'.
       name: "ZenUML",
       fileName: "zenuml",
     },
+    sourcemap: true,
     rollupOptions: {
       output: [
         {
           format: "esm",
-          sourcemap: true,
           // https://rollupjs.org/guide/en/#outputentryfilenames
           // It will use the file name in `build.lib.entry` without extension as `[name]` if `[name].xxx.yyy` is provided.
           // So we hard code as zenuml. We may consider rename `core.ts` to `zenuml.ts`.
@@ -29,7 +29,6 @@ export default defineConfig({
         {
           name: "zenuml", //  it is the global variable name representing your bundle. https://rollupjs.org/guide/en/#outputname
           format: "umd",
-          sourcemap: true,
           entryFileNames: `zenuml.js`,
         },
       ],

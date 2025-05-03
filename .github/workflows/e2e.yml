@@ -24,7 +24,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           sudo -H pip install setuptools
-
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -38,7 +37,9 @@ jobs:
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
-        uses: cypress-io/github-action@v6.6.1
+        uses: cypress-io/github-action@v6.7.16
+        env:
+          npm_config_side_effects_cache: false # Disable pnpm side effects cache: https://github.com/cypress-io/github-action/issues/1363
         with:
           browser: chrome
           build: pnpm build:site
@@ -46,6 +47,7 @@ jobs:
           command: pnpm run cy
           wait-on: http://127.0.0.1:8080
           auto-cancel-after-failures: 2
+
       - name: Upload artifacts # Find artifacts under actions/jobs
         if: always()
         uses: actions/upload-artifact@v4
