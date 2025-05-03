@@ -20,7 +20,7 @@ export const Statement = (props: {
   number: string;
   collapsed: boolean;
 }) => {
-  const comment = props.context.getComment() ? props.context.getComment() : "";
+  const comment = props.context.getComment() || "";
   const commentObj = new Comment(comment);
 
   const subProps = {
