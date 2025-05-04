@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import { execSync } from "child_process";
 import { readFileSync } from "fs";
+import svgr from "vite-plugin-svgr";
 
 process.env.VITE_APP_GIT_HASH = process.env.DOCKER
   ? ""
@@ -39,7 +40,7 @@ export default defineConfig(({ mode }) => ({
       "@": resolve(__dirname, "./src"),
     },
   },
-  plugins: [react()],
+  plugins: [svgr(), react()],
   define: {
     "process.env.NODE_ENV": JSON.stringify(mode),
     "process.env.VITE_BUILD_TIME": JSON.stringify(new Date().toISOString()),

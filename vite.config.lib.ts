@@ -3,6 +3,7 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
+import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
   build: {
@@ -40,7 +41,7 @@ export default defineConfig({
       "@": resolve(__dirname, "./src"),
     },
   },
-  plugins: [react(), cssInjectedByJsPlugin()],
+  plugins: [svgr(), react(), cssInjectedByJsPlugin()],
   define: {
     "process.env.NODE_ENV": '"production"',
   },
