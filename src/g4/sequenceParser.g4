@@ -210,6 +210,7 @@ type
 
 assignee
  : atom | (ID (COMMA ID)*) | STRING
+ | NEW // allowing `new = method()`
  ;
 
 methodName
