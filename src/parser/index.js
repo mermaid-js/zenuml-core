@@ -35,10 +35,13 @@ function rootContext(code) {
   return parser._syntaxErrors ? null : parser.prog();
 }
 
+antlr4.ParserRuleContext.prototype.getRawText = function () {
+  return this.parser.getTokenStream().getText(this.getSourceInterval());
+};
+
 antlr4.ParserRuleContext.prototype.getFormattedText = function () {
-  const code = this.parser.getTokenStream().getText(this.getSourceInterval());
   // remove extra quotes, spaces and new lines
-  return formatText(code);
+  return formatText(this.getRawText());
 };
 
 // Comment is where users have the most flexibility. The parser should make minimal assumptions about

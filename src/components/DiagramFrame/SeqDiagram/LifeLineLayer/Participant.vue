@@ -1,10 +1,11 @@
 <template>
   <div
-    class="participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
+    class="participant flex items-center bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex-col justify-center z-10 h-10 top-8 group"
     :class="{ selected: selected }"
     ref="participant"
     :style="{
       backgroundColor: isDefaultStarter ? undefined : backgroundColor,
+      borderColor: backgroundColor,
       color: isDefaultStarter ? undefined : color,
       transform: `translateY(${translate}px)`,
     }"
@@ -14,7 +15,7 @@
       <div
         v-if="!!icon"
         v-html="icon"
-        class="h-6 w-6 mr-1 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full"
+        class="h-6 w-6 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full"
         :aria-description="`icon for ${entity.name}`"
       ></div>
 
@@ -40,6 +41,11 @@
         />
       </div>
     </div>
+    <ColorPicker
+      v-if="!isDefaultStarter"
+      v-model="participantColor"
+      class="absolute rounded top-full transform -translate-y-1/2 invisible group-hover:visible bg-inherit"
+    />
   </div>
 </template>
 
@@ -55,6 +61,7 @@ import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
 import { RenderMode } from "@/store/Store";
 import ParticipantLabel from "./ParticipantLabel.vue";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import ColorPicker from "./ColorPicker.vue";
 
 const INTERSECTION_ERROR_MARGIN = 10; // a threshold for judging whether the participant is intersecting with the viewport
 
@@ -62,10 +69,21 @@ export default {
   name: "Participant",
   components: {
     ParticipantLabel,
+    ColorPicker,
   },
   setup(props) {
     const store = useStore();
     const participant = ref(null);
+    const participantColor = computed({
+      get: () => props.entity.color,
+      set: (value) => {
+        store.dispatch("updateParticipantColor", {
+          color: value,
+          participant: store.getters.participants.Get(props.entity.name),
+        });
+      },
+    });
+
     if (store.state.mode === RenderMode.Static) {
       return { translate: 0, participant };
     }
@@ -106,7 +124,19 @@ export default {
         participantOffsetTop
       );
     });
-    return { translate, participant, labelPositions, assigneePositions };
+    // watch(
+    //   () => participantColor.value,
+    //   (newColor) => {
+    //     this.updateFontColor(newColor);
+    //   },
+    // );
+    return {
+      translate,
+      participant,
+      labelPositions,
+      assigneePositions,
+      participantColor,
+    };
   },
   props: {
     entity: {
@@ -173,8 +203,8 @@ export default {
     onSelect() {
       this.$store.commit("onSelect", this.entity.name);
     },
-    updateFontColor() {
-      if (!this.entity.color) {
+    updateFontColor(newColor) {
+      if (!newColor) {
         this.color = undefined;
         return;
       }

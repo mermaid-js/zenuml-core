@@ -1,5 +1,21 @@
 export type Position = [number, number];
 
+interface FieldDeclaration {
+  rawText: string;
+  position?: Position;
+}
+
+interface ParticipantDeclaration {
+  participantType?: FieldDeclaration;
+  stereotype?: FieldDeclaration;
+  name: FieldDeclaration;
+  width?: FieldDeclaration;
+  label?: FieldDeclaration;
+  color?: FieldDeclaration;
+  start?: number;
+  stop?: number;
+}
+
 interface ParticipantOptions {
   isStarter?: boolean;
   stereotype?: string;
@@ -13,6 +29,7 @@ interface ParticipantOptions {
   assignee?: string;
   position?: Position;
   assigneePosition?: Position;
+  declaration?: ParticipantDeclaration;
 }
 
 export const blankParticipant = {
@@ -29,6 +46,7 @@ export const blankParticipant = {
   assignee: undefined,
   positions: new Set(),
   assigneePositions: new Set(),
+  declaration: undefined,
 };
 
 export class Participant {
@@ -40,11 +58,12 @@ export class Participant {
   isStarter: boolean | undefined;
   label: string | undefined;
   private type: string | undefined;
-  private color: string | undefined;
+  color: string | undefined;
   private comment: string | undefined;
   private assignee: string | undefined;
   positions: Set<Position> = new Set();
   assigneePositions: Set<Position> = new Set();
+  declaration?: ParticipantDeclaration;
 
   constructor(name: string, options: ParticipantOptions) {
     this.name = name;
@@ -63,6 +82,7 @@ export class Participant {
       color,
       comment,
       assignee,
+      declaration,
     } = options;
     this.stereotype ||= stereotype;
     this.width ||= width;
@@ -74,7 +94,9 @@ export class Participant {
     this.color ||= color;
     this.comment ||= comment;
     this.assignee ||= assignee;
+    this.declaration ||= declaration;
   }
+
   public AddPosition(position: Position) {
     this.positions.add(position);
   }
@@ -94,6 +116,7 @@ export class Participant {
       assignee: this.assignee,
       positions: this.positions,
       assigneePositions: this.assigneePositions,
+      declaration: this.declaration,
     };
   }
 }
