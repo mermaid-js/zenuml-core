@@ -2,7 +2,7 @@
 // jshint ignore: start
 import antlr4 from 'antlr4';
 import sequenceParserListener from './sequenceParserListener.js';
-const serializedATN = [4,1,70,608,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
+const serializedATN = [4,1,70,609,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,
 2,13,7,13,2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,
 20,7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,26,2,27,
@@ -35,35 +35,35 @@ const serializedATN = [4,1,70,608,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 29,1,29,3,29,403,8,29,1,30,1,30,3,30,407,8,30,1,30,1,30,1,31,3,31,412,8,
 31,1,31,1,31,1,31,1,32,1,32,1,32,3,32,420,8,32,1,32,1,32,1,32,3,32,425,8,
 32,1,32,1,32,1,32,3,32,430,8,32,3,32,432,8,32,1,33,1,33,1,34,1,34,1,35,1,
-35,1,36,1,36,1,36,1,36,5,36,444,8,36,10,36,12,36,447,9,36,1,36,3,36,450,
-8,36,1,37,1,37,1,38,1,38,1,38,5,38,457,8,38,10,38,12,38,460,9,38,1,38,3,
-38,463,8,38,1,39,1,39,3,39,467,8,39,1,40,1,40,1,40,1,41,1,41,5,41,474,8,
-41,10,41,12,41,477,9,41,1,41,3,41,480,8,41,1,42,1,42,1,42,1,43,1,43,3,43,
-487,8,43,1,43,1,43,1,44,1,44,1,44,1,45,1,45,5,45,496,8,45,10,45,12,45,499,
-9,45,1,45,3,45,502,8,45,1,46,1,46,1,46,1,46,1,47,1,47,1,47,1,47,1,47,1,48,
-1,48,1,48,1,49,1,49,3,49,518,8,49,1,49,1,49,1,50,1,50,1,50,1,50,1,50,1,50,
-1,50,3,50,529,8,50,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,3,51,540,
-8,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,3,51,551,8,51,1,51,1,51,
+35,1,36,1,36,1,36,1,36,5,36,444,8,36,10,36,12,36,447,9,36,1,36,1,36,3,36,
+451,8,36,1,37,1,37,1,38,1,38,1,38,5,38,458,8,38,10,38,12,38,461,9,38,1,38,
+3,38,464,8,38,1,39,1,39,3,39,468,8,39,1,40,1,40,1,40,1,41,1,41,5,41,475,
+8,41,10,41,12,41,478,9,41,1,41,3,41,481,8,41,1,42,1,42,1,42,1,43,1,43,3,
+43,488,8,43,1,43,1,43,1,44,1,44,1,44,1,45,1,45,5,45,497,8,45,10,45,12,45,
+500,9,45,1,45,3,45,503,8,45,1,46,1,46,1,46,1,46,1,47,1,47,1,47,1,47,1,47,
+1,48,1,48,1,48,1,49,1,49,3,49,519,8,49,1,49,1,49,1,50,1,50,1,50,1,50,1,50,
+1,50,1,50,3,50,530,8,50,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,3,51,
+541,8,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,3,51,552,8,51,1,51,
 1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,51,1,
-51,1,51,1,51,1,51,1,51,5,51,574,8,51,10,51,12,51,577,9,51,1,52,1,52,1,52,
-1,52,1,52,1,52,1,52,3,52,586,8,52,1,53,1,53,1,53,1,53,1,53,1,53,1,53,1,53,
-1,53,3,53,597,8,53,1,54,1,54,1,54,3,54,602,8,54,1,55,1,55,1,55,1,55,1,55,
-0,1,102,56,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,
-44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,
-92,94,96,98,100,102,104,106,108,110,0,10,2,0,57,57,62,62,2,0,8,8,17,17,2,
-0,9,9,16,16,2,0,10,10,21,21,1,0,22,24,1,0,20,21,1,0,16,19,1,0,14,15,1,0,
-58,59,1,0,34,35,678,0,131,1,0,0,0,2,133,1,0,0,0,4,154,1,0,0,0,6,177,1,0,
-0,0,8,188,1,0,0,0,10,190,1,0,0,0,12,210,1,0,0,0,14,225,1,0,0,0,16,230,1,
-0,0,0,18,232,1,0,0,0,20,234,1,0,0,0,22,236,1,0,0,0,24,239,1,0,0,0,26,255,
+51,1,51,1,51,1,51,1,51,1,51,5,51,575,8,51,10,51,12,51,578,9,51,1,52,1,52,
+1,52,1,52,1,52,1,52,1,52,3,52,587,8,52,1,53,1,53,1,53,1,53,1,53,1,53,1,53,
+1,53,1,53,3,53,598,8,53,1,54,1,54,1,54,3,54,603,8,54,1,55,1,55,1,55,1,55,
+1,55,0,1,102,56,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,
+42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,
+90,92,94,96,98,100,102,104,106,108,110,0,10,2,0,57,57,62,62,2,0,8,8,17,17,
+2,0,9,9,16,16,2,0,10,10,21,21,1,0,22,24,1,0,20,21,1,0,16,19,1,0,14,15,1,
+0,58,59,1,0,34,35,680,0,131,1,0,0,0,2,133,1,0,0,0,4,154,1,0,0,0,6,177,1,
+0,0,0,8,188,1,0,0,0,10,190,1,0,0,0,12,210,1,0,0,0,14,225,1,0,0,0,16,230,
+1,0,0,0,18,232,1,0,0,0,20,234,1,0,0,0,22,236,1,0,0,0,24,239,1,0,0,0,26,255,
 1,0,0,0,28,257,1,0,0,0,30,259,1,0,0,0,32,279,1,0,0,0,34,284,1,0,0,0,36,289,
 1,0,0,0,38,301,1,0,0,0,40,314,1,0,0,0,42,316,1,0,0,0,44,321,1,0,0,0,46,356,
 1,0,0,0,48,358,1,0,0,0,50,386,1,0,0,0,52,388,1,0,0,0,54,396,1,0,0,0,56,398,
 1,0,0,0,58,400,1,0,0,0,60,404,1,0,0,0,62,411,1,0,0,0,64,431,1,0,0,0,66,433,
-1,0,0,0,68,435,1,0,0,0,70,437,1,0,0,0,72,449,1,0,0,0,74,451,1,0,0,0,76,453,
-1,0,0,0,78,466,1,0,0,0,80,468,1,0,0,0,82,471,1,0,0,0,84,481,1,0,0,0,86,484,
-1,0,0,0,88,490,1,0,0,0,90,493,1,0,0,0,92,503,1,0,0,0,94,507,1,0,0,0,96,512,
-1,0,0,0,98,515,1,0,0,0,100,528,1,0,0,0,102,550,1,0,0,0,104,585,1,0,0,0,106,
-596,1,0,0,0,108,601,1,0,0,0,110,603,1,0,0,0,112,114,3,2,1,0,113,112,1,0,
+1,0,0,0,68,435,1,0,0,0,70,437,1,0,0,0,72,450,1,0,0,0,74,452,1,0,0,0,76,454,
+1,0,0,0,78,467,1,0,0,0,80,469,1,0,0,0,82,472,1,0,0,0,84,482,1,0,0,0,86,485,
+1,0,0,0,88,491,1,0,0,0,90,494,1,0,0,0,92,504,1,0,0,0,94,508,1,0,0,0,96,513,
+1,0,0,0,98,516,1,0,0,0,100,529,1,0,0,0,102,551,1,0,0,0,104,586,1,0,0,0,106,
+597,1,0,0,0,108,602,1,0,0,0,110,604,1,0,0,0,112,114,3,2,1,0,113,112,1,0,
 0,0,113,114,1,0,0,0,114,115,1,0,0,0,115,132,5,0,0,1,116,118,3,2,1,0,117,
 116,1,0,0,0,117,118,1,0,0,0,118,119,1,0,0,0,119,120,3,4,2,0,120,121,5,0,
 0,1,121,132,1,0,0,0,122,124,3,2,1,0,123,122,1,0,0,0,123,124,1,0,0,0,124,
@@ -156,60 +156,60 @@ const serializedATN = [4,1,70,608,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 424,425,1,0,0,0,425,432,1,0,0,0,426,427,3,54,27,0,427,429,7,3,0,0,428,430,
 3,56,28,0,429,428,1,0,0,0,429,430,1,0,0,0,430,432,1,0,0,0,431,419,1,0,0,
 0,431,426,1,0,0,0,432,65,1,0,0,0,433,434,5,67,0,0,434,67,1,0,0,0,435,436,
-7,0,0,0,436,69,1,0,0,0,437,438,7,0,0,0,438,71,1,0,0,0,439,450,3,104,52,0,
+7,0,0,0,436,69,1,0,0,0,437,438,7,0,0,0,438,71,1,0,0,0,439,451,3,104,52,0,
 440,445,5,57,0,0,441,442,5,28,0,0,442,444,5,57,0,0,443,441,1,0,0,0,444,447,
-1,0,0,0,445,443,1,0,0,0,445,446,1,0,0,0,446,450,1,0,0,0,447,445,1,0,0,0,
-448,450,5,62,0,0,449,439,1,0,0,0,449,440,1,0,0,0,449,448,1,0,0,0,450,73,
-1,0,0,0,451,452,7,0,0,0,452,75,1,0,0,0,453,458,3,78,39,0,454,455,5,28,0,
-0,455,457,3,78,39,0,456,454,1,0,0,0,457,460,1,0,0,0,458,456,1,0,0,0,458,
-459,1,0,0,0,459,462,1,0,0,0,460,458,1,0,0,0,461,463,5,28,0,0,462,461,1,0,
-0,0,462,463,1,0,0,0,463,77,1,0,0,0,464,467,3,80,40,0,465,467,3,102,51,0,
-466,464,1,0,0,0,466,465,1,0,0,0,467,79,1,0,0,0,468,469,3,70,35,0,469,470,
-5,57,0,0,470,81,1,0,0,0,471,475,3,84,42,0,472,474,3,86,43,0,473,472,1,0,
-0,0,474,477,1,0,0,0,475,473,1,0,0,0,475,476,1,0,0,0,476,479,1,0,0,0,477,
-475,1,0,0,0,478,480,3,88,44,0,479,478,1,0,0,0,479,480,1,0,0,0,480,83,1,0,
-0,0,481,482,5,49,0,0,482,483,3,98,49,0,483,85,1,0,0,0,484,486,5,50,0,0,485,
-487,3,60,30,0,486,485,1,0,0,0,486,487,1,0,0,0,487,488,1,0,0,0,488,489,3,
-98,49,0,489,87,1,0,0,0,490,491,5,51,0,0,491,492,3,98,49,0,492,89,1,0,0,0,
-493,497,3,92,46,0,494,496,3,94,47,0,495,494,1,0,0,0,496,499,1,0,0,0,497,
-495,1,0,0,0,497,498,1,0,0,0,498,501,1,0,0,0,499,497,1,0,0,0,500,502,3,96,
-48,0,501,500,1,0,0,0,501,502,1,0,0,0,502,91,1,0,0,0,503,504,5,37,0,0,504,
-505,3,106,53,0,505,506,3,98,49,0,506,93,1,0,0,0,507,508,5,38,0,0,508,509,
-5,37,0,0,509,510,3,106,53,0,510,511,3,98,49,0,511,95,1,0,0,0,512,513,5,38,
-0,0,513,514,3,98,49,0,514,97,1,0,0,0,515,517,5,32,0,0,516,518,3,24,12,0,
-517,516,1,0,0,0,517,518,1,0,0,0,518,519,1,0,0,0,519,520,5,33,0,0,520,99,
-1,0,0,0,521,522,5,39,0,0,522,523,3,106,53,0,523,524,3,98,49,0,524,529,1,
-0,0,0,525,526,5,39,0,0,526,529,3,106,53,0,527,529,5,39,0,0,528,521,1,0,0,
-0,528,525,1,0,0,0,528,527,1,0,0,0,529,101,1,0,0,0,530,531,6,51,-1,0,531,
-551,3,104,52,0,532,533,5,21,0,0,533,551,3,102,51,13,534,535,5,26,0,0,535,
-551,3,102,51,12,536,537,3,56,28,0,537,538,5,56,0,0,538,540,1,0,0,0,539,536,
-1,0,0,0,539,540,1,0,0,0,540,541,1,0,0,0,541,551,3,52,26,0,542,551,3,42,21,
-0,543,544,5,30,0,0,544,545,3,102,51,0,545,546,5,31,0,0,546,551,1,0,0,0,547,
-548,3,62,31,0,548,549,3,102,51,1,549,551,1,0,0,0,550,530,1,0,0,0,550,532,
-1,0,0,0,550,534,1,0,0,0,550,539,1,0,0,0,550,542,1,0,0,0,550,543,1,0,0,0,
-550,547,1,0,0,0,551,575,1,0,0,0,552,553,10,11,0,0,553,554,7,4,0,0,554,574,
-3,102,51,12,555,556,10,10,0,0,556,557,7,5,0,0,557,574,3,102,51,11,558,559,
-10,9,0,0,559,560,7,6,0,0,560,574,3,102,51,10,561,562,10,8,0,0,562,563,7,
-7,0,0,563,574,3,102,51,9,564,565,10,7,0,0,565,566,5,13,0,0,566,574,3,102,
-51,8,567,568,10,6,0,0,568,569,5,12,0,0,569,574,3,102,51,7,570,571,10,5,0,
-0,571,572,5,20,0,0,572,574,3,102,51,6,573,552,1,0,0,0,573,555,1,0,0,0,573,
-558,1,0,0,0,573,561,1,0,0,0,573,564,1,0,0,0,573,567,1,0,0,0,573,570,1,0,
-0,0,574,577,1,0,0,0,575,573,1,0,0,0,575,576,1,0,0,0,576,103,1,0,0,0,577,
-575,1,0,0,0,578,586,7,8,0,0,579,586,5,61,0,0,580,586,5,60,0,0,581,586,7,
-9,0,0,582,586,5,57,0,0,583,586,5,62,0,0,584,586,5,36,0,0,585,578,1,0,0,0,
-585,579,1,0,0,0,585,580,1,0,0,0,585,581,1,0,0,0,585,582,1,0,0,0,585,583,
-1,0,0,0,585,584,1,0,0,0,586,105,1,0,0,0,587,588,5,30,0,0,588,589,3,108,54,
-0,589,590,5,31,0,0,590,597,1,0,0,0,591,592,5,30,0,0,592,597,3,108,54,0,593,
-594,5,30,0,0,594,597,5,31,0,0,595,597,5,30,0,0,596,587,1,0,0,0,596,591,1,
-0,0,0,596,593,1,0,0,0,596,595,1,0,0,0,597,107,1,0,0,0,598,602,3,104,52,0,
-599,602,3,102,51,0,600,602,3,110,55,0,601,598,1,0,0,0,601,599,1,0,0,0,601,
-600,1,0,0,0,602,109,1,0,0,0,603,604,5,57,0,0,604,605,5,52,0,0,605,606,5,
-57,0,0,606,111,1,0,0,0,87,113,117,123,126,131,135,138,142,144,148,150,154,
-158,164,170,175,177,182,185,188,193,196,200,203,206,210,219,223,225,230,
-241,245,248,253,255,272,279,284,289,294,297,301,306,309,314,319,328,333,
-338,341,347,350,353,356,361,364,369,374,381,386,393,402,406,411,419,424,
-429,431,445,449,458,462,466,475,479,486,497,501,517,528,539,550,573,575,
-585,596,601];
+1,0,0,0,445,443,1,0,0,0,445,446,1,0,0,0,446,451,1,0,0,0,447,445,1,0,0,0,
+448,451,5,62,0,0,449,451,5,41,0,0,450,439,1,0,0,0,450,440,1,0,0,0,450,448,
+1,0,0,0,450,449,1,0,0,0,451,73,1,0,0,0,452,453,7,0,0,0,453,75,1,0,0,0,454,
+459,3,78,39,0,455,456,5,28,0,0,456,458,3,78,39,0,457,455,1,0,0,0,458,461,
+1,0,0,0,459,457,1,0,0,0,459,460,1,0,0,0,460,463,1,0,0,0,461,459,1,0,0,0,
+462,464,5,28,0,0,463,462,1,0,0,0,463,464,1,0,0,0,464,77,1,0,0,0,465,468,
+3,80,40,0,466,468,3,102,51,0,467,465,1,0,0,0,467,466,1,0,0,0,468,79,1,0,
+0,0,469,470,3,70,35,0,470,471,5,57,0,0,471,81,1,0,0,0,472,476,3,84,42,0,
+473,475,3,86,43,0,474,473,1,0,0,0,475,478,1,0,0,0,476,474,1,0,0,0,476,477,
+1,0,0,0,477,480,1,0,0,0,478,476,1,0,0,0,479,481,3,88,44,0,480,479,1,0,0,
+0,480,481,1,0,0,0,481,83,1,0,0,0,482,483,5,49,0,0,483,484,3,98,49,0,484,
+85,1,0,0,0,485,487,5,50,0,0,486,488,3,60,30,0,487,486,1,0,0,0,487,488,1,
+0,0,0,488,489,1,0,0,0,489,490,3,98,49,0,490,87,1,0,0,0,491,492,5,51,0,0,
+492,493,3,98,49,0,493,89,1,0,0,0,494,498,3,92,46,0,495,497,3,94,47,0,496,
+495,1,0,0,0,497,500,1,0,0,0,498,496,1,0,0,0,498,499,1,0,0,0,499,502,1,0,
+0,0,500,498,1,0,0,0,501,503,3,96,48,0,502,501,1,0,0,0,502,503,1,0,0,0,503,
+91,1,0,0,0,504,505,5,37,0,0,505,506,3,106,53,0,506,507,3,98,49,0,507,93,
+1,0,0,0,508,509,5,38,0,0,509,510,5,37,0,0,510,511,3,106,53,0,511,512,3,98,
+49,0,512,95,1,0,0,0,513,514,5,38,0,0,514,515,3,98,49,0,515,97,1,0,0,0,516,
+518,5,32,0,0,517,519,3,24,12,0,518,517,1,0,0,0,518,519,1,0,0,0,519,520,1,
+0,0,0,520,521,5,33,0,0,521,99,1,0,0,0,522,523,5,39,0,0,523,524,3,106,53,
+0,524,525,3,98,49,0,525,530,1,0,0,0,526,527,5,39,0,0,527,530,3,106,53,0,
+528,530,5,39,0,0,529,522,1,0,0,0,529,526,1,0,0,0,529,528,1,0,0,0,530,101,
+1,0,0,0,531,532,6,51,-1,0,532,552,3,104,52,0,533,534,5,21,0,0,534,552,3,
+102,51,13,535,536,5,26,0,0,536,552,3,102,51,12,537,538,3,56,28,0,538,539,
+5,56,0,0,539,541,1,0,0,0,540,537,1,0,0,0,540,541,1,0,0,0,541,542,1,0,0,0,
+542,552,3,52,26,0,543,552,3,42,21,0,544,545,5,30,0,0,545,546,3,102,51,0,
+546,547,5,31,0,0,547,552,1,0,0,0,548,549,3,62,31,0,549,550,3,102,51,1,550,
+552,1,0,0,0,551,531,1,0,0,0,551,533,1,0,0,0,551,535,1,0,0,0,551,540,1,0,
+0,0,551,543,1,0,0,0,551,544,1,0,0,0,551,548,1,0,0,0,552,576,1,0,0,0,553,
+554,10,11,0,0,554,555,7,4,0,0,555,575,3,102,51,12,556,557,10,10,0,0,557,
+558,7,5,0,0,558,575,3,102,51,11,559,560,10,9,0,0,560,561,7,6,0,0,561,575,
+3,102,51,10,562,563,10,8,0,0,563,564,7,7,0,0,564,575,3,102,51,9,565,566,
+10,7,0,0,566,567,5,13,0,0,567,575,3,102,51,8,568,569,10,6,0,0,569,570,5,
+12,0,0,570,575,3,102,51,7,571,572,10,5,0,0,572,573,5,20,0,0,573,575,3,102,
+51,6,574,553,1,0,0,0,574,556,1,0,0,0,574,559,1,0,0,0,574,562,1,0,0,0,574,
+565,1,0,0,0,574,568,1,0,0,0,574,571,1,0,0,0,575,578,1,0,0,0,576,574,1,0,
+0,0,576,577,1,0,0,0,577,103,1,0,0,0,578,576,1,0,0,0,579,587,7,8,0,0,580,
+587,5,61,0,0,581,587,5,60,0,0,582,587,7,9,0,0,583,587,5,57,0,0,584,587,5,
+62,0,0,585,587,5,36,0,0,586,579,1,0,0,0,586,580,1,0,0,0,586,581,1,0,0,0,
+586,582,1,0,0,0,586,583,1,0,0,0,586,584,1,0,0,0,586,585,1,0,0,0,587,105,
+1,0,0,0,588,589,5,30,0,0,589,590,3,108,54,0,590,591,5,31,0,0,591,598,1,0,
+0,0,592,593,5,30,0,0,593,598,3,108,54,0,594,595,5,30,0,0,595,598,5,31,0,
+0,596,598,5,30,0,0,597,588,1,0,0,0,597,592,1,0,0,0,597,594,1,0,0,0,597,596,
+1,0,0,0,598,107,1,0,0,0,599,603,3,104,52,0,600,603,3,102,51,0,601,603,3,
+110,55,0,602,599,1,0,0,0,602,600,1,0,0,0,602,601,1,0,0,0,603,109,1,0,0,0,
+604,605,5,57,0,0,605,606,5,52,0,0,606,607,5,57,0,0,607,111,1,0,0,0,87,113,
+117,123,126,131,135,138,142,144,148,150,154,158,164,170,175,177,182,185,
+188,193,196,200,203,206,210,219,223,225,230,241,245,248,253,255,272,279,
+284,289,294,297,301,306,309,314,319,328,333,338,341,347,350,353,356,361,
+364,369,374,381,386,393,402,406,411,419,424,429,431,445,450,459,463,467,
+476,480,487,498,502,518,529,540,551,574,576,586,597,602];
 
 
 const atn = new antlr4.atn.ATNDeserializer().deserialize(serializedATN);
@@ -1537,12 +1537,12 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.enterOuterAlt(localctx, 1);
 	            this.state = 341;
 	            this._errHandler.sync(this);
-	            _la = this._input.LA(1);
-	            if(((((_la - 34)) & ~0x1f) == 0 && ((1 << (_la - 34)) & 528482311) !== 0)) {
+	            var la_ = this._interp.adaptivePredict(this._input,49,this._ctx);
+	            if(la_===1) {
 	                this.state = 340;
 	                this.assignment();
-	            }
 
+	            }
 	            this.state = 343;
 	            this.match(sequenceParser.NEW);
 	            this.state = 344;
@@ -1571,12 +1571,12 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.enterOuterAlt(localctx, 2);
 	            this.state = 353;
 	            this._errHandler.sync(this);
-	            _la = this._input.LA(1);
-	            if(((((_la - 34)) & ~0x1f) == 0 && ((1 << (_la - 34)) & 528482311) !== 0)) {
+	            var la_ = this._interp.adaptivePredict(this._input,52,this._ctx);
+	            if(la_===1) {
 	                this.state = 352;
 	                this.assignment();
-	            }
 
+	            }
 	            this.state = 355;
 	            this.match(sequenceParser.NEW);
 	            break;
@@ -2079,7 +2079,7 @@ export default class sequenceParser extends antlr4.Parser {
 	    this.enterRule(localctx, 72, sequenceParser.RULE_assignee);
 	    var _la = 0; // Token type
 	    try {
-	        this.state = 449;
+	        this.state = 450;
 	        this._errHandler.sync(this);
 	        var la_ = this._interp.adaptivePredict(this._input,69,this._ctx);
 	        switch(la_) {
@@ -2113,6 +2113,12 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.match(sequenceParser.STRING);
 	            break;
 
+	        case 4:
+	            this.enterOuterAlt(localctx, 4);
+	            this.state = 449;
+	            this.match(sequenceParser.NEW);
+	            break;
+
 	        }
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -2136,7 +2142,7 @@ export default class sequenceParser extends antlr4.Parser {
 	    var _la = 0; // Token type
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 451;
+	        this.state = 452;
 	        _la = this._input.LA(1);
 	        if(!(_la===57 || _la===62)) {
 	        this._errHandler.recoverInline(this);
@@ -2167,28 +2173,28 @@ export default class sequenceParser extends antlr4.Parser {
 	    var _la = 0; // Token type
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 453;
+	        this.state = 454;
 	        this.parameter();
-	        this.state = 458;
+	        this.state = 459;
 	        this._errHandler.sync(this);
 	        var _alt = this._interp.adaptivePredict(this._input,70,this._ctx)
 	        while(_alt!=2 && _alt!=antlr4.atn.ATN.INVALID_ALT_NUMBER) {
 	            if(_alt===1) {
-	                this.state = 454;
-	                this.match(sequenceParser.COMMA);
 	                this.state = 455;
+	                this.match(sequenceParser.COMMA);
+	                this.state = 456;
 	                this.parameter(); 
 	            }
-	            this.state = 460;
+	            this.state = 461;
 	            this._errHandler.sync(this);
 	            _alt = this._interp.adaptivePredict(this._input,70,this._ctx);
 	        }
 
-	        this.state = 462;
+	        this.state = 463;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
 	        if(_la===28) {
-	            this.state = 461;
+	            this.state = 462;
 	            this.match(sequenceParser.COMMA);
 	        }
 
@@ -2212,19 +2218,19 @@ export default class sequenceParser extends antlr4.Parser {
 	    let localctx = new ParameterContext(this, this._ctx, this.state);
 	    this.enterRule(localctx, 78, sequenceParser.RULE_parameter);
 	    try {
-	        this.state = 466;
+	        this.state = 467;
 	        this._errHandler.sync(this);
 	        var la_ = this._interp.adaptivePredict(this._input,72,this._ctx);
 	        switch(la_) {
 	        case 1:
 	            this.enterOuterAlt(localctx, 1);
-	            this.state = 464;
+	            this.state = 465;
 	            this.declaration();
 	            break;
 
 	        case 2:
 	            this.enterOuterAlt(localctx, 2);
-	            this.state = 465;
+	            this.state = 466;
 	            this.expr(0);
 	            break;
 
@@ -2250,9 +2256,9 @@ export default class sequenceParser extends antlr4.Parser {
 	    this.enterRule(localctx, 80, sequenceParser.RULE_declaration);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 468;
-	        this.type();
 	        this.state = 469;
+	        this.type();
+	        this.state = 470;
 	        this.match(sequenceParser.ID);
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -2276,23 +2282,23 @@ export default class sequenceParser extends antlr4.Parser {
 	    var _la = 0; // Token type
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 471;
+	        this.state = 472;
 	        this.tryBlock();
-	        this.state = 475;
+	        this.state = 476;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
 	        while(_la===50) {
-	            this.state = 472;
+	            this.state = 473;
 	            this.catchBlock();
-	            this.state = 477;
+	            this.state = 478;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
 	        }
-	        this.state = 479;
+	        this.state = 480;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
 	        if(_la===51) {
-	            this.state = 478;
+	            this.state = 479;
 	            this.finallyBlock();
 	        }
 
@@ -2317,9 +2323,9 @@ export default class sequenceParser extends antlr4.Parser {
 	    this.enterRule(localctx, 84, sequenceParser.RULE_tryBlock);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 481;
-	        this.match(sequenceParser.TRY);
 	        this.state = 482;
+	        this.match(sequenceParser.TRY);
+	        this.state = 483;
 	        this.braceBlock();
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -2343,17 +2349,17 @@ export default class sequenceParser extends antlr4.Parser {
 	    var _la = 0; // Token type
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 484;
+	        this.state = 485;
 	        this.match(sequenceParser.CATCH);
-	        this.state = 486;
+	        this.state = 487;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
 	        if(_la===30) {
-	            this.state = 485;
+	            this.state = 486;
 	            this.invocation();
 	        }
 
-	        this.state = 488;
+	        this.state = 489;
 	        this.braceBlock();
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -2376,9 +2382,9 @@ export default class sequenceParser extends antlr4.Parser {
 	    this.enterRule(localctx, 88, sequenceParser.RULE_finallyBlock);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 490;
-	        this.match(sequenceParser.FINALLY);
 	        this.state = 491;
+	        this.match(sequenceParser.FINALLY);
+	        this.state = 492;
 	        this.braceBlock();
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -2402,26 +2408,26 @@ export default class sequenceParser extends antlr4.Parser {
 	    var _la = 0; // Token type
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 493;
+	        this.state = 494;
 	        this.ifBlock();
-	        this.state = 497;
+	        this.state = 498;
 	        this._errHandler.sync(this);
 	        var _alt = this._interp.adaptivePredict(this._input,76,this._ctx)
 	        while(_alt!=2 && _alt!=antlr4.atn.ATN.INVALID_ALT_NUMBER) {
 	            if(_alt===1) {
-	                this.state = 494;
+	                this.state = 495;
 	                this.elseIfBlock(); 
 	            }
-	            this.state = 499;
+	            this.state = 500;
 	            this._errHandler.sync(this);
 	            _alt = this._interp.adaptivePredict(this._input,76,this._ctx);
 	        }
 
-	        this.state = 501;
+	        this.state = 502;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
 	        if(_la===38) {
-	            this.state = 500;
+	            this.state = 501;
 	            this.elseBlock();
 	        }
 
@@ -2446,11 +2452,11 @@ export default class sequenceParser extends antlr4.Parser {
 	    this.enterRule(localctx, 92, sequenceParser.RULE_ifBlock);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 503;
-	        this.match(sequenceParser.IF);
 	        this.state = 504;
-	        this.parExpr();
+	        this.match(sequenceParser.IF);
 	        this.state = 505;
+	        this.parExpr();
+	        this.state = 506;
 	        this.braceBlock();
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -2473,13 +2479,13 @@ export default class sequenceParser extends antlr4.Parser {
 	    this.enterRule(localctx, 94, sequenceParser.RULE_elseIfBlock);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 507;
-	        this.match(sequenceParser.ELSE);
 	        this.state = 508;
-	        this.match(sequenceParser.IF);
+	        this.match(sequenceParser.ELSE);
 	        this.state = 509;
-	        this.parExpr();
+	        this.match(sequenceParser.IF);
 	        this.state = 510;
+	        this.parExpr();
+	        this.state = 511;
 	        this.braceBlock();
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -2502,9 +2508,9 @@ export default class sequenceParser extends antlr4.Parser {
 	    this.enterRule(localctx, 96, sequenceParser.RULE_elseBlock);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 512;
-	        this.match(sequenceParser.ELSE);
 	        this.state = 513;
+	        this.match(sequenceParser.ELSE);
+	        this.state = 514;
 	        this.braceBlock();
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -2528,17 +2534,17 @@ export default class sequenceParser extends antlr4.Parser {
 	    var _la = 0; // Token type
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 515;
+	        this.state = 516;
 	        this.match(sequenceParser.OBRACE);
-	        this.state = 517;
+	        this.state = 518;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
 	        if(((((_la - 32)) & ~0x1f) == 0 && ((1 << (_la - 32)) & 2118318013) !== 0) || _la===65 || _la===66) {
-	            this.state = 516;
+	            this.state = 517;
 	            this.block();
 	        }
 
-	        this.state = 519;
+	        this.state = 520;
 	        this.match(sequenceParser.CBRACE);
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -2560,31 +2566,31 @@ export default class sequenceParser extends antlr4.Parser {
 	    let localctx = new LoopContext(this, this._ctx, this.state);
 	    this.enterRule(localctx, 100, sequenceParser.RULE_loop);
 	    try {
-	        this.state = 528;
+	        this.state = 529;
 	        this._errHandler.sync(this);
 	        var la_ = this._interp.adaptivePredict(this._input,79,this._ctx);
 	        switch(la_) {
 	        case 1:
 	            this.enterOuterAlt(localctx, 1);
-	            this.state = 521;
-	            this.match(sequenceParser.WHILE);
 	            this.state = 522;
-	            this.parExpr();
+	            this.match(sequenceParser.WHILE);
 	            this.state = 523;
+	            this.parExpr();
+	            this.state = 524;
 	            this.braceBlock();
 	            break;
 
 	        case 2:
 	            this.enterOuterAlt(localctx, 2);
-	            this.state = 525;
-	            this.match(sequenceParser.WHILE);
 	            this.state = 526;
+	            this.match(sequenceParser.WHILE);
+	            this.state = 527;
 	            this.parExpr();
 	            break;
 
 	        case 3:
 	            this.enterOuterAlt(localctx, 3);
-	            this.state = 527;
+	            this.state = 528;
 	            this.match(sequenceParser.WHILE);
 	            break;
 
@@ -2617,7 +2623,7 @@ export default class sequenceParser extends antlr4.Parser {
 	    var _la = 0; // Token type
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 550;
+	        this.state = 551;
 	        this._errHandler.sync(this);
 	        var la_ = this._interp.adaptivePredict(this._input,81,this._ctx);
 	        switch(la_) {
@@ -2626,7 +2632,7 @@ export default class sequenceParser extends antlr4.Parser {
 	            this._ctx = localctx;
 	            _prevctx = localctx;
 
-	            this.state = 531;
+	            this.state = 532;
 	            this.atom();
 	            break;
 
@@ -2634,9 +2640,9 @@ export default class sequenceParser extends antlr4.Parser {
 	            localctx = new UnaryMinusExprContext(this, localctx);
 	            this._ctx = localctx;
 	            _prevctx = localctx;
-	            this.state = 532;
-	            this.match(sequenceParser.MINUS);
 	            this.state = 533;
+	            this.match(sequenceParser.MINUS);
+	            this.state = 534;
 	            this.expr(13);
 	            break;
 
@@ -2644,9 +2650,9 @@ export default class sequenceParser extends antlr4.Parser {
 	            localctx = new NotExprContext(this, localctx);
 	            this._ctx = localctx;
 	            _prevctx = localctx;
-	            this.state = 534;
-	            this.match(sequenceParser.NOT);
 	            this.state = 535;
+	            this.match(sequenceParser.NOT);
+	            this.state = 536;
 	            this.expr(12);
 	            break;
 
@@ -2654,17 +2660,17 @@ export default class sequenceParser extends antlr4.Parser {
 	            localctx = new FuncExprContext(this, localctx);
 	            this._ctx = localctx;
 	            _prevctx = localctx;
-	            this.state = 539;
+	            this.state = 540;
 	            this._errHandler.sync(this);
 	            var la_ = this._interp.adaptivePredict(this._input,80,this._ctx);
 	            if(la_===1) {
-	                this.state = 536;
-	                this.to();
 	                this.state = 537;
+	                this.to();
+	                this.state = 538;
 	                this.match(sequenceParser.DOT);
 
 	            }
-	            this.state = 541;
+	            this.state = 542;
 	            this.func();
 	            break;
 
@@ -2672,7 +2678,7 @@ export default class sequenceParser extends antlr4.Parser {
 	            localctx = new CreationExprContext(this, localctx);
 	            this._ctx = localctx;
 	            _prevctx = localctx;
-	            this.state = 542;
+	            this.state = 543;
 	            this.creation();
 	            break;
 
@@ -2680,11 +2686,11 @@ export default class sequenceParser extends antlr4.Parser {
 	            localctx = new ParenthesizedExprContext(this, localctx);
 	            this._ctx = localctx;
 	            _prevctx = localctx;
-	            this.state = 543;
-	            this.match(sequenceParser.OPAR);
 	            this.state = 544;
-	            this.expr(0);
+	            this.match(sequenceParser.OPAR);
 	            this.state = 545;
+	            this.expr(0);
+	            this.state = 546;
 	            this.match(sequenceParser.CPAR);
 	            break;
 
@@ -2692,15 +2698,15 @@ export default class sequenceParser extends antlr4.Parser {
 	            localctx = new AssignmentExprContext(this, localctx);
 	            this._ctx = localctx;
 	            _prevctx = localctx;
-	            this.state = 547;
-	            this.assignment();
 	            this.state = 548;
+	            this.assignment();
+	            this.state = 549;
 	            this.expr(1);
 	            break;
 
 	        }
 	        this._ctx.stop = this._input.LT(-1);
-	        this.state = 575;
+	        this.state = 576;
 	        this._errHandler.sync(this);
 	        var _alt = this._interp.adaptivePredict(this._input,83,this._ctx)
 	        while(_alt!=2 && _alt!=antlr4.atn.ATN.INVALID_ALT_NUMBER) {
@@ -2709,18 +2715,18 @@ export default class sequenceParser extends antlr4.Parser {
 	                    this.triggerExitRuleEvent();
 	                }
 	                _prevctx = localctx;
-	                this.state = 573;
+	                this.state = 574;
 	                this._errHandler.sync(this);
 	                var la_ = this._interp.adaptivePredict(this._input,82,this._ctx);
 	                switch(la_) {
 	                case 1:
 	                    localctx = new MultiplicationExprContext(this, new ExprContext(this, _parentctx, _parentState));
 	                    this.pushNewRecursionContext(localctx, _startState, sequenceParser.RULE_expr);
-	                    this.state = 552;
+	                    this.state = 553;
 	                    if (!( this.precpred(this._ctx, 11))) {
 	                        throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 11)");
 	                    }
-	                    this.state = 553;
+	                    this.state = 554;
 	                    localctx.op = this._input.LT(1);
 	                    _la = this._input.LA(1);
 	                    if(!((((_la) & ~0x1f) == 0 && ((1 << _la) & 29360128) !== 0))) {
@@ -2730,18 +2736,18 @@ export default class sequenceParser extends antlr4.Parser {
 	                    	this._errHandler.reportMatch(this);
 	                        this.consume();
 	                    }
-	                    this.state = 554;
+	                    this.state = 555;
 	                    this.expr(12);
 	                    break;
 
 	                case 2:
 	                    localctx = new AdditiveExprContext(this, new ExprContext(this, _parentctx, _parentState));
 	                    this.pushNewRecursionContext(localctx, _startState, sequenceParser.RULE_expr);
-	                    this.state = 555;
+	                    this.state = 556;
 	                    if (!( this.precpred(this._ctx, 10))) {
 	                        throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 10)");
 	                    }
-	                    this.state = 556;
+	                    this.state = 557;
 	                    localctx.op = this._input.LT(1);
 	                    _la = this._input.LA(1);
 	                    if(!(_la===20 || _la===21)) {
@@ -2751,18 +2757,18 @@ export default class sequenceParser extends antlr4.Parser {
 	                    	this._errHandler.reportMatch(this);
 	                        this.consume();
 	                    }
-	                    this.state = 557;
+	                    this.state = 558;
 	                    this.expr(11);
 	                    break;
 
 	                case 3:
 	                    localctx = new RelationalExprContext(this, new ExprContext(this, _parentctx, _parentState));
 	                    this.pushNewRecursionContext(localctx, _startState, sequenceParser.RULE_expr);
-	                    this.state = 558;
+	                    this.state = 559;
 	                    if (!( this.precpred(this._ctx, 9))) {
 	                        throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 9)");
 	                    }
-	                    this.state = 559;
+	                    this.state = 560;
 	                    localctx.op = this._input.LT(1);
 	                    _la = this._input.LA(1);
 	                    if(!((((_la) & ~0x1f) == 0 && ((1 << _la) & 983040) !== 0))) {
@@ -2772,18 +2778,18 @@ export default class sequenceParser extends antlr4.Parser {
 	                    	this._errHandler.reportMatch(this);
 	                        this.consume();
 	                    }
-	                    this.state = 560;
+	                    this.state = 561;
 	                    this.expr(10);
 	                    break;
 
 	                case 4:
 	                    localctx = new EqualityExprContext(this, new ExprContext(this, _parentctx, _parentState));
 	                    this.pushNewRecursionContext(localctx, _startState, sequenceParser.RULE_expr);
-	                    this.state = 561;
+	                    this.state = 562;
 	                    if (!( this.precpred(this._ctx, 8))) {
 	                        throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 8)");
 	                    }
-	                    this.state = 562;
+	                    this.state = 563;
 	                    localctx.op = this._input.LT(1);
 	                    _la = this._input.LA(1);
 	                    if(!(_la===14 || _la===15)) {
@@ -2793,52 +2799,52 @@ export default class sequenceParser extends antlr4.Parser {
 	                    	this._errHandler.reportMatch(this);
 	                        this.consume();
 	                    }
-	                    this.state = 563;
+	                    this.state = 564;
 	                    this.expr(9);
 	                    break;
 
 	                case 5:
 	                    localctx = new AndExprContext(this, new ExprContext(this, _parentctx, _parentState));
 	                    this.pushNewRecursionContext(localctx, _startState, sequenceParser.RULE_expr);
-	                    this.state = 564;
+	                    this.state = 565;
 	                    if (!( this.precpred(this._ctx, 7))) {
 	                        throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 7)");
 	                    }
-	                    this.state = 565;
-	                    this.match(sequenceParser.AND);
 	                    this.state = 566;
+	                    this.match(sequenceParser.AND);
+	                    this.state = 567;
 	                    this.expr(8);
 	                    break;
 
 	                case 6:
 	                    localctx = new OrExprContext(this, new ExprContext(this, _parentctx, _parentState));
 	                    this.pushNewRecursionContext(localctx, _startState, sequenceParser.RULE_expr);
-	                    this.state = 567;
+	                    this.state = 568;
 	                    if (!( this.precpred(this._ctx, 6))) {
 	                        throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 6)");
 	                    }
-	                    this.state = 568;
-	                    this.match(sequenceParser.OR);
 	                    this.state = 569;
+	                    this.match(sequenceParser.OR);
+	                    this.state = 570;
 	                    this.expr(7);
 	                    break;
 
 	                case 7:
 	                    localctx = new PlusExprContext(this, new ExprContext(this, _parentctx, _parentState));
 	                    this.pushNewRecursionContext(localctx, _startState, sequenceParser.RULE_expr);
-	                    this.state = 570;
+	                    this.state = 571;
 	                    if (!( this.precpred(this._ctx, 5))) {
 	                        throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 5)");
 	                    }
-	                    this.state = 571;
-	                    this.match(sequenceParser.PLUS);
 	                    this.state = 572;
+	                    this.match(sequenceParser.PLUS);
+	                    this.state = 573;
 	                    this.expr(6);
 	                    break;
 
 	                } 
 	            }
-	            this.state = 577;
+	            this.state = 578;
 	            this._errHandler.sync(this);
 	            _alt = this._interp.adaptivePredict(this._input,83,this._ctx);
 	        }
@@ -2864,14 +2870,14 @@ export default class sequenceParser extends antlr4.Parser {
 	    this.enterRule(localctx, 104, sequenceParser.RULE_atom);
 	    var _la = 0; // Token type
 	    try {
-	        this.state = 585;
+	        this.state = 586;
 	        this._errHandler.sync(this);
 	        switch(this._input.LA(1)) {
 	        case 58:
 	        case 59:
 	            localctx = new NumberAtomContext(this, localctx);
 	            this.enterOuterAlt(localctx, 1);
-	            this.state = 578;
+	            this.state = 579;
 	            _la = this._input.LA(1);
 	            if(!(_la===58 || _la===59)) {
 	            this._errHandler.recoverInline(this);
@@ -2884,20 +2890,20 @@ export default class sequenceParser extends antlr4.Parser {
 	        case 61:
 	            localctx = new NumberUnitAtomContext(this, localctx);
 	            this.enterOuterAlt(localctx, 2);
-	            this.state = 579;
+	            this.state = 580;
 	            this.match(sequenceParser.NUMBER_UNIT);
 	            break;
 	        case 60:
 	            localctx = new MoneyAtomContext(this, localctx);
 	            this.enterOuterAlt(localctx, 3);
-	            this.state = 580;
+	            this.state = 581;
 	            this.match(sequenceParser.MONEY);
 	            break;
 	        case 34:
 	        case 35:
 	            localctx = new BooleanAtomContext(this, localctx);
 	            this.enterOuterAlt(localctx, 4);
-	            this.state = 581;
+	            this.state = 582;
 	            _la = this._input.LA(1);
 	            if(!(_la===34 || _la===35)) {
 	            this._errHandler.recoverInline(this);
@@ -2910,19 +2916,19 @@ export default class sequenceParser extends antlr4.Parser {
 	        case 57:
 	            localctx = new IdAtomContext(this, localctx);
 	            this.enterOuterAlt(localctx, 5);
-	            this.state = 582;
+	            this.state = 583;
 	            this.match(sequenceParser.ID);
 	            break;
 	        case 62:
 	            localctx = new StringAtomContext(this, localctx);
 	            this.enterOuterAlt(localctx, 6);
-	            this.state = 583;
+	            this.state = 584;
 	            this.match(sequenceParser.STRING);
 	            break;
 	        case 36:
 	            localctx = new NilAtomContext(this, localctx);
 	            this.enterOuterAlt(localctx, 7);
-	            this.state = 584;
+	            this.state = 585;
 	            this.match(sequenceParser.NIL);
 	            break;
 	        default:
@@ -2948,39 +2954,39 @@ export default class sequenceParser extends antlr4.Parser {
 	    let localctx = new ParExprContext(this, this._ctx, this.state);
 	    this.enterRule(localctx, 106, sequenceParser.RULE_parExpr);
 	    try {
-	        this.state = 596;
+	        this.state = 597;
 	        this._errHandler.sync(this);
 	        var la_ = this._interp.adaptivePredict(this._input,85,this._ctx);
 	        switch(la_) {
 	        case 1:
 	            this.enterOuterAlt(localctx, 1);
-	            this.state = 587;
-	            this.match(sequenceParser.OPAR);
 	            this.state = 588;
-	            this.condition();
+	            this.match(sequenceParser.OPAR);
 	            this.state = 589;
+	            this.condition();
+	            this.state = 590;
 	            this.match(sequenceParser.CPAR);
 	            break;
 
 	        case 2:
 	            this.enterOuterAlt(localctx, 2);
-	            this.state = 591;
-	            this.match(sequenceParser.OPAR);
 	            this.state = 592;
+	            this.match(sequenceParser.OPAR);
+	            this.state = 593;
 	            this.condition();
 	            break;
 
 	        case 3:
 	            this.enterOuterAlt(localctx, 3);
-	            this.state = 593;
-	            this.match(sequenceParser.OPAR);
 	            this.state = 594;
+	            this.match(sequenceParser.OPAR);
+	            this.state = 595;
 	            this.match(sequenceParser.CPAR);
 	            break;
 
 	        case 4:
 	            this.enterOuterAlt(localctx, 4);
-	            this.state = 595;
+	            this.state = 596;
 	            this.match(sequenceParser.OPAR);
 	            break;
 
@@ -3005,25 +3011,25 @@ export default class sequenceParser extends antlr4.Parser {
 	    let localctx = new ConditionContext(this, this._ctx, this.state);
 	    this.enterRule(localctx, 108, sequenceParser.RULE_condition);
 	    try {
-	        this.state = 601;
+	        this.state = 602;
 	        this._errHandler.sync(this);
 	        var la_ = this._interp.adaptivePredict(this._input,86,this._ctx);
 	        switch(la_) {
 	        case 1:
 	            this.enterOuterAlt(localctx, 1);
-	            this.state = 598;
+	            this.state = 599;
 	            this.atom();
 	            break;
 
 	        case 2:
 	            this.enterOuterAlt(localctx, 2);
-	            this.state = 599;
+	            this.state = 600;
 	            this.expr(0);
 	            break;
 
 	        case 3:
 	            this.enterOuterAlt(localctx, 3);
-	            this.state = 600;
+	            this.state = 601;
 	            this.inExpr();
 	            break;
 
@@ -3049,11 +3055,11 @@ export default class sequenceParser extends antlr4.Parser {
 	    this.enterRule(localctx, 110, sequenceParser.RULE_inExpr);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 603;
-	        this.match(sequenceParser.ID);
 	        this.state = 604;
-	        this.match(sequenceParser.IN);
+	        this.match(sequenceParser.ID);
 	        this.state = 605;
+	        this.match(sequenceParser.IN);
+	        this.state = 606;
 	        this.match(sequenceParser.ID);
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -4924,6 +4930,10 @@ class AssigneeContext extends antlr4.ParserRuleContext {
 
 	STRING() {
 	    return this.getToken(sequenceParser.STRING, 0);
+	};
+
+	NEW() {
+	    return this.getToken(sequenceParser.NEW, 0);
 	};
 
 	enterRule(listener) {
