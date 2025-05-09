@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { defineAsyncComponent } from "vue";
+import { computed } from "vue";
 
 const props = defineProps({
   name: {
@@ -21,5 +21,16 @@ const props = defineProps({
   },
 });
 
-const icon = defineAsyncComponent(() => import(`./icons/${props.name}.svg`));
+/**
+ * Ensures all icons are immediately available when rendering, fixing issues with fragment icons
+ * not displaying in mermaid integration
+ * The `import.meta.glob` with `eager: true` loads all SVG files synchronously at build time,
+ * ensuring they're bundled and available immediately when needed.
+ */
+const iconModules = import.meta.glob("./icons/*.svg", { eager: true });
+
+const icon = computed(() => {
+  const iconPath = `./icons/${props.name}.svg`;
+  return iconModules[iconPath]?.default;
+});
 </script>
