@@ -6,7 +6,7 @@
     :style="{
       backgroundColor: isDefaultStarter ? undefined : backgroundColor,
       color: isDefaultStarter ? undefined : color,
-      transform: `translateY(${translate}px)`,
+      transform: `translateY(${stickyVerticalOffset}px)`,
     }"
     @click="onSelect"
   >
@@ -67,7 +67,7 @@ export default {
     const store = useStore();
     const participant = ref(null);
     if (store.state.mode === RenderMode.Static) {
-      return { translate: 0, participant };
+      return { stickyVerticalOffset: 0, participant };
     }
 
     const labelPositions = computed(() => {
@@ -88,7 +88,9 @@ export default {
     });
     const intersectionTop = useIntersectionTop();
     const [scrollTop] = useDocumentScroll();
-    const translate = computed(() => {
+    // We use this method to simulate sticky behavior. CSS sticky is not working when the diagram
+    // is rendered inside an iframe.
+    const stickyVerticalOffset = computed(() => {
       const participantOffsetTop = props.offsetTop2 || 0;
       let top = intersectionTop.value + scrollTop.value;
       if (
@@ -102,11 +104,16 @@ export default {
         : 0;
       if (top < participantOffsetTop + diagramTop) return 0;
       return (
-        Math.min(top - diagramTop, diagramHeight - PARTICIPANT_HEIGHT) -
+        Math.min(top - diagramTop, diagramHeight - PARTICIPANT_HEIGHT - 50) -
         participantOffsetTop
       );
     });
-    return { translate, participant, labelPositions, assigneePositions };
+    return {
+      stickyVerticalOffset,
+      participant,
+      labelPositions,
+      assigneePositions,
+    };
   },
   props: {
     entity: {

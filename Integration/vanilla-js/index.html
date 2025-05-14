@@ -20,6 +20,12 @@ A->B.method() {
   ret0_assign_rtl =C.method_long_to_give_space {
     @return C->D: ret1_annotation_ltr
     ret5_assign_ltr = B.method
+    if(x) {
+      ret0_assign_rtl =C.method_long_to_give_space {
+        @return C->D: ret1_annotation_ltr
+        ret5_assign_ltr = B.method
+      }
+    }
     B.method2 {
       return ret2_return_ltr
     }
