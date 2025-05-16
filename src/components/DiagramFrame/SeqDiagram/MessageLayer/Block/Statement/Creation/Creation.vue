@@ -38,12 +38,6 @@
         :classNames="messageClassNames"
         :textStyle="messageTextStyle"
       />
-      <div
-        ref="participantPlaceHolder"
-        class="invisible right-0 flex flex-col justify-center flex-shrink-0"
-      >
-        <participant :entity="{ name: target }" />
-      </div>
     </div>
     <occurrence
       :context="creation"
@@ -71,12 +65,8 @@ import Comment from "../Comment/Comment.vue";
 import Message from "../Message/Message.vue";
 import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
 import { CodeRange } from "@/parser/CodeRange";
-import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
-import {
-  LIFELINE_WIDTH,
-  OCCURRENCE_BAR_SIDE_WIDTH,
-} from "@/positioning/Constants";
+import { OCCURRENCE_BAR_SIDE_WIDTH } from "@/positioning/Constants";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 
 export default {
@@ -84,7 +74,13 @@ export default {
   props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
-    ...mapGetters(["cursor", "onElementClick", "distance2", "centerOf"]),
+    ...mapGetters([
+      "cursor",
+      "onElementClick",
+      "distance2",
+      "centerOf",
+      "coordinates",
+    ]),
     ...mapState(["numbering"]),
     source() {
       return this.origin;
@@ -127,20 +123,31 @@ export default {
   methods: {
     layoutMessageContainer() {
       let _layoutMessageContainer = () => {
-        if (!this.$refs.participantPlaceHolder || !this.$refs.messageContainer)
-          return;
-        const halfWidthOfPlaceholder =
-          this.$refs["participantPlaceHolder"].offsetWidth / 2;
-        // 100% width does not consider of the borders.
-        this.$refs["messageContainer"].style.width = `calc(100% + ${
-          halfWidthOfPlaceholder + OCCURRENCE_BAR_SIDE_WIDTH
-        }px`;
-        if (this.rightToLeft) {
-          this.$refs["messageContainer"].style.transform = `translateX( ${-(
-            halfWidthOfPlaceholder +
-            OCCURRENCE_BAR_SIDE_WIDTH +
-            LIFELINE_WIDTH
-          )}px`;
+        const participantElement = document.querySelector(
+          `[data-participant-id="${this.target}"]`,
+        );
+
+        if (participantElement) {
+          // Get the actual width from the DOM element
+          const participantWidth =
+            participantElement.getBoundingClientRect().width;
+          const halfWidthOfParticipant = participantWidth / 2;
+          console.log(
+            `Found participant element for ${this.target}, width: ${participantWidth}px`,
+          );
+          this.$refs["messageContainer"].style.width = `calc(100% - ${
+            halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH
+          }px`;
+
+          if (this.rightToLeft) {
+            this.$refs["messageContainer"].style.transform = `translateX( ${
+              halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH
+            }px`;
+          }
+        } else {
+          console.log(
+            `Could not find participant element for ${this.target}, using calculated width`,
+          );
         }
       };
       _layoutMessageContainer();
@@ -150,7 +157,6 @@ export default {
     },
   },
   components: {
-    Participant,
     Comment,
     Occurrence,
     Message,

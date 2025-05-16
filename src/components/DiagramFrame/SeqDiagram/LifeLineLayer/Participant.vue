@@ -3,6 +3,7 @@
     class="participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8"
     :class="{ selected: selected }"
     ref="participant"
+    :data-participant-id="entity.name"
     :style="{
       backgroundColor: isDefaultStarter ? undefined : backgroundColor,
       color: isDefaultStarter ? undefined : color,
