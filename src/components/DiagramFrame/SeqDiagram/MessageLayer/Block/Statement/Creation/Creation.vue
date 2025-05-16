@@ -145,7 +145,10 @@ export default {
           if (this.rightToLeft) {
             this.$refs["messageContainer"].style.transform = `translateX( ${
               halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH
-            }px`;
+            }px)`;
+          } else {
+            // A B.m {new A} => A B.m {new A1}
+            this.$refs["messageContainer"].style.transform = `translateX(0px)`;
           }
         } else {
           console.log(
