@@ -61,6 +61,7 @@
 
 <script type="text/babel">
 import { mapGetters, mapState } from "vuex";
+import { EventBus } from "@/EventBus";
 import Comment from "../Comment/Comment.vue";
 import Message from "../Message/Message.vue";
 import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
@@ -119,6 +120,8 @@ export default {
   },
   updated() {
     this.layoutMessageContainer();
+    EventBus.emit("participant_set_top");
+    console.log(`Updated message container for ${this.target}`);
   },
   methods: {
     layoutMessageContainer() {
