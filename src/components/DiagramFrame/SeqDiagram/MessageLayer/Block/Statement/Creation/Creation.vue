@@ -20,11 +20,10 @@
       ref="messageContainer"
       data-type="creation"
       class="message-container pointer-events-none flex items-center h-10 relative"
-      :class="{ 'flex-row-reverse': rightToLeft }"
+      :class="{ 'flex-row-reverse': rightToLeft, 'ml-auto': rightToLeft }"
       :data-to="target"
       :style="{
-        width: containerWidth,
-        transform: containerTransform,
+        width: `calc(100% - ${containerOffset}px)`,
       }"
     >
       <message
@@ -128,14 +127,6 @@ export default {
       return (
         this.participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH
       );
-    },
-    containerWidth() {
-      return `calc(100% - ${this.containerOffset}px)`;
-    },
-    containerTransform() {
-      return this.rightToLeft
-        ? `translateX(${this.containerOffset}px)`
-        : "translateX(0px)";
     },
   },
   mounted() {
