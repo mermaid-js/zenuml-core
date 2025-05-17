@@ -22,6 +22,10 @@
       class="message-container pointer-events-none flex items-center h-10 relative"
       :class="{ 'flex-row-reverse': rightToLeft }"
       :data-to="target"
+      :style="{
+        width: containerWidth,
+        transform: containerTransform,
+      }"
     >
       <message
         ref="messageEl"
@@ -75,6 +79,11 @@ export default {
   name: "creation",
   props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
+  data() {
+    return {
+      participantWidth: 0,
+    };
+  },
   computed: {
     ...mapGetters([
       "cursor",
@@ -115,45 +124,46 @@ export default {
     messageClassNames() {
       return this.commentObj?.messageClassNames;
     },
+    containerOffset() {
+      return (
+        this.participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH
+      );
+    },
+    containerWidth() {
+      return `calc(100% - ${this.containerOffset}px)`;
+    },
+    containerTransform() {
+      return this.rightToLeft
+        ? `translateX(${this.containerOffset}px)`
+        : "translateX(0px)";
+    },
   },
   mounted() {
-    this.layoutMessageContainer();
+    this.updateParticipantWidth();
   },
   updated() {
-    this.layoutMessageContainer();
+    this.updateParticipantWidth();
     EventBus.emit("participant_set_top");
     console.log(`Updated message container for ${this.target}`);
   },
   methods: {
-    layoutMessageContainer() {
-      const participantElement = document.querySelector(
-        `[data-participant-id="${this.target}"]`,
-      );
+    getParticipantElement() {
+      return document.querySelector(`[data-participant-id="${this.target}"]`);
+    },
+    updateParticipantWidth() {
+      const participantElement = this.getParticipantElement();
 
       if (!participantElement) {
         console.error(`Could not find participant element for ${this.target}`);
+        this.participantWidth = 0;
         return;
       }
 
       // Get the actual width from the DOM element
-      const participantWidth = participantElement.getBoundingClientRect().width;
-      const halfWidthOfParticipant = participantWidth / 2;
+      this.participantWidth = participantElement.getBoundingClientRect().width;
       console.log(
-        `Found participant element for ${this.target}, width: ${participantWidth}px`,
+        `Found participant element for ${this.target}, width: ${this.participantWidth}px`,
       );
-
-      const offset =
-        halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH;
-      this.$refs["messageContainer"].style.width = `calc(100% - ${offset}px)`;
-
-      if (this.rightToLeft) {
-        this.$refs[
-          "messageContainer"
-        ].style.transform = `translateX(${offset}px)`;
-      } else {
-        // A B.m {new A} => A B.m {new A1}
-        this.$refs["messageContainer"].style.transform = `translateX(0px)`;
-      }
     },
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
