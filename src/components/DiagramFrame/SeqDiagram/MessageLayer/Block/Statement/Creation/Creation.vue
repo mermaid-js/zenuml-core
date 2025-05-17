@@ -1,11 +1,8 @@
 <template>
-  <!-- .point-events-none allows hover over the participant underneath (from lifeline layer)
-       .point-events-auto allows hover over the messages (from message layer, default behaviour) -->
   <div
     :data-origin="origin"
-    class="interaction creation sync text-center transform"
-    v-on:click.stop="onClick"
     :data-signature="signature"
+    class="interaction creation sync text-center transform"
     :class="{
       'right-to-left': rightToLeft,
       '-translate-x-full-minus-1': rightToLeft,
@@ -15,6 +12,7 @@
       transform: 'translateX(' + translateX + 'px)',
       width: interactionWidth + 'px',
     }"
+    v-on:click.stop="onClick"
   >
     <comment v-if="comment" :commentObj="commentObj" />
     <!-- flex items-center is an idiom that vertically align items left and right.
@@ -38,15 +36,17 @@
         :textStyle="messageTextStyle"
       />
     </div>
+
     <occurrence
       :context="creation"
       class="pointer-events-auto"
       :participant="target"
       :number="number"
     />
+
     <message
-      class="return transform -translate-y-full pointer-events-auto"
       v-if="assignee"
+      class="return transform -translate-y-full pointer-events-auto"
       :context="creation.creationBody().assignment()"
       :content="assignee"
       :rtl="!rightToLeft"
