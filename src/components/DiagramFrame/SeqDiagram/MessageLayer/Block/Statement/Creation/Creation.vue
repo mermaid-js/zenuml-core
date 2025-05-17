@@ -124,39 +124,32 @@ export default {
   },
   methods: {
     layoutMessageContainer() {
-      let _layoutMessageContainer = () => {
-        const participantElement = document.querySelector(
-          `[data-participant-id="${this.target}"]`,
-        );
+      const participantElement = document.querySelector(
+        `[data-participant-id="${this.target}"]`,
+      );
 
-        if (participantElement) {
-          // Get the actual width from the DOM element
-          const participantWidth =
-            participantElement.getBoundingClientRect().width;
-          const halfWidthOfParticipant = participantWidth / 2;
-          console.log(
-            `Found participant element for ${this.target}, width: ${participantWidth}px`,
-          );
-          const offset = halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH;
+      if (participantElement) {
+        // Get the actual width from the DOM element
+        const participantWidth =
+          participantElement.getBoundingClientRect().width;
+        const halfWidthOfParticipant = participantWidth / 2;
+        console.log(
+          `Found participant element for ${this.target}, width: ${participantWidth}px`,
+        );
+        const offset = halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH;
+        this.$refs["messageContainer"].style.width = `calc(100% - ${offset}px)`;
+
+        if (this.rightToLeft) {
           this.$refs[
             "messageContainer"
-          ].style.width = `calc(100% - ${offset}px)`;
-
-          if (this.rightToLeft) {
-            this.$refs[
-              "messageContainer"
-            ].style.transform = `translateX( ${offset}px)`;
-          } else {
-            // A B.m {new A} => A B.m {new A1}
-            this.$refs["messageContainer"].style.transform = `translateX(0px)`;
-          }
+          ].style.transform = `translateX( ${offset}px)`;
         } else {
-          console.error(
-            `Could not find participant element for ${this.target}`,
-          );
+          // A B.m {new A} => A B.m {new A1}
+          this.$refs["messageContainer"].style.transform = `translateX(0px)`;
         }
-      };
-      _layoutMessageContainer();
+      } else {
+        console.error(`Could not find participant element for ${this.target}`);
+      }
     },
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
