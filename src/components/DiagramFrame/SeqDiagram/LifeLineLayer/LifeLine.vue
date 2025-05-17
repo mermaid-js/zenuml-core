@@ -31,7 +31,7 @@ export default {
   data: () => {
     return {
       translateX: 0,
-      top: 24,
+      top: 0,
     };
   },
   computed: {
@@ -100,7 +100,7 @@ export default {
       } else {
         // A B.m {new A} => A B.m {new A1}
         logger.debug(`First message to ${this.entity.name} is not creation`);
-        this.top = 0;
+        // this.top = 0;
       }
     },
   },
