@@ -1,21 +1,17 @@
 <template>
-  <!-- .point-events-none allows hover over the participant underneath (from lifeline layer)
-       .point-events-auto allows hover over the messages (from message layer, default behaviour) -->
   <div
     :data-origin="origin"
-    class="interaction creation sync text-center transform"
-    v-on:click.stop="onClick"
     :data-signature="signature"
+    class="interaction creation sync"
     :class="{
       'right-to-left': rightToLeft,
-      '-translate-x-full-minus-1': rightToLeft,
       highlight: isCurrent,
     }"
     :style="{
       transform: 'translateX(' + translateX + 'px)',
-
       width: interactionWidth + 'px',
     }"
+    v-on:click.stop="onClick"
   >
     <comment v-if="comment" :commentObj="commentObj" />
     <!-- flex items-center is an idiom that vertically align items left and right.
@@ -30,6 +26,7 @@
       <message
         ref="messageEl"
         class="invocation w-full transform -translate-y-1/2 pointer-events-auto"
+        :style="{ width: `calc(100% - ${containerOffset}px)` }"
         :context="creation"
         :content="signature"
         :rtl="rightToLeft"
@@ -38,22 +35,18 @@
         :classNames="messageClassNames"
         :textStyle="messageTextStyle"
       />
-      <div
-        ref="participantPlaceHolder"
-        class="invisible right-0 flex flex-col justify-center flex-shrink-0"
-      >
-        <participant :entity="{ name: target }" />
-      </div>
     </div>
+
     <occurrence
       :context="creation"
       class="pointer-events-auto"
       :participant="target"
       :number="number"
     />
+
     <message
-      class="return transform -translate-y-full pointer-events-auto"
       v-if="assignee"
+      class="return transform -translate-y-full pointer-events-auto"
       :context="creation.creationBody().assignment()"
       :content="assignee"
       :rtl="!rightToLeft"
@@ -67,11 +60,11 @@
 
 <script type="text/babel">
 import { mapGetters, mapState } from "vuex";
+import { EventBus } from "@/EventBus";
 import Comment from "../Comment/Comment.vue";
 import Message from "../Message/Message.vue";
 import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
 import { CodeRange } from "@/parser/CodeRange";
-import Participant from "../../../../../../../components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.vue";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
 import {
   LIFELINE_WIDTH,
@@ -83,8 +76,19 @@ export default {
   name: "creation",
   props: ["context", "comment", "commentObj", "number"],
   mixins: [ArrowMixin, DirectionMixin],
+  data() {
+    return {
+      participantWidth: 0,
+    };
+  },
   computed: {
-    ...mapGetters(["cursor", "onElementClick", "distance2", "centerOf"]),
+    ...mapGetters([
+      "cursor",
+      "onElementClick",
+      "distance2",
+      "centerOf",
+      "coordinates",
+    ]),
     ...mapState(["numbering"]),
     source() {
       return this.origin;
@@ -117,48 +121,47 @@ export default {
     messageClassNames() {
       return this.commentObj?.messageClassNames;
     },
+    containerOffset() {
+      return (
+        this.participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH
+      );
+    },
   },
   mounted() {
-    this.layoutMessageContainer();
+    this.updateParticipantWidth();
   },
   updated() {
-    this.layoutMessageContainer();
+    this.updateParticipantWidth();
+    EventBus.emit("participant_set_top");
+    console.log(`Updated message container for ${this.target}`);
   },
   methods: {
-    layoutMessageContainer() {
-      let _layoutMessageContainer = () => {
-        if (!this.$refs.participantPlaceHolder || !this.$refs.messageContainer)
-          return;
-        const halfWidthOfPlaceholder =
-          this.$refs["participantPlaceHolder"].offsetWidth / 2;
-        // 100% width does not consider of the borders.
-        this.$refs["messageContainer"].style.width = `calc(100% + ${
-          halfWidthOfPlaceholder + OCCURRENCE_BAR_SIDE_WIDTH
-        }px`;
-        if (this.rightToLeft) {
-          this.$refs["messageContainer"].style.transform = `translateX( ${-(
-            halfWidthOfPlaceholder +
-            OCCURRENCE_BAR_SIDE_WIDTH +
-            LIFELINE_WIDTH
-          )}px`;
-        }
-      };
-      _layoutMessageContainer();
+    getParticipantElement() {
+      return document.querySelector(`[data-participant-id="${this.target}"]`);
+    },
+    updateParticipantWidth() {
+      const participantElement = this.getParticipantElement();
+
+      if (!participantElement) {
+        console.error(`Could not find participant element for ${this.target}`);
+        this.participantWidth = 0;
+        return;
+      }
+
+      // Get the actual width from the DOM element
+      this.participantWidth = participantElement.getBoundingClientRect().width;
+      console.log(
+        `Found participant element for ${this.target}, width: ${this.participantWidth}px`,
+      );
     },
     onClick() {
       this.onElementClick(CodeRange.from(this.context));
     },
   },
   components: {
-    Participant,
     Comment,
     Occurrence,
     Message,
   },
 };
 </script>
-<style scoped>
-.-translate-x-full-minus-1 {
-  transform: translateX(calc(-100% - 1px));
-}
-</style>

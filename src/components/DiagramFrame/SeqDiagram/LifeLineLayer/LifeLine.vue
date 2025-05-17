@@ -31,7 +31,7 @@ export default {
   data: () => {
     return {
       translateX: 0,
-      top: 24,
+      top: 0,
     };
   },
   computed: {
@@ -97,6 +97,10 @@ export default {
         const rootY = this.$el.getBoundingClientRect().y;
         const messageY = firstMessage.getBoundingClientRect().y;
         this.top = (messageY - rootY) / this.scale;
+      } else {
+        // A B.m {new A} => A B.m {new A1}
+        logger.debug(`First message to ${this.entity.name} is not creation`);
+        // this.top = 0;
       }
     },
   },

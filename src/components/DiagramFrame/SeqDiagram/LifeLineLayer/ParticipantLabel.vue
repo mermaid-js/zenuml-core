@@ -3,7 +3,7 @@
     <template v-if="assignee">
       <label
         title="Double click to edit"
-        class="name px-1 leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
+        class="name pl-1 leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
         :class="{
           'py-1 cursor-text': assigneeLabelHandler.editing,
         }"
@@ -20,9 +20,11 @@
     </template>
     <label
       title="Double click to edit"
-      class="name px-1 leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
+      class="name leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
       :class="{
         'py-1 cursor-text': participantLabelHandler.editing,
+        'px-1': !assignee,
+        'pr-1': !!assignee,
       }"
       :contenteditable="
         participantLabelHandler.editing &&
