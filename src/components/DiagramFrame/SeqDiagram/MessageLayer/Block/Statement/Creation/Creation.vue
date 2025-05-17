@@ -13,7 +13,6 @@
     }"
     :style="{
       transform: 'translateX(' + translateX + 'px)',
-
       width: interactionWidth + 'px',
     }"
   >
@@ -138,21 +137,22 @@ export default {
           console.log(
             `Found participant element for ${this.target}, width: ${participantWidth}px`,
           );
-          this.$refs["messageContainer"].style.width = `calc(100% - ${
-            halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH
-          }px`;
+          const offset = halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH;
+          this.$refs[
+            "messageContainer"
+          ].style.width = `calc(100% - ${offset}px)`;
 
           if (this.rightToLeft) {
-            this.$refs["messageContainer"].style.transform = `translateX( ${
-              halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH
-            }px)`;
+            this.$refs[
+              "messageContainer"
+            ].style.transform = `translateX( ${offset}px)`;
           } else {
             // A B.m {new A} => A B.m {new A1}
             this.$refs["messageContainer"].style.transform = `translateX(0px)`;
           }
         } else {
-          console.log(
-            `Could not find participant element for ${this.target}, using calculated width`,
+          console.error(
+            `Could not find participant element for ${this.target}`,
           );
         }
       };
