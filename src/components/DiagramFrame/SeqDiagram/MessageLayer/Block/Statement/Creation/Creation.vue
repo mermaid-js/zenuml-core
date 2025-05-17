@@ -2,10 +2,9 @@
   <div
     :data-origin="origin"
     :data-signature="signature"
-    class="interaction creation sync text-center transform"
+    class="interaction creation sync"
     :class="{
       'right-to-left': rightToLeft,
-      '-translate-x-full-minus-1': rightToLeft,
       highlight: isCurrent,
     }"
     :style="{
@@ -66,7 +65,10 @@ import Message from "../Message/Message.vue";
 import Occurrence from "../Interaction/Occurrence/Occurrence.vue";
 import { CodeRange } from "@/parser/CodeRange";
 import ArrowMixin from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/ArrowMixin";
-import { OCCURRENCE_BAR_SIDE_WIDTH } from "@/positioning/Constants";
+import {
+  LIFELINE_WIDTH,
+  OCCURRENCE_BAR_SIDE_WIDTH,
+} from "@/positioning/Constants";
 import { DirectionMixin } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/DirectionMixin";
 
 export default {
@@ -140,7 +142,8 @@ export default {
         `Found participant element for ${this.target}, width: ${participantWidth}px`,
       );
 
-      const offset = halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH;
+      const offset =
+        halfWidthOfParticipant - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH;
       this.$refs["messageContainer"].style.width = `calc(100% - ${offset}px)`;
 
       if (this.rightToLeft) {
@@ -163,8 +166,3 @@ export default {
   },
 };
 </script>
-<style scoped>
-.-translate-x-full-minus-1 {
-  transform: translateX(calc(-100% - 1px));
-}
-</style>
