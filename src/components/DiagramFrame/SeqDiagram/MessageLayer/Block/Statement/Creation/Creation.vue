@@ -20,15 +20,13 @@
       ref="messageContainer"
       data-type="creation"
       class="message-container pointer-events-none flex items-center h-10 relative"
-      :class="{ 'flex-row-reverse': rightToLeft, 'ml-auto': rightToLeft }"
+      :class="{ 'flex-row-reverse': rightToLeft }"
       :data-to="target"
-      :style="{
-        width: `calc(100% - ${containerOffset}px)`,
-      }"
     >
       <message
         ref="messageEl"
         class="invocation w-full transform -translate-y-1/2 pointer-events-auto"
+        :style="{ width: `calc(100% - ${containerOffset}px)` }"
         :context="creation"
         :content="signature"
         :rtl="rightToLeft"
