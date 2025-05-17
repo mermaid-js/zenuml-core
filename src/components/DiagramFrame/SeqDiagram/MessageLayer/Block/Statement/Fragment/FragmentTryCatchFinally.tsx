@@ -11,10 +11,10 @@ import { useMemo } from "react";
 
 export const FragmentTryCatchFinally = (props: {
   context: any;
-  comment: string;
-  commentObj: CommentClass;
-  number: string;
   origin: string;
+  comment?: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const {
@@ -57,7 +57,7 @@ export const FragmentTryCatchFinally = (props: {
         style={fragmentStyle}
       >
         <div className="segment">
-          {props.commentObj.text && (
+          {props.commentObj?.text && (
             <Comment comment={props.comment} commentObj={props.commentObj} />
           )}
           <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
@@ -67,8 +67,8 @@ export const FragmentTryCatchFinally = (props: {
                 label="Try"
                 collapsed={collapsed}
                 onClick={toggleCollapse}
-                style={props.commentObj.messageStyle}
-                className={cn(props.commentObj.messageClassNames)}
+                style={props.commentObj?.messageStyle}
+                className={cn(props.commentObj?.messageClassNames)}
               />
             </div>
           </div>

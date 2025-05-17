@@ -17,8 +17,8 @@ import { cn } from "@/utils";
 export const Statement = (props: {
   context: any;
   origin: string;
-  number: string;
-  collapsed: boolean;
+  number?: string;
+  collapsed?: boolean;
 }) => {
   const comment = props.context.getComment() || "";
   const commentObj = new Comment(comment);

@@ -24,7 +24,7 @@ export const Block = (props: {
     <div
       className={cn("block", props.className)}
       style={props.style}
-      data-origin="origin"
+      data-origin={props.origin}
     >
       {statements.map((stat, index) => (
         <div

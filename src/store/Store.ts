@@ -21,9 +21,9 @@ export const codeAtom = atom("");
 
 export const rootContextAtom = atom((get) => RootContext(get(codeAtom)));
 
-// export const titleAtom = atom<string | null>((get) =>
-//   get(rootContextAtom)?.title()?.content(),
-// );
+export const titleAtom = atom<string | null>((get) =>
+  get(rootContextAtom)?.title()?.content(),
+);
 
 export const participantsAtom = atom((get) =>
   Participants(get(rootContextAtom)),
@@ -60,7 +60,7 @@ export const onSelectAtom = atom(null, (get, set, payload: string) => {
   }
 });
 
-export const cursorAtom = atom<number | null>(null);
+export const cursorAtom = atom<number | null | undefined>(null);
 
 export const showTipsAtom = atom(false);
 

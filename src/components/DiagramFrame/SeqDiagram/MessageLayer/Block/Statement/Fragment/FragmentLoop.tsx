@@ -10,10 +10,10 @@ import "./FragmentLoop.css";
 
 export const FragmentLoop = (props: {
   context: any;
-  comment: string;
-  commentObj: CommentClass;
-  number: string;
   origin: string;
+  comment?: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const {
@@ -39,7 +39,7 @@ export const FragmentLoop = (props: {
         className="group fragment fragment-loop loop border-skin-fragment rounded"
         style={fragmentStyle}
       >
-        {props.commentObj.text && (
+        {props.commentObj?.text && (
           <Comment comment={props.comment} commentObj={props.commentObj} />
         )}
         <div className="header text-skin-fragment-header bg-skin-fragment-header leading-4 relative rounded-t">
@@ -49,8 +49,8 @@ export const FragmentLoop = (props: {
               label="Loop"
               collapsed={collapsed}
               onClick={toggleCollapse}
-              style={props.commentObj.messageStyle}
-              className={cn(props.commentObj.messageClassNames)}
+              style={props.commentObj?.messageStyle}
+              className={cn(props.commentObj?.messageClassNames)}
             />
           </div>
         </div>

@@ -1,23 +1,17 @@
-import { shallowMount } from "@vue/test-utils";
-import { createStore } from "vuex";
-import { VueSequence } from "@/index";
-// @ts-ignore
-import Interaction from "./Interaction/Interaction.vue";
 import { Fixture } from "../../../../../../../test/unit/parser/fixture/Fixture";
-import { configureCompat } from "vue";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { expect } from "vitest";
 import Anchor2 from "@/positioning/Anchor2";
+import store, { codeAtom } from "@/store/Store";
+import { render } from "@testing-library/react";
+import { Interaction } from "./Interaction/Interaction";
 
 function mountInteractionWithCode(
   code: string,
   contextLocator: (code: string) => any,
   origin = "",
 ) {
-  const storeConfig = VueSequence.Store();
-  // @ts-ignore
-  storeConfig.state.code = code;
-  const store = createStore(storeConfig);
+  store.set(codeAtom, code);
 
   const context = contextLocator(code);
   const props = {
@@ -26,13 +20,8 @@ function mountInteractionWithCode(
     fragmentOffset: 100,
   };
 
-  return shallowMount(Interaction, { global: { plugins: [store] }, props });
+  return render(<Interaction {...props} />);
 }
-beforeEach(() => {
-  configureCompat({
-    RENDER_FUNCTION: false,
-  });
-});
 describe("ArrowMixin", () => {
   it("self message 1", async () => {
     const interaction = mountInteractionWithCode(
@@ -41,8 +30,9 @@ describe("ArrowMixin", () => {
       _STARTER_,
     );
 
-    const vm = interaction.vm as any;
-    expect(vm.anchor2Origin).toStrictEqual(new Anchor2(50, 0));
+    expect(interaction.container.style.transform).toEqual(
+      "translateX(" + new Anchor2(50, 0) + "px)",
+    );
   });
 
   it("sync message 1", async () => {
@@ -52,8 +42,9 @@ describe("ArrowMixin", () => {
       _STARTER_,
     );
 
-    const vm = interaction.vm as any;
-    expect(vm.anchor2Origin).toStrictEqual(new Anchor2(50, 0));
+    expect(interaction.container.style.transform).toEqual(
+      "translateX(" + new Anchor2(50, 0) + "px)",
+    );
   });
 
   it("creation message 1", async () => {
@@ -63,9 +54,8 @@ describe("ArrowMixin", () => {
       _STARTER_,
     );
 
-    const vm = interaction.vm as any;
-    expect(vm.anchor2Origin).toStrictEqual(new Anchor2(50, 0));
-    expect(vm.anchor2Source).toStrictEqual(new Anchor2(50, 0));
-    expect(vm.anchor2Target).toStrictEqual(new Anchor2(50, 0));
+    expect(interaction.container.style.transform).toEqual(
+      "translateX(" + new Anchor2(50, 0) + "px)",
+    );
   });
 });

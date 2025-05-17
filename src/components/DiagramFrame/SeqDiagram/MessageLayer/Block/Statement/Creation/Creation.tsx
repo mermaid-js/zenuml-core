@@ -11,15 +11,15 @@ import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useArrow } from "../useArrow";
 
 export const Creation = (props: {
+  context: any;
   origin: any;
-  context?: any;
-  comment: string;
-  commentObj: CommentClass;
-  number: string;
+  comment?: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const messageContainerRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,7 @@ export const Creation = (props: {
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
 
-  const assignee = () => {
+  const assignee = useMemo(() => {
     function safeCodeGetter(context: any) {
       return (context && context.getFormattedText()) || "";
     }
@@ -49,7 +49,7 @@ export const Creation = (props: {
     const assignee = safeCodeGetter(assignment.assignee());
     const type = safeCodeGetter(assignment.type());
     return assignee + (type ? ":" + type : "");
-  };
+  }, [creation]);
 
   useEffect(() => {
     if (!participantPlaceHolder.current || !messageContainerRef.current) return;
@@ -129,9 +129,9 @@ export const Creation = (props: {
           messageClassNames,
         )}
         textStyle={messageTextStyle}
-        v-if="assignee"
+        v-if={assignee}
         context={creation.creationBody().assignment()}
-        content={assignee()}
+        content={assignee}
         rtl={!rightToLeft}
         type="return"
         number={`${props.number}.${creation.Statements().length + 1}`}
