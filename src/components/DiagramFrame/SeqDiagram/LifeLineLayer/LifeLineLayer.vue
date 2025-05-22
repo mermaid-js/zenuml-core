@@ -1,6 +1,6 @@
 <template>
   <div
-    class="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0 pt-2"
+    class="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0 pt-1"
     :data-participant-names="participantNames"
     :style="{
       'min-width': mode === RenderMode.Dynamic ? '200px' : 'auto',
