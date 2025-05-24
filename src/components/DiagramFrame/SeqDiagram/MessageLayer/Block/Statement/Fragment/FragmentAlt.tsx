@@ -24,7 +24,7 @@ export const FragmentAlt = (props: {
   const elseBlock = alt?.elseBlock()?.braceBlock()?.block();
   const blockInIfBlock = alt?.ifBlock()?.braceBlock()?.block();
   const blockLengthAcc = useMemo(() => {
-    const acc = [blockLength(blockInIfBlock.value)];
+    const acc = [blockLength(blockInIfBlock)];
     if (alt?.elseIfBlock()) {
       alt.elseIfBlock().forEach((block: any) => {
         acc.push(acc[acc.length - 1] + blockLength(blockInElseIfBlock(block)));

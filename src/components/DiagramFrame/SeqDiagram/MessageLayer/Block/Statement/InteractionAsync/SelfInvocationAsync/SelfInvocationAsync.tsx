@@ -10,8 +10,8 @@ export const SelfInvocationAsync = (props: {
 }) => {
   const content = props.context?.content();
   const labelPosition = (): [number, number] => {
-    if (!content.value) return [-1, -1];
-    return [content.value.start.start, content.value.stop.stop];
+    if (!content) return [-1, -1];
+    return [content.start.start, content.stop.stop];
   };
 
   return (

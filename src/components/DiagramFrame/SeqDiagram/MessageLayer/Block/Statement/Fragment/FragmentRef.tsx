@@ -15,10 +15,10 @@ export const FragmentRef = (props: {
   const { paddingLeft, fragmentStyle, border, leftParticipant } =
     useFragmentData(props.context, props.origin);
   const content = props.context.ref().Content();
-  const contentLabel = content.value?.getFormattedText();
+  const contentLabel = content?.getFormattedText();
   const contentPosition: [number, number] = [
-    content.value?.start.start,
-    content.value?.stop.stop,
+    content?.start.start,
+    content?.stop.stop,
   ];
 
   return (

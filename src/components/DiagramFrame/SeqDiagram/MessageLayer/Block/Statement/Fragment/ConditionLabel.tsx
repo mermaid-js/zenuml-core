@@ -8,7 +8,7 @@ const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
 export const ConditionLabel = (props: { condition: any }) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
-  const labelText = props.condition?.value?.getFormattedText() ?? "";
+  const labelText = props.condition?.getFormattedText() ?? "";
   const { editing, handleDblClick, handleBlur, handleKeydown, handleKeyup } =
     useEditLabel((e) => {
       e.preventDefault();
@@ -20,7 +20,7 @@ export const ConditionLabel = (props: { condition: any }) => {
 
       // if text is empty, we need to replace it with the original condition text
       if (newText === "") {
-        target.innerText = labelText.value;
+        target.innerText = labelText;
         return;
       }
 
@@ -31,8 +31,8 @@ export const ConditionLabel = (props: { condition: any }) => {
       }
 
       const [start, end] = [
-        props.condition.value?.start?.start,
-        props.condition.value?.stop?.stop,
+        props.condition?.start?.start,
+        props.condition?.stop?.stop,
       ];
       if (start === -1 || end === -1) {
         console.warn("labelPosition is not set");

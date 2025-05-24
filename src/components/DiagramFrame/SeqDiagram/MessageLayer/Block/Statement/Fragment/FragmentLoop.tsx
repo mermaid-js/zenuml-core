@@ -27,7 +27,10 @@ export const FragmentLoop = (props: {
 
   const loop = props.context.loop();
   const blockInLoop = loop?.braceBlock()?.block();
-  const getConditionFromBlock = () => loop?.parExpr()?.condition();
+  console.log(111);
+  console.log(loop?.parExpr()?.condition());
+  console.log(222);
+  const condition = loop?.parExpr()?.condition();
 
   return (
     <div className={props.className}>
@@ -57,7 +60,7 @@ export const FragmentLoop = (props: {
         <div className={cn({ hidden: collapsed })}>
           <div className="segment">
             <div className="text-skin-fragment">
-              <ConditionLabel condition={getConditionFromBlock()} />
+              <ConditionLabel condition={condition} />
             </div>
             <Block
               origin={leftParticipant}
