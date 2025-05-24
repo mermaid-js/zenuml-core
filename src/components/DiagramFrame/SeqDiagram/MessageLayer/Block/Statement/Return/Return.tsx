@@ -11,10 +11,10 @@ import { useArrow } from "../useArrow";
 
 export const Return = (props: {
   context: any;
-  comment: string;
-  commentObj: CommentClass;
-  number: string;
   origin: string;
+  comment?: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const onElementClick = useAtomValue(onElementClickAtom);

@@ -68,6 +68,7 @@ export const LifeLine = (props: {
         props.className,
       )}
       style={{ paddingTop: top + "px", left: left + "px" }}
+      ref={elRef}
     >
       {props.renderParticipants && (
         <Participant entity={props.entity} offsetTop2={top} />

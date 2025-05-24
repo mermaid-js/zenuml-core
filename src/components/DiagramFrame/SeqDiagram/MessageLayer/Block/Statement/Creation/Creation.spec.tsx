@@ -1,22 +1,16 @@
-import { shallowMount } from "@vue/test-utils";
-import { createStore } from "vuex";
-import { VueSequence } from "@/index";
-// @ts-ignore
-import Creation from "./Creation.vue";
 import { Fixture } from "../../../../../../../../test/unit/parser/fixture/Fixture";
-import { configureCompat } from "vue";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import Anchor2 from "@/positioning/Anchor2";
+import store, { codeAtom } from "@/store/Store";
+import { render } from "@testing-library/react";
+import { Creation } from "./Creation";
 
 function mountCreationWithCode(
   code: string,
   contextLocator: (code: string) => any,
   origin = "",
 ) {
-  const storeConfig = VueSequence.Store();
-  // @ts-ignore
-  storeConfig.state.code = code;
-  const store = createStore(storeConfig);
+  store.set(codeAtom, code);
 
   const creationContext = contextLocator(code);
   const props = {
@@ -25,13 +19,8 @@ function mountCreationWithCode(
     fragmentOffset: 100,
   };
 
-  return shallowMount(Creation, { global: { plugins: [store] }, props });
+  return render(<Creation {...props} />);
 }
-beforeEach(() => {
-  configureCompat({
-    RENDER_FUNCTION: false,
-  });
-});
 describe("Creation", () => {
   it("data, props and computed properties", async () => {
     /**
@@ -44,9 +33,13 @@ describe("Creation", () => {
       _STARTER_,
     );
 
-    const vm = creationWrapper.vm as any;
-    expect(vm.signature).toBe("«create»");
-    expect(vm.assignee).toBe("a");
+    expect(
+      creationWrapper.container.querySelector("div")?.dataset.signature,
+    ).toBe("«create»");
+    expect(
+      creationWrapper.container.querySelector(".message label")?.textContent,
+    ).toBe("a");
+
     // -------------==a:A==-
     // --<<create>>-->[]
     // In the above demonstration,
@@ -56,8 +49,14 @@ describe("Creation", () => {
     const anchorStarter = new Anchor2(100, 0);
     const anchorA = new Anchor2(200, 1);
     const expected = anchorStarter.edgeOffset(anchorA);
-    expect(vm.interactionWidth).toBe(expected);
-    expect(vm.rightToLeft).toBeFalsy();
+    expect(creationWrapper.container.querySelector("div")?.style.width).toBe(
+      expected + "px",
+    );
+    expect(
+      creationWrapper.container
+        .querySelector("div")
+        ?.classList.contains("right-to-left"),
+    ).toBeFalsy();
   });
 
   it("right to left", async () => {
@@ -66,15 +65,20 @@ describe("Creation", () => {
       Fixture.firstGrandChild,
       "B",
     );
-    const vm = creationWrapper.vm as any;
-    expect(vm.rightToLeft).toBeTruthy();
+    expect(
+      creationWrapper.container
+        .querySelector("div")
+        ?.classList.contains("right-to-left"),
+    ).toBeTruthy();
     // -====A====--====B====-
     //      []]<--<<c>>--
     // There is enough space for the message arrow and occurrence.
     const anchorA = new Anchor2(100, 2);
     const anchorB = new Anchor2(200, 1);
     const expected = anchorA.edgeOffset(anchorB);
-    expect(vm.interactionWidth).toBe(expected);
+    expect(creationWrapper.container.querySelector("div")?.style.width).toBe(
+      expected + "px",
+    );
   });
 
   it("right to left within alt fragment", async () => {
@@ -91,14 +95,19 @@ describe("Creation", () => {
       contextLocator,
       "B",
     );
-    const vm = creationWrapper.vm as any;
-    expect(vm.rightToLeft).toBeTruthy();
+    expect(
+      creationWrapper.container
+        .querySelector("div")
+        ?.classList.contains("right-to-left"),
+    ).toBeTruthy();
     // -====A====--====B====-
     //      []]--<<c>>--
     // There is enough space for the message and occurrence.
     const anchorA = new Anchor2(100, 2);
     const anchorB = new Anchor2(200, 1);
     const expected = anchorA.edgeOffset(anchorB);
-    expect(vm.interactionWidth).toBe(expected);
+    expect(creationWrapper.container.querySelector("div")?.style.width).toBe(
+      expected + "px",
+    );
   });
 });

@@ -9,10 +9,10 @@ import "./FragmentPar.css";
 
 export const FragmentPar = (props: {
   context: any;
-  comment: string;
-  commentObj: CommentClass;
-  number: string;
   origin: string;
+  comment?: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const {
@@ -36,7 +36,7 @@ export const FragmentPar = (props: {
         className="group fragment fragment-par par border-skin-fragment rounded"
         style={fragmentStyle}
       >
-        {props.commentObj.text && (
+        {props.commentObj?.text && (
           <Comment comment={props.comment} commentObj={props.commentObj} />
         )}
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
@@ -46,8 +46,8 @@ export const FragmentPar = (props: {
               label="Par"
               collapsed={collapsed}
               onClick={toggleCollapse} // Assuming 'this.toggle' is accessible or replace with appropriate handler
-              style={props.commentObj.messageStyle}
-              className={cn(props.commentObj.messageClassNames)}
+              style={props.commentObj?.messageStyle}
+              className={cn(props.commentObj?.messageClassNames)}
             />
           </div>
         </div>

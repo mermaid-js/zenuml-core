@@ -8,10 +8,10 @@ import { cn } from "@/utils";
 
 export const FragmentOpt = (props: {
   context: any;
-  comment: string;
-  commentObj: CommentClass;
-  number: string;
   origin: string;
+  comment?: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const opt = props.context.opt();
@@ -35,7 +35,7 @@ export const FragmentOpt = (props: {
       )}
       style={fragmentStyle}
     >
-      {props.commentObj.text && (
+      {props.commentObj?.text && (
         <Comment comment={props.comment} commentObj={props.commentObj} />
       )}
       <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 relative">
@@ -45,8 +45,8 @@ export const FragmentOpt = (props: {
             label="Opt"
             collapsed={collapsed}
             onClick={toggleCollapse}
-            style={props.commentObj.textStyle}
-            className={cn(props.commentObj.classNames)}
+            style={props.commentObj?.textStyle}
+            className={cn(props.commentObj?.classNames)}
           />
         </div>
       </div>

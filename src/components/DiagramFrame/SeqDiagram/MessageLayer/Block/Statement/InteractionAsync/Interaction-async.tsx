@@ -82,10 +82,10 @@ function isNullOrUndefined(value: any) {
 
 export const InteractionAsync = (props: {
   context: any;
-  comment: string;
-  commentObj: CommentClass;
-  number: string;
   origin: string;
+  comment?: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const cursor = useAtomValue(cursorAtom);
@@ -105,8 +105,8 @@ export const InteractionAsync = (props: {
   });
 
   console.log(props.commentObj);
-  const messageClassNames = props.commentObj.messageClassNames;
-  const messageTextStyle = props.commentObj.messageStyle;
+  const messageClassNames = props.commentObj?.messageClassNames;
+  const messageTextStyle = props.commentObj?.messageStyle;
   const getIsCurrent = () => {
     const start = asyncMessage.start.start;
     const stop = asyncMessage.stop.stop + 1;

@@ -33,10 +33,12 @@ export const SelfInvocation = (props: {
       <label className="name text-left group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em] w-full">
         <Numbering number={props.number} />
         <div className="label">
-          <span v-if="assignee">
-            <span className="assignee px-1">{assignee}</span>
-            <span>=</span>
-          </span>
+          {assignee && (
+            <span>
+              <span className="assignee px-1">{assignee}</span>
+              <span>=</span>
+            </span>
+          )}
           <MessageLabel
             style={props.textStyle}
             className={props.classNames}

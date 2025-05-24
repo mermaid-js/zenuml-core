@@ -42,7 +42,7 @@ export const Divider = (props: {
   return (
     <div
       className={cn("divider", props.className)}
-      data-origin="origin"
+      data-origin={props.origin}
       style={{
         width: width + "px",
         transform: "translateX(" + (-1 * centerOfOrigin + 10) + "px)",

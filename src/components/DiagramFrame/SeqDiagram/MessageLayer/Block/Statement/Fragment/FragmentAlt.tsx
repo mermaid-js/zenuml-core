@@ -12,10 +12,10 @@ import { Fragment, useMemo } from "react";
 
 export const FragmentAlt = (props: {
   context: any;
-  comment: string;
-  commentObj: CommentClass;
-  number: string;
   origin: string;
+  comment?: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const alt = props.context.alt();
@@ -51,10 +51,10 @@ export const FragmentAlt = (props: {
 
   return (
     <div
-      data-origin="origin"
+      data-origin={props.origin}
       data-left-participant={props.origin}
-      data-frame-padding-left={props.commentObj.messageStyle?.paddingLeft}
-      data-frame-padding-right={props.commentObj.messageStyle?.paddingRight}
+      data-frame-padding-left={props.commentObj?.messageStyle?.paddingLeft}
+      data-frame-padding-right={props.commentObj?.messageStyle?.paddingRight}
       className={cn(
         "group fragment fragment-alt alt border-skin-fragment rounded",
         props.className,
@@ -62,7 +62,7 @@ export const FragmentAlt = (props: {
       style={fragmentStyle}
     >
       <div className="segment">
-        {props.commentObj.text && (
+        {props.commentObj?.text && (
           <Comment comment={props.comment} commentObj={props.commentObj} />
         )}
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
@@ -73,8 +73,8 @@ export const FragmentAlt = (props: {
                 label="Alt"
                 collapsed={collapsed}
                 onClick={toggleCollapse}
-                style={props.commentObj.messageStyle}
-                className={cn(props.commentObj.messageClassNames)}
+                style={props.commentObj?.messageStyle}
+                className={cn(props.commentObj?.messageClassNames)}
               />
             </label>
           </div>

@@ -11,15 +11,15 @@ import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useArrow } from "../useArrow";
 
 export const Creation = (props: {
+  context: any;
   origin: any;
-  context?: any;
-  comment: string;
-  commentObj: CommentClass;
-  number: string;
+  comment?: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const messageContainerRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,7 @@ export const Creation = (props: {
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
 
-  const assignee = () => {
+  const assignee = useMemo(() => {
     function safeCodeGetter(context: any) {
       return (context && context.getFormattedText()) || "";
     }
@@ -49,7 +49,7 @@ export const Creation = (props: {
     const assignee = safeCodeGetter(assignment.assignee());
     const type = safeCodeGetter(assignment.type());
     return assignee + (type ? ":" + type : "");
-  };
+  }, [creation]);
 
   useEffect(() => {
     if (!participantPlaceHolder.current || !messageContainerRef.current) return;
@@ -70,7 +70,7 @@ export const Creation = (props: {
 
   return (
     <div
-      data-origin="origin"
+      data-origin={props.origin}
       className={cn(
         "interaction creation sync text-center transform",
         {
@@ -84,7 +84,6 @@ export const Creation = (props: {
       data-signature={creation?.SignatureText()}
       style={{
         transform: "translateX(" + translateX + "px)",
-
         width: interactionWidth + "px",
       }}
     >
@@ -96,7 +95,7 @@ export const Creation = (props: {
           "message-container pointer-events-none flex items-center h-10 relative",
           { "flex-row-reverse": rightToLeft },
         )}
-        data-to="target"
+        data-to={target}
       >
         <Message
           className={cn(
@@ -123,19 +122,20 @@ export const Creation = (props: {
         participant={target}
         number={props.number}
       />
-      <Message
-        className={cn(
-          "return transform -translate-y-full pointer-events-auto",
-          messageClassNames,
-        )}
-        textStyle={messageTextStyle}
-        v-if="assignee"
-        context={creation.creationBody().assignment()}
-        content={assignee()}
-        rtl={!rightToLeft}
-        type="return"
-        number={`${props.number}.${creation.Statements().length + 1}`}
-      />
+      {assignee && (
+        <Message
+          className={cn(
+            "return transform -translate-y-full pointer-events-auto",
+            messageClassNames,
+          )}
+          textStyle={messageTextStyle}
+          context={creation.creationBody().assignment()}
+          content={assignee}
+          rtl={!rightToLeft}
+          type="return"
+          number={`${props.number}.${creation.Statements().length + 1}`}
+        />
+      )}
     </div>
   );
 };

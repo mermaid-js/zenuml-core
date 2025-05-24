@@ -6,10 +6,10 @@ import { MessageLabel } from "../../../MessageLabel";
 
 export const FragmentRef = (props: {
   context: any;
-  comment: string;
-  commentObj: CommentClass;
-  number: string;
   origin: string;
+  comment?: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const { paddingLeft, fragmentStyle, border, leftParticipant } =
@@ -33,7 +33,7 @@ export const FragmentRef = (props: {
       >
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t absolute top-0 left-0">
           <Numbering number={props.number} />
-          {props.commentObj.text && (
+          {props.commentObj?.text && (
             <Comment
               className="absolute -top-4 left-0"
               comment={props.comment}
@@ -44,8 +44,8 @@ export const FragmentRef = (props: {
             <div className="polygon-border absolute inset-0"></div>
             <div className="polygon-content bg-skin-frame text-skin-fragment-header absolute inset-[1px] flex flex-col items-center justify-center">
               <span
-                className={`flex items-center justify-center font-semibold ${props.commentObj.messageClassNames || ""}`}
-                style={props.commentObj.messageStyle}
+                className={`flex items-center justify-center font-semibold ${props.commentObj?.messageClassNames || ""}`}
+                style={props.commentObj?.messageStyle}
               >
                 Ref
               </span>

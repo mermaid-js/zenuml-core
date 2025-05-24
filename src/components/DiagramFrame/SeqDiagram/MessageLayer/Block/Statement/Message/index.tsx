@@ -118,6 +118,7 @@ export const Message = (props: {
           return: type === "return",
           "right-to-left": rtl,
         },
+        className,
       )}
       style={{ borderBottomStyle: borderStyle }}
       onClick={onClick}

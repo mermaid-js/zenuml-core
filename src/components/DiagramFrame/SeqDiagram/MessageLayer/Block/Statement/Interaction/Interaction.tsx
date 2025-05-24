@@ -12,13 +12,13 @@ import { useArrow } from "../useArrow";
 export const Interaction = (props: {
   context: any;
   origin: string;
-  commentObj: CommentClass;
-  number: string;
+  commentObj?: CommentClass;
+  number?: string;
   className?: string;
 }) => {
   const cursor = useAtomValue(cursorAtom);
-  const messageTextStyle = props.commentObj.messageStyle;
-  const messageClassNames = props.commentObj.messageClassNames;
+  const messageTextStyle = props.commentObj?.messageStyle;
+  const messageClassNames = props.commentObj?.messageClassNames;
   const message = props.context?.message();
   const statements = message?.Statements();
   const assignee = message?.Assignment()?.getText() || "";
@@ -62,7 +62,7 @@ export const Interaction = (props: {
       data-source-layers={sourceLayers}
       data-target-layers={targetLayers}
       data-type="interaction"
-      data-signature="signature"
+      data-signature={signature}
       style={{
         width: isSelf ? undefined : interactionWidth + "px",
         transform: "translateX(" + translateX + "px)",

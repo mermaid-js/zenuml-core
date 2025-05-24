@@ -13,7 +13,7 @@ import parentLogger from "../../../../logger/logger";
 const logger = parentLogger.child({ name: "MessageLayer" });
 export const MessageLayer = (props: {
   context: any;
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
 }) => {
   const rootContext = useAtomValue(rootContextAtom);
 
