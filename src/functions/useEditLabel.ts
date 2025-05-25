@@ -9,7 +9,6 @@ export const useEditLabel = (
 
   async function handleDblClick(e: MouseEvent) {
     e.preventDefault();
-    console.log(111);
     e.stopPropagation();
     setEditing(true);
 

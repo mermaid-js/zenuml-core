@@ -27,9 +27,6 @@ export const FragmentLoop = (props: {
 
   const loop = props.context.loop();
   const blockInLoop = loop?.braceBlock()?.block();
-  console.log(111);
-  console.log(loop?.parExpr()?.condition());
-  console.log(222);
   const condition = loop?.parExpr()?.condition();
 
   return (
