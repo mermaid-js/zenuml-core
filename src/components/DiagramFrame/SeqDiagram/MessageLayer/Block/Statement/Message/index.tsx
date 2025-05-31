@@ -128,7 +128,7 @@ export const Message = (props: {
     >
       <div className="name group text-center flex-grow relative hover:text-skin-message-hover hover:bg-skin-message-hover">
         <div className="inline-block static min-h-[1em]">
-          <div style={textStyle} className={className}>
+          <div style={textStyle}>
             {editable ? (
               <>
                 {type === "creation" && <span>«</span>}
