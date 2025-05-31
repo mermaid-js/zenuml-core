@@ -46,7 +46,7 @@ export const FragmentLoop = (props: {
         <div className="header text-skin-fragment-header bg-skin-fragment-header leading-4 relative rounded-t">
           <Numbering number={props.number} />
           <div className="name font-semibold p-1 border-b">
-            <label className="p-0 flex items-center">
+            <label className="p-0 flex items-center gap-0.5">
               <Icon name="loop-fragment" />
               <CollapseButton
                 label="Loop"

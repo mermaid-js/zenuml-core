@@ -43,7 +43,7 @@ export const FragmentPar = (props: {
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
           <Numbering number={props.number} />
           <div className="name font-semibold p-1 border-b">
-            <label className="p-0 flex items-center">
+            <label className="p-0 flex items-center gap-0.5">
               <Icon name="par-fragment" />
               <CollapseButton
                 label="Par"

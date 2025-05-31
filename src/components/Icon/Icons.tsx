@@ -57,7 +57,7 @@ const Icon = (props: {
   return (
     <span
       className={cn(
-        "flex items-center justify-center w-4 h-4",
+        "flex items-center justify-center w-5 h-4",
         props.className,
       )}
       onClick={props.onClick}
