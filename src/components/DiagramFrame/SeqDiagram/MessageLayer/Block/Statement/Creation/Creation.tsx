@@ -1,7 +1,6 @@
 import { cn } from "@/utils";
 import { Message } from "../Message";
 import { Occurrence } from "../Interaction/Occurrence/Occurrence";
-import { Participant } from "@/components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant";
 import { CodeRange } from "@/parser/CodeRange";
 import {
   LIFELINE_WIDTH,
@@ -11,8 +10,9 @@ import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
+import { EventBus } from "@/EventBus";
 
 export const Creation = (props: {
   context: any;
@@ -23,9 +23,9 @@ export const Creation = (props: {
   className?: string;
 }) => {
   const messageContainerRef = useRef<HTMLDivElement>(null);
-  const participantPlaceHolder = useRef<HTMLDivElement>(null);
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
+  const [participantWidth, setParticipantWidth] = useState(0);
   const creation = props.context?.creation();
   const target = creation?.Owner();
   const isCurrent = creation?.isCurrent(cursor);
@@ -51,31 +51,37 @@ export const Creation = (props: {
     return assignee + (type ? ":" + type : "");
   }, [creation]);
 
+  const containerOffset =
+    participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH;
+
   useEffect(() => {
-    if (!participantPlaceHolder.current || !messageContainerRef.current) return;
-    const halfWidthOfPlaceholder =
-      participantPlaceHolder.current.offsetWidth / 2;
-    // 100% width does not consider of the borders.
-    messageContainerRef.current.style.width = `calc(100% + ${
-      halfWidthOfPlaceholder + OCCURRENCE_BAR_SIDE_WIDTH
-    }px)`;
-    if (rightToLeft) {
-      messageContainerRef.current.style.transform = `translateX( ${-(
-        halfWidthOfPlaceholder +
-        OCCURRENCE_BAR_SIDE_WIDTH +
-        LIFELINE_WIDTH
-      )}px`;
+    const participantElement = document.querySelector(
+      `[data-participant-id="${target}"]`,
+    );
+
+    if (!participantElement) {
+      console.error(`Could not find participant element for ${target}`);
+      setParticipantWidth(0);
+      return;
     }
-  });
+
+    // Get the actual width from the DOM element
+    setParticipantWidth(participantElement.getBoundingClientRect().width);
+    console.log(
+      `Found participant element for ${target}, width: ${participantWidth}px`,
+    );
+
+    EventBus.emit("participant_set_top");
+    console.log(`Init or update message container for ${target}`);
+  }, [target, participantWidth]);
 
   return (
     <div
       data-origin={props.origin}
       className={cn(
-        "interaction creation sync text-center transform",
+        "interaction creation sync",
         {
           "right-to-left": rightToLeft,
-          "-translate-x-full-minus-1": rightToLeft,
           highlight: isCurrent,
         },
         props.className,
@@ -108,13 +114,8 @@ export const Creation = (props: {
           type="creation"
           number={props.number}
           textStyle={messageTextStyle}
+          style={{ width: `calc(100% - ${containerOffset}px)` }}
         />
-        <div
-          ref={participantPlaceHolder}
-          className="invisible right-0 flex flex-col justify-center flex-shrink-0"
-        >
-          <Participant entity={{ name: target }} />
-        </div>
       </div>
       <Occurrence
         context={creation}

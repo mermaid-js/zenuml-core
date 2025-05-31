@@ -19,7 +19,7 @@ export const LifeLine = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const scale = useAtomValue(scaleAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
-  const [top, setTop] = useState(24);
+  const [top, setTop] = useState(0);
 
   const left = centerOf(props.entity.name) - (props.groupLeft || 0);
 
@@ -43,6 +43,10 @@ export const LifeLine = (props: {
       const rootY = elRef.current?.getBoundingClientRect().y || 0;
       const messageY = firstMessage.getBoundingClientRect().y;
       setTop((messageY - rootY) / scale);
+    } else {
+      // A B.m {new A} => A B.m {new A1}
+      logger.debug(`First message to ${props.entity.name} is not creation`);
+      setTop(0);
     }
   }, [diagramElement, props.entity.name, scale]);
 

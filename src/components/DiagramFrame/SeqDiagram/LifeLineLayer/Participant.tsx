@@ -49,7 +49,7 @@ export const Participant = (props: {
     // Sort the label positions in descending order to avoid index shifting when updating code
   ).sort((a, b) => b[0] - a[0]);
 
-  const calcTranslate = () => {
+  const calcOffset = () => {
     const participantOffsetTop = props.offsetTop2 || 0;
     let top = intersectionTop + scrollTop;
     if (intersectionTop > INTERSECTION_ERROR_MARGIN && stickyOffset)
@@ -60,12 +60,13 @@ export const Participant = (props: {
       : 0;
     if (top < participantOffsetTop + diagramTop) return 0;
     return (
-      Math.min(top - diagramTop, diagramHeight - PARTICIPANT_HEIGHT) -
+      Math.min(top - diagramTop, diagramHeight - PARTICIPANT_HEIGHT - 50) -
       participantOffsetTop
     );
   };
 
-  const translate = mode === RenderMode.Static ? 0 : calcTranslate();
+  // We use this method to simulate sticky behavior. CSS sticky is not working out of an iframe.
+  const stickyVerticalOffset = mode === RenderMode.Static ? 0 : calcOffset();
 
   const backgroundColor = props.entity.color
     ? removeAlpha(props.entity.color)
@@ -98,9 +99,10 @@ export const Participant = (props: {
       style={{
         backgroundColor: isDefaultStarter ? undefined : backgroundColor,
         color: isDefaultStarter ? undefined : color,
-        transform: `translateY(${translate}px)`,
+        transform: `translateY(${stickyVerticalOffset}px)`,
       }}
       onClick={() => onSelect(props.entity.name)}
+      data-participant-id={props.entity.name}
     >
       <div className="flex items-center justify-center">
         {icon && (

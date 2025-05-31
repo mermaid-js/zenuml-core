@@ -13,6 +13,14 @@ import IconTheme from "./icons/theme.svg?react";
 import IconTip from "./icons/tip.svg?react";
 import IconZoomIn from "./icons/zoom-in.svg?react";
 import IconZoomOut from "./icons/zoom-out.svg?react";
+import IconAltFragment from "./icons/alt-fragment.svg?react";
+import IconCriticalFragment from "./icons/critical-fragment.svg?react";
+import IconLoopFragment from "./icons/loop-fragment.svg?react";
+import IconOptFragment from "./icons/opt-fragment.svg?react";
+import IconRefFragment from "./icons/ref-fragment.svg?react";
+import IconParFragment from "./icons/par-fragment.svg?react";
+import IconSectionFragment from "./icons/section-fragment.svg?react";
+import IconTryCatchFragment from "./icons/try-catch-fragment.svg?react";
 
 const icons: { [key: string]: FC } = {
   close: IconClose,
@@ -28,6 +36,14 @@ const icons: { [key: string]: FC } = {
   tip: IconTip,
   "zoom-in": IconZoomIn,
   "zoom-out": IconZoomOut,
+  "alt-fragment": IconAltFragment,
+  "critical-fragment": IconCriticalFragment,
+  "loop-fragment": IconLoopFragment,
+  "opt-fragment": IconOptFragment,
+  "ref-fragment": IconRefFragment,
+  "par-fragment": IconParFragment,
+  "section-fragment": IconSectionFragment,
+  "try-catch-fragment": IconTryCatchFragment,
 };
 
 const Icon = (props: {

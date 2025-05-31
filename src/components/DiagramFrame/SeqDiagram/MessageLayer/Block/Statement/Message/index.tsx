@@ -75,6 +75,7 @@ export const Message = (props: {
   type?: string;
   textStyle?: CSSProperties;
   className?: string;
+  style?: CSSProperties;
   number?: string;
 }) => {
   const {
@@ -84,6 +85,7 @@ export const Message = (props: {
     type = "",
     textStyle,
     className,
+    style,
     number,
   } = props;
   const mode = useAtomValue(modeAtom);
@@ -120,7 +122,7 @@ export const Message = (props: {
         },
         className,
       )}
-      style={{ borderBottomStyle: borderStyle }}
+      style={{ ...style, borderBottomStyle: borderStyle }}
       onClick={onClick}
       ref={messageRef}
     >

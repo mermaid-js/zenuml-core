@@ -47,6 +47,9 @@
 
     /* Occurrence */
     --color-bg-occurrence: #dedede;
+
+    /* Fragment */
+    --color-bg-fragment-header: #dedede7f;
   }
 
   .theme-clean-light {

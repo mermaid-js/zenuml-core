@@ -75,7 +75,7 @@ export const ParticipantLabel = (props: {
           <label
             title="Double click to edit"
             className={cn(
-              "name px-1 leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover",
+              "name pl-1 leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover",
               {
                 "py-1 cursor-text": assigneeLabelHandler.editing,
               },
@@ -96,7 +96,8 @@ export const ParticipantLabel = (props: {
       <label
         title="Double click to edit"
         className={cn(
-          "name px-1 leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover",
+          "name leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover",
+          props.assignee ? "pr-1" : "px-1",
           {
             "py-1 cursor-text": participantLabelHandler.editing,
           },
