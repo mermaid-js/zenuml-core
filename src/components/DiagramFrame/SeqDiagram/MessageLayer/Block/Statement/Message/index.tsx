@@ -92,7 +92,7 @@ export const Message = (props: {
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const isAsync = type === "async";
-  const editable = getEditable(content, mode, type || "");
+  const editable = getEditable(context, mode, type || "");
   const stylable =
     mode !== RenderMode.Static &&
     ["sync", "async", "return", "creation"].includes(type);
