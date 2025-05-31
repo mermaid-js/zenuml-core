@@ -1,7 +1,11 @@
 import { cn } from "@/utils";
 import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/StringUtil";
-import { useAtom, useSetAtom } from "jotai";
-import { codeAtom, onMessageClickAtom } from "@/store/Store";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import {
+  codeAtom,
+  onContentChangeAtom,
+  onMessageClickAtom,
+} from "@/store/Store";
 import { useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
@@ -31,10 +35,16 @@ const btns = [
 
 export const StylePanel = () => {
   const [code, setCode] = useAtom(codeAtom);
+  const onContentChange = useAtomValue(onContentChangeAtom);
   const setOnMessageClick = useSetAtom(onMessageClickAtom);
   const [isOpen, setIsOpen] = useState(false);
   const [existingStyles, setExistingStyles] = useState<string[]>([]);
   const [messageContext, setMessageContext] = useState("");
+
+  const updateCode = (newCode: string) => {
+    setCode(newCode);
+    onContentChange(newCode);
+  };
 
   const messageData = useRef({
     start: 0,
@@ -76,13 +86,13 @@ export const StylePanel = () => {
           .trimStart()}`;
       }
       if (!newComment.endsWith("\n")) newComment += "\n";
-      setCode(
+      updateCode(
         code.slice(0, getPrevLineHead(code, message.start)) +
           newComment +
           code.slice(message.lineHead),
       );
     } else {
-      setCode(
+      updateCode(
         code.slice(0, message.lineHead) +
           `${message.leadingSpaces}// [${style}]\n` +
           code.slice(message.lineHead),

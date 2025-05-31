@@ -88,9 +88,6 @@ export const onMessageClickAtom = atomWithFunctionValue<
 export const onContentChangeAtom = atomWithFunctionValue<
   (code: string) => void
 >(() => {});
-store.sub(codeAtom, () => {
-  store.get(onContentChangeAtom)(store.get(codeAtom));
-});
 
 export const onThemeChangeAtom = atomWithFunctionValue<
   (data: { theme: string; scoped: boolean }) => void

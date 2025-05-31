@@ -1,4 +1,4 @@
-import { codeAtom, modeAtom } from "@/store/Store";
+import { codeAtom, modeAtom, onContentChangeAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { useAtom, useAtomValue } from "jotai";
 import { formatText } from "@/utils/StringUtil";
@@ -16,6 +16,7 @@ export const MessageLabel = (props: {
 }) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
+  const onContentChange = useAtomValue(onContentChangeAtom);
   const formattedLabelText = formatText(props.labelText);
 
   const replaceLabelText = (e: FocusEvent | KeyboardEvent | MouseEvent) => {
@@ -53,6 +54,7 @@ export const MessageLabel = (props: {
 
     const newCode = code.slice(0, start) + newText + code.slice(end + 1);
     setCode(newCode);
+    onContentChange(newCode);
   };
   const { editing, handleDblClick, handleBlur, handleKeydown, handleKeyup } =
     useEditLabel(replaceLabelText);

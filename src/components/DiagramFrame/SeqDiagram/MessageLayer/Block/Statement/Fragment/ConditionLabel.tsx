@@ -1,13 +1,19 @@
 import { cn } from "@/utils";
 import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
 import { useAtom, useAtomValue } from "jotai";
-import { codeAtom, modeAtom, RenderMode } from "@/store/Store";
+import {
+  codeAtom,
+  modeAtom,
+  onContentChangeAtom,
+  RenderMode,
+} from "@/store/Store";
 
 const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
 
 export const ConditionLabel = (props: { condition: any }) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
+  const onContentChange = useAtomValue(onContentChangeAtom);
   const labelText = props.condition?.getFormattedText() ?? "";
   const { editing, handleDblClick, handleBlur, handleKeydown, handleKeyup } =
     useEditLabel((e) => {
@@ -38,7 +44,9 @@ export const ConditionLabel = (props: { condition: any }) => {
         console.warn("labelPosition is not set");
         return;
       }
-      setCode(code.slice(0, start) + newText + code.slice(end + 1));
+      const newCode = code.slice(0, start) + newText + code.slice(end + 1);
+      setCode(newCode);
+      onContentChange(newCode);
     });
 
   return (
