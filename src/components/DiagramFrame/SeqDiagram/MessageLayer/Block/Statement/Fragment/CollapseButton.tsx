@@ -1,5 +1,6 @@
 import Icon from "@/components/Icon/Icons";
 import { cn } from "@/utils";
+import "./CollapseButton.css";
 
 export const CollapseButton = (props: {
   label: string;

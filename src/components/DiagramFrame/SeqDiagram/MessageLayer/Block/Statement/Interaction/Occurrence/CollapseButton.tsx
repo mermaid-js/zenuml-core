@@ -1,11 +1,12 @@
 import { cn } from "@/utils";
+import "./CollapseButton.css";
 
 export const CollapseButton = (props: {
   collapsed?: boolean;
   onClick?: () => void;
 }) => {
   return (
-    <div className="collapsible-header flex w-full justify-between">
+    <div className="occurrence-collapsible-header w-auto">
       <svg
         width="20px"
         height="20px"
