@@ -142,7 +142,7 @@ export const StylePanel = () => {
   });
 
   return (
-    <div ref={refs.setFloating} style={floatingStyles}>
+    <div id="style-panel" ref={refs.setFloating} style={floatingStyles}>
       {isOpen && (
         <div className="flex bg-white shadow-md z-10 rounded-md p-1">
           {btns.map((btn) => (
