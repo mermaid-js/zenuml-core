@@ -103,7 +103,7 @@ export const Interaction = (props: {
           content={assignee}
           rtl={!rightToLeft}
           type="return"
-          number={`${props.number}.${statements + 1}`}
+          number={`${props.number}.${statements.length + 1}`}
           textStyle={messageTextStyle}
         />
       )}
