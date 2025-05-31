@@ -25,7 +25,7 @@ export const Statement = (props: {
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
-      hidden: props.collapsed,
+      hidden: props.collapsed && !props.context.ret(),
     }),
     context: props.context,
     origin: props.origin,
@@ -59,7 +59,7 @@ export const Statement = (props: {
       return <InteractionAsync {...subProps} />;
     case Boolean(props.context.divider()):
       return <Divider {...subProps} />;
-    case props.context.ret:
+    case Boolean(props.context.ret()):
       return (
         <Return {...subProps} className="text-left text-sm text-skin-message" />
       );
