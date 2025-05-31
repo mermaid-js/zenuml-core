@@ -28,7 +28,7 @@ const icons = {
   debug: IconDebug,
   "message-arrow": IconMessageArrow,
   "non-selected-cycle": IconNonSelectedCycle,
-  numerical: IconNumbering,
+  numbering: IconNumbering,
   privacy: IconPrivacy,
   "selected-cycle": IconSelectedCycle,
   theme: IconTheme,
