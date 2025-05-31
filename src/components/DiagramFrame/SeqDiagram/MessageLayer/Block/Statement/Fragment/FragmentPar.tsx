@@ -6,6 +6,7 @@ import { CollapseButton } from "./CollapseButton";
 import { cn } from "@/utils";
 import { Block } from "../../Block";
 import "./FragmentPar.css";
+import Icon from "@/components/Icon/Icons";
 
 export const FragmentPar = (props: {
   context: any;
@@ -42,13 +43,16 @@ export const FragmentPar = (props: {
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
           <Numbering number={props.number} />
           <div className="name font-semibold p-1 border-b">
-            <CollapseButton
-              label="Par"
-              collapsed={collapsed}
-              onClick={toggleCollapse} // Assuming 'this.toggle' is accessible or replace with appropriate handler
-              style={props.commentObj?.messageStyle}
-              className={cn(props.commentObj?.messageClassNames)}
-            />
+            <label className="p-0 flex items-center">
+              <Icon name="par-fragment" />
+              <CollapseButton
+                label="Par"
+                collapsed={collapsed}
+                onClick={toggleCollapse} // Assuming 'this.toggle' is accessible or replace with appropriate handler
+                style={props.commentObj?.messageStyle}
+                className={cn(props.commentObj?.messageClassNames)}
+              />
+            </label>
           </div>
         </div>
         {!!par.braceBlock() && (

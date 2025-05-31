@@ -1,5 +1,4 @@
 import { cn } from "@/utils";
-import { FC } from "react";
 import IconClose from "./icons/close.svg?react";
 import IconCollapseExpanded from "./icons/collapse-expanded.svg?react";
 import IconCollapseUnexpanded from "./icons/collapse-unexpanded.svg?react";
@@ -22,7 +21,7 @@ import IconParFragment from "./icons/par-fragment.svg?react";
 import IconSectionFragment from "./icons/section-fragment.svg?react";
 import IconTryCatchFragment from "./icons/try-catch-fragment.svg?react";
 
-const icons: { [key: string]: FC } = {
+const icons = {
   close: IconClose,
   "collapse-expanded": IconCollapseExpanded,
   "collapse-unexpanded": IconCollapseUnexpanded,
@@ -47,7 +46,7 @@ const icons: { [key: string]: FC } = {
 };
 
 const Icon = (props: {
-  name: string;
+  name: keyof typeof icons;
   className?: string;
   onClick?: () => void;
 }) => {

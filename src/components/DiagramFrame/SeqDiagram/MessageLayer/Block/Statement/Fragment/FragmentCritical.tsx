@@ -6,6 +6,7 @@ import { CollapseButton } from "./CollapseButton";
 import { cn } from "@/utils";
 import { Block } from "../../Block";
 import "./FragmentCritical.css";
+import Icon from "@/components/Icon/Icons";
 
 export const FragmentCritical = (props: {
   context: any;
@@ -48,7 +49,8 @@ export const FragmentCritical = (props: {
           <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
             <Numbering number={props.number} />
             <div className="name font-semibold p-1 border-b">
-              <label className="p-0">
+              <label className="p-0 items-center">
+                <Icon name="critical-fragment" />
                 <CollapseButton
                   label={label}
                   collapsed={collapsed}

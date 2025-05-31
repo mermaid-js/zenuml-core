@@ -7,6 +7,7 @@ import { Block } from "../../Block";
 import { capitalize } from "radash";
 import { cn } from "@/utils";
 import "./FragmentSection.css";
+import Icon from "@/components/Icon/Icons";
 
 export const FragmentSection = (props: {
   context: any;
@@ -48,7 +49,8 @@ export const FragmentSection = (props: {
           <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
             <Numbering number={props.number} />
             <div className="name font-semibold p-1 border-b">
-              <label className="p-0">
+              <label className="p-0 flex items-center">
+                <Icon name="section-fragment" />
                 <CollapseButton
                   label={label}
                   collapsed={collapsed}

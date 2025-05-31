@@ -7,6 +7,7 @@ import { cn } from "@/utils";
 import { ConditionLabel } from "./ConditionLabel";
 import { Block } from "../../Block";
 import "./FragmentLoop.css";
+import Icon from "@/components/Icon/Icons";
 
 export const FragmentLoop = (props: {
   context: any;
@@ -45,13 +46,16 @@ export const FragmentLoop = (props: {
         <div className="header text-skin-fragment-header bg-skin-fragment-header leading-4 relative rounded-t">
           <Numbering number={props.number} />
           <div className="name font-semibold p-1 border-b">
-            <CollapseButton
-              label="Loop"
-              collapsed={collapsed}
-              onClick={toggleCollapse}
-              style={props.commentObj?.messageStyle}
-              className={cn(props.commentObj?.messageClassNames)}
-            />
+            <label className="p-0 flex items-center">
+              <Icon name="loop-fragment" />
+              <CollapseButton
+                label="Loop"
+                collapsed={collapsed}
+                onClick={toggleCollapse}
+                style={props.commentObj?.messageStyle}
+                className={cn(props.commentObj?.messageClassNames)}
+              />
+            </label>
           </div>
         </div>
         <div className={cn({ hidden: collapsed })}>

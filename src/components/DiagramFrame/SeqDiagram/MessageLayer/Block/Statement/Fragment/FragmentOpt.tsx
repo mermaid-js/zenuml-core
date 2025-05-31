@@ -5,6 +5,7 @@ import { Numbering } from "../../../Numbering";
 import { CollapseButton } from "./CollapseButton";
 import { Block } from "../../Block";
 import { cn } from "@/utils";
+import Icon from "@/components/Icon/Icons";
 
 export const FragmentOpt = (props: {
   context: any;
@@ -41,13 +42,16 @@ export const FragmentOpt = (props: {
       <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 relative">
         <Numbering number={props.number} />
         <div className="name font-semibold p-1 border-b">
-          <CollapseButton
-            label="Opt"
-            collapsed={collapsed}
-            onClick={toggleCollapse}
-            style={props.commentObj?.textStyle}
-            className={cn(props.commentObj?.classNames)}
-          />
+          <label className="p-0 flex items-center">
+            <Icon name="opt-fragment" />
+            <CollapseButton
+              label="Opt"
+              collapsed={collapsed}
+              onClick={toggleCollapse}
+              style={props.commentObj?.textStyle}
+              className={cn(props.commentObj?.classNames)}
+            />
+          </label>
         </div>
       </div>
       <Block

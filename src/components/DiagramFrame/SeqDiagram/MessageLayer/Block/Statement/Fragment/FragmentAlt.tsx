@@ -9,6 +9,7 @@ import { cn } from "@/utils";
 import { ConditionLabel } from "./ConditionLabel";
 import "./FragmentAlt.css";
 import { Fragment, useMemo } from "react";
+import Icon from "@/components/Icon/Icons";
 
 export const FragmentAlt = (props: {
   context: any;
@@ -68,7 +69,8 @@ export const FragmentAlt = (props: {
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
           <Numbering number={props.number} />
           <div className="name font-semibold p-1 border-b">
-            <label className="p-0">
+            <label className="p-0 flex items-center">
+              <Icon name="alt-fragment" />
               <CollapseButton
                 label="Alt"
                 collapsed={collapsed}

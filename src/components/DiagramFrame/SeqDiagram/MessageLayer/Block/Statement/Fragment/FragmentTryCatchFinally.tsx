@@ -8,6 +8,7 @@ import { Block } from "../../Block";
 import { blockLength } from "@/utils/Numbering";
 import "./FragmentTryCatchFinally.css";
 import { useMemo } from "react";
+import Icon from "@/components/Icon/Icons";
 
 export const FragmentTryCatchFinally = (props: {
   context: any;
@@ -63,13 +64,16 @@ export const FragmentTryCatchFinally = (props: {
           <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
             <Numbering number={props.number} />
             <div className="name font-semibold p-1 border-b">
-              <CollapseButton
-                label="Try"
-                collapsed={collapsed}
-                onClick={toggleCollapse}
-                style={props.commentObj?.messageStyle}
-                className={cn(props.commentObj?.messageClassNames)}
-              />
+              <label className="p-0 flex items-center">
+                <Icon name="try-catch-fragment" />
+                <CollapseButton
+                  label="Try"
+                  collapsed={collapsed}
+                  onClick={toggleCollapse}
+                  style={props.commentObj?.messageStyle}
+                  className={cn(props.commentObj?.messageClassNames)}
+                />
+              </label>
             </div>
           </div>
         </div>
