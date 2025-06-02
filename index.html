@@ -1,6 +1,9 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="preload stylesheet"
@@ -16,9 +19,6 @@
       /*    font-family: "Kalam", serif;*/
       /*}*/
     </style>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <link
       rel="stylesheet"
       href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css"
@@ -34,10 +34,14 @@
     />
     <title>ZenUML Core Demo</title>
     <style>
+      body {
+        margin: 0;
+      }
       .CodeMirror {
         /* Set height, width, borders, and global font properties here */
         font-family: monospace;
         font-size: 13px;
+        height: 100vh;
       }
 
       .zenuml .CodeMirror .CodeMirror-cursor {
@@ -62,14 +66,7 @@
       }
     </style>
   </head>
-
   <body>
-    <noscript>
-      <strong
-        >We're sorry but vue-sequence doesn't work properly without JavaScript
-        enabled. Please enable it to continue.</strong
-      >
-    </noscript>
     <div class="m-1 grid grid-cols-6" id="diagram1">
       <div class="col-span-2">
         <textarea
@@ -121,6 +118,6 @@
         editor.setValue(savedCode);
       }
     </script>
-    <script type="module" src="./src/main.ts"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

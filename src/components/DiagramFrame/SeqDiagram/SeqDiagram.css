@@ -1,0 +1,19 @@
+.zenuml .sequence-diagram * {
+  box-sizing: inherit;
+}
+
+.zenuml .sequence-diagram {
+  /* Reset line-height for the diagram */
+  line-height: normal;
+}
+
+/* .participant is shared by MessageLayer and LifeLineLayer */
+.zenuml .participant {
+  /* don't override */
+  border-width: 2px;
+  padding: 0 4px;
+  min-width: 80px;
+  max-width: 250px;
+  text-align: center;
+  pointer-events: all;
+}

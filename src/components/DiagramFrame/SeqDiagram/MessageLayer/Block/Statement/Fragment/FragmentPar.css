@@ -1,0 +1,4 @@
+/* We need to do this because tailwind 3.2.4 set border-color to #e5e7eb via '*'. */
+.fragment-par * {
+  border-color: inherit;
+}

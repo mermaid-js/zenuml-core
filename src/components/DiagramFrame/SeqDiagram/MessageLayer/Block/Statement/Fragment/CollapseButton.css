@@ -1,0 +1,11 @@
+.collapsible-header {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.collapse-button {
+  display: none;
+}
+.fragment:hover .collapsible-header .collapse-button.expanded {
+  display: inline-block !important;
+}

@@ -1,0 +1,11 @@
+.occurrence-collapsible-header {
+  position: absolute;
+  top: 1px;
+  left: -5px;
+}
+.occurrence-collapsible-header .collapse-button {
+  display: none;
+}
+.occurrence:hover .occurrence-collapsible-header .collapse-button.expanded {
+  display: inline-block !important;
+}

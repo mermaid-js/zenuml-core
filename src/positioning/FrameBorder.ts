@@ -31,7 +31,7 @@ function longestPath(frame: Frame, pathType: PathType): number {
   return maxDepth + 1;
 }
 
-export default function FrameBorder(frame: Frame) {
+export default function FrameBorder(frame: Frame | null) {
   if (!frame) {
     return { left: 0, right: 0 };
   }
