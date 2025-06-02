@@ -133,12 +133,25 @@ export default class ZenUml implements IZenUml {
       this.store.set(enableMultiThemeAtom, config?.enableMultiTheme);
     }
     this.store.set(codeAtom, this._code || "");
-    setTimeout(() => {
-      this._lastRenderingCostMilliseconds = calculateCostTime(
-        "rendering end",
-        start,
-      );
-    }, 0);
+
+    // Wait for React rendering and event processing to complete
+    // Use requestAnimationFrame to wait for the next paint
+    return new Promise<void>((resolve) => {
+      // First wait for React to finish its current work
+      setTimeout(() => {
+        // Then wait for the next browser paint
+        requestAnimationFrame(() => {
+          // Then wait a bit more to ensure all events have been processed
+          setTimeout(() => {
+            this._lastRenderingCostMilliseconds = calculateCostTime(
+              "rendering end",
+              start,
+            );
+            resolve();
+          }, 0); // Small additional delay to catch any final events
+        });
+      }, 0);
+    });
   }
 
   calculateDebounceMilliseconds(): number {
