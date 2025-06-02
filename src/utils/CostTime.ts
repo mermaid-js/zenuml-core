@@ -11,7 +11,8 @@ export const calculateCostTime = (
 ) => {
   const now = getStartTime();
   const diff = now - processStartTime;
-  console.debug(processName + " cost: " + buildCostDesc(diff));
+  // keep it at 'info' level so developers can see it in the console
+  console.info(processName + " cost: " + buildCostDesc(diff));
   return diff;
 };
 
