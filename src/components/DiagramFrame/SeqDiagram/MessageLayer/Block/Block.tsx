@@ -28,7 +28,11 @@ export const Block = (props: {
     >
       {statements.map((stat, index) => (
         <div
-          className="statement-container my-4"
+          className={cn(
+            "statement-container my-4",
+            index === statements.length - 1 &&
+              "[&>.return]:-mb-4 [&>.return]:bottom-[-1px]",
+          )}
           data-origin={props.origin}
           key={index}
         >
