@@ -19,7 +19,8 @@ export const LifeLine = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const scale = useAtomValue(scaleAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
-  const [top, setTop] = useState(0);
+  const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
+  const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
 
   const left = centerOf(props.entity.name) - (props.groupLeft || 0);
 
@@ -46,7 +47,7 @@ export const LifeLine = (props: {
     } else {
       // A B.m {new A} => A B.m {new A1}
       logger.debug(`First message to ${props.entity.name} is not creation`);
-      setTop(0);
+      setTop(PARTICIPANT_TOP_SPACE_FOR_GROUP);
     }
   }, [diagramElement, props.entity.name, scale]);
 
