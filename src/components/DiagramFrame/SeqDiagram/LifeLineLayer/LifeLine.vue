@@ -17,6 +17,7 @@ import { EventBus } from "@/EventBus";
 import { mapGetters, mapState } from "vuex";
 import Participant from "./Participant.vue";
 const logger = parentLogger.child({ name: "LifeLine" });
+const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
 export default {
   name: "life-line",
   components: { Participant },
@@ -31,7 +32,7 @@ export default {
   data: () => {
     return {
       translateX: 0,
-      top: 0,
+      top: PARTICIPANT_TOP_SPACE_FOR_GROUP,
     };
   },
   computed: {
@@ -100,7 +101,7 @@ export default {
       } else {
         // A B.m {new A} => A B.m {new A1}
         logger.debug(`First message to ${this.entity.name} is not creation`);
-        // this.top = 0;
+        this.top = PARTICIPANT_TOP_SPACE_FOR_GROUP;
       }
     },
   },
