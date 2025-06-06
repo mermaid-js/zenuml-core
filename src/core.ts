@@ -34,6 +34,7 @@ interface Config {
   onContentChange?: (code: string) => void;
   onEventEmit?: (name: string, data: any) => void;
   mode?: RenderMode;
+  cursor?: number | null;
 }
 interface IZenUml {
   get code(): string | undefined;
@@ -116,6 +117,7 @@ export default class ZenUml implements IZenUml {
     this.store.commit("onContentChange", config?.onContentChange || (() => {}));
     this.store.commit("onThemeChange", config?.onThemeChange || (() => {}));
     this.store.commit("onEventEmit", config?.onEventEmit || (() => {}));
+    this.store.commit("cursor", config?.cursor);
     if (config?.enableMultiTheme !== undefined) {
       this.store.state.enableMultiTheme = config?.enableMultiTheme;
     }

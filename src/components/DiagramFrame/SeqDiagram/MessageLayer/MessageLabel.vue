@@ -1,9 +1,11 @@
 <template>
   <label
+    ref="messageLabel"
     title="Double click to edit"
     class="px-1 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
     :class="{
       'cursor-text': editing,
+      highlight: isCurrent,
     }"
     :contenteditable="editing && mode === RenderMode.Dynamic"
     @dblclick="handleDblClick"
@@ -15,7 +17,7 @@
   </label>
 </template>
 <script setup lang="ts">
-import { computed, toRefs } from "vue";
+import { computed, toRefs, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { RenderMode } from "@/store/Store";
 import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
@@ -39,6 +41,29 @@ const { labelText, labelPosition, isAsync } = toRefs(props);
 const store = useStore();
 const mode = computed(() => store.state.mode);
 const code = computed(() => store.getters.code);
+const cursor = computed(() => store.getters.cursor);
+const messageLabel = ref<HTMLElement | null>(null);
+const isCurrent = computed(() => {
+  console.log("feng msglabel labelPosition", labelPosition.value);
+  console.log("feng msglabel cursor", cursor.value);
+  if (!labelPosition.value || !cursor.value) return false;
+  const cursorIndex = cursor.value;
+  const [start, end] = labelPosition.value;
+  var is_current = cursorIndex > start && cursorIndex < end;
+  console.log("feng msglabel is_current", is_current);
+  return is_current;
+});
+
+watch(isCurrent, (newValue) => {
+  if (newValue && messageLabel.value) {
+    messageLabel.value.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "nearest",
+    });
+  }
+});
+
 const onContentChange = computed(
   () => store.getters.onContentChange || (() => {}),
 );
