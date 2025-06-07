@@ -12,7 +12,7 @@
     data-type="interaction"
     :data-signature="signature"
     :class="{
-      highlight: isCurrent,
+      highlight: isCurrent && enableCurrentElementHighlight,
       self: isSelf,
       'right-to-left': rightToLeft,
     }"
@@ -79,6 +79,12 @@ export default {
   computed: {
     // add tracker to the mapGetters
     ...mapGetters(["participants", "cursor", "onElementClick", "centerOf"]),
+    enableCurrentElementHighlight() {
+      return this.$store.state.enableCurrentElementHighlight ?? false;
+    },
+    enableCurrentElementScrollIntoView() {
+      return this.$store.state.enableCurrentElementScrollIntoView ?? false;
+    },
     hasComment() {
       return this.commentObj?.text !== "";
     },
@@ -110,6 +116,17 @@ export default {
     },
     isCurrent: function () {
       return this.message?.isCurrent(this.cursor);
+    },
+  },
+  watch: {
+    isCurrent(newValue) {
+      if (newValue && this.enableCurrentElementScrollIntoView) {
+        this.$el.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+      }
     },
   },
   methods: {

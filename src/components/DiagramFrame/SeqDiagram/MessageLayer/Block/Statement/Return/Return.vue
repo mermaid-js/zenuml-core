@@ -11,7 +11,7 @@
     :data-target="target"
     :class="{
       'right-to-left': rightToLeft,
-      highlight: isCurrent,
+      highlight: isCurrent && enableCurrentElementHighlight,
     }"
     :style="{
       width: interactionWidth + 'px',
@@ -62,6 +62,12 @@ export default {
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["cursor", "onElementClick"]),
+    enableCurrentElementHighlight() {
+      return this.$store.state.enableCurrentElementHighlight ?? false;
+    },
+    enableCurrentElementScrollIntoView() {
+      return this.$store.state.enableCurrentElementScrollIntoView ?? false;
+    },
     /**
      * ret
      *  : RETURN expr? SCOL?
@@ -102,6 +108,17 @@ export default {
     },
     messageContext() {
       return this.asyncMessage?.content() || this.context?.ret()?.expr();
+    },
+  },
+  watch: {
+    isCurrent(newValue) {
+      if (newValue && this.enableCurrentElementScrollIntoView) {
+        this.$el.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+      }
     },
   },
   methods: {

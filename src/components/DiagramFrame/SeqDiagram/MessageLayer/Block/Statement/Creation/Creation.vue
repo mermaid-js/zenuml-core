@@ -9,7 +9,7 @@
     :class="{
       'right-to-left': rightToLeft,
       '-translate-x-full-minus-1': rightToLeft,
-      highlight: isCurrent,
+      highlight: isCurrent && enableCurrentElementHighlight,
     }"
     :style="{
       transform: 'translateX(' + translateX + 'px)',
@@ -86,6 +86,12 @@ export default {
   computed: {
     ...mapGetters(["cursor", "onElementClick", "distance2", "centerOf"]),
     ...mapState(["numbering"]),
+    enableCurrentElementHighlight() {
+      return this.$store.state.enableCurrentElementHighlight ?? false;
+    },
+    enableCurrentElementScrollIntoView() {
+      return this.$store.state.enableCurrentElementScrollIntoView ?? false;
+    },
     source() {
       return this.origin;
     },
@@ -123,6 +129,17 @@ export default {
   },
   updated() {
     this.layoutMessageContainer();
+  },
+  watch: {
+    isCurrent(newValue) {
+      if (newValue && this.enableCurrentElementScrollIntoView) {
+        this.$el.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+      }
+    },
   },
   methods: {
     layoutMessageContainer() {

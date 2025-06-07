@@ -35,6 +35,8 @@ interface Config {
   onEventEmit?: (name: string, data: any) => void;
   mode?: RenderMode;
   cursor?: number | null;
+  enableCurrentElementHighlight?: boolean;
+  enableCurrentElementScrollIntoView?: boolean;
 }
 interface IZenUml {
   get code(): string | undefined;
@@ -120,6 +122,15 @@ export default class ZenUml implements IZenUml {
     this.store.commit("cursor", config?.cursor);
     if (config?.enableMultiTheme !== undefined) {
       this.store.state.enableMultiTheme = config?.enableMultiTheme;
+    }
+    // Add new config parameters
+    if (config?.enableCurrentElementHighlight !== undefined) {
+      this.store.state.enableCurrentElementHighlight =
+        config?.enableCurrentElementHighlight;
+    }
+    if (config?.enableCurrentElementScrollIntoView !== undefined) {
+      this.store.state.enableCurrentElementScrollIntoView =
+        config?.enableCurrentElementScrollIntoView;
     }
     // await dispatch will wait until the diagram is finished rendering.
     // It includes the time adjusting the top of participants for creation message.

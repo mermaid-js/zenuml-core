@@ -5,7 +5,7 @@
     class="px-1 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover"
     :class="{
       'cursor-text': editing,
-      highlight: isCurrent,
+      highlight: isCurrent && enableCurrentElementHighlight,
     }"
     :contenteditable="editing && mode === RenderMode.Dynamic"
     @dblclick="handleDblClick"
@@ -43,6 +43,13 @@ const mode = computed(() => store.state.mode);
 const code = computed(() => store.getters.code);
 const cursor = computed(() => store.getters.cursor);
 const messageLabel = ref<HTMLElement | null>(null);
+const enableCurrentElementHighlight = computed(
+  () => store.state.enableCurrentElementHighlight ?? false,
+);
+const enableCurrentElementScrollIntoView = computed(
+  () => store.state.enableCurrentElementScrollIntoView ?? false,
+);
+
 const isCurrent = computed(() => {
   if (!labelPosition.value || !cursor.value) return false;
   const cursorIndex = cursor.value;
@@ -52,7 +59,12 @@ const isCurrent = computed(() => {
 });
 
 watch([isCurrent, labelText], ([newIsCurrent, newLabelText]) => {
-  if (newIsCurrent && newLabelText && messageLabel.value) {
+  if (
+    newIsCurrent &&
+    newLabelText &&
+    messageLabel.value &&
+    enableCurrentElementScrollIntoView.value
+  ) {
     messageLabel.value.scrollIntoView({
       behavior: "smooth",
       block: "center",

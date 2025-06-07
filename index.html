@@ -97,6 +97,8 @@
         const config = createConfig({
           onContentChange: (code) => editor.setValue(code),
           cursor: cursor,
+          enableCurrentElementScrollIntoView: true,
+          enableCurrentElementHighlight: true,
         });
 
         window.zenUml.render(content, config).then((r) => {

@@ -14,7 +14,7 @@
     :class="{
       'left-to-right': !rightToLeft,
       'right-to-left': rightToLeft,
-      highlight: isCurrent,
+      highlight: isCurrent && enableCurrentElementHighlight,
       'self-invocation': isSelf,
     }"
     :style="{
@@ -125,6 +125,12 @@ export default {
   mixins: [ArrowMixin, DirectionMixin],
   computed: {
     ...mapGetters(["distance", "centerOf", "cursor", "onElementClick"]),
+    enableCurrentElementHighlight() {
+      return this.$store.state.enableCurrentElementHighlight ?? false;
+    },
+    enableCurrentElementScrollIntoView() {
+      return this.$store.state.enableCurrentElementScrollIntoView ?? false;
+    },
     asyncMessage: function () {
       return this.context?.asyncMessage();
     },
@@ -156,6 +162,17 @@ export default {
     },
     messageClassNames() {
       return this.commentObj?.messageClassNames;
+    },
+  },
+  watch: {
+    isCurrent(newValue) {
+      if (newValue && this.enableCurrentElementScrollIntoView) {
+        this.$el.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+      }
     },
   },
   methods: {
