@@ -44,18 +44,22 @@ const code = computed(() => store.getters.code);
 const cursor = computed(() => store.getters.cursor);
 const messageLabel = ref<HTMLElement | null>(null);
 const isCurrent = computed(() => {
-  console.log("feng msglabel labelPosition", labelPosition.value);
-  console.log("feng msglabel cursor", cursor.value);
+  console.log(
+    "feng msglabel",
+    labelText.value,
+    labelPosition.value,
+    cursor.value,
+  );
   if (!labelPosition.value || !cursor.value) return false;
   const cursorIndex = cursor.value;
   const [start, end] = labelPosition.value;
-  var is_current = cursorIndex >= start && cursorIndex <= end;
+  var is_current = cursorIndex >= start && cursorIndex <= end + 1;
   console.log("feng msglabel is_current", is_current);
   return is_current;
 });
 
-watch(isCurrent, (newValue) => {
-  if (newValue && messageLabel.value) {
+watch([isCurrent, labelText], ([newIsCurrent, newLabelText]) => {
+  if (newIsCurrent && newLabelText && messageLabel.value) {
     messageLabel.value.scrollIntoView({
       behavior: "smooth",
       block: "center",

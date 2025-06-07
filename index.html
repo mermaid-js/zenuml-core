@@ -117,11 +117,8 @@
         );
       });
 
-      editor.on("mousedown", function (cm, event) {
-        // left mouse button
-        if (event.button === 0) {
-          updateDiagram(cm.getValue(), cm.indexFromPos(cm.getCursor()));
-        }
+      editor.on("cursorActivity", function (cm) {
+        updateDiagram(cm.getValue(), cm.indexFromPos(cm.getCursor()));
       });
 
       // Load saved code from localStorage
