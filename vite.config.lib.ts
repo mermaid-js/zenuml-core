@@ -4,6 +4,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 import svgr from "vite-plugin-svgr";
+import { readFileSync } from "fs";
+
+// Read version from package.json
+const packageJson = JSON.parse(
+  readFileSync(resolve(__dirname, "package.json"), "utf-8"),
+);
 
 export default defineConfig({
   build: {
@@ -44,5 +50,6 @@ export default defineConfig({
   plugins: [svgr(), react(), cssInjectedByJsPlugin()],
   define: {
     "process.env.NODE_ENV": '"production"',
+    "process.env.VITE_VERSION": JSON.stringify(packageJson.version),
   },
 });
