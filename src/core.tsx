@@ -65,10 +65,10 @@ export default class ZenUml implements IZenUml {
   private _currentTimeout: NodeJS.Timeout | undefined;
   private _lastRenderingCostMilliseconds = 0;
   private initialRender = true;
-  constructor(el: HTMLElement, naked: boolean = false) {
-    this.el = el;
+  constructor(el: HTMLElement | string, naked: boolean = false) {
+    this.el = typeof el === "string" ? document.querySelector(el)! : el;
     this.store = store;
-    createRoot(el).render(
+    createRoot(this.el).render(
       <StrictMode>
         <Provider store={store}>
           <div> {naked ? <SeqDiagram /> : <DiagramFrame />}</div>
