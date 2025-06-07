@@ -49,7 +49,7 @@ const isCurrent = computed(() => {
   if (!labelPosition.value || !cursor.value) return false;
   const cursorIndex = cursor.value;
   const [start, end] = labelPosition.value;
-  var is_current = cursorIndex > start && cursorIndex < end;
+  var is_current = cursorIndex >= start && cursorIndex <= end;
   console.log("feng msglabel is_current", is_current);
   return is_current;
 });
