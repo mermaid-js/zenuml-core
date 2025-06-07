@@ -44,17 +44,10 @@ const code = computed(() => store.getters.code);
 const cursor = computed(() => store.getters.cursor);
 const messageLabel = ref<HTMLElement | null>(null);
 const isCurrent = computed(() => {
-  console.log(
-    "feng msglabel",
-    labelText.value,
-    labelPosition.value,
-    cursor.value,
-  );
   if (!labelPosition.value || !cursor.value) return false;
   const cursorIndex = cursor.value;
   const [start, end] = labelPosition.value;
   var is_current = cursorIndex >= start && cursorIndex <= end + 1;
-  console.log("feng msglabel is_current", is_current);
   return is_current;
 });
 
