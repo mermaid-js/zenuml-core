@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+ 
 import "cypress-plugin-snapshots/commands";
 describe("Smoke test", function () {
   it("style-panel", function () {

@@ -1,18 +1,19 @@
-import { onMounted, onUnmounted, ref } from "vue";
+import { useEffect, useState } from "react";
 
 export default function useDocumentScroll() {
-  const scrollTop = ref(0);
-  const scrollLeft = ref(0);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
   const updateScroll = () => {
-    scrollTop.value = document.documentElement.scrollTop;
-    scrollLeft.value = document.documentElement.scrollLeft;
+    setScrollTop(document.documentElement.scrollTop);
+    setScrollLeft(document.documentElement.scrollLeft);
   };
-  onMounted(() => {
+  useEffect(() => {
     updateScroll();
-    document.addEventListener("scroll", updateScroll);
-  });
-  onUnmounted(() => {
-    document.removeEventListener("scroll", updateScroll);
-  });
+    const ab = new AbortController();
+    document.addEventListener("scroll", updateScroll, { signal: ab.signal });
+    return () => {
+      ab.abort();
+    };
+  }, []);
   return [scrollTop, scrollLeft];
 }

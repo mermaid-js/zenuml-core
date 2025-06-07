@@ -1,8 +1,8 @@
-import Store from "./Store";
+import store, { showTipsAtom } from "./Store";
 
 describe("Store", () => {
   it("should create an instance", () => {
-    expect(Store().state.showTips).toBeDefined();
-    expect(Store().state.showTips).toBeFalsy();
+    expect(store.get(showTipsAtom)).toBeDefined();
+    expect(store.get(showTipsAtom)).toBeFalsy();
   });
 });

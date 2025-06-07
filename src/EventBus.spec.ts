@@ -1,5 +1,6 @@
 import EventEmitter from "events";
 import { EventBus, CustomEmit, TrackEvent } from "./EventBus";
+import store, { onEventEmitAtom } from "./store/Store";
 
 describe("EventEmitter", () => {
   let eventEmitter: EventEmitter;
@@ -51,16 +52,14 @@ describe("EventEmitter", () => {
 });
 
 describe("CustomEmit and TrackEvent", () => {
-  let mockStore: any;
-
   beforeEach(() => {
-    mockStore = { commit: vi.fn() };
+    store.set(onEventEmitAtom, vi.fn());
     vi.spyOn(EventBus, "emit");
   });
 
   it("should handle CustomEmit with undefined data", () => {
-    CustomEmit(mockStore, "testEvent", undefined);
-    expect(mockStore.commit).toHaveBeenCalledWith("eventEmit", {
+    CustomEmit("testEvent", undefined);
+    expect(store.get(onEventEmitAtom)).toHaveBeenCalledWith("eventEmit", {
       event: "testEvent",
       data: undefined,
     });
@@ -69,13 +68,13 @@ describe("CustomEmit and TrackEvent", () => {
 
   it("should handle TrackEvent with complex label object", () => {
     const complexLabel = { id: 1, name: "Test" };
-    TrackEvent(mockStore, complexLabel, "testAction", "testCategory");
+    TrackEvent(complexLabel, "testAction", "testCategory");
     const expectedTrackData = {
       label: JSON.stringify(complexLabel),
       action: "testAction",
       category: "testCategory",
     };
-    expect(mockStore.commit).toHaveBeenCalledWith("eventEmit", {
+    expect(store.get(onEventEmitAtom)).toHaveBeenCalledWith("eventEmit", {
       event: "trackEvent",
       data: expectedTrackData,
     });

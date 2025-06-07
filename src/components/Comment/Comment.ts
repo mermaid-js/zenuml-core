@@ -1,4 +1,4 @@
-import { CSSProperties } from "vue";
+import { CSSProperties } from "react";
 import { getStyle } from "@/utils/messageStyling";
 
 function parseLine(input: string): [string[], string[], string[], string] {
@@ -38,7 +38,7 @@ function parseLine(input: string): [string[], string[], string[], string] {
     input.slice(lastMatchIndex),
   ];
 }
-export default class Comment {
+export default class CommentClass {
   // define properties color and text
   public text: string = "";
   /** @deprecated use commentStyle or messageStyle instead */

@@ -1,14 +1,9 @@
-import {
-  RootContext,
-  Participants,
-  GroupContext,
-  ParticipantContext,
-} from "@/parser";
-
+import { atom, createStore } from "jotai";
+import { atomWithLocalStorage, atomWithFunctionValue } from "./utils.ts";
+import { RootContext, Participants } from "../parser/index.js";
 import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
-import { Coordinates } from "@/positioning/Coordinates";
-import { CodeRange } from "@/parser/CodeRange";
-import { StoreOptions } from "vuex";
+import { Coordinates } from "../positioning/Coordinates";
+import { CodeRange } from "../parser/CodeRange";
 
 /*
  * RenderMode
@@ -20,170 +15,93 @@ export const enum RenderMode {
   Dynamic = "dynamic",
 }
 
-export interface StoreState {
-  code: string;
-  scale: number;
-  selected: any[];
-  cursor: any;
-  mode: RenderMode;
-  showTips: boolean;
-  onElementClick: (codeRange: CodeRange) => void;
-  numbering: boolean;
-}
-// vuex 101: Deal with sync in mutation, async in actions
-const Store = (): StoreOptions<StoreState> => {
-  return {
-    state: {
-      code: "",
-      theme: "theme-default",
-      enableScopedTheming: false,
-      themeIconDot: Boolean(
-        localStorage.getItem(`${location.hostname}-zenuml-theme-icon-dot`),
-      ),
-      enableMultiTheme: true,
-      scale: 1,
-      selected: [],
-      cursor: null,
-      showTips: false,
-      mode: RenderMode.Dynamic,
-      numbering: Boolean(
-        localStorage.getItem(`${location.hostname}-zenuml-numbering`),
-      ),
-      stickyOffset: 0,
-      diagramElement: null,
-      onElementClick: (codeRange: CodeRange) => {
-        console.log("Element clicked", codeRange);
-      },
-      onMessageClick: () => {},
-      onContentChange: () => {},
-      onThemeChange: () => {},
-      onEventEmit: () => {},
-    } as StoreState,
-    getters: {
-      code: (state: any) => state.code,
-      rootContext: (state: any) => {
-        return RootContext(state.code);
-      },
-      title: (state: any, getters: any) => {
-        return getters.rootContext?.title()?.content();
-      },
-      participants: (state: any, getters: any) => {
-        return Participants(getters.rootContext);
-      },
-      coordinates: (state: any, getters: any) => {
-        return new Coordinates(getters.rootContext, WidthProviderOnBrowser);
-      },
-      centerOf: (state: any, getters: any) => (entity: any) => {
-        if (!entity) {
-          console.error("[@zenuml/core] centerOf: entity is undefined");
-          return 0;
-        }
-        try {
-          return getters.coordinates.getPosition(entity) || 0;
-        } catch (e) {
-          console.error(e);
-          return 0;
-        }
-      },
-      GroupContext: () => GroupContext,
-      ParticipantContext: () => ParticipantContext,
-      cursor: (state: any) => state.cursor,
-      // deprecated, use distances that returns centerOf(to) - centerOf(from)
-      distance: (state: any, getters: any) => (from: any, to: any) => {
-        return getters.centerOf(from) - getters.centerOf(to);
-      },
-      distance2: (state: any, getters: any) => (from: any, to: any) => {
-        if (!from || !to) return 0;
-        return getters.centerOf(to) - getters.centerOf(from);
-      },
-      onElementClick: (state: any) => state.onElementClick,
-      onMessageClick: (state: any) => state.onMessageClick,
-      diagramElement: (state: any) => state.diagramElement,
-      onContentChange: (state: any) => state.onContentChange,
-      onThemeChange: (state: any) => state.onThemeChange,
-      onEventEmit: (state: any) => state.onEventEmit,
-    },
-    mutations: {
-      code: function (state: any, payload: any) {
-        state.code = payload;
-      },
-      setScale: function (state: any, payload: any) {
-        state.scale = payload;
-      },
-      onSelect: function (state: any, payload: any) {
-        if (state.selected.includes(payload)) {
-          state.selected = state.selected.filter((p: any) => p !== payload);
-        } else {
-          state.selected.push(payload);
-        }
-      },
-      cursor: function (state: any, payload: any) {
-        state.cursor = payload;
-      },
-      toggleNumbering(state, payload: boolean) {
-        if (payload) {
-          localStorage.setItem(`${location.hostname}-zenuml-numbering`, "1");
-        } else {
-          localStorage.setItem(`${location.hostname}-zenuml-numbering`, "");
-        }
-        state.numbering = payload;
-      },
-      setTheme: function (state: any, payload: string) {
-        state.theme = payload;
-        state.onThemeChange?.({
-          theme: payload,
-          scoped: Boolean(state.enableScopedTheming),
-        });
-      },
-      setThemeIconDot: function (state: any, payload: boolean) {
-        localStorage.setItem(
-          `${location.hostname}-zenuml-theme-icon-dot`,
-          payload ? "1" : "",
-        );
-        state.themeIconDot = payload;
-      },
-      setEnableScopedTheming: function (state: any, payload: boolean) {
-        state.enableScopedTheming = payload;
-        state.onThemeChange?.({
-          theme: state.theme,
-          scoped: payload,
-        });
-      },
-      eventEmit: function (state: any, payload: any) {
-        state.onEventEmit?.(payload.event, payload.data);
-      },
-      onEventEmit: function (state: any, payload: any) {
-        state.onEventEmit = payload;
-      },
-      onMessageClick: function (state: any, payload: any) {
-        state.onMessageClick = payload;
-      },
-      onContentChange: function (state: any, payload: any) {
-        state.onContentChange = payload;
-      },
-      onThemeChange: function (state: any, payload: any) {
-        state.onThemeChange = payload;
-      },
-      diagramElement: function (state: any, payload: any) {
-        state.diagramElement = payload;
-      },
-    },
-    actions: {
-      // Why debounce is here instead of mutation 'code'?
-      // Both code and cursor must be mutated together, especially during typing.
-      updateCode: function ({ commit }: any, payload: any) {
-        if (typeof payload === "string") {
-          throw Error(
-            "You are using a old version of vue-sequence. New version requires {code, cursor}.",
-          );
-        }
-        if (payload.code !== this.state.code) {
-          commit("code", payload.code);
-        }
-      },
-    },
-    // TODO: Enable strict for development?
-    strict: false,
-  };
-};
-export default Store;
+const store = createStore();
+
+export const codeAtom = atom("");
+
+export const rootContextAtom = atom((get) => RootContext(get(codeAtom)));
+
+export const titleAtom = atom<string | null>((get) =>
+  get(rootContextAtom)?.title()?.content(),
+);
+
+export const participantsAtom = atom((get) =>
+  Participants(get(rootContextAtom)),
+);
+
+export const coordinatesAtom = atom(
+  (get) => new Coordinates(get(rootContextAtom), WidthProviderOnBrowser),
+);
+
+export const themeAtom = atom("theme-default");
+
+export const enableScopedThemingAtom = atom<boolean>(false);
+
+export const themeIconDotAtom = atomWithLocalStorage(
+  `${location.hostname}-zenuml-theme-icon-dot`,
+  "1",
+);
+
+export const enableMultiThemeAtom = atom(true);
+
+export const scaleAtom = atom(1);
+
+export const selectedAtom = atom<string[]>([]);
+
+export const onSelectAtom = atom(null, (get, set, payload: string) => {
+  const selected = get(selectedAtom);
+  if (selected.includes(payload)) {
+    set(
+      selectedAtom,
+      selected.filter((item) => item !== payload),
+    );
+  } else {
+    set(selectedAtom, [...selected, payload]);
+  }
+});
+
+export const cursorAtom = atom<number | null | undefined>(null);
+
+export const showTipsAtom = atom(false);
+
+export const modeAtom = atom(RenderMode.Dynamic);
+
+export const enableNumberingAtom = atomWithLocalStorage(
+  `${location.hostname}-zenuml-numbering`,
+  true,
+);
+
+export const stickyOffsetAtom = atom(0);
+
+export const diagramElementAtom = atom<HTMLElement | null>(null);
+
+export const onElementClickAtom = atomWithFunctionValue(
+  (codeRange: CodeRange) => {
+    console.log("Element clicked", codeRange);
+  },
+);
+
+export const onMessageClickAtom = atomWithFunctionValue<
+  (context: any, element: HTMLElement) => void
+>(() => {});
+
+export const onContentChangeAtom = atomWithFunctionValue<
+  (code: string) => void
+>(() => {});
+
+export const onThemeChangeAtom = atomWithFunctionValue<
+  (data: { theme: string; scoped: boolean }) => void
+>(() => {});
+
+store.sub(themeAtom, () => {
+  store.get(onThemeChangeAtom)({
+    theme: store.get(themeAtom),
+    scoped: store.get(enableScopedThemingAtom),
+  });
+});
+
+export const onEventEmitAtom = atomWithFunctionValue<
+  (name: string, data: any) => void
+>(() => {});
+
+export default store;
