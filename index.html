@@ -89,9 +89,12 @@
         singleCursorHeightPerLine: false,
       });
 
-      const updateDiagram = debounce((content) => {
+      const updateDiagram = debounce((content, cursor) => {
         const config = createConfig({
           onContentChange: (code) => editor.setValue(code),
+          cursor: cursor,
+          enableCurrentElementScrollIntoView: true,
+          enableCurrentElementHighlight: true,
         });
 
         window.zenUml.render(content, config).then((r) => {
@@ -105,11 +108,15 @@
         waitUntil(
           () => window.zenUml,
           () => {
-            updateDiagram(cm.getValue());
+            updateDiagram(cm.getValue(), cm.indexFromPos(cm.getCursor()));
             // Save to localStorage
             localStorage.setItem("zenuml-cm-code", cm.getValue());
           },
         );
+      });
+
+      editor.on("cursorActivity", function (cm) {
+        updateDiagram(cm.getValue(), cm.indexFromPos(cm.getCursor()));
       });
 
       // Load saved code from localStorage

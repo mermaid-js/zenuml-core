@@ -1,10 +1,18 @@
-import { codeAtom, modeAtom, onContentChangeAtom } from "@/store/Store";
+import {
+  codeAtom,
+  modeAtom,
+  onContentChangeAtom,
+  cursorAtom,
+  enableCurrentElementHighlightAtom,
+  enableCurrentElementScrollIntoViewAtom,
+} from "@/store/Store";
 import { cn } from "@/utils";
 import { useAtom, useAtomValue } from "jotai";
 import { formatText } from "@/utils/StringUtil";
 import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
 import { RenderMode } from "@/store/Store";
 import type { FocusEvent, KeyboardEvent, MouseEvent } from "react";
+import { useEffect, useRef } from "react";
 
 export const MessageLabel = (props: {
   labelText: string;
@@ -16,8 +24,36 @@ export const MessageLabel = (props: {
 }) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
+  const cursor = useAtomValue(cursorAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
+  const enableCurrentElementHighlight = useAtomValue(
+    enableCurrentElementHighlightAtom,
+  );
+  const enableCurrentElementScrollIntoView = useAtomValue(
+    enableCurrentElementScrollIntoViewAtom,
+  );
   const formattedLabelText = formatText(props.labelText);
+  const labelRef = useRef<HTMLLabelElement>(null);
+
+  const isCurrent =
+    cursor != null &&
+    cursor >= props.labelPosition[0] &&
+    cursor <= props.labelPosition[1] + 1;
+
+  useEffect(() => {
+    if (
+      isCurrent &&
+      props.labelText &&
+      labelRef.current &&
+      enableCurrentElementScrollIntoView
+    ) {
+      labelRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "nearest",
+      });
+    }
+  }, [isCurrent, props.labelText, enableCurrentElementScrollIntoView]);
 
   const replaceLabelText = (e: FocusEvent | KeyboardEvent | MouseEvent) => {
     e.preventDefault();
@@ -61,10 +97,12 @@ export const MessageLabel = (props: {
 
   return (
     <label
+      ref={labelRef}
       title="Double click to edit"
       className={cn(
         "px-1 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover",
         editing && "cursor-text",
+        isCurrent && enableCurrentElementHighlight && "bg-blue-100",
         props.className,
       )}
       style={props.style}
