@@ -102,7 +102,7 @@ export const MessageLabel = (props: {
       className={cn(
         "px-1 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover",
         editing && "cursor-text",
-        isCurrent && enableCurrentElementHighlight && "bg-blue-100",
+        isCurrent && enableCurrentElementHighlight && "highlight",
         props.className,
       )}
       style={props.style}
