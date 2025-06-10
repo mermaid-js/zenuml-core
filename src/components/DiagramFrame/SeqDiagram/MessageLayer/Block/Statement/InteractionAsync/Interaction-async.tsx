@@ -72,13 +72,9 @@ import { SelfInvocationAsync } from "./SelfInvocationAsync/SelfInvocationAsync";
 import { Message } from "../Message";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
-import { cursorAtom, onElementClickAtom } from "@/store/Store";
+import { onElementClickAtom } from "@/store/Store";
 import { CodeRange } from "@/parser/CodeRange";
 import { useArrow } from "../useArrow";
-
-function isNullOrUndefined(value: any) {
-  return value === null || value === undefined;
-}
 
 export const InteractionAsync = (props: {
   context: any;
@@ -88,7 +84,6 @@ export const InteractionAsync = (props: {
   number?: string;
   className?: string;
 }) => {
-  const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
   const asyncMessage = props.context?.asyncMessage();
   const signature = asyncMessage?.content()?.getFormattedText();
@@ -107,17 +102,6 @@ export const InteractionAsync = (props: {
   console.log(props.commentObj);
   const messageClassNames = props.commentObj?.messageClassNames;
   const messageTextStyle = props.commentObj?.messageStyle;
-  const getIsCurrent = () => {
-    const start = asyncMessage.start.start;
-    const stop = asyncMessage.stop.stop + 1;
-    if (
-      isNullOrUndefined(cursor) ||
-      isNullOrUndefined(start) ||
-      isNullOrUndefined(stop)
-    )
-      return false;
-    return cursor! >= start && cursor! <= stop;
-  };
   return (
     <div
       data-origin={origin}
@@ -129,7 +113,6 @@ export const InteractionAsync = (props: {
         {
           "left-to-right": !rightToLeft,
           "right-to-left": rightToLeft,
-          highlight: getIsCurrent(),
           "self-invocation": isSelf,
         },
         props.className,

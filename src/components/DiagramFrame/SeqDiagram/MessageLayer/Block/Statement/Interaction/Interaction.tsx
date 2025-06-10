@@ -3,8 +3,6 @@ import { cn } from "@/utils";
 import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
 import { Message } from "../Message";
 import { Occurrence } from "./Occurrence/Occurrence";
-import { useAtomValue } from "jotai";
-import { cursorAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { useArrow } from "../useArrow";
@@ -16,14 +14,12 @@ export const Interaction = (props: {
   number?: string;
   className?: string;
 }) => {
-  const cursor = useAtomValue(cursorAtom);
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
   const message = props.context?.message();
   const statements = message?.Statements();
   const assignee = message?.Assignment()?.getText() || "";
   const signature = message?.SignatureText();
-  const isCurrent = message?.isCurrent(cursor);
   const source = message?.From() || _STARTER_;
   const target = props.context?.message()?.Owner() || _STARTER_;
   const isSelf = source === target;
@@ -47,7 +43,6 @@ export const Interaction = (props: {
       className={cn(
         "interaction sync inline-block",
         {
-          highlight: isCurrent,
           self: isSelf,
           "right-to-left": rightToLeft,
         },

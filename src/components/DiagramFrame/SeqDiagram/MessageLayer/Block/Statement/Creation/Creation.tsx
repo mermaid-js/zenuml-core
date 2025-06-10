@@ -8,7 +8,7 @@ import {
 } from "@/positioning/Constants";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
-import { cursorAtom, onElementClickAtom } from "@/store/Store";
+import { onElementClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
@@ -23,12 +23,10 @@ export const Creation = (props: {
   className?: string;
 }) => {
   const messageContainerRef = useRef<HTMLDivElement>(null);
-  const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
   const [participantWidth, setParticipantWidth] = useState(0);
   const creation = props.context?.creation();
   const target = creation?.Owner();
-  const isCurrent = creation?.isCurrent(cursor);
 
   const { translateX, interactionWidth, rightToLeft } = useArrow({
     context: props.context,
@@ -82,7 +80,6 @@ export const Creation = (props: {
         "interaction creation sync",
         {
           "right-to-left": rightToLeft,
-          highlight: isCurrent,
         },
         props.className,
       )}
