@@ -52,6 +52,17 @@ export const MessageLabel = (props: {
         block: "center",
         inline: "nearest",
       });
+
+      if (enableCurrentElementHighlight) {
+        // Add flashing animation class
+        labelRef.current.classList.add("flash-highlight");
+
+        // Remove animation class after 2 seconds
+        const timer = setTimeout(() => {
+          labelRef.current?.classList.remove("flash-highlight");
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
     }
   }, [isCurrent, props.labelText, enableCurrentElementScrollIntoView]);
 
@@ -102,7 +113,6 @@ export const MessageLabel = (props: {
       className={cn(
         "px-1 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover",
         editing && "cursor-text",
-        isCurrent && enableCurrentElementHighlight && "highlight",
         props.className,
       )}
       style={props.style}
