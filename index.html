@@ -116,6 +116,7 @@
       });
 
       editor.on("cursorActivity", function (cm) {
+        if (!window.zenUml) return;
         updateDiagram(cm.getValue(), cm.indexFromPos(cm.getCursor()));
       });
 
