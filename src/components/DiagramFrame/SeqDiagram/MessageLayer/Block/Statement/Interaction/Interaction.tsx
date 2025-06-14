@@ -6,7 +6,13 @@ import { Occurrence } from "./Occurrence/Occurrence";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { useArrow } from "../useArrow";
-
+import {
+  cursorAtom,
+  enableCurrentElementHighlightAtom,
+  enableCurrentElementScrollIntoViewAtom,
+} from "@/store/Store";
+import { useEffect, useRef } from "react";
+import { useAtomValue } from "jotai";
 export const Interaction = (props: {
   context: any;
   origin: string;
@@ -23,6 +29,15 @@ export const Interaction = (props: {
   const source = message?.From() || _STARTER_;
   const target = props.context?.message()?.Owner() || _STARTER_;
   const isSelf = source === target;
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const cursor = useAtomValue(cursorAtom);
+  const enableCurrentElementHighlight = useAtomValue(
+    enableCurrentElementHighlightAtom,
+  );
+  const enableCurrentElementScrollIntoView = useAtomValue(
+    enableCurrentElementScrollIntoViewAtom,
+  );
+  const isCurrent = message?.isCurrent(cursor);
 
   const {
     translateX,
@@ -38,6 +53,32 @@ export const Interaction = (props: {
     target,
   });
 
+  useEffect(() => {
+    if (
+      enableCurrentElementScrollIntoView &&
+      isCurrent &&
+      messageContainerRef.current
+    ) {
+      messageContainerRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
+
+      if (enableCurrentElementHighlight) {
+        messageContainerRef.current.classList.add("flash-highlight");
+        const timer = setTimeout(() => {
+          messageContainerRef.current?.classList.remove("flash-highlight");
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [
+    isCurrent,
+    enableCurrentElementScrollIntoView,
+    enableCurrentElementHighlight,
+  ]);
+
   return (
     <div
       className={cn(
@@ -45,6 +86,7 @@ export const Interaction = (props: {
         {
           self: isSelf,
           "right-to-left": rightToLeft,
+          current: isCurrent,
         },
         props.className,
       )}

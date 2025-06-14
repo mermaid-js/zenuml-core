@@ -75,6 +75,12 @@ import { useAtomValue } from "jotai";
 import { onElementClickAtom } from "@/store/Store";
 import { CodeRange } from "@/parser/CodeRange";
 import { useArrow } from "../useArrow";
+import {
+  cursorAtom,
+  enableCurrentElementHighlightAtom,
+  enableCurrentElementScrollIntoViewAtom,
+} from "@/store/Store";
+import { useEffect, useRef } from "react";
 
 export const InteractionAsync = (props: {
   context: any;
@@ -91,6 +97,55 @@ export const InteractionAsync = (props: {
   const source = providedSource || props.origin;
   const target = asyncMessage?.to()?.getFormattedText();
   const isSelf = source === target;
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const cursor = useAtomValue(cursorAtom);
+  const enableCurrentElementHighlight = useAtomValue(
+    enableCurrentElementHighlightAtom,
+  );
+  const enableCurrentElementScrollIntoView = useAtomValue(
+    enableCurrentElementScrollIntoViewAtom,
+  );
+  const isCurrent = () => {
+    const start = asyncMessage.start.start;
+    const stop = asyncMessage.stop.stop + 1;
+    if (
+      isNullOrUndefined(cursor) ||
+      isNullOrUndefined(start) ||
+      isNullOrUndefined(stop)
+    )
+      return false;
+    return cursor! >= start && cursor! <= stop;
+  };
+
+  function isNullOrUndefined(value: any) {
+    return value === null || value === undefined;
+  }
+
+  useEffect(() => {
+    if (
+      enableCurrentElementScrollIntoView &&
+      isCurrent() &&
+      messageContainerRef.current
+    ) {
+      messageContainerRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
+
+      if (enableCurrentElementHighlight) {
+        messageContainerRef.current.classList.add("flash-highlight");
+        const timer = setTimeout(() => {
+          messageContainerRef.current?.classList.remove("flash-highlight");
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [
+    isCurrent,
+    enableCurrentElementScrollIntoView,
+    enableCurrentElementHighlight,
+  ]);
 
   const { translateX, interactionWidth, rightToLeft } = useArrow({
     context: props.context,

@@ -8,7 +8,12 @@ import {
 } from "@/positioning/Constants";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
-import { onElementClickAtom } from "@/store/Store";
+import {
+  onElementClickAtom,
+  cursorAtom,
+  enableCurrentElementHighlightAtom,
+  enableCurrentElementScrollIntoViewAtom,
+} from "@/store/Store";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
@@ -24,9 +29,17 @@ export const Creation = (props: {
 }) => {
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const onElementClick = useAtomValue(onElementClickAtom);
+  const cursor = useAtomValue(cursorAtom);
+  const enableCurrentElementHighlight = useAtomValue(
+    enableCurrentElementHighlightAtom,
+  );
+  const enableCurrentElementScrollIntoView = useAtomValue(
+    enableCurrentElementScrollIntoViewAtom,
+  );
   const [participantWidth, setParticipantWidth] = useState(0);
   const creation = props.context?.creation();
   const target = creation?.Owner();
+  const isCurrent = creation?.isCurrent(cursor);
 
   const { translateX, interactionWidth, rightToLeft } = useArrow({
     context: props.context,
@@ -73,6 +86,32 @@ export const Creation = (props: {
     console.log(`Init or update message container for ${target}`);
   }, [target, participantWidth]);
 
+  useEffect(() => {
+    if (
+      enableCurrentElementScrollIntoView &&
+      isCurrent &&
+      messageContainerRef.current
+    ) {
+      messageContainerRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
+
+      if (enableCurrentElementHighlight) {
+        messageContainerRef.current.classList.add("flash-highlight");
+        const timer = setTimeout(() => {
+          messageContainerRef.current?.classList.remove("flash-highlight");
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [
+    isCurrent,
+    enableCurrentElementScrollIntoView,
+    enableCurrentElementHighlight,
+  ]);
+
   return (
     <div
       data-origin={props.origin}
@@ -80,6 +119,7 @@ export const Creation = (props: {
         "interaction creation sync",
         {
           "right-to-left": rightToLeft,
+          current: isCurrent,
         },
         props.className,
       )}
