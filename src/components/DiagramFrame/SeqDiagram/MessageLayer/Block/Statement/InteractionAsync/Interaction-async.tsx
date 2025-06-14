@@ -65,6 +65,7 @@
  * }
  *
  */
+import { handleScrollAndHighlight } from "@/parser/IsCurrent";
 
 import { cn } from "@/utils";
 import { Comment } from "../Comment/Comment";
@@ -72,13 +73,15 @@ import { SelfInvocationAsync } from "./SelfInvocationAsync/SelfInvocationAsync";
 import { Message } from "../Message";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
-import { cursorAtom, onElementClickAtom } from "@/store/Store";
+import { onElementClickAtom } from "@/store/Store";
 import { CodeRange } from "@/parser/CodeRange";
 import { useArrow } from "../useArrow";
-
-function isNullOrUndefined(value: any) {
-  return value === null || value === undefined;
-}
+import {
+  cursorAtom,
+  enableCurrentElementHighlightAtom,
+  enableCurrentElementScrollIntoViewAtom,
+} from "@/store/Store";
+import { useEffect, useRef } from "react";
 
 export const InteractionAsync = (props: {
   context: any;
@@ -88,7 +91,6 @@ export const InteractionAsync = (props: {
   number?: string;
   className?: string;
 }) => {
-  const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
   const asyncMessage = props.context?.asyncMessage();
   const signature = asyncMessage?.content()?.getFormattedText();
@@ -96,6 +98,42 @@ export const InteractionAsync = (props: {
   const source = providedSource || props.origin;
   const target = asyncMessage?.to()?.getFormattedText();
   const isSelf = source === target;
+  const msgRef = useRef<HTMLDivElement>(null);
+  const cursor = useAtomValue(cursorAtom);
+  const enableCurrentElementHighlight = useAtomValue(
+    enableCurrentElementHighlightAtom,
+  );
+  const enableCurrentElementScrollIntoView = useAtomValue(
+    enableCurrentElementScrollIntoViewAtom,
+  );
+  const isCurrent = () => {
+    const start = asyncMessage.start.start;
+    const stop = asyncMessage.stop.stop + 1;
+    if (
+      isNullOrUndefined(cursor) ||
+      isNullOrUndefined(start) ||
+      isNullOrUndefined(stop)
+    )
+      return false;
+    return cursor! >= start && cursor! <= stop;
+  };
+
+  function isNullOrUndefined(value: any) {
+    return value === null || value === undefined;
+  }
+
+  useEffect(() => {
+    return handleScrollAndHighlight({
+      ref: msgRef,
+      isCurrent: isCurrent(),
+      enableCurrentElementScrollIntoView,
+      enableCurrentElementHighlight,
+    });
+  }, [
+    isCurrent,
+    enableCurrentElementScrollIntoView,
+    enableCurrentElementHighlight,
+  ]);
 
   const { translateX, interactionWidth, rightToLeft } = useArrow({
     context: props.context,
@@ -107,19 +145,9 @@ export const InteractionAsync = (props: {
   console.log(props.commentObj);
   const messageClassNames = props.commentObj?.messageClassNames;
   const messageTextStyle = props.commentObj?.messageStyle;
-  const getIsCurrent = () => {
-    const start = asyncMessage.start.start;
-    const stop = asyncMessage.stop.stop + 1;
-    if (
-      isNullOrUndefined(cursor) ||
-      isNullOrUndefined(start) ||
-      isNullOrUndefined(stop)
-    )
-      return false;
-    return cursor! >= start && cursor! <= stop;
-  };
   return (
     <div
+      ref={msgRef}
       data-origin={origin}
       data-to={target}
       data-source={source}
@@ -129,7 +157,6 @@ export const InteractionAsync = (props: {
         {
           "left-to-right": !rightToLeft,
           "right-to-left": rightToLeft,
-          highlight: getIsCurrent(),
           "self-invocation": isSelf,
         },
         props.className,

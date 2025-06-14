@@ -19,6 +19,26 @@
     serif;
 }
 
+.zenuml .highlight {
+  background-color: rgba(255, 255, 0, 0.3);
+}
+
+.zenuml .flash-highlight {
+  animation: flash-animation 2s 1;
+}
+
+@keyframes flash-animation {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: gray;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
 @layer base {
   :root {
     --color-bg-base: #ffffff;
