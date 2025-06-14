@@ -18,6 +18,7 @@ import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
 import { EventBus } from "@/EventBus";
+import { handleScrollAndHighlight } from "@/parser/IsCurrent";
 
 export const Creation = (props: {
   context: any;
@@ -87,21 +88,12 @@ export const Creation = (props: {
   }, [target, participantWidth]);
 
   useEffect(() => {
-    if (enableCurrentElementScrollIntoView && isCurrent && msgRef.current) {
-      msgRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center",
-      });
-
-      if (enableCurrentElementHighlight) {
-        msgRef.current.classList.add("flash-highlight");
-        const timer = setTimeout(() => {
-          msgRef.current?.classList.remove("flash-highlight");
-        }, 2000);
-        return () => clearTimeout(timer);
-      }
-    }
+    return handleScrollAndHighlight({
+      ref: msgRef,
+      isCurrent,
+      enableCurrentElementScrollIntoView,
+      enableCurrentElementHighlight,
+    });
   }, [
     isCurrent,
     enableCurrentElementScrollIntoView,

@@ -13,6 +13,7 @@ import {
 } from "@/store/Store";
 import { useEffect, useRef } from "react";
 import { useAtomValue } from "jotai";
+import { handleScrollAndHighlight } from "@/parser/IsCurrent";
 export const Interaction = (props: {
   context: any;
   origin: string;
@@ -54,21 +55,12 @@ export const Interaction = (props: {
   });
 
   useEffect(() => {
-    if (enableCurrentElementScrollIntoView && isCurrent && msgRef.current) {
-      msgRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center",
-      });
-
-      if (enableCurrentElementHighlight) {
-        msgRef.current.classList.add("flash-highlight");
-        const timer = setTimeout(() => {
-          msgRef.current?.classList.remove("flash-highlight");
-        }, 2000);
-        return () => clearTimeout(timer);
-      }
-    }
+    return handleScrollAndHighlight({
+      ref: msgRef,
+      isCurrent,
+      enableCurrentElementScrollIntoView,
+      enableCurrentElementHighlight,
+    });
   }, [
     isCurrent,
     enableCurrentElementScrollIntoView,

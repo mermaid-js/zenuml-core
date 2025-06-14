@@ -6,6 +6,7 @@ import {
   enableCurrentElementHighlightAtom,
   enableCurrentElementScrollIntoViewAtom,
 } from "@/store/Store";
+import { handleScrollAndHighlight } from "@/parser/IsCurrent";
 import { cn } from "@/utils";
 import { useAtom, useAtomValue } from "jotai";
 import { formatText } from "@/utils/StringUtil";
@@ -41,30 +42,20 @@ export const MessageLabel = (props: {
     cursor <= props.labelPosition[1] + 1;
 
   useEffect(() => {
-    if (
-      enableCurrentElementScrollIntoView &&
-      isCurrent &&
-      props.labelText &&
-      labelRef.current
-    ) {
-      labelRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center",
+    if (props.labelText) {
+      return handleScrollAndHighlight({
+        ref: labelRef,
+        isCurrent,
+        enableCurrentElementScrollIntoView,
+        enableCurrentElementHighlight,
       });
-
-      if (enableCurrentElementHighlight) {
-        // Add flashing animation class
-        labelRef.current.classList.add("flash-highlight");
-
-        // Remove animation class after 2 seconds
-        const timer = setTimeout(() => {
-          labelRef.current?.classList.remove("flash-highlight");
-        }, 2000);
-        return () => clearTimeout(timer);
-      }
     }
-  }, [isCurrent, props.labelText, enableCurrentElementScrollIntoView]);
+  }, [
+    isCurrent,
+    props.labelText,
+    enableCurrentElementScrollIntoView,
+    enableCurrentElementHighlight,
+  ]);
 
   const replaceLabelText = (e: FocusEvent | KeyboardEvent | MouseEvent) => {
     e.preventDefault();

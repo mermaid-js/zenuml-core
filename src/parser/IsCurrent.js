@@ -24,3 +24,26 @@ function isCurrent(cursor) {
     return false;
   }
 }
+
+export function handleScrollAndHighlight({
+  ref,
+  isCurrent,
+  enableCurrentElementScrollIntoView,
+  enableCurrentElementHighlight,
+}) {
+  if (enableCurrentElementScrollIntoView && isCurrent && ref.current) {
+    ref.current.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "center",
+    });
+
+    if (enableCurrentElementHighlight) {
+      ref.current.classList.add("flash-highlight");
+      const timer = setTimeout(() => {
+        ref.current?.classList.remove("flash-highlight");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }
+}
