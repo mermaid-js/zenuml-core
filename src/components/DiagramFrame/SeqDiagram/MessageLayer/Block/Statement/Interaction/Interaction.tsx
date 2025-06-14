@@ -29,7 +29,7 @@ export const Interaction = (props: {
   const source = message?.From() || _STARTER_;
   const target = props.context?.message()?.Owner() || _STARTER_;
   const isSelf = source === target;
-  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const msgRef = useRef<HTMLDivElement>(null);
   const cursor = useAtomValue(cursorAtom);
   const enableCurrentElementHighlight = useAtomValue(
     enableCurrentElementHighlightAtom,
@@ -54,21 +54,17 @@ export const Interaction = (props: {
   });
 
   useEffect(() => {
-    if (
-      enableCurrentElementScrollIntoView &&
-      isCurrent &&
-      messageContainerRef.current
-    ) {
-      messageContainerRef.current.scrollIntoView({
+    if (enableCurrentElementScrollIntoView && isCurrent && msgRef.current) {
+      msgRef.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
         inline: "center",
       });
 
       if (enableCurrentElementHighlight) {
-        messageContainerRef.current.classList.add("flash-highlight");
+        msgRef.current.classList.add("flash-highlight");
         const timer = setTimeout(() => {
-          messageContainerRef.current?.classList.remove("flash-highlight");
+          msgRef.current?.classList.remove("flash-highlight");
         }, 2000);
         return () => clearTimeout(timer);
       }
@@ -86,10 +82,10 @@ export const Interaction = (props: {
         {
           self: isSelf,
           "right-to-left": rightToLeft,
-          current: isCurrent,
         },
         props.className,
       )}
+      ref={msgRef}
       onClick={(e) => e.stopPropagation()}
       data-to={target}
       data-origin={origin}

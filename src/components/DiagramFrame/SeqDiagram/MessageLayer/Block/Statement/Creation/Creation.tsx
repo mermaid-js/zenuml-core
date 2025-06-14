@@ -27,7 +27,7 @@ export const Creation = (props: {
   number?: string;
   className?: string;
 }) => {
-  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const msgRef = useRef<HTMLDivElement>(null);
   const onElementClick = useAtomValue(onElementClickAtom);
   const cursor = useAtomValue(cursorAtom);
   const enableCurrentElementHighlight = useAtomValue(
@@ -87,21 +87,17 @@ export const Creation = (props: {
   }, [target, participantWidth]);
 
   useEffect(() => {
-    if (
-      enableCurrentElementScrollIntoView &&
-      isCurrent &&
-      messageContainerRef.current
-    ) {
-      messageContainerRef.current.scrollIntoView({
+    if (enableCurrentElementScrollIntoView && isCurrent && msgRef.current) {
+      msgRef.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
         inline: "center",
       });
 
       if (enableCurrentElementHighlight) {
-        messageContainerRef.current.classList.add("flash-highlight");
+        msgRef.current.classList.add("flash-highlight");
         const timer = setTimeout(() => {
-          messageContainerRef.current?.classList.remove("flash-highlight");
+          msgRef.current?.classList.remove("flash-highlight");
         }, 2000);
         return () => clearTimeout(timer);
       }
@@ -114,12 +110,12 @@ export const Creation = (props: {
 
   return (
     <div
+      ref={msgRef}
       data-origin={props.origin}
       className={cn(
         "interaction creation sync",
         {
           "right-to-left": rightToLeft,
-          current: isCurrent,
         },
         props.className,
       )}
@@ -132,7 +128,6 @@ export const Creation = (props: {
     >
       {props.comment && <Comment commentObj={props.commentObj} />}
       <div
-        ref={messageContainerRef}
         data-type="creation"
         className={cn(
           "message-container pointer-events-none flex items-center h-10 relative",

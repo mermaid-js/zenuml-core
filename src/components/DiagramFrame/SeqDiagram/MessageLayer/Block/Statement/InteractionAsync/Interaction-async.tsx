@@ -97,7 +97,7 @@ export const InteractionAsync = (props: {
   const source = providedSource || props.origin;
   const target = asyncMessage?.to()?.getFormattedText();
   const isSelf = source === target;
-  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const msgRef = useRef<HTMLDivElement>(null);
   const cursor = useAtomValue(cursorAtom);
   const enableCurrentElementHighlight = useAtomValue(
     enableCurrentElementHighlightAtom,
@@ -122,21 +122,17 @@ export const InteractionAsync = (props: {
   }
 
   useEffect(() => {
-    if (
-      enableCurrentElementScrollIntoView &&
-      isCurrent() &&
-      messageContainerRef.current
-    ) {
-      messageContainerRef.current.scrollIntoView({
+    if (enableCurrentElementScrollIntoView && isCurrent() && msgRef.current) {
+      msgRef.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
         inline: "center",
       });
 
       if (enableCurrentElementHighlight) {
-        messageContainerRef.current.classList.add("flash-highlight");
+        msgRef.current.classList.add("flash-highlight");
         const timer = setTimeout(() => {
-          messageContainerRef.current?.classList.remove("flash-highlight");
+          msgRef.current?.classList.remove("flash-highlight");
         }, 2000);
         return () => clearTimeout(timer);
       }
@@ -159,6 +155,7 @@ export const InteractionAsync = (props: {
   const messageTextStyle = props.commentObj?.messageStyle;
   return (
     <div
+      ref={msgRef}
       data-origin={origin}
       data-to={target}
       data-source={source}
