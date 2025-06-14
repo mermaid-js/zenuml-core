@@ -42,15 +42,15 @@ export const MessageLabel = (props: {
 
   useEffect(() => {
     if (
+      enableCurrentElementScrollIntoView &&
       isCurrent &&
       props.labelText &&
-      labelRef.current &&
-      enableCurrentElementScrollIntoView
+      labelRef.current
     ) {
       labelRef.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
-        inline: "nearest",
+        inline: "center",
       });
 
       if (enableCurrentElementHighlight) {
