@@ -10,7 +10,6 @@ export function useDocumentEvent<TType extends keyof DocumentEventMap>(
 
   useEffect(() => {
     function handler(event: DocumentEventMap[TType]) {
-      console.log("document");
       listenerRef.current(event);
     }
 

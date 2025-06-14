@@ -62,8 +62,5 @@ export default defineConfig(({ mode }) => ({
       provider: "v8", // or 'v8'
     },
     setupFiles: resolve(__dirname, "test/setup.ts"),
-    // deps: {
-    //   inline: ["@vue/test-utils"],
-    // },
   },
 }));

@@ -9,7 +9,13 @@ import {
   themeAtom,
 } from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
-import { CSSProperties, useImperativeHandle, useMemo, useRef } from "react";
+import {
+  CSSProperties,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from "react";
 import { TotalWidth } from "./WidthOfContext";
 import "./SeqDiagram.css";
 import { cn } from "@/utils";
@@ -28,7 +34,9 @@ export const SeqDiagram = (props: {
   const setDiagramElement = useSetAtom(diagramElementAtom);
 
   const diagramRef = useRef<HTMLDivElement>(null);
-  setDiagramElement(diagramRef.current);
+  useEffect(() => {
+    setDiagramElement(diagramRef.current);
+  });
 
   useImperativeHandle(props.ref, () => {
     return diagramRef.current!;

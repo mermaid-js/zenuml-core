@@ -104,7 +104,6 @@ export const InteractionAsync = (props: {
     target,
   });
 
-  console.log(props.commentObj);
   const messageClassNames = props.commentObj?.messageClassNames;
   const messageTextStyle = props.commentObj?.messageStyle;
   const getIsCurrent = () => {

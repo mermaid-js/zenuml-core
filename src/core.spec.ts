@@ -1,5 +1,5 @@
 import { JSDOM } from "jsdom";
-import ZenUml, { VueSequence } from "./core";
+import ZenUml from "./core";
 
 vi.stubGlobal(
   "IntersectionObserver",
@@ -61,10 +61,5 @@ describe("@ZenUML/core", function () {
       console.error("Test failed:", error);
       throw error;
     }
-  });
-});
-describe("VueSequence", () => {
-  it("should export a VueSequence", () => {
-    expect(VueSequence).toBeDefined();
   });
 });

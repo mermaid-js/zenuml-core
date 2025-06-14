@@ -139,7 +139,7 @@ export const StylePanel = () => {
         setIsOpen(true);
       }, 0);
     });
-  });
+  }, [code, refs, setOnMessageClick]);
 
   return (
     <div id="style-panel" ref={refs.setFloating} style={floatingStyles}>

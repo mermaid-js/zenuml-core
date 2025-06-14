@@ -12,7 +12,6 @@ import store, {
   themeAtom,
 } from "./store/Store";
 import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
-// import SeqDiagram from "./components/DiagramFrame/SeqDiagram/SeqDiagram.vue";
 import { VERSION } from "./version.ts";
 import * as htmlToImage from "html-to-image";
 
@@ -25,8 +24,6 @@ import "./components/Cosmetic-star-uml.scss";
 import "./components/theme-blue-river.scss";
 import "./themes/theme-dark.css";
 
-// import Block from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Block.vue";
-// import Comment from "./components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Comment/Comment.vue";
 import { getStartTime, calculateCostTime } from "./utils/CostTime";
 import { clearCache } from "./utils/RenderingCache";
 import { createRoot } from "react-dom/client";
@@ -165,9 +162,3 @@ export default class ZenUml implements IZenUml {
     });
   }
 }
-
-export const VueSequence = {
-  store,
-  // SeqDiagram,
-  // DiagramFrame,
-};
