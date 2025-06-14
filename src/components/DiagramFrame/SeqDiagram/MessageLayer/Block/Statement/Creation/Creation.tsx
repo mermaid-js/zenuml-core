@@ -67,12 +67,12 @@ export const Creation = (props: {
 
     // Get the actual width from the DOM element
     setParticipantWidth(participantElement.getBoundingClientRect().width);
-    console.log(
+    console.debug(
       `Found participant element for ${target}, width: ${participantWidth}px`,
     );
 
     EventBus.emit("participant_set_top");
-    console.log(`Init or update message container for ${target}`);
+    console.debug(`Init or update message container for ${target}`);
   }, [target, participantWidth]);
 
   return (

@@ -1,4 +1,4 @@
-import { CSSProperties } from "vue";
+import { CSSProperties } from "react";
 
 export const cssColors = [
   "aliceblue",
