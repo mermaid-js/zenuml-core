@@ -13,7 +13,7 @@ import {
 } from "@/store/Store";
 import { useEffect, useRef } from "react";
 import { useAtomValue } from "jotai";
-import { handleScrollAndHighlight } from "@/parser/IsCurrent";
+// import { handleScrollAndHighlight } from "@/parser/IsCurrent";
 export const Interaction = (props: {
   context: any;
   origin: string;
@@ -55,12 +55,12 @@ export const Interaction = (props: {
   });
 
   useEffect(() => {
-    return handleScrollAndHighlight({
-      ref: msgRef,
-      isCurrent,
-      enableCurrentElementScrollIntoView,
-      enableCurrentElementHighlight,
-    });
+    // return handleScrollAndHighlight({
+    //   ref: msgRef,
+    //   isCurrent,
+    //   enableCurrentElementScrollIntoView,
+    //   enableCurrentElementHighlight,
+    // });
   }, [
     isCurrent,
     enableCurrentElementScrollIntoView,
