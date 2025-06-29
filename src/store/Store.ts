@@ -104,4 +104,10 @@ export const onEventEmitAtom = atomWithFunctionValue<
   (name: string, data: any) => void
 >(() => {});
 
+export const dragParticipantAtom = atom<{
+  name: string;
+  x: number;
+  y: number;
+}>();
+
 export default store;

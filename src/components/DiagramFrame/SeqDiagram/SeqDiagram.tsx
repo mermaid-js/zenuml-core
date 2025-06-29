@@ -21,6 +21,7 @@ import "./SeqDiagram.css";
 import { cn } from "@/utils";
 import { LifeLineLayer } from "./LifeLineLayer/LifeLineLayer";
 import { MessageLayer } from "./MessageLayer/MessageLayer";
+import { DragLine } from "./DragLine";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -60,7 +61,7 @@ export const SeqDiagram = (props: {
   return (
     <div
       className={cn(
-        "zenuml sequence-diagram relative box-border text-left overflow-visible px-2.5",
+        "zenuml sequence-diagram relative box-border text-left overflow-visible px-2.5 select-none",
         theme,
         props.className,
       )}
@@ -108,6 +109,7 @@ export const SeqDiagram = (props: {
           </>
         )}
       </div>
+      <DragLine />
     </div>
   );
 };
