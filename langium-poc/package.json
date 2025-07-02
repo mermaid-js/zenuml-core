@@ -1,0 +1,38 @@
+{
+  "name": "langium-poc",
+  "version": "1.0.0",
+  "description": "Proof of concept for ZenUML sequence grammar in Langium",
+  "main": "out/language/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && node esbuild.mjs",
+    "langium:generate": "langium generate",
+    "langium:watch": "langium generate --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "keywords": [
+    "langium",
+    "sequence",
+    "grammar",
+    "poc"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.1",
+  "dependencies": {
+    "chevrotain": "^11.0.3",
+    "langium": "3.5.0",
+    "typescript": "5.8.3"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^3.2.4",
+    "langium-cli": "^3.5.0",
+    "ts-node": "^10.9.2",
+    "vitest": "^3.2.4"
+  },
+  "bin": {
+    "sequence-cli": "./out/cli/index.js"
+  }
+}

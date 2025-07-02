@@ -1,0 +1,59 @@
+{
+  "name": "sequence",
+  "scopeName": "source.sequence",
+  "fileTypes": [".seq"],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "name": "keyword.control.sequence",
+      "match": "\\b(Starter|as|catch|critical|else|finally|group|if|new|opt|par|ref|section|starter|title|try|while)\\b"
+    },
+    {
+      "name": "string.quoted.double.sequence",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "include": "#string-character-escape"
+        }
+      ]
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.sequence",
+          "begin": "/\\*",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.sequence"
+            }
+          },
+          "end": "\\*/",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.sequence"
+            }
+          }
+        },
+        {
+          "begin": "//",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.whitespace.comment.leading.sequence"
+            }
+          },
+          "end": "(?=$)",
+          "name": "comment.line.sequence"
+        }
+      ]
+    },
+    "string-character-escape": {
+      "name": "constant.character.escape.sequence",
+      "match": "\\\\(x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|u\\{[0-9A-Fa-f]+\\}|[0-2][0-7]{0,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.|$)"
+    }
+  }
+}

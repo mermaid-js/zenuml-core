@@ -44,3 +44,22 @@ yarn-error.log*
 *.sln
 *.sw*
 
+
+# Logs
+*.log
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+.env
+*.sw?
+# OS specific
+
+# Task files
+tasks.json
+tasks/
+.cursor
+.taskmaster/
+AGENTS.md
+CLAUDE.md
+.env

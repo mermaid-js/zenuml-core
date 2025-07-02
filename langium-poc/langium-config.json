@@ -1,0 +1,14 @@
+{
+  "projectName": "Sequence",
+  "languages": [
+    {
+      "id": "sequence",
+      "grammar": "src/language/sequence.langium",
+      "fileExtensions": [".seq"],
+      "textMate": {
+        "out": "syntaxes/sequence.tmLanguage.json"
+      }
+    }
+  ],
+  "out": "src/language/generated"
+}
