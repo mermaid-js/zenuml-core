@@ -8,7 +8,7 @@
     },
     {
       "name": "keyword.control.sequence",
-      "match": "\\b(Starter|as|catch|critical|else|finally|group|if|new|opt|par|ref|section|starter|title|try|while)\\b"
+      "match": "\\b(as|async|await|catch|const|critical|else|finally|forEach|foreach|group|if|in|loop|new|nil|null|opt|par|readonly|ref|return|section|static|title|try|var|while)\\b|\\B(@Starter|@starter)\\b"
     },
     {
       "name": "string.quoted.double.sequence",
@@ -38,16 +38,6 @@
               "name": "punctuation.definition.comment.sequence"
             }
           }
-        },
-        {
-          "begin": "//",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.whitespace.comment.leading.sequence"
-            }
-          },
-          "end": "(?=$)",
-          "name": "comment.line.sequence"
         }
       ]
     },

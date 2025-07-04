@@ -11,17 +11,22 @@ export const SequenceTerminals = {
   FLOAT: /[0-9]+\.[0-9]+/,
   INT: /[0-9]+/,
   MONEY: /\$[0-9]+(\.[0-9]+)?/,
+  NUMBER_UNIT: /([0-9]+(\.[0-9]+)?)[a-zA-Z]+/,
+  COLOR: /#[0-9a-fA-F]+/,
   BOOLEAN: /true|false/,
+  DIVIDER: /==[^\r\n]*/,
   ID: /[a-zA-Z_][a-zA-Z_0-9]*/,
-  ANNOTATION: /@[a-zA-Z_][a-zA-Z_0-9]*/,
+  ANNOTATION: /@(?!(Return|return|Reply|reply))[a-zA-Z_][a-zA-Z_0-9]*/,
+  ANNOTATION_RET: /@(Return|return|Reply|reply)/,
+  SL_COMMENT: /\/\/[^\r\n]*/,
   WS: /\s+/,
   ML_COMMENT: /\/\*[\s\S]*?\*\//,
-  SL_COMMENT: /\/\/[^\r\n]*/,
 };
 
 export type SequenceTerminalNames = keyof typeof SequenceTerminals;
 
 export type SequenceKeywordNames =
+  | "!"
   | "!="
   | "%"
   | "&&"
@@ -44,24 +49,36 @@ export type SequenceKeywordNames =
   | ">"
   | ">="
   | ">>"
-  | "@"
-  | "Starter"
+  | "@Starter"
+  | "@starter"
   | "^"
   | "as"
+  | "async"
+  | "await"
   | "catch"
+  | "const"
   | "critical"
   | "else"
   | "finally"
+  | "forEach"
+  | "foreach"
   | "group"
   | "if"
+  | "in"
+  | "loop"
   | "new"
+  | "nil"
+  | "null"
   | "opt"
   | "par"
+  | "readonly"
   | "ref"
+  | "return"
   | "section"
-  | "starter"
+  | "static"
   | "title"
   | "try"
+  | "var"
   | "while"
   | "{"
   | "||"
@@ -69,20 +86,66 @@ export type SequenceKeywordNames =
 
 export type SequenceTokenNames = SequenceTerminalNames | SequenceKeywordNames;
 
-export type Alt = ElseBlock | ElseIfBlock | IfBlock;
+export type Atom =
+  | BooleanAtom
+  | IdAtom
+  | MoneyAtom
+  | NilAtom
+  | NumberAtom
+  | NumberUnitAtom
+  | StringAtom;
 
-export const Alt = "Alt";
+export const Atom = "Atom";
 
-export function isAlt(item: unknown): item is Alt {
-  return reflection.isInstance(item, Alt);
+export function isAtom(item: unknown): item is Atom {
+  return reflection.isInstance(item, Atom);
 }
 
-export type Expression = BinaryExpr | Primary;
+export type AtomicExpression =
+  | AssignmentExpression
+  | Atom
+  | CreationExpression
+  | FuncExpression;
+
+export const AtomicExpression = "AtomicExpression";
+
+export function isAtomicExpression(item: unknown): item is AtomicExpression {
+  return reflection.isInstance(item, AtomicExpression);
+}
+
+export type Condition = Atom | Expression | InExpression;
+
+export const Condition = "Condition";
+
+export function isCondition(item: unknown): item is Condition {
+  return reflection.isInstance(item, Condition);
+}
+
+export type Expression = AtomicExpression | BinaryExpression | UnaryExpression;
 
 export const Expression = "Expression";
 
 export function isExpression(item: unknown): item is Expression {
   return reflection.isInstance(item, Expression);
+}
+
+export type Modifier =
+  | "async"
+  | "await"
+  | "const"
+  | "readonly"
+  | "static"
+  | "var";
+
+export function isModifier(item: unknown): item is Modifier {
+  return (
+    item === "const" ||
+    item === "readonly" ||
+    item === "static" ||
+    item === "await" ||
+    item === "async" ||
+    item === "var"
+  );
 }
 
 export type Operator =
@@ -131,13 +194,16 @@ export function isParameter(item: unknown): item is Parameter {
 export type Statement =
   | Alt
   | AsyncMessage
+  | Comment
   | Creation
   | Critical
+  | Divider
   | Loop
   | Message
   | Opt
   | Par
   | Ref
+  | Ret
   | Section
   | TCF;
 
@@ -147,11 +213,40 @@ export function isStatement(item: unknown): item is Statement {
   return reflection.isInstance(item, Statement);
 }
 
+export interface Alt extends langium.AstNode {
+  readonly $container: Block;
+  readonly $type: "Alt";
+  elseBlock?: ElseBlock;
+  elseIfBlocks: Array<ElseIfBlock>;
+  ifBlock: IfBlock;
+}
+
+export const Alt = "Alt";
+
+export function isAlt(item: unknown): item is Alt {
+  return reflection.isInstance(item, Alt);
+}
+
+export interface Assignee extends langium.AstNode {
+  readonly $container: Assignment;
+  readonly $type: "Assignee";
+  atom?: Atom;
+  ids: Array<string>;
+  value?: string;
+}
+
+export const Assignee = "Assignee";
+
+export function isAssignee(item: unknown): item is Assignee {
+  return reflection.isInstance(item, Assignee);
+}
+
 export interface Assignment extends langium.AstNode {
-  readonly $container: CreationBody | MessageBody;
+  readonly $container: AssignmentExpression | CreationBody | MessageBody;
   readonly $type: "Assignment";
-  assignee: string;
-  type?: string;
+  assignee: Assignee;
+  modifiers: Array<Modifier>;
+  type?: Type;
 }
 
 export const Assignment = "Assignment";
@@ -160,13 +255,34 @@ export function isAssignment(item: unknown): item is Assignment {
   return reflection.isInstance(item, Assignment);
 }
 
+export interface AssignmentExpression extends langium.AstNode {
+  readonly $container:
+    | AssignmentExpression
+    | BinaryExpression
+    | ConditionalExpression
+    | MessageBody
+    | Parameters
+    | Ret
+    | UnaryExpression;
+  readonly $type: "AssignmentExpression";
+  assignment: Assignment;
+  expr: AtomicExpression;
+}
+
+export const AssignmentExpression = "AssignmentExpression";
+
+export function isAssignmentExpression(
+  item: unknown,
+): item is AssignmentExpression {
+  return reflection.isInstance(item, AssignmentExpression);
+}
+
 export interface AsyncMessage extends langium.AstNode {
-  readonly $container: Block;
+  readonly $container: Block | Ret;
   readonly $type: "AsyncMessage";
-  arrow?: "-" | "->";
-  content?: string;
-  from?: string;
-  to: string;
+  content?: Content;
+  from?: From;
+  to: To;
 }
 
 export const AsyncMessage = "AsyncMessage";
@@ -175,22 +291,18 @@ export function isAsyncMessage(item: unknown): item is AsyncMessage {
   return reflection.isInstance(item, AsyncMessage);
 }
 
-export interface BinaryExpr extends langium.AstNode {
-  readonly $container:
-    | BinaryExpr
-    | ConditionalExpression
-    | Parameters
-    | Primary;
-  readonly $type: "BinaryExpr";
-  left: Primary;
+export interface BinaryExpression extends langium.AstNode {
+  readonly $container: ConditionalExpression | MessageBody | Parameters | Ret;
+  readonly $type: "BinaryExpression";
+  left: AtomicExpression;
   op: Operator;
-  right: Expression;
+  right: AtomicExpression;
 }
 
-export const BinaryExpr = "BinaryExpr";
+export const BinaryExpression = "BinaryExpression";
 
-export function isBinaryExpr(item: unknown): item is BinaryExpr {
-  return reflection.isInstance(item, BinaryExpr);
+export function isBinaryExpression(item: unknown): item is BinaryExpression {
+  return reflection.isInstance(item, BinaryExpression);
 }
 
 export interface Block extends langium.AstNode {
@@ -205,9 +317,32 @@ export function isBlock(item: unknown): item is Block {
   return reflection.isInstance(item, Block);
 }
 
+export interface BooleanAtom extends langium.AstNode {
+  readonly $container:
+    | Assignee
+    | AssignmentExpression
+    | BinaryExpression
+    | ConditionalExpression
+    | Critical
+    | MessageBody
+    | Parameters
+    | Ret
+    | Section
+    | UnaryExpression;
+  readonly $type: "BooleanAtom";
+  value: string;
+}
+
+export const BooleanAtom = "BooleanAtom";
+
+export function isBooleanAtom(item: unknown): item is BooleanAtom {
+  return reflection.isInstance(item, BooleanAtom);
+}
+
 export interface BraceBlock extends langium.AstNode {
   readonly $container:
     | CatchBlock
+    | Creation
     | Critical
     | ElseBlock
     | ElseIfBlock
@@ -217,7 +352,6 @@ export interface BraceBlock extends langium.AstNode {
     | Message
     | Opt
     | Par
-    | Ref
     | Section
     | TryBlock;
   readonly $type: "BraceBlock";
@@ -234,7 +368,7 @@ export interface CatchBlock extends langium.AstNode {
   readonly $container: TCF;
   readonly $type: "CatchBlock";
   block: BraceBlock;
-  exception: string;
+  invocation?: Invocation;
 }
 
 export const CatchBlock = "CatchBlock";
@@ -243,21 +377,10 @@ export function isCatchBlock(item: unknown): item is CatchBlock {
   return reflection.isInstance(item, CatchBlock);
 }
 
-export interface Comment extends langium.AstNode {
-  readonly $type: "Comment";
-  content?: string;
-}
-
-export const Comment = "Comment";
-
-export function isComment(item: unknown): item is Comment {
-  return reflection.isInstance(item, Comment);
-}
-
 export interface ConditionalExpression extends langium.AstNode {
   readonly $container: ElseIfBlock | IfBlock | Loop;
   readonly $type: "ConditionalExpression";
-  condition?: Expression;
+  condition?: Condition;
 }
 
 export const ConditionalExpression = "ConditionalExpression";
@@ -268,9 +391,34 @@ export function isConditionalExpression(
   return reflection.isInstance(item, ConditionalExpression);
 }
 
+export interface Construct extends langium.AstNode {
+  readonly $container: CreationBody;
+  readonly $type: "Construct";
+  value: string;
+}
+
+export const Construct = "Construct";
+
+export function isConstruct(item: unknown): item is Construct {
+  return reflection.isInstance(item, Construct);
+}
+
+export interface Content extends langium.AstNode {
+  readonly $container: AsyncMessage;
+  readonly $type: "Content";
+  value: string;
+}
+
+export const Content = "Content";
+
+export function isContent(item: unknown): item is Content {
+  return reflection.isInstance(item, Content);
+}
+
 export interface Creation extends langium.AstNode {
-  readonly $container: Block;
+  readonly $container: Block | CreationExpression;
   readonly $type: "Creation";
+  block?: BraceBlock;
   body: CreationBody;
 }
 
@@ -284,8 +432,8 @@ export interface CreationBody extends langium.AstNode {
   readonly $container: Creation;
   readonly $type: "CreationBody";
   assignment?: Assignment;
-  construct: string;
-  invocation: Invocation;
+  construct?: Construct;
+  parameters?: Parameters;
 }
 
 export const CreationBody = "CreationBody";
@@ -294,10 +442,32 @@ export function isCreationBody(item: unknown): item is CreationBody {
   return reflection.isInstance(item, CreationBody);
 }
 
+export interface CreationExpression extends langium.AstNode {
+  readonly $container:
+    | AssignmentExpression
+    | BinaryExpression
+    | ConditionalExpression
+    | MessageBody
+    | Parameters
+    | Ret
+    | UnaryExpression;
+  readonly $type: "CreationExpression";
+  creation: Creation;
+}
+
+export const CreationExpression = "CreationExpression";
+
+export function isCreationExpression(
+  item: unknown,
+): item is CreationExpression {
+  return reflection.isInstance(item, CreationExpression);
+}
+
 export interface Critical extends langium.AstNode {
   readonly $container: Block;
   readonly $type: "Critical";
-  block: BraceBlock;
+  atom?: Atom;
+  block?: BraceBlock;
 }
 
 export const Critical = "Critical";
@@ -309,8 +479,9 @@ export function isCritical(item: unknown): item is Critical {
 export interface Declaration extends langium.AstNode {
   readonly $container: Parameters;
   readonly $type: "Declaration";
+  modifiers: Array<Modifier>;
   name: string;
-  type: string;
+  type: Type;
 }
 
 export const Declaration = "Declaration";
@@ -320,8 +491,9 @@ export function isDeclaration(item: unknown): item is Declaration {
 }
 
 export interface Divider extends langium.AstNode {
+  readonly $container: Block;
   readonly $type: "Divider";
-  content?: string;
+  note: DividerNote;
 }
 
 export const Divider = "Divider";
@@ -330,8 +502,20 @@ export function isDivider(item: unknown): item is Divider {
   return reflection.isInstance(item, Divider);
 }
 
+export interface DividerNote extends langium.AstNode {
+  readonly $container: Divider;
+  readonly $type: "DividerNote";
+  content: string;
+}
+
+export const DividerNote = "DividerNote";
+
+export function isDividerNote(item: unknown): item is DividerNote {
+  return reflection.isInstance(item, DividerNote);
+}
+
 export interface ElseBlock extends langium.AstNode {
-  readonly $container: Block;
+  readonly $container: Alt;
   readonly $type: "ElseBlock";
   block: BraceBlock;
 }
@@ -343,10 +527,10 @@ export function isElseBlock(item: unknown): item is ElseBlock {
 }
 
 export interface ElseIfBlock extends langium.AstNode {
-  readonly $container: Block;
+  readonly $container: Alt;
   readonly $type: "ElseIfBlock";
   block: BraceBlock;
-  condition?: ConditionalExpression;
+  condition: ConditionalExpression;
 }
 
 export const ElseIfBlock = "ElseIfBlock";
@@ -367,16 +551,48 @@ export function isFinallyBlock(item: unknown): item is FinallyBlock {
   return reflection.isInstance(item, FinallyBlock);
 }
 
+export interface From extends langium.AstNode {
+  readonly $container: AsyncMessage | MessageBody;
+  readonly $type: "From";
+  value: string;
+}
+
+export const From = "From";
+
+export function isFrom(item: unknown): item is From {
+  return reflection.isInstance(item, From);
+}
+
 export interface Func extends langium.AstNode {
-  readonly $container: MessageBody;
+  readonly $container: FuncExpression | MessageBody;
   readonly $type: "Func";
-  signature: Array<Signature>;
+  signatures: Array<Signature>;
 }
 
 export const Func = "Func";
 
 export function isFunc(item: unknown): item is Func {
   return reflection.isInstance(item, Func);
+}
+
+export interface FuncExpression extends langium.AstNode {
+  readonly $container:
+    | AssignmentExpression
+    | BinaryExpression
+    | ConditionalExpression
+    | MessageBody
+    | Parameters
+    | Ret
+    | UnaryExpression;
+  readonly $type: "FuncExpression";
+  func: Func;
+  to?: To;
+}
+
+export const FuncExpression = "FuncExpression";
+
+export function isFuncExpression(item: unknown): item is FuncExpression {
+  return reflection.isInstance(item, FuncExpression);
 }
 
 export interface Group extends langium.AstNode {
@@ -393,8 +609,10 @@ export function isGroup(item: unknown): item is Group {
 }
 
 export interface Head extends langium.AstNode {
-  readonly $type: "Head" | "StarterExpression";
+  readonly $container: Model;
+  readonly $type: "Head";
   headers: Array<Header>;
+  starterExp?: StarterExpression;
 }
 
 export const Head = "Head";
@@ -416,11 +634,33 @@ export function isHeader(item: unknown): item is Header {
   return reflection.isInstance(item, Header);
 }
 
+export interface IdAtom extends langium.AstNode {
+  readonly $container:
+    | Assignee
+    | AssignmentExpression
+    | BinaryExpression
+    | ConditionalExpression
+    | Critical
+    | MessageBody
+    | Parameters
+    | Ret
+    | Section
+    | UnaryExpression;
+  readonly $type: "IdAtom";
+  value: string;
+}
+
+export const IdAtom = "IdAtom";
+
+export function isIdAtom(item: unknown): item is IdAtom {
+  return reflection.isInstance(item, IdAtom);
+}
+
 export interface IfBlock extends langium.AstNode {
-  readonly $container: Block;
+  readonly $container: Alt;
   readonly $type: "IfBlock";
   block: BraceBlock;
-  condition?: ConditionalExpression;
+  condition: ConditionalExpression;
 }
 
 export const IfBlock = "IfBlock";
@@ -429,8 +669,21 @@ export function isIfBlock(item: unknown): item is IfBlock {
   return reflection.isInstance(item, IfBlock);
 }
 
+export interface InExpression extends langium.AstNode {
+  readonly $container: ConditionalExpression;
+  readonly $type: "InExpression";
+  left: string;
+  right: string;
+}
+
+export const InExpression = "InExpression";
+
+export function isInExpression(item: unknown): item is InExpression {
+  return reflection.isInstance(item, InExpression);
+}
+
 export interface Invocation extends langium.AstNode {
-  readonly $container: CreationBody | Signature;
+  readonly $container: CatchBlock | Signature;
   readonly $type: "Invocation";
   parameters?: Parameters;
 }
@@ -482,11 +735,11 @@ export function isMessage(item: unknown): item is Message {
 export interface MessageBody extends langium.AstNode {
   readonly $container: Message;
   readonly $type: "MessageBody";
-  arrow?: "->";
-  assignment: Assignment;
-  from?: Name;
+  assignment?: Assignment;
+  expr?: Expression;
+  from?: From;
   func?: Func;
-  to?: Name;
+  to?: To;
 }
 
 export const MessageBody = "MessageBody";
@@ -495,9 +748,22 @@ export function isMessageBody(item: unknown): item is MessageBody {
   return reflection.isInstance(item, MessageBody);
 }
 
+export interface MethodName extends langium.AstNode {
+  readonly $container: Signature;
+  readonly $type: "MethodName";
+  value: string;
+}
+
+export const MethodName = "MethodName";
+
+export function isMethodName(item: unknown): item is MethodName {
+  return reflection.isInstance(item, MethodName);
+}
+
 export interface Model extends langium.AstNode {
-  readonly $type: "Model";
-  blocks: Array<Block>;
+  readonly $container: Block;
+  readonly $type: "Comment" | "Model";
+  block?: Block;
   head?: Head;
   title?: Title;
 }
@@ -508,15 +774,30 @@ export function isModel(item: unknown): item is Model {
   return reflection.isInstance(item, Model);
 }
 
-export interface Name extends langium.AstNode {
+export interface MoneyAtom extends langium.AstNode {
   readonly $container:
-    | Group
-    | Label
+    | Assignee
+    | AssignmentExpression
+    | BinaryExpression
+    | ConditionalExpression
+    | Critical
     | MessageBody
-    | Participant
-    | Signature
-    | StarterExpression
-    | Stereotype;
+    | Parameters
+    | Ret
+    | Section
+    | UnaryExpression;
+  readonly $type: "MoneyAtom";
+  value: string;
+}
+
+export const MoneyAtom = "MoneyAtom";
+
+export function isMoneyAtom(item: unknown): item is MoneyAtom {
+  return reflection.isInstance(item, MoneyAtom);
+}
+
+export interface Name extends langium.AstNode {
+  readonly $container: Group | Label | Participant | Ref | Stereotype | Title;
   readonly $type: "Name";
   value: string;
 }
@@ -527,10 +808,76 @@ export function isName(item: unknown): item is Name {
   return reflection.isInstance(item, Name);
 }
 
+export interface NilAtom extends langium.AstNode {
+  readonly $container:
+    | Assignee
+    | AssignmentExpression
+    | BinaryExpression
+    | ConditionalExpression
+    | Critical
+    | MessageBody
+    | Parameters
+    | Ret
+    | Section
+    | UnaryExpression;
+  readonly $type: "NilAtom";
+  value: "nil" | "null";
+}
+
+export const NilAtom = "NilAtom";
+
+export function isNilAtom(item: unknown): item is NilAtom {
+  return reflection.isInstance(item, NilAtom);
+}
+
+export interface NumberAtom extends langium.AstNode {
+  readonly $container:
+    | Assignee
+    | AssignmentExpression
+    | BinaryExpression
+    | ConditionalExpression
+    | Critical
+    | MessageBody
+    | Parameters
+    | Ret
+    | Section
+    | UnaryExpression;
+  readonly $type: "NumberAtom";
+  value: string;
+}
+
+export const NumberAtom = "NumberAtom";
+
+export function isNumberAtom(item: unknown): item is NumberAtom {
+  return reflection.isInstance(item, NumberAtom);
+}
+
+export interface NumberUnitAtom extends langium.AstNode {
+  readonly $container:
+    | Assignee
+    | AssignmentExpression
+    | BinaryExpression
+    | ConditionalExpression
+    | Critical
+    | MessageBody
+    | Parameters
+    | Ret
+    | Section
+    | UnaryExpression;
+  readonly $type: "NumberUnitAtom";
+  value: string;
+}
+
+export const NumberUnitAtom = "NumberUnitAtom";
+
+export function isNumberUnitAtom(item: unknown): item is NumberUnitAtom {
+  return reflection.isInstance(item, NumberUnitAtom);
+}
+
 export interface Opt extends langium.AstNode {
   readonly $container: Block;
   readonly $type: "Opt";
-  block: BraceBlock;
+  block?: BraceBlock;
 }
 
 export const Opt = "Opt";
@@ -542,7 +889,7 @@ export function isOpt(item: unknown): item is Opt {
 export interface Par extends langium.AstNode {
   readonly $container: Block;
   readonly $type: "Par";
-  block: BraceBlock;
+  block?: BraceBlock;
 }
 
 export const Par = "Par";
@@ -552,9 +899,9 @@ export function isPar(item: unknown): item is Par {
 }
 
 export interface Parameters extends langium.AstNode {
-  readonly $container: Invocation;
+  readonly $container: CreationBody | Invocation;
   readonly $type: "Parameters";
-  parameter: Array<Parameter>;
+  parameters: Array<Parameter>;
 }
 
 export const Parameters = "Parameters";
@@ -566,10 +913,12 @@ export function isParameters(item: unknown): item is Parameters {
 export interface Participant extends langium.AstNode {
   readonly $container: Group | Header;
   readonly $type: "Participant";
+  color?: string;
   label?: Label;
-  name: Name;
+  name?: Name;
   stereotype?: Stereotype;
   type?: ParticipantType;
+  width?: Width;
 }
 
 export const Participant = "Participant";
@@ -590,21 +939,10 @@ export function isParticipantType(item: unknown): item is ParticipantType {
   return reflection.isInstance(item, ParticipantType);
 }
 
-export interface Primary extends langium.AstNode {
-  readonly $type: "Literal" | "Primary" | "Reference";
-  expr: Expression;
-}
-
-export const Primary = "Primary";
-
-export function isPrimary(item: unknown): item is Primary {
-  return reflection.isInstance(item, Primary);
-}
-
 export interface Ref extends langium.AstNode {
   readonly $container: Block;
   readonly $type: "Ref";
-  block: BraceBlock;
+  names: Array<Name>;
 }
 
 export const Ref = "Ref";
@@ -613,10 +951,25 @@ export function isRef(item: unknown): item is Ref {
   return reflection.isInstance(item, Ref);
 }
 
+export interface Ret extends langium.AstNode {
+  readonly $container: Block;
+  readonly $type: "Ret";
+  annotation?: string;
+  asyncMessage?: AsyncMessage;
+  expr?: Expression;
+}
+
+export const Ret = "Ret";
+
+export function isRet(item: unknown): item is Ret {
+  return reflection.isInstance(item, Ret);
+}
+
 export interface Section extends langium.AstNode {
   readonly $container: Block;
   readonly $type: "Section";
-  block: BraceBlock;
+  atom?: Atom;
+  block?: BraceBlock;
 }
 
 export const Section = "Section";
@@ -629,7 +982,7 @@ export interface Signature extends langium.AstNode {
   readonly $container: Func;
   readonly $type: "Signature";
   invocation?: Invocation;
-  methodName: Name;
+  methodName: MethodName;
 }
 
 export const Signature = "Signature";
@@ -638,10 +991,35 @@ export function isSignature(item: unknown): item is Signature {
   return reflection.isInstance(item, Signature);
 }
 
+export interface Starter extends langium.AstNode {
+  readonly $container: StarterExpression;
+  readonly $type: "Starter";
+  value: string;
+}
+
+export const Starter = "Starter";
+
+export function isStarter(item: unknown): item is Starter {
+  return reflection.isInstance(item, Starter);
+}
+
+export interface StarterExpression extends langium.AstNode {
+  readonly $container: Head;
+  readonly $type: "StarterExpression";
+  annotation?: string;
+  starter?: Starter;
+}
+
+export const StarterExpression = "StarterExpression";
+
+export function isStarterExpression(item: unknown): item is StarterExpression {
+  return reflection.isInstance(item, StarterExpression);
+}
+
 export interface Stereotype extends langium.AstNode {
   readonly $container: Participant;
   readonly $type: "Stereotype";
-  name: Name;
+  name?: Name;
 }
 
 export const Stereotype = "Stereotype";
@@ -650,12 +1028,34 @@ export function isStereotype(item: unknown): item is Stereotype {
   return reflection.isInstance(item, Stereotype);
 }
 
+export interface StringAtom extends langium.AstNode {
+  readonly $container:
+    | Assignee
+    | AssignmentExpression
+    | BinaryExpression
+    | ConditionalExpression
+    | Critical
+    | MessageBody
+    | Parameters
+    | Ret
+    | Section
+    | UnaryExpression;
+  readonly $type: "StringAtom";
+  value: string;
+}
+
+export const StringAtom = "StringAtom";
+
+export function isStringAtom(item: unknown): item is StringAtom {
+  return reflection.isInstance(item, StringAtom);
+}
+
 export interface TCF extends langium.AstNode {
   readonly $container: Block;
   readonly $type: "TCF";
-  catch?: CatchBlock;
-  finally?: FinallyBlock;
-  try: TryBlock;
+  catchBlocks: Array<CatchBlock>;
+  finallyBlock?: FinallyBlock;
+  tryBlock: TryBlock;
 }
 
 export const TCF = "TCF";
@@ -667,13 +1067,25 @@ export function isTCF(item: unknown): item is TCF {
 export interface Title extends langium.AstNode {
   readonly $container: Model;
   readonly $type: "Title";
-  content: string;
+  content?: Name;
 }
 
 export const Title = "Title";
 
 export function isTitle(item: unknown): item is Title {
   return reflection.isInstance(item, Title);
+}
+
+export interface To extends langium.AstNode {
+  readonly $container: AsyncMessage | FuncExpression | MessageBody;
+  readonly $type: "To";
+  value: string;
+}
+
+export const To = "To";
+
+export function isTo(item: unknown): item is To {
+  return reflection.isInstance(item, To);
 }
 
 export interface TryBlock extends langium.AstNode {
@@ -688,7 +1100,33 @@ export function isTryBlock(item: unknown): item is TryBlock {
   return reflection.isInstance(item, TryBlock);
 }
 
+export interface Type extends langium.AstNode {
+  readonly $container: Assignment | Declaration;
+  readonly $type: "Type";
+  value: string;
+}
+
+export const Type = "Type";
+
+export function isType(item: unknown): item is Type {
+  return reflection.isInstance(item, Type);
+}
+
+export interface UnaryExpression extends langium.AstNode {
+  readonly $container: ConditionalExpression | MessageBody | Parameters | Ret;
+  readonly $type: "UnaryExpression";
+  expr: AtomicExpression;
+  op: "!" | "-";
+}
+
+export const UnaryExpression = "UnaryExpression";
+
+export function isUnaryExpression(item: unknown): item is UnaryExpression {
+  return reflection.isInstance(item, UnaryExpression);
+}
+
 export interface Width extends langium.AstNode {
+  readonly $container: Participant;
   readonly $type: "Width";
   value: string;
 }
@@ -699,89 +1137,89 @@ export function isWidth(item: unknown): item is Width {
   return reflection.isInstance(item, Width);
 }
 
-export interface StarterExpression extends Head {
-  readonly $type: "StarterExpression";
-  annotation?: string;
-  name?: Name;
-}
-
-export const StarterExpression = "StarterExpression";
-
-export function isStarterExpression(item: unknown): item is StarterExpression {
-  return reflection.isInstance(item, StarterExpression);
-}
-
-export interface Literal extends Primary {
-  readonly $type: "Literal";
+export interface Comment extends Model {
+  readonly $container: Block;
+  readonly $type: "Comment";
   value: string;
 }
 
-export const Literal = "Literal";
+export const Comment = "Comment";
 
-export function isLiteral(item: unknown): item is Literal {
-  return reflection.isInstance(item, Literal);
-}
-
-export interface Reference extends Primary {
-  readonly $type: "Reference";
-  ref: string;
-}
-
-export const Reference = "Reference";
-
-export function isReference(item: unknown): item is Reference {
-  return reflection.isInstance(item, Reference);
+export function isComment(item: unknown): item is Comment {
+  return reflection.isInstance(item, Comment);
 }
 
 export type SequenceAstType = {
   Alt: Alt;
+  Assignee: Assignee;
   Assignment: Assignment;
+  AssignmentExpression: AssignmentExpression;
   AsyncMessage: AsyncMessage;
-  BinaryExpr: BinaryExpr;
+  Atom: Atom;
+  AtomicExpression: AtomicExpression;
+  BinaryExpression: BinaryExpression;
   Block: Block;
+  BooleanAtom: BooleanAtom;
   BraceBlock: BraceBlock;
   CatchBlock: CatchBlock;
   Comment: Comment;
+  Condition: Condition;
   ConditionalExpression: ConditionalExpression;
+  Construct: Construct;
+  Content: Content;
   Creation: Creation;
   CreationBody: CreationBody;
+  CreationExpression: CreationExpression;
   Critical: Critical;
   Declaration: Declaration;
   Divider: Divider;
+  DividerNote: DividerNote;
   ElseBlock: ElseBlock;
   ElseIfBlock: ElseIfBlock;
   Expression: Expression;
   FinallyBlock: FinallyBlock;
+  From: From;
   Func: Func;
+  FuncExpression: FuncExpression;
   Group: Group;
   Head: Head;
   Header: Header;
+  IdAtom: IdAtom;
   IfBlock: IfBlock;
+  InExpression: InExpression;
   Invocation: Invocation;
   Label: Label;
-  Literal: Literal;
   Loop: Loop;
   Message: Message;
   MessageBody: MessageBody;
+  MethodName: MethodName;
   Model: Model;
+  MoneyAtom: MoneyAtom;
   Name: Name;
+  NilAtom: NilAtom;
+  NumberAtom: NumberAtom;
+  NumberUnitAtom: NumberUnitAtom;
   Opt: Opt;
   Par: Par;
   Parameter: Parameter;
   Parameters: Parameters;
   Participant: Participant;
   ParticipantType: ParticipantType;
-  Primary: Primary;
   Ref: Ref;
-  Reference: Reference;
+  Ret: Ret;
   Section: Section;
   Signature: Signature;
+  Starter: Starter;
   StarterExpression: StarterExpression;
   Statement: Statement;
   Stereotype: Stereotype;
+  StringAtom: StringAtom;
   TCF: TCF;
   Title: Title;
+  To: To;
   TryBlock: TryBlock;
+  Type: Type;
+  UnaryExpression: UnaryExpression;
   Width: Width;
 };
 
@@ -789,53 +1227,75 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
   getAllTypes(): string[] {
     return [
       Alt,
+      Assignee,
       Assignment,
+      AssignmentExpression,
       AsyncMessage,
-      BinaryExpr,
+      Atom,
+      AtomicExpression,
+      BinaryExpression,
       Block,
+      BooleanAtom,
       BraceBlock,
       CatchBlock,
       Comment,
+      Condition,
       ConditionalExpression,
+      Construct,
+      Content,
       Creation,
       CreationBody,
+      CreationExpression,
       Critical,
       Declaration,
       Divider,
+      DividerNote,
       ElseBlock,
       ElseIfBlock,
       Expression,
       FinallyBlock,
+      From,
       Func,
+      FuncExpression,
       Group,
       Head,
       Header,
+      IdAtom,
       IfBlock,
+      InExpression,
       Invocation,
       Label,
-      Literal,
       Loop,
       Message,
       MessageBody,
+      MethodName,
       Model,
+      MoneyAtom,
       Name,
+      NilAtom,
+      NumberAtom,
+      NumberUnitAtom,
       Opt,
       Par,
       Parameter,
       Parameters,
       Participant,
       ParticipantType,
-      Primary,
       Ref,
-      Reference,
+      Ret,
       Section,
       Signature,
+      Starter,
       StarterExpression,
       Statement,
       Stereotype,
+      StringAtom,
       TCF,
       Title,
+      To,
       TryBlock,
+      Type,
+      UnaryExpression,
       Width,
     ];
   }
@@ -849,34 +1309,59 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
       case AsyncMessage:
       case Creation:
       case Critical:
+      case Divider:
       case Loop:
       case Message:
       case Opt:
       case Par:
       case Ref:
+      case Ret:
       case Section:
       case TCF: {
         return this.isSubtype(Statement, supertype);
       }
-      case BinaryExpr:
-      case Primary: {
+      case AssignmentExpression:
+      case CreationExpression:
+      case FuncExpression: {
+        return this.isSubtype(AtomicExpression, supertype);
+      }
+      case Atom: {
+        return (
+          this.isSubtype(AtomicExpression, supertype) ||
+          this.isSubtype(Condition, supertype)
+        );
+      }
+      case AtomicExpression:
+      case BinaryExpression:
+      case UnaryExpression: {
         return this.isSubtype(Expression, supertype);
       }
-      case Declaration:
-      case Expression: {
+      case BooleanAtom:
+      case IdAtom:
+      case MoneyAtom:
+      case NilAtom:
+      case NumberAtom:
+      case NumberUnitAtom:
+      case StringAtom: {
+        return this.isSubtype(Atom, supertype);
+      }
+      case Comment: {
+        return (
+          this.isSubtype(Model, supertype) ||
+          this.isSubtype(Statement, supertype)
+        );
+      }
+      case Declaration: {
         return this.isSubtype(Parameter, supertype);
       }
-      case ElseBlock:
-      case ElseIfBlock:
-      case IfBlock: {
-        return this.isSubtype(Alt, supertype);
+      case Expression: {
+        return (
+          this.isSubtype(Condition, supertype) ||
+          this.isSubtype(Parameter, supertype)
+        );
       }
-      case Literal:
-      case Reference: {
-        return this.isSubtype(Primary, supertype);
-      }
-      case StarterExpression: {
-        return this.isSubtype(Head, supertype);
+      case InExpression: {
+        return this.isSubtype(Condition, supertype);
       }
       default: {
         return false;
@@ -895,26 +1380,51 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
 
   getTypeMetaData(type: string): langium.TypeMetaData {
     switch (type) {
+      case Alt: {
+        return {
+          name: Alt,
+          properties: [
+            { name: "elseBlock" },
+            { name: "elseIfBlocks", defaultValue: [] },
+            { name: "ifBlock" },
+          ],
+        };
+      }
+      case Assignee: {
+        return {
+          name: Assignee,
+          properties: [
+            { name: "atom" },
+            { name: "ids", defaultValue: [] },
+            { name: "value" },
+          ],
+        };
+      }
       case Assignment: {
         return {
           name: Assignment,
-          properties: [{ name: "assignee" }, { name: "type" }],
+          properties: [
+            { name: "assignee" },
+            { name: "modifiers", defaultValue: [] },
+            { name: "type" },
+          ],
+        };
+      }
+      case AssignmentExpression: {
+        return {
+          name: AssignmentExpression,
+          properties: [{ name: "assignment" }, { name: "expr" }],
         };
       }
       case AsyncMessage: {
         return {
           name: AsyncMessage,
-          properties: [
-            { name: "arrow" },
-            { name: "content" },
-            { name: "from" },
-            { name: "to" },
-          ],
+          properties: [{ name: "content" }, { name: "from" }, { name: "to" }],
         };
       }
-      case BinaryExpr: {
+      case BinaryExpression: {
         return {
-          name: BinaryExpr,
+          name: BinaryExpression,
           properties: [{ name: "left" }, { name: "op" }, { name: "right" }],
         };
       }
@@ -922,6 +1432,12 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
         return {
           name: Block,
           properties: [{ name: "statements", defaultValue: [] }],
+        };
+      }
+      case BooleanAtom: {
+        return {
+          name: BooleanAtom,
+          properties: [{ name: "value" }],
         };
       }
       case BraceBlock: {
@@ -933,13 +1449,7 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
       case CatchBlock: {
         return {
           name: CatchBlock,
-          properties: [{ name: "block" }, { name: "exception" }],
-        };
-      }
-      case Comment: {
-        return {
-          name: Comment,
-          properties: [{ name: "content" }],
+          properties: [{ name: "block" }, { name: "invocation" }],
         };
       }
       case ConditionalExpression: {
@@ -948,10 +1458,22 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
           properties: [{ name: "condition" }],
         };
       }
+      case Construct: {
+        return {
+          name: Construct,
+          properties: [{ name: "value" }],
+        };
+      }
+      case Content: {
+        return {
+          name: Content,
+          properties: [{ name: "value" }],
+        };
+      }
       case Creation: {
         return {
           name: Creation,
-          properties: [{ name: "body" }],
+          properties: [{ name: "block" }, { name: "body" }],
         };
       }
       case CreationBody: {
@@ -960,25 +1482,41 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
           properties: [
             { name: "assignment" },
             { name: "construct" },
-            { name: "invocation" },
+            { name: "parameters" },
           ],
+        };
+      }
+      case CreationExpression: {
+        return {
+          name: CreationExpression,
+          properties: [{ name: "creation" }],
         };
       }
       case Critical: {
         return {
           name: Critical,
-          properties: [{ name: "block" }],
+          properties: [{ name: "atom" }, { name: "block" }],
         };
       }
       case Declaration: {
         return {
           name: Declaration,
-          properties: [{ name: "name" }, { name: "type" }],
+          properties: [
+            { name: "modifiers", defaultValue: [] },
+            { name: "name" },
+            { name: "type" },
+          ],
         };
       }
       case Divider: {
         return {
           name: Divider,
+          properties: [{ name: "note" }],
+        };
+      }
+      case DividerNote: {
+        return {
+          name: DividerNote,
           properties: [{ name: "content" }],
         };
       }
@@ -1000,10 +1538,22 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
           properties: [{ name: "block" }],
         };
       }
+      case From: {
+        return {
+          name: From,
+          properties: [{ name: "value" }],
+        };
+      }
       case Func: {
         return {
           name: Func,
-          properties: [{ name: "signature", defaultValue: [] }],
+          properties: [{ name: "signatures", defaultValue: [] }],
+        };
+      }
+      case FuncExpression: {
+        return {
+          name: FuncExpression,
+          properties: [{ name: "func" }, { name: "to" }],
         };
       }
       case Group: {
@@ -1018,7 +1568,10 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
       case Head: {
         return {
           name: Head,
-          properties: [{ name: "headers", defaultValue: [] }],
+          properties: [
+            { name: "headers", defaultValue: [] },
+            { name: "starterExp" },
+          ],
         };
       }
       case Header: {
@@ -1027,10 +1580,22 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
           properties: [{ name: "group" }, { name: "participant" }],
         };
       }
+      case IdAtom: {
+        return {
+          name: IdAtom,
+          properties: [{ name: "value" }],
+        };
+      }
       case IfBlock: {
         return {
           name: IfBlock,
           properties: [{ name: "block" }, { name: "condition" }],
+        };
+      }
+      case InExpression: {
+        return {
+          name: InExpression,
+          properties: [{ name: "left" }, { name: "right" }],
         };
       }
       case Invocation: {
@@ -1061,27 +1626,53 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
         return {
           name: MessageBody,
           properties: [
-            { name: "arrow" },
             { name: "assignment" },
+            { name: "expr" },
             { name: "from" },
             { name: "func" },
             { name: "to" },
           ],
         };
       }
+      case MethodName: {
+        return {
+          name: MethodName,
+          properties: [{ name: "value" }],
+        };
+      }
       case Model: {
         return {
           name: Model,
-          properties: [
-            { name: "blocks", defaultValue: [] },
-            { name: "head" },
-            { name: "title" },
-          ],
+          properties: [{ name: "block" }, { name: "head" }, { name: "title" }],
+        };
+      }
+      case MoneyAtom: {
+        return {
+          name: MoneyAtom,
+          properties: [{ name: "value" }],
         };
       }
       case Name: {
         return {
           name: Name,
+          properties: [{ name: "value" }],
+        };
+      }
+      case NilAtom: {
+        return {
+          name: NilAtom,
+          properties: [{ name: "value" }],
+        };
+      }
+      case NumberAtom: {
+        return {
+          name: NumberAtom,
+          properties: [{ name: "value" }],
+        };
+      }
+      case NumberUnitAtom: {
+        return {
+          name: NumberUnitAtom,
           properties: [{ name: "value" }],
         };
       }
@@ -1100,17 +1691,19 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
       case Parameters: {
         return {
           name: Parameters,
-          properties: [{ name: "parameter", defaultValue: [] }],
+          properties: [{ name: "parameters", defaultValue: [] }],
         };
       }
       case Participant: {
         return {
           name: Participant,
           properties: [
+            { name: "color" },
             { name: "label" },
             { name: "name" },
             { name: "stereotype" },
             { name: "type" },
+            { name: "width" },
           ],
         };
       }
@@ -1120,22 +1713,26 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
           properties: [{ name: "type" }],
         };
       }
-      case Primary: {
-        return {
-          name: Primary,
-          properties: [{ name: "expr" }],
-        };
-      }
       case Ref: {
         return {
           name: Ref,
-          properties: [{ name: "block" }],
+          properties: [{ name: "names", defaultValue: [] }],
+        };
+      }
+      case Ret: {
+        return {
+          name: Ret,
+          properties: [
+            { name: "annotation" },
+            { name: "asyncMessage" },
+            { name: "expr" },
+          ],
         };
       }
       case Section: {
         return {
           name: Section,
-          properties: [{ name: "block" }],
+          properties: [{ name: "atom" }, { name: "block" }],
         };
       }
       case Signature: {
@@ -1144,16 +1741,38 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
           properties: [{ name: "invocation" }, { name: "methodName" }],
         };
       }
+      case Starter: {
+        return {
+          name: Starter,
+          properties: [{ name: "value" }],
+        };
+      }
+      case StarterExpression: {
+        return {
+          name: StarterExpression,
+          properties: [{ name: "annotation" }, { name: "starter" }],
+        };
+      }
       case Stereotype: {
         return {
           name: Stereotype,
           properties: [{ name: "name" }],
         };
       }
+      case StringAtom: {
+        return {
+          name: StringAtom,
+          properties: [{ name: "value" }],
+        };
+      }
       case TCF: {
         return {
           name: TCF,
-          properties: [{ name: "catch" }, { name: "finally" }, { name: "try" }],
+          properties: [
+            { name: "catchBlocks", defaultValue: [] },
+            { name: "finallyBlock" },
+            { name: "tryBlock" },
+          ],
         };
       }
       case Title: {
@@ -1162,10 +1781,28 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
           properties: [{ name: "content" }],
         };
       }
+      case To: {
+        return {
+          name: To,
+          properties: [{ name: "value" }],
+        };
+      }
       case TryBlock: {
         return {
           name: TryBlock,
           properties: [{ name: "block" }],
+        };
+      }
+      case Type: {
+        return {
+          name: Type,
+          properties: [{ name: "value" }],
+        };
+      }
+      case UnaryExpression: {
+        return {
+          name: UnaryExpression,
+          properties: [{ name: "expr" }, { name: "op" }],
         };
       }
       case Width: {
@@ -1174,26 +1811,15 @@ export class SequenceAstReflection extends langium.AbstractAstReflection {
           properties: [{ name: "value" }],
         };
       }
-      case StarterExpression: {
+      case Comment: {
         return {
-          name: StarterExpression,
+          name: Comment,
           properties: [
-            { name: "annotation" },
-            { name: "headers", defaultValue: [] },
-            { name: "name" },
+            { name: "block" },
+            { name: "head" },
+            { name: "title" },
+            { name: "value" },
           ],
-        };
-      }
-      case Literal: {
-        return {
-          name: Literal,
-          properties: [{ name: "expr" }, { name: "value" }],
-        };
-      }
-      case Reference: {
-        return {
-          name: Reference,
-          properties: [{ name: "expr" }, { name: "ref" }],
         };
       }
       default: {
