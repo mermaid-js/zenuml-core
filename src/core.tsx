@@ -1,6 +1,9 @@
 import parentLogger from "./logger/logger";
 import store, {
   codeAtom,
+  cursorAtom,
+  enableCurrentElementHighlightAtom,
+  enableCurrentElementScrollIntoViewAtom,
   enableMultiThemeAtom,
   enableScopedThemingAtom,
   modeAtom,
@@ -41,6 +44,9 @@ interface Config {
   onContentChange?: (code: string) => void;
   onEventEmit?: (name: string, data: unknown) => void;
   mode?: RenderMode;
+  cursor?: number | null;
+  enableCurrentElementHighlight?: boolean;
+  enableCurrentElementScrollIntoView?: boolean;
 }
 interface IZenUml {
   get code(): string | undefined;
@@ -103,6 +109,21 @@ export default class ZenUml implements IZenUml {
       config?.enableScopedTheming || false,
     );
     this.store.set(modeAtom, config?.mode || RenderMode.Dynamic);
+    this.store.set(cursorAtom, config?.cursor || null);
+
+    if (config?.enableCurrentElementHighlight !== undefined) {
+      this.store.set(
+        enableCurrentElementHighlightAtom,
+        config.enableCurrentElementHighlight,
+      );
+    }
+
+    if (config?.enableCurrentElementScrollIntoView !== undefined) {
+      this.store.set(
+        enableCurrentElementScrollIntoViewAtom,
+        config.enableCurrentElementScrollIntoView,
+      );
+    }
 
     // this.initialRender is used to avoid the first rendering is debounced by setTimeout.
     // The first rendering should be executed immediately. It fixes the issue that causes the blank screen on mermaid live editor.

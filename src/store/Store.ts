@@ -60,7 +60,9 @@ export const onSelectAtom = atom(null, (get, set, payload: string) => {
   }
 });
 
-export const cursorAtom = atom<number | null | undefined>(null);
+export const cursorAtom = atom<number | null>(null);
+export const enableCurrentElementHighlightAtom = atom<boolean>(false);
+export const enableCurrentElementScrollIntoViewAtom = atom<boolean>(false);
 
 export const showTipsAtom = atom(false);
 

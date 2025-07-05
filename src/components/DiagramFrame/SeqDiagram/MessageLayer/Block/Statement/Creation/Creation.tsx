@@ -8,11 +8,17 @@ import {
 } from "@/positioning/Constants";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
-import { cursorAtom, onElementClickAtom } from "@/store/Store";
+import {
+  onElementClickAtom,
+  cursorAtom,
+  enableCurrentElementHighlightAtom,
+  enableCurrentElementScrollIntoViewAtom,
+} from "@/store/Store";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
 import { EventBus } from "@/EventBus";
+import { handleScrollAndHighlight } from "@/parser/IsCurrent";
 
 export const Creation = (props: {
   context: any;
@@ -22,9 +28,15 @@ export const Creation = (props: {
   number?: string;
   className?: string;
 }) => {
-  const messageContainerRef = useRef<HTMLDivElement>(null);
-  const cursor = useAtomValue(cursorAtom);
+  const msgRef = useRef<HTMLDivElement>(null);
   const onElementClick = useAtomValue(onElementClickAtom);
+  const cursor = useAtomValue(cursorAtom);
+  const enableCurrentElementHighlight = useAtomValue(
+    enableCurrentElementHighlightAtom,
+  );
+  const enableCurrentElementScrollIntoView = useAtomValue(
+    enableCurrentElementScrollIntoViewAtom,
+  );
   const [participantWidth, setParticipantWidth] = useState(0);
   const creation = props.context?.creation();
   const target = creation?.Owner();
@@ -75,14 +87,27 @@ export const Creation = (props: {
     console.debug(`Init or update message container for ${target}`);
   }, [target, participantWidth]);
 
+  useEffect(() => {
+    return handleScrollAndHighlight({
+      ref: msgRef,
+      isCurrent,
+      enableCurrentElementScrollIntoView,
+      enableCurrentElementHighlight,
+    });
+  }, [
+    isCurrent,
+    enableCurrentElementScrollIntoView,
+    enableCurrentElementHighlight,
+  ]);
+
   return (
     <div
+      ref={msgRef}
       data-origin={props.origin}
       className={cn(
         "interaction creation sync",
         {
           "right-to-left": rightToLeft,
-          highlight: isCurrent,
         },
         props.className,
       )}
@@ -95,7 +120,6 @@ export const Creation = (props: {
     >
       {props.comment && <Comment commentObj={props.commentObj} />}
       <div
-        ref={messageContainerRef}
         data-type="creation"
         className={cn(
           "message-container pointer-events-none flex items-center h-10 relative",

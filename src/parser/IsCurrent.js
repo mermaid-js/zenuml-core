@@ -24,3 +24,40 @@ function isCurrent(cursor) {
     return false;
   }
 }
+
+export function handleScrollAndHighlight({
+  ref,
+  isCurrent,
+  enableCurrentElementScrollIntoView,
+  enableCurrentElementHighlight,
+}) {
+  if (enableCurrentElementScrollIntoView && isCurrent && ref.current) {
+    ref.current.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "center",
+    });
+
+    if (enableCurrentElementHighlight) {
+      // First, remove any existing class names to ensure the animation restarts
+      ref.current.classList.remove("flash-highlight");
+      // Use requestAnimationFrame to ensure the class name is added in the next frame
+      requestAnimationFrame(() => {
+        if (ref.current) {
+          ref.current.classList.add("flash-highlight");
+          const timer = setTimeout(() => {
+            if (ref.current) {
+              ref.current.classList.remove("flash-highlight");
+            }
+          }, 2000);
+          return () => {
+            clearTimeout(timer);
+            if (ref.current) {
+              ref.current.classList.remove("flash-highlight");
+            }
+          };
+        }
+      });
+    }
+  }
+}
