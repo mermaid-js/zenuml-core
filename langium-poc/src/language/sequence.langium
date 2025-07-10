@@ -10,7 +10,8 @@ Title:
 
 // head: (group | participant)+ | (group | participant)* starterExp
 Head:
-    (headers+=Header)+ | (headers+=Header)* starterExp=StarterExpression;
+    headers+=Header+ starterExp=StarterExpression? |
+    starterExp=StarterExpression;
 
 Header:
     group=Group | participant=Participant;

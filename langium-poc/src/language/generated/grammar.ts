@@ -115,19 +115,6 @@ export const SequenceGrammar = (): Grammar =>
         "$type": "Alternatives",
         "elements": [
           {
-            "$type": "Assignment",
-            "feature": "headers",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@3"
-              },
-              "arguments": []
-            },
-            "cardinality": "+"
-          },
-          {
             "$type": "Group",
             "elements": [
               {
@@ -141,7 +128,7 @@ export const SequenceGrammar = (): Grammar =>
                   },
                   "arguments": []
                 },
-                "cardinality": "*"
+                "cardinality": "+"
               },
               {
                 "$type": "Assignment",
@@ -153,9 +140,22 @@ export const SequenceGrammar = (): Grammar =>
                     "$ref": "#/rules@5"
                   },
                   "arguments": []
-                }
+                },
+                "cardinality": "?"
               }
             ]
+          },
+          {
+            "$type": "Assignment",
+            "feature": "starterExp",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@5"
+              },
+              "arguments": []
+            }
           }
         ]
       },
