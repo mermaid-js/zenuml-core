@@ -8,7 +8,7 @@
     },
     {
       "name": "keyword.control.sequence",
-      "match": "\\b(as|async|await|catch|const|critical|else|finally|forEach|foreach|group|if|in|loop|new|nil|null|opt|par|readonly|ref|return|section|static|title|try|var|while)\\b|\\B(@Starter|@starter)\\b"
+      "match": "\\b(RET|ReturnType|as|async|await|catch|const|critical|else|finally|forEach|foreach|group|if|in|loop|new|nil|null|opt|par|readonly|ref|return|section|static|title|try|var|while)\\b|\\B(@Starter|@starter)\\b"
     },
     {
       "name": "string.quoted.double.sequence",

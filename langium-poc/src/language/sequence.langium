@@ -2,7 +2,7 @@ grammar Sequence
 
 // prog: title? EOF | title? head EOF | title? head? block EOF
 entry Model:
-    Comment? title=Title? (head=Head)?  (block=Block)?;
+    leadingComments+=SL_COMMENT* title=Title? (head=Head)?  (block=Block)?;
 
 // title: TITLE TITLE_CONTENT? TITLE_END?
 Title:
@@ -39,7 +39,7 @@ Participant:
 
 // New rule to handle modifiers (previously in MODIFIER_CHANNEL)
 Modifier returns string:
-    'const' | 'readonly' | 'static' | 'await' | 'async' | 'var';
+    'const' | 'readonly' | 'static' | 'await' | 'async' | 'var' | 'RET' | 'ReturnType';
 
 // stereotype: SOPEN name SCLOSE | SOPEN name GT? | (LT | SOPEN) (GT | SCLOSE)?
 Stereotype:
@@ -70,8 +70,20 @@ Block:
 // stat: alt | par | opt | critical | section | ref | loop | creation | message
 //     | asyncMessage EVENT_END? | ret | divider | tcf | OTHER
 Statement:
-    Alt | Par | Opt | Critical | Section | Ref | Loop | Creation | Ret |  Divider | TCF |  Message |
-    AsyncMessage | Comment;
+    Alt | Par | Opt | Critical | Section | Ref | Loop | Creation | Ret | Divider | TCF |
+    AssignmentStatement | MessageCall | FunctionCallStatement | AsyncMessage | Comment;
+
+// New: simple assignment statement separate from message parsing
+AssignmentStatement:
+    assignment=Assignment (';' | block=BraceBlock)?;
+
+// New: message call statement separate from assignment
+MessageCall:
+    (from=From '->')? to=To ('.' | '.' func=Func)? (';' | block=BraceBlock)?;
+
+// New: standalone function call statement (e.g., init())
+FunctionCallStatement:
+    func=Func (';' | block=BraceBlock)?;
 
 // par: PAR braceBlock | PAR
 Par:
@@ -99,24 +111,23 @@ Ref:
 
 // creationBody: assignment? NEW construct(OPAR parameters? CPAR)? | assignment? NEW
 CreationBody:
-    assignment=Assignment? 'new' construct=Construct ('(' parameters=Parameters? ')')? |
-    assignment=Assignment? 'new';
+    (assignee=ID '=')? 'new' construct=Construct ('(' parameters=Parameters? ')')? |
+    (assignee=ID '=')? 'new';
 
-// message: messageBody (SCOL | braceBlock)?
-Message:
-    body=MessageBody (';' | block=BraceBlock)?;
+// Remove the complex MessageBody rule that was causing ambiguity
+// // message: messageBody (SCOL | braceBlock)?
+// Message:
+//     body=MessageBody (';' | block=BraceBlock)?;
 
-// messageBody: assignment? ((from ARROW)? to DOT)? func | assignment | (from ARROW)? to DOT
-MessageBody:
-    (assignment=Assignment? (from=From '->')? to=To '.' func=Func) |
-    (assignment=Assignment? func=Func) |
-    (assignment=Assignment? expr=Expression) |
-    assignment=Assignment |
-    (from=From '->')? to=To '.';
+// // messageBody: assignment? ((from ARROW)? to DOT)? func | assignment | (from ARROW)? to DOT
+// MessageBody:
+//     assignment=Assignment? (from=From '->')? to=To ('.' func=Func)? |
+//     assignment=Assignment |
+//     (from=From '->')? to=To '.'?;
 
 // asyncMessage: (from ARROW)? to COL content? | from (MINUS | ARROW) to?
 AsyncMessage:
-    (from=From '->')? to=To ':' content=Content? |
+    (from=From '->')? to=To (':')+ content=Content? |
     from=From ('-' | '->') to=To?;
 
 // func: signature (DOT signature)*
@@ -141,8 +152,7 @@ Invocation:
 
 // assignment: (type? assignee ASSIGN)
 Assignment:
-    // Include modifiers that were in MODIFIER_CHANNEL
-    modifiers+=Modifier* type=Type? assignee=Assignee '=';
+    modifiers+=Modifier* type=Type? assignee=ID '=' value=Expression?;
 
 // ret: RETURN expr? SCOL? | ANNOTATION_RET asyncMessage EVENT_END?
 Ret:
@@ -169,13 +179,6 @@ Construct:
 Type:
     value=ID | value=STRING;
 
-// assignee: atom | (ID (COMMA ID)*) | STRING | NEW
-Assignee:
-    atom=Atom |
-    ids+=ID (',' ids+=ID)* |
-    value=STRING |
-    'new';
-
 // methodName: ID | STRING
 MethodName:
     value=ID | value=STRING;
@@ -190,7 +193,7 @@ Parameter:
 
 // declaration: type ID
 Declaration:
-    modifiers+=Modifier* type=Type name=ID;
+    type=Type name=ID;
 
 // tcf: tryBlock catchBlock* finallyBlock?
 TCF:
@@ -246,13 +249,17 @@ Comment:
 
 // Expression entry point - basic hierarchy without circular references
 Expression:
-    AtomicExpression | BinaryExpression | UnaryExpression;
+    BinaryExpression | UnaryExpression | AtomicExpression;
 
 AtomicExpression:
-    Atom |
+    '(' expr=Expression ')' |
     FuncExpression |
+    SelfFuncExpression |
     CreationExpression |
-    AssignmentExpression;
+    Atom;
+
+CreationExpression:
+    'new' (constructor=Type)? ('(' params=Parameters? ')')? block=BraceBlock?;
 
 BinaryExpression:
     left=AtomicExpression op=Operator right=AtomicExpression;
@@ -260,15 +267,11 @@ BinaryExpression:
 UnaryExpression:
     op=('-' | '!') expr=AtomicExpression;
 
-
 FuncExpression:
-    (to=To '.')? func=Func;
+    (from=From '->')? to=To ('.' func=Func)?;
 
-CreationExpression:
-    creation=Creation;
-
-AssignmentExpression:
-    assignment=Assignment expr=AtomicExpression;
+SelfFuncExpression:
+    func=Func;
 
 // atom: (INT | FLOAT) | NUMBER_UNIT | MONEY | (TRUE | FALSE) | ID | STRING | NIL
 Atom:
@@ -293,15 +296,15 @@ StringAtom:
     value=STRING;
 
 NilAtom:
-    value=('nil' | 'null');
+    value='nil' | value='null';
 
 // parExpr: OPAR condition CPAR | OPAR condition | OPAR CPAR | OPAR
 ConditionalExpression:
     '(' condition=Condition? ')';
 
-// condition: atom | expr | inExpr
+// condition:  inExpr | atom
 Condition:
-    Atom | Expression | InExpression;
+    InExpression | Atom;
 
 // inExpr: ID IN ID
 InExpression:

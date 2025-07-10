@@ -11,7 +11,6 @@
     },
     "allowJs": true,
     "types": ["vitest/globals", "@testing-library/jest-dom"],
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -19,7 +18,6 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -27,5 +25,12 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "langium-poc/src/test/fixtures/demo2.js",
+    "langium-poc/src/test/fixtures/demo3.js",
+    "langium-poc/src/test/fixtures/demo4.js",
+    "langium-poc/src/test/fixtures/demo5.js",
+    "langium-poc/src/test/fixtures/demo6.js"
+  ]
 }

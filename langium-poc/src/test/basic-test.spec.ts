@@ -27,11 +27,11 @@ describe("Langium Sequence Parser - Complete ANTLR Translation", () => {
       await validateParser('title "Test"\n@Actor A');
     });
 
-    it("should parse title, head and block", async () => {
+    it("should parse title, head and  message block", async () => {
       await validateParser('title "Test"\nA->B.method()');
     });
 
-    it("should parse title, head and block", async () => {
+    it("should parse title, head, starter and block", async () => {
       await validateParser(
         'title "Test"\n@Actor A\n@Actor B\n@Starter(m)\nA->B.method()',
       );
@@ -247,7 +247,7 @@ describe("Langium Sequence Parser - Complete ANTLR Translation", () => {
       });
 
       it("should parse critical without parameter", async () => {
-        await validateParser("critical {\n  A->B.critical()\n}");
+        await validateParser("critical {\n  A->B.method()\n}");
       });
 
       it("should parse critical without block", async () => {
@@ -297,6 +297,22 @@ describe("Langium Sequence Parser - Complete ANTLR Translation", () => {
 
       it("should parse message with block", async () => {
         await validateParser("A->B.method() {\n  callback()\n}");
+      });
+
+      it("should parse a self call block", async () => {
+        await validateParser("self { return C }");
+      });
+
+      it("should parse a self call block", async () => {
+        const input = `
+      ret2 = selfCall() {
+        B.syncCallWithinSelfCall() {
+          ParticipantName.rightToLeftCall()
+          return B
+        }
+      }
+    `;
+        await validateParser(input);
       });
     });
 
@@ -426,6 +442,10 @@ describe("Langium Sequence Parser - Complete ANTLR Translation", () => {
       it("should parse empty invocation", async () => {
         await validateParser("A->B.method()");
       });
+
+      it("should parse method with block", async () => {
+        await validateParser("A->B.method() {\n  callback()\n}");
+      });
     });
 
     describe("assignment", () => {
@@ -435,6 +455,10 @@ describe("Langium Sequence Parser - Complete ANTLR Translation", () => {
 
       it("should parse untyped assignment", async () => {
         await validateParser("result = A->B.getValue()");
+      });
+
+      it("should parse assignment with block", async () => {
+        await validateParser("RET result = B.method() {\n  callback()\n}");
       });
     });
 
