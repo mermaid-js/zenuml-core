@@ -5,6 +5,7 @@ import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import store, { coordinatesAtom } from "@/store/Store";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { useEffect, useState } from "react";
+import { depthOnParticipant } from "@/parser/DepthCalculator";
 
 export const getLeftParticipant = (context: any) => {
   const allParticipants = store.get(coordinatesAtom).orderedParticipantNames();
@@ -72,8 +73,10 @@ export const useFragmentData = (context: any, origin: string) => {
   // TODO: consider using this.getParticipantGap(this.participantModels[0])
   const halfLeftParticipant = coordinates.half(leftParticipant);
   console.debug(`left participant: ${leftParticipant} ${halfLeftParticipant}`);
+  const depth = depthOnParticipant(context, leftParticipant);
+  const originOffset = coordinates.distance(leftParticipant, origin);
   const offsetX =
-    (origin ? coordinates.distance(leftParticipant, origin) : 0) +
+    (origin ? originOffset + 7 * depth : 0) +
     getBorder(context).left +
     halfLeftParticipant;
   const paddingLeft = getBorder(context).left + halfLeftParticipant;
