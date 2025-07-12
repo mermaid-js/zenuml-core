@@ -8,9 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Build library**: `pnpm build` (builds library with vite.config.lib.ts)
 - **Build site**: `pnpm build:site` (builds demo site with vite.config.ts)
 - **Run tests**: `pnpm test` (runs Vitest unit tests)
-- **Run E2E tests**: `pnpm cy` (runs Cypress tests)
-- **Open Cypress UI**: `pnpm cy:open`
-- **Update Cypress snapshots**: `pnpm cy:update`
+- **Run E2E tests**: `pnpm pw` (runs Playwright tests)
+- **Run E2E tests (CI)**: `pnpm pw:ci` (runs with GitHub reporter for CI)
+- **Open Playwright UI**: `pnpm pw:ui`
+- **Update Playwright snapshots**: `pnpm pw:update`
+- **Install Playwright browsers**: `pnpm pw:install`
+- **Run smoke tests**: `pnpm pw:smoke`
 - **Lint code**: `pnpm eslint` (runs ESLint with auto-fix)
 - **Format code**: `pnpm prettier` (runs Prettier)
 - **Generate ANTLR parser**: `pnpm antlr` (generates JavaScript parser from grammar)
@@ -70,7 +73,7 @@ Output formats:
 
 - **Unit tests**: Vitest for parser and utility functions
 - **Component tests**: React Testing Library for component logic
-- **E2E tests**: Cypress for full integration testing with visual snapshots
+- **E2E tests**: Playwright for full integration testing with visual snapshots
 - **Test files**: Co-located with source files using `.spec.ts` extension
 
 ## Key Dependencies
