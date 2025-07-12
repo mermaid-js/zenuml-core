@@ -6,12 +6,12 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    runs-on: macos-latest
+  playwright-tests:
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20] # Work with 18. https://github.com/cypress-io/github-action/issues/534#issuecomment-1115947632
+        node-version: [20]
     steps:
       - uses: actions/checkout@v4
 
@@ -20,10 +20,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          sudo -H pip install setuptools
+          pip install setuptools
+
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -34,23 +35,29 @@ jobs:
           cache: pnpm
           node-version: ${{ matrix.node-version }}
 
-      # Install NPM dependencies, cache them correctly
-      # and run all Cypress tests
-      - name: Cypress run
-        uses: cypress-io/github-action@v6.7.16
-        env:
-          npm_config_side_effects_cache: false # Disable pnpm side effects cache: https://github.com/cypress-io/github-action/issues/1363
-        with:
-          browser: chrome
-          build: pnpm build:site
-          start: pnpm preview
-          command: pnpm run cy
-          wait-on: http://127.0.0.1:8080
-          auto-cancel-after-failures: 2
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: Upload artifacts # Find artifacts under actions/jobs
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build site
+        run: pnpm build:site
+
+      - name: Start server and run Playwright tests
+        run: |
+          pnpm preview &
+          sleep 5
+          pnpm pw:ci
+        env:
+          CI: true
+
+      - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: snapshots
-          path: ./cypress/
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30

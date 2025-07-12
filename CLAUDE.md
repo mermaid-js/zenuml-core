@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Build site**: `pnpm build:site` (builds demo site with vite.config.ts)
 - **Run tests**: `pnpm test` (runs Vitest unit tests)
 - **Run E2E tests**: `pnpm pw` (runs Playwright tests)
+- **Run E2E tests (CI)**: `pnpm pw:ci` (runs with GitHub reporter for CI)
 - **Open Playwright UI**: `pnpm pw:ui`
 - **Update Playwright snapshots**: `pnpm pw:update`
 - **Install Playwright browsers**: `pnpm pw:install`

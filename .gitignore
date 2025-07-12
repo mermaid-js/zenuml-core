@@ -1,7 +1,7 @@
-cypress/videos/**/*
-cypress/screenshots/**/*
-cypress/integration/__image_snapshots__/*.diff.png
-cypress/integration/__image_snapshots__/*.actual.png
+# Playwright test results and reports
+/test-results/
+/playwright-report/
+/playwright/.cache/
 coverage
 
 # Gauge - metadata dir
