@@ -104,4 +104,62 @@ export const onEventEmitAtom = atomWithFunctionValue<
   (name: string, data: any) => void
 >(() => {});
 
+// AST-based atoms for decoupled rendering
+import { messageTransformer } from "../parser/ast/MessageTransformer";
+import { depthCalculator } from "../parser/ast/DepthCalculator";
+import type { DocumentAST, MessageNode } from "../parser/ast/types";
+
+// Transform ANTLR context to AST
+export const astAtom = atom<DocumentAST>((get) => {
+  const rootContext = get(rootContextAtom);
+  if (!rootContext) {
+    return {
+      type: 'document',
+      id: 'empty-document',
+      sourceRange: {
+        start: { line: 0, column: 0, offset: 0 },
+        end: { line: 0, column: 0, offset: 0 },
+        text: ''
+      },
+      statements: []
+    };
+  }
+  
+  const result = messageTransformer.transform(rootContext);
+  return result.ast;
+});
+
+// Extract message nodes from AST
+export const astMessagesAtom = atom<MessageNode[]>((get) => {
+  const ast = get(astAtom);
+  const messages: MessageNode[] = [];
+  
+  function collectMessages(statements: any[]): void {
+    for (const stmt of statements) {
+      if (stmt.type !== 'error') {
+        const messageNode = stmt as MessageNode;
+        messages.push(messageNode);
+        if (messageNode.statements) {
+          collectMessages(messageNode.statements);
+        }
+      }
+    }
+  }
+  
+  collectMessages(ast.statements);
+  return messages;
+});
+
+// Lazy depth calculation atom - returns a function to get depth for specific node/participant
+export const astDepthCalculatorAtom = atom(() => depthCalculator);
+
+// Convenience atom to get depth for a specific message and participant
+export const getMessageDepthAtom = atom(null, (get, set, nodeId: string, participant: string) => {
+  const calculator = get(astDepthCalculatorAtom);
+  const messages = get(astMessagesAtom);
+  const node = messages.find(m => m.id === nodeId);
+  
+  return node ? calculator.getOccurrenceDepth(node, participant) : 0;
+});
+
 export default store;
