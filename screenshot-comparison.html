@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cypress vs Playwright Screenshot Comparison</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .comparison-grid {
+        display: grid;
+        gap: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .comparison-item {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .test-title {
+        background: #2563eb;
+        color: white;
+        padding: 15px;
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .images-container {
+        display: flex;
+        min-height: 400px;
+      }
+      .image-side {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #e5e7eb;
+      }
+      .image-side:last-child {
+        border-right: none;
+      }
+      .image-header {
+        background: #f9fafb;
+        padding: 10px 15px;
+        font-weight: 600;
+        font-size: 14px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .cypress-header {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .playwright-header {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .image-content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+      }
+      .screenshot {
+        max-width: 100%;
+        max-height: 500px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .screenshot:hover {
+        transform: scale(1.02);
+      }
+      .missing {
+        color: #dc2626;
+        font-style: italic;
+        text-align: center;
+        padding: 40px;
+      }
+      .stats {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      .difference-good {
+        background: #10b981;
+      }
+      .difference-moderate {
+        background: #f59e0b;
+      }
+      .difference-high {
+        background: #ef4444;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+      }
+      .modal-content {
+        margin: auto;
+        display: block;
+        width: 80%;
+        max-width: 1200px;
+        max-height: 80%;
+        margin-top: 5%;
+      }
+      .close {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .legend {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Cypress vs Playwright Screenshot Comparison</h1>
+      <p>
+        Visual comparison of test screenshots after migration from Cypress to
+        Playwright
+      </p>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color difference-good"></div>
+          <span>Good (0-2% diff)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color difference-moderate"></div>
+          <span>Moderate (2-3% diff)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color difference-high"></div>
+          <span>High (4%+ diff)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <!-- Smoke Test -->
+      <div class="comparison-item">
+        <h3 class="test-title">Smoke Test - Home Page</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/Smoke%20test%20%20should%20load%20the%20home%20page%20%230.png"
+                alt="Cypress Smoke Test"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-moderate">2.20% diff</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/smoke.spec.ts-snapshots/should-load-the-home-page-chromium-darwin.png"
+                alt="Playwright Smoke Test"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Async Message 1 -->
+      <div class="comparison-item">
+        <h3 class="test-title">Async Message 1</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/Rendering%20%20Async%20message%20-%201%20%230.png"
+                alt="Cypress Async 1"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-good">0.90% diff</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/async-message.spec.ts-snapshots/async-message-1-chromium-darwin.png"
+                alt="Playwright Async 1"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Async Message 2 -->
+      <div class="comparison-item">
+        <h3 class="test-title">Async Message 2</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/Rendering%20%20Async%20message%20-%202%20%230.png"
+                alt="Cypress Async 2"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-good">~1% diff</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/async-message.spec.ts-snapshots/async-message-2-chromium-darwin.png"
+                alt="Playwright Async 2"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Creation Test -->
+      <div class="comparison-item">
+        <h3 class="test-title">Creation Test</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/Smoke%20test%20%20creation%20%230.png"
+                alt="Cypress Creation"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-good">0.50% diff</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/creation.spec.ts-snapshots/creation-chromium-darwin.png"
+                alt="Playwright Creation"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interaction Test -->
+      <div class="comparison-item">
+        <h3 class="test-title">Interaction Test</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/Smoke%20test%20%20interaction%20%230.png"
+                alt="Cypress Interaction"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-moderate">2.48% diff</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/interaction.spec.ts-snapshots/interaction-chromium-darwin.png"
+                alt="Playwright Interaction"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fragment Test -->
+      <div class="comparison-item">
+        <h3 class="test-title">Fragment Test ⚠️ HIGH DIFFERENCE</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/Smoke%20test%20%20fragment%20%230.png"
+                alt="Cypress Fragment"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-high">4.02% diff</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/fragment.spec.ts-snapshots/Smoke-test-fragment-1-chromium-darwin.png"
+                alt="Playwright Fragment"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Return Test -->
+      <div class="comparison-item">
+        <h3 class="test-title">Return Functionality</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/Return%20functionality%20%20return%20%230.png"
+                alt="Cypress Return"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-good">1.72% diff</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/return.spec.ts-snapshots/Return-functionality-return-1-chromium-darwin.png"
+                alt="Playwright Return"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Style Panel - Before Click -->
+      <div class="comparison-item">
+        <h3 class="test-title">Style Panel - Before Click</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/before-click%20%230.png"
+                alt="Cypress Before Click"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-good">0.50% diff</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/style-panel.spec.ts-snapshots/before-click-chromium-darwin.png"
+                alt="Playwright Before Click"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Style Panel - After Click -->
+      <div class="comparison-item">
+        <h3 class="test-title">Style Panel - After Click</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/after-click%20%230.png"
+                alt="Cypress After Click"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-good">1.45% diff</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/style-panel.spec.ts-snapshots/after-click-chromium-darwin.png"
+                alt="Playwright After Click"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editable Label - Special Characters -->
+      <div class="comparison-item">
+        <h3 class="test-title">
+          Editable Label - Special Characters & Extra Spaces
+        </h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/Editable%20Label%20%20Special%20characters%20%26%20extra%20spaces%20%230.png"
+                alt="Cypress Special Characters"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-good">New comparison</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/editable-label.spec.ts-snapshots/Editable-Label-Special-characters-extra-spaces-1-chromium-darwin.png"
+                alt="Playwright Special Characters"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editable Label - Self Message -->
+      <div class="comparison-item">
+        <h3 class="test-title">Editable Label - Self Message</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/Editable%20Label%20%20Self%20message%20%230.png"
+                alt="Cypress Self Message"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-good">New comparison</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/editable-label.spec.ts-snapshots/Editable-Label-Self-message-1-chromium-darwin.png"
+                alt="Playwright Self Message"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editable Label - Async Message -->
+      <div class="comparison-item">
+        <h3 class="test-title">Editable Label - Async Message</h3>
+        <div class="images-container">
+          <div class="image-side">
+            <div class="image-header cypress-header">Cypress (Expected)</div>
+            <div class="image-content">
+              <img
+                src="cypress/e2e/__image_snapshots__/Editable%20Label%20%20Async%20message%20%230.png"
+                alt="Cypress Async Message Edit"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+              <div class="stats difference-good">New comparison</div>
+            </div>
+          </div>
+          <div class="image-side">
+            <div class="image-header playwright-header">
+              Playwright (Actual)
+            </div>
+            <div class="image-content">
+              <img
+                src="tests/editable-label.spec.ts-snapshots/Editable-Label-Async-message-1-chromium-darwin.png"
+                alt="Playwright Async Message Edit"
+                class="screenshot"
+                onclick="openModal(this)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for enlarged images -->
+    <div id="imageModal" class="modal">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <img class="modal-content" id="modalImage" />
+    </div>
+
+    <script>
+      function openModal(img) {
+        const modal = document.getElementById("imageModal");
+        const modalImg = document.getElementById("modalImage");
+        modal.style.display = "block";
+        modalImg.src = img.src;
+      }
+
+      function closeModal() {
+        document.getElementById("imageModal").style.display = "none";
+      }
+
+      // Close modal when clicking outside the image
+      window.onclick = function (event) {
+        const modal = document.getElementById("imageModal");
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      };
+
+      // Handle image load errors
+      document.querySelectorAll(".screenshot").forEach((img) => {
+        img.onerror = function () {
+          this.style.display = "none";
+          this.parentNode.innerHTML +=
+            '<div class="missing">❌ Image not found</div>';
+        };
+      });
+    </script>
+  </body>
+</html>
