@@ -1,9 +1,6 @@
 import { centerOf, distance2 } from "./utils";
 import Anchor2 from "@/positioning/Anchor2";
-import {
-  depthOnParticipant,
-  depthOnParticipant4Stat,
-} from "@/parser/DepthCalculator";
+import { getParticipantDepthInfo } from "@/parser/DepthCalculator";
 
 export const useArrow = ({
   context,
@@ -18,17 +15,13 @@ export const useArrow = ({
 }) => {
   const isSelf = source === target;
 
-  const originLayers = depthOnParticipant(context, origin);
+  const depthInfo = getParticipantDepthInfo(context, origin, source, target);
 
-  const sourceLayers = depthOnParticipant(context, source);
+  const anchor2Origin = new Anchor2(centerOf(origin), depthInfo.origin.layers);
 
-  const targetLayers = depthOnParticipant4Stat(context, target);
+  const anchor2Source = new Anchor2(centerOf(source), depthInfo.source.layers);
 
-  const anchor2Origin = new Anchor2(centerOf(origin), originLayers);
-
-  const anchor2Source = new Anchor2(centerOf(source), sourceLayers);
-
-  const anchor2Target = new Anchor2(centerOf(target), targetLayers);
+  const anchor2Target = new Anchor2(centerOf(target), depthInfo.target.layers);
 
   const interactionWidth = Math.abs(anchor2Source.edgeOffset(anchor2Target));
 
@@ -40,9 +33,9 @@ export const useArrow = ({
 
   return {
     isSelf,
-    originLayers,
-    sourceLayers,
-    targetLayers,
+    originLayers: depthInfo.origin.layers,
+    sourceLayers: depthInfo.source.layers,
+    targetLayers: depthInfo.target.layers,
     anchor2Origin,
     anchor2Source,
     anchor2Target,

@@ -1,4 +1,5 @@
 import sequenceParser from "@/generated-parser/sequenceParser";
+import { ParticipantDepth, ParticipantDepthInfo } from "./ast/ParticipantDepth";
 
 export const depthOnParticipant = (context: any, participant: any): number => {
   return context?.getAncestors((ctx: any) => {
@@ -27,4 +28,41 @@ export const depthOnParticipant4Stat = (
     return 0;
   }
   return depthOnParticipant(child, participant);
+};
+
+export const getParticipantDepth = (
+  context: any,
+  participant: string,
+): ParticipantDepth => {
+  const depth = depthOnParticipant(context, participant);
+  return {
+    participant,
+    depth,
+    layers: depth,
+  };
+};
+
+export const getParticipantDepthForStat = (
+  context: any,
+  participant: string,
+): ParticipantDepth => {
+  const depth = depthOnParticipant4Stat(context, participant);
+  return {
+    participant,
+    depth,
+    layers: depth,
+  };
+};
+
+export const getParticipantDepthInfo = (
+  context: any,
+  origin: string,
+  source: string,
+  target: string,
+): ParticipantDepthInfo => {
+  return {
+    origin: getParticipantDepth(context, origin),
+    source: getParticipantDepth(context, source),
+    target: getParticipantDepthForStat(context, target),
+  };
 };
