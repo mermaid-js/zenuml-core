@@ -44,11 +44,8 @@ jobs:
       - name: Build site
         run: pnpm build:site
 
-      - name: Start server and run Playwright tests
-        run: |
-          pnpm preview &
-          sleep 5
-          pnpm pw:ci
+      - name: Run Playwright tests
+        run: pnpm pw:ci
         env:
           CI: true
 
