@@ -1,5 +1,10 @@
 import { cn } from "@/utils";
-import { modeAtom, onMessageClickAtom, RenderMode } from "@/store/Store";
+import {
+  dragAnchorAtom,
+  modeAtom,
+  onMessageClickAtom,
+  RenderMode,
+} from "@/store/Store";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { CSSProperties, useRef } from "react";
 import { useAtomValue } from "jotai";
@@ -89,6 +94,7 @@ export const Message = (props: {
     number,
   } = props;
   const mode = useAtomValue(modeAtom);
+  const dragAnchore = useAtomValue(dragAnchorAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const isAsync = type === "async";
@@ -120,6 +126,7 @@ export const Message = (props: {
           return: type === "return",
           "right-to-left": rtl,
         },
+        dragAnchore ? "pointer-events-none" : "pointer-events-auto",
         className,
       )}
       style={{ ...style, borderBottomStyle: borderStyle }}

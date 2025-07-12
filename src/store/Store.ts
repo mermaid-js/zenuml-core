@@ -110,4 +110,12 @@ export const dragParticipantAtom = atom<{
   y: number;
 }>();
 
+export const dragAnchorAtom = atom<{
+  context: any;
+  index?: number;
+  participant: string;
+  x: number;
+  y: number;
+}>();
+
 export default store;
