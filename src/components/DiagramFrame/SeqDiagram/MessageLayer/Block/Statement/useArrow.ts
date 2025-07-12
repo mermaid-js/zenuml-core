@@ -1,19 +1,10 @@
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { centerOf, distance2 } from "./utils";
 import Anchor2 from "@/positioning/Anchor2";
+import { MessageCountingUtils } from "@/utils/MessageCountingUtils";
 
 const depthOnParticipant = (context: any, participant: any): number => {
-  return context?.getAncestors((ctx: any) => {
-    const isSync = (ctx: any) => {
-      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-      return isMessageContext || isCreationContext;
-    };
-    if (isSync(ctx)) {
-      return ctx.Owner() === participant;
-    }
-    return false;
-  }).length;
+  return MessageCountingUtils.getParticipantMessageDepth(context, participant);
 };
 
 const depthOnParticipant4Stat = (context: any, participant: any): number => {
