@@ -16,6 +16,7 @@
     "pw": "playwright test",
     "pw:ci": "playwright test --reporter=github",
     "pw:update": "playwright test --update-snapshots",
+    "pw:update-ci": "playwright test --update-snapshots --reporter=github",
     "pw:ui": "playwright test --ui",
     "pw:smoke": "playwright test smoke",
     "pw:install": "playwright install",
