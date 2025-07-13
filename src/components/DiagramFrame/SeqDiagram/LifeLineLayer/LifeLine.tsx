@@ -5,7 +5,7 @@ import parentLogger from "@/logger/logger";
 import { EventBus } from "@/EventBus";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
-import { centerOf } from "../MessageLayer/Block/Statement/utils";
+import { getParticipantCenter } from "@/positioning/GeometryUtils";
 
 const logger = parentLogger.child({ name: "LifeLine" });
 
@@ -22,7 +22,7 @@ export const LifeLine = (props: {
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
 
-  const left = centerOf(props.entity.name) - (props.groupLeft || 0);
+  const left = getParticipantCenter(props.entity.name) - (props.groupLeft || 0);
 
   const updateTop = useCallback(() => {
     // escape entity name to avoid 'not a valid selector' error.

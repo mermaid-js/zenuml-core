@@ -12,7 +12,7 @@
     "build:site": "vite build",
     "build:gh-pages": "vite build --mode gh-pages",
     "build": "vite build -c vite.config.lib.ts",
-    "test": "vitest",
+    "test": "vitest --run",
     "pw": "playwright test",
     "pw:ci": "playwright test --reporter=github",
     "pw:update": "playwright test --update-snapshots",

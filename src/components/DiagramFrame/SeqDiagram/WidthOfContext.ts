@@ -2,9 +2,8 @@ import { AllMessages } from "@/parser/MessageCollector";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder, { Frame } from "@/positioning/FrameBorder";
 import { Coordinates } from "@/positioning/Coordinates";
-import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { calculateFragmentContextWidth, calculateSelfMessageExtraWidth } from "@/positioning/GeometryUtils";
 
 export function TotalWidth(ctx: any, coordinates: Coordinates) {
   const allParticipants = coordinates.orderedParticipantNames();
@@ -16,43 +15,24 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
       .slice()
       .reverse()
       .find((p) => localParticipants.includes(p)) || "";
+  
+  if (leftParticipant === "" || rightParticipant === "") {
+    return 0;
+  }
+
   const frameBuilder = new FrameBuilder(allParticipants as string[]);
   const frame = frameBuilder.getFrame(ctx);
   const border = FrameBorder(frame as Frame);
-  const extraWidth = extraWidthDueToSelfMessage(
-    ctx,
-    rightParticipant,
-    coordinates,
-  );
-  // if (leftParticipant === "" || rightParticipant === "") {
-  //   return 0;
-  // }
-  const participantWidth =
-    coordinates.distance(leftParticipant, rightParticipant) +
-    coordinates.half(leftParticipant) +
-    coordinates.half(rightParticipant);
-  return (
-    Math.max(participantWidth, FRAGMENT_MIN_WIDTH) +
-    border.left +
-    border.right +
-    extraWidth
-  );
+  
+  // Calculate extra width due to self messages using new mathematical model
+  const allMessages = AllMessages(ctx);
+  const selfMessages = allMessages.filter((m) => m.from === m.to);
+  const extraWidth = calculateSelfMessageExtraWidth(selfMessages, rightParticipant, coordinates);
+  
+  // Calculate border depth from border object (border.left should equal border.right)
+  const borderDepth = border.left / 10; // FRAGMENT_PADDING_X = 10
+  
+  // Use new mathematical model for fragment context width calculation
+  return calculateFragmentContextWidth(leftParticipant, rightParticipant, borderDepth, extraWidth, coordinates);
 }
 
-function extraWidthDueToSelfMessage(
-  ctx: any,
-  rightParticipant: string,
-  coordinates: Coordinates,
-) {
-  const allMessages = AllMessages(ctx);
-  const widths = allMessages
-    .filter((m) => m.from === m.to)
-    // 37 is arrow width (30) + half occurrence width(7)
-    .map(
-      (m) =>
-        coordinates.getMessageWidth(m) -
-        coordinates.distance(m.from || _STARTER_, rightParticipant) -
-        coordinates.half(rightParticipant),
-    );
-  return Math.max.apply(null, [0, ...widths]);
-}

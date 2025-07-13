@@ -3,7 +3,7 @@ import { cn } from "@/utils";
 import { getStyle } from "@/utils/messageStyling";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
-import { centerOf } from "../utils";
+import { getParticipantCenter } from "@/positioning/GeometryUtils";
 
 export const Divider = (props: {
   context: any;
@@ -16,10 +16,10 @@ export const Divider = (props: {
     // TODO: with should be the width of the whole diagram
     const rearParticipant = participants.Names().pop();
     // 20px for the right margin of the participant
-    return centerOf(rearParticipant) + 10;
+    return getParticipantCenter(rearParticipant) + 10;
   }, [participants]);
 
-  const centerOfOrigin = centerOf(props.origin);
+  const centerOfOrigin = getParticipantCenter(props.origin);
 
   const note = props.context.divider().Note();
 

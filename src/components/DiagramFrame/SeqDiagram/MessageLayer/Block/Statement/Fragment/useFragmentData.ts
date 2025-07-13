@@ -6,7 +6,11 @@ import store, { coordinatesAtom } from "@/store/Store";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { useEffect, useState, useMemo } from "react";
 import { depthOnParticipant } from "../utils";
-import Anchor2 from "@/positioning/Anchor2";
+import { 
+  calculateFragmentOffset, 
+  generateFragmentTransform, 
+  calculateFragmentPaddingLeft 
+} from "@/positioning/GeometryUtils";
 
 export const getLeftParticipant = (context: any) => {
   const allParticipants = store.get(coordinatesAtom).orderedParticipantNames();
@@ -58,9 +62,8 @@ class FragmentGeometryExtractor {
 
 
 /**
- * Pure mathematical fragment coordinate transformer
- * Depends only on the Coordinates object (which is mathematically pure) and geometry parameters
- * No dependency on the God object (context)
+ * Simplified fragment coordinate transformer using unified mathematical model
+ * Uses LayoutMath for all complex calculations, dramatically reducing code complexity
  */
 class PureFragmentCoordinateTransform {
   private readonly geometry: FragmentGeometry;
@@ -78,10 +81,8 @@ class PureFragmentCoordinateTransform {
   }
 
   /**
-   * Core mathematical transformation: calculate fragment offset in global coordinate system
-   * 
-   * Mathematical model:
-   * offset = border_padding + participant_alignment + activation_layer_correction
+   * Core mathematical transformation using unified LayoutMath
+   * Replaces complex manual calculations with clean mathematical model
    */
   calculateOffsetX(): number {
     if (this._offsetX !== undefined) {
@@ -89,43 +90,11 @@ class PureFragmentCoordinateTransform {
     }
 
     const { leftParticipant, borderPadding } = this.geometry;
-    const leftHalfWidth = this.coordinates.half(leftParticipant);
+    const borderDepth = borderPadding.left / 10; // Convert border to depth (FRAGMENT_PADDING_X = 10)
     
-    // Base offset: border padding + left participant half width
-    const baseOffset = borderPadding.left + leftHalfWidth;
-    
-    // If same participant, return base offset directly
-    if (leftParticipant === this.origin || !this.origin) {
-      console.debug(`Simple offset calculation - left participant: ${leftParticipant} ${leftHalfWidth}`);
-      this._offsetX = baseOffset;
-      return baseOffset;
-    }
-    
-    // Cross-participant spatial transformation
-    const spatialCorrection = this.calculateSpatialCorrection();
-    const result = baseOffset + spatialCorrection;
-    this._offsetX = result;
-    return result;
-  }
-
-  /**
-   * Calculate spatial correction caused by activation bar layers
-   * 
-   * Mathematical model:
-   * correction = centerToCenter(left_anchor, origin_anchor_with_layers)
-   */
-  private calculateSpatialCorrection(): number {
-    const { leftParticipant, originLayers } = this.geometry;
-    
-    // Get positions directly from coordinates object (mathematically pure)
-    const leftPosition = this.coordinates.getPosition(leftParticipant) || 0;
-    const originPosition = this.coordinates.getPosition(this.origin) || 0;
-    
-    // Create Anchor2 instances for precise calculation
-    const leftAnchor = new Anchor2(leftPosition, 0);
-    const originAnchor = new Anchor2(originPosition, originLayers);
-    
-    return leftAnchor.centerToCenter(originAnchor);
+    // Use unified mathematical model - replaces 50+ lines of complex calculation
+    this._offsetX = calculateFragmentOffset(leftParticipant, this.origin, borderDepth, this.coordinates);
+    return this._offsetX;
   }
 
   generateFragmentStyle(totalWidth: number, minWidth: number): any {
@@ -133,9 +102,14 @@ class PureFragmentCoordinateTransform {
       return this._fragmentStyle;
     }
 
-    const offsetX = this.calculateOffsetX();
+    const { leftParticipant, borderPadding } = this.geometry;
+    const borderDepth = borderPadding.left / 10; // Convert border to depth
+    
+    // Use unified mathematical model for transform generation
+    const transform = generateFragmentTransform(leftParticipant, this.origin, borderDepth, this.coordinates);
+    
     this._fragmentStyle = {
-      transform: `translateX(${-(offsetX + 1)}px)`,
+      transform: transform,
       width: `${totalWidth}px`,
       minWidth: `${minWidth}px`,
     };
@@ -145,8 +119,10 @@ class PureFragmentCoordinateTransform {
 
   getPaddingLeft(): number {
     const { leftParticipant, borderPadding } = this.geometry;
-    const leftHalfWidth = this.coordinates.half(leftParticipant);
-    return borderPadding.left + leftHalfWidth;
+    const borderDepth = borderPadding.left / 10; // Convert border to depth
+    
+    // Use unified mathematical model - replaces manual calculation
+    return calculateFragmentPaddingLeft(leftParticipant, borderDepth, this.coordinates);
   }
 
   getLeftParticipant(): string {
@@ -166,26 +142,39 @@ class PureFragmentCoordinateTransform {
 
 export const getOffsetX = (context: any, origin: string) => {
   const coordinates = store.get(coordinatesAtom);
-  const geometry = FragmentGeometryExtractor.extract(context, origin);
-  const transform = new PureFragmentCoordinateTransform(geometry, origin, coordinates);
-  return transform.calculateOffsetX();
+  const leftParticipant = getLeftParticipant(context);
+  const border = getBorder(context);
+  const borderDepth = border.left / 10; // Convert border to depth
+  
+  // Use unified mathematical model directly
+  return calculateFragmentOffset(leftParticipant || "", origin, borderDepth, coordinates);
 };
 
 export const getPaddingLeft = (context: any) => {
-  const halfLeftParticipant = store
-    .get(coordinatesAtom)
-    .half(getLeftParticipant(context) || "");
-  return getBorder(context).left + halfLeftParticipant;
+  const leftParticipant = getLeftParticipant(context);
+  const border = getBorder(context);
+  const borderDepth = border.left / 10; // Convert border to depth
+  const coordinates = store.get(coordinatesAtom);
+  
+  // Use unified mathematical model directly
+  return calculateFragmentPaddingLeft(leftParticipant || "", borderDepth, coordinates);
 };
 
 export const getFragmentStyle = (context: any, origin: string) => {
   const coordinates = store.get(coordinatesAtom);
-  const geometry = FragmentGeometryExtractor.extract(context, origin);
-  const transform = new PureFragmentCoordinateTransform(geometry, origin, coordinates);
-  return transform.generateFragmentStyle(
-    TotalWidth(context, coordinates),
-    FRAGMENT_MIN_WIDTH
-  );
+  const leftParticipant = getLeftParticipant(context);
+  const border = getBorder(context);
+  const borderDepth = border.left / 10; // Convert border to depth
+  
+  // Use unified mathematical model for transform
+  const transform = generateFragmentTransform(leftParticipant || "", origin, borderDepth, coordinates);
+  const totalWidth = TotalWidth(context, coordinates);
+  
+  return {
+    transform: transform,
+    width: `${totalWidth}px`,
+    minWidth: `${FRAGMENT_MIN_WIDTH}px`,
+  };
 };
 
 export const useFragmentData = (context: any, origin: string) => {

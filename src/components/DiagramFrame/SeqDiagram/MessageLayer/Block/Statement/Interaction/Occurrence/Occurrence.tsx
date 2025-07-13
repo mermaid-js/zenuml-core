@@ -3,7 +3,7 @@ import { EventBus } from "@/EventBus";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
-import { centerOf } from "../../utils";
+import { getParticipantCenter } from "@/positioning/GeometryUtils";
 
 export const Occurrence = (props: {
   context: any;
@@ -18,7 +18,7 @@ export const Occurrence = (props: {
 
   const computedCenter = () => {
     try {
-      return centerOf(props.participant);
+      return getParticipantCenter(props.participant);
     } catch (e) {
       console.error(e);
       return 0;

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Block } from "./Block/Block";
-import { centerOf } from "./Block/Statement/utils";
+import { getParticipantCenter } from "@/positioning/GeometryUtils";
 import { StylePanel } from "./StylePanel";
 import { useAtomValue } from "jotai";
 import { rootContextAtom } from "@/store/Store";
@@ -23,7 +23,7 @@ export const MessageLayer = (props: {
     return ownableMessages[0].from || _STARTER_;
   }, [rootContext]);
 
-  const paddingLeft = centerOf(origin) + 1;
+  const paddingLeft = getParticipantCenter(origin) + 1;
 
   const [mounted, setMounted] = useState(false);
   if (mounted) {

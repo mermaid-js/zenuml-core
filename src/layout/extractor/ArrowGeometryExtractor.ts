@@ -1,5 +1,6 @@
 import { ArrowGeometry, ParticipantArrowData } from "../geometry/ArrowGeometry";
-import { centerOf, depthOnParticipant } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/utils";
+import { getParticipantCenter } from "@/positioning/GeometryUtils";
+import { depthOnParticipant } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/utils";
 import sequenceParser from "@/generated-parser/sequenceParser";
 
 /**
@@ -48,7 +49,7 @@ export class ArrowGeometryExtractor {
     isTarget: boolean = false
   ): ParticipantArrowData {
     
-    const centerPosition = centerOf(participantName);
+    const centerPosition = getParticipantCenter(participantName);
     const activationLayers = isTarget 
       ? this.depthOnParticipantForTarget(context, participantName)
       : depthOnParticipant(context, participantName);
