@@ -62,5 +62,9 @@ export default defineConfig(({ mode }) => ({
       provider: "v8", // or 'v8'
     },
     setupFiles: resolve(__dirname, "test/setup.ts"),
+    exclude: [
+      "node_modules/**",
+      "tests/**", // Exclude Playwright tests
+    ],
   },
 }));
