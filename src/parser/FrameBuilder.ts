@@ -1,9 +1,6 @@
 import antlr4 from "antlr4";
 import sequenceParserListener from "../generated-parser/sequenceParserListener";
 import { Frame } from "@/positioning/FrameBorder";
-import { Participants } from "./index";
-import { Participant } from "@/parser/Participants";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
@@ -16,16 +13,6 @@ class FrameBuilder extends sequenceParserListener {
   constructor(orderedParticipants: string[]) {
     super();
     this._orderedParticipants = orderedParticipants;
-  }
-
-  // TODO: extract a module to get local participants
-  private getLocalParticipants(ctx: any): string[] {
-    return [
-      ctx.Origin() || _STARTER_,
-      ...Participants(ctx)
-        .ImplicitArray()
-        .map((p: Participant) => p.name),
-    ];
   }
 
   private getLeft(ctx: any): string {
