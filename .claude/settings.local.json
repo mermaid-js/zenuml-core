@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm test:*)",
+      "Bash(act:*)",
+      "Bash(brew info:*)",
+      "Bash(pnpm cy:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(compare:*)",
+      "Bash(open:*)",
+      "Bash(pnpm eslint:*)"
+    ],
+    "deny": []
+  }
+}

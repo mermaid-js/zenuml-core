@@ -5,24 +5,8 @@ import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import store, { coordinatesAtom } from "@/store/Store";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { useEffect, useState } from "react";
-import sequenceParser from "@/generated-parser/sequenceParser";
 import Anchor2 from "@/positioning/Anchor2";
-import { centerOf } from "../utils";
-
-// Helper function to calculate the depth/layers on a participant due to nested calls
-const depthOnParticipant = (context: any, participant: any): number => {
-  return context?.getAncestors((ctx: any) => {
-    const isSync = (ctx: any) => {
-      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-      return isMessageContext || isCreationContext;
-    };
-    if (isSync(ctx)) {
-      return ctx.Owner() === participant;
-    }
-    return false;
-  }).length;
-};
+import { centerOf, depthOnParticipant } from "../utils";
 
 export const getLeftParticipant = (context: any) => {
   const allParticipants = store.get(coordinatesAtom).orderedParticipantNames();

@@ -1,5 +1,6 @@
 import { Coordinates } from "@/positioning/Coordinates";
 import store, { coordinatesAtom } from "@/store/Store";
+import sequenceParser from "@/generated-parser/sequenceParser";
 
 let coordinates: Coordinates = store.get(coordinatesAtom);
 store.sub(coordinatesAtom, () => {
@@ -46,4 +47,18 @@ export const distance = (from: string, to: string) => {
 export const distance2 = (from: string, to: string) => {
   if (!from || !to) return 0;
   return centerOf(to) - centerOf(from);
+};
+
+export const depthOnParticipant = (context: any, participant: any): number => {
+  return context?.getAncestors((ctx: any) => {
+    const isSync = (ctx: any) => {
+      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
+      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
+      return isMessageContext || isCreationContext;
+    };
+    if (isSync(ctx)) {
+      return ctx.Owner() === participant;
+    }
+    return false;
+  }).length;
 };
