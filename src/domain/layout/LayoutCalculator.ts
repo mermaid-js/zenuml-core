@@ -20,6 +20,11 @@ export class LayoutCalculator {
   private currentY = 50;  // Start position
 
   calculate(diagram: SequenceDiagram): DiagramLayout {
+    console.log('[LayoutCalculator] Calculating layout for diagram');
+    console.log('  - Participants:', diagram.participants.size);
+    console.log('  - Interactions:', diagram.interactions.length);
+    console.log('  - Fragments:', diagram.fragments.length);
+    
     // Step 1: Calculate participant positions
     const participants = this.calculateParticipantLayouts(diagram);
     
@@ -170,6 +175,7 @@ export class LayoutCalculator {
           break;
           
         case 'divider':
+          console.log('[LayoutCalculator] Processing divider statement:', statement);
           const dividerLayout = this.calculateDividerLayout(
             statement as DividerStatement,
             diagram

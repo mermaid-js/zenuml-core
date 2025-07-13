@@ -136,6 +136,7 @@ export const Participant = (props: {
 }) => {
   // If layout data is provided, use the new rendering path
   if (props.layoutData) {
+    console.log('[Participant] Using NEW architecture for:', props.layoutData.participantId);
     return <ParticipantWithLayout layout={props.layoutData} offsetTop2={props.offsetTop2} />;
   }
   
@@ -155,6 +156,8 @@ export const Participant = (props: {
     console.warn('Participant: Neither layoutData, participantId with valid layout, nor entity provided');
     return null;
   }
+  
+  console.log('[Participant] Using OLD architecture for:', props.entity.name);
   const elRef = useRef<HTMLDivElement>(null);
   const mode = useAtomValue(modeAtom);
   const participants = useAtomValue(participantsAtom);

@@ -13,10 +13,14 @@ import { DiagramLayout } from '@/domain/models/DiagramLayout';
 // Domain model derived from parse tree
 export const domainModelAtom = atom<SequenceDiagram | null>((get) => {
   const rootContext = get(rootContextAtom);
-  if (!rootContext) return null;
+  if (!rootContext) {
+    console.log('[DomainModelStore] No root context available');
+    return null;
+  }
   
   try {
     // Convert parse tree to domain model (single traversal)
+    console.log('[DomainModelStore] Building domain model from root context');
     return buildDomainModel(rootContext);
   } catch (error) {
     console.error('Failed to build domain model:', error);
@@ -27,12 +31,22 @@ export const domainModelAtom = atom<SequenceDiagram | null>((get) => {
 // Layout calculated from domain model
 export const diagramLayoutAtom = atom<DiagramLayout | null>((get) => {
   const domainModel = get(domainModelAtom);
-  if (!domainModel) return null;
+  if (!domainModel) {
+    console.log('[DomainModelStore] No domain model available for layout');
+    return null;
+  }
   
   try {
     // Calculate layout from domain model (pure calculation)
+    console.log('[DomainModelStore] Calculating layout from domain model');
     const calculator = new LayoutCalculator();
-    return calculator.calculate(domainModel);
+    const layout = calculator.calculate(domainModel);
+    console.log('[DomainModelStore] Layout calculated:', {
+      participants: layout.participants.length,
+      dividers: layout.dividers.length,
+      interactions: layout.interactions.length
+    });
+    return layout;
   } catch (error) {
     console.error('Failed to calculate layout:', error);
     return null;

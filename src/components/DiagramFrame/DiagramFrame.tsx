@@ -24,6 +24,7 @@ import { TipsDialog } from "./Tutorial/TipsDialog";
 import Icon from "../Icon/Icons";
 import { ThemeSelector } from "./ThemeSelector";
 import { SeqDiagram } from "./SeqDiagram/SeqDiagram";
+import { DebugPanel } from "../DebugPanel";
 
 const exportConfig = {
   backgroundColor: "white",
@@ -175,6 +176,8 @@ export const DiagramFrame = ({
             className="origin-top-left"
             style={{ transform: `scale(${scale})` }}
           />
+          {/* Show debug panel - remove true || to only show in development */}
+          {(true || process.env.NODE_ENV === 'development') && <DebugPanel />}
         </div>
         <div className="footer rounded text-skin-control bg-skin-title px-4 py-1 flex justify-between items-center gap-3">
           {mode === RenderMode.Dynamic && (

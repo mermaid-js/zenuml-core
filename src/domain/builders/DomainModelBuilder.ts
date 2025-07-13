@@ -271,6 +271,8 @@ export class DomainModelBuilder extends sequenceParserListener {
   // Divider handling
   enterDivider(ctx: any) {
     const note = ctx.Note();
+    console.log('[DomainModelBuilder] Building divider with note:', note);
+    
     let text = note;
     let style: MessageStyle | undefined;
     
