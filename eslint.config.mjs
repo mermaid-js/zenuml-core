@@ -6,7 +6,15 @@ import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  { 
+    ignores: [
+      "node_modules",
+      "dist", 
+      "generated-parser",
+      "pnpm-lock.yaml",
+      "**.spec.js"
+    ]
+  },
   {
     extends: [
       js.configs.recommended,
