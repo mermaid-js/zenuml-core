@@ -27,7 +27,7 @@ export const SelfInvocation = (props: {
   return (
     <div
       ref={messageRef}
-      className="self-invocation message leading-none self flex items-start flex-col border-none"
+      className="self-invocation message leading-none self flex items-start flex-col border-none pointer-events-auto"
       onClick={onClick}
     >
       <label className="name text-left group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em] w-full">

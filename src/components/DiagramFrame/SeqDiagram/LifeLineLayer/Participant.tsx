@@ -11,6 +11,7 @@ import {
   onSelectAtom,
   participantsAtom,
   RenderMode,
+  scaleAtom,
   selectedAtom,
   stickyOffsetAtom,
 } from "@/store/Store";
@@ -96,7 +97,7 @@ export const Participant = (props: {
   const icon = isDefaultStarter
     ? iconPath["actor"]
     : iconPath[props.entity.type?.toLowerCase() as "actor"];
-
+  const scale = useAtomValue(scaleAtom);
   const handleDrag = () => {
     const {
       left = 0,
@@ -107,8 +108,8 @@ export const Participant = (props: {
     const diagramRect = diagramElement?.getBoundingClientRect();
     setDragParticipant({
       name: props.entity.name,
-      x: left + width / 2 - (diagramRect?.left || 0),
-      y: top + height / 2 - (diagramRect?.top || 0),
+      x: (left + width / 2) / scale - (diagramRect?.left || 0),
+      y: (top + height / 2) / scale - (diagramRect?.top || 0),
     });
   };
   const handleDrop = () => {

@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
 import { centerOf } from "../../utils";
+import { Anchor } from "../../../../Anchor";
+import { useAtomValue } from "jotai";
+import { dragAnchorAtom } from "@/store/Store";
 
 export const Occurrence = (props: {
   context: any;
@@ -13,6 +16,7 @@ export const Occurrence = (props: {
   className?: string;
 }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const dragAnchor = useAtomValue(dragAnchorAtom);
 
   const debug = localStorage.getItem("zenumlDebug");
 
@@ -50,6 +54,7 @@ export const Occurrence = (props: {
       className={cn(
         "occurrence min-h-6 shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full w-[15px] mt-[-2px] pl-[6px]",
         { "right-to-left left-[-14px]": props.rtl },
+        dragAnchor ? "pointer-events-none" : "pointer-events-auto",
         props.className,
       )}
       data-el-type="occurrence"
@@ -70,13 +75,15 @@ export const Occurrence = (props: {
       {hasAnyStatementsExceptReturn() && (
         <CollapseButton collapsed={collapsed} onClick={toggle} />
       )}
-      {props.context.braceBlock() && (
+      {props.context.braceBlock() ? (
         <Block
           origin={props.participant}
           context={props.context.braceBlock().block()}
           number={props.number}
           collapsed={collapsed}
         ></Block>
+      ) : (
+        <Anchor context={props.context} participant={props.participant} />
       )}
     </div>
   );

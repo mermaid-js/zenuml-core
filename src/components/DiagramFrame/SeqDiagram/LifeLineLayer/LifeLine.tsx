@@ -1,13 +1,28 @@
-import { diagramElementAtom, scaleAtom } from "@/store/Store";
-import { useAtomValue } from "jotai";
+import {
+  codeAtom,
+  diagramElementAtom,
+  dragAnchorAtom,
+  onContentChangeAtom,
+  scaleAtom,
+} from "@/store/Store";
+import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import parentLogger from "@/logger/logger";
 import { EventBus } from "@/EventBus";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
+import {
+  getCurrentLine,
+  getLeadingSpaces,
+  getLineTail,
+  getPrevLine,
+  getPrevNotCommentLineTail,
+} from "@/utils/StringUtil";
 
 const logger = parentLogger.child({ name: "LifeLine" });
+
+const INDENT = "  ";
 
 export const LifeLine = (props: {
   entity: any;
@@ -17,6 +32,8 @@ export const LifeLine = (props: {
   className?: string;
 }) => {
   const elRef = useRef<HTMLDivElement>(null);
+  const [code, setCode] = useAtom(codeAtom);
+  const onContentChange = useAtomValue(onContentChangeAtom);
   const scale = useAtomValue(scaleAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
@@ -61,6 +78,38 @@ export const LifeLine = (props: {
     EventBus.on("participant_set_top", () => setTimeout(() => updateTop(), 0));
   }, [props.entity, updateTop]);
 
+  const dragAnchor = useAtomValue(dragAnchorAtom);
+  const handleDrop = () => {
+    if (!dragAnchor) return;
+    let newCode = code;
+    const messageContent = `${props.entity.name}.method`;
+    if (typeof dragAnchor.index !== "number") {
+      const start = dragAnchor.context.children[0]?.start?.start;
+      const insertPosition = getLineTail(code, start);
+      const prev = code.slice(0, insertPosition);
+      const next = code.slice(insertPosition);
+      const leadingSpaces = getLeadingSpaces(
+        getPrevLine(code, insertPosition + 1),
+      );
+      newCode = `${prev} {\n${leadingSpaces}${INDENT}${messageContent}\n${leadingSpaces}}${next}`;
+    } else if (dragAnchor.index < dragAnchor.context.children.length) {
+      const start = dragAnchor.context.children[dragAnchor.index]?.start?.start;
+      const insertPosition = getPrevNotCommentLineTail(code, start) + 1;
+      const prev = code.slice(0, insertPosition);
+      const next = code.slice(insertPosition);
+      newCode = `${prev}${getLeadingSpaces(next)}${messageContent}\n${next}`;
+    } else {
+      const start =
+        dragAnchor.context.children.at(-1)?.stop?.stop || code.length;
+      const insertPosition = getLineTail(code, start);
+      const prev = code.slice(0, insertPosition);
+      const next = code.slice(insertPosition);
+      newCode = `${prev}\n${getLeadingSpaces(getCurrentLine(code, insertPosition))}${messageContent}\n${next}`;
+    }
+    setCode(newCode);
+    onContentChange(newCode);
+  };
+
   return (
     <div
       id={props.entity.name}
@@ -79,7 +128,16 @@ export const LifeLine = (props: {
         <Participant entity={props.entity} offsetTop2={top} />
       )}
       {props.renderLifeLine && (
-        <div className="line w0 mx-auto flex-grow w-px bg-[linear-gradient(to_bottom,transparent_50%,var(--color-border-base)_50%)] bg-[length:1px_10px]"></div>
+        <>
+          <div
+            className={cn(
+              "absolute top-0 bottom-0 -left-2.5 -right-2.5 hover:bg-sky-200 cursor-copy",
+              dragAnchor ? "visible" : "invisible",
+            )}
+            onMouseUp={handleDrop}
+          />
+          <div className="relative line w0 mx-auto flex-grow w-px bg-[linear-gradient(to_bottom,transparent_50%,var(--color-border-base)_50%)] bg-[length:1px_10px]" />
+        </>
       )}
     </div>
   );

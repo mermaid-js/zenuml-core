@@ -84,6 +84,7 @@ export const SeqDiagram = (props: {
               context={rootContext?.head()}
               renderLifeLine
             />
+            <DragLine />
             <MessageLayer
               context={rootContext?.block()}
               style={{ width: `${width}px` }}
@@ -109,7 +110,6 @@ export const SeqDiagram = (props: {
           </>
         )}
       </div>
-      <DragLine />
     </div>
   );
 };

@@ -1,6 +1,8 @@
 import { increaseNumber } from "@/utils/Numbering";
 import { Statement } from "./Statement/Statement";
 import { cn } from "@/utils";
+import { Fragment } from "react/jsx-runtime";
+import { Anchor } from "../Anchor";
 
 export const Block = (props: {
   origin?: string;
@@ -22,27 +24,38 @@ export const Block = (props: {
   };
   return (
     <div
-      className={cn("block", props.className)}
+      className={cn("block pt-6 pb-2 pointer-events-none", props.className)}
       style={props.style}
       data-origin={props.origin}
     >
+      <Anchor
+        context={props.context}
+        index={0}
+        participant={props.origin || ""}
+      />
       {statements.map((stat, index) => (
-        <div
-          className={cn(
-            "statement-container my-4",
-            index === statements.length - 1 &&
-              "[&>.return]:-mb-4 [&>.return]:bottom-[-1px]",
-          )}
-          data-origin={props.origin}
-          key={index}
-        >
-          <Statement
-            origin={props.origin || ""}
-            context={stat}
-            collapsed={Boolean(props.collapsed)}
-            number={getNumber(index)}
+        <Fragment key={index}>
+          <div
+            className={cn(
+              "statement-container pointer-events-none",
+              index === statements.length - 1 &&
+                "[&>.return]:-mb-4 [&>.return]:bottom-[-1px]",
+            )}
+            data-origin={props.origin}
+          >
+            <Statement
+              origin={props.origin || ""}
+              context={stat}
+              collapsed={Boolean(props.collapsed)}
+              number={getNumber(index)}
+            />
+          </div>
+          <Anchor
+            context={props.context}
+            index={index + 1}
+            participant={props.origin || ""}
           />
-        </div>
+        </Fragment>
       ))}
     </div>
   );

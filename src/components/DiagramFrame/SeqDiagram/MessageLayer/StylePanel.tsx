@@ -1,5 +1,10 @@
 import { cn } from "@/utils";
-import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/StringUtil";
+import {
+  getLeadingSpaces,
+  getLineHead,
+  getPrevLine,
+  getPrevLineHead,
+} from "@/utils/StringUtil";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   codeAtom,
@@ -87,7 +92,7 @@ export const StylePanel = () => {
       }
       if (!newComment.endsWith("\n")) newComment += "\n";
       updateCode(
-        code.slice(0, getPrevLineHead(code, message.start)) +
+        code.slice(0, getPrevLineHead(code, message.start) || 0) +
           newComment +
           code.slice(message.lineHead),
       );
@@ -110,10 +115,9 @@ export const StylePanel = () => {
       setTimeout(() => {
         const message = messageData.current;
         message.start = context.start.start;
-        message.lineHead = getLineHead(code, message.start);
+        message.lineHead = getLineHead(code, message.start) || 0;
         message.prevLine = getPrevLine(code, message.start);
-        message.leadingSpaces =
-          code.slice(message.lineHead).match(/^\s*/)?.[0] || "";
+        message.leadingSpaces = getLeadingSpaces(code.slice(message.lineHead));
         message.prevLineIsComment = message.prevLine.trim().startsWith("//");
         if (message.prevLineIsComment) {
           const trimedPrevLine = message.prevLine
@@ -142,7 +146,12 @@ export const StylePanel = () => {
   }, [code, refs, setOnMessageClick]);
 
   return (
-    <div id="style-panel" ref={refs.setFloating} style={floatingStyles}>
+    <div
+      id="style-panel"
+      ref={refs.setFloating}
+      className="pointer-events-auto"
+      style={floatingStyles}
+    >
       {isOpen && (
         <div className="flex bg-white shadow-md z-10 rounded-md p-1">
           {btns.map((btn) => (
