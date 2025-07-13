@@ -19,7 +19,7 @@
     "pw:update-ci": "playwright test --update-snapshots --reporter=github",
     "pw:ui": "playwright test --ui",
     "pw:smoke": "playwright test smoke",
-    "pw:install": "playwright install",
+    "pw:install": "playwright install-deps && playwright install chromium",
     "antlr:setup": "python3 -m pip install antlr4-tools",
     "antlr:generate": "pwd && cd ./src/g4-units/hello-world && antlr4 Hello.g4",
     "antlr:javac": "pwd && cd ./src/g4-units/hello-world && CLASSPATH=\"../../../antlr/antlr-4.11.1-complete.jar:$CLASSPATH\" javac *.java",
