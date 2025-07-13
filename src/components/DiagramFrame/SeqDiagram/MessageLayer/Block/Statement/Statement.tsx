@@ -32,11 +32,6 @@ export const Statement = (props: {
   // Helper to find divider layout - in a real implementation,
   // we'd need a better way to map context to domain model
   const findDividerLayout = () => {
-    console.log('[Statement] Finding divider layout...');
-    console.log('  - diagramLayout exists:', !!diagramLayout);
-    console.log('  - domainModel exists:', !!domainModel);
-    console.log('  - has divider context:', !!props.context.divider());
-    
     if (!diagramLayout || !domainModel || !props.context.divider()) {
       return undefined;
     }
@@ -44,8 +39,6 @@ export const Statement = (props: {
     // This is a simplified approach - in production, we'd need
     // a proper mapping between context and domain model statements
     const dividerText = props.context.divider().Note()?.trim();
-    console.log('  - divider text:', dividerText);
-    console.log('  - available dividers:', diagramLayout.dividers.map(d => d.text));
     
     if (dividerText) {
       return diagramLayout.dividers.find(d => 

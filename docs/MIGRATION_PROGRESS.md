@@ -54,15 +54,20 @@ We successfully migrated the Divider component as a proof of concept:
    - Successfully renders using pre-calculated layout
    - Maintains backward compatibility
 
-2. **Participant Component** ✅ (Just completed)
+2. **Participant Component** ✅ 
    - Enhanced to support dual-mode rendering
    - Can use either old entity prop or new layout data
    - Domain model now includes color/style information
    - Layout calculator provides all necessary properties
+   - NOW USING NEW ARCHITECTURE IN PRODUCTION!
 
 3. **Statement Component** ✅ (Enhanced)
    - Now passes layout data to child components when available
    - Provides bridge between old context and new layout system
+
+4. **LifeLine Component** ✅ (Just updated)
+   - Now passes participantId to enable new architecture
+   - Participant children now use pre-calculated layout
 
 ### Domain Model Enhancements
 

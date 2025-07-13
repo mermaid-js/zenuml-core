@@ -9,6 +9,11 @@ export const DebugPanel = () => {
   const domainModel = useAtomValue(domainModelAtom);
   const diagramLayout = useAtomValue(diagramLayoutAtom);
   
+  // Hide in test environments
+  if (typeof window !== 'undefined' && (window.location.pathname.includes('/cy/') || window.location.pathname.includes('/test'))) {
+    return null;
+  }
+  
   if (!domainModel || !diagramLayout) {
     return null;
   }

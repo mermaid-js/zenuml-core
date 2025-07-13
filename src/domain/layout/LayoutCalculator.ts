@@ -206,6 +206,10 @@ export class LayoutCalculator {
       return {
         interactionId: interaction.id,
         type: interaction.type,
+        from: interaction.from,
+        to: interaction.to,
+        message: interaction.message,
+        isSelfMessage: true,
         startPoint: { x: fromX, y: this.currentY },
         endPoint: { x: fromX + this.constraints.selfMessageWidth, y: this.currentY + 20 },
         labelBounds: {
@@ -221,13 +225,20 @@ export class LayoutCalculator {
             width: this.constraints.selfMessageWidth,
             height: 20
           }
-        }
+        },
+        translateX: fromX,
+        width: this.constraints.selfMessageWidth
       };
     }
     
     return {
       interactionId: interaction.id,
       type: interaction.type,
+      from: interaction.from,
+      to: interaction.to,
+      message: interaction.message,
+      rightToLeft: fromX > toX,
+      isSelfMessage: false,
       startPoint: {
         x: fromX + (nestingLevel * this.constraints.activationWidth),
         y: this.currentY
@@ -245,7 +256,9 @@ export class LayoutCalculator {
       arrowStyle: {
         lineType: interaction.type === 'return' ? 'dashed' : 'solid',
         arrowHead: interaction.type === 'async' ? 'open' : 'filled'
-      }
+      },
+      translateX: Math.min(fromX, toX),
+      width: Math.abs(toX - fromX)
     };
   }
 

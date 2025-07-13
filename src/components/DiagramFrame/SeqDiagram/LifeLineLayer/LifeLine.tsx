@@ -6,6 +6,7 @@ import { EventBus } from "@/EventBus";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { getParticipantCenter } from "@/positioning/GeometryUtils";
+import { diagramLayoutAtom } from "@/domain/DomainModelStore";
 
 const logger = parentLogger.child({ name: "LifeLine" });
 
@@ -16,6 +17,7 @@ export const LifeLine = (props: {
   renderLifeLine?: boolean;
   className?: string;
 }) => {
+  const diagramLayout = useAtomValue(diagramLayoutAtom);
   const elRef = useRef<HTMLDivElement>(null);
   const scale = useAtomValue(scaleAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
@@ -76,7 +78,11 @@ export const LifeLine = (props: {
       ref={elRef}
     >
       {props.renderParticipants && (
-        <Participant entity={props.entity} offsetTop2={top} />
+        <Participant 
+          entity={props.entity} 
+          participantId={props.entity.name}
+          offsetTop2={top} 
+        />
       )}
       {props.renderLifeLine && (
         <div className="line w0 mx-auto flex-grow w-px bg-[linear-gradient(to_bottom,transparent_50%,var(--color-border-base)_50%)] bg-[length:1px_10px]"></div>

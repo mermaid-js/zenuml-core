@@ -50,10 +50,18 @@ export interface LifelineLayout {
 export interface InteractionLayout {
   interactionId: string;
   type: 'sync' | 'async' | 'create' | 'return';
+  from: string;
+  to: string;
+  message: string;
   startPoint: Point;
   endPoint: Point;
   labelBounds: BoundingBox;
   arrowStyle: ArrowStyle;
+  rightToLeft?: boolean;
+  isSelfMessage?: boolean;
+  assignee?: string;
+  translateX?: number;
+  width?: number;
   children?: InteractionLayout[];  // For nested calls
 }
 

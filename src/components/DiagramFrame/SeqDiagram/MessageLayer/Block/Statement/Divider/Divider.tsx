@@ -44,7 +44,6 @@ export const Divider = (props: {
 }) => {
   // If layout data is provided, use the new rendering path
   if (props.layoutData) {
-    console.log('[Divider] Using NEW architecture for:', props.layoutData.text);
     return <DividerWithLayout layout={props.layoutData} className={props.className} />;
   }
   
@@ -53,8 +52,6 @@ export const Divider = (props: {
     console.warn('Divider: Neither layoutData nor context/origin provided');
     return null;
   }
-  
-  console.log('[Divider] Using OLD architecture');
   
   const participants = useAtomValue(participantsAtom);
 

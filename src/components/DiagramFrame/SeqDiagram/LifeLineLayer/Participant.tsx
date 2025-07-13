@@ -136,12 +136,11 @@ export const Participant = (props: {
 }) => {
   // If layout data is provided, use the new rendering path
   if (props.layoutData) {
-    console.log('[Participant] Using NEW architecture for:', props.layoutData.participantId);
     return <ParticipantWithLayout layout={props.layoutData} offsetTop2={props.offsetTop2} />;
   }
   
   // Try to get layout data from the new architecture if participantId is provided
-  if (props.participantId && !props.entity) {
+  if (props.participantId) {
     const diagramLayout = useAtomValue(diagramLayoutAtom);
     const participantLayout = diagramLayout?.participants.find(
       p => p.participantId === props.participantId
@@ -157,7 +156,6 @@ export const Participant = (props: {
     return null;
   }
   
-  console.log('[Participant] Using OLD architecture for:', props.entity.name);
   const elRef = useRef<HTMLDivElement>(null);
   const mode = useAtomValue(modeAtom);
   const participants = useAtomValue(participantsAtom);
