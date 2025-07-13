@@ -6,6 +6,7 @@ import store, { coordinatesAtom } from "@/store/Store";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { useEffect, useState, useMemo } from "react";
 import { depthOnParticipant } from "../utils";
+import Anchor2 from "@/positioning/Anchor2";
 
 export const getLeftParticipant = (context: any) => {
   const allParticipants = store.get(coordinatesAtom).orderedParticipantNames();
@@ -55,46 +56,6 @@ class FragmentGeometryExtractor {
   }
 }
 
-/**
- * Pure mathematical anchor point for activation bar layer calculations
- * Encapsulates the geometric transformation caused by occurrence bars
- */
-class MathematicalAnchor {
-  private readonly basePosition: number;
-  private readonly layers: number;
-  
-  constructor(basePosition: number, layers: number) {
-    this.basePosition = basePosition;
-    this.layers = layers;
-  }
-
-  /**
-   * Calculate effective center position considering activation bar layers
-   * 
-   * Mathematical formula:
-   * effective_center = base_position + OCCURRENCE_BAR_SIDE_WIDTH * (layers - 1)
-   */
-  getEffectiveCenter(): number {
-    if (this.layers <= 1) {
-      return this.basePosition;
-    }
-    return this.basePosition + 7 * (this.layers - 1); // OCCURRENCE_BAR_SIDE_WIDTH = 7
-  }
-
-  /**
-   * Calculate distance to another anchor point
-   */
-  distanceTo(other: MathematicalAnchor): number {
-    return other.getEffectiveCenter() - this.getEffectiveCenter();
-  }
-
-  /**
-   * Calculate center-to-center distance (equivalent to Anchor2.centerToCenter)
-   */
-  centerToCenter(other: MathematicalAnchor): number {
-    return this.distanceTo(other);
-  }
-}
 
 /**
  * Pure mathematical fragment coordinate transformer
@@ -151,7 +112,7 @@ class PureFragmentCoordinateTransform {
    * Calculate spatial correction caused by activation bar layers
    * 
    * Mathematical model:
-   * correction = distance(left_anchor, origin_anchor_with_layers)
+   * correction = centerToCenter(left_anchor, origin_anchor_with_layers)
    */
   private calculateSpatialCorrection(): number {
     const { leftParticipant, originLayers } = this.geometry;
@@ -160,11 +121,11 @@ class PureFragmentCoordinateTransform {
     const leftPosition = this.coordinates.getPosition(leftParticipant) || 0;
     const originPosition = this.coordinates.getPosition(this.origin) || 0;
     
-    // Create mathematical anchors for precise calculation
-    const leftAnchor = new MathematicalAnchor(leftPosition, 0);
-    const originAnchor = new MathematicalAnchor(originPosition, originLayers);
+    // Create Anchor2 instances for precise calculation
+    const leftAnchor = new Anchor2(leftPosition, 0);
+    const originAnchor = new Anchor2(originPosition, originLayers);
     
-    return leftAnchor.distanceTo(originAnchor);
+    return leftAnchor.centerToCenter(originAnchor);
   }
 
   generateFragmentStyle(totalWidth: number, minWidth: number): any {
