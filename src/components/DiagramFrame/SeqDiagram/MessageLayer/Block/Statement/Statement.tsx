@@ -81,6 +81,36 @@ export const Statement = (props: {
     return layout;
   };
 
+  // Helper function to find interaction layout by context
+  const findInteractionLayout = (messageContext: any) => {
+    if (!diagramLayout || !domainModel || !contextMapping) {
+      console.log('[Statement] Missing dependencies for interaction:', { 
+        diagramLayout: !!diagramLayout, 
+        domainModel: !!domainModel, 
+        contextMapping: !!contextMapping 
+      });
+      return undefined;
+    }
+    
+    // Use the context mapping to find the interaction ID
+    const interactionId = contextMapping.get(messageContext);
+    console.log('[Statement] Interaction context mapping lookup:', { 
+      messageContext, 
+      interactionId, 
+      mappingSize: contextMapping.size 
+    });
+    
+    if (!interactionId) {
+      console.log('[Statement] No interaction ID found in context mapping');
+      return undefined;
+    }
+    
+    // Find the interaction layout by ID
+    const layout = diagramLayout.interactions.find(i => i.interactionId === interactionId);
+    console.log('[Statement] Found interaction layout:', layout);
+    return layout;
+  };
+
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
       hidden: props.collapsed && !props.context.ret(),
@@ -121,9 +151,15 @@ export const Statement = (props: {
     case Boolean(props.context.creation()):
       return <Creation {...subProps} />;
     case Boolean(props.context.message()):
-      return <Interaction {...subProps} />;
+      const messageContext = props.context.message();
+      const interactionLayoutData = findInteractionLayout(messageContext);
+      console.log('[Statement] Interaction - context:', messageContext, 'layoutData:', interactionLayoutData);
+      return <Interaction {...subProps} layoutData={interactionLayoutData} />;
     case Boolean(props.context.asyncMessage()):
-      return <InteractionAsync {...subProps} />;
+      const asyncMessageContext = props.context.asyncMessage();
+      const asyncInteractionLayoutData = findInteractionLayout(asyncMessageContext);
+      console.log('[Statement] AsyncInteraction - context:', asyncMessageContext, 'layoutData:', asyncInteractionLayoutData);
+      return <InteractionAsync {...subProps} layoutData={asyncInteractionLayoutData} />;
     case Boolean(props.context.divider()):
       return <Divider {...subProps} layoutData={findDividerLayout()} />;
     case Boolean(props.context.ret()):

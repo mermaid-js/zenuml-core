@@ -75,6 +75,7 @@ import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { CodeRange } from "@/parser/CodeRange";
 import { useArrow } from "../useArrow";
+import { InteractionLayout } from "@/domain/models/DiagramLayout";
 
 function isNullOrUndefined(value: any) {
   return value === null || value === undefined;
@@ -87,7 +88,9 @@ export const InteractionAsync = (props: {
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  layoutData?: InteractionLayout;
 }) => {
+  // Always call hooks to maintain order
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
   const asyncMessage = props.context?.asyncMessage();
@@ -103,6 +106,10 @@ export const InteractionAsync = (props: {
     source,
     target,
   });
+
+  // For now, always use old architecture to avoid hook issues
+  // TODO: Enable new architecture once hook issues are resolved
+  console.log('[InteractionAsync] Using OLD architecture (layoutData temporarily ignored):', props.layoutData);
 
   const messageClassNames = props.commentObj?.messageClassNames;
   const messageTextStyle = props.commentObj?.messageStyle;

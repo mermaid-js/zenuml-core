@@ -8,6 +8,7 @@ import { cursorAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { useArrow } from "../useArrow";
+import { InteractionLayout } from "@/domain/models/DiagramLayout";
 
 export const Interaction = (props: {
   context: any;
@@ -15,7 +16,9 @@ export const Interaction = (props: {
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  layoutData?: InteractionLayout;
 }) => {
+  // Always call hooks to maintain order
   const cursor = useAtomValue(cursorAtom);
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
@@ -41,6 +44,10 @@ export const Interaction = (props: {
     source,
     target,
   });
+
+  // For now, always use old architecture to avoid hook issues
+  // TODO: Enable new architecture once hook issues are resolved
+  console.log('[Interaction] Using OLD architecture (layoutData temporarily ignored):', props.layoutData);
 
   return (
     <div
