@@ -269,6 +269,11 @@ export class LayoutCalculator {
   ): FragmentLayout {
     // Find participants involved in this fragment
     const involvedParticipants = this.findInvolvedParticipants(fragment, diagram);
+    if (involvedParticipants.length === 0) {
+      // If no participants found, use all participants
+      involvedParticipants.push(...Array.from(diagram.participants.keys()));
+    }
+    
     const leftmostX = Math.min(...involvedParticipants.map(p => 
       this.participantPositions.get(p) || 0
     )) - 50;
@@ -277,9 +282,20 @@ export class LayoutCalculator {
     )) + 50;
     
     const startY = this.currentY;
-    const padding = this.constraints.fragmentPadding * nestingLevel;
+    const padding = this.constraints.fragmentPadding + (nestingLevel * 10);
+    const paddingLeft = padding + 20; // Internal padding for content
     
-    return {
+    // Calculate transform based on leftmost participant
+    const leftmostParticipant = involvedParticipants.reduce((left, p) => {
+      const pos = this.participantPositions.get(p) || 0;
+      const leftPos = this.participantPositions.get(left) || 0;
+      return pos < leftPos ? p : left;
+    });
+    
+    const leftParticipantX = this.participantPositions.get(leftmostParticipant) || 0;
+    const transform = `translateX(${leftParticipantX - padding}px)`;
+    
+    const fragmentLayout: FragmentLayout = {
       fragmentId: fragment.id,
       type: fragment.type,
       bounds: {
@@ -302,12 +318,20 @@ export class LayoutCalculator {
           height: 50  // Will be adjusted
         },
         contentOffset: {
-          x: padding,
+          x: paddingLeft,
           y: 5
-        }
+        },
+        label: section.label,
+        condition: section.condition
       })),
-      nestingLevel
+      nestingLevel,
+      comment: fragment.comment,
+      style: fragment.style,
+      paddingLeft,
+      transform
     };
+    
+    return fragmentLayout;
   }
 
   private createActivation(

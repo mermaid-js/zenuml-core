@@ -23,6 +23,9 @@ export class DomainModelBuilder extends sequenceParserListener {
   private blockStack: Block[] = [];
   private fragmentStack: Fragment[] = [];
   private interactionStack: Interaction[] = [];
+  
+  // Context mapping for connecting ANTLR contexts to domain model elements
+  private contextToElementMap = new Map<any, string>();
 
   constructor() {
     super();
@@ -94,9 +97,9 @@ export class DomainModelBuilder extends sequenceParserListener {
 
   // Message/Interaction handling
   enterMessage(ctx: any) {
-    const from = ctx.from()?.getConnectedParticipant() || '_STARTER_';
-    const to = ctx.to()?.getText() || '';
-    const signature = ctx.signature();
+    const from = ctx.From() || '_STARTER_';
+    const to = ctx.Owner() || '';
+    const signature = ctx.SignatureText();
     
     // Ensure participants exist
     this.ensureParticipant(from);
@@ -107,7 +110,7 @@ export class DomainModelBuilder extends sequenceParserListener {
       type: InteractionType.SYNC,
       from,
       to,
-      message: signature?.getText() || '',
+      message: signature || '',
       parent: this.currentInteraction?.id,
       children: []
     };
@@ -131,8 +134,8 @@ export class DomainModelBuilder extends sequenceParserListener {
   }
 
   enterAsyncMessage(ctx: any) {
-    const from = ctx.from()?.getText() || '_STARTER_';
-    const to = ctx.to()?.getText() || '';
+    const from = ctx.From() || '_STARTER_';
+    const to = ctx.Owner() || '';
     
     this.ensureParticipant(from);
     this.ensureParticipant(to);
@@ -142,7 +145,7 @@ export class DomainModelBuilder extends sequenceParserListener {
       type: InteractionType.ASYNC,
       from,
       to,
-      message: ctx.content()?.getText() || ''
+      message: ctx.SignatureText() || ''
     };
     
     this.diagram.interactions.push(interaction);
@@ -153,7 +156,7 @@ export class DomainModelBuilder extends sequenceParserListener {
   }
 
   enterCreation(ctx: any) {
-    const to = ctx.to()?.getText() || '';
+    const to = ctx.Owner() || '';
     const from = this.currentInteraction?.to || '_STARTER_';
     
     this.ensureParticipant(from);
@@ -180,7 +183,8 @@ export class DomainModelBuilder extends sequenceParserListener {
       id: this.generateId('fragment'),
       type: FragmentType.ALT,
       sections: [],
-      parent: this.currentFragment?.id
+      parent: this.currentFragment?.id,
+      comment: ctx.getComment ? ctx.getComment() : undefined
     };
     
     this.diagram.fragments.push(fragment);
@@ -188,6 +192,9 @@ export class DomainModelBuilder extends sequenceParserListener {
       type: 'fragment',
       fragmentId: fragment.id
     });
+    
+    // Store the mapping from context to fragment ID
+    this.contextToElementMap.set(ctx, fragment.id);
     
     this.fragmentStack.push(fragment);
   }
@@ -210,6 +217,28 @@ export class DomainModelBuilder extends sequenceParserListener {
   }
 
   exitIfBlock(ctx: any) {
+    this.blockStack.pop();
+  }
+
+  enterElseIfBlock(ctx: any) {
+    const fragment = this.currentFragment;
+    if (fragment && fragment.type === FragmentType.ALT) {
+      const block: Block = {
+        id: this.generateId('block'),
+        statements: []
+      };
+      
+      fragment.sections.push({
+        label: 'else if',
+        condition: ctx.parExpr()?.condition()?.getText(),
+        block
+      });
+      
+      this.blockStack.push(block);
+    }
+  }
+
+  exitElseIfBlock(ctx: any) {
     this.blockStack.pop();
   }
 
@@ -250,7 +279,8 @@ export class DomainModelBuilder extends sequenceParserListener {
           statements: []
         }
       }],
-      parent: this.currentFragment?.id
+      parent: this.currentFragment?.id,
+      comment: ctx.getComment ? ctx.getComment() : undefined
     };
     
     this.diagram.fragments.push(fragment);
@@ -259,11 +289,48 @@ export class DomainModelBuilder extends sequenceParserListener {
       fragmentId: fragment.id
     });
     
+    // Store the mapping from context to fragment ID
+    this.contextToElementMap.set(ctx, fragment.id);
+    
     this.fragmentStack.push(fragment);
     this.blockStack.push(fragment.sections[0].block);
   }
 
   exitOpt(ctx: any) {
+    this.blockStack.pop();
+    this.fragmentStack.pop();
+  }
+  
+  // Loop fragment
+  enterLoop(ctx: any) {
+    const fragment: Fragment = {
+      id: this.generateId('fragment'),
+      type: FragmentType.LOOP,
+      condition: ctx.parExpr()?.condition()?.getText(),
+      sections: [{
+        block: {
+          id: this.generateId('block'),
+          statements: []
+        }
+      }],
+      parent: this.currentFragment?.id,
+      comment: ctx.getComment ? ctx.getComment() : undefined
+    };
+    
+    this.diagram.fragments.push(fragment);
+    this.addStatementToCurrentBlock({
+      type: 'fragment',
+      fragmentId: fragment.id
+    });
+    
+    // Store the mapping from context to fragment ID
+    this.contextToElementMap.set(ctx, fragment.id);
+    
+    this.fragmentStack.push(fragment);
+    this.blockStack.push(fragment.sections[0].block);
+  }
+
+  exitLoop(ctx: any) {
     this.blockStack.pop();
     this.fragmentStack.pop();
   }
@@ -340,14 +407,21 @@ export class DomainModelBuilder extends sequenceParserListener {
   getDiagram(): SequenceDiagram {
     return this.diagram;
   }
+  
+  getContextMapping(): Map<any, string> {
+    return this.contextToElementMap;
+  }
 }
 
 /**
  * Main entry point for converting parse tree to domain model
  */
-export function buildDomainModel(parseTree: any): SequenceDiagram {
+export function buildDomainModel(parseTree: any): { diagram: SequenceDiagram; contextMapping: Map<any, string> } {
   const builder = new DomainModelBuilder();
   const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
   walker.walk(builder, parseTree);
-  return builder.getDiagram();
+  return {
+    diagram: builder.getDiagram(),
+    contextMapping: builder.getContextMapping()
+  };
 }

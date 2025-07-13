@@ -11,7 +11,8 @@ describe('DomainModelBuilder - Divider Handling', () => {
     `;
     
     const rootContext = RootContext(code);
-    const domainModel = buildDomainModel(rootContext);
+    const result = buildDomainModel(rootContext);
+    const domainModel = result.diagram;
     
     // Check that we have the divider in the root block
     const dividerStatements = domainModel.rootBlock.statements.filter(s => s.type === 'divider');
@@ -30,7 +31,8 @@ describe('DomainModelBuilder - Divider Handling', () => {
     `;
     
     const rootContext = RootContext(code);
-    const domainModel = buildDomainModel(rootContext);
+    const result = buildDomainModel(rootContext);
+    const domainModel = result.diagram;
     
     const dividerStatements = domainModel.rootBlock.statements.filter(s => s.type === 'divider');
     expect(dividerStatements).toHaveLength(1);
@@ -50,7 +52,8 @@ describe('DomainModelBuilder - Divider Handling', () => {
     `;
     
     const rootContext = RootContext(code);
-    const domainModel = buildDomainModel(rootContext);
+    const result = buildDomainModel(rootContext);
+    const domainModel = result.diagram;
     
     const dividerStatements = domainModel.rootBlock.statements.filter(s => s.type === 'divider');
     const divider = dividerStatements[0];

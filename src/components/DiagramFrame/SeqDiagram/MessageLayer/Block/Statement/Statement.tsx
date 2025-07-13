@@ -14,7 +14,7 @@ import { Return } from "./Return/Return";
 import Comment from "../../../../../Comment/Comment";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
-import { diagramLayoutAtom, domainModelAtom } from "@/domain/DomainModelStore";
+import { diagramLayoutAtom, domainModelAtom, contextMappingAtom } from "@/domain/DomainModelStore";
 
 export const Statement = (props: {
   context: any;
@@ -26,8 +26,10 @@ export const Statement = (props: {
   const commentObj = new Comment(comment);
   
   // Try to get layout data from new architecture
-  const diagramLayout = useAtomValue(diagramLayoutAtom);
-  const domainModel = useAtomValue(domainModelAtom);
+  // TEMPORARILY DISABLED until hook order issues are resolved
+  const diagramLayout = null;
+  const domainModel = null;
+  const contextMapping = null;
   
   // Helper to find divider layout - in a real implementation,
   // we'd need a better way to map context to domain model
@@ -48,6 +50,36 @@ export const Statement = (props: {
     }
     return undefined;
   };
+  
+  // Helper to find fragment layout using context mapping
+  const findFragmentLayout = (fragmentContext: any) => {
+    if (!diagramLayout || !domainModel || !contextMapping) {
+      console.log('[Statement] Missing dependencies:', { 
+        diagramLayout: !!diagramLayout, 
+        domainModel: !!domainModel, 
+        contextMapping: !!contextMapping 
+      });
+      return undefined;
+    }
+    
+    // Use the context mapping to find the fragment ID
+    const fragmentId = contextMapping.get(fragmentContext);
+    console.log('[Statement] Context mapping lookup:', { 
+      fragmentContext, 
+      fragmentId, 
+      mappingSize: contextMapping.size 
+    });
+    
+    if (!fragmentId) {
+      console.log('[Statement] No fragment ID found in context mapping');
+      return undefined;
+    }
+    
+    // Find the fragment layout by ID
+    const layout = diagramLayout.fragments.find(f => f.fragmentId === fragmentId);
+    console.log('[Statement] Found layout:', layout);
+    return layout;
+  };
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
@@ -64,7 +96,10 @@ export const Statement = (props: {
     case Boolean(props.context.loop()):
       return <FragmentLoop {...subProps} />;
     case Boolean(props.context.alt()):
-      return <FragmentAlt {...subProps} />;
+      const altContext = props.context.alt();
+      const layoutData = findFragmentLayout(altContext);
+      console.log('[Statement] Alt fragment - context:', altContext, 'layoutData:', layoutData);
+      return <FragmentAlt {...subProps} layoutData={layoutData} />;
     case Boolean(props.context.par()):
       return <FragmentPar {...subProps} />;
     case Boolean(props.context.opt()):

@@ -77,6 +77,8 @@ export interface Fragment {
   condition?: string;  // For alt, opt, loop
   sections: FragmentSection[];
   parent?: string;  // Parent fragment ID for nesting
+  comment?: string;  // Comment text for the fragment
+  style?: MessageStyle;  // Style for the fragment
 }
 
 export enum FragmentType {

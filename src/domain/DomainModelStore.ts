@@ -10,22 +10,42 @@ import { DiagramLayout } from '@/domain/models/DiagramLayout';
  * These atoms provide the new domain model and layout while keeping the old system working.
  */
 
-// Domain model derived from parse tree
-export const domainModelAtom = atom<SequenceDiagram | null>((get) => {
+// Store both domain model and context mapping together
+interface DomainModelWithMapping {
+  diagram: SequenceDiagram | null;
+  contextMapping: Map<any, string>;
+}
+
+// Domain model and context mapping derived from parse tree
+const domainModelWithMappingAtom = atom<DomainModelWithMapping>((get) => {
   const rootContext = get(rootContextAtom);
   if (!rootContext) {
     console.log('[DomainModelStore] No root context available');
-    return null;
+    return { diagram: null, contextMapping: new Map() };
   }
   
   try {
     // Convert parse tree to domain model (single traversal)
     console.log('[DomainModelStore] Building domain model from root context');
-    return buildDomainModel(rootContext);
+    const result = buildDomainModel(rootContext);
+    return {
+      diagram: result.diagram,
+      contextMapping: result.contextMapping
+    };
   } catch (error) {
     console.error('Failed to build domain model:', error);
-    return null;
+    return { diagram: null, contextMapping: new Map() };
   }
+});
+
+// Expose just the diagram for existing code
+export const domainModelAtom = atom<SequenceDiagram | null>((get) => {
+  return get(domainModelWithMappingAtom).diagram;
+});
+
+// Expose the context mapping
+export const contextMappingAtom = atom<Map<any, string>>((get) => {
+  return get(domainModelWithMappingAtom).contextMapping;
 });
 
 // Layout calculated from domain model

@@ -11,7 +11,8 @@ describe('DomainModelBuilder - Participant Features', () => {
     `;
     
     const rootContext = RootContext(code);
-    const domainModel = buildDomainModel(rootContext);
+    const result = buildDomainModel(rootContext);
+    const domainModel = result.diagram;
     
     const participantA = domainModel.participants.get('A');
     expect(participantA).toBeDefined();
@@ -26,7 +27,8 @@ describe('DomainModelBuilder - Participant Features', () => {
     `;
     
     const rootContext = RootContext(code);
-    const domainModel = buildDomainModel(rootContext);
+    const result = buildDomainModel(rootContext);
+    const domainModel = result.diagram;
     
     const participantA = domainModel.participants.get('A');
     expect(participantA).toBeDefined();
@@ -40,7 +42,8 @@ describe('DomainModelBuilder - Participant Features', () => {
     `;
     
     const rootContext = RootContext(code);
-    const domainModel = buildDomainModel(rootContext);
+    const result = buildDomainModel(rootContext);
+    const domainModel = result.diagram;
     
     const participantA = domainModel.participants.get('A');
     expect(participantA).toBeDefined();
@@ -54,7 +57,8 @@ describe('DomainModelBuilder - Participant Features', () => {
     `;
     
     const rootContext = RootContext(code);
-    const domainModel = buildDomainModel(rootContext);
+    const result = buildDomainModel(rootContext);
+    const domainModel = result.diagram;
     
     const participantA = domainModel.participants.get('A');
     expect(participantA).toBeDefined();

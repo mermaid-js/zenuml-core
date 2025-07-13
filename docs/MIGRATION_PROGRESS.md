@@ -64,10 +64,18 @@ We successfully migrated the Divider component as a proof of concept:
 3. **Statement Component** ✅ (Enhanced)
    - Now passes layout data to child components when available
    - Provides bridge between old context and new layout system
+   - Uses context mapping to find correct domain elements
 
 4. **LifeLine Component** ✅ (Just updated)
    - Now passes participantId to enable new architecture
    - Participant children now use pre-calculated layout
+
+5. **FragmentAlt Component** ✅ (NEW!)
+   - First fragment component to support dual-mode rendering
+   - Uses pre-calculated layout when available
+   - Falls back to old implementation seamlessly
+   - Supports all sections (if, else if, else)
+   - Context mapping enables proper element lookup
 
 ### Domain Model Enhancements
 
@@ -76,10 +84,22 @@ We successfully migrated the Divider component as a proof of concept:
   - Proper type mapping from ANTLR context
   - All rendering properties needed by components
 
+- **Fragment model** now includes:
+  - Comment and style support
+  - Proper section handling (if, else if, else)
+  - Context mapping for element lookup
+
 - **DomainModelBuilder** enhanced to:
   - Extract COLOR from participant context
   - Build style object for participants
   - Handle all participant types properly
+  - Store context-to-element mappings
+  - Support alt, opt, and loop fragments
+
+- **LayoutCalculator** enhanced to:
+  - Calculate fragment transforms and padding
+  - Include section labels and conditions
+  - Support nested fragment layouts
 
 ### Next Steps for Phase 2
 

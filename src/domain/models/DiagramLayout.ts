@@ -86,12 +86,21 @@ export interface FragmentLayout {
   headerBounds: BoundingBox;
   sections: FragmentSectionLayout[];
   nestingLevel: number;  // For border calculation
+  comment?: string;
+  style?: {
+    textStyle?: any;
+    classNames?: string[];
+  };
+  paddingLeft?: number;  // Internal padding for content
+  transform?: string;  // CSS transform for positioning
 }
 
 export interface FragmentSectionLayout {
   bounds: BoundingBox;
   labelBounds?: BoundingBox;
   contentOffset: Point;  // Offset for nested content
+  label?: string;  // e.g., "else", "else if", "catch"
+  condition?: string;  // Condition text for this section
 }
 
 export interface ActivationLayout {
