@@ -252,7 +252,6 @@ export const useFragmentData = (context: any, origin: string) => {
   }, [context, coordinateTransform]);
 
   // Use pure mathematical calculations
-  const offsetX = coordinateTransform.calculateOffsetX();
   const paddingLeft = coordinateTransform.getPaddingLeft();
   const fragmentStyle = coordinateTransform.generateFragmentStyle(
     TotalWidth(context, coordinates),
@@ -260,16 +259,13 @@ export const useFragmentData = (context: any, origin: string) => {
   );
   const border = coordinateTransform.getBorderPadding();
   const leftParticipant = coordinateTransform.getLeftParticipant();
-  const halfLeftParticipant = coordinates.half(leftParticipant);
 
   return {
     collapsed,
     toggleCollapse,
-    offsetX,
     paddingLeft,
     fragmentStyle,
     border,
-    halfLeftParticipant,
     leftParticipant,
   };
 };
