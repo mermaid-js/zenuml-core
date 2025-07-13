@@ -44,4 +44,7 @@ yarn-error.log*
 *.sln
 *.sw*
 
+# Claude Code settings
+.claude
+
 .pnpm-store
