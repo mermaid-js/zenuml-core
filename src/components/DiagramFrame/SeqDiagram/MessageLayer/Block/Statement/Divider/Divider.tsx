@@ -4,12 +4,55 @@ import { getStyle } from "@/utils/messageStyling";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 import { getParticipantCenter } from "@/positioning/GeometryUtils";
+import { DividerLayout } from "@/domain/models/DiagramLayout";
 
-export const Divider = (props: {
-  context: any;
-  origin: string;
+/**
+ * Internal component that renders using pre-calculated layout
+ */
+const DividerWithLayout = ({ 
+  layout, 
+  className 
+}: { 
+  layout: DividerLayout; 
   className?: string;
 }) => {
+  return (
+    <div
+      className={cn("divider", className)}
+      style={{
+        width: layout.bounds.width + "px",
+        transform: "translateX(" + layout.bounds.x + "px)",
+      }}
+    >
+      <div className="left bg-skin-divider"></div>
+      <div
+        style={layout.style?.textStyle}
+        className={cn("name", ...(layout.style?.classNames || []))}
+      >
+        {layout.text}
+      </div>
+      <div className="right bg-skin-divider"></div>
+    </div>
+  );
+};
+
+export const Divider = (props: {
+  context?: any;
+  origin?: string;
+  layoutData?: DividerLayout;  // New optional prop
+  className?: string;
+}) => {
+  // If layout data is provided, use the new rendering path
+  if (props.layoutData) {
+    return <DividerWithLayout layout={props.layoutData} className={props.className} />;
+  }
+  
+  // Otherwise, fall back to the original implementation
+  if (!props.context || !props.origin) {
+    console.warn('Divider: Neither layoutData nor context/origin provided');
+    return null;
+  }
+  
   const participants = useAtomValue(participantsAtom);
 
   const width = useMemo(() => {

@@ -13,6 +13,8 @@ import { Divider } from "./Divider/Divider";
 import { Return } from "./Return/Return";
 import Comment from "../../../../../Comment/Comment";
 import { cn } from "@/utils";
+import { useAtomValue } from "jotai";
+import { diagramLayoutAtom, domainModelAtom } from "@/domain/DomainModelStore";
 
 export const Statement = (props: {
   context: any;
@@ -22,6 +24,29 @@ export const Statement = (props: {
 }) => {
   const comment = props.context.getComment() || "";
   const commentObj = new Comment(comment);
+  
+  // Try to get layout data from new architecture
+  const diagramLayout = useAtomValue(diagramLayoutAtom);
+  const domainModel = useAtomValue(domainModelAtom);
+  
+  // Helper to find divider layout - in a real implementation,
+  // we'd need a better way to map context to domain model
+  const findDividerLayout = () => {
+    if (!diagramLayout || !domainModel || !props.context.divider()) {
+      return undefined;
+    }
+    
+    // This is a simplified approach - in production, we'd need
+    // a proper mapping between context and domain model statements
+    const dividerText = props.context.divider().Note()?.trim();
+    if (dividerText) {
+      return diagramLayout.dividers.find(d => 
+        d.text === dividerText || 
+        d.text === dividerText.replace(/\[.*?\]\s*/, '') // Handle styled text
+      );
+    }
+    return undefined;
+  };
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
@@ -58,7 +83,7 @@ export const Statement = (props: {
     case Boolean(props.context.asyncMessage()):
       return <InteractionAsync {...subProps} />;
     case Boolean(props.context.divider()):
-      return <Divider {...subProps} />;
+      return <Divider {...subProps} layoutData={findDividerLayout()} />;
     case Boolean(props.context.ret()):
       return (
         <Return {...subProps} className="text-left text-sm text-skin-message" />
