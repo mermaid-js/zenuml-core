@@ -8,7 +8,7 @@ import { Numbering } from "../../../Numbering";
 import { cn } from "@/utils";
 import { ConditionLabel } from "./ConditionLabel";
 import "./FragmentAlt.css";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo } from "react";
 import Icon from "@/components/Icon/Icons";
 import { FragmentLayout } from "@/domain/models/DiagramLayout";
 
@@ -21,9 +21,6 @@ export const FragmentAlt = (props: {
   className?: string;
   layoutData?: FragmentLayout;
 }) => {
-  // State for collapse functionality (always call hooks)
-  const [collapsed, setCollapsed] = useState(false);
-  const toggleCollapse = () => setCollapsed(prev => !prev);
   
   // Always call the old hook to maintain hook order
   const alt = props.context.alt();
@@ -50,86 +47,18 @@ export const FragmentAlt = (props: {
   }
 
   const {
-    collapsed: oldCollapsed,
-    toggleCollapse: oldToggleCollapse,
+    collapsed,
+    toggleCollapse,
     paddingLeft,
     fragmentStyle,
     leftParticipant,
   } = useFragmentData(props.context, props.origin);
   
-  // Determine which rendering approach to use
-  const useNewArchitecture = false; // Temporarily disabled until hook issue is resolved
-  console.log('[FragmentAlt] Using architecture:', useNewArchitecture ? 'NEW' : 'OLD', 'layoutData:', props.layoutData);
+  // For now, always use old architecture to avoid hook issues
+  // TODO: Enable new architecture once hook issues are resolved
+  console.log('[FragmentAlt] Using OLD architecture (layoutData temporarily ignored):', props.layoutData);
   
-  // Single return statement to avoid hook order issues
-  return useNewArchitecture ? (
-    // NEW ARCHITECTURE RENDERING
-    <div
-      data-origin={props.origin}
-      data-left-participant={props.origin}
-      className={cn(
-        "group fragment fragment-alt alt border-skin-fragment rounded",
-        props.className,
-      )}
-      style={{
-        transform: props.layoutData!.transform,
-        width: `${props.layoutData!.bounds.width}px`,
-        minWidth: `${props.layoutData!.bounds.width}px`,
-      }}
-    >
-      <div className="segment">
-        {props.layoutData!.comment && (
-          <Comment comment={props.layoutData!.comment} commentObj={props.commentObj} />
-        )}
-        <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
-          <Numbering number={props.number} />
-          <div className="name font-semibold p-1 border-b">
-            <label className="p-0 flex items-center gap-0.5">
-              <Icon name="alt-fragment" />
-              <CollapseButton
-                label="Alt"
-                collapsed={collapsed}
-                onClick={toggleCollapse}
-                style={props.commentObj?.messageStyle}
-                className={cn(props.commentObj?.messageClassNames)}
-              />
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div className={collapsed ? "hidden" : "block"}>
-        {props.layoutData!.sections.map((section, index) => (
-          <Fragment key={index}>
-            {index > 0 && (
-              <div className="segment mt-2 border-t border-solid" />
-            )}
-            <div className="segment">
-              <div className="text-skin-fragment flex">
-                {section.condition && (
-                  <>
-                    <label>[</label>
-                    <label className="bg-skin-frame opacity-65 condition px-1">
-                      {section.condition}
-                    </label>
-                    <label>]</label>
-                  </>
-                )}
-                {section.label === 'else' && (
-                  <label className="p-1">[else]</label>
-                )}
-              </div>
-              {/* Note: In full implementation, we'd render block content here */}
-              <div style={{ paddingLeft: `${props.layoutData!.paddingLeft}px` }}>
-                {/* Block content would go here */}
-              </div>
-            </div>
-          </Fragment>
-        ))}
-      </div>
-    </div>
-  ) : (
-    // OLD ARCHITECTURE RENDERING (fallback)
+  return (
     <div
       data-origin={props.origin}
       data-left-participant={props.origin}
@@ -152,8 +81,8 @@ export const FragmentAlt = (props: {
               <Icon name="alt-fragment" />
               <CollapseButton
                 label="Alt"
-                collapsed={oldCollapsed}
-                onClick={oldToggleCollapse}
+                collapsed={collapsed}
+                onClick={toggleCollapse}
                 style={props.commentObj?.messageStyle}
                 className={cn(props.commentObj?.messageClassNames)}
               />
@@ -162,7 +91,7 @@ export const FragmentAlt = (props: {
         </div>
       </div>
 
-      <div className={oldCollapsed ? "hidden" : "block"}>
+      <div className={collapsed ? "hidden" : "block"}>
         <div className="segment">
           <div className="text-skin-fragment flex">
             <ConditionLabel condition={conditionFromIfElseBlock(ifBlock)} />

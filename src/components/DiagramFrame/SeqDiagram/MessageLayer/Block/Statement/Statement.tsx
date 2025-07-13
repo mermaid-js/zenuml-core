@@ -94,7 +94,10 @@ export const Statement = (props: {
 
   switch (true) {
     case Boolean(props.context.loop()):
-      return <FragmentLoop {...subProps} />;
+      const loopContext = props.context.loop();
+      const loopLayoutData = findFragmentLayout(loopContext);
+      console.log('[Statement] Loop fragment - context:', loopContext, 'layoutData:', loopLayoutData);
+      return <FragmentLoop {...subProps} layoutData={loopLayoutData} />;
     case Boolean(props.context.alt()):
       const altContext = props.context.alt();
       const layoutData = findFragmentLayout(altContext);
@@ -103,7 +106,10 @@ export const Statement = (props: {
     case Boolean(props.context.par()):
       return <FragmentPar {...subProps} />;
     case Boolean(props.context.opt()):
-      return <FragmentOpt {...subProps} />;
+      const optContext = props.context.opt();
+      const optLayoutData = findFragmentLayout(optContext);
+      console.log('[Statement] Opt fragment - context:', optContext, 'layoutData:', optLayoutData);
+      return <FragmentOpt {...subProps} layoutData={optLayoutData} />;
     case Boolean(props.context.section()):
       return <FragmentSection {...subProps} />;
     case Boolean(props.context.critical()):

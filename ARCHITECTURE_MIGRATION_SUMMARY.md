@@ -25,12 +25,22 @@
    - Statement component bridges old and new systems
    - LifeLine component updated to enable new architecture
 
-#### Successfully Migrated Fragment:
+#### Successfully Migrated Fragments:
 1. **FragmentAlt Component** ✅
    - First fragment component migrated
    - Dual-mode rendering working perfectly
    - Context mapping enables proper element lookup
    - All sections (if, else if, else) supported
+
+2. **FragmentOpt Component** ✅
+   - Single-section fragment migrated
+   - Follows established dual-mode pattern
+   - Simpler than Alt but same architecture
+
+3. **FragmentLoop Component** ✅
+   - Condition-based fragment migrated
+   - Hook order properly managed
+   - Ready for new architecture activation
 
 #### Components Ready for Migration:
 1. **Interaction/Message Components**

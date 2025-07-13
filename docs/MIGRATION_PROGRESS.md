@@ -77,6 +77,18 @@ We successfully migrated the Divider component as a proof of concept:
    - Supports all sections (if, else if, else)
    - Context mapping enables proper element lookup
 
+6. **FragmentOpt Component** ✅ (NEW!)
+   - Migrated using established pattern from FragmentAlt
+   - Dual-mode rendering with hook order management
+   - Single section fragment (simpler than Alt)
+   - Ready for new architecture activation
+
+7. **FragmentLoop Component** ✅ (NEW!)
+   - Migrated following same dual-mode pattern
+   - Supports condition rendering in new architecture
+   - Maintains backward compatibility
+   - Hook order properly managed
+
 ### Domain Model Enhancements
 
 - **Participant model** now includes:

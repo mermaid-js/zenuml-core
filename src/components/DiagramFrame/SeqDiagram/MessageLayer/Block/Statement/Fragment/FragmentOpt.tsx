@@ -6,6 +6,7 @@ import { CollapseButton } from "./CollapseButton";
 import { Block } from "../../Block";
 import { cn } from "@/utils";
 import Icon from "@/components/Icon/Icons";
+import { FragmentLayout } from "@/domain/models/DiagramLayout";
 
 export const FragmentOpt = (props: {
   context: any;
@@ -14,6 +15,7 @@ export const FragmentOpt = (props: {
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  layoutData?: FragmentLayout;
 }) => {
   const opt = props.context.opt();
   const {
@@ -24,9 +26,14 @@ export const FragmentOpt = (props: {
     border,
     leftParticipant,
   } = useFragmentData(props.context, props.origin);
+
+  // For now, always use old architecture to avoid hook issues
+  // TODO: Enable new architecture once hook issues are resolved
+  console.log('[FragmentOpt] Using OLD architecture (layoutData temporarily ignored):', props.layoutData);
+
   return (
     <div
-      data-origin={origin}
+      data-origin={props.origin}
       data-left-participant={leftParticipant}
       data-frame-padding-left={border.left}
       data-frame-padding-right={border.right}

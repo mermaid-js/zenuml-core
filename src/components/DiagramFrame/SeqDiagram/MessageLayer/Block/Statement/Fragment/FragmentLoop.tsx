@@ -8,6 +8,7 @@ import { ConditionLabel } from "./ConditionLabel";
 import { Block } from "../../Block";
 import "./FragmentLoop.css";
 import Icon from "@/components/Icon/Icons";
+import { FragmentLayout } from "@/domain/models/DiagramLayout";
 
 export const FragmentLoop = (props: {
   context: any;
@@ -16,7 +17,12 @@ export const FragmentLoop = (props: {
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  layoutData?: FragmentLayout;
 }) => {
+  const loop = props.context.loop();
+  const blockInLoop = loop?.braceBlock()?.block();
+  const condition = loop?.parExpr()?.condition();
+  
   const {
     collapsed,
     toggleCollapse,
@@ -26,14 +32,14 @@ export const FragmentLoop = (props: {
     leftParticipant,
   } = useFragmentData(props.context, props.origin);
 
-  const loop = props.context.loop();
-  const blockInLoop = loop?.braceBlock()?.block();
-  const condition = loop?.parExpr()?.condition();
+  // For now, always use old architecture to avoid hook issues
+  // TODO: Enable new architecture once hook issues are resolved
+  console.log('[FragmentLoop] Using OLD architecture (layoutData temporarily ignored):', props.layoutData);
 
   return (
     <div className={props.className}>
       <div
-        data-origin={origin}
+        data-origin={props.origin}
         data-left-participant={leftParticipant}
         data-frame-padding-left={border.left}
         data-frame-padding-right={border.right}
