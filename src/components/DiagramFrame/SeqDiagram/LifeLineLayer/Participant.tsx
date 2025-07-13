@@ -19,7 +19,7 @@ import { useMemo, useRef } from "react";
 import { ParticipantLabel } from "./ParticipantLabel";
 import iconPath from "../../Tutorial/Icons";
 import { ParticipantLayout } from "@/domain/models/DiagramLayout";
-import { diagramLayoutAtom, domainModelAtom } from "@/domain/DomainModelStore";
+import { diagramLayoutAtom } from "@/domain/DomainModelStore";
 
 const INTERSECTION_ERROR_MARGIN = 10;
 
@@ -134,6 +134,34 @@ export const Participant = (props: {
   layoutData?: ParticipantLayout;
   offsetTop2?: number;
 }) => {
+  // Always call hooks at the top level to maintain hook order
+  const elRef = useRef<HTMLDivElement>(null);
+  const mode = useAtomValue(modeAtom);
+  const participants = useAtomValue(participantsAtom);
+  const diagramElement = useAtomValue(diagramElementAtom);
+  const stickyOffset = useAtomValue(stickyOffsetAtom);
+  const selected = useAtomValue(selectedAtom);
+  const onSelect = useSetAtom(onSelectAtom);
+  const intersectionTop = useIntersectionTop();
+  const [scrollTop] = useDocumentScroll();
+  const diagramLayout = useAtomValue(diagramLayoutAtom);
+
+  // Calculate color based on entity color (must be called at top level)
+  const color = useMemo(() => {
+    if (!props.entity?.color) {
+      return undefined;
+    }
+    const bgColor =
+      elRef.current &&
+      window
+        .getComputedStyle(elRef.current)
+        .getPropertyValue("background-color");
+    if (!bgColor) {
+      return undefined;
+    }
+    return brightnessIgnoreAlpha(bgColor) > 128 ? "#000" : "#fff";
+  }, [props.entity?.color]);
+
   // If layout data is provided, use the new rendering path
   if (props.layoutData) {
     return <ParticipantWithLayout layout={props.layoutData} offsetTop2={props.offsetTop2} />;
@@ -141,7 +169,6 @@ export const Participant = (props: {
   
   // Try to get layout data from the new architecture if participantId is provided
   if (props.participantId) {
-    const diagramLayout = useAtomValue(diagramLayoutAtom);
     const participantLayout = diagramLayout?.participants.find(
       p => p.participantId === props.participantId
     );
@@ -155,16 +182,6 @@ export const Participant = (props: {
     console.warn('Participant: Neither layoutData, participantId with valid layout, nor entity provided');
     return null;
   }
-  
-  const elRef = useRef<HTMLDivElement>(null);
-  const mode = useAtomValue(modeAtom);
-  const participants = useAtomValue(participantsAtom);
-  const diagramElement = useAtomValue(diagramElementAtom);
-  const stickyOffset = useAtomValue(stickyOffsetAtom);
-  const selected = useAtomValue(selectedAtom);
-  const onSelect = useSetAtom(onSelectAtom);
-  const intersectionTop = useIntersectionTop();
-  const [scrollTop] = useDocumentScroll();
 
   const isDefaultStarter = props.entity.name === _STARTER_;
 
@@ -199,32 +216,18 @@ export const Participant = (props: {
   // We use this method to simulate sticky behavior. CSS sticky is not working out of an iframe.
   const stickyVerticalOffset = mode === RenderMode.Static ? 0 : calcOffset();
 
-  const backgroundColor = props.entity.color
+  const backgroundColor = props.entity?.color
     ? removeAlpha(props.entity.color)
     : undefined;
-  const color = useMemo(() => {
-    if (!props.entity.color) {
-      return undefined;
-    }
-    const bgColor =
-      elRef.current &&
-      window
-        .getComputedStyle(elRef.current)
-        .getPropertyValue("background-color");
-    if (!bgColor) {
-      return undefined;
-    }
-    return brightnessIgnoreAlpha(bgColor) > 128 ? "#000" : "#fff";
-  }, [props.entity.color]);
   const icon = isDefaultStarter
     ? iconPath["actor"]
-    : iconPath[props.entity.type?.toLowerCase() as "actor"];
+    : iconPath[props.entity?.type?.toLowerCase() as "actor"];
 
   return (
     <div
       className={cn(
         "participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8",
-        { selected: selected.includes(props.entity.name) },
+        { selected: selected.includes(props.entity!.name) },
       )}
       ref={elRef}
       style={{
@@ -232,8 +235,8 @@ export const Participant = (props: {
         color: isDefaultStarter ? undefined : color,
         transform: `translateY(${stickyVerticalOffset}px)`,
       }}
-      onClick={() => onSelect(props.entity.name)}
-      data-participant-id={props.entity.name}
+      onClick={() => onSelect(props.entity!.name)}
+      data-participant-id={props.entity!.name}
     >
       <div className="flex items-center justify-center">
         {icon && (
@@ -254,11 +257,7 @@ export const Participant = (props: {
               </label>
             )}
             <ParticipantLabel
-              labelText={
-                props.entity.assignee
-                  ? props.entity.name.split(":")[1]
-                  : props.entity.label || props.entity.name
-              }
+              labelText={props.entity.label || props.entity.name}
               labelPositions={labelPositions}
               assignee={props.entity.assignee}
               assigneePositions={assigneePositions}

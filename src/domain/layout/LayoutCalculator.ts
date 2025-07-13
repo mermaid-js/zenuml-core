@@ -87,7 +87,7 @@ export class LayoutCalculator {
         label: participant.label || participant.name,
         type: participant.type,
         stereotype: participant.stereotype,
-        isAssignee: participant.name.includes(':'),
+        isAssignee: Boolean(participant.assignee),
         style: participant.style ? {
           backgroundColor: participant.style.backgroundColor,
           color: participant.style.color

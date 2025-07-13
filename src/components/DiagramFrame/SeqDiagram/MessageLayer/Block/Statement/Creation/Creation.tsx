@@ -47,8 +47,8 @@ export const Creation = (props: {
     const assignment = creation?.creationBody().assignment();
     if (!assignment) return "";
     const assignee = safeCodeGetter(assignment.assignee());
-    const type = safeCodeGetter(assignment.type());
-    return assignee + (type ? ":" + type : "");
+    // For return messages, we only want the assignee name, not the full "assignee:type" format
+    return assignee;
   }, [creation]);
 
   const containerOffset =
