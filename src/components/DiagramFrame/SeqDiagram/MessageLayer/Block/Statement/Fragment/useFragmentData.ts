@@ -69,11 +69,11 @@ class PureFragmentCoordinateTransform {
       return this._fragmentStyle;
     }
 
-    const { leftParticipant, borderPadding } = this.geometry;
+    const { leftParticipant, borderPadding, originLayers } = this.geometry;
     const borderDepth = borderPadding.left / 10; // Convert border to depth
 
-    // Use unified mathematical model for transform generation
-    const transform = generateFragmentTransform(leftParticipant, this.origin, borderDepth, this.coordinates);
+    // Use unified mathematical model for transform generation with correct origin activation layers
+    const transform = generateFragmentTransform(leftParticipant, this.origin, borderDepth, this.coordinates, originLayers);
 
     this._fragmentStyle = {
       transform: transform,

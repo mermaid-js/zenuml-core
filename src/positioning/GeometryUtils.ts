@@ -162,20 +162,36 @@ export function calculateFragmentOffset(
  * @param originParticipant Origin participant name (can be null)
  * @param borderDepth Border depth
  * @param coordinates Optional coordinates object
+ * @param originLayers Optional origin activation layers count
  * @returns CSS transform string
  */
 export function generateFragmentTransform(
   leftParticipant: string,
   originParticipant: string | null,
   borderDepth: number,
-  coordinates?: Coordinates
+  coordinates?: Coordinates,
+  originLayers?: number
 ): string {
   try {
     const coords = coordinates || store.get(coordinatesAtom);
     const extractor = new ParticipantGeometryExtractor(coords);
     
     const leftGeometry = extractor.extractParticipant(leftParticipant);
-    const originGeometry = originParticipant ? extractor.extractParticipant(originParticipant) : null;
+    let originGeometry = null;
+    
+    if (originParticipant) {
+      // Use provided originLayers if available, otherwise extract without context (defaulting to 0)
+      if (originLayers !== undefined) {
+        originGeometry = {
+          name: originParticipant,
+          centerPosition: coords.getPosition(originParticipant),
+          halfWidth: coords.half(originParticipant),
+          activationLayers: originLayers,
+        };
+      } else {
+        originGeometry = extractor.extractParticipant(originParticipant);
+      }
+    }
     
     return LayoutMath.fragmentTransform(leftGeometry, originGeometry, borderDepth);
   } catch (e) {
