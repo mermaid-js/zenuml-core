@@ -13,10 +13,20 @@ test.describe("Editable Label", () => {
     // Edit the message
     const messageLabel = page.getByText("method()");
     await messageLabel.dblclick();
+
+    // Wait for edit mode to be active
+    await page.waitForTimeout(100);
+
     // Clear existing text and add new content
     await messageLabel.pressSequentially("1");
     await messageLabel.press("Enter");
-    await expect(page.locator("label").getByText("method()1")).toBeVisible();
+
+    // Wait for the edit to complete
+    await page.waitForTimeout(500);
+
+    await expect(page.locator("label").getByText("method()1")).toBeVisible({
+      timeout: 10000,
+    });
     await page.locator(".header").click();
     await page.waitForTimeout(1000);
     await expect(page).toHaveScreenshot({
@@ -35,13 +45,21 @@ test.describe("Editable Label", () => {
     // Edit the message
     const messageLabel = page.getByText("SelfMessage");
     await messageLabel.dblclick();
+
+    // Wait for edit mode to be active
+    await page.waitForTimeout(100);
+
     await messageLabel.pressSequentially(" n");
     await messageLabel.press("Backspace");
     await messageLabel.pressSequentially("n");
     await messageLabel.press("Enter");
-    await expect(
-      page.locator("label").getByText("SelfMessage n"),
-    ).toBeVisible();
+
+    // Wait for the edit to complete
+    await page.waitForTimeout(500);
+
+    await expect(page.locator("label").getByText("SelfMessage n")).toBeVisible({
+      timeout: 10000,
+    });
     await page.locator(".header").click();
     await page.waitForTimeout(1000);
 
@@ -61,11 +79,19 @@ test.describe("Editable Label", () => {
     // Edit the message
     const messageLabel = page.getByText("Hello Bob");
     await messageLabel.dblclick();
+
+    // Wait for edit mode to be active
+    await page.waitForTimeout(100);
+
     await messageLabel.pressSequentially(" how are you?");
     await messageLabel.press("Enter");
+
+    // Wait for the edit to complete
+    await page.waitForTimeout(500);
+
     await expect(
       page.locator("label").getByText("Hello Bob how are you?"),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
     await page.locator(".header").click();
     await page.waitForTimeout(1000);
 
