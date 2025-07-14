@@ -6,17 +6,32 @@ import { Block } from "../../../Block";
 import { getParticipantCenter } from "@/positioning/GeometryUtils";
 
 export const Occurrence = (props: {
-  context: any;
-  participant: any;
+  context?: any;
+  participant?: any;
   rtl?: boolean;
   number?: string;
   className?: string;
+  layoutData?: {
+    participantId: string;
+    centerPosition: number;
+    rtl?: boolean;
+    hasStatements: boolean;
+    collapsed: boolean;
+    style?: React.CSSProperties;
+  };
 }) => {
+  // Determine which architecture to use
+  const isNewArchitecture = !!props.layoutData;
+  
+  // Always call hooks at top level to maintain hook order
   const [collapsed, setCollapsed] = useState(false);
 
   const debug = localStorage.getItem("zenumlDebug");
 
   const computedCenter = () => {
+    if (isNewArchitecture) {
+      return props.layoutData!.centerPosition;
+    }
     try {
       return getParticipantCenter(props.participant);
     } catch (e) {
@@ -24,8 +39,12 @@ export const Occurrence = (props: {
       return 0;
     }
   };
+  
   const hasAnyStatementsExceptReturn = () => {
-    const braceBlock = props.context.braceBlock();
+    if (isNewArchitecture) {
+      return props.layoutData!.hasStatements;
+    }
+    const braceBlock = props.context?.braceBlock();
     if (!braceBlock) return false;
     const stats = braceBlock.block()?.stat() || [];
     const len = stats.length;
@@ -41,21 +60,30 @@ export const Occurrence = (props: {
     EventBus.emit("participant_set_top");
   };
 
+  // Extract unified data
+  const participantId = isNewArchitecture ? props.layoutData!.participantId : props.participant;
+  const isRtl = isNewArchitecture ? props.layoutData!.rtl : props.rtl;
+
   useEffect(() => {
-    setCollapsed(false);
-  }, [props.context]);
+    if (isNewArchitecture) {
+      setCollapsed(props.layoutData!.collapsed);
+    } else {
+      setCollapsed(false);
+    }
+  }, [isNewArchitecture, props.layoutData, props.context]);
 
   return (
     <div
       className={cn(
         "occurrence min-h-6 shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full w-[15px] mt-[-2px] pl-[6px]",
-        { "right-to-left left-[-14px]": props.rtl },
+        { "right-to-left left-[-14px]": isRtl },
         props.className,
       )}
       data-el-type="occurrence"
-      data-belongs-to={props.participant}
+      data-belongs-to={participantId}
       data-x-offset={0}
       data-debug-center-of={computedCenter()}
+      style={isNewArchitecture ? props.layoutData!.style : undefined}
     >
       {debug && (
         <>
@@ -70,10 +98,10 @@ export const Occurrence = (props: {
       {hasAnyStatementsExceptReturn() && (
         <CollapseButton collapsed={collapsed} onClick={toggle} />
       )}
-      {props.context.braceBlock() && (
+      {(isNewArchitecture ? props.layoutData!.hasStatements : props.context?.braceBlock()) && (
         <Block
-          origin={props.participant}
-          context={props.context.braceBlock().block()}
+          origin={participantId}
+          context={isNewArchitecture ? undefined : props.context.braceBlock().block()}
           number={props.number}
           collapsed={collapsed}
         ></Block>

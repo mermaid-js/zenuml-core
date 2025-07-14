@@ -15,32 +15,57 @@ import { useArrow } from "../useArrow";
 import { EventBus } from "@/EventBus";
 
 export const Creation = (props: {
-  context: any;
-  origin: any;
+  context?: any;
+  origin?: any;
   comment?: string;
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  layoutData?: {
+    signature: string;
+    target: string;
+    assignee?: string;
+    translateX: number;
+    interactionWidth: number;
+    rightToLeft: boolean;
+    containerOffset: number;
+    isCurrent: boolean;
+    style?: React.CSSProperties;
+  };
 }) => {
+  // Determine which architecture to use
+  const isNewArchitecture = !!props.layoutData;
+  
+  // Always call hooks at top level to maintain hook order
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
   const [participantWidth, setParticipantWidth] = useState(0);
+  
+  // Pre-calculate old architecture values
   const creation = props.context?.creation();
-  const target = creation?.Owner();
-  const isCurrent = creation?.isCurrent(cursor);
-
-  const { translateX, interactionWidth, rightToLeft } = useArrow({
+  const arrowData = useArrow({
     context: props.context,
     origin: props.origin,
     source: props.origin,
     target: creation?.Owner(),
   });
 
+  // Extract unified data
+  const target = isNewArchitecture ? props.layoutData!.target : creation?.Owner();
+  const signature = isNewArchitecture ? props.layoutData!.signature : creation?.SignatureText();
+  const translateX = isNewArchitecture ? props.layoutData!.translateX : arrowData.translateX;
+  const interactionWidth = isNewArchitecture ? props.layoutData!.interactionWidth : arrowData.interactionWidth;
+  const rightToLeft = isNewArchitecture ? props.layoutData!.rightToLeft : arrowData.rightToLeft;
+  const isCurrent = isNewArchitecture ? props.layoutData!.isCurrent : creation?.isCurrent(cursor);
+
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
 
   const assignee = useMemo(() => {
+    if (isNewArchitecture) {
+      return props.layoutData!.assignee || "";
+    }
     function safeCodeGetter(context: any) {
       return (context && context.getFormattedText()) || "";
     }
@@ -49,12 +74,18 @@ export const Creation = (props: {
     const assignee = safeCodeGetter(assignment.assignee());
     // For return messages, we only want the assignee name, not the full "assignee:type" format
     return assignee;
-  }, [creation]);
+  }, [isNewArchitecture, props.layoutData, creation]);
 
-  const containerOffset =
-    participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH;
+  const containerOffset = isNewArchitecture 
+    ? props.layoutData!.containerOffset 
+    : participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH;
 
   useEffect(() => {
+    if (isNewArchitecture) {
+      // Skip DOM manipulation in new architecture
+      return;
+    }
+    
     const participantElement = document.querySelector(
       `[data-participant-id="${target}"]`,
     );
@@ -73,7 +104,7 @@ export const Creation = (props: {
 
     EventBus.emit("participant_set_top");
     console.debug(`Init or update message container for ${target}`);
-  }, [target, participantWidth]);
+  }, [isNewArchitecture, target, participantWidth]);
 
   return (
     <div
@@ -87,10 +118,11 @@ export const Creation = (props: {
         props.className,
       )}
       onClick={() => onElementClick(CodeRange.from(props.context))}
-      data-signature={creation?.SignatureText()}
+      data-signature={signature}
       style={{
         transform: "translateX(" + translateX + "px)",
         width: interactionWidth + "px",
+        ...(isNewArchitecture ? props.layoutData!.style : {}),
       }}
     >
       {props.comment && <Comment commentObj={props.commentObj} />}
@@ -108,8 +140,8 @@ export const Creation = (props: {
             "invocation w-full transform -translate-y-1/2 pointer-events-auto",
             messageClassNames,
           )}
-          context={creation}
-          content={creation?.SignatureText()}
+          context={isNewArchitecture ? undefined : creation}
+          content={signature}
           rtl={rightToLeft}
           type="creation"
           number={props.number}
@@ -118,7 +150,7 @@ export const Creation = (props: {
         />
       </div>
       <Occurrence
-        context={creation}
+        context={isNewArchitecture ? undefined : creation}
         className="pointer-events-auto"
         participant={target}
         number={props.number}
@@ -130,11 +162,11 @@ export const Creation = (props: {
             messageClassNames,
           )}
           textStyle={messageTextStyle}
-          context={creation.creationBody().assignment()}
+          context={isNewArchitecture ? undefined : creation?.creationBody().assignment()}
           content={assignee}
           rtl={!rightToLeft}
           type="return"
-          number={`${props.number}.${creation.Statements().length + 1}`}
+          number={`${props.number}.${isNewArchitecture ? "2" : creation?.Statements().length + 1}`}
         />
       )}
     </div>
