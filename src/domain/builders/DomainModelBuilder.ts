@@ -92,7 +92,19 @@ export class DomainModelBuilder extends sequenceParserListener {
       'queue': ParticipantType.QUEUE,
       '@queue': ParticipantType.QUEUE
     };
-    return typeMap[type || ''] || ParticipantType.PARTICIPANT;
+    
+    // Check for known types first
+    if (typeMap[type || '']) {
+      return typeMap[type || ''];
+    }
+    
+    // For AWS services and other custom types starting with @, preserve the type name
+    // This allows @EC2, @Lambda, @S3, etc. to be passed through for icon resolution
+    if (type && type.startsWith('@')) {
+      return type.substring(1) as ParticipantType; // Remove @ prefix and use as type
+    }
+    
+    return ParticipantType.PARTICIPANT;
   }
 
   // Message/Interaction handling

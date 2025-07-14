@@ -42,17 +42,7 @@ export const Divider = (props: {
   layoutData?: DividerLayout;  // New optional prop
   className?: string;
 }) => {
-  // If layout data is provided, use the new rendering path
-  if (props.layoutData) {
-    return <DividerWithLayout layout={props.layoutData} className={props.className} />;
-  }
-  
-  // Otherwise, fall back to the original implementation
-  if (!props.context || !props.origin) {
-    console.warn('Divider: Neither layoutData nor context/origin provided');
-    return null;
-  }
-  
+  // Always call hooks at the top level to maintain hook order
   const participants = useAtomValue(participantsAtom);
 
   const width = useMemo(() => {
@@ -62,11 +52,9 @@ export const Divider = (props: {
     return getParticipantCenter(rearParticipant) + 10;
   }, [participants]);
 
-  const centerOfOrigin = getParticipantCenter(props.origin);
-
-  const note = props.context.divider().Note();
-
   const messageStyle = useMemo(() => {
+    if (!props.context) return { style: getStyle([]), note: '' };
+    const note = props.context.divider().Note();
     if (note.trim().indexOf("[") === 0 && note.indexOf("]") !== -1) {
       const startIndex = note.indexOf("[");
       const endIndex = note.indexOf("]");
@@ -80,7 +68,20 @@ export const Divider = (props: {
       };
     }
     return { style: getStyle([]), note: note };
-  }, [note]);
+  }, [props.context]);
+
+  // If layout data is provided, use the new rendering path
+  if (props.layoutData) {
+    return <DividerWithLayout layout={props.layoutData} className={props.className} />;
+  }
+  
+  // Otherwise, fall back to the original implementation
+  if (!props.context || !props.origin) {
+    console.warn('Divider: Neither layoutData nor context/origin provided');
+    return null;
+  }
+
+  const centerOfOrigin = getParticipantCenter(props.origin);
 
   return (
     <div

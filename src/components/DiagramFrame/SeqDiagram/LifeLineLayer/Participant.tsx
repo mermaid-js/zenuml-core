@@ -118,7 +118,7 @@ const ParticipantWithLayout = ({
             <ParticipantLabel
               labelText={layout.label}
               labelPositions={layout.labelPositions || []}
-              assignee={layout.isAssignee}
+              assignee={layout.isAssignee ? layout.label : undefined}
               assigneePositions={layout.assigneePositions || []}
             />
           </div>
