@@ -1,5 +1,10 @@
-import { SequenceDiagram, Participant, Interaction, Fragment, Block, Statement, DividerStatement } from '../models/SequenceDiagram';
-import { DiagramLayout, ParticipantLayout, InteractionLayout, FragmentLayout, ActivationLayout, BoundingBox, Point, LayoutConstraints, DividerLayout } from '../models/DiagramLayout';
+import { SequenceDiagram, Participant, Interaction, Fragment, Block, DividerStatement } from '../models/SequenceDiagram';
+import { DiagramLayout, ParticipantLayout, InteractionLayout, FragmentLayout, ActivationLayout, LayoutConstraints, DividerLayout } from '../models/DiagramLayout';
+import { MIN_PARTICIPANT_WIDTH, MARGIN, OCCURRENCE_WIDTH, ARROW_HEAD_WIDTH, OCCURRENCE_BAR_SIDE_WIDTH } from '@/positioning/Constants';
+import { TextType } from '@/positioning/Coordinate';
+import { find_optimal } from '@/positioning/david/DavidEisenstat';
+
+export type WidthProvider = (text: string, type: TextType) => number;
 
 /**
  * Calculates layout from domain model.
@@ -8,40 +13,42 @@ import { DiagramLayout, ParticipantLayout, InteractionLayout, FragmentLayout, Ac
  */
 export class LayoutCalculator {
   private constraints: LayoutConstraints = {
-    minParticipantWidth: 100,
-    participantPadding: 50,
+    minParticipantWidth: MIN_PARTICIPANT_WIDTH,
+    participantPadding: MARGIN,
     interactionHeight: 30,
     fragmentPadding: 10,
-    activationWidth: 15,
+    activationWidth: OCCURRENCE_WIDTH,
     selfMessageWidth: 40
   };
 
   private participantPositions = new Map<string, number>();
   private currentY = 50;  // Start position
+  private widthProvider: WidthProvider;
+
+  constructor(widthProvider?: WidthProvider) {
+    // Default width provider if none provided
+    this.widthProvider = widthProvider || ((text: string) => text.length * 8);
+  }
 
   calculate(diagram: SequenceDiagram): DiagramLayout {
-    console.log('[LayoutCalculator] Calculating layout for diagram');
-    console.log('  - Participants:', diagram.participants.size);
-    console.log('  - Interactions:', diagram.interactions.length);
-    console.log('  - Fragments:', diagram.fragments.length);
-    
+
     // Step 1: Calculate participant positions
     const participants = this.calculateParticipantLayouts(diagram);
-    
+
     // Step 2: Process root block to calculate vertical positions
     const { interactions, fragments, activations, dividers } = this.processBlock(
       diagram.rootBlock,
       diagram,
       0  // nesting level
     );
-    
+
     // Step 3: Calculate lifeline heights
     const lifelines = this.calculateLifelineLayouts(participants, this.currentY);
-    
+
     // Step 4: Calculate total dimensions
     const width = this.calculateTotalWidth(participants);
     const height = this.currentY + 50;  // Add bottom padding
-    
+
     return {
       width,
       height,
@@ -56,33 +63,51 @@ export class LayoutCalculator {
 
   private calculateParticipantLayouts(diagram: SequenceDiagram): ParticipantLayout[] {
     const layouts: ParticipantLayout[] = [];
-    let currentX = 50;  // Left margin
-    
+
     // Sort participants by order
     const sortedParticipants = Array.from(diagram.participants.values())
       .sort((a, b) => a.order - b.order);
+
+    if (sortedParticipants.length === 0) {
+      return layouts;
+    }
+
+    // Use the same matrix-based approach as the old architecture
+    const matrix = this.buildConstraintMatrix(diagram, sortedParticipants);
+    const positions = find_optimal(matrix);
     
-    for (const participant of sortedParticipants) {
+    // Apply leftGap like the old architecture
+    // In old architecture: leftGap = getParticipantGap(firstParticipant)
+    // where getParticipantGap = half(p.left) + half(p.name)
+    // For the first participant, p.left would be undefined/empty, so it's just half(p.name)
+    const firstParticipant = sortedParticipants[0];
+    const firstParticipantHalfWidth = this.calculateParticipantWidth(firstParticipant) / 2;
+    // Since there's no participant to the left of the first one, we add 0 for the left half
+    const leftGap = 0 + firstParticipantHalfWidth;
+    
+    for (let i = 0; i < sortedParticipants.length; i++) {
+      const participant = sortedParticipants[i];
       const width = this.calculateParticipantWidth(participant);
-      const centerX = currentX + width / 2;
-      
-      this.participantPositions.set(participant.id, centerX);
-      
+      const halfWidth = width / 2;
+      const position = leftGap + positions[i];
+
+      this.participantPositions.set(participant.id, position);
+
       layouts.push({
         participantId: participant.id,
         bounds: {
-          x: currentX,
+          x: position - halfWidth,
           y: 10,
           width,
           height: 40
         },
         labelBounds: {
-          x: currentX + 10,
+          x: position - halfWidth + 10,
           y: 20,
           width: width - 20,
           height: 20
         },
-        lifelineX: centerX,
+        lifelineX: position,
         // Additional properties for rendering
         label: participant.label || participant.name,
         type: participant.type,
@@ -96,21 +121,71 @@ export class LayoutCalculator {
         labelPositions: [],
         assigneePositions: []
       });
-      
-      currentX += width + this.constraints.participantPadding;
     }
-    
+
     return layouts;
   }
 
+  private buildConstraintMatrix(
+    diagram: SequenceDiagram, 
+    sortedParticipants: Participant[]
+  ): number[][] {
+    // Initialize matrix like old architecture
+    const matrix = sortedParticipants.map((_, i) => {
+      return sortedParticipants.map((v, j) => {
+        // Adjacent participants have their gap constraint
+        if (j - i === 1) {
+          // This matches the old architecture's getParticipantGap logic:
+          // gap = half(leftParticipant) + half(rightParticipant)
+          const leftParticipant = sortedParticipants[i];
+          const rightParticipant = v;
+          const leftHalfWidth = this.calculateParticipantWidth(leftParticipant) / 2;
+          const rightHalfWidth = this.calculateParticipantWidth(rightParticipant) / 2;
+          return leftHalfWidth + rightHalfWidth;
+        }
+        return 0;
+      });
+    });
+
+    // Add message constraints like old architecture
+    for (const interaction of diagram.interactions) {
+      const fromIndex = sortedParticipants.findIndex(p => p.id === interaction.from);
+      const toIndex = sortedParticipants.findIndex(p => p.id === interaction.to);
+      
+      if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+        const leftIndex = Math.min(fromIndex, toIndex);
+        const rightIndex = Math.max(fromIndex, toIndex);
+        
+        // Calculate message width requirement
+        const messageWidth = this.widthProvider(interaction.message || '', TextType.MessageContent);
+        const requiredWidth = messageWidth + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH;
+        
+        // Set the constraint in the matrix
+        matrix[leftIndex][rightIndex] = Math.max(
+          requiredWidth,
+          matrix[leftIndex][rightIndex]
+        );
+      }
+    }
+
+    return matrix;
+  }
+
   private calculateParticipantWidth(participant: Participant): number {
-    // In real implementation, would measure text
-    const labelWidth = (participant.label || participant.name).length * 8;
-    return Math.max(
-      this.constraints.minParticipantWidth,
-      participant.width || 0,
-      labelWidth + 20
-    );
+    // Match old architecture width calculation
+    const hasIcon = false; // TODO: check participant.icon or participant.type for icon
+    const iconWidth = hasIcon ? 40 : 0;
+    
+    // Use width provider to measure text, matching old architecture
+    const displayName = participant.label || participant.name;
+    const labelWidth = this.widthProvider(displayName, TextType.ParticipantName);
+    
+    const baseWidth = Math.max(
+      labelWidth + iconWidth,
+      this.constraints.minParticipantWidth
+    ) + MARGIN;
+    
+    return baseWidth;
   }
 
   private processBlock(
@@ -127,7 +202,7 @@ export class LayoutCalculator {
     const fragments: FragmentLayout[] = [];
     const activations: ActivationLayout[] = [];
     const dividers: DividerLayout[] = [];
-    
+
     for (const statement of block.statements) {
       switch (statement.type) {
         case 'interaction':
@@ -137,16 +212,16 @@ export class LayoutCalculator {
           if (interaction) {
             const layout = this.calculateInteractionLayout(interaction, nestingLevel);
             interactions.push(layout);
-            
+
             // Add activation if sync
             if (interaction.type === 'sync' || interaction.type === 'create') {
               activations.push(this.createActivation(interaction, layout));
             }
-            
+
             this.currentY += this.constraints.interactionHeight;
           }
           break;
-          
+
         case 'fragment':
           const fragment = diagram.fragments.find(
             f => f.id === statement.fragmentId
@@ -158,7 +233,7 @@ export class LayoutCalculator {
               nestingLevel
             );
             fragments.push(fragmentLayout);
-            
+
             // Process fragment sections
             for (const section of fragment.sections) {
               const sectionResult = this.processBlock(
@@ -173,7 +248,7 @@ export class LayoutCalculator {
             }
           }
           break;
-          
+
         case 'divider':
           console.log('[LayoutCalculator] Processing divider statement:', statement);
           const dividerLayout = this.calculateDividerLayout(
@@ -183,25 +258,25 @@ export class LayoutCalculator {
           dividers.push(dividerLayout);
           this.currentY += 20;
           break;
-          
+
         case 'comment':
           this.currentY += 15;
           break;
       }
     }
-    
+
     return { interactions, fragments, activations, dividers };
   }
 
   private calculateInteractionLayout(
     interaction: Interaction,
-    nestingLevel: number
+    _nestingLevel: number
   ): InteractionLayout {
     const fromX = this.participantPositions.get(interaction.from) || 0;
     const toX = this.participantPositions.get(interaction.to) || 0;
-    
+
     const isSelfMessage = interaction.from === interaction.to;
-    
+
     if (isSelfMessage) {
       return {
         interactionId: interaction.id,
@@ -230,6 +305,10 @@ export class LayoutCalculator {
         width: this.constraints.selfMessageWidth
       };
     }
+
+    // Calculate proper occurrence bar positioning
+    // For now, use participant center positions without incorrect nesting adjustments
+    // TODO: Implement proper Anchor2-style activation layer tracking
     
     return {
       interactionId: interaction.id,
@@ -240,11 +319,11 @@ export class LayoutCalculator {
       rightToLeft: fromX > toX,
       isSelfMessage: false,
       startPoint: {
-        x: fromX + (nestingLevel * this.constraints.activationWidth),
+        x: fromX, // Use participant center, not adjusted by nesting
         y: this.currentY
       },
       endPoint: {
-        x: toX - (nestingLevel * this.constraints.activationWidth),
+        x: toX, // Use participant center, not adjusted by nesting
         y: this.currentY
       },
       labelBounds: {
@@ -273,28 +352,28 @@ export class LayoutCalculator {
       // If no participants found, use all participants
       involvedParticipants.push(...Array.from(diagram.participants.keys()));
     }
-    
-    const leftmostX = Math.min(...involvedParticipants.map(p => 
+
+    const leftmostX = Math.min(...involvedParticipants.map(p =>
       this.participantPositions.get(p) || 0
     )) - 50;
-    const rightmostX = Math.max(...involvedParticipants.map(p => 
+    const rightmostX = Math.max(...involvedParticipants.map(p =>
       this.participantPositions.get(p) || 0
     )) + 50;
-    
+
     const startY = this.currentY;
     const padding = this.constraints.fragmentPadding + (nestingLevel * 10);
     const paddingLeft = padding + 20; // Internal padding for content
-    
+
     // Calculate transform based on leftmost participant
     const leftmostParticipant = involvedParticipants.reduce((left, p) => {
       const pos = this.participantPositions.get(p) || 0;
       const leftPos = this.participantPositions.get(left) || 0;
       return pos < leftPos ? p : left;
     });
-    
+
     const leftParticipantX = this.participantPositions.get(leftmostParticipant) || 0;
     const transform = `translateX(${leftParticipantX - padding}px)`;
-    
+
     const fragmentLayout: FragmentLayout = {
       fragmentId: fragment.id,
       type: fragment.type,
@@ -330,7 +409,7 @@ export class LayoutCalculator {
       paddingLeft,
       transform
     };
-    
+
     return fragmentLayout;
   }
 
@@ -365,7 +444,10 @@ export class LayoutCalculator {
   private calculateTotalWidth(participants: ParticipantLayout[]): number {
     if (participants.length === 0) return 0;
     const lastParticipant = participants[participants.length - 1];
-    return lastParticipant.bounds.x + lastParticipant.bounds.width + 50;
+    // Old architecture calculates width as position + half width
+    const calculatedWidth = lastParticipant.lifelineX + lastParticipant.bounds.width / 2;
+    // Old architecture has a minimum width of 200
+    return Math.max(calculatedWidth, 200);
   }
 
   private findInvolvedParticipants(
@@ -373,12 +455,12 @@ export class LayoutCalculator {
     diagram: SequenceDiagram
   ): string[] {
     const participants = new Set<string>();
-    
+
     // Find all interactions in this fragment's blocks
     for (const section of fragment.sections) {
       this.collectParticipantsFromBlock(section.block, diagram, participants);
     }
-    
+
     return Array.from(participants);
   }
 
@@ -408,7 +490,7 @@ export class LayoutCalculator {
       }
     }
   }
-  
+
   private calculateDividerLayout(
     divider: DividerStatement,
     diagram: SequenceDiagram
@@ -416,13 +498,13 @@ export class LayoutCalculator {
     // Get the rightmost participant to determine diagram width
     const sortedParticipants = Array.from(diagram.participants.values())
       .sort((a, b) => a.order - b.order);
-    
+
     const rightmostParticipant = sortedParticipants[sortedParticipants.length - 1];
     const rightmostPosition = this.participantPositions.get(rightmostParticipant?.id || '') || 0;
-    
+
     // Divider spans from left edge to beyond rightmost participant
     const dividerWidth = rightmostPosition + 50; // Add some padding
-    
+
     return {
       bounds: {
         x: 10, // Start from left margin

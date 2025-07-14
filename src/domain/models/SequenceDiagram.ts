@@ -19,6 +19,7 @@ export interface Participant {
   type: ParticipantType;
   stereotype?: string;
   width?: number;
+  assignee?: string;
   color?: string;
   group?: string;
   order: number;  // Explicit ordering

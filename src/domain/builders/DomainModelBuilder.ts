@@ -2,6 +2,7 @@ import { SequenceDiagram, Participant, Interaction, Fragment, Block, Statement, 
 import sequenceParser from '@/generated-parser/sequenceParser';
 import sequenceParserListener from '@/generated-parser/sequenceParserListener';
 import antlr4 from 'antlr4';
+import { _STARTER_ } from '@/parser/OrderedParticipants';
 
 /**
  * Builds a domain model from the ANTLR parse tree.
@@ -109,7 +110,7 @@ export class DomainModelBuilder extends sequenceParserListener {
 
   // Message/Interaction handling
   enterMessage(ctx: any) {
-    const from = ctx.From() || '_STARTER_';
+    const from = ctx.From() || _STARTER_;
     const to = ctx.Owner() || '';
     const signature = ctx.SignatureText();
     
@@ -146,7 +147,7 @@ export class DomainModelBuilder extends sequenceParserListener {
   }
 
   enterAsyncMessage(ctx: any) {
-    const from = ctx.From() || '_STARTER_';
+    const from = ctx.From() || _STARTER_;
     const to = ctx.Owner() || '';
     
     this.ensureParticipant(from);
@@ -169,7 +170,7 @@ export class DomainModelBuilder extends sequenceParserListener {
 
   enterCreation(ctx: any) {
     const to = ctx.Owner() || '';
-    const from = this.currentInteraction?.to || '_STARTER_';
+    const from = this.currentInteraction?.to || _STARTER_;
     
     this.ensureParticipant(from);
     this.ensureParticipant(to);
@@ -403,12 +404,28 @@ export class DomainModelBuilder extends sequenceParserListener {
   // Helper methods
   private ensureParticipant(name: string) {
     if (!this.diagram.participants.has(name)) {
-      this.diagram.participants.set(name, {
-        id: name,
-        name: name,
-        type: ParticipantType.PARTICIPANT,
-        order: this.participantOrder++
-      });
+      // Special handling for _STARTER_ participant
+      if (name === _STARTER_) {
+        // _STARTER_ should be the first participant (order 0)
+        // Shift all existing participants' order by 1
+        this.diagram.participants.forEach(p => {
+          p.order++;
+        });
+        
+        this.diagram.participants.set(name, {
+          id: name,
+          name: name,
+          type: ParticipantType.PARTICIPANT,
+          order: 0
+        });
+      } else {
+        this.diagram.participants.set(name, {
+          id: name,
+          name: name,
+          type: ParticipantType.PARTICIPANT,
+          order: this.participantOrder++
+        });
+      }
     }
   }
 

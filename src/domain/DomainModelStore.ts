@@ -4,6 +4,7 @@ import { buildDomainModel } from '@/domain/builders/DomainModelBuilder';
 import { LayoutCalculator } from '@/domain/layout/LayoutCalculator';
 import { SequenceDiagram } from '@/domain/models/SequenceDiagram';
 import { DiagramLayout } from '@/domain/models/DiagramLayout';
+import WidthProviderOnBrowser from '@/positioning/WidthProviderFunc';
 
 /**
  * Bridge between old and new architecture.
@@ -57,9 +58,9 @@ export const diagramLayoutAtom = atom<DiagramLayout | null>((get) => {
   }
   
   try {
-    // Calculate layout from domain model (pure calculation)
+    // Calculate layout from domain model using the same width provider as old architecture
     console.log('[DomainModelStore] Calculating layout from domain model');
-    const calculator = new LayoutCalculator();
+    const calculator = new LayoutCalculator(WidthProviderOnBrowser);
     const layout = calculator.calculate(domainModel);
     console.log('[DomainModelStore] Layout calculated:', {
       participants: layout.participants.length,
