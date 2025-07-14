@@ -32,19 +32,41 @@ export const FragmentLoop = (props: {
     leftParticipant,
   } = useFragmentData(props.context, props.origin);
 
-  // For now, always use old architecture to avoid hook issues
-  // TODO: Enable new architecture once hook issues are resolved
-  console.log('[FragmentLoop] Using OLD architecture (layoutData temporarily ignored):', props.layoutData);
+  // Determine if using new or old architecture
+  const isNewArchitecture = !!props.layoutData;
+  
+  // Extract data based on architecture
+  const data = isNewArchitecture
+    ? {
+        collapsed: props.layoutData!.collapsed,
+        toggleCollapse: () => {}, // TODO: Implement collapse functionality in new architecture
+        paddingLeft: props.layoutData!.paddingLeft,
+        fragmentStyle: props.layoutData!.fragmentStyle,
+        border: props.layoutData!.border,
+        leftParticipant: props.layoutData!.leftParticipant,
+        condition: props.layoutData!.condition,
+        block: props.layoutData!.block,
+      }
+    : {
+        collapsed,
+        toggleCollapse,
+        paddingLeft,
+        fragmentStyle,
+        border,
+        leftParticipant,
+        condition,
+        block: blockInLoop,
+      };
 
   return (
     <div className={props.className}>
       <div
         data-origin={props.origin}
-        data-left-participant={leftParticipant}
-        data-frame-padding-left={border.left}
-        data-frame-padding-right={border.right}
+        data-left-participant={data.leftParticipant}
+        data-frame-padding-left={data.border.left}
+        data-frame-padding-right={data.border.right}
         className="group fragment fragment-loop loop border-skin-fragment rounded"
-        style={fragmentStyle}
+        style={data.fragmentStyle}
       >
         {props.commentObj?.text && (
           <Comment comment={props.comment} commentObj={props.commentObj} />
@@ -56,23 +78,23 @@ export const FragmentLoop = (props: {
               <Icon name="loop-fragment" />
               <CollapseButton
                 label="Loop"
-                collapsed={collapsed}
-                onClick={toggleCollapse}
+                collapsed={data.collapsed}
+                onClick={data.toggleCollapse}
                 style={props.commentObj?.messageStyle}
                 className={cn(props.commentObj?.messageClassNames)}
               />
             </label>
           </div>
         </div>
-        <div className={cn({ hidden: collapsed })}>
+        <div className={cn({ hidden: data.collapsed })}>
           <div className="segment">
             <div className="text-skin-fragment">
-              <ConditionLabel condition={condition} />
+              <ConditionLabel condition={data.condition} />
             </div>
             <Block
-              origin={leftParticipant}
-              style={{ paddingLeft: `${paddingLeft}px` }}
-              context={blockInLoop}
+              origin={data.leftParticipant}
+              style={{ paddingLeft: `${data.paddingLeft}px` }}
+              context={data.block}
               number={`${props.number}.1`}
               incremental
             />

@@ -20,6 +20,11 @@ export const Interaction = (props: {
 }) => {
   // Always call hooks to maintain order
   const cursor = useAtomValue(cursorAtom);
+  
+  // Determine if using new or old architecture
+  const isNewArchitecture = !!props.layoutData;
+  
+  // Pre-calculate values for useArrow hook (always called to maintain hook order)
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
   const message = props.context?.message();
@@ -31,87 +36,141 @@ export const Interaction = (props: {
   const target = props.context?.message()?.Owner() || _STARTER_;
   const isSelf = source === target;
 
-  const {
-    translateX,
-    interactionWidth,
-    originLayers,
-    sourceLayers,
-    targetLayers,
-    rightToLeft,
-  } = useArrow({
+  // Always call useArrow hook to maintain hook order
+  const arrowData = useArrow({
     context: props.context,
     origin: props.origin,
     source,
     target,
   });
-
-  // For now, always use old architecture to avoid hook issues
-  // TODO: Enable new architecture once hook issues are resolved
-  console.log('[Interaction] Using OLD architecture (layoutData temporarily ignored):', props.layoutData);
+  
+  // For old architecture, collect all data
+  let oldArchData = null;
+  if (!isNewArchitecture) {
+    oldArchData = {
+      messageTextStyle,
+      messageClassNames,
+      message,
+      statements,
+      assignee,
+      signature,
+      isCurrent,
+      source,
+      target,
+      isSelf,
+      ...arrowData
+    };
+  }
+  
+  // Extract data based on architecture
+  const data = isNewArchitecture
+    ? {
+        messageTextStyle: props.commentObj?.messageStyle,
+        messageClassNames: props.commentObj?.messageClassNames,
+        message: null, // New architecture doesn't need raw context
+        statements: props.layoutData!.statements || [],
+        assignee: props.layoutData!.assignee || "",
+        signature: props.layoutData!.signature,
+        isCurrent: false, // TODO: Handle current state in new architecture
+        source: props.layoutData!.source,
+        target: props.layoutData!.target,
+        isSelf: props.layoutData!.isSelf,
+        translateX: props.layoutData!.translateX,
+        interactionWidth: props.layoutData!.interactionWidth,
+        originLayers: props.layoutData!.originLayers,
+        sourceLayers: props.layoutData!.sourceLayers,
+        targetLayers: props.layoutData!.targetLayers,
+        rightToLeft: props.layoutData!.rightToLeft,
+      }
+    : oldArchData!;
 
   return (
     <div
       className={cn(
         "interaction sync inline-block",
         {
-          highlight: isCurrent,
-          self: isSelf,
-          "right-to-left": rightToLeft,
+          highlight: data.isCurrent,
+          self: data.isSelf,
+          "right-to-left": data.rightToLeft,
         },
         props.className,
       )}
       onClick={(e) => e.stopPropagation()}
-      data-to={target}
+      data-to={data.target}
       data-origin={props.origin}
-      data-source={source}
-      data-target={target}
-      data-origin-layers={originLayers}
-      data-source-layers={sourceLayers}
-      data-target-layers={targetLayers}
+      data-source={data.source}
+      data-target={data.target}
+      data-origin-layers={data.originLayers}
+      data-source-layers={data.sourceLayers}
+      data-target-layers={data.targetLayers}
       data-type="interaction"
-      data-signature={signature}
+      data-signature={data.signature}
       style={{
-        width: isSelf ? undefined : interactionWidth + "px",
-        transform: "translateX(" + translateX + "px)",
+        width: data.isSelf ? undefined : data.interactionWidth + "px",
+        transform: "translateX(" + data.translateX + "px)",
       }}
     >
       {props.commentObj?.text && <Comment commentObj={props.commentObj} />}
-      {isSelf ? (
+      {data.isSelf ? (
         <SelfInvocation
-          classNames={messageClassNames}
-          textStyle={messageTextStyle}
-          context={message}
+          layoutData={isNewArchitecture ? {
+            assignee: data.assignee,
+            signatureText: data.signature,
+            labelPosition: [-1, -1], // TODO: Pass proper label position in new architecture
+            number: props.number,
+            textStyle: data.messageTextStyle,
+            classNames: data.messageClassNames,
+          } : undefined}
+          classNames={data.messageClassNames}
+          textStyle={data.messageTextStyle}
+          context={data.message}
           number={props.number}
         />
       ) : (
         <Message
-          className={cn("text-center", messageClassNames)}
-          textStyle={messageTextStyle}
-          context={message}
-          content={signature}
-          rtl={rightToLeft}
+          layoutData={isNewArchitecture ? {
+            content: data.signature,
+            rtl: data.rightToLeft,
+            type: "sync",
+            textStyle: data.messageTextStyle,
+            className: cn("text-center", data.messageClassNames),
+            number: props.number,
+          } : undefined}
+          className={cn("text-center", data.messageClassNames)}
+          textStyle={data.messageTextStyle}
+          context={data.message}
+          content={data.signature}
+          rtl={data.rightToLeft}
           number={props.number}
           type="sync"
         />
       )}
       <Occurrence
-        context={message}
-        participant={target}
-        rtl={rightToLeft}
+        context={data.message}
+        participant={data.target}
+        rtl={data.rightToLeft}
         number={props.number}
       />
-      {assignee && !isSelf && (
+      {data.assignee && !data.isSelf && (
         <Message
+          layoutData={isNewArchitecture ? {
+            content: data.assignee,
+            rtl: !data.rightToLeft,
+            type: "return",
+            textStyle: data.messageTextStyle,
+            className: cn("return transform -translate-y-full", data.messageClassNames),
+            number: `${props.number}.${data.statements.length + 1}`,
+          } : undefined}
           className={cn(
             "return transform -translate-y-full",
-            messageClassNames,
+            data.messageClassNames,
           )}
-          context={message}
-          content={assignee}
-          rtl={!rightToLeft}
+          context={data.message}
+          content={data.assignee}
+          rtl={!data.rightToLeft}
           type="return"
-          number={`${props.number}.${statements.length + 1}`}
-          textStyle={messageTextStyle}
+          number={`${props.number}.${data.statements.length + 1}`}
+          textStyle={data.messageTextStyle}
         />
       )}
     </div>

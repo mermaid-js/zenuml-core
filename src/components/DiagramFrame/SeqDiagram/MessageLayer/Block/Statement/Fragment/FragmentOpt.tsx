@@ -27,21 +27,41 @@ export const FragmentOpt = (props: {
     leftParticipant,
   } = useFragmentData(props.context, props.origin);
 
-  // For now, always use old architecture to avoid hook issues
-  // TODO: Enable new architecture once hook issues are resolved
-  console.log('[FragmentOpt] Using OLD architecture (layoutData temporarily ignored):', props.layoutData);
+  // Determine if using new or old architecture
+  const isNewArchitecture = !!props.layoutData;
+  
+  // Extract data based on architecture
+  const data = isNewArchitecture
+    ? {
+        collapsed: props.layoutData!.collapsed,
+        toggleCollapse: () => {}, // TODO: Implement collapse functionality in new architecture
+        paddingLeft: props.layoutData!.paddingLeft,
+        fragmentStyle: props.layoutData!.fragmentStyle,
+        border: props.layoutData!.border,
+        leftParticipant: props.layoutData!.leftParticipant,
+        block: props.layoutData!.block,
+      }
+    : {
+        collapsed,
+        toggleCollapse,
+        paddingLeft,
+        fragmentStyle,
+        border,
+        leftParticipant,
+        block: opt?.braceBlock()?.block(),
+      };
 
   return (
     <div
       data-origin={props.origin}
-      data-left-participant={leftParticipant}
-      data-frame-padding-left={border.left}
-      data-frame-padding-right={border.right}
+      data-left-participant={data.leftParticipant}
+      data-frame-padding-left={data.border.left}
+      data-frame-padding-right={data.border.right}
       className={cn(
         "group fragment opt border-skin-fragment rounded",
         props.className,
       )}
-      style={fragmentStyle}
+      style={data.fragmentStyle}
     >
       {props.commentObj?.text && (
         <Comment comment={props.comment} commentObj={props.commentObj} />
@@ -53,8 +73,8 @@ export const FragmentOpt = (props: {
             <Icon name="opt-fragment" />
             <CollapseButton
               label="Opt"
-              collapsed={collapsed}
-              onClick={toggleCollapse}
+              collapsed={data.collapsed}
+              onClick={data.toggleCollapse}
               style={props.commentObj?.textStyle}
               className={cn(props.commentObj?.classNames)}
             />
@@ -62,10 +82,10 @@ export const FragmentOpt = (props: {
         </div>
       </div>
       <Block
-        origin={leftParticipant}
-        className={cn({ hidden: collapsed })}
-        style={{ paddingLeft: `${paddingLeft}px` }}
-        context={opt?.braceBlock()?.block()}
+        origin={data.leftParticipant}
+        className={cn({ hidden: data.collapsed })}
+        style={{ paddingLeft: `${data.paddingLeft}px` }}
+        context={data.block}
         number={`${props.number}.1`}
         incremental
       />

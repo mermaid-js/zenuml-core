@@ -54,9 +54,35 @@ export const FragmentAlt = (props: {
     leftParticipant,
   } = useFragmentData(props.context, props.origin);
   
-  // For now, always use old architecture to avoid hook issues
-  // TODO: Enable new architecture once hook issues are resolved
-  console.log('[FragmentAlt] Using OLD architecture (layoutData temporarily ignored):', props.layoutData);
+  // Determine if using new or old architecture
+  const isNewArchitecture = !!props.layoutData;
+  
+  // Extract data based on architecture
+  const data = isNewArchitecture
+    ? {
+        collapsed: props.layoutData!.collapsed,
+        toggleCollapse: () => {}, // TODO: Implement collapse functionality in new architecture
+        paddingLeft: props.layoutData!.paddingLeft,
+        fragmentStyle: props.layoutData!.fragmentStyle,
+        leftParticipant: props.layoutData!.leftParticipant,
+        ifCondition: props.layoutData!.ifCondition,
+        ifBlock: props.layoutData!.ifBlock,
+        elseIfBlocks: props.layoutData!.elseIfBlocks || [],
+        elseBlock: props.layoutData!.elseBlock,
+        blockLengthAcc: props.layoutData!.blockLengthAcc || [],
+      }
+    : {
+        collapsed,
+        toggleCollapse,
+        paddingLeft,
+        fragmentStyle,
+        leftParticipant,
+        ifCondition: conditionFromIfElseBlock(ifBlock),
+        ifBlock: blockInIfBlock,
+        elseIfBlocks: elseIfBlocks || [],
+        elseBlock,
+        blockLengthAcc,
+      };
   
   return (
     <div
@@ -68,7 +94,7 @@ export const FragmentAlt = (props: {
         "group fragment fragment-alt alt border-skin-fragment rounded",
         props.className,
       )}
-      style={fragmentStyle}
+      style={data.fragmentStyle}
     >
       <div className="segment">
         {props.commentObj?.text && (
@@ -81,8 +107,8 @@ export const FragmentAlt = (props: {
               <Icon name="alt-fragment" />
               <CollapseButton
                 label="Alt"
-                collapsed={collapsed}
-                onClick={toggleCollapse}
+                collapsed={data.collapsed}
+                onClick={data.toggleCollapse}
                 style={props.commentObj?.messageStyle}
                 className={cn(props.commentObj?.messageClassNames)}
               />
@@ -91,22 +117,22 @@ export const FragmentAlt = (props: {
         </div>
       </div>
 
-      <div className={collapsed ? "hidden" : "block"}>
+      <div className={data.collapsed ? "hidden" : "block"}>
         <div className="segment">
           <div className="text-skin-fragment flex">
-            <ConditionLabel condition={conditionFromIfElseBlock(ifBlock)} />
+            <ConditionLabel condition={data.ifCondition} />
           </div>
-          {blockInIfBlock && (
+          {data.ifBlock && (
             <Block
-              origin={leftParticipant}
-              style={{ paddingLeft: `${paddingLeft}px` }}
-              context={blockInIfBlock}
+              origin={data.leftParticipant}
+              style={{ paddingLeft: `${data.paddingLeft}px` }}
+              context={data.ifBlock}
               number={`${props.number}.1`}
               incremental
             />
           )}
         </div>
-        {elseIfBlocks.map((elseIfBlock: any, index: number) => (
+        {data.elseIfBlocks.map((elseIfBlock: any, index: number) => (
           <Fragment key={index}>
             <div
               className="segment mt-2 border-t border-solid"
@@ -115,32 +141,32 @@ export const FragmentAlt = (props: {
               <div className="text-skin-fragment" key={index + 1000}>
                 <label className="else-if hidden">else if</label>
                 <ConditionLabel
-                  condition={conditionFromIfElseBlock(elseIfBlock)}
+                  condition={isNewArchitecture ? elseIfBlock.condition : conditionFromIfElseBlock(elseIfBlock)}
                 />
               </div>
               <Block
-                origin={leftParticipant}
-                style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInElseIfBlock(elseIfBlock)}
+                origin={data.leftParticipant}
+                style={{ paddingLeft: `${data.paddingLeft}px` }}
+                context={isNewArchitecture ? elseIfBlock.block : blockInElseIfBlock(elseIfBlock)}
                 key={index + 2000}
-                number={`${props.number}.${blockLengthAcc[index] + 1}`}
+                number={`${props.number}.${data.blockLengthAcc[index] + 1}`}
                 incremental
               />
             </div>
           </Fragment>
         ))}
-        {elseBlock && (
+        {data.elseBlock && (
           <>
             <div className="segment mt-2 border-t border-solid">
               <div className="text-skin-fragment">
                 <label className="p-1">[else]</label>
               </div>
               <Block
-                origin={leftParticipant}
-                style={{ paddingLeft: `${paddingLeft}px` }}
-                context={elseBlock}
+                origin={data.leftParticipant}
+                style={{ paddingLeft: `${data.paddingLeft}px` }}
+                context={data.elseBlock}
                 number={`${props.number}.${
-                  blockLengthAcc[blockLengthAcc.length - 1] + 1
+                  data.blockLengthAcc[data.blockLengthAcc.length - 1] + 1
                 }`}
                 incremental
               />

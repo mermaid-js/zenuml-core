@@ -68,9 +68,25 @@ const getLabelPosition = (context: Context, type: string): [number, number] => {
   return [start, stop];
 };
 
+/**
+ * Message component that supports both old and new architecture
+ */
 export const Message = (props: {
+  // New architecture props
+  layoutData?: {
+    content: string;
+    rtl?: boolean;
+    type?: string;
+    textStyle?: CSSProperties;
+    className?: string;
+    style?: CSSProperties;
+    number?: string;
+    borderStyle?: "solid" | "dashed";
+    editable?: boolean;
+  };
+  // Old architecture props (kept for compatibility)
   context?: Context;
-  content: string;
+  content?: string;
   rtl?: string | boolean;
   type?: string;
   textStyle?: CSSProperties;
@@ -78,37 +94,61 @@ export const Message = (props: {
   style?: CSSProperties;
   number?: string;
 }) => {
-  const {
-    context,
-    content,
-    rtl,
-    type = "",
-    textStyle,
-    className,
-    style,
-    number,
-  } = props;
   const mode = useAtomValue(modeAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
-  const isAsync = type === "async";
-  const editable = getEditable(context, mode, type || "");
+
+  // Determine if using new or old architecture
+  const isNewArchitecture = !!props.layoutData;
+  
+  // Extract data based on architecture
+  const data = isNewArchitecture
+    ? {
+        content: props.layoutData!.content,
+        rtl: props.layoutData!.rtl,
+        type: props.layoutData!.type || "",
+        textStyle: props.layoutData!.textStyle,
+        className: props.layoutData!.className,
+        style: props.layoutData!.style,
+        number: props.layoutData!.number,
+        borderStyle: props.layoutData!.borderStyle,
+        editable: props.layoutData!.editable,
+      }
+    : {
+        content: props.content || "",
+        rtl: props.rtl,
+        type: props.type || "",
+        textStyle: props.textStyle,
+        className: props.className,
+        style: props.style,
+        number: props.number,
+        borderStyle: ({
+          sync: "solid",
+          async: "solid",
+          creation: "dashed",
+          return: "dashed",
+        }[props.type || ""] as "solid" | "dashed"),
+        editable: getEditable(props.context, mode, props.type || ""),
+      };
+
+  const isAsync = data.type === "async";
   const stylable =
     mode !== RenderMode.Static &&
-    ["sync", "async", "return", "creation"].includes(type);
+    ["sync", "async", "return", "creation"].includes(data.type);
   const labelText =
-    type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
-  const labelPosition = getLabelPosition(context, type || "");
-  const borderStyle: "solid" | "dashed" | undefined = {
-    sync: "solid",
-    async: "solid",
-    creation: "dashed",
-    return: "dashed",
-  }[type] as "solid";
+    data.type === "creation" 
+      ? data.content.match(/«([^»]+)»/)?.[1] || "" 
+      : data.content || "";
+  const labelPosition = isNewArchitecture 
+    ? [-1, -1] as [number, number] // New architecture doesn't need label positions for now
+    : getLabelPosition(props.context, data.type || "");
 
   const onClick = () => {
     if (!stylable || !messageRef.current) return;
-    onMessageClick(context, messageRef.current);
+    // For new architecture, we might not have context, so only call if it exists
+    if (props.context) {
+      onMessageClick(props.context, messageRef.current);
+    }
   };
 
   return (
@@ -116,41 +156,41 @@ export const Message = (props: {
       className={cn(
         "message leading-none border-skin-message-arrow border-b-2 flex items-end",
         {
-          "flex-row-reverse": rtl,
-          return: type === "return",
-          "right-to-left": rtl,
+          "flex-row-reverse": data.rtl,
+          return: data.type === "return",
+          "right-to-left": data.rtl,
         },
-        className,
+        data.className,
       )}
-      style={{ ...style, borderBottomStyle: borderStyle }}
+      style={{ ...data.style, borderBottomStyle: data.borderStyle }}
       onClick={onClick}
       ref={messageRef}
     >
       <div className="name group text-center flex-grow relative hover:text-skin-message-hover hover:bg-skin-message-hover">
         <div className="inline-block static min-h-[1em]">
-          <div style={textStyle}>
-            {editable ? (
+          <div style={data.textStyle}>
+            {data.editable ? (
               <>
-                {type === "creation" && <span>«</span>}
+                {data.type === "creation" && <span>«</span>}
                 <MessageLabel
                   labelText={labelText ?? ""}
                   labelPosition={labelPosition}
                   isAsync={isAsync}
                 />
-                {type === "creation" && <span>»</span>}
+                {data.type === "creation" && <span>»</span>}
               </>
             ) : (
-              <>{content}</>
+              <>{data.content}</>
             )}
           </div>
         </div>
       </div>
       <Point
         className="flex-shrink-0 transform translate-y-1/2 -my-px"
-        fill={type === "sync"}
-        rtl={Boolean(rtl)}
+        fill={data.type === "sync"}
+        rtl={Boolean(data.rtl)}
       />
-      <Numbering number={number} />
+      <Numbering number={data.number} />
     </div>
   );
 };
