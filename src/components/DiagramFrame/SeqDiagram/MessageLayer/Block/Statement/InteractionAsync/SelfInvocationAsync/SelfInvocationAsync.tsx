@@ -7,21 +7,40 @@ export const SelfInvocationAsync = (props: {
   number?: string;
   textStyle?: CSSProperties;
   classNames?: string;
+  layoutData?: {
+    content: string;
+    labelPosition: [number, number];
+    number?: string;
+    style?: React.CSSProperties;
+  };
 }) => {
+  // Determine which architecture to use
+  const isNewArchitecture = !!props.layoutData;
+  
+  // Extract unified data
   const content = props.context?.content();
   const labelPosition = (): [number, number] => {
+    if (isNewArchitecture) {
+      return props.layoutData!.labelPosition;
+    }
     if (!content) return [-1, -1];
     return [content.start.start, content.stop.stop];
   };
 
+  const labelText = isNewArchitecture ? props.layoutData!.content : content?.getFormattedText();
+  const number = isNewArchitecture ? props.layoutData!.number : props.number;
+
   return (
-    <div className="message self flex items-start flex-col !border-none">
+    <div 
+      className="message self flex items-start flex-col !border-none"
+      style={isNewArchitecture ? props.layoutData!.style : undefined}
+    >
       <label className="name group px-px hover:text-skin-message-hover hover:bg-skin-message-hover min-h-[1em]">
-        <Numbering number={props.number} />
+        <Numbering number={number} />
         <MessageLabel
           style={props.textStyle}
           className={props.classNames}
-          labelText={content?.getFormattedText()}
+          labelText={labelText}
           labelPosition={labelPosition()}
           isAsync={true}
           isSelf={true}

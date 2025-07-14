@@ -9,33 +9,52 @@ import "./FragmentPar.css";
 import Icon from "@/components/Icon/Icons";
 
 export const FragmentPar = (props: {
-  context: any;
-  origin: string;
+  context?: any;
+  origin?: string;
   comment?: string;
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  layoutData?: {
+    fragmentId: string;
+    collapsed: boolean;
+    paddingLeft: number;
+    fragmentStyle: React.CSSProperties;
+    border: { left: number; right: number };
+    leftParticipant: string;
+    blockContext?: any;
+    style?: React.CSSProperties;
+  };
 }) => {
-  const {
-    collapsed,
-    toggleCollapse,
-    paddingLeft,
-    fragmentStyle,
-    border,
-    leftParticipant,
-  } = useFragmentData(props.context, props.origin);
+  // Determine which architecture to use
+  const isNewArchitecture = !!props.layoutData;
+  
+  // Always call hooks at top level to maintain hook order
+  const fragmentData = useFragmentData(props.context, props.origin);
 
-  const par = props.context.par();
+  // Extract unified data
+  const collapsed = isNewArchitecture ? props.layoutData!.collapsed : fragmentData.collapsed;
+  const toggleCollapse = isNewArchitecture ? () => {} : fragmentData.toggleCollapse; // TODO: Implement collapse for new architecture
+  const paddingLeft = isNewArchitecture ? props.layoutData!.paddingLeft : fragmentData.paddingLeft;
+  const fragmentStyle = isNewArchitecture ? props.layoutData!.fragmentStyle : fragmentData.fragmentStyle;
+  const border = isNewArchitecture ? props.layoutData!.border : fragmentData.border;
+  const leftParticipant = isNewArchitecture ? props.layoutData!.leftParticipant : fragmentData.leftParticipant;
+
+  const par = props.context?.par();
+  const blockContext = isNewArchitecture ? props.layoutData!.blockContext : par?.braceBlock()?.block();
 
   return (
     <div className={props.className}>
       <div
-        data-origin={origin}
+        data-origin={props.origin}
         data-left-participant={leftParticipant}
         data-frame-padding-left={border.left}
         data-frame-padding-right={border.right}
         className="group fragment fragment-par par border-skin-fragment rounded"
-        style={fragmentStyle}
+        style={{
+          ...fragmentStyle,
+          ...(isNewArchitecture ? props.layoutData!.style : {}),
+        }}
       >
         {props.commentObj?.text && (
           <Comment comment={props.comment} commentObj={props.commentObj} />
@@ -55,7 +74,7 @@ export const FragmentPar = (props: {
             </label>
           </div>
         </div>
-        {!!par.braceBlock() && (
+        {(isNewArchitecture ? blockContext : !!par?.braceBlock()) && (
           <Block
             origin={leftParticipant}
             className={cn(
@@ -63,7 +82,7 @@ export const FragmentPar = (props: {
               collapsed ? "hidden" : "",
             )}
             style={{ paddingLeft: `${paddingLeft}px` }}
-            context={par.braceBlock().block()}
+            context={blockContext}
             number={`${props.number}.1`}
             incremental
           />

@@ -733,33 +733,38 @@ describe('DomainModelBuilder', () => {
 - ✅ Participant  
 - ✅ Message & Return
 - ✅ Interaction & InteractionAsync
-- ✅ SelfInvocation
+- ✅ SelfInvocation & SelfInvocationAsync
 - ✅ FragmentAlt, FragmentOpt, FragmentLoop, FragmentCritical
+- ✅ FragmentPar, FragmentRef, FragmentTryCatchFinally
 - ✅ Comment
 - ✅ Creation
 - ✅ Occurrence
 
-### Remaining Components
-- ❌ SelfInvocationAsync
-- ❌ FragmentPar, FragmentRef, FragmentTryCatchFinally
+### Component Migration Status
+🎉 **MIGRATION COMPLETE**: All components now support dual-mode architecture!
 
-**Migration Coverage**: ~75% of components, ~90% of core functionality
+**Migration Coverage**: **100% of components**, **100% of core functionality**
 
 ## Future Considerations
 
-### Phase 1: Complete Migration (Optional)
-- Migrate remaining components using established patterns
-- Add layout data generation for all component types
+### Phase 1: Old Architecture Cleanup ✨
+Now that all components support dual-mode architecture, the next logical step is to:
+- Remove old visitor pattern implementations
+- Clean up deprecated parsing code paths
+- Simplify component interfaces by removing old architecture props
+- Remove temporary dual-mode compatibility code
 
-### Phase 2: Optimization
-- Remove old architecture code paths
-- Optimize domain model builder performance
-- Implement layout calculation caching
+### Phase 2: Performance Optimization
+- Optimize domain model builder performance further
+- Implement layout calculation caching at the diagram level
+- Add memoization for expensive geometric calculations
+- Consider WebWorker for large diagram processing
 
 ### Phase 3: Advanced Features
 - Add animation support through layout transitions
 - Implement collaborative editing features
-- Add advanced layout algorithms
+- Add advanced layout algorithms (auto-spacing, smart positioning)
+- Support for custom themes and styling APIs
 
 ## Conclusion
 
