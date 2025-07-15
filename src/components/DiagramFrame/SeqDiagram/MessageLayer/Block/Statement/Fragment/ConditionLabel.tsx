@@ -61,6 +61,7 @@ export const ConditionLabel = (props: { condition: any }) => {
           },
         )}
         contentEditable={editing && mode === RenderMode.Dynamic}
+        suppressContentEditableWarning={true}
         onDoubleClick={handleDblClick}
         onBlur={handleBlur}
         onKeyUp={handleKeyup}

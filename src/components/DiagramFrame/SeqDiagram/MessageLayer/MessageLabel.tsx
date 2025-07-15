@@ -69,6 +69,7 @@ export const MessageLabel = (props: {
       )}
       style={props.style}
       contentEditable={editing && mode === RenderMode.Dynamic}
+      suppressContentEditableWarning={true}
       onDoubleClick={handleDblClick}
       onBlur={handleBlur}
       onKeyUp={handleKeyup}

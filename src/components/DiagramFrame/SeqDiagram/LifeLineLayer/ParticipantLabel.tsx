@@ -83,6 +83,7 @@ export const ParticipantLabel = (props: {
             contentEditable={
               assigneeLabelHandler.editing && mode === RenderMode.Dynamic
             }
+            suppressContentEditableWarning={true}
             onDoubleClick={assigneeLabelHandler.handleDblClick}
             onBlur={assigneeLabelHandler.handleBlur}
             onKeyUp={assigneeLabelHandler.handleKeyup}
@@ -107,6 +108,7 @@ export const ParticipantLabel = (props: {
           mode === RenderMode.Dynamic &&
           UneditableText.indexOf(props.labelText) === -1
         }
+        suppressContentEditableWarning={true}
         onDoubleClick={participantLabelHandler.handleDblClick}
         onBlur={participantLabelHandler.handleBlur}
         onKeyUp={participantLabelHandler.handleKeyup}
