@@ -126,7 +126,7 @@ export const Message = (props: {
       onClick={onClick}
       ref={messageRef}
     >
-      <div className="name group text-center flex-grow relative hover:text-skin-message-hover hover:bg-skin-message-hover">
+      <div className="name group text-center flex-grow relative">
         <div className="inline-block static min-h-[1em]">
           <div style={textStyle}>
             {editable ? (

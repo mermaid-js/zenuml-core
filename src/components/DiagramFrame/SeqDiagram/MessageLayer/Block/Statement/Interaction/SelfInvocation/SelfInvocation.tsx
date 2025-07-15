@@ -30,7 +30,7 @@ export const SelfInvocation = (props: {
       className="self-invocation message leading-none self flex items-start flex-col border-none"
       onClick={onClick}
     >
-      <label className="name text-left group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em] w-full">
+      <label className="name text-left group px-px relative min-h-[1em] w-full">
         <Numbering number={props.number} />
         <div className="label">
           {assignee && (

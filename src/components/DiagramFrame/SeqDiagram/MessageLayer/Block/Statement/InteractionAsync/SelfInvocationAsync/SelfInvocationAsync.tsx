@@ -16,7 +16,7 @@ export const SelfInvocationAsync = (props: {
 
   return (
     <div className="message self flex items-start flex-col !border-none">
-      <label className="name group px-px hover:text-skin-message-hover hover:bg-skin-message-hover min-h-[1em]">
+      <label className="name group px-px min-h-[1em]">
         <Numbering number={props.number} />
         <MessageLabel
           style={props.textStyle}
