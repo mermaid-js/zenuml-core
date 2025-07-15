@@ -2,9 +2,10 @@ import { codeAtom, modeAtom, onContentChangeAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { useAtom, useAtomValue } from "jotai";
 import { formatText } from "@/utils/StringUtil";
-import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
+import { useEditLabelImproved, specialCharRegex } from "@/functions/useEditLabel";
 import { RenderMode } from "@/store/Store";
 import type { FocusEvent, KeyboardEvent, MouseEvent } from "react";
+import "../LifeLineLayer/EditableLabel.css";
 
 export const MessageLabel = (props: {
   labelText: string;
@@ -56,23 +57,27 @@ export const MessageLabel = (props: {
     setCode(newCode);
     onContentChange(newCode);
   };
-  const { editing, handleDblClick, handleBlur, handleKeydown, handleKeyup } =
-    useEditLabel(replaceLabelText);
+  const labelHandler = useEditLabelImproved(replaceLabelText, {
+    singleClick: true,
+    showHoverHint: true
+  });
 
   return (
     <label
-      title="Double click to edit"
-      className={cn(
-        "px-1 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover",
-        editing && "cursor-text",
-        props.className,
+      title="Click to edit"
+      className={labelHandler.getEditableClasses(
+        cn("px-1 right", props.className)
       )}
       style={props.style}
-      contentEditable={editing && mode === RenderMode.Dynamic}
-      onDoubleClick={handleDblClick}
-      onBlur={handleBlur}
-      onKeyUp={handleKeyup}
-      onKeyDown={handleKeydown}
+      contentEditable={labelHandler.editing && mode === RenderMode.Dynamic}
+      suppressContentEditableWarning={true}
+      onClick={labelHandler.handleClick}
+      onDoubleClick={labelHandler.handleDoubleClick}
+      onMouseEnter={labelHandler.handleMouseEnter}
+      onMouseLeave={labelHandler.handleMouseLeave}
+      onBlur={labelHandler.handleBlur}
+      onKeyUp={labelHandler.handleKeyup}
+      onKeyDown={labelHandler.handleKeydown}
     >
       {formattedLabelText}
     </label>

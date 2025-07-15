@@ -1,6 +1,7 @@
 import { cn } from "@/utils";
-import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
+import { useEditLabelImproved, specialCharRegex } from "@/functions/useEditLabel";
 import { useAtom, useAtomValue } from "jotai";
+import "../../../../LifeLineLayer/EditableLabel.css";
 import {
   codeAtom,
   modeAtom,
@@ -15,8 +16,7 @@ export const ConditionLabel = (props: { condition: any }) => {
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const labelText = props.condition?.getFormattedText() ?? "";
-  const { editing, handleDblClick, handleBlur, handleKeydown, handleKeyup } =
-    useEditLabel((e) => {
+  const labelHandler = useEditLabelImproved((e) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -47,24 +47,25 @@ export const ConditionLabel = (props: { condition: any }) => {
       const newCode = code.slice(0, start) + newText + code.slice(end + 1);
       setCode(newCode);
       onContentChange(newCode);
-    });
+    }, { singleClick: true, showHoverHint: true });
 
   return (
     <>
       <label>[</label>
       <label
-        title="Double click to edit"
-        className={cn(
-          "bg-skin-frame opacity-65 condition px-1 cursor-text hover:text-skin-message-hover hover:bg-skin-message-hover",
-          {
-            "cursor-text": editing,
-          },
+        title="Click to edit"
+        className={labelHandler.getEditableClasses(
+          "bg-skin-frame opacity-65 condition"
         )}
-        contentEditable={editing && mode === RenderMode.Dynamic}
-        onDoubleClick={handleDblClick}
-        onBlur={handleBlur}
-        onKeyUp={handleKeyup}
-        onKeyDown={handleKeydown}
+        contentEditable={labelHandler.editing && mode === RenderMode.Dynamic}
+        suppressContentEditableWarning={true}
+        onClick={labelHandler.handleClick}
+        onDoubleClick={labelHandler.handleDoubleClick}
+        onMouseEnter={labelHandler.handleMouseEnter}
+        onMouseLeave={labelHandler.handleMouseLeave}
+        onBlur={labelHandler.handleBlur}
+        onKeyUp={labelHandler.handleKeyup}
+        onKeyDown={labelHandler.handleKeydown}
       >
         {labelText}
       </label>

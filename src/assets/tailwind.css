@@ -39,8 +39,6 @@
 
     /* Message */
     --color-message-arrow: #000;
-    --color-text-message-hover: #ffffff;
-    --color-bg-message-hover: #000;
 
     /* Participant */
     --color-bg-participant: #ffffff;
@@ -66,8 +64,6 @@
     /* Message */
     --color-text-message: #368eff;
     --color-message-arrow: #368eff;
-    --color-text-message-hover: #ffffff;
-    --color-bg-message-hover: #368eff;
 
     /* Participant */
     --color-text-participant: #368eff;
@@ -94,8 +90,6 @@
 
     /* Message */
     --color-message-arrow: #536fff;
-    --color-text-message-hover: #ffffff;
-    --color-bg-message-hover: #536fff;
 
     /* Participant */
     --color-text-participant: #536fff;
@@ -122,8 +116,6 @@
 
     /* Message */
     --color-message-arrow: #8ffc5b;
-    --color-text-message-hover: #000000;
-    --color-bg-message-hover: #8ffc5b;
 
     /* Participant */
     --color-text-participant: #8ffc5b;
@@ -167,8 +159,6 @@
     /* Messages */
     --color-text-message: #ffb86c;
     --color-message-arrow: #cccccc;
-    --color-bg-message-hover: #ffffff;
-    --color-text-message-hover: #1747e5;
     --color-text-comment: #666666;
 
     /* Fragment */
@@ -203,8 +193,6 @@
     /* Messages */
     --color-text-message: #032c72;
     --color-message-arrow: #032c72;
-    --color-bg-message-hover: #ffffff;
-    --color-text-message-hover: #1747e5;
     --color-text-comment: #666666;
 
     /* Fragment */
@@ -239,8 +227,6 @@
     /* Messages */
     --color-text-message: #030809;
     --color-message-arrow: #324939;
-    --color-bg-message-hover: #ffffff;
-    --color-text-message-hover: #000000;
     --color-text-comment: #030809;
 
     /* Fragment */
@@ -275,8 +261,6 @@
     /* Messages */
     --color-text-message: #000000;
     --color-message-arrow: #000000;
-    --color-bg-message-hover: #ffffff;
-    --color-text-message-hover: #ffffff;
     --color-text-comment: #000000;
 
     /* Fragment */
@@ -315,8 +299,6 @@
     /* Messages */
     --color-text-message: #12522f;
     --color-message-arrow: #049e50;
-    --color-bg-message-hover: #ffffff;
-    --color-text-message-hover: #ffffff;
     --color-text-comment: #000000;
 
     /* Fragment */
@@ -351,8 +333,6 @@
     /* Messages */
     --color-text-message: #42a4e0;
     --color-message-arrow: #089fd8;
-    --color-bg-message-hover: #ffffff;
-    --color-text-message-hover: #ffffff;
     --color-text-comment: #000000;
 
     /* Fragment */
@@ -386,8 +366,6 @@
 
     /* Messages */
     --color-text-message: #c30000;
-    --color-bg-message-hover: #fff;
-    --color-text-message-hover: #c30000;
 
     /* Fragment */
     --color-bg-fragment-header: #c30000; /* Fragment Headers */
@@ -419,8 +397,6 @@
     /* Messages */
     --color-text-message: #db4437;
     --color-message-arrow: #db4437;
-    --color-bg-message-hover: #fffefb;
-    --color-text-message-hover: #ffffff;
     --color-text-comment: #000000;
 
     /* Fragment */
@@ -459,8 +435,6 @@
     /* Messages */
     --color-text-message: #333333; /* Dark text for messages */
     --color-message-arrow: #333333; /* Dark arrow for messages */
-    --color-bg-message-hover: #4caf50; /* Green hover background */
-    --color-text-message-hover: #ffffff; /* White text on hover */
     --color-text-comment: #333333; /* Dark text for comments */
 
     /* Fragment */
@@ -501,8 +475,6 @@
     /* Messages */
     --color-text-message: #666666; /* Medium gray text for messages */
     --color-message-arrow: #8254ac; /* Purple arrow for messages */
-    --color-bg-message-hover: #f3eef8; /* Very light purple hover background */
-    --color-text-message-hover: #8254ac; /* #8254AC - Purple text on hover */
     --color-text-comment: #999999; /* Light gray text for comments */
 
     /* Fragment */

@@ -30,7 +30,7 @@ export const SelfInvocation = (props: {
       className="self-invocation message leading-none self flex items-start flex-col border-none"
       onClick={onClick}
     >
-      <label className="name text-left group px-px hover:text-skin-message-hover hover:bg-skin-message-hover relative min-h-[1em] w-full">
+      <label className="name text-left group px-px relative min-h-[1em] w-full">
         <Numbering number={props.number} />
         <div className="label">
           {assignee && (
@@ -51,10 +51,16 @@ export const SelfInvocation = (props: {
       <svg className="arrow text-skin-message-arrow" width="30" height="24">
         <polyline
           className="line stroke-current fill-none stroke-2"
+          stroke="currentColor"
+          fill="none"
+          strokeWidth="2"
           points="0,2 28,2 28,15 14,15"
         ></polyline>
         <polyline
           className="head stroke-current fill-current stroke-2"
+          stroke="currentColor"
+          fill="currentColor"
+          strokeWidth="2"
           points="18,9 8,15 18,21"
         ></polyline>
       </svg>
