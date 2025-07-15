@@ -45,3 +45,5 @@ yarn-error.log*
 *.sw*
 
 .pnpm-store
+*storybook.log
+storybook-static
