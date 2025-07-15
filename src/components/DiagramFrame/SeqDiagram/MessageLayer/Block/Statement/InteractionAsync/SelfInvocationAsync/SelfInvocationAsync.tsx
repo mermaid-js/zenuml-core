@@ -30,10 +30,16 @@ export const SelfInvocationAsync = (props: {
       <svg className="arrow text-skin-message-arrow" width="34" height="34">
         <polyline
           className="stroke-current stroke-2 fill-none"
+          stroke="currentColor"
+          fill="none"
+          strokeWidth="2"
           points="0,2 28,2 28,25 1,25"
         ></polyline>
         <polyline
-          className="head stroke-current stroke-2 fill-none"
+          className="head stroke-current stroke-2 fill-current"
+          stroke="currentColor"
+          fill="currentColor"
+          strokeWidth="2"
           points="11,19 1,25 11,31"
         ></polyline>
         {/* TODO: What is the below line used for?

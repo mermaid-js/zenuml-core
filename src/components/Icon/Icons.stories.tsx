@@ -18,7 +18,6 @@ const meta: Meta<typeof Icon> = {
         'critical-fragment',
         'debug',
         'loop-fragment',
-        'message-arrow',
         'non-selected-cycle',
         'numbering',
         'opt-fragment',
@@ -43,7 +42,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    name: 'message-arrow',
+    name: 'close',
   },
 }
 
@@ -57,7 +56,6 @@ export const AllIcons: Story = {
       'critical-fragment',
       'debug',
       'loop-fragment',
-      'message-arrow',
       'non-selected-cycle',
       'numbering',
       'opt-fragment',
