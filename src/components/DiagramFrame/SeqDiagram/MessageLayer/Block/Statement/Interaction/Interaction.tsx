@@ -95,10 +95,7 @@ export const Interaction = (props: {
       />
       {assignee && !isSelf && (
         <Message
-          className={cn(
-            "return transform -translate-y-full",
-            messageClassNames,
-          )}
+          className={cn("return transform -mt-4", messageClassNames)}
           context={message}
           content={assignee}
           rtl={!rightToLeft}

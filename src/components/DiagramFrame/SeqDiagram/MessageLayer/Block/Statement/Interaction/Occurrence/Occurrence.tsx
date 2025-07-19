@@ -73,7 +73,9 @@ export const Occurrence = (props: {
         </>
       )}
       {hasAnyStatementsExceptReturn() && (
-        <CollapseButton collapsed={collapsed} onClick={toggle} />
+        <div className="mb-5">
+          <CollapseButton collapsed={collapsed} onClick={toggle} />
+        </div>
       )}
       {props.context.braceBlock() ? (
         <Block

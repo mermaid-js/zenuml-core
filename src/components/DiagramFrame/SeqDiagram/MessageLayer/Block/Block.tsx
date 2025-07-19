@@ -24,7 +24,7 @@ export const Block = (props: {
   };
   return (
     <div
-      className={cn("block pt-6 pb-2 pointer-events-none", props.className)}
+      className={cn("block pointer-events-none", props.className)}
       style={props.style}
       data-origin={props.origin}
     >
