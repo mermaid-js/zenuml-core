@@ -84,10 +84,15 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "[View on npm](https://www.npmjs.com/package/@zenuml/core/v/${{ steps.bump.outputs.version }})" >> $GITHUB_STEP_SUMMARY
 
-  # Build the site for Cloudflare Pages deployment
-  build-site:
+  # Deploy to Cloudflare Workers
+  deploy-to-cloudflare:
     runs-on: ubuntu-22.04
     needs: test
+    permissions:
+      contents: read
+      deployments: write
+    outputs:
+      deployment-url: ${{ steps.deploy-production.outputs.deployment-url || steps.deploy-staging.outputs.deployment-url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -102,61 +107,71 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
         run: pnpm install
-      - name: Build the site
-        run: pnpm build:site
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: site-build
-          path: ./dist
-
-  # Deploy to Cloudflare Pages
-  deploy-to-cloudflare:
-    runs-on: ubuntu-22.04
-    needs: build-site
-    permissions:
-      contents: read
-      deployments: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: site-build
-          path: ./dist
-
-      - name: Deploy to Cloudflare Pages (Production)
+        
+      - name: Deploy to Cloudflare Workers (Production)
         if: github.ref == 'refs/heads/main'
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ vars.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: zenuml-web-renderer
-          directory: dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        id: deploy-production
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ vars.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # Deploy and capture the output
+          DEPLOY_OUTPUT=$(pnpm worker:deploy 2>&1)
+          echo "$DEPLOY_OUTPUT"
+          
+          # Extract the deployment URL from wrangler output
+          DEPLOYMENT_URL=$(echo "$DEPLOY_OUTPUT" | grep -oE 'https://[^[:space:]]+\.workers\.dev' | head -1)
+          echo "Deployment URL: $DEPLOYMENT_URL"
+          echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          
+          # Add annotation to the step
+          echo "::notice title=Production Deployment::🚀 Deployed to $DEPLOYMENT_URL"
 
-      - name: Deploy to Cloudflare Pages (Staging)
+      - name: Deploy to Cloudflare Workers (Staging)
         if: github.ref != 'refs/heads/main'
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ vars.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: zenuml-web-renderer-staging
-          directory: dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        id: deploy-staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ vars.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # Deploy and capture the output
+          DEPLOY_OUTPUT=$(pnpm worker:deploy:staging 2>&1)
+          echo "$DEPLOY_OUTPUT"
+          
+          # Extract the deployment URL from wrangler output
+          DEPLOYMENT_URL=$(echo "$DEPLOY_OUTPUT" | grep -oE 'https://[^[:space:]]+\.workers\.dev' | head -1)
+          echo "Deployment URL: $DEPLOYMENT_URL"
+          echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          
+          # Add annotation to the step
+          echo "::notice title=Staging Deployment::🧪 Deployed to $DEPLOYMENT_URL"
 
       - name: Add Cloudflare deployment info to job summary
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "# 🚀 Cloudflare Production Deployment" >> $GITHUB_STEP_SUMMARY
+            echo "# 🚀 Cloudflare Workers Production Deployment" >> $GITHUB_STEP_SUMMARY
             echo "Deployed to: **Production**" >> $GITHUB_STEP_SUMMARY
-            echo "Project: **zenuml-web-renderer**" >> $GITHUB_STEP_SUMMARY
+            echo "Environment: **production**" >> $GITHUB_STEP_SUMMARY
+            echo "URL: ${{ steps.deploy-production.outputs.deployment-url }}" >> $GITHUB_STEP_SUMMARY
           else
-            echo "# 🧪 Cloudflare Staging Deployment" >> $GITHUB_STEP_SUMMARY
+            echo "# 🧪 Cloudflare Workers Staging Deployment" >> $GITHUB_STEP_SUMMARY
             echo "Deployed to: **Staging**" >> $GITHUB_STEP_SUMMARY
-            echo "Project: **zenuml-web-renderer-staging**" >> $GITHUB_STEP_SUMMARY
+            echo "Environment: **staging**" >> $GITHUB_STEP_SUMMARY
+            echo "URL: ${{ steps.deploy-staging.outputs.deployment-url }}" >> $GITHUB_STEP_SUMMARY
           fi
           echo "Branch: **${{ github.ref_name }}**" >> $GITHUB_STEP_SUMMARY
           echo "Commit: **${{ github.sha }}**" >> $GITHUB_STEP_SUMMARY
+
+  # Display deployment URL in workflow graph
+  deployment-info:
+    name: "🌐 Deployment URL"
+    runs-on: ubuntu-22.04
+    needs: deploy-to-cloudflare
+    if: always() && needs.deploy-to-cloudflare.result == 'success'
+    steps:
+      - name: "Show Deployment URL"
+        run: |
+          echo "🎆 Deployment successful!"
+          echo "URL: ${{ needs.deploy-to-cloudflare.outputs.deployment-url }}"
+          echo ""
+          echo "Visit: ${{ needs.deploy-to-cloudflare.outputs.deployment-url }}"
