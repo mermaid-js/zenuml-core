@@ -49,6 +49,9 @@
     <!-- ZenUML diagram container -->
     <pre class="zenuml" id="zenuml-diagram"></pre>
 
+    <!-- Load pako for compression/decompression -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    
     <!-- Initialize the renderer -->
     <script type="module">
       // ZenUML Web Renderer initialization
@@ -127,7 +130,35 @@ A.method() {
         }
       }
 
-      // Process URL code parameter with Base64 decoding
+      // Gzip decompression functionality
+      function decompressGzip(compressedData) {
+        try {
+          console.log('Attempting to decompress gzip data...');
+          
+          // Check if pako is available
+          if (typeof pako === 'undefined') {
+            throw new Error('Pako library not loaded');
+          }
+          
+          // Convert base64 decoded string to Uint8Array
+          const binaryString = compressedData;
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          
+          // Decompress using pako
+          const decompressed = pako.ungzip(bytes, { to: 'string' });
+          console.log('Gzip decompression successful');
+          
+          return decompressed;
+        } catch (error) {
+          console.error('Gzip decompression failed:', error);
+          throw new Error(`Gzip decompression failed: ${error.message}`);
+        }
+      }
+
+      // Process URL code parameter with Base64 decoding and optional gzip decompression
       function processURLCodeParameter(encodedCode) {
         try {
           console.log('Processing URL code parameter...');
@@ -137,16 +168,47 @@ A.method() {
             return null;
           }
           
-          // Try to decode as Base64
-          const decodedCode = decodeBase64(encodedCode);
-          console.log('Code parameter successfully decoded from Base64');
+          let processedCode = encodedCode;
           
-          return decodedCode;
+          // Step 1: Try to decode as Base64
+          try {
+            const base64Decoded = decodeBase64(encodedCode);
+            console.log('Base64 decoding successful');
+            processedCode = base64Decoded;
+            
+            // Step 2: Check if the decoded data is gzipped and decompress if needed
+            // Gzip files start with magic numbers: 1f 8b
+            if (processedCode.length >= 2 && 
+                processedCode.charCodeAt(0) === 0x1f && 
+                processedCode.charCodeAt(1) === 0x8b) {
+              console.log('Gzip signature detected, attempting decompression...');
+              processedCode = decompressGzip(processedCode);
+              console.log('Successfully decompressed gzipped data');
+            } else {
+              console.log('No gzip signature found, using Base64 decoded data');
+            }
+          } catch (base64Error) {
+            console.warn('Base64 decoding failed, trying direct gzip decompression:', base64Error);
+            
+            // If Base64 fails, maybe it's already raw text or needs different handling
+            // Try to see if it's URL encoded
+            try {
+              const urlDecoded = decodeURIComponent(encodedCode);
+              if (urlDecoded !== encodedCode) {
+                console.log('URL decoding applied');
+                processedCode = urlDecoded;
+              }
+            } catch (urlError) {
+              console.warn('URL decoding failed:', urlError);
+            }
+          }
+          
+          return processedCode;
         } catch (error) {
           console.error('Failed to process URL code parameter:', error);
           
           // Return the original code as fallback (might be plain text)
-          console.log('Falling back to using raw parameter value');
+          console.log('All decoding attempts failed, using raw parameter value');
           return encodedCode;
         }
       }
