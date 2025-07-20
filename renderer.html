@@ -49,11 +49,9 @@
     <!-- ZenUML diagram container -->
     <pre class="zenuml" id="zenuml-diagram"></pre>
 
-    <!-- Load pako for compression/decompression -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
-    
     <!-- Initialize the renderer -->
     <script type="module">
+      import pako from 'pako';
       // ZenUML Web Renderer initialization
       console.log('ZenUML Web Renderer initializing...');
       
@@ -134,11 +132,6 @@ A.method() {
       function decompressGzip(compressedData) {
         try {
           console.log('Attempting to decompress gzip data...');
-          
-          // Check if pako is available
-          if (typeof pako === 'undefined') {
-            throw new Error('Pako library not loaded');
-          }
           
           // Convert base64 decoded string to Uint8Array
           const binaryString = compressedData;

@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZenUML Compression Test</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -92,7 +91,9 @@
   <h3>Test Results:</h3>
   <div id="testResults"></div>
 
-  <script>
+  <script type="module">
+    import pako from 'pako';
+    
     // Helper function to escape HTML special characters
     function escapeHtml(unsafe) {
       return unsafe
@@ -260,10 +261,14 @@
       document.getElementById('testResults').innerHTML = results;
     }
 
+    // Make functions available globally for onclick handlers
+    window.encodeAndCompress = encodeAndCompress;
+    window.testDecode = testDecode;
+    window.generateUrl = generateUrl;
+    window.clearAll = clearAll;
+    
     // Run tests on page load
-    window.onload = () => {
-      runTests();
-    };
+    runTests();
   </script>
 </body>
 </html>
