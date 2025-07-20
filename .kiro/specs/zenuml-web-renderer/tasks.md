@@ -16,7 +16,7 @@
   - 在本地测试空图表渲染功能
   - _需求: 1.2, 1.3_
 
-- [ ] 3. 配置Cloudflare Workers基础部署
+- [x] 3. 配置Cloudflare Workers基础部署
 
   - 安装wrangler CLI工具
   - 创建基本的wrangler.toml配置文件

@@ -84,7 +84,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "[View on npm](https://www.npmjs.com/package/@zenuml/core/v/${{ steps.bump.outputs.version }})" >> $GITHUB_STEP_SUMMARY
 
-  # Build the site for embed view and other demo
+  # Build the site for Cloudflare Pages deployment
   build-site:
     runs-on: ubuntu-22.04
     needs: test
@@ -102,26 +102,61 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
         run: pnpm install
-      - name: Build the site for demo page and embed view
-        run: pnpm build:gh-pages
-      - name: Upload artifact for pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist
-      - name: Upload artifact for embed view
+      - name: Build the site
+        run: pnpm build:site
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zenuml-embed
+          name: site-build
           path: ./dist
 
-  # Single deploy job since we're just deploying
-  publish-to-gh-pages:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Deploy to Cloudflare Pages
+  deploy-to-cloudflare:
     runs-on: ubuntu-22.04
     needs: build-site
+    permissions:
+      contents: read
+      deployments: write
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site-build
+          path: ./dist
+
+      - name: Deploy to Cloudflare Pages (Production)
+        if: github.ref == 'refs/heads/main'
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: zenuml-web-renderer
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy to Cloudflare Pages (Staging)
+        if: github.ref != 'refs/heads/main'
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: zenuml-web-renderer-staging
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add Cloudflare deployment info to job summary
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "# 🚀 Cloudflare Production Deployment" >> $GITHUB_STEP_SUMMARY
+            echo "Deployed to: **Production**" >> $GITHUB_STEP_SUMMARY
+            echo "Project: **zenuml-web-renderer**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "# 🧪 Cloudflare Staging Deployment" >> $GITHUB_STEP_SUMMARY
+            echo "Deployed to: **Staging**" >> $GITHUB_STEP_SUMMARY
+            echo "Project: **zenuml-web-renderer-staging**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "Branch: **${{ github.ref_name }}**" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: **${{ github.sha }}**" >> $GITHUB_STEP_SUMMARY
