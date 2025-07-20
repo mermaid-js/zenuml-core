@@ -36,7 +36,10 @@
     "git:forget": "git rm -r --cached . && git add . && git commit -m \"Forget all ignored files\"",
     "test:specs": "echo \"Error: test:specs is not supported\"",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "worker:dev": "pnpm build:site && wrangler dev",
+    "worker:deploy": "pnpm build:site && wrangler deploy",
+    "worker:deploy:staging": "pnpm build:site && wrangler deploy --env staging"
   },
   "main": "./dist/zenuml.js",
   "module": "./dist/zenuml.esm.mjs",

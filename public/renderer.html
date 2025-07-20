@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%; width: 100%">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>ZenUML Web Renderer</title>
+    <meta name="description" content="ZenUML Web Renderer - Render sequence diagrams from URL parameters" />
+    <meta name="keywords" content="zenuml, sequence diagram, uml, renderer, web" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload stylesheet"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;700&display=swap"
+    />
+    
+    <!-- Basic styles for the renderer -->
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto Slab', serif, system-ui, -apple-system, sans-serif;
+        background-color: white;
+        height: 100vh;
+        width: 100vw;
+        overflow: auto;
+      }
+      
+      .zenuml {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: auto;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ZenUML diagram container -->
+    <pre class="zenuml" id="zenuml-diagram"></pre>
+
+    <!-- Initialize the renderer -->
+    <script type="module">
+      // ZenUML Web Renderer initialization
+      console.log('ZenUML Web Renderer initializing...');
+      
+      // Default empty ZenUML code to display when no URL parameters are provided
+      const DEFAULT_ZENUML_CODE = `title ZenUML Web Renderer
+A.method() {
+  B.process()
+  return result
+}`;
+
+      // Initialize the renderer
+      async function initRenderer() {
+        try {
+          console.log('Waiting for ZenUML core to load...');
+          
+          // Wait for ZenUML to be available
+          await waitForZenUML();
+          
+          console.log('ZenUML core loaded successfully');
+          
+          // Get the ZenUML instance that was created by main.ts
+          const zenUmlInstance = window.zenUml;
+          
+          if (!zenUmlInstance) {
+            throw new Error('ZenUML instance not found');
+          }
+          
+          // Verify ZenUML version
+          console.log('ZenUML Version:', window.ZENUML_VERSION);
+          
+          // Render the default empty diagram
+          console.log('Rendering default empty diagram...');
+          await zenUmlInstance.render(DEFAULT_ZENUML_CODE);
+          
+          console.log('Default diagram rendered successfully');
+          
+          console.log('ZenUML Web Renderer initialized successfully');
+          
+          // Add success indicator to the page
+          addStatusIndicator('success', 'ZenUML Web Renderer Ready');
+          
+        } catch (error) {
+          console.error('Failed to initialize renderer:', error);
+          addStatusIndicator('error', `Initialization failed: ${error.message}`);
+          
+          // Show error in the diagram container
+          const diagramContainer = document.getElementById('zenuml-diagram');
+          if (diagramContainer) {
+            diagramContainer.innerHTML = `
+              <div style="padding: 20px; color: #dc2626; text-align: center;">
+                <h3>ZenUML Renderer Error</h3>
+                <p>Failed to initialize: ${error.message}</p>
+                <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                  Retry
+                </button>
+              </div>
+            `;
+          }
+        }
+      }
+      
+      // Wait for ZenUML to be available with timeout
+      function waitForZenUML(timeout = 10000) {
+        return new Promise((resolve, reject) => {
+          const startTime = Date.now();
+          
+          const checkZenUml = () => {
+            if (typeof window.zenUml !== 'undefined') {
+              resolve();
+            } else if (Date.now() - startTime > timeout) {
+              reject(new Error('ZenUML loading timeout'));
+            } else {
+              setTimeout(checkZenUml, 100);
+            }
+          };
+          
+          checkZenUml();
+        });
+      }
+      
+      // Add status indicator to show initialization status
+      function addStatusIndicator(type, message) {
+        const indicator = document.createElement('div');
+        indicator.id = 'status-indicator';
+        indicator.style.cssText = `
+          position: fixed;
+          top: 10px;
+          right: 10px;
+          padding: 8px 12px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 500;
+          z-index: 1000;
+          ${type === 'success' 
+            ? 'background: #10b981; color: white;' 
+            : 'background: #dc2626; color: white;'
+          }
+        `;
+        indicator.textContent = message;
+        document.body.appendChild(indicator);
+        
+        // Auto-hide success messages after 3 seconds
+        if (type === 'success') {
+          setTimeout(() => {
+            if (indicator.parentNode) {
+              indicator.parentNode.removeChild(indicator);
+            }
+          }, 3000);
+        }
+      }
+      
+      // Start initialization when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initRenderer);
+      } else {
+        initRenderer();
+      }
+    </script>
+    
+    <!-- Load ZenUML core -->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
