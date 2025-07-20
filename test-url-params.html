@@ -10,6 +10,14 @@
     <div id="test-results"></div>
     
     <script>
+        // Utility function to escape HTML special characters
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, (char) => {
+                const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                return escapeMap[char];
+            });
+        }
+        
         // Copy the URL parameter extraction functions from renderer.html
         function extractCodeFromURL() {
             try {
@@ -105,7 +113,7 @@
             
             // Test 1: Check current URL
             const currentUrl = window.location.href;
-            results += `<p><strong>Current URL:</strong> ${currentUrl}</p>`;
+            results += `<p><strong>Current URL:</strong> ${escapeHTML(currentUrl)}</p>`;
             
             // Test 2: Check if code parameter exists
             const hasCode = hasCodeParameter();
@@ -113,7 +121,7 @@
             
             // Test 3: Extract code parameter
             const codeParam = extractCodeFromURL();
-            results += `<p><strong>Extracted code parameter:</strong> ${codeParam || 'null'}</p>`;
+            results += `<p><strong>Extracted code parameter:</strong> ${escapeHTML(codeParam) || 'null'}</p>`;
             
             // Test 4: Process URL code parameter (includes Base64 decoding)
             if (codeParam) {
@@ -137,7 +145,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             results += '<p><strong>All URL parameters:</strong></p><ul>';
             for (const [key, value] of urlParams) {
-                results += `<li>${key}: ${value}</li>`;
+                results += `<li>${escapeHTML(key)}: ${escapeHTML(value)}</li>`;
             }
             results += '</ul>';
             
