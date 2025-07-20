@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => ({
   base: mode === "gh-pages" ? "/zenuml-core/" : "/",
   build: {
     rollupOptions: {
-      input: ["index.html", "embed.html", ...cypressHtmlFiles],
+      input: ["index.html", "embed.html", "renderer.html", ...cypressHtmlFiles],
     },
   },
   resolve: {
