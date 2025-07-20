@@ -131,8 +131,8 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: cloudflare/pages-action@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ vars.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           projectName: zenuml-web-renderer
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
@@ -141,8 +141,8 @@ jobs:
         if: github.ref != 'refs/heads/main'
         uses: cloudflare/pages-action@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ vars.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           projectName: zenuml-web-renderer-staging
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
