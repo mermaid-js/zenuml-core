@@ -161,4 +161,12 @@ export default class ZenUml implements IZenUml {
       },
     });
   }
+
+  async getSvg(): Promise<string> {
+    return htmlToImage.toSvg(this.el, {
+      filter: (node) => {
+        return !node?.classList?.contains("hide-export");
+      },
+    });
+  }
 }
