@@ -42,7 +42,7 @@ export function initZenUml(element: HTMLElement) {
 const elm = document.querySelector("pre.zenuml");
 if (elm) {
   const instance = initZenUml(elm);
-  instance.render(""); // Initial render with empty content
+  // Initial render is handled by renderer.html
 }
 
 // @ts-ignore

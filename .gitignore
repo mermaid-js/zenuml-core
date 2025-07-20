@@ -4,6 +4,8 @@
 /playwright/.cache/
 coverage
 
+.wrangler
+
 # Gauge - metadata dir
 .gauge
 
@@ -44,6 +46,8 @@ yarn-error.log*
 *.sln
 *.sw*
 
+/playwright-report
+/test-results
 .pnpm-store
 *storybook.log
 storybook-static

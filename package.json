@@ -36,7 +36,10 @@
     "git:forget": "git rm -r --cached . && git add . && git commit -m \"Forget all ignored files\"",
     "test:specs": "echo \"Error: test:specs is not supported\"",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "worker:dev": "pnpm build:site && wrangler dev",
+    "worker:deploy": "pnpm build:site && wrangler deploy",
+    "worker:deploy:staging": "pnpm build:site && wrangler deploy --env staging"
   },
   "main": "./dist/zenuml.js",
   "module": "./dist/zenuml.esm.mjs",
@@ -70,6 +73,7 @@
     "immer": "^10.1.1",
     "jotai": "^2.12.2",
     "marked": "^4.3.0",
+    "pako": "^2.1.0",
     "pino": "^8.8.0",
     "radash": "^12.1.0",
     "ramda": "^0.28.0",
@@ -115,6 +119,7 @@
     "vite-plugin-css-injected-by-js": "^3.5.2",
     "vite-plugin-svgr": "^4.3.0",
     "vite-svg-loader": "^5.1.0",
-    "vitest": "^3.1.1"
+    "vitest": "^3.1.1",
+    "wrangler": "^4.25.0"
   }
 }
