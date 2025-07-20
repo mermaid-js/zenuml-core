@@ -93,6 +93,16 @@
   <div id="testResults"></div>
 
   <script>
+    // Helper function to escape HTML special characters
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+    
     // Compression and encoding functions
     function compressAndEncode(text) {
       try {
@@ -159,7 +169,7 @@
           </div>
         `;
       } catch (error) {
-        resultsDiv.innerHTML = `<div class="error">Encoding failed: ${error.message}</div>`;
+        resultsDiv.innerHTML = `<div class="error">Encoding failed: ${escapeHtml(error.message)}</div>`;
       }
     }
 
