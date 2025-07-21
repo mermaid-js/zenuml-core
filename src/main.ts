@@ -8,7 +8,7 @@ const defaultConfig = {
   stickyOffset: 0,
   theme:
     localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
-    "theme-idle-afternoon",
+    "theme-default",
   onThemeChange: ({ theme }) => {
     localStorage.setItem(`${location.hostname}-zenuml-theme`, theme);
   },
@@ -41,8 +41,7 @@ export function initZenUml(element: HTMLElement) {
 // find the first element with tag `pre` and class `zenuml`
 const elm = document.querySelector("pre.zenuml");
 if (elm) {
-  const instance = initZenUml(elm);
-  // Initial render is handled by renderer.html
+  initZenUml(elm);
 }
 
 // @ts-ignore
