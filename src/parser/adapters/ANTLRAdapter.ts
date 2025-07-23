@@ -6,6 +6,7 @@ import {
   ParticipantNode,
   AsyncMessageNode,
   FragmentNode,
+  DividerNode,
 } from "../types/astNode.types.js";
 import { formatText } from "../../utils/StringUtil.js";
 
@@ -175,6 +176,11 @@ interface FragmentContextInterface extends BaseANTLRContext {
   expr?(): { getText(): string } | null;
   ifBlock?(): { block?(): BlockContextInterface } | null;
   block?(): BlockContextInterface | null;
+}
+
+interface DividerContextInterface extends BaseANTLRContext {
+  dividerNote?(): { getFormattedText(): string } | null;
+  Note?(): string | null;
 }
 
 export class ANTLRMessageAdapter
@@ -429,5 +435,43 @@ export class ANTLRFragmentAdapter
     return statements.map(
       (statCtx: BaseANTLRContext) => new ANTLRASTAdapter(statCtx),
     );
+  }
+
+  getBraceBlock(): SequenceASTNode | null {
+    const block = this.ctx.block?.();
+    if (!block) return null;
+    return new ANTLRASTAdapter(block) as SequenceASTNode;
+  }
+}
+
+export class ANTLRDividerAdapter
+  extends ANTLRASTAdapter<DividerContextInterface>
+  implements DividerNode
+{
+  constructor(ctx: DividerContextInterface) {
+    super(ctx);
+  }
+
+  getNote(): string | null {
+    // Try to get the note using the Note() method first (from DividerContext extensions)
+    const note = this.ctx.Note?.();
+    if (note) return note;
+
+    // Fallback to the dividerNote method
+    const dividerNote = this.ctx.dividerNote?.();
+    if (!dividerNote) return null;
+
+    const formattedText = dividerNote.getFormattedText()?.trim();
+    if (!formattedText || !formattedText.startsWith("==")) {
+      return null;
+    }
+
+    // Remove leading and trailing '=' characters
+    return formattedText.replace(/^=+|=+$/g, "").trim() || null;
+  }
+
+  isCurrent(cursor: number): boolean {
+    const [start, end] = this.getRange();
+    return cursor >= start && cursor <= end;
   }
 }

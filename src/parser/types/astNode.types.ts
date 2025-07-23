@@ -53,7 +53,7 @@ export interface CreationNode extends SequenceASTNode {
 
 export interface ParticipantNode extends SequenceASTNode {
   getName(): string;
-  getType(): string | null;
+  getType(): string;
   getStereotype(): string | null;
   getLabel(): string | null;
   getWidth(): number | null;
@@ -84,4 +84,17 @@ export interface FragmentNode extends SequenceASTNode {
     | "ref";
   getCondition(): string | null;
   getStatements(): SequenceASTNode[];
+  getBraceBlock(): SequenceASTNode | null;
+}
+
+export interface DividerNode extends SequenceASTNode {
+  getNote(): string | null;
+  isCurrent(cursor: number): boolean;
+}
+
+export interface ReturnNode extends SequenceASTNode {
+  getFrom(): string | null;
+  getTo(): string | null;
+  getExpression(): string | null;
+  isCurrent(cursor: number): boolean;
 }

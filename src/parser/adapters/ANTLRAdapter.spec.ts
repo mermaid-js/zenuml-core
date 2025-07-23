@@ -6,6 +6,7 @@ import {
   ANTLRCreationAdapter,
   ANTLRParticipantAdapter,
   ANTLRAsyncMessageAdapter,
+  ANTLRDividerAdapter,
 } from "./ANTLRAdapter";
 
 // Import the ANTLR extensions that add methods like From(), Owner(), SignatureText()
@@ -389,6 +390,45 @@ describe("ANTLRAsyncMessageAdapter", () => {
 
       expect(adapter.getTo()).toBe("B");
       expect(adapter.getContent()).toBe("hello");
+    });
+  });
+});
+
+describe("ANTLRDividerAdapter", () => {
+  describe("Basic divider parsing", () => {
+    test("should parse divider with note", () => {
+      const dividerCtx = Fixture.firstStatement("==Section Title==").divider();
+      const adapter = new ANTLRDividerAdapter(dividerCtx);
+
+      expect(adapter.getType()).toBe("DividerContext");
+      expect(adapter.getNote()).toBe("Section Title");
+    });
+
+    test("should parse divider with complex note", () => {
+      const dividerCtx = Fixture.firstStatement(
+        "===Important Section===",
+      ).divider();
+      const adapter = new ANTLRDividerAdapter(dividerCtx);
+
+      expect(adapter.getNote()).toBe("Important Section");
+    });
+
+    test("should parse divider with spaced note", () => {
+      const dividerCtx = Fixture.firstStatement("== A B ==").divider();
+      const adapter = new ANTLRDividerAdapter(dividerCtx);
+
+      expect(adapter.getNote()?.trim()).toBe("A B");
+    });
+
+    test("should detect cursor position", () => {
+      const dividerCtx = Fixture.firstStatement("==Test==").divider();
+      const adapter = new ANTLRDividerAdapter(dividerCtx);
+
+      const [start, end] = adapter.getRange();
+      expect(adapter.isCurrent(start)).toBe(true);
+      expect(adapter.isCurrent(end)).toBe(true);
+      expect(adapter.isCurrent(start - 1)).toBe(false);
+      expect(adapter.isCurrent(end + 1)).toBe(false);
     });
   });
 });
