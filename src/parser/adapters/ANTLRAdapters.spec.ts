@@ -7,7 +7,7 @@ import {
   ANTLRParticipantAdapter,
   ANTLRAsyncMessageAdapter,
   ANTLRDividerAdapter,
-} from "./ANTLRAdapter";
+} from "./ANTLRAdapters";
 
 // Import the ANTLR extensions that add methods like From(), Owner(), SignatureText()
 import "../From";

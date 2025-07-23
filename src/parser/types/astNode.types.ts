@@ -40,6 +40,29 @@ export interface MessageNode extends SequenceASTNode {
   getStatements(): SequenceASTNode[];
 }
 
+export interface ToNode extends SequenceASTNode {}
+
+export interface FromNode extends SequenceASTNode {}
+
+
+export interface FromNode extends SequenceASTNode {}
+
+export interface RefNode extends SequenceASTNode {}
+
+
+export interface ParameterNode extends SequenceASTNode {}
+
+export interface ConditionNode extends SequenceASTNode {}
+
+export interface GroupNode extends SequenceASTNode {}
+
+export interface RetNode extends SequenceASTNode {}
+
+export interface ToNode extends SequenceASTNode {}
+
+export interface ParametersNode extends SequenceASTNode {}
+
+
 export interface CreationNode extends SequenceASTNode {
   getConstructor(): string;
   getAssignee(): string | null;
@@ -53,12 +76,12 @@ export interface CreationNode extends SequenceASTNode {
 
 export interface ParticipantNode extends SequenceASTNode {
   getName(): string;
-  getType(): string;
   getStereotype(): string | null;
   getLabel(): string | null;
   getWidth(): number | null;
   getColor(): string | null;
   getGroupId(): string | null;
+  getComment():  string | null;
   isExplicit(): boolean;
   isStarter(): boolean;
 }
@@ -92,9 +115,12 @@ export interface DividerNode extends SequenceASTNode {
   isCurrent(cursor: number): boolean;
 }
 
-export interface ReturnNode extends SequenceASTNode {
+export interface RetNode extends SequenceASTNode {
   getFrom(): string | null;
   getTo(): string | null;
   getExpression(): string | null;
+  getAsyncMessage(): string | null;
   isCurrent(cursor: number): boolean;
 }
+
+export type ASTNodeType = 'MessageNode' | 'ToNode' | 'FromNode' | 'ParticipantNode' | 'CreationNode' | 'AsyncMessageNode' | 'FragmentNode' | 'DividerNode' | 'RetNode' | 'GroupNode' | 'RefNode' | 'ParameterNode' | 'ConditionNode' | 'ParametersNode'
