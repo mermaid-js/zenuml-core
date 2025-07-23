@@ -51,3 +51,15 @@ yarn-error.log*
 .pnpm-store
 *storybook.log
 storybook-static
+
+# Cursor IDE files
+.cursor/
+
+# Taskmaster files
+.taskmaster/
+
+# Development documentation
+AGENTS.md
+CLAUDE.md
+PLAN.md
+
