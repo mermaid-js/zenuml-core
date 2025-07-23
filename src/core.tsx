@@ -68,7 +68,12 @@ export default class ZenUml implements IZenUml {
     createRoot(this.el).render(
       <StrictMode>
         <Provider store={store}>
-          <div> {naked ? <SeqDiagram /> : <DiagramFrame />}</div>
+          {/* IMPORTANT: The .zenuml class here works with Tailwind's important: ".zenuml" configuration.
+              With this setup, Tailwind generates selectors like ".zenuml .bg-skin-canvas" instead of 
+              just ".bg-skin-canvas". This means all Tailwind utilities used in child components 
+              (like DiagramFrame) will only work when they are descendants of an element with the 
+              .zenuml class. This provides scoped styling for the ZenUML library. */}
+          <div className="zenuml"> {naked ? <SeqDiagram /> : <DiagramFrame />}</div>
         </Provider>
       </StrictMode>,
     );
