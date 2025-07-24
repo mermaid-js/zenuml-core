@@ -54,6 +54,9 @@ interface IZenUml {
 
 export default class ZenUml implements IZenUml {
   static readonly version = VERSION;
+  // UMD Compatibility Layer - Support both window.zenuml and window.zenuml.default
+  // The problem was introduced at commit 4c46879f when we remove the named export VueSequence
+  static readonly default = ZenUml; // Self-reference for UMD compatibility
 
   private readonly el: HTMLElement;
   private _code: string | undefined;
@@ -69,9 +72,9 @@ export default class ZenUml implements IZenUml {
       <StrictMode>
         <Provider store={store}>
           {/* IMPORTANT: The .zenuml class here works with Tailwind's important: ".zenuml" configuration.
-              With this setup, Tailwind generates selectors like ".zenuml .bg-skin-canvas" instead of 
-              just ".bg-skin-canvas". This means all Tailwind utilities used in child components 
-              (like DiagramFrame) will only work when they are descendants of an element with the 
+              With this setup, Tailwind generates selectors like ".zenuml .bg-skin-canvas" instead of
+              just ".bg-skin-canvas". This means all Tailwind utilities used in child components
+              (like DiagramFrame) will only work when they are descendants of an element with the
               .zenuml class. This provides scoped styling for the ZenUML library. */}
           <div className="zenuml"> {naked ? <SeqDiagram /> : <DiagramFrame />}</div>
         </Provider>
