@@ -175,3 +175,9 @@ export default class ZenUml implements IZenUml {
     });
   }
 }
+
+// UMD Compatibility Layer - Support both window.zenuml and window.zenuml.default
+// This ensures backward compatibility with v3.32.x usage patterns while maintaining v3.34.0+ support
+if (typeof window !== "undefined" && window.zenuml && !window.zenuml.default) {
+  window.zenuml.default = window.zenuml;
+}
