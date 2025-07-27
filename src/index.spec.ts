@@ -1,4 +1,7 @@
-import store, { codeAtom, titleAtom } from "./store/Store";
+import { createStore } from "jotai";
+import { codeAtom, titleAtom } from "./store/Store";
+
+const store = createStore();
 
 describe("index (store)", () => {
   it("should have title", () => {

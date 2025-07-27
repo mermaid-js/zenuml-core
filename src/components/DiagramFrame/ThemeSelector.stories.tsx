@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { ThemeSelector } from './ThemeSelector'
-import { Provider } from 'jotai'
-import store from '../../store/Store'
+import { createStore, Provider } from 'jotai'
+
+const store = createStore();
 
 const meta: Meta<typeof ThemeSelector> = {
   title: 'Components/ThemeSelector',

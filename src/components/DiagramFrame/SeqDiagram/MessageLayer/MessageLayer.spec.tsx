@@ -1,6 +1,9 @@
-import store, { codeAtom } from "@/store/Store";
+import { codeAtom } from "@/store/Store";
 import { render } from "@testing-library/react";
 import { MessageLayer } from "./MessageLayer";
+import { createStore } from "jotai";
+
+const store = createStore();
 
 store.set(codeAtom, "a");
 

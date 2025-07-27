@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { DiagramFrame } from './DiagramFrame'
-import { Provider } from 'jotai'
-import store, { codeAtom, modeAtom, RenderMode } from '../../store/Store'
+import { createStore, Provider } from 'jotai'
+import { codeAtom, modeAtom, RenderMode } from '../../store/Store'
+
+const store = createStore()
 
 const meta: Meta<typeof DiagramFrame> = {
   title: 'Components/DiagramFrame',
@@ -46,7 +48,7 @@ Client->WebServer.doPost() {
       Database->WebServer: Error
     }
   }
-  
+
   WebServer->Client: Response
 }`)
     store.set(modeAtom, RenderMode.Static)

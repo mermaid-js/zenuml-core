@@ -1,4 +1,5 @@
-import store, { onEventEmitAtom } from "./store/Store";
+import { createStore } from "jotai";
+import { onEventEmitAtom } from "./store/Store";
 
 type Callback = (...args: any[]) => any;
 class EventEmitter {
@@ -29,13 +30,13 @@ class EventEmitter {
 
 export const EventBus = new EventEmitter();
 
-export function CustomEmit(event: string, data: any) {
+export function CustomEmit(store: ReturnType<typeof createStore> ,event: string, data: any) {
   const onEventEmit = store.get(onEventEmitAtom);
   onEventEmit("eventEmit", { event, data });
   EventBus.emit(event, data);
 }
 
-export function TrackEvent(label: any, action: string, category: string) {
+export function TrackEvent(store: ReturnType<typeof createStore> ,label: any, action: string, category: string) {
   const trackData = { label: JSON.stringify(label), action, category };
   const onEventEmit = store.get(onEventEmitAtom);
   onEventEmit("eventEmit", { event: "trackEvent", data: trackData });

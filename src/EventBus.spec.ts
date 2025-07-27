@@ -1,6 +1,9 @@
 import EventEmitter from "events";
 import { EventBus, CustomEmit, TrackEvent } from "./EventBus";
-import store, { onEventEmitAtom } from "./store/Store";
+import { onEventEmitAtom } from "./store/Store";
+import { createStore } from "jotai";
+
+const store = createStore()
 
 describe("EventEmitter", () => {
   let eventEmitter: EventEmitter;
@@ -58,7 +61,7 @@ describe("CustomEmit and TrackEvent", () => {
   });
 
   it("should handle CustomEmit with undefined data", () => {
-    CustomEmit("testEvent", undefined);
+    CustomEmit(store, "testEvent", undefined);
     expect(store.get(onEventEmitAtom)).toHaveBeenCalledWith("eventEmit", {
       event: "testEvent",
       data: undefined,
@@ -68,7 +71,7 @@ describe("CustomEmit and TrackEvent", () => {
 
   it("should handle TrackEvent with complex label object", () => {
     const complexLabel = { id: 1, name: "Test" };
-    TrackEvent(complexLabel, "testAction", "testCategory");
+    TrackEvent(store, complexLabel, "testAction", "testCategory");
     const expectedTrackData = {
       label: JSON.stringify(complexLabel),
       action: "testAction",

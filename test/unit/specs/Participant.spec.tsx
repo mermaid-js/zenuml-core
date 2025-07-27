@@ -1,8 +1,11 @@
-import store, { codeAtom, selectedAtom } from "../../../src/store/Store";
+import { codeAtom, selectedAtom } from "../../../src/store/Store";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, it } from "vitest";
 import { Participant } from "../../../src/components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant";
 import { expect } from "vitest";
+import { createStore } from "jotai";
+
+const store = createStore();
 
 store.set(codeAtom, "abc");
 
