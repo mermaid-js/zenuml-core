@@ -1,12 +1,14 @@
 import parentLogger from "./logger/logger";
-import store, {
+import {
   codeAtom,
   enableMultiThemeAtom,
   enableScopedThemingAtom,
+  lifelineReadyAtom,
   modeAtom,
   onContentChangeAtom,
   onEventEmitAtom,
   onThemeChangeAtom,
+  renderingReadyAtom,
   RenderMode,
   stickyOffsetAtom,
   themeAtom,
@@ -28,7 +30,7 @@ import { getStartTime, calculateCostTime } from "./utils/CostTime";
 import { clearCache } from "./utils/RenderingCache";
 import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
-import { Provider } from "jotai";
+import { createStore, Provider } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
 const logger = parentLogger.child({ name: "core" });
 
@@ -61,22 +63,33 @@ export default class ZenUml implements IZenUml {
   private readonly el: HTMLElement;
   private _code: string | undefined;
   private _theme: string | undefined;
-  private readonly store: typeof store;
+  private readonly store: ReturnType<typeof createStore>;
   private _currentTimeout: NodeJS.Timeout | undefined;
   private _lastRenderingCostMilliseconds = 0;
   private initialRender = true;
   constructor(el: HTMLElement | string, naked: boolean = false) {
     this.el = typeof el === "string" ? document.querySelector(el)! : el;
-    this.store = store;
+    this.store = createStore();
+
+    this.store.sub(themeAtom, () => {
+      this.store.get(onThemeChangeAtom)({
+        theme: this.store.get(themeAtom),
+        scoped: this.store.get(enableScopedThemingAtom),
+      });
+    });
+
     createRoot(this.el).render(
       <StrictMode>
-        <Provider store={store}>
+        <Provider store={this.store}>
           {/* IMPORTANT: The .zenuml class here works with Tailwind's important: ".zenuml" configuration.
               With this setup, Tailwind generates selectors like ".zenuml .bg-skin-canvas" instead of
               just ".bg-skin-canvas". This means all Tailwind utilities used in child components
               (like DiagramFrame) will only work when they are descendants of an element with the
               .zenuml class. This provides scoped styling for the ZenUML library. */}
-          <div className="zenuml"> {naked ? <SeqDiagram /> : <DiagramFrame />}</div>
+          <div className="zenuml">
+            {" "}
+            {naked ? <SeqDiagram /> : <DiagramFrame />}
+          </div>
         </Provider>
       </StrictMode>,
     );
@@ -137,7 +150,19 @@ export default class ZenUml implements IZenUml {
     if (config?.enableMultiTheme !== undefined) {
       this.store.set(enableMultiThemeAtom, config?.enableMultiTheme);
     }
-    this.store.set(codeAtom, this._code || "");
+    if (this._code === this.store.get(codeAtom)) {
+      return true;
+    } else {
+      await new Promise((resolve) => {
+        this.store.set(lifelineReadyAtom, []);
+        this.store.sub(renderingReadyAtom, () => {
+          if (this.store.get(renderingReadyAtom)) {
+            resolve(true);
+          }
+        });
+        this.store.set(codeAtom, this._code || "");
+      });
+    }
     setTimeout(() => {
       this._lastRenderingCostMilliseconds = calculateCostTime(
         "rendering end",

@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { ParticipantLabel } from './ParticipantLabel'
-import { Provider } from 'jotai'
-import store, { modeAtom, RenderMode } from '../../../../store/Store'
+import { createStore, Provider } from 'jotai'
+import { modeAtom, RenderMode } from '../../../../store/Store'
+
+const store = createStore();
 
 const meta: Meta<typeof ParticipantLabel> = {
   title: 'Components/ParticipantLabel',
@@ -27,15 +29,15 @@ const meta: Meta<typeof ParticipantLabel> = {
     },
   },
   argTypes: {
-    labelText: { 
+    labelText: {
       control: 'text',
       description: 'The participant label text'
     },
-    assignee: { 
+    assignee: {
       control: 'text',
       description: 'Optional assignee (variable name)'
     },
-    editable: { 
+    editable: {
       control: 'boolean',
       description: 'Enable editing mode (Dynamic vs Static)',
       defaultValue: true,

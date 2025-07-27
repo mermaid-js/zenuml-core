@@ -1,10 +1,4 @@
 import { Coordinates } from "@/positioning/Coordinates";
-import store, { coordinatesAtom } from "@/store/Store";
-
-let coordinates: Coordinates = store.get(coordinatesAtom);
-store.sub(coordinatesAtom, () => {
-  coordinates = store.get(coordinatesAtom);
-});
 
 export const getContextType = (context: any) => {
   const dict: Record<string, string> = {
@@ -26,7 +20,7 @@ export const getContextType = (context: any) => {
   return dict[key];
 };
 
-export const centerOf = (entity: string) => {
+export const centerOf = (coordinates: Coordinates, entity: string) => {
   if (!entity) {
     console.error("[@zenuml/core] centerOf: entity is undefined");
     return 0;
@@ -39,11 +33,11 @@ export const centerOf = (entity: string) => {
   }
 };
 
-export const distance = (from: string, to: string) => {
-  return centerOf(from) - centerOf(to);
+export const distance = (coordinates: Coordinates, from: string, to: string) => {
+  return centerOf(coordinates, from) - centerOf(coordinates, to);
 };
 
-export const distance2 = (from: string, to: string) => {
+export const distance2 = (coordinates: Coordinates, from: string, to: string) => {
   if (!from || !to) return 0;
-  return centerOf(to) - centerOf(from);
+  return centerOf(coordinates, to) - centerOf(coordinates, from);
 };
