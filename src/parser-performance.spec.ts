@@ -173,6 +173,11 @@ class SeqErrorListener extends antlr4.error.ErrorListener {
 }
 
 function measureMemory(): MemoryMeasurement {
+  // Force GC before measuring (only works with --expose-gc flag)
+  if (typeof global !== "undefined" && global.gc) {
+    global.gc();
+  }
+
   if (typeof process !== "undefined" && process.memoryUsage) {
     const mem = process.memoryUsage();
     return {
