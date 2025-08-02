@@ -111,11 +111,14 @@ export const dragParticipantAtom = atom<{
 }>();
 
 export const dragAnchorAtom = atom<{
+  id?: string;
   context: any;
   index?: number;
   participant: string;
   x: number;
   y: number;
 }>();
+
+export const lastCreatedStatementAtom = atom("");
 
 export default store;

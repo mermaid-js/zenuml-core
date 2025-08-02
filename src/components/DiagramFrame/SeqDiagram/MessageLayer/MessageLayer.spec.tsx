@@ -15,7 +15,7 @@ describe("MessageLayer", () => {
     expect(messageLayer.container.querySelector(".message-layer")).toBeTruthy();
     // We do not need to wait until next tick in **test**.
     // await messageLayerWrapper.vm.$nextTick()
-    expect(messageLayer.container.querySelector(".pt-14")).toBeTruthy();
+    expect(messageLayer.container.querySelector(".pt-20")).toBeTruthy();
   });
   it("gets participant names", async () => {
     expect(

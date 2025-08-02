@@ -94,7 +94,7 @@ export const Message = (props: {
     number,
   } = props;
   const mode = useAtomValue(modeAtom);
-  const dragAnchore = useAtomValue(dragAnchorAtom);
+  const dragAnchor = useAtomValue(dragAnchorAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const isAsync = type === "async";
@@ -126,7 +126,7 @@ export const Message = (props: {
           return: type === "return",
           "right-to-left": rtl,
         },
-        dragAnchore ? "pointer-events-none" : "pointer-events-auto",
+        dragAnchor ? "pointer-events-none" : "pointer-events-auto",
         className,
       )}
       style={{ ...style, borderBottomStyle: borderStyle }}

@@ -114,6 +114,15 @@ module.exports = {
         participant: "var(--color-shadow-participant, transparent)",
         occurrence: "var(--color-shadow-occurrence, transparent)",
       },
+      keyframes: {
+        "statement-slide-in": {
+          "0%": { opacity: "0", transform: "translateY(-20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        "statement-slide-in": "statement-slide-in 0.3s ease-out forwards",
+      },
     },
   },
   variants: {

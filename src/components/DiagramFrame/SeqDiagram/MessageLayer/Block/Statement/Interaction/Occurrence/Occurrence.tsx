@@ -77,7 +77,7 @@ export const Occurrence = (props: {
           <CollapseButton collapsed={collapsed} onClick={toggle} />
         </div>
       )}
-      {props.context.braceBlock() ? (
+      {props.context.braceBlock()?.block() ? (
         <Block
           origin={props.participant}
           context={props.context.braceBlock().block()}
@@ -85,7 +85,11 @@ export const Occurrence = (props: {
           collapsed={collapsed}
         ></Block>
       ) : (
-        <Anchor context={props.context} participant={props.participant} />
+        <Anchor
+          context={props.context}
+          participant={props.participant}
+          offset={40}
+        />
       )}
     </div>
   );

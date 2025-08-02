@@ -18,13 +18,13 @@
     /* positioning Point */
   }
 
-  .interaction.right-to-left > .occurrence {
+  .interaction.right-to-left > div > .occurrence {
     /* InteractionBorderWidth + (OccurrenceWidth-1)/2 */
     left: -15px;
     /* overlay occurrence bar on the existing bar. */
   }
 
-  .interaction.self > .occurrence {
+  .interaction.self > div > .occurrence {
     /* width of InteractionBorderWidth 7px + lifeline center 1px */
     /* overlay occurrence bar on the existing bar. */
     left: -8px;

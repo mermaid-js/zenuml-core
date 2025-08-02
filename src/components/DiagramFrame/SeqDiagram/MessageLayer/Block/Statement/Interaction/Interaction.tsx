@@ -4,7 +4,7 @@ import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
 import { Message } from "../Message";
 import { Occurrence } from "./Occurrence/Occurrence";
 import { useAtomValue } from "jotai";
-import { cursorAtom } from "@/store/Store";
+import { cursorAtom, lastCreatedStatementAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { useArrow } from "../useArrow";
@@ -16,6 +16,7 @@ export const Interaction = (props: {
   number?: string;
   className?: string;
 }) => {
+  const lastCreatedStatement = useAtomValue(lastCreatedStatementAtom);
   const cursor = useAtomValue(cursorAtom);
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
@@ -68,42 +69,48 @@ export const Interaction = (props: {
         transform: "translateX(" + translateX + "px)",
       }}
     >
-      {props.commentObj?.text && <Comment commentObj={props.commentObj} />}
-      {isSelf ? (
-        <SelfInvocation
-          classNames={messageClassNames}
-          textStyle={messageTextStyle}
+      <div
+        className={cn(
+          signature === lastCreatedStatement && "animate-statement-slide-in",
+        )}
+      >
+        {props.commentObj?.text && <Comment commentObj={props.commentObj} />}
+        {isSelf ? (
+          <SelfInvocation
+            classNames={messageClassNames}
+            textStyle={messageTextStyle}
+            context={message}
+            number={props.number}
+          />
+        ) : (
+          <Message
+            className={cn("text-center", messageClassNames)}
+            textStyle={messageTextStyle}
+            context={message}
+            content={signature}
+            rtl={rightToLeft}
+            number={props.number}
+            type="sync"
+          />
+        )}
+        <Occurrence
           context={message}
-          number={props.number}
-        />
-      ) : (
-        <Message
-          className={cn("text-center", messageClassNames)}
-          textStyle={messageTextStyle}
-          context={message}
-          content={signature}
+          participant={target}
           rtl={rightToLeft}
           number={props.number}
-          type="sync"
         />
-      )}
-      <Occurrence
-        context={message}
-        participant={target}
-        rtl={rightToLeft}
-        number={props.number}
-      />
-      {assignee && !isSelf && (
-        <Message
-          className={cn("return transform -mt-4", messageClassNames)}
-          context={message}
-          content={assignee}
-          rtl={!rightToLeft}
-          type="return"
-          number={`${props.number}.${statements.length + 1}`}
-          textStyle={messageTextStyle}
-        />
-      )}
+        {assignee && !isSelf && (
+          <Message
+            className={cn("return transform -mt-4", messageClassNames)}
+            context={message}
+            content={assignee}
+            rtl={!rightToLeft}
+            type="return"
+            number={`${props.number}.${statements.length + 1}`}
+            textStyle={messageTextStyle}
+          />
+        )}
+      </div>
     </div>
   );
 };
