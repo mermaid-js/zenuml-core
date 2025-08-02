@@ -6,9 +6,10 @@ import {
 } from "@/store/Store";
 import { useAtom, useAtomValue } from "jotai";
 import { Position } from "@/parser/Participants";
-import { useEditLabel, specialCharRegex } from "@/functions/useEditLabel";
+import { useEditLabelImproved, specialCharRegex } from "@/functions/useEditLabel";
 import { SyntheticEvent } from "react";
 import { cn } from "@/utils";
+import "./EditableLabel.css";
 
 const UneditableText = ["Missing Constructor", "ZenUML"];
 
@@ -61,11 +62,13 @@ export const ParticipantLabel = (props: {
     };
   };
 
-  const participantLabelHandler = useEditLabel(
+  const participantLabelHandler = useEditLabelImproved(
     replaceLabelTextWithaPositions(props.labelPositions ?? []),
+    { singleClick: true, showHoverHint: true }
   );
-  const assigneeLabelHandler = useEditLabel(
+  const assigneeLabelHandler = useEditLabelImproved(
     replaceLabelTextWithaPositions(props.assigneePositions ?? []),
+    { singleClick: true, showHoverHint: true }
   );
 
   return (
@@ -73,17 +76,18 @@ export const ParticipantLabel = (props: {
       {props.assignee && (
         <>
           <label
-            title="Double click to edit"
-            className={cn(
-              "name pl-1 leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover",
-              {
-                "py-1 cursor-text": assigneeLabelHandler.editing,
-              },
+            title="Click to edit"
+            className={assigneeLabelHandler.getEditableClasses(
+              "name pl-1 leading-4 right"
             )}
             contentEditable={
               assigneeLabelHandler.editing && mode === RenderMode.Dynamic
             }
-            onDoubleClick={assigneeLabelHandler.handleDblClick}
+            suppressContentEditableWarning={true}
+            onClick={assigneeLabelHandler.handleClick}
+            onDoubleClick={assigneeLabelHandler.handleDoubleClick}
+            onMouseEnter={assigneeLabelHandler.handleMouseEnter}
+            onMouseLeave={assigneeLabelHandler.handleMouseLeave}
             onBlur={assigneeLabelHandler.handleBlur}
             onKeyUp={assigneeLabelHandler.handleKeyup}
             onKeyDown={assigneeLabelHandler.handleKeydown}
@@ -94,20 +98,23 @@ export const ParticipantLabel = (props: {
         </>
       )}
       <label
-        title="Double click to edit"
-        className={cn(
-          "name leading-4 cursor-text right hover:text-skin-message-hover hover:bg-skin-message-hover",
-          props.assignee ? "pr-1" : "px-1",
-          {
-            "py-1 cursor-text": participantLabelHandler.editing,
-          },
+        title="Click to edit"
+        className={participantLabelHandler.getEditableClasses(
+          cn(
+            "name leading-4 right",
+            props.assignee ? "pr-1" : "px-1"
+          )
         )}
         contentEditable={
           participantLabelHandler.editing &&
           mode === RenderMode.Dynamic &&
           UneditableText.indexOf(props.labelText) === -1
         }
-        onDoubleClick={participantLabelHandler.handleDblClick}
+        suppressContentEditableWarning={true}
+        onClick={participantLabelHandler.handleClick}
+        onDoubleClick={participantLabelHandler.handleDoubleClick}
+        onMouseEnter={participantLabelHandler.handleMouseEnter}
+        onMouseLeave={participantLabelHandler.handleMouseLeave}
         onBlur={participantLabelHandler.handleBlur}
         onKeyUp={participantLabelHandler.handleKeyup}
         onKeyDown={participantLabelHandler.handleKeydown}

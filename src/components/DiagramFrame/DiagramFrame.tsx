@@ -94,9 +94,7 @@ export const DiagramFrame = ({
   };
   const setStyle = (style: string) => {
     const styleElementId = "zenuml-style";
-    let styleElement =
-      document.getElementById(styleElementId) ||
-      document.createElement("style");
+    let styleElement: HTMLElement;
     styleElement = document.createElement("style");
     styleElement.id = styleElementId;
     document.head.append(styleElement);
@@ -105,8 +103,8 @@ export const DiagramFrame = ({
   const setRemoteCss = (url: string) => {
     const hostname = new URL(url).hostname;
 
-    // if url is from github, we fetch the raw content and set the style
-    // if url contains github.com or githubusercontent.com, we fetch the raw content and set the style
+    // if url is from GitHub, we fetch the raw content and set the style
+    // if url contains GitHub.com or githubusercontent.com, we fetch the raw content and set the style
     if (
       hostname === "https://github.com" ||
       hostname === "https://githubusercontent.com"
@@ -124,9 +122,7 @@ export const DiagramFrame = ({
     }
     const remoteCssUrlId = "zenuml-remote-css";
     // check if remote css element exists
-    let remoteCssElement =
-      (document.getElementById(remoteCssUrlId) as HTMLLinkElement) ||
-      document.createElement("link");
+    let remoteCssElement: HTMLLinkElement;
     remoteCssElement = document.createElement("link");
     remoteCssElement.id = remoteCssUrlId;
     remoteCssElement.rel = "stylesheet";
@@ -146,9 +142,12 @@ export const DiagramFrame = ({
   }));
 
   return (
+    // The Tailwind utilities (p-1, bg-skin-canvas, inline-block) work here because this component
+    // is rendered inside a parent div with .zenuml class in core.tsx. The Tailwind configuration
+    // uses important: ".zenuml" which generates selectors like ".zenuml .p-1" for scoped styling.
     <div
       ref={containerRef}
-      className={cn("zenuml p-1 bg-skin-canvas inline-block", theme)}
+      className={cn("p-1 bg-skin-canvas inline-block", theme)}
     >
       <Debug />
       <div className="frame text-skin-base bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded">

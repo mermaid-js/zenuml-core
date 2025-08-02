@@ -1,9 +1,12 @@
 import { Fixture } from "../../../../../../../../test/unit/parser/fixture/Fixture";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import Anchor2 from "@/positioning/Anchor2";
-import store, { codeAtom } from "@/store/Store";
+import { codeAtom } from "@/store/Store";
 import { render } from "@testing-library/react";
 import { Creation } from "./Creation";
+import { createStore, Provider } from "jotai";
+
+const store = createStore();
 
 function mountCreationWithCode(
   code: string,
@@ -19,7 +22,11 @@ function mountCreationWithCode(
     fragmentOffset: 100,
   };
 
-  return render(<Creation {...props} />);
+  return render(
+    <Provider store={store}>
+      <Creation {...props} />
+    </Provider>,
+  );
 }
 describe("Creation", () => {
   it("data, props and computed properties", async () => {

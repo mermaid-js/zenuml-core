@@ -1,4 +1,7 @@
-import store, { showTipsAtom } from "./Store";
+import { createStore } from "jotai";
+import { showTipsAtom } from "./Store";
+
+const store = createStore();
 
 describe("Store", () => {
   it("should create an instance", () => {

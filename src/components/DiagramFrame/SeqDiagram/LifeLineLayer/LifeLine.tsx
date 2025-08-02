@@ -1,5 +1,11 @@
-import { diagramElementAtom, dragAnchorAtom, scaleAtom } from "@/store/Store";
-import { useAtomValue } from "jotai";
+import {
+  coordinatesAtom,
+  diagramElementAtom,
+  dragAnchorAtom,
+  lifelineReadyAtom,
+  scaleAtom,
+} from "@/store/Store";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import parentLogger from "@/logger/logger";
 import { EventBus } from "@/EventBus";
@@ -7,6 +13,7 @@ import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
 import { useAnchorDrop } from "./useAnchorDrop";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 const logger = parentLogger.child({ name: "LifeLine" });
 
@@ -20,10 +27,13 @@ export const LifeLine = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const scale = useAtomValue(scaleAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
+  const coordinates = useAtomValue(coordinatesAtom);
+  const setLifelineReady = useSetAtom(lifelineReadyAtom);
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
 
-  const left = centerOf(props.entity.name) - (props.groupLeft || 0);
+  const left =
+    centerOf(coordinates, props.entity.name) - (props.groupLeft || 0);
 
   const updateTop = useCallback(() => {
     // escape entity name to avoid 'not a valid selector' error.
@@ -49,6 +59,15 @@ export const LifeLine = (props: {
       // A B.m {new A} => A B.m {new A1}
       logger.debug(`First message to ${props.entity.name} is not creation`);
       setTop(PARTICIPANT_TOP_SPACE_FOR_GROUP);
+    }
+    if (props.entity.name !== _STARTER_) {
+      setTimeout(() => {
+        setLifelineReady((prev) =>
+          prev.includes(props.entity.name)
+            ? prev
+            : [...prev, props.entity.name],
+        );
+      }, 0);
     }
   }, [diagramElement, props.entity.name, scale]);
 

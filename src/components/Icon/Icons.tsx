@@ -3,7 +3,6 @@ import IconClose from "./icons/close.svg?react";
 import IconCollapseExpanded from "./icons/collapse-expanded.svg?react";
 import IconCollapseUnexpanded from "./icons/collapse-unexpanded.svg?react";
 import IconDebug from "./icons/debug.svg?react";
-import IconMessageArrow from "./icons/message-arrow.svg?react";
 import IconNonSelectedCycle from "./icons/non-selected-cycle.svg?react";
 import IconNumbering from "./icons/numbering.svg?react";
 import IconPrivacy from "./icons/privacy.svg?react";
@@ -26,7 +25,6 @@ const icons = {
   "collapse-expanded": IconCollapseExpanded,
   "collapse-unexpanded": IconCollapseUnexpanded,
   debug: IconDebug,
-  "message-arrow": IconMessageArrow,
   "non-selected-cycle": IconNonSelectedCycle,
   numbering: IconNumbering,
   privacy: IconPrivacy,

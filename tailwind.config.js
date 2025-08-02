@@ -38,8 +38,6 @@ module.exports = {
           message: "var(--color-text-message, var(--color-text-base, #000))",
           "message-arrow":
             "var(--color-message-arrow, var(--color-border-frame, var(--color-border-base, #000)))", // message arrow head
-          "message-hover":
-            "var(--color-text-message-hover, var(--color-bg-base, var(--color-backup-white, #ffffff)))",
           comment:
             "var(--color-text-comment, var(--color-text-secondary, var(--color-text-base, #000)))",
           "fragment-header":
@@ -71,8 +69,6 @@ module.exports = {
             "var(--color-border-participant, var(--color-border-participant, var(--color-border-frame, var(--color-border-base, #000))))",
           divider:
             "var(--color-border-participant, var(--color-border-frame, var(--color-border-base, #000)))",
-          "message-hover":
-            "var(--color-bg-message-hover, var(--color-text-base, #000))",
           "fragment-header":
             "var(--color-bg-fragment-header, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
           occurrence:

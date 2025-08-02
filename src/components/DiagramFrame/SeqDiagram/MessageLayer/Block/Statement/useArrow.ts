@@ -1,6 +1,8 @@
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { centerOf, distance2 } from "./utils";
 import Anchor2 from "@/positioning/Anchor2";
+import { coordinatesAtom } from "@/store/Store";
+import { useAtomValue } from "jotai";
 
 const depthOnParticipant = (context: any, participant: any): number => {
   return context?.getAncestors((ctx: any) => {
@@ -39,6 +41,8 @@ export const useArrow = ({
   source: string;
   target: string;
 }) => {
+  const coordinates = useAtomValue(coordinatesAtom);
+
   const isSelf = source === target;
 
   const originLayers = depthOnParticipant(context, origin);
@@ -47,15 +51,15 @@ export const useArrow = ({
 
   const targetLayers = depthOnParticipant4Stat(context, target);
 
-  const anchor2Origin = new Anchor2(centerOf(origin), originLayers);
+  const anchor2Origin = new Anchor2(centerOf(coordinates, origin), originLayers);
 
-  const anchor2Source = new Anchor2(centerOf(source), sourceLayers);
+  const anchor2Source = new Anchor2(centerOf(coordinates, source), sourceLayers);
 
-  const anchor2Target = new Anchor2(centerOf(target), targetLayers);
+  const anchor2Target = new Anchor2(centerOf(coordinates, target), targetLayers);
 
   const interactionWidth = Math.abs(anchor2Source.edgeOffset(anchor2Target));
 
-  const rightToLeft = distance2(source, target) < 0;
+  const rightToLeft = distance2(coordinates, source, target) < 0;
 
   const translateX = anchor2Origin.centerToEdge(
     !rightToLeft ? anchor2Source : anchor2Target,

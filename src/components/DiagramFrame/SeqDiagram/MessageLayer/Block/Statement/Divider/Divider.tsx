@@ -1,4 +1,4 @@
-import { participantsAtom } from "@/store/Store";
+import { coordinatesAtom, participantsAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { getStyle } from "@/utils/messageStyling";
 import { useAtomValue } from "jotai";
@@ -11,15 +11,16 @@ export const Divider = (props: {
   className?: string;
 }) => {
   const participants = useAtomValue(participantsAtom);
+    const coordinates = useAtomValue(coordinatesAtom);
 
   const width = useMemo(() => {
     // TODO: with should be the width of the whole diagram
     const rearParticipant = participants.Names().pop();
     // 20px for the right margin of the participant
-    return centerOf(rearParticipant) + 10;
+    return centerOf(coordinates, rearParticipant) + 10;
   }, [participants]);
 
-  const centerOfOrigin = centerOf(props.origin);
+  const centerOfOrigin = centerOf(coordinates, props.origin);
 
   const note = props.context.divider().Note();
 

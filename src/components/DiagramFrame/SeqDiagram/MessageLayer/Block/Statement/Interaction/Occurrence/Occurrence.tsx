@@ -5,8 +5,9 @@ import { cn } from "@/utils";
 import { Block } from "../../../Block";
 import { centerOf } from "../../utils";
 import { Anchor } from "../../../../Anchor";
-import { useAtomValue } from "jotai";
 import { dragAnchorAtom } from "@/store/Store";
+import { useAtomValue } from "jotai";
+import { coordinatesAtom } from "@/store/Store";
 
 export const Occurrence = (props: {
   context: any;
@@ -15,6 +16,7 @@ export const Occurrence = (props: {
   number?: string;
   className?: string;
 }) => {
+  const coordinates = useAtomValue(coordinatesAtom);
   const [collapsed, setCollapsed] = useState(false);
   const dragAnchor = useAtomValue(dragAnchorAtom);
 
@@ -22,7 +24,7 @@ export const Occurrence = (props: {
 
   const computedCenter = () => {
     try {
-      return centerOf(props.participant);
+      return centerOf(coordinates, props.participant);
     } catch (e) {
       console.error(e);
       return 0;

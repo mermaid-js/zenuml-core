@@ -19,7 +19,7 @@ You can use it ZenUML on your favorite platforms and applications:
 # Integrations
 
 ZenUML can be integrated with your favorite tools and platforms as a library or an embeddable widget.
-Please follow the [integration guide](./docs/asciidoc/integration-guide.adoc) for detailed steps.
+Please follow the [integration tutorial](./TUTORIAL.md) for detailed steps.
 
 # Development
 

@@ -1,4 +1,4 @@
-import { atom, createStore } from "jotai";
+import { atom } from "jotai";
 import { atomWithLocalStorage, atomWithFunctionValue } from "./utils.ts";
 import { RootContext, Participants } from "../parser/index.js";
 import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
@@ -14,8 +14,6 @@ export const enum RenderMode {
   Static = "static",
   Dynamic = "dynamic",
 }
-
-const store = createStore();
 
 export const codeAtom = atom("");
 
@@ -93,13 +91,6 @@ export const onThemeChangeAtom = atomWithFunctionValue<
   (data: { theme: string; scoped: boolean }) => void
 >(() => {});
 
-store.sub(themeAtom, () => {
-  store.get(onThemeChangeAtom)({
-    theme: store.get(themeAtom),
-    scoped: store.get(enableScopedThemingAtom),
-  });
-});
-
 export const onEventEmitAtom = atomWithFunctionValue<
   (name: string, data: any) => void
 >(() => {});
@@ -121,4 +112,10 @@ export const dragAnchorAtom = atom<{
 
 export const lastCreatedStatementAtom = atom("");
 
-export default store;
+export const lifelineReadyAtom = atom<string[]>([]);
+
+export const renderingReadyAtom = atom((get) => {
+  const lifeLineReady = get(lifelineReadyAtom);
+  const { participants } = get(participantsAtom);
+  return lifeLineReady.length === Array.from(participants).length;
+});

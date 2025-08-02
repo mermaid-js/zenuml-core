@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => ({
   base: mode === "gh-pages" ? "/zenuml-core/" : "/",
   build: {
     rollupOptions: {
-      input: ["index.html", "embed.html", ...cypressHtmlFiles],
+      input: ["index.html", "embed.html", "renderer.html", "test-compression.html", ...cypressHtmlFiles],
     },
   },
   resolve: {
@@ -62,5 +62,9 @@ export default defineConfig(({ mode }) => ({
       provider: "v8", // or 'v8'
     },
     setupFiles: resolve(__dirname, "test/setup.ts"),
+    exclude: [
+      "node_modules/**",
+      "tests/**", // Exclude Playwright tests
+    ],
   },
 }));

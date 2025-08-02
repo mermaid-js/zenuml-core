@@ -3,7 +3,7 @@ import { Block } from "./Block/Block";
 import { centerOf } from "./Block/Statement/utils";
 import { StylePanel } from "./StylePanel";
 import { useAtomValue } from "jotai";
-import { rootContextAtom } from "@/store/Store";
+import { coordinatesAtom, rootContextAtom } from "@/store/Store";
 import { AllMessages } from "@/parser/MessageCollector";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import "./MessageLayer.scss";
@@ -16,6 +16,7 @@ export const MessageLayer = (props: {
   style?: React.CSSProperties;
 }) => {
   const rootContext = useAtomValue(rootContextAtom);
+  const coordinates = useAtomValue(coordinatesAtom);
 
   const origin = useMemo(() => {
     const ownableMessages = AllMessages(rootContext);
@@ -23,7 +24,7 @@ export const MessageLayer = (props: {
     return ownableMessages[0].from || _STARTER_;
   }, [rootContext]);
 
-  const paddingLeft = centerOf(origin) + 1;
+  const paddingLeft = centerOf(coordinates, origin) + 1;
 
   const [mounted, setMounted] = useState(false);
   if (mounted) {

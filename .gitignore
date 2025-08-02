@@ -1,8 +1,10 @@
-cypress/videos/**/*
-cypress/screenshots/**/*
-cypress/integration/__image_snapshots__/*.diff.png
-cypress/integration/__image_snapshots__/*.actual.png
+# Playwright test results and reports
+/test-results/
+/playwright-report/
+/playwright/.cache/
 coverage
+
+.wrangler
 
 # Gauge - metadata dir
 .gauge
@@ -44,3 +46,8 @@ yarn-error.log*
 *.sln
 *.sw*
 
+/playwright-report
+/test-results
+.pnpm-store
+*storybook.log
+storybook-static

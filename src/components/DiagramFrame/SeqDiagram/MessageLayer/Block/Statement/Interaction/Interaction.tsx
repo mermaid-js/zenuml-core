@@ -56,7 +56,7 @@ export const Interaction = (props: {
       )}
       onClick={(e) => e.stopPropagation()}
       data-to={target}
-      data-origin={origin}
+      data-origin={props.origin}
       data-source={source}
       data-target={target}
       data-origin-layers={originLayers}

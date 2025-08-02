@@ -1,6 +1,9 @@
-import store, { codeAtom, rootContextAtom } from "@/store/Store";
+import { codeAtom, rootContextAtom } from "@/store/Store";
 import { render } from "@testing-library/react";
 import { Statement } from "./Statement";
+import { createStore } from "jotai";
+
+const store = createStore();
 
 function renderCode(code: string) {
   store.set(codeAtom, code);
