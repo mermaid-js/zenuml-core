@@ -10,6 +10,7 @@ import {
   RenderMode,
   selectedAtom,
   stickyOffsetAtom,
+  scrollRootAtom,
 } from "@/store/Store";
 import { cn } from "@/utils";
 import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
@@ -29,6 +30,7 @@ export const Participant = (props: {
   const mode = useAtomValue(modeAtom);
   const participants = useAtomValue(participantsAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
+  const scrollRoot = useAtomValue(scrollRootAtom);
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
   const onSelect = useSetAtom(onSelectAtom);
@@ -56,7 +58,8 @@ export const Participant = (props: {
       top += stickyOffset;
     const diagramHeight = diagramElement?.clientHeight || 0;
     const diagramTop = diagramElement
-      ? getElementDistanceToTop(diagramElement)
+      ? getElementDistanceToTop(diagramElement) -
+        (scrollRoot ? getElementDistanceToTop(scrollRoot) : 0)
       : 0;
     if (top < participantOffsetTop + diagramTop) return 0;
     return (
