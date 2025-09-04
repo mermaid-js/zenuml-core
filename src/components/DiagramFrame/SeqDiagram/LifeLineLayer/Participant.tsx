@@ -56,6 +56,14 @@ export const Participant = (props: {
     let top = intersectionTop + scrollTop;
     if (intersectionTop > INTERSECTION_ERROR_MARGIN && stickyOffset)
       top += stickyOffset;
+    // If the scroll container is partially scrolled out of the viewport (its top < 0),
+    // reflect that clipping so sticky still engages when the outer page scrolls.
+    if (scrollRoot) {
+      const containerTopInViewport = scrollRoot.getBoundingClientRect().top;
+      if (containerTopInViewport < 0) {
+        top += -containerTopInViewport;
+      }
+    }
     const diagramHeight = diagramElement?.clientHeight || 0;
     const diagramTop = diagramElement
       ? getElementDistanceToTop(diagramElement) -
