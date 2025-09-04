@@ -73,6 +73,9 @@ export const stickyOffsetAtom = atom(0);
 
 export const diagramElementAtom = atom<HTMLElement | null>(null);
 
+// Scroll root for sticky logic (null = document/viewport)
+export const scrollRootAtom = atom<HTMLElement | null>(null);
+
 export const onElementClickAtom = atomWithFunctionValue(
   (codeRange: CodeRange) => {
     console.log("Element clicked", codeRange);

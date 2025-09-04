@@ -12,6 +12,7 @@ export function setTheme(theme: string): void {
 export const defaultConfig = {
   enableMultiTheme: true,
   stickyOffset: 0,
+  scrollRoot: null as HTMLElement | null,
   theme: getTheme(),
   onThemeChange: ({ theme }: { theme: string }) => {
     setTheme(theme);

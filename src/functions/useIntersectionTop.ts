@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useAtomValue } from "jotai";
+import { scrollRootAtom } from "@/store/Store";
 
 const DETECTOR_COUNT = 10;
 const INTERSECTION_ERROR_MARGIN = 1;
 const SCROLLBAR_WIDTH = 20;
 
-function initializeDetectors() {
+function initializeDetectors(rootEl: HTMLElement | null) {
   let detectorContainer = document.getElementById(
     "zenuml-intersection-detector-container",
   );
@@ -39,7 +41,11 @@ function initializeDetectors() {
     detectorContainer?.appendChild(detector);
     return detector;
   });
-  document.body.appendChild(detectorContainer);
+  if (rootEl) {
+    rootEl.appendChild(detectorContainer);
+  } else {
+    document.body.appendChild(detectorContainer);
+  }
 
   return { detectorContainer, detectors };
 }
@@ -47,17 +53,18 @@ function initializeDetectors() {
 export default function useIntersectionTop() {
   const [top, setTop] = useState(0);
   const ob = useRef<IntersectionObserver | null>(null);
+  const scrollRoot = useAtomValue(scrollRootAtom);
 
   useEffect(() => {
-    const { detectorContainer, detectors } = initializeDetectors();
+    const rootEl = scrollRoot;
+    const { detectorContainer, detectors } = initializeDetectors(rootEl);
 
-    const scrollHeight =
-      document.documentElement.scrollHeight - SCROLLBAR_WIDTH;
-    const scrollWidth = document.documentElement.scrollWidth - SCROLLBAR_WIDTH;
+    const scrollHeight = (rootEl?.scrollHeight || document.documentElement.scrollHeight) - SCROLLBAR_WIDTH;
+    const scrollWidth = (rootEl?.scrollWidth || document.documentElement.scrollWidth) - SCROLLBAR_WIDTH;
     detectorContainer.style.height = scrollHeight + "px";
     detectorContainer.style.width = scrollWidth + "px";
     const detectorHeight = Math.ceil(
-      document.documentElement.scrollHeight / DETECTOR_COUNT,
+      (rootEl?.scrollHeight || document.documentElement.scrollHeight) / DETECTOR_COUNT,
     );
     const threshold = [...Array(detectorHeight + 1).keys()]
       .map((i) => i / detectorHeight)
@@ -77,6 +84,7 @@ export default function useIntersectionTop() {
       },
       {
         threshold,
+        root: rootEl || null,
       },
     );
     detectors.forEach((detector) => {
@@ -87,6 +95,6 @@ export default function useIntersectionTop() {
     return () => {
       ob.current?.disconnect();
     };
-  }, []);
+  }, [scrollRoot]);
   return top;
 }

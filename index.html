@@ -103,7 +103,7 @@
           <div class="bg-gray-800 text-white px-4 py-3">
             <h3 class="font-medium">Preview</h3>
           </div>
-          <div style="height: calc(100% - 52px); overflow: auto;" class="p-4">
+          <div id="preview-scroll-root" style="height: calc(100% - 52px); overflow: auto;" class="p-4">
             <pre class="zenuml" style="margin: 0"></pre>
           </div>
         </div>
@@ -127,6 +127,7 @@
       const updateDiagram = debounce((content) => {
         const config = createConfig({
           onContentChange: (code) => editor.setValue(code),
+          scrollRoot: document.getElementById('preview-scroll-root'),
         });
 
         window.zenUml.render(content, config).then((r) => {
