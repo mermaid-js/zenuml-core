@@ -13,6 +13,7 @@ export const defaultConfig = {
   enableMultiTheme: true,
   stickyOffset: 0,
   scrollRoot: null as HTMLElement | null,
+  stickyStrategy: 'io' as 'io' | 'raf',
   theme: getTheme(),
   onThemeChange: ({ theme }: { theme: string }) => {
     setTheme(theme);
