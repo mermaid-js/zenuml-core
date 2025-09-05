@@ -27,10 +27,15 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
+  webServer: process.env.CI ? {
+    command: "bun run preview",
+    url: "http://127.0.0.1:8080",
+    reuseExistingServer: false,
+    timeout: 120 * 1000,
+  } : {
     command: "bun run dev",
     url: "http://127.0.0.1:8080",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120 * 1000,
   },
 });
