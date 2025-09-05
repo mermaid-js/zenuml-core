@@ -1,18 +1,18 @@
 export type Position = [number, number];
 
 interface ParticipantOptions {
-  isStarter?: boolean;
-  stereotype?: string;
-  width?: number;
-  groupId?: number | string;
-  label?: string;
-  explicit?: boolean;
-  type?: string;
-  color?: string;
-  comment?: string;
-  assignee?: string;
-  position?: Position;
-  assigneePosition?: Position;
+  isStarter?: boolean | null;
+  stereotype?: string | null;
+  width?: number | null;
+  groupId?: number | string | null;
+  label?: string | null;
+  explicit?: boolean | null;
+  type?: string | null;
+  color?: string | null;
+  comment?: string | null;
+  assignee?: string | null;
+  position?: Position | null;
+  assigneePosition?: Position | null;
 }
 
 export const blankParticipant = {
@@ -33,16 +33,16 @@ export const blankParticipant = {
 
 export class Participant {
   name: string;
-  private stereotype: string | undefined;
-  private width: number | undefined;
-  private groupId: number | string | undefined;
-  explicit: boolean | undefined;
-  isStarter: boolean | undefined;
-  label: string | undefined;
-  private type: string | undefined;
-  private color: string | undefined;
-  private comment: string | undefined;
-  private assignee: string | undefined;
+  stereotype: string | null | undefined;
+  width: number | null | undefined;
+  groupId: number | string | null | undefined;
+  explicit: boolean | null | undefined;
+  isStarter: boolean | null | undefined;
+  label: string | null | undefined;
+  type: string | null | undefined;
+   color: string | null | undefined;
+  comment: string | null | undefined;
+  assignee: string | null | undefined;
   positions: Set<Position> = new Set();
   assigneePositions: Set<Position> = new Set();
 

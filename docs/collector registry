@@ -1,0 +1,140 @@
+
+## Unified **Collector**
+
+```js
+interface BaseCollector<R extends any> {
+  visitNode(nodeType: string, node: SequenceASTNode): void;
+  result(): R
+  reset(): void;
+}
+
+abstract class BaseCollector<R extends any> implements BaseCollector<R> {
+  visitNode(nodeType: string, node: SequenceASTNode): {
+    if (nodeType in this) {
+      this[nodeType](node);
+    }
+  }
+}
+
+export class ASTParticipantCollector extends BaseCollector {
+  private isBlind = false;
+  private participants = new Participants();
+
+  ParticipantNode(node: ParticipantNode) {
+    if (this.isBlind) return;
+
+    this.participants.Add(node.getName(), {
+      isStarter: node.isStarter(),
+      type: node.getType(),
+      stereotype: node.getStereotype(),
+      width: node.getWidth(),
+      groupId: this.groupId || node.getGroupId(),
+      label: node.getLabel(),
+      explicit: node.isExplicit(),
+      color: node.getColor(),
+      position: node.getRange(),
+    });
+  }
+
+  MessageNode(node: MessageNode) {
+    if (this.isBlind) return;
+
+  const from = node.getFrom();
+    const to = node.getTo();
+
+    if (from) {
+      this.participants.Add(from, {
+        isStarter: false,
+        position: node.getRange(),
+      });
+    }
+
+    if (to) {
+      // Handle assignee logic for creation statements
+      const participantInstance = this.participants.Get(to);
+      if (participantInstance?.label) {
+        this.participants.Add(to, { isStarter: false });
+      } else {
+        this.participants.Add(to, {
+          isStarter: false,
+          position: node.getRange(),
+        });
+      }
+    }
+  }
+
+  result() {
+    return this.participants;
+  }
+}
+
+export class ASTMessageCollector extends BaseCollector {
+  private isBlind = false;
+  private messages: OwnableMessage[] = [];
+
+  CreationNode(node: CreationNode): void {
+    if (this.isBlind) return;
+
+    this.ownableMessages.push({
+      from: node.getFrom(),
+      signature: node.getSignature(),
+      type: OwnableMessageType.CreationMessage,
+      to: node.getOwner(),
+    });
+  }
+
+  result() {
+    return this.messages;
+  }
+}
+
+export class UnifiedCollector {
+  private participants = new Participants();
+  private messages: OwnableMessage[] = [];
+  private frameRoot: Frame | null = null;
+  private frameStack: Frame[] = [];
+  private isBlind = false;
+  private groupId?: string;
+  private collectors: BaseCollector[] = [];
+
+
+
+  constructor(private orderedParticipants: string[] = []) {
+    this.collectors = [new ASTParticipantCollector(), new ASTMessageCollector()];
+  }
+
+  collect(rootNode: SequenceASTNode) {
+    this.reset();
+    this.traverseNode(rootNode);
+
+    return {
+      participants: this.participants,
+      messages: this.messages,
+      frameRoot: this.frameRoot,
+    };
+  }
+
+  private reset(): void {
+    this.participants = new Participants();
+    this.messages = [];
+    this.frameRoot = null;
+    this.frameStack = [];
+    this.isBlind = false;
+    this.groupId = undefined;
+  }
+
+  private traverseNode(node: SequenceASTNode): void {
+    this.processNode(node);
+
+    // Traverse children
+    node.getChildren().forEach(child => this.traverseNode(child));
+  }
+
+  private processNode(node: SequenceASTNode): void {
+    const nodeType = node.getType();
+    for (const collector of this.collectors) {
+      collector.visitNode(nodeType, node);
+    }
+  }
+
+```
