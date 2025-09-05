@@ -12,6 +12,7 @@ import {
   RenderMode,
   stickyOffsetAtom,
   scrollRootAtom,
+  stickyStrategyAtom,
   themeAtom,
 } from "./store/Store";
 import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
@@ -41,6 +42,7 @@ interface Config {
   onThemeChange?: (data: { theme: string; scoped?: boolean }) => void;
   enableMultiTheme?: boolean;
   stickyOffset?: number;
+  stickyStrategy?: 'io' | 'raf';
   scrollRoot?: HTMLElement | null;
   onContentChange?: (code: string) => void;
   onEventEmit?: (name: string, data: unknown) => void;
@@ -120,6 +122,9 @@ export default class ZenUml implements IZenUml {
     this._code = code === undefined ? this._code : code;
     this._theme = config?.theme || this._theme;
     this.store.set(stickyOffsetAtom, config?.stickyOffset || 0);
+    if (config?.stickyStrategy) {
+      this.store.set(stickyStrategyAtom, config.stickyStrategy);
+    }
     // Set scroll root for sticky behavior
     // null/undefined -> default to viewport scrolling
     // HTMLElement -> use container scroll
