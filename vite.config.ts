@@ -65,6 +65,8 @@ export default defineConfig(({ mode }) => ({
     exclude: [
       "node_modules/**",
       "tests/**", // Exclude Playwright tests
+      "**/tests/**/*.spec.ts", // Exclude Playwright test files specifically
+      "**/tests/**/*.spec.js", // Exclude Playwright test files specifically
     ],
   },
 }));
