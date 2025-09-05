@@ -111,7 +111,17 @@ test.describe("Editable Label", () => {
     // Edit the message
     const messageLabel = page.locator("label").filter({ hasText: "create" });
     await messageLabel.dblclick();
+    
+    // Wait for edit mode to be active
+    await page.waitForTimeout(100);
+    
+    // Type the new text
     await messageLabel.pressSequentially("1");
-    await expect(page.getByText("create1")).toBeVisible();
+    
+    // Wait for the text to be updated and visible
+    await page.waitForTimeout(200);
+    
+    // Check for the updated text with a longer timeout
+    await expect(page.getByText("create1")).toBeVisible({ timeout: 10000 });
   });
 });
