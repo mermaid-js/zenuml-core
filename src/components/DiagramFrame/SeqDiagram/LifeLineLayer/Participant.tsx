@@ -1,8 +1,5 @@
-import useDocumentScroll from "@/functions/useDocumentScroll";
-import useIntersectionTop from "@/functions/useIntersectionTop";
 import useStickyOffset from "@/functions/useStickyOffset";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
 import {
   diagramElementAtom,
   modeAtom,
@@ -12,18 +9,13 @@ import {
   selectedAtom,
   stickyOffsetAtom,
   scrollRootAtom,
-  stickyStrategyAtom,
 } from "@/store/Store";
 import { cn } from "@/utils";
 import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
-import { getElementDistanceToTop } from "@/utils/dom";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useRef } from "react";
 import { ParticipantLabel } from "./ParticipantLabel";
 import iconPath from "../../Tutorial/Icons";
-
-const INTERSECTION_ERROR_MARGIN = 10;
-
 export const Participant = (props: {
   entity: Record<string, string>;
   offsetTop2?: number;
@@ -33,12 +25,9 @@ export const Participant = (props: {
   const participants = useAtomValue(participantsAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const scrollRoot = useAtomValue(scrollRootAtom);
-  const stickyStrategy = useAtomValue(stickyStrategyAtom);
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
   const onSelect = useSetAtom(onSelectAtom);
-  const intersectionTop = useIntersectionTop();
-  const [scrollTop] = useDocumentScroll();
 
   const isDefaultStarter = props.entity.name === _STARTER_;
 
@@ -54,44 +43,14 @@ export const Participant = (props: {
     // Sort the label positions in descending order to avoid index shifting when updating code
   ).sort((a, b) => b[0] - a[0]);
 
-  const calcOffset = () => {
-    const participantOffsetTop = props.offsetTop2 || 0;
-    let top = intersectionTop + scrollTop;
-    if (intersectionTop > INTERSECTION_ERROR_MARGIN && stickyOffset)
-      top += stickyOffset;
-    // If the scroll container is partially scrolled out of the viewport (its top < 0),
-    // reflect that clipping so sticky still engages when the outer page scrolls.
-    if (scrollRoot) {
-      const containerTopInViewport = scrollRoot.getBoundingClientRect().top;
-      if (containerTopInViewport < 0) {
-        top += -containerTopInViewport;
-      }
-    }
-    const diagramHeight = diagramElement?.clientHeight || 0;
-    const diagramTop = diagramElement
-      ? getElementDistanceToTop(diagramElement) -
-        (scrollRoot ? getElementDistanceToTop(scrollRoot) : 0)
-      : 0;
-    if (top < participantOffsetTop + diagramTop) return 0;
-    return (
-      Math.min(top - diagramTop, diagramHeight - PARTICIPANT_HEIGHT - 50) -
-      participantOffsetTop
-    );
-  };
-
-  // Geometry-based sticky calculation (preferred when enabled)
-  const stickyViaRaf = useStickyOffset({
+  // Geometry-based sticky calculation (single strategy)
+  const stickyVerticalOffset = useStickyOffset({
     scrollRoot: scrollRoot || null,
     diagramEl: diagramElement,
     participantTop: props.offsetTop2 || 0,
     stickyOffset: stickyOffset || 0,
-    enabled: mode !== RenderMode.Static && stickyStrategy === 'raf',
+    enabled: mode !== RenderMode.Static,
   });
-
-  // Intersection-based fallback
-  const stickyViaIo = mode === RenderMode.Static || stickyStrategy === 'raf' ? 0 : calcOffset();
-
-  const stickyVerticalOffset = stickyStrategy === 'raf' ? stickyViaRaf : stickyViaIo;
 
   const backgroundColor = props.entity.color
     ? removeAlpha(props.entity.color)

@@ -13,7 +13,8 @@ export const defaultConfig = {
   enableMultiTheme: true,
   stickyOffset: 0,
   scrollRoot: null as HTMLElement | null,
-  stickyStrategy: 'io' as 'io' | 'raf',
+  // External shift from parent page (optional)
+  externalViewportShift: 0,
   theme: getTheme(),
   onThemeChange: ({ theme }: { theme: string }) => {
     setTheme(theme);
