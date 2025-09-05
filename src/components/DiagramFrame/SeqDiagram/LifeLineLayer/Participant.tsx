@@ -1,5 +1,6 @@
 import useDocumentScroll from "@/functions/useDocumentScroll";
 import useIntersectionTop from "@/functions/useIntersectionTop";
+import useStickyOffset from "@/functions/useStickyOffset";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
 import {
@@ -10,6 +11,8 @@ import {
   RenderMode,
   selectedAtom,
   stickyOffsetAtom,
+  scrollRootAtom,
+  stickyStrategyAtom,
 } from "@/store/Store";
 import { cn } from "@/utils";
 import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
@@ -29,6 +32,8 @@ export const Participant = (props: {
   const mode = useAtomValue(modeAtom);
   const participants = useAtomValue(participantsAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
+  const scrollRoot = useAtomValue(scrollRootAtom);
+  const stickyStrategy = useAtomValue(stickyStrategyAtom);
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
   const onSelect = useSetAtom(onSelectAtom);
@@ -54,9 +59,18 @@ export const Participant = (props: {
     let top = intersectionTop + scrollTop;
     if (intersectionTop > INTERSECTION_ERROR_MARGIN && stickyOffset)
       top += stickyOffset;
+    // If the scroll container is partially scrolled out of the viewport (its top < 0),
+    // reflect that clipping so sticky still engages when the outer page scrolls.
+    if (scrollRoot) {
+      const containerTopInViewport = scrollRoot.getBoundingClientRect().top;
+      if (containerTopInViewport < 0) {
+        top += -containerTopInViewport;
+      }
+    }
     const diagramHeight = diagramElement?.clientHeight || 0;
     const diagramTop = diagramElement
-      ? getElementDistanceToTop(diagramElement)
+      ? getElementDistanceToTop(diagramElement) -
+        (scrollRoot ? getElementDistanceToTop(scrollRoot) : 0)
       : 0;
     if (top < participantOffsetTop + diagramTop) return 0;
     return (
@@ -65,8 +79,19 @@ export const Participant = (props: {
     );
   };
 
-  // We use this method to simulate sticky behavior. CSS sticky is not working out of an iframe.
-  const stickyVerticalOffset = mode === RenderMode.Static ? 0 : calcOffset();
+  // Geometry-based sticky calculation (preferred when enabled)
+  const stickyViaRaf = useStickyOffset({
+    scrollRoot: scrollRoot || null,
+    diagramEl: diagramElement,
+    participantTop: props.offsetTop2 || 0,
+    stickyOffset: stickyOffset || 0,
+    enabled: mode !== RenderMode.Static && stickyStrategy === 'raf',
+  });
+
+  // Intersection-based fallback
+  const stickyViaIo = mode === RenderMode.Static || stickyStrategy === 'raf' ? 0 : calcOffset();
+
+  const stickyVerticalOffset = stickyStrategy === 'raf' ? stickyViaRaf : stickyViaIo;
 
   const backgroundColor = props.entity.color
     ? removeAlpha(props.entity.color)
