@@ -14,7 +14,7 @@
     "build": "bun run --bun vite build -c vite.config.lib.ts",
     "test": "bun run --bun vitest --config vitest.config.ts",
     "pw": "playwright test",
-    "pw:ci": "playwright test --reporter=github",
+    "pw:ci": "playwright test",
     "pw:update": "playwright test --update-snapshots",
     "pw:update-ci": "playwright test --update-snapshots --reporter=github",
     "pw:ui": "playwright test --ui",
