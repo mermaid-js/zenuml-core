@@ -16,10 +16,33 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        id: bun-cache
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: bun-deps-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            bun-deps-
+
       - name: Install dependencies
+        if: steps.bun-cache.outputs.cache-hit != 'true'
         run: bun install
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browsers-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            playwright-browsers-
+
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: bun run pw:install
 
       - name: Run Playwright tests
