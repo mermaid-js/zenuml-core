@@ -22,9 +22,6 @@ jobs:
       - name: Install Playwright browsers
         run: bun run pw:install
 
-      - name: Build site
-        run: bun run build:site
-
       - name: Run Playwright tests
         run: bun run pw:ci
         env:
