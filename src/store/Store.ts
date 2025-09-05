@@ -79,6 +79,9 @@ export const scrollRootAtom = atom<HTMLElement | null>(null);
 // Sticky strategy: 'io' (IntersectionObserver-based) or 'raf' (geometry-based)
 export const stickyStrategyAtom = atom<'io' | 'raf'>('io');
 
+// External viewport shift (e.g., parent page scroll offset for cross-origin iframes)
+export const externalViewportShiftAtom = atom(0);
+
 export const onElementClickAtom = atomWithFunctionValue(
   (codeRange: CodeRange) => {
     console.log("Element clicked", codeRange);
