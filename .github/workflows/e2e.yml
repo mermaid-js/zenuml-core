@@ -44,6 +44,15 @@ jobs:
       - name: Build site
         run: bun run build:site
 
+      - name: Test server startup
+        run: |
+          timeout 30s bun run preview --port 8081 --host 0.0.0.0 &
+          SERVER_PID=$!
+          sleep 5
+          curl -f http://127.0.0.1:8081 || exit 1
+          kill $SERVER_PID
+          echo "✅ Server startup test passed"
+
       - name: Run Playwright tests
         run: bun run pw:ci
         env:
