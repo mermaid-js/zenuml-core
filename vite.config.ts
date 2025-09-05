@@ -53,24 +53,4 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  test: {
-    // used by vitest: https://vitest.dev/guide/#configuring-vitest
-    environment: "jsdom",
-    reportOnFailure: true,
-    globals: true,
-    coverage: {
-      provider: "v8", // or 'v8'
-    },
-    setupFiles: resolve(__dirname, "test/setup.ts"),
-    exclude: [
-      "node_modules/**",
-      "tests/**", // Exclude Playwright tests
-      "**/tests/**/*.spec.ts", // Exclude Playwright test files specifically
-      "**/tests/**/*.spec.js", // Exclude Playwright test files specifically
-    ],
-    include: [
-      "src/**/*.{test,spec}.{js,ts,jsx,tsx}",
-      "test/**/*.{test,spec}.{js,ts,jsx,tsx}",
-    ],
-  },
 }));
