@@ -68,5 +68,9 @@ export default defineConfig(({ mode }) => ({
       "**/tests/**/*.spec.ts", // Exclude Playwright test files specifically
       "**/tests/**/*.spec.js", // Exclude Playwright test files specifically
     ],
+    include: [
+      "src/**/*.{test,spec}.{js,ts,jsx,tsx}",
+      "test/**/*.{test,spec}.{js,ts,jsx,tsx}",
+    ],
   },
 }));
