@@ -39,7 +39,7 @@ jobs:
         run: bun install
 
       - name: Install Playwright browsers
-        run: bun exec playwright install --with-deps chromium
+        run: bun run pw:install
 
       - name: Build site
         run: bun run build:site
