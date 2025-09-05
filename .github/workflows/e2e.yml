@@ -25,27 +25,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          version: 10
+          bun-version: latest
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          cache: pnpm
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: bun exec playwright install --with-deps chromium
 
       - name: Build site
-        run: pnpm build:site
+        run: bun run build:site
 
       - name: Run Playwright tests
-        run: pnpm pw:ci
+        run: bun run pw:ci
         env:
           CI: true
 
