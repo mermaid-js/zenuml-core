@@ -12,7 +12,7 @@
     "build:site": "bun run --bun vite build",
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
     "build": "bun run --bun vite build -c vite.config.lib.ts",
-    "test": "bun run --bun vitest",
+    "test": "bun run --bun vitest --config vitest.config.ts",
     "pw": "bun run --bun playwright test",
     "pw:ci": "bun run --bun playwright test --reporter=github",
     "pw:update": "bun run --bun playwright test --update-snapshots",
