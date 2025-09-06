@@ -43,6 +43,7 @@ export const LifeLine = (props: {
     const firstMessage = diagramElement?.querySelector(
       `[data-to="${escapedName}"]`,
     ) as any;
+    if (!firstMessage)  return;
     const isVisible = firstMessage?.offsetParent != null;
     if (
       firstMessage &&

@@ -1,7 +1,6 @@
 import useStickyOffset from "@/functions/useStickyOffset";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import {
-  diagramElementAtom,
   modeAtom,
   onSelectAtom,
   participantsAtom,
@@ -22,7 +21,6 @@ export const Participant = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const mode = useAtomValue(modeAtom);
   const participants = useAtomValue(participantsAtom);
-  const diagramElement = useAtomValue(diagramElementAtom);
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
   const onSelect = useSetAtom(onSelectAtom);
@@ -41,12 +39,12 @@ export const Participant = (props: {
     // Sort the label positions in descending order to avoid index shifting when updating code
   ).sort((a, b) => b[0] - a[0]);
 
-  const stickyVerticalOffset = useStickyOffset({
-    diagramEl: diagramElement,
-    participantTop: props.offsetTop2 || 0,
-    stickyOffset: stickyOffset || 0,
-    enabled: mode !== RenderMode.Static,
-  });
+  const stickyVerticalOffset = mode !== RenderMode.Static 
+    ? useStickyOffset({
+        participantTop: props.offsetTop2 || 0,
+        stickyOffset: stickyOffset || 0,
+      })
+    : 0;
 
   const backgroundColor = props.entity.color
     ? removeAlpha(props.entity.color)

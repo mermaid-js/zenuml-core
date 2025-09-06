@@ -1,26 +1,20 @@
 import { useEffect, useState } from "react";
-import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
+import { useAtomValue } from "jotai";
+import { diagramFrameElementAtom } from "@/store/Store";
 
 type Params = {
-  diagramEl: HTMLElement | null;
   participantTop: number; // offsetTop within the diagram
   stickyOffset: number; // header offset
-  enabled: boolean;
 };
 
 export default function useStickyOffset({
-  diagramEl,
   participantTop,
   stickyOffset,
-  enabled,
 }: Params) {
+  const diagramFrameEl = useAtomValue(diagramFrameElementAtom);
   const [y, setY] = useState(0);
 
   useEffect(() => {
-    if (!enabled || !diagramEl) {
-      setY(0);
-      return;
-    }
 
     const isInIframe = window.self !== window.top;
     if (!isInIframe) {
@@ -28,25 +22,42 @@ export default function useStickyOffset({
       return;
     }
 
+    if (!diagramFrameEl) {
+      // Element not ready yet, will retry when diagramFrameEl changes
+      return;
+    }
+
     // Strategy: Iframe context (e.g., Confluence)
-    // This logic only runs when inside an iframe.
+    // Observe the diagram frame element to detect scroll changes
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const hiddenTop = Math.max(0, entry.intersectionRect.top - entry.boundingClientRect.top);
-        // We use a 0.5px tolerance to avoid floating point issues.
-        const unclamped = hiddenTop > 0.5 ? hiddenTop + stickyOffset : 0;
-        const max = (diagramEl?.clientHeight || 0) - PARTICIPANT_HEIGHT - 50;
-        const next = Math.min(unclamped, max);
-        setY(next);
+        // Calculate how much of the diagram frame is hidden above viewport
+        const frameOutOfViewPort = Math.max(0, entry.intersectionRect.top - entry.boundingClientRect.top);
+        
+        // Check if this specific participant should be sticky
+        // Participant should stick when the scroll has reached its position
+        if (frameOutOfViewPort >= participantTop) {
+          // This participant's position has been scrolled past - apply sticky
+          // Account for the distance from frame edge to participant position
+          const FRAME_PADDING_TO_PARTICIPANT = 40; // Distance from DiagramFrame edge to participant top
+          const offset = frameOutOfViewPort - participantTop + stickyOffset - FRAME_PADDING_TO_PARTICIPANT;
+          setY(Math.max(0, offset));
+        } else {
+          // This participant hasn't been reached yet
+          setY(0);
+        }
       },
-      { threshold: Array.from({ length: 101 }, (_, i) => i / 100) }
+      { 
+        threshold: Array.from({ length: 101 }, (_, i) => i / 100)
+      }
     );
-    observer.observe(diagramEl);
+    
+    observer.observe(diagramFrameEl);
 
     return () => {
       observer.disconnect();
     };
-  }, [diagramEl, participantTop, stickyOffset, enabled]);
+  }, [diagramFrameEl, participantTop, stickyOffset]);
 
   return y;
 }

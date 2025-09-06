@@ -7,14 +7,16 @@ import {
   themeAtom,
   enableNumberingAtom,
   enableMultiThemeAtom,
+  diagramFrameElementAtom,
 } from "@/store/Store";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import * as htmlToImage from "html-to-image";
 import {
   PropsWithChildren,
   RefObject,
   useImperativeHandle,
   useRef,
+  useEffect,
 } from "react";
 import { cn } from "@/utils";
 import { Debug } from "./Debug";
@@ -48,6 +50,7 @@ export const DiagramFrame = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const rootContext = useAtomValue(rootContextAtom);
+  const setDiagramFrameElement = useSetAtom(diagramFrameElementAtom);
   const [showTips, setShowTips] = useAtom(showTipsAtom);
   const [scale, setScale] = useAtom(scaleAtom);
   const [theme, setTheme] = useAtom(themeAtom);
@@ -55,6 +58,10 @@ export const DiagramFrame = ({
   const enableMultiTheme = useAtomValue(enableMultiThemeAtom);
   const mode = useAtomValue(modeAtom);
   const title = rootContext?.title();
+
+  useEffect(() => {
+    setDiagramFrameElement(containerRef.current);
+  });
 
   const showTipsDialog = () => {
     setShowTips(true);
