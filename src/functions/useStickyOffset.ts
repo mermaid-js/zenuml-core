@@ -48,7 +48,7 @@ export default function useStickyOffset({
         }
       },
       { 
-        threshold: Array.from({ length: 101 }, (_, i) => i / 100)
+        threshold: Array.from({ length: 101 }, (_, i) => i / 200)
       }
     );
     
