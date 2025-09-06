@@ -8,44 +8,45 @@ permissions:
 jobs:
   playwright-tests:
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [20]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          python-version: "3.12"
+          bun-version: latest
 
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install setuptools
-
-      - uses: pnpm/action-setup@v4
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        id: bun-cache
         with:
-          version: 10
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          node-version: ${{ matrix.node-version }}
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: bun-deps-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            bun-deps-
 
       - name: Install dependencies
-        run: pnpm install
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browsers-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            playwright-browsers-
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Build site
-        run: pnpm build:site
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: bun run pw:install
 
       - name: Run Playwright tests
-        run: pnpm pw:ci
+        run: bun run pw:ci
         env:
           CI: true
 
