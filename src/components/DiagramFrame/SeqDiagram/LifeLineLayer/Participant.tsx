@@ -1,19 +1,17 @@
 import useStickyOffset from "@/functions/useStickyOffset";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import {
-  diagramElementAtom,
   modeAtom,
   onSelectAtom,
   participantsAtom,
   RenderMode,
   selectedAtom,
   stickyOffsetAtom,
-  scrollRootAtom,
 } from "@/store/Store";
 import { cn } from "@/utils";
 import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useMemo, useRef } from "react";
+import { CSSProperties, useMemo, useRef } from "react";
 import { ParticipantLabel } from "./ParticipantLabel";
 import iconPath from "../../Tutorial/Icons";
 export const Participant = (props: {
@@ -23,8 +21,6 @@ export const Participant = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const mode = useAtomValue(modeAtom);
   const participants = useAtomValue(participantsAtom);
-  const diagramElement = useAtomValue(diagramElementAtom);
-  const scrollRoot = useAtomValue(scrollRootAtom);
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
   const onSelect = useSetAtom(onSelectAtom);
@@ -43,14 +39,12 @@ export const Participant = (props: {
     // Sort the label positions in descending order to avoid index shifting when updating code
   ).sort((a, b) => b[0] - a[0]);
 
-  // Geometry-based sticky calculation (single strategy)
-  const stickyVerticalOffset = useStickyOffset({
-    scrollRoot: scrollRoot || null,
-    diagramEl: diagramElement,
-    participantTop: props.offsetTop2 || 0,
-    stickyOffset: stickyOffset || 0,
-    enabled: mode !== RenderMode.Static,
-  });
+  const stickyVerticalOffset = mode !== RenderMode.Static 
+    ? useStickyOffset({
+        participantTop: props.offsetTop2 || 0,
+        stickyOffset: stickyOffset || 0,
+      })
+    : 0;
 
   const backgroundColor = props.entity.color
     ? removeAlpha(props.entity.color)
@@ -73,6 +67,19 @@ export const Participant = (props: {
     ? iconPath["actor"]
     : iconPath[props.entity.type?.toLowerCase() as "actor"];
 
+  const isInIframe = useMemo(() => window.self !== window.top, []);
+  const style: CSSProperties = {
+    backgroundColor: isDefaultStarter ? undefined : backgroundColor,
+    color: isDefaultStarter ? undefined : color,
+  };
+  if (isInIframe) {
+    style.transform = `translateY(${stickyVerticalOffset}px)`;
+    style.transition = "transform 0.05s ease-out"; // Smooth transition between updates
+  } else {
+    style.position = "sticky";
+    style.top = `${stickyOffset}px`;
+  }
+
   return (
     <div
       className={cn(
@@ -80,11 +87,7 @@ export const Participant = (props: {
         { selected: selected.includes(props.entity.name) },
       )}
       ref={elRef}
-      style={{
-        backgroundColor: isDefaultStarter ? undefined : backgroundColor,
-        color: isDefaultStarter ? undefined : color,
-        transform: `translateY(${stickyVerticalOffset}px)`,
-      }}
+      style={style}
       onClick={() => onSelect(props.entity.name)}
       data-participant-id={props.entity.name}
     >

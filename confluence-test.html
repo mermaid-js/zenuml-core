@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZenUML Test - Confluence Style</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f7f8f9;
+            color: #172b4d;
+        }
+
+        /* Top Banner */
+        .top-banner {
+            background: rgba(7, 71, 166, 0.5); /* Made transparent for debugging */
+            color: white;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 56px;
+        }
+
+        .banner-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .banner-center {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .banner-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            background: #0052cc;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: #0065ff;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            margin-top: 56px;
+            display: flex;
+            min-height: calc(100vh - 56px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: #f7f8f9;
+            border-right: 1px solid #dfe1e6;
+            padding: 16px;
+            position: fixed;
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #5e6c84;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 4px;
+        }
+
+        .sidebar-nav a {
+            color: #172b4d;
+            text-decoration: none;
+            padding: 4px 8px;
+            display: block;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        .sidebar-nav a:hover {
+            background: #ebecf0;
+        }
+
+        /* Content Area */
+        .content-wrapper {
+            flex: 1;
+            margin-left: 240px;
+            padding: 24px;
+            max-width: calc(100vw - 240px);
+        }
+
+        /* Page Header */
+        .page-header {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #172b4d;
+        }
+
+        .page-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 14px;
+            color: #5e6c84;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .page-actions button {
+            padding: 6px 12px;
+            border: 1px solid #dfe1e6;
+            background: white;
+            color: #172b4d;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-actions button:hover {
+            background: #f4f5f7;
+        }
+
+        .page-actions .primary {
+            background: #0052cc;
+            color: white;
+            border-color: #0052cc;
+        }
+
+        .page-actions .primary:hover {
+            background: #0065ff;
+        }
+
+        /* Content Area */
+        .page-content {
+            background: white;
+            padding: 32px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            line-height: 1.6;
+        }
+
+        .content-section {
+            margin-bottom: 32px;
+        }
+
+        .content-section h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #172b4d;
+        }
+
+        .content-section p {
+            margin-bottom: 16px;
+            color: #42526e;
+        }
+
+        /* Iframe Container - mimics Confluence macro style */
+        .macro-container {
+            border: 1px solid #dfe1e6;
+            border-radius: 4px;
+            margin: 24px 0;
+            background: white;
+            overflow: hidden;
+        }
+
+        .macro-header {
+            background: #f4f5f7;
+            padding: 8px 16px;
+            border-bottom: 1px solid #dfe1e6;
+            font-size: 12px;
+            color: #5e6c84;
+            font-weight: 600;
+        }
+
+        .macro-content {
+            position: relative;
+        }
+
+        .macro-iframe {
+            width: 100%;
+            height: 800px; /* Full height to show entire diagram */
+            border: none;
+            display: block;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5e6c84;
+            font-size: 14px;
+        }
+
+        /* Debug Panel */
+        .debug-panel {
+            position: fixed;
+            top: 70px;
+            right: 16px;
+            width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 16px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            z-index: 100;
+        }
+
+        .debug-panel h4 {
+            margin-bottom: 12px;
+            color: #4a9eff;
+        }
+
+        .debug-info {
+            margin-bottom: 8px;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            position: fixed;
+            right: 0;
+            top: 56px;
+            width: 320px;
+            height: calc(100vh - 56px);
+            background: white;
+            border-left: 1px solid #dfe1e6;
+            padding: 16px;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .right-panel.open {
+            transform: translateX(0);
+        }
+
+        .panel-tab {
+            padding: 8px 16px;
+            border: none;
+            background: #f4f5f7;
+            color: #42526e;
+            cursor: pointer;
+            margin-right: 4px;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .panel-tab.active {
+            background: white;
+            border-bottom: 2px solid #0052cc;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Banner -->
+    <div class="top-banner">
+        <div class="banner-left">
+            <button class="btn">☰</button>
+            <strong>Confluence</strong>
+        </div>
+        <div class="banner-center">
+            <input type="text" class="search-box" placeholder="Search...">
+        </div>
+        <div class="banner-right">
+            <button class="btn">Create</button>
+            <button class="btn">🔔</button>
+            <button class="btn">?</button>
+            <button class="btn">👤</button>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h3>ZenUML Staging</h3>
+            <ul class="sidebar-nav">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Recent</a></li>
+                <li><a href="#">Templates</a></li>
+                <li><a href="#">Create from template</a></li>
+            </ul>
+
+            <h3 style="margin-top: 24px;">Spaces</h3>
+            <ul class="sidebar-nav">
+                <li><a href="#" style="font-weight: 600;">ZenUML Staging</a></li>
+                <li><a href="#">Documentation</a></li>
+                <li><a href="#">Tests</a></li>
+            </ul>
+
+            <h3 style="margin-top: 24px;">Recent Pages</h3>
+            <ul class="sidebar-nav">
+                <li><a href="#">2025-09-05</a></li>
+                <li><a href="#">Sticky Test</a></li>
+                <li><a href="#">Previous Tests</a></li>
+            </ul>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-wrapper">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">ZenUML Sticky Test - Confluence Environment</h1>
+                <div class="page-meta">
+                    <span>Updated 2 minutes ago</span>
+                    <span>•</span>
+                    <span>By Test User</span>
+                    <span>•</span>
+                    <span>1 view</span>
+                </div>
+                <div class="page-actions">
+                    <button class="primary">Edit</button>
+                    <button>Share</button>
+                    <button>Copy link</button>
+                    <button>More actions</button>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <div class="content-section">
+                    <h2>Testing ZenUML Sticky Effect in Confluence</h2>
+                    <p>This page simulates the Confluence environment where ZenUML diagrams are embedded as macros. The sticky participant effect should work correctly when scrolling the main page content.</p>
+                    
+                    <p><strong>Test Instructions:</strong></p>
+                    <ul style="margin-left: 20px; margin-bottom: 20px;">
+                        <li>Scroll down to see the embedded ZenUML diagram</li>
+                        <li>Continue scrolling to test if participants become sticky</li>
+                        <li>The participants should stay visible at the top when scrolling past them</li>
+                    </ul>
+                </div>
+
+                <div class="content-section">
+                    <h2>Content Before Diagram</h2>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+                </div>
+
+                <!-- ZenUML Macro Container -->
+                <div class="macro-container">
+                    <div class="macro-header">
+                        ZenUML Diagram Macro
+                    </div>
+                    <div class="macro-content">
+                        <iframe 
+                            class="macro-iframe" 
+                            src="/confluence-iframe-content.html"
+                            title="ZenUML Diagram">
+                        </iframe>
+                        <div class="loading-overlay" id="loading-overlay">
+                            Loading ZenUML diagram...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h2>Content After Diagram</h2>
+                    <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+                    <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+                    <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestae consequatur.</p>
+                    <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.</p>
+                    <p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.</p>
+                </div>
+
+                <div class="content-section">
+                    <h2>More Content for Scrolling</h2>
+                    <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.</p>
+                    <p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.</p>
+                    <p>Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div class="debug-panel">
+        <h4>Debug Information</h4>
+        <div class="debug-info" id="scroll-info">Page scroll: 0px</div>
+        <div class="debug-info" id="iframe-info">Iframe loaded: No</div>
+        <div class="debug-info" id="sticky-info">Sticky active: No</div>
+        <div class="debug-info" id="viewport-info">Viewport: 0x0</div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel" id="right-panel">
+        <div style="border-bottom: 1px solid #dfe1e6; margin-bottom: 16px;">
+            <button class="panel-tab active">Comments</button>
+            <button class="panel-tab">Details</button>
+        </div>
+        <div>
+            <p style="color: #5e6c84; font-size: 14px;">No comments yet.</p>
+        </div>
+    </div>
+
+    <script>
+        // Debug information updates
+        function updateDebugInfo() {
+            document.getElementById('scroll-info').textContent = `Page scroll: ${window.scrollY}px`;
+            document.getElementById('viewport-info').textContent = `Viewport: ${window.innerWidth}x${window.innerHeight}`;
+        }
+
+        // Hide loading overlay when iframe loads
+        const iframe = document.querySelector('.macro-iframe');
+        iframe.addEventListener('load', () => {
+            document.getElementById('loading-overlay').style.display = 'none';
+            document.getElementById('iframe-info').textContent = 'Iframe loaded: Yes';
+        });
+
+        // Update debug info on scroll and resize
+        window.addEventListener('scroll', updateDebugInfo);
+        window.addEventListener('resize', updateDebugInfo);
+
+        // Initial debug info
+        updateDebugInfo();
+
+        // Panel toggle (for testing)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab' && e.shiftKey) {
+                e.preventDefault();
+                const panel = document.getElementById('right-panel');
+                panel.classList.toggle('open');
+            }
+        });
+
+        console.log('Confluence-style test page loaded');
+        console.log('Environment: Main Confluence page with embedded iframe');
+    </script>
+</body>
+</html>

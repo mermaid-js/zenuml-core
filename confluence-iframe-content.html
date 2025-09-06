@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZenUML Diagram - Confluence Macro</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .macro-wrapper {
+            background: white;
+            border-radius: 4px;
+        }
+        
+        .macro-toolbar {
+            background: #f7f8f9;
+            border-bottom: 1px solid #dfe1e6;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: -16px -16px 16px -16px;
+        }
+        
+        .macro-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #42526e;
+        }
+        
+        .macro-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .macro-btn {
+            background: none;
+            border: 1px solid #dfe1e6;
+            color: #42526e;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .macro-btn:hover {
+            background: #f4f5f7;
+        }
+        
+        .content-area {
+            padding: 20px 0;
+        }
+        
+        .diagram-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .diagram-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #172b4d;
+            margin-bottom: 8px;
+        }
+        
+        .diagram-subtitle {
+            color: #5e6c84;
+            font-size: 14px;
+        }
+        
+        #diagram-container {
+            background: white;
+            border: 1px solid #dfe1e6;
+            border-radius: 6px;
+            min-height: calc(100vh - 200px);
+            height: auto;
+            position: relative;
+            overflow: visible;
+        }
+        
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            color: #5e6c84;
+            font-size: 16px;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #f4f5f7;
+            border-top: 3px solid #0052cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 11px;
+            z-index: 200;
+            max-width: 280px;
+            line-height: 1.4;
+        }
+        
+        .debug-info h4 {
+            margin: 0 0 8px 0;
+            color: #4a9eff;
+            font-size: 12px;
+        }
+        
+        .debug-item {
+            margin: 4px 0;
+        }
+        
+        .footer-content {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #f4f5f7;
+            text-align: center;
+            color: #5e6c84;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="macro-wrapper">
+        <!-- Macro Toolbar (similar to Confluence macro header) -->
+        <div class="macro-toolbar">
+            <div class="macro-title">ZenUML Sequence Diagram</div>
+            <div class="macro-actions">
+                <button class="macro-btn">Edit</button>
+                <button class="macro-btn">⚙️</button>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="diagram-header">
+                <h1 class="diagram-title">Order Processing Flow</h1>
+                <div class="diagram-subtitle">Interactive sequence diagram showing order processing workflow</div>
+            </div>
+            
+            <div id="diagram-container">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <div>Loading ZenUML diagram...</div>
+                </div>
+            </div>
+            
+            <div class="footer-content">
+                <p>Scroll up and down to test the sticky participant effect</p>
+                <p><small>This diagram is embedded in a Confluence-style iframe environment</small></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="debug-info" id="debug-info">
+        <h4>Iframe Debug Info</h4>
+        <div class="debug-item" id="iframe-scroll">Iframe scroll: 0px</div>
+        <div class="debug-item" id="parent-scroll">Parent scroll: 0px</div>
+        <div class="debug-item" id="sticky-offset">Sticky offset: 0</div>
+        <div class="debug-item" id="external-shift">External shift: 0</div>
+        <div class="debug-item" id="is-iframe">Is iframe: true</div>
+        <div class="debug-item" id="participant-count">Participants: 0</div>
+    </div>
+
+    <script type="module">
+        // Configuration matching the Confluence environment
+        const urlParams = new URLSearchParams(window.location.search);
+        const stickyOffset = 56;
+        const externalShift = parseInt(urlParams.get('externalShift') || '0');
+        
+        // Update debug info
+        function updateDebugInfo() {
+            try {
+                const parentScroll = window.parent ? (window.parent.pageYOffset || window.parent.scrollY || 0) : 0;
+                
+                document.getElementById('iframe-scroll').textContent = `Iframe scroll: ${window.scrollY}px`;
+                document.getElementById('parent-scroll').textContent = `Parent scroll: ${parentScroll}px`;
+                document.getElementById('sticky-offset').textContent = `Sticky offset: ${stickyOffset}px`;
+                document.getElementById('external-shift').textContent = `External shift: ${externalShift}px`;
+                document.getElementById('is-iframe').textContent = `Is iframe: ${window !== window.parent}`;
+                
+                const participantElements = document.querySelectorAll('[data-participant-id]');
+                document.getElementById('participant-count').textContent = `Participants: ${participantElements.length}`;
+            } catch (e) {
+                console.warn('Debug info update failed (likely cross-origin):', e.message);
+            }
+        }
+        
+        // Listen for scroll events (both iframe and parent)
+        window.addEventListener('scroll', updateDebugInfo);
+        try {
+            window.parent.addEventListener('scroll', updateDebugInfo);
+        } catch (e) {
+            console.warn('Cannot listen to parent scroll (cross-origin)');
+        }
+        
+        // ZenUML content for testing - simple but comprehensive
+        const zenUmlCode = `RET ret = A.methodA() {
+        new X()
+  B.method
+  B.method
+  B.method
+  C.method
+  C.method
+  C.invoke
+  B.method() {
+    if (X) {
+      C.methodC() {
+        a = A.methodA(111) {
+          D.method
+          D.method()
+        }
+      }
+    }
+    while (Y) {
+      C.methodC() {
+        A.methodA()
+      }
+    }
+   }
+ }`;
+
+        // Load ZenUML when page loads
+        async function loadZenUML() {
+            try {
+                // Import ZenUML modules from the dev server
+                const { createConfig } = await import('/src/config.ts');
+                const { initZenUml } = await import('/src/main.tsx');
+                
+                // Clear loading state
+                const container = document.getElementById('diagram-container');
+                container.innerHTML = '<pre class="zenuml"></pre>';
+                
+                const preElement = container.querySelector('pre.zenuml');
+                const zenUmlInstance = initZenUml(preElement);
+                
+                // Create configuration for Confluence environment
+                const config = createConfig({
+                    stickyOffset: stickyOffset,
+                    externalViewportShift: externalShift,
+                    theme: 'theme-simple',
+                    onContentChange: (code) => {
+                        console.log('ZenUML content changed:', code?.length || 0, 'characters');
+                    }
+                });
+                
+                console.log('ZenUML Config for Confluence:', config);
+                
+                // Render the diagram
+                await zenUmlInstance.render(zenUmlCode, config);
+                console.log('ZenUML diagram rendered successfully in Confluence iframe');
+                
+                // Update debug info after render
+                updateDebugInfo();
+                
+            } catch (error) {
+                console.error('Failed to load ZenUML in Confluence iframe:', error);
+                document.getElementById('diagram-container').innerHTML = `
+                    <div class="loading-state" style="color: #de350b;">
+                        <div>❌ Error loading ZenUML</div>
+                        <div style="font-size: 12px; margin-top: 8px;">${error.message}</div>
+                        <div style="font-size: 11px; margin-top: 4px;">Make sure the dev server is running on port 8080</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadZenUML);
+        } else {
+            loadZenUML();
+        }
+        
+        // Initial debug update
+        updateDebugInfo();
+        
+        // Log iframe context for debugging
+        console.log('Confluence iframe context:', {
+            isIframe: window !== window.parent,
+            stickyOffset,
+            externalShift,
+            location: window.location.href,
+            parentAvailable: !!window.parent
+        });
+    </script>
+</body>
+</html>
