@@ -74,6 +74,7 @@ export const Participant = (props: {
   };
   if (isInIframe) {
     style.transform = `translateY(${stickyVerticalOffset}px)`;
+    style.transition = "transform 0.05s ease-out"; // Smooth transition between updates
   } else {
     style.position = "sticky";
     style.top = `${stickyOffset}px`;
