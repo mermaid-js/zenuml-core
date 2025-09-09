@@ -32,7 +32,7 @@ function formatParameter(param: Parameter): string {
 
 // Helper function to format parameters list
 function formatParameters(params: Parameter[]): string {
-  return params.map(formatParameter).join(", ");
+  return params.map(formatParameter).join(",");
 }
 
 // Get the parser contexts and assert their types
