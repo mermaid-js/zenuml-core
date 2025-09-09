@@ -365,6 +365,15 @@ export default class sequenceParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by sequenceParser#namedParameter.
+	enterNamedParameter(ctx) {
+	}
+
+	// Exit a parse tree produced by sequenceParser#namedParameter.
+	exitNamedParameter(ctx) {
+	}
+
+
 	// Enter a parse tree produced by sequenceParser#declaration.
 	enterDeclaration(ctx) {
 	}
