@@ -12,7 +12,9 @@ function formatParameter(param: Parameter): string {
   if (param.namedParameter?.()) {
     const namedParam = param.namedParameter();
     if (namedParam) {
-      return `${namedParam.ID().getText()}=${namedParam.expr().getFormattedText()}`;
+      const expr = namedParam.expr();
+      const value = expr ? expr.getFormattedText() : "";
+      return `${namedParam.ID().getText()}=${value}`;
     }
   }
   

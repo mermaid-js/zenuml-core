@@ -121,12 +121,57 @@ describe("NamedParameter", () => {
       const invocation = ast.messageBody().func().signature()[0].invocation();
       expect(invocation.parameters()).toBeFalsy();
     });
+
+    it("should handle method call with missing parameter value", () => {
+      const ast = parseMessage("A.method(p=)");
+      expect(ast.messageBody()).toBeTruthy();
+      
+      const parameters = ast.messageBody().func().signature()[0].invocation().parameters();
+      expect(parameters.parameter().length).toBe(1);
+      
+      const param = parameters.parameter()[0];
+      expect(param.namedParameter()).toBeTruthy();
+      expect(param.namedParameter().ID().getText()).toBe("p");
+      expect(param.namedParameter().expr()).toBeFalsy(); // Missing expression should be handled
+    });
   });
 
   describe("error handling", () => {
     it("should handle missing parameter value", () => {
       // This should still parse but may not be semantically correct
       expect(() => parseParameters("userId=")).not.toThrow();
+      
+      const ast = parseParameters("userId=");
+      expect(ast.parameter().length).toBe(1);
+      
+      const param = ast.parameter()[0];
+      expect(param.namedParameter()).toBeTruthy();
+      expect(param.namedParameter().ID().getText()).toBe("userId");
+      expect(param.namedParameter().expr()).toBeFalsy(); // No expression provided
+    });
+
+    it("should handle missing values with commas", () => {
+      const ast = parseParameters("userId=, name=\"John\"");
+      expect(ast.parameter().length).toBe(2);
+      
+      const param1 = ast.parameter()[0];
+      expect(param1.namedParameter()).toBeTruthy();
+      expect(param1.namedParameter().ID().getText()).toBe("userId");
+      expect(param1.namedParameter().expr()).toBeFalsy();
+      
+      const param2 = ast.parameter()[1];
+      expect(param2.namedParameter()).toBeTruthy();
+      expect(param2.namedParameter().ID().getText()).toBe("name");
+      expect(param2.namedParameter().expr()).toBeTruthy();
+    });
+
+    it("should handle multiple missing values", () => {
+      const ast = parseParameters("p1=, p2=, p3=123");
+      expect(ast.parameter().length).toBe(3);
+      
+      expect(ast.parameter()[0].namedParameter().expr()).toBeFalsy();
+      expect(ast.parameter()[1].namedParameter().expr()).toBeFalsy();
+      expect(ast.parameter()[2].namedParameter().expr()).toBeTruthy();
     });
 
     it("should handle invalid parameter names", () => {
