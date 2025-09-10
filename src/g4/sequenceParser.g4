@@ -226,7 +226,7 @@ parameter
  ;
 
 namedParameter
- : ID ASSIGN expr
+ : ID ASSIGN expr?
  ;
 
 declaration
