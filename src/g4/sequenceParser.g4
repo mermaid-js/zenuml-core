@@ -222,7 +222,11 @@ parameters
  ;
 
 parameter
- : declaration | expr
+ : namedParameter | declaration | expr
+ ;
+
+namedParameter
+ : ID ASSIGN expr
  ;
 
 declaration
