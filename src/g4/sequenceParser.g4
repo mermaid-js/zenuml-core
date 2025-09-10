@@ -221,6 +221,8 @@ parameters
  : parameter (COMMA parameter)* COMMA?
  ;
 
+// both namedParameter and expr could match 'a=1'.
+// namedParameter provides more semantic context and better error recovery.
 parameter
  : namedParameter | declaration | expr
  ;
