@@ -94,8 +94,11 @@ DOT
  : '.'
  ;
 
+// Support Unicode letters in identifiers
+// \p{L} matches any Unicode letter (including Chinese, Japanese, Korean, etc.)
+// \p{Nd} matches any Unicode decimal digit
 ID
- : [a-zA-Z_] [a-zA-Z_0-9]*
+ : [\p{L}_] [\p{L}\p{Nd}_]*
  ;
 
 fragment UNIT
