@@ -86,6 +86,43 @@ For identifiers containing spaces, use quotes:
 - Can contain Unicode letters, numbers, and underscores
 - Keywords (if, while, return) remain in English
 
+## 📊 Before vs After: See the Difference
+
+| Scenario | Before (Workarounds) | After (Native Unicode) |
+|----------|---------------------|------------------------|
+| **Chinese participants** | `"用户" "订单服务" "数据库"` | `用户 订单服务 数据库` |
+| **Japanese methods** | `User."ログイン"()` | `ユーザー.ログイン()` |
+| **Mixed languages** | `"UserService" "数据库" "CacheManager"` | `UserService 数据库 CacheManager` |
+| **Korean business logic** | `"사용자"."인증"()` | `사용자.인증()` |
+| **Arabic identifiers** | `"المستخدم"."تسجيل_الدخول"()` | `المستخدم.تسجيل_الدخول()` |
+
+### Real Impact Examples
+
+**E-commerce Team (Chinese):**
+```zenuml
+// Before: Mixed English/quoted Chinese
+User "订单服务" Database
+User."创建订单"()
+"订单服务".validateOrder()
+
+// After: Pure Chinese business language
+用户 订单服务 数据库
+用户.创建订单()
+订单服务.验证订单()
+```
+
+**Banking System (Japanese):**
+```zenuml
+// Before: Awkward English mapping
+Customer "AccountService" "TransactionDB"
+Customer."残高照会"()
+
+// After: Natural Japanese terminology
+顧客 口座サービス 取引データベース
+顧客.残高照会()
+口座サービス.残高取得()
+```
+
 ## 🚀 Try It Now
 
 Visit https://app.zenuml.com
