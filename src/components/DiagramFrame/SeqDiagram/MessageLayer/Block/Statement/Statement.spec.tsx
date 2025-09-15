@@ -18,26 +18,29 @@ function renderCode(code: string) {
 
 describe("Statement", () => {
   test.each([
-    ["// comment \n A->B:m", "comment", "", ""],
+    // canvastext comes from the CSS Color Module Level 4 specification as a system color keyword.
+    // Note: Different DOM implementations may return different values for default colors
+    ["// comment \n A->B:m", "comment", ["canvastext", ""], ["canvastext", ""]],
     [
       "// [red] comment \n A->B:m",
       "comment",
-      "rgb(255, 0, 0)",
-      "rgb(255, 0, 0)",
+      ["rgb(255, 0, 0)", "red"],
+      ["rgb(255, 0, 0)", "red"],
     ],
   ])("code %s", function (code, text, commentStyle, messageStyle) {
     const wrapper = renderCode(code);
     expect(wrapper.container.querySelector(".comments p")?.textContent).toEqual(
       text,
     );
-    expect(
-      window.getComputedStyle(wrapper.container.querySelector(".comments div")!)
-        .color,
-    ).toEqual(commentStyle);
-    expect(
-      window.getComputedStyle(
-        wrapper.container.querySelector(".message .name div div")!,
-      ).color,
-    ).toEqual(messageStyle);
+    
+    const actualCommentColor = window.getComputedStyle(
+      wrapper.container.querySelector(".comments div")!
+    ).color;
+    expect(commentStyle).toContain(actualCommentColor);
+    
+    const actualMessageColor = window.getComputedStyle(
+      wrapper.container.querySelector(".message .name div div")!,
+    ).color;
+    expect(messageStyle).toContain(actualMessageColor);
   });
 });
