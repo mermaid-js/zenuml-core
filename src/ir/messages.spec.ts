@@ -1,6 +1,5 @@
 import { describe, it, expect } from "bun:test";
 import { RootContext } from "@/parser";
-import { AllMessages } from "@/parser/MessageCollector";
 import { buildMessagesModel } from "@/ir/messages";
 
 function collectIR(code: string) {
@@ -8,12 +7,7 @@ function collectIR(code: string) {
   return buildMessagesModel(ctx);
 }
 
-function collectLegacy(code: string) {
-  const ctx = RootContext(code);
-  return ctx ? AllMessages(ctx) : [];
-}
-
-describe("buildMessagesModel parity", () => {
+describe("buildMessagesModel", () => {
   it("sync and async and creation", () => {
     const code = `
       A.method(E.m) {
@@ -29,8 +23,12 @@ describe("buildMessagesModel parity", () => {
       signature: m.signature,
       type: m.type,
     }));
-    const legacy = collectLegacy(code);
-    expect(ir).toStrictEqual(legacy);
+    expect(ir).toStrictEqual([
+      { from: undefined, signature: "method(E.m)", to: "A", type: 0 },
+      { from: "B", signature: "method", to: "C", type: 0 },
+      { from: undefined, signature: "«create»", to: "B", type: 2 },
+      { from: "C", signature: " message", to: "D", type: 1 },
+    ]);
   });
 
   it("return variants", () => {
@@ -44,8 +42,9 @@ describe("buildMessagesModel parity", () => {
       signature: m.signature,
       type: m.type,
     }));
-    const legacy = collectLegacy(code);
-    expect(ir).toStrictEqual(legacy);
+    expect(ir).toStrictEqual([
+      { from: undefined, signature: "result", to: undefined, type: 3 },
+      { from: "A", signature: "m", to: "B", type: 1 },
+    ]);
   });
 });
-

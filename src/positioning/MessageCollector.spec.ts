@@ -1,4 +1,4 @@
-import { AllMessages } from "@/parser/MessageCollector";
+import { buildMessagesModel } from "@/ir/messages";
 import { RootContext } from "@/parser";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
 
@@ -8,7 +8,12 @@ describe("MessageCollector", () => {
     if (!rootContext) {
       return [];
     }
-    return AllMessages(rootContext);
+    return buildMessagesModel(rootContext).map((m) => ({
+      from: m.from,
+      signature: m.signature,
+      to: m.to,
+      type: m.type,
+    }));
   };
 
   describe("Return", () => {
