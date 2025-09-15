@@ -93,44 +93,71 @@ export function labelRangeOfMessage(
 
 // Safe label range for ref(...) fragment title (first name inside the ref)
 // Returns [-1, -1] when name is missing or synthesized by error recovery
-export function labelRangeOfRef(context: any): [number, number] {
+export function labelRangeOfRef(context: any): [number, number] | null {
   try {
     // Try to resolve the first name context under the ref
     let nameCtx: any = null;
-    if (context?.Content) {
+    if (typeof context?.Content === "function") {
       // Likely a RefContext
       nameCtx = context.Content();
-    } else if (context?.ref) {
-      const r = context.ref();
-      nameCtx = r?.Content?.() ?? (r?.name?.()?.[0]);
-    } else if (Array.isArray(context?.name?.())) {
-      nameCtx = context.name()[0];
-    } else if (context?.start && context?.stop) {
-      // Already a name-like context
-      nameCtx = context;
     }
-    if (!nameCtx) return [-1, -1];
+    // Do not try to auto-detect other shapes here; helper is strict
+    if (!nameCtx && Array.isArray(context?.name?.())) {
+      nameCtx = context.name()[0];
+    }
+    if (!nameCtx) return null;
     const s = nameCtx.start;
     const e = nameCtx.stop;
-    if (!s || !e) return [-1, -1];
+    if (!s || !e) return null;
     // Ensure the token type corresponds to a valid Name (ID/CSTRING/USTRING)
     const validNameTypes = [
       (sequenceParser as any).ID,
       (sequenceParser as any).CSTRING,
       (sequenceParser as any).USTRING,
     ];
-    if (typeof s.type === "number" && !validNameTypes.includes(s.type)) {
-      return [-1, -1];
-    }
+    if (typeof s.type === "number" && !validNameTypes.includes(s.type)) return null;
     // Guard synthesized tokens from error recovery
-    if (typeof s.tokenIndex === "number" && s.tokenIndex < 0) return [-1, -1];
-    if (typeof e.tokenIndex === "number" && e.tokenIndex < 0) return [-1, -1];
+    if (typeof s.tokenIndex === "number" && s.tokenIndex < 0) return null;
+    if (typeof e.tokenIndex === "number" && e.tokenIndex < 0) return null;
     const start = s.start ?? -1;
     const stop = e.stop ?? -1;
-    if (start == null || stop == null) return [-1, -1];
+    if (start == null || stop == null) return null;
     return [start, stop];
   } catch {
-    return [-1, -1];
+    return null;
+  }
+}
+
+// Label range for a fragment/par expression condition (e.g., [ x == y ])
+// Accepts contexts that have start/stop or a parent with parExpr().condition().
+export function labelRangeOfCondition(context: any): [number, number] | null {
+  try {
+    // Prefer parExpr().condition() if available (if/else, section, critical)
+    let cond: any = null;
+    if (typeof context?.parExpr === "function") {
+      const pe = context.parExpr();
+      cond = typeof pe?.condition === "function" ? pe.condition() : null;
+    }
+    // If the argument itself is a ParExprContext or ConditionContext
+    if (!cond && typeof context?.condition === "function") {
+      cond = context.condition();
+    }
+    if (!cond && context?.start && context?.stop) {
+      // Assume the provided context is already the condition (e.g., ConditionContext)
+      cond = context;
+    }
+    const s = cond?.start;
+    const e = cond?.stop;
+    if (!s || !e) return null;
+    // Guard synthesized tokens
+    if (typeof s.tokenIndex === "number" && s.tokenIndex < 0) return null;
+    if (typeof e.tokenIndex === "number" && e.tokenIndex < 0) return null;
+    const start = s.start ?? -1;
+    const stop = e.stop ?? -1;
+    if (start == null || stop == null) return null;
+    return [start, stop];
+  } catch {
+    return null;
   }
 }
 
@@ -138,6 +165,7 @@ export default {
   codeRangeOf,
   labelRangeOfMessage,
   labelRangeOfRef,
+  labelRangeOfCondition,
   commentOf,
   signatureOf,
 };

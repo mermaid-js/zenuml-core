@@ -1,13 +1,8 @@
-import { cn } from "@/utils";
 import { useEditLabelImproved, specialCharRegex } from "@/functions/useEditLabel";
 import { useAtom, useAtomValue } from "jotai";
 import "../../../../LifeLineLayer/EditableLabel.css";
-import {
-  codeAtom,
-  modeAtom,
-  onContentChangeAtom,
-  RenderMode,
-} from "@/store/Store";
+import { codeAtom, modeAtom, onContentChangeAtom, RenderMode } from "@/store/Store";
+import { labelRangeOfCondition } from "@/parser/helpers";
 
 const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
 
@@ -36,10 +31,7 @@ export const ConditionLabel = (props: { condition: any }) => {
         newText = `"${newText}"`;
       }
 
-      const [start, end] = [
-        props.condition?.start?.start,
-        props.condition?.stop?.stop,
-      ];
+      const [start, end] = labelRangeOfCondition(props.condition) ?? [-1, -1];
       if (start === -1 || end === -1) {
         console.warn("labelPosition is not set");
         return;

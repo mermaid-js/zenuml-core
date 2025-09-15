@@ -24,13 +24,11 @@ describe("labelRangeOfRef", () => {
     expect(sliceInclusive(code, start, stop)).toBe("a");
   });
 
-  it("ref() -> returns [-1,-1] under error recovery", () => {
+  it("ref() -> returns null under error recovery", () => {
     const code = "ref()";
     const stat = StatContextFixture(code);
     const refCtx = stat.ref();
-    const [start, stop] = labelRangeOfRef(refCtx);
-    expect(start).toBe(-1);
-    expect(stop).toBe(-1);
+    const range = labelRangeOfRef(refCtx);
+    expect(range).toBeNull();
   });
 });
-

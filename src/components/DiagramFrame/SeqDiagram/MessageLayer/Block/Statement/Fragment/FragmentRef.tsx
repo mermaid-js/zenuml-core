@@ -18,7 +18,8 @@ export const FragmentRef = (props: {
   const refCtx = props.context?.ref?.();
   const content = refCtx?.Content?.();
   const contentLabel = content?.getFormattedText() || "";
-  const contentPosition: [number, number] = labelRangeOfRef(refCtx);
+  const contentRange = labelRangeOfRef(refCtx);
+  const contentPosition: [number, number] = contentRange ?? [-1, -1];
 
   return (
     <div className={props.className}>
