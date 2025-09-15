@@ -88,7 +88,7 @@ test('A participant with comments', () => {
   let rootContext = RootContext('\n// comment\nA\nA.method');
   let participants = rootContext.head().participant();
   expectText(participants[0].name()).toBe('A');
-  expect(participants[0].getComment()).toBe(' comment\n');
+  expect(participants[0].getComment()).toBe(' comment');
 });
 
 function expectText(context) {

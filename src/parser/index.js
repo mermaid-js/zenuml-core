@@ -56,7 +56,7 @@ antlr4.ParserRuleContext.prototype.getComment = function () {
     hiddenTokensToLeft &&
     hiddenTokensToLeft
       .map((t) => t.text.substring(2)) // skip '//'
-      .join("")
+      .join("\n")
   );
 };
 

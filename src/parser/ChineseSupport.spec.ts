@@ -32,14 +32,14 @@ describe("Chinese Character Support", () => {
     it("should parse Chinese method names", () => {
       const context = ProgContextFixture("用户.登录()");
       const message = context.block().stat(0).message();
-      expect(message.messageBody().to().getText()).toBe("用户");
+      expect(message.messageBody().fromTo().to().getText()).toBe("用户");
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe("登录");
     });
 
     it("should parse mixed Chinese-English identifiers", () => {
       const context = ProgContextFixture("UserService.获取数据()");
       const message = context.block().stat(0).message();
-      expect(message.messageBody().to().getText()).toBe("UserService");
+      expect(message.messageBody().fromTo().to().getText()).toBe("UserService");
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe("获取数据");
     });
   });
@@ -55,7 +55,7 @@ describe("Chinese Character Support", () => {
     it("should parse Chinese strings with spaces in method calls", () => {
       const context = ProgContextFixture('"用户 服务"."获取 信息"()');
       const message = context.block().stat(0).message();
-      expect(message.messageBody().to().getText()).toBe('"用户 服务"');
+      expect(message.messageBody().fromTo().to().getText()).toBe('"用户 服务"');
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe('"获取 信息"');
     });
 
@@ -99,7 +99,7 @@ describe("Chinese Character Support", () => {
       const context = ProgContextFixture('结果 = 服务.查询数据()');
       const message = context.block().stat(0).message();
       expect(message.messageBody().assignment().assignee().getText()).toBe("结果");
-      expect(message.messageBody().to().getText()).toBe("服务");
+      expect(message.messageBody().fromTo().to().getText()).toBe("服务");
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe("查询数据");
     });
 
@@ -130,28 +130,28 @@ describe("Chinese Character Support", () => {
     it("should support Japanese characters", () => {
       const context = ProgContextFixture('ユーザー.ログイン()');
       const message = context.block().stat(0).message();
-      expect(message.messageBody().to().getText()).toBe("ユーザー");
+      expect(message.messageBody().fromTo().to().getText()).toBe("ユーザー");
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe("ログイン");
     });
 
     it("should support Korean characters", () => {
       const context = ProgContextFixture('사용자.로그인()');
       const message = context.block().stat(0).message();
-      expect(message.messageBody().to().getText()).toBe("사용자");
+      expect(message.messageBody().fromTo().to().getText()).toBe("사용자");
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe("로그인");
     });
 
     it("should support Arabic characters", () => {
       const context = ProgContextFixture('مستخدم.دخول()');
       const message = context.block().stat(0).message();
-      expect(message.messageBody().to().getText()).toBe("مستخدم");
+      expect(message.messageBody().fromTo().to().getText()).toBe("مستخدم");
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe("دخول");
     });
 
     it("should support Cyrillic characters", () => {
       const context = ProgContextFixture('Пользователь.Войти()');
       const message = context.block().stat(0).message();
-      expect(message.messageBody().to().getText()).toBe("Пользователь");
+      expect(message.messageBody().fromTo().to().getText()).toBe("Пользователь");
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe("Войти");
     });
   });
@@ -160,21 +160,21 @@ describe("Chinese Character Support", () => {
     it("should still parse ASCII identifiers", () => {
       const context = ProgContextFixture('UserService.login()');
       const message = context.block().stat(0).message();
-      expect(message.messageBody().to().getText()).toBe("UserService");
+      expect(message.messageBody().fromTo().to().getText()).toBe("UserService");
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe("login");
     });
 
     it("should still parse underscores in identifiers", () => {
       const context = ProgContextFixture('user_service.get_data()');
       const message = context.block().stat(0).message();
-      expect(message.messageBody().to().getText()).toBe("user_service");
+      expect(message.messageBody().fromTo().to().getText()).toBe("user_service");
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe("get_data");
     });
 
     it("should still parse numbers in identifiers", () => {
       const context = ProgContextFixture('service123.method456()');
       const message = context.block().stat(0).message();
-      expect(message.messageBody().to().getText()).toBe("service123");
+      expect(message.messageBody().fromTo().to().getText()).toBe("service123");
       expect(message.messageBody().func().signature(0).methodName().getText()).toBe("method456");
     });
   });

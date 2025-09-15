@@ -7,7 +7,7 @@
     "url": "https://github.com/mermaid-js/zenuml-core"
   },
   "scripts": {
-    "dev": "bun run --bun vite dev --port 8080 --host 0.0.0.0",
+    "dev": "vite dev --port 8080 --host 0.0.0.0",
     "preview": "bun run --bun vite preview --port 8080 --host",
     "build:site": "bun run --bun vite build",
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
