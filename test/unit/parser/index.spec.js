@@ -31,7 +31,7 @@ test('seqDsl should parse Description allowing @', () => {
   expect(starter.starter().getText()).toBe('X');
 
   let comment = starter.getComment();
-  expect(comment).toBe(' title \r\n Comment allows @ \r\n');
+  expect(comment).toBe(' title \n Comment allows @ ');
 });
 
 test('Description should allow multi-lines', () => {
@@ -41,7 +41,7 @@ test('Description should allow multi-lines', () => {
   let starterExp = rootContext.head().starterExp();
   expect(starterExp.starter().getText()).toBe('X');
   let comments = rootContext.head().starterExp().getComment();
-  expect(comments).toBe('first line\r\n 2nd line \r\n 3rd line\r\n');
+  expect(comments).toBe('first line\n 2nd line \n 3rd line');
 });
 
 test('Async message', () => {

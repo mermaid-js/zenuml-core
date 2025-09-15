@@ -15,7 +15,7 @@ test('`try` with a block', () => {
 
 test('`if` with comments only', () => {
   let braceBlock = braceBlockOfTry('try { // comment \n\r}');
-  expect(braceBlock.getComment()).toBe(' comment \n');
+  expect(braceBlock.getComment()).toBe(' comment ');
 });
 
 test('`if` with comments and a block', () => {

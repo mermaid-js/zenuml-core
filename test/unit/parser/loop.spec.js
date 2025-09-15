@@ -12,7 +12,7 @@ test("Empty `loop`", () => {
 test("`loop` with comments", () => {
   let rootContext = RootContext("while(x) { // comment \n\r}");
   let block = rootContext.block();
-  expect(block.stat()[0].loop().braceBlock().getComment()).toBe(" comment \n");
+  expect(block.stat()[0].loop().braceBlock().getComment()).toBe(" comment ");
 });
 
 test("`loop` with block", () => {
