@@ -282,10 +282,9 @@ braceBlock
  : OBRACE block? CBRACE
  ;
 
+// Simplified: tolerate missing parens and/or block during typing.
 loop
- : WHILE parExpr braceBlock
- | WHILE parExpr
- | WHILE
+ : WHILE parExpr? braceBlock?
  ;
 
 // [Perf tuning] Merging expr op expr does not help.
