@@ -69,7 +69,8 @@ describe("NamedParameter", () => {
     });
 
     it("should parse named parameters with complex expressions", () => {
-      const ast = parseParameters("count=users.length, isAdmin=user.role === \"admin\"");
+      // The DSL supports '==' and '!=', but not strict '==='.
+      const ast = parseParameters("count=users.length, isAdmin=user.role == \"admin\"");
       expect(ast.parameter().length).toBe(2);
       
       const param1 = ast.parameter()[0];
@@ -78,7 +79,7 @@ describe("NamedParameter", () => {
       
       const param2 = ast.parameter()[1];
       expect(param2.namedParameter().ID().getText()).toBe("isAdmin");
-      expect(param2.namedParameter().expr().getText()).toBe("user.role===\"admin\"");
+      expect(param2.namedParameter().expr().getText()).toBe("user.role==\"admin\"");
     });
   });
 
