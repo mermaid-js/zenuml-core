@@ -111,6 +111,6 @@ export const lifelineReadyAtom = atom<string[]>([]);
 
 export const renderingReadyAtom = atom((get) => {
   const lifeLineReady = get(lifelineReadyAtom);
-  const participantsModel = get(participantsModelAtom);
-  return lifeLineReady.length === participantsModel.length;
+  const { participants } = get(participantsAtom);
+  return lifeLineReady.length === Array.from(participants).length;
 });

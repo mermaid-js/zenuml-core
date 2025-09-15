@@ -6,10 +6,10 @@ import {
   diagramElementAtom,
   modeAtom,
   onSelectAtom,
+  participantsAtom,
   RenderMode,
   selectedAtom,
   stickyOffsetAtom,
-  participantsModelAtom,
 } from "@/store/Store";
 import { cn } from "@/utils";
 import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
@@ -27,7 +27,7 @@ export const Participant = (props: {
 }) => {
   const elRef = useRef<HTMLDivElement>(null);
   const mode = useAtomValue(modeAtom);
-  const participantsModel = useAtomValue(participantsModelAtom);
+  const participants = useAtomValue(participantsAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
@@ -37,18 +37,15 @@ export const Participant = (props: {
 
   const isDefaultStarter = props.entity.name === _STARTER_;
 
-  const p = useMemo(
-    () => participantsModel.find((x) => x.name === props.entity.name),
-    [participantsModel, props.entity.name],
-  );
-  const labelPositions = useMemo(() => {
-    const list = (p?.positions as [number, number][]) || [];
-    return list.slice().sort((a, b) => b[0] - a[0]);
-  }, [p]);
-  const assigneePositions = useMemo(() => {
-    const list = (p?.assigneePositions as [number, number][]) || [];
-    return list.slice().sort((a, b) => b[0] - a[0]);
-  }, [p]);
+  const labelPositions = Array.from(
+    (participants.GetPositions(props.entity.name) as [number, number][]) ?? [],
+  ).sort((a, b) => b[0] - a[0]);
+  const assigneePositions = Array.from(
+    (participants.GetAssigneePositions(props.entity.name) as [
+      number,
+      number,
+    ][]) ?? [],
+  ).sort((a, b) => b[0] - a[0]);
 
   const calcOffset = () => {
     const participantOffsetTop = props.offsetTop2 || 0;

@@ -1,5 +1,5 @@
 import ToCollector from "@/parser/ToCollector";
-import { AllMessages } from "@/parser/MessageCollector";
+import { buildMessagesModel } from "@/ir/messages";
 import { blankParticipant } from "@/parser/Participants";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
 
@@ -34,7 +34,7 @@ export function OrderedParticipants(rootContext: any): IParticipantModel[] {
   const participants = ToCollector.getParticipants(rootContext);
   const participantEntries = Array.from(participants.participants.entries());
 
-  const allMessages = AllMessages(rootContext);
+  const allMessages = buildMessagesModel(rootContext);
 
   const emptyContext =
     allMessages.length === 0 && participantEntries.length === 0;
