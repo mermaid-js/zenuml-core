@@ -1,13 +1,13 @@
 import { atom } from "jotai";
 import { atomWithLocalStorage, atomWithFunctionValue } from "./utils.ts";
-import { RootContext, Participants } from "../parser/index.js";
+import { RootContext, Participants } from "@/parser";
 import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "../positioning/Coordinates";
 import { CodeRange } from "../parser/CodeRange";
 
 /*
  * RenderMode
- * Static: Compatible with Mermaid renderind which renders once and never update. It also disables sticky participants and hides the footer
+ * Static: Compatible with Mermaid which renders once and never update. It also disables sticky participants and hides the footer
  * Dynamic: Render once and update when code changes
  */
 export const enum RenderMode {
