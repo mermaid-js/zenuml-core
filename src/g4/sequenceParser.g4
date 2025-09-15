@@ -20,13 +20,10 @@ head
  | (group | participant)* starterExp
  ;
 
-// The following order is important.
-// It ensures group { A } will not be parsed as group + anonymouseBlock.
-// It seems that we should always put the longest rule at the top.
+// Left-factored for readability and fewer alternatives while preserving tolerance.
+// Keeps behavior that `group { A }` is parsed as a group declaration (not an anonymous block).
 group
- : GROUP name? OBRACE participant* CBRACE
- | GROUP name? OBRACE
- | GROUP name?
+ : GROUP name? (OBRACE participant* CBRACE?)?
  ;
 
 // [Perf] Changing starter to name does not help.
