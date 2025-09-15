@@ -127,11 +127,20 @@ NUMBER_UNIT
  : (INT | FLOAT) UNIT
  ;
 
-// As long as the text starts with double quotes, we treat it as a string before a closing double quote or change line
-// This is to allow the user to keep typing - A as "a long string before closing it with quote
-// Note that most of our editors will auto-complete the double quote anyway.
-STRING
- : '"' (~["\r\n] | '""')* ('"'|[\r\n])?
+// Strings are split into closed vs. unclosed to improve editor tolerance
+// and lexer predictability:
+// - CSTRING matches a normal double-quoted string that is properly closed.
+// - USTRING matches an in-progress string without a closing quote and stops
+//   at EOL/EOF. This prevents the lexer from consuming the newline and keeps
+//   incremental typing states parseable without introducing ambiguity.
+// Note: CSTRING is defined before USTRING so that when both could match,
+// the closed form (longer match including the closing quote) is preferred.
+CSTRING
+ : '"' ( '""' | ~["\r\n] )* '"'
+ ;
+
+USTRING
+ : '"' ( '""' | ~["\r\n] )*
  ;
 
 CR

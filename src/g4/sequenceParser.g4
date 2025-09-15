@@ -36,7 +36,7 @@ starterExp
  ;
 
 starter
- : ID | STRING
+ : name
  ;
 
 participant
@@ -61,7 +61,7 @@ participantType
  ;
 
 name
- : ID | STRING
+ : ID | CSTRING | USTRING
  ;
 
 width
@@ -109,7 +109,6 @@ stat
  | ret
  | divider
  | tcf
- | OTHER {console.log("unknown char: " + $OTHER.text);}
  ;
 
 par
@@ -171,11 +170,11 @@ func
  ;
 
 from
- : ID | STRING
+ : name
  ;
 
 to
- : ID | STRING
+ : name
  ;
 
 signature
@@ -201,20 +200,20 @@ content
  ;
 
 construct
- : ID | STRING
+ : name
  ;
 
 type
- : ID | STRING
+ : name
  ;
 
 assignee
- : atom | (ID (COMMA ID)*) | STRING
+ : atom | (ID (COMMA ID)*) | CSTRING | USTRING
  | NEW // allowing `new = method()`
  ;
 
 methodName
- : ID | STRING
+ : name
  ;
 
 parameters
@@ -306,16 +305,13 @@ atom
  | MONEY          #moneyAtom
  | (TRUE | FALSE) #booleanAtom
  | ID             #idAtom
- | STRING         #stringAtom
+ | (CSTRING | USTRING) #stringAtom
  | NIL            #nilAtom
  ;
 
 // [Perf tuning] Removing alternative rules does not help.
 parExpr
- : OPAR condition CPAR
- | OPAR condition
- | OPAR CPAR
- | OPAR
+ : OPAR condition? CPAR?
  ;
 
 condition
