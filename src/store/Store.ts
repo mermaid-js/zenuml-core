@@ -5,6 +5,7 @@ import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "../positioning/Coordinates";
 import { CodeRange } from "../parser/CodeRange";
 import { buildMessagesModel } from "@/ir/messages";
+import { buildParticipantsModel } from "@/ir/participants";
 
 /*
  * RenderMode
@@ -24,9 +25,8 @@ export const titleAtom = atom<string | null>((get) =>
   get(rootContextAtom)?.title()?.content(),
 );
 
-export const participantsAtom = atom((get) =>
-  Participants(get(rootContextAtom)),
-);
+// Legacy participants object (kept for now where needed)
+export const participantsAtom = atom((get) => Participants(get(rootContextAtom)));
 
 export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), WidthProviderOnBrowser),
@@ -36,6 +36,11 @@ export const coordinatesAtom = atom(
 export const messagesModelAtom = atom((get) => {
   const ctx = get(rootContextAtom);
   return ctx ? buildMessagesModel(ctx) : [];
+});
+
+export const participantsModelAtom = atom((get) => {
+  const ctx = get(rootContextAtom);
+  return ctx ? buildParticipantsModel(ctx) : [];
 });
 
 export const themeAtom = atom("theme-default");
@@ -106,6 +111,6 @@ export const lifelineReadyAtom = atom<string[]>([]);
 
 export const renderingReadyAtom = atom((get) => {
   const lifeLineReady = get(lifelineReadyAtom);
-  const { participants } = get(participantsAtom);
-  return lifeLineReady.length === Array.from(participants).length;
+  const participantsModel = get(participantsModelAtom);
+  return lifeLineReady.length === participantsModel.length;
 });

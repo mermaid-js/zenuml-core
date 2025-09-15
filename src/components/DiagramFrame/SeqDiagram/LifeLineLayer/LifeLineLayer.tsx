@@ -1,9 +1,4 @@
-import {
-  coordinatesAtom,
-  modeAtom,
-  participantsAtom,
-  RenderMode,
-} from "@/store/Store";
+import { coordinatesAtom, modeAtom, RenderMode, participantsModelAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
 import { LifeLine } from "./LifeLine";
 import { LifeLineGroup } from "./LifeLineGroup";
@@ -20,7 +15,7 @@ export const LifeLineLayer = (props: {
 }) => {
   const mode = useAtomValue(modeAtom);
   const coordinates = useAtomValue(coordinatesAtom);
-  const participants = useAtomValue(participantsAtom);
+  const participantsModel = useAtomValue(participantsModelAtom);
 
   const starterParticipant = useMemo(() => {
     const names = coordinates.orderedParticipantNames();
@@ -79,7 +74,9 @@ export const LifeLineLayer = (props: {
               )}
             </Fragment>
           ))}
-        {participants.ImplicitArray().map((entity: any) => (
+        {participantsModel
+          .filter((p: any) => !p.explicit)
+          .map((entity: any) => (
           <LifeLine
             key={entity.name}
             entity={entity}
