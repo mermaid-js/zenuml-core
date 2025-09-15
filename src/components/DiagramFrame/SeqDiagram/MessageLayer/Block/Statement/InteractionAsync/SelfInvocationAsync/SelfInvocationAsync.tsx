@@ -1,6 +1,7 @@
-import { CSSProperties } from "react";
+import { CSSProperties, useMemo } from "react";
 import { MessageLabel } from "../../../../MessageLabel";
 import { Numbering } from "../../../../Numbering";
+import { labelRangeOfMessage } from "@/parser/helpers";
 
 export const SelfInvocationAsync = (props: {
   context?: any;
@@ -9,10 +10,9 @@ export const SelfInvocationAsync = (props: {
   classNames?: string;
 }) => {
   const content = props.context?.content();
-  const labelPosition = (): [number, number] => {
-    if (!content) return [-1, -1];
-    return [content.start.start, content.stop.stop];
-  };
+  const labelPosition: [number, number] = useMemo(() => {
+    return labelRangeOfMessage(props.context, "async");
+  }, [props.context]);
 
   return (
     <div className="message self flex items-start flex-col !border-none">
@@ -22,7 +22,7 @@ export const SelfInvocationAsync = (props: {
           style={props.textStyle}
           className={props.classNames}
           labelText={content?.getFormattedText()}
-          labelPosition={labelPosition()}
+          labelPosition={labelPosition}
           isAsync={true}
           isSelf={true}
         />

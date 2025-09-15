@@ -3,6 +3,7 @@ import { useAtomValue } from "jotai";
 import { CSSProperties, useMemo, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
 import { MessageLabel } from "../../../../MessageLabel";
+import { labelRangeOfMessage } from "@/parser/helpers";
 
 export const SelfInvocation = (props: {
   context?: any;
@@ -15,9 +16,7 @@ export const SelfInvocation = (props: {
 
   const assignee = props.context?.Assignment()?.getText() || "";
   const labelPosition: [number, number] = useMemo(() => {
-    const func = props.context?.messageBody().func();
-    if (!func) return [-1, -1];
-    return [func.start.start, func.stop.stop];
+    return labelRangeOfMessage(props.context, "sync");
   }, [props.context]);
 
   const onClick = () => {

@@ -5,7 +5,7 @@ import { Message } from "../Message";
 import { useAtomValue } from "jotai";
 import { onElementClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { CodeRange } from "@/parser/CodeRange";
+import { codeRangeOf } from "@/parser/helpers";
 import { SyntheticEvent } from "react";
 import { useArrow } from "../useArrow";
 
@@ -46,7 +46,8 @@ export const Return = (props: {
 
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation();
-    onElementClick(CodeRange.from(props.context));
+    const range = codeRangeOf(props.context);
+    if (range) onElementClick(range);
   };
   return (
     // .relative to allow left style

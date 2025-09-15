@@ -1,11 +1,11 @@
 import { cn } from "@/utils";
 import { modeAtom, onMessageClickAtom, RenderMode } from "@/store/Store";
-import sequenceParser from "@/generated-parser/sequenceParser";
 import { CSSProperties, useRef } from "react";
 import { useAtomValue } from "jotai";
 import { Point } from "./Point";
 import { Numbering } from "../../../Numbering";
 import { MessageLabel } from "../../../MessageLabel";
+import { labelRangeOfMessage } from "@/parser/helpers";
 
 type Context = any;
 
@@ -26,47 +26,6 @@ const getEditable = (context: Context, mode: RenderMode, type: string) => {
   }
 };
 
-const getLabelPosition = (context: Context, type: string): [number, number] => {
-  let start = -1,
-    stop = -1;
-  switch (type) {
-    case "sync":
-      {
-        const signature = context?.messageBody().func()?.signature()[0];
-        [start, stop] = [signature?.start.start, signature?.stop.stop];
-      }
-      break;
-    case "async":
-      {
-        const content = context?.content();
-        [start, stop] = [content?.start.start, content?.stop.stop];
-      }
-      break;
-    case "creation":
-      {
-        const signature = context?.creationBody()?.parameters();
-        [start, stop] = [signature?.start.start, signature?.stop.stop];
-      }
-      break;
-    case "return":
-      {
-        if (context instanceof sequenceParser.MessageContext) {
-          const signature = context.messageBody().func()?.signature()?.[0];
-          [start, stop] = [signature?.start.start, signature?.stop.stop];
-        } else if (context instanceof sequenceParser.AtomExprContext) {
-          const ret = context.atom();
-          [start, stop] = [ret?.start.start, ret?.stop.stop];
-        } else if (context instanceof sequenceParser.ContentContext) {
-          [start, stop] = [context.start.start, context.stop.stop];
-        } else if (context instanceof sequenceParser.AssignmentContext) {
-          const assignee = context.assignee();
-          [start, stop] = [assignee.start.start, assignee.stop.stop];
-        }
-      }
-      break;
-  }
-  return [start, stop];
-};
 
 export const Message = (props: {
   context?: Context;
@@ -98,7 +57,7 @@ export const Message = (props: {
     ["sync", "async", "return", "creation"].includes(type);
   const labelText =
     type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
-  const labelPosition = getLabelPosition(context, type || "");
+  const labelPosition = labelRangeOfMessage(context, (type || "") as any);
   const borderStyle: "solid" | "dashed" | undefined = {
     sync: "solid",
     async: "solid",

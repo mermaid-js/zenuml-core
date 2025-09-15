@@ -12,6 +12,7 @@ import { InteractionAsync } from "./InteractionAsync/Interaction-async";
 import { Divider } from "./Divider/Divider";
 import { Return } from "./Return/Return";
 import Comment from "../../../../../Comment/Comment";
+import { commentOf } from "@/parser/helpers";
 import { cn } from "@/utils";
 
 export const Statement = (props: {
@@ -20,7 +21,7 @@ export const Statement = (props: {
   number?: string;
   collapsed?: boolean;
 }) => {
-  const comment = props.context.getComment() || "";
+  const comment = commentOf(props.context) || "";
   const commentObj = new Comment(comment);
 
   const subProps = {

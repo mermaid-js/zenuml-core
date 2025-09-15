@@ -1,7 +1,7 @@
 import { cn } from "@/utils";
 import { Message } from "../Message";
 import { Occurrence } from "../Interaction/Occurrence/Occurrence";
-import { CodeRange } from "@/parser/CodeRange";
+import { codeRangeOf } from "@/parser/helpers";
 import {
   LIFELINE_WIDTH,
   OCCURRENCE_BAR_SIDE_WIDTH,
@@ -86,7 +86,10 @@ export const Creation = (props: {
         },
         props.className,
       )}
-      onClick={() => onElementClick(CodeRange.from(props.context))}
+      onClick={() => {
+        const range = codeRangeOf(props.context);
+        if (range) onElementClick(range);
+      }}
       data-signature={creation?.SignatureText()}
       style={{
         transform: "translateX(" + translateX + "px)",

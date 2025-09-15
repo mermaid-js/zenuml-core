@@ -73,7 +73,7 @@ import { Message } from "../Message";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
-import { CodeRange } from "@/parser/CodeRange";
+import { codeRangeOf } from "@/parser/helpers";
 import { useArrow } from "../useArrow";
 
 function isNullOrUndefined(value: any) {
@@ -133,7 +133,10 @@ export const InteractionAsync = (props: {
         },
         props.className,
       )}
-      onClick={() => onElementClick(CodeRange.from(props.context))}
+      onClick={() => {
+        const range = codeRangeOf(props.context);
+        if (range) onElementClick(range);
+      }}
       data-signature={signature}
       style={{
         width: interactionWidth + "px",
