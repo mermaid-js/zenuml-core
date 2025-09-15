@@ -60,7 +60,7 @@ export const Creation = (props: {
     );
 
     if (!participantElement) {
-      console.error(`Could not find participant element for ${target}`);
+      console.warn(`Could not find participant element for ${target}`);
       setParticipantWidth(0);
       return;
     }
