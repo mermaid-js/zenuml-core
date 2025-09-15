@@ -158,10 +158,21 @@ message
  : messageBody (SCOL | braceBlock)?
  ;
 
+// Message body is structured to reduce backtracking and keep runtime API stable:
+// - assignment + func: supports forms like `ret = do()`
+// - assignment + fromTo (+ optional func): `ret = A->B.m()` or `ret = A->B.`
+// - fromTo (+ optional func): `A->B.m()` or `A->B.` and `B.m()` or `B.`
+// We flatten `func` at this rule level (not inside fromTo) so
+// messageBody().func() remains available for callers that rely on it.
 messageBody
- : assignment? ((from ARROW)? to DOT)? func
- | assignment
- | (from ARROW)? to DOT   // A->B. or B.
+ : assignment (fromTo (func)? | func)?
+ | fromTo (func)?
+ | func
+ ;
+
+// Only the target (from/to) and dot; func is flattened at messageBody level
+fromTo
+ : (from ARROW)? to DOT
  ;
 
 // func is also used in exp as parameter with expr: (to DOT)? func;

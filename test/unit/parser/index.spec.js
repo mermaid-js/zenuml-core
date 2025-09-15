@@ -5,7 +5,7 @@ import { Fixture } from './fixture/Fixture';
 test('seqDsl should parse the to and method', () => {
   const messageBody = Fixture.firstStatement('"b:B".method()').message().messageBody();
   let func = messageBody.func();
-  expect(messageBody.to().getText()).toBe('"b:B"');
+  expect(messageBody.fromTo().to().getText()).toBe('"b:B"');
   expect(func.signature()[0].getText()).toBe('method()');
 });
 
