@@ -62,13 +62,5 @@ describe("Money", () => {
       expect(sequenceParser.symbolicNames[token3.type]).toBe("MONEY");
     });
 
-    // Debug helper to print all token information
-    it("should print token debug information", () => {
-      const ast = parseAtom("$100");
-      const token = ast.MONEY().symbol;
-      console.log("Token type:", token.type);
-      console.log("Symbolic names:", sequenceParser.symbolicNames);
-      console.log("Rule names:", sequenceParser.ruleNames);
-    });
   });
 });
