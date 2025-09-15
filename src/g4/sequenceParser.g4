@@ -221,8 +221,14 @@ parameters
  : parameter (COMMA parameter)* COMMA?
  ;
 
+// both namedParameter and expr could match 'a=1'.
+// namedParameter provides more semantic context and better error recovery.
 parameter
- : declaration | expr
+ : namedParameter | declaration | expr
+ ;
+
+namedParameter
+ : ID ASSIGN expr?
  ;
 
 declaration

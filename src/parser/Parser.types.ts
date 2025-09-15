@@ -6,6 +6,19 @@ export interface BaseContext {
 
 export interface Parameter extends BaseContext {
   length: number;
+  namedParameter?(): NamedParameter | null;
+  expr?(): Expression | null;
+  declaration?(): Declaration | null;
+}
+
+export interface NamedParameter extends BaseContext {
+  ID(): { getText(): string };
+  expr(): Expression;
+}
+
+export interface Declaration extends BaseContext {
+  type(): { getText(): string };
+  ID(): { getText(): string };
 }
 
 export interface Parameters extends BaseContext {
