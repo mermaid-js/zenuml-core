@@ -9,7 +9,7 @@ import type { WidthFunc } from "./Coordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
 import { find_optimal } from "./david/DavidEisenstat";
-import { AllMessages } from "@/parser/MessageCollector";
+import { buildMessagesModel } from "@/ir/messages";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
 import type { OwnableMessage } from "@/parser/OwnableMessage";
 import { clearCache, getCache, setCache } from "@/utils/RenderingCache";
@@ -23,7 +23,8 @@ export class Coordinates {
   constructor(ctx: any, widthProvider: WidthFunc) {
     clearCache();
     this.participantModels = OrderedParticipants(ctx);
-    this.ownableMessages = AllMessages(ctx);
+    // Use IR; cast to parser-compatible shape used here
+    this.ownableMessages = buildMessagesModel(ctx) as unknown as OwnableMessage[];
 
     this.widthProvider = widthProvider;
     this.walkThrough();
