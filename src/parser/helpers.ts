@@ -91,10 +91,53 @@ export function labelRangeOfMessage(
   return [start, stop];
 }
 
+// Safe label range for ref(...) fragment title (first name inside the ref)
+// Returns [-1, -1] when name is missing or synthesized by error recovery
+export function labelRangeOfRef(context: any): [number, number] {
+  try {
+    // Try to resolve the first name context under the ref
+    let nameCtx: any = null;
+    if (context?.Content) {
+      // Likely a RefContext
+      nameCtx = context.Content();
+    } else if (context?.ref) {
+      const r = context.ref();
+      nameCtx = r?.Content?.() ?? (r?.name?.()?.[0]);
+    } else if (Array.isArray(context?.name?.())) {
+      nameCtx = context.name()[0];
+    } else if (context?.start && context?.stop) {
+      // Already a name-like context
+      nameCtx = context;
+    }
+    if (!nameCtx) return [-1, -1];
+    const s = nameCtx.start;
+    const e = nameCtx.stop;
+    if (!s || !e) return [-1, -1];
+    // Ensure the token type corresponds to a valid Name (ID/CSTRING/USTRING)
+    const validNameTypes = [
+      (sequenceParser as any).ID,
+      (sequenceParser as any).CSTRING,
+      (sequenceParser as any).USTRING,
+    ];
+    if (typeof s.type === "number" && !validNameTypes.includes(s.type)) {
+      return [-1, -1];
+    }
+    // Guard synthesized tokens from error recovery
+    if (typeof s.tokenIndex === "number" && s.tokenIndex < 0) return [-1, -1];
+    if (typeof e.tokenIndex === "number" && e.tokenIndex < 0) return [-1, -1];
+    const start = s.start ?? -1;
+    const stop = e.stop ?? -1;
+    if (start == null || stop == null) return [-1, -1];
+    return [start, stop];
+  } catch {
+    return [-1, -1];
+  }
+}
+
 export default {
   codeRangeOf,
   labelRangeOfMessage,
+  labelRangeOfRef,
   commentOf,
   signatureOf,
 };
-

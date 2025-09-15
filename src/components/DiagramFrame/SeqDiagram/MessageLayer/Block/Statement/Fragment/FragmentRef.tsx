@@ -3,6 +3,7 @@ import { useFragmentData } from "./useFragmentData";
 import { Numbering } from "../../../Numbering";
 import { Comment } from "../Comment/Comment";
 import { MessageLabel } from "../../../MessageLabel";
+import { labelRangeOfRef } from "@/parser/helpers";
 
 export const FragmentRef = (props: {
   context: any;
@@ -14,12 +15,10 @@ export const FragmentRef = (props: {
 }) => {
   const { paddingLeft, fragmentStyle, border, leftParticipant } =
     useFragmentData(props.context, props.origin);
-  const content = props.context.ref().Content();
-  const contentLabel = content?.getFormattedText();
-  const contentPosition: [number, number] = [
-    content?.start.start,
-    content?.stop.stop,
-  ];
+  const refCtx = props.context?.ref?.();
+  const content = refCtx?.Content?.();
+  const contentLabel = content?.getFormattedText() || "";
+  const contentPosition: [number, number] = labelRangeOfRef(refCtx);
 
   return (
     <div className={props.className}>
