@@ -4,7 +4,8 @@ channels {
   MODIFIER_CHANNEL
 }
 
-WS: [ \t] -> channel(HIDDEN);
+fragment HWS: [ \t]; // Horizontal WhiteSpace
+WS: HWS+ -> channel(HIDDEN);
 
 // variable modifiers
 CONSTANT:   'const' -> channel(MODIFIER_CHANNEL);
@@ -138,7 +139,7 @@ CR
  ;
 
 COMMENT
- : '//' .*? '\n' -> channel(COMMENT_CHANNEL)
+ : '//' ~[\r\n]* -> channel(COMMENT_CHANNEL)
  ;
 OTHER
  : .
@@ -148,7 +149,7 @@ OTHER
 // Divider notes can be characters other than changeline.
 // So it must not be tokenized by other Lexer rules.
 // Thus this is not suitable for the parser to parse.
-DIVIDER: {this.column === 0}? WS* '==' ~[\r\n]*;
+DIVIDER: {this.column === 0}? HWS* '==' ~[\r\n]*;
 
 mode EVENT;
 EVENT_PAYLOAD_LXR
