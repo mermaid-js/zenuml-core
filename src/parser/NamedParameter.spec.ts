@@ -78,7 +78,7 @@ describe("NamedParameter", () => {
       
       const param2 = ast.parameter()[1];
       expect(param2.namedParameter().ID().getText()).toBe("isAdmin");
-      expect(param2.namedParameter().expr().getText()).toBe("user.role === \"admin\"");
+      expect(param2.namedParameter().expr().getText()).toBe("user.role===\"admin\"");
     });
   });
 
