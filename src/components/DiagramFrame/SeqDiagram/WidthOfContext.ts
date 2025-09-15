@@ -1,4 +1,4 @@
-import { AllMessages } from "@/parser/MessageCollector";
+import { buildMessagesModel } from "@/ir/messages";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder, { Frame } from "@/positioning/FrameBorder";
 import { Coordinates } from "@/positioning/Coordinates";
@@ -44,13 +44,14 @@ function extraWidthDueToSelfMessage(
   rightParticipant: string,
   coordinates: Coordinates,
 ) {
-  const allMessages = AllMessages(ctx);
+  const allMessages = buildMessagesModel(ctx);
   const widths = allMessages
     .filter((m) => m.from === m.to)
     // 37 is arrow width (30) + half occurrence width(7)
     .map(
       (m) =>
-        coordinates.getMessageWidth(m) -
+        // m conforms to OwnableMessage shape; cast to any for TS compatibility
+        coordinates.getMessageWidth(m as any) -
         coordinates.distance(m.from || _STARTER_, rightParticipant) -
         coordinates.half(rightParticipant),
     );

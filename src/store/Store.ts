@@ -4,6 +4,7 @@ import { RootContext, Participants } from "@/parser";
 import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "../positioning/Coordinates";
 import { CodeRange } from "../parser/CodeRange";
+import { buildMessagesModel } from "@/ir/messages";
 
 /*
  * RenderMode
@@ -30,6 +31,12 @@ export const participantsAtom = atom((get) =>
 export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), WidthProviderOnBrowser),
 );
+
+// Thin messages model atom (used incrementally)
+export const messagesModelAtom = atom((get) => {
+  const ctx = get(rootContextAtom);
+  return ctx ? buildMessagesModel(ctx) : [];
+});
 
 export const themeAtom = atom("theme-default");
 
