@@ -1,6 +1,11 @@
 import Anchor2 from "@/positioning/Anchor2";
 
 describe("Anchor2", () => {
+  it("stores provided name", () => {
+    const anchor = new Anchor2(100, 1, "ParticipantA");
+    expect(anchor.name).toBe("ParticipantA");
+  });
+
   describe("Center of Right Wall", () => {
     test.each([
       {

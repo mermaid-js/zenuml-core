@@ -64,8 +64,16 @@ const getOffsetX = (
   const originLayers = depthOnParticipant(fragmentContext, origin);
 
   // Create anchors for both participants to calculate accurate distance
-  const anchor2Origin = new Anchor2(centerOf(coordinates, origin), originLayers);
-  const anchor2LeftParticipant = new Anchor2(centerOf(coordinates, leftParticipant), 0);
+  const anchor2Origin = new Anchor2(
+    centerOf(coordinates, origin),
+    originLayers,
+    origin,
+  );
+  const anchor2LeftParticipant = new Anchor2(
+    centerOf(coordinates, leftParticipant),
+    0,
+    leftParticipant,
+  );
 
   // Calculate the offset from the left participant to the origin, accounting for occurrence bar layers
   const distanceWithLayers =

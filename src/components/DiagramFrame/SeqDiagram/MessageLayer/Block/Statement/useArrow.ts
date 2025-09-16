@@ -51,11 +51,23 @@ export const useArrow = ({
 
   const targetLayers = depthOnParticipant4Stat(context, target);
 
-  const anchor2Origin = new Anchor2(centerOf(coordinates, origin), originLayers);
+  const anchor2Origin = new Anchor2(
+    centerOf(coordinates, origin),
+    originLayers,
+    origin,
+  );
 
-  const anchor2Source = new Anchor2(centerOf(coordinates, source), sourceLayers);
+  const anchor2Source = new Anchor2(
+    centerOf(coordinates, source),
+    sourceLayers,
+    source,
+  );
 
-  const anchor2Target = new Anchor2(centerOf(coordinates, target), targetLayers);
+  const anchor2Target = new Anchor2(
+    centerOf(coordinates, target),
+    targetLayers,
+    target,
+  );
 
   const interactionWidth = Math.abs(anchor2Source.edgeOffset(anchor2Target));
 

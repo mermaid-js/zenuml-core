@@ -7,6 +7,7 @@ export default class Anchor2 {
   constructor(
     private position: number,
     private layers: number,
+    public readonly name?: string,
   ) {}
 
   /**
