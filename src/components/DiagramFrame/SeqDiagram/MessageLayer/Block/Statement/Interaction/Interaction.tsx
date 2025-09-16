@@ -4,10 +4,10 @@ import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
 import { Message } from "../Message";
 import { Occurrence } from "./Occurrence/Occurrence";
 import { useAtomValue } from "jotai";
-import { cursorAtom } from "@/store/Store";
+import { coordinatesAtom, cursorAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
-import { useArrow } from "../useArrow";
+import { calculateArrowGeometry, useArrow } from "../useArrow";
 import { signatureOf } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
 
@@ -24,6 +24,7 @@ export const Interaction = (props: {
   vm?: MessageVM;
 }) => {
   const cursor = useAtomValue(cursorAtom);
+  const coordinates = useAtomValue(coordinatesAtom);
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
   const message = props.context?.message();
@@ -62,6 +63,30 @@ export const Interaction = (props: {
     source,
     target,
   });
+
+  if (vm) {
+    const candidate = calculateArrowGeometry({
+      context: props.context,
+      origin: props.origin,
+      source,
+      target,
+      coordinates,
+    });
+    const diff = Math.abs(candidate.translateX - translateX);
+    if (diff > 0.1 && import.meta.env?.MODE !== "production") {
+      console.warn(
+        "[messages] translateX mismatch",
+        {
+          signature,
+          context:
+            props.context?.message?.()?.getText?.() ?? props.context?.getText?.(),
+          expected: translateX,
+          candidate: candidate.translateX,
+          diff,
+        },
+      );
+    }
+  }
 
   return (
     <div

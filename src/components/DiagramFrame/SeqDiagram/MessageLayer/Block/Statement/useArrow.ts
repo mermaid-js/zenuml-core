@@ -3,6 +3,25 @@ import { centerOf, distance2 } from "./utils";
 import Anchor2 from "@/positioning/Anchor2";
 import { coordinatesAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
+import type { Coordinates } from "@/positioning/Coordinates";
+
+export type ArrowInput = {
+  context: any;
+  origin: string;
+  source: string;
+  target: string;
+  coordinates: Coordinates;
+};
+
+export type ArrowGeometry = {
+  isSelf: boolean;
+  originLayers: number;
+  sourceLayers: number;
+  targetLayers: number;
+  interactionWidth: number;
+  rightToLeft: boolean;
+  translateX: number;
+};
 
 const depthOnParticipant = (context: any, participant: any): number => {
   return context?.getAncestors((ctx: any) => {
@@ -30,19 +49,13 @@ const depthOnParticipant4Stat = (context: any, participant: any): number => {
   return depthOnParticipant(child, participant);
 };
 
-export const useArrow = ({
+export const calculateArrowGeometry = ({
   context,
   origin,
   source,
   target,
-}: {
-  context: any;
-  origin: string;
-  source: string;
-  target: string;
-}) => {
-  const coordinates = useAtomValue(coordinatesAtom);
-
+  coordinates,
+}: ArrowInput): ArrowGeometry => {
   const isSelf = source === target;
 
   const originLayers = depthOnParticipant(context, origin);
@@ -82,11 +95,26 @@ export const useArrow = ({
     originLayers,
     sourceLayers,
     targetLayers,
-    anchor2Origin,
-    anchor2Source,
-    anchor2Target,
     interactionWidth,
     rightToLeft,
     translateX,
   };
 };
+
+export const useArrow = ({
+  context,
+  origin,
+  source,
+  target,
+}: Omit<ArrowInput, "coordinates">) => {
+  const coordinates = useAtomValue(coordinatesAtom);
+  return calculateArrowGeometry({
+    context,
+    origin,
+    source,
+    target,
+    coordinates,
+  });
+};
+
+export type { ArrowGeometry as UseArrowGeometry };
