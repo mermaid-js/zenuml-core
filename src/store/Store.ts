@@ -6,6 +6,7 @@ import { Coordinates } from "../positioning/Coordinates";
 import { CodeRange } from "../parser/CodeRange";
 import { buildMessagesModel } from "@/ir/messages";
 import { buildParticipantsModel } from "@/ir/participants";
+import { buildFramesModel } from "@/ir/frames";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { buildMessagesVM } from "@/vm/messages";
 
@@ -47,6 +48,16 @@ export const messagesVMAtom = atom((get) => {
 export const participantsAtom = atom((get) => {
   const ctx = get(rootContextAtom);
   return ctx ? buildParticipantsModel(ctx) : [];
+});
+
+export const framesModelAtom = atom((get) => {
+  const ctx = get(rootContextAtom);
+  if (!ctx) {
+    return { root: null, byId: {} };
+  }
+  const coordinates = get(coordinatesAtom);
+  const ordered = coordinates.orderedParticipantNames();
+  return buildFramesModel(ctx, ordered);
 });
 
 export const themeAtom = atom("theme-default");

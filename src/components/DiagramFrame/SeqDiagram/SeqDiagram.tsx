@@ -1,7 +1,7 @@
-import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import {
   coordinatesAtom,
+  framesModelAtom,
   diagramElementAtom,
   modeAtom,
   RenderMode,
@@ -31,6 +31,7 @@ export const SeqDiagram = (props: {
   const mode = useAtomValue(modeAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
+  const framesModel = useAtomValue(framesModelAtom);
   const setDiagramElement = useSetAtom(diagramElementAtom);
 
   const diagramRef = useRef<HTMLDivElement>(null);
@@ -43,19 +44,16 @@ export const SeqDiagram = (props: {
   });
 
   const frameBorderLeft = useMemo(() => {
-    const allParticipants = coordinates.orderedParticipantNames();
-    const frameBuilder = new FrameBuilder(allParticipants);
-    const frame = frameBuilder.getFrame(rootContext);
-    return frame ? FrameBorder(frame).left : 0;
-  }, [coordinates, rootContext]);
+    return FrameBorder(framesModel.root).left;
+  }, [framesModel]);
 
   const width = useMemo(() => {
-    const contextWidth = TotalWidth(rootContext, coordinates);
+    const contextWidth = TotalWidth(rootContext, coordinates, framesModel.root);
     //   [MessageLayer width] <- contextWidth
     //  [Frame width        ]
     // || <- frameBorderLeft extra width provided by container
     return contextWidth - frameBorderLeft;
-  }, [rootContext, coordinates, frameBorderLeft]);
+  }, [rootContext, coordinates, framesModel.root, frameBorderLeft]);
 
   return (
     <div

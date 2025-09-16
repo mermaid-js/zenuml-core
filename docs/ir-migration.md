@@ -45,6 +45,12 @@ Delivered in this branch:
     - `Coordinates` message gaps
     - `OrderedParticipants` starter/ordering
 
+- Frames IR (`src/ir/frames.ts`)
+  - Builder: `buildFramesModel(ctx, orderedParticipants)`
+  - Runtime adoption:
+    - `SeqDiagram` padding and width budget
+    - Fragment layout (`useFragmentData`, `TotalWidth`) consumes IR via `framesModelAtom`
+
 - Participants IR (`src/ir/participants.ts`)
   - Implemented; now the canonical runtime source via `participantsAtom`.
 
@@ -86,7 +92,7 @@ Acceptance
 
 ### Phase 3 (Fragments and Frame Data — Optional)
 
-- Keep current `FrameBuilder` unless IR is needed for fragment tree.
+- Frame tree IR in place (`buildFramesModel` via `framesModelAtom`); renderer no longer instantiates `FrameBuilder`.
 - Continue centralizing fragment label ranges via helpers (`labelRangeOfRef`, `labelRangeOfCondition`).
 
 Acceptance

@@ -1,14 +1,14 @@
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
-import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { coordinatesAtom } from "@/store/Store";
+import { coordinatesAtom, framesModelAtom } from "@/store/Store";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { useEffect, useState } from "react";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import Anchor2 from "@/positioning/Anchor2";
 import { centerOf } from "../utils";
 import { createStore, useStore } from "jotai";
+import { frameForContext } from "@/ir/frames";
 
 type Store = ReturnType<typeof createStore>;
 
@@ -27,22 +27,29 @@ const depthOnParticipant = (context: any, participant: any): number => {
   }).length;
 };
 
-const getLeftParticipant = (store: Store, context: any) => {
-  const allParticipants = store.get(coordinatesAtom).orderedParticipantNames();
-  const localParticipants = getLocalParticipantNames(context);
-  return allParticipants.find((p) => localParticipants.includes(p));
-};
+const resolveFragmentContext = (context: any) =>
+  context?.loop?.() ||
+  context?.alt?.() ||
+  context?.par?.() ||
+  context?.opt?.() ||
+  context?.section?.() ||
+  context?.critical?.() ||
+  context?.tcf?.() ||
+  context?.ref?.() ||
+  context;
 
-const getBorder = (store: Store, context: any) => {
-  const allParticipants = store.get(coordinatesAtom).orderedParticipantNames();
-  const frameBuilder = new FrameBuilder(allParticipants);
-  const frame = frameBuilder.getFrame(context);
-  return FrameBorder(frame);
-};
-
-const getOffsetX = (store: Store, context: any, origin: string) => {
+const getOffsetX = (
+  store: Store,
+  fragmentContext: any,
+  origin: string,
+  borderLeft: number,
+  leftParticipant: string,
+) => {
+  if (!leftParticipant) {
+    return borderLeft;
+  }
   const coordinates = store.get(coordinatesAtom);
-  const leftParticipant = getLeftParticipant(store, context) || "";
+
   const halfLeftParticipant = coordinates.half(leftParticipant);
 
   // If leftParticipant and origin are the same, no additional offset needed
@@ -50,11 +57,11 @@ const getOffsetX = (store: Store, context: any, origin: string) => {
     console.debug(
       `left participant: ${leftParticipant} ${halfLeftParticipant}`,
     );
-    return getBorder(store, context).left + halfLeftParticipant;
+    return borderLeft + halfLeftParticipant;
   }
 
   // Calculate the depth/layers for the origin participant to account for occurrence bar offset
-  const originLayers = depthOnParticipant(context, origin);
+  const originLayers = depthOnParticipant(fragmentContext, origin);
 
   // Create anchors for both participants to calculate accurate distance
   const anchor2Origin = new Anchor2(centerOf(coordinates, origin), originLayers);
@@ -64,9 +71,7 @@ const getOffsetX = (store: Store, context: any, origin: string) => {
   const distanceWithLayers =
     anchor2LeftParticipant.centerToCenter(anchor2Origin);
 
-  return (
-    distanceWithLayers + getBorder(store, context).left + halfLeftParticipant
-  );
+  return distanceWithLayers + borderLeft + halfLeftParticipant;
 };
 export const useFragmentData = (context: any, origin: string) => {
   const store = useStore();
@@ -80,25 +85,34 @@ export const useFragmentData = (context: any, origin: string) => {
   }, [context]);
 
   const coordinates = store.get(coordinatesAtom);
+  const framesModel = store.get(framesModelAtom);
+  const fragmentContext = resolveFragmentContext(context);
 
   const allParticipants = coordinates.orderedParticipantNames();
-  const localParticipants = getLocalParticipantNames(context);
+  const localParticipants = getLocalParticipantNames(fragmentContext);
   const leftParticipant =
     allParticipants.find((p) => localParticipants.includes(p)) || "";
 
-  const frameBuilder = new FrameBuilder(allParticipants);
-  const frame = frameBuilder.getFrame(context);
+  const frame = frameForContext(framesModel, fragmentContext);
   const border = FrameBorder(frame);
 
   // Calculate offset using the updated function that accounts for occurrence bar layers
-  const offsetX = getOffsetX(store, context, origin);
-  const halfLeftParticipant = coordinates.half(leftParticipant);
-  const paddingLeft = getBorder(store, context).left + halfLeftParticipant;
+  const offsetX = getOffsetX(
+    store,
+    fragmentContext,
+    origin,
+    border.left,
+    leftParticipant,
+  );
+  const halfLeftParticipant = leftParticipant
+    ? coordinates.half(leftParticipant)
+    : 0;
+  const paddingLeft = border.left + halfLeftParticipant;
 
   const fragmentStyle = {
     // +1px for the border of the fragment
     transform: "translateX(" + (offsetX + 1) * -1 + "px)",
-    width: TotalWidth(context, coordinates) + "px",
+    width: TotalWidth(fragmentContext, coordinates, frame) + "px",
     minWidth: FRAGMENT_MIN_WIDTH + "px",
   };
 

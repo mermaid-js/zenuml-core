@@ -1,12 +1,16 @@
 import { buildMessagesModel } from "@/ir/messages";
-import FrameBuilder from "@/parser/FrameBuilder";
+import { buildFramesModel } from "@/ir/frames";
 import FrameBorder, { Frame } from "@/positioning/FrameBorder";
 import { Coordinates } from "@/positioning/Coordinates";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
-export function TotalWidth(ctx: any, coordinates: Coordinates) {
+export function TotalWidth(
+  ctx: any,
+  coordinates: Coordinates,
+  frameOverride?: Frame | null,
+) {
   const allParticipants = coordinates.orderedParticipantNames();
   const localParticipants = getLocalParticipantNames(ctx);
   const leftParticipant =
@@ -16,9 +20,11 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
       .slice()
       .reverse()
       .find((p) => localParticipants.includes(p)) || "";
-  const frameBuilder = new FrameBuilder(allParticipants as string[]);
-  const frame = frameBuilder.getFrame(ctx);
-  const border = FrameBorder(frame as Frame);
+  const frame =
+    frameOverride !== undefined
+      ? frameOverride
+      : buildFramesModel(ctx, allParticipants as string[]).root;
+  const border = FrameBorder(frame as Frame | null);
   const extraWidth = extraWidthDueToSelfMessage(
     ctx,
     rightParticipant,
