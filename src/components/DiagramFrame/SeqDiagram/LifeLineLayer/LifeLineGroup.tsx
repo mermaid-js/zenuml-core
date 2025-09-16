@@ -1,8 +1,8 @@
 import { LifeLine } from "./LifeLine";
 import { useAtomValue } from "jotai";
-import { coordinatesAtom } from "@/store/Store";
+import { coordinatesAtom, participantsModelAtom } from "@/store/Store";
 import { cn } from "@/utils";
-import { Participants } from "@/parser";
+import { participantNamesInGroup } from "@/parser/helpers";
 
 // Constants
 const LIFELINE_GROUP_OUTLINE_MARGIN = 2; // Small margin for group outline positioning
@@ -13,7 +13,11 @@ export const LifeLineGroup = (props: {
   renderLifeLine: any;
 }) => {
   const coordinates = useAtomValue(coordinatesAtom);
-  const entities: any[] = Participants(props.context).Array();
+  const participantsModel = useAtomValue(participantsModelAtom);
+  const participantNames = participantNamesInGroup(props.context);
+  const entities = participantNames
+    .map((n) => participantsModel.find((p) => p.name === n))
+    .filter(Boolean) as any[];
   if (entities.length <= 0) return null;
   const left =
     coordinates.left(entities[0].name) + LIFELINE_GROUP_OUTLINE_MARGIN;

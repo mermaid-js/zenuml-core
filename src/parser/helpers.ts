@@ -1,5 +1,6 @@
 import { CodeRange } from "./CodeRange";
 import sequenceParser from "@/generated-parser/sequenceParser";
+import { Participants } from "@/parser";
 
 // Safely get CodeRange from any parser context
 export function codeRangeOf(ctx: any): CodeRange | null {
@@ -169,3 +170,15 @@ export default {
   commentOf,
   signatureOf,
 };
+
+// Group utilities
+// Returns the declared participant names within a group context using parser utilities.
+// Kept here to avoid parser coupling in UI components.
+export function participantNamesInGroup(ctx: any): string[] {
+  try {
+    const names = Participants(ctx)?.Names?.();
+    return Array.isArray(names) ? names : [];
+  } catch {
+    return [];
+  }
+}

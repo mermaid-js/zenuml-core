@@ -10,7 +10,7 @@ import { LifeLineGroup } from "./LifeLineGroup";
 import { Fragment, useMemo } from "react";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { blankParticipant } from "@/parser/Participants";
-import { GroupContext, ParticipantContext, Participants } from "@/parser";
+import { GroupContext, ParticipantContext } from "@/parser";
 
 export const LifeLineLayer = (props: {
   context: any;
@@ -69,14 +69,18 @@ export const LifeLineLayer = (props: {
                   renderLifeLine={props.renderLifeLine}
                 />
               )}
-              {child instanceof ParticipantContext && (
-                <LifeLine
-                  key={index}
-                  entity={Participants(child).First()}
-                  renderParticipants={props.renderParticipants}
-                  renderLifeLine={props.renderLifeLine}
-                />
-              )}
+              {child instanceof ParticipantContext && (() => {
+                const name = child?.name?.()?.getFormattedText?.();
+                const irEntity = name && participantsModel.find((p) => p.name === name);
+                return irEntity ? (
+                  <LifeLine
+                    key={index}
+                    entity={irEntity}
+                    renderParticipants={props.renderParticipants}
+                    renderLifeLine={props.renderLifeLine}
+                  />
+                ) : null;
+              })()}
             </Fragment>
           ))}
         {participantsModel
