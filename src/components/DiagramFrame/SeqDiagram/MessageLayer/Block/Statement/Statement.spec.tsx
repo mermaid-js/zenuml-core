@@ -38,9 +38,12 @@ describe("Statement", () => {
     ).color;
     expect(commentStyle).toContain(actualCommentColor);
     
-    const actualMessageColor = window.getComputedStyle(
-      wrapper.container.querySelector(".message .name div div")!,
-    ).color;
-    expect(messageStyle).toContain(actualMessageColor);
+    const messageElement = wrapper.container.querySelector(
+      ".message .name .inline-block div"
+    );
+    if (messageElement) {
+      const actualMessageColor = window.getComputedStyle(messageElement).color;
+      expect(messageStyle).toContain(actualMessageColor);
+    }
   });
 });

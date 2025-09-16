@@ -1,7 +1,8 @@
 import antlr4 from "antlr4";
 import sequenceParserListener from "@/generated-parser/sequenceParserListener";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
-import { commentOf, labelRangeOfMessage, signatureOf } from "@/parser/helpers";
+import { commentOf, labelRangeOfMessage, signatureOf, offsetRangeOf, codeRangeOf } from "@/parser/helpers";
+import type { CodeRange } from "@/parser/CodeRange";
 
 export interface IRMessage {
   from?: string;
@@ -10,6 +11,9 @@ export interface IRMessage {
   type: OwnableMessageType;
   labelRange?: [number, number] | null;
   comment?: string;
+  range?: [number, number] | null;
+  codeRange?: CodeRange | null;
+  providedFrom?: string | null;
 }
 
 class MessagesIRCollector extends sequenceParserListener {
@@ -33,6 +37,9 @@ class MessagesIRCollector extends sequenceParserListener {
       const content = ctx?.asyncMessage?.()?.content?.();
       labelCtx = content || expr || ctx;
     }
+    const range = offsetRangeOf(ctx);
+    const codeRange = codeRangeOf(ctx);
+    const providedFrom = typeof ctx?.ProvidedFrom === "function" ? ctx.ProvidedFrom() : undefined;
     this.messages.push({
       from: ctx?.From?.(),
       to: ctx?.Owner?.(),
@@ -40,6 +47,9 @@ class MessagesIRCollector extends sequenceParserListener {
       type: typeMap[kind],
       labelRange: labelRangeOfMessage(labelCtx, kind),
       comment: commentOf(ctx),
+      range,
+      codeRange: codeRange ?? null,
+      providedFrom: providedFrom ?? null,
     });
   }
 
@@ -79,4 +89,3 @@ export function buildMessagesModel(rootCtx: any): IRMessage[] {
   walker.walk(collector, rootCtx);
   return collector.result();
 }
-

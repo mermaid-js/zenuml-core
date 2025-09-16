@@ -9,6 +9,7 @@ import { buildParticipantsModel } from "@/ir/participants";
 import { buildFramesModel } from "@/ir/frames";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { buildMessagesVM } from "@/vm/messages";
+import type { MessageVM } from "@/vm/messages";
 
 /*
  * RenderMode
@@ -42,6 +43,18 @@ export const messagesModelAtom = atom((get) => {
 export const messagesVMAtom = atom((get) => {
   const ir = get(messagesModelAtom);
   return buildMessagesVM(ir);
+});
+
+export const messagesVMByStartAtom = atom((get) => {
+  const vms = get(messagesVMAtom);
+  const map: Record<number, MessageVM> = {};
+  for (const vm of vms) {
+    const start = vm.range?.[0];
+    if (typeof start === "number") {
+      map[start] = vm;
+    }
+  }
+  return map;
 });
 
 // Participants IR is the canonical source of participants

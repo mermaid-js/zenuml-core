@@ -73,42 +73,42 @@ import { Message } from "../Message";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
-import { codeRangeOf, formattedTextOf } from "@/parser/helpers";
-import { useArrow } from "../useArrow";
-import { signatureOf, offsetRangeOf } from "@/parser/helpers";
+import type { MessageVM } from "@/vm/messages";
 
 function isNullOrUndefined(value: any) {
   return value === null || value === undefined;
 }
 
+type ArrowData = {
+  translateX: number;
+  interactionWidth: number;
+  rightToLeft: boolean;
+  isSelf: boolean;
+};
+
 export const InteractionAsync = (props: {
-  context: any;
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  vm?: MessageVM;
+  arrow?: ArrowData;
 }) => {
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
-  const asyncMessage = props.context?.asyncMessage();
-  const signature = signatureOf(asyncMessage);
-  const providedSource = asyncMessage?.ProvidedFrom();
-  const source = providedSource || props.origin;
-  const target = formattedTextOf(asyncMessage?.to?.());
-  const isSelf = source === target;
-
-  const { translateX, interactionWidth, rightToLeft } = useArrow({
-    context: props.context,
-    origin: props.origin,
-    source,
-    target,
-  });
-
+  const vm = props.vm;
+  const signature = vm?.signature ?? "";
+  const source = vm?.source ?? vm?.from ?? props.origin;
+  const target = vm?.to ?? source ?? props.origin;
+  const isSelf = props.arrow?.isSelf ?? vm?.isSelf ?? source === target;
+  const translateX = props.arrow?.translateX ?? 0;
+  const interactionWidth = props.arrow?.interactionWidth ?? 0;
+  const rightToLeft = props.arrow?.rightToLeft ?? false;
   const messageClassNames = props.commentObj?.messageClassNames;
   const messageTextStyle = props.commentObj?.messageStyle;
   const getIsCurrent = () => {
-    const range = asyncMessage ? offsetRangeOf(asyncMessage) : null;
+    const range = vm?.range ?? null;
     const start = range ? range[0] : undefined;
     const endExclusive = range ? range[1] : undefined;
     if (isNullOrUndefined(cursor) || isNullOrUndefined(start) || isNullOrUndefined(endExclusive)) return false;
@@ -131,8 +131,7 @@ export const InteractionAsync = (props: {
         props.className,
       )}
       onClick={() => {
-        const range = codeRangeOf(props.context);
-        if (range) onElementClick(range);
+        if (vm?.codeRange) onElementClick(vm.codeRange);
       }}
       data-signature={signature}
       style={{
@@ -145,18 +144,23 @@ export const InteractionAsync = (props: {
         <SelfInvocationAsync
           classNames={cn(messageClassNames)}
           textStyle={messageTextStyle}
-          context={asyncMessage}
+          labelText={signature}
+          labelRange={vm?.labelRange ?? null}
           number={props.number}
         />
       ) : (
         <Message
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
-          context={asyncMessage}
           content={signature}
           rtl={rightToLeft}
           type="async"
           number={props.number}
+          labelRangeOverride={vm?.labelRange ?? null}
+          onMessageClickOverride={(element) => {
+            if (!element || !vm?.codeRange) return;
+            onElementClick(vm.codeRange);
+          }}
         />
       )}
     </div>

@@ -36,6 +36,10 @@ export const Message = (props: {
   className?: string;
   style?: CSSProperties;
   number?: string;
+  labelRangeOverride?: [number, number] | null;
+  editableOverride?: boolean;
+  stylableOverride?: boolean;
+  onMessageClickOverride?: (element: HTMLElement | null) => void;
 }) => {
   const {
     context,
@@ -46,18 +50,25 @@ export const Message = (props: {
     className,
     style,
     number,
+    labelRangeOverride,
+    editableOverride,
+    stylableOverride,
+    onMessageClickOverride,
   } = props;
   const mode = useAtomValue(modeAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const isAsync = type === "async";
-  const editable = getEditable(context, mode, type || "");
+  const editable =
+    editableOverride ?? getEditable(context, mode, type || "");
   const stylable =
-    mode !== RenderMode.Static &&
-    ["sync", "async", "return", "creation"].includes(type);
+    stylableOverride ??
+    (mode !== RenderMode.Static &&
+      ["sync", "async", "return", "creation"].includes(type));
   const labelText =
     type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
-  const labelPosition = labelRangeOfMessage(context, (type || "") as any);
+  const labelPosition =
+    labelRangeOverride ?? labelRangeOfMessage(context, (type || "") as any);
   const borderStyle: "solid" | "dashed" | undefined = {
     sync: "solid",
     async: "solid",
@@ -67,6 +78,10 @@ export const Message = (props: {
 
   const onClick = () => {
     if (!stylable || !messageRef.current) return;
+    if (onMessageClickOverride) {
+      onMessageClickOverride(messageRef.current);
+      return;
+    }
     onMessageClick(context, messageRef.current);
   };
 

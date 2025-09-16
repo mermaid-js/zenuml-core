@@ -12,8 +12,11 @@ import { InteractionAsync } from "./InteractionAsync/Interaction-async";
 import { Divider } from "./Divider/Divider";
 import { Return } from "./Return/Return";
 import Comment from "../../../../../Comment/Comment";
-import { commentOf } from "@/parser/helpers";
+import { commentOf, offsetRangeOf } from "@/parser/helpers";
 import { cn } from "@/utils";
+import { useAtomValue } from "jotai";
+import { messagesVMByStartAtom } from "@/store/Store";
+import { useArrow } from "./useArrow";
 
 export const Statement = (props: {
   context: any;
@@ -21,8 +24,21 @@ export const Statement = (props: {
   number?: string;
   collapsed?: boolean;
 }) => {
+  const messagesByStart = useAtomValue(messagesVMByStartAtom);
   const comment = commentOf(props.context) || "";
   const commentObj = new Comment(comment);
+
+  const asyncMessageCtx = props.context?.asyncMessage?.();
+  const asyncRange = asyncMessageCtx ? offsetRangeOf(asyncMessageCtx) : null;
+  const asyncVM = asyncRange ? messagesByStart[asyncRange[0]] : undefined;
+  const asyncSource = asyncVM?.source ?? asyncVM?.from ?? props.origin;
+  const asyncTarget = asyncVM?.to ?? asyncSource;
+  const asyncArrow = useArrow({
+    context: props.context,
+    origin: props.origin,
+    source: asyncSource ?? props.origin,
+    target: asyncTarget ?? props.origin,
+  });
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
@@ -57,7 +73,17 @@ export const Statement = (props: {
     case Boolean(props.context.message()):
       return <Interaction {...subProps} />;
     case Boolean(props.context.asyncMessage()):
-      return <InteractionAsync {...subProps} />;
+      return (
+        <InteractionAsync
+          origin={props.origin}
+          comment={comment}
+          commentObj={commentObj}
+          number={props.number}
+          className={subProps.className}
+          vm={asyncVM}
+          arrow={asyncArrow}
+        />
+      );
     case Boolean(props.context.divider()):
       return <Divider {...subProps} />;
     case Boolean(props.context.ret()):
