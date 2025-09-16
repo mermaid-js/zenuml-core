@@ -17,12 +17,6 @@ function renderCode(code: string) {
     <InteractionAsync
       origin=""
       vm={vm}
-      arrow={{
-        interactionWidth: 0,
-        translateX: 0,
-        rightToLeft: false,
-        isSelf: vm?.isSelf ?? false,
-      }}
     />,
   );
 }

@@ -79,13 +79,6 @@ function isNullOrUndefined(value: any) {
   return value === null || value === undefined;
 }
 
-type ArrowData = {
-  translateX: number;
-  interactionWidth: number;
-  rightToLeft: boolean;
-  isSelf: boolean;
-};
-
 export const InteractionAsync = (props: {
   origin: string;
   comment?: string;
@@ -93,7 +86,6 @@ export const InteractionAsync = (props: {
   number?: string;
   className?: string;
   vm?: MessageVM;
-  arrow?: ArrowData;
 }) => {
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
@@ -101,10 +93,10 @@ export const InteractionAsync = (props: {
   const signature = vm?.signature ?? "";
   const source = vm?.source ?? vm?.from ?? props.origin;
   const target = vm?.to ?? source ?? props.origin;
-  const isSelf = props.arrow?.isSelf ?? vm?.isSelf ?? source === target;
-  const translateX = props.arrow?.translateX ?? 0;
-  const interactionWidth = props.arrow?.interactionWidth ?? 0;
-  const rightToLeft = props.arrow?.rightToLeft ?? false;
+  const isSelf = vm?.isSelf ?? source === target;
+  const translateX = vm?.arrow?.translateX ?? 0;
+  const interactionWidth = vm?.arrow?.interactionWidth ?? 0;
+  const rightToLeft = vm?.arrow?.rightToLeft ?? false;
   const messageClassNames = props.commentObj?.messageClassNames;
   const messageTextStyle = props.commentObj?.messageStyle;
   const getIsCurrent = () => {

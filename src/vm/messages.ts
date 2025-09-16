@@ -18,6 +18,11 @@ export type MessageVM = {
   // Optional comment text (not styling)
   comment?: string | null;
   isSelf: boolean;
+  arrow?: {
+    translateX: number;
+    interactionWidth: number;
+    rightToLeft: boolean;
+  };
 };
 
 export function buildMessagesVM(messages: Array<any>): MessageVM[] {

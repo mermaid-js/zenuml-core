@@ -39,6 +39,16 @@ export const Statement = (props: {
     source: asyncSource ?? props.origin,
     target: asyncTarget ?? props.origin,
   });
+  const asyncVMWithArrow = asyncVM
+    ? {
+        ...asyncVM,
+        arrow: {
+          translateX: asyncArrow.translateX,
+          interactionWidth: asyncArrow.interactionWidth,
+          rightToLeft: asyncArrow.rightToLeft,
+        },
+      }
+    : undefined;
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
@@ -80,8 +90,7 @@ export const Statement = (props: {
           commentObj={commentObj}
           number={props.number}
           className={subProps.className}
-          vm={asyncVM}
-          arrow={asyncArrow}
+          vm={asyncVMWithArrow}
         />
       );
     case Boolean(props.context.divider()):
