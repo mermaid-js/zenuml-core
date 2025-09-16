@@ -57,9 +57,7 @@ export const Interaction = (props: {
   };
   const isCurrent = getIsCurrent();
 
-  // Use arrow geometry from VM if available, otherwise compute it
-  const arrowData = vm?.arrow;
-
+  // Use arrow geometry from VM (required)
   const {
     translateX,
     interactionWidth,
@@ -67,7 +65,14 @@ export const Interaction = (props: {
     sourceLayers,
     targetLayers,
     rightToLeft,
-  } = arrowData;
+  } = vm?.arrow || {
+    translateX: 0,
+    interactionWidth: 0,
+    originLayers: 0,
+    sourceLayers: 0,
+    targetLayers: 0,
+    rightToLeft: false,
+  };
 
   return (
     <div

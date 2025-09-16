@@ -50,10 +50,12 @@ export const Creation = (props: {
   };
   const isCurrent = getIsCurrent();
 
-  // Use arrow geometry from VM if available, otherwise compute it
-  const arrowData = vm?.arrow;
-
-  const { translateX, interactionWidth, rightToLeft } = arrowData;
+  // Use arrow geometry from VM (required)
+  const { translateX, interactionWidth, rightToLeft } = vm?.arrow || {
+    translateX: 0,
+    interactionWidth: 0,
+    rightToLeft: false,
+  };
 
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
