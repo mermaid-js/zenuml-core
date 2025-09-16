@@ -31,13 +31,26 @@ function renderInteraction(code: string, cursor?: number | null) {
     throw new Error("expected message view model");
   }
 
+  // Add arrow data to VM for the component
+  const vmWithArrow = {
+    ...vm,
+    arrow: {
+      translateX: 0,
+      interactionWidth: 100,
+      rightToLeft: false,
+      originLayers: 0,
+      sourceLayers: 0,
+      targetLayers: 1,
+    },
+  };
+
   const utils = render(
     <Provider store={store}>
-      <Interaction context={stat} origin="" vm={vm} />
+      <Interaction context={stat} origin="" vm={vmWithArrow} />
     </Provider>,
   );
 
-  return { ...utils, vm, range };
+  return { ...utils, vm: vmWithArrow, range };
 }
 
 describe("Interaction (sync message)", () => {

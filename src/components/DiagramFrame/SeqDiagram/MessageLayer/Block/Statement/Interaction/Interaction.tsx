@@ -4,10 +4,9 @@ import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
 import { Message } from "../Message";
 import { Occurrence } from "./Occurrence/Occurrence";
 import { useAtomValue } from "jotai";
-import { coordinatesAtom, cursorAtom } from "@/store/Store";
+import { cursorAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
-import { calculateArrowGeometry } from "../useArrow";
 import { signatureOf } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
 
@@ -21,10 +20,18 @@ export const Interaction = (props: {
   commentObj?: CommentClass;
   number?: string;
   className?: string;
-  vm?: MessageVM;
+  vm?: MessageVM & {
+    arrow?: {
+      translateX: number;
+      interactionWidth: number;
+      rightToLeft: boolean;
+      originLayers?: number;
+      sourceLayers?: number;
+      targetLayers?: number;
+    }
+  };
 }) => {
   const cursor = useAtomValue(cursorAtom);
-  const coordinates = useAtomValue(coordinatesAtom);
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
   const message = props.context?.message();
@@ -50,14 +57,17 @@ export const Interaction = (props: {
   };
   const isCurrent = getIsCurrent();
 
-  const geometry = calculateArrowGeometry({
-    context: props.context,
-    origin: props.origin,
-    source,
-    target,
-    coordinates,
-  });
-  const { translateX, interactionWidth, originLayers, sourceLayers, targetLayers, rightToLeft } = geometry;
+  // Use arrow geometry from VM if available, otherwise compute it
+  const arrowData = vm?.arrow;
+
+  const {
+    translateX,
+    interactionWidth,
+    originLayers,
+    sourceLayers,
+    targetLayers,
+    rightToLeft,
+  } = arrowData;
 
   return (
     <div

@@ -5,13 +5,16 @@ import { codeAtom } from "@/store/Store";
 import { render } from "@testing-library/react";
 import { Creation } from "./Creation";
 import { createStore, Provider } from "jotai";
+import type { MessageVM } from "@/vm/messages";
+import { OwnableMessageType } from "@/parser/OwnableMessage";
 
 const store = createStore();
 
-function mountCreationWithCode(
+function mountCreationWithVM(
   code: string,
   contextLocator: (code: string) => any,
   origin = "",
+  vm: MessageVM & { arrow: { translateX: number; interactionWidth: number; rightToLeft: boolean } },
 ) {
   store.set(codeAtom, code);
 
@@ -20,6 +23,7 @@ function mountCreationWithCode(
     context: creationContext,
     origin,
     fragmentOffset: 100,
+    vm,
   };
 
   return render(
@@ -28,16 +32,36 @@ function mountCreationWithCode(
     </Provider>,
   );
 }
+
 describe("Creation", () => {
   it("data, props and computed properties", async () => {
     /**
      * Known limitations:
      * 1. `IA a = new A()` cannot be the first statement in the file. `IA` will be recognised as a Participant.
      */
-    const creationWrapper = mountCreationWithCode(
+    const anchorStarter = new Anchor2(100, 0);
+    const anchorA = new Anchor2(200, 1);
+    const expected = anchorStarter.edgeOffset(anchorA);
+
+    const mockVM: MessageVM & { arrow: { translateX: number; interactionWidth: number; rightToLeft: boolean } } = {
+      id: "test-creation",
+      type: OwnableMessageType.CreationMessage,
+      from: _STARTER_,
+      to: "A",
+      signature: "«create»",
+      isSelf: false,
+      arrow: {
+        translateX: 0,
+        interactionWidth: expected,
+        rightToLeft: false,
+      },
+    };
+
+    const creationWrapper = mountCreationWithVM(
       "a = new A",
       Fixture.firstStatement,
       _STARTER_,
+      mockVM,
     );
 
     expect(
@@ -53,9 +77,6 @@ describe("Creation", () => {
     // `-` is for margin and `=` is for participant width.
     // `---xxx--->` is for message arrow and `[]` is for occurrence.
     // TODO: add a test case where the width is caused by the message
-    const anchorStarter = new Anchor2(100, 0);
-    const anchorA = new Anchor2(200, 1);
-    const expected = anchorStarter.edgeOffset(anchorA);
     expect(creationWrapper.container.querySelector("div")?.style.width).toBe(
       expected + "px",
     );
@@ -67,11 +88,31 @@ describe("Creation", () => {
   });
 
   it("right to left", async () => {
-    const creationWrapper = mountCreationWithCode(
+    const anchorA = new Anchor2(100, 2);
+    const anchorB = new Anchor2(200, 1);
+    const expected = anchorA.edgeOffset(anchorB);
+
+    const mockVM: MessageVM & { arrow: { translateX: number; interactionWidth: number; rightToLeft: boolean } } = {
+      id: "test-creation-rtl",
+      type: OwnableMessageType.CreationMessage,
+      from: "B",
+      to: "A",
+      signature: "«create»",
+      isSelf: false,
+      arrow: {
+        translateX: 0,
+        interactionWidth: expected,
+        rightToLeft: true,
+      },
+    };
+
+    const creationWrapper = mountCreationWithVM(
       "A.m{B.m{new A}}",
       Fixture.firstGrandChild,
       "B",
+      mockVM,
     );
+
     expect(
       creationWrapper.container
         .querySelector("div")
@@ -80,9 +121,6 @@ describe("Creation", () => {
     // -====A====--====B====-
     //      []]<--<<c>>--
     // There is enough space for the message arrow and occurrence.
-    const anchorA = new Anchor2(100, 2);
-    const anchorB = new Anchor2(200, 1);
-    const expected = anchorA.edgeOffset(anchorB);
     expect(creationWrapper.container.querySelector("div")?.style.width).toBe(
       expected + "px",
     );
@@ -97,11 +135,32 @@ describe("Creation", () => {
         .block()
         .stat()[0];
     }
-    const creationWrapper = mountCreationWithCode(
+
+    const anchorA = new Anchor2(100, 2);
+    const anchorB = new Anchor2(200, 1);
+    const expected = anchorA.edgeOffset(anchorB);
+
+    const mockVM: MessageVM & { arrow: { translateX: number; interactionWidth: number; rightToLeft: boolean } } = {
+      id: "test-creation-alt",
+      type: OwnableMessageType.CreationMessage,
+      from: "B",
+      to: "A",
+      signature: "«create»",
+      isSelf: false,
+      arrow: {
+        translateX: 0,
+        interactionWidth: expected,
+        rightToLeft: true,
+      },
+    };
+
+    const creationWrapper = mountCreationWithVM(
       "A.m{B.m{if(x){new A}}}",
       contextLocator,
       "B",
+      mockVM,
     );
+
     expect(
       creationWrapper.container
         .querySelector("div")
@@ -110,9 +169,6 @@ describe("Creation", () => {
     // -====A====--====B====-
     //      []]--<<c>>--
     // There is enough space for the message and occurrence.
-    const anchorA = new Anchor2(100, 2);
-    const anchorB = new Anchor2(200, 1);
-    const expected = anchorA.edgeOffset(anchorB);
     expect(creationWrapper.container.querySelector("div")?.style.width).toBe(
       expected + "px",
     );

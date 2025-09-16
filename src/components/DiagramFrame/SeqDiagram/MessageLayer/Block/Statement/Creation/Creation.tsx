@@ -11,8 +11,8 @@ import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useArrow } from "../useArrow";
 import { EventBus } from "@/EventBus";
+import type { MessageVM } from "@/vm/messages";
 
 export const Creation = (props: {
   context: any;
@@ -21,21 +21,39 @@ export const Creation = (props: {
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  vm?: MessageVM & { arrow?: { translateX: number; interactionWidth: number; rightToLeft: boolean } };
 }) => {
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
   const [participantWidth, setParticipantWidth] = useState(0);
   const creation = props.context?.creation();
-  const target = creation?.Owner();
-  const isCurrent = creation?.isCurrent(cursor);
+  const vm = props.vm;
 
-  const { translateX, interactionWidth, rightToLeft } = useArrow({
-    context: props.context,
-    origin: props.origin,
-    source: props.origin,
-    target: creation?.Owner(),
-  });
+  // Use VM data if available, fallback to parser context
+  const target = vm?.to ?? creation?.Owner();
+  const signature = vm?.signature ?? creation?.SignatureText();
+  const range = vm?.range ?? null;
+
+  // Calculate isCurrent using range from VM
+  const getIsCurrent = () => {
+    const start = range ? range[0] : undefined;
+    const endExclusive = range ? range[1] : undefined;
+    if (
+      cursor == null ||
+      start == null ||
+      endExclusive == null
+    ) {
+      return false;
+    }
+    return cursor >= start && cursor < endExclusive;
+  };
+  const isCurrent = getIsCurrent();
+
+  // Use arrow geometry from VM if available, otherwise compute it
+  const arrowData = vm?.arrow;
+
+  const { translateX, interactionWidth, rightToLeft } = arrowData;
 
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
@@ -84,10 +102,10 @@ export const Creation = (props: {
         props.className,
       )}
       onClick={() => {
-        const range = codeRangeOf(props.context);
-        if (range) onElementClick(range);
+        const codeRange = vm?.codeRange ?? codeRangeOf(props.context);
+        if (codeRange) onElementClick(codeRange);
       }}
-      data-signature={creation?.SignatureText()}
+      data-signature={signature}
       style={{
         transform: "translateX(" + translateX + "px)",
         width: interactionWidth + "px",
@@ -109,12 +127,13 @@ export const Creation = (props: {
             messageClassNames,
           )}
           context={creation}
-          content={creation?.SignatureText()}
+          content={signature}
           rtl={rightToLeft}
           type="creation"
           number={props.number}
           textStyle={messageTextStyle}
           style={{ width: `calc(100% - ${containerOffset}px)` }}
+          labelRangeOverride={vm?.labelRange ?? null}
         />
       </div>
       <Occurrence
