@@ -16,7 +16,7 @@ import { commentOf, offsetRangeOf } from "@/parser/helpers";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMByStartAtom } from "@/store/Store";
-import { calculateArrowGeometry, useArrow } from "./useArrow";
+import { calculateArrowGeometry } from "./useArrow";
 
 export const Statement = (props: {
   context: any;
@@ -38,37 +38,20 @@ export const Statement = (props: {
   const asyncVM = asyncRange ? messagesByStart[asyncRange[0]] : undefined;
   const asyncSource = asyncVM?.source ?? asyncVM?.from ?? props.origin;
   const asyncTarget = asyncVM?.to ?? asyncSource;
-  const asyncArrow = useArrow({
+  const asyncGeometry = calculateArrowGeometry({
     context: props.context,
     origin: props.origin,
     source: asyncSource ?? props.origin,
     target: asyncTarget ?? props.origin,
+    coordinates,
   });
-  if (asyncVM) {
-    const candidate = calculateArrowGeometry({
-      context: props.context,
-      origin: props.origin,
-      source: asyncSource ?? props.origin,
-      target: asyncTarget ?? props.origin,
-      coordinates,
-    });
-    const diff = Math.abs(candidate.translateX - asyncArrow.translateX);
-    if (diff > 0.1 && import.meta.env?.MODE !== "production") {
-      console.warn("[messages async] translateX mismatch", {
-        signature: asyncVM.signature,
-        expected: asyncArrow.translateX,
-        candidate: candidate.translateX,
-        diff,
-      });
-    }
-  }
   const asyncVMWithArrow = asyncVM
     ? {
         ...asyncVM,
         arrow: {
-          translateX: asyncArrow.translateX,
-          interactionWidth: asyncArrow.interactionWidth,
-          rightToLeft: asyncArrow.rightToLeft,
+          translateX: asyncGeometry.translateX,
+          interactionWidth: asyncGeometry.interactionWidth,
+          rightToLeft: asyncGeometry.rightToLeft,
         },
       }
     : undefined;

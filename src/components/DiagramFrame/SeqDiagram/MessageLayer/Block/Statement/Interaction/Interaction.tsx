@@ -7,7 +7,7 @@ import { useAtomValue } from "jotai";
 import { coordinatesAtom, cursorAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
-import { calculateArrowGeometry, useArrow } from "../useArrow";
+import { calculateArrowGeometry } from "../useArrow";
 import { signatureOf } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
 
@@ -50,43 +50,14 @@ export const Interaction = (props: {
   };
   const isCurrent = getIsCurrent();
 
-  const {
-    translateX,
-    interactionWidth,
-    originLayers,
-    sourceLayers,
-    targetLayers,
-    rightToLeft,
-  } = useArrow({
+  const geometry = calculateArrowGeometry({
     context: props.context,
     origin: props.origin,
     source,
     target,
+    coordinates,
   });
-
-  if (vm) {
-    const candidate = calculateArrowGeometry({
-      context: props.context,
-      origin: props.origin,
-      source,
-      target,
-      coordinates,
-    });
-    const diff = Math.abs(candidate.translateX - translateX);
-    if (diff > 0.1 && import.meta.env?.MODE !== "production") {
-      console.warn(
-        "[messages] translateX mismatch",
-        {
-          signature,
-          context:
-            props.context?.message?.()?.getText?.() ?? props.context?.getText?.(),
-          expected: translateX,
-          candidate: candidate.translateX,
-          diff,
-        },
-      );
-    }
-  }
+  const { translateX, interactionWidth, originLayers, sourceLayers, targetLayers, rightToLeft } = geometry;
 
   return (
     <div
