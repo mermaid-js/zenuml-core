@@ -37,7 +37,7 @@ export const MessageLayer = (props: {
 
   return (
     <div
-      className="message-layer relative z-30 pt-14 pb-10"
+      className="message-layer relative z-30 pt-20 pb-10 pointer-events-none"
       style={props.style}
     >
       <Block

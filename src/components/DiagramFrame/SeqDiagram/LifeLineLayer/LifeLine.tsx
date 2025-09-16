@@ -1,6 +1,7 @@
 import {
   coordinatesAtom,
   diagramElementAtom,
+  dragAnchorAtom,
   lifelineReadyAtom,
   scaleAtom,
 } from "@/store/Store";
@@ -11,6 +12,7 @@ import { EventBus } from "@/EventBus";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
+import { useAnchorDrop } from "./useAnchorDrop";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 const logger = parentLogger.child({ name: "LifeLine" });
@@ -79,6 +81,9 @@ export const LifeLine = (props: {
     EventBus.on("participant_set_top", () => setTimeout(() => updateTop(), 0));
   }, [props.entity, updateTop]);
 
+  const dragAnchor = useAtomValue(dragAnchorAtom);
+  const { handleDrop } = useAnchorDrop(props.entity.name);
+
   return (
     <div
       id={props.entity.name}
@@ -97,7 +102,16 @@ export const LifeLine = (props: {
         <Participant entity={props.entity} offsetTop2={top} />
       )}
       {props.renderLifeLine && (
-        <div className="line w0 mx-auto flex-grow w-px bg-[linear-gradient(to_bottom,transparent_50%,var(--color-border-base)_50%)] bg-[length:1px_10px]"></div>
+        <>
+          <div
+            className={cn(
+              "absolute top-0 bottom-0 -left-2.5 -right-2.5 hover:bg-sky-200 cursor-copy",
+              dragAnchor ? "visible" : "invisible",
+            )}
+            onMouseUp={handleDrop}
+          />
+          <div className="relative line mx-auto flex-grow w-px bg-[linear-gradient(to_bottom,transparent_50%,var(--color-border-base)_50%)] bg-[length:1px_10px] pointer-events-none" />
+        </>
       )}
     </div>
   );

@@ -95,6 +95,23 @@ export const onEventEmitAtom = atomWithFunctionValue<
   (name: string, data: any) => void
 >(() => {});
 
+export const dragParticipantAtom = atom<{
+  name: string;
+  x: number;
+  y: number;
+}>();
+
+export const dragAnchorAtom = atom<{
+  id?: string;
+  context: any;
+  index?: number;
+  participant: string;
+  x: number;
+  y: number;
+}>();
+
+export const lastCreatedStatementAtom = atom("");
+
 export const lifelineReadyAtom = atom<string[]>([]);
 
 export const renderingReadyAtom = atom((get) => {
