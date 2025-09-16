@@ -29,7 +29,7 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
   return messages.map((m, i) => {
     const source = m.providedFrom ?? m.from;
     const to = m.to;
-    const isSelf = typeof source === "string" && typeof to === "string" && source === to;
+    const isSelf = (source === to) || !to;
     return {
       id: `${m.from ?? ""}->${m.to ?? ""}:${m.signature}:${m.type}:${i}`,
       type: m.type,

@@ -62,6 +62,10 @@ Delivered in this branch:
   - Message components (sync/async/self/creation/return) use `labelRangeOfMessage`.
   - FragmentRef uses `labelRangeOfRef`.
   - ConditionLabel uses `labelRangeOfCondition`.
+- Message VM adoption
+  - `messagesVMAtom` adapts messages IR for presentation (`id`, `from`, `to`, `signature`, `range`, `labelRange`).
+  - `InteractionAsync` and `Interaction` consume the VM for metadata and highlight state; arrow geometry and self-invocation editing still rely on parser contexts until a dedicated VM surface is available.
+  - Added React tests to lock the VM expectations for async and sync interactions.
 
 ## Phased Plan
 
@@ -115,9 +119,9 @@ Approach: Introduce a thin View Model (VM) layer derived from IR (+ coordinates)
 Scope (small, verifiable steps):
 
 1) MessageVM
-   - Add `messagesVMAtom`: adapts messages IR + coordinates into an array of `{ id, type, from, to, signature, isSelf, number, offsetRange, labelRange, rightToLeft, interactionWidth, translateX }`.
-   - Migrate one message type first (e.g., async) to consume `MessageVM` instead of parser context; verify visuals and label edits.
-   - Iterate to migrate remaining message types (sync, creation, return).
+   - `messagesVMAtom` in place, currently exposes `{ id, type, from, to, signature, labelRange, range, codeRange, comment, isSelf }`.
+   - Async and sync interactions read VM metadata (source/target/signature/range) while still computing arrow geometry via `useArrow`.
+   - Next: fill in arrow geometry + occurrence depth on the VM and migrate creation/return components.
 
 2) ParticipantVM
    - Add `participantsVMAtom`: normalize fields from participants IR (label, type, color, positions) for presentation. No behavior change.

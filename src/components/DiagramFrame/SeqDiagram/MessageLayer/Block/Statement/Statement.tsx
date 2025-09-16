@@ -28,6 +28,10 @@ export const Statement = (props: {
   const comment = commentOf(props.context) || "";
   const commentObj = new Comment(comment);
 
+  const messageCtx = props.context?.message?.();
+  const messageRange = messageCtx ? offsetRangeOf(messageCtx) : null;
+  const messageVM = messageRange ? messagesByStart[messageRange[0]] : undefined;
+
   const asyncMessageCtx = props.context?.asyncMessage?.();
   const asyncRange = asyncMessageCtx ? offsetRangeOf(asyncMessageCtx) : null;
   const asyncVM = asyncRange ? messagesByStart[asyncRange[0]] : undefined;
@@ -81,7 +85,7 @@ export const Statement = (props: {
     case Boolean(props.context.creation()):
       return <Creation {...subProps} />;
     case Boolean(props.context.message()):
-      return <Interaction {...subProps} />;
+      return <Interaction {...subProps} vm={messageVM} />;
     case Boolean(props.context.asyncMessage()):
       return (
         <InteractionAsync
