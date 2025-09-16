@@ -1,11 +1,12 @@
 import { atom } from "jotai";
 import { atomWithLocalStorage, atomWithFunctionValue } from "./utils.ts";
-import { RootContext, Participants } from "@/parser";
+import { RootContext } from "@/parser";
 import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "../positioning/Coordinates";
 import { CodeRange } from "../parser/CodeRange";
 import { buildMessagesModel } from "@/ir/messages";
 import { buildParticipantsModel } from "@/ir/participants";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 /*
  * RenderMode
@@ -24,9 +25,6 @@ export const rootContextAtom = atom((get) => RootContext(get(codeAtom)));
 export const titleAtom = atom<string | null>((get) =>
   get(rootContextAtom)?.title()?.content(),
 );
-
-// Legacy participants object (kept for now where needed)
-export const participantsAtom = atom((get) => Participants(get(rootContextAtom)));
 
 export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), WidthProviderOnBrowser),
@@ -111,6 +109,7 @@ export const lifelineReadyAtom = atom<string[]>([]);
 
 export const renderingReadyAtom = atom((get) => {
   const lifeLineReady = get(lifelineReadyAtom);
-  const { participants } = get(participantsAtom);
-  return lifeLineReady.length === Array.from(participants).length;
+  const names = get(coordinatesAtom).orderedParticipantNames();
+  const expected = names.filter((n) => n !== _STARTER_).length;
+  return lifeLineReady.length === expected;
 });

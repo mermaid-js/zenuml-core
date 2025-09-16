@@ -1,8 +1,8 @@
-import { Participants } from "@/parser";
 import { LifeLine } from "./LifeLine";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom } from "@/store/Store";
 import { cn } from "@/utils";
+import { Participants } from "@/parser";
 
 // Constants
 const LIFELINE_GROUP_OUTLINE_MARGIN = 2; // Small margin for group outline positioning
