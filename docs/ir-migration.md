@@ -100,6 +100,38 @@ Acceptance
 Acceptance
 - No remaining token math in components; helpers and IR are the only boundary.
 
+### Phase 5 (View Models — Remove Parser Context From Components)
+
+Problem: Many components still receive `ParserRuleContext` and/or rely on parser-specific APIs. Helpers reduced the surface, but contexts remain in props.
+
+Approach: Introduce a thin View Model (VM) layer derived from IR (+ coordinates) and pass only plain data to components.
+
+Scope (small, verifiable steps):
+
+1) MessageVM
+   - Add `messagesVMAtom`: adapts messages IR + coordinates into an array of `{ id, type, from, to, signature, isSelf, number, offsetRange, labelRange, rightToLeft, interactionWidth, translateX }`.
+   - Migrate one message type first (e.g., async) to consume `MessageVM` instead of parser context; verify visuals and label edits.
+   - Iterate to migrate remaining message types (sync, creation, return).
+
+2) ParticipantVM
+   - Add `participantsVMAtom`: normalize fields from participants IR (label, type, color, positions) for presentation. No behavior change.
+   - Update `Participant` to accept `ParticipantVM` instead of IR entity; keep coordinates driven outside.
+
+3) Fragment VMs (labels only)
+   - Add minimal VMs for fragment labels:
+     - `RefVM: { contentLabel, labelRange }` via helpers
+     - `ConditionVM: { text, labelRange }` via helpers
+   - Update `FragmentRef` and `ConditionLabel` to accept these VMs and remove parser lookups from UI.
+
+4) Remove context props
+   - Replace remaining context props with VMs across components.
+   - Keep all parser and token logic inside selectors/builders and helpers; components become pure presentational.
+
+Acceptance
+- Components no longer receive parser contexts.
+- Editing and layout derive from VMs and helpers; tests cover selectors/builders.
+- No visual regressions across sample diagrams.
+
 ## Validation Strategy
 
 - Helper tests: pure, input-to-output assertions for ranges, signatures, comments.

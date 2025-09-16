@@ -3,7 +3,7 @@ import { Block } from "./Block/Block";
 import { centerOf } from "./Block/Statement/utils";
 import { StylePanel } from "./StylePanel";
 import { useAtomValue } from "jotai";
-import { coordinatesAtom, messagesModelAtom } from "@/store/Store";
+import { coordinatesAtom, messagesVMAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import "./MessageLayer.scss";
 
@@ -15,11 +15,11 @@ export const MessageLayer = (props: {
   style?: React.CSSProperties;
 }) => {
   const coordinates = useAtomValue(coordinatesAtom);
-  const messagesModel = useAtomValue(messagesModelAtom);
+  const messagesVM = useAtomValue(messagesVMAtom);
 
   const origin = useMemo(() => {
-    return messagesModel.length > 0 ? messagesModel[0].from || _STARTER_ : _STARTER_;
-  }, [messagesModel]);
+    return messagesVM.length > 0 ? messagesVM[0].from || _STARTER_ : _STARTER_;
+  }, [messagesVM]);
 
   const paddingLeft = centerOf(coordinates, origin) + 1;
 

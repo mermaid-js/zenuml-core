@@ -9,6 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
+import { offsetRangeOf } from "@/parser/helpers";
 
 const btns = [
   {
@@ -109,12 +110,8 @@ export const StylePanel = () => {
       // make sure this is triggered after the outsideclicking
       setTimeout(() => {
         const message = messageData.current;
-        try {
-          const range = (require("@/parser/helpers") as any).offsetRangeOf(context);
-          message.start = Array.isArray(range) ? range[0] : 0;
-        } catch {
-          message.start = 0;
-        }
+        const range = offsetRangeOf(context);
+        message.start = Array.isArray(range) ? range[0] : 0;
         message.lineHead = getLineHead(code, message.start);
         message.prevLine = getPrevLine(code, message.start);
         message.leadingSpaces =

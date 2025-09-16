@@ -7,6 +7,7 @@ import { CodeRange } from "../parser/CodeRange";
 import { buildMessagesModel } from "@/ir/messages";
 import { buildParticipantsModel } from "@/ir/participants";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { buildMessagesVM } from "@/vm/messages";
 
 /*
  * RenderMode
@@ -34,6 +35,12 @@ export const coordinatesAtom = atom(
 export const messagesModelAtom = atom((get) => {
   const ctx = get(rootContextAtom);
   return ctx ? buildMessagesModel(ctx) : [];
+});
+
+// View-model for messages (adapter over IR)
+export const messagesVMAtom = atom((get) => {
+  const ir = get(messagesModelAtom);
+  return buildMessagesVM(ir);
 });
 
 // Participants IR is the canonical source of participants
