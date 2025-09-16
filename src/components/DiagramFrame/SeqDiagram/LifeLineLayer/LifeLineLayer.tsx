@@ -5,7 +5,7 @@ import { LifeLineGroup } from "./LifeLineGroup";
 import { Fragment, useMemo } from "react";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { blankParticipant } from "@/parser/Participants";
-import { GroupContext, ParticipantContext } from "@/parser";
+import { isGroupContext, isParticipantContext, participantNameOf } from "@/parser/helpers";
 
 export const LifeLineLayer = (props: {
   context: any;
@@ -51,12 +51,10 @@ export const LifeLineLayer = (props: {
           />
         )}
         {((props.context?.children as any[]) || [])
-          .filter(
-            (c) => c instanceof GroupContext || c instanceof ParticipantContext,
-          )
+          .filter((c) => isGroupContext(c) || isParticipantContext(c))
           .map((child, index) => (
             <Fragment key={index}>
-              {child instanceof GroupContext && (
+              {isGroupContext(child) && (
                 <LifeLineGroup
                   key={index}
                   context={child}
@@ -64,8 +62,8 @@ export const LifeLineLayer = (props: {
                   renderLifeLine={props.renderLifeLine}
                 />
               )}
-              {child instanceof ParticipantContext && (() => {
-                const name = child?.name?.()?.getFormattedText?.();
+              {isParticipantContext(child) && (() => {
+                const name = participantNameOf(child);
                 const irEntity = name && participantsModel.find((p) => p.name === name);
                 return irEntity ? (
                   <LifeLine

@@ -109,7 +109,12 @@ export const StylePanel = () => {
       // make sure this is triggered after the outsideclicking
       setTimeout(() => {
         const message = messageData.current;
-        message.start = context.start.start;
+        try {
+          const range = (require("@/parser/helpers") as any).offsetRangeOf(context);
+          message.start = Array.isArray(range) ? range[0] : 0;
+        } catch {
+          message.start = 0;
+        }
         message.lineHead = getLineHead(code, message.start);
         message.prevLine = getPrevLine(code, message.start);
         message.leadingSpaces =

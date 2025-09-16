@@ -3,6 +3,7 @@ import { useAtomValue } from "jotai";
 import { CSSProperties, useMemo, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
 import { MessageLabel } from "../../../../MessageLabel";
+import { signatureOf } from "@/parser/helpers";
 import { labelRangeOfMessage } from "@/parser/helpers";
 
 export const SelfInvocation = (props: {
@@ -41,7 +42,7 @@ export const SelfInvocation = (props: {
           <MessageLabel
             style={props.textStyle}
             className={props.classNames}
-            labelText={props.context?.SignatureText()}
+            labelText={signatureOf(props.context)}
             labelPosition={labelPosition}
             isSelf={true}
           />

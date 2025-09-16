@@ -8,6 +8,7 @@ import { cursorAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { useArrow } from "../useArrow";
+import { signatureOf } from "@/parser/helpers";
 
 export const Interaction = (props: {
   context: any;
@@ -22,7 +23,7 @@ export const Interaction = (props: {
   const message = props.context?.message();
   const statements = message?.Statements();
   const assignee = message?.Assignment()?.getText() || "";
-  const signature = message?.SignatureText();
+  const signature = signatureOf(message);
   const isCurrent = message?.isCurrent(cursor);
   const source = message?.From() || _STARTER_;
   const target = props.context?.message()?.Owner() || _STARTER_;

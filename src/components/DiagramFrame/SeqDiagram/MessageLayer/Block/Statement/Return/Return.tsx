@@ -8,6 +8,7 @@ import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { codeRangeOf } from "@/parser/helpers";
 import { SyntheticEvent } from "react";
 import { useArrow } from "../useArrow";
+import { signatureOf } from "@/parser/helpers";
 
 export const Return = (props: {
   context: any;
@@ -23,9 +24,7 @@ export const Return = (props: {
 
   const asyncMessage = ret?.asyncMessage();
 
-  const signature =
-    asyncMessage?.content()?.getFormattedText() ||
-    props.context?.ret()?.expr()?.getFormattedText();
+  const signature = signatureOf(props.context?.ret?.());
   const source = asyncMessage?.From() || ret?.From() || _STARTER_;
 
   const target =

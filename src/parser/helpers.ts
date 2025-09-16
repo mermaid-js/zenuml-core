@@ -92,6 +92,21 @@ export function labelRangeOfMessage(
   return [start, stop];
 }
 
+// Generic offset range for a parser context: [startInclusive, endExclusive]
+export function offsetRangeOf(ctx: any): [number, number] | null {
+  try {
+    const s = ctx?.start;
+    const e = ctx?.stop;
+    if (!s || !e) return null;
+    const start = s.start;
+    const stop = e.stop;
+    if (typeof start !== "number" || typeof stop !== "number") return null;
+    return [start, stop + 1];
+  } catch {
+    return null;
+  }
+}
+
 // Safe label range for ref(...) fragment title (first name inside the ref)
 // Returns [-1, -1] when name is missing or synthesized by error recovery
 export function labelRangeOfRef(context: any): [number, number] | null {
@@ -180,5 +195,22 @@ export function participantNamesInGroup(ctx: any): string[] {
     return Array.isArray(names) ? names : [];
   } catch {
     return [];
+  }
+}
+
+// Type guards for parser contexts (kept here to avoid direct parser imports in components)
+export function isGroupContext(node: any): boolean {
+  return node instanceof (sequenceParser as any).GroupContext;
+}
+
+export function isParticipantContext(node: any): boolean {
+  return node instanceof (sequenceParser as any).ParticipantContext;
+}
+
+export function participantNameOf(ctx: any): string | undefined {
+  try {
+    return ctx?.name?.()?.getFormattedText?.();
+  } catch {
+    return undefined;
   }
 }

@@ -75,6 +75,7 @@ import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { codeRangeOf } from "@/parser/helpers";
 import { useArrow } from "../useArrow";
+import { signatureOf } from "@/parser/helpers";
 
 function isNullOrUndefined(value: any) {
   return value === null || value === undefined;
@@ -91,7 +92,7 @@ export const InteractionAsync = (props: {
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
   const asyncMessage = props.context?.asyncMessage();
-  const signature = asyncMessage?.content()?.getFormattedText();
+  const signature = signatureOf(asyncMessage);
   const providedSource = asyncMessage?.ProvidedFrom();
   const source = providedSource || props.origin;
   const target = asyncMessage?.to()?.getFormattedText();
@@ -107,15 +108,11 @@ export const InteractionAsync = (props: {
   const messageClassNames = props.commentObj?.messageClassNames;
   const messageTextStyle = props.commentObj?.messageStyle;
   const getIsCurrent = () => {
-    const start = asyncMessage.start.start;
-    const stop = asyncMessage.stop.stop + 1;
-    if (
-      isNullOrUndefined(cursor) ||
-      isNullOrUndefined(start) ||
-      isNullOrUndefined(stop)
-    )
-      return false;
-    return cursor! >= start && cursor! <= stop;
+    const range = asyncMessage ? (require("@/parser/helpers") as any).offsetRangeOf(asyncMessage) : null;
+    const start = range ? range[0] : undefined;
+    const endExclusive = range ? range[1] : undefined;
+    if (isNullOrUndefined(cursor) || isNullOrUndefined(start) || isNullOrUndefined(endExclusive)) return false;
+    return cursor! >= start && cursor! < endExclusive;
   };
   return (
     <div
