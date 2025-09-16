@@ -33,7 +33,7 @@
 
 - Store atoms (see `src/store/Store.ts`):
   - `messagesModelAtom` exposes messages IR for consumers.
-  - `participantsModelAtom` exposes participants IR for staged adoption.
+- `participantsAtom` exposes participants IR (canonical source).
 - Runtime consumers:
   - `MessageLayer`: origin calculation from messages IR.
   - `WidthOfContext`: computes extra width using messages IR.

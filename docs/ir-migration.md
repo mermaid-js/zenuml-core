@@ -46,7 +46,7 @@ Delivered in this branch:
     - `OrderedParticipants` starter/ordering
 
 - Participants IR (`src/ir/participants.ts`)
-  - Implemented; runtime adoption is incremental (kept legacy participants for stability after initial freeze).
+  - Implemented; now the canonical runtime source via `participantsAtom`.
 
 - Legacy removal and tests
   - Removed runtime `MessageCollector.ts`; tests now assert IR outputs.
@@ -129,4 +129,3 @@ Acceptance
 - Helpers: `src/parser/helpers.ts`
 - Messages IR: `src/ir/messages.ts`
 - Participants IR: `src/ir/participants.ts`
-

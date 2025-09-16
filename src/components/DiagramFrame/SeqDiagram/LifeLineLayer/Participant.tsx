@@ -6,7 +6,7 @@ import {
   diagramElementAtom,
   modeAtom,
   onSelectAtom,
-  participantsModelAtom,
+  participantsAtom,
   RenderMode,
   selectedAtom,
   stickyOffsetAtom,
@@ -27,7 +27,7 @@ export const Participant = (props: {
 }) => {
   const elRef = useRef<HTMLDivElement>(null);
   const mode = useAtomValue(modeAtom);
-  const participantsModel = useAtomValue(participantsModelAtom);
+  const participantsModel = useAtomValue(participantsAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);

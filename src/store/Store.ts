@@ -36,7 +36,8 @@ export const messagesModelAtom = atom((get) => {
   return ctx ? buildMessagesModel(ctx) : [];
 });
 
-export const participantsModelAtom = atom((get) => {
+// Participants IR is the canonical source of participants
+export const participantsAtom = atom((get) => {
   const ctx = get(rootContextAtom);
   return ctx ? buildParticipantsModel(ctx) : [];
 });

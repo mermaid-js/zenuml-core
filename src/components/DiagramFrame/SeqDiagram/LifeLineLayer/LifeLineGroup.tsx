@@ -1,6 +1,6 @@
 import { LifeLine } from "./LifeLine";
 import { useAtomValue } from "jotai";
-import { coordinatesAtom, participantsModelAtom } from "@/store/Store";
+import { coordinatesAtom, participantsAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { participantNamesInGroup } from "@/parser/helpers";
 
@@ -13,7 +13,7 @@ export const LifeLineGroup = (props: {
   renderLifeLine: any;
 }) => {
   const coordinates = useAtomValue(coordinatesAtom);
-  const participantsModel = useAtomValue(participantsModelAtom);
+  const participantsModel = useAtomValue(participantsAtom);
   const participantNames = participantNamesInGroup(props.context);
   const entities = participantNames
     .map((n) => participantsModel.find((p) => p.name === n))
