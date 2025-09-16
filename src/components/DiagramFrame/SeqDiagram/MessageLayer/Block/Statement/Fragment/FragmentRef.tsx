@@ -3,7 +3,7 @@ import { useFragmentData } from "./useFragmentData";
 import { Numbering } from "../../../Numbering";
 import { Comment } from "../Comment/Comment";
 import { MessageLabel } from "../../../MessageLabel";
-import { labelRangeOfRef } from "@/parser/helpers";
+import { labelRangeOfRef, formattedTextOf } from "@/parser/helpers";
 
 export const FragmentRef = (props: {
   context: any;
@@ -17,7 +17,7 @@ export const FragmentRef = (props: {
     useFragmentData(props.context, props.origin);
   const refCtx = props.context?.ref?.();
   const content = refCtx?.Content?.();
-  const contentLabel = content?.getFormattedText() || "";
+  const contentLabel = formattedTextOf(content);
   const contentRange = labelRangeOfRef(refCtx);
   const contentPosition: [number, number] = contentRange ?? [-1, -1];
 

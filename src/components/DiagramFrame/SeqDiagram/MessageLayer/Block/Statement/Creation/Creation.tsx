@@ -1,7 +1,7 @@
 import { cn } from "@/utils";
 import { Message } from "../Message";
 import { Occurrence } from "../Interaction/Occurrence/Occurrence";
-import { codeRangeOf } from "@/parser/helpers";
+import { codeRangeOf, formattedTextOf } from "@/parser/helpers";
 import {
   LIFELINE_WIDTH,
   OCCURRENCE_BAR_SIDE_WIDTH,
@@ -41,13 +41,10 @@ export const Creation = (props: {
   const messageClassNames = props.commentObj?.messageClassNames;
 
   const assignee = useMemo(() => {
-    function safeCodeGetter(context: any) {
-      return (context && context.getFormattedText()) || "";
-    }
     const assignment = creation?.creationBody().assignment();
     if (!assignment) return "";
-    const assignee = safeCodeGetter(assignment.assignee());
-    const type = safeCodeGetter(assignment.type());
+    const assignee = formattedTextOf(assignment.assignee?.());
+    const type = formattedTextOf(assignment.type?.());
     return assignee + (type ? ":" + type : "");
   }, [creation]);
 

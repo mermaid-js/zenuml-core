@@ -73,7 +73,7 @@ import { Message } from "../Message";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
-import { codeRangeOf } from "@/parser/helpers";
+import { codeRangeOf, formattedTextOf } from "@/parser/helpers";
 import { useArrow } from "../useArrow";
 import { signatureOf, offsetRangeOf } from "@/parser/helpers";
 
@@ -95,7 +95,7 @@ export const InteractionAsync = (props: {
   const signature = signatureOf(asyncMessage);
   const providedSource = asyncMessage?.ProvidedFrom();
   const source = providedSource || props.origin;
-  const target = asyncMessage?.to()?.getFormattedText();
+  const target = formattedTextOf(asyncMessage?.to?.());
   const isSelf = source === target;
 
   const { translateX, interactionWidth, rightToLeft } = useArrow({

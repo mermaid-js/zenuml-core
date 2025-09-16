@@ -8,6 +8,7 @@ import { capitalize } from "radash";
 import { cn } from "@/utils";
 import "./FragmentSection.css";
 import Icon from "@/components/Icon/Icons";
+import { formattedTextOf } from "@/parser/helpers";
 
 export const FragmentSection = (props: {
   context: any;
@@ -27,7 +28,7 @@ export const FragmentSection = (props: {
   } = useFragmentData(props.context, props.origin);
   const section = props.context.section();
   const braceBlock = section?.braceBlock();
-  const atom = section?.atom()?.getFormattedText();
+  const atom = formattedTextOf(section?.atom?.());
   const blockInSection = braceBlock?.block();
 
   const label = atom ?? capitalize("section");

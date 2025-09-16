@@ -1,7 +1,7 @@
 import { CSSProperties, useMemo } from "react";
 import { MessageLabel } from "../../../../MessageLabel";
 import { Numbering } from "../../../../Numbering";
-import { labelRangeOfMessage } from "@/parser/helpers";
+import { formattedTextOf, labelRangeOfMessage } from "@/parser/helpers";
 
 export const SelfInvocationAsync = (props: {
   context?: any;
@@ -9,7 +9,7 @@ export const SelfInvocationAsync = (props: {
   textStyle?: CSSProperties;
   classNames?: string;
 }) => {
-  const content = props.context?.content();
+  const content = props.context?.content?.();
   const labelPosition: [number, number] = useMemo(() => {
     return labelRangeOfMessage(props.context, "async");
   }, [props.context]);
@@ -21,7 +21,7 @@ export const SelfInvocationAsync = (props: {
         <MessageLabel
           style={props.textStyle}
           className={props.classNames}
-          labelText={content?.getFormattedText()}
+          labelText={formattedTextOf(content)}
           labelPosition={labelPosition}
           isAsync={true}
           isSelf={true}

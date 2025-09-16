@@ -2,7 +2,7 @@ import { useEditLabelImproved, specialCharRegex } from "@/functions/useEditLabel
 import { useAtom, useAtomValue } from "jotai";
 import "../../../../LifeLineLayer/EditableLabel.css";
 import { codeAtom, modeAtom, onContentChangeAtom, RenderMode } from "@/store/Store";
-import { labelRangeOfCondition } from "@/parser/helpers";
+import { formattedTextOf, labelRangeOfCondition } from "@/parser/helpers";
 
 const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
 
@@ -10,7 +10,7 @@ export const ConditionLabel = (props: { condition: any }) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
-  const labelText = props.condition?.getFormattedText() ?? "";
+  const labelText = formattedTextOf(props.condition);
   const labelHandler = useEditLabelImproved((e) => {
       e.preventDefault();
       e.stopPropagation();

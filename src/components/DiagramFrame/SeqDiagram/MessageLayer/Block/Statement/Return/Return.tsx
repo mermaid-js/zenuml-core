@@ -5,7 +5,7 @@ import { Message } from "../Message";
 import { useAtomValue } from "jotai";
 import { onElementClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { codeRangeOf } from "@/parser/helpers";
+import { codeRangeOf, formattedTextOf } from "@/parser/helpers";
 import { SyntheticEvent } from "react";
 import { useArrow } from "../useArrow";
 import { signatureOf } from "@/parser/helpers";
@@ -29,7 +29,7 @@ export const Return = (props: {
 
   const target =
     // TODO: move this logic to the parser (ReturnTo)
-    asyncMessage?.to()?.getFormattedText() ||
+    formattedTextOf(asyncMessage?.to?.()) ||
     props.context?.ret()?.ReturnTo() ||
     _STARTER_;
 

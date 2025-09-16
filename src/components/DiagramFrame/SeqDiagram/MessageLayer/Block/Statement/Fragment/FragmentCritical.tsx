@@ -7,6 +7,7 @@ import { cn } from "@/utils";
 import { Block } from "../../Block";
 import "./FragmentCritical.css";
 import Icon from "@/components/Icon/Icons";
+import { formattedTextOf } from "@/parser/helpers";
 
 export const FragmentCritical = (props: {
   context: any;
@@ -27,7 +28,7 @@ export const FragmentCritical = (props: {
 
   const critical = props.context.critical();
   const braceBlock = critical?.braceBlock();
-  const atom = critical?.atom()?.getFormattedText();
+  const atom = formattedTextOf(critical?.atom?.());
   const blockInCritical = braceBlock?.block();
 
   const label = atom ? `Critical:${atom}` : "Critical";

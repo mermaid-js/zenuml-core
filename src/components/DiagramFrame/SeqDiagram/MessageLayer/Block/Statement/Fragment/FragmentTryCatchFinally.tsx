@@ -9,6 +9,7 @@ import { blockLength } from "@/utils/Numbering";
 import "./FragmentTryCatchFinally.css";
 import { useMemo } from "react";
 import Icon from "@/components/Icon/Icons";
+import { formattedTextOf } from "@/parser/helpers";
 
 export const FragmentTryCatchFinally = (props: {
   context: any;
@@ -28,7 +29,7 @@ export const FragmentTryCatchFinally = (props: {
   } = useFragmentData(props.context, props.origin);
 
   const exception = (ctx: any) => {
-    return ctx?.invocation()?.parameters()?.getFormattedText();
+    return formattedTextOf(ctx?.invocation?.()?.parameters?.());
   };
   const blockInCatchBlock = (ctx: any) => {
     return ctx?.braceBlock()?.block();

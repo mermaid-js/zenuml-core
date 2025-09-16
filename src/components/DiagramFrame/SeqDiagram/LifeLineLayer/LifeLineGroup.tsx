@@ -2,7 +2,7 @@ import { LifeLine } from "./LifeLine";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, participantsAtom } from "@/store/Store";
 import { cn } from "@/utils";
-import { participantNamesInGroup } from "@/parser/helpers";
+import { participantNamesInGroup, formattedTextOf } from "@/parser/helpers";
 
 // Constants
 const LIFELINE_GROUP_OUTLINE_MARGIN = 2; // Small margin for group outline positioning
@@ -25,7 +25,7 @@ export const LifeLineGroup = (props: {
     coordinates.right(entities[entities.length - 1].name) -
     LIFELINE_GROUP_OUTLINE_MARGIN;
 
-  const name = props.context?.name()?.getFormattedText();
+  const name = formattedTextOf(props.context?.name?.());
   // Merged the outer and middle divs while preserving all functionality
   return (
     <div

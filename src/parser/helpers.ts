@@ -21,6 +21,17 @@ export function commentOf(ctx: any): string | undefined {
   }
 }
 
+// Safe wrapper around ParserRuleContext#getFormattedText
+export function formattedTextOf(ctx: any): string {
+  try {
+    return typeof ctx?.getFormattedText === "function"
+      ? ctx.getFormattedText()
+      : "";
+  } catch {
+    return "";
+  }
+}
+
 // Wrap SignatureText prototype method if available
 export function signatureOf(ctx: any): string {
   try {
@@ -184,6 +195,7 @@ export default {
   labelRangeOfCondition,
   commentOf,
   signatureOf,
+  formattedTextOf,
 };
 
 // Group utilities
