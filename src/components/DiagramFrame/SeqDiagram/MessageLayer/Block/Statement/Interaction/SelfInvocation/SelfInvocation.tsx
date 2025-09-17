@@ -22,7 +22,10 @@ export const SelfInvocation = (props: {
   }, [props.vm?.labelRange, props.context]);
 
   const onClick = () => {
-    onMessageClick(props.context, messageRef.current!);
+    onMessageClick(
+      { context: props.context, startOffset: props.vm?.range ? props.vm.range[0] : undefined },
+      messageRef.current!,
+    );
   };
 
   return (

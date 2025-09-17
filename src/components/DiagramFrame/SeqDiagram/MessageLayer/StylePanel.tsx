@@ -112,20 +112,13 @@ export const StylePanel = () => {
       // make sure this is triggered after the outsideclicking
       setTimeout(() => {
         const message = messageData.current;
-        // Legacy context-based computation used for actual behavior
-        const legacyContext =
-          (payloadOrContext && payloadOrContext.context) || payloadOrContext;
-        const legacyRange = offsetRangeOf(legacyContext);
-        const legacyStart = Array.isArray(legacyRange) ? legacyRange[0] : 0;
-        message.start = legacyStart;
-
-        // New approach parity: optional startOffset or codeRange in payload
+        // New approach: expect startOffset or codeRange
         const hasNewPayload =
           payloadOrContext &&
           (typeof payloadOrContext.startOffset === "number" ||
             payloadOrContext.codeRange);
+        let newStart: number | null = null;
         if (hasNewPayload) {
-          let newStart: number | null = null;
           if (typeof payloadOrContext.startOffset === "number") {
             newStart = payloadOrContext.startOffset as number;
           } else if (payloadOrContext.codeRange) {
@@ -134,16 +127,26 @@ export const StylePanel = () => {
               newStart = offsetFromLineCol(code, cr.start.line, cr.start.col);
             } catch {}
           }
-          if (newStart != null) {
-            if (newStart !== legacyStart) {
-              console.warn("[stylepanel] start offset mismatch", {
-                legacyStart,
-                newStart,
-              });
-            } else {
-              console.log("[stylepanel] start offset parity ✓", { start: newStart });
-            }
-          }
+        }
+        // Do not fallback. If newStart is not provided, bail out.
+        if (newStart == null) {
+          console.warn("[stylepanel] missing startOffset/codeRange in payload; aborting");
+          return;
+        }
+        message.start = newStart;
+
+        // Parity check (do not affect behavior)
+        const legacyContext =
+          (payloadOrContext && payloadOrContext.context) || payloadOrContext;
+        const legacyRange = offsetRangeOf(legacyContext);
+        const legacyStart = Array.isArray(legacyRange) ? legacyRange[0] : 0;
+        if (newStart !== legacyStart) {
+          console.warn("[stylepanel] start offset mismatch", {
+            legacyStart,
+            newStart,
+          });
+        } else {
+          console.log("[stylepanel] start offset parity ✓", { start: newStart });
         }
         message.lineHead = getLineHead(code, message.start);
         message.prevLine = getPrevLine(code, message.start);
