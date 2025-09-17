@@ -22,6 +22,8 @@ export type MessageVM = {
   // Optional comment text (not styling)
   comment?: string | null;
   isSelf: boolean;
+  // Whether the label is editable (creation requires valid params)
+  canEditLabel?: boolean;
   arrow?: {
     translateX: number;
     interactionWidth: number;
@@ -37,6 +39,10 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
     const source = m.providedFrom ?? m.from;
     const to = m.to;
     const isSelf = (source === to) || !to;
+    const isCreation = m.type === OwnableMessageType.CreationMessage;
+    const label = m.labelRange ?? null;
+    const labelValid = Array.isArray(label) && label.length === 2 && label[0] != null && label[1] != null && label[0] >= 0 && label[1] >= 0;
+    const canEditLabel = isCreation ? !!labelValid : true;
     return {
       id: `${m.from ?? ""}->${m.to ?? ""}:${m.signature}:${m.type}:${i}`,
       type: m.type,
@@ -50,6 +56,7 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
       codeRange: m.codeRange ?? null,
       comment: m.comment ?? null,
       isSelf,
+      canEditLabel,
     };
   });
 }

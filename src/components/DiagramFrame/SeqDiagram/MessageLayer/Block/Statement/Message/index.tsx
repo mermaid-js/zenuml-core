@@ -5,25 +5,14 @@ import { useAtomValue } from "jotai";
 import { Point } from "./Point";
 import { Numbering } from "../../../Numbering";
 import { MessageLabel } from "../../../MessageLabel";
-import { labelRangeOfMessage } from "@/parser/helpers";
+// Note: label range and editability come from VM via overrides
 
 type Context = any;
 
-const getEditable = (context: Context, mode: RenderMode, type: string) => {
+const getEditableDefault = (mode: RenderMode, type: string) => {
   if (mode === RenderMode.Static) return false;
-  switch (type) {
-    case "sync":
-    case "async":
-    case "return":
-      return true;
-    case "creation": {
-      // Avoid editing "«create»" label for invalid creations
-      const isValid = context?.isParamValid?.() > 0;
-      return isValid;
-    }
-    default:
-      return false;
-  }
+  if (type === "creation") return false; // rely on override from VM
+  return ["sync", "async", "return"].includes(type);
 };
 
 
@@ -59,16 +48,14 @@ export const Message = (props: {
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const isAsync = type === "async";
-  const editable =
-    editableOverride ?? getEditable(context, mode, type || "");
+  const editable = editableOverride ?? getEditableDefault(mode, type || "");
   const stylable =
     stylableOverride ??
     (mode !== RenderMode.Static &&
       ["sync", "async", "return", "creation"].includes(type));
   const labelText =
     type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
-  const labelPosition =
-    labelRangeOverride ?? labelRangeOfMessage(context, (type || "") as any);
+  const labelPosition = labelRangeOverride ?? [-1, -1];
   const borderStyle: "solid" | "dashed" | undefined = {
     sync: "solid",
     async: "solid",
@@ -80,9 +67,9 @@ export const Message = (props: {
     if (!stylable || !messageRef.current) return;
     if (onMessageClickOverride) {
       onMessageClickOverride(messageRef.current);
-      return;
+    } else {
+      onMessageClick(context, messageRef.current);
     }
-    onMessageClick(context, messageRef.current);
   };
 
   return (

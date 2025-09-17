@@ -34,3 +34,34 @@ All migrated components now consume arrow/geometry and related presentation data
 
 - **Rollback hygiene** – Keeping the old context-based components intact makes it easy to revert when regressions surface. Prefer a clean switch (all VM or all context) rather than partial hybrids.
 - **Range-driven highlighting** – Highlight state should be derived from the VM-provided statement `range`. Keeping cursor math inside the component caused drift once contexts disappeared, so always lift that information into the VM lookup before rendering.
+
+### Outstanding
+
+- Message primitive (`Message/index.tsx`) still references parser context for editability and label range fallback. Plan:
+  - Add `canEditLabel` to `MessageVM` (encodes creation validity and type-based editability) and consume it in `Message`.
+  - Pass `labelRangeOverride={vm.labelRange ?? null}` and `onMessageClickOverride` from parents using `vm.codeRange`.
+  - Remove `labelRangeOfMessage` and `context.isParamValid()` from `Message`; remove parser-based click wiring.
+  - Acceptance: `Message` has no parser imports or context reads; editing and clicks rely solely on VM props.
+
+- SelfInvocation components
+  - `Interaction/SelfInvocation` still uses parser helpers (`signatureOf`, `labelRangeOfMessage`) and passes parser `context` into click handlers.
+  - Plan: treat self-invocations as a view of `MessageVM` when `isSelf === true`.
+    - Pass `labelRangeOverride={vm.labelRange}` and `labelText={vm.signature}`; click uses `vm.codeRange`.
+    - Remove parser imports and the `context` prop from SelfInvocation.
+  - `InteractionAsync/SelfInvocationAsync` already accepts `labelText` and `labelRange` props; just thread VM props consistently.
+
+- Fragment labels
+  - `FragmentRef` and `ConditionLabel` still use parser helpers (`formattedTextOf`, `labelRangeOfRef/Condition`).
+  - Plan: introduce minimal VMs for fragment labels (RefVM, ConditionVM) and pass them down; remove parser accesses from UI.
+
+- Lifeline group metadata
+  - `LifeLineLayer`/`LifeLineGroup` use parser helpers to enumerate groups and read group names.
+  - Plan: extend Participants IR or provide a small Group VM that maps group contexts to participant name arrays and label text; render purely from VM and coordinates.
+
+- Style panel click wiring
+  - `StylePanel` sets `onMessageClickAtom` with `(context, element)` and uses `offsetRangeOf(context)`.
+  - Plan: change the click contract to pass `CodeRange` (from VM) and the element; update Interaction/Creation/Return to pass `vm.codeRange`.
+
+- Fallbacks in message components
+  - `Interaction` still falls back to `signatureOf(context)`; `Creation` and `Return` fall back to parser for `codeRange` or assignee text.
+  - Plan: rely solely on VM fields (`signature`, `codeRange`, creation assignment pieces) and remove parser fallbacks once VM is guaranteed present at all call sites.

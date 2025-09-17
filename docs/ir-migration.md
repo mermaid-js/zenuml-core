@@ -102,6 +102,8 @@ Acceptance
 Acceptance
 - Fragment labels remain editable and correct on valid input; invalid inputs do not expose synthetic label ranges.
 
+Status note: Fragment components still use parser helpers directly; introduce `RefVM` and `ConditionVM` and thread them to UI.
+
 ### Phase 4 (Tighten the Boundary)
 
 - Audit components for residual parser/token accesses (e.g., `start.start`, `stop.stop`).
@@ -109,6 +111,11 @@ Acceptance
 
 Acceptance
 - No remaining token math in components; helpers and IR are the only boundary.
+
+Status note: Several components still import parser helpers. Targeted follow-ups:
+- SelfInvocation (sync) to consume `MessageVM` instead of parser context.
+- LifeLineGroup to read group labels and membership from a VM or Participants IR extension.
+- StylePanel to accept `CodeRange` rather than parser `context` in click handler.
 
 ### Phase 5 (View Models — Remove Parser Context From Components)
 
@@ -140,6 +147,15 @@ Acceptance
 - Components no longer receive parser contexts.
 - Editing and layout derive from VMs and helpers; tests cover selectors/builders.
 - No visual regressions across sample diagrams.
+
+5) Message primitive (index.tsx)
+   - Problem: `Message/index.tsx` still reads parser context for editability and label ranges and calls `onMessageClick` with parser context.
+   - Plan:
+     - Add `canEditLabel` to `MessageVM` (true for creation with valid params; otherwise based on type and mode) and use it to drive editability.
+     - Ensure parents pass `labelRangeOverride={vm.labelRange ?? null}` and `onMessageClickOverride` based on `vm.codeRange`.
+     - Stop using `labelRangeOfMessage` and `context.isParamValid()` in `Message`.
+     - Remove the `context`-based call in `onClick`; rely on `onMessageClickOverride` only.
+   - Acceptance: `Message` has no parser imports or context reads; tests updated to assert behavior via VM props.
 
 ## Validation Strategy
 

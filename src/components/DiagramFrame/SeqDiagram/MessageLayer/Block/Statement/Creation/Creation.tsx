@@ -138,6 +138,7 @@ export const Creation = (props: {
           textStyle={messageTextStyle}
           style={{ width: `calc(100% - ${containerOffset}px)` }}
           labelRangeOverride={vm?.labelRange ?? null}
+          editableOverride={vm?.canEditLabel ?? false}
         />
       </div>
       <Occurrence

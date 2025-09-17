@@ -142,6 +142,7 @@ export const Return = (props: {
           rtl={rightToLeft}
           type="return"
           number={props.number}
+          labelRangeOverride={vm?.labelRange ?? null}
         />
       )}
     </div>
