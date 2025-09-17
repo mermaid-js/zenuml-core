@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Divider Component", () => {
   test("should render divider with all features", async ({ page }) => {
-    await page.goto("http://localhost:8082/cy/divider.html");
+    await page.goto("http://localhost:8080/cy/divider.html");
     
     // Wait for the page to load
     await page.waitForLoadState("networkidle");
