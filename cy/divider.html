@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Divider Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      }
+      .test-section {
+        margin-bottom: 40px;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      .test-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Divider Component Test</h1>
+    
+    <div class="test-section">
+      <div class="test-title">Comprehensive Divider Test</div>
+      <div id="diagram1" class="diagram">
+        <pre class="zenuml" style="margin: 0">
+A
+==Basic Divider==
+B
+==[red,bold]Styled Divider==
+C
+==This is a very long divider text that should wrap properly==
+D
+==First Divider==
+E
+==Second Divider==
+F
+==[italic,underline]Third Divider==
+G
+        </pre>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main-cy.ts"></script>
+  </body>
+</html>
