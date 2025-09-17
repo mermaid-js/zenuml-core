@@ -64,24 +64,16 @@ const parsePrevComment = (
 //   "  //   [bold]  note"     -> "note"
 //   "// [bold,italic]"        -> ""
 //   "not a comment line"      -> "not a comment line" (fallback)
-const extractCommentSuffix = (prevLine: string): string => {
-  if (!prevLine) return "";
-  const m = prevLine.match(/^\s*\/\/\s*(?:\[[^\]]*\])?\s*(.*)$/);
-  return m ? m[1].trim() : prevLine.trim();
-};
-
 const formatCommentLine = (
   leadingSpaces: string,
   styles: string[],
   suffix: string,
 ) => {
   const styleList = styles.filter(Boolean).join(", ");
-  const suffixSegment = suffix ? ` ${suffix}` : " ";
-  return `${leadingSpaces}// [${styleList}]${suffixSegment}`;
+  const suffixSegment = suffix ? ` ${suffix}` : "";
+  const line = `${leadingSpaces}// [${styleList}]${suffixSegment}`;
+  return line.endsWith("\n") ? line : `${line}\n`;
 };
-
-const ensureTrailingNewline = (value: string) =>
-  value.endsWith("\n") ? value : `${value}\n`;
 
 export const applyStyleToggle = (
   code: string,
@@ -89,20 +81,11 @@ export const applyStyleToggle = (
   style: string,
 ) => {
   const { anchor, comment } = selection;
-  if (!comment.exists) {
-    const commentLine = `${comment.leading}// [${style}]\n`;
-    return code.slice(0, anchor.lineStart) + commentLine + code.slice(anchor.lineStart);
-  }
+  const start= comment.exists ? comment.replaceHead : anchor.lineStart;
 
   const styles = toggleStyle(comment.styles, style);
-  const commentLine = ensureTrailingNewline(
-    formatCommentLine(comment.leading, styles, comment.suffix),
-  );
-  return (
-    code.slice(0, comment.replaceHead) +
-    commentLine +
-    code.slice(anchor.lineStart)
-  );
+  const commentLine = formatCommentLine(comment.leading, styles, comment.suffix);
+  return code.slice(0, start) +  commentLine + code.slice(anchor.lineStart);
 };
 
 export const analyzeStyleSelection = (
