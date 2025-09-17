@@ -64,7 +64,7 @@ Delivered in this branch:
   - ConditionLabel uses `labelRangeOfCondition`.
 - Message VM adoption
   - `messagesVMAtom` adapts messages IR for presentation (`id`, `from`, `to`, `signature`, `range`, `labelRange`).
-  - Arrow geometry now provided at the VM layer via enhancers for all message kinds (sync, async, creation, return) with component-side parity checks. Return uses a dedicated enhancer to derive `source`/`target` from parser context until IR adds an explicit `returnTo`.
+  - Arrow geometry is provided at the VM layer via enhancers for all message kinds (sync, async, creation, return). Return uses a dedicated enhancer to derive `source`/`target` from parser context until IR adds an explicit `returnTo`.
   - Added React tests to lock the VM expectations for async and sync interactions; Return tests cover bare and async-return forms.
 
 ## Phased Plan

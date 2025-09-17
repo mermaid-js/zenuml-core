@@ -3,11 +3,11 @@
 ## Current Migration Status (as of latest update)
 
 ### Successfully Migrated to VM Pattern
-- **Creation component** - Uses VM arrow data (via enhancer) with fallback parity checking
-- **Interaction component** - Uses VM arrow data (via enhancer) with fallback parity checking
+- **Creation component** - Uses VM arrow data (via enhancer)
+- **Interaction component** - Uses VM arrow data (via enhancer)
 - **InteractionAsync component** - Uses VM arrow data (via enhancer)
-- **Divider component** - Uses VM data for width, translateX, and styling with comprehensive parity checking
-- **Return component** - Uses VM arrow data via a dedicated Return enhancer with parity checking; target fallback remains until IR supports `returnTo`
+- **Divider component** - Uses VM data for width, translateX, and styling
+- **Return component** - Uses VM arrow data via a dedicated Return enhancer; target fallback remains until IR supports `returnTo`
 
 ### Migration Completed
 🎉 **All components have been successfully migrated away from the `useArrow` hook!**
@@ -17,18 +17,12 @@
 - Components have been refactored to use a dedicated `arrowGeometry.ts` module
 - All migration goals achieved without breaking Playwright tests
 
-### Parity Checking Implementation
-All migrated components now include comprehensive parity checking that:
-- Compares VM-provided values against fallback calculations
-- Logs warnings when mismatches exceed tolerance (0.1px for numeric values)
-- Logs success messages with ✓ when values match within tolerance
-- Includes detailed diagnostic information for debugging mismatches
-- Covers all geometric properties (translateX, interactionWidth, rightToLeft, layer counts)
-- Includes styling validation for Divider component
+### VM Geometry
+All migrated components now consume arrow/geometry and related presentation data exclusively from the VM layer. Where VM data is unavailable, components render safe defaults or use limited local fallbacks (e.g., Divider width/translateX).
 
 ### Migration Lessons
 
-- **Return semantics** – Bare `return x;` expressions lack an explicit target in the current IR. We now compute Return arrow geometry in a dedicated VM enhancer that derives `source`/`target` from parser context (`async.From() | ret.From()` and `async.to | ReturnTo()`), with parity checking in the component. IR should still gain an explicit `returnTo` to remove this special-case.
+- **Return semantics** – Bare `return x;` expressions lack an explicit target in the current IR. We now compute Return arrow geometry in a dedicated VM enhancer that derives `source`/`target` from parser context (`async.From() | ret.From()` and `async.to | ReturnTo()`). IR should still gain an explicit `returnTo` to remove this special-case.
 
 - **Arrow geometry** – ✅ **RESOLVED**: All components successfully migrated from `useArrow` hook to direct `calculateArrowGeometry` usage. Components now use memoized calculations with proper dependency management, eliminating the React hook overhead while maintaining the same geometry calculations.
 

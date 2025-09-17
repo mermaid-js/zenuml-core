@@ -81,7 +81,7 @@ export const Statement = (props: {
     };
   }
 
-  // Return VM calculation with arrow parity (specialized semantics)
+  // Return VM calculation via dedicated enhancer (no parity checks in component)
   const retCtx = props.context?.ret?.();
   const retAsync = retCtx?.asyncMessage?.();
   const retKeyRange = retAsync

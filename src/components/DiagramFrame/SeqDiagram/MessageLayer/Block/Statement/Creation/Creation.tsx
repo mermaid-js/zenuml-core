@@ -50,7 +50,7 @@ export const Creation = (props: {
   };
   const isCurrent = getIsCurrent();
 
-  // Use arrow geometry from VM with parity checking
+  // Use arrow geometry from VM only (no parity checks)
   const { translateX, interactionWidth, rightToLeft } = useMemo(() => {
     if (!vm?.arrow) {
       console.warn("[creation] missing VM arrow; rendering with zero geometry", { signature });

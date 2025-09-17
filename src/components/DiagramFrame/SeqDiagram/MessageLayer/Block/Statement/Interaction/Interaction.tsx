@@ -58,7 +58,7 @@ export const Interaction = (props: {
   };
   const isCurrent = getIsCurrent();
 
-  // Use arrow geometry from VM with parity checking
+  // Use arrow geometry from VM only (no parity checks)
   const { translateX, interactionWidth, originLayers, sourceLayers, targetLayers, rightToLeft } = useMemo(() => {
     if (!vm?.arrow) {
       console.warn("[interaction] missing VM arrow; rendering with zero geometry", { signature });
