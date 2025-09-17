@@ -1,5 +1,4 @@
 import { cn } from "@/utils";
-import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/StringUtil";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   codeAtom,
@@ -9,6 +8,11 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
+import {
+  analyzeMessageSelection,
+  buildUpdatedCode,
+  MessageSelection,
+} from "./StylePanel.helpers";
 // No parser or CodeRange dependency in the click path
 
 const btns = [
@@ -47,7 +51,7 @@ export const StylePanel = () => {
     onContentChange(newCode);
   };
 
-  const messageData = useRef({
+  const messageData = useRef<MessageSelection>({
     start: 0,
     lineHead: 0,
     prevLine: "",
@@ -61,44 +65,19 @@ export const StylePanel = () => {
     onOpenChange: setIsOpen,
   });
 
-  const handleClick = (style: string) => {
+  const onToggleStyle = (style: string) => {
     setIsOpen(false);
     if (!hasSelection) return;
-    const message = messageData.current;
-    if (message.prevLineIsComment) {
-      let newComment = "";
-      if (message.hasStyleBrackets) {
-        let updatedStyles;
 
-        if (existingStyles.includes(style)) {
-          updatedStyles = existingStyles.filter((s) => s !== style);
-        } else {
-          updatedStyles = [...existingStyles, style];
-        }
-
-        newComment = `${message.leadingSpaces}// [${updatedStyles
-          .filter(Boolean)
-          .join(", ")}] ${message.prevLine
-          .slice(message.prevLine.indexOf("]") + 1)
-          .trimStart()}`;
-      } else {
-        newComment = `${message.leadingSpaces}// [${style}] ${message.prevLine
-          .slice((message.prevLine.match(/\/\/*/)?.index || -2) + 2)
-          .trimStart()}`;
-      }
-      if (!newComment.endsWith("\n")) newComment += "\n";
-      updateCode(
-        code.slice(0, getPrevLineHead(code, message.start)) +
-          newComment +
-          code.slice(message.lineHead),
-      );
-    } else {
-      updateCode(
-        code.slice(0, message.lineHead) +
-          `${message.leadingSpaces}// [${style}]\n` +
-          code.slice(message.lineHead),
-      );
-    }
+    // Recompute selection against the latest code to avoid using
+    // stale cached data if the document changed while the panel was open.
+    const start = messageData.current.start;
+    const { selection, existingStyles: freshStyles } = analyzeMessageSelection(
+      code,
+      start,
+    );
+    const newCode = buildUpdatedCode(code, selection, style, freshStyles);
+    updateCode(newCode);
   };
 
   useOutsideClick(refs.floating.current, () => {
@@ -107,40 +86,14 @@ export const StylePanel = () => {
 
   useEffect(() => {
     setOnMessageClick((startOffset: number, element: HTMLElement) => {
-      // make sure this is triggered after the outsideclicking
+      // Run on the next tick so useOutsideClick can close any previous panel first
       setTimeout(() => {
-        const message = messageData.current;
-        // Require startOffset; don't fallback
-        if (typeof startOffset !== "number") {
-          console.warn("[stylepanel] missing startOffset/codeRange in payload; aborting");
-          return;
-        }
-        message.start = startOffset;
-
-        message.lineHead = getLineHead(code, message.start);
-        message.prevLine = getPrevLine(code, message.start);
-        message.leadingSpaces =
-          code.slice(message.lineHead).match(/^\s*/)?.[0] || "";
-        message.prevLineIsComment = message.prevLine.trim().startsWith("//");
-        if (message.prevLineIsComment) {
-          const trimedPrevLine = message.prevLine
-            .trimStart()
-            .slice(2)
-            .trimStart();
-          const styleStart = trimedPrevLine.indexOf("[");
-          const styleEnd = trimedPrevLine.indexOf("]");
-          message.hasStyleBrackets = Boolean(styleStart === 0 && styleEnd);
-          if (message.hasStyleBrackets) {
-            setExistingStyles(
-              trimedPrevLine
-                .slice(styleStart + 1, styleEnd)
-                .split(",")
-                .map((s) => s.trim()),
-            );
-          } else {
-            setExistingStyles([]);
-          }
-        }
+        const { selection, existingStyles: styles } = analyzeMessageSelection(
+          code,
+          startOffset,
+        );
+        messageData.current = selection;
+        setExistingStyles(styles);
         refs.setReference(element);
         setHasSelection(true);
         setIsOpen(true);
@@ -156,7 +109,7 @@ export const StylePanel = () => {
           data-testid="style-panel-toolbar"
         >
           {btns.map((btn) => (
-            <div onClick={() => handleClick(btn.class)} key={btn.name}>
+            <div onClick={() => onToggleStyle(btn.class)} key={btn.name}>
               <div
                 className={cn(
                   "w-6 mx-1 py-1 rounded-md text-black text-center cursor-pointer hover:bg-gray-200",
