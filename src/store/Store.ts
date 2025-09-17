@@ -121,8 +121,14 @@ export const onElementClickAtom = atomWithFunctionValue(
   },
 );
 
+export type MessageClickPayload = {
+  context?: any;
+  startOffset?: number;
+  codeRange?: CodeRange | null;
+};
+
 export const onMessageClickAtom = atomWithFunctionValue<
-  (context: any, element: HTMLElement) => void
+  (payload: MessageClickPayload, element: HTMLElement) => void
 >(() => {});
 
 export const onContentChangeAtom = atomWithFunctionValue<

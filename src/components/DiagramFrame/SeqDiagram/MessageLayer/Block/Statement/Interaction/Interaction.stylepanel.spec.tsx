@@ -44,30 +44,15 @@ function renderInteractionWithStylePanel(code: string) {
 }
 
 describe("StylePanel start offset parity for Interaction", () => {
-  test("parity holds for sync message A->B.m1", async () => {
-    const spyWarn = vi.spyOn(console, "warn");
-    const spyLog = vi.spyOn(console, "log");
-    const { container } = renderInteractionWithStylePanel("A->B.m1");
+  test("opens style panel with new payload for sync message A->B.m1", async () => {
+    const { container, getByTestId } = renderInteractionWithStylePanel("A->B.m1");
     const messageEl = container.querySelector(
       "div.interaction.sync .message",
     ) as HTMLElement;
     expect(messageEl).toBeTruthy();
     fireEvent.click(messageEl);
-
     await waitFor(() => {
-      expect(spyWarn).not.toHaveBeenCalledWith(
-        expect.stringContaining("[stylepanel] start offset mismatch"),
-        expect.anything(),
-      );
+      expect(getByTestId("style-panel-toolbar")).toBeTruthy();
     });
-
-    const anyParity = spyLog.mock.calls.some((args) =>
-      String(args[0]).includes("[stylepanel] start offset parity ✓"),
-    );
-    expect(anyParity).toBe(true);
-
-    spyWarn.mockRestore();
-    spyLog.mockRestore();
   });
 });
-

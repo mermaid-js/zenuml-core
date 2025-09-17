@@ -43,31 +43,15 @@ function renderReturnWithStylePanel(code: string) {
 }
 
 describe("StylePanel start offset parity for Return", () => {
-  test("startOffsetOverride matches legacy context for '@return A->B: ok'", async () => {
-    const spyWarn = vi.spyOn(console, "warn");
-    const spyLog = vi.spyOn(console, "log");
-    const { container } = renderReturnWithStylePanel("@return A->B: ok");
+  test("opens style panel with new payload for '@return A->B: ok'", async () => {
+    const { container, getByTestId } = renderReturnWithStylePanel("@return A->B: ok");
     const messageEl = container.querySelector(
       "div.interaction.return .message",
     ) as HTMLElement;
     expect(messageEl).toBeTruthy();
     fireEvent.click(messageEl);
-
     await waitFor(() => {
-      // Expect no parity mismatch logged
-      expect(spyWarn).not.toHaveBeenCalledWith(
-        expect.stringContaining("[stylepanel] start offset mismatch"),
-        expect.anything(),
-      );
+      expect(getByTestId("style-panel-toolbar")).toBeTruthy();
     });
-
-    // Optionally verify parity ✓ log occurred at least once
-    const anyParity = spyLog.mock.calls.some((args) =>
-      String(args[0]).includes("[stylepanel] start offset parity ✓"),
-    );
-    expect(anyParity).toBe(true);
-
-    spyWarn.mockRestore();
-    spyLog.mockRestore();
   });
 });

@@ -9,7 +9,6 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
-import { offsetRangeOf } from "@/parser/helpers";
 import type { CodeRange } from "@/parser/CodeRange";
 import { offsetFromLineCol } from "@/utils/StringUtil";
 
@@ -42,7 +41,7 @@ export const StylePanel = () => {
   const setOnMessageClick = useSetAtom(onMessageClickAtom);
   const [isOpen, setIsOpen] = useState(false);
   const [existingStyles, setExistingStyles] = useState<string[]>([]);
-  const [messageContext, setMessageContext] = useState("");
+  const [hasSelection, setHasSelection] = useState(false);
 
   const updateCode = (newCode: string) => {
     setCode(newCode);
@@ -65,7 +64,7 @@ export const StylePanel = () => {
 
   const handleClick = (style: string) => {
     setIsOpen(false);
-    if (!messageContext) return;
+    if (!hasSelection) return;
     const message = messageData.current;
     if (message.prevLineIsComment) {
       let newComment = "";
@@ -135,19 +134,6 @@ export const StylePanel = () => {
         }
         message.start = newStart;
 
-        // Parity check (do not affect behavior)
-        const legacyContext =
-          (payloadOrContext && payloadOrContext.context) || payloadOrContext;
-        const legacyRange = offsetRangeOf(legacyContext);
-        const legacyStart = Array.isArray(legacyRange) ? legacyRange[0] : 0;
-        if (newStart !== legacyStart) {
-          console.warn("[stylepanel] start offset mismatch", {
-            legacyStart,
-            newStart,
-          });
-        } else {
-          console.log("[stylepanel] start offset parity ✓", { start: newStart });
-        }
         message.lineHead = getLineHead(code, message.start);
         message.prevLine = getPrevLine(code, message.start);
         message.leadingSpaces =
@@ -173,7 +159,7 @@ export const StylePanel = () => {
           }
         }
         refs.setReference(element);
-        setMessageContext(legacyContext);
+        setHasSelection(true);
         setIsOpen(true);
       }, 0);
     });
@@ -182,7 +168,10 @@ export const StylePanel = () => {
   return (
     <div id="style-panel" ref={refs.setFloating} style={floatingStyles}>
       {isOpen && (
-        <div className="flex bg-white shadow-md z-10 rounded-md p-1">
+        <div
+          className="flex bg-white shadow-md z-10 rounded-md p-1"
+          data-testid="style-panel-toolbar"
+        >
           {btns.map((btn) => (
             <div onClick={() => handleClick(btn.class)} key={btn.name}>
               <div

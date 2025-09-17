@@ -47,30 +47,15 @@ function renderCreationWithStylePanel(code: string) {
 }
 
 describe("StylePanel start offset parity for Creation", () => {
-  test("parity holds for 'a = new A'", async () => {
-    const spyWarn = vi.spyOn(console, "warn");
-    const spyLog = vi.spyOn(console, "log");
-    const { container } = renderCreationWithStylePanel("a = new A");
+  test("opens style panel with new payload for 'a = new A'", async () => {
+    const { container, getByTestId } = renderCreationWithStylePanel("a = new A");
     const messageEl = container.querySelector(
       "div.interaction.creation .message",
     ) as HTMLElement;
     expect(messageEl).toBeTruthy();
     fireEvent.click(messageEl);
-
     await waitFor(() => {
-      expect(spyWarn).not.toHaveBeenCalledWith(
-        expect.stringContaining("[stylepanel] start offset mismatch"),
-        expect.anything(),
-      );
+      expect(getByTestId("style-panel-toolbar")).toBeTruthy();
     });
-
-    const anyParity = spyLog.mock.calls.some((args) =>
-      String(args[0]).includes("[stylepanel] start offset parity ✓"),
-    );
-    expect(anyParity).toBe(true);
-
-    spyWarn.mockRestore();
-    spyLog.mockRestore();
   });
 });
-
