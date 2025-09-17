@@ -16,8 +16,8 @@ import { commentOf, offsetRangeOf } from "@/parser/helpers";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMByStartAtom } from "@/store/Store";
-import { calculateArrowGeometry } from "./arrowGeometry";
 import { centerOf } from "./utils";
+import { enhanceMessageVMWithArrow } from "@/vm/messages";
 
 export const Statement = (props: {
   context: any;
@@ -33,72 +33,22 @@ export const Statement = (props: {
   const messageCtx = props.context?.message?.();
   const messageRange = messageCtx ? offsetRangeOf(messageCtx) : null;
   const messageVM = messageRange ? messagesByStart[messageRange[0]] : undefined;
-  const messageSource = messageVM?.source ?? messageVM?.from ?? props.origin;
-  const messageTarget = messageVM?.to ?? messageSource;
-  const messageCandidate = calculateArrowGeometry({
-    context: props.context,
-    origin: props.origin,
-    source: messageSource,
-    target: messageTarget,
-    coordinates,
-  });
   const messageVMWithArrow = messageVM
-    ? {
-        ...messageVM,
-        arrow: {
-          translateX: messageCandidate.translateX,
-          interactionWidth: messageCandidate.interactionWidth,
-          rightToLeft: messageCandidate.rightToLeft,
-          originLayers: messageCandidate.originLayers,
-          sourceLayers: messageCandidate.sourceLayers,
-          targetLayers: messageCandidate.targetLayers,
-        },
-      }
+    ? enhanceMessageVMWithArrow(messageVM, props.context, props.origin, coordinates)
     : undefined;
 
   const asyncMessageCtx = props.context?.asyncMessage?.();
   const asyncRange = asyncMessageCtx ? offsetRangeOf(asyncMessageCtx) : null;
   const asyncVM = asyncRange ? messagesByStart[asyncRange[0]] : undefined;
-  const asyncSource = asyncVM?.source ?? asyncVM?.from ?? props.origin;
-  const asyncTarget = asyncVM?.to ?? asyncSource;
-  const asyncCandidate = calculateArrowGeometry({
-    context: props.context,
-    origin: props.origin,
-    source: asyncSource ?? props.origin,
-    target: asyncTarget ?? props.origin,
-    coordinates,
-  });
   const asyncVMWithArrow = asyncVM
-    ? {
-        ...asyncVM,
-        arrow: {
-          translateX: asyncCandidate.translateX,
-          interactionWidth: asyncCandidate.interactionWidth,
-          rightToLeft: asyncCandidate.rightToLeft,
-        },
-      }
+    ? enhanceMessageVMWithArrow(asyncVM, props.context, props.origin, coordinates)
     : undefined;
 
   const creationCtx = props.context?.creation?.();
   const creationRange = creationCtx ? offsetRangeOf(creationCtx) : null;
   const creationVM = creationRange ? messagesByStart[creationRange[0]] : undefined;
-  const creationTarget = creationVM?.to ?? creationCtx?.Owner?.() ?? props.origin;
-  const creationCandidate = calculateArrowGeometry({
-    context: props.context,
-    origin: props.origin,
-    source: props.origin,
-    target: creationTarget,
-    coordinates,
-  });
   const creationVMWithArrow = creationVM
-    ? {
-        ...creationVM,
-        arrow: {
-          translateX: creationCandidate.translateX,
-          interactionWidth: creationCandidate.interactionWidth,
-          rightToLeft: creationCandidate.rightToLeft,
-        },
-      }
+    ? enhanceMessageVMWithArrow(creationVM, props.context, props.origin, coordinates)
     : undefined;
 
   // Divider VM calculation

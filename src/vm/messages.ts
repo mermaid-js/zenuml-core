@@ -1,5 +1,7 @@
 import { OwnableMessageType } from "@/parser/OwnableMessage";
 import type { CodeRange } from "@/parser/CodeRange";
+import { calculateArrowGeometry } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/arrowGeometry";
+import type { Coordinates } from "@/positioning/Coordinates";
 
 export type MessageVM = {
   id: string;
@@ -22,6 +24,9 @@ export type MessageVM = {
     translateX: number;
     interactionWidth: number;
     rightToLeft: boolean;
+    originLayers?: number;
+    sourceLayers?: number;
+    targetLayers?: number;
   };
 };
 
@@ -45,4 +50,40 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
       isSelf,
     };
   });
+}
+
+/**
+ * Enhances a MessageVM with arrow geometry calculations
+ * This is a helper function to centralize arrow calculations for MessageVMs
+ */
+export function enhanceMessageVMWithArrow(
+  vm: MessageVM,
+  context: any,
+  origin: string,
+  coordinates: Coordinates,
+): MessageVM {
+  if (!vm) return vm;
+
+  const source = vm.source ?? vm.from ?? origin;
+  const target = vm.to ?? source;
+
+  const arrowGeometry = calculateArrowGeometry({
+    context,
+    origin,
+    source,
+    target,
+    coordinates,
+  });
+
+  return {
+    ...vm,
+    arrow: {
+      translateX: arrowGeometry.translateX,
+      interactionWidth: arrowGeometry.interactionWidth,
+      rightToLeft: arrowGeometry.rightToLeft,
+      originLayers: arrowGeometry.originLayers,
+      sourceLayers: arrowGeometry.sourceLayers,
+      targetLayers: arrowGeometry.targetLayers,
+    },
+  };
 }
