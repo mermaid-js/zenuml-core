@@ -12,12 +12,13 @@ import { InteractionAsync } from "./InteractionAsync/Interaction-async";
 import { Divider } from "./Divider/Divider";
 import { Return } from "./Return/Return";
 import Comment from "../../../../../Comment/Comment";
-import { commentOf, offsetRangeOf } from "@/parser/helpers";
+import { commentOf, offsetRangeOf, formattedTextOf } from "@/parser/helpers";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMByStartAtom } from "@/store/Store";
 import { centerOf } from "./utils";
 import { enhanceMessageVMWithArrow } from "@/vm/messages";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export const Statement = (props: {
   context: any;
@@ -81,6 +82,24 @@ export const Statement = (props: {
     };
   }
 
+  // Return VM calculation with arrow parity
+  const retCtx = props.context?.ret?.();
+  const retRange = retCtx ? offsetRangeOf(retCtx) : null;
+  const retVM = retRange ? messagesByStart[retRange[0]] : undefined;
+  const retAsync = retCtx?.asyncMessage?.();
+  const retSourceOverride = retAsync?.From?.() || retCtx?.From?.() || _STARTER_;
+  const retTargetOverride =
+    formattedTextOf(retAsync?.to?.()) || retCtx?.ReturnTo?.() || _STARTER_;
+  const retVMWithArrow = retVM
+    ? enhanceMessageVMWithArrow(
+        retVM,
+        props.context,
+        props.origin,
+        coordinates,
+        { source: retSourceOverride, target: retTargetOverride },
+      )
+    : undefined;
+
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
       hidden: props.collapsed && !props.context.ret(),
@@ -128,7 +147,11 @@ export const Statement = (props: {
       return <Divider {...subProps} vm={dividerVM} />;
     case Boolean(props.context.ret()):
       return (
-        <Return {...subProps} className="text-left text-sm text-skin-message" />
+        <Return
+          {...subProps}
+          className="text-left text-sm text-skin-message"
+          vm={retVMWithArrow}
+        />
       );
   }
 };

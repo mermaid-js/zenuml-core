@@ -61,11 +61,12 @@ export function enhanceMessageVMWithArrow(
   context: any,
   origin: string,
   coordinates: Coordinates,
+  overrides?: { source?: string; target?: string },
 ): MessageVM {
   if (!vm) return vm;
 
-  const source = vm.source ?? vm.from ?? origin;
-  const target = vm.to ?? source;
+  const source = overrides?.source ?? vm.source ?? vm.from ?? origin;
+  const target = overrides?.target ?? vm.to ?? source;
 
   const arrowGeometry = calculateArrowGeometry({
     context,
