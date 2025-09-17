@@ -126,6 +126,7 @@ export const Interaction = (props: {
           number={props.number}
           type="sync"
           labelRangeOverride={vm?.labelRange ?? null}
+          startOffsetOverride={vm?.range ? vm.range[0] : undefined}
         />
       )}
       <Occurrence

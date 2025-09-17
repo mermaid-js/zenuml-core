@@ -29,6 +29,7 @@ export const Message = (props: {
   editableOverride?: boolean;
   stylableOverride?: boolean;
   onMessageClickOverride?: (element: HTMLElement | null) => void;
+  startOffsetOverride?: number;
 }) => {
   const {
     context,
@@ -43,6 +44,7 @@ export const Message = (props: {
     editableOverride,
     stylableOverride,
     onMessageClickOverride,
+    startOffsetOverride,
   } = props;
   const mode = useAtomValue(modeAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
@@ -68,7 +70,10 @@ export const Message = (props: {
     if (onMessageClickOverride) {
       onMessageClickOverride(messageRef.current);
     } else {
-      onMessageClick(context, messageRef.current);
+      onMessageClick(
+        { context, startOffset: startOffsetOverride },
+        messageRef.current,
+      );
     }
   };
 

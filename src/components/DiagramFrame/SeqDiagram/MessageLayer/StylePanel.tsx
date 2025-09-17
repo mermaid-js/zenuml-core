@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
 import { offsetRangeOf } from "@/parser/helpers";
+import type { CodeRange } from "@/parser/CodeRange";
+import { offsetFromLineCol } from "@/utils/StringUtil";
 
 const btns = [
   {
@@ -106,12 +108,43 @@ export const StylePanel = () => {
   });
 
   useEffect(() => {
-    setOnMessageClick((context: any, element: HTMLElement) => {
+    setOnMessageClick((payloadOrContext: any, element: HTMLElement) => {
       // make sure this is triggered after the outsideclicking
       setTimeout(() => {
         const message = messageData.current;
-        const range = offsetRangeOf(context);
-        message.start = Array.isArray(range) ? range[0] : 0;
+        // Legacy context-based computation used for actual behavior
+        const legacyContext =
+          (payloadOrContext && payloadOrContext.context) || payloadOrContext;
+        const legacyRange = offsetRangeOf(legacyContext);
+        const legacyStart = Array.isArray(legacyRange) ? legacyRange[0] : 0;
+        message.start = legacyStart;
+
+        // New approach parity: optional startOffset or codeRange in payload
+        const hasNewPayload =
+          payloadOrContext &&
+          (typeof payloadOrContext.startOffset === "number" ||
+            payloadOrContext.codeRange);
+        if (hasNewPayload) {
+          let newStart: number | null = null;
+          if (typeof payloadOrContext.startOffset === "number") {
+            newStart = payloadOrContext.startOffset as number;
+          } else if (payloadOrContext.codeRange) {
+            const cr = payloadOrContext.codeRange as CodeRange;
+            try {
+              newStart = offsetFromLineCol(code, cr.start.line, cr.start.col);
+            } catch {}
+          }
+          if (newStart != null) {
+            if (newStart !== legacyStart) {
+              console.warn("[stylepanel] start offset mismatch", {
+                legacyStart,
+                newStart,
+              });
+            } else {
+              console.log("[stylepanel] start offset parity ✓", { start: newStart });
+            }
+          }
+        }
         message.lineHead = getLineHead(code, message.start);
         message.prevLine = getPrevLine(code, message.start);
         message.leadingSpaces =
@@ -137,7 +170,7 @@ export const StylePanel = () => {
           }
         }
         refs.setReference(element);
-        setMessageContext(context);
+        setMessageContext(legacyContext);
         setIsOpen(true);
       }, 0);
     });

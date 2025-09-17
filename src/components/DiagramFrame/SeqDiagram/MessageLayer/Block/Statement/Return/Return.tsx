@@ -143,6 +143,7 @@ export const Return = (props: {
           type="return"
           number={props.number}
           labelRangeOverride={vm?.labelRange ?? null}
+          startOffsetOverride={vm?.range ? vm.range[0] : undefined}
         />
       )}
     </div>

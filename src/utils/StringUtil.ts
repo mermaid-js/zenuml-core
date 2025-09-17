@@ -44,3 +44,16 @@ export const getPrevLine = (code: string, position: number) => {
   const prevLineHead = getPrevLineHead(code, position);
   return code.slice(prevLineHead, lineHead);
 };
+
+// Convert 1-based line and 0-based column to absolute offset in the code string
+export function offsetFromLineCol(code: string, line: number, col: number) {
+  // ANTLR tokens are typically 1-based for line and 0-based for column
+  const lines = code.split("\n");
+  const l = Math.max(1, Math.min(line, lines.length));
+  let offset = 0;
+  for (let i = 0; i < l - 1; i++) {
+    offset += lines[i].length + 1; // include newline
+  }
+  const c = Math.max(0, Math.min(col, (lines[l - 1] || "").length));
+  return offset + c;
+}

@@ -139,6 +139,7 @@ export const Creation = (props: {
           style={{ width: `calc(100% - ${containerOffset}px)` }}
           labelRangeOverride={vm?.labelRange ?? null}
           editableOverride={vm?.canEditLabel ?? false}
+          startOffsetOverride={vm?.range ? vm.range[0] : undefined}
         />
       </div>
       <Occurrence
