@@ -70,10 +70,11 @@ export const Message = (props: {
     if (onMessageClickOverride) {
       onMessageClickOverride(messageRef.current);
     } else {
-      onMessageClick(
-        { context, startOffset: startOffsetOverride },
-        messageRef.current,
-      );
+      if (typeof startOffsetOverride === "number") {
+        onMessageClick(startOffsetOverride, messageRef.current);
+      } else {
+        console.warn("[message] missing startOffsetOverride; style panel not opened");
+      }
     }
   };
 

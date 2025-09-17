@@ -9,8 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
-import type { CodeRange } from "@/parser/CodeRange";
-import { offsetFromLineCol } from "@/utils/StringUtil";
+// No parser or CodeRange dependency in the click path
 
 const btns = [
   {
@@ -107,32 +106,16 @@ export const StylePanel = () => {
   });
 
   useEffect(() => {
-    setOnMessageClick((payloadOrContext: any, element: HTMLElement) => {
+    setOnMessageClick((startOffset: number, element: HTMLElement) => {
       // make sure this is triggered after the outsideclicking
       setTimeout(() => {
         const message = messageData.current;
-        // New approach: expect startOffset or codeRange
-        const hasNewPayload =
-          payloadOrContext &&
-          (typeof payloadOrContext.startOffset === "number" ||
-            payloadOrContext.codeRange);
-        let newStart: number | null = null;
-        if (hasNewPayload) {
-          if (typeof payloadOrContext.startOffset === "number") {
-            newStart = payloadOrContext.startOffset as number;
-          } else if (payloadOrContext.codeRange) {
-            const cr = payloadOrContext.codeRange as CodeRange;
-            try {
-              newStart = offsetFromLineCol(code, cr.start.line, cr.start.col);
-            } catch {}
-          }
-        }
-        // Do not fallback. If newStart is not provided, bail out.
-        if (newStart == null) {
+        // Require startOffset; don't fallback
+        if (typeof startOffset !== "number") {
           console.warn("[stylepanel] missing startOffset/codeRange in payload; aborting");
           return;
         }
-        message.start = newStart;
+        message.start = startOffset;
 
         message.lineHead = getLineHead(code, message.start);
         message.prevLine = getPrevLine(code, message.start);
