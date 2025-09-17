@@ -83,8 +83,13 @@ export const Statement = (props: {
 
   // Return VM calculation with arrow parity (specialized semantics)
   const retCtx = props.context?.ret?.();
-  const retRange = retCtx ? offsetRangeOf(retCtx) : null;
-  const retVM = retRange ? messagesByStart[retRange[0]] : undefined;
+  const retAsync = retCtx?.asyncMessage?.();
+  const retKeyRange = retAsync
+    ? offsetRangeOf(retAsync)
+    : retCtx
+    ? offsetRangeOf(retCtx)
+    : null;
+  const retVM = retKeyRange ? messagesByStart[retKeyRange[0]] : undefined;
   const retVMWithArrow = retVM
     ? enhanceReturnVMWithArrow(retVM, props.context, props.origin, coordinates)
     : undefined;

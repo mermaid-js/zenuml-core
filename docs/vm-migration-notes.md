@@ -3,11 +3,11 @@
 ## Current Migration Status (as of latest update)
 
 ### Successfully Migrated to VM Pattern
-- **Creation component** - Uses VM arrow data with fallback values and comprehensive parity checking
-- **Interaction component** - Uses VM arrow data with fallback values and comprehensive parity checking
-- **InteractionAsync component** - Already uses VM arrow data
+- **Creation component** - Uses VM arrow data (via enhancer) with fallback parity checking
+- **Interaction component** - Uses VM arrow data (via enhancer) with fallback parity checking
+- **InteractionAsync component** - Uses VM arrow data (via enhancer)
 - **Divider component** - Uses VM data for width, translateX, and styling with comprehensive parity checking
-- **Return component** - Successfully migrated from `useArrow` hook to `calculateArrowGeometry` direct usage
+- **Return component** - Uses VM arrow data via a dedicated Return enhancer with parity checking; target fallback remains until IR supports `returnTo`
 
 ### Migration Completed
 🎉 **All components have been successfully migrated away from the `useArrow` hook!**
@@ -28,7 +28,7 @@ All migrated components now include comprehensive parity checking that:
 
 ### Migration Lessons
 
-- **Return semantics** – Bare `return x;` expressions lack an explicit target in the current IR. When the VM assumes `data-to`/`target`, the renderer creates a self-message loop. Any VM rework must either extend the IR with a `returnTo` concept or retain a parser-context fallback to distinguish plain returns.
+- **Return semantics** – Bare `return x;` expressions lack an explicit target in the current IR. We now compute Return arrow geometry in a dedicated VM enhancer that derives `source`/`target` from parser context (`async.From() | ret.From()` and `async.to | ReturnTo()`), with parity checking in the component. IR should still gain an explicit `returnTo` to remove this special-case.
 
 - **Arrow geometry** – ✅ **RESOLVED**: All components successfully migrated from `useArrow` hook to direct `calculateArrowGeometry` usage. Components now use memoized calculations with proper dependency management, eliminating the React hook overhead while maintaining the same geometry calculations.
 

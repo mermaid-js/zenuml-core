@@ -3,11 +3,10 @@ import { Comment } from "../Comment/Comment";
 import { cn } from "@/utils";
 import { Message } from "../Message";
 import { useAtomValue } from "jotai";
-import { onElementClickAtom, coordinatesAtom, cursorAtom } from "@/store/Store";
+import { onElementClickAtom, cursorAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { codeRangeOf, formattedTextOf } from "@/parser/helpers";
 import { SyntheticEvent, useMemo } from "react";
-import { calculateArrowGeometry } from "../arrowGeometry";
 import { signatureOf } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
 
@@ -30,7 +29,6 @@ export const Return = (props: {
   };
 }) => {
   const onElementClick = useAtomValue(onElementClickAtom);
-  const coordinates = useAtomValue(coordinatesAtom);
   const cursor = useAtomValue(cursorAtom);
 
   const ret = props.context?.ret();
@@ -60,60 +58,30 @@ export const Return = (props: {
   const isCurrent = getIsCurrent();
 
   const { translateX, interactionWidth, rightToLeft, isSelf, originLayers, sourceLayers, targetLayers } = useMemo(() => {
-    if (vm?.arrow) {
-      const fallback = calculateArrowGeometry({
-        context: props.context,
-        origin: props.origin,
-        source,
-        target,
-        coordinates,
-      });
-
-      const translateXDiff = Math.abs(vm.arrow.translateX - fallback.translateX);
-      const widthDiff = Math.abs(vm.arrow.interactionWidth - fallback.interactionWidth);
-      const rtlMatch = vm.arrow.rightToLeft === fallback.rightToLeft;
-      const originLayersMatch = (vm.arrow.originLayers ?? 0) === (fallback.originLayers ?? 0);
-      const sourceLayersMatch = (vm.arrow.sourceLayers ?? 0) === (fallback.sourceLayers ?? 0);
-      const targetLayersMatch = (vm.arrow.targetLayers ?? 0) === (fallback.targetLayers ?? 0);
-
-      if (translateXDiff > 0.1 || widthDiff > 0.1 || !rtlMatch || !originLayersMatch || !sourceLayersMatch || !targetLayersMatch) {
-        console.warn("[return] arrow geometry mismatch", {
-          signature,
-          vm: vm.arrow,
-          fallback,
-          diffs: { translateXDiff, widthDiff, rtlMatch, originLayersMatch, sourceLayersMatch, targetLayersMatch },
-        });
-      } else {
-        console.log("[return] arrow geometry parity ✓", {
-          signature,
-          translateX: vm.arrow.translateX,
-          interactionWidth: vm.arrow.interactionWidth,
-          rightToLeft: vm.arrow.rightToLeft,
-          originLayers: vm.arrow.originLayers,
-          sourceLayers: vm.arrow.sourceLayers,
-          targetLayers: vm.arrow.targetLayers,
-        });
-      }
-
+    if (!vm?.arrow) {
+      // Rely on VM; no parity or fallback
+      console.warn("[return] missing VM arrow; rendering with zero geometry", { signature });
       return {
-        translateX: vm.arrow.translateX,
-        interactionWidth: vm.arrow.interactionWidth,
-        rightToLeft: vm.arrow.rightToLeft,
-        isSelf: fallback.isSelf, // keep fallback's isSelf computation
-        originLayers: vm.arrow.originLayers ?? 0,
-        sourceLayers: vm.arrow.sourceLayers ?? 0,
-        targetLayers: vm.arrow.targetLayers ?? 0,
+        translateX: 0,
+        interactionWidth: 0,
+        rightToLeft: false,
+        isSelf: source === target,
+        originLayers: 0,
+        sourceLayers: 0,
+        targetLayers: 0,
       };
     }
 
-    return calculateArrowGeometry({
-      context: props.context,
-      origin: props.origin,
-      source,
-      target,
-      coordinates,
-    });
-  }, [vm?.arrow, props.context, props.origin, source, target, coordinates, signature]);
+    return {
+      translateX: vm.arrow.translateX,
+      interactionWidth: vm.arrow.interactionWidth,
+      rightToLeft: vm.arrow.rightToLeft,
+      isSelf: source === target,
+      originLayers: vm.arrow.originLayers ?? 0,
+      sourceLayers: vm.arrow.sourceLayers ?? 0,
+      targetLayers: vm.arrow.targetLayers ?? 0,
+    };
+  }, [vm?.arrow, source, target, signature]);
 
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation();
