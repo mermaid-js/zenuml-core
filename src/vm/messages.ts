@@ -2,6 +2,8 @@ import { OwnableMessageType } from "@/parser/OwnableMessage";
 import type { CodeRange } from "@/parser/CodeRange";
 import { calculateArrowGeometry } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/arrowGeometry";
 import type { Coordinates } from "@/positioning/Coordinates";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { formattedTextOf } from "@/parser/helpers";
 
 export type MessageVM = {
   id: string;
@@ -61,12 +63,52 @@ export function enhanceMessageVMWithArrow(
   context: any,
   origin: string,
   coordinates: Coordinates,
-  overrides?: { source?: string; target?: string },
 ): MessageVM {
   if (!vm) return vm;
 
-  const source = overrides?.source ?? vm.source ?? vm.from ?? origin;
-  const target = overrides?.target ?? vm.to ?? source;
+  const source = vm.source ?? vm.from ?? origin;
+  const target = vm.to ?? source;
+
+  const arrowGeometry = calculateArrowGeometry({
+    context,
+    origin,
+    source,
+    target,
+    coordinates,
+  });
+
+  return {
+    ...vm,
+    arrow: {
+      translateX: arrowGeometry.translateX,
+      interactionWidth: arrowGeometry.interactionWidth,
+      rightToLeft: arrowGeometry.rightToLeft,
+      originLayers: arrowGeometry.originLayers,
+      sourceLayers: arrowGeometry.sourceLayers,
+      targetLayers: arrowGeometry.targetLayers,
+    },
+  };
+}
+
+/**
+ * Specialized enhancer for Return statements. Source/target semantics differ from other messages:
+ * - source: async.From() || ret.From() || _STARTER_
+ * - target: formatted(async.to) || ret.ReturnTo() || _STARTER_
+ */
+export function enhanceReturnVMWithArrow(
+  vm: MessageVM,
+  context: any,
+  origin: string,
+  coordinates: Coordinates,
+): MessageVM {
+  if (!vm) return vm;
+  const ret = context?.ret?.();
+  const asyncMsg = ret?.asyncMessage?.();
+  const source = asyncMsg?.From?.() || ret?.From?.() || _STARTER_;
+  const target =
+    formattedTextOf(asyncMsg?.to?.()) ||
+    ret?.ReturnTo?.() ||
+    _STARTER_;
 
   const arrowGeometry = calculateArrowGeometry({
     context,
