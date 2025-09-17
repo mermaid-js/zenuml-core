@@ -9,9 +9,9 @@ import { useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
 import {
-  analyzeMessageSelection,
-  buildUpdatedCode,
-  MessageSelection,
+  analyzeStyleSelection,
+  applyStyleToggle,
+  SelectionContext,
 } from "./StylePanel.helpers";
 // No parser or CodeRange dependency in the click path
 
@@ -51,13 +51,16 @@ export const StylePanel = () => {
     onContentChange(newCode);
   };
 
-  const selectionRef = useRef<MessageSelection>({
-    start: 0,
-    lineHead: 0,
-    prevLine: "",
-    leadingSpaces: "",
-    prevLineIsComment: false,
-    hasStyleBrackets: false,
+  const selectionRef = useRef<SelectionContext>({
+    anchor: { start: 0, lineStart: 0 },
+    comment: {
+      exists: false,
+      hasBrackets: false,
+      leading: "",
+      styles: [],
+      suffix: "",
+      replaceHead: 0,
+    },
   });
 
   const { refs, floatingStyles } = useFloating({
@@ -71,12 +74,12 @@ export const StylePanel = () => {
 
     // Recompute selection against the latest code to avoid using
     // stale cached data if the document changed while the panel was open.
-    const start = selectionRef.current.start;
-    const { selection, existingStyles: freshStyles } = analyzeMessageSelection(
+    const start = selectionRef.current.anchor.start;
+    const { selection } = analyzeStyleSelection(
       code,
       start,
     );
-    const newCode = buildUpdatedCode(code, selection, style, freshStyles);
+    const newCode = applyStyleToggle(code, selection, style);
     updateCode(newCode);
   };
 
@@ -88,12 +91,12 @@ export const StylePanel = () => {
     setOnMessageClick((startOffset: number, element: HTMLElement) => {
       // Run on the next tick so useOutsideClick can close any previous panel first
       setTimeout(() => {
-        const { selection, existingStyles: styles } = analyzeMessageSelection(
+        const { selection } = analyzeStyleSelection(
           code,
           startOffset,
         );
         selectionRef.current = selection;
-        setExistingStyles(styles);
+        setExistingStyles(selection.comment.styles);
         refs.setReference(element);
         setHasSelection(true);
         setIsOpen(true);

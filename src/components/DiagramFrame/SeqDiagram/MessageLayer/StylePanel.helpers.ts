@@ -1,12 +1,33 @@
 import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/StringUtil";
 
-export type MessageSelection = {
-  start: number;
-  lineHead: number;
-  prevLine: string;
-  leadingSpaces: string;
-  prevLineIsComment: boolean;
-  hasStyleBrackets: boolean;
+// Range semantics:
+// - Offsets are absolute indices into the code string
+// - anchor.lineStart and comment.replaceHead are start indices (inclusive)
+// - Where a range end is needed, we compute it on demand
+
+export type Offset = number;
+
+export type SelectionContext = {
+  anchor: {
+    // Message start anchor (start of the statement token)
+    start: Offset;
+    // Line start offset of the message line
+    lineStart: Offset;
+  };
+  comment: {
+    // Whether there is a comment line immediately above the message
+    exists: boolean;
+    // Whether the comment starts with a style bracket list like: // [a, b]
+    hasBrackets: boolean;
+    // Indentation of the message line to preserve formatting
+    leading: string;
+    // Parsed styles from the bracket list (empty when no brackets)
+    styles: string[];
+    // The suffix comment text after the bracket list or after // when no brackets
+    suffix: string;
+    // Absolute offset of the previous line's head (start of the comment line)
+    replaceHead: Offset;
+  };
 };
 
 const toggleStyle = (styles: string[], style: string) =>
@@ -35,18 +56,18 @@ const extractCommentSuffix = (prevLine: string, hasStyleBrackets: boolean) => {
   if (hasStyleBrackets) {
     const closingIndex = prevLine.indexOf("]");
     if (closingIndex === -1) return prevLine.trim();
-    return prevLine.slice(closingIndex + 1).trimStart();
+    return prevLine.slice(closingIndex + 1).trim();
   }
 
   const commentIndex = prevLine.indexOf("//");
   if (commentIndex === -1) return prevLine.trim();
-  return prevLine.slice(commentIndex + 2).trimStart();
+  return prevLine.slice(commentIndex + 2).trim();
 };
 
 const formatCommentLine = (
   leadingSpaces: string,
   styles: string[],
-  suffix: string
+  suffix: string,
 ) => {
   const styleList = styles.filter(Boolean).join(", ");
   const suffixSegment = suffix ? ` ${suffix}` : " ";
@@ -56,62 +77,62 @@ const formatCommentLine = (
 const ensureTrailingNewline = (value: string) =>
   value.endsWith("\n") ? value : `${value}\n`;
 
-export const buildUpdatedCode = (
+export const applyStyleToggle = (
   code: string,
-  message: MessageSelection,
+  selection: SelectionContext,
   style: string,
-  existingStyles: string[]
 ) => {
-  if (!message.prevLineIsComment) {
-    const commentLine = `${message.leadingSpaces}// [${style}]\n`;
-    return (
-      code.slice(0, message.lineHead) + commentLine + code.slice(message.lineHead)
-    );
+  const { anchor, comment } = selection;
+  if (!comment.exists) {
+    const commentLine = `${comment.leading}// [${style}]\n`;
+    return code.slice(0, anchor.lineStart) + commentLine + code.slice(anchor.lineStart);
   }
 
-  const styles = message.hasStyleBrackets
-    ? toggleStyle(existingStyles, style)
-    : [style];
-
+  const styles = comment.hasBrackets ? toggleStyle(comment.styles, style) : [style];
   const commentLine = ensureTrailingNewline(
-    formatCommentLine(
-      message.leadingSpaces,
-      styles,
-      extractCommentSuffix(message.prevLine, message.hasStyleBrackets)
-    )
+    formatCommentLine(comment.leading, styles, comment.suffix),
   );
-
-  const commentHead = getPrevLineHead(code, message.start);
-  return code.slice(0, commentHead) + commentLine + code.slice(message.lineHead);
+  return (
+    code.slice(0, comment.replaceHead) +
+    commentLine +
+    code.slice(anchor.lineStart)
+  );
 };
 
-export const analyzeMessageSelection = (
+export const analyzeStyleSelection = (
   code: string,
-  startOffset: number
+  startOffset: number,
 ) => {
-  const lineHead = getLineHead(code, startOffset);
+  const lineStart = getLineHead(code, startOffset);
   const prevLine = getPrevLine(code, startOffset);
-  const leadingSpaces = code.slice(lineHead).match(/^\s*/)?.[0] || "";
+  const leading = code.slice(lineStart).match(/^\s*/)?.[0] || "";
   const prevLineTrimmed = prevLine.trim();
-  const prevLineIsComment = prevLineTrimmed.startsWith("//");
+  const exists = prevLineTrimmed.startsWith("//");
   const trimmedPrevLine = prevLine.trimStart();
   const commentBody = trimmedPrevLine.startsWith("//")
     ? trimmedPrevLine.slice(2).trimStart()
     : "";
   const styleStart = commentBody.indexOf("[");
   const styleEnd = commentBody.indexOf("]");
-  const hasStyleBrackets = prevLineIsComment && styleStart === 0 && styleEnd > styleStart;
+  const hasBrackets = exists && styleStart === 0 && styleEnd > styleStart;
+  const styles = extractExistingStyles(commentBody, hasBrackets);
+  const suffix = extractCommentSuffix(prevLine, hasBrackets);
+  const replaceHead = getPrevLineHead(code, startOffset);
 
-  const existingStyles = extractExistingStyles(commentBody, hasStyleBrackets);
-
-  const selection: MessageSelection = {
-    start: startOffset,
-    lineHead,
-    prevLine,
-    leadingSpaces,
-    prevLineIsComment,
-    hasStyleBrackets,
+  const selection: SelectionContext = {
+    anchor: {
+      start: startOffset,
+      lineStart,
+    },
+    comment: {
+      exists,
+      hasBrackets,
+      leading,
+      styles,
+      suffix,
+      replaceHead,
+    },
   };
 
-  return { selection, existingStyles };
+  return { selection };
 };
