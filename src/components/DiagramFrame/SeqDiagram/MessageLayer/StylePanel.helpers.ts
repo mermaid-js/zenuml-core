@@ -17,8 +17,6 @@ export type SelectionContext = {
   comment: {
     // Whether there is a comment line immediately above the message
     exists: boolean;
-    // Whether the comment starts with a style bracket list like: // [a, b]
-    hasBrackets: boolean;
     // Indentation of the message line to preserve formatting
     leading: string;
     // Parsed styles from the bracket list (empty when no brackets)
@@ -35,33 +33,41 @@ const toggleStyle = (styles: string[], style: string) =>
     ? styles.filter((existingStyle) => existingStyle !== style)
     : [...styles, style];
 
-const extractExistingStyles = (commentBody: string, hasStyleBrackets: boolean) => {
-  if (!hasStyleBrackets) return [];
-
-  const styleStart = commentBody.indexOf("[");
-  const styleEnd = commentBody.indexOf("]");
-
-  if (styleStart !== 0 || styleEnd <= styleStart) return [];
-
-  return commentBody
-    .slice(styleStart + 1, styleEnd)
-    .split(",")
-    .map((style) => style.trim())
-    .filter(Boolean);
+// Utilities for a single-pass, semantic parse of surrounding lines
+const getLineStarts = (code: string, startOffset: number) => {
+  const lineStart = getLineHead(code, startOffset);
+  const prevLineStart = getPrevLineHead(code, startOffset);
+  const prevLineText = getPrevLine(code, startOffset);
+  return { lineStart, prevLineStart, prevLineText };
 };
 
-const extractCommentSuffix = (prevLine: string, hasStyleBrackets: boolean) => {
+const getIndentAt = (code: string, lineStart: number) =>
+  code.slice(lineStart).match(/^\s*/)?.[0] || "";
+
+const parsePrevComment = (
+  prevLine: string,
+): { exists: boolean; styles: string[]; suffix: string } => {
+  const line = prevLine.replace(/[\r\n]+$/, "");
+  const m = line.match(/^\s*\/\/\s*(?:\[([^\]]*)\])?\s*(.*)$/);
+  if (!m) return { exists: false, styles: [], suffix: "" };
+  const styles = (m[1] || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const suffix = (m[2] || "").trim();
+  return { exists: true, styles, suffix };
+};
+
+// Extracts the free-text part after optional style brackets in a comment line.
+// Examples:
+//   "// note here"            -> "note here"
+//   "  //   [bold]  note"     -> "note"
+//   "// [bold,italic]"        -> ""
+//   "not a comment line"      -> "not a comment line" (fallback)
+const extractCommentSuffix = (prevLine: string): string => {
   if (!prevLine) return "";
-
-  if (hasStyleBrackets) {
-    const closingIndex = prevLine.indexOf("]");
-    if (closingIndex === -1) return prevLine.trim();
-    return prevLine.slice(closingIndex + 1).trim();
-  }
-
-  const commentIndex = prevLine.indexOf("//");
-  if (commentIndex === -1) return prevLine.trim();
-  return prevLine.slice(commentIndex + 2).trim();
+  const m = prevLine.match(/^\s*\/\/\s*(?:\[[^\]]*\])?\s*(.*)$/);
+  return m ? m[1].trim() : prevLine.trim();
 };
 
 const formatCommentLine = (
@@ -88,7 +94,7 @@ export const applyStyleToggle = (
     return code.slice(0, anchor.lineStart) + commentLine + code.slice(anchor.lineStart);
   }
 
-  const styles = comment.hasBrackets ? toggleStyle(comment.styles, style) : [style];
+  const styles = toggleStyle(comment.styles, style);
   const commentLine = ensureTrailingNewline(
     formatCommentLine(comment.leading, styles, comment.suffix),
   );
@@ -103,21 +109,12 @@ export const analyzeStyleSelection = (
   code: string,
   startOffset: number,
 ) => {
-  const lineStart = getLineHead(code, startOffset);
-  const prevLine = getPrevLine(code, startOffset);
-  const leading = code.slice(lineStart).match(/^\s*/)?.[0] || "";
-  const prevLineTrimmed = prevLine.trim();
-  const exists = prevLineTrimmed.startsWith("//");
-  const trimmedPrevLine = prevLine.trimStart();
-  const commentBody = trimmedPrevLine.startsWith("//")
-    ? trimmedPrevLine.slice(2).trimStart()
-    : "";
-  const styleStart = commentBody.indexOf("[");
-  const styleEnd = commentBody.indexOf("]");
-  const hasBrackets = exists && styleStart === 0 && styleEnd > styleStart;
-  const styles = extractExistingStyles(commentBody, hasBrackets);
-  const suffix = extractCommentSuffix(prevLine, hasBrackets);
-  const replaceHead = getPrevLineHead(code, startOffset);
+  const { lineStart, prevLineStart, prevLineText } = getLineStarts(code, startOffset);
+  const leading = getIndentAt(code, lineStart);
+  const exists = prevLineText.trim().startsWith("//");
+  const parsed = exists ? parsePrevComment(prevLineText) : { exists: false, styles: [], suffix: "" };
+  const { styles, suffix } = parsed;
+  const replaceHead = prevLineStart;
 
   const selection: SelectionContext = {
     anchor: {
@@ -126,7 +123,6 @@ export const analyzeStyleSelection = (
     },
     comment: {
       exists,
-      hasBrackets,
       leading,
       styles,
       suffix,

@@ -32,7 +32,6 @@ describe("StylePanel helpers (analyzeStyleSelection/applyStyleToggle)", () => {
     const start = code.indexOf("A->B");
     const { selection } = analyzeStyleSelection(code, start);
     expect(selection.comment.exists).toBe(true);
-    expect(selection.comment.hasBrackets).toBe(false);
     expect(selection.comment.suffix).toBe("note here");
 
     const updated = applyStyleToggle(code, selection, "bold");
@@ -55,7 +54,6 @@ describe("StylePanel helpers (analyzeStyleSelection/applyStyleToggle)", () => {
     const start = code.indexOf("A->B");
     const { selection } = analyzeStyleSelection(code, start);
     expect(selection.comment.exists).toBe(true);
-    expect(selection.comment.hasBrackets).toBe(true);
     expect(selection.comment.styles).toEqual(["bold", "italic"]);
     expect(selection.comment.suffix).toBe("custom");
 
