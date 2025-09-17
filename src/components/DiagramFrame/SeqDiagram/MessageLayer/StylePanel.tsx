@@ -51,7 +51,7 @@ export const StylePanel = () => {
     onContentChange(newCode);
   };
 
-  const messageData = useRef<MessageSelection>({
+  const selectionRef = useRef<MessageSelection>({
     start: 0,
     lineHead: 0,
     prevLine: "",
@@ -71,7 +71,7 @@ export const StylePanel = () => {
 
     // Recompute selection against the latest code to avoid using
     // stale cached data if the document changed while the panel was open.
-    const start = messageData.current.start;
+    const start = selectionRef.current.start;
     const { selection, existingStyles: freshStyles } = analyzeMessageSelection(
       code,
       start,
@@ -92,7 +92,7 @@ export const StylePanel = () => {
           code,
           startOffset,
         );
-        messageData.current = selection;
+        selectionRef.current = selection;
         setExistingStyles(styles);
         refs.setReference(element);
         setHasSelection(true);
