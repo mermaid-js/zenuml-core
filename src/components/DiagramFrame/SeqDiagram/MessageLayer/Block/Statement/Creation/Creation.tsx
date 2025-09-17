@@ -13,7 +13,7 @@ import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EventBus } from "@/EventBus";
 import type { MessageVM } from "@/vm/messages";
-import { calculateArrowGeometry } from "../useArrow";
+import { calculateArrowGeometry } from "../arrowGeometry";
 
 export const Creation = (props: {
   context: any;

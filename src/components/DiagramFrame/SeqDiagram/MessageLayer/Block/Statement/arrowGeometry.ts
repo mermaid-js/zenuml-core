@@ -98,8 +98,3 @@ export const calculateArrowGeometry = ({
     translateX,
   };
 };
-
-// useArrow hook has been removed - all components now use calculateArrowGeometry directly
-// This file is kept for backward compatibility and will be deprecated
-
-export type { ArrowGeometry as UseArrowGeometry };

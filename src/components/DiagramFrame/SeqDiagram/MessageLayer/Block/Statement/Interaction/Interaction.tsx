@@ -9,7 +9,7 @@ import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { signatureOf } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
-import { calculateArrowGeometry } from "../useArrow";
+import { calculateArrowGeometry } from "../arrowGeometry";
 import { useMemo } from "react";
 
 function isNullOrUndefined(value: any) {

@@ -3,11 +3,11 @@ import { Comment } from "../Comment/Comment";
 import { cn } from "@/utils";
 import { Message } from "../Message";
 import { useAtomValue } from "jotai";
-import { onElementClickAtom } from "@/store/Store";
+import { onElementClickAtom, coordinatesAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { codeRangeOf, formattedTextOf } from "@/parser/helpers";
-import { SyntheticEvent } from "react";
-import { useArrow } from "../useArrow";
+import { SyntheticEvent, useMemo } from "react";
+import { calculateArrowGeometry } from "../arrowGeometry";
 import { signatureOf } from "@/parser/helpers";
 
 export const Return = (props: {
@@ -19,6 +19,7 @@ export const Return = (props: {
   className?: string;
 }) => {
   const onElementClick = useAtomValue(onElementClickAtom);
+  const coordinates = useAtomValue(coordinatesAtom);
 
   const ret = props.context?.ret();
 
@@ -36,12 +37,15 @@ export const Return = (props: {
   const messageContext =
     asyncMessage?.content() || props.context?.ret()?.expr();
 
-  const { translateX, interactionWidth, rightToLeft, isSelf } = useArrow({
-    context: props.context,
-    origin: props.origin,
-    source,
-    target,
-  });
+  const { translateX, interactionWidth, rightToLeft, isSelf } = useMemo(() => {
+    return calculateArrowGeometry({
+      context: props.context,
+      origin: props.origin,
+      source,
+      target,
+      coordinates,
+    });
+  }, [props.context, props.origin, source, target, coordinates]);
 
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation();
@@ -54,7 +58,7 @@ export const Return = (props: {
       onClick={onClick}
       data-type="return"
       data-signature={signature}
-      data-origin={origin}
+      data-origin={props.origin}
       data-to={target}
       data-source={source}
       data-target={target}

@@ -16,7 +16,7 @@ import { commentOf, offsetRangeOf } from "@/parser/helpers";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMByStartAtom } from "@/store/Store";
-import { calculateArrowGeometry } from "./useArrow";
+import { calculateArrowGeometry } from "./arrowGeometry";
 import { centerOf } from "./utils";
 
 export const Statement = (props: {
