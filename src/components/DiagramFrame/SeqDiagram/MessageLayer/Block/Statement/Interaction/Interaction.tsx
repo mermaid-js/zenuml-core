@@ -4,12 +4,11 @@ import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
 import { Message } from "../Message";
 import { Occurrence } from "./Occurrence/Occurrence";
 import { useAtomValue } from "jotai";
-import { cursorAtom, coordinatesAtom } from "@/store/Store";
+import { cursorAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { signatureOf } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
-import { calculateArrowGeometry } from "../arrowGeometry";
 import { useMemo } from "react";
 
 function isNullOrUndefined(value: any) {
@@ -34,7 +33,6 @@ export const Interaction = (props: {
   };
 }) => {
   const cursor = useAtomValue(cursorAtom);
-  const coordinates = useAtomValue(coordinatesAtom);
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
   const message = props.context?.message();
@@ -61,99 +59,27 @@ export const Interaction = (props: {
   const isCurrent = getIsCurrent();
 
   // Use arrow geometry from VM with parity checking
-  const {
-    translateX,
-    interactionWidth,
-    originLayers,
-    sourceLayers,
-    targetLayers,
-    rightToLeft,
-  } = useMemo(() => {
-    if (vm?.arrow) {
-      // Check parity with fallback calculation
-      const fallbackCandidate = calculateArrowGeometry({
-        context: props.context,
-        origin: props.origin,
-        source: source,
-        target: target,
-        coordinates,
-      });
-
-      const translateXDiff = Math.abs(vm.arrow.translateX - fallbackCandidate.translateX);
-      const widthDiff = Math.abs(vm.arrow.interactionWidth - fallbackCandidate.interactionWidth);
-      const rtlMatch = vm.arrow.rightToLeft === fallbackCandidate.rightToLeft;
-      const originLayersMatch = (vm.arrow.originLayers ?? 0) === (fallbackCandidate.originLayers ?? 0);
-      const sourceLayersMatch = (vm.arrow.sourceLayers ?? 0) === (fallbackCandidate.sourceLayers ?? 0);
-      const targetLayersMatch = (vm.arrow.targetLayers ?? 0) === (fallbackCandidate.targetLayers ?? 0);
-
-      if (translateXDiff > 0.1 || widthDiff > 0.1 || !rtlMatch || !originLayersMatch || !sourceLayersMatch || !targetLayersMatch) {
-        console.warn("[interaction] arrow geometry mismatch", {
-          signature,
-          vm: {
-            translateX: vm.arrow.translateX,
-            interactionWidth: vm.arrow.interactionWidth,
-            rightToLeft: vm.arrow.rightToLeft,
-            originLayers: vm.arrow.originLayers,
-            sourceLayers: vm.arrow.sourceLayers,
-            targetLayers: vm.arrow.targetLayers,
-          },
-          fallback: {
-            translateX: fallbackCandidate.translateX,
-            interactionWidth: fallbackCandidate.interactionWidth,
-            rightToLeft: fallbackCandidate.rightToLeft,
-            originLayers: fallbackCandidate.originLayers,
-            sourceLayers: fallbackCandidate.sourceLayers,
-            targetLayers: fallbackCandidate.targetLayers,
-          },
-          diffs: {
-            translateXDiff,
-            widthDiff,
-            rtlMatch,
-            originLayersMatch,
-            sourceLayersMatch,
-            targetLayersMatch
-          },
-        });
-      } else {
-        console.log("[interaction] arrow geometry parity ✓", {
-          signature,
-          translateX: vm.arrow.translateX,
-          interactionWidth: vm.arrow.interactionWidth,
-          rightToLeft: vm.arrow.rightToLeft,
-          originLayers: vm.arrow.originLayers,
-          sourceLayers: vm.arrow.sourceLayers,
-          targetLayers: vm.arrow.targetLayers,
-        });
-      }
-
+  const { translateX, interactionWidth, originLayers, sourceLayers, targetLayers, rightToLeft } = useMemo(() => {
+    if (!vm?.arrow) {
+      console.warn("[interaction] missing VM arrow; rendering with zero geometry", { signature });
       return {
-        translateX: vm.arrow.translateX,
-        interactionWidth: vm.arrow.interactionWidth,
-        originLayers: vm.arrow.originLayers ?? 0,
-        sourceLayers: vm.arrow.sourceLayers ?? 0,
-        targetLayers: vm.arrow.targetLayers ?? 0,
-        rightToLeft: vm.arrow.rightToLeft,
+        translateX: 0,
+        interactionWidth: 0,
+        originLayers: 0,
+        sourceLayers: 0,
+        targetLayers: 0,
+        rightToLeft: false,
       };
     }
-
-    // Fallback calculation
-    const fallbackCandidate = calculateArrowGeometry({
-      context: props.context,
-      origin: props.origin,
-      source: source,
-      target: target,
-      coordinates,
-    });
-
     return {
-      translateX: fallbackCandidate.translateX,
-      interactionWidth: fallbackCandidate.interactionWidth,
-      originLayers: fallbackCandidate.originLayers ?? 0,
-      sourceLayers: fallbackCandidate.sourceLayers ?? 0,
-      targetLayers: fallbackCandidate.targetLayers ?? 0,
-      rightToLeft: fallbackCandidate.rightToLeft,
+      translateX: vm.arrow.translateX,
+      interactionWidth: vm.arrow.interactionWidth,
+      originLayers: vm.arrow.originLayers ?? 0,
+      sourceLayers: vm.arrow.sourceLayers ?? 0,
+      targetLayers: vm.arrow.targetLayers ?? 0,
+      rightToLeft: vm.arrow.rightToLeft,
     };
-  }, [vm?.arrow, props.context, props.origin, source, target, coordinates, signature]);
+  }, [vm?.arrow, signature]);
 
   return (
     <div

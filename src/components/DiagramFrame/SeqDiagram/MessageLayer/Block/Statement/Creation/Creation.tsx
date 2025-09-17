@@ -8,12 +8,11 @@ import {
 } from "@/positioning/Constants";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
-import { cursorAtom, onElementClickAtom, coordinatesAtom } from "@/store/Store";
+import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EventBus } from "@/EventBus";
 import type { MessageVM } from "@/vm/messages";
-import { calculateArrowGeometry } from "../arrowGeometry";
 
 export const Creation = (props: {
   context: any;
@@ -27,7 +26,6 @@ export const Creation = (props: {
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
-  const coordinates = useAtomValue(coordinatesAtom);
   const [participantWidth, setParticipantWidth] = useState(0);
   const creation = props.context?.creation();
   const vm = props.vm;
@@ -54,62 +52,12 @@ export const Creation = (props: {
 
   // Use arrow geometry from VM with parity checking
   const { translateX, interactionWidth, rightToLeft } = useMemo(() => {
-    if (vm?.arrow) {
-      // Check parity with fallback calculation
-      const fallbackCandidate = calculateArrowGeometry({
-        context: props.context,
-        origin: props.origin,
-        source: props.origin,
-        target: target,
-        coordinates,
-      });
-
-      const translateXDiff = Math.abs(vm.arrow.translateX - fallbackCandidate.translateX);
-      const widthDiff = Math.abs(vm.arrow.interactionWidth - fallbackCandidate.interactionWidth);
-      const rtlMatch = vm.arrow.rightToLeft === fallbackCandidate.rightToLeft;
-
-      if (translateXDiff > 0.1 || widthDiff > 0.1 || !rtlMatch) {
-        console.warn("[creation] arrow geometry mismatch", {
-          signature,
-          vm: {
-            translateX: vm.arrow.translateX,
-            interactionWidth: vm.arrow.interactionWidth,
-            rightToLeft: vm.arrow.rightToLeft,
-          },
-          fallback: {
-            translateX: fallbackCandidate.translateX,
-            interactionWidth: fallbackCandidate.interactionWidth,
-            rightToLeft: fallbackCandidate.rightToLeft,
-          },
-          diffs: { translateXDiff, widthDiff, rtlMatch },
-        });
-      } else {
-        console.log("[creation] arrow geometry parity ✓", {
-          signature,
-          translateX: vm.arrow.translateX,
-          interactionWidth: vm.arrow.interactionWidth,
-          rightToLeft: vm.arrow.rightToLeft,
-        });
-      }
-
-      return vm.arrow;
+    if (!vm?.arrow) {
+      console.warn("[creation] missing VM arrow; rendering with zero geometry", { signature });
+      return { translateX: 0, interactionWidth: 0, rightToLeft: false };
     }
-
-    // Fallback calculation
-    const fallbackCandidate = calculateArrowGeometry({
-      context: props.context,
-      origin: props.origin,
-      source: props.origin,
-      target: target,
-      coordinates,
-    });
-
-    return {
-      translateX: fallbackCandidate.translateX,
-      interactionWidth: fallbackCandidate.interactionWidth,
-      rightToLeft: fallbackCandidate.rightToLeft,
-    };
-  }, [vm?.arrow, props.context, props.origin, target, coordinates, signature]);
+    return vm.arrow;
+  }, [vm?.arrow, signature]);
 
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
