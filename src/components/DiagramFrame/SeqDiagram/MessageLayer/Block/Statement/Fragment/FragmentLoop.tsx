@@ -8,6 +8,7 @@ import { ConditionLabel } from "./ConditionLabel";
 import { Block } from "../../Block";
 import "./FragmentLoop.css";
 import Icon from "@/components/Icon/Icons";
+import { buildConditionVM } from "@/vm/fragments";
 
 export const FragmentLoop = (props: {
   context: any;
@@ -61,7 +62,14 @@ export const FragmentLoop = (props: {
         <div className={cn({ hidden: collapsed })}>
           <div className="segment">
             <div className="text-skin-fragment">
-              <ConditionLabel condition={condition} />
+              {(() => {
+                const conditionVM = buildConditionVM(condition);
+                if (!conditionVM) {
+                  console.warn("Failed to build ConditionVM for loop condition");
+                  return null;
+                }
+                return <ConditionLabel condition={condition} vm={conditionVM} />;
+              })()}
             </div>
             <Block
               origin={leftParticipant}

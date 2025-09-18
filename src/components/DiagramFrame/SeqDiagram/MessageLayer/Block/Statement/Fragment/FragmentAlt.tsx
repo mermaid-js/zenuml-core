@@ -7,6 +7,7 @@ import { Comment } from "../Comment/Comment";
 import { Numbering } from "../../../Numbering";
 import { cn } from "@/utils";
 import { ConditionLabel } from "./ConditionLabel";
+import { buildConditionVM } from "@/vm/fragments";
 import "./FragmentAlt.css";
 import { Fragment, useMemo } from "react";
 import Icon from "@/components/Icon/Icons";
@@ -86,7 +87,15 @@ export const FragmentAlt = (props: {
       <div className={collapsed ? "hidden" : "block"}>
         <div className="segment">
           <div className="text-skin-fragment flex">
-            <ConditionLabel condition={conditionFromIfElseBlock(ifBlock)} />
+            {(() => {
+              const condition = conditionFromIfElseBlock(ifBlock);
+              const conditionVM = buildConditionVM(condition);
+              if (!conditionVM) {
+                console.warn("Failed to build ConditionVM for if condition");
+                return null;
+              }
+              return <ConditionLabel condition={condition} vm={conditionVM} />;
+            })()}
           </div>
           {blockInIfBlock && (
             <Block
@@ -106,9 +115,15 @@ export const FragmentAlt = (props: {
             >
               <div className="text-skin-fragment" key={index + 1000}>
                 <label className="else-if hidden">else if</label>
-                <ConditionLabel
-                  condition={conditionFromIfElseBlock(elseIfBlock)}
-                />
+                {(() => {
+                  const condition = conditionFromIfElseBlock(elseIfBlock);
+                  const conditionVM = buildConditionVM(condition);
+                  if (!conditionVM) {
+                    console.warn("Failed to build ConditionVM for else-if condition");
+                    return null;
+                  }
+                  return <ConditionLabel condition={condition} vm={conditionVM} />;
+                })()}
               </div>
               <Block
                 origin={leftParticipant}

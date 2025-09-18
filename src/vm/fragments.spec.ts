@@ -8,9 +8,9 @@ describe("Fragment VMs", () => {
       const refVM = buildRefVM(context);
 
       expect(refVM).toBeDefined();
-      expect(refVM?.labelText).toBe("A");
-      expect(refVM?.labelRange).toEqual([4, 4]); // Position of 'A'
-      expect(refVM?.id).toMatch(/^ref:/);
+      expect(refVM!.labelText).toBe("A");
+      expect(refVM!.labelRange).toEqual([4, 4]); // Position of 'A'
+      expect(refVM!.id).toMatch(/^ref:/);
     });
 
     it("should handle empty ref context", () => {
@@ -23,8 +23,8 @@ describe("Fragment VMs", () => {
       const refVM = buildRefVM(context);
 
       expect(refVM).toBeDefined();
-      expect(refVM?.labelText).toBe("test content");
-      expect(refVM?.labelRange).toEqual([4, 17]); // Position of quoted content
+      expect(refVM!.labelText).toBe("test content");
+      expect(refVM!.labelRange).toEqual([4, 17]); // Position of quoted content
     });
   });
 
@@ -34,9 +34,9 @@ describe("Fragment VMs", () => {
       const conditionVM = buildConditionVM(context);
 
       expect(conditionVM).toBeDefined();
-      expect(conditionVM?.labelText).toBe("x == y");
-      expect(conditionVM?.labelRange).toEqual([3, 8]); // Position of 'x == y'
-      expect(conditionVM?.id).toMatch(/^condition:/);
+      expect(conditionVM!.labelText).toBe("x == y");
+      expect(conditionVM!.labelRange).toEqual([3, 8]); // Position of 'x == y'
+      expect(conditionVM!.id).toMatch(/^condition:/);
     });
 
     it("should handle null condition context", () => {
@@ -49,8 +49,8 @@ describe("Fragment VMs", () => {
       const conditionVM = buildConditionVM(context);
 
       expect(conditionVM).toBeDefined();
-      expect(conditionVM?.labelText).toBe('"test" == value');
-      expect(conditionVM?.labelRange).toEqual([3, 17]); // Position of condition
+      expect(conditionVM!.labelText).toBe('"test" == value');
+      expect(conditionVM!.labelRange).toEqual([3, 17]); // Position of condition
     });
   });
 });

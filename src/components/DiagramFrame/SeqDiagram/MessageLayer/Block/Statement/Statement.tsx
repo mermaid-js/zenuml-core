@@ -18,6 +18,7 @@ import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMByStartAtom } from "@/store/Store";
 import { centerOf } from "./utils";
 import { enhanceMessageVMWithArrow, enhanceReturnVMWithArrow } from "@/vm/messages";
+import { buildRefVM } from "@/vm/fragments";
 
 export const Statement = (props: {
   context: any;
@@ -121,7 +122,12 @@ export const Statement = (props: {
     case Boolean(props.context.tcf()):
       return <FragmentTryCatchFinally {...subProps} />;
     case Boolean(props.context.ref()):
-      return <FragmentRef {...subProps} />;
+      const refVM = buildRefVM(props.context);
+      if (!refVM) {
+        console.warn("Failed to build RefVM for ref context");
+        return null;
+      }
+      return <FragmentRef {...subProps} vm={refVM} />;
     case Boolean(props.context.creation()):
       return <Creation {...subProps} vm={creationVMWithArrow} />;
     case Boolean(props.context.message()):
