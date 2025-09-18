@@ -1,9 +1,5 @@
-import { coordinatesAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { getStyle } from "@/utils/messageStyling";
-import { useAtomValue } from "jotai";
-import { useMemo } from "react";
-import { centerOf } from "../utils";
 
 type DividerVM = {
   note: string;
@@ -19,51 +15,13 @@ export const Divider = (props: {
   className?: string;
   vm?: DividerVM;
 }) => {
-  const coordinates = useAtomValue(coordinatesAtom);
-
-  // Use VM data if available, otherwise calculate
-  const width = useMemo(() => {
-    if (props.vm?.width !== undefined) {
-      return props.vm.width;
-    }
-    const names = coordinates.orderedParticipantNames();
-    const rearParticipant = names[names.length - 1];
-    return centerOf(coordinates, rearParticipant) + 10;
-  }, [props.vm?.width, coordinates]);
-
-  const translateX = useMemo(() => {
-    if (props.vm?.translateX !== undefined) {
-      return props.vm.translateX;
-    }
-    const centerOfOrigin = centerOf(coordinates, props.origin);
-    return -1 * centerOfOrigin + 10;
-  }, [props.vm?.translateX, coordinates, props.origin]);
-
-  const note = props.vm?.rawNote ?? props.context.divider().Note();
-
-  const messageStyle = useMemo(() => {
-    // If VM has styling info, use it without parity checks
-    if (props.vm?.styling?.styles) {
-      return {
-        style: getStyle(props.vm.styling.styles),
-        note: props.vm.note,
-      };
-    }
-    // Fallback parsing
-    if (note.trim().indexOf("[") === 0 && note.indexOf("]") !== -1) {
-      const startIndex = note.indexOf("[");
-      const endIndex = note.indexOf("]");
-      const [style, _note] = [
-        note.slice(startIndex + 1, endIndex),
-        note.slice(endIndex + 1),
-      ];
-      return {
-        style: getStyle(style.split(",").map((s: string) => s.trim())),
-        note: _note,
-      };
-    }
-    return { style: getStyle([]), note: note };
-  }, [props.vm, note]);
+  // Use VM data exclusively (fail early if missing)
+  const width = props.vm?.width || 0;
+  const translateX = props.vm?.translateX || 0;
+  const messageStyle = {
+    style: getStyle(props.vm?.styling?.styles || []),
+    note: props.vm?.note || "",
+  };
 
   return (
     <div

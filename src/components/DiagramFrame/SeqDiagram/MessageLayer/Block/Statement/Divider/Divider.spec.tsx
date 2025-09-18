@@ -50,13 +50,21 @@ describe("Divider", () => {
     expect(nameEl?.textContent).toBe("Processed note");
   });
 
-  test("renders without VM (fallback)", () => {
-    const { container } = renderDivider("====divider");
+  test("renders with minimal VM data", () => {
+    const minimalVM: DividerVM = {
+      note: "Test divider note",
+      rawNote: "Test divider note",
+      width: 200,
+      translateX: 10,
+      styling: { styles: [] },
+    };
+
+    const { container } = renderDivider("====divider", minimalVM);
     const dividerEl = container.querySelector(".divider");
 
-    // Should have some width and transform
-    expect(dividerEl?.style.width).toBeTruthy();
-    expect(dividerEl?.style.transform).toBeTruthy();
+    // Should use VM data
+    expect(dividerEl?.style.width).toBe("200px");
+    expect(dividerEl?.style.transform).toBe("translateX(10px)");
 
     const nameEl = container.querySelector(".name");
     expect(nameEl?.textContent).toBe("Test divider note");
