@@ -138,7 +138,6 @@ export const Return = (props: {
         <Message
           className={cn(props.commentObj?.messageClassNames)}
           textStyle={props.commentObj?.messageStyle}
-          context={messageContext}
           content={signature}
           rtl={rightToLeft}
           type="return"

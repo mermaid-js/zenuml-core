@@ -7,17 +7,13 @@ import { Numbering } from "../../../Numbering";
 import { MessageLabel } from "../../../MessageLabel";
 // Note: label range and editability come from VM via overrides
 
-type Context = any;
-
 const getEditableDefault = (mode: RenderMode, type: string) => {
   if (mode === RenderMode.Static) return false;
   if (type === "creation") return false; // rely on override from VM
   return ["sync", "async", "return"].includes(type);
 };
 
-
 export const Message = (props: {
-  context?: Context;
   content: string;
   rtl?: string | boolean;
   type?: string;
@@ -31,7 +27,6 @@ export const Message = (props: {
   onOpenStylePanel?: (element: HTMLElement | null) => void;
 }) => {
   const {
-    context,
     content,
     rtl,
     type = "",
