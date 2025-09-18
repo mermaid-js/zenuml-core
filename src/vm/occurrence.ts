@@ -1,5 +1,3 @@
-import { buildBlockVM } from "./block";
-
 export interface OccurrenceVM {
   /** The participant this occurrence belongs to */
   participant: string;
@@ -21,36 +19,24 @@ export interface OccurrenceVM {
 }
 
 /**
- * Build OccurrenceVM from occurrence context and participant data
+ * Build OccurrenceVM from pre-computed MessageVM occurrence data and participant info
  */
 export function buildOccurrenceVM(
-  context: any,
+  messageVM: import("./messages").MessageVM | null,
   participant: string,
   centerPosition: number,
   rightToLeft: boolean = false,
 ): OccurrenceVM | undefined {
-  if (!context) {
+  if (!messageVM?.occurrence) {
     return undefined;
   }
 
-  // Check if has brace block and statements
-  const braceBlock = context.braceBlock?.();
-  const stats = braceBlock?.block?.()?.stat?.() || [];
-  const hasStatements = stats.length > 0;
-  
-  // Check if has any statements except return statements
-  const hasNonReturnStatements = (() => {
-    if (stats.length > 1) return true;
-    // When the only one statement is not the RetContext
-    return stats.length === 1 && stats[0]["ret"]?.() == null;
-  })();
-
   return {
     participant,
-    hasStatements,
-    hasNonReturnStatements,
+    hasStatements: messageVM.occurrence.hasStatements,
+    hasNonReturnStatements: messageVM.occurrence.hasNonReturnStatements,
     centerPosition,
     rightToLeft,
-    blockVM: braceBlock?.block?.() ? buildBlockVM(braceBlock.block()) : undefined,
+    blockVM: messageVM.occurrence.blockVM,
   };
 }

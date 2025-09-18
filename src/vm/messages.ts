@@ -4,6 +4,7 @@ import { calculateArrowGeometry } from "@/components/DiagramFrame/SeqDiagram/Mes
 import type { Coordinates } from "@/positioning/Coordinates";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { formattedTextOf } from "@/parser/helpers";
+import { buildBlockVM } from "./block";
 
 export type MessageVM = {
   type: OwnableMessageType;
@@ -26,6 +27,12 @@ export type MessageVM = {
   assignee?: string | null;
   // Number of statements in the message (for return message numbering)
   statementsCount: number;
+  // Occurrence data for building OccurrenceVM without parser context
+  occurrence?: {
+    hasStatements: boolean;
+    hasNonReturnStatements: boolean;
+    blockVM?: import("./block").BlockVM;
+  };
   arrow?: {
     translateX: number;
     interactionWidth: number;
@@ -36,7 +43,7 @@ export type MessageVM = {
   };
 };
 
-export function buildMessagesVM(messages: Array<any>): MessageVM[] {
+export function buildMessagesVM(messages: Array<any>, contexts?: Record<string, any>): MessageVM[] {
   return messages.map((m, i) => {
     const source = m.providedFrom ?? m.from;
     const to = m.to;
@@ -45,6 +52,31 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
     const label = m.labelRange ?? null;
     const labelValid = Array.isArray(label) && label.length === 2 && label[0] != null && label[1] != null && label[0] >= 0 && label[1] >= 0;
     const canEditLabel = isCreation ? labelValid : true;
+    
+    // Compute occurrence data from context if available
+    let occurrence: MessageVM['occurrence'] = undefined;
+    if (contexts && m.range) {
+      const context = contexts[m.range[0]]; // Use start position as key
+      if (context) {
+        const braceBlock = context.braceBlock?.();
+        const stats = braceBlock?.block?.()?.stat?.() || [];
+        const hasStatements = stats.length > 0;
+        
+        // Check if has any statements except return statements
+        const hasNonReturnStatements = (() => {
+          if (stats.length > 1) return true;
+          // When the only one statement is not the RetContext
+          return stats.length === 1 && stats[0]["ret"]?.() == null;
+        })();
+        
+        occurrence = {
+          hasStatements,
+          hasNonReturnStatements,
+          blockVM: braceBlock?.block?.() ? buildBlockVM(braceBlock.block()) : undefined,
+        };
+      }
+    }
+    
     const vm: MessageVM = {
       type: m.type,
       from: m.from,
@@ -59,6 +91,7 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
       canEditLabel,
       assignee: m.assignee ?? null,
       statementsCount: m.statementsCount,
+      occurrence,
     };
     return vm;
   });

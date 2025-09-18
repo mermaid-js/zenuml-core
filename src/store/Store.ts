@@ -4,7 +4,7 @@ import { RootContext } from "@/parser";
 import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "../positioning/Coordinates";
 import { CodeRange } from "../parser/CodeRange";
-import { buildMessagesModel } from "@/ir/messages";
+import { buildMessagesModel, buildMessagesModelWithContexts } from "@/ir/messages";
 import { buildParticipantsModel } from "@/ir/participants";
 import { buildFramesModel } from "@/ir/frames";
 import { buildGroupsModel } from "@/ir/groups";
@@ -48,10 +48,16 @@ export const messagesModelAtom = atom((get) => {
   return ctx ? buildMessagesModel(ctx) : [];
 });
 
+// Messages model with contexts for VM building
+export const messagesModelWithContextsAtom = atom((get) => {
+  const ctx = get(rootContextAtom);
+  return ctx ? buildMessagesModelWithContexts(ctx) : { messages: [], contexts: {} };
+});
+
 // View-model for messages (adapter over IR)
 export const messagesVMAtom = atom((get) => {
-  const ir = get(messagesModelAtom);
-  return buildMessagesVM(ir);
+  const { messages, contexts } = get(messagesModelWithContextsAtom);
+  return buildMessagesVM(messages, contexts);
 });
 
 export const messagesVMByStartAtom = atom((get) => {

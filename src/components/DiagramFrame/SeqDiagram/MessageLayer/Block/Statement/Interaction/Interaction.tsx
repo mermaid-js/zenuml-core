@@ -18,7 +18,7 @@ function isNullOrUndefined(value: any) {
 }
 
 export const Interaction = (props: {
-  context: any;
+  context?: any; // Optional during migration - no longer used internally
   origin: string;
   commentObj?: CommentClass;
   number?: string;
@@ -38,7 +38,6 @@ export const Interaction = (props: {
   const coordinates = useAtomValue(coordinatesAtom);
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
-  const message = props.context?.message();
   const vm = props.vm;
   const assignee = vm?.assignee || "";
   const onMessageClick = useAtomValue(onMessageClickAtom);
@@ -134,12 +133,17 @@ export const Interaction = (props: {
           }}
         />
       )}
-      <Occurrence
-        participant={to}
-        rtl={rightToLeft}
-        number={props.number}
-        vm={buildOccurrenceVM(message, to, centerOf(coordinates, to), rightToLeft)}
-      />
+      {(() => {
+        const occurrenceVM = buildOccurrenceVM(vm, to, centerOf(coordinates, to), rightToLeft);
+        return occurrenceVM ? (
+          <Occurrence
+            participant={to}
+            rtl={rightToLeft}
+            number={props.number}
+            vm={occurrenceVM}
+          />
+        ) : null;
+      })()}
       {assignee && !isSelf && (
         <Message
           className={cn(

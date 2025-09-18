@@ -21,6 +21,7 @@ export interface IRMessage {
 class MessagesIRCollector extends sequenceParserListener {
   private isBlind = false;
   private messages: IRMessage[] = [];
+  private contexts: Record<number, any> = {};
 
   private push(kind: "sync" | "async" | "creation" | "return", ctx: any) {
     if (this.isBlind) return;
@@ -73,6 +74,11 @@ class MessagesIRCollector extends sequenceParserListener {
       assignee: assignee ?? null,
       statementsCount,
     });
+    
+    // Store context for VM building
+    if (range) {
+      this.contexts[range[0]] = ctx;
+    }
   }
 
   // Visitors
@@ -100,12 +106,20 @@ class MessagesIRCollector extends sequenceParserListener {
   }
 
   result() {
-    return this.messages;
+    return { messages: this.messages, contexts: this.contexts };
   }
 }
 
 export function buildMessagesModel(rootCtx: any): IRMessage[] {
   if (!rootCtx) return [];
+  const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
+  const collector = new MessagesIRCollector();
+  walker.walk(collector, rootCtx);
+  return collector.result().messages;
+}
+
+export function buildMessagesModelWithContexts(rootCtx: any): { messages: IRMessage[], contexts: Record<number, any> } {
+  if (!rootCtx) return { messages: [], contexts: {} };
   const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
   const collector = new MessagesIRCollector();
   walker.walk(collector, rootCtx);

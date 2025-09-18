@@ -148,12 +148,17 @@ export const Creation = (props: {
           }}
         />
       </div>
-      <Occurrence
-        className="pointer-events-auto"
-        participant={to}
-        number={props.number}
-        vm={buildOccurrenceVM(creation, to as any, centerOf(coordinates, String(to)), rightToLeft)}
-      />
+      {(() => {
+        const occurrenceVM = buildOccurrenceVM(vm, to as any, centerOf(coordinates, String(to)), rightToLeft);
+        return occurrenceVM ? (
+          <Occurrence
+            className="pointer-events-auto"
+            participant={to}
+            number={props.number}
+            vm={occurrenceVM}
+          />
+        ) : null;
+      })()}
       {assignee && (
         <Message
           className={cn(
@@ -164,7 +169,7 @@ export const Creation = (props: {
           labelText={assignee}
           rtl={!rightToLeft}
           type="return"
-          number={`${props.number}.${creation.Statements().length + 1}`}
+          number={`${props.number}.${(vm?.statementsCount ?? 0) + 1}`}
         />
       )}
     </div>
