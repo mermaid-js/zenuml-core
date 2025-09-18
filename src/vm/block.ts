@@ -11,12 +11,7 @@ export interface BlockVM {
  * Falls back gracefully if context is missing or does not expose `stat()`.
  */
 export function buildBlockVM(context: any): BlockVM {
-  // Some contexts expose `Statements()` (Message/Creation/etc.),
-  // while plain blocks expose `stat()`. Support both for robustness.
-  const statements: any[] =
-    (typeof context?.Statements === 'function' && context.Statements()) ||
-    (typeof context?.stat === 'function' && context.stat()) ||
-    [];
+  const statements: any[] = (typeof context?.stat === 'function' && context.stat()) ||  [];
 
   return { statements };
 }

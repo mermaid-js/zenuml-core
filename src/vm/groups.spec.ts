@@ -13,7 +13,6 @@ describe("GroupVM", () => {
 
       const vm = buildGroupVM(group);
 
-      expect(vm.id).toBe("group:0:A,B");
       expect(vm.name).toBe("Test Group");
       expect(vm.participantNames).toEqual(["A", "B"]);
     });
@@ -26,7 +25,6 @@ describe("GroupVM", () => {
 
       const vm = buildGroupVM(group);
 
-      expect(vm.id).toBe("group:1:C,D");
       expect(vm.name).toBeUndefined();
       expect(vm.participantNames).toEqual(["C", "D"]);
     });

@@ -60,7 +60,7 @@ export const LifeLineLayer = (props: {
         {/* Render groups using VM data */}
         {groupsVM.map((group, index) => (
           <LifeLineGroup
-            key={group.id}
+            key={`group:${index}:${group.participantNames.join(",")}`}
             group={{
               name: group.name,
               participantNames: group.participantNames,
