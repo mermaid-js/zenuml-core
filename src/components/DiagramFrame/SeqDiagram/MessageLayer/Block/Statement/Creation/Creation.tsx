@@ -8,11 +8,13 @@ import {
 } from "@/positioning/Constants";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
-import { cursorAtom, onElementClickAtom, onMessageClickAtom } from "@/store/Store";
+import { coordinatesAtom, cursorAtom, onElementClickAtom, onMessageClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EventBus } from "@/EventBus";
 import type { MessageVM } from "@/vm/messages";
+import { buildOccurrenceVM } from "@/vm/occurrence";
+import { centerOf } from "../utils";
 
 export const Creation = (props: {
   context: any;
@@ -25,6 +27,7 @@ export const Creation = (props: {
 }) => {
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const cursor = useAtomValue(cursorAtom);
+  const coordinates = useAtomValue(coordinatesAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const [participantWidth, setParticipantWidth] = useState(0);
@@ -150,6 +153,7 @@ export const Creation = (props: {
         className="pointer-events-auto"
         participant={target}
         number={props.number}
+        vm={buildOccurrenceVM(creation, target as any, centerOf(coordinates, String(target)), rightToLeft)}
       />
       {assignee && (
         <Message

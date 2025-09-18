@@ -4,12 +4,14 @@ import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
 import { Message } from "../Message";
 import { Occurrence } from "./Occurrence/Occurrence";
 import { useAtomValue } from "jotai";
-import { cursorAtom, onMessageClickAtom } from "@/store/Store";
+import { coordinatesAtom, cursorAtom, onMessageClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { signatureOf } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
 import { useMemo } from "react";
+import { buildOccurrenceVM } from "@/vm/occurrence";
+import { centerOf } from "../utils";
 
 function isNullOrUndefined(value: any) {
   return value === null || value === undefined;
@@ -33,6 +35,7 @@ export const Interaction = (props: {
   };
 }) => {
   const cursor = useAtomValue(cursorAtom);
+  const coordinates = useAtomValue(coordinatesAtom);
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
   const message = props.context?.message();
@@ -138,6 +141,7 @@ export const Interaction = (props: {
         participant={target}
         rtl={rightToLeft}
         number={props.number}
+        vm={buildOccurrenceVM(message, target, centerOf(coordinates, target), rightToLeft)}
       />
       {assignee && !isSelf && (
         <Message

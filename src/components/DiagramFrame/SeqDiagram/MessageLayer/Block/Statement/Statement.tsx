@@ -12,13 +12,12 @@ import { InteractionAsync } from "./InteractionAsync/Interaction-async";
 import { Divider } from "./Divider/Divider";
 import { Return } from "./Return/Return";
 import Comment from "../../../../../Comment/Comment";
-import { commentOf, offsetRangeOf } from "@/parser/helpers";
+import { commentOf } from "@/parser/helpers";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMByStartAtom } from "@/store/Store";
-import { enhanceMessageVMWithArrow, enhanceReturnVMWithArrow } from "@/vm/messages";
-import { buildDividerVM } from "@/vm/divider";
-import { buildRefVM } from "@/vm/fragments";
+import { buildStatementVM } from "@/vm/statement";
+import { useMemo } from "react";
 
 export const Statement = (props: {
   context: any;
@@ -31,45 +30,10 @@ export const Statement = (props: {
   const comment = commentOf(props.context) || "";
   const commentObj = new Comment(comment);
 
-  const messageCtx = props.context?.message?.();
-  const messageRange = messageCtx ? offsetRangeOf(messageCtx) : null;
-  const messageVM = messageRange ? messagesByStart[messageRange[0]] : undefined;
-  const messageVMWithArrow = messageVM
-    ? enhanceMessageVMWithArrow(messageVM, props.context, props.origin, coordinates)
-    : undefined;
-
-  const asyncMessageCtx = props.context?.asyncMessage?.();
-  const asyncRange = asyncMessageCtx ? offsetRangeOf(asyncMessageCtx) : null;
-  const asyncVM = asyncRange ? messagesByStart[asyncRange[0]] : undefined;
-  const asyncVMWithArrow = asyncVM
-    ? enhanceMessageVMWithArrow(asyncVM, props.context, props.origin, coordinates)
-    : undefined;
-
-  const creationCtx = props.context?.creation?.();
-  const creationRange = creationCtx ? offsetRangeOf(creationCtx) : null;
-  const creationVM = creationRange ? messagesByStart[creationRange[0]] : undefined;
-  const creationVMWithArrow = creationVM
-    ? enhanceMessageVMWithArrow(creationVM, props.context, props.origin, coordinates)
-    : undefined;
-
-  // Divider VM calculation
-  const dividerCtx = props.context?.divider?.();
-  const dividerVM = dividerCtx
-    ? buildDividerVM(dividerCtx, props.origin, coordinates)
-    : null;
-
-  // Return VM calculation via dedicated enhancer (no parity checks in component)
-  const retCtx = props.context?.ret?.();
-  const retAsync = retCtx?.asyncMessage?.();
-  const retKeyRange = retAsync
-    ? offsetRangeOf(retAsync)
-    : retCtx
-    ? offsetRangeOf(retCtx)
-    : null;
-  const retVM = retKeyRange ? messagesByStart[retKeyRange[0]] : undefined;
-  const retVMWithArrow = retVM
-    ? enhanceReturnVMWithArrow(retVM, props.context, props.origin, coordinates)
-    : undefined;
+  const vmData = useMemo(
+    () => buildStatementVM(props.context, props.origin, coordinates, messagesByStart),
+    [props.context, props.origin, coordinates, messagesByStart],
+  );
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
@@ -98,16 +62,15 @@ export const Statement = (props: {
     case Boolean(props.context.tcf()):
       return <FragmentTryCatchFinally {...subProps} />;
     case Boolean(props.context.ref()):
-      const refVM = buildRefVM(props.context);
-      if (!refVM) {
+      if (!vmData.ref) {
         console.warn("Failed to build RefVM for ref context");
         return null;
       }
-      return <FragmentRef {...subProps} vm={refVM} />;
+      return <FragmentRef {...subProps} vm={vmData.ref} />;
     case Boolean(props.context.creation()):
-      return <Creation {...subProps} vm={creationVMWithArrow} />;
+      return <Creation {...subProps} vm={vmData.creation} />;
     case Boolean(props.context.message()):
-      return <Interaction {...subProps} vm={messageVMWithArrow} />;
+      return <Interaction {...subProps} vm={vmData.message} />;
     case Boolean(props.context.asyncMessage()):
       return (
         <InteractionAsync
@@ -116,11 +79,11 @@ export const Statement = (props: {
           commentObj={commentObj}
           number={props.number}
           className={subProps.className}
-          vm={asyncVMWithArrow}
+          vm={vmData.asyncMessage}
         />
       );
     case Boolean(props.context.divider()):
-      return <Divider {...subProps} vm={dividerVM || undefined} />;
+      return <Divider {...subProps} vm={vmData.divider || undefined} />;
     case Boolean(props.context.ret()):
       return (
         <Return
@@ -129,7 +92,7 @@ export const Statement = (props: {
           commentObj={subProps.commentObj}
           number={subProps.number}
           className="text-left text-sm text-skin-message"
-          vm={retVMWithArrow}
+          vm={vmData.return}
         />
       );
   }
