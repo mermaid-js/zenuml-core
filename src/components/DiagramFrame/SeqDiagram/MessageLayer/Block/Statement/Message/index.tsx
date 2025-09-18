@@ -5,7 +5,6 @@ import { useAtomValue } from "jotai";
 import { Point } from "./Point";
 import { Numbering } from "../../../Numbering";
 import { MessageLabel } from "../../../MessageLabel";
-// Note: label range and editability come from VM via overrides
 
 const getEditableDefault = (mode: RenderMode, type: string) => {
   if (mode === RenderMode.Static) return false;
@@ -14,26 +13,41 @@ const getEditableDefault = (mode: RenderMode, type: string) => {
 };
 
 export const Message = (props: {
+  // Content and display
   content: string;
+  labelText?: string; // Processed label text (e.g., for creation: extracted from «...»)
   rtl?: string | boolean;
   type?: string;
   textStyle?: CSSProperties;
   className?: string;
   style?: CSSProperties;
   number?: string;
+  
+  // VM-driven behavior (new props)
+  editable?: boolean; // From vm.canEditLabel
+  stylable?: boolean; // From VM logic
+  labelRange?: [number, number] | null; // From vm.labelRange
+  
+  // Legacy props (for backward compatibility)
   labelRangeOverride?: [number, number] | null;
   editableOverride?: boolean;
   stylableOverride?: boolean;
+  
+  // Callbacks
   onOpenStylePanel?: (element: HTMLElement | null) => void;
 }) => {
   const {
     content,
+    labelText,
     rtl,
     type = "",
     textStyle,
     className,
     style,
     number,
+    editable,
+    stylable,
+    labelRange,
     labelRangeOverride,
     editableOverride,
     stylableOverride,
@@ -42,14 +56,15 @@ export const Message = (props: {
   const mode = useAtomValue(modeAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const isAsync = type === "async";
-  const editable = editableOverride ?? getEditableDefault(mode, type || "");
-  const stylable =
-    stylableOverride ??
-    (mode !== RenderMode.Static &&
-      ["sync", "async", "return", "creation"].includes(type));
-  const labelText =
-    type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
-  const labelPosition = labelRangeOverride ?? [-1, -1];
+  
+  // Support both new and legacy props
+  const finalEditable = editable ?? editableOverride ?? getEditableDefault(mode, type || "");
+  const finalStylable = stylable ?? stylableOverride ?? 
+    (mode !== RenderMode.Static && ["sync", "async", "return", "creation"].includes(type));
+  const finalLabelRange = labelRange ?? labelRangeOverride ?? [-1, -1];
+  
+  const displayLabelText = type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : (labelText ?? content ?? "");
+  const labelPosition = finalLabelRange;
   const borderStyle: "solid" | "dashed" | undefined = {
     sync: "solid",
     async: "solid",
@@ -58,7 +73,7 @@ export const Message = (props: {
   }[type] as "solid";
 
   const onClick = () => {
-    if (!stylable || !messageRef.current) return;
+    if (!finalStylable || !messageRef.current) return;
     if (onOpenStylePanel) {
       onOpenStylePanel(messageRef.current);
     } else {
@@ -84,11 +99,11 @@ export const Message = (props: {
       <div className="name group text-center flex-grow relative">
         <div className="inline-block static min-h-[1em]">
           <div style={textStyle}>
-            {editable ? (
+            {finalEditable ? (
               <>
                 {type === "creation" && <span>«</span>}
                 <MessageLabel
-                  labelText={labelText ?? ""}
+                  labelText={displayLabelText}
                   labelPosition={labelPosition}
                   isAsync={isAsync}
                 />

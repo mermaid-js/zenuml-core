@@ -145,10 +145,13 @@ export const InteractionAsync = (props: {
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
           content={signature}
+          labelText={signature}
           rtl={rightToLeft}
           type="async"
           number={props.number}
-          labelRangeOverride={vm?.labelRange ?? null}
+          editable={vm?.canEditLabel ?? true}
+          stylable={true}
+          labelRange={vm?.labelRange ?? null}
           onOpenStylePanel={(element) => {
             if (!element || !vm?.codeRange) return;
             onElementClick(vm.codeRange);

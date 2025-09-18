@@ -121,10 +121,13 @@ export const Interaction = (props: {
           className={cn("text-center", messageClassNames)}
           textStyle={messageTextStyle}
           content={signature}
+          labelText={signature}
           rtl={rightToLeft}
           number={props.number}
           type="sync"
-          labelRangeOverride={vm?.labelRange ?? null}
+          editable={vm?.canEditLabel ?? true}
+          stylable={true}
+          labelRange={vm?.labelRange ?? null}
           onOpenStylePanel={(element) => {
             if (!element || !vm?.codeRange) return;
             onMessageClick(vm.codeRange, element);
@@ -144,10 +147,13 @@ export const Interaction = (props: {
             messageClassNames,
           )}
           content={assignee}
+          labelText={assignee}
           rtl={!rightToLeft}
           type="return"
           number={`${props.number}.${statements.length + 1}`}
           textStyle={messageTextStyle}
+          editable={false}
+          stylable={false}
         />
       )}
     </div>

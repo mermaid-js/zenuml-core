@@ -139,10 +139,13 @@ export const Return = (props: {
           className={cn(props.commentObj?.messageClassNames)}
           textStyle={props.commentObj?.messageStyle}
           content={signature}
+          labelText={signature}
           rtl={rightToLeft}
           type="return"
           number={props.number}
-          labelRangeOverride={vm?.labelRange ?? null}
+          editable={vm?.canEditLabel ?? true}
+          stylable={true}
+          labelRange={vm?.labelRange ?? null}
           onOpenStylePanel={(element) => {
             if (!element || !vm?.codeRange) return;
             onMessageClick(vm.codeRange, element);
