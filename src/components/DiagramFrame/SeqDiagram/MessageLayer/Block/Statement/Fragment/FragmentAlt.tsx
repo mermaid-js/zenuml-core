@@ -12,12 +12,13 @@ import Icon from "@/components/Icon/Icons";
 import type { AltVM } from "@/vm/fragments";
 
 export const FragmentAlt = (props: {
+  context: any; // Required for useFragmentData hook - provides fragment positioning, styling, and participant calculations
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
   number?: string;
   className?: string;
-  vm?: AltVM;
+  vm?: AltVM; // VM data for rendering logic (conditions, blocks, etc.)
 }) => {
   // Use VM data exclusively (fail early if missing)
   const vm = props.vm;
@@ -34,7 +35,7 @@ export const FragmentAlt = (props: {
     paddingLeft,
     fragmentStyle,
     leftParticipant,
-  } = useFragmentData(null, props.origin); // Pass null since we're VM-only
+  } = useFragmentData(props.context, props.origin);
 
   return (
     <div
