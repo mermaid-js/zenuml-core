@@ -34,7 +34,6 @@ export const MessageLayer = (props: {
       style={props.style}
     >
       <Block
-        context={props.context}
         vm={buildBlockVM(props.context)}
         style={{ paddingLeft: `${vm.paddingLeft}px` }}
         origin={vm.origin}

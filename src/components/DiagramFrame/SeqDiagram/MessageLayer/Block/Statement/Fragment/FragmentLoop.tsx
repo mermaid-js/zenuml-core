@@ -75,7 +75,6 @@ export const FragmentLoop = (props: {
             <Block
               origin={leftParticipant}
               style={{ paddingLeft: `${paddingLeft}px` }}
-              context={blockInLoop}
               vm={buildBlockVM(blockInLoop)}
               number={`${props.number}.1`}
               incremental

@@ -72,7 +72,6 @@ export const FragmentSection = (props: {
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInSection}
                 vm={buildBlockVM(blockInSection)}
                 number={props.number}
               />

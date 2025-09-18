@@ -64,7 +64,6 @@ export const FragmentPar = (props: {
               collapsed ? "hidden" : "",
             )}
             style={{ paddingLeft: `${paddingLeft}px` }}
-            context={par.braceBlock().block()}
             vm={buildBlockVM(par.braceBlock().block())}
             number={`${props.number}.1`}
             incremental

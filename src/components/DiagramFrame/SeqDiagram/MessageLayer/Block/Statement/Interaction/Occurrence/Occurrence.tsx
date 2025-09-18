@@ -74,7 +74,6 @@ export const Occurrence = (props: {
       {vm?.blockContext && (
         <Block
           origin={props.participant}
-          context={vm.blockContext}
           vm={buildBlockVM(vm.blockContext)}
           number={props.number}
           collapsed={collapsed}

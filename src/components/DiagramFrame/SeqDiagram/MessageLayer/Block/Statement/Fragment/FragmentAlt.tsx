@@ -102,7 +102,6 @@ export const FragmentAlt = (props: {
             <Block
               origin={leftParticipant}
               style={{ paddingLeft: `${paddingLeft}px` }}
-              context={blockInIfBlock}
               vm={buildBlockVM(blockInIfBlock)}
               number={`${props.number}.1`}
               incremental
@@ -130,7 +129,6 @@ export const FragmentAlt = (props: {
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInElseIfBlock(elseIfBlock)}
                 vm={buildBlockVM(blockInElseIfBlock(elseIfBlock))}
                 key={index + 2000}
                 number={`${props.number}.${blockLengthAcc[index] + 1}`}
@@ -148,7 +146,6 @@ export const FragmentAlt = (props: {
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={elseBlock}
                 vm={buildBlockVM(elseBlock)}
                 number={`${props.number}.${
                   blockLengthAcc[blockLengthAcc.length - 1] + 1

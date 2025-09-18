@@ -59,7 +59,6 @@ export const FragmentOpt = (props: {
         origin={leftParticipant}
         className={cn({ hidden: collapsed })}
         style={{ paddingLeft: `${paddingLeft}px` }}
-        context={opt?.braceBlock()?.block()}
         vm={buildBlockVM(opt?.braceBlock()?.block())}
         number={`${props.number}.1`}
         incremental

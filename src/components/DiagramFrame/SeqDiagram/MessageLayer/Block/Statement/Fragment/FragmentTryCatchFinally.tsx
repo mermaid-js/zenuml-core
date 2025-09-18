@@ -85,7 +85,6 @@ export const FragmentTryCatchFinally = (props: {
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInTryBlock}
                 vm={buildBlockVM(blockInTryBlock)}
                 number={`${props.number}.1`}
                 incremental
@@ -107,7 +106,6 @@ export const FragmentTryCatchFinally = (props: {
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInCatchBlock(catchBlock)}
                 vm={buildBlockVM(blockInCatchBlock(catchBlock))}
                 key={index + 2000}
                 number={`${props.number}.${blockLengthAcc[index] + 1}`}
@@ -125,7 +123,6 @@ export const FragmentTryCatchFinally = (props: {
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={finallyBlock}
                 vm={buildBlockVM(finallyBlock)}
                 number={`${props.number}.${
                   blockLengthAcc[blockLengthAcc.length - 1] + 1

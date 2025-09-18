@@ -72,7 +72,6 @@ export const FragmentCritical = (props: {
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInCritical}
                 vm={buildBlockVM(blockInCritical)}
                 number={`${props.number}.1`}
                 incremental
