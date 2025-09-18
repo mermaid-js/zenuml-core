@@ -130,6 +130,9 @@ export function enhanceReturnVMWithArrow(
 
   return {
     ...vm,
+    // Override the from/to with the correctly computed source/target for returns
+    from: source,
+    to: target,
     arrow: {
       translateX: arrowGeometry.translateX,
       interactionWidth: arrowGeometry.interactionWidth,

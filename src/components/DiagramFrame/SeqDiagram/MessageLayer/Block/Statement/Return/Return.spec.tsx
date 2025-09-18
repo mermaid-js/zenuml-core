@@ -50,7 +50,7 @@ function renderReturn(code: string, cursor?: number | null) {
 
   const utils = render(
     <Provider store={store}>
-      <Return context={stat} origin="" vm={vmWithArrow} />
+      <Return origin="" vm={vmWithArrow} />
     </Provider>,
   );
 
@@ -135,7 +135,7 @@ describe("Return (async return form)", () => {
 
     const utils = render(
       <Provider store={store}>
-        <Return context={stat} origin="" vm={vmWithArrow} />
+        <Return origin="" vm={vmWithArrow} />
       </Provider>,
     );
 

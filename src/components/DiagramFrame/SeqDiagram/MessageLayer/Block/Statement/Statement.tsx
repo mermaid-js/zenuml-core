@@ -148,7 +148,10 @@ export const Statement = (props: {
     case Boolean(props.context.ret()):
       return (
         <Return
-          {...subProps}
+          origin={subProps.origin}
+          comment={subProps.comment}
+          commentObj={subProps.commentObj}
+          number={subProps.number}
           className="text-left text-sm text-skin-message"
           vm={retVMWithArrow}
         />

@@ -5,13 +5,10 @@ import { Message } from "../Message";
 import { useAtomValue } from "jotai";
 import { onElementClickAtom, cursorAtom, onMessageClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { formattedTextOf } from "@/parser/helpers";
 import { SyntheticEvent, useMemo } from "react";
-import { signatureOf } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
 
 export const Return = (props: {
-  context: any;
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -32,20 +29,11 @@ export const Return = (props: {
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const cursor = useAtomValue(cursorAtom);
 
-  const ret = props.context?.ret();
-
-  const asyncMessage = ret?.asyncMessage();
-
   const vm = props.vm;
-  const signature = vm?.signature ?? signatureOf(props.context?.ret?.());
-  // For return semantics, prefer async/from or ret/from; ignore VM from/to here
-  const source = asyncMessage?.From() || ret?.From() || _STARTER_;
-  // TODO: move this logic to the parser (ReturnTo)
-  const target =
-    formattedTextOf(asyncMessage?.to?.()) ||
-    props.context?.ret()?.ReturnTo() ||
-    _STARTER_;
-  asyncMessage?.content() || props.context?.ret()?.expr();
+  const signature = vm?.signature;
+  const source = vm?.from || vm?.source || _STARTER_;
+  const target = vm?.to || _STARTER_;
+
   const range = vm?.range ?? null;
   const getIsCurrent = () => {
     const start = range ? range[0] : undefined;

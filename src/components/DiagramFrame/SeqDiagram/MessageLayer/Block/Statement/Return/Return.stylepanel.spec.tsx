@@ -35,7 +35,7 @@ function renderReturnWithStylePanel(code: string) {
   const utils = render(
     <Provider store={store}>
       <StylePanel />
-      <Return context={stat} origin="" vm={vmWithArrow} />
+      <Return origin="" vm={vmWithArrow} />
     </Provider>,
   );
 
