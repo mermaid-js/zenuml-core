@@ -24,6 +24,8 @@ export type MessageVM = {
   isSelf: boolean;
   // Whether the label is editable (creation requires valid params)
   canEditLabel?: boolean;
+  // Assignment text (e.g., "ret" for "ret = A.method()")
+  assignee?: string | null;
   arrow?: {
     translateX: number;
     interactionWidth: number;
@@ -57,6 +59,7 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
       comment: m.comment ?? null,
       isSelf,
       canEditLabel,
+      assignee: m.assignee ?? null,
     };
   });
 }

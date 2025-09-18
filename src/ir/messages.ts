@@ -14,6 +14,7 @@ export interface IRMessage {
   range?: [number, number] | null;
   codeRange?: CodeRange | null;
   providedFrom?: string | null;
+  assignee?: string | null;
 }
 
 class MessagesIRCollector extends sequenceParserListener {
@@ -40,6 +41,7 @@ class MessagesIRCollector extends sequenceParserListener {
     const range = offsetRangeOf(ctx);
     const codeRange = codeRangeOf(ctx);
     const providedFrom = typeof ctx?.ProvidedFrom === "function" ? ctx.ProvidedFrom() : undefined;
+    const assignee = typeof ctx?.Assignment === "function" ? ctx.Assignment()?.getText() : undefined;
     this.messages.push({
       from: ctx?.From?.(),
       to: ctx?.Owner?.(),
@@ -50,6 +52,7 @@ class MessagesIRCollector extends sequenceParserListener {
       range,
       codeRange: codeRange ?? null,
       providedFrom: providedFrom ?? null,
+      assignee: assignee ?? null,
     });
   }
 

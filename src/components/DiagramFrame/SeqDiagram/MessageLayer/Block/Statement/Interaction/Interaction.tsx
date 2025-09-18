@@ -113,9 +113,8 @@ export const Interaction = (props: {
         <SelfInvocation
           classNames={messageClassNames}
           textStyle={messageTextStyle}
-          context={message}
           number={props.number}
-          vm={vm}
+          vm={vm!}
         />
       ) : (
         <Message

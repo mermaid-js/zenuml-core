@@ -1,28 +1,24 @@
 import { onMessageClickAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
-import { CSSProperties, useMemo, useRef } from "react";
+import { CSSProperties, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
 import { MessageLabel } from "../../../../MessageLabel";
-import { signatureOf, labelRangeOfMessage } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
 
 export const SelfInvocation = (props: {
-  context?: any;
+  vm: MessageVM;
   number?: string;
   textStyle?: CSSProperties;
   classNames?: any;
-  vm?: MessageVM;
 }) => {
   const messageRef = useRef(null);
   const onMessageClick = useAtomValue(onMessageClickAtom);
 
-  const assignee = props.context?.Assignment()?.getText() || "";
-  const labelPosition: [number, number] = useMemo(() => {
-    return props.vm?.labelRange ?? labelRangeOfMessage(props.context, "sync");
-  }, [props.vm?.labelRange, props.context]);
+  const assignee = props.vm.assignee || "";
+  const labelPosition: [number, number] = props.vm.labelRange ?? [-1, -1];
 
   const onClick = () => {
-    const range = props.vm?.codeRange;
+    const range = props.vm.codeRange;
     if (range) {
       onMessageClick(range, messageRef.current!);
     } else {
@@ -48,7 +44,7 @@ export const SelfInvocation = (props: {
           <MessageLabel
             style={props.textStyle}
             className={props.classNames}
-            labelText={props.vm?.signature ?? signatureOf(props.context)}
+            labelText={props.vm.signature}
             labelPosition={labelPosition}
             isSelf={true}
           />
