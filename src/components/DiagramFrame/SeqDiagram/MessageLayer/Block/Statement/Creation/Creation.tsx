@@ -112,7 +112,7 @@ export const Creation = (props: {
         props.className,
       )}
       onClick={() => {
-        const codeRange = vm?.codeRange ?? codeRangeOf(props.context);
+        const codeRange = vm?.codeRange;
         if (codeRange) onElementClick(codeRange);
       }}
       data-signature={signature}

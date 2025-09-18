@@ -5,7 +5,7 @@ import { Message } from "../Message";
 import { useAtomValue } from "jotai";
 import { onElementClickAtom, cursorAtom, onMessageClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { codeRangeOf, formattedTextOf } from "@/parser/helpers";
+import { formattedTextOf } from "@/parser/helpers";
 import { SyntheticEvent, useMemo } from "react";
 import { signatureOf } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
@@ -83,7 +83,7 @@ export const Return = (props: {
 
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation();
-    const range = codeRangeOf(props.context);
+    const range = vm?.codeRange;
     if (range) onElementClick(range);
   };
   return (
