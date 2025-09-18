@@ -79,3 +79,65 @@ export function buildStatementVM(
   };
 }
 
+export type StatementKind =
+  | "loop"
+  | "alt"
+  | "par"
+  | "opt"
+  | "section"
+  | "critical"
+  | "tcf"
+  | "ref"
+  | "creation"
+  | "message"
+  | "async"
+  | "divider"
+  | "return";
+
+export type DiscriminatedStatementVM =
+  | { kind: "loop" }
+  | { kind: "alt" }
+  | { kind: "par" }
+  | { kind: "opt" }
+  | { kind: "section" }
+  | { kind: "critical" }
+  | { kind: "tcf" }
+  | { kind: "ref"; ref: RefVM | null }
+  | { kind: "divider"; divider: DividerVM | null }
+  | { kind: "creation"; message?: MessageVM }
+  | { kind: "message"; message?: MessageVM }
+  | { kind: "async"; message?: MessageVM }
+  | { kind: "return"; message?: MessageVM };
+
+/**
+ * Build a discriminated Statement VM with a `kind` field to drive rendering.
+ * Where applicable, includes the computed view model for that kind.
+ */
+export function buildDiscriminatedStatementVM(
+  context: any,
+  origin: string,
+  coordinates: Coordinates,
+  messagesByStart: Record<number, MessageVM>,
+): DiscriminatedStatementVM {
+  // Preserve the same precedence as existing switch in Statement.tsx
+  if (context?.loop?.()) return { kind: "loop" };
+  if (context?.alt?.()) return { kind: "alt" };
+  if (context?.par?.()) return { kind: "par" };
+  if (context?.opt?.()) return { kind: "opt" };
+  if (context?.section?.()) return { kind: "section" };
+  if (context?.critical?.()) return { kind: "critical" };
+  if (context?.tcf?.()) return { kind: "tcf" };
+
+  // Build base data once and reuse
+  const data = buildStatementVM(context, origin, coordinates, messagesByStart);
+
+  if (context?.ref?.()) return { kind: "ref", ref: data.ref ?? null };
+  if (context?.creation?.()) return { kind: "creation", message: data.creation };
+  if (context?.message?.()) return { kind: "message", message: data.message };
+  if (context?.asyncMessage?.()) return { kind: "async", message: data.asyncMessage };
+  if (context?.divider?.()) return { kind: "divider", divider: data.divider ?? null };
+  if (context?.ret?.()) return { kind: "return", message: data.return };
+
+  // Fallback: unknown statement, prefer message shape to avoid crashes
+  return { kind: "message", message: data.message };
+}

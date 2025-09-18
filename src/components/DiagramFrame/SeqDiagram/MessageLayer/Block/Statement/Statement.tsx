@@ -16,7 +16,7 @@ import { commentOf } from "@/parser/helpers";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMByStartAtom } from "@/store/Store";
-import { buildStatementVM } from "@/vm/statement";
+import { buildDiscriminatedStatementVM } from "@/vm/statement";
 import { useMemo } from "react";
 
 export const Statement = (props: {
@@ -31,13 +31,13 @@ export const Statement = (props: {
   const commentObj = new Comment(comment);
 
   const vmData = useMemo(
-    () => buildStatementVM(props.context, props.origin, coordinates, messagesByStart),
+    () => buildDiscriminatedStatementVM(props.context, props.origin, coordinates, messagesByStart),
     [props.context, props.origin, coordinates, messagesByStart],
   );
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
-      hidden: props.collapsed && !props.context.ret(),
+      hidden: props.collapsed && vmData.kind !== "return",
     }),
     context: props.context,
     origin: props.origin,
@@ -46,32 +46,32 @@ export const Statement = (props: {
     number: props.number,
   };
 
-  switch (true) {
-    case Boolean(props.context.loop()):
+  switch (vmData.kind) {
+    case "loop":
       return <FragmentLoop {...subProps} />;
-    case Boolean(props.context.alt()):
+    case "alt":
       return <FragmentAlt {...subProps} />;
-    case Boolean(props.context.par()):
+    case "par":
       return <FragmentPar {...subProps} />;
-    case Boolean(props.context.opt()):
+    case "opt":
       return <FragmentOpt {...subProps} />;
-    case Boolean(props.context.section()):
+    case "section":
       return <FragmentSection {...subProps} />;
-    case Boolean(props.context.critical()):
+    case "critical":
       return <FragmentCritical {...subProps} />;
-    case Boolean(props.context.tcf()):
+    case "tcf":
       return <FragmentTryCatchFinally {...subProps} />;
-    case Boolean(props.context.ref()):
-      if (!vmData.ref) {
+    case "ref":
+      if (!('ref' in vmData) || !vmData.ref) {
         console.warn("Failed to build RefVM for ref context");
         return null;
       }
       return <FragmentRef {...subProps} vm={vmData.ref} />;
-    case Boolean(props.context.creation()):
-      return <Creation {...subProps} vm={vmData.creation} />;
-    case Boolean(props.context.message()):
-      return <Interaction {...subProps} vm={vmData.message} />;
-    case Boolean(props.context.asyncMessage()):
+    case "creation":
+      return <Creation {...subProps} vm={(vmData as any).message} />;
+    case "message":
+      return <Interaction {...subProps} vm={(vmData as any).message} />;
+    case "async":
       return (
         <InteractionAsync
           origin={props.origin}
@@ -79,12 +79,12 @@ export const Statement = (props: {
           commentObj={commentObj}
           number={props.number}
           className={subProps.className}
-          vm={vmData.asyncMessage}
+          vm={(vmData as any).message}
         />
       );
-    case Boolean(props.context.divider()):
-      return <Divider {...subProps} vm={vmData.divider || undefined} />;
-    case Boolean(props.context.ret()):
+    case "divider":
+      return <Divider {...subProps} vm={(vmData as any).divider || undefined} />;
+    case "return":
       return (
         <Return
           origin={subProps.origin}
@@ -92,7 +92,7 @@ export const Statement = (props: {
           commentObj={subProps.commentObj}
           number={subProps.number}
           className="text-left text-sm text-skin-message"
-          vm={vmData.return}
+          vm={(vmData as any).message}
         />
       );
   }
