@@ -8,11 +8,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
-import {
-  analyzeStyleSelection,
-  applyStyleToggle,
-  SelectionContext,
-} from "./StylePanel.helpers";
+import { applyStylesAt, readStylesAt, toggleStyleList } from "./StylePanel.helpers";
 // No parser or CodeRange dependency in the click path
 
 const btns = [
@@ -51,17 +47,7 @@ export const StylePanel = () => {
     onContentChange(newCode);
   };
 
-  const selectionRef = useRef<SelectionContext>({
-    anchor: { start: 0, lineStart: 0 },
-    comment: {
-      exists: false,
-      hasBrackets: false,
-      leading: "",
-      styles: [],
-      suffix: "",
-      replaceHead: 0,
-    },
-  });
+  const startRef = useRef<number>(0);
 
   const { refs, floatingStyles } = useFloating({
     open: isOpen,
@@ -74,12 +60,9 @@ export const StylePanel = () => {
 
     // Recompute selection against the latest code to avoid using
     // stale cached data if the document changed while the panel was open.
-    const start = selectionRef.current.anchor.start;
-    const { selection } = analyzeStyleSelection(
-      code,
-      start,
-    );
-    const newCode = applyStyleToggle(code, selection, style);
+    const start = startRef.current;
+    const toggled = toggleStyleList(existingStyles, style);
+    const newCode = applyStylesAt(code, start, toggled);
     updateCode(newCode);
   };
 
@@ -91,12 +74,9 @@ export const StylePanel = () => {
     setOnMessageClick((startOffset: number, element: HTMLElement) => {
       // Run on the next tick so useOutsideClick can close any previous panel first
       setTimeout(() => {
-        const { selection } = analyzeStyleSelection(
-          code,
-          startOffset,
-        );
-        selectionRef.current = selection;
-        setExistingStyles(selection.comment.styles);
+        const styles = readStylesAt(code, startOffset);
+        startRef.current = startOffset;
+        setExistingStyles(styles);
         refs.setReference(element);
         setHasSelection(true);
         setIsOpen(true);

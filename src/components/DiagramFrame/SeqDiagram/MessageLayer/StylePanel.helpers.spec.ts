@@ -1,4 +1,4 @@
-import { analyzeStyleSelection, applyStyleToggle } from "./StylePanel.helpers";
+import { readStylesAt, applyStylesAt, toggleStyleList } from "./StylePanel.helpers";
 
 describe("StylePanel helpers (analyzeStyleSelection/applyStyleToggle)", () => {
   test("insert comment when none exists, preserve indentation", () => {
@@ -8,11 +8,8 @@ describe("StylePanel helpers (analyzeStyleSelection/applyStyleToggle)", () => {
       "",
     ].join("\n");
     const start = code.indexOf("A->B");
-    const { selection } = analyzeStyleSelection(code, start);
-    expect(selection.comment.exists).toBe(false);
-    expect(selection.comment.leading).toBe("  ");
-
-    const updated = applyStyleToggle(code, selection, "italic");
+    const styles = readStylesAt(code, start);
+    const updated = applyStylesAt(code, start, toggleStyleList(styles, "italic"));
     const expected = [
       "participant A",
       "  // [italic]",
@@ -30,11 +27,8 @@ describe("StylePanel helpers (analyzeStyleSelection/applyStyleToggle)", () => {
       "",
     ].join("\n");
     const start = code.indexOf("A->B");
-    const { selection } = analyzeStyleSelection(code, start);
-    expect(selection.comment.exists).toBe(true);
-    expect(selection.comment.suffix).toBe("note here");
-
-    const updated = applyStyleToggle(code, selection, "bold");
+    const styles = readStylesAt(code, start);
+    const updated = applyStylesAt(code, start, toggleStyleList(styles, "bold"));
     const expected = [
       "participant A",
       "  // [bold] note here",
@@ -52,12 +46,9 @@ describe("StylePanel helpers (analyzeStyleSelection/applyStyleToggle)", () => {
       "",
     ].join("\n");
     const start = code.indexOf("A->B");
-    const { selection } = analyzeStyleSelection(code, start);
-    expect(selection.comment.exists).toBe(true);
-    expect(selection.comment.styles).toEqual(["bold", "italic"]);
-    expect(selection.comment.suffix).toBe("custom");
-
-    const updated = applyStyleToggle(code, selection, "italic");
+    const styles = readStylesAt(code, start);
+    expect(styles).toEqual(["bold", "italic"]);
+    const updated = applyStylesAt(code, start, toggleStyleList(styles, "italic"));
     const expected = [
       "participant A",
       "  // [bold] custom",

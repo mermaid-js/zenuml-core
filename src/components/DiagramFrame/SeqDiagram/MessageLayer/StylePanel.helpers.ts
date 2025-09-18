@@ -1,117 +1,100 @@
-import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/StringUtil";
-
-// Range semantics:
-// - Offsets are absolute indices into the code string
-// - anchor.lineStart and comment.replaceHead are start indices (inclusive)
-// - Where a range end is needed, we compute it on demand
-
-export type Offset = number;
-
-export type SelectionContext = {
-  anchor: {
-    // Message start anchor (start of the statement token)
-    start: Offset;
-    // Line start offset of the message line
-    lineStart: Offset;
-  };
-  comment: {
-    // Whether there is a comment line immediately above the message
-    exists: boolean;
-    // Indentation of the message line to preserve formatting
-    leading: string;
-    // Parsed styles from the bracket list (empty when no brackets)
-    styles: string[];
-    // The suffix comment text after the bracket list or after // when no brackets
-    suffix: string;
-    // Absolute offset of the previous line's head (start of the comment line)
-    replaceHead: Offset;
-  };
-};
-
-const toggleStyle = (styles: string[], style: string) =>
+export const toggleStyleList = (styles: string[], style: string) =>
   styles.includes(style)
     ? styles.filter((existingStyle) => existingStyle !== style)
     : [...styles, style];
 
-// Utilities for a single-pass, semantic parse of surrounding lines
-const getLineStarts = (code: string, startOffset: number) => {
-  const lineStart = getLineHead(code, startOffset);
-  const prevLineStart = getPrevLineHead(code, startOffset);
-  const prevLineText = getPrevLine(code, startOffset);
-  return { lineStart, prevLineStart, prevLineText };
-};
+// OO internals to encapsulate string math and parsing
+class CodeCursor {
+  constructor(public readonly code: string, public readonly start: number) {}
 
-const getIndentAt = (code: string, lineStart: number) =>
-  code.slice(lineStart).match(/^\s*/)?.[0] || "";
+  private lineStartFrom(index: number): number {
+    const { code } = this;
+    let i = index;
+    if (i >= 0 && code[i] === "\n") i--;
+    while (i >= 0) {
+      if (code[i] === "\n") return i + 1;
+      i--;
+    }
+    return 0;
+  }
 
-const parsePrevComment = (
-  prevLine: string,
-): { exists: boolean; styles: string[]; suffix: string } => {
-  const line = prevLine.replace(/[\r\n]+$/, "");
-  const m = line.match(/^\s*\/\/\s*(?:\[([^\]]*)\])?\s*(.*)$/);
-  if (!m) return { exists: false, styles: [], suffix: "" };
-  const styles = (m[1] || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const suffix = (m[2] || "").trim();
-  return { exists: true, styles, suffix };
-};
+  get lineStart(): number {
+    return this.lineStartFrom(this.start);
+  }
 
-// Extracts the free-text part after optional style brackets in a comment line.
-// Examples:
-//   "// note here"            -> "note here"
-//   "  //   [bold]  note"     -> "note"
-//   "// [bold,italic]"        -> ""
-//   "not a comment line"      -> "not a comment line" (fallback)
-const formatCommentLine = (
-  leadingSpaces: string,
-  styles: string[],
-  suffix: string,
-) => {
-  const styleList = styles.filter(Boolean).join(", ");
-  const suffixSegment = suffix ? ` ${suffix}` : "";
-  const line = `${leadingSpaces}// [${styleList}]${suffixSegment}`;
-  return line.endsWith("\n") ? line : `${line}\n`;
-};
+  get prevLineStart(): number {
+    const head = this.lineStartFrom(this.start);
+    if (head === 0) return 0;
+    return this.lineStartFrom(head - 1);
+  }
 
-export const applyStyleToggle = (
+  get leadingIndent(): string {
+    const m = this.code.slice(this.lineStart).match(/^\s*/);
+    return m?.[0] || "";
+  }
+
+  get prevLineTextNoEOL(): string {
+    const { code } = this;
+    const s = this.prevLineStart;
+    const e = this.lineStart;
+    let end = e;
+    if (end > s && code[end - 1] === "\n") {
+      end--;
+      if (end > s && code[end - 1] === "\r") end--;
+    }
+    return code.slice(s, end);
+  }
+}
+
+class CommentLine {
+  constructor(
+    public readonly exists: boolean,
+    public readonly styles: string[],
+    public readonly suffix: string,
+  ) {}
+
+  static parse(text: string): CommentLine {
+    const m = text.match(/^\s*\/\/\s*(?:\[([^\]]*)\])?\s*(.*)$/);
+    if (!m) return new CommentLine(false, [], "");
+    const styles = (m[1] || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const suffix = (m[2] || "").trim();
+    return new CommentLine(true, styles, suffix);
+  }
+
+  static format(leading: string, styles: string[], suffix: string): string {
+    const list = styles.filter(Boolean).join(", ");
+    const tail = suffix ? ` ${suffix}` : "";
+    return `${leading}// [${list}]${tail}\n`;
+  }
+}
+
+class StyleEditor {
+  constructor(private readonly cursor: CodeCursor) {}
+
+  read() {
+    const c = CommentLine.parse(this.cursor.prevLineTextNoEOL);
+    return c.styles;
+  }
+
+  apply(styles: string[]) {
+    const c = CommentLine.parse(this.cursor.prevLineTextNoEOL);
+    const insertHead = c.exists ? this.cursor.prevLineStart : this.cursor.lineStart;
+    const commentLine = CommentLine.format(this.cursor.leadingIndent, styles, c.suffix);
+    const { code } = this.cursor;
+    return code.slice(0, insertHead) + commentLine + code.slice(this.cursor.lineStart);
+  }
+}
+
+// Read existing styles at a message starting at startOffset.
+export const readStylesAt = (
   code: string,
-  selection: SelectionContext,
-  style: string,
-) => {
-  const { anchor, comment } = selection;
-  const start= comment.exists ? comment.replaceHead : anchor.lineStart;
+  messageStartPosition: number,
+): string[] => new StyleEditor(new CodeCursor(code, messageStartPosition)).read();
 
-  const styles = toggleStyle(comment.styles, style);
-  const commentLine = formatCommentLine(comment.leading, styles, comment.suffix);
-  return code.slice(0, start) +  commentLine + code.slice(anchor.lineStart);
-};
-
-export const analyzeStyleSelection = (
-  code: string,
-  startOffset: number,
-) => {
-  const { lineStart, prevLineStart, prevLineText } = getLineStarts(code, startOffset);
-  const leading = getIndentAt(code, lineStart);
-  const exists = prevLineText.trim().startsWith("//");
-  const parsed = exists ? parsePrevComment(prevLineText) : { exists: false, styles: [], suffix: "" };
-  const { styles, suffix } = parsed;
-  const replaceHead = prevLineStart;
-
-  const selection: SelectionContext = {
-    anchor: {
-      start: startOffset,
-      lineStart,
-    },
-    comment: {
-      exists,
-      leading,
-      styles,
-      suffix,
-      replaceHead,
-    },
-  };
-
-  return { selection };
-};
+// Apply a set of styles at the message starting at startOffset.
+// Returns the updated code only; callers typically re-anchor on the next click.
+export const applyStylesAt = (code: string, messageStartPosition: number, styles: string[]) =>
+  new StyleEditor(new CodeCursor(code, messageStartPosition)).apply(styles);
