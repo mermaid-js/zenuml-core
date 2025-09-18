@@ -43,10 +43,10 @@ export const Interaction = (props: {
   const vm = props.vm;
   const assignee = vm?.assignee || "";
   const onMessageClick = useAtomValue(onMessageClickAtom);
-  const signature = vm?.signature ?? signatureOf(message);
-  const from = vm?.from ?? message?.From?.() ?? _STARTER_;
-  const to = vm?.to ?? message?.Owner?.() ?? _STARTER_;
-  const isSelf = vm?.isSelf ?? from === to;
+  const signature = vm?.signature;
+  const from = vm?.from ?? _STARTER_;
+  const to = vm?.to ?? _STARTER_;
+  const isSelf = vm?.isSelf;
   const range = vm?.range ?? null;
   const getIsCurrent = () => {
     const start = range ? range[0] : undefined;
