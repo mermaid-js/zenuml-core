@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Block } from "./Block/Block";
-import { centerOf } from "./Block/Statement/utils";
 import { StylePanel } from "./StylePanel";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMAtom } from "@/store/Store";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 import "./MessageLayer.scss";
+import { buildMessageLayerVM } from "@/vm/messageLayer";
 import { buildBlockVM } from "@/vm/block";
 
 import parentLogger from "../../../../logger/logger";
@@ -18,11 +17,7 @@ export const MessageLayer = (props: {
   const coordinates = useAtomValue(coordinatesAtom);
   const messagesVM = useAtomValue(messagesVMAtom);
 
-  const origin = useMemo(() => {
-    return messagesVM.length > 0 ? messagesVM[0].from || _STARTER_ : _STARTER_;
-  }, [messagesVM]);
-
-  const paddingLeft = centerOf(coordinates, origin) + 1;
+  const vm = useMemo(() => buildMessageLayerVM(messagesVM, coordinates), [messagesVM, coordinates]);
 
   const [mounted, setMounted] = useState(false);
   if (mounted) {
@@ -41,8 +36,8 @@ export const MessageLayer = (props: {
       <Block
         context={props.context}
         vm={buildBlockVM(props.context)}
-        style={{ paddingLeft: `${paddingLeft}px` }}
-        origin={origin}
+        style={{ paddingLeft: `${vm.paddingLeft}px` }}
+        origin={vm.origin}
       />
       <StylePanel />
     </div>
