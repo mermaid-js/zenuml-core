@@ -31,8 +31,8 @@ export const Return = (props: {
 
   const vm = props.vm;
   const signature = vm?.signature;
-  const source = vm?.from || _STARTER_;
-  const target = vm?.to || _STARTER_;
+  const from = vm?.from || _STARTER_;
+  const to = vm?.to || _STARTER_;
 
   const range = vm?.range ?? null;
   const getIsCurrent = () => {
@@ -51,7 +51,7 @@ export const Return = (props: {
         translateX: 0,
         interactionWidth: 0,
         rightToLeft: false,
-        isSelf: source === target,
+        isSelf: from === to,
         originLayers: 0,
         sourceLayers: 0,
         targetLayers: 0,
@@ -62,12 +62,12 @@ export const Return = (props: {
       translateX: vm.arrow.translateX,
       interactionWidth: vm.arrow.interactionWidth,
       rightToLeft: vm.arrow.rightToLeft,
-      isSelf: source === target,
+      isSelf: from === to,
       originLayers: vm.arrow.originLayers ?? 0,
       sourceLayers: vm.arrow.sourceLayers ?? 0,
       targetLayers: vm.arrow.targetLayers ?? 0,
     };
-  }, [vm?.arrow, source, target, signature]);
+  }, [vm?.arrow, from, to, signature]);
 
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation();
@@ -81,9 +81,8 @@ export const Return = (props: {
       data-type="return"
       data-signature={signature}
       data-origin={props.origin}
-      data-to={target}
-      data-source={source}
-      data-target={target}
+      data-to={to}
+      data-from={from}
       data-origin-layers={originLayers}
       data-source-layers={sourceLayers}
       data-target-layers={targetLayers}

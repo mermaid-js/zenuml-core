@@ -44,9 +44,9 @@ export const Interaction = (props: {
   const vm = props.vm;
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const signature = vm?.signature ?? signatureOf(message);
-  const source = vm?.from ?? message?.From?.() ?? _STARTER_;
-  const target = vm?.to ?? message?.Owner?.() ?? _STARTER_;
-  const isSelf = vm?.isSelf ?? source === target;
+  const from = vm?.from ?? message?.From?.() ?? _STARTER_;
+  const to = vm?.to ?? message?.Owner?.() ?? _STARTER_;
+  const isSelf = vm?.isSelf ?? from === to;
   const range = vm?.range ?? null;
   const getIsCurrent = () => {
     const start = range ? range[0] : undefined;
@@ -97,10 +97,9 @@ export const Interaction = (props: {
         props.className,
       )}
       onClick={(e) => e.stopPropagation()}
-      data-to={target}
+      data-to={to}
       data-origin={props.origin}
-      data-source={source}
-      data-target={target}
+      data-from={from}
       data-origin-layers={originLayers}
       data-source-layers={sourceLayers}
       data-target-layers={targetLayers}
@@ -138,10 +137,10 @@ export const Interaction = (props: {
       )}
       <Occurrence
         context={message}
-        participant={target}
+        participant={to}
         rtl={rightToLeft}
         number={props.number}
-        vm={buildOccurrenceVM(message, target, centerOf(coordinates, target), rightToLeft)}
+        vm={buildOccurrenceVM(message, to, centerOf(coordinates, to), rightToLeft)}
       />
       {assignee && !isSelf && (
         <Message

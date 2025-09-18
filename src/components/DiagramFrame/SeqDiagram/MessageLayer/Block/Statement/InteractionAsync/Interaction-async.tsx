@@ -91,9 +91,9 @@ export const InteractionAsync = (props: {
   const onElementClick = useAtomValue(onElementClickAtom);
   const vm = props.vm;
   const signature = vm?.signature ?? "";
-  const source = vm?.from ?? props.origin;
-  const target = vm?.to ?? source ?? props.origin;
-  const isSelf = vm?.isSelf ?? source === target;
+  const from = vm?.from ?? props.origin;
+  const to = vm?.to ?? from ?? props.origin;
+  const isSelf = vm?.isSelf ?? from === to;
   const translateX = vm?.arrow?.translateX ?? 0;
   const interactionWidth = vm?.arrow?.interactionWidth ?? 0;
   const rightToLeft = vm?.arrow?.rightToLeft ?? false;
@@ -109,9 +109,8 @@ export const InteractionAsync = (props: {
   return (
     <div
       data-origin={origin}
-      data-to={target}
-      data-source={source}
-      data-target={target}
+      data-to={to}
+      data-from={from}
       className={cn(
         "interaction async",
         {

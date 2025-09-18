@@ -35,7 +35,7 @@ export const Creation = (props: {
   const vm = props.vm;
 
   // Use VM data if available, fallback to parser context
-  const target = vm?.to ?? creation?.Owner();
+  const to = vm?.to ?? creation?.Owner();
   const signature = vm?.signature ?? creation?.SignatureText();
   const range = vm?.range ?? null;
 
@@ -79,11 +79,11 @@ export const Creation = (props: {
 
   useEffect(() => {
     const participantElement = document.querySelector(
-      `[data-participant-id="${target}"]`,
+      `[data-participant-id="${to}"]`,
     );
 
     if (!participantElement) {
-      console.warn(`Could not find participant element for ${target}`);
+      console.warn(`Could not find participant element for ${to}`);
       setParticipantWidth(0);
       return;
     }
@@ -91,12 +91,12 @@ export const Creation = (props: {
     // Get the actual width from the DOM element
     setParticipantWidth(participantElement.getBoundingClientRect().width);
     console.debug(
-      `Found participant element for ${target}, width: ${participantWidth}px`,
+      `Found participant element for ${to}, width: ${participantWidth}px`,
     );
 
     EventBus.emit("participant_set_top");
-    console.debug(`Init or update message container for ${target}`);
-  }, [target, participantWidth]);
+    console.debug(`Init or update message container for ${to}`);
+  }, [to, participantWidth]);
 
   return (
     <div
@@ -127,7 +127,7 @@ export const Creation = (props: {
           "message-container pointer-events-none flex items-center h-10 relative",
           { "flex-row-reverse": rightToLeft },
         )}
-        data-to={target}
+        data-to={to}
       >
         <Message
           className={cn(
@@ -151,9 +151,9 @@ export const Creation = (props: {
       <Occurrence
         context={creation}
         className="pointer-events-auto"
-        participant={target}
+        participant={to}
         number={props.number}
-        vm={buildOccurrenceVM(creation, target as any, centerOf(coordinates, String(target)), rightToLeft)}
+        vm={buildOccurrenceVM(creation, to as any, centerOf(coordinates, String(to)), rightToLeft)}
       />
       {assignee && (
         <Message

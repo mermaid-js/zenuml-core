@@ -57,8 +57,8 @@ describe("Interaction (sync message)", () => {
   test.each<string>(["A->B.m1", "B.m2"])("uses VM metadata for %s", (code) => {
     const { container, vm } = renderInteraction(code);
     const root = container.querySelector("div.interaction");
-    expect(root?.dataset?.source).toBe(vm.from ?? _STARTER_);
-    expect(root?.dataset?.target).toBe(vm.to ?? "");
+    expect(root?.dataset?.from).toBe(vm.from ?? _STARTER_);
+    expect(root?.dataset?.to).toBe(vm.to ?? "");
     expect(root?.dataset?.signature).toBe(vm.signature);
   });
 

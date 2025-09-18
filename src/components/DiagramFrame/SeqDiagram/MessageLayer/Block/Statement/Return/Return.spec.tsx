@@ -64,8 +64,8 @@ describe("Return (bare return statement)", () => {
     expect(root).toBeTruthy();
     expect(root?.dataset?.signature).toBe(vm.signature);
     // Bare return uses starter for both source and target
-    expect(root?.dataset?.source).toBe(_STARTER_);
-    expect(root?.dataset?.target).toBe(_STARTER_);
+    expect(root?.dataset?.from).toBe(_STARTER_);
+    expect(root?.dataset?.to).toBe(_STARTER_);
     expect(root?.dataset?.type).toBe("return");
   });
 
@@ -146,8 +146,8 @@ describe("Return (async return form)", () => {
     const { container } = renderAsyncReturn();
     const root = container.querySelector("div.interaction.return");
     expect(root).toBeTruthy();
-    expect(root?.dataset?.source).toBe("A");
-    expect(root?.dataset?.target).toBe("B");
+    expect(root?.dataset?.from).toBe("A");
+    expect(root?.dataset?.to).toBe("B");
     expect(root?.dataset?.type).toBe("return");
   });
 });

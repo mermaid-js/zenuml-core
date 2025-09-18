@@ -30,8 +30,8 @@ describe("Async Call", () => {
     // [ 'B:m',  'Starter', 'B', 'm', false], // Removed support of 'B:m'. This is confusing and dramatically increase parsing time (13 times slower)
   ])("code %s", function (code, source, target, message, isSelf) {
     const wrapper = renderCode(code);
-    expect(wrapper.container.querySelector("div")?.dataset.source).toBe(source);
-    expect(wrapper.container.querySelector("div")?.dataset.target).toBe(target);
+    expect(wrapper.container.querySelector("div")?.dataset.from).toBe(source);
+    expect(wrapper.container.querySelector("div")?.dataset.to).toBe(target);
     expect(wrapper.container.querySelector("div")?.dataset.signature).toBe(
       message,
     );
