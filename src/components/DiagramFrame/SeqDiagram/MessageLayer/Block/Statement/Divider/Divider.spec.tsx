@@ -14,16 +14,9 @@ type DividerVM = {
 function renderDivider(code: string, vm?: DividerVM) {
   const store = createStore();
   store.set(codeAtom, code);
-
-  const mockContext = {
-    divider: () => ({
-      Note: () => "Test divider note",
-    }),
-  };
-
   const utils = render(
     <Provider store={store}>
-      <Divider context={mockContext} origin="A" vm={vm} />
+      <Divider origin="A" vm={vm} />
     </Provider>,
   );
 

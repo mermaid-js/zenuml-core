@@ -3,7 +3,6 @@ import { getStyle } from "@/utils/messageStyling";
 import type { DividerVM } from "@/vm/divider";
 
 export const Divider = (props: {
-  context: any;
   origin: string;
   className?: string;
   vm?: DividerVM;
