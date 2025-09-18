@@ -20,9 +20,6 @@ export function frameKeyOf(ctx: any): string | null {
   const range = offsetRangeOf(ctx);
   if (!range) return null;
   const [start, stopExclusive] = range;
-  if (typeof start !== "number" || typeof stopExclusive !== "number") {
-    return null;
-  }
   return `${start}:${stopExclusive}`;
 }
 

@@ -7,10 +7,12 @@ import { CodeRange } from "../parser/CodeRange";
 import { buildMessagesModel } from "@/ir/messages";
 import { buildParticipantsModel } from "@/ir/participants";
 import { buildFramesModel } from "@/ir/frames";
+import { buildGroupsModel } from "@/ir/groups";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { buildMessagesVM } from "@/vm/messages";
 import type { MessageVM } from "@/vm/messages";
 import { buildParticipantsVM } from "@/vm/participants";
+import { buildGroupsVM } from "@/vm/groups";
 
 /*
  * RenderMode
@@ -68,6 +70,18 @@ export const participantsAtom = atom((get) => {
 export const participantsVMAtom = atom((get) => {
   const participantsIR = get(participantsAtom);
   return buildParticipantsVM(participantsIR);
+});
+
+// Groups IR is the canonical source of groups
+export const groupsAtom = atom((get) => {
+  const ctx = get(rootContextAtom);
+  return ctx ? buildGroupsModel(ctx) : [];
+});
+
+// Groups VM provides enhanced group data for UI components
+export const groupsVMAtom = atom((get) => {
+  const groupsIR = get(groupsAtom);
+  return buildGroupsVM(groupsIR);
 });
 
 export const framesModelAtom = atom((get) => {

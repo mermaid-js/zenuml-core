@@ -1,4 +1,4 @@
-import { coordinatesAtom, modeAtom, participantsAtom, participantsVMAtom, RenderMode } from "@/store/Store";
+import { coordinatesAtom, modeAtom, participantsAtom, participantsVMAtom, groupsVMAtom, RenderMode } from "@/store/Store";
 import { useAtomValue } from "jotai";
 import { LifeLine } from "./LifeLine";
 import { LifeLineGroup } from "./LifeLineGroup";
@@ -17,6 +17,7 @@ export const LifeLineLayer = (props: {
   const coordinates = useAtomValue(coordinatesAtom);
   const participantsModel = useAtomValue(participantsAtom);
   const participantsVM = useAtomValue(participantsVMAtom);
+  const groupsVM = useAtomValue(groupsVMAtom);
 
   const starterParticipant = useMemo(() => {
     const names = coordinates.orderedParticipantNames();
@@ -56,34 +57,36 @@ export const LifeLineLayer = (props: {
             renderLifeLine={props.renderLifeLine}
           />
         )}
+        {/* Render groups using VM data */}
+        {groupsVM.map((group, index) => (
+          <LifeLineGroup
+            key={group.id}
+            group={{
+              name: group.name,
+              participantNames: group.participantNames,
+            }}
+            renderParticipants={props.renderParticipants}
+            renderLifeLine={props.renderLifeLine}
+          />
+        ))}
+        
+        {/* Render explicit participants that are not in groups */}
         {((props.context?.children as any[]) || [])
-          .filter((c) => isGroupContext(c) || isParticipantContext(c))
-          .map((child, index) => (
-            <Fragment key={index}>
-              {isGroupContext(child) && (
-                <LifeLineGroup
-                  key={index}
-                  context={child}
-                  renderParticipants={props.renderParticipants}
-                  renderLifeLine={props.renderLifeLine}
-                />
-              )}
-              {isParticipantContext(child) && (() => {
-                const name = participantNameOf(child);
-                const irEntity = name && participantsModel.find((p) => p.name === name);
-                const vm = name && participantsVM.find((p) => p.name === name);
-                return irEntity ? (
-                  <LifeLine
-                    key={index}
-                    entity={irEntity}
-                    vm={vm}
-                    renderParticipants={props.renderParticipants}
-                    renderLifeLine={props.renderLifeLine}
-                  />
-                ) : null;
-              })()}
-            </Fragment>
-          ))}
+          .filter((c) => isParticipantContext(c))
+          .map((child, index) => {
+            const name = participantNameOf(child);
+            const irEntity = name && participantsModel.find((p) => p.name === name);
+            const vm = name && participantsVM.find((p) => p.name === name);
+            return irEntity ? (
+              <LifeLine
+                key={`explicit-${index}`}
+                entity={irEntity}
+                vm={vm}
+                renderParticipants={props.renderParticipants}
+                renderLifeLine={props.renderLifeLine}
+              />
+            ) : null;
+          })}
         {participantsModel
           .filter((p: any) => !p.explicit)
           .map((entity: any) => {
