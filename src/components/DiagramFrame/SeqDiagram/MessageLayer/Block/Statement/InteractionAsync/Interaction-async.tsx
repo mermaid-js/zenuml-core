@@ -144,7 +144,6 @@ export const InteractionAsync = (props: {
         <Message
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
-          content={signature}
           labelText={signature}
           rtl={rightToLeft}
           type="async"

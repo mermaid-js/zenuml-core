@@ -120,7 +120,6 @@ export const Interaction = (props: {
         <Message
           className={cn("text-center", messageClassNames)}
           textStyle={messageTextStyle}
-          content={signature}
           labelText={signature}
           rtl={rightToLeft}
           number={props.number}
@@ -146,7 +145,6 @@ export const Interaction = (props: {
             "return transform -translate-y-full",
             messageClassNames,
           )}
-          content={assignee}
           labelText={assignee}
           rtl={!rightToLeft}
           type="return"

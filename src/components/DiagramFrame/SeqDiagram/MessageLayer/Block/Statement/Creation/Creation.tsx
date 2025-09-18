@@ -136,7 +136,6 @@ export const Creation = (props: {
             "invocation w-full transform -translate-y-1/2 pointer-events-auto",
             messageClassNames,
           )}
-          content={signature}
           labelText={cleanLabelText}
           rtl={rightToLeft}
           type="creation"
@@ -164,7 +163,6 @@ export const Creation = (props: {
             messageClassNames,
           )}
           textStyle={messageTextStyle}
-          content={assignee}
           labelText={assignee}
           rtl={!rightToLeft}
           type="return"

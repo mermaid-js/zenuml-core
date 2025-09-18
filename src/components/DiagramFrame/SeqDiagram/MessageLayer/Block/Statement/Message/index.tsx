@@ -14,7 +14,6 @@ const getEditableDefault = (mode: RenderMode, type: string) => {
 
 export const Message = (props: {
   // Content and display
-  content: string;
   labelText?: string; // Clean display text (preferred), falls back to content
   rtl?: string | boolean;
   type?: string;
@@ -37,7 +36,6 @@ export const Message = (props: {
   onOpenStylePanel?: (element: HTMLElement | null) => void;
 }) => {
   const {
-    content,
     labelText,
     rtl,
     type = "",
@@ -63,7 +61,7 @@ export const Message = (props: {
     (mode !== RenderMode.Static && ["sync", "async", "return", "creation"].includes(type));
   const finalLabelRange = labelRange ?? labelRangeOverride ?? [-1, -1];
   
-  const displayLabelText = labelText ?? content ?? "";
+  const displayLabelText = labelText ?? "";
   const labelPosition = finalLabelRange;
   const borderStyle: "solid" | "dashed" | undefined = {
     sync: "solid",
@@ -99,19 +97,19 @@ export const Message = (props: {
       <div className="name group text-center flex-grow relative">
         <div className="inline-block static min-h-[1em]">
           <div style={textStyle}>
-            {finalEditable ? (
-              <>
-                {type === "creation" && <span>«</span>}
+            <>
+              {type === "creation" && <span>«</span>}
+              {finalEditable ? (
                 <MessageLabel
                   labelText={displayLabelText}
                   labelPosition={labelPosition}
                   isAsync={isAsync}
                 />
-                {type === "creation" && <span>»</span>}
-              </>
-            ) : (
-              <>{content}</>
-            )}
+              ) : (
+                displayLabelText
+              )}
+              {type === "creation" && <span>»</span>}
+            </>
           </div>
         </div>
       </div>

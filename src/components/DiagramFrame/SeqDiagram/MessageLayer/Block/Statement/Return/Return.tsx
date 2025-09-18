@@ -45,10 +45,7 @@ export const Return = (props: {
     formattedTextOf(asyncMessage?.to?.()) ||
     props.context?.ret()?.ReturnTo() ||
     _STARTER_;
-
-  const messageContext =
-    asyncMessage?.content() || props.context?.ret()?.expr();
-
+  asyncMessage?.content() || props.context?.ret()?.expr();
   const range = vm?.range ?? null;
   const getIsCurrent = () => {
     const start = range ? range[0] : undefined;
@@ -138,7 +135,6 @@ export const Return = (props: {
         <Message
           className={cn(props.commentObj?.messageClassNames)}
           textStyle={props.commentObj?.messageStyle}
-          content={signature}
           labelText={signature}
           rtl={rightToLeft}
           type="return"
