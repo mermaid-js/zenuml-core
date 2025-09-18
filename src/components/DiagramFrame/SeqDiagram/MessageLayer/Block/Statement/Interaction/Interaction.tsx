@@ -7,7 +7,6 @@ import { useAtomValue } from "jotai";
 import { coordinatesAtom, cursorAtom, onMessageClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
-import { signatureOf } from "@/parser/helpers";
 import type { MessageVM } from "@/vm/messages";
 import { useMemo } from "react";
 import { buildOccurrenceVM } from "@/vm/occurrence";
@@ -18,7 +17,6 @@ function isNullOrUndefined(value: any) {
 }
 
 export const Interaction = (props: {
-  context?: any; // Optional during migration - no longer used internally
   origin: string;
   commentObj?: CommentClass;
   number?: string;

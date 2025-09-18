@@ -46,7 +46,7 @@ function renderInteraction(code: string, cursor?: number | null) {
 
   const utils = render(
     <Provider store={store}>
-      <Interaction context={stat} origin="" vm={vmWithArrow} />
+      <Interaction origin="" vm={vmWithArrow} />
     </Provider>,
   );
 
