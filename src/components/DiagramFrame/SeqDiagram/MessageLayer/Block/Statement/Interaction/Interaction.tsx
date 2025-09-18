@@ -44,7 +44,7 @@ export const Interaction = (props: {
   const vm = props.vm;
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const signature = vm?.signature ?? signatureOf(message);
-  const source = vm?.source ?? vm?.from ?? message?.From?.() ?? _STARTER_;
+  const source = vm?.from ?? message?.From?.() ?? _STARTER_;
   const target = vm?.to ?? message?.Owner?.() ?? _STARTER_;
   const isSelf = vm?.isSelf ?? source === target;
   const range = vm?.range ?? null;

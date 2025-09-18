@@ -9,7 +9,6 @@ export type MessageVM = {
   type: OwnableMessageType;
   from?: string;
   to?: string;
-  source?: string;
   providedFrom?: string | null;
   signature: string;
   // Inclusive label range for inline editing, when available
@@ -43,12 +42,11 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
     const isCreation = m.type === OwnableMessageType.CreationMessage;
     const label = m.labelRange ?? null;
     const labelValid = Array.isArray(label) && label.length === 2 && label[0] != null && label[1] != null && label[0] >= 0 && label[1] >= 0;
-    const canEditLabel = isCreation ? !!labelValid : true;
-    return {
+    const canEditLabel = isCreation ? labelValid : true;
+    const vm: MessageVM = {
       type: m.type,
       from: m.from,
       to,
-      source: source ?? undefined,
       providedFrom: m.providedFrom ?? null,
       signature: m.signature,
       labelRange: m.labelRange ?? null,
@@ -59,6 +57,7 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
       canEditLabel,
       assignee: m.assignee ?? null,
     };
+    return vm;
   });
 }
 
@@ -74,7 +73,7 @@ export function enhanceMessageVMWithArrow(
 ): MessageVM {
   if (!vm) return vm;
 
-  const source = vm.source ?? vm.from ?? origin;
+  const source = vm.from ?? origin;
   const target = vm.to ?? source;
 
   const arrowGeometry = calculateArrowGeometry({
@@ -85,7 +84,7 @@ export function enhanceMessageVMWithArrow(
     coordinates,
   });
 
-  return {
+  const enhanced: MessageVM = {
     ...vm,
     arrow: {
       translateX: arrowGeometry.translateX,
@@ -96,6 +95,7 @@ export function enhanceMessageVMWithArrow(
       targetLayers: arrowGeometry.targetLayers,
     },
   };
+  return enhanced;
 }
 
 /**
@@ -126,7 +126,7 @@ export function enhanceReturnVMWithArrow(
     coordinates,
   });
 
-  return {
+  const enhanced: MessageVM = {
     ...vm,
     // Override the from/to with the correctly computed source/target for returns
     from: source,
@@ -140,4 +140,5 @@ export function enhanceReturnVMWithArrow(
       targetLayers: arrowGeometry.targetLayers,
     },
   };
+  return enhanced;
 }

@@ -91,7 +91,7 @@ export const InteractionAsync = (props: {
   const onElementClick = useAtomValue(onElementClickAtom);
   const vm = props.vm;
   const signature = vm?.signature ?? "";
-  const source = vm?.source ?? vm?.from ?? props.origin;
+  const source = vm?.from ?? props.origin;
   const target = vm?.to ?? source ?? props.origin;
   const isSelf = vm?.isSelf ?? source === target;
   const translateX = vm?.arrow?.translateX ?? 0;

@@ -8,7 +8,6 @@ describe("SelfInvocation", () => {
     type: OwnableMessageType.SyncMessage,
     from: "A",
     to: "A",
-    source: "A",
     signature: "method2()",
     labelRange: [8, 17] as [number, number],
     range: [0, 18] as [number, number],

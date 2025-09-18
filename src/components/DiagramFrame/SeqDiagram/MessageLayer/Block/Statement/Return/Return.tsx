@@ -31,7 +31,7 @@ export const Return = (props: {
 
   const vm = props.vm;
   const signature = vm?.signature;
-  const source = vm?.from || vm?.source || _STARTER_;
+  const source = vm?.from || _STARTER_;
   const target = vm?.to || _STARTER_;
 
   const range = vm?.range ?? null;
