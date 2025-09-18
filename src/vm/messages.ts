@@ -73,14 +73,14 @@ export function enhanceMessageVMWithArrow(
 ): MessageVM {
   if (!vm) return vm;
 
-  const source = vm.from ?? origin;
-  const target = vm.to ?? source;
+  const from = vm.from ?? origin;
+  const to = vm.to ?? from;
 
   const arrowGeometry = calculateArrowGeometry({
     context,
     origin,
-    source,
-    target,
+    from,
+    to,
     coordinates,
   });
 
@@ -112,8 +112,8 @@ export function enhanceReturnVMWithArrow(
   if (!vm) return vm;
   const ret = context?.ret?.();
   const asyncMsg = ret?.asyncMessage?.();
-  const source = asyncMsg?.From?.() || ret?.From?.() || _STARTER_;
-  const target =
+  const from = asyncMsg?.From?.() || ret?.From?.() || _STARTER_;
+  const to =
     formattedTextOf(asyncMsg?.to?.()) ||
     ret?.ReturnTo?.() ||
     _STARTER_;
@@ -121,16 +121,16 @@ export function enhanceReturnVMWithArrow(
   const arrowGeometry = calculateArrowGeometry({
     context,
     origin,
-    source,
-    target,
+    from,
+    to,
     coordinates,
   });
 
   const enhanced: MessageVM = {
     ...vm,
     // Override the from/to with the correctly computed source/target for returns
-    from: source,
-    to: target,
+    from,
+    to,
     arrow: {
       translateX: arrowGeometry.translateX,
       interactionWidth: arrowGeometry.interactionWidth,

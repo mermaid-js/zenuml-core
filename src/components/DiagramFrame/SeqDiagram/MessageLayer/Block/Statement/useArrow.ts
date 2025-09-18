@@ -6,8 +6,8 @@ import type { Coordinates } from "@/positioning/Coordinates";
 export type ArrowInput = {
   context: any;
   origin: string;
-  source: string;
-  target: string;
+  from: string;
+  to: string;
   coordinates: Coordinates;
 };
 
@@ -50,17 +50,17 @@ const depthOnParticipant4Stat = (context: any, participant: any): number => {
 export const calculateArrowGeometry = ({
   context,
   origin,
-  source,
-  target,
+  from,
+  to,
   coordinates,
 }: ArrowInput): ArrowGeometry => {
-  const isSelf = source === target;
+  const isSelf = from === to;
 
   const originLayers = depthOnParticipant(context, origin);
 
-  const sourceLayers = depthOnParticipant(context, source);
+  const sourceLayers = depthOnParticipant(context, from);
 
-  const targetLayers = depthOnParticipant4Stat(context, target);
+  const targetLayers = depthOnParticipant4Stat(context, to);
 
   const anchor2Origin = new Anchor2(
     centerOf(coordinates, origin),
@@ -69,20 +69,20 @@ export const calculateArrowGeometry = ({
   );
 
   const anchor2Source = new Anchor2(
-    centerOf(coordinates, source),
+    centerOf(coordinates, from),
     sourceLayers,
-    source,
+    from,
   );
 
   const anchor2Target = new Anchor2(
-    centerOf(coordinates, target),
+    centerOf(coordinates, to),
     targetLayers,
-    target,
+    to,
   );
 
   const interactionWidth = Math.abs(anchor2Source.edgeOffset(anchor2Target));
 
-  const rightToLeft = distance2(coordinates, source, target) < 0;
+  const rightToLeft = distance2(coordinates, from, to) < 0;
 
   const translateX = anchor2Origin.centerToEdge(
     !rightToLeft ? anchor2Source : anchor2Target,
