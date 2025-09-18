@@ -1,7 +1,7 @@
 import { cn } from "@/utils";
 import { Message } from "../Message";
 import { Occurrence } from "../Interaction/Occurrence/Occurrence";
-import { codeRangeOf, formattedTextOf } from "@/parser/helpers";
+import { codeRangeOf } from "@/parser/helpers";
 import {
   LIFELINE_WIDTH,
   OCCURRENCE_BAR_SIDE_WIDTH,
@@ -63,13 +63,8 @@ export const Creation = (props: {
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
 
-  const assignee = useMemo(() => {
-    const assignment = creation?.creationBody().assignment();
-    if (!assignment) return "";
-    const assignee = formattedTextOf(assignment.assignee?.());
-    const type = formattedTextOf(assignment.type?.());
-    return assignee + (type ? ":" + type : "");
-  }, [creation]);
+  // Use assignee from VM (fail early if missing)
+  const assignee = vm?.assignee || "";
 
   // Extract clean label text from VM signature for Message component
   const cleanLabelText = useMemo(() => {

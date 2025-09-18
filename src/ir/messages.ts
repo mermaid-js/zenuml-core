@@ -41,7 +41,19 @@ class MessagesIRCollector extends sequenceParserListener {
     const range = offsetRangeOf(ctx);
     const codeRange = codeRangeOf(ctx);
     const providedFrom = typeof ctx?.ProvidedFrom === "function" ? ctx.ProvidedFrom() : undefined;
-    const assignee = typeof ctx?.Assignment === "function" ? ctx.Assignment()?.getText() : undefined;
+    // Extract assignee based on message type
+    let assignee;
+    if (kind === "creation") {
+      // For creation messages: get assignee and type separately, then format as "assignee:type"
+      const assigneeText = ctx?.creationBody?.()?.assignment?.()?.assignee?.()?.getFormattedText?.();
+      const typeText = ctx?.creationBody?.()?.construct?.()?.getFormattedText?.();
+      if (assigneeText) {
+        assignee = typeText ? `${assigneeText}:${typeText}` : assigneeText;
+      }
+    } else {
+      // For other messages: use Assignment() method if available
+      assignee = typeof ctx?.Assignment === "function" ? ctx.Assignment()?.getText() : undefined;
+    }
     this.messages.push({
       from: ctx?.From?.(),
       to: ctx?.Owner?.(),

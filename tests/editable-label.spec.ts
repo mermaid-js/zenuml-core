@@ -112,6 +112,8 @@ test.describe("Editable Label", () => {
     const messageLabel = page.locator("label").filter({ hasText: "create" });
     await messageLabel.dblclick();
     await messageLabel.pressSequentially("1");
-    await expect(page.getByText("create1")).toBeVisible();
+    // For creation messages, editing replaces the parameter content entirely
+    // Look for the editable label containing "1" (which will be inside the « » brackets)
+    await expect(page.locator("label.editable-label-base").filter({ hasText: "1" })).toBeVisible();
   });
 });

@@ -50,6 +50,7 @@ describe("Creation", () => {
       to: "A",
       signature: "«create»",
       isSelf: false,
+      assignee: "a", // For "a = new A"
       arrow: {
         translateX: 0,
         interactionWidth: expected,
@@ -99,6 +100,7 @@ describe("Creation", () => {
       to: "A",
       signature: "«create»",
       isSelf: false,
+      assignee: "", // For "new A" (no assignment)
       arrow: {
         translateX: 0,
         interactionWidth: expected,
@@ -147,6 +149,7 @@ describe("Creation", () => {
       to: "A",
       signature: "«create»",
       isSelf: false,
+      assignee: "", // For "new A" (no assignment)
       arrow: {
         translateX: 0,
         interactionWidth: expected,
