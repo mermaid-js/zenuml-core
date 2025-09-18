@@ -7,6 +7,7 @@ import {
   themeAtom,
   enableNumberingAtom,
   enableMultiThemeAtom,
+  titleVMAtom,
 } from "@/store/Store";
 import { useAtom, useAtomValue } from "jotai";
 import * as htmlToImage from "html-to-image";
@@ -54,7 +55,7 @@ export const DiagramFrame = ({
   const [enableNumbering, setEnableNumbering] = useAtom(enableNumberingAtom);
   const enableMultiTheme = useAtomValue(enableMultiThemeAtom);
   const mode = useAtomValue(modeAtom);
-  const title = rootContext?.title();
+  const titleVM = useAtomValue(titleVMAtom);
 
   const showTipsDialog = () => {
     setShowTips(true);
@@ -155,7 +156,7 @@ export const DiagramFrame = ({
           <div className="header text-skin-title bg-skin-title border-skin-frame border-b p-1 flex justify-between rounded-t">
             <div className="left hide-export">{children}</div>
             <div className="right flex-grow flex justify-between">
-              <DiagramTitle context={title} />
+              <DiagramTitle vm={titleVM} />
               {/* Knowledge: how to vertically align a svg icon. */}
               <Privacy className="hide-export flex items-center" />
             </div>

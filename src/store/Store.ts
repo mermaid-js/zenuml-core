@@ -13,6 +13,7 @@ import { buildMessagesVM } from "@/vm/messages";
 import type { MessageVM } from "@/vm/messages";
 import { buildParticipantsVM } from "@/vm/participants";
 import { buildGroupsVM } from "@/vm/groups";
+import { buildTitleVM } from "@/vm/title";
 
 /*
  * RenderMode
@@ -31,6 +32,11 @@ export const rootContextAtom = atom((get) => RootContext(get(codeAtom)));
 export const titleAtom = atom<string | null>((get) =>
   get(rootContextAtom)?.title()?.content(),
 );
+
+export const titleVMAtom = atom((get) => {
+  const titleContext = get(rootContextAtom)?.title();
+  return buildTitleVM(titleContext);
+});
 
 export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), WidthProviderOnBrowser),
