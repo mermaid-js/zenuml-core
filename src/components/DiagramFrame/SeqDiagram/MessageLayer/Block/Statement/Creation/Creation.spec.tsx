@@ -44,7 +44,6 @@ describe("Creation", () => {
     const expected = anchorStarter.edgeOffset(anchorA);
 
     const mockVM: MessageVM & { arrow: { translateX: number; interactionWidth: number; rightToLeft: boolean } } = {
-      id: "test-creation",
       type: OwnableMessageType.CreationMessage,
       from: _STARTER_,
       to: "A",
@@ -94,7 +93,6 @@ describe("Creation", () => {
     const expected = anchorA.edgeOffset(anchorB);
 
     const mockVM: MessageVM & { arrow: { translateX: number; interactionWidth: number; rightToLeft: boolean } } = {
-      id: "test-creation-rtl",
       type: OwnableMessageType.CreationMessage,
       from: "B",
       to: "A",
@@ -143,7 +141,6 @@ describe("Creation", () => {
     const expected = anchorA.edgeOffset(anchorB);
 
     const mockVM: MessageVM & { arrow: { translateX: number; interactionWidth: number; rightToLeft: boolean } } = {
-      id: "test-creation-alt",
       type: OwnableMessageType.CreationMessage,
       from: "B",
       to: "A",

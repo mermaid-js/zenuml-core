@@ -2,14 +2,12 @@ import { formattedTextOf, labelRangeOfRef, labelRangeOfCondition, codeRangeOf } 
 import { CodeRange } from "@/parser/CodeRange";
 
 export interface RefVM {
-  id: string;
   labelText: string;
   labelRange: [number, number] | null;
   codeRange: CodeRange | null;
 }
 
 export interface ConditionVM {
-  id: string;
   labelText: string;
   labelRange: [number, number] | null;
   codeRange: CodeRange | null;
@@ -29,12 +27,7 @@ export function buildRefVM(context: any): RefVM | null {
   const labelRange = labelRangeOfRef(refCtx);
   const codeRange = codeRangeOf(context);
   
-  // Generate a unique ID for the ref
-  const range = labelRange || codeRangeOf(context)?.toRange();
-  const id = range ? `ref:${range[0]}:${range[1]}` : `ref:${Math.random()}`;
-  
   return {
-    id,
     labelText,
     labelRange,
     codeRange,
@@ -51,12 +44,7 @@ export function buildConditionVM(context: any): ConditionVM | null {
   const labelRange = labelRangeOfCondition(context);
   const codeRange = codeRangeOf(context);
   
-  // Generate a unique ID for the condition
-  const range = labelRange || codeRange?.toRange();
-  const id = range ? `condition:${range[0]}:${range[1]}` : `condition:${Math.random()}`;
-  
   return {
-    id,
     labelText,
     labelRange,
     codeRange,

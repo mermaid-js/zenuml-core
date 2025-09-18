@@ -10,7 +10,7 @@ describe("Fragment VMs", () => {
       expect(refVM).toBeDefined();
       expect(refVM!.labelText).toBe("A");
       expect(refVM!.labelRange).toEqual([4, 4]); // Position of 'A'
-      expect(refVM!.id).toMatch(/^ref:/);
+      // id removed; stability relies on label range + code range
     });
 
     it("should handle empty ref context", () => {
@@ -36,7 +36,7 @@ describe("Fragment VMs", () => {
       expect(conditionVM).toBeDefined();
       expect(conditionVM!.labelText).toBe("x == y");
       expect(conditionVM!.labelRange).toEqual([3, 8]); // Position of 'x == y'
-      expect(conditionVM!.id).toMatch(/^condition:/);
+      // id removed; stability relies on label range + code range
     });
 
     it("should handle null condition context", () => {

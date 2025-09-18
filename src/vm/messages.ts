@@ -6,7 +6,6 @@ import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { formattedTextOf } from "@/parser/helpers";
 
 export type MessageVM = {
-  id: string;
   type: OwnableMessageType;
   from?: string;
   to?: string;
@@ -46,7 +45,6 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
     const labelValid = Array.isArray(label) && label.length === 2 && label[0] != null && label[1] != null && label[0] >= 0 && label[1] >= 0;
     const canEditLabel = isCreation ? !!labelValid : true;
     return {
-      id: `${m.from ?? ""}->${m.to ?? ""}:${m.signature}:${m.type}:${i}`,
       type: m.type,
       from: m.from,
       to,

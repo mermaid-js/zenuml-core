@@ -5,7 +5,6 @@ import type { MessageVM } from "@/vm/messages";
 
 describe("SelfInvocation", () => {
   const mockVM: MessageVM = {
-    id: "A->A:method2():sync:0",
     type: OwnableMessageType.SyncMessage,
     from: "A",
     to: "A",
