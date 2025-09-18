@@ -71,6 +71,11 @@ export const Creation = (props: {
     return assignee + (type ? ":" + type : "");
   }, [creation]);
 
+  // Extract clean label text from VM signature for Message component
+  const cleanLabelText = useMemo(() => {
+    return vm?.signature?.match(/«([^»]+)»/)?.[1] || "";
+  }, [vm?.signature]);
+
   const containerOffset =
     participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH;
 
@@ -132,6 +137,7 @@ export const Creation = (props: {
             messageClassNames,
           )}
           content={signature}
+          labelText={cleanLabelText}
           rtl={rightToLeft}
           type="creation"
           number={props.number}
@@ -159,6 +165,7 @@ export const Creation = (props: {
           )}
           textStyle={messageTextStyle}
           content={assignee}
+          labelText={assignee}
           rtl={!rightToLeft}
           type="return"
           number={`${props.number}.${creation.Statements().length + 1}`}

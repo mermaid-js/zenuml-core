@@ -15,7 +15,7 @@ const getEditableDefault = (mode: RenderMode, type: string) => {
 export const Message = (props: {
   // Content and display
   content: string;
-  labelText?: string; // Processed label text (e.g., for creation: extracted from «...»)
+  labelText?: string; // Clean display text (preferred), falls back to content
   rtl?: string | boolean;
   type?: string;
   textStyle?: CSSProperties;
@@ -63,7 +63,7 @@ export const Message = (props: {
     (mode !== RenderMode.Static && ["sync", "async", "return", "creation"].includes(type));
   const finalLabelRange = labelRange ?? labelRangeOverride ?? [-1, -1];
   
-  const displayLabelText = type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : (labelText ?? content ?? "");
+  const displayLabelText = labelText ?? content ?? "";
   const labelPosition = finalLabelRange;
   const borderStyle: "solid" | "dashed" | undefined = {
     sync: "solid",
