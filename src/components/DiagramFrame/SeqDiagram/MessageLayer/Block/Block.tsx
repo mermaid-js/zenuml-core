@@ -1,6 +1,8 @@
 import { increaseNumber } from "@/utils/Numbering";
 import { Statement } from "./Statement/Statement";
 import { cn } from "@/utils";
+import { buildBlockVM, type BlockVM } from "@/vm/block";
+import { useMemo } from "react";
 
 export const Block = (props: {
   origin?: string;
@@ -10,8 +12,11 @@ export const Block = (props: {
   collapsed?: boolean;
   style?: React.CSSProperties;
   className?: string;
+  vm?: BlockVM;
 }) => {
-  const statements: any[] = props.context?.stat() || [];
+  // Prefer VM if provided; otherwise build from context.
+  const vm = useMemo(() => props.vm ?? buildBlockVM(props.context), [props.vm, props.context]);
+  const statements: any[] = vm.statements || [];
   const getNumber = (index: number) => {
     if (props.number) {
       return props.incremental
