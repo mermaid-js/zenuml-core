@@ -10,6 +10,7 @@ import { buildFramesModel } from "@/ir/frames";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { buildMessagesVM } from "@/vm/messages";
 import type { MessageVM } from "@/vm/messages";
+import { buildParticipantsVM } from "@/vm/participants";
 
 /*
  * RenderMode
@@ -61,6 +62,12 @@ export const messagesVMByStartAtom = atom((get) => {
 export const participantsAtom = atom((get) => {
   const ctx = get(rootContextAtom);
   return ctx ? buildParticipantsModel(ctx) : [];
+});
+
+// Participants VM provides enhanced participant data for UI components
+export const participantsVMAtom = atom((get) => {
+  const participantsIR = get(participantsAtom);
+  return buildParticipantsVM(participantsIR);
 });
 
 export const framesModelAtom = atom((get) => {

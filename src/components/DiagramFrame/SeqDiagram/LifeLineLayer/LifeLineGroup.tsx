@@ -1,6 +1,6 @@
 import { LifeLine } from "./LifeLine";
 import { useAtomValue } from "jotai";
-import { coordinatesAtom, participantsAtom } from "@/store/Store";
+import { coordinatesAtom, participantsAtom, participantsVMAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { participantNamesInGroup, formattedTextOf } from "@/parser/helpers";
 
@@ -14,6 +14,7 @@ export const LifeLineGroup = (props: {
 }) => {
   const coordinates = useAtomValue(coordinatesAtom);
   const participantsModel = useAtomValue(participantsAtom);
+  const participantsVM = useAtomValue(participantsVMAtom);
   const participantNames = participantNamesInGroup(props.context);
   const entities = participantNames
     .map((n) => participantsModel.find((p) => p.name === n))
@@ -47,15 +48,19 @@ export const LifeLineGroup = (props: {
       )}
 
       <div className="lifeline-group relative flex-grow">
-        {entities.map((entity) => (
-          <LifeLine
-            key={entity.name}
-            entity={entity}
-            groupLeft={left}
-            renderLifeLine={props.renderLifeLine}
-            renderParticipants={props.renderParticipants}
-          />
-        ))}
+        {entities.map((entity) => {
+          const vm = participantsVM.find((p) => p.name === entity.name);
+          return (
+            <LifeLine
+              key={entity.name}
+              entity={entity}
+              vm={vm}
+              groupLeft={left}
+              renderLifeLine={props.renderLifeLine}
+              renderParticipants={props.renderParticipants}
+            />
+          );
+        })}
       </div>
     </div>
   );

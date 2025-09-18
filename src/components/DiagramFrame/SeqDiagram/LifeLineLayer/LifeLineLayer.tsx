@@ -1,4 +1,4 @@
-import { coordinatesAtom, modeAtom, participantsAtom, RenderMode } from "@/store/Store";
+import { coordinatesAtom, modeAtom, participantsAtom, participantsVMAtom, RenderMode } from "@/store/Store";
 import { useAtomValue } from "jotai";
 import { LifeLine } from "./LifeLine";
 import { LifeLineGroup } from "./LifeLineGroup";
@@ -16,6 +16,7 @@ export const LifeLineLayer = (props: {
   const mode = useAtomValue(modeAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const participantsModel = useAtomValue(participantsAtom);
+  const participantsVM = useAtomValue(participantsVMAtom);
 
   const starterParticipant = useMemo(() => {
     const names = coordinates.orderedParticipantNames();
@@ -31,6 +32,10 @@ export const LifeLineLayer = (props: {
     }
     return null;
   }, [coordinates]);
+
+  const starterVM = useMemo(() => {
+    return participantsVM.find(vm => vm.name === _STARTER_);
+  }, [participantsVM]);
   return (
     <div
       className="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0 pt-2"
@@ -45,6 +50,7 @@ export const LifeLineLayer = (props: {
         {starterParticipant && !starterParticipant?.explicit && (
           <LifeLine
             entity={starterParticipant}
+            vm={starterVM}
             className="starter"
             renderParticipants={props.renderParticipants}
             renderLifeLine={props.renderLifeLine}
@@ -65,10 +71,12 @@ export const LifeLineLayer = (props: {
               {isParticipantContext(child) && (() => {
                 const name = participantNameOf(child);
                 const irEntity = name && participantsModel.find((p) => p.name === name);
+                const vm = name && participantsVM.find((p) => p.name === name);
                 return irEntity ? (
                   <LifeLine
                     key={index}
                     entity={irEntity}
+                    vm={vm}
                     renderParticipants={props.renderParticipants}
                     renderLifeLine={props.renderLifeLine}
                   />
@@ -78,14 +86,18 @@ export const LifeLineLayer = (props: {
           ))}
         {participantsModel
           .filter((p: any) => !p.explicit)
-          .map((entity: any) => (
-          <LifeLine
-            key={entity.name}
-            entity={entity}
-            renderParticipants={props.renderParticipants}
-            renderLifeLine={props.renderLifeLine}
-          />
-        ))}
+          .map((entity: any) => {
+            const vm = participantsVM.find((p) => p.name === entity.name);
+            return (
+              <LifeLine
+                key={entity.name}
+                entity={entity}
+                vm={vm}
+                renderParticipants={props.renderParticipants}
+                renderLifeLine={props.renderLifeLine}
+              />
+            );
+          })}
       </div>
     </div>
   );

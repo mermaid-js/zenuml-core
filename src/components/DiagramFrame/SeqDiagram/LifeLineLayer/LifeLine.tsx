@@ -17,6 +17,7 @@ const logger = parentLogger.child({ name: "LifeLine" });
 
 export const LifeLine = (props: {
   entity: any;
+  vm?: any; // ParticipantVM when available
   groupLeft?: any;
   renderParticipants?: boolean;
   renderLifeLine?: boolean;
@@ -93,8 +94,8 @@ export const LifeLine = (props: {
       style={{ paddingTop: top + "px", left: left + "px" }}
       ref={elRef}
     >
-      {props.renderParticipants && (
-        <Participant entity={props.entity} offsetTop2={top} />
+      {props.renderParticipants && props.vm && (
+        <Participant vm={props.vm} offsetTop2={top} />
       )}
       {props.renderLifeLine && (
         <div className="line w0 mx-auto flex-grow w-px bg-[linear-gradient(to_bottom,transparent_50%,var(--color-border-base)_50%)] bg-[length:1px_10px]"></div>

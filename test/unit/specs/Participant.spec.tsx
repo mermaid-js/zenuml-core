@@ -4,6 +4,7 @@ import { describe, it } from "vitest";
 import { Participant } from "@/components/DiagramFrame/SeqDiagram/LifeLineLayer/Participant.tsx";
 import { expect } from "vitest";
 import { createStore, Provider } from "jotai";
+import { ParticipantVM } from "@/vm/participants";
 
 
 const store = createStore();
@@ -12,7 +13,14 @@ store.set(codeAtom, "abc");
 
 describe("select a participant", () => {
   it("For VM and HTML and store", async () => {
-    const props = { entity: { name: "A" } };
+    const mockVM: ParticipantVM = {
+      name: "A",
+      displayName: "A",
+      isDefaultStarter: false,
+      labelPositions: [],
+      assigneePositions: [],
+    };
+    const props = { vm: mockVM };
     const participantWrapper = render(
       <Provider store={store}>
         <Participant {...props} />

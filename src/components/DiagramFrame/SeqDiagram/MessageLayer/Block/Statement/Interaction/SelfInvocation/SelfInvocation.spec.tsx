@@ -21,20 +21,16 @@ describe("SelfInvocation", () => {
     providedFrom: null,
   };
 
-  const selfInvocationWrapper = render(
-    <SelfInvocation vm={mockVM} />,
-  );
+    const selfInvocationWrapper = render(
+      <SelfInvocation vm={mockVM} />,
+    );
 
   test("assignment", () => {
     expect(
       selfInvocationWrapper.container.querySelector(".assignee")?.textContent,
     ).toBe("ret");
     expect(
-      selfInvocationWrapper.container.querySelector(".label label")
-        ?.textContent,
-    ).toBe("method2()");
-    expect(
-      selfInvocationWrapper.container.querySelector(".self-invocation>label")
+      selfInvocationWrapper.container.querySelector(".self-invocation>label>.label")
         ?.textContent,
     ).toBe("ret=method2()");
   });
