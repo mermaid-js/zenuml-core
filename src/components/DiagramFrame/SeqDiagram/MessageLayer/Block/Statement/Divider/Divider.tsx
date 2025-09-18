@@ -1,13 +1,6 @@
 import { cn } from "@/utils";
 import { getStyle } from "@/utils/messageStyling";
-
-type DividerVM = {
-  note: string;
-  rawNote: string;
-  width: number;
-  translateX: number;
-  styling: { styles?: string[] };
-};
+import type { DividerVM } from "@/vm/divider";
 
 export const Divider = (props: {
   context: any;

@@ -8,6 +8,7 @@ import { Block } from "../../Block";
 import "./FragmentCritical.css";
 import Icon from "@/components/Icon/Icons";
 import { formattedTextOf } from "@/parser/helpers";
+import { buildBlockVM } from "@/vm/block";
 
 export const FragmentCritical = (props: {
   context: any;
@@ -72,6 +73,7 @@ export const FragmentCritical = (props: {
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
                 context={blockInCritical}
+                vm={buildBlockVM(blockInCritical)}
                 number={`${props.number}.1`}
                 incremental
               />

@@ -9,6 +9,7 @@ import { Block } from "../../Block";
 import "./FragmentLoop.css";
 import Icon from "@/components/Icon/Icons";
 import { buildConditionVM } from "@/vm/fragments";
+import { buildBlockVM } from "@/vm/block";
 
 export const FragmentLoop = (props: {
   context: any;
@@ -75,6 +76,7 @@ export const FragmentLoop = (props: {
               origin={leftParticipant}
               style={{ paddingLeft: `${paddingLeft}px` }}
               context={blockInLoop}
+              vm={buildBlockVM(blockInLoop)}
               number={`${props.number}.1`}
               incremental
             />

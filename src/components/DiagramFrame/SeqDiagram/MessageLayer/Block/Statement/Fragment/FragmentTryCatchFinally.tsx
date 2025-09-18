@@ -10,6 +10,7 @@ import "./FragmentTryCatchFinally.css";
 import { useMemo } from "react";
 import Icon from "@/components/Icon/Icons";
 import { formattedTextOf } from "@/parser/helpers";
+import { buildBlockVM } from "@/vm/block";
 
 export const FragmentTryCatchFinally = (props: {
   context: any;
@@ -85,6 +86,7 @@ export const FragmentTryCatchFinally = (props: {
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
                 context={blockInTryBlock}
+                vm={buildBlockVM(blockInTryBlock)}
                 number={`${props.number}.1`}
                 incremental
               />
@@ -106,6 +108,7 @@ export const FragmentTryCatchFinally = (props: {
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
                 context={blockInCatchBlock(catchBlock)}
+                vm={buildBlockVM(blockInCatchBlock(catchBlock))}
                 key={index + 2000}
                 number={`${props.number}.${blockLengthAcc[index] + 1}`}
                 incremental
@@ -123,6 +126,7 @@ export const FragmentTryCatchFinally = (props: {
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
                 context={finallyBlock}
+                vm={buildBlockVM(finallyBlock)}
                 number={`${props.number}.${
                   blockLengthAcc[blockLengthAcc.length - 1] + 1
                 }`}

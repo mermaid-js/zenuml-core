@@ -16,8 +16,8 @@ import { commentOf, offsetRangeOf } from "@/parser/helpers";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMByStartAtom } from "@/store/Store";
-import { centerOf } from "./utils";
 import { enhanceMessageVMWithArrow, enhanceReturnVMWithArrow } from "@/vm/messages";
+import { buildDividerVM } from "@/vm/divider";
 import { buildRefVM } from "@/vm/fragments";
 
 export const Statement = (props: {
@@ -54,33 +54,9 @@ export const Statement = (props: {
 
   // Divider VM calculation
   const dividerCtx = props.context?.divider?.();
-  const dividerNote = dividerCtx?.Note?.() || "";
-  let dividerVM;
-  if (dividerCtx) {
-    const names = coordinates.orderedParticipantNames();
-    const rearParticipant = names[names.length - 1];
-    const dividerWidth = centerOf(coordinates, rearParticipant) + 10;
-    const centerOfOrigin = centerOf(coordinates, props.origin);
-
-    // Parse note for styling
-    let parsedNote = dividerNote;
-    let styleInfo = {};
-    if (dividerNote.trim().indexOf("[") === 0 && dividerNote.indexOf("]") !== -1) {
-      const startIndex = dividerNote.indexOf("[");
-      const endIndex = dividerNote.indexOf("]");
-      const styleStr = dividerNote.slice(startIndex + 1, endIndex);
-      parsedNote = dividerNote.slice(endIndex + 1);
-      styleInfo = { styles: styleStr.split(",").map((s: string) => s.trim()) };
-    }
-
-    dividerVM = {
-      note: parsedNote,
-      rawNote: dividerNote,
-      width: dividerWidth,
-      translateX: -1 * centerOfOrigin + 10,
-      styling: styleInfo,
-    };
-  }
+  const dividerVM = dividerCtx
+    ? buildDividerVM(dividerCtx, props.origin, coordinates)
+    : null;
 
   // Return VM calculation via dedicated enhancer (no parity checks in component)
   const retCtx = props.context?.ret?.();
@@ -144,7 +120,7 @@ export const Statement = (props: {
         />
       );
     case Boolean(props.context.divider()):
-      return <Divider {...subProps} vm={dividerVM} />;
+      return <Divider {...subProps} vm={dividerVM || undefined} />;
     case Boolean(props.context.ret()):
       return (
         <Return

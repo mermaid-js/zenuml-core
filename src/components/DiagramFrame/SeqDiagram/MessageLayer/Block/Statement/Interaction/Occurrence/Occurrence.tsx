@@ -3,6 +3,7 @@ import { EventBus } from "@/EventBus";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
+import { buildBlockVM } from "@/vm/block";
 import { buildOccurrenceVM, type OccurrenceVM } from "@/vm/occurrence";
 import { centerOf } from "../../utils";
 import { useAtomValue } from "jotai";
@@ -74,6 +75,7 @@ export const Occurrence = (props: {
         <Block
           origin={props.participant}
           context={vm.blockContext}
+          vm={buildBlockVM(vm.blockContext)}
           number={props.number}
           collapsed={collapsed}
         ></Block>

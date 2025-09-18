@@ -7,6 +7,7 @@ import { cn } from "@/utils";
 import { Block } from "../../Block";
 import "./FragmentPar.css";
 import Icon from "@/components/Icon/Icons";
+import { buildBlockVM } from "@/vm/block";
 
 export const FragmentPar = (props: {
   context: any;
@@ -64,6 +65,7 @@ export const FragmentPar = (props: {
             )}
             style={{ paddingLeft: `${paddingLeft}px` }}
             context={par.braceBlock().block()}
+            vm={buildBlockVM(par.braceBlock().block())}
             number={`${props.number}.1`}
             incremental
           />

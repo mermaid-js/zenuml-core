@@ -11,6 +11,7 @@ import { buildConditionVM } from "@/vm/fragments";
 import "./FragmentAlt.css";
 import { Fragment, useMemo } from "react";
 import Icon from "@/components/Icon/Icons";
+import { buildBlockVM } from "@/vm/block";
 
 export const FragmentAlt = (props: {
   context: any;
@@ -102,6 +103,7 @@ export const FragmentAlt = (props: {
               origin={leftParticipant}
               style={{ paddingLeft: `${paddingLeft}px` }}
               context={blockInIfBlock}
+              vm={buildBlockVM(blockInIfBlock)}
               number={`${props.number}.1`}
               incremental
             />
@@ -129,6 +131,7 @@ export const FragmentAlt = (props: {
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
                 context={blockInElseIfBlock(elseIfBlock)}
+                vm={buildBlockVM(blockInElseIfBlock(elseIfBlock))}
                 key={index + 2000}
                 number={`${props.number}.${blockLengthAcc[index] + 1}`}
                 incremental
@@ -146,6 +149,7 @@ export const FragmentAlt = (props: {
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
                 context={elseBlock}
+                vm={buildBlockVM(elseBlock)}
                 number={`${props.number}.${
                   blockLengthAcc[blockLengthAcc.length - 1] + 1
                 }`}

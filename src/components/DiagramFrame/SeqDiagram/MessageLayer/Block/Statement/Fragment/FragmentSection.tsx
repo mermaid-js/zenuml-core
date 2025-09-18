@@ -9,6 +9,7 @@ import { cn } from "@/utils";
 import "./FragmentSection.css";
 import Icon from "@/components/Icon/Icons";
 import { formattedTextOf } from "@/parser/helpers";
+import { buildBlockVM } from "@/vm/block";
 
 export const FragmentSection = (props: {
   context: any;
@@ -72,6 +73,7 @@ export const FragmentSection = (props: {
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
                 context={blockInSection}
+                vm={buildBlockVM(blockInSection)}
                 number={props.number}
               />
             )}

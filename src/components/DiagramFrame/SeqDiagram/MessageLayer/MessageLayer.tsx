@@ -6,6 +6,7 @@ import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import "./MessageLayer.scss";
+import { buildBlockVM } from "@/vm/block";
 
 import parentLogger from "../../../../logger/logger";
 
@@ -39,6 +40,7 @@ export const MessageLayer = (props: {
     >
       <Block
         context={props.context}
+        vm={buildBlockVM(props.context)}
         style={{ paddingLeft: `${paddingLeft}px` }}
         origin={origin}
       />

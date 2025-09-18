@@ -6,6 +6,7 @@ import { CollapseButton } from "./CollapseButton";
 import { Block } from "../../Block";
 import { cn } from "@/utils";
 import Icon from "@/components/Icon/Icons";
+import { buildBlockVM } from "@/vm/block";
 
 export const FragmentOpt = (props: {
   context: any;
@@ -59,6 +60,7 @@ export const FragmentOpt = (props: {
         className={cn({ hidden: collapsed })}
         style={{ paddingLeft: `${paddingLeft}px` }}
         context={opt?.braceBlock()?.block()}
+        vm={buildBlockVM(opt?.braceBlock()?.block())}
         number={`${props.number}.1`}
         incremental
       />
