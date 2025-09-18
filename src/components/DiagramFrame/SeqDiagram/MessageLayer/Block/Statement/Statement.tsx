@@ -50,7 +50,7 @@ export const Statement = (props: {
     case "loop":
       return <FragmentLoop {...subProps} />;
     case "alt":
-      return <FragmentAlt {...subProps} />;
+      return <FragmentAlt {...subProps} vm={vmData.vm} />;
     case "par":
       return <FragmentPar {...subProps} />;
     case "opt":

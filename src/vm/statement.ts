@@ -4,8 +4,8 @@ import type { MessageVM } from "@/vm/messages";
 import { enhanceMessageVMWithArrow, enhanceReturnVMWithArrow } from "@/vm/messages";
 import type { DividerVM } from "@/vm/divider";
 import { buildDividerVM } from "@/vm/divider";
-import type { RefVM } from "@/vm/fragments";
-import { buildRefVM } from "@/vm/fragments";
+import type { RefVM, AltVM } from "@/vm/fragments";
+import { buildRefVM, buildAltVM } from "@/vm/fragments";
 
 export interface StatementVMData {
   message?: MessageVM;
@@ -96,7 +96,7 @@ export type StatementKind =
 
 export type DiscriminatedStatementVM =
   | { kind: "loop" }
-  | { kind: "alt" }
+  | { kind: "alt"; vm: AltVM | null }
   | { kind: "par" }
   | { kind: "opt" }
   | { kind: "section" }
@@ -121,7 +121,10 @@ export function buildDiscriminatedStatementVM(
 ): DiscriminatedStatementVM {
   // Preserve the same precedence as existing switch in Statement.tsx
   if (context?.loop?.()) return { kind: "loop" };
-  if (context?.alt?.()) return { kind: "alt" };
+  if (context?.alt?.()) {
+    const altVM = buildAltVM(context);
+    return { kind: "alt", vm: altVM };
+  }
   if (context?.par?.()) return { kind: "par" };
   if (context?.opt?.()) return { kind: "opt" };
   if (context?.section?.()) return { kind: "section" };
