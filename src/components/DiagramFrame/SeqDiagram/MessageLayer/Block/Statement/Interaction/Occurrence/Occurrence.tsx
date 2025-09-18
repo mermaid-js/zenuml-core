@@ -3,6 +3,7 @@ import { EventBus } from "@/EventBus";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
+import { buildOccurrenceVM, type OccurrenceVM } from "@/vm/occurrence";
 import { centerOf } from "../../utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom } from "@/store/Store";
@@ -13,29 +14,25 @@ export const Occurrence = (props: {
   rtl?: boolean;
   number?: string;
   className?: string;
+  vm?: OccurrenceVM;
 }) => {
   const coordinates = useAtomValue(coordinatesAtom);
   const [collapsed, setCollapsed] = useState(false);
 
   const debug = localStorage.getItem("zenumlDebug");
 
-  const computedCenter = () => {
+  // Calculate center position for VM building
+  const centerPosition = (() => {
     try {
       return centerOf(coordinates, props.participant);
     } catch (e) {
       console.error(e);
       return 0;
     }
-  };
-  const hasAnyStatementsExceptReturn = () => {
-    const braceBlock = props.context.braceBlock();
-    if (!braceBlock) return false;
-    const stats = braceBlock.block()?.stat() || [];
-    const len = stats.length;
-    if (len > 1) return true;
-    //when the only one statement is not the RetContext
-    return len === 1 && stats[0]["ret"]() == null;
-  };
+  })();
+
+  // Build VM if not provided (fallback for transition period)
+  const vm = props.vm || buildOccurrenceVM(props.context, props.participant, centerPosition, props.rtl);
   const toggle = () => {
     setCollapsed(!collapsed);
 
@@ -58,7 +55,7 @@ export const Occurrence = (props: {
       data-el-type="occurrence"
       data-belongs-to={props.participant}
       data-x-offset={0}
-      data-debug-center-of={computedCenter()}
+      data-debug-center-of={vm?.centerPosition || 0}
     >
       {debug && (
         <>
@@ -70,13 +67,13 @@ export const Occurrence = (props: {
           </div>
         </>
       )}
-      {hasAnyStatementsExceptReturn() && (
+      {vm?.hasNonReturnStatements && (
         <CollapseButton collapsed={collapsed} onClick={toggle} />
       )}
-      {props.context.braceBlock() && (
+      {vm?.blockContext && (
         <Block
           origin={props.participant}
-          context={props.context.braceBlock().block()}
+          context={vm.blockContext}
           number={props.number}
           collapsed={collapsed}
         ></Block>
