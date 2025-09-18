@@ -1,3 +1,5 @@
+import { buildBlockVM } from "./block";
+
 export interface OccurrenceVM {
   /** The participant this occurrence belongs to */
   participant: string;
@@ -14,8 +16,8 @@ export interface OccurrenceVM {
   /** Whether the occurrence should be right-to-left */
   rightToLeft: boolean;
   
-  /** Block context for nested rendering (may still need parser context temporarily) */
-  blockContext?: any;
+  /** Pre-built BlockVM for nested rendering */
+  blockVM?: import("./block").BlockVM;
 }
 
 /**
@@ -49,6 +51,6 @@ export function buildOccurrenceVM(
     hasNonReturnStatements,
     centerPosition,
     rightToLeft,
-    blockContext: braceBlock?.block?.(),
+    blockVM: braceBlock?.block?.() ? buildBlockVM(braceBlock.block()) : undefined,
   };
 }

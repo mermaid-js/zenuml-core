@@ -3,7 +3,6 @@ import { EventBus } from "@/EventBus";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
-import { buildBlockVM } from "@/vm/block";
 import { type OccurrenceVM } from "@/vm/occurrence";
 
 export const Occurrence = (props: {
@@ -27,7 +26,7 @@ export const Occurrence = (props: {
 
   useEffect(() => {
     setCollapsed(false);
-  }, [vm.blockContext]);
+  }, [vm.blockVM]);
 
   return (
     <div
@@ -54,10 +53,10 @@ export const Occurrence = (props: {
       {vm.hasNonReturnStatements && (
         <CollapseButton collapsed={collapsed} onClick={toggle} />
       )}
-      {vm.blockContext && (
+      {vm.blockVM && (
         <Block
           origin={props.participant}
-          vm={buildBlockVM(vm.blockContext)}
+          vm={vm.blockVM}
           number={props.number}
           collapsed={collapsed}
         ></Block>
