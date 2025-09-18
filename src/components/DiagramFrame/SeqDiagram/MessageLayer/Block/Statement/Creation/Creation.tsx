@@ -1,7 +1,6 @@
 import { cn } from "@/utils";
 import { Message } from "../Message";
 import { Occurrence } from "../Interaction/Occurrence/Occurrence";
-import { codeRangeOf } from "@/parser/helpers";
 import {
   LIFELINE_WIDTH,
   OCCURRENCE_BAR_SIDE_WIDTH,
@@ -17,7 +16,6 @@ import { buildOccurrenceVM } from "@/vm/occurrence";
 import { centerOf } from "../utils";
 
 export const Creation = (props: {
-  context: any;
   origin: any;
   comment?: string;
   commentObj?: CommentClass;
@@ -31,12 +29,11 @@ export const Creation = (props: {
   const onElementClick = useAtomValue(onElementClickAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const [participantWidth, setParticipantWidth] = useState(0);
-  const creation = props.context?.creation();
   const vm = props.vm;
 
-  // Use VM data if available, fallback to parser context
-  const to = vm?.to ?? creation?.Owner();
-  const signature = vm?.signature ?? creation?.SignatureText();
+  // Use VM data only
+  const to = vm?.to;
+  const signature = vm?.signature;
   const range = vm?.range ?? null;
 
   // Calculate isCurrent using range from VM

@@ -20,7 +20,6 @@ function mountCreationWithVM(
 
   const creationContext = contextLocator(code);
   const props = {
-    context: creationContext,
     origin,
     fragmentOffset: 100,
     vm,

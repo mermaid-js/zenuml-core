@@ -39,7 +39,7 @@ function renderCreationWithStylePanel(code: string) {
   const utils = render(
     <Provider store={store}>
       <StylePanel />
-      <Creation context={stat} origin={_STARTER_} vm={vmWithArrow} />
+      <Creation origin={_STARTER_} vm={vmWithArrow} />
     </Provider>,
   );
 
