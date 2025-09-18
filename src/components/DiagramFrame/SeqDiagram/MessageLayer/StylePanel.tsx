@@ -9,6 +9,8 @@ import { useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
 import { applyStylesAt, readStylesAt, toggleStyleList } from "./StylePanel.helpers";
+import { offsetFromLineCol } from "@/utils/StringUtil";
+import type { CodeRange } from "@/parser/CodeRange";
 // No parser or CodeRange dependency in the click path
 
 const btns = [
@@ -71,9 +73,10 @@ export const StylePanel = () => {
   });
 
   useEffect(() => {
-    setOnMessageClick((startOffset: number, element: HTMLElement) => {
+    setOnMessageClick((range: CodeRange, element: HTMLElement) => {
       // Run on the next tick so useOutsideClick can close any previous panel first
       setTimeout(() => {
+        const startOffset = offsetFromLineCol(code, range.start.line, range.start.col);
         const styles = readStylesAt(code, startOffset);
         startRef.current = startOffset;
         setExistingStyles(styles);

@@ -152,9 +152,9 @@ Acceptance
    - Problem: `Message/index.tsx` still reads parser context for editability and label ranges and calls `onMessageClick` with parser context.
    - Plan:
      - Add `canEditLabel` to `MessageVM` (true for creation with valid params; otherwise based on type and mode) and use it to drive editability.
-     - Ensure parents pass `labelRangeOverride={vm.labelRange ?? null}` and `onMessageClickOverride` based on `vm.codeRange`.
+     - Ensure parents pass `labelRangeOverride={vm.labelRange ?? null}` and `onOpenStylePanel` based on `vm.codeRange`.
      - Stop using `labelRangeOfMessage` and `context.isParamValid()` in `Message`.
-     - Remove the `context`-based call in `onClick`; rely on `onMessageClickOverride` only.
+     - Remove the `context`-based call in `onClick`; rely on `onOpenStylePanel` only.
    - Acceptance: `Message` has no parser imports or context reads; tests updated to assert behavior via VM props.
 
 ## Validation Strategy

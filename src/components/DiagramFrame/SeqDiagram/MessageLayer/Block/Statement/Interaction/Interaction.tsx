@@ -4,7 +4,7 @@ import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
 import { Message } from "../Message";
 import { Occurrence } from "./Occurrence/Occurrence";
 import { useAtomValue } from "jotai";
-import { cursorAtom } from "@/store/Store";
+import { cursorAtom, onMessageClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { signatureOf } from "@/parser/helpers";
@@ -39,6 +39,7 @@ export const Interaction = (props: {
   const statements = message?.Statements();
   const assignee = message?.Assignment()?.getText() || "";
   const vm = props.vm;
+  const onMessageClick = useAtomValue(onMessageClickAtom);
   const signature = vm?.signature ?? signatureOf(message);
   const source = vm?.source ?? vm?.from ?? message?.From?.() ?? _STARTER_;
   const target = vm?.to ?? message?.Owner?.() ?? _STARTER_;
@@ -126,7 +127,10 @@ export const Interaction = (props: {
           number={props.number}
           type="sync"
           labelRangeOverride={vm?.labelRange ?? null}
-          startOffsetOverride={vm?.range ? vm.range[0] : undefined}
+          onOpenStylePanel={(element) => {
+            if (!element || !vm?.codeRange) return;
+            onMessageClick(vm.codeRange, element);
+          }}
         />
       )}
       <Occurrence

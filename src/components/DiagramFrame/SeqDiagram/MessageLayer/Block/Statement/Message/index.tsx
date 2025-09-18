@@ -1,5 +1,5 @@
 import { cn } from "@/utils";
-import { modeAtom, onMessageClickAtom, RenderMode } from "@/store/Store";
+import { modeAtom, RenderMode } from "@/store/Store";
 import { CSSProperties, useRef } from "react";
 import { useAtomValue } from "jotai";
 import { Point } from "./Point";
@@ -28,8 +28,7 @@ export const Message = (props: {
   labelRangeOverride?: [number, number] | null;
   editableOverride?: boolean;
   stylableOverride?: boolean;
-  onMessageClickOverride?: (element: HTMLElement | null) => void;
-  startOffsetOverride?: number;
+  onOpenStylePanel?: (element: HTMLElement | null) => void;
 }) => {
   const {
     context,
@@ -43,11 +42,9 @@ export const Message = (props: {
     labelRangeOverride,
     editableOverride,
     stylableOverride,
-    onMessageClickOverride,
-    startOffsetOverride,
+    onOpenStylePanel,
   } = props;
   const mode = useAtomValue(modeAtom);
-  const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const isAsync = type === "async";
   const editable = editableOverride ?? getEditableDefault(mode, type || "");
@@ -67,14 +64,10 @@ export const Message = (props: {
 
   const onClick = () => {
     if (!stylable || !messageRef.current) return;
-    if (onMessageClickOverride) {
-      onMessageClickOverride(messageRef.current);
+    if (onOpenStylePanel) {
+      onOpenStylePanel(messageRef.current);
     } else {
-      if (typeof startOffsetOverride === "number") {
-        onMessageClick(startOffsetOverride, messageRef.current);
-      } else {
-        console.warn("[message] missing startOffsetOverride; style panel not opened");
-      }
+      console.warn("[message] onOpenStylePanel not provided; style panel not opened");
     }
   };
 

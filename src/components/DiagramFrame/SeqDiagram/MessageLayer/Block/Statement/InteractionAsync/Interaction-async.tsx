@@ -149,7 +149,7 @@ export const InteractionAsync = (props: {
           type="async"
           number={props.number}
           labelRangeOverride={vm?.labelRange ?? null}
-          onMessageClickOverride={(element) => {
+          onOpenStylePanel={(element) => {
             if (!element || !vm?.codeRange) return;
             onElementClick(vm.codeRange);
           }}

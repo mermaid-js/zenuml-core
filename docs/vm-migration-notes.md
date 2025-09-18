@@ -37,10 +37,9 @@ All migrated components now consume arrow/geometry and related presentation data
 
 ### Outstanding
 
-- Message primitive (`Message/index.tsx`) still references parser context for editability and label range fallback. Plan:
-  - Add `canEditLabel` to `MessageVM` (encodes creation validity and type-based editability) and consume it in `Message`.
-  - Pass `labelRangeOverride={vm.labelRange ?? null}` and `onMessageClickOverride` from parents using `vm.codeRange`.
-  - Remove `labelRangeOfMessage` and `context.isParamValid()` from `Message`; remove parser-based click wiring.
+- Message primitive (`Message/index.tsx`) should remain presentational only.
+  - Drive editability via `editableOverride={vm.canEditLabel}` and label ranges via `labelRangeOverride={vm.labelRange ?? null}`.
+  - Parents pass `onOpenStylePanel` based on `vm.codeRange`; `Message` no longer uses parser context or a start-offset path.
   - Acceptance: `Message` has no parser imports or context reads; editing and clicks rely solely on VM props.
 
 - SelfInvocation components
@@ -59,8 +58,8 @@ All migrated components now consume arrow/geometry and related presentation data
   - Plan: extend Participants IR or provide a small Group VM that maps group contexts to participant name arrays and label text; render purely from VM and coordinates.
 
 - Style panel click wiring
-  - `StylePanel` sets `onMessageClickAtom` with `(context, element)` and uses `offsetRangeOf(context)`.
-  - Plan: change the click contract to pass `CodeRange` (from VM) and the element; update Interaction/Creation/Return to pass `vm.codeRange`.
+  - `StylePanel` sets `onMessageClickAtom` with `(codeRange, element)` and derives the anchor offset from code via `offsetFromLineCol`.
+  - Parents pass `onOpenStylePanel` to `Message` and close over `vm.codeRange` (`onOpenStylePanel={(el) => onMessageClick(vm.codeRange!, el)}`).
 
 - Fallbacks in message components
   - `Interaction` still falls back to `signatureOf(context)`; `Creation` and `Return` fall back to parser for `codeRange` or assignee text.

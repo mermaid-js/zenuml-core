@@ -8,7 +8,7 @@ import {
 } from "@/positioning/Constants";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
-import { cursorAtom, onElementClickAtom } from "@/store/Store";
+import { cursorAtom, onElementClickAtom, onMessageClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EventBus } from "@/EventBus";
@@ -26,6 +26,7 @@ export const Creation = (props: {
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
+  const onMessageClick = useAtomValue(onMessageClickAtom);
   const [participantWidth, setParticipantWidth] = useState(0);
   const creation = props.context?.creation();
   const vm = props.vm;
@@ -139,7 +140,10 @@ export const Creation = (props: {
           style={{ width: `calc(100% - ${containerOffset}px)` }}
           labelRangeOverride={vm?.labelRange ?? null}
           editableOverride={vm?.canEditLabel ?? false}
-          startOffsetOverride={vm?.range ? vm.range[0] : undefined}
+          onOpenStylePanel={(element) => {
+            if (!element || !vm?.codeRange) return;
+            onMessageClick(vm.codeRange, element);
+          }}
         />
       </div>
       <Occurrence

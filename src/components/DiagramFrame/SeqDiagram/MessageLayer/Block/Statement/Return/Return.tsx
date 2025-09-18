@@ -3,7 +3,7 @@ import { Comment } from "../Comment/Comment";
 import { cn } from "@/utils";
 import { Message } from "../Message";
 import { useAtomValue } from "jotai";
-import { onElementClickAtom, cursorAtom } from "@/store/Store";
+import { onElementClickAtom, cursorAtom, onMessageClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { codeRangeOf, formattedTextOf } from "@/parser/helpers";
 import { SyntheticEvent, useMemo } from "react";
@@ -29,6 +29,7 @@ export const Return = (props: {
   };
 }) => {
   const onElementClick = useAtomValue(onElementClickAtom);
+  const onMessageClick = useAtomValue(onMessageClickAtom);
   const cursor = useAtomValue(cursorAtom);
 
   const ret = props.context?.ret();
@@ -143,7 +144,10 @@ export const Return = (props: {
           type="return"
           number={props.number}
           labelRangeOverride={vm?.labelRange ?? null}
-          startOffsetOverride={vm?.labelRange ? vm.labelRange[0] : undefined}
+          onOpenStylePanel={(element) => {
+            if (!element || !vm?.codeRange) return;
+            onMessageClick(vm.codeRange, element);
+          }}
         />
       )}
     </div>

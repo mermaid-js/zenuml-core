@@ -22,11 +22,11 @@ export const SelfInvocation = (props: {
   }, [props.vm?.labelRange, props.context]);
 
   const onClick = () => {
-    const start = props.vm?.range ? props.vm.range[0] : undefined;
-    if (typeof start === "number") {
-      onMessageClick(start, messageRef.current!);
+    const range = props.vm?.codeRange;
+    if (range) {
+      onMessageClick(range, messageRef.current!);
     } else {
-      console.warn("[self-invocation] missing startOffset; style panel not opened");
+      console.warn("[self-invocation] missing codeRange; style panel not opened");
     }
   };
 

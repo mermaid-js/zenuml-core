@@ -122,7 +122,7 @@ export const onElementClickAtom = atomWithFunctionValue(
 );
 
 export const onMessageClickAtom = atomWithFunctionValue<
-  (startOffset: number, element: HTMLElement) => void
+  (codeRange: CodeRange, element: HTMLElement) => void
 >(() => {});
 
 export const onContentChangeAtom = atomWithFunctionValue<
