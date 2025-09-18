@@ -15,6 +15,7 @@ export interface IRMessage {
   codeRange?: CodeRange | null;
   providedFrom?: string | null;
   assignee?: string | null;
+  statementsCount: number;
 }
 
 class MessagesIRCollector extends sequenceParserListener {
@@ -54,6 +55,11 @@ class MessagesIRCollector extends sequenceParserListener {
       // For other messages: use Assignment() method if available
       assignee = typeof ctx?.Assignment === "function" ? ctx.Assignment()?.getText() : undefined;
     }
+    
+    // Extract statements count for return message numbering
+    const statements = ctx?.Statements?.() || [];
+    const statementsCount = statements.length;
+    
     this.messages.push({
       from: ctx?.From?.(),
       to: ctx?.Owner?.(),
@@ -65,6 +71,7 @@ class MessagesIRCollector extends sequenceParserListener {
       codeRange: codeRange ?? null,
       providedFrom: providedFrom ?? null,
       assignee: assignee ?? null,
+      statementsCount,
     });
   }
 

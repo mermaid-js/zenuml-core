@@ -24,6 +24,8 @@ export type MessageVM = {
   canEditLabel?: boolean;
   // Assignment text (e.g., "ret" for "ret = A.method()")
   assignee?: string | null;
+  // Number of statements in the message (for return message numbering)
+  statementsCount: number;
   arrow?: {
     translateX: number;
     interactionWidth: number;
@@ -56,6 +58,7 @@ export function buildMessagesVM(messages: Array<any>): MessageVM[] {
       isSelf,
       canEditLabel,
       assignee: m.assignee ?? null,
+      statementsCount: m.statementsCount,
     };
     return vm;
   });
