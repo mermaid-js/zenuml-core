@@ -4,36 +4,19 @@ import { useEffect, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
 import { buildBlockVM } from "@/vm/block";
-import { buildOccurrenceVM, type OccurrenceVM } from "@/vm/occurrence";
-import { centerOf } from "../../utils";
-import { useAtomValue } from "jotai";
-import { coordinatesAtom } from "@/store/Store";
+import { type OccurrenceVM } from "@/vm/occurrence";
 
 export const Occurrence = (props: {
-  context: any;
   participant: any;
   rtl?: boolean;
   number?: string;
   className?: string;
-  vm?: OccurrenceVM;
+  vm: OccurrenceVM;
 }) => {
-  const coordinates = useAtomValue(coordinatesAtom);
   const [collapsed, setCollapsed] = useState(false);
 
   const debug = localStorage.getItem("zenumlDebug");
-
-  // Calculate center position for VM building
-  const centerPosition = (() => {
-    try {
-      return centerOf(coordinates, props.participant);
-    } catch (e) {
-      console.error(e);
-      return 0;
-    }
-  })();
-
-  // Build VM if not provided (fallback for transition period)
-  const vm = props.vm || buildOccurrenceVM(props.context, props.participant, centerPosition, props.rtl);
+  const vm = props.vm;
   const toggle = () => {
     setCollapsed(!collapsed);
 
@@ -44,7 +27,7 @@ export const Occurrence = (props: {
 
   useEffect(() => {
     setCollapsed(false);
-  }, [props.context]);
+  }, [vm.blockContext]);
 
   return (
     <div
@@ -56,7 +39,7 @@ export const Occurrence = (props: {
       data-el-type="occurrence"
       data-belongs-to={props.participant}
       data-x-offset={0}
-      data-debug-center-of={vm?.centerPosition || 0}
+      data-debug-center-of={vm.centerPosition}
     >
       {debug && (
         <>
@@ -68,10 +51,10 @@ export const Occurrence = (props: {
           </div>
         </>
       )}
-      {vm?.hasNonReturnStatements && (
+      {vm.hasNonReturnStatements && (
         <CollapseButton collapsed={collapsed} onClick={toggle} />
       )}
-      {vm?.blockContext && (
+      {vm.blockContext && (
         <Block
           origin={props.participant}
           vm={buildBlockVM(vm.blockContext)}

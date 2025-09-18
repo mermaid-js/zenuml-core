@@ -135,7 +135,6 @@ export const Interaction = (props: {
         />
       )}
       <Occurrence
-        context={message}
         participant={to}
         rtl={rightToLeft}
         number={props.number}

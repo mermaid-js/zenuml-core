@@ -149,7 +149,6 @@ export const Creation = (props: {
         />
       </div>
       <Occurrence
-        context={creation}
         className="pointer-events-auto"
         participant={to}
         number={props.number}
