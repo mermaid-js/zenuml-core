@@ -11,7 +11,7 @@ describe("MessageLayer", () => {
   let messageLayer: ReturnType<typeof render>;
 
   beforeEach(() => {
-    messageLayer = render(<MessageLayer context={null} />);
+    messageLayer = render(<MessageLayer />);
   });
 
   it("should have a width", async () => {

@@ -78,33 +78,14 @@ export const SeqDiagram = (props: {
             {/* Why do we have two `life-line-layer`s? This is introduced when we add support of
               floating participant. Essentially, the Participant labels must be on the top
               of message layer and the lines of lifelines must be under the message layer. */}
-            <LifeLineLayer
-              leftGap={frameBorderLeft}
-              context={rootContext?.head()}
-              renderLifeLine
-            />
-            <MessageLayer
-              context={rootContext?.block()}
-              style={{ width: `${width}px` }}
-            />
-            <LifeLineLayer
-              leftGap={frameBorderLeft}
-              context={rootContext?.head()}
-              renderParticipants
-            />
+            <LifeLineLayer leftGap={frameBorderLeft} renderLifeLine />
+            <MessageLayer style={{ width: `${width}px` }} />
+            <LifeLineLayer leftGap={frameBorderLeft} renderParticipants />
           </>
         ) : (
           <>
-            <LifeLineLayer
-              leftGap={frameBorderLeft}
-              context={rootContext?.head()}
-              renderParticipants
-              renderLifeLine
-            />
-            <MessageLayer
-              context={rootContext?.block()}
-              style={{ width: `${width}px` }}
-            />
+            <LifeLineLayer leftGap={frameBorderLeft} renderParticipants renderLifeLine />
+            <MessageLayer style={{ width: `${width}px` }} />
           </>
         )}
       </div>
