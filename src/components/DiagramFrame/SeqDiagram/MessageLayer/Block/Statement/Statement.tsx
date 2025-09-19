@@ -12,7 +12,6 @@ import { InteractionAsync } from "./InteractionAsync/Interaction-async";
 import { Divider } from "./Divider/Divider";
 import { Return } from "./Return/Return";
 import Comment from "../../../../../Comment/Comment";
-import { commentOf } from "@/parser/helpers";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMByStartAtom } from "@/store/Store";
@@ -27,13 +26,14 @@ export const Statement = (props: {
 }) => {
   const messagesByStart = useAtomValue(messagesVMByStartAtom);
   const coordinates = useAtomValue(coordinatesAtom);
-  const comment = commentOf(props.context) || "";
-  const commentObj = new Comment(comment);
 
   const vmData = useMemo(
     () => buildDiscriminatedStatementVM(props.context, props.origin, coordinates, messagesByStart),
     [props.context, props.origin, coordinates, messagesByStart],
   );
+
+  const comment = vmData.comment || "";
+  const commentObj = new Comment(comment);
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {

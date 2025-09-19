@@ -21,16 +21,16 @@ export function TotalWidth(
   let leftParticipant = "";
   let rightParticipant = "";
 
-  const localSet = new Set<string>();
+  const localParticipants = new Set<string>();
   for (const m of messages) {
     const from = m.from || _STARTER_;
     const to = m.to || "";
-    if (from) localSet.add(from);
-    if (to) localSet.add(to);
+    if (from) localParticipants.add(from);
+    if (to) localParticipants.add(to);
   }
-  leftParticipant = allParticipants.find((p) => localSet.has(p)) || "";
+  leftParticipant = allParticipants.find((p) => localParticipants.has(p)) || "";
   rightParticipant =
-    allParticipants.slice().reverse().find((p) => localSet.has(p)) || "";
+    allParticipants.slice().reverse().find((p) => localParticipants.has(p)) || "";
 
   // Fallback: if frame/messages did not yield valid participants, use extremes
   if (!leftParticipant || !rightParticipant) {
