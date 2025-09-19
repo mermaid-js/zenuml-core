@@ -5,7 +5,7 @@ import { enhanceMessageVMWithArrow, enhanceReturnVMWithArrow } from "@/vm/messag
 import type { DividerVM } from "@/vm/divider";
 import { buildDividerVM } from "@/vm/divider";
 import type { RefVM, AltVM, FragmentData } from "@/vm/fragments";
-import { buildRefVM, buildAltVM, extractFragmentData } from "@/vm/fragments";
+import { buildRefVM, buildAltVM, buildLoopVM, buildOptVM, buildParVM, buildSectionVM, buildCriticalVM, buildTcfVM, extractFragmentData } from "@/vm/fragments";
 
 export interface StatementVMData {
   message?: MessageVM;
@@ -95,13 +95,13 @@ export type StatementKind =
   | "return";
 
 export type DiscriminatedStatementVM =
-  | { kind: "loop"; fragmentData: FragmentData; comment?: string }
+  | { kind: "loop"; fragmentData: FragmentData; loopVM: ReturnType<typeof buildLoopVM>; comment?: string }
   | { kind: "alt"; vm: AltVM | null; fragmentData: FragmentData; comment?: string }
-  | { kind: "par"; fragmentData: FragmentData; comment?: string }
-  | { kind: "opt"; fragmentData: FragmentData; comment?: string }
-  | { kind: "section"; fragmentData: FragmentData; comment?: string }
-  | { kind: "critical"; fragmentData: FragmentData; comment?: string }
-  | { kind: "tcf"; fragmentData: FragmentData; comment?: string }
+  | { kind: "par"; fragmentData: FragmentData; parVM: ReturnType<typeof buildParVM>; comment?: string }
+  | { kind: "opt"; fragmentData: FragmentData; optVM: ReturnType<typeof buildOptVM>; comment?: string }
+  | { kind: "section"; fragmentData: FragmentData; sectionVM: ReturnType<typeof buildSectionVM>; comment?: string }
+  | { kind: "critical"; fragmentData: FragmentData; criticalVM: ReturnType<typeof buildCriticalVM>; comment?: string }
+  | { kind: "tcf"; fragmentData: FragmentData; tcfVM: ReturnType<typeof buildTcfVM>; comment?: string }
   | { kind: "ref"; ref: RefVM | null; fragmentData: FragmentData; comment?: string }
   | { kind: "divider"; divider: DividerVM | null; comment?: string }
   | { kind: "creation"; message?: MessageVM; comment?: string }
@@ -124,7 +124,8 @@ export function buildDiscriminatedStatementVM(
   // Preserve the same precedence as existing switch in Statement.tsx
   if (context?.loop?.()) {
     const fragmentData = extractFragmentData(context);
-    return { kind: "loop", fragmentData, comment };
+    const loopVM = buildLoopVM(context);
+    return { kind: "loop", fragmentData, loopVM, comment };
   }
   if (context?.alt?.()) {
     const altVM = buildAltVM(context);
@@ -133,23 +134,28 @@ export function buildDiscriminatedStatementVM(
   }
   if (context?.par?.()) {
     const fragmentData = extractFragmentData(context);
-    return { kind: "par", fragmentData, comment };
+    const parVM = buildParVM(context);
+    return { kind: "par", fragmentData, parVM, comment };
   }
   if (context?.opt?.()) {
     const fragmentData = extractFragmentData(context);
-    return { kind: "opt", fragmentData, comment };
+    const optVM = buildOptVM(context);
+    return { kind: "opt", fragmentData, optVM, comment };
   }
   if (context?.section?.()) {
     const fragmentData = extractFragmentData(context);
-    return { kind: "section", fragmentData, comment };
+    const sectionVM = buildSectionVM(context);
+    return { kind: "section", fragmentData, sectionVM, comment };
   }
   if (context?.critical?.()) {
     const fragmentData = extractFragmentData(context);
-    return { kind: "critical", fragmentData, comment };
+    const criticalVM = buildCriticalVM(context);
+    return { kind: "critical", fragmentData, criticalVM, comment };
   }
   if (context?.tcf?.()) {
     const fragmentData = extractFragmentData(context);
-    return { kind: "tcf", fragmentData, comment };
+    const tcfVM = buildTcfVM(context);
+    return { kind: "tcf", fragmentData, tcfVM, comment };
   }
 
   // Build base data once and reuse

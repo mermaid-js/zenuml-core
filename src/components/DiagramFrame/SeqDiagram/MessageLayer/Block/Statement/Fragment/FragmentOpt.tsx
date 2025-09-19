@@ -6,19 +6,18 @@ import { CollapseButton } from "./CollapseButton";
 import { Block } from "../../Block";
 import { cn } from "@/utils";
 import Icon from "@/components/Icon/Icons";
-import { buildBlockVM } from "@/vm/block";
-import { FragmentData } from "@/vm/fragments";
+import type { FragmentData, OptVM } from "@/vm/fragments";
 
 export const FragmentOpt = (props: {
   fragmentData: FragmentData;
-  context: any; // Still needed for building content VMs until we extract more data
+  vm?: OptVM | null; // VM provides block
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
   number?: string;
   className?: string;
 }) => {
-  const opt = props.context.opt();
+  const vm = props.vm;
   const {
     collapsed,
     toggleCollapse,
@@ -61,7 +60,7 @@ export const FragmentOpt = (props: {
         origin={leftParticipant}
         className={cn({ hidden: collapsed })}
         style={{ paddingLeft: `${paddingLeft}px` }}
-        vm={buildBlockVM(opt?.braceBlock()?.block())}
+        vm={vm?.blockVM}
         number={`${props.number}.1`}
         incremental
       />

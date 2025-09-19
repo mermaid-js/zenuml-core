@@ -7,13 +7,11 @@ import { cn } from "@/utils";
 import { Block } from "../../Block";
 import "./FragmentCritical.css";
 import Icon from "@/components/Icon/Icons";
-import { formattedTextOf } from "@/parser/helpers";
-import { buildBlockVM } from "@/vm/block";
-import { FragmentData } from "@/vm/fragments";
+import type { FragmentData, CriticalVM } from "@/vm/fragments";
 
 export const FragmentCritical = (props: {
   fragmentData: FragmentData;
-  context: any; // Still needed for building content VMs until we extract more data
+  vm?: CriticalVM | null; // VM provides label and block
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -29,12 +27,8 @@ export const FragmentCritical = (props: {
     leftParticipant,
   } = useFragmentData(props.fragmentData, props.origin);
 
-  const critical = props.context.critical();
-  const braceBlock = critical?.braceBlock();
-  const atom = formattedTextOf(critical?.atom?.());
-  const blockInCritical = braceBlock?.block();
-
-  const label = atom ? `Critical:${atom}` : "Critical";
+  const criticalVM = props.vm;
+  const label = criticalVM?.labelText ?? "Critical";
 
   return (
     <div className={props.className}>
@@ -70,11 +64,11 @@ export const FragmentCritical = (props: {
         <div className={collapsed ? "hidden" : ""}>
           <div className="segment">
             <div className="text-skin-fragment flex">{/* Value */}</div>
-            {blockInCritical && (
+            {criticalVM?.blockVM && (
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                vm={buildBlockVM(blockInCritical)}
+                vm={criticalVM.blockVM}
                 number={`${props.number}.1`}
                 incremental
               />

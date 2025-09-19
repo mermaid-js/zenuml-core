@@ -48,19 +48,19 @@ export const Statement = (props: {
 
   switch (vmData.kind) {
     case "loop":
-      return <FragmentLoop {...subProps} fragmentData={vmData.fragmentData} context={props.context} />;
+      return <FragmentLoop {...subProps} fragmentData={vmData.fragmentData} vm={vmData.loopVM} />;
     case "alt":
       return <FragmentAlt {...subProps} vm={vmData.vm} fragmentData={vmData.fragmentData} context={props.context} />;
     case "par":
-      return <FragmentPar {...subProps} fragmentData={vmData.fragmentData} context={props.context} />;
+      return <FragmentPar {...subProps} fragmentData={vmData.fragmentData} vm={vmData.parVM} />;
     case "opt":
-      return <FragmentOpt {...subProps} fragmentData={vmData.fragmentData} context={props.context} />;
+      return <FragmentOpt {...subProps} fragmentData={vmData.fragmentData} vm={vmData.optVM} />;
     case "section":
-      return <FragmentSection {...subProps} fragmentData={vmData.fragmentData} context={props.context} />;
+      return <FragmentSection {...subProps} fragmentData={vmData.fragmentData} vm={vmData.sectionVM} />;
     case "critical":
-      return <FragmentCritical {...subProps} fragmentData={vmData.fragmentData} context={props.context} />;
+      return <FragmentCritical {...subProps} fragmentData={vmData.fragmentData} vm={vmData.criticalVM} />;
     case "tcf":
-      return <FragmentTryCatchFinally {...subProps} fragmentData={vmData.fragmentData} context={props.context} />;
+      return <FragmentTryCatchFinally {...subProps} fragmentData={vmData.fragmentData} vm={vmData.tcfVM} />;
     case "ref":
       if (!('ref' in vmData) || !vmData.ref) {
         console.warn("Failed to build RefVM for ref context");

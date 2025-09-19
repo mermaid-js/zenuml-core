@@ -7,15 +7,12 @@ import { cn } from "@/utils";
 import { Block } from "../../Block";
 import { blockLength } from "@/utils/Numbering";
 import "./FragmentTryCatchFinally.css";
-import { useMemo } from "react";
 import Icon from "@/components/Icon/Icons";
-import { formattedTextOf } from "@/parser/helpers";
-import { buildBlockVM } from "@/vm/block";
-import { FragmentData } from "@/vm/fragments";
+import type { FragmentData, TcfVM } from "@/vm/fragments";
 
 export const FragmentTryCatchFinally = (props: {
   fragmentData: FragmentData;
-  context: any; // Still needed for building content VMs until we extract more data
+  vm?: TcfVM | null; // VM provides try/catch/finally blocks and labels
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -31,25 +28,7 @@ export const FragmentTryCatchFinally = (props: {
     leftParticipant,
   } = useFragmentData(props.fragmentData, props.origin);
 
-  const exception = (ctx: any) => {
-    return formattedTextOf(ctx?.invocation?.()?.parameters?.());
-  };
-  const blockInCatchBlock = (ctx: any) => {
-    return ctx?.braceBlock()?.block();
-  };
-
-  const tcf = props.context.tcf();
-  const blockInTryBlock = tcf?.tryBlock()?.braceBlock()?.block();
-  const finallyBlock = tcf?.finallyBlock()?.braceBlock()?.block();
-  const blockLengthAcc = useMemo(() => {
-    const acc = [blockLength(blockInTryBlock)];
-    if (tcf?.catchBlock()) {
-      tcf.catchBlock().forEach((block: any) => {
-        acc.push(acc[acc.length - 1] + blockLength(blockInCatchBlock(block)));
-      });
-    }
-    return acc;
-  }, [tcf, blockInTryBlock]);
+  const tcfVM = props.vm;
 
   return (
     <div className={props.className}>
@@ -83,17 +62,17 @@ export const FragmentTryCatchFinally = (props: {
         </div>
         <div className={collapsed ? "hidden" : ""}>
           <div className="segment">
-            {blockInTryBlock && (
+            {tcfVM?.tryBlockVM && (
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                vm={buildBlockVM(blockInTryBlock)}
+                vm={tcfVM.tryBlockVM}
                 number={`${props.number}.1`}
                 incremental
               />
             )}
           </div>
-          {tcf.catchBlock().map((catchBlock: any, index: number) => (
+          {tcfVM?.catchBlocks?.map((catchBlock: any, index: number) => (
             <div
               className="segment mt-2 border-t border-solid"
               key={index + 500}
@@ -103,19 +82,19 @@ export const FragmentTryCatchFinally = (props: {
                 key={index + 1000}
               >
                 <label className="keyword catch p-1">catch</label>
-                <label className="exception p-1">{exception(catchBlock)}</label>
+                <label className="exception p-1">{catchBlock.exceptionText}</label>
               </div>
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                vm={buildBlockVM(blockInCatchBlock(catchBlock))}
+                vm={catchBlock.blockVM}
                 key={index + 2000}
-                number={`${props.number}.${blockLengthAcc[index] + 1}`}
+                number={`${props.number}.${(tcfVM.blockLengthAcc?.[index] ?? 0) + 1}`}
                 incremental
               />
             </div>
           ))}
-          {finallyBlock && (
+          {tcfVM?.finallyBlockVM && (
             <div className="segment mt-2 border-t border-solid">
               <div className="header flex text-skin-fragment finally">
                 <label className="keyword finally bg-skin-frame opacity-65 px-1 inline-block">
@@ -125,9 +104,9 @@ export const FragmentTryCatchFinally = (props: {
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                vm={buildBlockVM(finallyBlock)}
+                vm={tcfVM.finallyBlockVM}
                 number={`${props.number}.${
-                  blockLengthAcc[blockLengthAcc.length - 1] + 1
+                  (tcfVM.blockLengthAcc?.[tcfVM.blockLengthAcc.length - 1] ?? 0) + 1
                 }`}
                 incremental
               />

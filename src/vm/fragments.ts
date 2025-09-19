@@ -60,6 +60,19 @@ export interface FragmentPositioningVM {
   leftParticipant: string;
 }
 
+// Fragment-specific view models for content rendering (parser-free in components)
+export interface LoopVM { conditionVM: ConditionVM | null; blockVM: any | null /* BlockVM */ }
+export interface OptVM { blockVM: any | null /* BlockVM */ }
+export interface ParVM { blockVM: any | null /* BlockVM */ }
+export interface SectionVM { labelText: string; blockVM: any | null /* BlockVM */ }
+export interface CriticalVM { labelText: string; blockVM: any | null /* BlockVM */ }
+export interface TcfVM {
+  tryBlockVM: any | null /* BlockVM */;
+  catchBlocks: Array<{ exceptionText: string; blockVM: any | null /* BlockVM */ }>;
+  finallyBlockVM: any | null /* BlockVM */;
+  blockLengthAcc: number[];
+}
+
 /**
  * Determine fragment type from context
  */
@@ -201,6 +214,90 @@ export function buildAltVM(context: any): AltVM | null {
     elseIfBlocks: elseIfBlocksVM,
     elseBlockVM,
   };
+}
+
+// Build LoopVM
+export function buildLoopVM(context: any): LoopVM | null {
+  if (!context) return null;
+  const loop = context.loop?.();
+  if (!loop) return null;
+  const condition = loop.parExpr?.()?.condition?.();
+  const conditionVM = buildConditionVM(condition);
+  const blockInLoop = loop.braceBlock?.()?.block?.();
+  const blockVM = blockInLoop ? buildBlockVM(blockInLoop) : null;
+  return { conditionVM, blockVM };
+}
+
+// Build OptVM
+export function buildOptVM(context: any): OptVM | null {
+  if (!context) return null;
+  const opt = context.opt?.();
+  if (!opt) return null;
+  const block = opt.braceBlock?.()?.block?.();
+  return { blockVM: block ? buildBlockVM(block) : null };
+}
+
+// Build ParVM
+export function buildParVM(context: any): ParVM | null {
+  if (!context) return null;
+  const par = context.par?.();
+  if (!par) return null;
+  const block = par.braceBlock?.()?.block?.();
+  return { blockVM: block ? buildBlockVM(block) : null };
+}
+
+// Build SectionVM
+export function buildSectionVM(context: any): SectionVM | null {
+  if (!context) return null;
+  const section = context.section?.();
+  if (!section) return null;
+  const atom = section?.atom?.();
+  const labelText = formattedTextOf(atom) || "section";
+  const block = section.braceBlock?.()?.block?.();
+  return { labelText, blockVM: block ? buildBlockVM(block) : null };
+}
+
+// Build CriticalVM
+export function buildCriticalVM(context: any): CriticalVM | null {
+  if (!context) return null;
+  const critical = context.critical?.();
+  if (!critical) return null;
+  const atom = critical?.atom?.();
+  const atomText = formattedTextOf(atom) || "";
+  const labelText = atomText ? `Critical:${atomText}` : "Critical";
+  const block = critical.braceBlock?.()?.block?.();
+  return { labelText, blockVM: block ? buildBlockVM(block) : null };
+}
+
+// Build TcfVM (try/catch/finally)
+export function buildTcfVM(context: any): TcfVM | null {
+  if (!context) return null;
+  const tcf = context.tcf?.();
+  if (!tcf) return null;
+
+  const tryBlock = tcf.tryBlock?.()?.braceBlock?.()?.block?.();
+  const tryBlockVM = tryBlock ? buildBlockVM(tryBlock) : null;
+
+  const exceptionText = (ctx: any) => formattedTextOf(ctx?.invocation?.()?.parameters?.()) || "";
+  const blockInCatch = (ctx: any) => ctx?.braceBlock?.()?.block?.();
+
+  const catches = tcf.catchBlock?.() || [];
+  const catchBlocks = catches.map((c: any) => ({
+    exceptionText: exceptionText(c),
+    blockVM: blockInCatch(c) ? buildBlockVM(blockInCatch(c)) : null,
+  }));
+
+  const finallyBlock = tcf.finallyBlock?.()?.braceBlock?.()?.block?.();
+  const finallyBlockVM = finallyBlock ? buildBlockVM(finallyBlock) : null;
+
+  // Build block length accumulator similar to component logic
+  const acc: number[] = [tryBlock ? blockLength(tryBlock) : 0];
+  for (const c of catches) {
+    const b = blockInCatch(c);
+    acc.push(acc[acc.length - 1] + (b ? blockLength(b) : 0));
+  }
+
+  return { tryBlockVM, catchBlocks, finallyBlockVM, blockLengthAcc: acc };
 }
 
 // Helper function to calculate the depth/layers on a participant due to nested calls

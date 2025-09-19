@@ -8,12 +8,11 @@ import { ConditionLabel } from "./ConditionLabel";
 import { Block } from "../../Block";
 import "./FragmentLoop.css";
 import Icon from "@/components/Icon/Icons";
-import { buildConditionVM, FragmentData } from "@/vm/fragments";
-import { buildBlockVM } from "@/vm/block";
+import type { FragmentData, LoopVM } from "@/vm/fragments";
 
 export const FragmentLoop = (props: {
   fragmentData: FragmentData;
-  context: any; // Still needed for building content VMs until we extract more data
+  vm?: LoopVM | null; // VM provides condition and block (parser-free)
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -29,9 +28,7 @@ export const FragmentLoop = (props: {
     leftParticipant,
   } = useFragmentData(props.fragmentData, props.origin);
 
-  const loop = props.context.loop();
-  const blockInLoop = loop?.braceBlock()?.block();
-  const condition = loop?.parExpr()?.condition();
+  const loopVM = props.vm;
 
   return (
     <div className={props.className}>
@@ -64,19 +61,14 @@ export const FragmentLoop = (props: {
         <div className={cn({ hidden: collapsed })}>
           <div className="segment">
             <div className="text-skin-fragment">
-              {(() => {
-                const conditionVM = buildConditionVM(condition);
-                if (!conditionVM) {
-                  console.warn("Failed to build ConditionVM for loop condition");
-                  return null;
-                }
-                return <ConditionLabel condition={condition} vm={conditionVM} />;
-              })()}
+              {loopVM?.conditionVM ? (
+                <ConditionLabel condition={null} vm={loopVM.conditionVM} />
+              ) : null}
             </div>
             <Block
               origin={leftParticipant}
               style={{ paddingLeft: `${paddingLeft}px` }}
-              vm={buildBlockVM(blockInLoop)}
+              vm={loopVM?.blockVM}
               number={`${props.number}.1`}
               incremental
             />
