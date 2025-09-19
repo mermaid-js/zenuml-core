@@ -13,7 +13,7 @@ export interface StatementVMData {
   creation?: MessageVM;
   return?: MessageVM;
   divider?: DividerVM | null;
-  ref?: RefVM | null;
+  ref?: RefVM | undefined;
 }
 
 function getVMForContext(
@@ -67,7 +67,7 @@ export function buildStatementVM(
     : null;
 
   // ref
-  const refVM: RefVM | null = context?.ref?.() ? buildRefVM(context) : null;
+  const refVM: RefVM | undefined = context?.ref?.() ? buildRefVM(context) : undefined;
 
   return {
     message: messageVMWithArrow,
@@ -102,7 +102,7 @@ export type DiscriminatedStatementVM =
   | { kind: "section"; fragmentData: FragmentData; sectionVM: ReturnType<typeof buildSectionVM>; comment?: string }
   | { kind: "critical"; fragmentData: FragmentData; criticalVM: ReturnType<typeof buildCriticalVM>; comment?: string }
   | { kind: "tcf"; fragmentData: FragmentData; tcfVM: ReturnType<typeof buildTcfVM>; comment?: string }
-  | { kind: "ref"; ref: RefVM | null; fragmentData: FragmentData; comment?: string }
+  | { kind: "ref"; ref: RefVM | undefined; fragmentData: FragmentData; comment?: string }
   | { kind: "divider"; divider: DividerVM | null; comment?: string }
   | { kind: "creation"; message?: MessageVM; comment?: string }
   | { kind: "message"; message?: MessageVM; comment?: string }

@@ -309,6 +309,7 @@ const depthOnParticipant = (context: any, participant: any): number => {
       return isMessageContext || isCreationContext;
     };
     if (isSync(ctx)) {
+      // @ts-ignore
       return ctx.Owner() === participant;
     }
     return false;

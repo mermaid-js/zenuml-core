@@ -62,11 +62,7 @@ export const Statement = (props: {
     case "tcf":
       return <FragmentTryCatchFinally {...subProps} fragmentData={vmData.fragmentData} vm={vmData.tcfVM} />;
     case "ref":
-      if (!('ref' in vmData) || !vmData.ref) {
-        console.warn("Failed to build RefVM for ref context");
-        return null;
-      }
-      return <FragmentRef {...subProps} vm={vmData.ref} fragmentData={vmData.fragmentData} context={props.context} />;
+      return <FragmentRef {...subProps} vm={vmData.ref} fragmentData={vmData.fragmentData} />;
     case "creation":
       return <Creation {...subProps} vm={(vmData as any).message} />;
     case "message":
