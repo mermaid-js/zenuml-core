@@ -76,7 +76,15 @@ describe('FragmentAlt', () => {
     },
   };
 
+  const mockFragmentData = {
+    type: 'alt' as const,
+    localParticipantNames: ['A', 'B'],
+    frameId: 'test-frame-id',
+    participantLayers: { A: 0, B: 1 },
+  };
+
   const defaultProps = {
+    fragmentData: mockFragmentData,
     context: mockContext,
     origin: 'A',
     comment: '',
@@ -90,7 +98,7 @@ describe('FragmentAlt', () => {
     vi.clearAllMocks();
   });
 
-  it('should render with VM data and context for useFragmentData', () => {
+  it('should render with VM data and fragmentData for useFragmentData', () => {
     const { useFragmentData } = require('./useFragmentData');
     
     render(
@@ -99,8 +107,8 @@ describe('FragmentAlt', () => {
       </Provider>
     );
 
-    // Verify useFragmentData was called with the context (not null)
-    expect(useFragmentData).toHaveBeenCalledWith(mockContext, 'A');
+    // Verify useFragmentData was called with the fragmentData (not context)
+    expect(useFragmentData).toHaveBeenCalledWith(mockFragmentData, 'A');
   });
 
   it('should throw error when VM is missing', () => {
@@ -158,7 +166,7 @@ describe('FragmentAlt', () => {
     expect(blocks.length).toBeGreaterThan(2); // if + elseIf + else blocks
   });
 
-  it('should use context for fragment positioning via useFragmentData', () => {
+  it('should use fragmentData for fragment positioning via useFragmentData', () => {
     const { useFragmentData } = require('./useFragmentData');
     
     render(
@@ -167,14 +175,8 @@ describe('FragmentAlt', () => {
       </Provider>
     );
 
-    // This test would have failed before the fix because we were passing null
-    // instead of the actual context to useFragmentData
-    expect(useFragmentData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        alt: expect.any(Function),
-      }),
-      'A'
-    );
+    // Verify useFragmentData was called with fragmentData
+    expect(useFragmentData).toHaveBeenCalledWith(mockFragmentData, 'A');
     
     // Verify it was NOT called with null (which would cause the original issue)
     expect(useFragmentData).not.toHaveBeenCalledWith(null, 'A');
@@ -199,10 +201,10 @@ describe('FragmentAlt', () => {
     // 3. frameForContext(framesModel, null) - would fail
     // 4. depthOnParticipant(null, origin) - would fail
     
-    // With our fix, it's correctly called with the actual context
-    expect(useFragmentData).toHaveBeenCalledWith(mockContext, 'A');
+    // With our fix, it's correctly called with the fragmentData
+    expect(useFragmentData).toHaveBeenCalledWith(mockFragmentData, 'A');
     // The exact call count depends on how many tests have run before this one
-    expect(useFragmentData).toHaveBeenCalledWith(mockContext, 'A');
+    expect(useFragmentData).toHaveBeenCalledWith(mockFragmentData, 'A');
   });
 
   it('should handle VM data with missing optional properties', () => {

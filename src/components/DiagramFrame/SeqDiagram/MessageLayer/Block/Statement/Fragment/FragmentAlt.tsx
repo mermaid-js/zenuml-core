@@ -9,10 +9,10 @@ import { ConditionLabel } from "./ConditionLabel";
 import "./FragmentAlt.css";
 import { Fragment } from "react";
 import Icon from "@/components/Icon/Icons";
-import type { AltVM } from "@/vm/fragments";
+import type { AltVM, FragmentData } from "@/vm/fragments";
 
 export const FragmentAlt = (props: {
-  context: any; // Required for useFragmentData hook - provides fragment positioning, styling, and participant calculations
+  fragmentData: FragmentData; // Fragment data for positioning, styling, and participant calculations
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -35,7 +35,7 @@ export const FragmentAlt = (props: {
     paddingLeft,
     fragmentStyle,
     leftParticipant,
-  } = useFragmentData(props.context, props.origin);
+  } = useFragmentData(props.fragmentData, props.origin);
 
   return (
     <div

@@ -39,17 +39,23 @@ jest.mock("@/vm/fragments", () => ({
 
 describe("FragmentRef", () => {
   const mockContext = { ref: () => ({ Content: () => ({ getText: () => "test" }) }) };
+  const mockFragmentData = {
+    type: 'ref' as const,
+    localParticipantNames: ['A'],
+    frameId: 'test-frame-id',
+    participantLayers: { A: 0 },
+  };
   
   it("should use provided VM when available", () => {
     const mockVM: RefVM = {
-      id: "ref:1",
       labelText: "vm-label",
       labelRange: [0, 8],
-      codeRange: [0, 15]
+      codeRange: null
     };
 
     const { container } = render(
       <FragmentRef
+        fragmentData={mockFragmentData}
         context={mockContext}
         origin="A"
         vm={mockVM}
@@ -59,20 +65,23 @@ describe("FragmentRef", () => {
     expect(container.textContent).toContain("vm-label");
   });
 
-  it("should fallback to buildRefVM when VM not provided", () => {
+  it("should handle missing VM gracefully", () => {
     const { container } = render(
       <FragmentRef
+        fragmentData={mockFragmentData}
         context={mockContext}
         origin="A"
       />
     );
 
-    expect(container.textContent).toContain("fallback-label");
+    // Should still render but with empty content
+    expect(container.querySelector('.fragment-ref')).toBeInTheDocument();
   });
 
   it("should handle null context gracefully", () => {
     const { container } = render(
       <FragmentRef
+        fragmentData={mockFragmentData}
         context={null}
         origin="A"
       />

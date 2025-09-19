@@ -9,9 +9,11 @@ import "./FragmentCritical.css";
 import Icon from "@/components/Icon/Icons";
 import { formattedTextOf } from "@/parser/helpers";
 import { buildBlockVM } from "@/vm/block";
+import { FragmentData } from "@/vm/fragments";
 
 export const FragmentCritical = (props: {
-  context: any;
+  fragmentData: FragmentData;
+  context: any; // Still needed for building content VMs until we extract more data
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -25,7 +27,7 @@ export const FragmentCritical = (props: {
     fragmentStyle,
     border,
     leftParticipant,
-  } = useFragmentData(props.context, props.origin);
+  } = useFragmentData(props.fragmentData, props.origin);
 
   const critical = props.context.critical();
   const braceBlock = critical?.braceBlock();

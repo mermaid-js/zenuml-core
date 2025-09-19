@@ -10,9 +10,11 @@ import "./FragmentSection.css";
 import Icon from "@/components/Icon/Icons";
 import { formattedTextOf } from "@/parser/helpers";
 import { buildBlockVM } from "@/vm/block";
+import { FragmentData } from "@/vm/fragments";
 
 export const FragmentSection = (props: {
-  context: any;
+  fragmentData: FragmentData;
+  context: any; // Still needed for building content VMs until we extract more data
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -26,7 +28,7 @@ export const FragmentSection = (props: {
     fragmentStyle,
     border,
     leftParticipant,
-  } = useFragmentData(props.context, props.origin);
+  } = useFragmentData(props.fragmentData, props.origin);
   const section = props.context.section();
   const braceBlock = section?.braceBlock();
   const atom = formattedTextOf(section?.atom?.());

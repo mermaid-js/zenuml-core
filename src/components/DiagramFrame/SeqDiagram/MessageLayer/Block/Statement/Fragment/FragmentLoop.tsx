@@ -8,11 +8,12 @@ import { ConditionLabel } from "./ConditionLabel";
 import { Block } from "../../Block";
 import "./FragmentLoop.css";
 import Icon from "@/components/Icon/Icons";
-import { buildConditionVM } from "@/vm/fragments";
+import { buildConditionVM, FragmentData } from "@/vm/fragments";
 import { buildBlockVM } from "@/vm/block";
 
 export const FragmentLoop = (props: {
-  context: any;
+  fragmentData: FragmentData;
+  context: any; // Still needed for building content VMs until we extract more data
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -26,7 +27,7 @@ export const FragmentLoop = (props: {
     fragmentStyle,
     border,
     leftParticipant,
-  } = useFragmentData(props.context, props.origin);
+  } = useFragmentData(props.fragmentData, props.origin);
 
   const loop = props.context.loop();
   const blockInLoop = loop?.braceBlock()?.block();

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, framesModelAtom } from "@/store/Store";
-import { buildFragmentPositioningVM, type FragmentPositioningVM } from "@/vm/fragments";
+import { buildFragmentPositioningVM, type FragmentPositioningVM, type FragmentData } from "@/vm/fragments";
 
-export const useFragmentData = (context: any, origin: string) => {
+export const useFragmentData = (fragmentData: FragmentData, origin: string) => {
   const [collapsed, setCollapsed] = useState(false);
   const coordinates = useAtomValue(coordinatesAtom);
   const framesModel = useAtomValue(framesModelAtom);
@@ -14,11 +14,11 @@ export const useFragmentData = (context: any, origin: string) => {
 
   useEffect(() => {
     setCollapsed(false);
-  }, [context]);
+  }, [fragmentData]);
 
-  // Build positioning VM using the new VM pattern
+  // Build positioning VM using the new VM pattern with FragmentData
   const positioningVM: FragmentPositioningVM = buildFragmentPositioningVM(
-    context,
+    fragmentData,
     origin,
     coordinates,
     framesModel,

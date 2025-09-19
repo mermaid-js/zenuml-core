@@ -4,8 +4,8 @@ import type { MessageVM } from "@/vm/messages";
 import { enhanceMessageVMWithArrow, enhanceReturnVMWithArrow } from "@/vm/messages";
 import type { DividerVM } from "@/vm/divider";
 import { buildDividerVM } from "@/vm/divider";
-import type { RefVM, AltVM } from "@/vm/fragments";
-import { buildRefVM, buildAltVM } from "@/vm/fragments";
+import type { RefVM, AltVM, FragmentData } from "@/vm/fragments";
+import { buildRefVM, buildAltVM, extractFragmentData } from "@/vm/fragments";
 
 export interface StatementVMData {
   message?: MessageVM;
@@ -95,14 +95,14 @@ export type StatementKind =
   | "return";
 
 export type DiscriminatedStatementVM =
-  | { kind: "loop" }
-  | { kind: "alt"; vm: AltVM | null }
-  | { kind: "par" }
-  | { kind: "opt" }
-  | { kind: "section" }
-  | { kind: "critical" }
-  | { kind: "tcf" }
-  | { kind: "ref"; ref: RefVM | null }
+  | { kind: "loop"; fragmentData: FragmentData }
+  | { kind: "alt"; vm: AltVM | null; fragmentData: FragmentData }
+  | { kind: "par"; fragmentData: FragmentData }
+  | { kind: "opt"; fragmentData: FragmentData }
+  | { kind: "section"; fragmentData: FragmentData }
+  | { kind: "critical"; fragmentData: FragmentData }
+  | { kind: "tcf"; fragmentData: FragmentData }
+  | { kind: "ref"; ref: RefVM | null; fragmentData: FragmentData }
   | { kind: "divider"; divider: DividerVM | null }
   | { kind: "creation"; message?: MessageVM }
   | { kind: "message"; message?: MessageVM }
@@ -120,21 +120,43 @@ export function buildDiscriminatedStatementVM(
   messagesByStart: Record<number, MessageVM>,
 ): DiscriminatedStatementVM {
   // Preserve the same precedence as existing switch in Statement.tsx
-  if (context?.loop?.()) return { kind: "loop" };
+  if (context?.loop?.()) {
+    const fragmentData = extractFragmentData(context);
+    return { kind: "loop", fragmentData };
+  }
   if (context?.alt?.()) {
     const altVM = buildAltVM(context);
-    return { kind: "alt", vm: altVM };
+    const fragmentData = extractFragmentData(context);
+    return { kind: "alt", vm: altVM, fragmentData };
   }
-  if (context?.par?.()) return { kind: "par" };
-  if (context?.opt?.()) return { kind: "opt" };
-  if (context?.section?.()) return { kind: "section" };
-  if (context?.critical?.()) return { kind: "critical" };
-  if (context?.tcf?.()) return { kind: "tcf" };
+  if (context?.par?.()) {
+    const fragmentData = extractFragmentData(context);
+    return { kind: "par", fragmentData };
+  }
+  if (context?.opt?.()) {
+    const fragmentData = extractFragmentData(context);
+    return { kind: "opt", fragmentData };
+  }
+  if (context?.section?.()) {
+    const fragmentData = extractFragmentData(context);
+    return { kind: "section", fragmentData };
+  }
+  if (context?.critical?.()) {
+    const fragmentData = extractFragmentData(context);
+    return { kind: "critical", fragmentData };
+  }
+  if (context?.tcf?.()) {
+    const fragmentData = extractFragmentData(context);
+    return { kind: "tcf", fragmentData };
+  }
 
   // Build base data once and reuse
   const data = buildStatementVM(context, origin, coordinates, messagesByStart);
 
-  if (context?.ref?.()) return { kind: "ref", ref: data.ref ?? null };
+  if (context?.ref?.()) {
+    const fragmentData = extractFragmentData(context);
+    return { kind: "ref", ref: data.ref ?? null, fragmentData };
+  }
   if (context?.creation?.()) return { kind: "creation", message: data.creation };
   if (context?.message?.()) return { kind: "message", message: data.message };
   if (context?.asyncMessage?.()) return { kind: "async", message: data.asyncMessage };

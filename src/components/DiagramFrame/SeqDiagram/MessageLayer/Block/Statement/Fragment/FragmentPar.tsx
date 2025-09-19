@@ -8,9 +8,11 @@ import { Block } from "../../Block";
 import "./FragmentPar.css";
 import Icon from "@/components/Icon/Icons";
 import { buildBlockVM } from "@/vm/block";
+import { FragmentData } from "@/vm/fragments";
 
 export const FragmentPar = (props: {
-  context: any;
+  fragmentData: FragmentData;
+  context: any; // Still needed for building content VMs until we extract more data
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -24,7 +26,7 @@ export const FragmentPar = (props: {
     fragmentStyle,
     border,
     leftParticipant,
-  } = useFragmentData(props.context, props.origin);
+  } = useFragmentData(props.fragmentData, props.origin);
 
   const par = props.context.par();
 
