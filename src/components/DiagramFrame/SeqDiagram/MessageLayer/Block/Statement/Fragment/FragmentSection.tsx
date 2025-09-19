@@ -8,11 +8,11 @@ import { capitalize } from "radash";
 import { cn } from "@/utils";
 import "./FragmentSection.css";
 import Icon from "@/components/Icon/Icons";
-import { formattedTextOf } from "@/parser/helpers";
-import { buildBlockVM } from "@/vm/block";
+import type { FragmentData, SectionVM } from "@/vm/fragments";
 
 export const FragmentSection = (props: {
-  context: any;
+  fragmentData: FragmentData;
+  vm?: SectionVM | null; // VM provides label and block
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -26,13 +26,9 @@ export const FragmentSection = (props: {
     fragmentStyle,
     border,
     leftParticipant,
-  } = useFragmentData(props.context, props.origin);
-  const section = props.context.section();
-  const braceBlock = section?.braceBlock();
-  const atom = formattedTextOf(section?.atom?.());
-  const blockInSection = braceBlock?.block();
-
-  const label = atom ?? capitalize("section");
+  } = useFragmentData(props.fragmentData, props.origin);
+  const sectionVM = props.vm;
+  const label = sectionVM?.labelText ?? capitalize("section");
 
   return (
     <div className={props.className}>
@@ -68,11 +64,11 @@ export const FragmentSection = (props: {
         <div className={collapsed ? "hidden" : ""}>
           <div className="segment">
             <div className="text-skin-fragment flex"></div>
-            {blockInSection && (
+            {sectionVM?.blockVM && (
               <Block
                 origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                vm={buildBlockVM(blockInSection)}
+                vm={sectionVM.blockVM}
                 number={props.number}
               />
             )}

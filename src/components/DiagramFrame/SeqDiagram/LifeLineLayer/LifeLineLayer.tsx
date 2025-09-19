@@ -2,13 +2,10 @@ import { coordinatesAtom, modeAtom, participantsAtom, participantsVMAtom, groups
 import { useAtomValue } from "jotai";
 import { LifeLine } from "./LifeLine";
 import { LifeLineGroup } from "./LifeLineGroup";
-import { Fragment, useMemo } from "react";
+import { useMemo } from "react";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { blankParticipant } from "@/parser/Participants";
-import { isGroupContext, isParticipantContext, participantNameOf } from "@/parser/helpers";
 
 export const LifeLineLayer = (props: {
-  context: any;
   leftGap: number;
   renderParticipants?: boolean;
   renderLifeLine?: boolean;
@@ -19,24 +16,10 @@ export const LifeLineLayer = (props: {
   const participantsVM = useAtomValue(participantsVMAtom);
   const groupsVM = useAtomValue(groupsVMAtom);
 
-  const starterParticipant = useMemo(() => {
-    const names = coordinates.orderedParticipantNames();
-    if (names.length === 0) return null;
-    const firstName = names[0];
-    if (firstName === _STARTER_) {
-      return {
-        ...blankParticipant,
-        name: _STARTER_,
-        explicit: false,
-        isStarter: true,
-      };
-    }
-    return null;
-  }, [coordinates]);
-
-  const starterVM = useMemo(() => {
-    return participantsVM.find(vm => vm.name === _STARTER_);
-  }, [participantsVM]);
+  const starterEntity = useMemo(() => {
+    return participantsModel.find((p) => p.name === _STARTER_) || null;
+  }, [participantsModel]);
+  const starterVM = useMemo(() => participantsVM.find(vm => vm.name === _STARTER_), [participantsVM]);
   return (
     <div
       className="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0 pt-2"
@@ -48,9 +31,9 @@ export const LifeLineLayer = (props: {
       }}
     >
       <div className="z-lifeline-container relative grow">
-        {starterParticipant && !starterParticipant?.explicit && (
+        {starterEntity && !starterEntity.explicit && (
           <LifeLine
-            entity={starterParticipant}
+            entity={starterEntity}
             vm={starterVM}
             className="starter"
             renderParticipants={props.renderParticipants}
@@ -70,37 +53,30 @@ export const LifeLineLayer = (props: {
           />
         ))}
         
-        {/* Render explicit participants that are not in groups */}
-        {((props.context?.children as any[]) || [])
-          .filter((c) => isParticipantContext(c))
-          .map((child, index) => {
-            const name = participantNameOf(child);
-            const irEntity = name && participantsModel.find((p) => p.name === name);
-            const vm = name && participantsVM.find((p) => p.name === name);
-            return irEntity ? (
-              <LifeLine
-                key={`explicit-${index}`}
-                entity={irEntity}
-                vm={vm}
-                renderParticipants={props.renderParticipants}
-                renderLifeLine={props.renderLifeLine}
-              />
-            ) : null;
-          })}
-        {participantsModel
-          .filter((p: any) => !p.explicit)
-          .map((entity: any) => {
-            const vm = participantsVM.find((p) => p.name === entity.name);
-            return (
-              <LifeLine
-                key={entity.name}
-                entity={entity}
-                vm={vm}
-                renderParticipants={props.renderParticipants}
-                renderLifeLine={props.renderLifeLine}
-              />
-            );
-          })}
+        {/* Render non-group participants (explicit or implicit), excluding starter already rendered */}
+        {(() => {
+          const groupMembers = new Set<string>();
+          for (const g of groupsVM) {
+            for (const n of g.participantNames) groupMembers.add(n);
+          }
+          const namesInOrder = coordinates.orderedParticipantNames();
+          return namesInOrder
+            .map((name) => participantsModel.find((p) => p.name === name))
+            .filter((p): p is NonNullable<typeof p> => Boolean(p))
+            .filter((p) => p.name !== _STARTER_ && !groupMembers.has(p.name))
+            .map((entity) => {
+              const vm = participantsVM.find((p) => p.name === entity.name);
+              return (
+                <LifeLine
+                  key={entity.name}
+                  entity={entity}
+                  vm={vm}
+                  renderParticipants={props.renderParticipants}
+                  renderLifeLine={props.renderLifeLine}
+                />
+              );
+            });
+        })()}
       </div>
     </div>
   );

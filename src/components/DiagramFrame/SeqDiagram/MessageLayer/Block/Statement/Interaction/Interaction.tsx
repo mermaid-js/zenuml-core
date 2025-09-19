@@ -10,11 +10,7 @@ import { Comment } from "../Comment/Comment";
 import type { MessageVM } from "@/vm/messages";
 import { useMemo } from "react";
 import { buildOccurrenceVM } from "@/vm/occurrence";
-import { centerOf } from "../utils";
-
-function isNullOrUndefined(value: any) {
-  return value === null || value === undefined;
-}
+import { centerOf, isCursorInRange } from "../utils";
 
 export const Interaction = (props: {
   origin: string;
@@ -43,20 +39,7 @@ export const Interaction = (props: {
   const from = vm?.from ?? _STARTER_;
   const to = vm?.to ?? _STARTER_;
   const isSelf = vm?.isSelf;
-  const range = vm?.range ?? null;
-  const getIsCurrent = () => {
-    const start = range ? range[0] : undefined;
-    const endExclusive = range ? range[1] : undefined;
-    if (
-      isNullOrUndefined(cursor) ||
-      isNullOrUndefined(start) ||
-      isNullOrUndefined(endExclusive)
-    ) {
-      return false;
-    }
-    return cursor! >= start && cursor! < endExclusive;
-  };
-  const isCurrent = getIsCurrent();
+  const isCurrent = isCursorInRange(cursor, vm?.range ?? null);
 
   // Use arrow geometry from VM only (no parity checks)
   const { translateX, interactionWidth, originLayers, sourceLayers, targetLayers, rightToLeft } = useMemo(() => {

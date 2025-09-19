@@ -14,6 +14,8 @@ import type { MessageVM } from "@/vm/messages";
 import { buildParticipantsVM } from "@/vm/participants";
 import { buildGroupsVM } from "@/vm/groups";
 import { buildTitleVM } from "@/vm/title";
+import { buildBlockVM } from "@/vm/block";
+import { buildMessageLayerVM } from "@/vm/messageLayer";
 
 /*
  * RenderMode
@@ -104,6 +106,20 @@ export const framesModelAtom = atom((get) => {
   const coordinates = get(coordinatesAtom);
   const ordered = coordinates.orderedParticipantNames();
   return buildFramesModel(ctx, ordered);
+});
+
+// MessageLayer VM (origin and padding)
+export const messageLayerVMAtom = atom((get) => {
+  const coordinates = get(coordinatesAtom);
+  const messagesVM = get(messagesVMAtom);
+  return buildMessageLayerVM(messagesVM, coordinates);
+});
+
+// BlockVM for the root message block
+export const blockVMAtom = atom((get) => {
+  const ctx = get(rootContextAtom);
+  const blockCtx = ctx?.block();
+  return buildBlockVM(blockCtx);
 });
 
 export const themeAtom = atom("theme-default");

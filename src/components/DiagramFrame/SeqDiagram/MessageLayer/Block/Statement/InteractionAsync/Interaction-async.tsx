@@ -74,6 +74,7 @@ import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import type { MessageVM } from "@/vm/messages";
+import { isCursorInRange } from "../utils";
 
 function isNullOrUndefined(value: any) {
   return value === null || value === undefined;
@@ -99,13 +100,7 @@ export const InteractionAsync = (props: {
   const rightToLeft = vm?.arrow?.rightToLeft ?? false;
   const messageClassNames = props.commentObj?.messageClassNames;
   const messageTextStyle = props.commentObj?.messageStyle;
-  const getIsCurrent = () => {
-    const range = vm?.range ?? null;
-    const start = range ? range[0] : undefined;
-    const endExclusive = range ? range[1] : undefined;
-    if (isNullOrUndefined(cursor) || isNullOrUndefined(start) || isNullOrUndefined(endExclusive)) return false;
-    return cursor! >= start && cursor! < endExclusive;
-  };
+  const isCurrent = isCursorInRange(cursor, vm?.range ?? null);
   return (
     <div
       data-origin={origin}
@@ -116,7 +111,7 @@ export const InteractionAsync = (props: {
         {
           "left-to-right": !rightToLeft,
           "right-to-left": rightToLeft,
-          highlight: getIsCurrent(),
+          highlight: isCurrent,
           "self-invocation": isSelf,
         },
         props.className,

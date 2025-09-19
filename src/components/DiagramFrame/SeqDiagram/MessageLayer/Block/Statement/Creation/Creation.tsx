@@ -13,7 +13,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { EventBus } from "@/EventBus";
 import type { MessageVM } from "@/vm/messages";
 import { buildOccurrenceVM } from "@/vm/occurrence";
-import { centerOf } from "../utils";
+import { centerOf, isCursorInRange } from "../utils";
 
 export const Creation = (props: {
   origin: any;
@@ -34,22 +34,7 @@ export const Creation = (props: {
   // Use VM data only
   const to = vm?.to;
   const signature = vm?.signature;
-  const range = vm?.range ?? null;
-
-  // Calculate isCurrent using range from VM
-  const getIsCurrent = () => {
-    const start = range ? range[0] : undefined;
-    const endExclusive = range ? range[1] : undefined;
-    if (
-      cursor == null ||
-      start == null ||
-      endExclusive == null
-    ) {
-      return false;
-    }
-    return cursor >= start && cursor < endExclusive;
-  };
-  const isCurrent = getIsCurrent();
+  const isCurrent = isCursorInRange(cursor, vm?.range ?? null);
 
   // Use arrow geometry from VM only (no parity checks)
   const { translateX, interactionWidth, rightToLeft } = useMemo(() => {

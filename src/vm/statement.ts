@@ -1,11 +1,11 @@
-import { offsetRangeOf } from "@/parser/helpers";
+import { offsetRangeOf, commentOf } from "@/parser/helpers";
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { MessageVM } from "@/vm/messages";
 import { enhanceMessageVMWithArrow, enhanceReturnVMWithArrow } from "@/vm/messages";
 import type { DividerVM } from "@/vm/divider";
 import { buildDividerVM } from "@/vm/divider";
-import type { RefVM } from "@/vm/fragments";
-import { buildRefVM } from "@/vm/fragments";
+import type { RefVM, AltVM, FragmentData } from "@/vm/fragments";
+import { buildRefVM, buildAltVM, buildLoopVM, buildOptVM, buildParVM, buildSectionVM, buildCriticalVM, buildTcfVM, extractFragmentData } from "@/vm/fragments";
 
 export interface StatementVMData {
   message?: MessageVM;
@@ -13,7 +13,7 @@ export interface StatementVMData {
   creation?: MessageVM;
   return?: MessageVM;
   divider?: DividerVM | null;
-  ref?: RefVM | null;
+  ref?: RefVM | undefined;
 }
 
 function getVMForContext(
@@ -67,7 +67,7 @@ export function buildStatementVM(
     : null;
 
   // ref
-  const refVM: RefVM | null = context?.ref?.() ? buildRefVM(context) : null;
+  const refVM: RefVM | undefined = context?.ref?.() ? buildRefVM(context) : undefined;
 
   return {
     message: messageVMWithArrow,
@@ -95,19 +95,19 @@ export type StatementKind =
   | "return";
 
 export type DiscriminatedStatementVM =
-  | { kind: "loop" }
-  | { kind: "alt" }
-  | { kind: "par" }
-  | { kind: "opt" }
-  | { kind: "section" }
-  | { kind: "critical" }
-  | { kind: "tcf" }
-  | { kind: "ref"; ref: RefVM | null }
-  | { kind: "divider"; divider: DividerVM | null }
-  | { kind: "creation"; message?: MessageVM }
-  | { kind: "message"; message?: MessageVM }
-  | { kind: "async"; message?: MessageVM }
-  | { kind: "return"; message?: MessageVM };
+  | { kind: "loop"; fragmentData: FragmentData; loopVM: ReturnType<typeof buildLoopVM>; comment?: string }
+  | { kind: "alt"; vm: AltVM | null; fragmentData: FragmentData; comment?: string }
+  | { kind: "par"; fragmentData: FragmentData; parVM: ReturnType<typeof buildParVM>; comment?: string }
+  | { kind: "opt"; fragmentData: FragmentData; optVM: ReturnType<typeof buildOptVM>; comment?: string }
+  | { kind: "section"; fragmentData: FragmentData; sectionVM: ReturnType<typeof buildSectionVM>; comment?: string }
+  | { kind: "critical"; fragmentData: FragmentData; criticalVM: ReturnType<typeof buildCriticalVM>; comment?: string }
+  | { kind: "tcf"; fragmentData: FragmentData; tcfVM: ReturnType<typeof buildTcfVM>; comment?: string }
+  | { kind: "ref"; ref: RefVM | undefined; fragmentData: FragmentData; comment?: string }
+  | { kind: "divider"; divider: DividerVM | null; comment?: string }
+  | { kind: "creation"; message?: MessageVM; comment?: string }
+  | { kind: "message"; message?: MessageVM; comment?: string }
+  | { kind: "async"; message?: MessageVM; comment?: string }
+  | { kind: "return"; message?: MessageVM; comment?: string };
 
 /**
  * Build a discriminated Statement VM with a `kind` field to drive rendering.
@@ -119,25 +119,58 @@ export function buildDiscriminatedStatementVM(
   coordinates: Coordinates,
   messagesByStart: Record<number, MessageVM>,
 ): DiscriminatedStatementVM {
+  // Centralize comment extraction here so components don't access parser helpers
+  const comment = commentOf(context) || "";
   // Preserve the same precedence as existing switch in Statement.tsx
-  if (context?.loop?.()) return { kind: "loop" };
-  if (context?.alt?.()) return { kind: "alt" };
-  if (context?.par?.()) return { kind: "par" };
-  if (context?.opt?.()) return { kind: "opt" };
-  if (context?.section?.()) return { kind: "section" };
-  if (context?.critical?.()) return { kind: "critical" };
-  if (context?.tcf?.()) return { kind: "tcf" };
+  if (context?.loop?.()) {
+    const fragmentData = extractFragmentData(context);
+    const loopVM = buildLoopVM(context);
+    return { kind: "loop", fragmentData, loopVM, comment };
+  }
+  if (context?.alt?.()) {
+    const altVM = buildAltVM(context);
+    const fragmentData = extractFragmentData(context);
+    return { kind: "alt", vm: altVM, fragmentData, comment };
+  }
+  if (context?.par?.()) {
+    const fragmentData = extractFragmentData(context);
+    const parVM = buildParVM(context);
+    return { kind: "par", fragmentData, parVM, comment };
+  }
+  if (context?.opt?.()) {
+    const fragmentData = extractFragmentData(context);
+    const optVM = buildOptVM(context);
+    return { kind: "opt", fragmentData, optVM, comment };
+  }
+  if (context?.section?.()) {
+    const fragmentData = extractFragmentData(context);
+    const sectionVM = buildSectionVM(context);
+    return { kind: "section", fragmentData, sectionVM, comment };
+  }
+  if (context?.critical?.()) {
+    const fragmentData = extractFragmentData(context);
+    const criticalVM = buildCriticalVM(context);
+    return { kind: "critical", fragmentData, criticalVM, comment };
+  }
+  if (context?.tcf?.()) {
+    const fragmentData = extractFragmentData(context);
+    const tcfVM = buildTcfVM(context);
+    return { kind: "tcf", fragmentData, tcfVM, comment };
+  }
 
   // Build base data once and reuse
   const data = buildStatementVM(context, origin, coordinates, messagesByStart);
 
-  if (context?.ref?.()) return { kind: "ref", ref: data.ref ?? null };
-  if (context?.creation?.()) return { kind: "creation", message: data.creation };
-  if (context?.message?.()) return { kind: "message", message: data.message };
-  if (context?.asyncMessage?.()) return { kind: "async", message: data.asyncMessage };
-  if (context?.divider?.()) return { kind: "divider", divider: data.divider ?? null };
-  if (context?.ret?.()) return { kind: "return", message: data.return };
+  if (context?.ref?.()) {
+    const fragmentData = extractFragmentData(context);
+    return { kind: "ref", ref: data.ref ?? null, fragmentData, comment };
+  }
+  if (context?.creation?.()) return { kind: "creation", message: data.creation, comment };
+  if (context?.message?.()) return { kind: "message", message: data.message, comment };
+  if (context?.asyncMessage?.()) return { kind: "async", message: data.asyncMessage, comment };
+  if (context?.divider?.()) return { kind: "divider", divider: data.divider ?? null, comment };
+  if (context?.ret?.()) return { kind: "return", message: data.return, comment };
 
   // Fallback: unknown statement, prefer message shape to avoid crashes
-  return { kind: "message", message: data.message };
+  return { kind: "message", message: data.message, comment };
 }

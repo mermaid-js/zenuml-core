@@ -3,11 +3,11 @@ import { useFragmentData } from "./useFragmentData";
 import { Numbering } from "../../../Numbering";
 import { Comment } from "../Comment/Comment";
 import { MessageLabel } from "../../../MessageLabel";
-import { RefVM, buildRefVM } from "@/vm/fragments";
+import { RefVM, FragmentData } from "@/vm/fragments";
 import { useMemo } from "react";
 
 export const FragmentRef = (props: {
-  context: any;
+  fragmentData: FragmentData;
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -16,12 +16,12 @@ export const FragmentRef = (props: {
   vm?: RefVM;
 }) => {
   const { paddingLeft, fragmentStyle, border, leftParticipant } =
-    useFragmentData(props.context, props.origin);
+    useFragmentData(props.fragmentData, props.origin);
   
   // Use VM if provided, otherwise build from context as fallback
   const refVM = useMemo(() => {
-    return props.vm || buildRefVM(props.context);
-  }, [props.vm, props.context]);
+    return props.vm;
+  }, [props.vm]);
   
   const contentLabel = refVM?.labelText || "";
   const contentPosition: [number, number] = refVM?.labelRange ?? [-1, -1];

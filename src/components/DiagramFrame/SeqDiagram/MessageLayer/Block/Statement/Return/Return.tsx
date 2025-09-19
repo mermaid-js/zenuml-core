@@ -7,6 +7,7 @@ import { onElementClickAtom, cursorAtom, onMessageClickAtom } from "@/store/Stor
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { SyntheticEvent, useMemo } from "react";
 import type { MessageVM } from "@/vm/messages";
+import { isCursorInRange } from "../utils";
 
 export const Return = (props: {
   origin: string;
@@ -34,14 +35,7 @@ export const Return = (props: {
   const from = vm?.from || _STARTER_;
   const to = vm?.to || _STARTER_;
 
-  const range = vm?.range ?? null;
-  const getIsCurrent = () => {
-    const start = range ? range[0] : undefined;
-    const endExclusive = range ? range[1] : undefined;
-    if (cursor == null || start == null || endExclusive == null) return false;
-    return cursor >= start && cursor < endExclusive;
-  };
-  const isCurrent = getIsCurrent();
+  const isCurrent = isCursorInRange(cursor, vm?.range ?? null);
 
   const { translateX, interactionWidth, rightToLeft, isSelf, originLayers, sourceLayers, targetLayers } = useMemo(() => {
     if (!vm?.arrow) {

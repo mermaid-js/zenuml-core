@@ -1,23 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Block } from "./Block/Block";
 import { StylePanel } from "./StylePanel";
 import { useAtomValue } from "jotai";
-import { coordinatesAtom, messagesVMAtom } from "@/store/Store";
+import { messageLayerVMAtom, blockVMAtom } from "@/store/Store";
 import "./MessageLayer.scss";
-import { buildMessageLayerVM } from "@/vm/messageLayer";
-import { buildBlockVM } from "@/vm/block";
 
 import parentLogger from "../../../../logger/logger";
 
 const logger = parentLogger.child({ name: "MessageLayer" });
 export const MessageLayer = (props: {
-  context: any;
   style?: React.CSSProperties;
 }) => {
-  const coordinates = useAtomValue(coordinatesAtom);
-  const messagesVM = useAtomValue(messagesVMAtom);
-
-  const vm = useMemo(() => buildMessageLayerVM(messagesVM, coordinates), [messagesVM, coordinates]);
+  const vm = useAtomValue(messageLayerVMAtom);
+  const blockVM = useAtomValue(blockVMAtom);
 
   const [mounted, setMounted] = useState(false);
   if (mounted) {
@@ -33,11 +28,7 @@ export const MessageLayer = (props: {
       className="message-layer relative z-30 pt-14 pb-10"
       style={props.style}
     >
-      <Block
-        vm={buildBlockVM(props.context)}
-        style={{ paddingLeft: `${vm.paddingLeft}px` }}
-        origin={vm.origin}
-      />
+      <Block vm={blockVM} style={{ paddingLeft: `${vm.paddingLeft}px` }} origin={vm.origin} />
       <StylePanel />
     </div>
   );

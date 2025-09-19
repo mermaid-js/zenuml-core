@@ -2,23 +2,16 @@ import { useEditLabelImproved, specialCharRegex } from "@/functions/useEditLabel
 import { useAtom, useAtomValue } from "jotai";
 import "../../../../LifeLineLayer/EditableLabel.css";
 import { codeAtom, modeAtom, onContentChangeAtom, RenderMode } from "@/store/Store";
-import { ConditionVM, buildConditionVM } from "@/vm/fragments";
-import { useMemo } from "react";
+import type { ConditionVM } from "@/vm/fragments";
 
 const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
 
-export const ConditionLabel = (props: { 
-  condition: any;
-  vm?: ConditionVM;
-}) => {
+export const ConditionLabel = (props: { vm?: ConditionVM | null }) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   
-  // Use VM if provided, otherwise build from context as fallback
-  const conditionVM = useMemo(() => {
-    return props.vm || buildConditionVM(props.condition);
-  }, [props.vm, props.condition]);
+  const conditionVM = props.vm || null;
   
   const labelText = conditionVM?.labelText || "";
   const labelHandler = useEditLabelImproved((e) => {

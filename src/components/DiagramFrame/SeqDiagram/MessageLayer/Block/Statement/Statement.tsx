@@ -12,7 +12,6 @@ import { InteractionAsync } from "./InteractionAsync/Interaction-async";
 import { Divider } from "./Divider/Divider";
 import { Return } from "./Return/Return";
 import Comment from "../../../../../Comment/Comment";
-import { commentOf } from "@/parser/helpers";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom, messagesVMByStartAtom } from "@/store/Store";
@@ -27,13 +26,14 @@ export const Statement = (props: {
 }) => {
   const messagesByStart = useAtomValue(messagesVMByStartAtom);
   const coordinates = useAtomValue(coordinatesAtom);
-  const comment = commentOf(props.context) || "";
-  const commentObj = new Comment(comment);
 
   const vmData = useMemo(
     () => buildDiscriminatedStatementVM(props.context, props.origin, coordinates, messagesByStart),
     [props.context, props.origin, coordinates, messagesByStart],
   );
+
+  const comment = vmData.comment || "";
+  const commentObj = new Comment(comment);
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
@@ -48,25 +48,21 @@ export const Statement = (props: {
 
   switch (vmData.kind) {
     case "loop":
-      return <FragmentLoop {...subProps} />;
+      return <FragmentLoop {...subProps} fragmentData={vmData.fragmentData} vm={vmData.loopVM} />;
     case "alt":
-      return <FragmentAlt {...subProps} />;
+      return <FragmentAlt {...subProps} vm={vmData.vm} fragmentData={vmData.fragmentData} context={props.context} />;
     case "par":
-      return <FragmentPar {...subProps} />;
+      return <FragmentPar {...subProps} fragmentData={vmData.fragmentData} vm={vmData.parVM} />;
     case "opt":
-      return <FragmentOpt {...subProps} />;
+      return <FragmentOpt {...subProps} fragmentData={vmData.fragmentData} vm={vmData.optVM} />;
     case "section":
-      return <FragmentSection {...subProps} />;
+      return <FragmentSection {...subProps} fragmentData={vmData.fragmentData} vm={vmData.sectionVM} />;
     case "critical":
-      return <FragmentCritical {...subProps} />;
+      return <FragmentCritical {...subProps} fragmentData={vmData.fragmentData} vm={vmData.criticalVM} />;
     case "tcf":
-      return <FragmentTryCatchFinally {...subProps} />;
+      return <FragmentTryCatchFinally {...subProps} fragmentData={vmData.fragmentData} vm={vmData.tcfVM} />;
     case "ref":
-      if (!('ref' in vmData) || !vmData.ref) {
-        console.warn("Failed to build RefVM for ref context");
-        return null;
-      }
-      return <FragmentRef {...subProps} vm={vmData.ref} />;
+      return <FragmentRef {...subProps} vm={vmData.ref} fragmentData={vmData.fragmentData} />;
     case "creation":
       return <Creation {...subProps} vm={(vmData as any).message} />;
     case "message":

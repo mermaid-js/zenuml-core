@@ -2,6 +2,8 @@ import { TotalWidth } from "./WidthOfContext";
 import { Coordinates } from "@/positioning/Coordinates";
 import { stubWidthProvider } from "@/../test/unit/parser/fixture/Fixture";
 import { RootContext } from "@/parser";
+import { buildMessagesModel } from "@/ir/messages";
+import { buildFramesModel } from "@/ir/frames";
 import {
   FRAGMENT_MIN_WIDTH,
   FRAGMENT_PADDING_X,
@@ -13,7 +15,9 @@ describe("TotalWidth", () => {
   const getTotalWidth = (code: string): number => {
     const rootContext = RootContext(code);
     const coordinates = new Coordinates(rootContext, stubWidthProvider);
-    return TotalWidth(rootContext, coordinates);
+    const messages = buildMessagesModel(rootContext);
+    const frames = buildFramesModel(rootContext, coordinates.orderedParticipantNames());
+    return TotalWidth(coordinates, messages, frames.root);
   };
 
   const getParticipantWidth = () => MIN_PARTICIPANT_WIDTH + MARGIN;

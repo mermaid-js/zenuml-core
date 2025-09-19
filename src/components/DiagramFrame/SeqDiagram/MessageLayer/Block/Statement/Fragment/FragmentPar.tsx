@@ -7,10 +7,11 @@ import { cn } from "@/utils";
 import { Block } from "../../Block";
 import "./FragmentPar.css";
 import Icon from "@/components/Icon/Icons";
-import { buildBlockVM } from "@/vm/block";
+import type { FragmentData, ParVM } from "@/vm/fragments";
 
 export const FragmentPar = (props: {
-  context: any;
+  fragmentData: FragmentData;
+  vm?: ParVM | null; // VM provides block
   origin: string;
   comment?: string;
   commentObj?: CommentClass;
@@ -24,9 +25,9 @@ export const FragmentPar = (props: {
     fragmentStyle,
     border,
     leftParticipant,
-  } = useFragmentData(props.context, props.origin);
+  } = useFragmentData(props.fragmentData, props.origin);
 
-  const par = props.context.par();
+  const vm = props.vm;
 
   return (
     <div className={props.className}>
@@ -49,14 +50,14 @@ export const FragmentPar = (props: {
               <CollapseButton
                 label="Par"
                 collapsed={collapsed}
-                onClick={toggleCollapse} // Assuming 'this.toggle' is accessible or replace with appropriate handler
+                onClick={toggleCollapse}
                 style={props.commentObj?.messageStyle}
                 className={cn(props.commentObj?.messageClassNames)}
               />
             </label>
           </div>
         </div>
-        {!!par.braceBlock() && (
+        {vm?.blockVM && (
           <Block
             origin={leftParticipant}
             className={cn(
@@ -64,7 +65,7 @@ export const FragmentPar = (props: {
               collapsed ? "hidden" : "",
             )}
             style={{ paddingLeft: `${paddingLeft}px` }}
-            vm={buildBlockVM(par.braceBlock().block())}
+            vm={vm.blockVM}
             number={`${props.number}.1`}
             incremental
           />
