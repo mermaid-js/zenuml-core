@@ -73,9 +73,7 @@ export const FragmentAlt = (props: {
       <div className={collapsed ? "hidden" : "block"}>
         <div className="segment">
           <div className="text-skin-fragment flex">
-            {vm.ifConditionVM && (
-              <ConditionLabel condition={null} vm={vm.ifConditionVM} />
-            )}
+            {vm.ifConditionVM && <ConditionLabel vm={vm.ifConditionVM} />}
           </div>
           {vm.ifBlockVM && (
             <Block
@@ -95,9 +93,7 @@ export const FragmentAlt = (props: {
             >
               <div className="text-skin-fragment" key={index + 1000}>
                 <label className="else-if hidden">else if</label>
-                {elseIfVM.conditionVM && (
-                  <ConditionLabel condition={null} vm={elseIfVM.conditionVM} />
-                )}
+                {elseIfVM.conditionVM && <ConditionLabel vm={elseIfVM.conditionVM} />}
               </div>
               {elseIfVM.blockVM && (
                 <Block

@@ -61,9 +61,7 @@ export const FragmentLoop = (props: {
         <div className={cn({ hidden: collapsed })}>
           <div className="segment">
             <div className="text-skin-fragment">
-              {loopVM?.conditionVM ? (
-                <ConditionLabel condition={null} vm={loopVM.conditionVM} />
-              ) : null}
+              {loopVM?.conditionVM ? <ConditionLabel vm={loopVM.conditionVM} /> : null}
             </div>
             <Block
               origin={leftParticipant}

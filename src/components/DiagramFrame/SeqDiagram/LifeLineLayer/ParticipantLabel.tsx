@@ -5,7 +5,6 @@ import {
   RenderMode,
 } from "@/store/Store";
 import { useAtom, useAtomValue } from "jotai";
-import { Position } from "@/parser/Participants";
 import { useEditLabelImproved, specialCharRegex } from "@/functions/useEditLabel";
 import { SyntheticEvent } from "react";
 import { cn } from "@/utils";
@@ -23,7 +22,7 @@ export const ParticipantLabel = (props: {
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
 
-  const replaceLabelTextWithaPositions = (positions: Array<Position>) => {
+  const replaceLabelTextWithaPositions = (positions: Array<[number, number]>) => {
     return function (e: SyntheticEvent) {
       e.preventDefault();
       e.stopPropagation();

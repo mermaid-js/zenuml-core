@@ -3,12 +3,11 @@ import { useFragmentData } from "./useFragmentData";
 import { Numbering } from "../../../Numbering";
 import { Comment } from "../Comment/Comment";
 import { MessageLabel } from "../../../MessageLabel";
-import { RefVM, buildRefVM, FragmentData } from "@/vm/fragments";
+import { RefVM, FragmentData } from "@/vm/fragments";
 import { useMemo } from "react";
 
 export const FragmentRef = (props: {
   fragmentData: FragmentData;
-  context: any; // Still needed for building content VMs until we extract more data
   origin: string;
   comment?: string;
   commentObj?: CommentClass;

@@ -3,9 +3,10 @@ import { Provider } from "jotai";
 import { createStore } from "jotai";
 import { ConditionLabel } from "./ConditionLabel";
 import { ConditionVM } from "@/vm/fragments";
+import { vi } from "vitest";
 
 // Mock the dependencies
-jest.mock("@/functions/useEditLabel", () => ({
+vi.mock("@/functions/useEditLabel", () => ({
   useEditLabelImproved: jest.fn(() => ({
     editing: false,
     getEditableClasses: jest.fn(() => "editable-class"),
@@ -15,7 +16,7 @@ jest.mock("@/functions/useEditLabel", () => ({
 }));
 
 // Mock buildConditionVM
-jest.mock("@/vm/fragments", () => ({
+vi.mock("@/vm/fragments", () => ({
   buildConditionVM: jest.fn((context) => {
     if (!context) return null;
     return {
@@ -29,8 +30,7 @@ jest.mock("@/vm/fragments", () => ({
 
 describe("ConditionLabel", () => {
   const store = createStore();
-  const mockCondition = { getText: () => "x == y" };
-  
+
   const renderWithProvider = (component: JSX.Element) => {
     return render(<Provider store={store}>{component}</Provider>);
   };
@@ -44,33 +44,14 @@ describe("ConditionLabel", () => {
     };
 
     const { container } = renderWithProvider(
-      <ConditionLabel
-        condition={mockCondition}
-        vm={mockVM}
-      />
+      <ConditionLabel vm={mockVM} />
     );
 
     expect(container.textContent).toContain("vm-condition");
   });
 
-  it("should fallback to buildConditionVM when VM not provided", () => {
-    const { container } = renderWithProvider(
-      <ConditionLabel
-        condition={mockCondition}
-      />
-    );
-
-    expect(container.textContent).toContain("fallback-condition");
-  });
-
-  it("should handle null condition gracefully", () => {
-    const { container } = renderWithProvider(
-      <ConditionLabel
-        condition={null}
-      />
-    );
-
-    // Should render brackets even with empty content
+  it("should render with empty VM gracefully", () => {
+    const { container } = renderWithProvider(<ConditionLabel vm={null as any} />);
     expect(container.textContent).toContain("[");
     expect(container.textContent).toContain("]");
   });
