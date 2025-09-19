@@ -2,6 +2,7 @@ import FrameBorder from "@/positioning/FrameBorder";
 import {
   coordinatesAtom,
   framesModelAtom,
+  messagesModelAtom,
   diagramElementAtom,
   modeAtom,
   RenderMode,
@@ -32,6 +33,7 @@ export const SeqDiagram = (props: {
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const framesModel = useAtomValue(framesModelAtom);
+  const messages = useAtomValue(messagesModelAtom);
   const setDiagramElement = useSetAtom(diagramElementAtom);
 
   const diagramRef = useRef<HTMLDivElement>(null);
@@ -48,12 +50,12 @@ export const SeqDiagram = (props: {
   }, [framesModel]);
 
   const width = useMemo(() => {
-    const contextWidth = TotalWidth(rootContext, coordinates, framesModel.root);
+    const contextWidth = TotalWidth(coordinates, messages, framesModel.root);
     //   [MessageLayer width] <- contextWidth
     //  [Frame width        ]
     // || <- frameBorderLeft extra width provided by container
     return contextWidth - frameBorderLeft;
-  }, [rootContext, coordinates, framesModel.root, frameBorderLeft]);
+  }, [messages, coordinates, framesModel.root, frameBorderLeft]);
 
   return (
     <div

@@ -2,15 +2,16 @@ import { formattedTextOf, labelRangeOfRef, labelRangeOfCondition, codeRangeOf } 
 import { CodeRange } from "@/parser/CodeRange";
 import { blockLength } from "@/utils/Numbering";
 import { buildBlockVM } from "@/vm/block";
-import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import FrameBorder from "@/positioning/FrameBorder";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import Anchor2 from "@/positioning/Anchor2";
 import { centerOf } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/utils";
-import { frameForContext, frameKeyOf } from "@/ir/frames";
+import { frameKeyOf } from "@/ir/frames";
 import type { Coordinates } from "@/positioning/Coordinates";
+import type { IRMessage } from "@/ir/messages";
 import sequenceParser from "@/generated-parser/sequenceParser";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export interface RefVM {
   labelText: string;
@@ -216,61 +217,6 @@ const depthOnParticipant = (context: any, participant: any): number => {
     return false;
   }).length;
 };
-
-const resolveFragmentContext = (context: any) =>
-  context?.loop?.() ||
-  context?.alt?.() ||
-  context?.par?.() ||
-  context?.opt?.() ||
-  context?.section?.() ||
-  context?.critical?.() ||
-  context?.tcf?.() ||
-  context?.ref?.() ||
-  context;
-
-const getOffsetX = (
-  fragmentContext: any,
-  origin: string,
-  borderLeft: number,
-  leftParticipant: string,
-  coordinates: Coordinates,
-) => {
-  if (!leftParticipant) {
-    return borderLeft;
-  }
-
-  const halfLeftParticipant = coordinates.half(leftParticipant);
-
-  // If leftParticipant and origin are the same, no additional offset needed
-  if (leftParticipant === origin || !origin) {
-    console.debug(
-      `left participant: ${leftParticipant} ${halfLeftParticipant}`,
-    );
-    return borderLeft + halfLeftParticipant;
-  }
-
-  // Calculate the depth/layers for the origin participant to account for occurrence bar offset
-  const originLayers = depthOnParticipant(fragmentContext, origin);
-
-  // Create anchors for both participants to calculate accurate distance
-  const anchor2Origin = new Anchor2(
-    centerOf(coordinates, origin),
-    originLayers,
-    origin,
-  );
-  const anchor2LeftParticipant = new Anchor2(
-    centerOf(coordinates, leftParticipant),
-    0,
-    leftParticipant,
-  );
-
-  // Calculate the offset from the left participant to the origin, accounting for occurrence bar layers
-  const distanceWithLayers =
-    anchor2LeftParticipant.centerToCenter(anchor2Origin);
-
-  return distanceWithLayers + borderLeft + halfLeftParticipant;
-};
-
 /**
  * Calculate offset using FragmentData (new VM pattern)
  */
@@ -326,14 +272,9 @@ const TotalWidthFromData = (
   fragmentData: FragmentData,
   coordinates: Coordinates,
   frame: any,
+  messages: IRMessage[],
 ): number => {
-  // Temporary: Use the original TotalWidth function if context is available
-  // This ensures we get the exact same width calculation including self-message handling
-  if (fragmentData.context) {
-    return TotalWidth(fragmentData.context, coordinates, frame);
-  }
-
-  // Fallback to simplified calculation (for when context is not available in the future)
+  // Derive participants from fragment data for span; use frame for border and message scoping
   const allParticipants = coordinates.orderedParticipantNames();
   const localParticipants = fragmentData.localParticipantNames;
   const leftParticipant =
@@ -352,8 +293,37 @@ const TotalWidthFromData = (
     coordinates.half(leftParticipant) +
     coordinates.half(rightParticipant);
 
-  // TODO: Extract self-message width data during parsing to avoid context dependency
-  const extraWidth = 0;
+  // Scope messages to this frame's code range when available
+  let scopedMessages = messages;
+  if (frame?.id) {
+    const [startStr, stopStr] = String(frame.id).split(":");
+    const start = parseInt(startStr, 10);
+    const stop = parseInt(stopStr, 10);
+    if (!Number.isNaN(start) && !Number.isNaN(stop)) {
+      scopedMessages = messages.filter((m) => {
+        const r = m.range;
+        if (!r) return false;
+        const [rs, re] = r;
+        return rs >= start && re <= stop;
+      });
+    }
+  }
+
+  // Compute extra width considering only self messages inside this frame
+  // Note: rightParticipant may be empty if locals are empty; in that case extraWidth = 0
+  const extraWidth = rightParticipant
+    ? Math.max(
+        0,
+        ...scopedMessages
+          .filter((m) => m.from === m.to)
+          .map(
+            (m) =>
+              coordinates.getMessageWidth(m as any) -
+              coordinates.distance((m.from as string) || _STARTER_, rightParticipant) -
+              coordinates.half(rightParticipant),
+          ),
+      )
+    : 0;
 
   return (
     Math.max(participantWidth, FRAGMENT_MIN_WIDTH) +
@@ -371,6 +341,7 @@ export function buildFragmentPositioningVM(
   origin: string,
   coordinates: Coordinates,
   framesModel: any,
+  messages: IRMessage[] = [],
 ): FragmentPositioningVM {
   const allParticipants = coordinates.orderedParticipantNames();
   const localParticipants = fragmentData.localParticipantNames;
@@ -396,57 +367,7 @@ export function buildFragmentPositioningVM(
   const fragmentStyle = {
     // +1px for the border of the fragment
     transform: "translateX(" + (offsetX + 1) * -1 + "px)",
-    width: TotalWidthFromData(fragmentData, coordinates, frame) + "px",
-    minWidth: FRAGMENT_MIN_WIDTH + "px",
-  };
-
-  return {
-    offsetX,
-    paddingLeft,
-    fragmentStyle,
-    border,
-    halfLeftParticipant,
-    leftParticipant,
-  };
-}
-
-/**
- * Build FragmentPositioningVM from fragment context (legacy support)
- * @deprecated Use buildFragmentPositioningVM with FragmentData instead
- */
-export function buildFragmentPositioningVMLegacy(
-  context: any,
-  origin: string,
-  coordinates: Coordinates,
-  framesModel: any,
-): FragmentPositioningVM {
-  const fragmentContext = resolveFragmentContext(context);
-
-  const allParticipants = coordinates.orderedParticipantNames();
-  const localParticipants = getLocalParticipantNames(fragmentContext);
-  const leftParticipant =
-    allParticipants.find((p) => localParticipants.includes(p)) || "";
-
-  const frame = frameForContext(framesModel, fragmentContext);
-  const border = FrameBorder(frame);
-
-  // Calculate offset using the updated function that accounts for occurrence bar layers
-  const offsetX = getOffsetX(
-    fragmentContext,
-    origin,
-    border.left,
-    leftParticipant,
-    coordinates,
-  );
-  const halfLeftParticipant = leftParticipant
-    ? coordinates.half(leftParticipant)
-    : 0;
-  const paddingLeft = border.left + halfLeftParticipant;
-
-  const fragmentStyle = {
-    // +1px for the border of the fragment
-    transform: "translateX(" + (offsetX + 1) * -1 + "px)",
-    width: TotalWidth(fragmentContext, coordinates, frame) + "px",
+    width: TotalWidthFromData(fragmentData, coordinates, frame, messages) + "px",
     minWidth: FRAGMENT_MIN_WIDTH + "px",
   };
 

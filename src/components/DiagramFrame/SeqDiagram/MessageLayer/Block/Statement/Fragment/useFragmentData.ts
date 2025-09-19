@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useAtomValue } from "jotai";
-import { coordinatesAtom, framesModelAtom } from "@/store/Store";
+import { coordinatesAtom, framesModelAtom, messagesModelAtom } from "@/store/Store";
 import { buildFragmentPositioningVM, type FragmentPositioningVM, type FragmentData } from "@/vm/fragments";
 
 export const useFragmentData = (fragmentData: FragmentData, origin: string) => {
   const [collapsed, setCollapsed] = useState(false);
   const coordinates = useAtomValue(coordinatesAtom);
   const framesModel = useAtomValue(framesModelAtom);
+  const messages = useAtomValue(messagesModelAtom);
 
   const toggleCollapse = () => {
     setCollapsed((prev) => !prev);
@@ -22,6 +23,7 @@ export const useFragmentData = (fragmentData: FragmentData, origin: string) => {
     origin,
     coordinates,
     framesModel,
+    messages,
   );
 
   return {
