@@ -20,9 +20,11 @@ vi.mock('./useFragmentData', () => ({
   })),
 }));
 
-// Mock the Block component
+// Mock the Block component but avoid passing non-DOM props like `incremental`
 vi.mock('../../Block', () => ({
-  Block: ({ children, ...props }: any) => <div data-testid="block" {...props}>{children}</div>,
+  Block: ({ children, incremental, vm, ...rest }: any) => (
+    <div data-testid="block" {...rest}>{children}</div>
+  ),
 }));
 
 // Mock the ConditionLabel component
@@ -127,7 +129,7 @@ describe('FragmentAlt', () => {
   });
 
   it('should render if condition and block', () => {
-    const { getByTestId, getAllByTestId } = render(
+    const {getAllByTestId } = render(
       <Provider>
         <FragmentAlt {...defaultProps} />
       </Provider>
