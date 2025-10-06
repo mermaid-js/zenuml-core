@@ -1,4 +1,3 @@
-import { cn } from "@/utils";
 import { useEditLabelImproved, specialCharRegex } from "@/functions/useEditLabel";
 import { useAtom, useAtomValue } from "jotai";
 import "../../../../LifeLineLayer/EditableLabel.css";

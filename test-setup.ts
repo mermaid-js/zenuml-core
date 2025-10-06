@@ -109,6 +109,8 @@ global.ResizeObserver = class ResizeObserver {
 // Clean up after all tests
 if (typeof afterAll !== "undefined") {
   afterAll(() => {
-    GlobalRegistrator.unregister();
+    if (GlobalRegistrator.isRegistered) {
+      GlobalRegistrator.unregister();
+    }
   });
 }
