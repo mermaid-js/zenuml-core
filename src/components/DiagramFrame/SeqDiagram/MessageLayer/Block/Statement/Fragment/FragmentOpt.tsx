@@ -4,6 +4,7 @@ import { Comment } from "../Comment/Comment";
 import { Numbering } from "../../../Numbering";
 import { CollapseButton } from "./CollapseButton";
 import { Block } from "../../Block";
+import { ConditionLabel } from "./ConditionLabel";
 import { cn } from "@/utils";
 import Icon from "@/components/Icon/Icons";
 
@@ -16,6 +17,7 @@ export const FragmentOpt = (props: {
   className?: string;
 }) => {
   const opt = props.context.opt();
+  const condition = opt?.parExpr()?.condition();
   const {
     collapsed,
     toggleCollapse,
@@ -54,14 +56,22 @@ export const FragmentOpt = (props: {
           </label>
         </div>
       </div>
-      <Block
-        origin={leftParticipant}
-        className={cn({ hidden: collapsed })}
-        style={{ paddingLeft: `${paddingLeft}px` }}
-        context={opt?.braceBlock()?.block()}
-        number={`${props.number}.1`}
-        incremental
-      />
+      <div className={cn({ hidden: collapsed })}>
+        <div className="segment">
+          {condition && (
+            <div className="text-skin-fragment">
+              <ConditionLabel condition={condition} />
+            </div>
+          )}
+          <Block
+            origin={leftParticipant}
+            style={{ paddingLeft: `${paddingLeft}px` }}
+            context={opt?.braceBlock()?.block()}
+            number={`${props.number}.1`}
+            incremental
+          />
+        </div>
+      </div>
     </div>
   );
 };

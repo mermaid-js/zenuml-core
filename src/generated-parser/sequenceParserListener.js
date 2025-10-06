@@ -698,5 +698,14 @@ export default class sequenceParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by sequenceParser#textExpr.
+	enterTextExpr(ctx) {
+	}
+
+	// Exit a parse tree produced by sequenceParser#textExpr.
+	exitTextExpr(ctx) {
+	}
+
+
 
 }

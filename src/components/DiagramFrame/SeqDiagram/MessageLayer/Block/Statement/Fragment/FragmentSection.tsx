@@ -42,24 +42,22 @@ export const FragmentSection = (props: {
         className="group fragment fragment-section section border-skin-fragment rounded"
         style={fragmentStyle}
       >
-        <div className="segment">
-          {props.commentObj?.text && (
-            <Comment comment={props.comment} commentObj={props.commentObj} />
-          )}
-          <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
-            <Numbering number={props.number} />
-            <div className="name font-semibold p-1 border-b">
-              <label className="p-0 flex items-center gap-0.5">
-                <Icon name="section-fragment" />
-                <CollapseButton
-                  label={label}
-                  collapsed={collapsed}
-                  onClick={toggleCollapse}
-                  style={props.commentObj?.messageStyle}
-                  className={cn(props.commentObj?.messageClassNames)}
-                />
-              </label>
-            </div>
+        {props.commentObj?.text && (
+          <Comment comment={props.comment} commentObj={props.commentObj} />
+        )}
+        <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
+          <Numbering number={props.number} />
+          <div className="name font-semibold p-1 border-b">
+            <label className="p-0 flex items-center gap-0.5">
+              <Icon name="section-fragment" />
+              <CollapseButton
+                label={label}
+                collapsed={collapsed}
+                onClick={toggleCollapse}
+                style={props.commentObj?.messageStyle}
+                className={cn(props.commentObj?.messageClassNames)}
+              />
+            </label>
           </div>
         </div>
 

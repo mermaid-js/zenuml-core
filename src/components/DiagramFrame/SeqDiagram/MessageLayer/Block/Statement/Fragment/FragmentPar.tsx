@@ -5,6 +5,7 @@ import { Numbering } from "../../../Numbering";
 import { CollapseButton } from "./CollapseButton";
 import { cn } from "@/utils";
 import { Block } from "../../Block";
+import { ConditionLabel } from "./ConditionLabel";
 import "./FragmentPar.css";
 import Icon from "@/components/Icon/Icons";
 
@@ -26,6 +27,7 @@ export const FragmentPar = (props: {
   } = useFragmentData(props.context, props.origin);
 
   const par = props.context.par();
+  const condition = par?.parExpr()?.condition();
 
   return (
     <div className={props.className}>
@@ -55,19 +57,25 @@ export const FragmentPar = (props: {
             </label>
           </div>
         </div>
-        {!!par.braceBlock() && (
-          <Block
-            origin={leftParticipant}
-            className={cn(
-              "[&>.statement-container:not(:first-child)]",
-              collapsed ? "hidden" : "",
+        <div className={cn({ hidden: collapsed })}>
+          <div className="segment">
+            {condition && (
+              <div className="text-skin-fragment">
+                <ConditionLabel condition={condition} />
+              </div>
             )}
-            style={{ paddingLeft: `${paddingLeft}px` }}
-            context={par.braceBlock().block()}
-            number={`${props.number}.1`}
-            incremental
-          />
-        )}
+            {!!par.braceBlock() && (
+              <Block
+                origin={leftParticipant}
+                className="[&>.statement-container:not(:first-child)]:border-t"
+                style={{ paddingLeft: `${paddingLeft}px` }}
+                context={par.braceBlock().block()}
+                number={`${props.number}.1`}
+                incremental
+              />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
