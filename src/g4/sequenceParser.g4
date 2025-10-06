@@ -109,17 +109,17 @@ stat
  ;
 
 par
- : PAR braceBlock
+ : PAR parExpr? braceBlock
  | PAR
  ;
 
 opt
- : OPT braceBlock
+ : OPT parExpr? braceBlock
  | OPT
  ;
 
 critical
-  : CRITICAL (OPAR atom? CPAR)? braceBlock
+  : CRITICAL parExpr? braceBlock
   | CRITICAL
  ;
 
@@ -325,8 +325,13 @@ condition
  : atom
  | expr
  | inExpr
+ | textExpr
  ;
 
 inExpr
  : ID IN ID
+ ;
+
+textExpr
+ : ID+
  ;

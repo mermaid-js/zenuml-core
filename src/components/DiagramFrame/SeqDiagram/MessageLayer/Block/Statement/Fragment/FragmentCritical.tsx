@@ -3,6 +3,7 @@ import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
 import { Numbering } from "../../../Numbering";
 import { CollapseButton } from "./CollapseButton";
+import { ConditionLabel } from "./ConditionLabel";
 import { cn } from "@/utils";
 import { Block } from "../../Block";
 import "./FragmentCritical.css";
@@ -27,10 +28,8 @@ export const FragmentCritical = (props: {
 
   const critical = props.context.critical();
   const braceBlock = critical?.braceBlock();
-  const atom = critical?.atom()?.getFormattedText();
+  const condition = critical?.parExpr()?.condition();
   const blockInCritical = braceBlock?.block();
-
-  const label = atom ? `Critical:${atom}` : "Critical";
 
   return (
     <div className={props.className}>
@@ -52,7 +51,7 @@ export const FragmentCritical = (props: {
               <label className="p-0 flex items-center gap-0.5">
                 <Icon name="critical-fragment" />
                 <CollapseButton
-                  label={label}
+                  label="Critical"
                   collapsed={collapsed}
                   onClick={toggleCollapse}
                   style={props.commentObj?.messageStyle}
@@ -65,7 +64,11 @@ export const FragmentCritical = (props: {
 
         <div className={collapsed ? "hidden" : ""}>
           <div className="segment">
-            <div className="text-skin-fragment flex">{/* Value */}</div>
+            {condition && (
+              <div className="text-skin-fragment">
+                <ConditionLabel condition={condition} />
+              </div>
+            )}
             {blockInCritical && (
               <Block
                 origin={leftParticipant}
