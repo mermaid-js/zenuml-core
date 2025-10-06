@@ -14,14 +14,14 @@ export const LifeLineGroup = (props: {
 }) => {
   const coordinates = useAtomValue(coordinatesAtom);
   const entities: any[] = Participants(props.context).Array();
+  if (entities.length <= 0) return null;
   const left =
     coordinates.left(entities[0].name) + LIFELINE_GROUP_OUTLINE_MARGIN;
   const right =
     coordinates.right(entities[entities.length - 1].name) -
     LIFELINE_GROUP_OUTLINE_MARGIN;
-  const name = props.context?.name()?.getFormattedText();
 
-  if (!entities.length) return null;
+  const name = props.context?.name()?.getFormattedText();
   // Merged the outer and middle divs while preserving all functionality
   return (
     <div

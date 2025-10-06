@@ -55,6 +55,7 @@ export default defineConfig(({ mode }) => ({
   },
   test: {
     // used by vitest: https://vitest.dev/guide/#configuring-vitest
+    // need this to run vitest in webstorm ide. vitest has better integration than bun
     environment: "jsdom",
     reportOnFailure: true,
     globals: true,

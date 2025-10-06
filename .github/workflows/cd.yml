@@ -26,20 +26,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          version: 10
+          bun-version: latest
 
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: "20"
-          cache: pnpm
           registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
       - name: Run tests
-        run: pnpm test
+        run: bun run test --run
 
   npm-publish:
     runs-on: ubuntu-22.04
@@ -48,23 +48,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          version: 10
+          bun-version: latest
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: "20"
-          cache: pnpm
           registry-url: "https://registry.npmjs.org"
-      - run: pnpm install
+      - run: bun install
       - name: Bump Version
         id: bump
         run: ./scripts/bump-version.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
-        run: pnpm build
+        run: bun run build
       - name: Publish to npm
         run: npm publish
         env:
@@ -94,28 +94,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          version: 10
+          bun-version: latest
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: "20"
-          cache: pnpm
           registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
         
       - name: Deploy to Cloudflare Workers (Production)
         if: github.ref == 'refs/heads/main'
         env:
           CLOUDFLARE_API_TOKEN: ${{ vars.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm worker:deploy
+        run: bun run worker:deploy
 
       - name: Deploy to Cloudflare Workers (Staging)
         if: github.ref != 'refs/heads/main'
         env:
           CLOUDFLARE_API_TOKEN: ${{ vars.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm worker:deploy:staging
+        run: bun run worker:deploy:staging

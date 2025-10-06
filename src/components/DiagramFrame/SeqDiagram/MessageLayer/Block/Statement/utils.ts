@@ -22,7 +22,7 @@ export const getContextType = (context: any) => {
 
 export const centerOf = (coordinates: Coordinates, entity: string) => {
   if (!entity) {
-    console.error("[@zenuml/core] centerOf: entity is undefined");
+    console.warn("[@zenuml/core] centerOf: entity is undefined");
     return 0;
   }
   try {

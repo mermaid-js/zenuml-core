@@ -40,7 +40,7 @@ describe("message - complete", () => {
 describe("message - incomplete", () => {
   test("A.", () => {
     let message = Fixture.firstStatement("A.").message();
-    expect(message.messageBody().to().getText()).toBe("A");
+  expect(message.messageBody().fromTo().to().getText()).toBe("A");
   });
 
   // This will be parsed as to statements: `A.` and `m(`, so the first statement has a null func.
@@ -70,13 +70,13 @@ test("seqDsl should parse a simple method with quoted method name", () => {
 test("Simple method: A->B.method()", () => {
   const message = Fixture.firstStatement("A->B.method()").message();
   let messageBody = message.messageBody();
-  expect(messageBody.from().getText()).toBe("A");
+  expect(messageBody.fromTo().from().getText()).toBe("A");
   expect(message.SignatureText()).toBe("method()");
 });
 
 test('Simple method: "A".method()', () => {
   const message = Fixture.firstStatement('"A".method()').message();
   let messageBody = message.messageBody();
-  expect(messageBody.to().getFormattedText()).toBe("A");
+  expect(messageBody.fromTo().to().getFormattedText()).toBe("A");
   expect(message.SignatureText()).toBe("method()");
 });

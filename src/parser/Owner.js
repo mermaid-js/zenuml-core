@@ -43,7 +43,7 @@ CreationContext.prototype.Owner = function () {
 };
 
 MessageContext.prototype.To = function () {
-  return this.messageBody()?.to()?.getFormattedText();
+  return this.messageBody()?.fromTo()?.to()?.getFormattedText();
 };
 
 MessageContext.prototype.Owner = function () {

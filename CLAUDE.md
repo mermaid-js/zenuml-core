@@ -4,19 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- **Start development server**: `pnpm dev` (runs on port 8080)
-- **Build library**: `pnpm build` (builds library with vite.config.lib.ts)
-- **Build site**: `pnpm build:site` (builds demo site with vite.config.ts)
-- **Run tests**: `pnpm test` (runs Vitest unit tests)
-- **Run E2E tests**: `pnpm pw` (runs Playwright tests)
-- **Run E2E tests (CI)**: `pnpm pw:ci` (runs with GitHub reporter for CI)
-- **Open Playwright UI**: `pnpm pw:ui`
-- **Update Playwright snapshots**: `pnpm pw:update`
-- **Install Playwright browsers**: `pnpm pw:install`
-- **Run smoke tests**: `pnpm pw:smoke`
-- **Lint code**: `pnpm eslint` (runs ESLint with auto-fix)
-- **Format code**: `pnpm prettier` (runs Prettier)
-- **Generate ANTLR parser**: `pnpm antlr` (generates JavaScript parser from grammar)
+- **Start development server**: `bun dev` (runs on port 8080)
+- **Build library**: `bun build` (builds library with vite.config.lib.ts)
+- **Build site**: `bun build:site` (builds demo site with vite.config.ts)
+- **Run tests**: `bun run test:bun` (runs unit tests with Bun, excluding E2E) or `bun run test` (runs Vitest)
+- **Run E2E tests**: `bun pw` (runs Playwright tests)
+- **Run E2E tests (CI)**: `bun pw:ci` (runs with GitHub reporter for CI)
+- **Open Playwright UI**: `bun pw:ui`
+- **Update Playwright snapshots**: `bun pw:update`
+- **Install Playwright browsers**: `bun pw:install`
+- **Run smoke tests**: `bun pw:smoke`
+- **Lint code**: `bun eslint` (runs ESLint with auto-fix)
+- **Format code**: `bun prettier` (runs Prettier)
+- **Generate ANTLR parser**: `bun antlr` (generates JavaScript parser from grammar)
 
 ## Project Architecture
 
@@ -87,7 +87,14 @@ Output formats:
 
 ## Package Management
 
-Uses pnpm with volta for Node.js version management. Always use `npx pnpm` for the first install.
+Uses Bun as the package manager and JavaScript runtime. Bun is a fast all-in-one JavaScript runtime that includes a package manager, test runner, and bundler.
+
+### Test Configuration
+- **Unit tests with Bun**: `bun run test:bun` - Runs unit tests in `src/` and `test/unit/` folders (excludes `/tests` E2E folder)
+- **Vitest**: `bun run test` - Uses Vitest for compatibility with existing test suite
+- **E2E tests**: `bun pw` - Runs Playwright tests in `/tests` folder
+- Tests use `vi` mocking utilities which are mapped to Jest-compatible APIs in `test-setup.ts`
+- Coverage is disabled by default due to resource issues; enable with `bun test --coverage`
 
 ## Development Notes
 
