@@ -27,10 +27,7 @@ Please follow the [integration tutorial](./TUTORIAL.md) for detailed steps.
 
 These are the tools we use for working with the code and documentation:
 
-- [volta](https://volta.sh/) to manage node versions.
-- [Node.js](https://nodejs.org/en/). `volta install node`
-- [pnpm](https://pnpm.io/) package manager. `volta install pnpm`
-- [npx](https://docs.npmjs.com/cli/v8/commands/npx) the packaged executor in npm. This is needed [to install pnpm.](#install-packages)
+- [Bun](https://bun.sh/) - Fast all-in-one JavaScript runtime
 
 Follow the setup steps below to install them and start the development.
 
@@ -44,16 +41,16 @@ cd zenuml-core
 
 ### Install packages
 
-Run `npx pnpm install`. You will need `npx` for this because volta doesn't support it yet.
+Run `bun install` to install dependencies.
 
 ```bash
-npx pnpm install # npx is required for first install
+bun install
 ```
 
 ### Launch
 
 ```bash
-npx pnpm run dev
+bun dev
 ```
 
 ## CI/CD
@@ -85,7 +82,7 @@ tunnels for this.
 
 ### Cloudflare tunnels [for collaborators only]
 
-1. Start your local dev server at `8080` with `pnpm dev`.
+1. Start your local dev server at `8080` with `bun dev`.
 2. Request a subdomain from the team. For example, `air.zenuml.com`.
 3. You will be given a command that install a service locally. Run it.
 4. Your localhost:8080 will be available at `air.zenuml.com`.
