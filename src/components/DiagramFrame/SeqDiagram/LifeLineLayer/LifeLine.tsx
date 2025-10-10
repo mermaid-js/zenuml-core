@@ -90,7 +90,7 @@ export const LifeLine = (props: {
         },
         props.className,
       )}
-      style={{ paddingTop: top + "px", left: left + "px" }}
+      style={{ paddingTop: top + "px", left: left + "px", translate: 0 }}
       ref={elRef}
     >
       {props.renderParticipants && (

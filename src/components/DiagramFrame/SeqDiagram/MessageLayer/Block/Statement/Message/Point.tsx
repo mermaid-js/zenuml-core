@@ -4,8 +4,9 @@ export const Point = (props: {
   fill: boolean;
   rtl: boolean;
   className: string;
+  style?: React.CSSProperties;
 }) => {
-  const { fill, rtl, className } = props;
+  const { fill, rtl, className, style } = props;
   return (
     <div
       className={cn(
@@ -16,6 +17,7 @@ export const Point = (props: {
         },
         className,
       )}
+      style={style}
     >
       {!rtl && fill && (
         <svg

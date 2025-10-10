@@ -114,7 +114,7 @@ export const Creation = (props: {
           type="creation"
           number={props.number}
           textStyle={messageTextStyle}
-          style={{ width: `calc(100% - ${containerOffset}px)` }}
+          style={{ width: `calc(100% - ${containerOffset}px)`, translate: 0 }}
         />
       </div>
       <Occurrence
@@ -129,6 +129,7 @@ export const Creation = (props: {
             "return transform -translate-y-full pointer-events-auto",
             messageClassNames,
           )}
+          style={{ translate: 0 }}
           textStyle={messageTextStyle}
           context={creation.creationBody().assignment()}
           content={assignee}

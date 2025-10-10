@@ -147,6 +147,7 @@ export const Message = (props: {
       </div>
       <Point
         className="flex-shrink-0 transform translate-y-1/2 -my-px"
+        style={{ translate: 0 }}
         fill={type === "sync"}
         rtl={Boolean(rtl)}
       />
