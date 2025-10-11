@@ -1,4 +1,4 @@
-import CommentClass from "@/components/Comment/Comment";
+import CommentVM from "@/components/Comment/Comment";
 import { useFragmentData } from "./useFragmentData";
 import { Numbering } from "../../../Numbering";
 import { Comment } from "../Comment/Comment";
@@ -8,9 +8,10 @@ export const FragmentRef = (props: {
   context: any;
   origin: string;
   comment?: string;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const { paddingLeft, fragmentStyle, border, leftParticipant } =
     useFragmentData(props.context, props.origin);
@@ -33,19 +34,19 @@ export const FragmentRef = (props: {
       >
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t absolute top-0 left-0">
           <Numbering number={props.number} />
-          {props.commentObj?.text && (
+          {props.commentVM?.text && (
             <Comment
               className="absolute -top-4 left-0"
               comment={props.comment}
-              commentObj={props.commentObj}
+              commentVM={props.commentVM}
             />
           )}
           <div className="text-skin-fragment relative w-9 h-8 -top-[1px] -left-[1px]">
             <div className="polygon-border absolute inset-0"></div>
             <div className="polygon-content bg-skin-frame text-skin-fragment-header absolute inset-[1px] flex flex-col items-center justify-center">
               <span
-                className={`flex items-center justify-center font-semibold ${props.commentObj?.messageClassNames || ""}`}
-                style={props.commentObj?.messageStyle}
+                className={`flex items-center justify-center font-semibold ${props.commentVM?.messageClassNames || ""}`}
+                style={props.commentVM?.messageStyle}
               >
                 Ref
               </span>

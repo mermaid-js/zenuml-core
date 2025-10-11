@@ -11,7 +11,7 @@ import { Interaction } from "./Interaction/Interaction";
 import { InteractionAsync } from "./InteractionAsync/Interaction-async";
 import { Divider } from "./Divider/Divider";
 import { Return } from "./Return/Return";
-import Comment from "../../../../../Comment/Comment";
+import CommentVM from "../../../../../Comment/Comment";
 import { cn } from "@/utils";
 
 export const Statement = (props: {
@@ -19,9 +19,10 @@ export const Statement = (props: {
   origin: string;
   number?: string;
   collapsed?: boolean;
+  top?: number;
 }) => {
   const comment = props.context.getComment() || "";
-  const commentObj = new Comment(comment);
+  const commentVM = new CommentVM(comment);
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {
@@ -30,8 +31,9 @@ export const Statement = (props: {
     context: props.context,
     origin: props.origin,
     comment: comment,
-    commentObj: commentObj,
+    commentVM: commentVM,
     number: props.number,
+    top: props.top ?? 0,
   };
 
   switch (true) {

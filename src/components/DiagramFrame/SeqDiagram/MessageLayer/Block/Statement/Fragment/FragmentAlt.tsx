@@ -1,23 +1,32 @@
-import CommentClass from "@/components/Comment/Comment";
+import CommentVM from "@/components/Comment/Comment";
+import Icon from "@/components/Icon/Icons";
+import {
+  FRAGMENT_HEADER_HEIGHT,
+} from "@/positioning/Constants";
+import {
+  advanceNestedBlock,
+  CONDITION_LABEL_HEIGHT,
+  FRAGMENT_SEGMENT_MARGIN,
+} from "../../BlockPositioning";
 import { blockLength } from "@/utils/Numbering";
-import { CollapseButton } from "./CollapseButton";
+import { cn } from "@/utils";
+import { Fragment, useMemo } from "react";
+import { Numbering } from "../../../Numbering";
 import { Block } from "../../Block";
+import { CollapseButton } from "./CollapseButton";
+import { ConditionLabel } from "./ConditionLabel";
 import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
-import { Numbering } from "../../../Numbering";
-import { cn } from "@/utils";
-import { ConditionLabel } from "./ConditionLabel";
 import "./FragmentAlt.css";
-import { Fragment, useMemo } from "react";
-import Icon from "@/components/Icon/Icons";
 
 export const FragmentAlt = (props: {
   context: any;
   origin: string;
   comment?: string;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const alt = props.context.alt();
   const ifBlock = alt?.ifBlock();
@@ -50,12 +59,42 @@ export const FragmentAlt = (props: {
     leftParticipant,
   } = useFragmentData(props.context, props.origin);
 
+  const commentHeight = props.commentVM?.getHeight() ?? 0;
+
+  let runningTop =
+    (props.top ?? 0) + commentHeight + FRAGMENT_HEADER_HEIGHT;
+
+  const ifBlockTop = blockInIfBlock
+    ? runningTop + CONDITION_LABEL_HEIGHT
+    : undefined;
+  if (blockInIfBlock && ifBlockTop !== undefined) {
+    runningTop = advanceNestedBlock(blockInIfBlock, leftParticipant, ifBlockTop);
+  }
+
+  const elseIfBlockTops = elseIfBlocks.map((elseIfBlock: any) => {
+    runningTop += FRAGMENT_SEGMENT_MARGIN + CONDITION_LABEL_HEIGHT;
+    const block = blockInElseIfBlock(elseIfBlock);
+    if (block) {
+      const blockTop = runningTop;
+      runningTop = advanceNestedBlock(block, leftParticipant, blockTop);
+      return blockTop;
+    }
+    return runningTop;
+  });
+
+  const elseBlockTop = elseBlock
+    ? runningTop + FRAGMENT_SEGMENT_MARGIN + CONDITION_LABEL_HEIGHT
+    : undefined;
+  if (elseBlock && elseBlockTop !== undefined) {
+    runningTop = advanceNestedBlock(elseBlock, leftParticipant, elseBlockTop);
+  }
+
   return (
     <div
       data-origin={props.origin}
       data-left-participant={props.origin}
-      data-frame-padding-left={props.commentObj?.messageStyle?.paddingLeft}
-      data-frame-padding-right={props.commentObj?.messageStyle?.paddingRight}
+      data-frame-padding-left={props.commentVM?.messageStyle?.paddingLeft}
+      data-frame-padding-right={props.commentVM?.messageStyle?.paddingRight}
       className={cn(
         "group fragment fragment-alt alt border-skin-fragment rounded",
         props.className,
@@ -63,8 +102,8 @@ export const FragmentAlt = (props: {
       style={fragmentStyle}
     >
       <div className="segment">
-        {props.commentObj?.text && (
-          <Comment comment={props.comment} commentObj={props.commentObj} />
+        {props.commentVM?.text && (
+          <Comment comment={props.comment} commentVM={props.commentVM} />
         )}
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
           <Numbering number={props.number} />
@@ -75,8 +114,8 @@ export const FragmentAlt = (props: {
                 label="Alt"
                 collapsed={collapsed}
                 onClick={toggleCollapse}
-                style={props.commentObj?.messageStyle}
-                className={cn(props.commentObj?.messageClassNames)}
+                style={props.commentVM?.messageStyle}
+                className={cn(props.commentVM?.messageClassNames)}
               />
             </label>
           </div>
@@ -95,6 +134,7 @@ export const FragmentAlt = (props: {
               context={blockInIfBlock}
               number={`${props.number}.1`}
               incremental
+              top={ifBlockTop}
             />
           )}
         </div>
@@ -117,6 +157,7 @@ export const FragmentAlt = (props: {
                 key={index + 2000}
                 number={`${props.number}.${blockLengthAcc[index] + 1}`}
                 incremental
+                top={elseIfBlockTops[index]}
               />
             </div>
           </Fragment>
@@ -135,6 +176,7 @@ export const FragmentAlt = (props: {
                   blockLengthAcc[blockLengthAcc.length - 1] + 1
                 }`}
                 incremental
+                top={elseBlockTop}
               />
             </div>
           </>

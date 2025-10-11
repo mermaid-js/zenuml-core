@@ -1,24 +1,32 @@
-import CommentClass from "@/components/Comment/Comment";
+import CommentVM from "@/components/Comment/Comment";
 import { cn } from "@/utils";
 import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
 import { Message } from "../Message";
 import { Occurrence } from "./Occurrence/Occurrence";
-import { useAtomValue } from "jotai";
-import { cursorAtom } from "@/store/Store";
+import { useAtomValue, useSetAtom } from "jotai";
+import { cursorAtom, participantMessagesAtom } from "@/store/Store";
+import {
+  removeParticipantMessage,
+  upsertParticipantMessage,
+} from "@/store/participantMessages";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { useArrow } from "../useArrow";
+import { MESSAGE_HEIGHT, SELF_INVOCATION_SYNC_HEIGHT } from "@/positioning/Constants";
+import { useEffect, useMemo } from "react";
 
 export const Interaction = (props: {
   context: any;
   origin: string;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const cursor = useAtomValue(cursorAtom);
-  const messageTextStyle = props.commentObj?.messageStyle;
-  const messageClassNames = props.commentObj?.messageClassNames;
+  const setParticipantMessages = useSetAtom(participantMessagesAtom);
+  const messageTextStyle = props.commentVM?.messageStyle;
+  const messageClassNames = props.commentVM?.messageClassNames;
   const message = props.context?.message();
   const statements = message?.Statements();
   const assignee = message?.Assignment()?.getText() || "";
@@ -41,6 +49,38 @@ export const Interaction = (props: {
     source,
     target,
   });
+
+  // Calculate accumulated top with comment
+  const messageTop = useMemo(() => {
+    let top = props.top ?? 0;
+    if (props.commentVM) {
+      top += props.commentVM.getHeight();
+    }
+    return top;
+  }, [props.top, props.commentVM]);
+
+  const messageId = useMemo(() => {
+    if (!target) return undefined;
+    return props.number || `${target}-${messageTop}`;
+  }, [props.number, target, messageTop]);
+
+  // Record message in store
+  useEffect(() => {
+    if (!target || target === _STARTER_ || !messageId) return;
+
+    setParticipantMessages((prev) =>
+      upsertParticipantMessage(prev, target, {
+        id: messageId,
+        type: "sync",
+        top: messageTop,
+      }),
+    );
+
+    return () =>
+      setParticipantMessages((prev) =>
+        removeParticipantMessage(prev, target, messageId),
+      );
+  }, [target, messageTop, messageId, setParticipantMessages]);
 
   return (
     <div
@@ -68,7 +108,7 @@ export const Interaction = (props: {
         transform: "translateX(" + translateX + "px)",
       }}
     >
-      {props.commentObj?.text && <Comment commentObj={props.commentObj} />}
+      {props.commentVM?.text && <Comment commentVM={props.commentVM} />}
       {isSelf ? (
         <SelfInvocation
           classNames={messageClassNames}
@@ -92,6 +132,7 @@ export const Interaction = (props: {
         participant={target}
         rtl={rightToLeft}
         number={props.number}
+        top={messageTop + (isSelf ? SELF_INVOCATION_SYNC_HEIGHT : MESSAGE_HEIGHT)}
       />
       {assignee && !isSelf && (
         <Message

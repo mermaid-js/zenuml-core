@@ -1,21 +1,26 @@
-import CommentClass from "@/components/Comment/Comment";
+import CommentVM from "@/components/Comment/Comment";
+import Icon from "@/components/Icon/Icons";
+import { FRAGMENT_HEADER_HEIGHT, FRAGMENT_BORDER_WIDTH } from "@/positioning/Constants";
+import { cn } from "@/utils";
+import { Numbering } from "../../../Numbering";
+import { Block } from "../../Block";
+import { CollapseButton } from "./CollapseButton";
 import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
-import { Numbering } from "../../../Numbering";
-import { CollapseButton } from "./CollapseButton";
-import { Block } from "../../Block";
-import { cn } from "@/utils";
-import Icon from "@/components/Icon/Icons";
 
 export const FragmentOpt = (props: {
   context: any;
   origin: string;
   comment?: string;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const opt = props.context.opt();
+  const commentHeight = props.commentVM?.getHeight() ?? 0;
+  const blockTop =
+    (props.top ?? 0) + commentHeight + FRAGMENT_HEADER_HEIGHT;
   const {
     collapsed,
     toggleCollapse,
@@ -36,8 +41,8 @@ export const FragmentOpt = (props: {
       )}
       style={fragmentStyle}
     >
-      {props.commentObj?.text && (
-        <Comment comment={props.comment} commentObj={props.commentObj} />
+      {props.commentVM?.text && (
+        <Comment comment={props.comment} commentVM={props.commentVM} />
       )}
       <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 relative">
         <Numbering number={props.number} />
@@ -48,8 +53,8 @@ export const FragmentOpt = (props: {
               label="Opt"
               collapsed={collapsed}
               onClick={toggleCollapse}
-              style={props.commentObj?.textStyle}
-              className={cn(props.commentObj?.classNames)}
+              style={props.commentVM?.textStyle}
+              className={cn(props.commentVM?.classNames)}
             />
           </label>
         </div>
@@ -61,6 +66,7 @@ export const FragmentOpt = (props: {
         context={opt?.braceBlock()?.block()}
         number={`${props.number}.1`}
         incremental
+        top={blockTop}
       />
     </div>
   );

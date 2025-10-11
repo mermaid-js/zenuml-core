@@ -1,23 +1,29 @@
-import CommentClass from "@/components/Comment/Comment";
+import CommentVM from "@/components/Comment/Comment";
 import { Comment } from "../Comment/Comment";
 import { cn } from "@/utils";
 import { Message } from "../Message";
-import { useAtomValue } from "jotai";
-import { onElementClickAtom } from "@/store/Store";
+import { useAtomValue, useSetAtom } from "jotai";
+import { onElementClickAtom, participantMessagesAtom } from "@/store/Store";
+import {
+  removeParticipantMessage,
+  upsertParticipantMessage,
+} from "@/store/participantMessages";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { CodeRange } from "@/parser/CodeRange";
-import { SyntheticEvent } from "react";
+import { SyntheticEvent, useEffect, useMemo } from "react";
 import { useArrow } from "../useArrow";
 
 export const Return = (props: {
   context: any;
   origin: string;
   comment?: string;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const onElementClick = useAtomValue(onElementClickAtom);
+  const setParticipantMessages = useSetAtom(participantMessagesAtom);
 
   const ret = props.context?.ret();
 
@@ -48,6 +54,39 @@ export const Return = (props: {
     e.stopPropagation();
     onElementClick(CodeRange.from(props.context));
   };
+
+  // Calculate accumulated top with comment
+  const messageTop = useMemo(() => {
+    let top = props.top ?? 0;
+    if (props.commentVM) {
+      top += props.commentVM.getHeight();
+    }
+    return top;
+  }, [props.top, props.commentVM]);
+
+  const messageId = useMemo(() => {
+    if (!target) return undefined;
+    return props.number || `${target}-${messageTop}`;
+  }, [props.number, target, messageTop]);
+
+  // Record message in store
+  useEffect(() => {
+    if (!target || target === _STARTER_ || !messageId) return;
+
+    setParticipantMessages((prev) =>
+      upsertParticipantMessage(prev, target, {
+        id: messageId,
+        type: "return",
+        top: messageTop,
+      }),
+    );
+
+    return () =>
+      setParticipantMessages((prev) =>
+        removeParticipantMessage(prev, target, messageId),
+      );
+  }, [target, messageTop, messageId, setParticipantMessages]);
+
   return (
     // .relative to allow left style
     <div
@@ -71,7 +110,7 @@ export const Return = (props: {
         transform: "translateX(" + translateX + "px)",
       }}
     >
-      {props.comment && <Comment commentObj={props.commentObj} />}
+      {props.comment && <Comment commentVM={props.commentVM} />}
       {isSelf && (
         <div className="flex items-center">
           <svg
@@ -92,8 +131,8 @@ export const Return = (props: {
       )}
       {!isSelf && (
         <Message
-          className={cn(props.commentObj?.messageClassNames)}
-          textStyle={props.commentObj?.messageStyle}
+          className={cn(props.commentVM?.messageClassNames)}
+          textStyle={props.commentVM?.messageStyle}
           context={messageContext}
           content={signature}
           rtl={rightToLeft}

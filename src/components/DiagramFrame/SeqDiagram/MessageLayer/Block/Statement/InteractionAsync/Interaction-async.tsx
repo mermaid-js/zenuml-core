@@ -70,11 +70,21 @@ import { cn } from "@/utils";
 import { Comment } from "../Comment/Comment";
 import { SelfInvocationAsync } from "./SelfInvocationAsync/SelfInvocationAsync";
 import { Message } from "../Message";
-import CommentClass from "@/components/Comment/Comment";
-import { useAtomValue } from "jotai";
-import { cursorAtom, onElementClickAtom } from "@/store/Store";
+import CommentVM from "@/components/Comment/Comment";
+import { useAtomValue, useSetAtom } from "jotai";
+import {
+  cursorAtom,
+  onElementClickAtom,
+  participantMessagesAtom,
+} from "@/store/Store";
+import {
+  removeParticipantMessage,
+  upsertParticipantMessage,
+} from "@/store/participantMessages";
 import { CodeRange } from "@/parser/CodeRange";
 import { useArrow } from "../useArrow";
+import { useEffect, useMemo } from "react";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 function isNullOrUndefined(value: any) {
   return value === null || value === undefined;
@@ -84,12 +94,14 @@ export const InteractionAsync = (props: {
   context: any;
   origin: string;
   comment?: string;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
+  const setParticipantMessages = useSetAtom(participantMessagesAtom);
   const asyncMessage = props.context?.asyncMessage();
   const signature = asyncMessage?.content()?.getFormattedText();
   const providedSource = asyncMessage?.ProvidedFrom();
@@ -104,8 +116,8 @@ export const InteractionAsync = (props: {
     target,
   });
 
-  const messageClassNames = props.commentObj?.messageClassNames;
-  const messageTextStyle = props.commentObj?.messageStyle;
+  const messageClassNames = props.commentVM?.messageClassNames;
+  const messageTextStyle = props.commentVM?.messageStyle;
   const getIsCurrent = () => {
     const start = asyncMessage.start.start;
     const stop = asyncMessage.stop.stop + 1;
@@ -117,6 +129,39 @@ export const InteractionAsync = (props: {
       return false;
     return cursor! >= start && cursor! <= stop;
   };
+
+  // Calculate accumulated top with comment
+  const messageTop = useMemo(() => {
+    let top = props.top ?? 0;
+    if (props.commentVM) {
+      top += props.commentVM.getHeight();
+    }
+    return top;
+  }, [props.top, props.commentVM]);
+
+  const messageId = useMemo(() => {
+    if (!target) return undefined;
+    return props.number || `${target}-${messageTop}`;
+  }, [props.number, target, messageTop]);
+
+  // Record message in store
+  useEffect(() => {
+    if (!target || target === _STARTER_ || !messageId) return;
+
+    setParticipantMessages((prev) =>
+      upsertParticipantMessage(prev, target, {
+        id: messageId,
+        type: "async",
+        top: messageTop,
+      }),
+    );
+
+    return () =>
+      setParticipantMessages((prev) =>
+        removeParticipantMessage(prev, target, messageId),
+      );
+  }, [target, messageTop, messageId, setParticipantMessages]);
+
   return (
     <div
       data-origin={origin}
@@ -140,7 +185,7 @@ export const InteractionAsync = (props: {
         transform: "translateX(" + translateX + "px)",
       }}
     >
-      {props.comment && <Comment commentObj={props.commentObj} />}
+      {props.comment && <Comment commentVM={props.commentVM} />}
       {isSelf ? (
         <SelfInvocationAsync
           classNames={cn(messageClassNames)}

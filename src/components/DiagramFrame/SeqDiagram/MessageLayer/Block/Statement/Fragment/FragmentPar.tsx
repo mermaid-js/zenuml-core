@@ -1,20 +1,25 @@
-import CommentClass from "@/components/Comment/Comment";
+import CommentVM from "@/components/Comment/Comment";
+import Icon from "@/components/Icon/Icons";
+import {
+  FRAGMENT_HEADER_HEIGHT,
+  FRAGMENT_BORDER_WIDTH,
+} from "@/positioning/Constants";
+import { cn } from "@/utils";
+import { Numbering } from "../../../Numbering";
+import { Block } from "../../Block";
+import { CollapseButton } from "./CollapseButton";
 import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
-import { Numbering } from "../../../Numbering";
-import { CollapseButton } from "./CollapseButton";
-import { cn } from "@/utils";
-import { Block } from "../../Block";
 import "./FragmentPar.css";
-import Icon from "@/components/Icon/Icons";
 
 export const FragmentPar = (props: {
   context: any;
   origin: string;
   comment?: string;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const {
     collapsed,
@@ -26,6 +31,8 @@ export const FragmentPar = (props: {
   } = useFragmentData(props.context, props.origin);
 
   const par = props.context.par();
+  const commentHeight = props.commentVM?.getHeight() ?? 0;
+  const blockTop = (props.top ?? 0) + commentHeight + FRAGMENT_HEADER_HEIGHT;
 
   return (
     <div className={props.className}>
@@ -37,8 +44,8 @@ export const FragmentPar = (props: {
         className="group fragment fragment-par par border-skin-fragment rounded"
         style={fragmentStyle}
       >
-        {props.commentObj?.text && (
-          <Comment comment={props.comment} commentObj={props.commentObj} />
+        {props.commentVM?.text && (
+          <Comment comment={props.comment} commentVM={props.commentVM} />
         )}
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
           <Numbering number={props.number} />
@@ -49,8 +56,8 @@ export const FragmentPar = (props: {
                 label="Par"
                 collapsed={collapsed}
                 onClick={toggleCollapse} // Assuming 'this.toggle' is accessible or replace with appropriate handler
-                style={props.commentObj?.messageStyle}
-                className={cn(props.commentObj?.messageClassNames)}
+                style={props.commentVM?.messageStyle}
+                className={cn(props.commentVM?.messageClassNames)}
               />
             </label>
           </div>
@@ -66,6 +73,7 @@ export const FragmentPar = (props: {
             context={par.braceBlock().block()}
             number={`${props.number}.1`}
             incremental
+            top={blockTop}
           />
         )}
       </div>

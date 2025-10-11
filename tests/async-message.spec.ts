@@ -45,4 +45,22 @@ test.describe("Rendering", () => {
       fullPage: true,
     });
   });
+
+  test("Async message without provided from", async ({ page }) => {
+    await page.goto("/cy/async-message-without-provided-from.html");
+
+    // Wait for privacy icon to be loaded
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Take screenshot for visual comparison
+    await expect(page).toHaveScreenshot(
+      "async-message-without-provided-from.png",
+      {
+        threshold: 0.01,
+        fullPage: true,
+      },
+    );
+  });
 });

@@ -44,6 +44,7 @@ export const MessageLayer = (props: {
         context={props.context}
         style={{ paddingLeft: `${paddingLeft}px` }}
         origin={origin}
+        top={0}
       />
       <StylePanel />
     </div>

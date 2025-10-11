@@ -1,21 +1,27 @@
-import CommentClass from "@/components/Comment/Comment";
+import CommentVM from "@/components/Comment/Comment";
+import Icon from "@/components/Icon/Icons";
+import {
+  FRAGMENT_BORDER_WIDTH,
+  FRAGMENT_HEADER_HEIGHT,
+  MESSAGE_HEIGHT,
+} from "@/positioning/Constants";
+import { cn } from "@/utils";
+import { Numbering } from "../../../Numbering";
+import { Block } from "../../Block";
+import { CollapseButton } from "./CollapseButton";
+import { ConditionLabel } from "./ConditionLabel";
 import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
-import { Numbering } from "../../../Numbering";
-import { CollapseButton } from "./CollapseButton";
-import { cn } from "@/utils";
-import { ConditionLabel } from "./ConditionLabel";
-import { Block } from "../../Block";
 import "./FragmentLoop.css";
-import Icon from "@/components/Icon/Icons";
 
 export const FragmentLoop = (props: {
   context: any;
   origin: string;
   comment?: string;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const {
     collapsed,
@@ -29,6 +35,13 @@ export const FragmentLoop = (props: {
   const loop = props.context.loop();
   const blockInLoop = loop?.braceBlock()?.block();
   const condition = loop?.parExpr()?.condition();
+  const commentHeight = props.commentVM?.getHeight() ?? 0;
+  const conditionHeight = condition ? MESSAGE_HEIGHT : 0;
+  const blockTop =
+    (props.top ?? 0) +
+    commentHeight +
+    FRAGMENT_HEADER_HEIGHT +
+    conditionHeight;
 
   return (
     <div className={props.className}>
@@ -40,8 +53,8 @@ export const FragmentLoop = (props: {
         className="group fragment fragment-loop loop border-skin-fragment rounded"
         style={fragmentStyle}
       >
-        {props.commentObj?.text && (
-          <Comment comment={props.comment} commentObj={props.commentObj} />
+        {props.commentVM?.text && (
+          <Comment comment={props.comment} commentVM={props.commentVM} />
         )}
         <div className="header text-skin-fragment-header bg-skin-fragment-header leading-4 relative rounded-t">
           <Numbering number={props.number} />
@@ -52,8 +65,8 @@ export const FragmentLoop = (props: {
                 label="Loop"
                 collapsed={collapsed}
                 onClick={toggleCollapse}
-                style={props.commentObj?.messageStyle}
-                className={cn(props.commentObj?.messageClassNames)}
+                style={props.commentVM?.messageStyle}
+                className={cn(props.commentVM?.messageClassNames)}
               />
             </label>
           </div>
@@ -69,6 +82,7 @@ export const FragmentLoop = (props: {
               context={blockInLoop}
               number={`${props.number}.1`}
               incremental
+              top={blockTop}
             />
           </div>
         </div>

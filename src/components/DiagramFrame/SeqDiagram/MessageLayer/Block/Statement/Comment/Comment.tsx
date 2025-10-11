@@ -8,7 +8,7 @@ import plaintext from "highlight.js/lib/languages/plaintext";
 import javascript from "highlight.js/lib/languages/javascript";
 import bash from "highlight.js/lib/languages/bash";
 import yaml from "highlight.js/lib/languages/yaml";
-import CommentClass from "@/components/Comment/Comment";
+import CommentVM from "@/components/Comment/Comment";
 import { cn } from "@/utils";
 
 // Register languages
@@ -53,11 +53,11 @@ marked.use({ renderer });
 
 export const Comment = (props: {
   comment?: any;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   className?: string;
 }) => {
   const markedComment = DOMPurify.sanitize(
-    (props.commentObj?.text && marked.parse(props.commentObj?.text)) ||
+    (props.commentVM?.text && marked.parse(props.commentVM?.text)) ||
       (props.comment && marked.parse(props.comment)),
   );
 
@@ -70,8 +70,8 @@ export const Comment = (props: {
     >
       <div
         dangerouslySetInnerHTML={{ __html: markedComment }}
-        className={cn(props.commentObj?.commentClassNames)}
-        style={props.commentObj?.commentStyle}
+        className={cn(props.commentVM?.commentClassNames)}
+        style={props.commentVM?.commentStyle}
       ></div>
     </div>
   );

@@ -1,5 +1,4 @@
 import { CollapseButton } from "./CollapseButton";
-import { EventBus } from "@/EventBus";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
@@ -13,6 +12,7 @@ export const Occurrence = (props: {
   rtl?: boolean;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const coordinates = useAtomValue(coordinatesAtom);
   const [collapsed, setCollapsed] = useState(false);
@@ -41,7 +41,6 @@ export const Occurrence = (props: {
 
     //update participant top in this cases: has child and sibling creation statement
     //e.g. : a.call() { b = new B(); b.call() { c = new C() c.call(){return}}}
-    EventBus.emit("participant_set_top");
   };
 
   useEffect(() => {
@@ -79,6 +78,7 @@ export const Occurrence = (props: {
           context={props.context.braceBlock().block()}
           number={props.number}
           collapsed={collapsed}
+          top={props.top ?? 0}
         ></Block>
       )}
     </div>

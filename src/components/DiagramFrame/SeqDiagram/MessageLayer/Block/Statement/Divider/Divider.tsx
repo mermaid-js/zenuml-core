@@ -9,6 +9,7 @@ export const Divider = (props: {
   context: any;
   origin: string;
   className?: string;
+  top?: number;
 }) => {
   const participants = useAtomValue(participantsAtom);
     const coordinates = useAtomValue(coordinatesAtom);

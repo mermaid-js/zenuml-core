@@ -5,26 +5,37 @@ import { CodeRange } from "@/parser/CodeRange";
 import {
   LIFELINE_WIDTH,
   OCCURRENCE_BAR_SIDE_WIDTH,
+  CREATION_MESSAGE_HEIGHT,
 } from "@/positioning/Constants";
-import CommentClass from "@/components/Comment/Comment";
-import { useAtomValue } from "jotai";
-import { cursorAtom, onElementClickAtom } from "@/store/Store";
+import CommentVM from "@/components/Comment/Comment";
+import { useAtomValue, useSetAtom } from "jotai";
+import {
+  cursorAtom,
+  onElementClickAtom,
+  participantMessagesAtom,
+} from "@/store/Store";
+import {
+  removeParticipantMessage,
+  upsertParticipantMessage,
+} from "@/store/participantMessages";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
-import { EventBus } from "@/EventBus";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export const Creation = (props: {
   context: any;
   origin: any;
   comment?: string;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
+  const setParticipantMessages = useSetAtom(participantMessagesAtom);
   const [participantWidth, setParticipantWidth] = useState(0);
   const creation = props.context?.creation();
   const target = creation?.Owner();
@@ -37,8 +48,8 @@ export const Creation = (props: {
     target: creation?.Owner(),
   });
 
-  const messageTextStyle = props.commentObj?.messageStyle;
-  const messageClassNames = props.commentObj?.messageClassNames;
+  const messageTextStyle = props.commentVM?.messageStyle;
+  const messageClassNames = props.commentVM?.messageClassNames;
 
   const assignee = useMemo(() => {
     function safeCodeGetter(context: any) {
@@ -53,6 +64,40 @@ export const Creation = (props: {
 
   const containerOffset =
     participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH;
+
+  // Calculate accumulated top with comment
+  const messageTop = useMemo(() => {
+    console.log("messageTop in creation.tsx1", props.top);
+    let top = props.top ?? 0;
+    if (props.commentVM) {
+      top += props.commentVM.getHeight();
+    }
+    console.log("messageTop in creation.tsx2", top);
+    return top;
+  }, [props.top, props.commentVM]);
+
+  const messageId = useMemo(() => {
+    if (!target) return undefined;
+    return props.number || `${target}-${messageTop}`;
+  }, [props.number, target, messageTop]);
+
+  // Record message in store
+  useEffect(() => {
+    if (!target || target === _STARTER_ || !messageId) return;
+
+    setParticipantMessages((prev) =>
+      upsertParticipantMessage(prev, target, {
+        id: messageId,
+        type: "creation",
+        top: messageTop,
+      }),
+    );
+
+    return () =>
+      setParticipantMessages((prev) =>
+        removeParticipantMessage(prev, target, messageId),
+      );
+  }, [target, messageTop, messageId, setParticipantMessages]);
 
   useEffect(() => {
     const participantElement = document.querySelector(
@@ -71,7 +116,6 @@ export const Creation = (props: {
       `Found participant element for ${target}, width: ${participantWidth}px`,
     );
 
-    EventBus.emit("participant_set_top");
     console.debug(`Init or update message container for ${target}`);
   }, [target, participantWidth]);
 
@@ -93,7 +137,7 @@ export const Creation = (props: {
         width: interactionWidth + "px",
       }}
     >
-      {props.comment && <Comment commentObj={props.commentObj} />}
+      {props.comment && <Comment commentVM={props.commentVM} />}
       <div
         ref={messageContainerRef}
         data-type="creation"
@@ -122,6 +166,7 @@ export const Creation = (props: {
         className="pointer-events-auto"
         participant={target}
         number={props.number}
+        top={messageTop + CREATION_MESSAGE_HEIGHT}
       />
       {assignee && (
         <Message

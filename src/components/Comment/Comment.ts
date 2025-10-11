@@ -1,4 +1,5 @@
 import { CSSProperties } from "react";
+import { COMMENT_LINE_HEIGHT } from "@/positioning/Constants";
 import { getStyle } from "@/utils/messageStyling";
 
 function parseLine(input: string): [string[], string[], string[], string] {
@@ -38,7 +39,7 @@ function parseLine(input: string): [string[], string[], string[], string] {
     input.slice(lastMatchIndex),
   ];
 }
-export default class CommentClass {
+export default class CommentVM {
   // define properties color and text
   public text: string = "";
   /** @deprecated use commentStyle or messageStyle instead */
@@ -50,6 +51,12 @@ export default class CommentClass {
   public messageStyle: CSSProperties = {};
   public commentClassNames: string[] = [];
   public messageClassNames: string[] = [];
+
+  public getHeight(): number {
+    if (!this.text) return 0;
+    const lineCount = this.text.split("\n").length;
+    return lineCount * COMMENT_LINE_HEIGHT;
+  }
 
   // Raw comment contains all spaces and newlines
   constructor(raw: string) {

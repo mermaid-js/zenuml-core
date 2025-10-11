@@ -3,12 +3,10 @@ import {
   codeAtom,
   enableMultiThemeAtom,
   enableScopedThemingAtom,
-  lifelineReadyAtom,
   modeAtom,
   onContentChangeAtom,
   onEventEmitAtom,
   onThemeChangeAtom,
-  renderingReadyAtom,
   RenderMode,
   stickyOffsetAtom,
   themeAtom,
@@ -153,15 +151,8 @@ export default class ZenUml implements IZenUml {
     if (this._code === this.store.get(codeAtom)) {
       return true;
     } else {
-      await new Promise((resolve) => {
-        this.store.set(lifelineReadyAtom, []);
-        this.store.sub(renderingReadyAtom, () => {
-          if (this.store.get(renderingReadyAtom)) {
-            resolve(true);
-          }
-        });
-        this.store.set(codeAtom, this._code || "");
-      });
+      this.store.set(codeAtom, this._code || "");
+      console.assert(this.el.querySelector(".message-layer"), "The API is returnning too early.");
     }
     setTimeout(() => {
       this._lastRenderingCostMilliseconds = calculateCostTime(

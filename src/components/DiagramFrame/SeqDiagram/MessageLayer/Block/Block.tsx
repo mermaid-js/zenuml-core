@@ -1,6 +1,8 @@
-import { increaseNumber } from "@/utils/Numbering";
-import { Statement } from "./Statement/Statement";
 import { cn } from "@/utils";
+import { increaseNumber } from "@/utils/Numbering";
+import { useMemo } from "react";
+import { Statement } from "./Statement/Statement";
+import { accumulateBlock } from "./BlockPositioning";
 
 export const Block = (props: {
   origin?: string;
@@ -10,8 +12,9 @@ export const Block = (props: {
   collapsed?: boolean;
   style?: React.CSSProperties;
   className?: string;
+  top?: number;
 }) => {
-  const statements: any[] = props.context?.stat() || [];
+  const statements: any[] = props.context?.stat?.() || [];
   const getNumber = (index: number) => {
     if (props.number) {
       return props.incremental
@@ -20,6 +23,13 @@ export const Block = (props: {
     }
     return String(index + 1);
   };
+
+  const statementTops = useMemo(
+    () =>
+      accumulateBlock(props.context, props.origin || "", props.top ?? 0).tops,
+    [props.context, props.origin, props.top],
+  );
+  console.log("statementTops", statementTops);
   return (
     <div
       className={cn("block", props.className)}
@@ -41,9 +51,11 @@ export const Block = (props: {
             context={stat}
             collapsed={Boolean(props.collapsed)}
             number={getNumber(index)}
+            top={statementTops[index]}
           />
         </div>
       ))}
     </div>
   );
 };
+

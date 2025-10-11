@@ -95,10 +95,16 @@ export const onEventEmitAtom = atomWithFunctionValue<
   (name: string, data: any) => void
 >(() => {});
 
-export const lifelineReadyAtom = atom<string[]>([]);
+// Message record for tracking participant messages and their positions
+export type MessageType = "creation" | "sync" | "async" | "return";
 
-export const renderingReadyAtom = atom((get) => {
-  const lifeLineReady = get(lifelineReadyAtom);
-  const { participants } = get(participantsAtom);
-  return lifeLineReady.length === Array.from(participants).length;
-});
+export interface MessageRecord {
+  type: MessageType;
+  top: number;
+  id?: string;
+}
+
+export type ParticipantMessagesMap = Record<string, MessageRecord[]>;
+
+// Atom for storing all participant messages with their calculated positions
+export const participantMessagesAtom = atom<ParticipantMessagesMap>({});

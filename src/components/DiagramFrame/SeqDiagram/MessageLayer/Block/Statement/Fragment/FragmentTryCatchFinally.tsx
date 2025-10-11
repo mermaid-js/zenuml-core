@@ -1,22 +1,29 @@
-import CommentClass from "@/components/Comment/Comment";
+import CommentVM from "@/components/Comment/Comment";
+import Icon from "@/components/Icon/Icons";
+import { FRAGMENT_BORDER_WIDTH, FRAGMENT_HEADER_HEIGHT } from "@/positioning/Constants";
+import {
+  advanceNestedBlock,
+  CONDITION_LABEL_HEIGHT,
+  FRAGMENT_SEGMENT_MARGIN,
+} from "../../BlockPositioning";
+import { blockLength } from "@/utils/Numbering";
+import { cn } from "@/utils";
+import { useMemo } from "react";
+import { Numbering } from "../../../Numbering";
+import { Block } from "../../Block";
+import { CollapseButton } from "./CollapseButton";
 import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
-import { Numbering } from "../../../Numbering";
-import { CollapseButton } from "./CollapseButton";
-import { cn } from "@/utils";
-import { Block } from "../../Block";
-import { blockLength } from "@/utils/Numbering";
 import "./FragmentTryCatchFinally.css";
-import { useMemo } from "react";
-import Icon from "@/components/Icon/Icons";
 
 export const FragmentTryCatchFinally = (props: {
   context: any;
   origin: string;
   comment?: string;
-  commentObj?: CommentClass;
+  commentVM?: CommentVM;
   number?: string;
   className?: string;
+  top?: number;
 }) => {
   const {
     collapsed,
@@ -46,6 +53,34 @@ export const FragmentTryCatchFinally = (props: {
     }
     return acc;
   }, [tcf, blockInTryBlock]);
+  const commentHeight = props.commentVM?.getHeight() ?? 0;
+  let runningTop =
+    (props.top ?? 0) + commentHeight + FRAGMENT_HEADER_HEIGHT;
+
+  const tryBlockTop = blockInTryBlock ? runningTop : undefined;
+  if (blockInTryBlock && tryBlockTop !== undefined) {
+    runningTop = advanceNestedBlock(blockInTryBlock, leftParticipant, tryBlockTop);
+  }
+
+  const catchBlockTops = tcf
+    .catchBlock()
+    .map((catchBlock: any) => {
+      runningTop += FRAGMENT_SEGMENT_MARGIN + CONDITION_LABEL_HEIGHT;
+      const block = blockInCatchBlock(catchBlock);
+      if (block) {
+        const blockTop = runningTop;
+        runningTop = advanceNestedBlock(block, leftParticipant, blockTop);
+        return blockTop;
+      }
+      return runningTop;
+    });
+
+  const finallyBlockTop = finallyBlock
+    ? runningTop + FRAGMENT_SEGMENT_MARGIN + CONDITION_LABEL_HEIGHT
+    : undefined;
+  if (finallyBlock && finallyBlockTop !== undefined) {
+    runningTop = advanceNestedBlock(finallyBlock, leftParticipant, finallyBlockTop);
+  }
 
   return (
     <div className={props.className}>
@@ -58,8 +93,8 @@ export const FragmentTryCatchFinally = (props: {
         style={fragmentStyle}
       >
         <div className="segment">
-          {props.commentObj?.text && (
-            <Comment comment={props.comment} commentObj={props.commentObj} />
+          {props.commentVM?.text && (
+            <Comment comment={props.comment} commentVM={props.commentVM} />
           )}
           <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
             <Numbering number={props.number} />
@@ -70,8 +105,8 @@ export const FragmentTryCatchFinally = (props: {
                   label="Try"
                   collapsed={collapsed}
                   onClick={toggleCollapse}
-                  style={props.commentObj?.messageStyle}
-                  className={cn(props.commentObj?.messageClassNames)}
+                  style={props.commentVM?.messageStyle}
+                  className={cn(props.commentVM?.messageClassNames)}
                 />
               </label>
             </div>
@@ -86,6 +121,7 @@ export const FragmentTryCatchFinally = (props: {
                 context={blockInTryBlock}
                 number={`${props.number}.1`}
                 incremental
+                top={tryBlockTop}
               />
             )}
           </div>
@@ -108,6 +144,7 @@ export const FragmentTryCatchFinally = (props: {
                 key={index + 2000}
                 number={`${props.number}.${blockLengthAcc[index] + 1}`}
                 incremental
+                top={catchBlockTops[index]}
               />
             </div>
           ))}
@@ -126,6 +163,7 @@ export const FragmentTryCatchFinally = (props: {
                   blockLengthAcc[blockLengthAcc.length - 1] + 1
                 }`}
                 incremental
+                top={finallyBlockTop}
               />
             </div>
           )}
