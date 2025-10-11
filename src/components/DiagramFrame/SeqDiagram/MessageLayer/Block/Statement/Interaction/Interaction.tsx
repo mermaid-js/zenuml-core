@@ -4,48 +4,46 @@ import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
 import { Message } from "../Message";
 import { Occurrence } from "./Occurrence/Occurrence";
 import { useAtomValue } from "jotai";
-import { cursorAtom } from "@/store/Store";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
+import {
+  cursorAtom,
+  onMessageClickAtom
+} from "@/store/Store";
+import { DebugLabel } from "../DebugLabel";
+import { _STARTER_ } from "@/constants";
 import { Comment } from "../Comment/Comment";
-import { useArrow } from "../useArrow";
+import type { MessageVM } from "@/vm/types";
+import { isCursorInRange } from "../utils";
 
 export const Interaction = (props: {
-  context: any;
-  origin: string;
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  vm?: MessageVM & {
+    arrow?: {
+      translateX: number;
+      interactionWidth: number;
+      rightToLeft: boolean;
+    }
+  };
 }) => {
   const cursor = useAtomValue(cursorAtom);
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
-  const message = props.context?.message();
-  const statements = message?.Statements();
-  const assignee = message?.Assignment()?.getText() || "";
-  const signature = message?.SignatureText();
-  const isCurrent = message?.isCurrent(cursor);
-  const source = message?.From() || _STARTER_;
-  const target = props.context?.message()?.Owner() || _STARTER_;
-  const isSelf = source === target;
+  const vm = props.vm;
+  const assignee = vm?.assignee || "";
+  const onMessageClick = useAtomValue(onMessageClickAtom);
+  const signature = vm?.signature;
+  const isSelf = vm?.isSelf;
+  const isCurrent = isCursorInRange(cursor, vm?.range ?? null);
 
-  const {
-    translateX,
-    interactionWidth,
-    originLayers,
-    sourceLayers,
-    targetLayers,
-    rightToLeft,
-  } = useArrow({
-    context: props.context,
-    origin: props.origin,
-    source,
-    target,
-  });
-
+  // Extract arrow geometry from VM with null safety
+  const translateX = vm?.arrow?.translateX ?? 0;
+  const interactionWidth = vm?.arrow?.interactionWidth ?? 0;
+  const rightToLeft = vm?.arrow?.rightToLeft ?? false;
   return (
     <div
       className={cn(
-        "interaction sync inline-block",
+        "interaction sync inline-block relative",
         {
           highlight: isCurrent,
           self: isSelf,
@@ -54,13 +52,6 @@ export const Interaction = (props: {
         props.className,
       )}
       onClick={(e) => e.stopPropagation()}
-      data-to={target}
-      data-origin={props.origin}
-      data-source={source}
-      data-target={target}
-      data-origin-layers={originLayers}
-      data-source-layers={sourceLayers}
-      data-target-layers={targetLayers}
       data-type="interaction"
       data-signature={signature}
       style={{
@@ -73,38 +64,53 @@ export const Interaction = (props: {
         <SelfInvocation
           classNames={messageClassNames}
           textStyle={messageTextStyle}
-          context={message}
           number={props.number}
+          vm={vm!}
         />
       ) : (
         <Message
           className={cn("text-center", messageClassNames)}
           textStyle={messageTextStyle}
-          context={message}
-          content={signature}
+          labelText={signature}
           rtl={rightToLeft}
           number={props.number}
           type="sync"
+          stylable={true}
+          labelRange={vm?.labelRange ?? null}
+          onOpenStylePanel={(element) => {
+            if (!element || !vm?.codeRange) return;
+            onMessageClick(vm.codeRange, element);
+          }}
         />
       )}
-      <Occurrence
-        context={message}
-        participant={target}
-        rtl={rightToLeft}
-        number={props.number}
+      <DebugLabel 
+        style="absolute"
       />
+ 
+      {(() => {
+        return vm.blockVM ? (
+          <Occurrence
+            number={props.number}
+            vm={vm.blockVM}
+          />
+        ) : null;
+      })()}
       {assignee && !isSelf && (
         <Message
           className={cn(
             "return transform -translate-y-full",
             messageClassNames,
           )}
-          context={message}
-          content={assignee}
+          labelText={assignee}
           rtl={!rightToLeft}
           type="return"
-          number={`${props.number}.${statements.length + 1}`}
+          number={`${props.number}.${(vm?.blockVM.statements.length ?? 0) + 1}`}
           textStyle={messageTextStyle}
+          stylable={false}
+          onOpenStylePanel={(element) => {
+            if (!element || !vm?.codeRange) return;
+            onMessageClick(vm.codeRange, element);
+          }}
         />
       )}
     </div>

@@ -41,3 +41,14 @@ export const distance2 = (coordinates: Coordinates, from: string, to: string) =>
   if (!from || !to) return 0;
   return centerOf(coordinates, to) - centerOf(coordinates, from);
 };
+
+// True if `cursor` is within the half-open range [start, endExclusive)
+export const isCursorInRange = (
+  cursor: number | null | undefined,
+  range?: [number, number] | null,
+): boolean => {
+  if (cursor == null || !range) return false;
+  const [start, endExclusive] = range;
+  if (start == null || endExclusive == null) return false;
+  return cursor >= start && cursor < endExclusive;
+};

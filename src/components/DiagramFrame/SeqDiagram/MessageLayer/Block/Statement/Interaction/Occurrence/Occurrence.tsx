@@ -3,42 +3,18 @@ import { EventBus } from "@/EventBus";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
-import { centerOf } from "../../utils";
-import { useAtomValue } from "jotai";
-import { coordinatesAtom } from "@/store/Store";
 
 export const Occurrence = (props: {
-  context: any;
-  participant: any;
-  rtl?: boolean;
   number?: string;
   className?: string;
+  vm: any;
 }) => {
-  const coordinates = useAtomValue(coordinatesAtom);
   const [collapsed, setCollapsed] = useState(false);
 
   const debug = localStorage.getItem("zenumlDebug");
-
-  const computedCenter = () => {
-    try {
-      return centerOf(coordinates, props.participant);
-    } catch (e) {
-      console.error(e);
-      return 0;
-    }
-  };
-  const hasAnyStatementsExceptReturn = () => {
-    const braceBlock = props.context.braceBlock();
-    if (!braceBlock) return false;
-    const stats = braceBlock.block()?.stat() || [];
-    const len = stats.length;
-    if (len > 1) return true;
-    //when the only one statement is not the RetContext
-    return len === 1 && stats[0]["ret"]() == null;
-  };
+  const vm = props.vm;
   const toggle = () => {
     setCollapsed(!collapsed);
-
     //update participant top in this cases: has child and sibling creation statement
     //e.g. : a.call() { b = new B(); b.call() { c = new C() c.call(){return}}}
     EventBus.emit("participant_set_top");
@@ -46,19 +22,15 @@ export const Occurrence = (props: {
 
   useEffect(() => {
     setCollapsed(false);
-  }, [props.context]);
+  }, [vm]);
 
   return (
     <div
       className={cn(
         "occurrence min-h-6 shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full w-[15px] mt-[-2px] pl-[6px]",
-        { "right-to-left left-[-14px]": props.rtl },
         props.className,
       )}
       data-el-type="occurrence"
-      data-belongs-to={props.participant}
-      data-x-offset={0}
-      data-debug-center-of={computedCenter()}
     >
       {debug && (
         <>
@@ -70,13 +42,12 @@ export const Occurrence = (props: {
           </div>
         </>
       )}
-      {hasAnyStatementsExceptReturn() && (
+      {vm.hasNonReturnStatements && (
         <CollapseButton collapsed={collapsed} onClick={toggle} />
       )}
-      {props.context.braceBlock() && (
+      {vm && (
         <Block
-          origin={props.participant}
-          context={props.context.braceBlock().block()}
+          vm={vm}
           number={props.number}
           collapsed={collapsed}
         ></Block>

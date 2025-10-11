@@ -1,5 +1,4 @@
 import CommentClass from "@/components/Comment/Comment";
-import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
 import { Numbering } from "../../../Numbering";
 import { CollapseButton } from "./CollapseButton";
@@ -8,43 +7,57 @@ import { capitalize } from "radash";
 import { cn } from "@/utils";
 import "./FragmentSection.css";
 import Icon from "@/components/Icon/Icons";
+import type { SectionVM } from "@/vm/fragment-types";
+import { useState, useEffect } from "react";
+import { DebugLabel } from "../DebugLabel";
+
+// Extended interface for TreeVMBuilder data structure
+interface ExtendedSectionVM extends SectionVM {
+  paddingLeft: number;
+  offsetX: number;
+  width: number;
+}
 
 export const FragmentSection = (props: {
-  context: any;
-  origin: string;
-  comment?: string;
+  vm?: ExtendedSectionVM | null; // VM provides TreeVMBuilder structure
   commentObj?: CommentClass;
   number?: string;
   className?: string;
 }) => {
-  const {
-    collapsed,
-    toggleCollapse,
-    paddingLeft,
-    fragmentStyle,
-    border,
-    leftParticipant,
-  } = useFragmentData(props.context, props.origin);
-  const section = props.context.section();
-  const braceBlock = section?.braceBlock();
-  const atom = section?.atom()?.getFormattedText();
-  const blockInSection = braceBlock?.block();
+  // Local state management (replaces useFragmentData collapsed state)
+  const [collapsed, setCollapsed] = useState(false);
+  
+  
+  const toggleCollapse = () => {
+    setCollapsed((prev) => !prev);
+  };
 
-  const label = atom ?? capitalize("section");
+  const sectionVM = props.vm;
+
+  useEffect(() => {
+    setCollapsed(false);
+  }, [sectionVM]);
+
+  // Get positioning from VM (replaces useFragmentData positioning)
+  const paddingLeft = sectionVM?.paddingLeft || 0;
+  const offsetX = sectionVM?.offsetX || 0;
+  const width = sectionVM?.width || 100;
+
+  const label = sectionVM?.labelText ?? capitalize("section");
 
   return (
     <div className={props.className}>
       <div
-        data-origin={origin}
-        data-left-participant={leftParticipant}
-        data-frame-padding-left={border.left}
-        data-frame-padding-right={border.right}
         className="group fragment fragment-section section border-skin-fragment rounded"
-        style={fragmentStyle}
+        style={{
+          transform: `translateX(${(offsetX + 1) * -1}px)`,
+          width: `${width}px`,
+          minWidth: `100px`,
+        }}
       >
         <div className="segment">
           {props.commentObj?.text && (
-            <Comment comment={props.comment} commentObj={props.commentObj} />
+            <Comment commentObj={props.commentObj} />
           )}
           <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
             <Numbering number={props.number} />
@@ -58,6 +71,9 @@ export const FragmentSection = (props: {
                   style={props.commentObj?.messageStyle}
                   className={cn(props.commentObj?.messageClassNames)}
                 />
+                <DebugLabel 
+                  offsetX={offsetX}
+                />
               </label>
             </div>
           </div>
@@ -66,11 +82,10 @@ export const FragmentSection = (props: {
         <div className={collapsed ? "hidden" : ""}>
           <div className="segment">
             <div className="text-skin-fragment flex"></div>
-            {blockInSection && (
+            {sectionVM?.blockVM && (
               <Block
-                origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInSection}
+                vm={sectionVM.blockVM}
                 number={props.number}
               />
             )}

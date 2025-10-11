@@ -73,90 +73,70 @@ import { Message } from "../Message";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
-import { CodeRange } from "@/parser/CodeRange";
-import { useArrow } from "../useArrow";
-
-function isNullOrUndefined(value: any) {
-  return value === null || value === undefined;
-}
-
+import { isCursorInRange } from "../utils";
+import { MessageVM } from "@/vm/tree-builder-types.ts";
 export const InteractionAsync = (props: {
-  context: any;
-  origin: string;
   comment?: string;
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  vm?: MessageVM;
 }) => {
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
-  const asyncMessage = props.context?.asyncMessage();
-  const signature = asyncMessage?.content()?.getFormattedText();
-  const providedSource = asyncMessage?.ProvidedFrom();
-  const source = providedSource || props.origin;
-  const target = asyncMessage?.to()?.getFormattedText();
-  const isSelf = source === target;
-
-  const { translateX, interactionWidth, rightToLeft } = useArrow({
-    context: props.context,
-    origin: props.origin,
-    source,
-    target,
-  });
-
+  const vm = props.vm;
+  const signature = vm?.signature ?? "";
+  const isSelf = vm?.isSelf;
+  const translateX = vm?.arrow?.translateX ?? 0;
+  const interactionWidth = vm?.arrow?.interactionWidth ?? 0;
+  const rightToLeft = vm?.arrow?.rightToLeft ?? false;
   const messageClassNames = props.commentObj?.messageClassNames;
   const messageTextStyle = props.commentObj?.messageStyle;
-  const getIsCurrent = () => {
-    const start = asyncMessage.start.start;
-    const stop = asyncMessage.stop.stop + 1;
-    if (
-      isNullOrUndefined(cursor) ||
-      isNullOrUndefined(start) ||
-      isNullOrUndefined(stop)
-    )
-      return false;
-    return cursor! >= start && cursor! <= stop;
-  };
+  const isCurrent = isCursorInRange(cursor, vm?.range ?? null);
   return (
     <div
-      data-origin={origin}
-      data-to={target}
-      data-source={source}
-      data-target={target}
       className={cn(
         "interaction async",
         {
           "left-to-right": !rightToLeft,
           "right-to-left": rightToLeft,
-          highlight: getIsCurrent(),
+          highlight: isCurrent,
           "self-invocation": isSelf,
         },
         props.className,
       )}
-      onClick={() => onElementClick(CodeRange.from(props.context))}
+      onClick={() => {
+        if (vm?.codeRange) onElementClick(vm.codeRange);
+      }}
       data-signature={signature}
       style={{
         width: interactionWidth + "px",
         transform: "translateX(" + translateX + "px)",
       }}
     >
-      {props.comment && <Comment commentObj={props.commentObj} />}
+      {props.commentObj && <Comment commentObj={props.commentObj} />}
       {isSelf ? (
         <SelfInvocationAsync
           classNames={cn(messageClassNames)}
           textStyle={messageTextStyle}
-          context={asyncMessage}
+          labelText={signature}
+          labelRange={vm?.labelRange ?? null}
           number={props.number}
         />
       ) : (
         <Message
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
-          context={asyncMessage}
-          content={signature}
+          labelText={signature}
           rtl={rightToLeft}
           type="async"
           number={props.number}
+          stylable={true}
+          labelRange={vm?.labelRange ?? null}
+          onOpenStylePanel={(element) => {
+            if (!element || !vm?.codeRange) return;
+            onElementClick(vm.codeRange);
+          }}
         />
       )}
     </div>

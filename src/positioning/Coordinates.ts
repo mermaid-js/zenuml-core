@@ -6,27 +6,72 @@ import {
 } from "./Constants";
 import { TextType } from "./Coordinate";
 import type { WidthFunc } from "./Coordinate";
-import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
+import { _STARTER_ } from "@/constants";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
 import { find_optimal } from "./david/DavidEisenstat";
-import { AllMessages } from "@/parser/MessageCollector";
-import { OwnableMessageType } from "@/parser/OwnableMessage";
-import type { OwnableMessage } from "@/parser/OwnableMessage";
 import { clearCache, getCache, setCache } from "@/utils/RenderingCache";
+import { StatementKind } from "@/ir/tree-types";
+
+// IR-driven approach imports
+import { IRParticipant } from "@/ir/participants";
+import { IRMessage } from "@/ir/tree-types";
+
+// Inlined participant model for IR data
+class IRParticipantModel implements IParticipantModel {
+  constructor(
+    public name: string,
+    public left: string,
+    public label?: string,
+    public type?: string,
+  ) {}
+
+  getDisplayName(): string {
+    return this.label || this.name;
+  }
+
+  hasIcon(): boolean {
+    return !!this.type;
+  }
+}
 
 export class Coordinates {
   private m: Array<Array<number>> = [];
   private readonly widthProvider: WidthFunc;
   private readonly participantModels: IParticipantModel[];
-  private readonly ownableMessages: OwnableMessage[];
+  private readonly ownableMessages: IRMessage[];
 
-  constructor(ctx: any, widthProvider: WidthFunc) {
+  // IR-driven constructor (main constructor)
+  constructor(
+    participants: IRParticipant[], 
+    messages: IRMessage[], 
+    widthProvider: WidthFunc
+  ) {
     clearCache();
-    this.participantModels = OrderedParticipants(ctx);
-    this.ownableMessages = AllMessages(ctx);
-
+    // Inline participant mapping logic
+    this.participantModels = participants.map((participant, index) => {
+      const previousName = index > 0 ? participants[index - 1].name : "";
+      return new IRParticipantModel(
+        participant.name,
+        previousName,
+        participant.label,
+        participant.type,
+      );
+    });
+    this.ownableMessages = messages as IRMessage[];
     this.widthProvider = widthProvider;
     this.walkThrough();
+  }
+
+  /**
+   * Create Coordinates instance from IR data
+   * @deprecated Use the main constructor directly: new Coordinates(participants, messages, widthProvider)
+   */
+  static fromIR(
+    participants: IRParticipant[], 
+    messages: IRMessage[], 
+    widthProvider: WidthFunc
+  ): Coordinates {
+    return new Coordinates(participants, messages, widthProvider);
   }
 
   orderedParticipantNames(): string[] {
@@ -89,21 +134,21 @@ export class Coordinates {
     return this.getPosition(right) - this.getPosition(left);
   }
 
-  getMessageWidth(message: OwnableMessage) {
+  getMessageWidth(message: IRMessage) {
     const halfSelf = this.half(message.to);
     let messageWidth = this.widthProvider(
       message.signature,
       TextType.MessageContent,
     );
     // hack for creation message
-    if (message.type === OwnableMessageType.CreationMessage) {
+    if (message.type === StatementKind.Creation) {
       messageWidth += halfSelf;
     }
     return messageWidth;
   }
 
   private withMessageGaps(
-    ownableMessages: OwnableMessage[],
+    ownableMessages: IRMessage[],
     participantModels: IParticipantModel[],
   ) {
     for (const message of ownableMessages) {

@@ -1,104 +1,63 @@
 import { cn } from "@/utils";
-import { modeAtom, onMessageClickAtom, RenderMode } from "@/store/Store";
-import sequenceParser from "@/generated-parser/sequenceParser";
+import { modeAtom, RenderMode } from "@/store/Store";
 import { CSSProperties, useRef } from "react";
 import { useAtomValue } from "jotai";
 import { Point } from "./Point";
 import { Numbering } from "../../../Numbering";
 import { MessageLabel } from "../../../MessageLabel";
 
-type Context = any;
-
-const getEditable = (context: Context, mode: RenderMode, type: string) => {
+const getEditableDefault = (mode: RenderMode, type: string, labelText?: string) => {
+  // 1. If mode is static, not editable
   if (mode === RenderMode.Static) return false;
-  switch (type) {
-    case "sync":
-    case "async":
-    case "return":
-      return true;
-    case "creation": {
-      // Avoid editing "«create»" label for invalid creations
-      const isValid = context?.isParamValid?.() > 0;
-      return isValid;
-    }
-    default:
-      return false;
-  }
-};
-
-const getLabelPosition = (context: Context, type: string): [number, number] => {
-  let start = -1,
-    stop = -1;
-  switch (type) {
-    case "sync":
-      {
-        const signature = context?.messageBody().func()?.signature()[0];
-        [start, stop] = [signature?.start.start, signature?.stop.stop];
-      }
-      break;
-    case "async":
-      {
-        const content = context?.content();
-        [start, stop] = [content?.start.start, content?.stop.stop];
-      }
-      break;
-    case "creation":
-      {
-        const signature = context?.creationBody()?.parameters();
-        [start, stop] = [signature?.start.start, signature?.stop.stop];
-      }
-      break;
-    case "return":
-      {
-        if (context instanceof sequenceParser.MessageContext) {
-          const signature = context.messageBody().func()?.signature()?.[0];
-          [start, stop] = [signature?.start.start, signature?.stop.stop];
-        } else if (context instanceof sequenceParser.AtomExprContext) {
-          const ret = context.atom();
-          [start, stop] = [ret?.start.start, ret?.stop.stop];
-        } else if (context instanceof sequenceParser.ContentContext) {
-          [start, stop] = [context.start.start, context.stop.stop];
-        } else if (context instanceof sequenceParser.AssignmentContext) {
-          const assignee = context.assignee();
-          [start, stop] = [assignee.start.start, assignee.stop.stop];
-        }
-      }
-      break;
-  }
-  return [start, stop];
+  
+  // 2. If type is 'creation' and labelText is '«create»' (default value), not editable
+  if (type === "creation" && labelText === "create") return false;
+  
+  // 3. Otherwise editable
+  return ["sync", "async", "return", "creation"].includes(type);
 };
 
 export const Message = (props: {
-  context?: Context;
-  content: string;
+  // Content and display
+  labelText?: string; // Clean display text (preferred), falls back to content
   rtl?: string | boolean;
   type?: string;
   textStyle?: CSSProperties;
   className?: string;
   style?: CSSProperties;
   number?: string;
+  
+  // VM-driven behavior
+  stylable?: boolean; // From VM logic
+  labelRange?: [number, number] | null; // From vm.labelRange
+  
+  // Callbacks
+  onOpenStylePanel?: (element: HTMLElement | null) => void;
 }) => {
   const {
-    context,
-    content,
+    labelText,
     rtl,
     type = "",
     textStyle,
     className,
     style,
     number,
+    stylable,
+    labelRange,
+    onOpenStylePanel,
   } = props;
   const mode = useAtomValue(modeAtom);
-  const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const isAsync = type === "async";
-  const editable = getEditable(context, mode, type || "");
-  const stylable =
-    mode !== RenderMode.Static &&
-    ["sync", "async", "return", "creation"].includes(type);
-  const labelText =
-    type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
-  const labelPosition = getLabelPosition(context, type || "");
+  
+  // Calculate editable logic inside component
+  const finalEditable = getEditableDefault(mode, type || "", labelText);
+  const finalStylable = stylable ?? 
+    (mode !== RenderMode.Static && ["sync", "async", "return", "creation"].includes(type));
+  const finalLabelRange = labelRange ?? [-1, -1];
+  
+  const displayLabelText = labelText ?? "";
+  const labelPosition = finalLabelRange;
   const borderStyle: "solid" | "dashed" | undefined = {
     sync: "solid",
     async: "solid",
@@ -107,8 +66,12 @@ export const Message = (props: {
   }[type] as "solid";
 
   const onClick = () => {
-    if (!stylable || !messageRef.current) return;
-    onMessageClick(context, messageRef.current);
+    if (!finalStylable || !messageRef.current) return;
+    if (onOpenStylePanel) {
+      onOpenStylePanel(messageRef.current);
+    } else {
+      console.warn("[message] onOpenStylePanel not provided; style panel not opened");
+    }
   };
 
   return (
@@ -129,19 +92,22 @@ export const Message = (props: {
       <div className="name group text-center flex-grow relative">
         <div className="inline-block static min-h-[1em]">
           <div style={textStyle}>
-            {editable ? (
-              <>
-                {type === "creation" && <span>«</span>}
+            <>
+              {type === "creation" && <span>«</span>}
+              {finalEditable ? (
                 <MessageLabel
-                  labelText={labelText ?? ""}
+                  labelText={displayLabelText}
                   labelPosition={labelPosition}
                   isAsync={isAsync}
                 />
-                {type === "creation" && <span>»</span>}
-              </>
-            ) : (
-              <>{content}</>
-            )}
+              ) : (
+                <label
+                  className={cn("editable-label-base")}>
+                  {displayLabelText}
+                </label>
+              )}
+              {type === "creation" && <span>»</span>}
+            </>
           </div>
         </div>
       </div>

@@ -1,53 +1,36 @@
 import useDocumentScroll from "@/functions/useDocumentScroll";
 import useIntersectionTop from "@/functions/useIntersectionTop";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { PARTICIPANT_HEIGHT } from "@/positioning/Constants";
 import {
   diagramElementAtom,
   modeAtom,
   onSelectAtom,
-  participantsAtom,
   RenderMode,
   selectedAtom,
   stickyOffsetAtom,
 } from "@/store/Store";
 import { cn } from "@/utils";
-import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
+import { brightnessIgnoreAlpha } from "@/utils/Color";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useRef } from "react";
 import { ParticipantLabel } from "./ParticipantLabel";
-import iconPath from "../../Tutorial/Icons";
+import type { ParticipantVM } from "@/vm/participants";
 
 const INTERSECTION_ERROR_MARGIN = 10;
 
 export const Participant = (props: {
-  entity: Record<string, string>;
+  vm: ParticipantVM;
   offsetTop2?: number;
 }) => {
   const elRef = useRef<HTMLDivElement>(null);
   const mode = useAtomValue(modeAtom);
-  const participants = useAtomValue(participantsAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
   const onSelect = useSetAtom(onSelectAtom);
   const intersectionTop = useIntersectionTop();
   const [scrollTop] = useDocumentScroll();
-
-  const isDefaultStarter = props.entity.name === _STARTER_;
-
-  const labelPositions = Array.from(
-    (participants.GetPositions(props.entity.name) as [number, number][]) ?? [],
-    // Sort the label positions in descending order to avoid index shifting when updating code
-  ).sort((a, b) => b[0] - a[0]);
-  const assigneePositions = Array.from(
-    (participants.GetAssigneePositions(props.entity.name) as [
-      number,
-      number,
-    ][]) ?? [],
-    // Sort the label positions in descending order to avoid index shifting when updating code
-  ).sort((a, b) => b[0] - a[0]);
 
   const calcOffset = () => {
     const participantOffsetTop = props.offsetTop2 || 0;
@@ -68,11 +51,8 @@ export const Participant = (props: {
   // We use this method to simulate sticky behavior. CSS sticky is not working out of an iframe.
   const stickyVerticalOffset = mode === RenderMode.Static ? 0 : calcOffset();
 
-  const backgroundColor = props.entity.color
-    ? removeAlpha(props.entity.color)
-    : undefined;
   const color = useMemo(() => {
-    if (!props.entity.color) {
+    if (!props.vm.color) {
       return undefined;
     }
     const bgColor =
@@ -84,53 +64,46 @@ export const Participant = (props: {
       return undefined;
     }
     return brightnessIgnoreAlpha(bgColor) > 128 ? "#000" : "#fff";
-  }, [props.entity.color]);
-  const icon = isDefaultStarter
-    ? iconPath["actor"]
-    : iconPath[props.entity.type?.toLowerCase() as "actor"];
+  }, [props.vm.color]);
 
   return (
     <div
       className={cn(
         "participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8",
-        { selected: selected.includes(props.entity.name) },
+        { selected: selected.includes(props.vm.name) },
       )}
       ref={elRef}
       style={{
-        backgroundColor: isDefaultStarter ? undefined : backgroundColor,
-        color: isDefaultStarter ? undefined : color,
+        backgroundColor: props.vm.isDefaultStarter ? undefined : props.vm.backgroundColor,
+        color: props.vm.isDefaultStarter ? undefined : color,
         transform: `translateY(${stickyVerticalOffset}px)`,
       }}
-      onClick={() => onSelect(props.entity.name)}
-      data-participant-id={props.entity.name}
+      onClick={() => onSelect(props.vm.name)}
+      data-participant-id={props.vm.name}
     >
       <div className="flex items-center justify-center">
-        {icon && (
+        {props.vm.icon && (
           <div
             className="h-6 w-6 mr-1 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full"
-            aria-description={`icon for ${props.entity.name}`}
+            aria-description={`icon for ${props.vm.name}`}
             dangerouslySetInnerHTML={{
-              __html: icon,
+              __html: props.vm.icon,
             }}
           />
         )}
 
-        {!isDefaultStarter && (
+        {!props.vm.isDefaultStarter && (
           <div className="h-5 group flex flex-col justify-center">
-            {props.entity.stereotype && (
+            {props.vm.stereotype && (
               <label className="interface leading-4">
-                «{props.entity.stereotype}»
+                «{props.vm.stereotype}»
               </label>
             )}
             <ParticipantLabel
-              labelText={
-                props.entity.assignee
-                  ? props.entity.name.split(":")[1]
-                  : props.entity.label || props.entity.name
-              }
-              labelPositions={labelPositions}
-              assignee={props.entity.assignee}
-              assigneePositions={assigneePositions}
+              labelText={props.vm.displayName}
+              labelPositions={props.vm.labelPositions}
+              assignee={props.vm.assignee}
+              assigneePositions={props.vm.assigneePositions}
             />
           </div>
         )}

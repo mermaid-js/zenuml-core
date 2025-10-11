@@ -1,65 +1,64 @@
 import CommentClass from "@/components/Comment/Comment";
-import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
 import { Numbering } from "../../../Numbering";
 import { CollapseButton } from "./CollapseButton";
 import { cn } from "@/utils";
 import { Block } from "../../Block";
-import { blockLength } from "@/utils/Numbering";
 import "./FragmentTryCatchFinally.css";
-import { useMemo } from "react";
 import Icon from "@/components/Icon/Icons";
+import { useState, useEffect } from "react";
+import { DebugLabel } from "../DebugLabel";
+
+// Extended interface for TreeVMBuilder data structure
+interface ExtendedTcfVM {
+  tryBlockVM: any;
+  catchBlocks: Array<{ exceptionText: string; blockVM: any }>;
+  finallyBlockVM: any;
+  paddingLeft: number;
+  offsetX: number;
+  width: number;
+}
 
 export const FragmentTryCatchFinally = (props: {
-  context: any;
-  origin: string;
-  comment?: string;
+  vm?: ExtendedTcfVM | null; // VM provides TreeVMBuilder structure
   commentObj?: CommentClass;
   number?: string;
   className?: string;
 }) => {
-  const {
-    collapsed,
-    toggleCollapse,
-    paddingLeft,
-    fragmentStyle,
-    border,
-    leftParticipant,
-  } = useFragmentData(props.context, props.origin);
-
-  const exception = (ctx: any) => {
-    return ctx?.invocation()?.parameters()?.getFormattedText();
-  };
-  const blockInCatchBlock = (ctx: any) => {
-    return ctx?.braceBlock()?.block();
+  // Local state management (replaces useFragmentData collapsed state)
+  const [collapsed, setCollapsed] = useState(false);
+  
+  
+  const toggleCollapse = () => {
+    setCollapsed((prev) => !prev);
   };
 
-  const tcf = props.context.tcf();
-  const blockInTryBlock = tcf?.tryBlock()?.braceBlock()?.block();
-  const finallyBlock = tcf?.finallyBlock()?.braceBlock()?.block();
-  const blockLengthAcc = useMemo(() => {
-    const acc = [blockLength(blockInTryBlock)];
-    if (tcf?.catchBlock()) {
-      tcf.catchBlock().forEach((block: any) => {
-        acc.push(acc[acc.length - 1] + blockLength(blockInCatchBlock(block)));
-      });
-    }
-    return acc;
-  }, [tcf, blockInTryBlock]);
+  const vm = props.vm;
+
+  useEffect(() => {
+    setCollapsed(false);
+  }, [vm]);
+
+  // Get positioning from VM (replaces useFragmentData positioning)
+  const paddingLeft = vm?.paddingLeft || 0;
+  const offsetX = vm?.offsetX || 0;
+  const width = vm?.width || 100;
+
+  const tcfVM = vm;
 
   return (
     <div className={props.className}>
       <div
-        data-origin={props.origin}
-        data-left-participant={leftParticipant}
-        data-frame-padding-left={border.left}
-        data-frame-padding-right={border.right}
         className="group fragment fragment-tcf tcf border-skin-fragment rounded"
-        style={fragmentStyle}
+        style={{
+          transform: `translateX(${(offsetX + 1) * -1}px)`,
+          width: `${width}px`,
+          minWidth: `100px`,
+        }}
       >
         <div className="segment">
           {props.commentObj?.text && (
-            <Comment comment={props.comment} commentObj={props.commentObj} />
+            <Comment commentObj={props.commentObj} />
           )}
           <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
             <Numbering number={props.number} />
@@ -73,23 +72,24 @@ export const FragmentTryCatchFinally = (props: {
                   style={props.commentObj?.messageStyle}
                   className={cn(props.commentObj?.messageClassNames)}
                 />
+                <DebugLabel 
+                />
               </label>
             </div>
           </div>
         </div>
         <div className={collapsed ? "hidden" : ""}>
           <div className="segment">
-            {blockInTryBlock && (
+            {tcfVM?.tryBlockVM && (
               <Block
-                origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInTryBlock}
+                vm={tcfVM.tryBlockVM}
                 number={`${props.number}.1`}
                 incremental
               />
             )}
           </div>
-          {tcf.catchBlock().map((catchBlock: any, index: number) => (
+          {tcfVM?.catchBlocks?.map((catchBlock: any, index: number) => (
             <div
               className="segment mt-2 border-t border-solid"
               key={index + 500}
@@ -99,19 +99,18 @@ export const FragmentTryCatchFinally = (props: {
                 key={index + 1000}
               >
                 <label className="keyword catch p-1">catch</label>
-                <label className="exception p-1">{exception(catchBlock)}</label>
+                <label className="exception p-1">{catchBlock.exceptionText}</label>
               </div>
               <Block
-                origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInCatchBlock(catchBlock)}
+                vm={catchBlock.blockVM}
                 key={index + 2000}
-                number={`${props.number}.${blockLengthAcc[index] + 1}`}
+                number={`${props.number}.${index + 2}`}
                 incremental
               />
             </div>
           ))}
-          {finallyBlock && (
+          {tcfVM?.finallyBlockVM && (
             <div className="segment mt-2 border-t border-solid">
               <div className="header flex text-skin-fragment finally">
                 <label className="keyword finally bg-skin-frame opacity-65 px-1 inline-block">
@@ -119,12 +118,9 @@ export const FragmentTryCatchFinally = (props: {
                 </label>
               </div>
               <Block
-                origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={finallyBlock}
-                number={`${props.number}.${
-                  blockLengthAcc[blockLengthAcc.length - 1] + 1
-                }`}
+                vm={tcfVM.finallyBlockVM}
+                number={`${props.number}.${2 + (tcfVM?.catchBlocks?.length || 0)}`}
                 incremental
               />
             </div>

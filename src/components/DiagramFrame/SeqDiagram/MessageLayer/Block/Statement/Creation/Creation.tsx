@@ -1,66 +1,60 @@
 import { cn } from "@/utils";
 import { Message } from "../Message";
 import { Occurrence } from "../Interaction/Occurrence/Occurrence";
-import { CodeRange } from "@/parser/CodeRange";
-import {
-  LIFELINE_WIDTH,
-  OCCURRENCE_BAR_SIDE_WIDTH,
-} from "@/positioning/Constants";
+import { LIFELINE_WIDTH, OCCURRENCE_BAR_SIDE_WIDTH } from "@/positioning/Constants";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
-import { cursorAtom, onElementClickAtom } from "@/store/Store";
+import {
+  cursorAtom,
+  onElementClickAtom,
+  onMessageClickAtom
+} from "@/store/Store";
 import { Comment } from "../Comment/Comment";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useArrow } from "../useArrow";
+import { useEffect, useRef, useState } from "react";
 import { EventBus } from "@/EventBus";
+import { isCursorInRange } from "../utils";
+import { MessageVM } from "@/vm/types.ts";
 
 export const Creation = (props: {
-  context: any;
-  origin: any;
-  comment?: string;
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  vm?: MessageVM & { arrow?: { translateX: number; interactionWidth: number; rightToLeft: boolean } };
 }) => {
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const cursor = useAtomValue(cursorAtom);
   const onElementClick = useAtomValue(onElementClickAtom);
+  const onMessageClick = useAtomValue(onMessageClickAtom);
   const [participantWidth, setParticipantWidth] = useState(0);
-  const creation = props.context?.creation();
-  const target = creation?.Owner();
-  const isCurrent = creation?.isCurrent(cursor);
+  const vm = props.vm;
 
-  const { translateX, interactionWidth, rightToLeft } = useArrow({
-    context: props.context,
-    origin: props.origin,
-    source: props.origin,
-    target: creation?.Owner(),
-  });
+  // Use VM data only
+  const to = vm?.to;
+  const signature = vm?.signature;
+  const isCurrent = isCursorInRange(cursor, vm?.range ?? null);
+
+  // Use arrow geometry from VM only (no parity checks)
+  const { translateX, interactionWidth, rightToLeft } = vm.arrow || {};
 
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
 
-  const assignee = useMemo(() => {
-    function safeCodeGetter(context: any) {
-      return (context && context.getFormattedText()) || "";
-    }
-    const assignment = creation?.creationBody().assignment();
-    if (!assignment) return "";
-    const assignee = safeCodeGetter(assignment.assignee());
-    const type = safeCodeGetter(assignment.type());
-    return assignee + (type ? ":" + type : "");
-  }, [creation]);
+  // Use assignee from VM (fail early if missing)
+  const assignee = vm?.assignee || "";
+
+  // Extract clean label text from VM signature for Message component
+  const cleanLabelText = vm?.signature?.match(/«([^»]+)»/)?.[1] || "";
 
   const containerOffset =
     participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH;
 
   useEffect(() => {
     const participantElement = document.querySelector(
-      `[data-participant-id="${target}"]`,
+      `[data-participant-id="${to}"]`,
     );
 
     if (!participantElement) {
-      console.warn(`Could not find participant element for ${target}`);
+      console.warn(`Could not find participant element for ${to}`);
       setParticipantWidth(0);
       return;
     }
@@ -68,16 +62,15 @@ export const Creation = (props: {
     // Get the actual width from the DOM element
     setParticipantWidth(participantElement.getBoundingClientRect().width);
     console.debug(
-      `Found participant element for ${target}, width: ${participantWidth}px`,
+      `Found participant element for ${to}, width: ${participantWidth}px`,
     );
 
     EventBus.emit("participant_set_top");
-    console.debug(`Init or update message container for ${target}`);
-  }, [target, participantWidth]);
+    console.debug(`Init or update message container for ${to}`);
+  }, [to, participantWidth]);
 
   return (
     <div
-      data-origin={props.origin}
       className={cn(
         "interaction creation sync",
         {
@@ -86,14 +79,17 @@ export const Creation = (props: {
         },
         props.className,
       )}
-      onClick={() => onElementClick(CodeRange.from(props.context))}
-      data-signature={creation?.SignatureText()}
+      onClick={() => {
+        const codeRange = vm?.codeRange;
+        if (codeRange) onElementClick(codeRange);
+      }}
+      data-signature={signature}
       style={{
         transform: "translateX(" + translateX + "px)",
         width: interactionWidth + "px",
       }}
     >
-      {props.comment && <Comment commentObj={props.commentObj} />}
+      {props.commentObj && <Comment commentObj={props.commentObj} />}
       <div
         ref={messageContainerRef}
         data-type="creation"
@@ -101,28 +97,35 @@ export const Creation = (props: {
           "message-container pointer-events-none flex items-center h-10 relative",
           { "flex-row-reverse": rightToLeft },
         )}
-        data-to={target}
+        data-to={to}
       >
         <Message
           className={cn(
             "invocation w-full transform -translate-y-1/2 pointer-events-auto",
             messageClassNames,
           )}
-          context={creation}
-          content={creation?.SignatureText()}
+          labelText={cleanLabelText}
           rtl={rightToLeft}
           type="creation"
           number={props.number}
           textStyle={messageTextStyle}
           style={{ width: `calc(100% - ${containerOffset}px)` }}
+          labelRange={vm?.labelRange ?? null}
+          onOpenStylePanel={(element) => {
+            if (!element || !vm?.codeRange) return;
+            onMessageClick(vm.codeRange, element);
+          }}
         />
       </div>
-      <Occurrence
-        context={creation}
-        className="pointer-events-auto"
-        participant={target}
-        number={props.number}
-      />
+      {(() => {
+        return vm.blockVM ? (
+          <Occurrence
+            className="pointer-events-auto"
+            number={props.number}
+            vm={vm.blockVM}
+          />
+        ) : null;
+      })()}
       {assignee && (
         <Message
           className={cn(
@@ -130,11 +133,14 @@ export const Creation = (props: {
             messageClassNames,
           )}
           textStyle={messageTextStyle}
-          context={creation.creationBody().assignment()}
-          content={assignee}
+          labelText={assignee}
           rtl={!rightToLeft}
           type="return"
-          number={`${props.number}.${creation.Statements().length + 1}`}
+          number={`${props.number}.${(vm?.blockVM.statements.length ?? 0) + 1}`}
+          onOpenStylePanel={(element) => {
+            if (!element || !vm?.codeRange) return;
+            onMessageClick(vm.codeRange, element);
+          }}
         />
       )}
     </div>

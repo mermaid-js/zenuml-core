@@ -1,62 +1,36 @@
-import { coordinatesAtom, participantsAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { getStyle } from "@/utils/messageStyling";
-import { useAtomValue } from "jotai";
-import { useMemo } from "react";
-import { centerOf } from "../utils";
+import type { DividerVM } from "@/vm/divider";
 
 export const Divider = (props: {
-  context: any;
-  origin: string;
   className?: string;
+  vm?: DividerVM;
 }) => {
-  const participants = useAtomValue(participantsAtom);
-    const coordinates = useAtomValue(coordinatesAtom);
-
-  const width = useMemo(() => {
-    // TODO: with should be the width of the whole diagram
-    const rearParticipant = participants.Names().pop();
-    // 20px for the right margin of the participant
-    return centerOf(coordinates, rearParticipant) + 10;
-  }, [participants]);
-
-  const centerOfOrigin = centerOf(coordinates, props.origin);
-
-  const note = props.context.divider().Note();
-
-  const messageStyle = useMemo(() => {
-    if (note.trim().indexOf("[") === 0 && note.indexOf("]") !== -1) {
-      const startIndex = note.indexOf("[");
-      const endIndex = note.indexOf("]");
-      const [style, _note] = [
-        note.slice(startIndex + 1, endIndex),
-        note.slice(endIndex + 1),
-      ];
-      return {
-        style: getStyle(style.split(",").map((s: string) => s.trim())),
-        note: _note,
-      };
-    }
-    return { style: getStyle([]), note: note };
-  }, [note]);
+  // Use VM data exclusively (fail early if missing)
+  const width = props.vm?.width || 0;
+  const translateX = props.vm?.translateX || 0;
+  const messageStyle = {
+    style: getStyle(props.vm?.styling?.styles || []),
+    note: props.vm?.note || "",
+  };
 
   return (
     <div
-      className={cn("divider", props.className)}
-      data-origin={props.origin}
+      className={cn("divider flex items-center", props.className)}
+      data-origin={props.vm.origin}
       style={{
         width: width + "px",
-        transform: "translateX(" + (-1 * centerOfOrigin + 10) + "px)",
+        transform: "translateX(" + translateX + "px)",
       }}
     >
-      <div className="left bg-skin-divider"></div>
+      <div className="left bg-skin-divider flex-1 h-px"></div>
       <div
         style={messageStyle.style.textStyle}
-        className={cn("name", messageStyle.style.classNames)}
+        className={cn("name text-center px-2", messageStyle.style.classNames)}
       >
         {messageStyle.note}
       </div>
-      <div className="right bg-skin-divider"></div>
+      <div className="right bg-skin-divider flex-1 h-px"></div>
     </div>
   );
 };

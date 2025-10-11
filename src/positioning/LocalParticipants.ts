@@ -1,4 +1,4 @@
-import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { _STARTER_ } from "@/constants";
 import { Participants } from "@/parser";
 
 /**

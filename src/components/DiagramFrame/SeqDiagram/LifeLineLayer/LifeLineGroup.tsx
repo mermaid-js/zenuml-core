@@ -1,27 +1,26 @@
-import { Participants } from "@/parser";
-import { LifeLine } from "./LifeLine";
-import { useAtomValue } from "jotai";
-import { coordinatesAtom } from "@/store/Store";
-import { cn } from "@/utils";
+import {LifeLine} from "./LifeLine";
+import {cn} from "@/utils";
+import { ParticipantVM } from "@/vm/participants.ts";
 
 // Constants
 const LIFELINE_GROUP_OUTLINE_MARGIN = 2; // Small margin for group outline positioning
 
 export const LifeLineGroup = (props: {
-  context: any;
+  vm?: any;
+  participantsVM?: any[];
   renderParticipants: any;
   renderLifeLine: any;
 }) => {
-  const coordinates = useAtomValue(coordinatesAtom);
-  const entities: any[] = Participants(props.context).Array();
+  const lifelineGroupVm = props.vm; // Alias for clarity in parity check
+  
+  const entities = lifelineGroupVm.participantNames
+    .map((n: string) => props.participantsVM?.find((p) => p.name === n))
+    .filter(Boolean) as any[];
   if (entities.length <= 0) return null;
-  const left =
-    coordinates.left(entities[0].name) + LIFELINE_GROUP_OUTLINE_MARGIN;
-  const right =
-    coordinates.right(entities[entities.length - 1].name) -
-    LIFELINE_GROUP_OUTLINE_MARGIN;
+  const left = entities[0]?.layout?.left + LIFELINE_GROUP_OUTLINE_MARGIN;
+  const right = entities[entities.length - 1].layout.right - LIFELINE_GROUP_OUTLINE_MARGIN;
 
-  const name = props.context?.name()?.getFormattedText();
+  const name = lifelineGroupVm.name;
   // Merged the outer and middle divs while preserving all functionality
   return (
     <div
@@ -43,15 +42,17 @@ export const LifeLineGroup = (props: {
       )}
 
       <div className="lifeline-group relative flex-grow">
-        {entities.map((entity) => (
-          <LifeLine
-            key={entity.name}
-            entity={entity}
-            groupLeft={left}
-            renderLifeLine={props.renderLifeLine}
-            renderParticipants={props.renderParticipants}
-          />
-        ))}
+        {entities.map((entity: ParticipantVM) => {
+          return (
+            <LifeLine
+              key={entity.name}
+              vm={entity}
+              groupLeft={left}
+              renderLifeLine={props.renderLifeLine}
+              renderParticipants={props.renderParticipants}
+            />
+          );
+        })}
       </div>
     </div>
   );

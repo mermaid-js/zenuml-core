@@ -3,50 +3,42 @@ import { Comment } from "../Comment/Comment";
 import { cn } from "@/utils";
 import { Message } from "../Message";
 import { useAtomValue } from "jotai";
-import { onElementClickAtom } from "@/store/Store";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { CodeRange } from "@/parser/CodeRange";
+import { onElementClickAtom, cursorAtom, onMessageClickAtom } from "@/store/Store";
+import { DebugLabel } from "../DebugLabel";
 import { SyntheticEvent } from "react";
-import { useArrow } from "../useArrow";
+import { isCursorInRange } from "../utils";
+import { MessageVM } from "@/vm/tree-builder-types.ts";
+
 
 export const Return = (props: {
-  context: any;
-  origin: string;
-  comment?: string;
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  vm?: MessageVM & {
+    arrow?: {
+      translateX: number;
+      interactionWidth: number;
+      rightToLeft: boolean;
+    };
+  };
 }) => {
   const onElementClick = useAtomValue(onElementClickAtom);
+  const onMessageClick = useAtomValue(onMessageClickAtom);
+  const cursor = useAtomValue(cursorAtom);
 
-  const ret = props.context?.ret();
+  const vm = props.vm;
+  const signature = vm?.signature;
+  const isCurrent = isCursorInRange(cursor, vm?.range ?? null);
 
-  const asyncMessage = ret?.asyncMessage();
-
-  const signature =
-    asyncMessage?.content()?.getFormattedText() ||
-    props.context?.ret()?.expr()?.getFormattedText();
-  const source = asyncMessage?.From() || ret?.From() || _STARTER_;
-
-  const target =
-    // TODO: move this logic to the parser (ReturnTo)
-    asyncMessage?.to()?.getFormattedText() ||
-    props.context?.ret()?.ReturnTo() ||
-    _STARTER_;
-
-  const messageContext =
-    asyncMessage?.content() || props.context?.ret()?.expr();
-
-  const { translateX, interactionWidth, rightToLeft, isSelf } = useArrow({
-    context: props.context,
-    origin: props.origin,
-    source,
-    target,
-  });
+  const translateX = vm.arrow.translateX;
+  const interactionWidth = vm.arrow.interactionWidth;
+  const rightToLeft = vm.arrow.rightToLeft;
+  const isSelf = vm?.isSelf;
 
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation();
-    onElementClick(CodeRange.from(props.context));
+    const range = vm?.codeRange;
+    if (range) onElementClick(range);
   };
   return (
     // .relative to allow left style
@@ -54,15 +46,11 @@ export const Return = (props: {
       onClick={onClick}
       data-type="return"
       data-signature={signature}
-      data-origin={origin}
-      data-to={target}
-      data-source={source}
-      data-target={target}
       className={cn(
         "interaction return relative",
         {
           "right-to-left": rightToLeft,
-          highlight: false,
+          highlight: isCurrent,
         },
         props.className,
       )}
@@ -71,7 +59,7 @@ export const Return = (props: {
         transform: "translateX(" + translateX + "px)",
       }}
     >
-      {props.comment && <Comment commentObj={props.commentObj} />}
+      {props.commentObj && <Comment commentObj={props.commentObj} />}
       {isSelf && (
         <div className="flex items-center">
           <svg
@@ -94,13 +82,21 @@ export const Return = (props: {
         <Message
           className={cn(props.commentObj?.messageClassNames)}
           textStyle={props.commentObj?.messageStyle}
-          context={messageContext}
-          content={signature}
+          labelText={signature}
           rtl={rightToLeft}
           type="return"
           number={props.number}
+          stylable={true}
+          labelRange={vm?.labelRange ?? null}
+          onOpenStylePanel={(element) => {
+            if (!element || !vm?.codeRange) return;
+            onMessageClick(vm.codeRange, element);
+          }}
         />
       )}
+      <DebugLabel 
+        style="absolute"
+      />
     </div>
   );
 };

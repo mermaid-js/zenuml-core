@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Complex Nested Fragments Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      }
+      .test-section {
+        margin-bottom: 40px;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      .test-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Complex Nested Fragments Test</h1>
+    
+    <div class="test-section">
+      <div class="test-title">Complex DSL with Comments, Alt Fragments, and Nested Try-Catch</div>
+      <div id="diagram1" class="diagram">
+        <pre class="zenuml" style="margin: 0">
+// comment 1
+A.m {
+  // comment 2
+  if(x) { // comment 3
+    B.m
+  } else if(y) {
+    C.m
+    D.m
+  }
+  try {
+    C.m {
+      try {
+        D.m
+      } catch {
+        A.m {
+          B.m
+        }
+      }
+    }
+  }
+}
+        </pre>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main-cy.ts"></script>
+  </body>
+</html>

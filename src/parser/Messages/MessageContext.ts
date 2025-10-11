@@ -52,6 +52,19 @@ CreationContext.prototype.Statements = function () {
 };
 
 // @ts-ignore
+CreationContext.prototype.Assignment = function () {
+  const assignmentContext = this.creationBody()?.assignment();
+  // @ts-ignore
+  const assignee = assignmentContext?.assignee()?.getFormattedText();
+  // @ts-ignore
+  const type = assignmentContext?.type()?.getFormattedText();
+  if (assignee) {
+    return new Assignment(assignee, type);
+  }
+  return undefined;
+};
+
+// @ts-ignore
 IfBlockContext.prototype.Statements = function () {
   return this.braceBlock()?.block()?.stat() || [];
 };

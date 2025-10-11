@@ -52,13 +52,11 @@ marked.setOptions({
 marked.use({ renderer });
 
 export const Comment = (props: {
-  comment?: any;
   commentObj?: CommentClass;
   className?: string;
 }) => {
   const markedComment = DOMPurify.sanitize(
-    (props.commentObj?.text && marked.parse(props.commentObj?.text)) ||
-      (props.comment && marked.parse(props.comment)),
+    (props.commentObj?.text && marked.parse(props.commentObj?.text)) || ""
   );
 
   return (

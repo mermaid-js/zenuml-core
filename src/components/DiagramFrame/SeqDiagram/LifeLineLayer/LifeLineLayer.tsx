@@ -1,45 +1,23 @@
-import {
-  coordinatesAtom,
-  modeAtom,
-  participantsAtom,
-  RenderMode,
-} from "@/store/Store";
+import { modeAtom, progVMAtom, RenderMode } from "@/store/Store";
 import { useAtomValue } from "jotai";
 import { LifeLine } from "./LifeLine";
 import { LifeLineGroup } from "./LifeLineGroup";
-import { Fragment, useMemo } from "react";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { blankParticipant } from "@/parser/Participants";
-import { GroupContext, ParticipantContext, Participants } from "@/parser";
+import { ParticipantVM } from "@/vm/participants.ts";
+import { GroupVM } from "@/vm/groups.ts";
 
 export const LifeLineLayer = (props: {
-  context: any;
   leftGap: number;
   renderParticipants?: boolean;
   renderLifeLine?: boolean;
 }) => {
   const mode = useAtomValue(modeAtom);
-  const coordinates = useAtomValue(coordinatesAtom);
-  const participants = useAtomValue(participantsAtom);
+  const progVM = useAtomValue(progVMAtom);
+  const participantsVM = progVM.participantsVM || [];
+  const groupsVM = progVM.groupsVM || [] as any[];
 
-  const starterParticipant = useMemo(() => {
-    const names = coordinates.orderedParticipantNames();
-    if (names.length === 0) return null;
-    const firstName = names[0];
-    if (firstName === _STARTER_) {
-      return {
-        ...blankParticipant,
-        name: _STARTER_,
-        explicit: false,
-        isStarter: true,
-      };
-    }
-    return null;
-  }, [coordinates]);
   return (
     <div
       className="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0 pt-2"
-      data-participant-names="participantNames"
       style={{
         minWidth: mode === RenderMode.Dynamic ? "200px" : "auto",
         width: `calc(100% - ${props.leftGap}px)`,
@@ -47,46 +25,29 @@ export const LifeLineLayer = (props: {
       }}
     >
       <div className="z-lifeline-container relative grow">
-        {starterParticipant && !starterParticipant?.explicit && (
-          <LifeLine
-            entity={starterParticipant}
-            className="starter"
-            renderParticipants={props.renderParticipants}
-            renderLifeLine={props.renderLifeLine}
-          />
-        )}
-        {((props.context?.children as any[]) || [])
-          .filter(
-            (c) => c instanceof GroupContext || c instanceof ParticipantContext,
-          )
-          .map((child, index) => (
-            <Fragment key={index}>
-              {child instanceof GroupContext && (
-                <LifeLineGroup
-                  key={index}
-                  context={child}
-                  renderParticipants={props.renderParticipants}
-                  renderLifeLine={props.renderLifeLine}
-                />
-              )}
-              {child instanceof ParticipantContext && (
-                <LifeLine
-                  key={index}
-                  entity={Participants(child).First()}
-                  renderParticipants={props.renderParticipants}
-                  renderLifeLine={props.renderLifeLine}
-                />
-              )}
-            </Fragment>
-          ))}
-        {participants.ImplicitArray().map((entity: any) => (
-          <LifeLine
-            key={entity.name}
-            entity={entity}
+        {/* position is decided by vm models */}
+        {groupsVM.map((group: GroupVM, index: number) => (
+          <LifeLineGroup
+            key={`group:${index}:${group.participantNames.join(",")}`}
+            vm={group}
+            participantsVM={participantsVM}
             renderParticipants={props.renderParticipants}
             renderLifeLine={props.renderLifeLine}
           />
         ))}
+        
+        {participantsVM
+          .filter((p: ParticipantVM) => 
+            !groupsVM.some((g: GroupVM) => g.participantNames.includes(p.name))
+          )
+          .map((entity: ParticipantVM) => (
+            <LifeLine
+              key={entity.name}
+              vm={entity}
+              renderParticipants={props.renderParticipants}
+              renderLifeLine={props.renderLifeLine}
+            />
+          ))}
       </div>
     </div>
   );

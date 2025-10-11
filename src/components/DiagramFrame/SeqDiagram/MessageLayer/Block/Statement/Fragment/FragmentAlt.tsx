@@ -1,66 +1,59 @@
 import CommentClass from "@/components/Comment/Comment";
-import { blockLength } from "@/utils/Numbering";
 import { CollapseButton } from "./CollapseButton";
 import { Block } from "../../Block";
-import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
 import { Numbering } from "../../../Numbering";
 import { cn } from "@/utils";
 import { ConditionLabel } from "./ConditionLabel";
 import "./FragmentAlt.css";
-import { Fragment, useMemo } from "react";
+import { Fragment, useState, useEffect } from "react";
+import { DebugLabel } from "../DebugLabel";
 import Icon from "@/components/Icon/Icons";
+import type { AltVM } from "@/vm/fragment-types";
+
+// Extended AltVM interface that includes positioning data
+interface ExtendedAltVM extends AltVM {
+  // Positioning data (previously from useFragmentData)
+  paddingLeft: number;
+  offsetX: number;
+  width: number;
+}
 
 export const FragmentAlt = (props: {
-  context: any;
-  origin: string;
   comment?: string;
   commentObj?: CommentClass;
   number?: string;
   className?: string;
+  vm: ExtendedAltVM; // VM data containing both content and positioning
 }) => {
-  const alt = props.context.alt();
-  const ifBlock = alt?.ifBlock();
-  const elseIfBlocks = alt?.elseIfBlock();
-  const elseBlock = alt?.elseBlock()?.braceBlock()?.block();
-  const blockInIfBlock = alt?.ifBlock()?.braceBlock()?.block();
-  const blockLengthAcc = useMemo(() => {
-    const acc = [blockLength(blockInIfBlock)];
-    if (alt?.elseIfBlock()) {
-      alt.elseIfBlock().forEach((block: any) => {
-        acc.push(acc[acc.length - 1] + blockLength(blockInElseIfBlock(block)));
-      });
-    }
-    return acc;
-  }, [alt, blockInIfBlock]);
+  // Use VM data exclusively (fail early if missing)
+  const vm = props.vm;
 
-  function conditionFromIfElseBlock(block: any) {
-    return block?.parExpr()?.condition();
-  }
+  // Collapse state - manage locally (could be moved to VM later)
+  const [collapsed, setCollapsed] = useState(false);
+  const toggleCollapse = () => setCollapsed(prev => !prev);
 
-  function blockInElseIfBlock(block: any) {
-    return block?.braceBlock()?.block();
-  }
+  // Reset collapse state when VM changes
+  useEffect(() => {
+    setCollapsed(false);
+  }, [vm]);
 
-  const {
-    collapsed,
-    toggleCollapse,
-    paddingLeft,
-    fragmentStyle,
-    leftParticipant,
-  } = useFragmentData(props.context, props.origin);
+  // Extract data from VM
+  const paddingLeft = vm.paddingLeft;
 
   return (
     <div
-      data-origin={props.origin}
-      data-left-participant={props.origin}
       data-frame-padding-left={props.commentObj?.messageStyle?.paddingLeft}
       data-frame-padding-right={props.commentObj?.messageStyle?.paddingRight}
       className={cn(
         "group fragment fragment-alt alt border-skin-fragment rounded",
         props.className,
       )}
-      style={fragmentStyle}
+      style={{
+        transform: `translateX(${(vm.offsetX + 1) * -1}px)`,
+        width: `${vm.width}px`,
+        minWidth: `100px`,
+      }}
     >
       <div className="segment">
         {props.commentObj?.text && (
@@ -78,6 +71,8 @@ export const FragmentAlt = (props: {
                 style={props.commentObj?.messageStyle}
                 className={cn(props.commentObj?.messageClassNames)}
               />
+              <DebugLabel 
+              />
             </label>
           </div>
         </div>
@@ -86,19 +81,18 @@ export const FragmentAlt = (props: {
       <div className={collapsed ? "hidden" : "block"}>
         <div className="segment">
           <div className="text-skin-fragment flex">
-            <ConditionLabel condition={conditionFromIfElseBlock(ifBlock)} />
+            {vm.ifBlockVM?.ifConditionVM && <ConditionLabel vm={vm.ifBlockVM.ifConditionVM} />}
           </div>
-          {blockInIfBlock && (
+          {vm.ifBlockVM && (
             <Block
-              origin={leftParticipant}
               style={{ paddingLeft: `${paddingLeft}px` }}
-              context={blockInIfBlock}
+              vm={vm.ifBlockVM}
               number={`${props.number}.1`}
               incremental
             />
           )}
         </div>
-        {elseIfBlocks.map((elseIfBlock: any, index: number) => (
+        {vm.elseIfBlocks?.map((elseIfVM: any, index: number) => (
           <Fragment key={index}>
             <div
               className="segment mt-2 border-t border-solid"
@@ -106,34 +100,30 @@ export const FragmentAlt = (props: {
             >
               <div className="text-skin-fragment" key={index + 1000}>
                 <label className="else-if hidden">else if</label>
-                <ConditionLabel
-                  condition={conditionFromIfElseBlock(elseIfBlock)}
-                />
+                {elseIfVM.conditionVM && <ConditionLabel vm={elseIfVM.conditionVM} />}
               </div>
-              <Block
-                origin={leftParticipant}
-                style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInElseIfBlock(elseIfBlock)}
-                key={index + 2000}
-                number={`${props.number}.${blockLengthAcc[index] + 1}`}
-                incremental
-              />
+              {elseIfVM.blockVM && (
+                <Block
+                  style={{ paddingLeft: `${paddingLeft}px` }}
+                  vm={elseIfVM.blockVM}
+                  key={index + 2000}
+                  number={`${props.number}.${index + 2}`}
+                  incremental
+                />
+              )}
             </div>
           </Fragment>
         ))}
-        {elseBlock && (
+        {vm.elseBlockVM && (
           <>
             <div className="segment mt-2 border-t border-solid">
               <div className="text-skin-fragment">
                 <label className="p-1">[else]</label>
               </div>
               <Block
-                origin={leftParticipant}
                 style={{ paddingLeft: `${paddingLeft}px` }}
-                context={elseBlock}
-                number={`${props.number}.${
-                  blockLengthAcc[blockLengthAcc.length - 1] + 1
-                }`}
+                vm={vm.elseBlockVM}
+                number={`${props.number}.${2 + (vm.elseIfBlocks?.length || 0)}`}
                 incremental
               />
             </div>

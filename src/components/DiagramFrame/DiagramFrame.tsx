@@ -1,12 +1,12 @@
 import {
   RenderMode,
   modeAtom,
-  rootContextAtom,
   showTipsAtom,
   scaleAtom,
   themeAtom,
   enableNumberingAtom,
   enableMultiThemeAtom,
+  progVMAtom
 } from "@/store/Store";
 import { useAtom, useAtomValue } from "jotai";
 import * as htmlToImage from "html-to-image";
@@ -47,26 +47,17 @@ export const DiagramFrame = ({
 }>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const rootContext = useAtomValue(rootContextAtom);
   const [showTips, setShowTips] = useAtom(showTipsAtom);
   const [scale, setScale] = useAtom(scaleAtom);
   const [theme, setTheme] = useAtom(themeAtom);
   const [enableNumbering, setEnableNumbering] = useAtom(enableNumberingAtom);
   const enableMultiTheme = useAtomValue(enableMultiThemeAtom);
   const mode = useAtomValue(modeAtom);
-  const title = rootContext?.title();
+  const progVM = useAtomValue(progVMAtom);
+  const titleVM = progVM.titleVM;
 
   const showTipsDialog = () => {
     setShowTips(true);
-
-    // try {
-    //   this.$gtag?.event("view", {
-    //     event_category: "help",
-    //     event_label: "tips dialog",
-    //   });
-    // } catch (e) {
-    //   console.error(e);
-    // }
   };
 
   const toPng = async () => {
@@ -155,7 +146,7 @@ export const DiagramFrame = ({
           <div className="header text-skin-title bg-skin-title border-skin-frame border-b p-1 flex justify-between rounded-t">
             <div className="left hide-export">{children}</div>
             <div className="right flex-grow flex justify-between">
-              <DiagramTitle context={title} />
+              <DiagramTitle vm={titleVM} />
               {/* Knowledge: how to vertically align a svg icon. */}
               <Privacy className="hide-export flex items-center" />
             </div>

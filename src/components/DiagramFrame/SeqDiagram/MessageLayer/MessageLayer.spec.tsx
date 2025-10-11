@@ -11,7 +11,7 @@ describe("MessageLayer", () => {
   let messageLayer: ReturnType<typeof render>;
 
   beforeEach(() => {
-    messageLayer = render(<MessageLayer context={null} />);
+    messageLayer = render(<MessageLayer />);
   });
 
   it("should have a width", async () => {
@@ -19,10 +19,5 @@ describe("MessageLayer", () => {
     // We do not need to wait until next tick in **test**.
     // await messageLayerWrapper.vm.$nextTick()
     expect(messageLayer.container.querySelector(".pt-14")).toBeTruthy();
-  });
-  it("gets participant names", async () => {
-    expect(
-      messageLayer.container.querySelector('[data-origin="_STARTER_"]'),
-    ).toBeTruthy();
   });
 });

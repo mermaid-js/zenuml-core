@@ -1,21 +1,19 @@
-import { cn } from "@/utils";
 import { useEditLabelImproved, specialCharRegex } from "@/functions/useEditLabel";
 import { useAtom, useAtomValue } from "jotai";
 import "../../../../LifeLineLayer/EditableLabel.css";
-import {
-  codeAtom,
-  modeAtom,
-  onContentChangeAtom,
-  RenderMode,
-} from "@/store/Store";
+import { codeAtom, modeAtom, onContentChangeAtom, RenderMode } from "@/store/Store";
+import type { ConditionVM } from "@/vm/fragment-types";
 
 const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
 
-export const ConditionLabel = (props: { condition: any }) => {
+export const ConditionLabel = (props: { vm?: ConditionVM | null }) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
-  const labelText = props.condition?.getFormattedText() ?? "";
+  
+  const conditionVM = props.vm || null;
+  
+  const labelText = conditionVM?.labelText || "";
   const labelHandler = useEditLabelImproved((e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -36,10 +34,7 @@ export const ConditionLabel = (props: { condition: any }) => {
         newText = `"${newText}"`;
       }
 
-      const [start, end] = [
-        props.condition?.start?.start,
-        props.condition?.stop?.stop,
-      ];
+      const [start, end] = conditionVM?.labelRange ?? [-1, -1];
       if (start === -1 || end === -1) {
         console.warn("labelPosition is not set");
         return;

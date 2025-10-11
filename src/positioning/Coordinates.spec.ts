@@ -12,7 +12,17 @@ import {
   stubWidthProvider,
 } from "../../test/unit/parser/fixture/Fixture";
 import { clearCache } from "@/utils/RenderingCache";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { _STARTER_ } from "@/constants";
+import { TreeBuilder } from "@/ir/tree-builder";
+
+// Helper function to create Coordinates from parser context (for tests)
+function createCoordinatesFromParser(ctx: any, widthProvider: any): Coordinates {
+  const treeBuilder = new TreeBuilder();
+  const tree = treeBuilder.buildTree(ctx);
+  const participants = tree.participants;
+  const messages = treeBuilder.flattenMessages(tree);
+  return new Coordinates(participants, messages, widthProvider);
+}
 describe("get absolute position of a participant", () => {
   beforeEach(() => {
     clearCache();
@@ -20,19 +30,19 @@ describe("get absolute position of a participant", () => {
 
   it("One short participant", () => {
     const rootContext = RootContext("A1");
-    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const coordinates = createCoordinatesFromParser(rootContext, stubWidthProvider);
     expect(coordinates.getPosition("A1")).toBe(50);
   });
 
   it("One wide participant", () => {
     const rootContext = RootContext("A300");
-    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const coordinates = createCoordinatesFromParser(rootContext, stubWidthProvider);
     expect(coordinates.getPosition("A300")).toBe(160);
   });
 
   it("wide participant label and error scenario", () => {
     const rootContext = RootContext("A200 group {B300} C400");
-    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const coordinates = createCoordinatesFromParser(rootContext, stubWidthProvider);
 
     expect(coordinates.getPosition("NotExist")).toBe(0);
     expect(coordinates.getPosition("A200")).toBe(110);
@@ -49,7 +59,7 @@ describe("get absolute position of a participant", () => {
   ])(`getPosition for %s`, (code) => {
     const rootContext = RootContext(code);
 
-    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const coordinates = createCoordinatesFromParser(rootContext, stubWidthProvider);
 
     const posA1 = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
     expect(coordinates.getPosition("A1")).toBe(posA1);
@@ -60,7 +70,7 @@ describe("get absolute position of a participant", () => {
 
   it("wide method", () => {
     const rootContext = RootContext("A1.m800");
-    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const coordinates = createCoordinatesFromParser(rootContext, stubWidthProvider);
     const posStarter = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
     expect(coordinates.getPosition(_STARTER_)).toBe(posStarter);
     expect(coordinates.getPosition("A1")).toBe(
@@ -70,7 +80,7 @@ describe("get absolute position of a participant", () => {
 
   it("should not duplicate participants", () => {
     const rootContext = RootContext("A1.a1 A1.a1 B1.a1");
-    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const coordinates = createCoordinatesFromParser(rootContext, stubWidthProvider);
     const posStarter = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
     expect(coordinates.getPosition(_STARTER_)).toBe(posStarter);
     const posA1 = posStarter + MIN_PARTICIPANT_WIDTH + MARGIN;
@@ -101,7 +111,7 @@ describe("get absolute position of a participant", () => {
     ],
   ])("creation method: %s", (code, name, offset) => {
     const rootContext = RootContext(code);
-    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const coordinates = createCoordinatesFromParser(rootContext, stubWidthProvider);
     const posStarter = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
     expect(coordinates.getPosition(_STARTER_)).toBe(posStarter);
     // half participant width + Starter Position + margin
@@ -115,7 +125,7 @@ describe("get absolute position of a participant", () => {
   ])("non-adjacent long message: %s", (code: string) => {
     const messageLength = 800;
     const rootContext = RootContext(code);
-    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const coordinates = createCoordinatesFromParser(rootContext, stubWidthProvider);
 
     const positionA = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
     expect(coordinates.getPosition("A1")).toBe(positionA);
@@ -136,7 +146,7 @@ describe("Let us focus on order", () => {
   });
   it("should add Starter to the left", () => {
     const rootContext = RootContext("A1 B1->A1:m1");
-    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const coordinates = createCoordinatesFromParser(rootContext, stubWidthProvider);
     const posA1 = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
     const posB1 =
       posA1 + MIN_PARTICIPANT_WIDTH / 2 + MARGIN + MIN_PARTICIPANT_WIDTH / 2;

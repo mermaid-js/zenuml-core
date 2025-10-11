@@ -96,6 +96,38 @@ Uses Bun as the package manager and JavaScript runtime. Bun is a fast all-in-one
 - Tests use `vi` mocking utilities which are mapped to Jest-compatible APIs in `test-setup.ts`
 - Coverage is disabled by default due to resource issues; enable with `bun test --coverage`
 
+## Current Refactoring: VM Layer Separation (Feature 002)
+
+**Status**: Planning Phase Complete  
+**Branch**: `002-vm-refactoring-strategy`  
+
+The project is undergoing a major refactoring to separate the View Model (VM) layer from parser dependencies:
+
+### Objectives
+- **IR-VM Separation**: Eliminate parser context usage in `src/vm/*` files
+- **Pure Geometry**: Centralize arrow and fragment geometry into testable pure functions  
+- **Normalized Contracts**: Standardize VM interfaces in `src/vm/types.ts`
+- **Performance**: Enable caching and memoization through deterministic calculations
+
+### Key Changes in Progress
+- **New Architecture**: Parser → IR → VM Builders → Geometry → Components
+- **Pure Functions**: `src/vm/geometry/arrow.ts`, `src/vm/geometry/fragment.ts`
+- **IR Enrichment**: LayersMap, OccurrenceExtras, FragmentData in IR phase
+- **Feature Flags**: Safe rollback capability during migration
+- **Test Strategy**: Unit tests for geometry, visual regression protection
+
+### Implementation Guidelines
+- **Baby Steps**: Run `bun run test` and `bun run pw` after each change
+- **Visual Parity**: Maintain pixel-perfect rendering throughout refactor
+- **Parser-Free VM**: No `@/generated-parser` imports in `src/vm/**`
+- **Deterministic**: All geometry calculations must be pure and cacheable
+
+### Files Under Active Development
+- `src/vm/types.ts` - Central VM contracts
+- `src/vm/geometry/` - Pure geometry services
+- `src/ir/enrichment.ts` - IR data enrichment
+- `specs/002-vm-refactoring-strategy/` - Design documentation
+
 ## Development Notes
 
 - The project builds both a library and a demo site

@@ -1,50 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+ import type React from "react";
 import { Block } from "./Block/Block";
-import { centerOf } from "./Block/Statement/utils";
 import { StylePanel } from "./StylePanel";
 import { useAtomValue } from "jotai";
-import { coordinatesAtom, rootContextAtom } from "@/store/Store";
-import { AllMessages } from "@/parser/MessageCollector";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { progVMAtom } from "@/store/Store";
 import "./MessageLayer.scss";
 
-import parentLogger from "../../../../logger/logger";
-
-const logger = parentLogger.child({ name: "MessageLayer" });
 export const MessageLayer = (props: {
-  context: any;
   style?: React.CSSProperties;
 }) => {
-  const rootContext = useAtomValue(rootContextAtom);
-  const coordinates = useAtomValue(coordinatesAtom);
-
-  const origin = useMemo(() => {
-    const ownableMessages = AllMessages(rootContext);
-    if (ownableMessages.length === 0) return _STARTER_;
-    return ownableMessages[0].from || _STARTER_;
-  }, [rootContext]);
-
-  const paddingLeft = centerOf(coordinates, origin) + 1;
-
-  const [mounted, setMounted] = useState(false);
-  if (mounted) {
-    logger.debug("MessageLayer updated");
-  }
-  useEffect(() => {
-    setMounted(true);
-    logger.debug("MessageLayer mounted");
-  }, []);
+  const vm = useAtomValue(progVMAtom);
 
   return (
     <div
       className="message-layer relative z-30 pt-14 pb-10"
       style={props.style}
     >
-      <Block
-        context={props.context}
-        style={{ paddingLeft: `${paddingLeft}px` }}
-        origin={origin}
-      />
+      <Block vm={vm.rootBlockVM} style={{ paddingLeft: `${vm.paddingLeft}px` }} origin={vm.origin} />
       <StylePanel />
     </div>
   );

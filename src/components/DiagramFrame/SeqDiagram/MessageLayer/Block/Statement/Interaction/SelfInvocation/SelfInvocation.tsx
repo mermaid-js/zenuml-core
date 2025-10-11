@@ -1,11 +1,12 @@
 import { onMessageClickAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
-import { CSSProperties, useMemo, useRef } from "react";
+import { CSSProperties, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
 import { MessageLabel } from "../../../../MessageLabel";
+import type { MessageVM } from "@/vm/messages";
 
 export const SelfInvocation = (props: {
-  context?: any;
+  vm: MessageVM;
   number?: string;
   textStyle?: CSSProperties;
   classNames?: any;
@@ -13,15 +14,16 @@ export const SelfInvocation = (props: {
   const messageRef = useRef(null);
   const onMessageClick = useAtomValue(onMessageClickAtom);
 
-  const assignee = props.context?.Assignment()?.getText() || "";
-  const labelPosition: [number, number] = useMemo(() => {
-    const func = props.context?.messageBody().func();
-    if (!func) return [-1, -1];
-    return [func.start.start, func.stop.stop];
-  }, [props.context]);
+  const assignee = props.vm.assignee || "";
+  const labelPosition: [number, number] = props.vm.labelRange ?? [-1, -1];
 
   const onClick = () => {
-    onMessageClick(props.context, messageRef.current!);
+    const range = props.vm.codeRange;
+    if (range) {
+      onMessageClick(range, messageRef.current!);
+    } else {
+      console.warn("[self-invocation] missing codeRange; style panel not opened");
+    }
   };
 
   return (
@@ -42,7 +44,7 @@ export const SelfInvocation = (props: {
           <MessageLabel
             style={props.textStyle}
             className={props.classNames}
-            labelText={props.context?.SignatureText()}
+            labelText={props.vm.signature}
             labelPosition={labelPosition}
             isSelf={true}
           />

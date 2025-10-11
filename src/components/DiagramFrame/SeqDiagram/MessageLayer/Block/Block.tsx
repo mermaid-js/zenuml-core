@@ -1,17 +1,18 @@
 import { increaseNumber } from "@/utils/Numbering";
 import { Statement } from "./Statement/Statement";
 import { cn } from "@/utils";
+import type { BlockVM } from "@/vm/types";
 
 export const Block = (props: {
-  origin?: string;
-  context?: any;
   number?: string;
   incremental?: boolean;
   collapsed?: boolean;
   style?: React.CSSProperties;
   className?: string;
+  vm: BlockVM;
 }) => {
-  const statements: any[] = props.context?.stat() || [];
+
+  const statementVMs = props.vm?.statements || [];
   const getNumber = (index: number) => {
     if (props.number) {
       return props.incremental
@@ -24,21 +25,18 @@ export const Block = (props: {
     <div
       className={cn("block", props.className)}
       style={props.style}
-      data-origin={props.origin}
     >
-      {statements.map((stat, index) => (
+      {statementVMs.map((vm, index) => (
         <div
           className={cn(
             "statement-container my-4",
-            index === statements.length - 1 &&
+            index === statementVMs.length - 1 &&
               "[&>.return]:-mb-4 [&>.return]:bottom-[-1px]",
           )}
-          data-origin={props.origin}
           key={index}
         >
           <Statement
-            origin={props.origin || ""}
-            context={stat}
+            vm={vm}
             collapsed={Boolean(props.collapsed)}
             number={getNumber(index)}
           />

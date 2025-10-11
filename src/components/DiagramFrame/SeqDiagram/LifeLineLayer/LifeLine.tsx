@@ -1,5 +1,4 @@
 import {
-  coordinatesAtom,
   diagramElementAtom,
   lifelineReadyAtom,
   scaleAtom,
@@ -10,13 +9,12 @@ import parentLogger from "@/logger/logger";
 import { EventBus } from "@/EventBus";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
-import { centerOf } from "../MessageLayer/Block/Statement/utils";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { _STARTER_ } from "@/constants";
 
 const logger = parentLogger.child({ name: "LifeLine" });
 
 export const LifeLine = (props: {
-  entity: any;
+  vm?: any; // ParticipantVM when available
   groupLeft?: any;
   renderParticipants?: boolean;
   renderLifeLine?: boolean;
@@ -25,23 +23,17 @@ export const LifeLine = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const scale = useAtomValue(scaleAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
-  const coordinates = useAtomValue(coordinatesAtom);
   const setLifelineReady = useSetAtom(lifelineReadyAtom);
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
 
-  const left =
-    centerOf(coordinates, props.entity.name) - (props.groupLeft || 0);
+  // New approach: Use VM layout center when available
+  const center = props.vm?.layout?.center;
+  const left = center ? center - (props.groupLeft || 0) : null;
 
   const updateTop = useCallback(() => {
-    // escape entity name to avoid 'not a valid selector' error.
-    const escapedName = props.entity.name.replace(
-      // eslint-disable-next-line no-useless-escape
-      /([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,
-      "\\$1",
-    );
     const firstMessage = diagramElement?.querySelector(
-      `[data-to="${escapedName}"]`,
+      `[data-to="${props.vm?.name}"]`,
     ) as any;
     const isVisible = firstMessage?.offsetParent != null;
     if (
@@ -49,40 +41,38 @@ export const LifeLine = (props: {
       firstMessage.attributes["data-type"]?.value === "creation" &&
       isVisible
     ) {
-      logger.debug(`First message to ${props.entity.name} is creation`);
+      logger.debug(`First message to ${props.vm.name} is creation`);
       const rootY = elRef.current?.getBoundingClientRect().y || 0;
       const messageY = firstMessage.getBoundingClientRect().y;
       setTop((messageY - rootY) / scale);
     } else {
       // A B.m {new A} => A B.m {new A1}
-      logger.debug(`First message to ${props.entity.name} is not creation`);
+      logger.debug(`First message to ${props.vm.name} is not creation`);
       setTop(PARTICIPANT_TOP_SPACE_FOR_GROUP);
     }
-    if (props.entity.name !== _STARTER_) {
+    if (props.vm.name !== _STARTER_) {
       setTimeout(() => {
         setLifelineReady((prev) =>
-          prev.includes(props.entity.name)
+          prev.includes(props.vm.name)
             ? prev
-            : [...prev, props.entity.name],
+            : [...prev, props.vm.name],
         );
       }, 0);
     }
-  }, [diagramElement, props.entity.name, scale]);
+  }, [diagramElement, props.vm.name, scale]);
 
   useEffect(() => {
-    logger.debug(`LifeLine mounted/update for ${props.entity.name}`);
     setTimeout(() => {
       updateTop();
-      logger.debug(`nextTick after updated for ${props.entity.name}`);
     }, 0);
 
     EventBus.on("participant_set_top", () => setTimeout(() => updateTop(), 0));
-  }, [props.entity, updateTop]);
+  }, [props.vm, updateTop]);
 
   return (
     <div
-      id={props.entity.name}
-      entity-type={props.entity.type?.toLowerCase()}
+      id={props.vm.name}
+      entity-type={props.vm.type?.toLowerCase()}
       className={cn(
         "lifeline absolute flex flex-col h-full",
         {
@@ -93,8 +83,8 @@ export const LifeLine = (props: {
       style={{ paddingTop: top + "px", left: left + "px" }}
       ref={elRef}
     >
-      {props.renderParticipants && (
-        <Participant entity={props.entity} offsetTop2={top} />
+      {props.renderParticipants && props.vm && (
+        <Participant vm={props.vm} offsetTop2={top} />
       )}
       {props.renderLifeLine && (
         <div className="line w0 mx-auto flex-grow w-px bg-[linear-gradient(to_bottom,transparent_50%,var(--color-border-base)_50%)] bg-[length:1px_10px]"></div>
