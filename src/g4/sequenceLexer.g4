@@ -4,6 +4,32 @@ channels {
   MODIFIER_CHANNEL
 }
 
+@members {
+  // 1. title must be at the beginning
+  // 2. title must not be followed by '.', '(', '='
+  this.isTitle = function() {
+    // Check if 'title' appears at the beginning (only whitespace/comments before it)
+    const currentPos = this._tokenStartCharIndex;
+    const preceding = this._input.getText(0, currentPos - 1)
+      .replace(/\/\/[^\n]*(?:\n|$)/g, '')
+      .trim();
+    if (preceding.length) return false;
+
+    // Look ahead past 'title' and any whitespace to check what follows
+    const SPACE = 32, TAB = 9, EOF = -1, DOT = 46, EQUALS = 61, OPEN_PAREN = 40;
+    let pos = 6, next = this._input.LA(pos);
+
+    // Skip past any whitespace
+    while (next === SPACE || next === TAB) {
+      ++pos;
+      next = this._input.LA(pos);
+    }
+
+    // Title directive if EOF or not followed by '.', '(', '='
+    return next === EOF || (next !== DOT && next !== EQUALS && next !== OPEN_PAREN);
+  };
+}
+
 fragment HWS: [ \t]; // Horizontal WhiteSpace
 WS: HWS+ -> channel(HIDDEN);
 
@@ -16,7 +42,7 @@ STATIC:     'static' -> channel(MODIFIER_CHANNEL);
 AWAIT:      'await' -> channel(MODIFIER_CHANNEL);
 
 TITLE
- : 'title' -> pushMode(TITLE_MODE)
+ : {this.isTitle()}? 'title' -> pushMode(TITLE_MODE)
  ;
 
 COL
