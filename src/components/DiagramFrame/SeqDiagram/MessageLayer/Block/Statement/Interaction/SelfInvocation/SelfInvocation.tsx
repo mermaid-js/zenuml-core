@@ -57,7 +57,9 @@ export const SelfInvocation = (props: {
           strokeWidth="2"
           points="0,2 28,2 28,15 14,15"
         ></polyline>
-        <ArrowHead x={7} y={10} fill={true} rtl={true} className="head stroke-2" />
+        <g transform="translate(7, 10)">
+          <ArrowHead fill={true} rtl={true} className="head stroke-2" />
+        </g>
       </svg>
     </div>
   );

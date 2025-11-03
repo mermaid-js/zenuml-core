@@ -36,7 +36,9 @@ export const SelfInvocationAsync = (props: {
           strokeWidth="2"
           points="0,2 28,2 28,25 1,25"
         ></polyline>
-        <ArrowHead x={0} y={20} fill={false} rtl={true} className="head stroke-2" />
+        <g transform="translate(0, 20)">
+          <ArrowHead fill={false} rtl={true} className="head stroke-2" />
+        </g>
         {/* TODO: What is the below line used for?
         <polyline class="closed" points="28,32 28,18"></polyline> */}
       </svg>

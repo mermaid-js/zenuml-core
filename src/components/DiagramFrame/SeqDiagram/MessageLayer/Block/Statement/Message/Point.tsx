@@ -20,7 +20,7 @@ export const Point = (props: {
       )}
       style={style}
     >
-      <ArrowHead x={0} y={0} fill={fill} rtl={rtl} className="arrow stroke-2" />
+      <ArrowHead fill={fill} rtl={rtl} className="arrow stroke-2" />
     </div>
   );
 };
