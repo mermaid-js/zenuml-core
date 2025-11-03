@@ -1,6 +1,7 @@
 import { CSSProperties } from "react";
 import { MessageLabel } from "../../../../MessageLabel";
 import { Numbering } from "../../../../Numbering";
+import { ArrowHead } from "../../Message/ArrowHead";
 
 export const SelfInvocationAsync = (props: {
   context?: any;
@@ -35,13 +36,7 @@ export const SelfInvocationAsync = (props: {
           strokeWidth="2"
           points="0,2 28,2 28,25 1,25"
         ></polyline>
-        <polyline
-          className="head stroke-current stroke-2 fill-current"
-          stroke="currentColor"
-          fill="currentColor"
-          strokeWidth="2"
-          points="11,19 1,25 11,31"
-        ></polyline>
+        <ArrowHead x={0} y={20} fill={false} rtl={true} className="head stroke-2" />
         {/* TODO: What is the below line used for?
         <polyline class="closed" points="28,32 28,18"></polyline> */}
       </svg>
