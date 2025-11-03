@@ -56,13 +56,20 @@ export const SelfInvocation = (props: {
           strokeWidth="2"
           points="0,2 28,2 28,15 14,15"
         ></polyline>
-        <polyline
-          className="head stroke-current fill-current stroke-2"
-          stroke="currentColor"
-          fill="currentColor"
-          strokeWidth="2"
-          points="18,9 8,15 18,21"
-        ></polyline>
+        <svg
+          className="head stroke-2"
+          x="7"
+          y="10"
+          height="10"
+          width="10"
+          viewBox="1 0 5 6"
+        >
+          <path
+            d="M0.571662 2.657C0.312726 2.81236 0.312726 3.18764 0.571662 3.343L4.3942 5.63652C4.66081 5.79649 5 5.60444 5 5.29352L5 0.706476C5 0.395559 4.66081 0.203513 4.3942 0.363479L0.571662 2.657Z"
+            fill="currentColor"
+            stroke="none"
+          />
+        </svg>
       </svg>
     </div>
   );
