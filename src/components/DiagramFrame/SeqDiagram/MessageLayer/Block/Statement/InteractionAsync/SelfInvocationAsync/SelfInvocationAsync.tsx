@@ -28,11 +28,12 @@ export const SelfInvocationAsync = (props: {
           isSelf={true}
         />
       </label>
-      <svg className="arrow text-skin-message-arrow" width="34" height="34">
-        <polyline className="stroke-current stroke-2 fill-none"
-          points="0,2 28,2 28,25 1,25"
-        ></polyline>
-        <g transform="translate(0, 20)">
+      <svg className="arrow text-skin-message-arrow" width="30" height="24">
+        <path
+          className="stroke-current stroke-2 fill-none"
+          d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 L1,15"
+        />
+        <g transform="translate(0, 10)">
           <ArrowHead fill={false} rtl={true} />
         </g>
       </svg>

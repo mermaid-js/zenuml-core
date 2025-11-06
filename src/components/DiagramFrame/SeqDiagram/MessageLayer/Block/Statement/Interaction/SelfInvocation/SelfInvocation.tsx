@@ -50,9 +50,10 @@ export const SelfInvocation = (props: {
         </div>
       </label>
       <svg className="arrow text-skin-message-arrow" width="30" height="24">
-        <polyline className="stroke-current fill-none stroke-2"
-          points="0,2 28,2 28,15 14,15"
-        ></polyline>
+        <path
+          className="stroke-current stroke-2 fill-none"
+          d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 L14,15"
+        />
         <g transform="translate(7, 10)">
           <ArrowHead fill={true} rtl={true} />
         </g>
