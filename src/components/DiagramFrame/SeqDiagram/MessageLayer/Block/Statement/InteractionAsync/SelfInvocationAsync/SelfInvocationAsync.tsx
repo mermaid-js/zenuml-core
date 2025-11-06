@@ -29,18 +29,12 @@ export const SelfInvocationAsync = (props: {
         />
       </label>
       <svg className="arrow text-skin-message-arrow" width="34" height="34">
-        <polyline
-          className="stroke-current stroke-2 fill-none"
-          stroke="currentColor"
-          fill="none"
-          strokeWidth="2"
+        <polyline className="stroke-current stroke-2 fill-none"
           points="0,2 28,2 28,25 1,25"
         ></polyline>
         <g transform="translate(0, 20)">
-          <ArrowHead fill={false} rtl={true} className="head stroke-2" />
+          <ArrowHead fill={false} rtl={true} />
         </g>
-        {/* TODO: What is the below line used for?
-        <polyline class="closed" points="28,32 28,18"></polyline> */}
       </svg>
     </div>
   );

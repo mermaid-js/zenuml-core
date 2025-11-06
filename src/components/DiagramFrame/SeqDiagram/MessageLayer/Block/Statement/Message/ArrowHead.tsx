@@ -1,14 +1,13 @@
 export const ArrowHead = (props: {
   fill: boolean;
   rtl: boolean;
-  className?: string;
 }) => {
-  const { fill, rtl, className } = props;
+  const { fill, rtl } = props;
 
   // Single unified arrow shape for both filled and open
   return (
     <svg
-      className={className}
+      className="stroke-2"
       height="10"
       width="7"
       viewBox="0 0 7 9"
