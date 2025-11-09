@@ -3,7 +3,7 @@ import { modeAtom, onMessageClickAtom, RenderMode } from "@/store/Store";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { CSSProperties, useRef } from "react";
 import { useAtomValue } from "jotai";
-import { Point } from "./Point";
+import { ArrowHead } from "./ArrowHead";
 import { Numbering } from "../../../Numbering";
 import { MessageLabel } from "../../../MessageLabel";
 
@@ -145,12 +145,13 @@ export const Message = (props: {
           </div>
         </div>
       </div>
-      <Point
-        className="flex-shrink-0 transform translate-y-1/2 -my-px"
-        style={{ translate: 0 }}
-        fill={type === "sync"}
-        rtl={Boolean(rtl)}
-      />
+      <div
+        className={cn(
+          "point text-skin-message-arrow translate-y-1/2 -my-px",
+        )}
+      >
+        <ArrowHead fill={type === "sync"} rtl={Boolean(rtl)} />
+      </div>
       <Numbering number={number} />
     </div>
   );
