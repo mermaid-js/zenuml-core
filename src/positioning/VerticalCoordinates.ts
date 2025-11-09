@@ -84,6 +84,18 @@ export class VerticalCoordinates {
     return this.creationTopByParticipant.get(participant);
   }
 
+  getMessageLayerPaddingTop(): number {
+    return this.metrics.messageLayerPaddingTop;
+  }
+
+  getStatementMarginTop(): number {
+    return this.metrics.statementMarginTop;
+  }
+
+  getLifelineLayerPaddingTop(): number {
+    return this.metrics.lifelineLayerPaddingTop;
+  }
+
   entries() {
     return Array.from(this.statementMap.entries());
   }

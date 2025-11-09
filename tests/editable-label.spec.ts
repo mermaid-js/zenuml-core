@@ -109,9 +109,13 @@ test.describe("Editable Label", () => {
     });
 
     // Edit the message
-    const messageLabel = page.locator("label").filter({ hasText: "create" });
+    const messageLabel = page
+      .locator('[data-type="creation"] .message .name label')
+      .first();
     await messageLabel.dblclick();
+    await messageLabel.press("End");
     await messageLabel.pressSequentially("1");
-    await expect(page.getByText("create1")).toBeVisible();
+    await messageLabel.press("Enter");
+    await expect(messageLabel).toContainText("create1");
   });
 });

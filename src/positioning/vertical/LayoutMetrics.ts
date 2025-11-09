@@ -4,6 +4,7 @@ export interface LayoutMetrics {
   statementMarginTop: number;
   statementMarginBottom: number;
   statementGap: number;
+  lifelineLayerPaddingTop: number;
   commentLineHeight: number;
   commentCodeLineHeight: number;
   commentBlockSpacing: number;
@@ -34,15 +35,16 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   statementMarginTop: tw(4),
   statementMarginBottom: tw(4),
   statementGap: tw(4),
+  lifelineLayerPaddingTop: tw(2), // pt-2 on lifeline layer container
   commentLineHeight: rem(1),
   commentCodeLineHeight: rem(1.1),
   commentBlockSpacing: tw(2),
   commentPaddingY: tw(1),
   commentMaxWidth: 360,
-  messageHeight: tw(10),
+  messageHeight: tw(4),
   asyncMessageHeight: tw(10),
-  selfInvocationHeight: rem(3),
-  selfAsyncHeight: rem(3),
+  selfInvocationHeight: tw(10),
+  selfAsyncHeight: tw(10),
   creationMessageHeight: tw(10),
   returnMessageHeight: tw(8),
   occurrenceMinHeight: tw(6),
