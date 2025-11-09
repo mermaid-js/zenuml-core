@@ -1,6 +1,13 @@
-import { marked, Tokens } from "marked";
+import { marked } from "marked";
 import { LayoutMetrics } from "./LayoutMetrics";
 import { TextType, WidthFunc } from "@/positioning/Coordinate";
+
+type GenericToken = ReturnType<typeof marked.lexer>[number];
+type ListItemToken = GenericToken & {
+  text?: string | string[];
+  tokens?: GenericToken[];
+  items?: ListItemToken[];
+};
 
 const STRIP_FORMATTING = /[*_`~]/g;
 
@@ -35,18 +42,18 @@ export class MarkdownMeasurer {
     return total;
   }
 
-  private measureToken(token: Tokens.Generic): number {
+  private measureToken(token: GenericToken): number {
     switch (token.type) {
       case "heading":
         return this.metrics.commentLineHeight * (token.depth || 1);
       case "paragraph":
         return this.measureParagraph(token.text);
       case "list":
-        return this.measureList(token.items || []);
+        return this.measureList((token as ListItemToken).items || []);
       case "code":
         return this.measureCode(token.text || "");
       case "blockquote":
-        return this.measureBlockquote(token.tokens || []);
+        return this.measureBlockquote((token as ListItemToken).tokens || []);
       case "space":
         return this.metrics.commentLineHeight * 0.5;
       default:
@@ -68,7 +75,7 @@ export class MarkdownMeasurer {
     }, 0);
   }
 
-  private measureList(items: Tokens.ListItem[]): number {
+  private measureList(items: ListItemToken[]): number {
     if (!items.length) {
       return this.metrics.commentLineHeight;
     }
@@ -83,11 +90,11 @@ export class MarkdownMeasurer {
     }, 0);
   }
 
-  private measureNestedTokens(tokens: Tokens.Generic[]): number {
+  private measureNestedTokens(tokens: GenericToken[]): number {
     return tokens.reduce((acc, token) => acc + this.measureToken(token), 0);
   }
 
-  private measureBlockquote(tokens: Tokens.Generic[]): number {
+  private measureBlockquote(tokens: GenericToken[]): number {
     if (!tokens.length) {
       return this.metrics.commentLineHeight;
     }
@@ -97,6 +104,8 @@ export class MarkdownMeasurer {
 
   private measureCode(text: string): number {
     const lines = text.split(/\n/).length || 1;
-    return lines * this.metrics.commentCodeLineHeight + this.metrics.commentPaddingY;
+    return (
+      lines * this.metrics.commentCodeLineHeight + this.metrics.commentPaddingY
+    );
   }
 }

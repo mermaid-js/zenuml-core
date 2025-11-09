@@ -22,9 +22,10 @@ export const codeAtom = atom("");
 
 export const rootContextAtom = atom((get) => RootContext(get(codeAtom)));
 
-export const titleAtom = atom<string | null>((get) =>
-  get(rootContextAtom)?.title()?.content(),
-);
+export const titleAtom = atom<string | null>((get) => {
+  const titleContext = get(rootContextAtom)?.title();
+  return (titleContext as any)?.content?.() ?? null;
+});
 
 export const participantsAtom = atom((get) =>
   Participants(get(rootContextAtom)),

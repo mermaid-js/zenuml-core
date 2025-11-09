@@ -1,7 +1,6 @@
 import { WidthFunc } from "@/positioning/Coordinate";
 import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
 import {
-  DEFAULT_LAYOUT_METRICS,
   getLayoutMetrics,
   LayoutMetrics,
   ThemeName,
@@ -62,19 +61,22 @@ export class VerticalCoordinates {
   }
 
   getStatementTop(keyOrCtx: StatementKey | any): number | undefined {
-    const key = typeof keyOrCtx === "string" ? keyOrCtx : createStatementKey(keyOrCtx);
+    const key =
+      typeof keyOrCtx === "string" ? keyOrCtx : createStatementKey(keyOrCtx);
     return this.statementMap.get(key)?.top;
   }
 
   getStatementHeight(keyOrCtx: StatementKey | any): number | undefined {
-    const key = typeof keyOrCtx === "string" ? keyOrCtx : createStatementKey(keyOrCtx);
+    const key =
+      typeof keyOrCtx === "string" ? keyOrCtx : createStatementKey(keyOrCtx);
     return this.statementMap.get(key)?.height;
   }
 
   getStatementAnchors(
     keyOrCtx: StatementKey | any,
   ): Partial<Record<StatementAnchor, number>> | undefined {
-    const key = typeof keyOrCtx === "string" ? keyOrCtx : createStatementKey(keyOrCtx);
+    const key =
+      typeof keyOrCtx === "string" ? keyOrCtx : createStatementKey(keyOrCtx);
     return this.statementMap.get(key)?.anchors;
   }
 
@@ -282,7 +284,8 @@ export class VerticalCoordinates {
       stat.tcf?.();
     const commentHeight = this.measureComment(fragmentContext);
     const headerHeight = this.metrics.fragmentHeaderHeight;
-    let cursor = top + commentHeight + headerHeight + this.metrics.fragmentBodyGap;
+    let cursor =
+      top + commentHeight + headerHeight + this.metrics.fragmentBodyGap;
     if (fragmentContext?.parExpr?.()?.condition?.()) {
       cursor += this.metrics.fragmentConditionHeight;
     }
@@ -295,19 +298,30 @@ export class VerticalCoordinates {
     return { top, height, kind };
   }
 
-  private measureAlt(stat: any, top: number, origin: string): StatementCoordinate {
+  private measureAlt(
+    stat: any,
+    top: number,
+    origin: string,
+  ): StatementCoordinate {
     const alt = stat.alt();
     const commentHeight = this.measureComment(alt);
     const headerHeight = this.metrics.fragmentHeaderHeight;
-    let cursor = top + commentHeight + headerHeight + this.metrics.fragmentBodyGap;
+    let cursor =
+      top + commentHeight + headerHeight + this.metrics.fragmentBodyGap;
     const leftParticipant = this.findLeftParticipant(alt) || origin;
     const branches: FragmentBranch[] = [];
     const ifBlock = alt?.ifBlock();
     if (ifBlock) {
-      branches.push({ block: ifBlock.braceBlock()?.block(), conditioned: true });
+      branches.push({
+        block: ifBlock.braceBlock()?.block(),
+        conditioned: true,
+      });
     }
     alt?.elseIfBlock?.()?.forEach((block: any) => {
-      branches.push({ block: block?.braceBlock?.()?.block?.(), conditioned: true });
+      branches.push({
+        block: block?.braceBlock?.()?.block?.(),
+        conditioned: true,
+      });
     });
     const elseBlock = alt?.elseBlock?.()?.braceBlock?.()?.block?.();
     if (elseBlock) {
@@ -317,11 +331,7 @@ export class VerticalCoordinates {
       if (branch.conditioned) {
         cursor += this.metrics.fragmentConditionHeight;
       }
-      const branchEnd = this.layoutBlock(
-        branch.block,
-        cursor,
-        leftParticipant,
-      );
+      const branchEnd = this.layoutBlock(branch.block, cursor, leftParticipant);
       cursor = branchEnd;
       if (index < branches.length - 1) {
         cursor += this.metrics.fragmentBranchGap;
@@ -332,11 +342,16 @@ export class VerticalCoordinates {
     return { top, height, kind: "alt" };
   }
 
-  private measurePar(stat: any, top: number, origin: string): StatementCoordinate {
+  private measurePar(
+    stat: any,
+    top: number,
+    origin: string,
+  ): StatementCoordinate {
     const par = stat.par();
     const commentHeight = this.measureComment(par);
     const headerHeight = this.metrics.fragmentHeaderHeight;
-    let cursor = top + commentHeight + headerHeight + this.metrics.fragmentBodyGap;
+    let cursor =
+      top + commentHeight + headerHeight + this.metrics.fragmentBodyGap;
     if (par?.parExpr?.()?.condition?.()) {
       cursor += this.metrics.fragmentConditionHeight;
     }
@@ -375,7 +390,11 @@ export class VerticalCoordinates {
     if (!block) {
       return this.metrics.occurrenceMinHeight;
     }
-    const blockEnd = this.layoutBlock(block, top, participant || this.rootOrigin);
+    const blockEnd = this.layoutBlock(
+      block,
+      top,
+      participant || this.rootOrigin,
+    );
     const height = blockEnd - top;
     return Math.max(this.metrics.occurrenceMinHeight, height);
   }
