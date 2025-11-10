@@ -48,10 +48,10 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   creationMessageHeight: tw(10),
   returnMessageHeight: tw(8),
   occurrenceMinHeight: tw(6),
-  fragmentHeaderHeight: rem(2.5),
+  fragmentHeaderHeight: rem(1.5),
   fragmentConditionHeight: rem(1.5),
   fragmentPaddingBottom: tw(2.5),
-  fragmentBodyGap: tw(2),
+  fragmentBodyGap: 0,
   fragmentBranchGap: tw(2),
   dividerHeight: tw(10),
 };

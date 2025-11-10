@@ -164,8 +164,9 @@ export class VerticalCoordinates {
       case "opt":
       case "section":
       case "critical":
-      case "tcf":
         return this.measureSingleBlockFragment(stat, top, kind, origin);
+      case "tcf":
+        return this.measureTryCatchFinally(stat, top, origin);
       case "alt":
         return this.measureAlt(stat, top, origin);
       case "par":
@@ -204,6 +205,7 @@ export class VerticalCoordinates {
       const anchorTop = anchors.message!;
       if (prevTop == null || anchorTop < prevTop) {
         this.creationTopByParticipant.set(target, anchorTop);
+        console.debug("[VerticalCoordinates] creation anchor", target, anchorTop);
       }
     }
     return { top, height, kind: "creation", anchors };
@@ -292,8 +294,7 @@ export class VerticalCoordinates {
       stat.loop?.() ||
       stat.opt?.() ||
       stat.section?.() ||
-      stat.critical?.() ||
-      stat.tcf?.();
+      stat.critical?.();
     const commentHeight = this.measureComment(fragmentContext);
     const headerHeight = this.metrics.fragmentHeaderHeight;
     let cursor =
@@ -381,6 +382,40 @@ export class VerticalCoordinates {
     const headerHeight = this.metrics.fragmentHeaderHeight;
     const height = commentHeight + headerHeight + padding;
     return { top, height, kind: "ref" };
+  }
+
+  private measureTryCatchFinally(
+    stat: any,
+    top: number,
+    origin: string,
+  ): StatementCoordinate {
+    const tcf = stat.tcf();
+    const commentHeight = this.measureComment(tcf);
+    const headerHeight = this.metrics.fragmentHeaderHeight;
+    const leftParticipant = this.findLeftParticipant(tcf) || origin;
+    let cursor =
+      top + commentHeight + headerHeight + this.metrics.fragmentBodyGap;
+
+    const tryBlock = tcf?.tryBlock?.()?.braceBlock?.()?.block?.();
+    if (tryBlock) {
+      cursor = this.layoutBlock(tryBlock, cursor, leftParticipant);
+    }
+
+    const catchBlocks = tcf?.catchBlock?.() || [];
+    catchBlocks.forEach((catchBlock: any) => {
+      cursor += this.metrics.fragmentBranchGap;
+      const block = catchBlock?.braceBlock?.()?.block?.();
+      cursor = this.layoutBlock(block, cursor, leftParticipant);
+    });
+
+    const finallyBlock = tcf?.finallyBlock?.()?.braceBlock?.()?.block?.();
+    if (finallyBlock) {
+      cursor += this.metrics.fragmentBranchGap;
+      cursor = this.layoutBlock(finallyBlock, cursor, leftParticipant);
+    }
+
+    cursor += this.metrics.fragmentPaddingBottom;
+    return { top, height: cursor - top, kind: "tcf" };
   }
 
   private findLeftParticipant(ctx: any): string | undefined {
