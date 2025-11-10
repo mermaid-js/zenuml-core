@@ -15,6 +15,7 @@
     "test": "bun test src test/unit",
     "pw": "playwright test",
     "pw:ci": "playwright test",
+    "measure:layout": "COLLECT_LAYOUT_METRICS=1 playwright test tests/layout-metrics.spec.ts --reporter=line --project=chromium",
     "pw:update": "playwright test --update-snapshots",
     "pw:update-ci": "playwright test --update-snapshots --reporter=github",
     "pw:ui": "playwright test --ui",

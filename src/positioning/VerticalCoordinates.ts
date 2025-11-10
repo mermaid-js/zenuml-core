@@ -21,6 +21,7 @@ interface StatementCoordinate {
   height: number;
   kind: StatementKind;
   anchors?: Partial<Record<StatementAnchor, number>>;
+  meta?: Record<string, number>;
 }
 
 interface VerticalCoordinatesOptions {
@@ -113,17 +114,45 @@ export class VerticalCoordinates {
       return startTop;
     }
     let cursor = startTop + this.metrics.statementMarginTop;
+    let lastKind: StatementKind | undefined;
     statements.forEach((stat, index) => {
       const key = createStatementKey(stat);
+      if (
+        typeof window !== "undefined" &&
+        (window as any).__ZEN_CAPTURE_VERTICAL
+      ) {
+        const debugBlocks =
+          (window as any).__zenumlBlockDebug ||
+          ((window as any).__zenumlBlockDebug = []);
+        debugBlocks.push({
+          key,
+          startTop,
+          cursorStart: cursor,
+          kind: this.resolveKind(stat),
+          origin,
+          index,
+          count: statements.length,
+        });
+      }
       const kind = this.resolveKind(stat);
-      const coordinate = this.measureStatement(stat, cursor, kind, origin);
+      lastKind = kind;
+      const coordinate = this.measureStatement(
+        stat,
+        cursor,
+        kind,
+        origin,
+      );
       this.statementMap.set(key, coordinate);
       cursor += coordinate.height;
       if (index < statements.length - 1) {
         cursor += this.metrics.statementGap;
       }
     });
-    cursor += this.metrics.statementMarginBottom;
+    const bottomMargin =
+      lastKind === "return"
+        ? this.metrics.returnStatementMarginBottom
+        : this.metrics.statementMarginBottom;
+    cursor += bottomMargin;
     return cursor;
   }
 
@@ -141,6 +170,35 @@ export class VerticalCoordinates {
     if (stat.asyncMessage()) return "async";
     if (stat.divider()) return "divider";
     return "return";
+  }
+
+  private isInsideFragment(stat: any): boolean {
+    let parent = stat?.parentCtx;
+    while (parent) {
+      if (typeof parent.alt === "function" && parent.alt()) {
+        return true;
+      }
+      if (typeof parent.loop === "function" && parent.loop()) {
+        return true;
+      }
+      if (typeof parent.par === "function" && parent.par()) {
+        return true;
+      }
+      if (typeof parent.opt === "function" && parent.opt()) {
+        return true;
+      }
+      if (typeof parent.section === "function" && parent.section()) {
+        return true;
+      }
+      if (typeof parent.critical === "function" && parent.critical()) {
+        return true;
+      }
+      if (typeof parent.tcf === "function" && parent.tcf()) {
+        return true;
+      }
+      parent = parent.parentCtx;
+    }
+    return false;
   }
 
   private measureStatement(
@@ -208,7 +266,13 @@ export class VerticalCoordinates {
         console.debug("[VerticalCoordinates] creation anchor", target, anchorTop);
       }
     }
-    return { top, height, kind: "creation", anchors };
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      messageHeight,
+      occurrenceHeight,
+      returnHeight: assignment ? this.metrics.returnMessageHeight : 0,
+    };
+    return { top, height, kind: "creation", anchors, meta };
   }
 
   private measureSync(stat: any, top: number): StatementCoordinate {
@@ -222,10 +286,19 @@ export class VerticalCoordinates {
       ? this.metrics.selfInvocationHeight
       : this.metrics.messageHeight;
     const occurrenceTop = messageTop + messageHeight;
+    const hasBlock = Boolean(
+      messageContext?.braceBlock?.()?.block?.()?.stat?.()?.length,
+    );
+    const insideFragment = this.isInsideFragment(stat);
+    const minOccurrenceHeight =
+      insideFragment && !hasBlock
+        ? this.metrics.fragmentOccurrenceMinHeight
+        : this.metrics.occurrenceMinHeight;
     const occurrenceHeight = this.measureOccurrence(
       messageContext,
       occurrenceTop,
       target,
+      minOccurrenceHeight,
     );
     const assignee = messageContext?.Assignment?.()?.getText?.();
     const anchors: StatementCoordinate["anchors"] = {
@@ -240,7 +313,13 @@ export class VerticalCoordinates {
     if (commentHeight) {
       anchors.comment = top;
     }
-    return { top, height, kind: "sync", anchors };
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      messageHeight,
+      occurrenceHeight,
+      returnHeight: assignee && !isSelf ? this.metrics.returnMessageHeight : 0,
+    };
+    return { top, height, kind: "sync", anchors, meta };
   }
 
   private measureAsync(
@@ -252,8 +331,14 @@ export class VerticalCoordinates {
     const commentHeight = this.measureComment(asyncContext);
     const messageTop = top + commentHeight;
     const source =
-      asyncContext?.ProvidedFrom?.() || asyncContext?.Origin?.() || origin;
-    const target = asyncContext?.to?.()?.getFormattedText?.() || source;
+      asyncContext?.From?.() ||
+      asyncContext?.ProvidedFrom?.() ||
+      asyncContext?.Origin?.() ||
+      origin;
+    const target =
+      asyncContext?.Owner?.() ||
+      asyncContext?.to?.()?.getFormattedText?.() ||
+      source;
     const isSelf = source === target;
     const messageHeight = isSelf
       ? this.metrics.selfAsyncHeight
@@ -263,7 +348,12 @@ export class VerticalCoordinates {
       anchors.comment = top;
     }
     const height = commentHeight + messageHeight;
-    return { top, height, kind: "async", anchors };
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      messageHeight,
+      isSelf: isSelf ? 1 : 0,
+    };
+    return { top, height, kind: "async", anchors, meta };
   }
 
   private measureReturn(stat: any, top: number): StatementCoordinate {
@@ -275,7 +365,11 @@ export class VerticalCoordinates {
       anchors.comment = top;
     }
     const height = commentHeight + this.metrics.returnMessageHeight;
-    return { top, height, kind: "return", anchors };
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      messageHeight: this.metrics.returnMessageHeight,
+    };
+    return { top, height, kind: "return", anchors, meta };
   }
 
   private measureDivider(stat: any, top: number): StatementCoordinate {
@@ -297,10 +391,14 @@ export class VerticalCoordinates {
       stat.critical?.();
     const commentHeight = this.measureComment(fragmentContext);
     const headerHeight = this.metrics.fragmentHeaderHeight;
+    const hasCondition = Boolean(fragmentContext?.parExpr?.()?.condition?.());
+    const conditionHeight = hasCondition
+      ? this.metrics.fragmentConditionHeight
+      : 0;
     let cursor =
       top + commentHeight + headerHeight + this.metrics.fragmentBodyGap;
-    if (fragmentContext?.parExpr?.()?.condition?.()) {
-      cursor += this.metrics.fragmentConditionHeight;
+    if (hasCondition) {
+      cursor += conditionHeight;
     }
     const block = fragmentContext?.braceBlock?.()?.block?.();
     const leftParticipant = this.findLeftParticipant(fragmentContext) || origin;
@@ -308,7 +406,14 @@ export class VerticalCoordinates {
     cursor = blockEnd;
     cursor += this.metrics.fragmentPaddingBottom;
     const height = cursor - top;
-    return { top, height, kind };
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      headerHeight,
+      bodyGap: this.metrics.fragmentBodyGap,
+      conditionHeight,
+      paddingBottom: this.metrics.fragmentPaddingBottom,
+    };
+    return { top, height, kind, meta };
   }
 
   private measureAlt(
@@ -344,7 +449,11 @@ export class VerticalCoordinates {
       if (branch.conditioned) {
         cursor += this.metrics.fragmentConditionHeight;
       }
-      const branchEnd = this.layoutBlock(branch.block, cursor, leftParticipant);
+      const branchEnd = this.layoutBlock(
+        branch.block,
+        cursor,
+        leftParticipant,
+      );
       cursor = branchEnd;
       if (index < branches.length - 1) {
         cursor += this.metrics.fragmentBranchGap;
@@ -352,7 +461,17 @@ export class VerticalCoordinates {
     });
     cursor += this.metrics.fragmentPaddingBottom;
     const height = cursor - top;
-    return { top, height, kind: "alt" };
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      headerHeight,
+      bodyGap: this.metrics.fragmentBodyGap,
+      branchGap: this.metrics.fragmentBranchGap,
+      paddingBottom: this.metrics.fragmentPaddingBottom,
+      conditionHeight: this.metrics.fragmentConditionHeight,
+      branchCount: branches.length,
+      conditionedBranches: branches.filter((b) => b.conditioned).length,
+    };
+    return { top, height, kind: "alt", meta };
   }
 
   private measurePar(
@@ -373,7 +492,16 @@ export class VerticalCoordinates {
     const blockEnd = this.layoutBlock(block, cursor, leftParticipant);
     cursor = blockEnd + this.metrics.fragmentPaddingBottom;
     const height = cursor - top;
-    return { top, height, kind: "par" };
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      headerHeight,
+      bodyGap: this.metrics.fragmentBodyGap,
+      conditionHeight: par?.parExpr?.()?.condition?.()
+        ? this.metrics.fragmentConditionHeight
+        : 0,
+      paddingBottom: this.metrics.fragmentPaddingBottom,
+    };
+    return { top, height, kind: "par", meta };
   }
 
   private measureRef(stat: any, top: number): StatementCoordinate {
@@ -381,7 +509,12 @@ export class VerticalCoordinates {
     const padding = this.metrics.fragmentPaddingBottom;
     const headerHeight = this.metrics.fragmentHeaderHeight;
     const height = commentHeight + headerHeight + padding;
-    return { top, height, kind: "ref" };
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      headerHeight,
+      paddingBottom: padding,
+    };
+    return { top, height, kind: "ref", meta };
   }
 
   private measureTryCatchFinally(
@@ -415,7 +548,17 @@ export class VerticalCoordinates {
     }
 
     cursor += this.metrics.fragmentPaddingBottom;
-    return { top, height: cursor - top, kind: "tcf" };
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      headerHeight,
+      bodyGap: this.metrics.fragmentBodyGap,
+      branchGap: this.metrics.fragmentBranchGap,
+      paddingBottom: this.metrics.fragmentPaddingBottom,
+      tryBlock: tryBlock ? 1 : 0,
+      catchBlocks: catchBlocks.length,
+      finallyBlock: finallyBlock ? 1 : 0,
+    };
+    return { top, height: cursor - top, kind: "tcf", meta };
   }
 
   private findLeftParticipant(ctx: any): string | undefined {
@@ -432,18 +575,22 @@ export class VerticalCoordinates {
     context: any,
     top: number,
     participant?: string,
+    minHeight = this.metrics.occurrenceMinHeight,
   ): number {
     const block = context?.braceBlock?.()?.block?.();
     if (!block) {
-      return this.metrics.occurrenceMinHeight;
+      return minHeight;
     }
+    const inset = this.metrics.occurrenceContentInset;
+    const offset = Math.max(0, this.metrics.statementMarginTop - inset);
+    const blockStart = top - offset;
     const blockEnd = this.layoutBlock(
       block,
-      top,
+      blockStart,
       participant || this.rootOrigin,
     );
-    const height = blockEnd - top;
-    return Math.max(this.metrics.occurrenceMinHeight, height);
+    const height = blockEnd - blockStart - offset;
+    return Math.max(minHeight, height);
   }
 
   private measureComment(context: any): number {

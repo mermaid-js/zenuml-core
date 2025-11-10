@@ -47,6 +47,20 @@ export const LifeLine = (props: {
     logger.debug(
       `LifeLine top resolved for ${props.entity.name}: ${resolvedTop}px`,
     );
+    if (
+      typeof window !== "undefined" &&
+      (window as any).__ZEN_CAPTURE_VERTICAL
+    ) {
+      (window as any).__zenumlVerticalEntries = verticalCoordinates.entries();
+      const registry =
+        (window as any).__zenumlLifelineDebug ||
+        ((window as any).__zenumlLifelineDebug = {});
+      registry[props.entity.name] = {
+        creationTop,
+        resolvedTop,
+        lifelineLayerPaddingTop,
+      };
+    }
     setTop(resolvedTop);
     if (props.entity.name !== _STARTER_) {
       setLifelineReady((prev) =>

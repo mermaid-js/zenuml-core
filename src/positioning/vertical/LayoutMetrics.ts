@@ -23,6 +23,9 @@ export interface LayoutMetrics {
   fragmentBodyGap: number;
   fragmentBranchGap: number;
   dividerHeight: number;
+  occurrenceContentInset: number;
+  returnStatementMarginBottom: number;
+  fragmentOccurrenceMinHeight: number;
 }
 
 const SPACING_UNIT = 4; // Tailwind spacing scale unit (1 => 0.25rem => 4px)
@@ -40,20 +43,23 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   commentCodeLineHeight: rem(1.1),
   commentBlockSpacing: tw(2),
   commentPaddingY: tw(1),
-  commentMaxWidth: 360,
-  messageHeight: tw(4),
-  asyncMessageHeight: tw(10),
-  selfInvocationHeight: tw(10),
-  selfAsyncHeight: tw(10),
-  creationMessageHeight: tw(10),
-  returnMessageHeight: tw(8),
+  commentMaxWidth: 640,
+  messageHeight: 31,
+  asyncMessageHeight: 16,
+  selfInvocationHeight: 31,
+  selfAsyncHeight: 31,
+  creationMessageHeight: 38,
+  returnMessageHeight: 16,
   occurrenceMinHeight: tw(6),
+  fragmentOccurrenceMinHeight: 10,
   fragmentHeaderHeight: rem(1.5),
   fragmentConditionHeight: rem(1.5),
   fragmentPaddingBottom: tw(2.5),
   fragmentBodyGap: 0,
   fragmentBranchGap: tw(2),
   dividerHeight: tw(10),
+  occurrenceContentInset: 1,
+  returnStatementMarginBottom: 0,
 };
 
 export type ThemeName = string | null | undefined;

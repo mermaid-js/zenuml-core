@@ -3,6 +3,7 @@
 /playwright-report/
 /playwright/.cache/
 coverage
+tmp/
 
 .wrangler
 
