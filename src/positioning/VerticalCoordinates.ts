@@ -136,12 +136,7 @@ export class VerticalCoordinates {
       }
       const kind = this.resolveKind(stat);
       lastKind = kind;
-      const coordinate = this.measureStatement(
-        stat,
-        cursor,
-        kind,
-        origin,
-      );
+      const coordinate = this.measureStatement(stat, cursor, kind, origin);
       this.statementMap.set(key, coordinate);
       cursor += coordinate.height;
       if (index < statements.length - 1) {
@@ -263,7 +258,11 @@ export class VerticalCoordinates {
       const anchorTop = anchors.message!;
       if (prevTop == null || anchorTop < prevTop) {
         this.creationTopByParticipant.set(target, anchorTop);
-        console.debug("[VerticalCoordinates] creation anchor", target, anchorTop);
+        console.debug(
+          "[VerticalCoordinates] creation anchor",
+          target,
+          anchorTop,
+        );
       }
     }
     const meta: StatementCoordinate["meta"] = {
@@ -449,11 +448,7 @@ export class VerticalCoordinates {
       if (branch.conditioned) {
         cursor += this.metrics.fragmentConditionHeight;
       }
-      const branchEnd = this.layoutBlock(
-        branch.block,
-        cursor,
-        leftParticipant,
-      );
+      const branchEnd = this.layoutBlock(branch.block, cursor, leftParticipant);
       cursor = branchEnd;
       if (index < branches.length - 1) {
         cursor += this.metrics.fragmentBranchGap;
@@ -537,6 +532,7 @@ export class VerticalCoordinates {
     const catchBlocks = tcf?.catchBlock?.() || [];
     catchBlocks.forEach((catchBlock: any) => {
       cursor += this.metrics.fragmentBranchGap;
+      cursor += this.metrics.tcfSegmentHeaderHeight;
       const block = catchBlock?.braceBlock?.()?.block?.();
       cursor = this.layoutBlock(block, cursor, leftParticipant);
     });
@@ -544,6 +540,7 @@ export class VerticalCoordinates {
     const finallyBlock = tcf?.finallyBlock?.()?.braceBlock?.()?.block?.();
     if (finallyBlock) {
       cursor += this.metrics.fragmentBranchGap;
+      cursor += this.metrics.tcfSegmentHeaderHeight;
       cursor = this.layoutBlock(finallyBlock, cursor, leftParticipant);
     }
 

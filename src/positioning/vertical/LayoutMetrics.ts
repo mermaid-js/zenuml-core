@@ -26,6 +26,7 @@ export interface LayoutMetrics {
   occurrenceContentInset: number;
   returnStatementMarginBottom: number;
   fragmentOccurrenceMinHeight: number;
+  tcfSegmentHeaderHeight: number;
 }
 
 const SPACING_UNIT = 4; // Tailwind spacing scale unit (1 => 0.25rem => 4px)
@@ -51,7 +52,6 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   creationMessageHeight: 38,
   returnMessageHeight: 16,
   occurrenceMinHeight: tw(6),
-  fragmentOccurrenceMinHeight: 10,
   fragmentHeaderHeight: rem(1.5),
   fragmentConditionHeight: rem(1.5),
   fragmentPaddingBottom: tw(2.5),
@@ -60,6 +60,8 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   dividerHeight: tw(10),
   occurrenceContentInset: 1,
   returnStatementMarginBottom: 0,
+  fragmentOccurrenceMinHeight: 10,
+  tcfSegmentHeaderHeight: 18,
 };
 
 export type ThemeName = string | null | undefined;
