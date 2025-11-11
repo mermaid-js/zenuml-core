@@ -48,7 +48,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   messageHeight: 31,
   asyncMessageHeight: 16,
   selfInvocationHeight: 31,
-  selfAsyncHeight: 31,
+  selfAsyncHeight: 54,
   creationMessageHeight: 38,
   returnMessageHeight: 16,
   occurrenceMinHeight: tw(6),

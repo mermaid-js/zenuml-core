@@ -1,22 +1,25 @@
 import { test, expect } from "@playwright/test";
 import { initVerticalDebug, writeVerticalDebug } from "./utils/verticalDebug";
 
-test.describe("Smoke test", () => {
-  test("Self Sync Message at Root", async ({ page }) => {
+test.describe("Rendering", () => {
+  test("Async message - mini", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/self-sync-message-at-root.html");
-    // This line is to make sure the privacy icon is loaded
+    await page.goto("/cy/async-message-mini.html");
+
+    // Wait for privacy icon to be loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
     });
+
+    // Take screenshot for visual comparison
     try {
-      await expect(page).toHaveScreenshot({
+      await expect(page).toHaveScreenshot("async-message-mini.png", {
         threshold: 0.01,
         fullPage: true,
       });
     } finally {
       if (didEnableDebug) {
-        await writeVerticalDebug(page, "self-sync-message-at-root-debug");
+        await writeVerticalDebug(page, "async-message-mini-debug");
       }
     }
   });
