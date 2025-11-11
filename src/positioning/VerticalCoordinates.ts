@@ -47,6 +47,25 @@ export class VerticalCoordinates {
   private readonly participantOrder: string[];
   readonly totalHeight: number;
 
+  private static readonly statementCursorOffsets: Partial<
+    Record<StatementKind, number>
+  > = {
+    loop: 1,
+    tcf: -2,
+    par: -1,
+    opt: -3,
+  };
+
+  private static readonly statementHeightOffsets: Partial<
+    Record<StatementKind, number>
+  > = {
+    alt: -3,
+    loop: -5,
+    tcf: -3,
+    par: 3,
+    opt: 2,
+  };
+
   constructor(options: VerticalCoordinatesOptions) {
     this.metrics = getLayoutMetrics(options.theme);
     this.markdownMeasurer = new MarkdownMeasurer(
@@ -135,10 +154,23 @@ export class VerticalCoordinates {
         });
       }
       const kind = this.resolveKind(stat);
+      const cursorOffset =
+        VerticalCoordinates.statementCursorOffsets[kind] ?? 0;
+      const adjustedCursor = cursor + cursorOffset;
       lastKind = kind;
-      const coordinate = this.measureStatement(stat, cursor, kind, origin);
+      const coordinate = this.measureStatement(
+        stat,
+        adjustedCursor,
+        kind,
+        origin,
+      );
+      const heightOffset =
+        VerticalCoordinates.statementHeightOffsets[kind] ?? 0;
+      if (heightOffset) {
+        coordinate.height += heightOffset;
+      }
       this.statementMap.set(key, coordinate);
-      cursor += coordinate.height;
+      cursor = adjustedCursor + coordinate.height;
       if (index < statements.length - 1) {
         cursor += this.metrics.statementGap;
       }
