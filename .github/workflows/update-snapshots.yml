@@ -2,6 +2,7 @@ name: Update Playwright Snapshots for Linux
 
 on:
   workflow_dispatch:
+  pull_request:
 
 permissions:
   contents: write
@@ -40,9 +41,9 @@ jobs:
             git commit -m "chore: update Playwright snapshots for Linux CI
 
             Generated Linux-specific snapshots for chromium-linux platform.
-            
+
             🤖 Generated with [Claude Code](https://claude.ai/code)
-            
+
             Co-Authored-By: Claude <noreply@anthropic.com>"
             git push
           else
