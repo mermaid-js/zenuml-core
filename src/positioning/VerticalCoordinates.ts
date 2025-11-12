@@ -610,21 +610,16 @@ export class VerticalCoordinates {
     if (!block) {
       return minHeight;
     }
-    const insetTop = this.metrics.occurrenceContentInsetTop;
-    const insetBottom = this.metrics.occurrenceContentInsetBottom;
-    const blockStart =
-      top + insetTop - this.metrics.statementMarginTop;
+    const inset = this.metrics.occurrenceContentInset;
+    const offset = Math.max(0, this.metrics.statementMarginTop - inset);
+    const blockStart = top - offset;
     const blockEnd = this.layoutBlock(
       block,
       blockStart,
       participant || this.rootOrigin,
     );
-    const rawBlockHeight = blockEnd - blockStart;
-    const collapsedMargins =
-      this.metrics.statementMarginTop + this.metrics.statementMarginBottom;
-    const contentHeight = Math.max(0, rawBlockHeight - collapsedMargins);
-    const totalHeight = contentHeight + insetTop + insetBottom;
-    return Math.max(minHeight, totalHeight);
+    const height = blockEnd - blockStart - offset;
+    return Math.max(minHeight, height);
   }
 
   private measureComment(context: any): number {
