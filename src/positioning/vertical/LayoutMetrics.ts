@@ -24,6 +24,7 @@ export interface LayoutMetrics {
   fragmentBranchGap: number;
   dividerHeight: number;
   occurrenceContentInset: number;
+  creationOccurrenceContentInset: number;
   returnStatementMarginBottom: number;
   fragmentOccurrenceMinHeight: number;
   tcfSegmentHeaderHeight: number;
@@ -59,6 +60,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   fragmentBranchGap: tw(2),
   dividerHeight: tw(10),
   occurrenceContentInset: 1,
+  creationOccurrenceContentInset: 18,
   returnStatementMarginBottom: 0,
   fragmentOccurrenceMinHeight: 10,
   tcfSegmentHeaderHeight: 18,

@@ -274,6 +274,8 @@ export class VerticalCoordinates {
       creation,
       occurrenceTop,
       target,
+      undefined,
+      this.metrics.creationOccurrenceContentInset,
     );
     const assignment = creation?.creationBody?.()?.assignment?.();
     const anchors: StatementCoordinate["anchors"] = {
@@ -605,13 +607,14 @@ export class VerticalCoordinates {
     top: number,
     participant?: string,
     minHeight = this.metrics.occurrenceMinHeight,
+    contentInset = this.metrics.occurrenceContentInset,
   ): number {
     const block = context?.braceBlock?.()?.block?.();
     if (!block) {
       return minHeight;
     }
-    const inset = this.metrics.occurrenceContentInset;
-    const offset = Math.max(0, this.metrics.statementMarginTop - inset);
+    const inset = contentInset ?? this.metrics.occurrenceContentInset;
+    const offset = this.metrics.statementMarginTop - inset;
     const blockStart = top - offset;
     const blockEnd = this.layoutBlock(
       block,
