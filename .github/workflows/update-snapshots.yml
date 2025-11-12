@@ -45,7 +45,7 @@ jobs:
             🤖 Generated with [Claude Code](https://claude.ai/code)
 
             Co-Authored-By: Claude <noreply@anthropic.com>"
-            git push origin HEAD:feature/vertical-coordinates
+            git push
           else
             echo "No snapshot changes to commit"
           fi
