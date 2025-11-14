@@ -286,6 +286,21 @@ export class VerticalCoordinates {
     return false;
   }
 
+  private isSectionFragment(ctx: any): boolean {
+    return typeof ctx.section === "function" && ctx.section();
+  }
+
+  private getCreationVisualAdjustment(stat: any): number {
+    let parent = stat?.parentCtx;
+    while (parent) {
+      if (this.isSectionFragment(parent)) {
+        return this.metrics.creationSectionOffset;
+      }
+      parent = parent.parentCtx;
+    }
+    return 0;
+  }
+
   private measureStatement(
     stat: any,
     top: number,
@@ -346,6 +361,14 @@ export class VerticalCoordinates {
       height += this.metrics.returnMessageHeight;
     }
     const anchorAdjustment = this.getCreationAnchorOffset(stat);
+    const visualAdjustment = this.getCreationVisualAdjustment(stat);
+    if (visualAdjustment) {
+      anchors.message! -= visualAdjustment;
+      anchors.occurrence! -= visualAdjustment;
+      if (anchors.return != null) {
+        anchors.return -= visualAdjustment;
+      }
+    }
     if (target) {
       const prevTop = this.creationTopByParticipant.get(target);
       const anchorTop = anchors.message! + anchorAdjustment;
@@ -358,14 +381,16 @@ export class VerticalCoordinates {
         );
       }
     }
+    const adjustedTop = top - visualAdjustment;
     const meta: StatementCoordinate["meta"] = {
       commentHeight,
       messageHeight,
       occurrenceHeight,
       returnHeight: assignment ? this.metrics.returnMessageHeight : 0,
       anchorAdjustment,
+      visualAdjustment,
     };
-    return { top, height, kind: "creation", anchors, meta };
+    return { top: adjustedTop, height, kind: "creation", anchors, meta };
   }
 
   private measureSync(stat: any, top: number): StatementCoordinate {
