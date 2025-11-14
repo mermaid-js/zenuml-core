@@ -28,6 +28,8 @@ export interface LayoutMetrics {
   returnStatementMarginBottom: number;
   fragmentOccurrenceMinHeight: number;
   tcfSegmentHeaderHeight: number;
+  creationAltBranchOffset: number;
+  creationTcfSegmentOffset: number;
 }
 
 const SPACING_UNIT = 4; // Tailwind spacing scale unit (1 => 0.25rem => 4px)
@@ -64,6 +66,8 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   returnStatementMarginBottom: 0,
   fragmentOccurrenceMinHeight: 10,
   tcfSegmentHeaderHeight: 18,
+  creationAltBranchOffset: 13,
+  creationTcfSegmentOffset: 5,
 };
 
 export type ThemeName = string | null | undefined;

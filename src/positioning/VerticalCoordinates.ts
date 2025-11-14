@@ -228,6 +228,64 @@ export class VerticalCoordinates {
     return false;
   }
 
+  private getCreationAnchorOffset(stat: any): number {
+    let offset = 0;
+    let parent = stat?.parentCtx;
+    let appliedAlt = false;
+    let appliedTcf = false;
+    while (parent) {
+      if (!appliedAlt && this.altHasMultipleBranches(parent)) {
+        offset += this.metrics.creationAltBranchOffset;
+        appliedAlt = true;
+      }
+      if (!appliedTcf && this.isWithinTcfTrySegment(parent, stat)) {
+        offset += this.metrics.creationTcfSegmentOffset;
+        appliedTcf = true;
+      }
+      parent = parent.parentCtx;
+    }
+    return offset;
+  }
+
+  private altHasMultipleBranches(ctx: any): boolean {
+    if (typeof ctx.alt !== "function") {
+      return false;
+    }
+    const altContext = ctx.alt();
+    if (!altContext) {
+      return false;
+    }
+    const elseIfBlocks = altContext?.elseIfBlock?.() || [];
+    const hasElse = Boolean(altContext?.elseBlock?.());
+    return elseIfBlocks.length > 0 || hasElse;
+  }
+
+  private isWithinTcfTrySegment(parent: any, stat: any): boolean {
+    if (typeof parent.tcf !== "function") {
+      return false;
+    }
+    const tcfContext = parent.tcf();
+    if (!tcfContext) {
+      return false;
+    }
+    const tryBlock = tcfContext?.tryBlock?.()?.braceBlock?.()?.block?.();
+    if (!tryBlock) {
+      return false;
+    }
+    return this.isAncestorOf(tryBlock, stat);
+  }
+
+  private isAncestorOf(target: any, maybeDescendant: any): boolean {
+    let current = maybeDescendant;
+    while (current) {
+      if (current === target) {
+        return true;
+      }
+      current = current.parentCtx;
+    }
+    return false;
+  }
+
   private measureStatement(
     stat: any,
     top: number,
@@ -287,9 +345,10 @@ export class VerticalCoordinates {
       anchors.return = occurrenceTop + occurrenceHeight;
       height += this.metrics.returnMessageHeight;
     }
+    const anchorAdjustment = this.getCreationAnchorOffset(stat);
     if (target) {
       const prevTop = this.creationTopByParticipant.get(target);
-      const anchorTop = anchors.message!;
+      const anchorTop = anchors.message! + anchorAdjustment;
       if (prevTop == null || anchorTop < prevTop) {
         this.creationTopByParticipant.set(target, anchorTop);
         console.debug(
@@ -304,6 +363,7 @@ export class VerticalCoordinates {
       messageHeight,
       occurrenceHeight,
       returnHeight: assignment ? this.metrics.returnMessageHeight : 0,
+      anchorAdjustment,
     };
     return { top, height, kind: "creation", anchors, meta };
   }
