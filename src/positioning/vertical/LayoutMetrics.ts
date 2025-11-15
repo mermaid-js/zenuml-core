@@ -1,3 +1,8 @@
+/**
+ * Pixel perfect spacing contract shared between the server-side measurement pass
+ * and the browser renderer. Every constant mirrors a concrete CSS dimension so
+ * that we can reason about layout without querying the DOM.
+ */
 export interface LayoutMetrics {
   messageLayerPaddingTop: number;
   messageLayerPaddingBottom: number;
@@ -37,6 +42,7 @@ const SPACING_UNIT = 4; // Tailwind spacing scale unit (1 => 0.25rem => 4px)
 const rem = (value: number) => value * 16;
 const tw = (value: number) => value * SPACING_UNIT;
 
+/** Theme agnostic default values derived from the Tailwind config. */
 export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   messageLayerPaddingTop: tw(14), // pt-14 => 56px
   messageLayerPaddingBottom: tw(10), // pb-10 => 40px
@@ -80,6 +86,7 @@ const THEME_OVERRIDES: Record<string, Partial<LayoutMetrics>> = {
   },
 };
 
+/** Returns theme-specific overrides merged onto the baseline metrics. */
 export function getLayoutMetrics(theme: ThemeName): LayoutMetrics {
   if (!theme) {
     return DEFAULT_LAYOUT_METRICS;

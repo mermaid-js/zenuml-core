@@ -1,3 +1,4 @@
+/** Union of all supported statement types. */
 export type StatementKind =
   | "loop"
   | "alt"
@@ -13,4 +14,5 @@ export type StatementKind =
   | "divider"
   | "return";
 
+/** Named anchor points that consumers can use to align canvas layers. */
 export type StatementAnchor = "message" | "occurrence" | "comment" | "return";

@@ -1,3 +1,10 @@
+/**
+ * Server-side layout pass that mirrors the per-pixel measurements the browser would
+ * normally perform. The goal is to deterministically derive the vertical positions
+ * of every statement (messages, fragments, dividers, etc.) using only parser context
+ * and Theme metrics so that Playwright or any other DOM engine is no longer needed
+ * in rendering tests.
+ */
 import { WidthFunc } from "@/positioning/Coordinate";
 import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
 import {
@@ -16,6 +23,13 @@ import {
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 
+/**
+ * Cached measurements for one statement. `top` is relative to the block that
+ * owns the statement and `height` is the total vertical span. `anchors` exposes
+ * important vertical reference points (message line, occurrence top, etc.) so
+ * consumers can align other layers, while `meta` carries debugging telemetry to
+ * cross-check browser results.
+ */
 interface StatementCoordinate {
   top: number;
   height: number;
@@ -24,6 +38,12 @@ interface StatementCoordinate {
   meta?: Record<string, number>;
 }
 
+/**
+ * Constructor parameters required to detach layout from the browser. We feed the
+ * parser root context, a text width measuring function (mirroring canvas measureText
+ * in the browser), the theme-driven spacing metrics, and the participant ordering so
+ * async fragment traversals can infer their origin.
+ */
 interface VerticalCoordinatesOptions {
   rootContext: any;
   widthProvider: WidthFunc;
@@ -32,11 +52,18 @@ interface VerticalCoordinatesOptions {
   participantOrder: string[];
 }
 
+/** Lightweight descriptor used while measuring alt/loop fragments. */
 interface FragmentBranch {
   block?: any;
   conditioned?: boolean;
 }
 
+/**
+ * Walks the parsed AST and deterministically assigns vertical coordinates to every
+ * statement. The recursion mirrors how the renderer stacks statements inside blocks
+ * and fragments so the resulting heights match what Playwright would capture from
+ * the DOM.
+ */
 export class VerticalCoordinates {
   private readonly metrics: LayoutMetrics;
   private readonly statementMap = new Map<StatementKey, StatementCoordinate>();
@@ -47,6 +74,11 @@ export class VerticalCoordinates {
   private readonly participantOrder: string[];
   readonly totalHeight: number;
 
+  /**
+   * Small offsets that compensate for DOM specific margins when starting a
+   * statement. These were empirically derived by diffing Playwright screenshots
+   * and ensure fragment headers overlap the same pixels server-side.
+   */
   private static readonly statementCursorOffsets: Partial<
     Record<StatementKind, number>
   > = {
@@ -56,6 +88,10 @@ export class VerticalCoordinates {
     opt: -3,
   };
 
+  /**
+   * Similar to `statementCursorOffsets`, but applied to the measured height to
+   * emulate subtle DOM rounding differences (e.g. fragments with borders).
+   */
   private static readonly statementHeightOffsets: Partial<
     Record<StatementKind, number>
   > = {
@@ -66,6 +102,10 @@ export class VerticalCoordinates {
     opt: 2,
   };
 
+  /**
+   * Build the measurement helpers up-front and immediately walk the root block so
+   * that `totalHeight` and the internal lookup tables are populated for callers.
+   */
   constructor(options: VerticalCoordinatesOptions) {
     this.metrics = getLayoutMetrics(options.theme);
     this.markdownMeasurer = new MarkdownMeasurer(
@@ -120,6 +160,12 @@ export class VerticalCoordinates {
     return Array.from(this.statementMap.entries());
   }
 
+  /**
+   * Recursively walks the statements inside a block, applying the same stacking
+   * logic as the renderer. The method maintains a `cursor` that mimics DOM flow
+   * layout: add margin, measure the statement, push the cursor by its height,
+   * insert spacing, and finally add trailing block-specific padding.
+   */
   private layoutBlock(
     blockContext: any,
     startTop: number,
@@ -183,6 +229,11 @@ export class VerticalCoordinates {
     return cursor;
   }
 
+  /**
+   * Infers the semantic classification of a statement based on which optional
+   * parser methods return a value. This keeps the measuring logic independent
+   * from the concrete antlr-generated types.
+   */
   private resolveKind(stat: any): StatementKind {
     if (stat.loop()) return "loop";
     if (stat.alt()) return "alt";
@@ -199,6 +250,7 @@ export class VerticalCoordinates {
     return "return";
   }
 
+  /** Returns true if the statement lives inside any fragment (alt/loop/... ). */
   private isInsideFragment(stat: any): boolean {
     let parent = stat?.parentCtx;
     while (parent) {
@@ -228,6 +280,11 @@ export class VerticalCoordinates {
     return false;
   }
 
+  /**
+   * Creation messages inherit additional padding when rendered under ALTs or
+   * try/catch blocks. Instead of re-implementing the entire CSS cascade we just
+   * add empirically measured offsets here based on the ancestor contexts.
+   */
   private getCreationAnchorOffset(stat: any): number {
     let offset = 0;
     let parent = stat?.parentCtx;
@@ -247,6 +304,7 @@ export class VerticalCoordinates {
     return offset;
   }
 
+  /** Helper that matches the DOM behavior where creation arrows shift when ALT has >1 branch. */
   private altHasMultipleBranches(ctx: any): boolean {
     if (typeof ctx.alt !== "function") {
       return false;
@@ -260,6 +318,7 @@ export class VerticalCoordinates {
     return elseIfBlocks.length > 0 || hasElse;
   }
 
+  /** True when the statement sits inside the `try` segment of a try/catch/finally fragment. */
   private isWithinTcfTrySegment(parent: any, stat: any): boolean {
     if (typeof parent.tcf !== "function") {
       return false;
@@ -275,6 +334,7 @@ export class VerticalCoordinates {
     return this.isAncestorOf(tryBlock, stat);
   }
 
+  /** Cheap pointer-identity ancestry check that mirrors antlr parentCtx traversal. */
   private isAncestorOf(target: any, maybeDescendant: any): boolean {
     let current = maybeDescendant;
     while (current) {
@@ -286,10 +346,16 @@ export class VerticalCoordinates {
     return false;
   }
 
+  /** Sections render slightly differently, so we track them separately. */
   private isSectionFragment(ctx: any): boolean {
     return typeof ctx.section === "function" && ctx.section();
   }
 
+  /**
+   * Returns an additional offset when the creation arrow lives inside a SECTION
+   * fragment. The DOM applies extra padding there to keep the dashed borders in
+   * sync with the message head.
+   */
   private getCreationVisualAdjustment(stat: any): number {
     let parent = stat?.parentCtx;
     while (parent) {
@@ -301,6 +367,7 @@ export class VerticalCoordinates {
     return 0;
   }
 
+  /** Central dispatcher that routes each grammar node to the correct measuring routine. */
   private measureStatement(
     stat: any,
     top: number,
@@ -336,6 +403,12 @@ export class VerticalCoordinates {
     }
   }
 
+  /**
+   * Creation arrows are special because they mint the target participant and can
+   * optionally carry assignments. We therefore split the measurement into the
+   * comment, the arrow itself, its inline occurrence block, and an optional
+   * return arrow, tracking anchor offsets for later use.
+   */
   private measureCreation(stat: any, top: number): StatementCoordinate {
     const creation = stat.creation();
     const commentHeight = this.measureComment(creation);
@@ -393,6 +466,7 @@ export class VerticalCoordinates {
     return { top: adjustedTop, height, kind: "creation", anchors, meta };
   }
 
+  /** Measures synchronous messages and their occurrence blocks (if present). */
   private measureSync(stat: any, top: number): StatementCoordinate {
     const messageContext = stat.message();
     const commentHeight = this.measureComment(messageContext);
@@ -440,6 +514,7 @@ export class VerticalCoordinates {
     return { top, height, kind: "sync", anchors, meta };
   }
 
+  /** Async arrows never spawn occurrences, so we only care about the arrow height plus comments. */
   private measureAsync(
     stat: any,
     top: number,
@@ -474,6 +549,7 @@ export class VerticalCoordinates {
     return { top, height, kind: "async", anchors, meta };
   }
 
+  /** Mirrors the simple dotted return lines rendered above occurrences. */
   private measureReturn(stat: any, top: number): StatementCoordinate {
     const context = stat.ret();
     const commentHeight = this.measureComment(context);
@@ -490,11 +566,13 @@ export class VerticalCoordinates {
     return { top, height, kind: "return", anchors, meta };
   }
 
+  /** Dividers are fixed height boxes. */
   private measureDivider(stat: any, top: number): StatementCoordinate {
     const dividerHeight = this.metrics.dividerHeight;
     return { top, height: dividerHeight, kind: "divider" };
   }
 
+  /** Handles loop/opt/section/critical fragments that wrap a single block. */
   private measureSingleBlockFragment(
     stat: any,
     top: number,
@@ -534,6 +612,7 @@ export class VerticalCoordinates {
     return { top, height, kind, meta };
   }
 
+  /** Measures ALT fragments by iterating each branch sequentially, respecting gaps/conditions. */
   private measureAlt(
     stat: any,
     top: number,
@@ -588,6 +667,7 @@ export class VerticalCoordinates {
     return { top, height, kind: "alt", meta };
   }
 
+  /** PAR fragments behave like a single block with optional condition header. */
   private measurePar(
     stat: any,
     top: number,
@@ -618,6 +698,7 @@ export class VerticalCoordinates {
     return { top, height, kind: "par", meta };
   }
 
+  /** External references are rendered as header-only fragments. */
   private measureRef(stat: any, top: number): StatementCoordinate {
     const commentHeight = this.measureComment(stat.ref?.());
     const padding = this.metrics.fragmentPaddingBottom;
@@ -631,6 +712,7 @@ export class VerticalCoordinates {
     return { top, height, kind: "ref", meta };
   }
 
+  /** Dedicated routine for try/catch/finally because each segment has its own header. */
   private measureTryCatchFinally(
     stat: any,
     top: number,
@@ -677,6 +759,11 @@ export class VerticalCoordinates {
     return { top, height: cursor - top, kind: "tcf", meta };
   }
 
+  /**
+   * Mirrors the renderer heuristic for determining which participant anchors the
+   * fragment header. We prefer the leftmost participant in the scene order so
+   * nested fragments align consistently.
+   */
   private findLeftParticipant(ctx: any): string | undefined {
     if (!ctx) return undefined;
     const local = getLocalParticipantNames(ctx) || [];
@@ -687,6 +774,11 @@ export class VerticalCoordinates {
     );
   }
 
+  /**
+   * Measures the block nested under a message (the gray activation bar). We
+   * recursively layout the nested block starting above the actual occurrence so
+   * the measured height matches the DOM inset padding.
+   */
   private measureOccurrence(
     context: any,
     top: number,
@@ -710,6 +802,7 @@ export class VerticalCoordinates {
     return Math.max(minHeight, height);
   }
 
+  /** Delegates markdown comment height measurement so statements can offset properly. */
   private measureComment(context: any): number {
     if (!context?.getComment) {
       return 0;

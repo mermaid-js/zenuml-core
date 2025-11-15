@@ -18,12 +18,19 @@ const defaultTokensOptions = {
   breaks: true,
 };
 
+/**
+ * Lightweight renderer that approximates how markdown comments expand vertically
+ * within the diagram. We only need pixel-perfect heights, so the logic tokenizes
+ * the markdown via `marked` and sums up the equivalent line heights using the
+ * same font metrics the browser would use.
+ */
 export class MarkdownMeasurer {
   constructor(
     private readonly metrics: LayoutMetrics,
     private readonly widthProvider: WidthFunc,
   ) {}
 
+  /** Returns the total height for a markdown snippet, including block spacing. */
   measure(text: string | undefined | null): number {
     if (!text || !text.trim()) {
       return 0;
@@ -42,6 +49,7 @@ export class MarkdownMeasurer {
     return total;
   }
 
+  /** Matches each markdown token to the corresponding vertical footprint. */
   private measureToken(token: GenericToken): number {
     switch (token.type) {
       case "heading":
@@ -61,6 +69,7 @@ export class MarkdownMeasurer {
     }
   }
 
+  /** Splits the paragraph into lines and simulates wrapping using `widthProvider`. */
   private measureParagraph(text: string): number {
     const lines = text.split(/\n+/);
     return lines.reduce((acc, line) => {
@@ -75,6 +84,7 @@ export class MarkdownMeasurer {
     }, 0);
   }
 
+  /** Recursively measures bullet/numbered lists. */
   private measureList(items: ListItemToken[]): number {
     if (!items.length) {
       return this.metrics.commentLineHeight;
@@ -94,6 +104,7 @@ export class MarkdownMeasurer {
     return tokens.reduce((acc, token) => acc + this.measureToken(token), 0);
   }
 
+  /** Blockquotes introduce an extra line for the decorative border. */
   private measureBlockquote(tokens: GenericToken[]): number {
     if (!tokens.length) {
       return this.metrics.commentLineHeight;
@@ -102,6 +113,7 @@ export class MarkdownMeasurer {
     return nestedHeight + this.metrics.commentLineHeight; // border/padding approx
   }
 
+  /** Monospace blocks use a different line height plus padding. */
   private measureCode(text: string): number {
     const lines = text.split(/\n/).length || 1;
     return (
