@@ -55,7 +55,7 @@ interface VerticalCoordinatesOptions {
 /** Lightweight descriptor used while measuring alt/loop fragments. */
 interface FragmentBranch {
   block?: any;
-  conditioned?: boolean;
+  conditionHeight?: number;
 }
 
 /**
@@ -291,7 +291,11 @@ export class VerticalCoordinates {
     let appliedAlt = false;
     let appliedTcf = false;
     while (parent) {
-      if (!appliedAlt && this.altHasMultipleBranches(parent)) {
+      if (
+        !appliedAlt &&
+        this.altHasMultipleBranches(parent) &&
+        !this.isRootLevelStatement(parent)
+      ) {
         offset += this.metrics.creationAltBranchOffset;
         appliedAlt = true;
       }
@@ -349,6 +353,11 @@ export class VerticalCoordinates {
   /** Sections render slightly differently, so we track them separately. */
   private isSectionFragment(ctx: any): boolean {
     return typeof ctx.section === "function" && ctx.section();
+  }
+
+  private isRootLevelStatement(statCtx: any): boolean {
+    const block = statCtx?.parentCtx;
+    return block === this.rootBlock;
   }
 
   /**
@@ -629,22 +638,29 @@ export class VerticalCoordinates {
     if (ifBlock) {
       branches.push({
         block: ifBlock.braceBlock()?.block(),
-        conditioned: true,
+        conditionHeight: this.metrics.fragmentConditionHeight,
       });
     }
     alt?.elseIfBlock?.()?.forEach((block: any) => {
       branches.push({
         block: block?.braceBlock?.()?.block?.(),
-        conditioned: true,
+        conditionHeight: this.metrics.fragmentConditionHeight,
       });
     });
     const elseBlock = alt?.elseBlock?.()?.braceBlock?.()?.block?.();
     if (elseBlock) {
-      branches.push({ block: elseBlock, conditioned: true });
+      branches.push({
+        block: elseBlock,
+        conditionHeight: this.metrics.fragmentElseLabelHeight,
+      });
     }
+    let conditionedBranches = 0;
+    let totalConditionHeight = 0;
     branches.forEach((branch, index) => {
-      if (branch.conditioned) {
-        cursor += this.metrics.fragmentConditionHeight;
+      if (branch.conditionHeight) {
+        cursor += branch.conditionHeight;
+        conditionedBranches += 1;
+        totalConditionHeight += branch.conditionHeight;
       }
       const branchEnd = this.layoutBlock(branch.block, cursor, leftParticipant);
       cursor = branchEnd;
@@ -660,9 +676,9 @@ export class VerticalCoordinates {
       bodyGap: this.metrics.fragmentBodyGap,
       branchGap: this.metrics.fragmentBranchGap,
       paddingBottom: this.metrics.fragmentPaddingBottom,
-      conditionHeight: this.metrics.fragmentConditionHeight,
       branchCount: branches.length,
-      conditionedBranches: branches.filter((b) => b.conditioned).length,
+      conditionedBranches,
+      conditionHeight: totalConditionHeight,
     };
     return { top, height, kind: "alt", meta };
   }

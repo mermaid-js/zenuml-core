@@ -36,6 +36,7 @@ export interface LayoutMetrics {
   creationAltBranchOffset: number;
   creationTcfSegmentOffset: number;
   creationSectionOffset: number;
+  fragmentElseLabelHeight: number;
 }
 
 const SPACING_UNIT = 4; // Tailwind spacing scale unit (1 => 0.25rem => 4px)
@@ -76,6 +77,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   creationAltBranchOffset: 13,
   creationTcfSegmentOffset: 5,
   creationSectionOffset: 14,
+  fragmentElseLabelHeight: 13,
 };
 
 export type ThemeName = string | null | undefined;

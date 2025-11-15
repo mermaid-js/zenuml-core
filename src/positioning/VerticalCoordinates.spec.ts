@@ -3,6 +3,7 @@ import { VerticalCoordinates } from "./VerticalCoordinates";
 import { Coordinates } from "./Coordinates";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { WidthFunc, TextType } from "@/positioning/Coordinate";
+import { getLayoutMetrics } from "@/positioning/vertical/LayoutMetrics";
 
 const stubWidthProvider: WidthFunc = (text: string, type: TextType) => {
   const base = type === TextType.ParticipantName ? 10 : 8;
@@ -26,4 +27,54 @@ describe("VerticalCoordinates", () => {
     const entries = vertical.entries();
     expect(entries.length).toBeGreaterThan(0);
   });
+
+  it("aligns creation anchors inside alt branches", () => {
+    const code = `if (x) { new A } else { new B }`;
+    const context = RootContext(code);
+    const coordinates = new Coordinates(context, stubWidthProvider);
+    const participantOrder = coordinates.orderedParticipantNames();
+    const vertical = new VerticalCoordinates({
+      rootContext: context,
+      widthProvider: stubWidthProvider,
+      originParticipant: _STARTER_,
+      participantOrder,
+    });
+    const creations = vertical
+      .entries()
+      .filter(([, coord]) => coord.kind === "creation")
+      .map(([, coord]) => coord)
+      .sort((a, b) => a.top - b.top);
+    expect(creations).toHaveLength(2);
+
+    const metrics = getLayoutMetrics(undefined);
+    const altTop =
+      metrics.messageLayerPaddingTop + metrics.statementMarginTop;
+    const headerBottom = altTop + metrics.fragmentHeaderHeight;
+    const firstBlockStart =
+      headerBottom + metrics.fragmentBodyGap + metrics.fragmentConditionHeight;
+    const firstStatementTop = firstBlockStart + metrics.statementMarginTop;
+    const firstExpected = firstStatementTop;
+
+    const creationHeight =
+      metrics.creationMessageHeight + metrics.occurrenceMinHeight;
+    const afterFirstBlock =
+      firstStatementTop + creationHeight + metrics.statementMarginBottom;
+    const afterElseCondition =
+      afterFirstBlock +
+      metrics.fragmentBranchGap +
+      metrics.fragmentElseLabelHeight;
+    const secondStatementTop = afterElseCondition + metrics.statementMarginTop;
+    const secondExpected = secondStatementTop;
+
+    expect(creations[0].anchors?.message).toBe(firstExpected);
+    expect(creations[1].anchors?.message).toBe(secondExpected);
+
+    const creationTops = ["A", "B"].map((name) =>
+      vertical.getCreationTop(name),
+    );
+    expect(creationTops).toEqual(
+      creations.map((creation) => creation.anchors?.message),
+    );
+  });
+
 });
