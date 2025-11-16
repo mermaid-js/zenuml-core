@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { initVerticalDebug, writeVerticalDebug } from "./utils/verticalDebug";
 
-test.describe("Creation assignment", () => {
-  test("renders without regression", async ({ page }) => {
+test.describe("Rendering", () => {
+  test("creation assignment", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
     await page.goto("http://127.0.0.1:8080/cy/creation-assignment.html");
 
@@ -18,6 +18,28 @@ test.describe("Creation assignment", () => {
     } finally {
       if (didEnableDebug) {
         await writeVerticalDebug(page, "creation-assignment");
+      }
+    }
+  });
+
+  test("creation assignment with comments", async ({ page }) => {
+    const didEnableDebug = await initVerticalDebug(page);
+    await page.goto(
+      "http://127.0.0.1:8080/cy/creation-assignment-comments.html",
+    );
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    try {
+      await expect(page).toHaveScreenshot("creation-assignment-comments.png", {
+        threshold: 0.02,
+        fullPage: true,
+      });
+    } finally {
+      if (didEnableDebug) {
+        await writeVerticalDebug(page, "creation-assignment-comments");
       }
     }
   });
