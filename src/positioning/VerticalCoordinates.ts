@@ -360,6 +360,13 @@ export class VerticalCoordinates {
     return block === this.rootBlock;
   }
 
+  /** True when the statement is the first child within its parent block. */
+  private isFirstStatement(statCtx: any): boolean {
+    const block = statCtx?.parentCtx;
+    const statements: any[] = block?.stat?.() || [];
+    return statements.length > 0 && statements[0] === statCtx;
+  }
+
   /**
    * Returns an additional offset when the creation arrow lives inside a SECTION
    * fragment. The DOM applies extra padding there to keep the dashed borders in
@@ -445,7 +452,9 @@ export class VerticalCoordinates {
     const anchorAdjustment = this.getCreationAnchorOffset(stat);
     const visualAdjustment = this.getCreationVisualAdjustment(stat);
     const assignmentAdjustment =
-      assignment && this.isRootLevelStatement(stat)
+      assignment &&
+      this.isRootLevelStatement(stat) &&
+      !this.isFirstStatement(stat)
         ? this.metrics.creationAssignmentOffset
         : 0;
     const totalAdjustment = visualAdjustment + assignmentAdjustment;
@@ -477,7 +486,7 @@ export class VerticalCoordinates {
       anchorAdjustment,
       visualAdjustment,
       assignmentAdjustment: assignment
-        ? this.metrics.creationAssignmentOffset
+        ? assignmentAdjustment
         : 0,
     };
     return { top: adjustedTop, height, kind: "creation", anchors, meta };
