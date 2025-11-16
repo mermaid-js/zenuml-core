@@ -47,8 +47,7 @@ describe("VerticalCoordinates", () => {
     expect(creations).toHaveLength(2);
 
     const metrics = getLayoutMetrics(undefined);
-    const altTop =
-      metrics.messageLayerPaddingTop + metrics.statementMarginTop;
+    const altTop = metrics.messageLayerPaddingTop + metrics.statementMarginTop;
     const headerBottom = altTop + metrics.fragmentHeaderHeight;
     const firstBlockStart =
       headerBottom + metrics.fragmentBodyGap + metrics.fragmentConditionHeight;
@@ -77,4 +76,21 @@ describe("VerticalCoordinates", () => {
     );
   });
 
+  it("keeps inline messages flush with following creation assignments", () => {
+    const code = `A.message\na = new A()`;
+    const context = RootContext(code);
+    const coordinates = new Coordinates(context, stubWidthProvider);
+    const participantOrder = coordinates.orderedParticipantNames();
+    const vertical = new VerticalCoordinates({
+      rootContext: context,
+      widthProvider: stubWidthProvider,
+      originParticipant: _STARTER_,
+      participantOrder,
+    });
+    const statements = context?.block()?.stat?.() || [];
+    expect(vertical.getStatementTop(statements[0])).toBe(72);
+    expect(vertical.getStatementTop(statements[1])).toBe(128);
+    expect(vertical.getStatementHeight(statements[0])).toBe(55);
+    expect(vertical.getStatementHeight(statements[1])).toBe(78);
+  });
 });

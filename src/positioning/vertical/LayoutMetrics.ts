@@ -15,6 +15,11 @@ export interface LayoutMetrics {
   commentBlockSpacing: number;
   commentPaddingY: number;
   commentMaxWidth: number;
+  /**
+   * Height of a bare message arrow with no block/occurrence content.
+   * This comes from the `.message` element in the DOM (~16px).
+   */
+  messageInlineHeight: number;
   messageHeight: number;
   asyncMessageHeight: number;
   selfInvocationHeight: number;
@@ -37,6 +42,7 @@ export interface LayoutMetrics {
   creationTcfSegmentOffset: number;
   creationSectionOffset: number;
   fragmentElseLabelHeight: number;
+  creationAssignmentOffset: number;
 }
 
 const SPACING_UNIT = 4; // Tailwind spacing scale unit (1 => 0.25rem => 4px)
@@ -56,6 +62,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   commentBlockSpacing: tw(2),
   commentPaddingY: 0,
   commentMaxWidth: 640,
+  messageInlineHeight: 16,
   messageHeight: 31,
   asyncMessageHeight: 16,
   selfInvocationHeight: 31,
@@ -78,6 +85,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   creationTcfSegmentOffset: 5,
   creationSectionOffset: 14,
   fragmentElseLabelHeight: 13,
+  creationAssignmentOffset: 15,
 };
 
 export type ThemeName = string | null | undefined;

@@ -216,7 +216,7 @@ export class VerticalCoordinates {
         coordinate.height += heightOffset;
       }
       this.statementMap.set(key, coordinate);
-      cursor = adjustedCursor + coordinate.height;
+      cursor = coordinate.top + coordinate.height;
       if (index < statements.length - 1) {
         cursor += this.metrics.statementGap;
       }
@@ -444,11 +444,16 @@ export class VerticalCoordinates {
     }
     const anchorAdjustment = this.getCreationAnchorOffset(stat);
     const visualAdjustment = this.getCreationVisualAdjustment(stat);
-    if (visualAdjustment) {
-      anchors.message! -= visualAdjustment;
-      anchors.occurrence! -= visualAdjustment;
+    const assignmentAdjustment =
+      assignment && this.isRootLevelStatement(stat)
+        ? this.metrics.creationAssignmentOffset
+        : 0;
+    const totalAdjustment = visualAdjustment + assignmentAdjustment;
+    if (totalAdjustment) {
+      anchors.message! -= totalAdjustment;
+      anchors.occurrence! -= totalAdjustment;
       if (anchors.return != null) {
-        anchors.return -= visualAdjustment;
+        anchors.return -= totalAdjustment;
       }
     }
     if (target) {
@@ -463,7 +468,7 @@ export class VerticalCoordinates {
         );
       }
     }
-    const adjustedTop = top - visualAdjustment;
+    const adjustedTop = top - totalAdjustment;
     const meta: StatementCoordinate["meta"] = {
       commentHeight,
       messageHeight,
@@ -471,6 +476,9 @@ export class VerticalCoordinates {
       returnHeight: assignment ? this.metrics.returnMessageHeight : 0,
       anchorAdjustment,
       visualAdjustment,
+      assignmentAdjustment: assignment
+        ? this.metrics.creationAssignmentOffset
+        : 0,
     };
     return { top: adjustedTop, height, kind: "creation", anchors, meta };
   }
@@ -487,12 +495,9 @@ export class VerticalCoordinates {
       ? this.metrics.selfInvocationHeight
       : this.metrics.messageHeight;
     const occurrenceTop = messageTop + messageHeight;
-    const hasBlock = Boolean(
-      messageContext?.braceBlock?.()?.block?.()?.stat?.()?.length,
-    );
     const insideFragment = this.isInsideFragment(stat);
     const minOccurrenceHeight =
-      insideFragment && !hasBlock
+      insideFragment && !messageContext?.braceBlock?.()?.block?.()
         ? this.metrics.fragmentOccurrenceMinHeight
         : this.metrics.occurrenceMinHeight;
     const occurrenceHeight = this.measureOccurrence(
