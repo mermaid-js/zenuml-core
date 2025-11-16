@@ -95,7 +95,7 @@ export class VerticalCoordinates {
   private static readonly statementHeightOffsets: Partial<
     Record<StatementKind, number>
   > = {
-    alt: -3,
+    alt: 2,
     loop: -5,
     tcf: -3,
     par: 3,
