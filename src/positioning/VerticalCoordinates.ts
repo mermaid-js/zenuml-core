@@ -308,6 +308,21 @@ export class VerticalCoordinates {
     return offset;
   }
 
+  private getCreationAltBranchInset(stat: any): number {
+    const inset = this.metrics.creationAltBranchInset || 0;
+    if (!inset) {
+      return 0;
+    }
+    let parent = stat?.parentCtx;
+    while (parent) {
+      if (this.altHasMultipleBranches(parent)) {
+        return inset;
+      }
+      parent = parent.parentCtx;
+    }
+    return 0;
+  }
+
   /** Helper that matches the DOM behavior where creation arrows shift when ALT has >1 branch. */
   private altHasMultipleBranches(ctx: any): boolean {
     if (typeof ctx.alt !== "function") {
@@ -449,6 +464,14 @@ export class VerticalCoordinates {
       anchors.return = occurrenceTop + occurrenceHeight;
       height += this.metrics.returnMessageHeight;
     }
+    const altBranchInset = this.getCreationAltBranchInset(stat);
+    if (altBranchInset) {
+      anchors.message! += altBranchInset;
+      anchors.occurrence! += altBranchInset;
+      if (anchors.return != null) {
+        anchors.return += altBranchInset;
+      }
+    }
     const anchorAdjustment = this.getCreationAnchorOffset(stat);
     const visualAdjustment = this.getCreationVisualAdjustment(stat);
     const assignmentAdjustment =
@@ -488,6 +511,7 @@ export class VerticalCoordinates {
       assignmentAdjustment: assignment
         ? assignmentAdjustment
         : 0,
+      altBranchInset,
     };
     return { top: adjustedTop, height, kind: "creation", anchors, meta };
   }
