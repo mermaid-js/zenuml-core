@@ -464,7 +464,9 @@ export class VerticalCoordinates {
       anchors.return = occurrenceTop + occurrenceHeight;
       height += this.metrics.returnMessageHeight;
     }
-    const altBranchInset = this.getCreationAltBranchInset(stat);
+    const anchorAdjustment = this.getCreationAnchorOffset(stat);
+    const rawAltBranchInset = this.getCreationAltBranchInset(stat);
+    const altBranchInset = anchorAdjustment === 0 ? rawAltBranchInset : 0;
     if (altBranchInset) {
       anchors.message! += altBranchInset;
       anchors.occurrence! += altBranchInset;
@@ -472,7 +474,6 @@ export class VerticalCoordinates {
         anchors.return += altBranchInset;
       }
     }
-    const anchorAdjustment = this.getCreationAnchorOffset(stat);
     const visualAdjustment = this.getCreationVisualAdjustment(stat);
     const assignmentAdjustment =
       assignment &&
