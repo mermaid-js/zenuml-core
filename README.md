@@ -9,33 +9,6 @@ help documentation catch up with development.
 ZenUML allows even non-programmers to easily create beautiful sequence diagrams through
 the [ZenUML Live Editor](https://app.zenuml.com).
 
-```mermaid
-
-zenuml
-    title Order Service
-    @Actor Client #FFEBE6
-    @Boundary OrderController #0747A6
-    @EC2 <<BFF>> OrderService #E3FCEF
-    group BusinessService {
-      @Lambda PurchaseService
-      @AzureFunction InvoiceService
-    }
-
-    // `POST /orders`
-    OrderController.post(payload) {
-      OrderService.create(payload) {
-        order = new Order(payload1)
-        if(order != null) {
-          par {
-            PurchaseService.createPO(order)
-            InvoiceService.createInvoice(order)      
-          }      
-        }
-      }
-    }
-    
-```
-
 You can use it ZenUML on your favorite platforms and applications:
 
 - [Confluence](https://marketplace.atlassian.com/apps/1218380/zenuml-diagrams-for-confluence-freemium?hosting=cloud&tab=overview)
