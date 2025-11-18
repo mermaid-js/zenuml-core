@@ -20,23 +20,9 @@ import {
   StatementAnchor,
   StatementKind,
 } from "@/positioning/vertical/StatementTypes";
+import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-
-/**
- * Cached measurements for one statement. `top` is relative to the block that
- * owns the statement and `height` is the total vertical span. `anchors` exposes
- * important vertical reference points (message line, occurrence top, etc.) so
- * consumers can align other layers, while `meta` carries debugging telemetry to
- * cross-check browser results.
- */
-interface StatementCoordinate {
-  top: number;
-  height: number;
-  kind: StatementKind;
-  anchors?: Partial<Record<StatementAnchor, number>>;
-  meta?: Record<string, number>;
-}
 
 /**
  * Constructor parameters required to detach layout from the browser. We feed the
