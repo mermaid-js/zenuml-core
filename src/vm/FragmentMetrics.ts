@@ -1,3 +1,0 @@
-export const CONDITION_LABEL_HEIGHT = 24;
-export const FRAGMENT_SEGMENT_MARGIN = 8;
-export const REF_FRAGMENT_MIN_HEIGHT = 60;

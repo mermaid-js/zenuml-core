@@ -1,12 +1,10 @@
-import {
-  CONDITION_LABEL_HEIGHT,
-  FRAGMENT_SEGMENT_MARGIN,
-} from "./FragmentMetrics";
+import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { FragmentVM } from "./FragmentVM";
 import type { LayoutRuntime } from "./types";
-import { toArray } from "./toArray";
 
 export class FragmentTryCatchVM extends FragmentVM {
+  readonly kind = "tcf" as const;
+
   constructor(
     statement: any,
     private readonly tcf: any,
@@ -15,25 +13,47 @@ export class FragmentTryCatchVM extends FragmentVM {
     super(statement, runtime);
   }
 
-  protected fragmentBodyHeight(fragmentOrigin: string): number {
-    let height = 0;
+  public measure(top: number, origin: string): StatementCoordinate {
+    const { cursor: startCursor, commentHeight, headerHeight } =
+      this.beginFragment(this.tcf, top);
+    let cursor = startCursor;
+    const leftParticipant =
+      this.findLeftParticipant(this.tcf, origin) || origin;
 
     const tryBlock = this.tcf?.tryBlock?.()?.braceBlock?.()?.block?.();
-    height += this.blockHeight(tryBlock, fragmentOrigin);
+    if (tryBlock) {
+      cursor = this.layoutNestedBlock(tryBlock, leftParticipant, cursor);
+    }
 
-    const catchBlocks = toArray(this.tcf?.catchBlock?.());
+    const catchBlocks = this.tcf?.catchBlock?.() || [];
     catchBlocks.forEach((catchBlock: any) => {
-      height += FRAGMENT_SEGMENT_MARGIN + CONDITION_LABEL_HEIGHT;
+      cursor += this.metrics.fragmentBranchGap;
+      cursor += this.metrics.tcfSegmentHeaderHeight;
       const block = catchBlock?.braceBlock?.()?.block?.();
-      height += this.blockHeight(block, fragmentOrigin);
+      cursor = this.layoutNestedBlock(block, leftParticipant, cursor);
     });
 
     const finallyBlock = this.tcf?.finallyBlock?.()?.braceBlock?.()?.block?.();
     if (finallyBlock) {
-      height += FRAGMENT_SEGMENT_MARGIN + CONDITION_LABEL_HEIGHT;
-      height += this.blockHeight(finallyBlock, fragmentOrigin);
+      cursor += this.metrics.fragmentBranchGap;
+      cursor += this.metrics.tcfSegmentHeaderHeight;
+      cursor = this.layoutNestedBlock(finallyBlock, leftParticipant, cursor);
     }
 
-    return height;
+    const result = this.finalizeFragment(top, cursor, {
+      commentHeight,
+      headerHeight,
+      branchGap: this.metrics.fragmentBranchGap,
+      tryBlock: tryBlock ? 1 : 0,
+      catchBlocks: catchBlocks.length,
+      finallyBlock: finallyBlock ? 1 : 0,
+    });
+
+    return {
+      top: result.top,
+      height: result.height,
+      kind: this.kind,
+      meta: result.meta,
+    };
   }
 }

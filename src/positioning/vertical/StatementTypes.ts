@@ -12,7 +12,8 @@ export type StatementKind =
   | "sync"
   | "async"
   | "divider"
-  | "return";
+  | "return"
+  | "empty";
 
 /** Named anchor points that consumers can use to align canvas layers. */
 export type StatementAnchor = "message" | "occurrence" | "comment" | "return";

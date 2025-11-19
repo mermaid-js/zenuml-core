@@ -1,12 +1,10 @@
-import { _STARTER_ } from "@/parser/OrderedParticipants";
-import {
-  MESSAGE_HEIGHT,
-  SELF_INVOCATION_ASYNC_HEIGHT,
-} from "@/positioning/Constants";
+import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
 export class AsyncMessageStatementVM extends StatementVM {
+  readonly kind = "async" as const;
+
   constructor(
     statement: any,
     private readonly asyncMessage: any,
@@ -15,12 +13,33 @@ export class AsyncMessageStatementVM extends StatementVM {
     super(statement, runtime);
   }
 
-  protected heightAfterComment(origin: string): number {
+  public measure(top: number, origin: string): StatementCoordinate {
+    const asyncContext = this.asyncMessage;
+    const commentHeight = this.measureComment(asyncContext);
+    const messageTop = top + commentHeight;
+    const source =
+      asyncContext?.From?.() ||
+      asyncContext?.ProvidedFrom?.() ||
+      asyncContext?.Origin?.() ||
+      origin;
     const target =
-      this.asyncMessage?.to?.()?.getFormattedText?.() || origin || _STARTER_;
-    const source = this.asyncMessage?.ProvidedFrom?.() || origin || _STARTER_;
+      asyncContext?.Owner?.() ||
+      asyncContext?.to?.()?.getFormattedText?.() ||
+      source;
     const isSelf = source === target;
-
-    return isSelf ? SELF_INVOCATION_ASYNC_HEIGHT : MESSAGE_HEIGHT;
+    const messageHeight = isSelf
+      ? this.metrics.selfAsyncHeight
+      : this.metrics.asyncMessageHeight;
+    const anchors: StatementCoordinate["anchors"] = { message: messageTop };
+    if (commentHeight) {
+      anchors.comment = top;
+    }
+    const height = commentHeight + messageHeight;
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      messageHeight,
+      isSelf: isSelf ? 1 : 0,
+    };
+    return { top, height, kind: this.kind, anchors, meta };
   }
 }

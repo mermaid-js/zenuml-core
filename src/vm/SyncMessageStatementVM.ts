@@ -1,14 +1,11 @@
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import {
-  MESSAGE_HEIGHT,
-  OCCURRENCE_EMPTY_HEIGHT,
-  OCCURRENCE_WITH_CHILDREN_HEIGHT,
-  SELF_INVOCATION_SYNC_HEIGHT,
-} from "@/positioning/Constants";
+import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
 export class SyncMessageStatementVM extends StatementVM {
+  readonly kind = "sync" as const;
+
   constructor(
     statement: any,
     private readonly message: any,
@@ -17,24 +14,48 @@ export class SyncMessageStatementVM extends StatementVM {
     super(statement, runtime);
   }
 
-  protected heightAfterComment(origin: string): number {
-    const source = this.message?.From?.() || _STARTER_;
-    const target = this.message?.Owner?.() || origin || _STARTER_;
-    const nestedBlock = this.message?.braceBlock?.()?.block?.();
-    const hasNestedBlock = Boolean(nestedBlock);
+  public measure(top: number, origin: string): StatementCoordinate {
+    const messageContext = this.message;
+    const commentHeight = this.measureComment(messageContext);
+    const messageTop = top + commentHeight;
+    const source = messageContext?.From?.() || _STARTER_;
+    const target = messageContext?.Owner?.() || _STARTER_;
     const isSelf = source === target;
-
-    const baseHeight = isSelf
-      ? SELF_INVOCATION_SYNC_HEIGHT
-      : MESSAGE_HEIGHT +
-          (hasNestedBlock
-            ? OCCURRENCE_WITH_CHILDREN_HEIGHT
-            // Total height of sync statement without nested block is somehow
-            // 41px. MESSAGE_HEIGHT + OCCURRENCE_EMPTY_HEIGHT = 40px.
-            // This is a workaround.
-            : (OCCURRENCE_EMPTY_HEIGHT + 1));
-
-    const nestedHeight = this.blockHeight(nestedBlock, target);
-    return baseHeight + nestedHeight;
+    const messageHeight = isSelf
+      ? this.metrics.selfInvocationHeight
+      : this.metrics.messageHeight;
+    const occurrenceTop = messageTop + messageHeight;
+    const insideFragment = this.isInsideFragment(this.context);
+    const hasNestedBlock = Boolean(messageContext?.braceBlock?.()?.block?.());
+    const minOccurrenceHeight =
+      insideFragment && !hasNestedBlock
+        ? this.metrics.fragmentOccurrenceMinHeight
+        : this.metrics.occurrenceMinHeight;
+    const occurrenceHeight = this.measureOccurrence(
+      messageContext,
+      occurrenceTop,
+      target,
+      minOccurrenceHeight,
+    );
+    const assignee = messageContext?.Assignment?.()?.getText?.();
+    const anchors: StatementCoordinate["anchors"] = {
+      message: messageTop,
+      occurrence: occurrenceTop,
+    };
+    if (commentHeight) {
+      anchors.comment = top;
+    }
+    let height = commentHeight + messageHeight + occurrenceHeight;
+    if (assignee && !isSelf) {
+      anchors.return = occurrenceTop + occurrenceHeight;
+      height += this.metrics.returnMessageHeight;
+    }
+    const meta: StatementCoordinate["meta"] = {
+      commentHeight,
+      messageHeight,
+      occurrenceHeight,
+      returnHeight: assignee && !isSelf ? this.metrics.returnMessageHeight : 0,
+    };
+    return { top, height, kind: this.kind, anchors, meta };
   }
 }

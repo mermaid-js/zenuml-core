@@ -1,23 +1,28 @@
-import {
-  FRAGMENT_HEADER_HEIGHT,
-  FRAGMENT_MARGIN,
-  FRAGMENT_PADDING_BOTTOM,
-} from "@/positioning/Constants";
 import { StatementVM } from "./StatementVM";
 
 export abstract class FragmentVM extends StatementVM {
-  protected heightAfterComment(origin: string): number {
-    const fragmentOrigin = this.resolveFragmentOrigin(origin);
-    const bodyHeight = this.fragmentBodyHeight(fragmentOrigin);
-
-    return (
-      FRAGMENT_MARGIN +
-      FRAGMENT_HEADER_HEIGHT +
-      bodyHeight +
-      FRAGMENT_PADDING_BOTTOM +
-      FRAGMENT_MARGIN
-    );
+  protected beginFragment(context: any, top: number) {
+    const commentHeight = this.measureComment(context);
+    const headerHeight = this.metrics.fragmentHeaderHeight;
+    let cursor =
+      top + commentHeight + headerHeight + this.metrics.fragmentBodyGap;
+    return { cursor, commentHeight, headerHeight };
   }
 
-  protected abstract fragmentBodyHeight(fragmentOrigin: string): number;
+  protected finalizeFragment(
+    top: number,
+    cursor: number,
+    meta: Record<string, number>,
+  ) {
+    cursor += this.metrics.fragmentPaddingBottom;
+    return {
+      top,
+      height: cursor - top,
+      meta: {
+        paddingBottom: this.metrics.fragmentPaddingBottom,
+        bodyGap: this.metrics.fragmentBodyGap,
+        ...meta,
+      },
+    } as const;
+  }
 }

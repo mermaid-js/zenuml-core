@@ -7,8 +7,14 @@ export abstract class NodeVM {
     protected readonly runtime: LayoutRuntime,
   ) {}
 
-  protected blockHeight(blockContext: any, origin: string): number {
-    if (!blockContext) return 0;
-    return createBlockVM(blockContext, this.runtime).height(origin);
+  protected layoutBlock(
+    blockContext: any,
+    origin: string,
+    startTop: number,
+  ): number {
+    if (!blockContext) {
+      return startTop;
+    }
+    return createBlockVM(blockContext, this.runtime).layout(origin, startTop);
   }
 }

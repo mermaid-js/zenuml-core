@@ -1,12 +1,15 @@
-import {
-  CONDITION_LABEL_HEIGHT,
-  FRAGMENT_SEGMENT_MARGIN,
-} from "./FragmentMetrics";
+import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { FragmentVM } from "./FragmentVM";
 import type { LayoutRuntime } from "./types";
-import { toArray } from "./toArray";
+
+interface FragmentBranch {
+  block?: any;
+  conditionHeight?: number;
+}
 
 export class FragmentAltVM extends FragmentVM {
+  readonly kind = "alt" as const;
+
   constructor(
     statement: any,
     private readonly alt: any,
@@ -15,28 +18,63 @@ export class FragmentAltVM extends FragmentVM {
     super(statement, runtime);
   }
 
-  protected fragmentBodyHeight(fragmentOrigin: string): number {
-    let height = 0;
+  public measure(top: number, origin: string): StatementCoordinate {
+    const { cursor: startCursor, commentHeight, headerHeight } =
+      this.beginFragment(this.alt, top);
+    let cursor = startCursor;
+    const leftParticipant =
+      this.findLeftParticipant(this.alt, origin) || origin;
 
-    const ifBlock = this.alt?.ifBlock?.()?.braceBlock?.()?.block?.();
+    const branches: FragmentBranch[] = [];
+    const ifBlock = this.alt?.ifBlock?.();
     if (ifBlock) {
-      height += CONDITION_LABEL_HEIGHT;
-      height += this.blockHeight(ifBlock, fragmentOrigin);
+      branches.push({
+        block: ifBlock.braceBlock()?.block(),
+        conditionHeight: this.metrics.fragmentConditionHeight,
+      });
     }
-
-    const elseIfBlocks = toArray(this.alt?.elseIfBlock?.());
-    elseIfBlocks.forEach((elseIfBlock: any) => {
-      height += FRAGMENT_SEGMENT_MARGIN + CONDITION_LABEL_HEIGHT;
-      const block = elseIfBlock?.braceBlock?.()?.block?.();
-      height += this.blockHeight(block, fragmentOrigin);
+    this.alt?.elseIfBlock?.()?.forEach((block: any) => {
+      branches.push({
+        block: block?.braceBlock?.()?.block?.(),
+        conditionHeight: this.metrics.fragmentConditionHeight,
+      });
     });
-
     const elseBlock = this.alt?.elseBlock?.()?.braceBlock?.()?.block?.();
     if (elseBlock) {
-      height += FRAGMENT_SEGMENT_MARGIN + CONDITION_LABEL_HEIGHT;
-      height += this.blockHeight(elseBlock, fragmentOrigin);
+      branches.push({
+        block: elseBlock,
+        conditionHeight: this.metrics.fragmentElseLabelHeight,
+      });
     }
 
-    return height;
+    let conditionedBranches = 0;
+    let totalConditionHeight = 0;
+    branches.forEach((branch, index) => {
+      if (branch.conditionHeight) {
+        cursor += branch.conditionHeight;
+        conditionedBranches += 1;
+        totalConditionHeight += branch.conditionHeight;
+      }
+      cursor = this.layoutNestedBlock(branch.block, leftParticipant, cursor);
+      if (index < branches.length - 1) {
+        cursor += this.metrics.fragmentBranchGap;
+      }
+    });
+
+    const result = this.finalizeFragment(top, cursor, {
+      commentHeight,
+      headerHeight,
+      branchGap: this.metrics.fragmentBranchGap,
+      branchCount: branches.length,
+      conditionedBranches,
+      conditionHeight: totalConditionHeight,
+    });
+
+    return {
+      top: result.top,
+      height: result.height,
+      kind: this.kind,
+      meta: result.meta,
+    };
   }
 }
