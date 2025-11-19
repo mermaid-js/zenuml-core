@@ -52,7 +52,8 @@ describe("VerticalCoordinates", () => {
     const firstBlockStart =
       headerBottom + metrics.fragmentBodyGap + metrics.fragmentConditionHeight;
     const firstStatementTop = firstBlockStart + metrics.statementMarginTop;
-    const firstExpected = firstStatementTop;
+    const branchInset = metrics.creationAltBranchInset;
+    const firstExpected = firstStatementTop + branchInset;
 
     const creationHeight =
       metrics.creationMessageHeight + metrics.occurrenceMinHeight;
@@ -63,7 +64,7 @@ describe("VerticalCoordinates", () => {
       metrics.fragmentBranchGap +
       metrics.fragmentElseLabelHeight;
     const secondStatementTop = afterElseCondition + metrics.statementMarginTop;
-    const secondExpected = secondStatementTop;
+    const secondExpected = secondStatementTop + branchInset;
 
     expect(creations[0].anchors?.message).toBe(firstExpected);
     expect(creations[1].anchors?.message).toBe(secondExpected);

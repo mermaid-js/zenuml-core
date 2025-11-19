@@ -122,10 +122,7 @@ export class CreationStatementVM extends StatementVM {
     }
     let parent = this.context?.parentCtx;
     while (parent) {
-      if (
-        this.altHasMultipleBranches(parent) &&
-        !this.isRootLevelStatement(parent)
-      ) {
+      if (this.altHasMultipleBranches(parent)) {
         return inset;
       }
       parent = parent.parentCtx;
