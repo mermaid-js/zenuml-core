@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 import svgr from "vite-plugin-svgr";
+import { visualizer } from "rollup-plugin-visualizer";
 import { execSync } from "child_process";
 import { readFileSync } from "fs";
 
@@ -54,7 +55,17 @@ export default defineConfig({
       "@": resolve(__dirname, "./src"),
     },
   },
-  plugins: [svgr(), react(), cssInjectedByJsPlugin()],
+  plugins: [
+    svgr(),
+    react(),
+    cssInjectedByJsPlugin(),
+    visualizer({
+      filename: "dist/stats.html",
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+    }),
+  ],
   define: {
     "process.env.NODE_ENV": '"production"',
     "process.env.VITE_VERSION": JSON.stringify(packageJson.version),
