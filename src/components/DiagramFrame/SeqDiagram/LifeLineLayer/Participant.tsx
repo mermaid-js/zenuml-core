@@ -17,7 +17,8 @@ import { getElementDistanceToTop } from "@/utils/dom";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useRef } from "react";
 import { ParticipantLabel } from "./ParticipantLabel";
-import iconPath from "../../Tutorial/Icons";
+import { AsyncIcon } from "../../Tutorial/AsyncIcon";
+// import iconPath from "../../Tutorial/Icons"; // Removed eager import
 
 const INTERSECTION_ERROR_MARGIN = 10;
 
@@ -25,6 +26,7 @@ export const Participant = (props: {
   entity: Record<string, string>;
   offsetTop2?: number;
 }) => {
+  // ... (hooks remain same)
   const elRef = useRef<HTMLDivElement>(null);
   const mode = useAtomValue(modeAtom);
   const participants = useAtomValue(participantsAtom);
@@ -39,14 +41,12 @@ export const Participant = (props: {
 
   const labelPositions = Array.from(
     (participants.GetPositions(props.entity.name) as [number, number][]) ?? [],
-    // Sort the label positions in descending order to avoid index shifting when updating code
   ).sort((a, b) => b[0] - a[0]);
   const assigneePositions = Array.from(
     (participants.GetAssigneePositions(props.entity.name) as [
       number,
       number,
     ][]) ?? [],
-    // Sort the label positions in descending order to avoid index shifting when updating code
   ).sort((a, b) => b[0] - a[0]);
 
   const calcOffset = () => {
@@ -65,7 +65,6 @@ export const Participant = (props: {
     );
   };
 
-  // We use this method to simulate sticky behavior. CSS sticky is not working out of an iframe.
   const stickyVerticalOffset = mode === RenderMode.Static ? 0 : calcOffset();
 
   const backgroundColor = props.entity.color
@@ -85,9 +84,11 @@ export const Participant = (props: {
     }
     return brightnessIgnoreAlpha(bgColor) > 128 ? "#000" : "#fff";
   }, [props.entity.color]);
-  const icon = isDefaultStarter
-    ? iconPath["actor"]
-    : iconPath[props.entity.type?.toLowerCase() as "actor"];
+
+  // Determine icon key
+  const iconKey = isDefaultStarter
+    ? "actor"
+    : props.entity.type?.toLowerCase();
 
   return (
     <div
@@ -105,13 +106,11 @@ export const Participant = (props: {
       data-participant-id={props.entity.name}
     >
       <div className="flex items-center justify-center">
-        {icon && (
-          <div
+        {iconKey && (
+          <AsyncIcon
+            iconKey={iconKey}
             className="h-6 w-6 mr-1 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full"
-            aria-description={`icon for ${props.entity.name}`}
-            dangerouslySetInnerHTML={{
-              __html: icon,
-            }}
+            alt={`icon for ${props.entity.name}`}
           />
         )}
 
