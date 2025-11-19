@@ -112,6 +112,13 @@ export class CreationStatementVM extends StatementVM {
       }
       parent = parent.parentCtx;
     }
+    if (
+      this.metrics.creationParSiblingOffset &&
+      this.isDirectChildOfParBlock() &&
+      !this.isFirstStatement(this.context)
+    ) {
+      offset += this.metrics.creationParSiblingOffset;
+    }
     return offset;
   }
 
@@ -154,5 +161,27 @@ export class CreationStatementVM extends StatementVM {
       return false;
     }
     return this.isAncestorOf(tryBlock, this.context);
+  }
+
+  private isDirectChildOfParBlock(): boolean {
+    const parentStat = this.context;
+    if (!parentStat) {
+      return false;
+    }
+    let ancestor = parentStat.parentCtx;
+    while (ancestor) {
+      if (typeof ancestor.par === "function") {
+        const parContext = ancestor.par();
+        const block = parContext?.braceBlock?.()?.block?.();
+        if (block) {
+          const statements: any[] = block.stat?.() || [];
+          if (statements.some((stat) => stat === parentStat)) {
+            return true;
+          }
+        }
+      }
+      ancestor = ancestor.parentCtx;
+    }
+    return false;
   }
 }

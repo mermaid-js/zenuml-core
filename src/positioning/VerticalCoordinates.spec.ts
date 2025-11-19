@@ -77,6 +77,67 @@ describe("VerticalCoordinates", () => {
     );
   });
 
+  it("applies try/catch offsets to creation anchors", () => {
+    const code = `try { new A } catch { }`;
+    const context = RootContext(code);
+    const coordinates = new Coordinates(context, stubWidthProvider);
+    const participantOrder = coordinates.orderedParticipantNames();
+    const vertical = new VerticalCoordinates({
+      rootContext: context,
+      widthProvider: stubWidthProvider,
+      originParticipant: _STARTER_,
+      participantOrder,
+    });
+    const metrics = getLayoutMetrics(undefined);
+    const tryBlock = context
+      ?.block()
+      ?.stat?.()?.[0]
+      ?.tcf?.()
+      ?.tryBlock?.()
+      ?.braceBlock?.()
+      ?.block?.();
+    const tryStatements = tryBlock?.stat?.() || [];
+    const firstCreation = tryStatements[0];
+    const anchors = vertical.getStatementAnchors(firstCreation);
+    expect(anchors?.message).toBeDefined();
+    const creationTop = vertical.getCreationTop("A");
+    expect(creationTop).toBeDefined();
+    expect(creationTop).toBe((anchors?.message || 0) + metrics.creationTcfSegmentOffset);
+  });
+
+  it("applies additional inset to subsequent creations inside PAR", () => {
+    const code = `par { new A new B }`;
+    const context = RootContext(code);
+    const coordinates = new Coordinates(context, stubWidthProvider);
+    const participantOrder = coordinates.orderedParticipantNames();
+    const vertical = new VerticalCoordinates({
+      rootContext: context,
+      widthProvider: stubWidthProvider,
+      originParticipant: _STARTER_,
+      participantOrder,
+    });
+    const metrics = getLayoutMetrics(undefined);
+    const parBlock = context
+      ?.block()
+      ?.stat?.()?.[0]
+      ?.par?.()
+      ?.braceBlock?.()
+      ?.block?.();
+    const parStatements = parBlock?.stat?.() || [];
+    const firstCreation = parStatements[0];
+    const secondCreation = parStatements[1];
+    const firstAnchors = vertical.getStatementAnchors(firstCreation);
+    const secondAnchors = vertical.getStatementAnchors(secondCreation);
+    expect(firstAnchors?.message).toBeDefined();
+    expect(secondAnchors?.message).toBeDefined();
+    const firstDiff =
+      (vertical.getCreationTop("A") || 0) - (firstAnchors?.message || 0);
+    const secondDiff =
+      (vertical.getCreationTop("B") || 0) - (secondAnchors?.message || 0);
+    expect(firstDiff).toBe(0);
+    expect(secondDiff).toBe(metrics.creationParSiblingOffset);
+  });
+
   it("keeps inline messages flush with following creation assignments", () => {
     const code = `A.message\na = new A()`;
     const context = RootContext(code);
