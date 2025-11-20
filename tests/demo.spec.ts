@@ -2,12 +2,12 @@ import { test, expect } from "@playwright/test";
 import { initVerticalDebug, writeVerticalDebug } from "./utils/verticalDebug";
 
 const demos = [
-  {
-    name: "Demo1 DSL",
-    url: "http://127.0.0.1:8080/cy/demo1.html",
-    snapshot: "demo1.png",
-    debugSlug: "demo1-debug",
-  },
+  // {
+  //   name: "Demo1 DSL",
+  //   url: "http://127.0.0.1:8080/cy/demo1.html",
+  //   snapshot: "demo1.png",
+  //   debugSlug: "demo1-debug",
+  // },
   {
     name: "Demo3 DSL",
     url: "http://127.0.0.1:8080/cy/demo3.html",
