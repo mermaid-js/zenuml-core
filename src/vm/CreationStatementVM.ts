@@ -3,6 +3,13 @@ import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate"
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
+interface CreationOffsets {
+  anchorAdjustment: number;
+  altBranchInset: number;
+  visualAdjustment: number;
+  assignmentAdjustment: number;
+}
+
 export class CreationStatementVM extends StatementVM {
   readonly kind = "creation" as const;
 
@@ -29,58 +36,71 @@ export class CreationStatementVM extends StatementVM {
       this.metrics.creationOccurrenceContentInset,
     );
     const assignment = creation?.creationBody?.()?.assignment?.();
+
+    const offsets = this.calculateOffsets(assignment);
+
+    // Base anchors
     const anchors: Partial<Record<StatementAnchor, number>> = {
       message: messageTop,
       occurrence: occurrenceTop,
     };
+
     let height = commentHeight + messageHeight + occurrenceHeight;
     if (assignment) {
       anchors.return = occurrenceTop + occurrenceHeight;
       height += this.metrics.returnMessageHeight;
     }
 
-    const anchorAdjustment = this.getCreationAnchorOffset();
-    const rawAltBranchInset = this.getCreationAltBranchInset();
-    const altBranchInset = anchorAdjustment === 0 ? rawAltBranchInset : 0;
-    if (altBranchInset) {
-      anchors.message! += altBranchInset;
-      anchors.occurrence! += altBranchInset;
+    // Apply adjustments
+    // 1. Anchor adjustment (e.g. nested in Alt/Tcf/Par) shifts everything down
+    if (offsets.anchorAdjustment) {
+      anchors.message! += offsets.anchorAdjustment;
+      anchors.occurrence! += offsets.anchorAdjustment;
       if (anchors.return != null) {
-        anchors.return += altBranchInset;
+        anchors.return += offsets.anchorAdjustment;
       }
     }
 
-    const visualAdjustment = this.getCreationVisualAdjustment();
-    const assignmentAdjustment =
-      assignment &&
-      this.isRootLevelStatement(this.context) &&
-      !this.isFirstStatement(this.context)
-        ? this.metrics.creationAssignmentOffset
-        : 0;
-    const totalAdjustment = visualAdjustment + assignmentAdjustment;
-    if (totalAdjustment) {
-      anchors.message! -= totalAdjustment;
-      anchors.occurrence! -= totalAdjustment;
+    // 2. Alt branch inset (if not already adjusted by anchorAdjustment)
+    // Note: Original logic said "altBranchInset = anchorAdjustment === 0 ? rawAltBranchInset : 0"
+    // This implies if we have anchorAdjustment, we ignore altBranchInset.
+    if (offsets.altBranchInset && offsets.anchorAdjustment === 0) {
+      anchors.message! += offsets.altBranchInset;
+      anchors.occurrence! += offsets.altBranchInset;
       if (anchors.return != null) {
-        anchors.return -= totalAdjustment;
+        anchors.return += offsets.altBranchInset;
+      }
+    }
+
+    // 3. Visual adjustment (Section) and Assignment adjustment shift things UP
+    const totalUpwardAdjustment =
+      offsets.visualAdjustment + offsets.assignmentAdjustment;
+    if (totalUpwardAdjustment) {
+      anchors.message! -= totalUpwardAdjustment;
+      anchors.occurrence! -= totalUpwardAdjustment;
+      if (anchors.return != null) {
+        anchors.return -= totalUpwardAdjustment;
       }
     }
 
     if (target) {
-      const anchorTop = anchors.message! + anchorAdjustment;
-      this.updateCreationTop(target, anchorTop);
+      // The lifeline start should align with the message arrow
+      this.updateCreationTop(target, anchors.message!);
     }
 
-    const adjustedTop = top - totalAdjustment;
+    // The top of the statement block itself is adjusted by the upward adjustments
+    // (This matches original logic: adjustedTop = top - totalAdjustment)
+    const adjustedTop = top - totalUpwardAdjustment;
+
     const meta: StatementCoordinate["meta"] = {
       commentHeight,
       messageHeight,
       occurrenceHeight,
       returnHeight: assignment ? this.metrics.returnMessageHeight : 0,
-      anchorAdjustment,
-      visualAdjustment,
-      assignmentAdjustment: assignment ? assignmentAdjustment : 0,
-      altBranchInset,
+      anchorAdjustment: offsets.anchorAdjustment,
+      visualAdjustment: offsets.visualAdjustment,
+      assignmentAdjustment: offsets.assignmentAdjustment,
+      altBranchInset: offsets.altBranchInset,
     };
 
     return {
@@ -92,60 +112,70 @@ export class CreationStatementVM extends StatementVM {
     };
   }
 
-  private getCreationAnchorOffset(): number {
-    let offset = 0;
+  private calculateOffsets(assignment: any): CreationOffsets {
+    let anchorAdjustment = 0;
+    let altBranchInset = 0;
+    let visualAdjustment = 0;
+
+    // Traverse up once to gather all context-based offsets
     let parent = this.context?.parentCtx;
     let appliedAlt = false;
     let appliedTcf = false;
+
     while (parent) {
+      // Anchor Adjustments
       if (
         !appliedAlt &&
         this.altHasMultipleBranches(parent) &&
         !this.isRootLevelStatement(parent)
       ) {
-        offset += this.metrics.creationAltBranchOffset;
+        anchorAdjustment += this.metrics.creationAltBranchOffset;
         appliedAlt = true;
       }
       if (!appliedTcf && this.isWithinTcfTrySegment(parent)) {
-        offset += this.metrics.creationTcfSegmentOffset;
+        anchorAdjustment += this.metrics.creationTcfSegmentOffset;
         appliedTcf = true;
       }
+
+      // Alt Branch Inset
+      // Only if we haven't found one yet (closest ancestor wins?)
+      // Original logic: "while(parent) { if (altHasMultipleBranches) return inset; }"
+      // So yes, first one found.
+      if (altBranchInset === 0 && this.altHasMultipleBranches(parent)) {
+        altBranchInset = this.metrics.creationAltBranchInset || 0;
+      }
+
+      // Visual Adjustment (Section)
+      if (this.isSectionFragment(parent)) {
+        visualAdjustment = this.metrics.creationSectionOffset;
+      }
+
       parent = parent.parentCtx;
     }
+
+    // Par Sibling Offset
     if (
       this.metrics.creationParSiblingOffset &&
       this.isDirectChildOfParBlock() &&
       !this.isFirstStatement(this.context)
     ) {
-      offset += this.metrics.creationParSiblingOffset;
+      anchorAdjustment += this.metrics.creationParSiblingOffset;
     }
-    return offset;
-  }
 
-  private getCreationAltBranchInset(): number {
-    const inset = this.metrics.creationAltBranchInset || 0;
-    if (!inset) {
-      return 0;
-    }
-    let parent = this.context?.parentCtx;
-    while (parent) {
-      if (this.altHasMultipleBranches(parent)) {
-        return inset;
-      }
-      parent = parent.parentCtx;
-    }
-    return 0;
-  }
+    // Assignment Offset
+    const assignmentAdjustment =
+      assignment &&
+      this.isRootLevelStatement(this.context) &&
+      !this.isFirstStatement(this.context)
+        ? this.metrics.creationAssignmentOffset
+        : 0;
 
-  private getCreationVisualAdjustment(): number {
-    let parent = this.context?.parentCtx;
-    while (parent) {
-      if (this.isSectionFragment(parent)) {
-        return this.metrics.creationSectionOffset;
-      }
-      parent = parent.parentCtx;
-    }
-    return 0;
+    return {
+      anchorAdjustment,
+      altBranchInset,
+      visualAdjustment,
+      assignmentAdjustment,
+    };
   }
 
   private isWithinTcfTrySegment(parent: any): boolean {
