@@ -18,7 +18,6 @@ describe("VerticalCoordinates", () => {
     const participantOrder = coordinates.orderedParticipantNames();
     const vertical = new VerticalCoordinates({
       rootContext: context,
-      widthProvider: stubWidthProvider,
       originParticipant: _STARTER_,
       participantOrder,
     });
@@ -35,7 +34,6 @@ describe("VerticalCoordinates", () => {
     const participantOrder = coordinates.orderedParticipantNames();
     const vertical = new VerticalCoordinates({
       rootContext: context,
-      widthProvider: stubWidthProvider,
       originParticipant: _STARTER_,
       participantOrder,
     });
@@ -84,7 +82,6 @@ describe("VerticalCoordinates", () => {
     const participantOrder = coordinates.orderedParticipantNames();
     const vertical = new VerticalCoordinates({
       rootContext: context,
-      widthProvider: stubWidthProvider,
       originParticipant: _STARTER_,
       participantOrder,
     });
@@ -112,7 +109,6 @@ describe("VerticalCoordinates", () => {
     const participantOrder = coordinates.orderedParticipantNames();
     const vertical = new VerticalCoordinates({
       rootContext: context,
-      widthProvider: stubWidthProvider,
       originParticipant: _STARTER_,
       participantOrder,
     });
@@ -145,7 +141,6 @@ describe("VerticalCoordinates", () => {
     const participantOrder = coordinates.orderedParticipantNames();
     const vertical = new VerticalCoordinates({
       rootContext: context,
-      widthProvider: stubWidthProvider,
       originParticipant: _STARTER_,
       participantOrder,
     });

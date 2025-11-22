@@ -1,14 +1,11 @@
 import { LayoutMetrics } from "@/positioning/vertical/LayoutMetrics";
 import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
+import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 
 export interface LayoutRuntime {
   metrics: LayoutMetrics;
   markdown: MarkdownMeasurer;
 }
-
-import { LayoutMetrics } from "@/positioning/vertical/LayoutMetrics";
-import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
-import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 
 export interface LayoutRuntime {
   metrics: LayoutMetrics;

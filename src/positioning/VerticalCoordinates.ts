@@ -5,7 +5,6 @@
  * and Theme metrics so that Playwright or any other DOM engine is no longer needed
  * in rendering tests.
  */
-import { WidthFunc } from "@/positioning/Coordinate";
 import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
 import {
   getLayoutMetrics,
@@ -24,13 +23,11 @@ import { LayoutRuntime } from "@/vm/types";
 
 /**
  * Constructor parameters required to detach layout from the browser. We feed the
- * parser root context, a text width measuring function (mirroring canvas measureText
- * in the browser), the theme-driven spacing metrics, and the participant ordering so
+ * parser root context, the theme-driven spacing metrics, and the participant ordering so
  * async fragment traversals can infer their origin.
  */
 interface VerticalCoordinatesOptions {
   rootContext: any;
-  widthProvider: WidthFunc;
   theme?: ThemeName;
   originParticipant: string;
   participantOrder: string[];
@@ -59,10 +56,7 @@ export class VerticalCoordinates {
    */
   constructor(options: VerticalCoordinatesOptions) {
     this.metrics = getLayoutMetrics(options.theme);
-    this.markdownMeasurer = new MarkdownMeasurer(
-      this.metrics,
-      options.widthProvider,
-    );
+    this.markdownMeasurer = new MarkdownMeasurer(this.metrics);
     this.rootBlock = options.rootContext?.block?.() ?? options.rootContext;
     this.rootOrigin = options.originParticipant || _STARTER_;
     this.participantOrder = options.participantOrder;

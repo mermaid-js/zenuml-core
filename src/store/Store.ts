@@ -53,7 +53,6 @@ export const verticalCoordinatesAtom = atom((get) => {
       : ownableMessages[0].from || _STARTER_;
   return new VerticalCoordinates({
     rootContext,
-    widthProvider: WidthProviderOnBrowser,
     theme,
     originParticipant,
     participantOrder,

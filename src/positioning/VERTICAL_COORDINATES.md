@@ -4,13 +4,13 @@ This branch replaces browser-driven measurements with a deterministic, server-si
 
 ## Entry Point: `VerticalCoordinates`
 - File: `src/positioning/VerticalCoordinates.ts`
-- Inputs: `rootContext` (parser AST), `widthProvider` (mirrors canvas `measureText`), optional `theme`, `originParticipant`, and `participantOrder` (for fragment-origin decisions).
+- Inputs: `rootContext` (parser AST), optional `theme`, `originParticipant`, and `participantOrder` (for fragment-origin decisions).
 - Outputs: `totalHeight` plus lookup helpers: `getStatementTop/Height/Anchors`, `getCreationTop`, `entries()`, and padding getters mirrored from theme metrics.
 - Statement keys are stable `(start.stop)` ranges via `vertical/StatementIdentifier.ts`, so browser and server agree on lookups.
 
 ## Pipeline Overview
 1) **Metrics** — `vertical/LayoutMetrics.ts` codifies every CSS dimension (margins, paddings, message heights, fragment gaps, etc.). Theme overrides (e.g., `theme-clean-light`) merge on top of the defaults.
-2) **Markdown** — `vertical/MarkdownMeasurer.ts` tokenizes comments with `marked`, strips formatting, wraps with the provided `widthProvider`, and sums line heights using the same font metrics the renderer uses.
+2) **Markdown** — `vertical/MarkdownMeasurer.ts` tokenizes comments with `marked` and sums line heights (wrapping is ignored) using the same font metrics the renderer uses.
 3) **VM Layer** — `src/vm/*` mirrors the renderer’s stacking rules. `createBlockVM` walks `stat` nodes, instantiates a `StatementVM` per construct, and accumulates cursor positions with small offsets to match DOM quirks.
 4) **Recording** — Each `StatementVM.measure` returns a `StatementCoordinate` (top, height, anchors, meta). The runtime’s `recordCoordinate` stitches these into a map keyed by parser range; `updateCreationTop` captures the earliest creation anchor per participant for lifeline alignment.
 5) **Height Finish** — Layout starts at `messageLayerPaddingTop`, walks the root block, and adds `messageLayerPaddingBottom` to produce `totalHeight`.
@@ -35,7 +35,7 @@ This branch replaces browser-driven measurements with a deterministic, server-si
 
 ## Keeping It Accurate
 - Any CSS/tailwind spacing change must update `LayoutMetrics` (and theme overrides) to keep server math in sync with the DOM.
-- `widthProvider` should mirror the renderer’s `measureText` behaviour; mismatched fonts or dpi will skew wrapped comment heights.
+- Comment heights assume no line wrapping; adjust `commentLineHeight`/`commentCodeLineHeight` in `LayoutMetrics` if fonts change.
 - When adding a new statement type, implement a `StatementVM`, register it in `createStatementVM`, and extend `StatementTypes`/tests to lock the expected coordinates.
 
 ## What Changed From `main`
