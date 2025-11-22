@@ -20,9 +20,7 @@ const defaultTokensOptions = {
  * same font metrics the browser would use.
  */
 export class MarkdownMeasurer {
-  constructor(
-    private readonly metrics: LayoutMetrics,
-  ) {}
+  constructor(private readonly metrics: LayoutMetrics) {}
 
   /** Returns the total height for a markdown snippet, including block spacing. */
   measure(text: string | undefined | null): number {
