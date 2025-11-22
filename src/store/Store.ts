@@ -8,6 +8,19 @@ import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { CodeRange } from "../parser/CodeRange";
 
+type VerticalMode = "server" | "browser";
+
+const resolveVerticalMode = (): VerticalMode => {
+  if (typeof window !== "undefined") {
+    const mode = (window as any).__ZEN_VERTICAL_MODE;
+    if (mode === "browser") return "browser";
+    if (mode === "server") return "server";
+  }
+  return import.meta.env.VITE_VERTICAL_MODE === "browser"
+    ? "browser"
+    : "server";
+};
+
 /*
  * RenderMode
  * Static: Compatible with Mermaid which renders once and never update. It also disables sticky participants and hides the footer
@@ -38,7 +51,12 @@ export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), WidthProviderOnBrowser),
 );
 
+export const verticalModeAtom = atom<VerticalMode>(resolveVerticalMode());
+
 export const verticalCoordinatesAtom = atom((get) => {
+  if (get(verticalModeAtom) === "browser") {
+    return null;
+  }
   const rootContext = get(rootContextAtom);
   if (!rootContext) {
     return null;

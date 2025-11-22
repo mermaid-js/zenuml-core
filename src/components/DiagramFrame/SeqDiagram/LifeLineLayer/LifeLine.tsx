@@ -2,6 +2,7 @@ import {
   coordinatesAtom,
   lifelineReadyAtom,
   verticalCoordinatesAtom,
+  verticalModeAtom,
 } from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
@@ -23,51 +24,79 @@ export const LifeLine = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const coordinates = useAtomValue(coordinatesAtom);
   const verticalCoordinates = useAtomValue(verticalCoordinatesAtom);
+  const verticalMode = useAtomValue(verticalModeAtom);
   const setLifelineReady = useSetAtom(lifelineReadyAtom);
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
-
   const left =
     centerOf(coordinates, props.entity.name) - (props.groupLeft || 0);
+  console.log("verticalMode: ", verticalMode);
 
   useEffect(() => {
-    if (!verticalCoordinates) {
-      return;
-    }
-    const creationTop = verticalCoordinates.getCreationTop(props.entity.name);
-    const lifelineLayerPaddingTop =
-      verticalCoordinates.getLifelineLayerPaddingTop();
-    const resolvedTop =
-      creationTop != null
-        ? Math.max(
-            PARTICIPANT_TOP_SPACE_FOR_GROUP,
-            creationTop - lifelineLayerPaddingTop,
-          )
-        : PARTICIPANT_TOP_SPACE_FOR_GROUP;
-    logger.debug(
-      `LifeLine top resolved for ${props.entity.name}: ${resolvedTop}px`,
-    );
-    if (
-      typeof window !== "undefined" &&
-      (window as any).__ZEN_CAPTURE_VERTICAL
-    ) {
-      (window as any).__zenumlVerticalEntries = verticalCoordinates.entries();
-      const registry =
-        (window as any).__zenumlLifelineDebug ||
-        ((window as any).__zenumlLifelineDebug = {});
-      registry[props.entity.name] = {
-        creationTop,
-        resolvedTop,
-        lifelineLayerPaddingTop,
-      };
-    }
-    setTop(resolvedTop);
-    if (props.entity.name !== _STARTER_) {
+    const resolveFromServer = () => {
+      if (!verticalCoordinates) return false;
+      const creationTop = verticalCoordinates.getCreationTop(props.entity.name);
+      const lifelineLayerPaddingTop =
+        verticalCoordinates.getLifelineLayerPaddingTop();
+      const resolvedTop =
+        creationTop != null
+          ? Math.max(
+              PARTICIPANT_TOP_SPACE_FOR_GROUP,
+              creationTop - lifelineLayerPaddingTop,
+            )
+          : PARTICIPANT_TOP_SPACE_FOR_GROUP;
+      logger.debug(
+        `LifeLine top resolved for ${props.entity.name}: ${resolvedTop}px`,
+      );
+      if (
+        typeof window !== "undefined" &&
+        (window as any).__ZEN_CAPTURE_VERTICAL
+      ) {
+        (window as any).__zenumlVerticalEntries = verticalCoordinates.entries();
+        const registry =
+          (window as any).__zenumlLifelineDebug ||
+          ((window as any).__zenumlLifelineDebug = {});
+        registry[props.entity.name] = {
+          creationTop,
+          resolvedTop,
+          lifelineLayerPaddingTop,
+        };
+      }
+      setTop(resolvedTop);
+      return true;
+    };
+
+    const resolveFromBrowser = () => {
+      if (typeof window === "undefined") return false;
+      const messageLayer = document.querySelector(
+        ".message-layer",
+      ) as HTMLElement | null;
+      if (!messageLayer) return false;
+      const messageLayerTop = messageLayer.getBoundingClientRect().top;
+      const creations = Array.from(
+        document.querySelectorAll(
+          `[data-type="creation"][data-to="${props.entity.name}"]`,
+        ) as NodeListOf<HTMLElement>,
+      );
+      if (!creations.length) return false;
+      const earliest = Math.min(
+        ...creations.map(
+          (el) => el.getBoundingClientRect().top - messageLayerTop,
+        ),
+      );
+      const resolvedTop = Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, earliest);
+      setTop(resolvedTop);
+      return true;
+    };
+
+    const resolved =
+      verticalMode === "server" ? resolveFromServer() : resolveFromBrowser();
+    if (resolved && props.entity.name !== _STARTER_) {
       setLifelineReady((prev) =>
         prev.includes(props.entity.name) ? prev : [...prev, props.entity.name],
       );
     }
-  }, [props.entity.name, verticalCoordinates, setLifelineReady]);
+  }, [props.entity.name, verticalCoordinates, verticalMode, setLifelineReady]);
 
   return (
     <div

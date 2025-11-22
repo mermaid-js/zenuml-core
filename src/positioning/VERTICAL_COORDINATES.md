@@ -32,6 +32,7 @@ This branch replaces browser-driven measurements with a deterministic, server-si
 - Rendering: use anchors (`message | occurrence | comment | return`) to align message arrows, occurrences, comments, and return arrows between canvas/SVG layers.
 - Lifelines: call `getCreationTop(participant)` to position lifeline start points based on the earliest creation anchor.
 - Testing: `src/positioning/VerticalCoordinates.spec.ts` covers creation offsets, ALT alignment, try/catch adjustments, PAR sibling inset, and inline message/creation spacing.
+- Snapshots: run Playwright with `VITE_VERTICAL_MODE=browser` to bypass server-side coordinates and let DOM measurements drive layout when regenerating screenshots (`playwright test --update-snapshots`). Default is `server`.
 
 ## Keeping It Accurate
 - Any CSS/tailwind spacing change must update `LayoutMetrics` (and theme overrides) to keep server math in sync with the DOM.
