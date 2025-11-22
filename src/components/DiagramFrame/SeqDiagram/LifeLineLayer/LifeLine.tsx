@@ -93,21 +93,23 @@ export const LifeLine = (props: {
       return true;
     };
 
-    const resolved =
-      verticalMode === "server"
-        ? resolveFromServer()
-        : (updateTopFromBrowser(), true);
-    if (resolved && props.entity.name !== _STARTER_) {
-      setLifelineReady((prev) =>
-        prev.includes(props.entity.name) ? prev : [...prev, props.entity.name],
-      );
-    }
-
-    if (verticalMode === "browser") {
+    if (verticalMode === "server") {
+      resolveFromServer();
+    } else {
       const rerun = () => setTimeout(updateTopFromBrowser, 0);
       setTimeout(updateTopFromBrowser, 0);
       EventBus.on("participant_set_top", rerun);
       return () => EventBus.off("participant_set_top", rerun);
+    }
+
+    if (props.entity.name !== _STARTER_) {
+      setTimeout(() => {
+        setLifelineReady((prev) =>
+          prev.includes(props.entity.name)
+            ? prev
+            : [...prev, props.entity.name],
+        );
+      }, 0);
     }
   }, [
     props.entity.name,
