@@ -3,6 +3,7 @@ import {
   lifelineReadyAtom,
   verticalCoordinatesAtom,
   verticalModeAtom,
+  themeAtom,
 } from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
@@ -11,6 +12,7 @@ import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { getLayoutMetrics } from "@/positioning/vertical/LayoutMetrics";
 
 const logger = parentLogger.child({ name: "LifeLine" });
 
@@ -25,6 +27,7 @@ export const LifeLine = (props: {
   const coordinates = useAtomValue(coordinatesAtom);
   const verticalCoordinates = useAtomValue(verticalCoordinatesAtom);
   const verticalMode = useAtomValue(verticalModeAtom);
+  const theme = useAtomValue(themeAtom);
   const setLifelineReady = useSetAtom(lifelineReadyAtom);
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
@@ -73,6 +76,7 @@ export const LifeLine = (props: {
       ) as HTMLElement | null;
       if (!messageLayer) return false;
       const messageLayerTop = messageLayer.getBoundingClientRect().top;
+      const lifelinePadding = getLayoutMetrics(theme).lifelineLayerPaddingTop;
       const creations = Array.from(
         document.querySelectorAll(
           `[data-type="creation"][data-to="${props.entity.name}"]`,
@@ -84,7 +88,10 @@ export const LifeLine = (props: {
           (el) => el.getBoundingClientRect().top - messageLayerTop,
         ),
       );
-      const resolvedTop = Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, earliest);
+      const resolvedTop = Math.max(
+        PARTICIPANT_TOP_SPACE_FOR_GROUP,
+        earliest - lifelinePadding,
+      );
       setTop(resolvedTop);
       return true;
     };
@@ -96,7 +103,13 @@ export const LifeLine = (props: {
         prev.includes(props.entity.name) ? prev : [...prev, props.entity.name],
       );
     }
-  }, [props.entity.name, verticalCoordinates, verticalMode, setLifelineReady]);
+  }, [
+    props.entity.name,
+    verticalCoordinates,
+    verticalMode,
+    setLifelineReady,
+    theme,
+  ]);
 
   return (
     <div
