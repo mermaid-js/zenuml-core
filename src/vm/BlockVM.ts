@@ -8,7 +8,7 @@ export class BlockVM extends NodeVM {
 
   private static readonly cursorOffsets: Partial<Record<StatementKind, number>> = {
     loop: 1,
-    tcf: -2,
+    tcf: 0,
     par: -1,
     opt: -3,
   };
