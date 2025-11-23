@@ -99,7 +99,18 @@ describe("VerticalCoordinates", () => {
     expect(anchors?.message).toBeDefined();
     const creationTop = vertical.getCreationTop("A");
     expect(creationTop).toBeDefined();
-    expect(creationTop).toBe((anchors?.message || 0) + metrics.creationTcfSegmentOffset);
+
+    // The anchor already absorbs the try-segment inset, so creationTop should
+    // match it exactly rather than adding the offset again.
+    expect(creationTop).toBe(anchors?.message);
+
+    const expectedAnchor =
+      metrics.messageLayerPaddingTop + // root padding
+      metrics.statementMarginTop + // margin before the TCF fragment
+      metrics.fragmentHeaderHeight + // "try" header
+      metrics.statementMarginTop + // margin before the creation inside try
+      metrics.creationTcfSegmentOffset; // inset applied within try block
+    expect(anchors?.message).toBe(expectedAnchor);
   });
 
   it("applies additional inset to subsequent creations inside PAR", () => {
@@ -131,7 +142,17 @@ describe("VerticalCoordinates", () => {
     const secondDiff =
       (vertical.getCreationTop("B") || 0) - (secondAnchors?.message || 0);
     expect(firstDiff).toBe(0);
-    expect(secondDiff).toBe(metrics.creationParSiblingOffset);
+    expect(secondDiff).toBe(0);
+
+    // The sibling inset should already be baked into the second anchor.
+    const creationHeight =
+      metrics.creationMessageHeight + metrics.occurrenceMinHeight;
+    const expectedSecondAnchor =
+      (firstAnchors?.message || 0) +
+      creationHeight +
+      metrics.statementGap +
+      metrics.creationParSiblingOffset;
+    expect(secondAnchors?.message).toBe(expectedSecondAnchor);
   });
 
   it("keeps inline messages flush with following creation assignments", () => {
