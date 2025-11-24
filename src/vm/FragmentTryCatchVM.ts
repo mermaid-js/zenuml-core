@@ -14,8 +14,11 @@ export class FragmentTryCatchVM extends FragmentVM {
   }
 
   public measure(top: number, origin: string): StatementCoordinate {
-    const { cursor: startCursor, commentHeight, headerHeight } =
-      this.beginFragment(this.tcf, top);
+    const {
+      cursor: startCursor,
+      commentHeight,
+      headerHeight,
+    } = this.beginFragment(this.tcf, top);
     let cursor = startCursor;
     const leftParticipant =
       this.findLeftParticipant(this.tcf, origin) || origin;

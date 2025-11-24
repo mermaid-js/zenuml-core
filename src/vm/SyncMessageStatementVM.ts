@@ -14,7 +14,7 @@ export class SyncMessageStatementVM extends StatementVM {
     super(statement, runtime);
   }
 
-  public measure(top: number, origin: string): StatementCoordinate {
+  public measure(top: number): StatementCoordinate {
     const messageContext = this.message;
     const commentHeight = this.measureComment(messageContext);
     const messageTop = top + commentHeight;

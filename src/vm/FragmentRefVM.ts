@@ -9,7 +9,7 @@ export class FragmentRefVM extends FragmentVM {
     super(statement, runtime);
   }
 
-  public measure(top: number, _origin: string): StatementCoordinate {
+  public measure(top: number): StatementCoordinate {
     const context = this.context?.ref?.() || this.context;
     const commentHeight = this.measureComment(context);
     const headerHeight = this.metrics.fragmentHeaderHeight;

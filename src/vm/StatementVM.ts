@@ -132,7 +132,8 @@ export abstract class StatementVM extends NodeVM {
       if (typeof parent.par === "function" && parent.par()) return true;
       if (typeof parent.opt === "function" && parent.opt()) return true;
       if (typeof parent.section === "function" && parent.section()) return true;
-      if (typeof parent.critical === "function" && parent.critical()) return true;
+      if (typeof parent.critical === "function" && parent.critical())
+        return true;
       if (typeof parent.tcf === "function" && parent.tcf()) return true;
       parent = parent.parentCtx;
     }

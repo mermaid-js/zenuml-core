@@ -19,8 +19,11 @@ export class FragmentAltVM extends FragmentVM {
   }
 
   public measure(top: number, origin: string): StatementCoordinate {
-    const { cursor: startCursor, commentHeight, headerHeight } =
-      this.beginFragment(this.alt, top);
+    const {
+      cursor: startCursor,
+      commentHeight,
+      headerHeight,
+    } = this.beginFragment(this.alt, top);
     let cursor = startCursor;
     const leftParticipant =
       this.findLeftParticipant(this.alt, origin) || origin;

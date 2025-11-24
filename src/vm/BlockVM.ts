@@ -6,20 +6,21 @@ import { StatementKind } from "@/positioning/vertical/StatementTypes";
 export class BlockVM extends NodeVM {
   private readonly statements: any[];
 
-  private static readonly cursorOffsets: Partial<Record<StatementKind, number>> = {
+  private static readonly cursorOffsets: Partial<
+    Record<StatementKind, number>
+  > = {
     loop: 1,
-    tcf: 0,
     par: -1,
     opt: -3,
   };
 
-  private static readonly heightOffsets: Partial<Record<StatementKind, number>> = {
+  private static readonly heightOffsets: Partial<
+    Record<StatementKind, number>
+  > = {
     alt: 2,
     loop: -5,
-    tcf: 0,
     par: 3,
     opt: 2,
-    critical: 0,
   };
 
   constructor(context: any, runtime: LayoutRuntime) {
@@ -37,8 +38,7 @@ export class BlockVM extends NodeVM {
 
     this.statements.forEach((statement: any, index: number) => {
       const statementVM = createStatementVM(statement, this.runtime);
-      const cursorOffset =
-        BlockVM.cursorOffsets[statementVM.kind] ?? 0;
+      const cursorOffset = BlockVM.cursorOffsets[statementVM.kind] ?? 0;
       const measureTop = cursor + cursorOffset;
       const coordinate = statementVM.measure(measureTop, origin);
       const heightOffset = BlockVM.heightOffsets[statementVM.kind] ?? 0;

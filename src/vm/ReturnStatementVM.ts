@@ -12,7 +12,7 @@ export class ReturnStatementVM extends StatementVM {
     this.returnContext = statement?.ret?.();
   }
 
-  public measure(top: number, origin: string): StatementCoordinate {
+  public measure(top: number): StatementCoordinate {
     const context = this.returnContext || this.context;
     const commentHeight = this.measureComment(context);
     const messageTop = top + commentHeight;

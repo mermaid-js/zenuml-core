@@ -9,7 +9,7 @@ export class EmptyStatementVM extends StatementVM {
     super(statement, runtime);
   }
 
-  public measure(top: number, _origin: string): StatementCoordinate {
+  public measure(top: number): StatementCoordinate {
     return { top, height: 0, kind: this.kind };
   }
 }

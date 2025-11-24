@@ -1,4 +1,7 @@
-import { StatementAnchor, StatementKind } from "@/positioning/vertical/StatementTypes";
+import {
+  StatementAnchor,
+  StatementKind,
+} from "@/positioning/vertical/StatementTypes";
 
 export interface StatementCoordinate {
   top: number;

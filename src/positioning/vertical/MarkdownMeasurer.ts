@@ -64,10 +64,7 @@ export class MarkdownMeasurer {
   /** Splits the paragraph into lines; wrapping is ignored for server-side determinism. */
   private measureParagraph(text: string): number {
     const lines = text.split(/\n+/);
-    return lines.reduce(
-      (acc, _line) => acc + this.metrics.commentLineHeight,
-      0,
-    );
+    return lines.reduce((acc) => acc + this.metrics.commentLineHeight, 0);
   }
 
   /** Recursively measures bullet/numbered lists. */
