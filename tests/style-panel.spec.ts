@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Smoke test", () => {
   test("style-panel", async ({ page }) => {

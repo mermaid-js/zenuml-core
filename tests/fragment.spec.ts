@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { initVerticalDebug, writeVerticalDebug } from "./utils/verticalDebug";
 
 test.describe("Smoke test", () => {

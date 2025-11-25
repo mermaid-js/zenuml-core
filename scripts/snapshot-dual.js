@@ -53,7 +53,7 @@ async function restoreSnapshotDirs(fromRoot) {
 }
 
 function runPlaywright(mode) {
-  const env = { ...process.env, VITE_VERTICAL_MODE: mode };
+  const env = { ...process.env, VERTICAL_MODE: mode };
   const args = ["playwright", "test", "--update-snapshots", ...testsArg];
   const result = spawnSync("npx", args, {
     cwd: repoRoot,

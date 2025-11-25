@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Editable Label", () => {
   test("Special characters & extra spaces", async ({ page }) => {

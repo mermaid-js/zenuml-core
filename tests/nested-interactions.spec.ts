@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Nested Interactions Test", () => {
   test("should render nested interactions with fragment and self-invocation correctly", async ({
