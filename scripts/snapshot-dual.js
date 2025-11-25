@@ -19,6 +19,14 @@ const paths = {
   diff: path.join(tmpRoot, "diff"),
 };
 
+function snapshotsDirToSpecPath(dirName) {
+  return path.join("tests", dirName.replace(/-snapshots$/, ""));
+}
+
+function fileNameToTestName(file) {
+  return file.replace(/\.png$/, "").replace(/-chromium.*$/, "");
+}
+
 async function ensureDir(dir) {
   await fs.mkdir(dir, { recursive: true });
 }
@@ -66,6 +74,7 @@ function runPlaywright(mode) {
 }
 
 async function diffImages() {
+  const differences = [];
   await ensureDir(paths.diff);
   const serverDirs = await fs.readdir(paths.server, { withFileTypes: true });
   for (const dirent of serverDirs) {
@@ -103,15 +112,24 @@ async function diffImages() {
         );
         const outDir = path.join(paths.diff, baseName);
         await ensureDir(outDir);
-        await fs.writeFile(path.join(outDir, file.replace(/\.png$/, ".diff.png")), PNG.sync.write(diff));
+        const diffFileName = file.replace(/\.png$/, ".diff.png");
+        await fs.writeFile(path.join(outDir, diffFileName), PNG.sync.write(diff));
         if (diffPixels > 0) {
-          console.log(`${baseName}/${file}: ${diffPixels} differing pixels`);
+          differences.push({
+            snapshotDir: baseName,
+            file,
+            diffPixels,
+            specPath: snapshotsDirToSpecPath(baseName),
+            testName: fileNameToTestName(file),
+            diffPath: path.join(paths.diff, baseName, diffFileName),
+          });
         }
       } catch (err) {
         console.warn(`Diff failed for ${baseName}/${file}: ${err.message}`);
       }
     }
   }
+  return differences;
 }
 
 async function main() {
@@ -136,9 +154,24 @@ async function main() {
   await restoreSnapshotDirs(paths.original);
 
   // generate diffs
-  await diffImages();
+  const differences = await diffImages();
   console.log(`Snapshots saved under ${paths.server} and ${paths.browser}`);
   console.log(`Diff overlays saved under ${paths.diff}`);
+  if (differences.length === 0) {
+    console.log("All snapshots match between server and browser modes.");
+  } else {
+    console.log("Snapshots with differences:");
+    const sorted = differences.sort((a, b) => {
+      if (a.specPath === b.specPath) return a.testName.localeCompare(b.testName);
+      return a.specPath.localeCompare(b.specPath);
+    });
+    for (const diff of sorted) {
+      const relDiffPath = path.relative(repoRoot, diff.diffPath);
+      console.log(
+        `- ${diff.specPath} (test \"${diff.testName}\"): ${diff.snapshotDir}/${diff.file} -> ${diff.diffPixels} differing pixels [${relDiffPath}]`
+      );
+    }
+  }
 }
 
 main().catch((err) => {
