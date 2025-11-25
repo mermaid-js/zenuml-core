@@ -49,17 +49,6 @@ async function copySnapshotDirs(destRoot) {
   }
 }
 
-async function restoreSnapshotDirs(fromRoot) {
-  const dirs = await fs.readdir(fromRoot, { withFileTypes: true });
-  for (const dirent of dirs) {
-    if (!dirent.isDirectory()) continue;
-    const src = path.join(fromRoot, dirent.name);
-    const dest = path.join(repoRoot, "tests", dirent.name);
-    await fs.rm(dest, { recursive: true, force: true });
-    await fs.cp(src, dest, { recursive: true });
-  }
-}
-
 function runPlaywright(mode) {
   const env = { ...process.env, VERTICAL_MODE: mode };
   const args = ["playwright", "test", "--update-snapshots", ...testsArg];
@@ -101,19 +90,25 @@ async function diffImages() {
           console.warn(`Skipping ${file}: dimension mismatch`);
           continue;
         }
-        const diff = new PNG({ width: serverImg.width, height: serverImg.height });
+        const diff = new PNG({
+          width: serverImg.width,
+          height: serverImg.height,
+        });
         const diffPixels = pixelmatch(
           serverImg.data,
           browserImg.data,
           diff.data,
           serverImg.width,
           serverImg.height,
-          { threshold: 0.1 }
+          { threshold: 0.1 },
         );
         const outDir = path.join(paths.diff, baseName);
         await ensureDir(outDir);
         const diffFileName = file.replace(/\.png$/, ".diff.png");
-        await fs.writeFile(path.join(outDir, diffFileName), PNG.sync.write(diff));
+        await fs.writeFile(
+          path.join(outDir, diffFileName),
+          PNG.sync.write(diff),
+        );
         if (diffPixels > 0) {
           differences.push({
             snapshotDir: baseName,
@@ -134,24 +129,21 @@ async function diffImages() {
 
 async function main() {
   await ensureDir(tmpRoot);
-  const snapshotDirs = await listSnapshotDirs();
-  await fs.rm(paths.original, { recursive: true, force: true });
-  await ensureDir(paths.original);
+  // const snapshotDirs = await listSnapshotDirs();
+  // await fs.rm(paths.original, { recursive: true, force: true });
+  // await ensureDir(paths.original);
   // backup existing snapshots
-  await copySnapshotDirs(paths.original);
-
-  // server mode
-  runPlaywright("server");
-  await fs.rm(paths.server, { recursive: true, force: true });
-  await copySnapshotDirs(paths.server);
+  // await copySnapshotDirs(paths.original);
 
   // browser mode
   runPlaywright("browser");
   await fs.rm(paths.browser, { recursive: true, force: true });
   await copySnapshotDirs(paths.browser);
 
-  // restore originals to avoid dirty tree
-  await restoreSnapshotDirs(paths.original);
+  // server mode
+  runPlaywright("server");
+  await fs.rm(paths.server, { recursive: true, force: true });
+  await copySnapshotDirs(paths.server);
 
   // generate diffs
   const differences = await diffImages();
@@ -162,13 +154,14 @@ async function main() {
   } else {
     console.log("Snapshots with differences:");
     const sorted = differences.sort((a, b) => {
-      if (a.specPath === b.specPath) return a.testName.localeCompare(b.testName);
+      if (a.specPath === b.specPath)
+        return a.testName.localeCompare(b.testName);
       return a.specPath.localeCompare(b.specPath);
     });
     for (const diff of sorted) {
       const relDiffPath = path.relative(repoRoot, diff.diffPath);
       console.log(
-        `- ${diff.specPath} (test \"${diff.testName}\"): ${diff.snapshotDir}/${diff.file} -> ${diff.diffPixels} differing pixels [${relDiffPath}]`
+        `- ${diff.specPath} (test \"${diff.testName}\"): ${diff.snapshotDir}/${diff.file} -> ${diff.diffPixels} differing pixels [${relDiffPath}]`,
       );
     }
   }
