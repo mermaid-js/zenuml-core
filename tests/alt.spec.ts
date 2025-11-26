@@ -61,4 +61,24 @@ test.describe("Rendering", () => {
       }
     }
   });
+
+  test("alt-4", async ({ page }) => {
+    const didEnableDebug = await initVerticalDebug(page);
+    await page.goto("http://127.0.0.1:8080/cy/alt-4.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    try {
+      await expect(page).toHaveScreenshot("alt-4.png", {
+        threshold: 0.02,
+        fullPage: true,
+      });
+    } finally {
+      if (didEnableDebug) {
+        await writeVerticalDebug(page, "alt-4-debug");
+      }
+    }
+  });
 });
