@@ -124,10 +124,14 @@ export class CreationStatementVM extends StatementVM {
 
     while (parent) {
       // Anchor Adjustments
+      // Only apply creationAltBranchOffset when the alt is NOT inside another fragment
+      // (par, loop, opt, etc.). If the alt is inside a fragment, the browser doesn't
+      // apply this offset.
       if (
         !appliedAlt &&
         this.altHasMultipleBranches(parent) &&
-        !this.isRootLevelStatement(parent)
+        !this.isRootLevelStatement(parent) &&
+        !this.isAltInsideFragment(parent)
       ) {
         anchorAdjustment += this.metrics.creationAltBranchOffset;
         appliedAlt = true;
@@ -141,8 +145,12 @@ export class CreationStatementVM extends StatementVM {
       // Only if we haven't found one yet (closest ancestor wins?)
       // Original logic: "while(parent) { if (altHasMultipleBranches) return inset; }"
       // So yes, first one found.
+      // When alt is inside a fragment, use a larger inset (3) to match browser behavior.
       if (altBranchInset === 0 && this.altHasMultipleBranches(parent)) {
-        altBranchInset = this.metrics.creationAltBranchInset || 0;
+        const insideFragment = this.isAltInsideFragment(parent);
+        altBranchInset = insideFragment
+          ? 3
+          : this.metrics.creationAltBranchInset || 0;
       }
 
       // Visual Adjustment (Section)
@@ -211,6 +219,32 @@ export class CreationStatementVM extends StatementVM {
         }
       }
       ancestor = ancestor.parentCtx;
+    }
+    return false;
+  }
+
+  /**
+   * Checks if the alt statement containing the creation is itself inside another
+   * fragment (par, loop, opt, section, critical). In this case, the
+   * creationAltBranchOffset should NOT be applied.
+   */
+  private isAltInsideFragment(altStatContext: any): boolean {
+    if (!altStatContext || typeof altStatContext.alt !== "function") {
+      return false;
+    }
+    // Start from the alt statement's parent (the block containing the alt)
+    let parent = altStatContext?.parentCtx;
+    while (parent) {
+      // Check for fragment types that would contain the alt
+      if (typeof parent.par === "function" && parent.par()) return true;
+      if (typeof parent.loop === "function" && parent.loop()) return true;
+      if (typeof parent.opt === "function" && parent.opt()) return true;
+      if (typeof parent.section === "function" && parent.section()) return true;
+      if (typeof parent.critical === "function" && parent.critical())
+        return true;
+      // Note: We don't check for tcf here because alt inside try/catch is handled
+      // by creationTcfSegmentOffset separately
+      parent = parent.parentCtx;
     }
     return false;
   }
