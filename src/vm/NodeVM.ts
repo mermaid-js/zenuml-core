@@ -1,4 +1,4 @@
-import { createBlockVM } from "./createBlockVM";
+import { BlockVM } from "./BlockVM";
 import type { LayoutRuntime } from "./types";
 
 export abstract class NodeVM {
@@ -15,6 +15,6 @@ export abstract class NodeVM {
     if (!blockContext) {
       return startTop;
     }
-    return createBlockVM(blockContext, this.runtime).layout(origin, startTop);
+    return new BlockVM(blockContext, this.runtime).layout(origin, startTop);
   }
 }

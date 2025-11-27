@@ -11,7 +11,7 @@ import {
 import { StatementAnchor } from "@/positioning/vertical/StatementTypes";
 import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { createBlockVM } from "@/vm/createBlockVM";
+import { BlockVM } from "@/vm/BlockVM";
 import { LayoutRuntime } from "@/vm/types";
 
 interface VerticalCoordinatesOptions {
@@ -56,7 +56,7 @@ export class VerticalCoordinates {
       },
     };
     const start = this.metrics.messageLayerPaddingTop;
-    const rootBlockVM = createBlockVM(this.rootBlock, this.runtime);
+    const rootBlockVM = new BlockVM(this.rootBlock, this.runtime);
     const end = rootBlockVM.layout(this.rootOrigin, start);
     this.totalHeight = end + this.metrics.messageLayerPaddingBottom;
   }
