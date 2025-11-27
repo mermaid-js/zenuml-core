@@ -87,7 +87,13 @@ export const LifeLine = (props: {
           creationTop,
           resolvedTop,
           lifelineLayerPaddingTop,
+          components: verticalCoordinates.getCreationTopComponents(
+            props.entity.name,
+          ),
         };
+        // Also export the full creation top records for all participants
+        (window as any).__zenumlCreationTopRecords =
+          verticalCoordinates.getCreationTopRecords();
       }
       setTop(resolvedTop);
       return true;

@@ -5,6 +5,8 @@ import type { LayoutRuntime } from "./types";
 import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { StatementKind } from "@/positioning/vertical/StatementTypes";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
+import { CreationTopComponent } from "@/positioning/vertical/CreationTopComponent";
+import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 
 export abstract class StatementVM extends NodeVM {
   abstract readonly kind: StatementKind;
@@ -58,8 +60,16 @@ export abstract class StatementVM extends NodeVM {
     return this.layoutBlock(blockContext, origin, startTop);
   }
 
-  protected updateCreationTop(participant: string, top: number): void {
-    this.runtime.updateCreationTop(participant, top);
+  protected updateCreationTop(
+    participant: string,
+    top: number,
+    components?: CreationTopComponent[],
+  ): void {
+    this.runtime.updateCreationTop(participant, top, components);
+  }
+
+  protected getStatementKey(): string {
+    return createStatementKey(this.context);
   }
 
   protected measureOccurrence(

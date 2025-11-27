@@ -21,6 +21,8 @@ export async function writeVerticalDebug(page: Page, slug: string) {
     const lifelineDebug =
       (window as any).__zenumlLifelineDebug ||
       ((window as any).__zenumlLifelineDebug = {});
+    const creationTopRecords =
+      (window as any).__zenumlCreationTopRecords || [];
     const messageLayer = document.querySelector(".message-layer");
     const messageLayerTop =
       messageLayer?.getBoundingClientRect().top ?? 0;
@@ -89,7 +91,7 @@ export async function writeVerticalDebug(page: Page, slug: string) {
       };
       return acc;
     }, {});
-    return { entries, dom, lifelines, messageLayerTop };
+    return { entries, dom, lifelines, messageLayerTop, creationTopRecords };
   });
   const outputDir = path.resolve("tmp");
   await fs.mkdir(outputDir, { recursive: true });

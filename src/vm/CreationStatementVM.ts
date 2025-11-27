@@ -1,5 +1,6 @@
 import { StatementAnchor } from "@/positioning/vertical/StatementTypes";
 import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import { CreationTopComponent } from "@/positioning/vertical/CreationTopComponent";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
@@ -8,6 +9,8 @@ interface CreationOffsets {
   altBranchInset: number;
   visualAdjustment: number;
   assignmentAdjustment: number;
+  /** Component breakdown for debug purposes */
+  components: CreationTopComponent[];
 }
 
 export class CreationStatementVM extends StatementVM {
@@ -38,6 +41,26 @@ export class CreationStatementVM extends StatementVM {
     const assignment = creation?.creationBody?.()?.assignment?.();
 
     const offsets = this.calculateOffsets(assignment);
+    const statementKey = this.getStatementKey();
+
+    // Build component breakdown for debugging
+    const components: CreationTopComponent[] = [
+      {
+        name: "cursorTop",
+        value: top,
+        statementKey,
+        description: "Initial cursor position passed to measure()",
+      },
+    ];
+
+    if (commentHeight > 0) {
+      components.push({
+        name: "commentHeight",
+        value: commentHeight,
+        statementKey,
+        description: "Height of comment above creation",
+      });
+    }
 
     // Base anchors
     const anchors: Partial<Record<StatementAnchor, number>> = {
@@ -59,6 +82,8 @@ export class CreationStatementVM extends StatementVM {
       if (anchors.return != null) {
         anchors.return += offsets.anchorAdjustment;
       }
+      // Add offset components to breakdown
+      components.push(...offsets.components.filter((c) => c.value > 0));
     }
 
     // 2. Alt branch inset (if not already adjusted by anchorAdjustment)
@@ -69,6 +94,13 @@ export class CreationStatementVM extends StatementVM {
       anchors.occurrence! += offsets.altBranchInset;
       if (anchors.return != null) {
         anchors.return += offsets.altBranchInset;
+      }
+      // Add inset component
+      const insetComponent = offsets.components.find(
+        (c) => c.name === "altBranchInset",
+      );
+      if (insetComponent) {
+        components.push(insetComponent);
       }
     }
 
@@ -81,11 +113,36 @@ export class CreationStatementVM extends StatementVM {
       if (anchors.return != null) {
         anchors.return -= totalUpwardAdjustment;
       }
+      // Add negative adjustment components
+      if (offsets.visualAdjustment) {
+        const visComp = offsets.components.find(
+          (c) => c.name === "visualAdjustment",
+        );
+        if (visComp) {
+          components.push({ ...visComp, value: -visComp.value });
+        }
+      }
+      if (offsets.assignmentAdjustment) {
+        const assComp = offsets.components.find(
+          (c) => c.name === "assignmentAdjustment",
+        );
+        if (assComp) {
+          components.push({ ...assComp, value: -assComp.value });
+        }
+      }
     }
+
+    // Add final message anchor component
+    components.push({
+      name: "finalMessageAnchor",
+      value: anchors.message!,
+      statementKey,
+      description: "Final calculated message anchor (= creationTop)",
+    });
 
     if (target) {
       // The lifeline start should align with the message arrow
-      this.updateCreationTop(target, anchors.message!);
+      this.updateCreationTop(target, anchors.message!, components);
     }
 
     // The top of the statement block itself is adjusted by the upward adjustments
@@ -116,6 +173,8 @@ export class CreationStatementVM extends StatementVM {
     let anchorAdjustment = 0;
     let altBranchInset = 0;
     let visualAdjustment = 0;
+    const components: CreationTopComponent[] = [];
+    const statementKey = this.getStatementKey();
 
     // Traverse up once to gather all context-based offsets
     let parent = this.context?.parentCtx;
@@ -134,10 +193,22 @@ export class CreationStatementVM extends StatementVM {
         !this.isAltInsideFragment(parent)
       ) {
         anchorAdjustment += this.metrics.creationAltBranchOffset;
+        components.push({
+          name: "creationAltBranchOffset",
+          value: this.metrics.creationAltBranchOffset,
+          statementKey,
+          description: "Offset for creation inside alt with multiple branches",
+        });
         appliedAlt = true;
       }
       if (!appliedTcf && this.isWithinTcfTrySegment(parent)) {
         anchorAdjustment += this.metrics.creationTcfSegmentOffset;
+        components.push({
+          name: "creationTcfSegmentOffset",
+          value: this.metrics.creationTcfSegmentOffset,
+          statementKey,
+          description: "Offset for creation inside try/catch try segment",
+        });
         appliedTcf = true;
       }
 
@@ -151,11 +222,27 @@ export class CreationStatementVM extends StatementVM {
         altBranchInset = insideFragment
           ? 3
           : this.metrics.creationAltBranchInset || 0;
+        if (altBranchInset > 0) {
+          components.push({
+            name: "altBranchInset",
+            value: altBranchInset,
+            statementKey,
+            description: insideFragment
+              ? "Alt branch inset (inside fragment, larger value)"
+              : "Alt branch inset",
+          });
+        }
       }
 
       // Visual Adjustment (Section)
       if (this.isSectionFragment(parent)) {
         visualAdjustment = this.metrics.creationSectionOffset;
+        components.push({
+          name: "visualAdjustment",
+          value: visualAdjustment,
+          statementKey,
+          description: "Visual adjustment for section fragment",
+        });
       }
 
       parent = parent.parentCtx;
@@ -168,6 +255,12 @@ export class CreationStatementVM extends StatementVM {
       !this.isFirstStatement(this.context)
     ) {
       anchorAdjustment += this.metrics.creationParSiblingOffset;
+      components.push({
+        name: "creationParSiblingOffset",
+        value: this.metrics.creationParSiblingOffset,
+        statementKey,
+        description: "Offset for non-first creation inside par block",
+      });
     }
 
     // Assignment Offset
@@ -177,12 +270,21 @@ export class CreationStatementVM extends StatementVM {
       !this.isFirstStatement(this.context)
         ? this.metrics.creationAssignmentOffset
         : 0;
+    if (assignmentAdjustment > 0) {
+      components.push({
+        name: "assignmentAdjustment",
+        value: assignmentAdjustment,
+        statementKey,
+        description: "Assignment offset for non-first root-level creation",
+      });
+    }
 
     return {
       anchorAdjustment,
       altBranchInset,
       visualAdjustment,
       assignmentAdjustment,
+      components,
     };
   }
 
