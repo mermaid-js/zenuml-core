@@ -6,32 +6,49 @@ The classes in this directory provide the polymorphic layout engine for sequence
 classDiagram
     class NodeVM {
       <<abstract>>
-      +context:any
-      #blockHeight(block, origin) number
+      #context: any
+      #runtime: LayoutRuntime
+      +constructor(context, runtime)
+      #layoutBlock(blockContext, origin, startTop) number
     }
 
     class BlockVM {
-      +layout(origin, startTop) BlockLayout
-      +advance(origin, startTop) number
-      +height(origin) number
+      -statements: any[]
+      +constructor(context, runtime)
+      +layout(origin, startTop) number
     }
 
     class StatementVM {
       <<abstract>>
-      +height(origin) number
-      #heightAfterComment(origin) number
-      #resolveFragmentOrigin(fallback) string
+      +kind: StatementKind
+      +constructor(statement, runtime)
+      +measure(top, origin)* StatementCoordinate
+      #measureComment(context?) number
+      #resolveFragmentOrigin(fallbackOrigin) string
+      #findLeftParticipant(ctx, fallbackOrigin) string
     }
 
     NodeVM <|-- BlockVM
     NodeVM <|-- StatementVM
 
-    class CreationStatementVM
-    class SyncMessageStatementVM
-    class AsyncMessageStatementVM
-    class ReturnStatementVM
-    class DividerStatementVM
-    class EmptyStatementVM
+    class CreationStatementVM {
+      +kind: "creation"
+    }
+    class SyncMessageStatementVM {
+      +kind: "syncMessage"
+    }
+    class AsyncMessageStatementVM {
+      +kind: "asyncMessage"
+    }
+    class ReturnStatementVM {
+      +kind: "return"
+    }
+    class DividerStatementVM {
+      +kind: "divider"
+    }
+    class EmptyStatementVM {
+      +kind: "empty"
+    }
 
     StatementVM <|-- CreationStatementVM
     StatementVM <|-- SyncMessageStatementVM
@@ -42,20 +59,39 @@ classDiagram
 
     class FragmentVM {
       <<abstract>>
-      #fragmentBodyHeight(origin) number
+      #beginFragment(context, top) object
+      #finalizeFragment(top, cursor, meta) object
     }
 
     StatementVM <|-- FragmentVM
 
-    class FragmentLoopVM
-    class FragmentSingleBlockVM
-    class FragmentOptVM
-    class FragmentParVM
-    class FragmentSectionVM
-    class FragmentCriticalVM
-    class FragmentTryCatchVM
-    class FragmentAltVM
-    class FragmentRefVM
+    class FragmentLoopVM {
+      +kind: "loop"
+    }
+    class FragmentSingleBlockVM {
+      <<abstract>>
+    }
+    class FragmentOptVM {
+      +kind: "opt"
+    }
+    class FragmentParVM {
+      +kind: "par"
+    }
+    class FragmentSectionVM {
+      +kind: "section"
+    }
+    class FragmentCriticalVM {
+      +kind: "critical"
+    }
+    class FragmentTryCatchVM {
+      +kind: "tcf"
+    }
+    class FragmentAltVM {
+      +kind: "alt"
+    }
+    class FragmentRefVM {
+      +kind: "ref"
+    }
 
     FragmentVM <|-- FragmentLoopVM
     FragmentVM <|-- FragmentSingleBlockVM
@@ -68,11 +104,10 @@ classDiagram
     FragmentVM <|-- FragmentRefVM
 
     class createStatementVM {
-      +createStatementVM(statement) StatementVM
+      <<function>>
+      +createStatementVM(statement, runtime) StatementVM
     }
 
-    BlockVM --> StatementVM : uses createStatementVM
-    NodeVM <.. createBlockVM : factory helper
-    FragmentTryCatchVM ..> toArray
-    FragmentLoopVM ..> CONDITION_LABEL_HEIGHT
+    BlockVM ..> createStatementVM : uses
+    createStatementVM ..> StatementVM : creates
 ```
