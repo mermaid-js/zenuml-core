@@ -1,10 +1,3 @@
-/**
- * Server-side layout pass that mirrors the per-pixel measurements the browser would
- * normally perform. The goal is to deterministically derive the vertical positions
- * of every statement (messages, fragments, dividers, etc.) using only parser context
- * and Theme metrics so that Playwright or any other DOM engine is no longer needed
- * in rendering tests.
- */
 import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
 import {
   getLayoutMetrics,
@@ -21,11 +14,6 @@ import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { createBlockVM } from "@/vm/createBlockVM";
 import { LayoutRuntime } from "@/vm/types";
 
-/**
- * Constructor parameters required to detach layout from the browser. We feed the
- * parser root context, the theme-driven spacing metrics, and the participant ordering so
- * async fragment traversals can infer their origin.
- */
 interface VerticalCoordinatesOptions {
   rootContext: any;
   theme?: ThemeName;
@@ -33,12 +21,6 @@ interface VerticalCoordinatesOptions {
   participantOrder: string[];
 }
 
-/**
- * Walks the parsed AST and deterministically assigns vertical coordinates to every
- * statement. The recursion mirrors how the renderer stacks statements inside blocks
- * and fragments so the resulting heights match what Playwright would capture from
- * the DOM.
- */
 export class VerticalCoordinates {
   private readonly metrics: LayoutMetrics;
   private readonly statementMap = new Map<StatementKey, StatementCoordinate>();
@@ -50,10 +32,6 @@ export class VerticalCoordinates {
   private readonly runtime: LayoutRuntime;
   readonly totalHeight: number;
 
-  /**
-   * Build the measurement helpers up-front and immediately walk the root block so
-   * that `totalHeight` and the internal lookup tables are populated for callers.
-   */
   constructor(options: VerticalCoordinatesOptions) {
     this.metrics = getLayoutMetrics(options.theme);
     this.markdownMeasurer = new MarkdownMeasurer(this.metrics);

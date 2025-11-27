@@ -2,7 +2,7 @@ import { atom } from "jotai";
 import { atomWithLocalStorage, atomWithFunctionValue } from "./utils.ts";
 import { RootContext, Participants } from "@/parser";
 import { AllMessages } from "@/parser/MessageCollector";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
@@ -61,9 +61,8 @@ export const verticalCoordinatesAtom = atom((get) => {
   if (!rootContext) {
     return null;
   }
-  const coordinates = get(coordinatesAtom);
   const theme = get(themeAtom);
-  const participantOrder = coordinates.orderedParticipantNames();
+  const participantOrder = OrderedParticipants(rootContext).map((p) => p.name);
   const ownableMessages = AllMessages(rootContext);
   const originParticipant =
     ownableMessages.length === 0

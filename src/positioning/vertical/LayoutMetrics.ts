@@ -1,8 +1,3 @@
-/**
- * Pixel perfect spacing contract shared between the server-side measurement pass
- * and the browser renderer. Every constant mirrors a concrete CSS dimension so
- * that we can reason about layout without querying the DOM.
- */
 export interface LayoutMetrics {
   messageLayerPaddingTop: number;
   messageLayerPaddingBottom: number;

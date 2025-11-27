@@ -22,7 +22,6 @@ const defaultTokensOptions = {
 export class MarkdownMeasurer {
   constructor(private readonly metrics: LayoutMetrics) {}
 
-  /** Returns the total height for a markdown snippet, including block spacing. */
   measure(text: string | undefined | null): number {
     if (!text || !text.trim()) {
       return 0;
@@ -41,7 +40,6 @@ export class MarkdownMeasurer {
     return total;
   }
 
-  /** Matches each markdown token to the corresponding vertical footprint. */
   private measureToken(token: GenericToken): number {
     switch (token.type) {
       case "heading":
