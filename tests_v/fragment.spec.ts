@@ -185,6 +185,26 @@ test.describe("Fragments", () => {
     }
   });
 
+  test("mixed fragments with creation deep", async ({ page }) => {
+    const didEnableDebug = await initVerticalDebug(page);
+    await page.goto("http://127.0.0.1:8080/cy/fragment-mixed-2.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    try {
+      await expect(page).toHaveScreenshot("fragment-mixed-2.png", {
+        threshold: 0.02,
+        fullPage: true,
+      });
+    } finally {
+      if (didEnableDebug) {
+        await writeVerticalDebug(page, "fragment-mixed-2");
+      }
+    }
+  });
+
   test("fragment combo without creations", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
     await page.goto("http://127.0.0.1:8080/cy/fragment-combo.html");
