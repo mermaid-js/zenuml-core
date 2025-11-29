@@ -101,4 +101,84 @@ test.describe("Fragments", () => {
       }
     }
   });
+
+  test("section fragment", async ({ page }) => {
+    const didEnableDebug = await initVerticalDebug(page);
+    await page.goto("http://127.0.0.1:8080/cy/fragment-section.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    try {
+      await expect(page).toHaveScreenshot("fragment-section.png", {
+        threshold: 0.02,
+        fullPage: true,
+      });
+    } finally {
+      if (didEnableDebug) {
+        await writeVerticalDebug(page, "fragment-section");
+      }
+    }
+  });
+
+  test("critical fragment", async ({ page }) => {
+    const didEnableDebug = await initVerticalDebug(page);
+    await page.goto("http://127.0.0.1:8080/cy/fragment-critical.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    try {
+      await expect(page).toHaveScreenshot("fragment-critical.png", {
+        threshold: 0.02,
+        fullPage: true,
+      });
+    } finally {
+      if (didEnableDebug) {
+        await writeVerticalDebug(page, "fragment-critical");
+      }
+    }
+  });
+
+  test("try/catch fragment", async ({ page }) => {
+    const didEnableDebug = await initVerticalDebug(page);
+    await page.goto("http://127.0.0.1:8080/cy/fragment-tcf.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    try {
+      await expect(page).toHaveScreenshot("fragment-tcf.png", {
+        threshold: 0.02,
+        fullPage: true,
+      });
+    } finally {
+      if (didEnableDebug) {
+        await writeVerticalDebug(page, "fragment-tcf");
+      }
+    }
+  });
+
+  test("par with nested alt", async ({ page }) => {
+    const didEnableDebug = await initVerticalDebug(page);
+    await page.goto("http://127.0.0.1:8080/cy/fragment-par-alt.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    try {
+      await expect(page).toHaveScreenshot("fragment-par-alt.png", {
+        threshold: 0.02,
+        fullPage: true,
+      });
+    } finally {
+      if (didEnableDebug) {
+        await writeVerticalDebug(page, "fragment-par-alt");
+      }
+    }
+  });
 });
