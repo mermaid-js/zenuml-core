@@ -17,7 +17,7 @@ export class BlockVM extends NodeVM {
   private static readonly heightOffsets: Partial<
     Record<StatementKind, number>
   > = {
-    alt: 2,
+    alt: 1,
     loop: -5,
     par: 3,
     opt: 2,

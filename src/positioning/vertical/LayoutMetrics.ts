@@ -89,7 +89,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   creationSectionOffset: 14,
   fragmentElseLabelHeight: 13,
   creationAssignmentOffset: 15,
-  creationAltBranchInset: 1,
+  creationAltBranchInset: 0,
   creationParSiblingOffset: 1,
 };
 

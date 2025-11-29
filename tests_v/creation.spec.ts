@@ -24,6 +24,12 @@ const cases = [
     snapshot: "creation-assignment.png",
     debugSlug: "creation-assignment",
   },
+  {
+    name: "creation inside alt branch",
+    url: "http://127.0.0.1:8080/cy/creation-alt.html",
+    snapshot: "creation-alt.png",
+    debugSlug: "creation-alt",
+  },
 ];
 
 cases.forEach((item) => {
