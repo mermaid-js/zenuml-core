@@ -86,7 +86,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   tcfSegmentHeaderHeight: 16,
   creationAltBranchOffset: 11,
   creationTcfSegmentOffset: 1,
-  creationSectionOffset: 14,
+  creationSectionOffset: 4,
   fragmentElseLabelHeight: 13,
   creationAssignmentOffset: 15,
   creationAltBranchInset: 0,

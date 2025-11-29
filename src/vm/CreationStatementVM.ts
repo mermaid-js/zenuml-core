@@ -140,14 +140,15 @@ export class CreationStatementVM extends StatementVM {
       description: "Final calculated message anchor (= creationTop)",
     });
 
+    const adjustedTop = top - totalUpwardAdjustment;
+
     if (target) {
-      // The lifeline start should align with the message arrow
-      this.updateCreationTop(target, anchors.message!, components);
+      // Lifeline start aligns to the container top (matches browser querySelector on the statement)
+      this.updateCreationTop(target, adjustedTop, components);
     }
 
     // The top of the statement block itself is adjusted by the upward adjustments
     // (This matches original logic: adjustedTop = top - totalAdjustment)
-    const adjustedTop = top - totalUpwardAdjustment;
 
     const meta: StatementCoordinate["meta"] = {
       commentHeight,
@@ -236,12 +237,12 @@ export class CreationStatementVM extends StatementVM {
 
       // Visual Adjustment (Section)
       if (this.isSectionFragment(parent)) {
-        visualAdjustment = this.metrics.creationSectionOffset;
+        anchorAdjustment += this.metrics.creationSectionOffset;
         components.push({
-          name: "visualAdjustment",
-          value: visualAdjustment,
+          name: "creationSectionOffset",
+          value: this.metrics.creationSectionOffset,
           statementKey,
-          description: "Visual adjustment for section fragment",
+          description: "Anchor adjustment for creation inside section fragment",
         });
       }
 

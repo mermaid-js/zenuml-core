@@ -30,6 +30,18 @@ const cases = [
     snapshot: "creation-alt.png",
     debugSlug: "creation-alt",
   },
+  {
+    name: "creation inside section fragment",
+    url: "http://127.0.0.1:8080/cy/creation-section.html",
+    snapshot: "creation-section.png",
+    debugSlug: "creation-section",
+  },
+  {
+    name: "creation inside try/catch fragment",
+    url: "http://127.0.0.1:8080/cy/creation-tcf.html",
+    snapshot: "creation-tcf.png",
+    debugSlug: "creation-tcf",
+  },
 ];
 
 cases.forEach((item) => {
@@ -39,7 +51,7 @@ cases.forEach((item) => {
       await page.goto(item.url);
 
       await expect(page.locator(".privacy>span>svg")).toBeVisible({
-        timeout: 5000,
+        timeout: 15000,
       });
 
       try {

@@ -21,6 +21,7 @@ export class BlockVM extends NodeVM {
     loop: -5,
     par: 3,
     opt: 2,
+    section: 1,
   };
 
   constructor(context: any, runtime: LayoutRuntime) {
