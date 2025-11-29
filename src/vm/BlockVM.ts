@@ -10,7 +10,7 @@ export class BlockVM extends NodeVM {
     Record<StatementKind, number>
   > = {
     loop: 1,
-    par: -1,
+    par: 0,
     opt: -3,
   };
 

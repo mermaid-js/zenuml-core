@@ -73,7 +73,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   returnMessageHeight: 16,
   returnSelfMessageHeight: 20,
   occurrenceMinHeight: tw(6),
-  fragmentHeaderHeight: rem(1.5) + 1,
+  fragmentHeaderHeight: rem(1.5) + 2,
   fragmentConditionHeight: rem(1.5),
   fragmentPaddingBottom: tw(2.5),
   fragmentBodyGap: 0,
