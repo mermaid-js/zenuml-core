@@ -1,5 +1,8 @@
 import { test, expect } from "./fixtures";
-import { initVerticalDebug, writeVerticalDebug } from "../tests/utils/verticalDebug";
+import {
+  initVerticalDebug,
+  writeVerticalDebug,
+} from "../tests/utils/verticalDebug";
 
 test.describe("Fragments", () => {
   test("single-branch opt", async ({ page }) => {

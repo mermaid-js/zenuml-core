@@ -54,6 +54,12 @@ const cases = [
     snapshot: "creation-multi.png",
     debugSlug: "creation-multi",
   },
+  {
+    name: "creation assignment inside block",
+    url: "http://127.0.0.1:8080/cy/creation-assignment-block.html",
+    snapshot: "creation-assignment-block.png",
+    debugSlug: "creation-assignment-block",
+  },
 ];
 
 cases.forEach((item) => {
