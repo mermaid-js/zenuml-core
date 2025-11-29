@@ -147,7 +147,7 @@ export class CreationStatementVM extends StatementVM {
     });
 
     const adjustedTop = top - totalUpwardAdjustment;
-    const creationAnchor = anchors.message!;
+    let creationAnchor = anchors.message!;
 
     if (target) {
       // Lifeline start aligns to the rendered creation arrow, which is the final
