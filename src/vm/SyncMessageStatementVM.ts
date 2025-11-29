@@ -21,22 +21,33 @@ export class SyncMessageStatementVM extends StatementVM {
     const source = messageContext?.From?.() || _STARTER_;
     const target = messageContext?.Owner?.() || _STARTER_;
     const isSelf = source === target;
+    const hasNestedBlock = Boolean(messageContext?.braceBlock?.()?.block?.());
+    const signature = messageContext?.SignatureText?.() || "";
+    const wrapped = signature.length > 20;
+    const baseMessageHeight = hasNestedBlock
+      ? this.metrics.messageHeight
+      : this.metrics.messageInlineHeight;
     const messageHeight = isSelf
       ? this.metrics.selfInvocationHeight
-      : this.metrics.messageHeight;
+      : baseMessageHeight + (wrapped ? 7 : 0);
     const occurrenceTop = messageTop + messageHeight;
     const insideFragment = this.isInsideFragment(this.context);
-    const hasNestedBlock = Boolean(messageContext?.braceBlock?.()?.block?.());
     const minOccurrenceHeight =
       insideFragment && !hasNestedBlock
         ? this.metrics.fragmentOccurrenceMinHeight
         : this.metrics.occurrenceMinHeight;
-    const occurrenceHeight = this.measureOccurrence(
+    let occurrenceHeight = this.measureOccurrence(
       messageContext,
       occurrenceTop,
       target,
       minOccurrenceHeight,
     );
+    if (hasNestedBlock && commentHeight > 0) {
+      occurrenceHeight += Math.min(
+        commentHeight / 2,
+        this.metrics.statementMarginTop,
+      );
+    }
     const assignee = messageContext?.Assignment?.()?.getText?.();
     const anchors: StatementCoordinate["anchors"] = {
       message: messageTop,

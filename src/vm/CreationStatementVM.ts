@@ -69,6 +69,12 @@ export class CreationStatementVM extends StatementVM {
     };
 
     let height = commentHeight + messageHeight + occurrenceHeight;
+    const parSiblingOffset =
+      offsets.components.find((c) => c.name === "creationParSiblingOffset")
+        ?.value || 0;
+    if (parSiblingOffset) {
+      height += parSiblingOffset;
+    }
     if (assignment) {
       anchors.return = occurrenceTop + occurrenceHeight;
       height += this.metrics.returnMessageHeight;
@@ -141,10 +147,12 @@ export class CreationStatementVM extends StatementVM {
     });
 
     const adjustedTop = top - totalUpwardAdjustment;
+    const creationAnchor = anchors.message!;
 
     if (target) {
-      // Lifeline start aligns to the container top (matches browser querySelector on the statement)
-      this.updateCreationTop(target, adjustedTop, components);
+      // Lifeline start aligns to the rendered creation arrow, which is the final
+      // message anchor (not the statement's pre-comment cursorTop).
+      this.updateCreationTop(target, creationAnchor, components);
     }
 
     // The top of the statement block itself is adjusted by the upward adjustments
@@ -221,7 +229,7 @@ export class CreationStatementVM extends StatementVM {
       if (altBranchInset === 0 && this.altHasMultipleBranches(parent)) {
         const insideFragment = this.isAltInsideFragment(parent);
         altBranchInset = insideFragment
-          ? 3
+          ? 1
           : this.metrics.creationAltBranchInset || 0;
         if (altBranchInset > 0) {
           components.push({
