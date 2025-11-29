@@ -49,6 +49,7 @@ yarn-error.log*
 
 /playwright-report
 /test-results
+/test-results-v
 .pnpm-store
 *storybook.log
 storybook-static

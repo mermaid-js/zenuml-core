@@ -42,6 +42,18 @@ const cases = [
     snapshot: "creation-tcf.png",
     debugSlug: "creation-tcf",
   },
+  {
+    name: "creation inside loop fragment",
+    url: "http://127.0.0.1:8080/cy/creation-loop.html",
+    snapshot: "creation-loop.png",
+    debugSlug: "creation-loop",
+  },
+  {
+    name: "multiple creations in sequence",
+    url: "http://127.0.0.1:8080/cy/creation-multi.html",
+    snapshot: "creation-multi.png",
+    debugSlug: "creation-multi",
+  },
 ];
 
 cases.forEach((item) => {
