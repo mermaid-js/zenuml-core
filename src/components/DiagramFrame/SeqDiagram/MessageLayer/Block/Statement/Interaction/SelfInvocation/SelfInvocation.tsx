@@ -3,6 +3,7 @@ import { useAtomValue } from "jotai";
 import { CSSProperties, useMemo, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
 import { MessageLabel } from "../../../../MessageLabel";
+import { ArrowHead } from "../../Message/ArrowHead";
 
 export const SelfInvocation = (props: {
   context?: any;
@@ -49,20 +50,13 @@ export const SelfInvocation = (props: {
         </div>
       </label>
       <svg className="arrow text-skin-message-arrow" width="30" height="24">
-        <polyline
-          className="line stroke-current fill-none stroke-2"
-          stroke="currentColor"
-          fill="none"
-          strokeWidth="2"
-          points="0,2 28,2 28,15 14,15"
-        ></polyline>
-        <polyline
-          className="head stroke-current fill-current stroke-2"
-          stroke="currentColor"
-          fill="currentColor"
-          strokeWidth="2"
-          points="18,9 8,15 18,21"
-        ></polyline>
+        <path
+          className="stroke-current stroke-2 fill-none"
+          d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 L14,15"
+        />
+        <g transform="translate(7, 10)">
+          <ArrowHead fill={true} rtl={true} />
+        </g>
       </svg>
     </div>
   );

@@ -5,10 +5,10 @@ import { execSync } from "child_process";
 import { readFileSync } from "fs";
 import svgr from "vite-plugin-svgr";
 
-process.env.VITE_APP_GIT_HASH = process.env.DOCKER
+const gitHash = process.env.DOCKER
   ? ""
   : execSync("git rev-parse --short HEAD").toString().trim();
-process.env.VITE_APP_GIT_BRANCH = process.env.DOCKER
+const gitBranch = process.env.DOCKER
   ? ""
   : execSync("git branch --show-current").toString().trim();
 
@@ -45,6 +45,8 @@ export default defineConfig(({ mode }) => ({
     "process.env.NODE_ENV": JSON.stringify(mode),
     "process.env.VITE_BUILD_TIME": JSON.stringify(new Date().toISOString()),
     "process.env.VITE_VERSION": JSON.stringify(packageJson.version),
+    "import.meta.env.VITE_APP_GIT_HASH": JSON.stringify(gitHash),
+    "import.meta.env.VITE_APP_GIT_BRANCH": JSON.stringify(gitBranch),
   },
   css: {
     preprocessorOptions: {
