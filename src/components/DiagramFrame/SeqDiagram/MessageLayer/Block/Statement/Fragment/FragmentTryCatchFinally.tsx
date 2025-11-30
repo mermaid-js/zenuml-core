@@ -89,7 +89,7 @@ export const FragmentTryCatchFinally = (props: {
           </div>
           {tcf.catchBlock().map((catchBlock: any, index: number) => (
             <div
-              className="segment mt-2 border-t border-solid"
+              className="segment border-t border-solid"
               key={index + 500}
             >
               <div
@@ -110,7 +110,7 @@ export const FragmentTryCatchFinally = (props: {
             </div>
           ))}
           {finallyBlock && (
-            <div className="segment mt-2 border-t border-solid">
+            <div className="segment border-t border-solid">
               <div className="header flex text-skin-fragment finally">
                 <label className="keyword finally bg-skin-frame opacity-65 px-1 inline-block">
                   finally
