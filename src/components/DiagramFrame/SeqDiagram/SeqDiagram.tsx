@@ -109,7 +109,7 @@ export const SeqDiagram = (props: {
           </>
         )}
       </div>
-      <StatementCoordinateDebug />
+      {/* <StatementCoordinateDebug /> */}
     </div>
   );
 };
