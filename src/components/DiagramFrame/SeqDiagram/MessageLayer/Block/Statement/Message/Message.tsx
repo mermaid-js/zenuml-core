@@ -74,6 +74,7 @@ export const Message = (props: {
   className?: string;
   style?: CSSProperties;
   number?: string;
+  normalizeText?: (text: string) => string;
 }) => {
   const {
     context,
@@ -84,11 +85,11 @@ export const Message = (props: {
     className,
     style,
     number,
+    normalizeText,
   } = props;
   const mode = useAtomValue(modeAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
-  const isAsync = type === "async";
   const editable = getEditable(context, mode, type || "");
   const stylable =
     mode !== RenderMode.Static &&
@@ -114,7 +115,7 @@ export const Message = (props: {
       editable={editable}
       labelText={labelText ?? ""}
       labelPosition={labelPosition}
-      isAsync={isAsync}
+      normalizeText={normalizeText}
       type={type}
       textStyle={textStyle}
       className={className}

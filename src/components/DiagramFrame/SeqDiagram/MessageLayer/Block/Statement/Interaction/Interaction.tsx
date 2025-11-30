@@ -8,6 +8,7 @@ import { cursorAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { useArrow } from "../useArrow";
+import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 
 export const Interaction = (props: {
   context: any;
@@ -85,6 +86,7 @@ export const Interaction = (props: {
           rtl={rightToLeft}
           number={props.number}
           type="sync"
+          normalizeText={syncMessageNormalizer}
         />
       )}
       <Occurrence
@@ -105,6 +107,7 @@ export const Interaction = (props: {
           type="return"
           number={`${props.number}.${statements.length + 1}`}
           textStyle={messageTextStyle}
+          normalizeText={syncMessageNormalizer}
         />
       )}
     </div>

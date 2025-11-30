@@ -2,7 +2,7 @@ import { codeAtom, modeAtom, onContentChangeAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { useAtom, useAtomValue } from "jotai";
 import { formatText } from "@/utils/StringUtil";
-import { useEditLabelImproved, specialCharRegex } from "@/functions/useEditLabel";
+import { useEditLabelImproved } from "@/functions/useEditLabel";
 import { RenderMode } from "@/store/Store";
 import type { FocusEvent, KeyboardEvent, MouseEvent } from "react";
 import "../LifeLineLayer/EditableLabel.css";
@@ -10,7 +10,7 @@ import "../LifeLineLayer/EditableLabel.css";
 export const MessageLabel = (props: {
   labelText: string;
   labelPosition: [number, number];
-  isAsync?: boolean;
+  normalizeText?: (text: string) => string;
   isSelf?: boolean;
   className?: string;
   style?: React.CSSProperties;
@@ -35,17 +35,8 @@ export const MessageLabel = (props: {
       return;
     }
 
-    if (newText.includes(" ")) {
-      newText = newText.replace(/\s+/g, " "); // remove extra spaces
-    }
-
-    // If text has special characters or space, we wrap it with double quotes
-    // *NOTE*: We don't wrap the text with  quotes if it's an async message
-    if (!props.isAsync && specialCharRegex.test(newText)) {
-      newText = newText.replace(/"/g, ""); // remove existing double quotes
-      newText = `"${newText}"`;
-      specialCharRegex.lastIndex = 0;
-    }
+    // Apply parent-provided normalizer
+    newText = props.normalizeText?.(newText) ?? newText;
 
     const [start, end] = props.labelPosition;
     if (start === -1 || end === -1) {

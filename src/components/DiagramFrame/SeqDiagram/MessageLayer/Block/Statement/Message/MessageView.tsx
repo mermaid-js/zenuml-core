@@ -9,7 +9,7 @@ export type MessageViewProps = {
   editable: boolean;
   labelText: string;
   labelPosition: [number, number];
-  isAsync: boolean;
+  normalizeText?: (text: string) => string;
   type?: string;
   textStyle?: CSSProperties;
   className?: string;
@@ -27,7 +27,7 @@ export const MessageView = ({
   editable,
   labelText,
   labelPosition,
-  isAsync,
+  normalizeText,
   type = "",
   textStyle,
   className,
@@ -65,7 +65,7 @@ export const MessageView = ({
                 <MessageLabel
                   labelText={labelText ?? ""}
                   labelPosition={labelPosition}
-                  isAsync={isAsync}
+                  normalizeText={normalizeText}
                 />
                 {isCreation && <span>»</span>}
               </>

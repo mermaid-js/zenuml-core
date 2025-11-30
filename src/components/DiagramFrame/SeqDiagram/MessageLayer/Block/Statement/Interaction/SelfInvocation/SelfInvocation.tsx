@@ -4,6 +4,7 @@ import { CSSProperties, useMemo, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
 import { MessageLabel } from "../../../../MessageLabel";
 import { ArrowHead } from "../../Message/ArrowHead";
+import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 
 export const SelfInvocation = (props: {
   context?: any;
@@ -45,6 +46,7 @@ export const SelfInvocation = (props: {
             className={props.classNames}
             labelText={props.context?.SignatureText()}
             labelPosition={labelPosition}
+            normalizeText={syncMessageNormalizer}
             isSelf={true}
           />
         </div>

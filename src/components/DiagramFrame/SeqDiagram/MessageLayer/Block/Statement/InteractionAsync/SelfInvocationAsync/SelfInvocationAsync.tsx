@@ -2,6 +2,7 @@ import { CSSProperties } from "react";
 import { MessageLabel } from "../../../../MessageLabel";
 import { Numbering } from "../../../../Numbering";
 import { ArrowHead } from "../../Message/ArrowHead";
+import { asyncMessageNormalizer } from "@/utils/messageNormalizers";
 
 export const SelfInvocationAsync = (props: {
   context?: any;
@@ -24,7 +25,7 @@ export const SelfInvocationAsync = (props: {
           className={props.classNames}
           labelText={content?.getFormattedText()}
           labelPosition={labelPosition()}
-          isAsync={true}
+          normalizeText={asyncMessageNormalizer}
           isSelf={true}
         />
       </label>

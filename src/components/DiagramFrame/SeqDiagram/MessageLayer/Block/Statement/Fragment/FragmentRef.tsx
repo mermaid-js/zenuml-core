@@ -3,6 +3,7 @@ import { useFragmentData } from "./useFragmentData";
 import { Numbering } from "../../../Numbering";
 import { Comment } from "../Comment/Comment";
 import { MessageLabel } from "../../../MessageLabel";
+import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 
 export const FragmentRef = (props: {
   context: any;
@@ -56,6 +57,7 @@ export const FragmentRef = (props: {
           className="text-skin-title mt-3 mb-2"
           labelText={contentLabel}
           labelPosition={contentPosition}
+          normalizeText={syncMessageNormalizer}
         />
       </div>
     </div>

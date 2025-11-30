@@ -8,6 +8,7 @@ import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { CodeRange } from "@/parser/CodeRange";
 import { SyntheticEvent } from "react";
 import { useArrow } from "../useArrow";
+import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 
 export const Return = (props: {
   context: any;
@@ -99,6 +100,7 @@ export const Return = (props: {
           rtl={rightToLeft}
           type="return"
           number={props.number}
+          normalizeText={syncMessageNormalizer}
         />
       )}
     </div>

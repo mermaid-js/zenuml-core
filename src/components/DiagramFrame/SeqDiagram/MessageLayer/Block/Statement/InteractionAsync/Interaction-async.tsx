@@ -75,6 +75,7 @@ import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { CodeRange } from "@/parser/CodeRange";
 import { useArrow } from "../useArrow";
+import { asyncMessageNormalizer } from "@/utils/messageNormalizers";
 
 function isNullOrUndefined(value: any) {
   return value === null || value === undefined;
@@ -157,6 +158,7 @@ export const InteractionAsync = (props: {
           rtl={rightToLeft}
           type="async"
           number={props.number}
+          normalizeText={asyncMessageNormalizer}
         />
       )}
     </div>

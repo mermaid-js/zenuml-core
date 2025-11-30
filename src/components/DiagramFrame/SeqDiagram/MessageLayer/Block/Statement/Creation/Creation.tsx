@@ -13,6 +13,7 @@ import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
 import { EventBus } from "@/EventBus";
+import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 
 export const Creation = (props: {
   context: any;
@@ -115,6 +116,7 @@ export const Creation = (props: {
           number={props.number}
           textStyle={messageTextStyle}
           style={{ width: `calc(100% - ${containerOffset}px)`, translate: 0 }}
+          normalizeText={syncMessageNormalizer}
         />
       </div>
       <Occurrence
@@ -136,6 +138,7 @@ export const Creation = (props: {
           rtl={!rightToLeft}
           type="return"
           number={`${props.number}.${creation.Statements().length + 1}`}
+          normalizeText={syncMessageNormalizer}
         />
       )}
     </div>
