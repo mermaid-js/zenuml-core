@@ -1,11 +1,8 @@
-import { cn } from "@/utils";
 import { modeAtom, onMessageClickAtom, RenderMode } from "@/store/Store";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { CSSProperties, useRef } from "react";
 import { useAtomValue } from "jotai";
-import { ArrowHead } from "./ArrowHead";
-import { Numbering } from "../../../Numbering";
-import { MessageLabel } from "../../../MessageLabel";
+import { MessageView } from "./MessageView";
 
 type Context = any;
 
@@ -112,47 +109,22 @@ export const Message = (props: {
   };
 
   return (
-    <div
-      className={cn(
-        "message leading-none border-skin-message-arrow border-b-2 flex items-end",
-        {
-          "flex-row-reverse": rtl,
-          return: type === "return",
-          "right-to-left": rtl,
-        },
-        className,
-      )}
-      style={{ ...style, borderBottomStyle: borderStyle }}
+    <MessageView
+      content={content}
+      editable={editable}
+      labelText={labelText ?? ""}
+      labelPosition={labelPosition}
+      isAsync={isAsync}
+      type={type}
+      textStyle={textStyle}
+      className={className}
+      style={style}
+      number={number}
+      rtl={rtl}
+      borderStyle={borderStyle}
+      stylable={stylable}
       onClick={onClick}
-      ref={messageRef}
-    >
-      <div className="name group text-center flex-grow relative">
-        <div className="inline-block static min-h-[1em]">
-          <div style={textStyle}>
-            {editable ? (
-              <>
-                {type === "creation" && <span>«</span>}
-                <MessageLabel
-                  labelText={labelText ?? ""}
-                  labelPosition={labelPosition}
-                  isAsync={isAsync}
-                />
-                {type === "creation" && <span>»</span>}
-              </>
-            ) : (
-              <>{content}</>
-            )}
-          </div>
-        </div>
-      </div>
-      <div
-        className={cn(
-          "point text-skin-message-arrow translate-y-1/2 -my-px",
-        )}
-      >
-        <ArrowHead fill={type === "sync"} rtl={Boolean(rtl)} />
-      </div>
-      <Numbering number={number} />
-    </div>
+      messageRef={messageRef}
+    />
   );
 };

@@ -1,7 +1,7 @@
 import CommentClass from "@/components/Comment/Comment";
 import { Comment } from "../Comment/Comment";
 import { cn } from "@/utils";
-import { Message } from "../Message";
+import { Message } from "../Message/Message";
 import { useAtomValue } from "jotai";
 import { onElementClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";

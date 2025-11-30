@@ -1,5 +1,5 @@
 import { cn } from "@/utils";
-import { Message } from "../Message";
+import { Message } from "../Message/Message";
 import { Occurrence } from "../Interaction/Occurrence/Occurrence";
 import { CodeRange } from "@/parser/CodeRange";
 import {

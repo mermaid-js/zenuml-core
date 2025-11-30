@@ -69,7 +69,7 @@
 import { cn } from "@/utils";
 import { Comment } from "../Comment/Comment";
 import { SelfInvocationAsync } from "./SelfInvocationAsync/SelfInvocationAsync";
-import { Message } from "../Message";
+import { Message } from "../Message/Message";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";

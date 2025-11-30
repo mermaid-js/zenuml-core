@@ -1,7 +1,7 @@
 import CommentClass from "@/components/Comment/Comment";
 import { cn } from "@/utils";
 import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
-import { Message } from "../Message";
+import { Message } from "../Message/Message";
 import { Occurrence } from "./Occurrence/Occurrence";
 import { useAtomValue } from "jotai";
 import { cursorAtom } from "@/store/Store";
