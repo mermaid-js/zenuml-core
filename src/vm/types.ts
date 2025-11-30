@@ -1,7 +1,7 @@
 import { LayoutMetrics } from "@/positioning/vertical/LayoutMetrics";
 import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
 import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
-import { CreationTopComponent } from "@/positioning/vertical/CreationTopComponent";
+import { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
 
 export interface LayoutRuntime {
   metrics: LayoutMetrics;
@@ -13,6 +13,6 @@ export interface LayoutRuntime {
   updateCreationTop: (
     participant: string,
     top: number,
-    components?: CreationTopComponent[],
+    components?: CreationTopBlock[],
   ) => void;
 }

@@ -7,9 +7,9 @@ import {
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import {
-  CreationTopComponent,
+  CreationTopBlock,
   // CreationTopRecord,
-} from "@/positioning/vertical/CreationTopComponent";
+} from "@/positioning/vertical/CreationTopBlock";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { BlockVM } from "@/vm/BlockVM";
 import { LayoutRuntime } from "@/vm/types";
@@ -19,10 +19,7 @@ export class VerticalCoordinates {
   private readonly metrics: LayoutMetrics;
   private readonly statementMap = new Map<string, StatementCoordinate>();
   private readonly creationTops = new Map<string, number>();
-  private readonly creationTopComponents = new Map<
-    string,
-    CreationTopComponent[]
-  >();
+  private readonly creationTopBlocks = new Map<string, CreationTopBlock[]>();
   private readonly rootBlock: any;
   private readonly rootOrigin: string;
   private readonly runtime: LayoutRuntime;
@@ -53,13 +50,13 @@ export class VerticalCoordinates {
       updateCreationTop: (
         participant: string,
         top: number,
-        components?: CreationTopComponent[],
+        blocks?: CreationTopBlock[],
       ) => {
         const prev = this.creationTops.get(participant);
         if (prev == null || top < prev) {
           this.creationTops.set(participant, top);
-          if (components) {
-            this.creationTopComponents.set(participant, components);
+          if (blocks) {
+            this.creationTopBlocks.set(participant, blocks);
           }
         }
       },
@@ -89,8 +86,4 @@ export class VerticalCoordinates {
   //   }
   //   return records;
   // }
-
-  entries() {
-    return Array.from(this.statementMap.entries());
-  }
 }

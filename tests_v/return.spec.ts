@@ -1,9 +1,8 @@
 import { test, expect } from "./fixtures";
-import { initVerticalDebug, writeVerticalDebug } from "../tests/utils/verticalDebug";
 import {
-  captureDebugScreenshot,
-  exportComponentBreakdown,
-} from "../tests/utils/debugScreenshot";
+  initVerticalDebug,
+  writeVerticalDebug,
+} from "../tests/utils/verticalDebug";
 
 test.describe("Return statements", () => {
   test("return produced by assignment", async ({ page }) => {
@@ -22,8 +21,6 @@ test.describe("Return statements", () => {
     } finally {
       if (didEnableDebug) {
         await writeVerticalDebug(page, "return-assignment");
-        await captureDebugScreenshot(page, "return-assignment");
-        await exportComponentBreakdown(page, "return-assignment");
       }
     }
   });
@@ -44,8 +41,6 @@ test.describe("Return statements", () => {
     } finally {
       if (didEnableDebug) {
         await writeVerticalDebug(page, "return-keyword");
-        await captureDebugScreenshot(page, "return-keyword");
-        await exportComponentBreakdown(page, "return-keyword");
       }
     }
   });
@@ -66,8 +61,6 @@ test.describe("Return statements", () => {
     } finally {
       if (didEnableDebug) {
         await writeVerticalDebug(page, "return-annotation");
-        await captureDebugScreenshot(page, "return-annotation");
-        await exportComponentBreakdown(page, "return-annotation");
       }
     }
   });

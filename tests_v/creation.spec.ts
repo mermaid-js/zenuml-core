@@ -1,9 +1,8 @@
 import { test, expect } from "./fixtures";
-import { initVerticalDebug, writeVerticalDebug } from "../tests/utils/verticalDebug";
 import {
-  captureDebugScreenshot,
-  exportComponentBreakdown,
-} from "../tests/utils/debugScreenshot";
+  initVerticalDebug,
+  writeVerticalDebug,
+} from "../tests/utils/verticalDebug";
 
 const cases = [
   {
@@ -80,8 +79,6 @@ cases.forEach((item) => {
       } finally {
         if (didEnableDebug) {
           await writeVerticalDebug(page, item.debugSlug);
-          await captureDebugScreenshot(page, item.debugSlug);
-          await exportComponentBreakdown(page, item.debugSlug);
         }
       }
     });

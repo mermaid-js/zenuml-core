@@ -5,7 +5,7 @@ import type { LayoutRuntime } from "./types";
 import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { StatementKind } from "@/positioning/vertical/StatementTypes";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { CreationTopComponent } from "@/positioning/vertical/CreationTopComponent";
+import { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 
 export abstract class StatementVM extends NodeVM {
@@ -63,7 +63,7 @@ export abstract class StatementVM extends NodeVM {
   protected updateCreationTop(
     participant: string,
     top: number,
-    components?: CreationTopComponent[],
+    components?: CreationTopBlock[],
   ): void {
     this.runtime.updateCreationTop(participant, top, components);
   }

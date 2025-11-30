@@ -1,9 +1,5 @@
 import { test, expect } from "./fixtures";
 import { initVerticalDebug, writeVerticalDebug } from "./utils/verticalDebug";
-import {
-  captureDebugScreenshot,
-  exportComponentBreakdown,
-} from "./utils/debugScreenshot";
 
 test.describe("Rendering", () => {
   test("alt-1", async ({ page }) => {
@@ -22,8 +18,6 @@ test.describe("Rendering", () => {
     } finally {
       if (didEnableDebug) {
         await writeVerticalDebug(page, "alt-1-debug");
-        await captureDebugScreenshot(page, "alt-1");
-        await exportComponentBreakdown(page, "alt-1");
       }
     }
   });
@@ -44,8 +38,6 @@ test.describe("Rendering", () => {
     } finally {
       if (didEnableDebug) {
         await writeVerticalDebug(page, "alt-2-debug");
-        await captureDebugScreenshot(page, "alt-2");
-        await exportComponentBreakdown(page, "alt-2");
       }
     }
   });
@@ -66,8 +58,6 @@ test.describe("Rendering", () => {
     } finally {
       if (didEnableDebug) {
         await writeVerticalDebug(page, "alt-3-debug");
-        await captureDebugScreenshot(page, "alt-3");
-        await exportComponentBreakdown(page, "alt-3");
       }
     }
   });
@@ -88,8 +78,6 @@ test.describe("Rendering", () => {
   //   } finally {
   //     if (didEnableDebug) {
   //       await writeVerticalDebug(page, "alt-4-debug");
-  //       await captureDebugScreenshot(page, "alt-4");
-  //       await exportComponentBreakdown(page, "alt-4");
   //     }
   //   }
   // });

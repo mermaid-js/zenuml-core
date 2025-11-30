@@ -8,14 +8,13 @@ import {
 } from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
-import parentLogger from "@/logger/logger";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { EventBus } from "@/EventBus";
 
-const logger = parentLogger.child({ name: "LifeLine" });
+// const logger = parentLogger.child({ name: "LifeLine" });
 
 export const LifeLine = (props: {
   entity: any;
@@ -94,6 +93,7 @@ export const LifeLine = (props: {
       return true;
     };
 
+    // console.info("LifeLine:verticalMode", verticalMode);
     if (verticalMode === "server") {
       resolveFromServer();
     } else {

@@ -1,9 +1,5 @@
 import { test, expect } from "./fixtures";
 import { initVerticalDebug, writeVerticalDebug } from "./utils/verticalDebug";
-import {
-  captureDebugScreenshot,
-  exportComponentBreakdown,
-} from "./utils/debugScreenshot";
 
 test.describe("Rendering", () => {
   test("single-1", async ({ page }) => {
@@ -22,8 +18,6 @@ test.describe("Rendering", () => {
     } finally {
       if (didEnableDebug) {
         await writeVerticalDebug(page, "single-1-debug");
-        await captureDebugScreenshot(page, "single-1");
-        await exportComponentBreakdown(page, "single-1");
       }
     }
   });

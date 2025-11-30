@@ -1,6 +1,6 @@
 import { StatementAnchor } from "@/positioning/vertical/StatementTypes";
 import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
-import { CreationTopComponent } from "@/positioning/vertical/CreationTopComponent";
+import { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
@@ -10,7 +10,7 @@ interface CreationOffsets {
   visualAdjustment: number;
   assignmentAdjustment: number;
   /** Component breakdown for debug purposes */
-  components: CreationTopComponent[];
+  components: CreationTopBlock[];
 }
 
 export class CreationStatementVM extends StatementVM {
@@ -44,7 +44,7 @@ export class CreationStatementVM extends StatementVM {
     const statementKey = this.getStatementKey();
 
     // Build component breakdown for debugging
-    const components: CreationTopComponent[] = [
+    const components: CreationTopBlock[] = [
       {
         name: "cursorTop",
         value: top,
@@ -147,7 +147,7 @@ export class CreationStatementVM extends StatementVM {
     });
 
     const adjustedTop = top - totalUpwardAdjustment;
-    let creationAnchor = anchors.message!;
+    const creationAnchor = anchors.message!;
 
     if (target) {
       // Lifeline start aligns to the rendered creation arrow, which is the final
@@ -181,8 +181,8 @@ export class CreationStatementVM extends StatementVM {
   private calculateOffsets(assignment: any): CreationOffsets {
     let anchorAdjustment = 0;
     let altBranchInset = 0;
-    let visualAdjustment = 0;
-    const components: CreationTopComponent[] = [];
+    const visualAdjustment = 0;
+    const components: CreationTopBlock[] = [];
     const statementKey = this.getStatementKey();
 
     // Traverse up once to gather all context-based offsets

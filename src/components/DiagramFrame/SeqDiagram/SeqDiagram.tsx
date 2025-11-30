@@ -21,7 +21,6 @@ import "./SeqDiagram.css";
 import { cn } from "@/utils";
 import { LifeLineLayer } from "./LifeLineLayer/LifeLineLayer";
 import { MessageLayer } from "./MessageLayer/MessageLayer";
-import { StatementCoordinateDebug } from "../Debug/StatementCoordinateDebug";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -109,7 +108,6 @@ export const SeqDiagram = (props: {
           </>
         )}
       </div>
-      {/* <StatementCoordinateDebug /> */}
     </div>
   );
 };

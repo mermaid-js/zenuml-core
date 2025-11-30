@@ -9,11 +9,10 @@ import { CodeRange } from "../parser/CodeRange";
 type VerticalMode = "server" | "browser";
 
 const resolveVerticalMode = (): VerticalMode => {
-  if (typeof window !== "undefined") {
-    const mode = (window as any).__ZEN_VERTICAL_MODE;
-    if (mode === "browser") return "browser";
-    if (mode === "server") return "server";
-  }
+  console.info(
+    "import.meta.env.VITE_VERTICAL_MODE",
+    import.meta.env.VITE_VERTICAL_MODE,
+  );
   return import.meta.env.VITE_VERTICAL_MODE === "browser"
     ? "browser"
     : "server";
