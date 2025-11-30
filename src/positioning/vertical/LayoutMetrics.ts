@@ -4,7 +4,6 @@ export interface LayoutMetrics {
   statementMarginTop: number;
   statementMarginBottom: number;
   statementGap: number;
-  lifelineLayerPaddingTop: number;
   commentLineHeight: number;
   commentCodeLineHeight: number;
   commentBlockSpacing: number;
@@ -58,7 +57,6 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   statementMarginTop: tw(4),
   statementMarginBottom: tw(4),
   statementGap: tw(4),
-  lifelineLayerPaddingTop: tw(2), // pt-2 on lifeline layer container
   commentLineHeight: rem(1.25),
   commentCodeLineHeight: rem(1.1),
   commentBlockSpacing: tw(2),

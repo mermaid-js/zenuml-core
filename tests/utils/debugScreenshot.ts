@@ -150,10 +150,8 @@ export async function captureDebugScreenshot(
 
   // Get creation top records from the page
   const debugData = await page.evaluate(() => {
-    const creationTopRecords =
-      (window as any).__zenumlCreationTopRecords || [];
-    const lifelineLayerPaddingTop =
-      (window as any).__zenumlLifelineLayerPaddingTop ?? 8;
+    const creationTopRecords = (window as any).__zenumlCreationTopRecords || [];
+    const lifelineLayerPaddingTop = 8;
     const messageLayer = document.querySelector(".message-layer");
     const messageLayerRect = messageLayer?.getBoundingClientRect();
     const diagramRect = document
@@ -202,7 +200,10 @@ export async function captureDebugScreenshot(
       const color =
         COMPONENT_COLORS[component.name] || COMPONENT_COLORS.default;
 
-      if (component.name === "cursorTop" || component.name === "finalMessageAnchor") {
+      if (
+        component.name === "cursorTop" ||
+        component.name === "finalMessageAnchor"
+      ) {
         // For absolute values, draw at the absolute position
         const y = verticalOffset + component.value;
         drawHorizontalLine(
@@ -214,7 +215,13 @@ export async function captureDebugScreenshot(
           component.name === "finalMessageAnchor" ? 2 : 4,
           component.name === "finalMessageAnchor" ? 1 : 2,
         );
-        drawMarker(png, centerX, y, color, component.name === "finalMessageAnchor" ? 5 : 3);
+        drawMarker(
+          png,
+          centerX,
+          y,
+          color,
+          component.name === "finalMessageAnchor" ? 5 : 3,
+        );
       } else if (component.value !== 0) {
         // For incremental values, draw at the cumulative position
         cumulativeY += component.value;

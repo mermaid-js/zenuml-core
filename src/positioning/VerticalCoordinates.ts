@@ -124,10 +124,6 @@ export class VerticalCoordinates {
     return this.metrics.statementMarginTop;
   }
 
-  getLifelineLayerPaddingTop(): number {
-    return this.metrics.lifelineLayerPaddingTop;
-  }
-
   entries() {
     return Array.from(this.statementMap.entries());
   }
