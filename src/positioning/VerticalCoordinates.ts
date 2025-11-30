@@ -14,16 +14,10 @@ import {
   CreationTopComponent,
   CreationTopRecord,
 } from "@/positioning/vertical/CreationTopComponent";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { BlockVM } from "@/vm/BlockVM";
 import { LayoutRuntime } from "@/vm/types";
-
-interface VerticalCoordinatesOptions {
-  rootContext: any;
-  theme?: ThemeName;
-  originParticipant: string;
-  participantOrder: string[];
-}
+import { AllMessages } from "@/parser/MessageCollector";
 
 export class VerticalCoordinates {
   private readonly metrics: LayoutMetrics;
@@ -40,12 +34,21 @@ export class VerticalCoordinates {
   private readonly runtime: LayoutRuntime;
   readonly totalHeight: number;
 
-  constructor(options: VerticalCoordinatesOptions) {
-    this.metrics = getLayoutMetrics(options.theme);
+  constructor(rootContext: any, theme?: ThemeName) {
+    this.metrics = getLayoutMetrics(theme);
     this.markdownMeasurer = new MarkdownMeasurer(this.metrics);
-    this.rootBlock = options.rootContext?.block?.() ?? options.rootContext;
-    this.rootOrigin = options.originParticipant || _STARTER_;
-    this.participantOrder = options.participantOrder;
+    this.rootBlock = rootContext?.block?.() ?? rootContext;
+
+    this.participantOrder = OrderedParticipants(rootContext).map((p) => p.name);
+    console.warn("participantOrder", this.participantOrder);
+
+    const ownableMessages = AllMessages(rootContext);
+    console.warn("ownableMessages", JSON.stringify(ownableMessages));
+    this.rootOrigin =
+      ownableMessages.length === 0
+        ? _STARTER_
+        : ownableMessages[0].from || _STARTER_;
+
     this.runtime = {
       metrics: this.metrics,
       markdown: this.markdownMeasurer,
