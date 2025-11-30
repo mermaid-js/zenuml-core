@@ -13,7 +13,6 @@ This branch replaces browser-driven measurements with a deterministic, server-si
 2) **Markdown** — `vertical/MarkdownMeasurer.ts` tokenizes comments with `marked` and sums line heights (wrapping is ignored) using the same font metrics the renderer uses.
 3) **VM Layer** — `src/vm/*` mirrors the renderer’s stacking rules. `createBlockVM` walks `stat` nodes, instantiates a `StatementVM` per construct, and accumulates cursor positions with small offsets to match DOM quirks.
 4) **Recording** — Each `StatementVM.measure` returns a `StatementCoordinate` (top, height, anchors, meta). The runtime’s `recordCoordinate` stitches these into a map keyed by parser range; `updateCreationTop` captures the earliest creation anchor per participant for lifeline alignment.
-5) **Height Finish** — Layout starts at `messageLayerPaddingTop`, walks the root block, and adds `messageLayerPaddingBottom` to produce `totalHeight`.
 
 ## Per-Statement Behaviours (highlights)
 - **Sync messages** (`SyncMessageStatementVM`): comment height first, then message height (self vs normal), then occurrence height (block content or min height). Adds `return` anchor/height when the message has an assignment target.

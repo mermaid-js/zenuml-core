@@ -43,7 +43,7 @@ export abstract class StatementVM extends NodeVM {
   ): string | undefined {
     if (!ctx) return undefined;
     const local = getLocalParticipantNames(ctx) || [];
-    const ordered = this.runtime.participantOrder;
+    const ordered = this.runtime.participants;
     return (
       ordered.find((name) => local.includes(name)) ||
       local[0] ||

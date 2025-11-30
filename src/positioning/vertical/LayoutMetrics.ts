@@ -1,5 +1,4 @@
 export interface LayoutMetrics {
-  messageLayerPaddingTop: number;
   messageLayerPaddingBottom: number;
   statementMarginTop: number;
   statementMarginBottom: number;
@@ -52,7 +51,6 @@ const tw = (value: number) => value * SPACING_UNIT;
 
 /** Theme agnostic default values derived from the Tailwind config. */
 export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
-  messageLayerPaddingTop: tw(14), // pt-14 => 56px
   messageLayerPaddingBottom: tw(10), // pb-10 => 40px
   statementMarginTop: tw(4),
   statementMarginBottom: tw(4),

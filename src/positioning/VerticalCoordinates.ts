@@ -4,15 +4,11 @@ import {
   LayoutMetrics,
   ThemeName,
 } from "@/positioning/vertical/LayoutMetrics";
-import {
-  createStatementKey,
-  StatementKey,
-} from "@/positioning/vertical/StatementIdentifier";
-import { StatementAnchor } from "@/positioning/vertical/StatementTypes";
+import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import {
   CreationTopComponent,
-  CreationTopRecord,
+  // CreationTopRecord,
 } from "@/positioning/vertical/CreationTopComponent";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { BlockVM } from "@/vm/BlockVM";
@@ -21,39 +17,34 @@ import { AllMessages } from "@/parser/MessageCollector";
 
 export class VerticalCoordinates {
   private readonly metrics: LayoutMetrics;
-  private readonly statementMap = new Map<StatementKey, StatementCoordinate>();
-  private readonly markdownMeasurer: MarkdownMeasurer;
-  private readonly creationTopByParticipant = new Map<string, number>();
+  private readonly statementMap = new Map<string, StatementCoordinate>();
+  private readonly creationTops = new Map<string, number>();
   private readonly creationTopComponents = new Map<
     string,
     CreationTopComponent[]
   >();
   private readonly rootBlock: any;
   private readonly rootOrigin: string;
-  private readonly participantOrder: string[];
   private readonly runtime: LayoutRuntime;
   readonly totalHeight: number;
 
   constructor(rootContext: any, theme?: ThemeName) {
     this.metrics = getLayoutMetrics(theme);
-    this.markdownMeasurer = new MarkdownMeasurer(this.metrics);
     this.rootBlock = rootContext?.block?.() ?? rootContext;
 
-    this.participantOrder = OrderedParticipants(rootContext).map((p) => p.name);
-    console.warn("participantOrder", this.participantOrder);
+    const participants = OrderedParticipants(rootContext).map((p) => p.name);
+    console.info("participants", participants);
 
-    const ownableMessages = AllMessages(rootContext);
-    console.warn("ownableMessages", JSON.stringify(ownableMessages));
+    const messages = AllMessages(rootContext);
+    console.info("messages", JSON.stringify(messages));
     this.rootOrigin =
-      ownableMessages.length === 0
-        ? _STARTER_
-        : ownableMessages[0].from || _STARTER_;
+      messages.length === 0 ? _STARTER_ : messages[0].from || _STARTER_;
 
     this.runtime = {
       metrics: this.metrics,
-      markdown: this.markdownMeasurer,
-      participantOrder: this.participantOrder,
       rootBlock: this.rootBlock,
+      markdown: new MarkdownMeasurer(this.metrics),
+      participants,
       originParticipant: this.rootOrigin,
       recordCoordinate: (statement: any, coordinate: StatementCoordinate) => {
         const key = createStatementKey(statement);
@@ -64,68 +55,40 @@ export class VerticalCoordinates {
         top: number,
         components?: CreationTopComponent[],
       ) => {
-        const prevTop = this.creationTopByParticipant.get(participant);
-        if (prevTop == null || top < prevTop) {
-          this.creationTopByParticipant.set(participant, top);
+        const prev = this.creationTops.get(participant);
+        if (prev == null || top < prev) {
+          this.creationTops.set(participant, top);
           if (components) {
             this.creationTopComponents.set(participant, components);
           }
         }
       },
     };
-    const start = this.metrics.messageLayerPaddingTop;
+
     const rootBlockVM = new BlockVM(this.rootBlock, this.runtime);
-    const end = rootBlockVM.layout(this.rootOrigin, start);
+    const end = rootBlockVM.layout(this.rootOrigin, 56); // pt-14 => 56px
     this.totalHeight = end + this.metrics.messageLayerPaddingBottom;
   }
 
-  getStatementTop(keyOrCtx: StatementKey | any): number | undefined {
-    const key =
-      typeof keyOrCtx === "string" ? keyOrCtx : createStatementKey(keyOrCtx);
-    return this.statementMap.get(key)?.top;
-  }
-
-  getStatementHeight(keyOrCtx: StatementKey | any): number | undefined {
-    const key =
-      typeof keyOrCtx === "string" ? keyOrCtx : createStatementKey(keyOrCtx);
-    return this.statementMap.get(key)?.height;
-  }
-
-  getStatementAnchors(
-    keyOrCtx: StatementKey | any,
-  ): Partial<Record<StatementAnchor, number>> | undefined {
-    const key =
-      typeof keyOrCtx === "string" ? keyOrCtx : createStatementKey(keyOrCtx);
-    return this.statementMap.get(key)?.anchors;
-  }
-
   getCreationTop(participant: string): number | undefined {
-    return this.creationTopByParticipant.get(participant);
+    return this.creationTops.get(participant);
   }
 
-  getCreationTopComponents(participant: string): CreationTopComponent[] {
-    return this.creationTopComponents.get(participant) || [];
-  }
+  // getCreationTopComponents(participant: string): CreationTopComponent[] {
+  //   return this.creationTopComponents.get(participant) || [];
+  // }
 
-  getCreationTopRecords(): CreationTopRecord[] {
-    const records: CreationTopRecord[] = [];
-    for (const [participant, finalTop] of this.creationTopByParticipant) {
-      records.push({
-        participant,
-        finalTop,
-        components: this.creationTopComponents.get(participant) || [],
-      });
-    }
-    return records;
-  }
-
-  getMessageLayerPaddingTop(): number {
-    return this.metrics.messageLayerPaddingTop;
-  }
-
-  getStatementMarginTop(): number {
-    return this.metrics.statementMarginTop;
-  }
+  // getCreationTopRecords(): CreationTopRecord[] {
+  //   const records: CreationTopRecord[] = [];
+  //   for (const [participant, finalTop] of this.creationTopByParticipant) {
+  //     records.push({
+  //       participant,
+  //       finalTop,
+  //       components: this.creationTopComponents.get(participant) || [],
+  //     });
+  //   }
+  //   return records;
+  // }
 
   entries() {
     return Array.from(this.statementMap.entries());

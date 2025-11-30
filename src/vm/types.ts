@@ -6,12 +6,7 @@ import { CreationTopComponent } from "@/positioning/vertical/CreationTopComponen
 export interface LayoutRuntime {
   metrics: LayoutMetrics;
   markdown: MarkdownMeasurer;
-}
-
-export interface LayoutRuntime {
-  metrics: LayoutMetrics;
-  markdown: MarkdownMeasurer;
-  participantOrder: string[];
+  participants: string[];
   rootBlock: any;
   originParticipant: string;
   recordCoordinate: (statement: any, coordinate: StatementCoordinate) => void;
