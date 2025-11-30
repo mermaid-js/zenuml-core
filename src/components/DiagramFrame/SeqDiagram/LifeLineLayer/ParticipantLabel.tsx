@@ -22,6 +22,10 @@ export const ParticipantLabel = (props: {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
+  const participantIsEditable =
+    mode === RenderMode.Dynamic &&
+    UneditableText.indexOf(props.labelText) === -1;
+  const assigneeIsEditable = mode === RenderMode.Dynamic;
 
   const replaceLabelTextWithaPositions = (positions: Array<Position>) => {
     return function (e: SyntheticEvent) {
@@ -64,11 +68,11 @@ export const ParticipantLabel = (props: {
 
   const participantLabelHandler = useEditLabelImproved(
     replaceLabelTextWithaPositions(props.labelPositions ?? []),
-    { singleClick: true, showHoverHint: true }
+    { showHoverHint: true, isEditable: participantIsEditable }
   );
   const assigneeLabelHandler = useEditLabelImproved(
     replaceLabelTextWithaPositions(props.assigneePositions ?? []),
-    { singleClick: true, showHoverHint: true }
+    { showHoverHint: true, isEditable: assigneeIsEditable }
   );
 
   return (
@@ -76,7 +80,7 @@ export const ParticipantLabel = (props: {
       {props.assignee && (
         <>
           <label
-            title="Click to edit"
+            title="Double-click to edit"
             className={assigneeLabelHandler.getEditableClasses(
               "name pl-1 leading-4 right"
             )}
@@ -84,7 +88,6 @@ export const ParticipantLabel = (props: {
               assigneeLabelHandler.editing && mode === RenderMode.Dynamic
             }
             suppressContentEditableWarning={true}
-            onClick={assigneeLabelHandler.handleClick}
             onDoubleClick={assigneeLabelHandler.handleDoubleClick}
             onMouseEnter={assigneeLabelHandler.handleMouseEnter}
             onMouseLeave={assigneeLabelHandler.handleMouseLeave}
@@ -98,7 +101,7 @@ export const ParticipantLabel = (props: {
         </>
       )}
       <label
-        title="Click to edit"
+        title="Double-click to edit"
         className={participantLabelHandler.getEditableClasses(
           cn(
             "name leading-4 right",
@@ -106,12 +109,9 @@ export const ParticipantLabel = (props: {
           )
         )}
         contentEditable={
-          participantLabelHandler.editing &&
-          mode === RenderMode.Dynamic &&
-          UneditableText.indexOf(props.labelText) === -1
+          participantLabelHandler.editing && participantIsEditable
         }
         suppressContentEditableWarning={true}
-        onClick={participantLabelHandler.handleClick}
         onDoubleClick={participantLabelHandler.handleDoubleClick}
         onMouseEnter={participantLabelHandler.handleMouseEnter}
         onMouseLeave={participantLabelHandler.handleMouseLeave}

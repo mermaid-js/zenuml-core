@@ -46,19 +46,18 @@ export const ConditionLabel = (props: { condition: any }) => {
       const newCode = code.slice(0, start) + newText + code.slice(end + 1);
       setCode(newCode);
       onContentChange(newCode);
-    }, { singleClick: true, showHoverHint: true });
+    }, { showHoverHint: true, isEditable: mode === RenderMode.Dynamic });
 
   return (
     <>
       <label>[</label>
       <label
-        title="Click to edit"
+        title="Double-click to edit"
         className={labelHandler.getEditableClasses(
           "bg-skin-frame opacity-65 condition"
         )}
         contentEditable={labelHandler.editing && mode === RenderMode.Dynamic}
         suppressContentEditableWarning={true}
-        onClick={labelHandler.handleClick}
         onDoubleClick={labelHandler.handleDoubleClick}
         onMouseEnter={labelHandler.handleMouseEnter}
         onMouseLeave={labelHandler.handleMouseLeave}

@@ -1,34 +1,3 @@
-/* Completely remove browser focus ring for editable labels */
-[contenteditable="true"] {
-  outline: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  box-shadow: none !important;
-}
-
-[contenteditable="true"]:focus {
-  outline: none !important;
-  -webkit-focus-ring-color: transparent !important;
-  box-shadow: none !important;
-  border-color: transparent !important;
-}
-
-/* Firefox specific */
-[contenteditable="true"]:focus {
-  -moz-outline: none !important;
-}
-
-/* WebKit specific */
-[contenteditable="true"]:focus {
-  -webkit-focus-ring-color: transparent !important;
-  -webkit-tap-highlight-color: transparent !important;
-}
-
-/* Remove any webkit focus ring */
-[contenteditable="true"]::-webkit-focus-ring-color {
-  outline-color: transparent !important;
-}
-
 /* Base styling for all editable labels to prevent layout shifts */
 .editable-label-base {
   border: 2px solid transparent !important;
