@@ -34,6 +34,15 @@ export const test = base.extend({
     await page.addInitScript((injectedMode) => {
       (window as any).__ZEN_VERTICAL_MODE = injectedMode;
     }, mode);
+
+    // Pipe browser console logs to the terminal
+    page.on("console", (msg) => {
+      const type = msg.type();
+      if (type === "warning" || type === "error") {
+        console.log(`[Browser] ${msg.text()}`);
+      }
+    });
+
     await uses(page);
   },
 });

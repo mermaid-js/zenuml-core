@@ -61,18 +61,21 @@ export const verticalCoordinatesAtom = atom((get) => {
   if (!rootContext) {
     return null;
   }
-  const theme = get(themeAtom);
   const participantOrder = OrderedParticipants(rootContext).map((p) => p.name);
+  console.warn("participantOrder", participantOrder);
+
   const ownableMessages = AllMessages(rootContext);
+  console.warn("ownableMessages", JSON.stringify(ownableMessages));
   const originParticipant =
     ownableMessages.length === 0
       ? _STARTER_
       : ownableMessages[0].from || _STARTER_;
+
   return new VerticalCoordinates({
     rootContext,
-    theme,
-    originParticipant,
+    theme: get(themeAtom),
     participantOrder,
+    originParticipant,
   });
 });
 
