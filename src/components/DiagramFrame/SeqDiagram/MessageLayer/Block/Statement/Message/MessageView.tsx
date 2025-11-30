@@ -47,7 +47,6 @@ export const MessageView = ({
         "message leading-none border-skin-message-arrow border-b-2 flex items-end",
         {
           "flex-row-reverse": rtl,
-          return: type === "return",
           "right-to-left": rtl,
           "cursor-pointer": stylable,
         },
