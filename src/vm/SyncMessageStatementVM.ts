@@ -1,5 +1,5 @@
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 

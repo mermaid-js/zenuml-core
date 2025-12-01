@@ -1,5 +1,5 @@
-import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
-import { StatementKind } from "@/positioning/vertical/StatementTypes";
+import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { StatementKind } from "@/positioning/vertical/StatementTypes";
 import { FragmentVM } from "./FragmentVM";
 import type { LayoutRuntime } from "./types";
 

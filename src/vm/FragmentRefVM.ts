@@ -1,13 +1,8 @@
-import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { FragmentVM } from "./FragmentVM";
-import type { LayoutRuntime } from "./types";
 
 export class FragmentRefVM extends FragmentVM {
   readonly kind = "ref" as const;
-
-  constructor(statement: any, runtime: LayoutRuntime) {
-    super(statement, runtime);
-  }
 
   public measure(top: number): StatementCoordinate {
     const context = this.context?.ref?.() || this.context;

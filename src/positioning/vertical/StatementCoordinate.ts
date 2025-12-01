@@ -1,4 +1,4 @@
-import {
+import type {
   StatementAnchor,
   StatementKind,
 } from "@/positioning/vertical/StatementTypes";

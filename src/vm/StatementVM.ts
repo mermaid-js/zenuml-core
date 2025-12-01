@@ -1,19 +1,14 @@
 import { NodeVM } from "./NodeVM";
-import { getCommentHeight } from "./getCommentHeight";
 import { resolveFragmentOrigin } from "./resolveFragmentOrigin";
-import type { LayoutRuntime } from "./types";
-import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
-import { StatementKind } from "@/positioning/vertical/StatementTypes";
+import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { StatementKind } from "@/positioning/vertical/StatementTypes";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
+import type { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
+import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
 
 export abstract class StatementVM extends NodeVM {
   abstract readonly kind: StatementKind;
-
-  constructor(statement: any, runtime: LayoutRuntime) {
-    super(statement, runtime);
-  }
 
   public abstract measure(top: number, origin: string): StatementCoordinate;
 
@@ -30,7 +25,12 @@ export abstract class StatementVM extends NodeVM {
   }
 
   protected measureComment(context: any = this.context): number {
-    return getCommentHeight(context, this.runtime.markdown);
+    if (!context?.getComment) return 0;
+    const rawComment = context.getComment() || "";
+    if (!rawComment) return 0;
+
+    const markdown = new MarkdownMeasurer(this.runtime.metrics);
+    return markdown.measure(rawComment);
   }
 
   protected resolveFragmentOrigin(fallbackOrigin: string): string {

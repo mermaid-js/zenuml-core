@@ -1,48 +1,38 @@
-import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
 import {
   getLayoutMetrics,
-  LayoutMetrics,
-  ThemeName,
+  type ThemeName,
 } from "@/positioning/vertical/LayoutMetrics";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
-import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
-import {
-  CreationTopBlock,
-  // CreationTopRecord,
-} from "@/positioning/vertical/CreationTopBlock";
+import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { BlockVM } from "@/vm/BlockVM";
-import { LayoutRuntime } from "@/vm/types";
+import type { LayoutRuntime } from "@/vm/types";
 import { AllMessages } from "@/parser/MessageCollector";
 
 export class VerticalCoordinates {
-  private readonly metrics: LayoutMetrics;
   private readonly statementMap = new Map<string, StatementCoordinate>();
   private readonly creationTops = new Map<string, number>();
   private readonly creationTopBlocks = new Map<string, CreationTopBlock[]>();
-  private readonly rootBlock: any;
-  private readonly rootOrigin: string;
-  private readonly runtime: LayoutRuntime;
   readonly totalHeight: number;
 
   constructor(rootContext: any, theme?: ThemeName) {
-    this.metrics = getLayoutMetrics(theme);
-    this.rootBlock = rootContext?.block?.() ?? rootContext;
+    const rootBlock = rootContext?.block?.() ?? rootContext;
 
     const participants = OrderedParticipants(rootContext).map((p) => p.name);
     console.info("participants", participants);
 
     const messages = AllMessages(rootContext);
     console.info("messages", JSON.stringify(messages));
-    this.rootOrigin =
+    const originParticipant =
       messages.length === 0 ? _STARTER_ : messages[0].from || _STARTER_;
 
-    this.runtime = {
-      metrics: this.metrics,
-      rootBlock: this.rootBlock,
-      markdown: new MarkdownMeasurer(this.metrics),
+    const metrics = getLayoutMetrics(theme);
+    const runtime: LayoutRuntime = {
+      metrics,
+      rootBlock,
       participants,
-      originParticipant: this.rootOrigin,
+      originParticipant,
       recordCoordinate: (statement: any, coordinate: StatementCoordinate) => {
         const key = createStatementKey(statement);
         this.statementMap.set(key, coordinate);
@@ -62,9 +52,9 @@ export class VerticalCoordinates {
       },
     };
 
-    const rootBlockVM = new BlockVM(this.rootBlock, this.runtime);
-    const end = rootBlockVM.layout(this.rootOrigin, 56); // pt-14 => 56px
-    this.totalHeight = end + this.metrics.messageLayerPaddingBottom;
+    const rootBlockVM = new BlockVM(rootBlock, runtime);
+    const end = rootBlockVM.layout(originParticipant, 56); // pt-14 => 56px
+    this.totalHeight = end + metrics.messageLayerPaddingBottom;
   }
 
   getCreationTop(participant: string): number | undefined {

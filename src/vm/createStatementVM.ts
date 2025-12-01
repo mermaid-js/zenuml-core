@@ -11,7 +11,7 @@ import { FragmentRefVM } from "./FragmentRefVM";
 import { FragmentSectionVM } from "./FragmentSectionVM";
 import { FragmentTryCatchVM } from "./FragmentTryCatchVM";
 import { ReturnStatementVM } from "./ReturnStatementVM";
-import { StatementVM } from "./StatementVM";
+import type { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 import { SyncMessageStatementVM } from "./SyncMessageStatementVM";
 

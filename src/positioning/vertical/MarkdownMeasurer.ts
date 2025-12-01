@@ -1,5 +1,5 @@
 import { marked } from "marked";
-import { LayoutMetrics } from "./LayoutMetrics";
+import type { LayoutMetrics } from "./LayoutMetrics";
 
 type GenericToken = ReturnType<typeof marked.lexer>[number];
 type ListItemToken = GenericToken & {

@@ -1,6 +1,6 @@
-import { StatementAnchor } from "@/positioning/vertical/StatementTypes";
-import { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
-import { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
+import type { StatementAnchor } from "@/positioning/vertical/StatementTypes";
+import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 

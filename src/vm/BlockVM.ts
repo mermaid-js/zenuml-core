@@ -1,7 +1,7 @@
 import { NodeVM } from "./NodeVM";
 import type { LayoutRuntime } from "./types";
 import { createStatementVM } from "./createStatementVM";
-import { StatementKind } from "@/positioning/vertical/StatementTypes";
+import type { StatementKind } from "@/positioning/vertical/StatementTypes";
 
 export class BlockVM extends NodeVM {
   private readonly statements: any[];
