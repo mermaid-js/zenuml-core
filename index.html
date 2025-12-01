@@ -83,7 +83,7 @@
                 Basic
               </button>
               <button onclick="loadExample('advanced')" class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition-colors">
-                Advanced
+                Demo1
               </button>
               <button onclick="clearEditor()" class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition-colors">
                 Clear
@@ -115,6 +115,7 @@
       import { waitUntil, debounce } from "./src/utils.ts";
       import { createConfig } from "./src/config.ts";
       import { toPng } from "html-to-image";
+      import demo1Content from "./src/demo1.js";
 
       const editor = CodeMirror.fromTextArea(document.getElementById("text"), {
         lineNumbers: true,
@@ -151,28 +152,7 @@
       const examples = {
         basic: `Alice -> Bob: Hello Bob!
 Bob -> Alice: Hello Alice!`,
-        advanced: `title Online Shopping
-participant Customer
-participant WebApp
-participant PaymentService
-participant Database
-
-Customer -> WebApp: Browse products
-WebApp -> Database: Query products
-Database --> WebApp: Return products
-WebApp --> Customer: Display products
-
-Customer -> WebApp: Add to cart
-WebApp -> Database: Update cart
-Database --> WebApp: Cart updated
-WebApp --> Customer: Show cart
-
-Customer -> WebApp: Checkout
-WebApp -> PaymentService: Process payment
-PaymentService --> WebApp: Payment confirmed
-WebApp -> Database: Create order
-Database --> WebApp: Order created
-WebApp --> Customer: Order confirmation`
+        advanced: demo1Content
       };
 
       // Global functions
