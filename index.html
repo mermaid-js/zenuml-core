@@ -67,15 +67,43 @@
       .editor-shadow {
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       }
+
+      .splitter {
+        width: 8px;
+        background: #cbd5e0;
+        cursor: col-resize;
+        flex-shrink: 0;
+        position: relative;
+        transition: background-color 0.2s;
+      }
+
+      .splitter:hover {
+        background: #94a3b8;
+      }
+
+      .splitter:active {
+        background: #64748b;
+      }
+
+      .resizable-container {
+        display: flex;
+        height: 100%;
+        gap: 0;
+      }
+
+      .panel {
+        overflow: hidden;
+        min-width: 200px;
+      }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-gray-50">
     <!-- Main Editor Section -->
     <div class="w-full h-screen p-4">
-      <div class="grid grid-cols-2 gap-4 h-full" id="diagram1">
+      <div class="resizable-container" id="diagram1">
         <!-- Editor Panel -->
-        <div class="bg-white rounded-lg shadow-lg editor-shadow overflow-hidden h-full">
+        <div id="editorPanel" class="panel bg-white rounded-lg shadow-lg editor-shadow h-full" style="width: 30%;">
           <div class="bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
             <h3 class="font-medium">Editor</h3>
             <div class="flex space-x-2">
@@ -98,8 +126,11 @@
           </div>
         </div>
 
+        <!-- Draggable Splitter -->
+        <div id="splitter" class="splitter"></div>
+
         <!-- Preview Panel -->
-        <div class="bg-white rounded-lg shadow-lg editor-shadow overflow-hidden h-full">
+        <div id="previewPanel" class="panel bg-white rounded-lg shadow-lg editor-shadow h-full" style="width: calc(70% - 8px);">
           <div class="bg-gray-800 text-white px-4 py-3">
             <h3 class="font-medium">Preview</h3>
           </div>
@@ -186,6 +217,49 @@ Bob -> Alice: Hello Alice!`,
       } else {
         editor.setValue(examples.basic);
       }
+
+      // Draggable splitter functionality
+      const splitter = document.getElementById('splitter');
+      const editorPanel = document.getElementById('editorPanel');
+      const previewPanel = document.getElementById('previewPanel');
+      const container = document.getElementById('diagram1');
+
+      let isResizing = false;
+
+      splitter.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+
+        const containerRect = container.getBoundingClientRect();
+        const containerWidth = containerRect.width;
+        const mouseX = e.clientX - containerRect.left;
+        
+        // Calculate percentage, constrained between 20% and 80%
+        let leftPercent = (mouseX / containerWidth) * 100;
+        leftPercent = Math.max(20, Math.min(80, leftPercent));
+        
+        const splitterWidth = 8;
+        const rightPercent = 100 - leftPercent;
+        
+        editorPanel.style.width = `${leftPercent}%`;
+        previewPanel.style.width = `calc(${rightPercent}% - ${splitterWidth}px)`;
+        
+        // Refresh CodeMirror to adjust to new width
+        editor.refresh();
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (isResizing) {
+          isResizing = false;
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+        }
+      });
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
