@@ -35,10 +35,12 @@ export class VerticalCoordinates {
         this.statementMap.set(key, coordinate);
       },
       updateCreationTop: (participant: string, top: number) => {
-        const prev = this.creationTops.get(participant);
-        if (prev == null || top < prev) {
-          this.creationTops.set(participant, top);
-        }
+        const paddingTop = top - 8; // .life-line-layer .pt-2
+        console.info("updateCreationTop", participant, paddingTop);
+        // const prev = this.creationTops.get(participant);
+        // if (prev == null || paddingTop < prev) {
+        this.creationTops.set(participant, paddingTop);
+        // }
       },
     };
 

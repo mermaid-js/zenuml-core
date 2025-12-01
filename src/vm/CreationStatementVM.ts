@@ -88,7 +88,7 @@ export class CreationStatementVM extends StatementVM {
     if (target) {
       // Lifeline start aligns to the rendered creation arrow, which is the final
       // message anchor (not the statement's pre-comment cursorTop).
-      this.updateCreationTop(target, creationAnchor);
+      this.runtime.updateCreationTop(target, creationAnchor);
     }
 
     // The top of the statement block itself is adjusted by the upward adjustments

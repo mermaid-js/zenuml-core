@@ -1,9 +1,7 @@
 import { NodeVM } from "./NodeVM";
-import { resolveFragmentOrigin } from "./resolveFragmentOrigin";
 import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import type { StatementKind } from "@/positioning/vertical/StatementTypes";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
 
 export abstract class StatementVM extends NodeVM {
@@ -13,14 +11,6 @@ export abstract class StatementVM extends NodeVM {
 
   protected get metrics() {
     return this.runtime.metrics;
-  }
-
-  protected get rootBlock() {
-    return this.runtime.rootBlock;
-  }
-
-  protected get originParticipant() {
-    return this.runtime.originParticipant;
   }
 
   protected measureComment(context: any = this.context): number {
@@ -33,7 +23,13 @@ export abstract class StatementVM extends NodeVM {
   }
 
   protected resolveFragmentOrigin(fallbackOrigin: string): string {
-    return resolveFragmentOrigin(this.context, fallbackOrigin);
+    try {
+      const participants = getLocalParticipantNames(this.context) || [];
+      return participants[0] || fallbackOrigin;
+    } catch (error) {
+      console.warn("Failed to resolve fragment origin", error);
+      return fallbackOrigin;
+    }
   }
 
   protected findLeftParticipant(
@@ -59,14 +55,6 @@ export abstract class StatementVM extends NodeVM {
     return this.layoutBlock(blockContext, origin, startTop);
   }
 
-  protected updateCreationTop(participant: string, top: number): void {
-    this.runtime.updateCreationTop(participant, top);
-  }
-
-  protected getStatementKey(): string {
-    return createStatementKey(this.context);
-  }
-
   protected measureOccurrence(
     context: any,
     top: number,
@@ -83,7 +71,7 @@ export abstract class StatementVM extends NodeVM {
     const blockStart = top - offset;
     const blockEnd = this.layoutNestedBlock(
       block,
-      participant || this.originParticipant,
+      participant || this.runtime.originParticipant,
       blockStart,
     );
     const height = blockEnd - blockStart - offset;
@@ -92,7 +80,7 @@ export abstract class StatementVM extends NodeVM {
 
   protected isRootLevelStatement(statCtx: any): boolean {
     const block = statCtx?.parentCtx;
-    return block === this.rootBlock;
+    return block === this.runtime.rootBlock;
   }
 
   protected isFirstStatement(statCtx: any): boolean {
