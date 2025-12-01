@@ -1,6 +1,6 @@
 import type { StatementAnchor } from "@/positioning/vertical/StatementTypes";
 import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
-import type { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
+import type { CreationTopStatement } from "@/positioning/vertical/CreationTopStatement";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
@@ -10,7 +10,7 @@ interface CreationOffsets {
   visualAdjustment: number;
   assignmentAdjustment: number;
   /** Component breakdown for debug purposes */
-  components: CreationTopBlock[];
+  components: CreationTopStatement[];
 }
 
 export class CreationStatementVM extends StatementVM {
@@ -44,7 +44,7 @@ export class CreationStatementVM extends StatementVM {
     const statementKey = this.getStatementKey();
 
     // Build component breakdown for debugging
-    const components: CreationTopBlock[] = [
+    const components: CreationTopStatement[] = [
       {
         name: "cursorTop",
         value: top,
@@ -182,7 +182,7 @@ export class CreationStatementVM extends StatementVM {
     let anchorAdjustment = 0;
     let altBranchInset = 0;
     const visualAdjustment = 0;
-    const components: CreationTopBlock[] = [];
+    const components: CreationTopStatement[] = [];
     const statementKey = this.getStatementKey();
 
     // Traverse up once to gather all context-based offsets

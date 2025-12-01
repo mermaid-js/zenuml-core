@@ -1,6 +1,6 @@
 import type { LayoutMetrics } from "@/positioning/vertical/LayoutMetrics";
 import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
-import type { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
+import type { CreationTopStatement } from "@/positioning/vertical/CreationTopStatement";
 
 export interface LayoutRuntime {
   metrics: LayoutMetrics;
@@ -11,6 +11,6 @@ export interface LayoutRuntime {
   updateCreationTop: (
     participant: string,
     top: number,
-    components?: CreationTopBlock[],
+    components?: CreationTopStatement[],
   ) => void;
 }

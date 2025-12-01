@@ -3,7 +3,7 @@ import { resolveFragmentOrigin } from "./resolveFragmentOrigin";
 import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import type { StatementKind } from "@/positioning/vertical/StatementTypes";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import type { CreationTopBlock } from "@/positioning/vertical/CreationTopBlock";
+import type { CreationTopStatement } from "@/positioning/vertical/CreationTopStatement";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
 
@@ -63,7 +63,7 @@ export abstract class StatementVM extends NodeVM {
   protected updateCreationTop(
     participant: string,
     top: number,
-    components?: CreationTopBlock[],
+    components?: CreationTopStatement[],
   ): void {
     this.runtime.updateCreationTop(participant, top, components);
   }
