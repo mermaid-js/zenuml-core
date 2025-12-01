@@ -27,7 +27,7 @@ export const LifeLineGroup = (props: {
     <div
       className={cn(
         "lifeline-group-container absolute flex flex-col flex-grow h-full",
-        { "outline-dashed outline-skin-primary": props.renderLifeLine },
+        { "outline-dashed outline-1 outline-skin-primary": props.renderLifeLine },
       )}
       style={{
         left: `${left}px`,
