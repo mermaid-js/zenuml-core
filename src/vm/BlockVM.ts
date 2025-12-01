@@ -34,7 +34,7 @@ export class BlockVM extends NodeVM {
       return startTop;
     }
     const metrics = this.runtime.metrics;
-    let cursor = startTop + metrics.statementMarginTop;
+    let cursor = startTop + metrics.statementMarginY;
     let lastKind: StatementKind | undefined;
 
     this.statements.forEach((statement: any, index: number) => {
@@ -57,7 +57,7 @@ export class BlockVM extends NodeVM {
     const bottomMargin =
       lastKind === "return"
         ? metrics.returnStatementMarginBottom
-        : metrics.statementMarginBottom;
+        : metrics.statementMarginY;
     return cursor + bottomMargin;
   }
 }

@@ -45,7 +45,7 @@ export class SyncMessageStatementVM extends StatementVM {
     if (hasNestedBlock && commentHeight > 0) {
       occurrenceHeight += Math.min(
         commentHeight / 2,
-        this.metrics.statementMarginTop,
+        this.metrics.statementMarginY,
       );
     }
     const assignee = messageContext?.Assignment?.()?.getText?.();

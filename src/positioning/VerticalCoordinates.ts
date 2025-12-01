@@ -56,8 +56,7 @@ export class VerticalCoordinates {
     };
 
     const rootBlockVM = new BlockVM(rootBlock, runtime);
-    const end = rootBlockVM.layout(originParticipant, 56); // .message-layer.pt-14 => 56px
-    this.totalHeight = end + metrics.messageLayerPaddingBottom;
+    rootBlockVM.layout(originParticipant, 56); // .message-layer.pt-14 => 56px
   }
 
   getCreationTop(participant: string): number | undefined {

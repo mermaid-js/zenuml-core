@@ -84,7 +84,7 @@ export abstract class StatementVM extends NodeVM {
       return minHeight;
     }
     const inset = contentInset ?? this.metrics.occurrenceContentInset;
-    const offset = this.metrics.statementMarginTop - inset;
+    const offset = this.metrics.statementMarginY - inset;
     const blockStart = top - offset;
     const blockEnd = this.layoutNestedBlock(
       block,
