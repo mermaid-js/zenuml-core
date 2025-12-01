@@ -6,23 +6,23 @@ import type { StatementKind } from "@/positioning/vertical/StatementTypes";
 export class BlockVM extends NodeVM {
   private readonly statements: any[];
 
-  private static readonly cursorOffsets: Partial<
-    Record<StatementKind, number>
-  > = {
-    loop: 1,
-    par: 0,
-    opt: -3,
-  };
+  // private static readonly cursorOffsets: Partial<
+  //   Record<StatementKind, number>
+  // > = {
+  //   loop: 1,
+  //   par: 0,
+  //   opt: -3,
+  // };
 
-  private static readonly heightOffsets: Partial<
-    Record<StatementKind, number>
-  > = {
-    alt: 1,
-    loop: -5,
-    par: 3,
-    opt: 2,
-    section: 1,
-  };
+  // private static readonly heightOffsets: Partial<
+  //   Record<StatementKind, number>
+  // > = {
+  //   alt: 1,
+  //   loop: -5,
+  //   par: 3,
+  //   opt: 2,
+  //   section: 1,
+  // };
 
   constructor(context: any, runtime: LayoutRuntime) {
     super(context, runtime);
@@ -39,18 +39,19 @@ export class BlockVM extends NodeVM {
 
     this.statements.forEach((statement: any, index: number) => {
       const statementVM = createStatementVM(statement, this.runtime);
-      const cursorOffset = BlockVM.cursorOffsets[statementVM.kind] ?? 0;
-      const measureTop = cursor + cursorOffset;
-      const coordinate = statementVM.measure(measureTop, origin);
-      const heightOffset = BlockVM.heightOffsets[statementVM.kind] ?? 0;
-      if (heightOffset) {
-        coordinate.height += heightOffset;
-      }
+      // const cursorOffset = BlockVM.cursorOffsets[statementVM.kind] ?? 0;
+      // const measureTop = cursor + cursorOffset;
+      const coordinate = statementVM.measure(cursor, origin);
+      console.info("statementVM coordinate", statementVM.kind, coordinate);
+      // const heightOffset = BlockVM.heightOffsets[statementVM.kind] ?? 0;
+      // if (heightOffset) {
+      //   coordinate.height += heightOffset;
+      // }
       this.runtime.recordCoordinate(statement, coordinate);
       cursor = coordinate.top + coordinate.height;
       lastKind = statementVM.kind;
       if (index < this.statements.length - 1) {
-        cursor += metrics.statementGap;
+        cursor += metrics.statementMarginY;
       }
     });
 

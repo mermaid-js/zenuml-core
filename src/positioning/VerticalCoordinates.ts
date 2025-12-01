@@ -17,7 +17,6 @@ export class VerticalCoordinates {
     string,
     CreationTopStatement[]
   >();
-  readonly totalHeight: number;
 
   constructor(rootContext: any, theme?: ThemeName) {
     const rootBlock = rootContext?.block?.() ?? rootContext;
