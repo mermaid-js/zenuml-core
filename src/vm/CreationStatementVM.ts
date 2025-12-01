@@ -21,17 +21,22 @@ export class CreationStatementVM extends StatementVM {
     super(statement, runtime);
   }
 
-  public measure(top: number, origin: string): StatementCoordinate {
+  public measure(top: number, originParticipant: string): StatementCoordinate {
     const creation = this.creation;
+    const participant = creation?.Owner?.() || originParticipant;
+    const enlog = participant === "D" || participant === "c";
+
     const commentHeight = this.measureComment(creation);
     const messageTop = top + commentHeight;
+    if (enlog) console.info("measure 0", top, commentHeight);
     const messageHeight = this.metrics.creationMessageHeight;
     const occurrenceTop = messageTop + messageHeight;
-    const target = creation?.Owner?.() || origin;
+    if (enlog) console.info("measure 1", messageTop, messageHeight);
+
     const occurrenceHeight = this.measureOccurrence(
       creation,
       occurrenceTop,
-      target,
+      participant,
       undefined,
       this.metrics.creationOccurrenceContentInset,
     );
@@ -44,51 +49,52 @@ export class CreationStatementVM extends StatementVM {
       occurrence: occurrenceTop,
     };
 
-    let height = commentHeight + messageHeight + occurrenceHeight;
+    let height = messageHeight + occurrenceHeight;
+    if (enlog) console.info("measure 2", messageHeight, occurrenceHeight);
+
     if (assignment) {
       anchors.return = occurrenceTop + occurrenceHeight;
       height += this.metrics.returnMessageHeight;
+      if (enlog) console.info("measure 3 assignment");
     }
 
-    // Apply adjustments
-    // 1. Anchor adjustment (e.g. nested in Alt/Tcf/Par) shifts everything down
-    if (offsets.anchorAdjustment) {
-      anchors.message! += offsets.anchorAdjustment;
-      anchors.occurrence! += offsets.anchorAdjustment;
-      if (anchors.return != null) {
-        anchors.return += offsets.anchorAdjustment;
-      }
-    }
+    // // Apply adjustments
+    // // 1. Anchor adjustment (e.g. nested in Alt/Tcf/Par) shifts everything down
+    // if (offsets.anchorAdjustment) {
+    //   anchors.message! += offsets.anchorAdjustment;
+    //   anchors.occurrence! += offsets.anchorAdjustment;
+    //   if (anchors.return != null) {
+    //     anchors.return += offsets.anchorAdjustment;
+    //   }
+    // }
 
-    // 2. Alt branch inset (if not already adjusted by anchorAdjustment)
-    // Note: Original logic said "altBranchInset = anchorAdjustment === 0 ? rawAltBranchInset : 0"
-    // This implies if we have anchorAdjustment, we ignore altBranchInset.
-    if (offsets.altBranchInset && offsets.anchorAdjustment === 0) {
-      anchors.message! += offsets.altBranchInset;
-      anchors.occurrence! += offsets.altBranchInset;
-      if (anchors.return != null) {
-        anchors.return += offsets.altBranchInset;
-      }
-    }
+    // // 2. Alt branch inset (if not already adjusted by anchorAdjustment)
+    // // Note: Original logic said "altBranchInset = anchorAdjustment === 0 ? rawAltBranchInset : 0"
+    // // This implies if we have anchorAdjustment, we ignore altBranchInset.
+    // if (offsets.altBranchInset && offsets.anchorAdjustment === 0) {
+    //   anchors.message! += offsets.altBranchInset;
+    //   anchors.occurrence! += offsets.altBranchInset;
+    //   if (anchors.return != null) {
+    //     anchors.return += offsets.altBranchInset;
+    //   }
+    // }
 
-    // 3. Visual adjustment (Section) and Assignment adjustment shift things UP
-    const totalUpwardAdjustment =
-      offsets.visualAdjustment + offsets.assignmentAdjustment;
-    if (totalUpwardAdjustment) {
-      anchors.message! -= totalUpwardAdjustment;
-      anchors.occurrence! -= totalUpwardAdjustment;
-      if (anchors.return != null) {
-        anchors.return -= totalUpwardAdjustment;
-      }
-    }
+    // // 3. Visual adjustment (Section) and Assignment adjustment shift things UP
+    // const totalUpwardAdjustment =
+    //   offsets.visualAdjustment + offsets.assignmentAdjustment;
+    // if (totalUpwardAdjustment) {
+    //   anchors.message! -= totalUpwardAdjustment;
+    //   anchors.occurrence! -= totalUpwardAdjustment;
+    //   if (anchors.return != null) {
+    //     anchors.return -= totalUpwardAdjustment;
+    //   }
+    // }
 
-    const adjustedTop = top - totalUpwardAdjustment;
+    // const adjustedTop = top - totalUpwardAdjustment;
     const creationAnchor = anchors.message!;
 
-    if (target) {
-      // Lifeline start aligns to the rendered creation arrow, which is the final
-      // message anchor (not the statement's pre-comment cursorTop).
-      this.runtime.updateCreationTop(target, creationAnchor);
+    if (participant) {
+      this.runtime.updateCreationTop(participant, creationAnchor);
     }
 
     // The top of the statement block itself is adjusted by the upward adjustments
@@ -106,7 +112,8 @@ export class CreationStatementVM extends StatementVM {
     };
 
     return {
-      top: adjustedTop,
+      // top: adjustedTop,
+      top,
       height,
       kind: this.kind,
       anchors,

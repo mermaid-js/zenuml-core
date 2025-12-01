@@ -62,6 +62,7 @@ export abstract class StatementVM extends NodeVM {
     minHeight = this.metrics.occurrenceMinHeight,
     contentInset = this.metrics.occurrenceContentInset,
   ): number {
+    // const enlog = participant === "c";
     const block = context?.braceBlock?.()?.block?.();
     if (!block) {
       return minHeight;

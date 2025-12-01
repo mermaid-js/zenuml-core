@@ -29,7 +29,7 @@ export class BlockVM extends NodeVM {
     this.statements = context?.stat?.() || [];
   }
 
-  public layout(origin: string, startTop: number): number {
+  public layout(originParticipant: string, startTop: number): number {
     if (!this.statements.length) {
       return startTop;
     }
@@ -41,7 +41,7 @@ export class BlockVM extends NodeVM {
       const statementVM = createStatementVM(statement, this.runtime);
       // const cursorOffset = BlockVM.cursorOffsets[statementVM.kind] ?? 0;
       // const measureTop = cursor + cursorOffset;
-      const coordinate = statementVM.measure(cursor, origin);
+      const coordinate = statementVM.measure(cursor, originParticipant);
       console.info("statementVM coordinate", statementVM.kind, coordinate);
       // const heightOffset = BlockVM.heightOffsets[statementVM.kind] ?? 0;
       // if (heightOffset) {
