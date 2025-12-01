@@ -3,7 +3,6 @@ import { resolveFragmentOrigin } from "./resolveFragmentOrigin";
 import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import type { StatementKind } from "@/positioning/vertical/StatementTypes";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import type { CreationTopStatement } from "@/positioning/vertical/CreationTopStatement";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { MarkdownMeasurer } from "@/positioning/vertical/MarkdownMeasurer";
 
@@ -60,12 +59,8 @@ export abstract class StatementVM extends NodeVM {
     return this.layoutBlock(blockContext, origin, startTop);
   }
 
-  protected updateCreationTop(
-    participant: string,
-    top: number,
-    components?: CreationTopStatement[],
-  ): void {
-    this.runtime.updateCreationTop(participant, top, components);
+  protected updateCreationTop(participant: string, top: number): void {
+    this.runtime.updateCreationTop(participant, top);
   }
 
   protected getStatementKey(): string {

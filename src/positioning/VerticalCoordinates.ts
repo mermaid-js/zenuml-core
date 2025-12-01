@@ -4,7 +4,6 @@ import {
 } from "@/positioning/vertical/LayoutMetrics";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
-import type { CreationTopStatement } from "@/positioning/vertical/CreationTopStatement";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { BlockVM } from "@/vm/BlockVM";
 import type { LayoutRuntime } from "@/vm/types";
@@ -13,10 +12,6 @@ import { AllMessages } from "@/parser/MessageCollector";
 export class VerticalCoordinates {
   private readonly statementMap = new Map<string, StatementCoordinate>();
   private readonly creationTops = new Map<string, number>();
-  private readonly creationTopStatements = new Map<
-    string,
-    CreationTopStatement[]
-  >();
 
   constructor(rootContext: any, theme?: ThemeName) {
     const rootBlock = rootContext?.block?.() ?? rootContext;
@@ -39,17 +34,10 @@ export class VerticalCoordinates {
         const key = createStatementKey(statement);
         this.statementMap.set(key, coordinate);
       },
-      updateCreationTop: (
-        participant: string,
-        top: number,
-        blocks?: CreationTopStatement[],
-      ) => {
+      updateCreationTop: (participant: string, top: number) => {
         const prev = this.creationTops.get(participant);
         if (prev == null || top < prev) {
           this.creationTops.set(participant, top);
-          if (blocks) {
-            this.creationTopStatements.set(participant, blocks);
-          }
         }
       },
     };
