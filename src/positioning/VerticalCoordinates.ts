@@ -35,7 +35,7 @@ export class VerticalCoordinates {
         this.statementMap.set(key, coordinate);
       },
       updateCreationTop: (participant: string, top: number) => {
-        const paddingTop = top - 8; // .life-line-layer .pt-2
+        const paddingTop = top - 8; // .life-line-layer, .pt-2
         // console.info(`updateCreationTop::${participant}`, paddingTop);
         // const prev = this.creationTops.get(participant);
         // if (prev == null || paddingTop < prev) {
@@ -45,7 +45,7 @@ export class VerticalCoordinates {
     };
 
     const rootBlockVM = new BlockVM(rootBlock, runtime);
-    rootBlockVM.layout(originParticipant, 56); // .message-layer.pt-14 => 56px
+    rootBlockVM.layout(originParticipant, 56); // .message-layer, .pt-14 => 56px
   }
 
   getCreationTop(participant: string): number | undefined {

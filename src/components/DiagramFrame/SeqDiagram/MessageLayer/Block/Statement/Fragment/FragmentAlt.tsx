@@ -83,7 +83,7 @@ export const FragmentAlt = (props: {
 
       <div className={collapsed ? "hidden" : "block"}>
         <div className="segment">
-          <div className="text-skin-fragment flex">
+          <div className="text-skin-fragment">
             <ConditionLabel condition={conditionFromIfElseBlock(ifBlock)} />
           </div>
           {blockInIfBlock && (

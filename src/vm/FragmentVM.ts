@@ -4,9 +4,12 @@ export abstract class FragmentVM extends StatementVM {
   protected beginFragment(context: any, top: number) {
     const commentHeight = this.measureComment(context);
     const headerHeight = this.metrics.fragmentHeaderHeight;
-    const cursor =
-      top + commentHeight + headerHeight + this.metrics.fragmentBodyGap;
-    return { cursor, commentHeight, headerHeight };
+
+    return {
+      cursor: top + commentHeight + headerHeight,
+      commentHeight,
+      headerHeight,
+    };
   }
 
   protected finalizeFragment(
@@ -20,7 +23,6 @@ export abstract class FragmentVM extends StatementVM {
       height: cursor - top,
       meta: {
         paddingBottom: this.metrics.fragmentPaddingBottom,
-        bodyGap: this.metrics.fragmentBodyGap,
         ...meta,
       },
     } as const;

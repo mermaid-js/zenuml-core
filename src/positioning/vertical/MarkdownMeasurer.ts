@@ -30,7 +30,7 @@ export class MarkdownMeasurer {
     if (!tokens.length) {
       return 0;
     }
-    let total = this.metrics.commentPaddingY * 2;
+    let total = 0;
     tokens.forEach((token, index) => {
       total += this.measureToken(token);
       if (index < tokens.length - 1) {
@@ -97,8 +97,6 @@ export class MarkdownMeasurer {
   /** Monospace blocks use a different line height plus padding. */
   private measureCode(text: string): number {
     const lines = text.split(/\n/).length || 1;
-    return (
-      lines * this.metrics.commentCodeLineHeight + this.metrics.commentPaddingY
-    );
+    return lines * this.metrics.commentCodeLineHeight;
   }
 }

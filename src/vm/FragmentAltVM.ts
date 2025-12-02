@@ -2,11 +2,6 @@ import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordi
 import { FragmentVM } from "./FragmentVM";
 import type { LayoutRuntime } from "./types";
 
-interface FragmentBranch {
-  block?: any;
-  conditionHeight?: number;
-}
-
 export class FragmentAltVM extends FragmentVM {
   readonly kind = "alt" as const;
 
@@ -19,58 +14,39 @@ export class FragmentAltVM extends FragmentVM {
   }
 
   public measure(top: number, origin: string): StatementCoordinate {
-    const {
-      cursor: startCursor,
-      commentHeight,
-      headerHeight,
-    } = this.beginFragment(this.alt, top);
-    let cursor = startCursor;
+    const { cursor } = this.beginFragment(this.alt, top);
+    let _cursor = cursor;
+
     const leftParticipant =
       this.findLeftParticipant(this.alt, origin) || origin;
+    console.info("FragmentAltVM::leftParticipant", leftParticipant);
 
-    const branches: FragmentBranch[] = [];
+    const branches = [];
     const ifBlock = this.alt?.ifBlock?.();
     if (ifBlock) {
-      branches.push({
-        block: ifBlock.braceBlock()?.block(),
-        conditionHeight: this.metrics.fragmentConditionHeight,
-      });
+      console.info("FragmentAltVM::ifBlock");
+      branches.push(ifBlock.braceBlock()?.block());
     }
     this.alt?.elseIfBlock?.()?.forEach((block: any) => {
-      branches.push({
-        block: block?.braceBlock?.()?.block?.(),
-        conditionHeight: this.metrics.fragmentConditionHeight,
-      });
+      console.info("FragmentAltVM::elseIfBlock");
+      branches.push(block?.braceBlock?.()?.block?.());
     });
     const elseBlock = this.alt?.elseBlock?.()?.braceBlock?.()?.block?.();
     if (elseBlock) {
-      branches.push({
-        block: elseBlock,
-        conditionHeight: this.metrics.fragmentElseLabelHeight,
-      });
+      console.info("FragmentAltVM::elseBlock");
+      branches.push(elseBlock);
     }
 
-    let conditionedBranches = 0;
-    let totalConditionHeight = 0;
     branches.forEach((branch, index) => {
-      if (branch.conditionHeight) {
-        cursor += branch.conditionHeight;
-        conditionedBranches += 1;
-        totalConditionHeight += branch.conditionHeight;
-      }
-      cursor = this.layoutNestedBlock(branch.block, leftParticipant, cursor);
+      _cursor += 20; // .text-skin-fragment > label
+      _cursor = this.layoutNestedBlock(branch.block, leftParticipant, _cursor);
       if (index < branches.length - 1) {
-        cursor += this.metrics.fragmentBranchGap;
+        _cursor += 10; // .fragmentBranchGap => padding-bottom: 10px
       }
     });
 
-    const result = this.finalizeFragment(top, cursor, {
-      commentHeight,
-      headerHeight,
-      branchGap: this.metrics.fragmentBranchGap,
+    const result = this.finalizeFragment(top, _cursor, {
       branchCount: branches.length,
-      conditionedBranches,
-      conditionHeight: totalConditionHeight,
     });
 
     return {
