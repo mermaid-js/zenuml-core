@@ -73,7 +73,6 @@ TITLE_END=71
 'readonly'=3
 'static'=4
 'await'=5
-'title'=6
 ':'=7
 '<<'=8
 '>>'=9

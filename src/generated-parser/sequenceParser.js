@@ -225,14 +225,14 @@ export default class sequenceParser extends antlr4.Parser {
 
     static grammarFileName = "java-escape";
     static literalNames = [ null, null, "'const'", "'readonly'", "'static'", 
-                            "'await'", "'title'", "':'", "'<<'", "'>>'", 
-                            "'->'", null, "'||'", "'&&'", "'=='", "'!='", 
-                            "'>'", "'<'", "'>='", "'<='", "'+'", "'-'", 
-                            "'*'", "'/'", "'%'", "'^'", "'!'", "';'", "','", 
-                            "'='", "'('", "')'", "'{'", "'}'", "'true'", 
-                            "'false'", null, "'if'", "'else'", null, "'return'", 
-                            "'new'", "'par'", "'group'", "'opt'", "'critical'", 
-                            null, "'ref'", "'as'", "'try'", "'catch'", "'finally'", 
+                            "'await'", null, "':'", "'<<'", "'>>'", "'->'", 
+                            null, "'||'", "'&&'", "'=='", "'!='", "'>'", 
+                            "'<'", "'>='", "'<='", "'+'", "'-'", "'*'", 
+                            "'/'", "'%'", "'^'", "'!'", "';'", "','", "'='", 
+                            "'('", "')'", "'{'", "'}'", "'true'", "'false'", 
+                            null, "'if'", "'else'", null, "'return'", "'new'", 
+                            "'par'", "'group'", "'opt'", "'critical'", null, 
+                            "'ref'", "'as'", "'try'", "'catch'", "'finally'", 
                             "'in'", null, null, null, "'.'" ];
     static symbolicNames = [ null, "WS", "CONSTANT", "READONLY", "STATIC", 
                              "AWAIT", "TITLE", "COL", "SOPEN", "SCLOSE", 
