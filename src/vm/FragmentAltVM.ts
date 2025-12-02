@@ -39,7 +39,7 @@ export class FragmentAltVM extends FragmentVM {
 
     branches.forEach((branch, index) => {
       _cursor += 20; // .text-skin-fragment > label
-      _cursor = this.layoutNestedBlock(branch.block, leftParticipant, _cursor);
+      _cursor = this.layoutNestedBlock(branch, leftParticipant, _cursor);
       if (index < branches.length - 1) {
         _cursor += 10; // .fragmentBranchGap => padding-bottom: 10px
       }
