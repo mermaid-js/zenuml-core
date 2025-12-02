@@ -35,7 +35,7 @@ export class SyncMessageStatementVM extends StatementVM {
     const minOccurrenceHeight =
       insideFragment && !hasNestedBlock
         ? this.metrics.fragmentOccurrenceMinHeight
-        : this.metrics.occurrenceMinHeight;
+        : 24;
     let occurrenceHeight = this.measureOccurrence(
       messageContext,
       occurrenceTop,

@@ -14,21 +14,18 @@ export interface LayoutMetrics {
   asyncMessageHeight: number;
   selfInvocationHeight: number;
   selfAsyncHeight: number;
-  creationMessageHeight: number;
   returnMessageHeight: number;
   /**
    * Height of a self-return (source === target) which renders a different DOM
    * structure (icon + text) and is a few pixels taller than a normal return.
    */
   returnSelfMessageHeight: number;
-  occurrenceMinHeight: number;
   fragmentHeaderHeight: number;
   fragmentConditionHeight: number;
   fragmentPaddingBottom: number;
   fragmentBodyGap: number;
   fragmentBranchGap: number;
   dividerHeight: number;
-  occurrenceContentInset: number;
   creationOccurrenceContentInset: number;
   returnStatementMarginBottom: number;
   fragmentOccurrenceMinHeight: number;
@@ -59,17 +56,14 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   asyncMessageHeight: 16,
   selfInvocationHeight: 31,
   selfAsyncHeight: 54,
-  creationMessageHeight: 38,
   returnMessageHeight: 16,
   returnSelfMessageHeight: 20,
-  occurrenceMinHeight: tw(6),
   fragmentHeaderHeight: rem(1.5) + 2,
   fragmentConditionHeight: rem(1.5),
   fragmentPaddingBottom: tw(2.5),
   fragmentBodyGap: 0,
   fragmentBranchGap: tw(2),
   dividerHeight: tw(10),
-  occurrenceContentInset: 1,
   creationOccurrenceContentInset: 18,
   returnStatementMarginBottom: 2,
   fragmentOccurrenceMinHeight: 22,

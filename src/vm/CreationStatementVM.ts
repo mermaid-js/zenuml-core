@@ -10,6 +10,8 @@ interface CreationOffsets {
   assignmentAdjustment: number;
 }
 
+const CREATION_MESSAGE_HEIGHT = 40; // [data-type="creation"] .h-10
+
 export class CreationStatementVM extends StatementVM {
   readonly kind = "creation" as const;
 
@@ -24,38 +26,44 @@ export class CreationStatementVM extends StatementVM {
   public measure(top: number, originParticipant: string): StatementCoordinate {
     const creation = this.creation;
     const participant = creation?.Owner?.() || originParticipant;
-    const enlog = participant === "D" || participant === "c";
+    const enlog = true;
+    // const enlog = participant === "b" || participant === "c";
 
     const commentHeight = this.measureComment(creation);
-    const messageTop = top + commentHeight;
-    if (enlog) console.info("measure 0", top, commentHeight);
-    const messageHeight = this.metrics.creationMessageHeight;
-    const occurrenceTop = messageTop + messageHeight;
-    if (enlog) console.info("measure 1", messageTop, messageHeight);
+    const occurrenceTop = top + commentHeight + CREATION_MESSAGE_HEIGHT;
+    if (enlog)
+      console.info(
+        `creation::${participant}::0 top:${top} commentHeight:${commentHeight}`,
+      );
 
-    const occurrenceHeight = this.measureOccurrence(
-      creation,
-      occurrenceTop,
-      participant,
-      undefined,
-      this.metrics.creationOccurrenceContentInset,
-    );
+    // const occurrenceHeight = this.measureOccurrence(
+    //   creation,
+    //   occurrenceTop,
+    //   participant,
+    //   undefined,
+    //   this.metrics.creationOccurrenceContentInset,
+    // );
+
+    const occurrenceHeight = 22; // .occurrence .min-h-6 .mt-[-2px]
+
+    let height = CREATION_MESSAGE_HEIGHT + occurrenceHeight;
+    if (enlog)
+      console.info(
+        `creation::${participant}::1 occurrenceHeight:${occurrenceHeight}`,
+      );
+
     const assignment = creation?.creationBody?.()?.assignment?.();
     const offsets = this.calculateOffsets(assignment);
 
-    // Base anchors
     const anchors: Partial<Record<StatementAnchor, number>> = {
-      message: messageTop,
+      message: top + commentHeight,
       occurrence: occurrenceTop,
     };
-
-    let height = messageHeight + occurrenceHeight;
-    if (enlog) console.info("measure 2", messageHeight, occurrenceHeight);
 
     if (assignment) {
       anchors.return = occurrenceTop + occurrenceHeight;
       height += this.metrics.returnMessageHeight;
-      if (enlog) console.info("measure 3 assignment");
+      if (enlog) console.info(`creation::${participant}::assignment`);
     }
 
     // // Apply adjustments
@@ -102,7 +110,6 @@ export class CreationStatementVM extends StatementVM {
 
     const meta: StatementCoordinate["meta"] = {
       commentHeight,
-      messageHeight,
       occurrenceHeight,
       returnHeight: assignment ? this.metrics.returnMessageHeight : 0,
       anchorAdjustment: offsets.anchorAdjustment,
@@ -110,6 +117,9 @@ export class CreationStatementVM extends StatementVM {
       assignmentAdjustment: offsets.assignmentAdjustment,
       altBranchInset: offsets.altBranchInset,
     };
+
+    if (enlog)
+      console.info(`creation::${participant}::2 top:${top} height:${height}`);
 
     return {
       // top: adjustedTop,

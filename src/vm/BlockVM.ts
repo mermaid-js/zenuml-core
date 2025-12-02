@@ -41,8 +41,8 @@ export class BlockVM extends NodeVM {
       const statementVM = createStatementVM(statement, this.runtime);
       // const cursorOffset = BlockVM.cursorOffsets[statementVM.kind] ?? 0;
       // const measureTop = cursor + cursorOffset;
+      console.info(`statementVM::begin::${statementVM.kind} cursor:${cursor}`);
       const coordinate = statementVM.measure(cursor, originParticipant);
-      console.info("statementVM coordinate", statementVM.kind, coordinate);
       // const heightOffset = BlockVM.heightOffsets[statementVM.kind] ?? 0;
       // if (heightOffset) {
       //   coordinate.height += heightOffset;
@@ -53,6 +53,9 @@ export class BlockVM extends NodeVM {
       if (index < this.statements.length - 1) {
         cursor += metrics.statementMarginY;
       }
+      console.info(
+        `statementVM::end::${statementVM.kind} top:${coordinate.top} height:${coordinate.height} cursor:${cursor}`,
+      );
     });
 
     const bottomMargin =

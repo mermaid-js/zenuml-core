@@ -59,16 +59,15 @@ export abstract class StatementVM extends NodeVM {
     context: any,
     top: number,
     participant?: string,
-    minHeight = this.metrics.occurrenceMinHeight,
-    contentInset = this.metrics.occurrenceContentInset,
+    minHeight = 24, // .occurrence .min-h-6
+    contentInset = 1,
   ): number {
     // const enlog = participant === "c";
     const block = context?.braceBlock?.()?.block?.();
     if (!block) {
       return minHeight;
     }
-    const inset = contentInset ?? this.metrics.occurrenceContentInset;
-    const offset = this.metrics.statementMarginY - inset;
+    const offset = this.metrics.statementMarginY - contentInset;
     const blockStart = top - offset;
     const blockEnd = this.layoutNestedBlock(
       block,
