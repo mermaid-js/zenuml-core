@@ -1,10 +1,13 @@
 import { test, expect } from "./fixtures";
-import { initVerticalDebug, writeVerticalDebug } from "../tests/utils/verticalDebug";
+import {
+  initVerticalDebug,
+  writeVerticalDebug,
+} from "../tests/utils/verticalDebug";
 
 test.describe("Messages", () => {
   test("sync message", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/message-sync.html");
+    await page.goto("/cy/message-sync.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -24,7 +27,7 @@ test.describe("Messages", () => {
 
   test("async message", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/message-async.html");
+    await page.goto("/cy/message-async.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -44,7 +47,7 @@ test.describe("Messages", () => {
 
   test("sync message with block", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/message-with-block.html");
+    await page.goto("/cy/message-with-block.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -64,9 +67,7 @@ test.describe("Messages", () => {
 
   test("self sync message at root", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto(
-      "http://127.0.0.1:8080/cy/self-sync-message-at-root.html",
-    );
+    await page.goto("/cy/self-sync-message-at-root.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,

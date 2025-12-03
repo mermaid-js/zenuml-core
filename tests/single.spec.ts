@@ -4,7 +4,7 @@ import { initVerticalDebug, writeVerticalDebug } from "./utils/verticalDebug";
 test.describe("Rendering", () => {
   test("single-1", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/single-1.html");
+    await page.goto("/cy/single-1.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,

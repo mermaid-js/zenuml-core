@@ -47,14 +47,6 @@ export abstract class StatementVM extends NodeVM {
     );
   }
 
-  protected layoutNestedBlock(
-    blockContext: any,
-    origin: string,
-    startTop: number,
-  ): number {
-    return this.layoutBlock(blockContext, origin, startTop);
-  }
-
   protected measureOccurrence(
     context: any,
     top: number,
@@ -69,7 +61,7 @@ export abstract class StatementVM extends NodeVM {
     }
     const offset = this.metrics.statementMarginY - contentInset;
     const blockStart = top - offset;
-    const blockEnd = this.layoutNestedBlock(
+    const blockEnd = this.layoutBlock(
       block,
       participant || this.runtime.originParticipant,
       blockStart,

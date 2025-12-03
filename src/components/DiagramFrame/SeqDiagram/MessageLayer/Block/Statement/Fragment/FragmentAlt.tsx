@@ -98,10 +98,7 @@ export const FragmentAlt = (props: {
         </div>
         {elseIfBlocks.map((elseIfBlock: any, index: number) => (
           <Fragment key={index}>
-            <div
-              className="segment mt-2 border-t border-solid"
-              key={index + 500}
-            >
+            <div className="segment border-t border-solid" key={index + 500}>
               <div className="text-skin-fragment" key={index + 1000}>
                 <label className="else-if hidden">else if</label>
                 <ConditionLabel
@@ -121,7 +118,7 @@ export const FragmentAlt = (props: {
         ))}
         {elseBlock && (
           <>
-            <div className="segment mt-2 border-t border-solid">
+            <div className="segment border-t border-solid">
               <div className="text-skin-fragment">
                 <label className="p-1">[else]</label>
               </div>

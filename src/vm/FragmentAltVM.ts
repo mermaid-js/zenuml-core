@@ -14,46 +14,49 @@ export class FragmentAltVM extends FragmentVM {
   }
 
   public measure(top: number, origin: string): StatementCoordinate {
-    const { cursor } = this.beginFragment(this.alt, top);
-    let _cursor = cursor;
-
     const leftParticipant =
       this.findLeftParticipant(this.alt, origin) || origin;
-    console.info("FragmentAltVM::leftParticipant", leftParticipant);
 
-    const branches = [];
+    const commentHeight = this.measureComment(this.alt);
+    let cursor = top + this.metrics.fragmentHeaderHeight + commentHeight;
+    console.info("FragmentAltVM::start", leftParticipant, commentHeight);
+
     const ifBlock = this.alt?.ifBlock?.();
     if (ifBlock) {
-      console.info("FragmentAltVM::ifBlock");
-      branches.push(ifBlock.braceBlock()?.block());
+      console.info("FragmentAltVM::ifBlock::start", cursor);
+      cursor += 20; // .text-skin-fragment > label
+      cursor = this.layoutBlock(
+        ifBlock.braceBlock()?.block(),
+        leftParticipant,
+        cursor,
+      );
+      console.info("FragmentAltVM::ifBlock::end", cursor);
     }
     this.alt?.elseIfBlock?.()?.forEach((block: any) => {
-      console.info("FragmentAltVM::elseIfBlock");
-      branches.push(block?.braceBlock?.()?.block?.());
+      console.info("FragmentAltVM::elseIfBlock::start", cursor);
+      cursor += 20; // .text-skin-fragment > label
+      cursor = this.layoutBlock(
+        block?.braceBlock?.()?.block?.(),
+        leftParticipant,
+        cursor,
+      );
+      console.info("FragmentAltVM::elseIfBlock::end", cursor);
     });
     const elseBlock = this.alt?.elseBlock?.()?.braceBlock?.()?.block?.();
     if (elseBlock) {
-      console.info("FragmentAltVM::elseBlock");
-      branches.push(elseBlock);
+      console.info("FragmentAltVM::elseBlock::start", cursor);
+      cursor += 20; // .text-skin-fragment > label
+      cursor = this.layoutBlock(elseBlock, leftParticipant, cursor);
+      console.info("FragmentAltVM::elseBlock::end", cursor);
     }
 
-    branches.forEach((branch, index) => {
-      _cursor += 20; // .text-skin-fragment > label
-      _cursor = this.layoutNestedBlock(branch, leftParticipant, _cursor);
-      if (index < branches.length - 1) {
-        _cursor += 10; // .fragmentBranchGap => padding-bottom: 10px
-      }
-    });
-
-    const result = this.finalizeFragment(top, _cursor, {
-      branchCount: branches.length,
-    });
+    cursor += this.metrics.fragmentPaddingBottom; // .zenuml .fragment =>padding-bottom: 10px
+    console.info("FragmentAltVM::end", cursor, cursor - top);
 
     return {
-      top: result.top,
-      height: result.height,
+      top,
+      height: cursor - top,
       kind: this.kind,
-      meta: result.meta,
     };
   }
 }

@@ -4,7 +4,7 @@ import { initVerticalDebug, writeVerticalDebug } from "./utils/verticalDebug";
 test.describe("Rendering", () => {
   test("alt-1", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/alt.html");
+    await page.goto("/cy/alt.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -24,7 +24,7 @@ test.describe("Rendering", () => {
 
   test("alt-2", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/alt-2.html");
+    await page.goto("/cy/alt-2.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -44,7 +44,7 @@ test.describe("Rendering", () => {
 
   test("alt-3", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/alt-3.html");
+    await page.goto("/cy/alt-3.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -64,7 +64,7 @@ test.describe("Rendering", () => {
 
   // test("alt-4", async ({ page }) => {
   //   const didEnableDebug = await initVerticalDebug(page);
-  //   await page.goto("http://127.0.0.1:8080/cy/alt-4.html");
+  //   await page.goto("/cy/alt-4.html");
 
   //   await expect(page.locator(".privacy>span>svg")).toBeVisible({
   //     timeout: 5000,

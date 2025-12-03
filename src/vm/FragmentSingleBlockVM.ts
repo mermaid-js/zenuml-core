@@ -31,7 +31,7 @@ export abstract class FragmentSingleBlockVM extends FragmentVM {
     const block = this.fragment?.braceBlock?.()?.block?.();
     const fragmentOrigin =
       this.findLeftParticipant(this.fragment, origin) || origin;
-    cursor = this.layoutNestedBlock(block, fragmentOrigin, cursor);
+    cursor = this.layoutBlock(block, fragmentOrigin, cursor);
     const result = this.finalizeFragment(top, cursor, {
       commentHeight,
       headerHeight,

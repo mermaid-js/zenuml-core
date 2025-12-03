@@ -43,7 +43,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   returnSelfMessageHeight: 20,
   fragmentHeaderHeight: 25, // .fragment .leading-4 => line-height: 1rem
   fragmentConditionHeight: 20,
-  fragmentPaddingBottom: tw(2.5),
+  fragmentPaddingBottom: 10, // .zenuml .fragment =>padding-bottom: 10px
   fragmentBranchGap: tw(2),
   dividerHeight: tw(10),
   creationOccurrenceContentInset: 18,

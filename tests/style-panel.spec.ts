@@ -2,7 +2,7 @@ import { test, expect } from "./fixtures";
 
 test.describe("Smoke test", () => {
   test("style-panel", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/smoke-creation.html");
+    await page.goto("/cy/smoke-creation.html");
     // Wait for the app to be fully loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,

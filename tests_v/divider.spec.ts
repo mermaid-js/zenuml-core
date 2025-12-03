@@ -1,10 +1,13 @@
 import { test, expect } from "./fixtures";
-import { initVerticalDebug, writeVerticalDebug } from "../tests/utils/verticalDebug";
+import {
+  initVerticalDebug,
+  writeVerticalDebug,
+} from "../tests/utils/verticalDebug";
 
 test.describe("Divider", () => {
   test("divider only diagram", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/divider.html");
+    await page.goto("/cy/divider.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,

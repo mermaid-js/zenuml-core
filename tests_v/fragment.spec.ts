@@ -7,7 +7,7 @@ import {
 test.describe("Fragments", () => {
   test("single-branch opt", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-opt.html");
+    await page.goto("/cy/fragment-opt.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -27,7 +27,7 @@ test.describe("Fragments", () => {
 
   test("two-branch alt", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-alt.html");
+    await page.goto("/cy/fragment-alt.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -47,7 +47,7 @@ test.describe("Fragments", () => {
 
   test("loop fragment", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-loop.html");
+    await page.goto("/cy/fragment-loop.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -67,7 +67,7 @@ test.describe("Fragments", () => {
 
   test("par fragment", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-par.html");
+    await page.goto("/cy/fragment-par.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -87,7 +87,7 @@ test.describe("Fragments", () => {
 
   test("nested alt with opt and loop", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-alt-nested.html");
+    await page.goto("/cy/fragment-alt-nested.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -107,7 +107,7 @@ test.describe("Fragments", () => {
 
   test("section fragment", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-section.html");
+    await page.goto("/cy/fragment-section.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -127,7 +127,7 @@ test.describe("Fragments", () => {
 
   test("critical fragment", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-critical.html");
+    await page.goto("/cy/fragment-critical.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -147,7 +147,7 @@ test.describe("Fragments", () => {
 
   test("try/catch fragment", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-tcf.html");
+    await page.goto("/cy/fragment-tcf.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -167,7 +167,7 @@ test.describe("Fragments", () => {
 
   test("par with nested alt", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-par-alt.html");
+    await page.goto("/cy/fragment-par-alt.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -187,7 +187,7 @@ test.describe("Fragments", () => {
 
   test("mixed fragments with creation deep", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-mixed-2.html");
+    await page.goto("/cy/fragment-mixed-2.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -207,7 +207,7 @@ test.describe("Fragments", () => {
 
   test("fragment combo without creations", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/fragment-combo.html");
+    await page.goto("/cy/fragment-combo.html");
 
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,

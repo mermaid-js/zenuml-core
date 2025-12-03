@@ -4,7 +4,7 @@ import { initVerticalDebug, writeVerticalDebug } from "./utils/verticalDebug";
 test.describe("Smoke test", () => {
   test("fragmentIssue", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/smoke-fragment-issue.html");
+    await page.goto("/cy/smoke-fragment-issue.html");
     // This line is to make sure the privacy icon is loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -23,7 +23,7 @@ test.describe("Smoke test", () => {
 
   test("fragment", async ({ page }) => {
     const didEnableDebug = await initVerticalDebug(page);
-    await page.goto("http://127.0.0.1:8080/cy/smoke-fragment.html");
+    await page.goto("/cy/smoke-fragment.html");
     // This line is to make sure the privacy icon is loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
