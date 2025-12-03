@@ -35,6 +35,7 @@ export class FragmentAltVM extends FragmentVM {
     this.alt?.elseIfBlock?.()?.forEach((block: any) => {
       console.info("FragmentAltVM::elseIfBlock::start", cursor);
       cursor += 20; // .text-skin-fragment > label
+      cursor += 1; // .segment.border-t.border-solid
       cursor = this.layoutBlock(
         block?.braceBlock?.()?.block?.(),
         leftParticipant,
@@ -46,6 +47,7 @@ export class FragmentAltVM extends FragmentVM {
     if (elseBlock) {
       console.info("FragmentAltVM::elseBlock::start", cursor);
       cursor += 20; // .text-skin-fragment > label
+      cursor += 1; // .segment.border-t.border-solid
       cursor = this.layoutBlock(elseBlock, leftParticipant, cursor);
       console.info("FragmentAltVM::elseBlock::end", cursor);
     }

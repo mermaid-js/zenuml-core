@@ -55,9 +55,7 @@ export class BlockVM extends NodeVM {
     });
 
     const bottomMargin =
-      lastKind === "return"
-        ? metrics.returnStatementMarginBottom
-        : metrics.statementMarginY;
+      lastKind === "return" ? metrics.returnStatementMarginBottom : 0;
     return cursor + bottomMargin;
   }
 }
