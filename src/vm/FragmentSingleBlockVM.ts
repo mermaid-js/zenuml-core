@@ -15,28 +15,17 @@ export abstract class FragmentSingleBlockVM extends FragmentVM {
   }
 
   public measure(top: number, origin: string): StatementCoordinate {
-    const {
-      cursor: startCursor,
-      commentHeight,
-      headerHeight,
-    } = this.beginFragment(this.fragment, top);
-    let cursor = startCursor;
+    const commentHeight = this.measureComment(this.fragment);
+    let cursor = top + 1 + this.metrics.fragmentHeaderHeight + commentHeight;
+
     const hasCondition = Boolean(this.fragment?.parExpr?.()?.condition?.());
-    const conditionHeight = hasCondition
-      ? this.metrics.fragmentConditionHeight
-      : 0;
-    if (hasCondition) {
-      cursor += conditionHeight;
-    }
+    if (hasCondition) cursor += 20;
+
     const block = this.fragment?.braceBlock?.()?.block?.();
     const fragmentOrigin =
       this.findLeftParticipant(this.fragment, origin) || origin;
     cursor = this.layoutBlock(block, fragmentOrigin, cursor);
-    const result = this.finalizeFragment(top, cursor, {
-      commentHeight,
-      headerHeight,
-      conditionHeight,
-    });
+    const result = this.finalizeFragment(top, cursor, {});
     return {
       top: result.top,
       height: result.height,

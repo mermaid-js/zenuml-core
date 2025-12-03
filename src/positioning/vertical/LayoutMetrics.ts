@@ -12,7 +12,6 @@ export interface LayoutMetrics {
   returnMessageHeight: number;
   returnSelfMessageHeight: number;
   fragmentHeaderHeight: number;
-  fragmentConditionHeight: number;
   fragmentPaddingBottom: number;
   fragmentBranchGap: number;
   dividerHeight: number;
@@ -42,7 +41,6 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   returnMessageHeight: 16,
   returnSelfMessageHeight: 20,
   fragmentHeaderHeight: 25, // .fragment .leading-4 => line-height: 1rem
-  fragmentConditionHeight: 20,
   fragmentPaddingBottom: 10, // .zenuml .fragment =>padding-bottom: 10px
   fragmentBranchGap: tw(2),
   dividerHeight: tw(10),

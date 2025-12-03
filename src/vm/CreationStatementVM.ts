@@ -30,7 +30,7 @@ export class CreationStatementVM extends StatementVM {
     // const enlog = participant === "b" || participant === "c";
 
     const commentHeight = this.measureComment(creation);
-    const occurrenceTop = top + commentHeight + CREATION_MESSAGE_HEIGHT;
+    const cursor = top + commentHeight + CREATION_MESSAGE_HEIGHT;
     if (enlog)
       console.info(
         `creation::${participant}::0 top:${top} commentHeight:${commentHeight}`,
@@ -38,7 +38,7 @@ export class CreationStatementVM extends StatementVM {
 
     // const occurrenceHeight = this.measureOccurrence(
     //   creation,
-    //   occurrenceTop,
+    //   cursor,
     //   participant,
     //   undefined,
     //   this.metrics.creationOccurrenceContentInset,
@@ -46,7 +46,7 @@ export class CreationStatementVM extends StatementVM {
 
     const occurrenceHeight = 22; // .occurrence, .min-h-6, .mt-[-2px]
 
-    let height = CREATION_MESSAGE_HEIGHT + occurrenceHeight;
+    let height = commentHeight + CREATION_MESSAGE_HEIGHT + occurrenceHeight;
     if (enlog)
       console.info(
         `creation::${participant}::1 occurrenceHeight:${occurrenceHeight}`,
@@ -57,11 +57,11 @@ export class CreationStatementVM extends StatementVM {
 
     const anchors: Partial<Record<StatementAnchor, number>> = {
       message: top + commentHeight,
-      occurrence: occurrenceTop,
+      occurrence: cursor,
     };
 
     if (assignment) {
-      anchors.return = occurrenceTop + occurrenceHeight;
+      anchors.return = cursor + occurrenceHeight;
       height += this.metrics.returnMessageHeight;
       if (enlog) console.info(`creation::${participant}::assignment`);
     }
@@ -108,12 +108,6 @@ export class CreationStatementVM extends StatementVM {
     // The top of the statement block itself is adjusted by the upward adjustments
     // (This matches original logic: adjustedTop = top - totalAdjustment)
 
-    const meta: StatementCoordinate["meta"] = {
-      commentHeight,
-      occurrenceHeight,
-      returnHeight: assignment ? this.metrics.returnMessageHeight : 0,
-    };
-
     if (enlog)
       console.info(`creation::${participant}::2 top:${top} height:${height}`);
 
@@ -123,7 +117,6 @@ export class CreationStatementVM extends StatementVM {
       height,
       kind: this.kind,
       anchors,
-      meta,
     };
   }
 
