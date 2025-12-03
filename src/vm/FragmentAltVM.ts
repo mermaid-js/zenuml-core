@@ -18,7 +18,7 @@ export class FragmentAltVM extends FragmentVM {
       this.findLeftParticipant(this.alt, origin) || origin;
 
     const commentHeight = this.measureComment(this.alt);
-    let cursor = top + this.metrics.fragmentHeaderHeight + commentHeight;
+    let cursor = top + 1 + this.metrics.fragmentHeaderHeight + commentHeight;
     console.info("FragmentAltVM::start", leftParticipant, commentHeight);
 
     const ifBlock = this.alt?.ifBlock?.();
@@ -50,7 +50,7 @@ export class FragmentAltVM extends FragmentVM {
       console.info("FragmentAltVM::elseBlock::end", cursor);
     }
 
-    cursor += this.metrics.fragmentPaddingBottom; // .zenuml .fragment =>padding-bottom: 10px
+    cursor += this.metrics.fragmentPaddingBottom + 1; // .zenuml .fragment =>padding-bottom: 10px
     console.info("FragmentAltVM::end", cursor, cursor - top);
 
     return {

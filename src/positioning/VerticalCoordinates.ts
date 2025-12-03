@@ -36,7 +36,7 @@ export class VerticalCoordinates {
       },
       updateCreationTop: (participant: string, top: number) => {
         const paddingTop = top - 8; // .life-line-layer, .pt-2
-        // console.info(`updateCreationTop::${participant}`, paddingTop);
+        console.info(`updateCreationTop::${participant}`, paddingTop);
         // const prev = this.creationTops.get(participant);
         // if (prev == null || paddingTop < prev) {
         this.creationTops.set(participant, paddingTop);

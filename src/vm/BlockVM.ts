@@ -33,7 +33,7 @@ export class BlockVM extends NodeVM {
     if (!this.statements.length) return startTop;
 
     const metrics = this.runtime.metrics;
-    let cursor = startTop + metrics.statementMarginY + 1; // .statement-container .my-4
+    let cursor = startTop + metrics.statementMarginY; // .statement-container .my-4
     let lastKind: StatementKind | undefined;
 
     this.statements.forEach((statement: any) => {
@@ -47,8 +47,7 @@ export class BlockVM extends NodeVM {
       //   coordinate.height += heightOffset;
       // }
       this.runtime.recordCoordinate(statement, coordinate);
-      cursor =
-        coordinate.top + coordinate.height + metrics.statementMarginY + 1;
+      cursor = coordinate.top + coordinate.height + metrics.statementMarginY;
       lastKind = statementVM.kind;
       console.info(
         `statementVM::end::${statementVM.kind} top:${coordinate.top} height:${coordinate.height} cursor:${cursor}`,
