@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const PORT = Number(process.env.PORT) || 8080;
+const BASE_URL = `http://127.0.0.1:${PORT}`;
+
 export default defineConfig({
   testDir: "./tests_v",
   fullyParallel: true,
@@ -8,10 +11,13 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   outputDir: "test-results-v/",
   reporter: process.env.CI
-    ? [["github"], ["html", { open: "never", outputFolder: "playwright-report-v" }]]
+    ? [
+        ["github"],
+        ["html", { open: "never", outputFolder: "playwright-report-v" }],
+      ]
     : [["html", { outputFolder: "playwright-report-v" }]],
   use: {
-    baseURL: "http://127.0.0.1:8080",
+    baseURL: BASE_URL,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -28,8 +34,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "bun run dev",
-    url: "http://127.0.0.1:8080",
+    command: `bun run dev -- --port=${PORT} --strictPort`,
+    url: BASE_URL,
     reuseExistingServer: false,
     timeout: 120 * 1000,
   },
