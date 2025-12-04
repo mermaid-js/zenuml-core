@@ -14,7 +14,6 @@
     "build": "bun run --bun vite build -c vite.config.lib.ts",
     "test": "bun test src test/unit",
     "pw": "playwright test --reporter=list",
-    "pw:v": "playwright test --config=playwright.v.config.ts --reporter=list",
     "pw:ci": "playwright test",
     "measure:layout": "COLLECT_LAYOUT_METRICS=1 playwright test tests/layout-metrics.spec.ts --reporter=line --project=chromium",
     "snapshots:dual": "node scripts/snapshot-dual.js",
