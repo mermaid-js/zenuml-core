@@ -16,7 +16,7 @@ export const MessageLabel = (props: {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
-  const formattedLabelText = formatText(props.labelText);
+  const formattedLabelText = formatText(props.labelText ?? "");
   const isEditable = mode === RenderMode.Dynamic;
 
   const handleSave = (newText: string) => {
