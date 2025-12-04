@@ -9,69 +9,34 @@ import {
 import "./EditableSpan.css";
 
 export interface EditableSpanProps {
-  /**
-   * The displayed/editable text (clean, no decoration)
-   */
   text: string;
-
-  /**
-   * Whether editing is allowed
-   * @default true
-   */
   isEditable?: boolean;
-
-  /**
-   * Show hover indicator for editable elements
-   * @default true
-   */
-  showHoverHint?: boolean;
-
-  /**
-   * Additional CSS classes
-   */
   className?: string;
-
-  /**
-   * Inline styles
-   */
   style?: CSSProperties;
-
-  /**
-   * Called when editing completes (Enter/Tab/blur)
-   */
   onSave: (newText: string) => void;
-
-  /**
-   * Called when editing is cancelled (Escape)
-   */
-  onCancel?: () => void;
-
-  /**
-   * Tooltip text
-   */
   title?: string;
 }
 
 export const EditableSpan = ({
   text,
   isEditable = true,
-  showHoverHint = true,
   className = "",
   style,
   onSave,
-  onCancel,
   title = "Double-click to edit",
 }: EditableSpanProps) => {
   const [editing, setEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const originalTextRef = useRef("");
   const spanRef = useRef<HTMLSpanElement>(null);
+  const cancelRef = useRef(false);
 
   const startEditing = (e: MouseEvent | KeyboardEvent) => {
     if (!isEditable) return;
     e.preventDefault();
     e.stopPropagation();
 
+    cancelRef.current = false;
     const target = e.target as HTMLElement | null;
     const clickPoint =
       "clientX" in e
@@ -83,7 +48,6 @@ export const EditableSpan = ({
 
     setEditing(true);
 
-    // Focus after state update; collapse selection near the click location
     setTimeout(() => {
       const target = e.target as HTMLElement;
       if (!target) return;
@@ -125,7 +89,7 @@ export const EditableSpan = ({
   };
 
   const handleMouseEnter = () => {
-    if (showHoverHint && !editing && isEditable) {
+    if (!editing && isEditable) {
       setIsHovered(true);
     }
   };
@@ -141,20 +105,32 @@ export const EditableSpan = ({
 
   const handleBlur = (e: FocusEvent) => {
     if (!editing) return;
-    // Avoid race condition with keyup event
-    setTimeout(() => {
-      if (!editing) return;
-      setEditing(false);
-      setIsHovered(false);
-      saveText();
-    }, 0);
+    if (cancelRef.current) return;
+    
+    setEditing(false);
+    setIsHovered(false);
+    saveText();
   };
 
   const handleKeydown = (e: KeyboardEvent) => {
     if (!isEditable) return;
+    if (!editing) return;
 
-    // Prevent new line
-    if (editing && e.key === "Enter") {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      cancelRef.current = true;
+      
+      const target = e.target as HTMLElement | null;
+      if (target) {
+        target.innerText = originalTextRef.current;
+      }
+      setEditing(false);
+      setIsHovered(false);
+      return;
+    }
+
+    if (e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
     }
@@ -163,17 +139,6 @@ export const EditableSpan = ({
   const handleKeyup = (e: KeyboardEvent) => {
     if (!isEditable) return;
     if (!editing) return;
-
-    if (e.key === "Escape") {
-      const target = e.target as HTMLElement | null;
-      if (target) {
-        target.innerText = originalTextRef.current;
-      }
-      setEditing(false);
-      setIsHovered(false);
-      onCancel?.();
-      return;
-    }
 
     if (e.key === "Enter" || e.key === "Tab") {
       setEditing(false);
@@ -187,7 +152,7 @@ export const EditableSpan = ({
 
     if (editing) {
       classes.push("editable-span-editing");
-    } else if (isHovered && showHoverHint) {
+    } else if (isHovered) {
       classes.push("editable-span-hover");
     } else if (isEditable) {
       classes.push("cursor-pointer");
@@ -215,4 +180,3 @@ export const EditableSpan = ({
     </span>
   );
 };
-
