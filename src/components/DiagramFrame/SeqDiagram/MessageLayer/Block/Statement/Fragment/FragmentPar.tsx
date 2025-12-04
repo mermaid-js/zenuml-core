@@ -67,7 +67,7 @@ export const FragmentPar = (props: {
             {!!par.braceBlock() && (
               <Block
                 origin={leftParticipant}
-                // className="[&>.statement-container:not(:first-child)]:border-t"
+                className="[&>.statement-container:not(:first-child)]:border-t"
                 style={{ paddingLeft: `${paddingLeft}px` }}
                 context={par.braceBlock().block()}
                 number={`${props.number}.1`}

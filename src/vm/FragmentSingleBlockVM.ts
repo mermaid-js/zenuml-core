@@ -24,13 +24,14 @@ export abstract class FragmentSingleBlockVM extends FragmentVM {
     const block = this.fragment?.braceBlock?.()?.block?.();
     const fragmentOrigin =
       this.findLeftParticipant(this.fragment, origin) || origin;
-    cursor = this.layoutBlock(block, fragmentOrigin, cursor);
-    const result = this.finalizeFragment(top, cursor, {});
+
+    cursor = this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
+    cursor += this.metrics.fragmentPaddingBottom;
+
     return {
-      top: result.top,
-      height: result.height,
+      top,
+      height: cursor - top,
       kind: this.kind,
-      meta: result.meta,
-    } as StatementCoordinate;
+    };
   }
 }

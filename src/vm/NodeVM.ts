@@ -1,5 +1,6 @@
 import { BlockVM } from "./BlockVM";
 import type { LayoutRuntime } from "./types";
+import { StatementKind } from "@/positioning/vertical/StatementTypes";
 
 export abstract class NodeVM {
   constructor(
@@ -11,10 +12,15 @@ export abstract class NodeVM {
     blockContext: any,
     origin: string,
     startTop: number,
+    parentKind?: StatementKind,
   ): number {
     if (!blockContext) {
       return startTop;
     }
-    return new BlockVM(blockContext, this.runtime).layout(origin, startTop);
+    return new BlockVM(blockContext, this.runtime).layout(
+      origin,
+      startTop,
+      parentKind,
+    );
   }
 }
