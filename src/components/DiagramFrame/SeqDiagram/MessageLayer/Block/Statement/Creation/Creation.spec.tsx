@@ -44,7 +44,7 @@ describe("Creation", () => {
       creationWrapper.container.querySelector("div")?.dataset.signature,
     ).toBe("«create»");
     expect(
-      creationWrapper.container.querySelector(".message label")?.textContent,
+      creationWrapper.container.querySelector(".message span")?.textContent,
     ).toBe("a");
 
     // -------------==a:A==-

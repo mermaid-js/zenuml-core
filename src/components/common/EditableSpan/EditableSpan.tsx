@@ -3,12 +3,23 @@ import {
   KeyboardEvent,
   MouseEvent,
   useState,
-  useRef
+  useRef,
+  CSSProperties,
 } from "react";
+import "./EditableSpan.css";
 
-export const specialCharRegex = /[!@#$%^&*()+-,.?''":{}|<>/\s]/;
+export interface EditableSpanProps {
+  /**
+   * The displayed/editable text (clean, no decoration)
+   */
+  text: string;
 
-export interface EditLabelOptions {
+  /**
+   * Whether editing is allowed
+   * @default true
+   */
+  isEditable?: boolean;
+
   /**
    * Show hover indicator for editable elements
    * @default true
@@ -16,24 +27,45 @@ export interface EditLabelOptions {
   showHoverHint?: boolean;
 
   /**
-   * Whether the label should enter edit mode
-   * @default true
+   * Additional CSS classes
    */
-  isEditable?: boolean;
+  className?: string;
+
+  /**
+   * Inline styles
+   */
+  style?: CSSProperties;
+
+  /**
+   * Called when editing completes (Enter/Tab/blur)
+   */
+  onSave: (newText: string) => void;
+
+  /**
+   * Called when editing is cancelled (Escape)
+   */
+  onCancel?: () => void;
+
+  /**
+   * Tooltip text
+   */
+  title?: string;
 }
 
-export const useEditLabelImproved = (
-  replaceTextFn: (e: FocusEvent | KeyboardEvent | MouseEvent) => void,
-  options: EditLabelOptions = {}
-) => {
-  const {
-    showHoverHint = true,
-    isEditable = true
-  } = options;
-
+export const EditableSpan = ({
+  text,
+  isEditable = true,
+  showHoverHint = true,
+  className = "",
+  style,
+  onSave,
+  onCancel,
+  title = "Double-click to edit",
+}: EditableSpanProps) => {
   const [editing, setEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const originalTextRef = useRef("");
+  const spanRef = useRef<HTMLSpanElement>(null);
 
   const startEditing = (e: MouseEvent | KeyboardEvent) => {
     if (!isEditable) return;
@@ -89,7 +121,6 @@ export const useEditLabelImproved = (
 
   const handleDoubleClick = (e: MouseEvent) => {
     if (editing || !isEditable) return;
-
     startEditing(e);
   };
 
@@ -103,6 +134,11 @@ export const useEditLabelImproved = (
     setIsHovered(false);
   };
 
+  const saveText = () => {
+    const newText = spanRef.current?.innerText?.trim() ?? "";
+    onSave(newText);
+  };
+
   const handleBlur = (e: FocusEvent) => {
     if (!editing) return;
     // Avoid race condition with keyup event
@@ -110,7 +146,7 @@ export const useEditLabelImproved = (
       if (!editing) return;
       setEditing(false);
       setIsHovered(false);
-      replaceTextFn(e);
+      saveText();
     }, 0);
   };
 
@@ -135,40 +171,48 @@ export const useEditLabelImproved = (
       }
       setEditing(false);
       setIsHovered(false);
+      onCancel?.();
       return;
     }
 
     if (e.key === "Enter" || e.key === "Tab") {
       setEditing(false);
       setIsHovered(false);
-      replaceTextFn(e);
+      saveText();
     }
   };
 
-  // Generate improved CSS classes
-  const getEditableClasses = (baseClasses = "") => {
-    const classes = [baseClasses, "editable-label-base"];
+  const getEditableClasses = () => {
+    const classes = [className, "editable-span-base"];
 
     if (editing) {
-      classes.push("editable-label-editing");
+      classes.push("editable-span-editing");
     } else if (isHovered && showHoverHint) {
-      classes.push("editable-label-hover");
-    } else {
+      classes.push("editable-span-hover");
+    } else if (isEditable) {
       classes.push("cursor-pointer");
     }
 
     return classes.filter(Boolean).join(" ");
   };
 
-  return {
-    editing,
-    isHovered,
-    handleDoubleClick,
-    handleMouseEnter,
-    handleMouseLeave,
-    handleBlur,
-    handleKeydown,
-    handleKeyup,
-    getEditableClasses,
-  };
+  return (
+    <span
+      ref={spanRef}
+      title={isEditable ? title : undefined}
+      className={getEditableClasses()}
+      style={style}
+      contentEditable={editing && isEditable}
+      suppressContentEditableWarning={true}
+      onDoubleClick={handleDoubleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onBlur={handleBlur}
+      onKeyUp={handleKeyup}
+      onKeyDown={handleKeydown}
+    >
+      {text}
+    </span>
+  );
 };
+

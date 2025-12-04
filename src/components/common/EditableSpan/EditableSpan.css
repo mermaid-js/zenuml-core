@@ -1,5 +1,5 @@
-/* Base styling for all editable labels to prevent layout shifts */
-.editable-label-base {
+/* Base styling for all editable spans to prevent layout shifts */
+.editable-span-base {
   border: 2px solid transparent !important;
   padding: 2px 4px !important;
   margin: -2px -4px !important;
@@ -8,7 +8,7 @@
 }
 
 /* Editing state - just change colors, keep dimensions */
-.editable-label-editing {
+.editable-span-editing {
   outline: none !important;
   border-color: #93c5fd !important;
   border-style: dashed !important;
@@ -16,9 +16,10 @@
 }
 
 /* Hover state - just change colors, keep dimensions */
-.editable-label-hover {
+.editable-span-hover {
   background-color: #f3f4f6 !important;
   border-color: #d1d5db !important;
   border-style: dashed !important;
   cursor: text !important;
 }
+

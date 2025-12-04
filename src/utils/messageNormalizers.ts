@@ -1,4 +1,4 @@
-import { specialCharRegex } from "@/functions/useEditLabel";
+export const specialCharRegex = /[!@#$%^&*()+-,.?''":{}|<>/\s]/;
 
 export const syncMessageNormalizer = (text: string): string => {
   let result = text.replace(/\s+/g, " ");
@@ -13,4 +13,3 @@ export const syncMessageNormalizer = (text: string): string => {
 export const asyncMessageNormalizer = (text: string): string => {
   return text.replace(/\s+/g, " ");
 };
-

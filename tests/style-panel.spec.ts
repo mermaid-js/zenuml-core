@@ -18,7 +18,7 @@ test.describe("Smoke test", () => {
     });
 
     // Click the message element (no force needed when page is stable)
-    await messageLabel.click();
+    await messageLabel.dblclick();
 
     // Add a wait to ensure the component has time to initialize
     await page.waitForTimeout(500);

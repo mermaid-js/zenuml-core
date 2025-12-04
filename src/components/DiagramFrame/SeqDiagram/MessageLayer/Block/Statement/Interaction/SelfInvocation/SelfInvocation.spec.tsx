@@ -14,7 +14,7 @@ describe("SelfInvocation", () => {
       selfInvocationWrapper.container.querySelector(".assignee")?.textContent,
     ).toBe("ret");
     expect(
-      selfInvocationWrapper.container.querySelector(".label label")
+      selfInvocationWrapper.container.querySelector(".label .editable-span-base")
         ?.textContent,
     ).toBe("method2()");
     expect(

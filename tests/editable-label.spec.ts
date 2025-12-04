@@ -11,7 +11,7 @@ test.describe("Editable Label", () => {
     await expect(page.getByText("Alice", { exact: false })).toBeVisible();
 
     // Edit the message - use stable locator
-    const messageLabel = page.locator(".interaction.sync .message .editable-label-base").first();
+    const messageLabel = page.locator(".interaction.sync .message .editable-span-base").first();
     await expect(messageLabel).toHaveText("method()");
     await messageLabel.dblclick();
 
@@ -25,7 +25,7 @@ test.describe("Editable Label", () => {
     // Wait for the edit to complete
     await page.waitForTimeout(500);
 
-    await expect(page.locator("label").getByText("meth1od()")).toBeVisible({
+    await expect(page.locator("span").getByText("meth1od()")).toBeVisible({
       timeout: 10000,
     });
     await page.locator(".header").click();
@@ -44,7 +44,7 @@ test.describe("Editable Label", () => {
     });
 
     // Edit the message - use a stable locator that won't change with text
-    const messageLabel = page.locator(".self-invocation .editable-label-base");
+    const messageLabel = page.locator(".self-invocation .editable-span-base");
     await expect(messageLabel).toHaveText("SelfMessage");
     await messageLabel.dblclick();
 
@@ -63,7 +63,7 @@ test.describe("Editable Label", () => {
     // Wait for the edit to complete
     await page.waitForTimeout(500);
 
-    await expect(page.locator("label").getByText("SelfMessage n")).toBeVisible({
+    await expect(page.locator("span").getByText("SelfMessage n")).toBeVisible({
       timeout: 10000,
     });
     await page.locator(".header").click();
@@ -83,7 +83,7 @@ test.describe("Editable Label", () => {
     });
 
     // Edit the message - use stable locator with text filter
-    const messageLabel = page.locator(".interaction.async .message .editable-label-base").filter({ hasText: "Hello Bob" });
+    const messageLabel = page.locator(".interaction.async .message .editable-span-base").filter({ hasText: "Hello Bob" });
     await expect(messageLabel).toBeVisible();
     await messageLabel.dblclick();
 
@@ -99,7 +99,7 @@ test.describe("Editable Label", () => {
     await page.waitForTimeout(500);
 
     await expect(
-      page.locator("label").getByText("Hello Bob how are you?"),
+      page.locator("span").getByText("Hello Bob how are you?"),
     ).toBeVisible({ timeout: 10000 });
     await page.locator(".header").click();
     await page.waitForTimeout(1000);
@@ -118,7 +118,7 @@ test.describe("Editable Label", () => {
     });
 
     // Edit the message - use stable locator
-    const messageLabel = page.locator(".interaction.creation .message .editable-label-base");
+    const messageLabel = page.locator(".interaction.creation .message .editable-span-base");
     await expect(messageLabel).toHaveText("create");
     await messageLabel.dblclick();
 
@@ -133,6 +133,6 @@ test.describe("Editable Label", () => {
     // Wait for the edit to complete
     await page.waitForTimeout(500);
 
-    await expect(page.locator(".interaction.creation .message .editable-label-base").filter({ hasText: "create1" })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(".interaction.creation .message .editable-span-base").filter({ hasText: "create1" })).toBeVisible({ timeout: 10000 });
   });
 });

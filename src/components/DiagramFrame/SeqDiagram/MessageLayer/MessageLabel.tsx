@@ -2,10 +2,8 @@ import { codeAtom, modeAtom, onContentChangeAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { useAtom, useAtomValue } from "jotai";
 import { formatText } from "@/utils/StringUtil";
-import { useEditLabelImproved } from "@/functions/useEditLabel";
+import { EditableSpan } from "@/components/common/EditableSpan";
 import { RenderMode } from "@/store/Store";
-import type { FocusEvent, KeyboardEvent, MouseEvent } from "react";
-import "../LifeLineLayer/EditableLabel.css";
 
 export const MessageLabel = (props: {
   labelText: string;
@@ -19,24 +17,16 @@ export const MessageLabel = (props: {
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const formattedLabelText = formatText(props.labelText);
+  const isEditable = mode === RenderMode.Dynamic;
 
-  const replaceLabelText = (e: FocusEvent | KeyboardEvent | MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const target = e.target;
-    if (!(target instanceof HTMLElement)) return;
-    let newText = target.innerText.trim() ?? "";
-
-    // If text is empty or same as the original label text,
-    // we replace it with the original label text and bail out early
+  const handleSave = (newText: string) => {
+    // If text is empty or same as the original label text, bail out
     if (newText === "" || newText === props.labelText) {
-      target.innerText = props.labelText;
       return;
     }
 
     // Apply parent-provided normalizer
-    newText = props.normalizeText?.(newText) ?? newText;
+    const normalizedText = props.normalizeText?.(newText) ?? newText;
 
     const [start, end] = props.labelPosition;
     if (start === -1 || end === -1) {
@@ -44,33 +34,19 @@ export const MessageLabel = (props: {
       return;
     }
 
-    const newCode = code.slice(0, start) + newText + code.slice(end + 1);
+    const newCode = code.slice(0, start) + normalizedText + code.slice(end + 1);
     setCode(newCode);
     onContentChange(newCode);
   };
-  const labelHandler = useEditLabelImproved(replaceLabelText, {
-    singleClick: true,
-    showHoverHint: true
-  });
 
   return (
-    <label
-      title="Click to edit"
-      className={labelHandler.getEditableClasses(
-        cn("px-1 right", props.className)
-      )}
+    <EditableSpan
+      text={formattedLabelText}
+      isEditable={isEditable}
+      className={cn("px-1 right", props.className)}
       style={props.style}
-      contentEditable={labelHandler.editing && mode === RenderMode.Dynamic}
-      suppressContentEditableWarning={true}
-      onClick={labelHandler.handleClick}
-      onDoubleClick={labelHandler.handleDoubleClick}
-      onMouseEnter={labelHandler.handleMouseEnter}
-      onMouseLeave={labelHandler.handleMouseLeave}
-      onBlur={labelHandler.handleBlur}
-      onKeyUp={labelHandler.handleKeyup}
-      onKeyDown={labelHandler.handleKeydown}
-    >
-      {formattedLabelText}
-    </label>
+      onSave={handleSave}
+      title="Double-click to edit"
+    />
   );
 };
