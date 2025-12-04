@@ -1,25 +1,15 @@
-/* Base styling for all editable spans to prevent layout shifts */
 .editable-span-base {
-  border: 2px solid transparent !important;
-  padding: 2px 4px !important;
-  margin: -2px -4px !important;
-  border-radius: 4px !important;
-  transition: all 0.15s ease-in-out !important;
+  padding: 0 4px;
+  border-radius: 4px;
 }
 
-/* Editing state - just change colors, keep dimensions */
 .editable-span-editing {
-  outline: none !important;
-  border-color: #93c5fd !important;
-  border-style: dashed !important;
-  background-color: #eff6ff !important;
+  outline: 2px dashed #93c5fd;
+  background-color: #eff6ff;
 }
 
-/* Hover state - just change colors, keep dimensions */
 .editable-span-hover {
-  background-color: #f3f4f6 !important;
-  border-color: #d1d5db !important;
-  border-style: dashed !important;
-  cursor: text !important;
+  outline: 2px dashed #d1d5db;
+  background-color: #f3f4f6;
+  cursor: text;
 }
-

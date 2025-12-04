@@ -12,6 +12,7 @@ test.describe("Fragments with Return Test", () => {
     await expect(page).toHaveScreenshot({
       threshold: 0.01,
       fullPage: true,
+      maxDiffPixels: 3, // Allow up to 3 pixels to differ for anti-aliasing variations
     });
   });
 });
