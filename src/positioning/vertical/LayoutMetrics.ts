@@ -6,9 +6,7 @@ export interface LayoutMetrics {
   commentMaxWidth: number;
   messageInlineHeight: number;
   messageHeight: number;
-  asyncMessageHeight: number;
   selfInvocationHeight: number;
-  selfAsyncHeight: number;
   returnMessageHeight: number;
   returnSelfMessageHeight: number;
   fragmentHeaderHeight: number;
@@ -35,9 +33,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   commentMaxWidth: 640,
   messageInlineHeight: 16,
   messageHeight: 31,
-  asyncMessageHeight: 16,
   selfInvocationHeight: 31,
-  selfAsyncHeight: 54,
   returnMessageHeight: 16,
   returnSelfMessageHeight: 20,
   fragmentHeaderHeight: 25, // .fragment .leading-4 => line-height: 1rem

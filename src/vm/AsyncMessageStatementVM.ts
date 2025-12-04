@@ -16,30 +16,25 @@ export class AsyncMessageStatementVM extends StatementVM {
   public measure(top: number, origin: string): StatementCoordinate {
     const asyncContext = this.asyncMessage;
     const commentHeight = this.measureComment(asyncContext);
-    const messageTop = top + commentHeight;
+
     const source =
       asyncContext?.From?.() ||
       asyncContext?.ProvidedFrom?.() ||
       asyncContext?.Origin?.() ||
       origin;
+
     const target =
       asyncContext?.Owner?.() ||
       asyncContext?.to?.()?.getFormattedText?.() ||
       source;
+
     const isSelf = source === target;
-    const messageHeight = isSelf
-      ? this.metrics.selfAsyncHeight
-      : this.metrics.asyncMessageHeight;
-    const anchors: StatementCoordinate["anchors"] = { message: messageTop };
-    if (commentHeight) {
-      anchors.comment = top;
-    }
-    const height = commentHeight + messageHeight;
-    const meta: StatementCoordinate["meta"] = {
-      commentHeight,
-      messageHeight,
-      isSelf: isSelf ? 1 : 0,
+    const messageHeight = isSelf ? 44 : 16;
+
+    return {
+      top,
+      height: commentHeight + messageHeight,
+      kind: this.kind,
     };
-    return { top, height, kind: this.kind, anchors, meta };
   }
 }
