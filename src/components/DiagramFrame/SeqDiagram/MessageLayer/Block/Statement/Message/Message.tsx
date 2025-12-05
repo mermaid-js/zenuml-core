@@ -6,15 +6,6 @@ import { MessageView } from "./MessageView";
 
 type Context = any;
 
-const getEditable = (context: Context, mode: RenderMode, type: string) => {
-  if (mode === RenderMode.Static) return false;
-  if (type === "creation") {
-    // Avoid editing "«create»" label for invalid creations
-    return context?.isParamValid?.() > 0;
-  }
-  return true;
-};
-
 const getLabelPosition = (context: Context, type: string): [number, number] => {
   let start = -1,
     stop = -1;
@@ -59,6 +50,7 @@ const getLabelPosition = (context: Context, type: string): [number, number] => {
 
 export const Message = (props: {
   context?: Context;
+  readonly?: boolean;
   content: string;
   rtl?: string | boolean;
   type?: string;
@@ -70,6 +62,7 @@ export const Message = (props: {
 }) => {
   const {
     context,
+    readonly,
     content,
     rtl,
     type = "",
@@ -82,7 +75,7 @@ export const Message = (props: {
   const mode = useAtomValue(modeAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
-  const editable = getEditable(context, mode, type || "");
+  const editable = !readonly;
   const stylable = mode !== RenderMode.Static;
   const labelText =
     type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";

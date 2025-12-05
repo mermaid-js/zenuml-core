@@ -110,6 +110,7 @@ export const Creation = (props: {
             messageClassNames,
           )}
           context={creation}
+          readonly={!props.context?.creation()?.isParamValid?.()}
           content={creation?.SignatureText()}
           rtl={rightToLeft}
           type="creation"
