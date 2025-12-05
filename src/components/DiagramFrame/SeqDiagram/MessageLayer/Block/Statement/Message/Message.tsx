@@ -10,12 +10,6 @@ const getLabelPosition = (context: Context, type: string): [number, number] => {
   let start = -1,
     stop = -1;
   switch (type) {
-    case "creation":
-      {
-        const signature = context?.creationBody()?.parameters();
-        [start, stop] = [signature?.start.start, signature?.stop.stop];
-      }
-      break;
     case "return":
       {
         if (context instanceof sequenceParser.MessageContext) {
