@@ -21,8 +21,8 @@ const getLabelPosition = (context: Context, type: string): [number, number] => {
         } else if (context instanceof sequenceParser.ContentContext) {
           [start, stop] = [context.start.start, context.stop.stop];
         } else if (context instanceof sequenceParser.AssignmentContext) {
-          const assignee = context.assignee();
-          [start, stop] = [assignee.start.start, assignee.stop.stop];
+          // const assignee = context.assignee();
+          // [start, stop] = [assignee.start.start, assignee.stop.stop];
         }
       }
       break;

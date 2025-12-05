@@ -31,6 +31,8 @@ export const Interaction = (props: {
   const signatureCtx = message?.messageBody().func()?.signature()[0];
   const [start, stop] = [signatureCtx?.start.start, signatureCtx?.stop.stop];
 
+  const assigneeCtx = message.messageBody().assignment()?.assignee();
+  const [assigneeStart, assigneeStop] = [assigneeCtx?.start.start, assigneeCtx?.stop.stop];
   const {
     translateX,
     interactionWidth,
@@ -105,6 +107,7 @@ export const Interaction = (props: {
             messageClassNames,
           )}
           context={message}
+          labelPosition1={[assigneeStart, assigneeStop]}
           content={assignee}
           rtl={!rightToLeft}
           type="return"
