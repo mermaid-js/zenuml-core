@@ -10,12 +10,6 @@ const getLabelPosition = (context: Context, type: string): [number, number] => {
   let start = -1,
     stop = -1;
   switch (type) {
-    case "async":
-      {
-        const content = context?.content();
-        [start, stop] = [content?.start.start, content?.stop.stop];
-      }
-      break;
     case "creation":
       {
         const signature = context?.creationBody()?.parameters();

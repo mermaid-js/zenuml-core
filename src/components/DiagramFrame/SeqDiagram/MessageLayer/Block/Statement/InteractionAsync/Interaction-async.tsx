@@ -98,6 +98,9 @@ export const InteractionAsync = (props: {
   const target = asyncMessage?.to()?.getFormattedText();
   const isSelf = source === target;
 
+  const content = asyncMessage?.content();
+  const [start, stop] = [content?.start.start, content?.stop.stop];
+
   const { translateX, interactionWidth, rightToLeft } = useArrow({
     context: props.context,
     origin: props.origin,
@@ -154,6 +157,7 @@ export const InteractionAsync = (props: {
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
           context={asyncMessage}
+          labelPosition1={[start, stop]}
           content={signature}
           rtl={rightToLeft}
           type="async"
