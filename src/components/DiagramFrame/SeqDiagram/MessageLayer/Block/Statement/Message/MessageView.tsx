@@ -15,7 +15,7 @@ export type MessageViewProps = {
   style?: CSSProperties;
   number?: string;
   rtl?: string | boolean;
-  borderStyle?: "solid" | "dashed";
+  lineStyle?: "solid" | "dashed";
   stylable: boolean;
   onClick?: () => void;
   messageRef?: RefObject<HTMLDivElement>;
@@ -32,7 +32,7 @@ export const MessageView = ({
   style,
   number,
   rtl,
-  borderStyle,
+  lineStyle,
   stylable,
   onClick,
   messageRef,
@@ -50,7 +50,7 @@ export const MessageView = ({
         },
         className,
       )}
-      style={{ ...style, borderBottomStyle: borderStyle }}
+      style={{ ...style, borderBottomStyle: lineStyle }}
       onClick={onClick}
       ref={messageRef}
     >

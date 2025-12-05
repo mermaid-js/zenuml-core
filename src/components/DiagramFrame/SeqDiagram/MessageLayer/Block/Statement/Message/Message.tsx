@@ -87,12 +87,7 @@ export const Message = (props: {
   const labelText =
     type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
   const labelPosition = getLabelPosition(context, type || "");
-  const borderStyle: "solid" | "dashed" | undefined = {
-    sync: "solid",
-    async: "solid",
-    creation: "dashed",
-    return: "dashed",
-  }[type] as "solid";
+  const lineStyle = type === "creation" || type === "return" ? "dashed" : "solid";
 
   const onClick = () => {
     if (!stylable || !messageRef.current) return;
@@ -111,7 +106,7 @@ export const Message = (props: {
       style={style}
       number={number}
       rtl={rtl}
-      borderStyle={borderStyle}
+      lineStyle={lineStyle}
       stylable={stylable}
       onClick={onClick}
       messageRef={messageRef}
