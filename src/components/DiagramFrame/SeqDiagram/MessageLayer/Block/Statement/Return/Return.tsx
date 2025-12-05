@@ -9,6 +9,7 @@ import { CodeRange } from "@/parser/CodeRange";
 import { SyntheticEvent } from "react";
 import { useArrow } from "../useArrow";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
+import sequenceParser from "@/generated-parser/sequenceParser";
 
 export const Return = (props: {
   context: any;
@@ -30,6 +31,13 @@ export const Return = (props: {
   const target = ret?.ReturnTo() || _STARTER_;
 
   const messageContext = asyncMessage?.content() || ret?.expr();
+  let start = -1, stop = -1;
+  if (messageContext instanceof sequenceParser.AtomExprContext) {
+    const ret = messageContext.atom();
+    [start, stop] = [ret?.start.start, ret?.stop.stop];
+  } else if (messageContext instanceof sequenceParser.ContentContext) {
+    [start, stop] = [messageContext.start.start, messageContext.stop.stop];
+  }
 
   const { translateX, interactionWidth, rightToLeft, isSelf } = useArrow({
     context: props.context,
@@ -89,6 +97,7 @@ export const Return = (props: {
           className={cn(props.commentObj?.messageClassNames)}
           textStyle={props.commentObj?.messageStyle}
           context={messageContext}
+          labelPosition1={[start, stop]}
           content={signature}
           rtl={rightToLeft}
           type="return"
