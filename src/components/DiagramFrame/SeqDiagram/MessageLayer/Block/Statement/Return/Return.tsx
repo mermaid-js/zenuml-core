@@ -29,11 +29,7 @@ export const Return = (props: {
     ret?.expr()?.getFormattedText();
   const source = asyncMessage?.From() || ret?.From() || _STARTER_;
 
-  const target =
-    // TODO: move this logic to the parser (ReturnTo)
-    asyncMessage?.to()?.getFormattedText() ||
-    ret?.ReturnTo() ||
-    _STARTER_;
+  const target = ret?.ReturnTo() || _STARTER_;
 
   const messageContext = asyncMessage?.content() || ret?.expr();
 

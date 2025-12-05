@@ -7,6 +7,12 @@ const MessageContext = seqParser.MessageContext;
 const CreationContext = seqParser.CreationContext;
 
 RetContext.prototype.ReturnTo = function () {
+  // Check asyncMessage 'to' first
+  const asyncTo = this.asyncMessage()?.to()?.getFormattedText();
+  if (asyncTo) {
+    return asyncTo;
+  }
+
   const stat = this.parentCtx;
   const block = stat.parentCtx;
   const blockParent = block.parentCtx;
