@@ -28,6 +28,8 @@ export const Interaction = (props: {
   const source = message?.From() || _STARTER_;
   const target = props.context?.message()?.Owner() || _STARTER_;
   const isSelf = source === target;
+  const signatureCtx = message?.messageBody().func()?.signature()[0];
+  const [start, stop] = [signatureCtx?.start.start, signatureCtx?.stop.stop];
 
   const {
     translateX,
@@ -80,6 +82,7 @@ export const Interaction = (props: {
       ) : (
         <Message
           className={cn("text-center", messageClassNames)}
+          labelPosition1={[start, stop]}
           textStyle={messageTextStyle}
           context={message}
           content={signature}

@@ -10,12 +10,6 @@ const getLabelPosition = (context: Context, type: string): [number, number] => {
   let start = -1,
     stop = -1;
   switch (type) {
-    case "sync":
-      {
-        const signature = context?.messageBody().func()?.signature()[0];
-        [start, stop] = [signature?.start.start, signature?.stop.stop];
-      }
-      break;
     case "async":
       {
         const content = context?.content();
@@ -50,6 +44,7 @@ const getLabelPosition = (context: Context, type: string): [number, number] => {
 
 export const Message = (props: {
   context?: Context;
+  labelPosition1: [number, number];
   readonly?: boolean;
   content: string;
   rtl?: string | boolean;
@@ -62,6 +57,7 @@ export const Message = (props: {
 }) => {
   const {
     context,
+    labelPosition1,
     readonly,
     content,
     rtl,
@@ -79,7 +75,10 @@ export const Message = (props: {
   const stylable = mode !== RenderMode.Static;
   const labelText =
     type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
-  const labelPosition = getLabelPosition(context, type || "");
+  console.log('labelPosition1', labelPosition1);
+  const labelPosition2 = getLabelPosition(context, type || "");
+  console.log('labelPosition2', labelPosition2);
+  const labelPosition = labelPosition1 || labelPosition2;
   const lineStyle = type === "creation" || type === "return" ? "dashed" : "solid";
 
   const onClick = () => {
