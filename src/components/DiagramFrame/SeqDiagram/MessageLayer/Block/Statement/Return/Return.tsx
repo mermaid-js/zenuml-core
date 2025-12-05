@@ -26,17 +26,16 @@ export const Return = (props: {
 
   const signature =
     asyncMessage?.content()?.getFormattedText() ||
-    props.context?.ret()?.expr()?.getFormattedText();
+    ret?.expr()?.getFormattedText();
   const source = asyncMessage?.From() || ret?.From() || _STARTER_;
 
   const target =
     // TODO: move this logic to the parser (ReturnTo)
     asyncMessage?.to()?.getFormattedText() ||
-    props.context?.ret()?.ReturnTo() ||
+    ret?.ReturnTo() ||
     _STARTER_;
 
-  const messageContext =
-    asyncMessage?.content() || props.context?.ret()?.expr();
+  const messageContext = asyncMessage?.content() || ret?.expr();
 
   const { translateX, interactionWidth, rightToLeft, isSelf } = useArrow({
     context: props.context,
