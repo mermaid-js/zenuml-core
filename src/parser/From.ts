@@ -43,6 +43,6 @@ AsyncMessageContext.prototype.From = function () {
 // @ts-ignore
 RetContext.prototype.From = function () {
   // @ts-ignore
-  return this.ClosestAncestorStat().Origin();
+  return this.asyncMessage()?.From() || this.ClosestAncestorStat().Origin();
 };
 export {};

@@ -24,10 +24,8 @@ export const Return = (props: {
 
   const asyncMessage = ret?.asyncMessage();
 
-  const signature =
-    asyncMessage?.content()?.getFormattedText() ||
-    ret?.expr()?.getFormattedText();
-  const source = asyncMessage?.From() || ret?.From() || _STARTER_;
+  const signature = ret?.Signature();
+  const source = ret?.From() || _STARTER_;
 
   const target = ret?.ReturnTo() || _STARTER_;
 
