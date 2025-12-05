@@ -8,19 +8,11 @@ type Context = any;
 
 const getEditable = (context: Context, mode: RenderMode, type: string) => {
   if (mode === RenderMode.Static) return false;
-  switch (type) {
-    case "sync":
-    case "async":
-    case "return":
-      return true;
-    case "creation": {
-      // Avoid editing "«create»" label for invalid creations
-      const isValid = context?.isParamValid?.() > 0;
-      return isValid;
-    }
-    default:
-      return false;
+  if (type === "creation") {
+    // Avoid editing "«create»" label for invalid creations
+    return context?.isParamValid?.() > 0;
   }
+  return true;
 };
 
 const getLabelPosition = (context: Context, type: string): [number, number] => {
