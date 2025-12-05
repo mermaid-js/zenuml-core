@@ -5,7 +5,6 @@ import { Numbering } from "../../../Numbering";
 import { MessageLabel } from "../../../MessageLabel";
 
 export type MessageViewProps = {
-  content?: string;
   editable: boolean;
   labelText: string;
   labelPosition: [number, number];
@@ -23,7 +22,6 @@ export type MessageViewProps = {
 };
 
 export const MessageView = ({
-  content = "",
   editable,
   labelText,
   labelPosition,
@@ -70,7 +68,7 @@ export const MessageView = ({
                 {isCreation && <span>»</span>}
               </>
             ) : (
-              <>{content}</>
+              <>{isCreation ? `«${labelText}»` : labelText}</>
             )}
           </div>
         </div>

@@ -101,7 +101,6 @@ export const Message = (props: {
 
   return (
     <MessageView
-      content={content}
       editable={editable}
       labelText={labelText ?? ""}
       labelPosition={labelPosition}
