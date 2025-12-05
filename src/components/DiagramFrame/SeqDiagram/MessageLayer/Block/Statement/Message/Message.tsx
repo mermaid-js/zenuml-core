@@ -83,9 +83,7 @@ export const Message = (props: {
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const editable = getEditable(context, mode, type || "");
-  const stylable =
-    mode !== RenderMode.Static &&
-    ["sync", "async", "return", "creation"].includes(type);
+  const stylable = mode !== RenderMode.Static;
   const labelText =
     type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
   const labelPosition = getLabelPosition(context, type || "");
