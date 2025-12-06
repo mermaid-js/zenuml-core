@@ -106,6 +106,7 @@ export const Creation = (props: {
           { "flex-row-reverse": rightToLeft },
         )}
         data-to={target}
+        style={{ width: `calc(100% - ${containerOffset}px)`, translate: 0 }}
       >
         <Message
           className={cn(
@@ -114,13 +115,11 @@ export const Creation = (props: {
           )}
           context={creation}
           labelPosition={[start, stop]}
-          readonly={!props.context?.creation()?.isParamValid?.()}
           content={creation?.ParametersText()}
           rtl={rightToLeft}
           type="creation"
           number={props.number}
           textStyle={messageTextStyle}
-          style={{ width: `calc(100% - ${containerOffset}px)`, translate: 0 }}
           normalizeText={syncMessageNormalizer}
         />
       </div>

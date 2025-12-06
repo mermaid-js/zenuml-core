@@ -15,27 +15,23 @@ export const Message = (props: {
   type?: string;
   textStyle?: CSSProperties;
   className?: string;
-  style?: CSSProperties;
   number?: string;
   normalizeText?: (text: string) => string;
 }) => {
   const {
     context,
     labelPosition,
-    readonly,
     content,
     rtl,
     type = "",
     textStyle,
     className,
-    style,
     number,
     normalizeText,
   } = props;
   const mode = useAtomValue(modeAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const messageRef = useRef<HTMLDivElement>(null);
-  const editable = !readonly;
   const stylable = mode !== RenderMode.Static;
   const labelText = content || "";
   const lineStyle = type === "creation" || type === "return" ? "dashed" : "solid";
@@ -47,14 +43,12 @@ export const Message = (props: {
 
   return (
     <MessageView
-      editable={editable}
       labelText={labelText ?? ""}
       labelPosition={labelPosition}
       normalizeText={normalizeText}
       type={type}
       textStyle={textStyle}
       className={cn({"cursor-pointer": stylable}, className)}
-      style={style}
       number={number}
       rtl={rtl}
       lineStyle={lineStyle}

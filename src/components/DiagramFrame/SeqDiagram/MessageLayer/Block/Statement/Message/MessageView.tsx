@@ -5,14 +5,12 @@ import { Numbering } from "../../../Numbering";
 import { MessageLabel } from "../../../MessageLabel";
 
 export type MessageViewProps = {
-  editable: boolean;
   labelText: string;
   labelPosition: [number, number];
   normalizeText?: (text: string) => string;
   type?: string;
   textStyle?: CSSProperties;
   className?: string;
-  style?: CSSProperties;
   number?: string;
   rtl?: string | boolean;
   lineStyle?: "solid" | "dashed";
@@ -21,14 +19,12 @@ export type MessageViewProps = {
 };
 
 export const MessageView = ({
-  editable,
   labelText,
   labelPosition,
   normalizeText,
   type = "",
   textStyle,
   className,
-  style,
   number,
   rtl,
   lineStyle,
@@ -36,6 +32,22 @@ export const MessageView = ({
   messageRef,
 }: MessageViewProps) => {
   const isCreation = type === "creation";
+
+  let message = null;
+  if(labelText ==="" && isCreation) {
+    message = "«create»"
+  } else {
+    message = (
+      <>
+        {isCreation && <span>«</span>}
+        <MessageLabel labelText={labelText}
+                      labelPosition={labelPosition}
+                      normalizeText={normalizeText}
+        />
+        {isCreation && <span>»</span>}
+      </>
+    )
+  }
 
   return (
     <div
@@ -47,26 +59,14 @@ export const MessageView = ({
         },
         className,
       )}
-      style={{ ...style, borderBottomStyle: lineStyle }}
+      style={{ borderBottomStyle: lineStyle }}
       onClick={onClick}
       ref={messageRef}
     >
       <div className="name group text-center flex-grow relative">
         <div className="inline-block static min-h-[1em]">
           <div style={textStyle}>
-            {editable ? (
-              <>
-                {isCreation && <span>«</span>}
-                <MessageLabel
-                  labelText={labelText}
-                  labelPosition={labelPosition}
-                  normalizeText={normalizeText}
-                />
-                {isCreation && <span>»</span>}
-              </>
-            ) : (
-              <>{isCreation ? `«${labelText || "create"}»` : labelText}</>
-            )}
+            {message}
           </div>
         </div>
       </div>
