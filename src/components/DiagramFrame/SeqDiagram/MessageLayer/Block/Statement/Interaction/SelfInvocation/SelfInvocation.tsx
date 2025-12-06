@@ -46,7 +46,6 @@ export const SelfInvocation = (props: {
             labelText={props.context?.SignatureText()}
             labelPosition={labelPosition}
             normalizeText={syncMessageNormalizer}
-            isSelf={true}
           />
         </div>
       </label>

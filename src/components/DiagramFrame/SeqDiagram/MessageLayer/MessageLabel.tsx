@@ -9,7 +9,6 @@ export const MessageLabel = (props: {
   labelText: string;
   labelPosition: [number, number];
   normalizeText?: (text: string) => string;
-  isSelf?: boolean;
   className?: string;
 }) => {
   const mode = useAtomValue(modeAtom);
