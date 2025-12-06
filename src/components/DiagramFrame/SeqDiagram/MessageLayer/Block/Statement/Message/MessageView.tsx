@@ -54,7 +54,6 @@ export const MessageView = ({
         "message leading-none border-skin-message-arrow border-b-2 flex items-end",
         {
           "flex-row-reverse": rtl,
-          "right-to-left": rtl,
         },
         className,
       )}

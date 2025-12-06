@@ -15,7 +15,7 @@ export const MessageLabel = (props: {
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const formattedLabelText = formatText(props.labelText ?? "");
-  const isEditable = mode === RenderMode.Dynamic;
+  const isEditable = mode !== RenderMode.Static;
 
   const handleSave = (newText: string) => {
     // If text is empty or same as the original label text, bail out
