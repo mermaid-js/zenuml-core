@@ -16,7 +16,6 @@ export type MessageViewProps = {
   number?: string;
   rtl?: string | boolean;
   lineStyle?: "solid" | "dashed";
-  stylable: boolean;
   onClick?: () => void;
   messageRef?: RefObject<HTMLDivElement>;
 };
@@ -33,7 +32,6 @@ export const MessageView = ({
   number,
   rtl,
   lineStyle,
-  stylable,
   onClick,
   messageRef,
 }: MessageViewProps) => {
@@ -46,7 +44,6 @@ export const MessageView = ({
         {
           "flex-row-reverse": rtl,
           "right-to-left": rtl,
-          "cursor-pointer": stylable,
         },
         className,
       )}

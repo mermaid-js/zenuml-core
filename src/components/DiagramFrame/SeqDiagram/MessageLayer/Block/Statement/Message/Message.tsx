@@ -2,6 +2,7 @@ import { modeAtom, onMessageClickAtom, RenderMode } from "@/store/Store";
 import { CSSProperties, useRef } from "react";
 import { useAtomValue } from "jotai";
 import { MessageView } from "./MessageView";
+import { cn } from "@/utils.ts";
 
 type Context = any;
 
@@ -52,12 +53,11 @@ export const Message = (props: {
       normalizeText={normalizeText}
       type={type}
       textStyle={textStyle}
-      className={className}
+      className={cn({"cursor-pointer": stylable}, className)}
       style={style}
       number={number}
       rtl={rtl}
       lineStyle={lineStyle}
-      stylable={stylable}
       onClick={onClick}
       messageRef={messageRef}
     />
