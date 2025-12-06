@@ -36,8 +36,7 @@ export const Message = (props: {
   const messageRef = useRef<HTMLDivElement>(null);
   const editable = !readonly;
   const stylable = mode !== RenderMode.Static;
-  const labelText =
-    type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
+  const labelText = content || "";
   const lineStyle = type === "creation" || type === "return" ? "dashed" : "solid";
 
   const onClick = () => {

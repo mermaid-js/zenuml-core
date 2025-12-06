@@ -66,6 +66,7 @@ export interface AsyncMessageContext extends BaseContext {
 export interface CreationContext extends BaseContext {
   creationBody(): CreationBody;
   SignatureText(): string;
+  ParametersText(): string;
   isParamValid(): boolean;
 }
 

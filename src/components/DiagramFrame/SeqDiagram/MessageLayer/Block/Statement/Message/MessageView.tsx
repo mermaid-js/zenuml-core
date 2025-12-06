@@ -61,14 +61,14 @@ export const MessageView = ({
               <>
                 {isCreation && <span>«</span>}
                 <MessageLabel
-                  labelText={labelText ?? ""}
+                  labelText={labelText}
                   labelPosition={labelPosition}
                   normalizeText={normalizeText}
                 />
                 {isCreation && <span>»</span>}
               </>
             ) : (
-              <>{isCreation ? `«${labelText}»` : labelText}</>
+              <>{isCreation ? `«${labelText || "create"}»` : labelText}</>
             )}
           </div>
         </div>
