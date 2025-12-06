@@ -83,7 +83,7 @@ export const Interaction = (props: {
         />
       ) : (
         <Message
-          className={cn("text-center", messageClassNames)}
+          className={cn(messageClassNames)}
           labelPosition={[start, stop]}
           textStyle={messageTextStyle}
           context={message}

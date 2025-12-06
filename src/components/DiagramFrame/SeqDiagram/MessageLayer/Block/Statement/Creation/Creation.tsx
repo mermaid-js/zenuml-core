@@ -135,7 +135,6 @@ export const Creation = (props: {
             "return transform -translate-y-full pointer-events-auto",
             messageClassNames,
           )}
-          style={{ translate: 0 }}
           textStyle={messageTextStyle}
           context={creation.creationBody().assignment()}
           content={assignee}
