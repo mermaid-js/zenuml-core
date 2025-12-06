@@ -34,7 +34,7 @@ export const SelfInvocation = (props: {
     >
       <label className="name text-left group px-px relative min-h-[1em] w-full">
         <Numbering number={props.number} />
-        <div className="label">
+        <div className="label" style={props.textStyle}>
           {assignee && (
             <span>
               <span className="assignee px-1">{assignee}</span>
@@ -42,7 +42,6 @@ export const SelfInvocation = (props: {
             </span>
           )}
           <MessageLabel
-            style={props.textStyle}
             className={props.classNames}
             labelText={props.context?.SignatureText()}
             labelPosition={labelPosition}

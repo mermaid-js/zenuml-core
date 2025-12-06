@@ -1,10 +1,8 @@
 import {
-  FocusEvent,
   KeyboardEvent,
   MouseEvent,
   useState,
   useRef,
-  CSSProperties,
 } from "react";
 import "./EditableSpan.css";
 
@@ -12,7 +10,6 @@ export interface EditableSpanProps {
   text: string;
   isEditable?: boolean;
   className?: string;
-  style?: CSSProperties;
   onSave: (newText: string) => void;
   title?: string;
 }
@@ -21,7 +18,6 @@ export const EditableSpan = ({
   text,
   isEditable = true,
   className = "",
-  style,
   onSave,
   title = "Double-click to edit",
 }: EditableSpanProps) => {
@@ -103,7 +99,7 @@ export const EditableSpan = ({
     onSave(newText);
   };
 
-  const handleBlur = (e: FocusEvent) => {
+  const handleBlur = () => {
     if (!editing) return;
     if (cancelRef.current) return;
     
@@ -166,7 +162,6 @@ export const EditableSpan = ({
       ref={spanRef}
       title={isEditable ? title : undefined}
       className={getEditableClasses()}
-      style={style}
       contentEditable={editing && isEditable}
       suppressContentEditableWarning={true}
       onDoubleClick={handleDoubleClick}

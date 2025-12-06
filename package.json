@@ -28,7 +28,7 @@
     "antlr:clear": "rm -rf src/generated-parser/*",
     "antlr:lexer": "java -Duser.dir=$(pwd)/src/g4 -cp $(pwd)/antlr/antlr-4.11.1-complete.jar org.antlr.v4.Tool -o ./src/generated-parser -Dlanguage=JavaScript sequenceLexer.g4",
     "antlr:parser": "java -Duser.dir=$(pwd)/src/g4 -cp $(pwd)/antlr/antlr-4.11.1-complete.jar org.antlr.v4.Tool -o ./src/generated-parser -Dlanguage=JavaScript sequenceParser.g4",
-    "eslint": "bun run --bun eslint --fix --ext .js,.ts,.tsx,.jsx src",
+    "eslint": "eslint --fix --ext .js,.ts,.tsx,.jsx src",
     "prettier": "bun run --bun prettier --write --ignore-unknown \"src/**/*.{js,ts,vue,json,htm,html}\"",
     "git:branch:clean:gone": "git fetch -p && git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -d",
     "git:branch:clean:merged": "git branch --merged|egrep -v \"(\\*|master|main|dev|skip_branch_name)\" | xargs git branch -d",

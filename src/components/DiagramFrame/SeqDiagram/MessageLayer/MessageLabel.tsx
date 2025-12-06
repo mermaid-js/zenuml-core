@@ -11,7 +11,6 @@ export const MessageLabel = (props: {
   normalizeText?: (text: string) => string;
   isSelf?: boolean;
   className?: string;
-  style?: React.CSSProperties;
 }) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
@@ -44,7 +43,6 @@ export const MessageLabel = (props: {
       text={formattedLabelText}
       isEditable={isEditable}
       className={cn("px-1 right", props.className)}
-      style={props.style}
       onSave={handleSave}
       title="Double-click to edit"
     />
