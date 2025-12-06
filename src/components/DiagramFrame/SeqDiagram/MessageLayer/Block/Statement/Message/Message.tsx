@@ -34,7 +34,6 @@ export const Message = (props: {
   const messageRef = useRef<HTMLDivElement>(null);
   const stylable = mode !== RenderMode.Static;
   const labelText = content || "";
-  const lineStyle = type === "creation" || type === "return" ? "dashed" : "solid";
 
   const onClick = () => {
     if (!stylable || !messageRef.current) return;
@@ -51,7 +50,6 @@ export const Message = (props: {
       className={cn({"cursor-pointer": stylable}, className)}
       number={number}
       rtl={rtl}
-      lineStyle={lineStyle}
       onClick={onClick}
       messageRef={messageRef}
     />

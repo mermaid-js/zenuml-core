@@ -13,7 +13,6 @@ export type MessageViewProps = {
   className?: string;
   number?: string;
   rtl?: string | boolean;
-  lineStyle?: "solid" | "dashed";
   onClick?: () => void;
   messageRef?: RefObject<HTMLDivElement>;
 };
@@ -27,11 +26,11 @@ export const MessageView = ({
   className,
   number,
   rtl,
-  lineStyle,
   onClick,
   messageRef,
 }: MessageViewProps) => {
   const isCreation = type === "creation";
+  const lineStyle = type === "creation" || type === "return" ? "dashed" : "solid";
 
   let message = null;
   if(labelText ==="" && isCreation) {
