@@ -113,7 +113,7 @@ export const Creation = (props: {
             messageClassNames,
           )}
           context={creation}
-          labelPosition1={[start, stop]}
+          labelPosition={[start, stop]}
           readonly={!props.context?.creation()?.isParamValid?.()}
           content={creation?.SignatureText()}
           rtl={rightToLeft}

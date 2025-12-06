@@ -84,7 +84,7 @@ export const Interaction = (props: {
       ) : (
         <Message
           className={cn("text-center", messageClassNames)}
-          labelPosition1={[start, stop]}
+          labelPosition={[start, stop]}
           textStyle={messageTextStyle}
           context={message}
           content={signature}
@@ -107,7 +107,7 @@ export const Interaction = (props: {
             messageClassNames,
           )}
           context={message}
-          labelPosition1={[assigneeStart, assigneeStop]}
+          labelPosition={[assigneeStart, assigneeStop]}
           content={assignee}
           rtl={!rightToLeft}
           type="return"

@@ -7,7 +7,7 @@ type Context = any;
 
 export const Message = (props: {
   context?: Context;
-  labelPosition1: [number, number];
+  labelPosition: [number, number];
   readonly?: boolean;
   content: string;
   rtl?: string | boolean;
@@ -20,7 +20,7 @@ export const Message = (props: {
 }) => {
   const {
     context,
-    labelPosition1,
+    labelPosition,
     readonly,
     content,
     rtl,
@@ -38,10 +38,6 @@ export const Message = (props: {
   const stylable = mode !== RenderMode.Static;
   const labelText =
     type === "creation" ? content.match(/«([^»]+)»/)?.[1] || "" : content || "";
-  // console.log('labelPosition1', labelPosition1);
-  const labelPosition2 = [-1, -1];
-  // console.log('labelPosition2', labelPosition2);
-  const labelPosition = labelPosition1 || labelPosition2;
   const lineStyle = type === "creation" || type === "return" ? "dashed" : "solid";
 
   const onClick = () => {
