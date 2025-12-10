@@ -4,9 +4,6 @@ export interface LayoutMetrics {
   commentCodeLineHeight: number;
   commentBlockSpacing: number;
   commentMaxWidth: number;
-  messageInlineHeight: number;
-  messageHeight: number;
-  selfInvocationHeight: number;
   returnMessageHeight: number;
   returnSelfMessageHeight: number;
   fragmentHeaderHeight: number;
@@ -15,7 +12,6 @@ export interface LayoutMetrics {
   dividerHeight: number;
   creationOccurrenceContentInset: number;
   returnStatementMarginBottom: number;
-  fragmentOccurrenceMinHeight: number;
   tcfSegmentHeaderHeight: number;
   creationAltBranchOffset: number;
 }
@@ -31,9 +27,7 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   commentCodeLineHeight: rem(1.1),
   commentBlockSpacing: tw(2),
   commentMaxWidth: 640,
-  messageInlineHeight: 16,
-  messageHeight: 31,
-  selfInvocationHeight: 31,
+  // messageHeight: 31,
   returnMessageHeight: 16,
   returnSelfMessageHeight: 20,
   fragmentHeaderHeight: 25, // .fragment .leading-4 => line-height: 1rem
@@ -42,7 +36,6 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   dividerHeight: tw(10),
   creationOccurrenceContentInset: 18,
   returnStatementMarginBottom: 2,
-  fragmentOccurrenceMinHeight: 22,
   tcfSegmentHeaderHeight: 13,
   creationAltBranchOffset: 11,
 };
@@ -51,7 +44,7 @@ export type ThemeName = string | null | undefined;
 
 const THEME_OVERRIDES: Record<string, Partial<LayoutMetrics>> = {
   "theme-clean-light": {
-    messageHeight: tw(11),
+    // messageHeight: tw(11),
   },
 };
 

@@ -15,58 +15,61 @@ export class SyncMessageStatementVM extends StatementVM {
   }
 
   public measure(top: number): StatementCoordinate {
-    const messageContext = this.message;
-    const commentHeight = this.measureComment(messageContext);
-    const messageTop = top + commentHeight;
-    const source = messageContext?.From?.() || _STARTER_;
-    const target = messageContext?.Owner?.() || _STARTER_;
+    const commentHeight = this.measureComment(this.message);
+    // let cursor = top + commentHeight;
+
+    const source = this.message?.From?.() || _STARTER_;
+    const target = this.message?.Owner?.() || _STARTER_;
     const isSelf = source === target;
-    const hasNestedBlock = Boolean(messageContext?.braceBlock?.()?.block?.());
-    const signature = messageContext?.SignatureText?.() || "";
-    const wrapped = signature.length > 20;
-    const baseMessageHeight = hasNestedBlock
-      ? this.metrics.messageHeight
-      : this.metrics.messageInlineHeight;
-    const messageHeight = isSelf
-      ? this.metrics.selfInvocationHeight
-      : baseMessageHeight + (wrapped ? 7 : 0);
-    const occurrenceTop = messageTop + messageHeight;
+    const hasNestedBlock = Boolean(this.message?.braceBlock?.()?.block?.());
     const insideFragment = this.isInsideFragment(this.context);
-    const minOccurrenceHeight =
-      insideFragment && !hasNestedBlock
-        ? this.metrics.fragmentOccurrenceMinHeight
-        : 24;
-    let occurrenceHeight = this.measureOccurrence(
-      messageContext,
-      occurrenceTop,
+    const assignee = this.message?.Assignment?.()?.getText?.();
+
+    const signature = this.message?.SignatureText?.() || "";
+    console.info(
+      "syncMessageVM::",
       target,
-      minOccurrenceHeight,
+      signature,
+      top,
+      source,
+      hasNestedBlock,
+      insideFragment,
+      assignee,
     );
+
+    const messageHeight = isSelf || hasNestedBlock ? 31 : 16;
+    // cursor += messageHeight;
+
+    let occurrenceHeight = 22; // .occurrence, .min-h-6, .mt-[-2px]
+    // let occurrenceHeight = insideFragment && !hasNestedBlock ? 22 : 24;
+    // occurrenceHeight = this.measureOccurrence(
+    //   this.message,
+    //   cursor,
+    //   target,
+    //   occurrenceHeight,
+    // );
+
     if (hasNestedBlock && commentHeight > 0) {
       occurrenceHeight += Math.min(
         commentHeight / 2,
         this.metrics.statementMarginY,
       );
     }
-    const assignee = messageContext?.Assignment?.()?.getText?.();
-    const anchors: StatementCoordinate["anchors"] = {
-      message: messageTop,
-      occurrence: occurrenceTop,
-    };
-    if (commentHeight) {
-      anchors.comment = top;
-    }
+
     let height = commentHeight + messageHeight + occurrenceHeight;
+
     if (assignee && !isSelf) {
-      anchors.return = occurrenceTop + occurrenceHeight;
       height += this.metrics.returnMessageHeight;
     }
-    const meta: StatementCoordinate["meta"] = {
+
+    console.info(
+      "syncMessageVM::height",
+      height,
       commentHeight,
       messageHeight,
       occurrenceHeight,
-      returnHeight: assignee && !isSelf ? this.metrics.returnMessageHeight : 0,
-    };
-    return { top, height, kind: this.kind, anchors, meta };
+    );
+
+    return { top, height, kind: this.kind };
   }
 }
