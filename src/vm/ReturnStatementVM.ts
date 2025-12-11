@@ -15,11 +15,8 @@ export class ReturnStatementVM extends StatementVM {
   public measure(top: number): StatementCoordinate {
     const context = this.returnContext || this.context;
     const commentHeight = this.measureComment(context);
-    const messageTop = top + commentHeight;
-    const anchors: StatementCoordinate["anchors"] = { message: messageTop };
-    if (commentHeight) {
-      anchors.comment = top;
-    }
+    let cursor = top + commentHeight;
+
     const ret = this.returnContext;
     const asyncMessage = ret?.asyncMessage?.();
     const source = asyncMessage?.From?.() || ret?.From?.() || _STARTER_;
@@ -28,14 +25,12 @@ export class ReturnStatementVM extends StatementVM {
       ret?.ReturnTo?.() ||
       _STARTER_;
     const isSelf = source === target;
-    const messageHeight = isSelf
-      ? this.metrics.returnSelfMessageHeight
-      : this.metrics.returnMessageHeight;
-    const height = commentHeight + messageHeight;
-    const meta: StatementCoordinate["meta"] = {
-      commentHeight,
-      messageHeight,
-    };
-    return { top, height, kind: this.kind, anchors, meta };
+
+    const messageHeight = isSelf ? 20 : 0;
+    cursor += messageHeight;
+    const height = cursor - top;
+    console.info("returnVM::", top, commentHeight, source, target, height);
+
+    return { top, height, kind: this.kind };
   }
 }

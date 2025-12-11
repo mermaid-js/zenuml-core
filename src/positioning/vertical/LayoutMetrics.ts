@@ -5,13 +5,11 @@ export interface LayoutMetrics {
   commentBlockSpacing: number;
   commentMaxWidth: number;
   returnMessageHeight: number;
-  returnSelfMessageHeight: number;
   fragmentHeaderHeight: number;
   fragmentPaddingBottom: number;
   fragmentBranchGap: number;
   dividerHeight: number;
   creationOccurrenceContentInset: number;
-  returnStatementMarginBottom: number;
   tcfSegmentHeaderHeight: number;
   creationAltBranchOffset: number;
 }
@@ -29,13 +27,11 @@ export const DEFAULT_LAYOUT_METRICS: LayoutMetrics = {
   commentMaxWidth: 640,
   // messageHeight: 31,
   returnMessageHeight: 16,
-  returnSelfMessageHeight: 20,
   fragmentHeaderHeight: 25, // .fragment .leading-4 => line-height: 1rem
   fragmentPaddingBottom: 10, // .zenuml .fragment =>padding-bottom: 10px
   fragmentBranchGap: tw(2),
   dividerHeight: tw(10),
   creationOccurrenceContentInset: 18,
-  returnStatementMarginBottom: 2,
   tcfSegmentHeaderHeight: 13,
   creationAltBranchOffset: 11,
 };

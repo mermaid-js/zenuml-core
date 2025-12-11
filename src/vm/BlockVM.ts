@@ -37,31 +37,28 @@ export class BlockVM extends NodeVM {
     if (!this.statements.length) return startTop;
 
     const metrics = this.runtime.metrics;
+    console.info(
+      `blockVM::start cursor:${startTop} statements.size:${this.statements.length}`,
+    );
+
     let cursor = startTop + metrics.statementMarginY; // .statement-container .my-4
-    let lastKind: StatementKind | undefined;
+    // let lastKind: StatementKind | undefined;
 
     this.statements.forEach((statement: any, index: number) => {
       if (parentKind === "par" && index !== 0) cursor += 1;
 
       const statementVM = createStatementVM(statement, this.runtime);
-      // const cursorOffset = BlockVM.cursorOffsets[statementVM.kind] ?? 0;
-      // const measureTop = cursor + cursorOffset;
       console.info(`statementVM::start::${statementVM.kind} cursor:${cursor}`);
       const coordinate = statementVM.measure(cursor, originParticipant);
-      // const heightOffset = BlockVM.heightOffsets[statementVM.kind] ?? 0;
-      // if (heightOffset) {
-      //   coordinate.height += heightOffset;
-      // }
       this.runtime.recordCoordinate(statement, coordinate);
       cursor = coordinate.top + coordinate.height + metrics.statementMarginY;
-      lastKind = statementVM.kind;
+      // lastKind = statementVM.kind;
       console.info(
-        `statementVM::end::${statementVM.kind} top:${coordinate.top} height:${coordinate.height} cursor:${cursor}`,
+        `statementVM::end::${statementVM.kind} height:${coordinate.height} cursor:${cursor}`,
       );
     });
 
-    const bottomMargin =
-      lastKind === "return" ? metrics.returnStatementMarginBottom : 0;
-    return cursor + bottomMargin;
+    console.info(`blockVM::end cursor:${cursor}`);
+    return cursor;
   }
 }

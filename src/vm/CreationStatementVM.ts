@@ -1,4 +1,3 @@
-import type { StatementAnchor } from "@/positioning/vertical/StatementTypes";
 import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
@@ -25,7 +24,7 @@ export class CreationStatementVM extends StatementVM {
     let cursor = top + commentHeight + CREATION_MESSAGE_HEIGHT;
     if (enlog)
       console.info(
-        `creation::${participant}::0 top:${top} commentHeight:${commentHeight}`,
+        `creation::${participant}::start cursor:${cursor} commentHeight:${commentHeight}`,
       );
 
     // const occurrenceHeight = this.measureOccurrence(
@@ -36,33 +35,20 @@ export class CreationStatementVM extends StatementVM {
     //   this.metrics.creationOccurrenceContentInset,
     // );
 
-    let occurrenceHeight = 0;
     const block = this.creation?.braceBlock?.()?.block?.();
     if (block) {
       const fragmentOrigin =
         this.findLeftParticipant(this.creation, origin) || origin;
-      cursor += this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
+      cursor = this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
+      cursor += 2; // .occurrence.border-2 for bottom
     } else {
-      occurrenceHeight = 22; // .occurrence, .min-h-6, .mt-[-2px]
-      cursor += occurrenceHeight;
+      cursor += 22; // .occurrence, .min-h-6, .mt-[-2px]
     }
 
-    if (enlog)
-      console.info(
-        `creation::${participant}::1 occurrenceHeight:${occurrenceHeight}`,
-      );
-
     const assignment = this.creation?.creationBody?.()?.assignment?.();
-
-    const anchors: Partial<Record<StatementAnchor, number>> = {
-      message: top + commentHeight,
-      occurrence: cursor,
-    };
-
     if (assignment) {
-      anchors.return = cursor + occurrenceHeight;
+      console.info(`creation::assignment::${participant}`);
       cursor += this.metrics.returnMessageHeight;
-      if (enlog) console.info(`creation::${participant}::assignment`);
     }
 
     // // Apply adjustments
@@ -106,12 +92,15 @@ export class CreationStatementVM extends StatementVM {
     // The top of the statement block itself is adjusted by the upward adjustments
     // (This matches original logic: adjustedTop = top - totalAdjustment)
 
+    const height = cursor - top;
     if (enlog)
-      console.info(`creation::${participant}::2 top:${top} cursor:${cursor}`);
+      console.info(
+        `creation::${participant}::end cursor:${cursor} height:${height}`,
+      );
 
     return {
       top,
-      height: cursor - top,
+      height,
       kind: this.kind,
     };
   }
