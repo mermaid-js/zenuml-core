@@ -48,49 +48,12 @@ export class CreationStatementVM extends StatementVM {
     const assignment = this.creation?.creationBody?.()?.assignment?.();
     if (assignment) {
       console.info(`creation::assignment::${participant}`);
-      cursor += this.metrics.returnMessageHeight;
+      cursor += 16;
     }
-
-    // // Apply adjustments
-    // // 1. Anchor adjustment (e.g. nested in Alt/Tcf/Par) shifts everything down
-    // if (offsets.anchorAdjustment) {
-    //   anchors.message! += offsets.anchorAdjustment;
-    //   anchors.occurrence! += offsets.anchorAdjustment;
-    //   if (anchors.return != null) {
-    //     anchors.return += offsets.anchorAdjustment;
-    //   }
-    // }
-
-    // // 2. Alt branch inset (if not already adjusted by anchorAdjustment)
-    // // Note: Original logic said "altBranchInset = anchorAdjustment === 0 ? rawAltBranchInset : 0"
-    // // This implies if we have anchorAdjustment, we ignore altBranchInset.
-    // if (offsets.altBranchInset && offsets.anchorAdjustment === 0) {
-    //   anchors.message! += offsets.altBranchInset;
-    //   anchors.occurrence! += offsets.altBranchInset;
-    //   if (anchors.return != null) {
-    //     anchors.return += offsets.altBranchInset;
-    //   }
-    // }
-
-    // // 3. Visual adjustment (Section) and Assignment adjustment shift things UP
-    // const totalUpwardAdjustment =
-    //   offsets.visualAdjustment + offsets.assignmentAdjustment;
-    // if (totalUpwardAdjustment) {
-    //   anchors.message! -= totalUpwardAdjustment;
-    //   anchors.occurrence! -= totalUpwardAdjustment;
-    //   if (anchors.return != null) {
-    //     anchors.return -= totalUpwardAdjustment;
-    //   }
-    // }
-
-    // const adjustedTop = top - totalUpwardAdjustment;
 
     if (participant) {
       this.runtime.updateCreationTop(participant, top + commentHeight);
     }
-
-    // The top of the statement block itself is adjusted by the upward adjustments
-    // (This matches original logic: adjustedTop = top - totalAdjustment)
 
     const height = cursor - top;
     if (enlog)
