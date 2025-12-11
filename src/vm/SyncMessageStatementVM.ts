@@ -16,12 +16,13 @@ export class SyncMessageStatementVM extends StatementVM {
 
   public measure(top: number): StatementCoordinate {
     const commentHeight = this.measureComment(this.message);
-    // let cursor = top + commentHeight;
+    let cursor = top + commentHeight;
 
     const source = this.message?.From?.() || _STARTER_;
     const target = this.message?.Owner?.() || _STARTER_;
-    const isSelf = source === target;
-    const hasNestedBlock = Boolean(this.message?.braceBlock?.()?.block?.());
+    // const isSelf = source === target;
+    const block = this.message?.braceBlock?.()?.block?.();
+    const hasNestedBlock = Boolean(block);
     const insideFragment = this.isInsideFragment(this.context);
     const assignee = this.message?.Assignment?.()?.getText?.();
 
@@ -37,10 +38,19 @@ export class SyncMessageStatementVM extends StatementVM {
       assignee,
     );
 
-    const messageHeight = isSelf || hasNestedBlock ? 31 : 16;
-    // cursor += messageHeight;
+    const messageHeight = 16;
+    cursor += messageHeight;
 
-    let occurrenceHeight = 22; // .occurrence, .min-h-6, .mt-[-2px]
+    let occurrenceHeight = 0;
+    if (block) {
+      const fragmentOrigin =
+        this.findLeftParticipant(this.message, origin) || origin;
+      cursor += this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
+    } else {
+      occurrenceHeight = 22; // .occurrence, .min-h-6, .mt-[-2px]
+      cursor += occurrenceHeight;
+    }
+
     // let occurrenceHeight = insideFragment && !hasNestedBlock ? 22 : 24;
     // occurrenceHeight = this.measureOccurrence(
     //   this.message,
@@ -49,18 +59,7 @@ export class SyncMessageStatementVM extends StatementVM {
     //   occurrenceHeight,
     // );
 
-    if (hasNestedBlock && commentHeight > 0) {
-      occurrenceHeight += Math.min(
-        commentHeight / 2,
-        this.metrics.statementMarginY,
-      );
-    }
-
-    let height = commentHeight + messageHeight + occurrenceHeight;
-
-    if (assignee && !isSelf) {
-      height += this.metrics.returnMessageHeight;
-    }
+    const height = cursor - top;
 
     console.info(
       "syncMessageVM::height",
