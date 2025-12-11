@@ -22,11 +22,13 @@ export abstract class FragmentSingleBlockVM extends FragmentVM {
     if (hasCondition) cursor += 20;
 
     const block = this.fragment?.braceBlock?.()?.block?.();
-    const fragmentOrigin =
-      this.findLeftParticipant(this.fragment, origin) || origin;
+    if (block) {
+      const fragmentOrigin =
+        this.findLeftParticipant(this.fragment, origin) || origin;
+      cursor = this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
+    }
 
-    cursor = this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
-    cursor += this.metrics.fragmentPaddingBottom;
+    cursor += this.metrics.fragmentPaddingBottom + 1;
 
     return {
       top,
