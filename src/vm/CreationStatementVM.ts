@@ -36,8 +36,16 @@ export class CreationStatementVM extends StatementVM {
     //   this.metrics.creationOccurrenceContentInset,
     // );
 
-    const occurrenceHeight = 22; // .occurrence, .min-h-6, .mt-[-2px]
-    cursor += occurrenceHeight;
+    let occurrenceHeight = 0;
+    const block = this.creation?.braceBlock?.()?.block?.();
+    if (block) {
+      const fragmentOrigin =
+        this.findLeftParticipant(this.creation, origin) || origin;
+      cursor += this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
+    } else {
+      occurrenceHeight = 22; // .occurrence, .min-h-6, .mt-[-2px]
+      cursor += occurrenceHeight;
+    }
 
     if (enlog)
       console.info(
@@ -97,13 +105,6 @@ export class CreationStatementVM extends StatementVM {
 
     // The top of the statement block itself is adjusted by the upward adjustments
     // (This matches original logic: adjustedTop = top - totalAdjustment)
-
-    const block = this.creation?.braceBlock?.()?.block?.();
-    if (block) {
-      const fragmentOrigin =
-        this.findLeftParticipant(this.creation, origin) || origin;
-      cursor += this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
-    }
 
     if (enlog)
       console.info(`creation::${participant}::2 top:${top} cursor:${cursor}`);
