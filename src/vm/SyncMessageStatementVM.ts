@@ -20,9 +20,7 @@ export class SyncMessageStatementVM extends StatementVM {
 
     const source = this.message?.From?.() || _STARTER_;
     const target = this.message?.Owner?.() || _STARTER_;
-    // const isSelf = source === target;
     const block = this.message?.braceBlock?.()?.block?.();
-    const hasNestedBlock = Boolean(block);
     const insideFragment = this.isInsideFragment(this.context);
     const assignee = this.message?.Assignment?.()?.getText?.();
 
@@ -33,12 +31,13 @@ export class SyncMessageStatementVM extends StatementVM {
       signature,
       top,
       source,
-      hasNestedBlock,
+      Boolean(block),
       insideFragment,
       assignee,
     );
 
-    const messageHeight = 16;
+    const isSelf = source === target;
+    const messageHeight = isSelf ? 30 : 16;
     cursor += messageHeight;
 
     let occurrenceHeight = 0;
@@ -51,7 +50,7 @@ export class SyncMessageStatementVM extends StatementVM {
       cursor += occurrenceHeight;
     }
 
-    // let occurrenceHeight = insideFragment && !hasNestedBlock ? 22 : 24;
+    // let occurrenceHeight = insideFragment && !Booslean(block) ? 22 : 24;
     // occurrenceHeight = this.measureOccurrence(
     //   this.message,
     //   cursor,
