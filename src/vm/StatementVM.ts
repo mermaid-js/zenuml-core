@@ -93,35 +93,4 @@ export abstract class StatementVM extends NodeVM {
     const hasElse = Boolean(altContext?.elseBlock?.());
     return elseIfBlocks.length > 0 || hasElse;
   }
-
-  protected isSectionFragment(ctx: any): boolean {
-    return typeof ctx?.section === "function" && Boolean(ctx.section());
-  }
-
-  protected isAncestorOf(target: any, maybeDescendant: any): boolean {
-    let current = maybeDescendant;
-    while (current) {
-      if (current === target) {
-        return true;
-      }
-      current = current.parentCtx;
-    }
-    return false;
-  }
-
-  protected isInsideFragment(stat: any = this.context): boolean {
-    let parent = stat?.parentCtx;
-    while (parent) {
-      if (typeof parent.alt === "function" && parent.alt()) return true;
-      if (typeof parent.loop === "function" && parent.loop()) return true;
-      if (typeof parent.par === "function" && parent.par()) return true;
-      if (typeof parent.opt === "function" && parent.opt()) return true;
-      if (typeof parent.section === "function" && parent.section()) return true;
-      if (typeof parent.critical === "function" && parent.critical())
-        return true;
-      if (typeof parent.tcf === "function" && parent.tcf()) return true;
-      parent = parent.parentCtx;
-    }
-    return false;
-  }
 }
