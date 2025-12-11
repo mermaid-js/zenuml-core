@@ -17,9 +17,7 @@ export abstract class StatementVM extends NodeVM {
     if (!context?.getComment) return 0;
     const rawComment = context.getComment() || "";
     if (!rawComment) return 0;
-
-    const markdown = new MarkdownMeasurer(this.runtime.metrics);
-    return markdown.measure(rawComment);
+    return new MarkdownMeasurer().measure(rawComment);
   }
 
   protected resolveFragmentOrigin(fallbackOrigin: string): string {
