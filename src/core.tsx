@@ -241,7 +241,6 @@ export default class ZenUml implements IZenUml {
           // Return ParseResult indicating failure with structured error info
           const parseResult: ParseResult = {
             pass: false,
-            diagramType: result?.type || 'unknown', // Use result type if available, otherwise 'unknown'
             offendingSymbol,
             line,
             col,
@@ -255,7 +254,6 @@ export default class ZenUml implements IZenUml {
         // If successful, return the ParseResult object indicating success
         const parseResult: ParseResult = {
           pass: true,
-          diagramType: result.type || 'sequence'
         };
 
         resolve(parseResult);
@@ -265,7 +263,6 @@ export default class ZenUml implements IZenUml {
 
         const parseResult: ParseResult = {
           pass: false,
-          diagramType: 'unknown',
           offendingSymbol: 'exception',
           line: 0,
           col: 0,
