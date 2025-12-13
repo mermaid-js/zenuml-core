@@ -17,7 +17,7 @@ import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
 import { VERSION } from "./version.ts";
 import * as htmlToImage from "html-to-image";
 import RootContext from "./parser/index.js";
-import Errors from "./parser/index.js";
+import ErrorDetails from "./parser/index.js";
 
 import "./assets/tailwind.css";
 import "./assets/tailwind-preflight.less";
@@ -49,11 +49,14 @@ interface Config {
 
 export interface ParseResult {
   pass: boolean;
-  offendingSymbol?: string;
-  line?: number;
-  col?: number;
-  msg?: string;
+  errorDetails: ErrorDetail[];
 }
+export interface  ErrorDetail {
+  line: number;
+  column: number;
+  msg: string;
+}
+
 
 interface IZenUml {
   get code(): string | undefined;
@@ -202,71 +205,30 @@ export default class ZenUml implements IZenUml {
     return new Promise((resolve) => {
       try {
         // Clear any previous errors
-        Errors.Errors.length = 0;
-
+        ErrorDetails.ErrorDetails.length = 0;
         const result = RootContext.RootContext(codeOrText);
-
-        // Get all parsing errors that were captured
-        const errors = [...Errors.Errors];
-
+        console.debug("errors", ErrorDetails.ErrorDetails);
+        const errors = [...ErrorDetails.ErrorDetails];
         // Clear errors after reading
-        Errors.Errors.length = 0;
-
+        ErrorDetails.ErrorDetails.length = 0;
         if (errors.length > 0 || result === null) {
-          // Parse the first error to extract structured information
-          // Expected format: "${offendingSymbol} line ${line}, col ${column}: ${msg}"
-          let offendingSymbol: string | undefined;
-          let line: number | undefined;
-          let col: number | undefined;
-          let msg: string | undefined;
-
-          if (errors.length > 0) {
-            const errorStr = errors[0];
-            const match = errorStr.match(/^(.*?) line (\d+), col (\d+): (.*)$/);
-
-            if (match) {
-              offendingSymbol = match[1]?.trim();
-              line = parseInt(match[2], 10);
-              col = parseInt(match[3], 10);
-              msg = match[4];
-            } else {
-              // Fallback if the error doesn't match expected format
-              offendingSymbol = 'unknown';
-              line = 0;
-              col = 0;
-              msg = errorStr;
-            }
-          }
-
           // Return ParseResult indicating failure with structured error info
           const parseResult: ParseResult = {
             pass: false,
-            offendingSymbol,
-            line,
-            col,
-            msg
+            errorDetails: errors,
           };
-
           resolve(parseResult);
           return;
         }
-
-        // If successful, return the ParseResult object indicating success
         const parseResult: ParseResult = {
           pass: true,
+          errorDetails: [],
         };
-
         resolve(parseResult);
       } catch (error) {
-        // Clear errors in case of exception too
-        Errors.Errors.length = 0;
-
         const parseResult: ParseResult = {
           pass: false,
-          offendingSymbol: 'exception',
-          line: 0,
-          col: 0,
-          msg: `Parse error: ${error instanceof Error ? error.message : String(error)}`
+          errorDetails: [],
         };
         resolve(parseResult);
       }
