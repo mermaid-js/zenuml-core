@@ -16,6 +16,8 @@ import {
 import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
 import { VERSION } from "./version.ts";
 import * as htmlToImage from "html-to-image";
+import RootContext from "./parser/index.js";
+import Errors from "./parser/index.js";
 
 import "./assets/tailwind.css";
 import "./assets/tailwind-preflight.less";
@@ -44,9 +46,19 @@ interface Config {
   onEventEmit?: (name: string, data: unknown) => void;
   mode?: RenderMode;
 }
+
+export interface ParseResult {
+  pass: boolean;
+  offendingSymbol?: string;
+  line?: number;
+  col?: number;
+  msg?: string;
+}
+
 interface IZenUml {
   get code(): string | undefined;
   get theme(): string | undefined;
+  parse(text: string): Promise<ParseResult>;
   // Resolve after rendering is finished.
   render(
     code: string | undefined,
@@ -184,6 +196,84 @@ export default class ZenUml implements IZenUml {
 
   get theme(): string | undefined {
     return this._theme;
+  }
+
+  parse(codeOrText: string): Promise<ParseResult> {
+    return new Promise((resolve) => {
+      try {
+        // Clear any previous errors
+        Errors.Errors.length = 0;
+
+        const result = RootContext.RootContext(codeOrText);
+
+        // Get all parsing errors that were captured
+        const errors = [...Errors.Errors];
+
+        // Clear errors after reading
+        Errors.Errors.length = 0;
+
+        if (errors.length > 0 || result === null) {
+          // Parse the first error to extract structured information
+          // Expected format: "${offendingSymbol} line ${line}, col ${column}: ${msg}"
+          let offendingSymbol: string | undefined;
+          let line: number | undefined;
+          let col: number | undefined;
+          let msg: string | undefined;
+
+          if (errors.length > 0) {
+            const errorStr = errors[0];
+            const match = errorStr.match(/^(.*?) line (\d+), col (\d+): (.*)$/);
+
+            if (match) {
+              offendingSymbol = match[1]?.trim();
+              line = parseInt(match[2], 10);
+              col = parseInt(match[3], 10);
+              msg = match[4];
+            } else {
+              // Fallback if the error doesn't match expected format
+              offendingSymbol = 'unknown';
+              line = 0;
+              col = 0;
+              msg = errorStr;
+            }
+          }
+
+          // Return ParseResult indicating failure with structured error info
+          const parseResult: ParseResult = {
+            pass: false,
+            diagramType: result?.type || 'unknown', // Use result type if available, otherwise 'unknown'
+            offendingSymbol,
+            line,
+            col,
+            msg
+          };
+
+          resolve(parseResult);
+          return;
+        }
+
+        // If successful, return the ParseResult object indicating success
+        const parseResult: ParseResult = {
+          pass: true,
+          diagramType: result.type || 'sequence'
+        };
+
+        resolve(parseResult);
+      } catch (error) {
+        // Clear errors in case of exception too
+        Errors.Errors.length = 0;
+
+        const parseResult: ParseResult = {
+          pass: false,
+          diagramType: 'unknown',
+          offendingSymbol: 'exception',
+          line: 0,
+          col: 0,
+          msg: `Parse error: ${error instanceof Error ? error.message : String(error)}`
+        };
+        resolve(parseResult);
+      }
+    });
   }
 
   async getPng(): Promise<string> {
