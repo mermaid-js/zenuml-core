@@ -135,12 +135,12 @@ export const Creation = (props: {
             "return transform -translate-y-full pointer-events-auto",
             messageClassNames,
           )}
-          textStyle={messageTextStyle}
-          context={creation.creationBody().assignment()}
+          context={creation}
           content={assignee}
           rtl={!rightToLeft}
           type="return"
           number={`${props.number}.${creation.Statements().length + 1}`}
+          textStyle={messageTextStyle}
           normalizeText={syncMessageNormalizer}
         />
       )}
