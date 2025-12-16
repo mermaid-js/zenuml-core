@@ -109,7 +109,7 @@ export const Creation = (props: {
       >
         <Message
           className={cn(
-            "invocation w-full transform -translate-y-1/2 pointer-events-auto",
+            "invocation transform -translate-y-1/2 pointer-events-auto",
             messageClassNames,
           )}
           context={creation}
