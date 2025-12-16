@@ -120,7 +120,7 @@ export const Creation = (props: {
           type="creation"
           number={props.number}
           textStyle={messageTextStyle}
-          style={{ width: `calc(100% - ${containerOffset}px)`, translate: 0 }}
+          style={{ width: `calc(100% - ${containerOffset}px)` }}
           normalizeText={syncMessageNormalizer}
         />
       </div>
