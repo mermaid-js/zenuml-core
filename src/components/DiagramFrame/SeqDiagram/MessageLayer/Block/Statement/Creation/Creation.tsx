@@ -55,6 +55,12 @@ export const Creation = (props: {
     return assignee + (type ? ":" + type : "");
   }, [creation]);
 
+  const assigneeCtx = creation?.creationBody().assignment()?.assignee();
+  const [assigneeStart, assigneeStop] = [
+    assigneeCtx?.start.start,
+    assigneeCtx?.stop.stop,
+  ];
+
   const containerOffset =
     participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH;
 
@@ -137,6 +143,7 @@ export const Creation = (props: {
             messageClassNames,
           )}
           context={creation}
+          labelPosition={[assigneeStart, assigneeStop]}
           content={assignee}
           rtl={!rightToLeft}
           type="return"
