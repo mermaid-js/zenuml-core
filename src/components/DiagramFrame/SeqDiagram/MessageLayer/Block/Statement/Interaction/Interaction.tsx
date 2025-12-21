@@ -21,8 +21,6 @@ export const Interaction = (props: {
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
   const message = props.context?.message();
-  const statements = message?.Statements();
-  const assignee = message?.Assignment()?.getText() || "";
   const signature = message?.SignatureText();
   const isCurrent = message?.isCurrent(cursor);
   const source = message?.From() || _STARTER_;
@@ -30,9 +28,6 @@ export const Interaction = (props: {
   const isSelf = source === target;
   const signatureCtx = message?.messageBody().func()?.signature()[0];
   const [start, stop] = [signatureCtx?.start.start, signatureCtx?.stop.stop];
-
-  const assigneeCtx = message.messageBody().assignment()?.assignee();
-  const [assigneeStart, assigneeStop] = [assigneeCtx?.start.start, assigneeCtx?.stop.stop];
   const {
     translateX,
     interactionWidth,
@@ -99,23 +94,11 @@ export const Interaction = (props: {
         participant={target}
         rtl={rightToLeft}
         number={props.number}
+        textStyle={messageTextStyle}
+        messageClassNames={messageClassNames}
+        isSelf={isSelf}
+        interactionWidth={isSelf ? undefined : interactionWidth}
       />
-      {assignee && !isSelf && (
-        <Message
-          className={cn(
-            "return transform -translate-y-full",
-            messageClassNames,
-          )}
-          context={message}
-          labelPosition={[assigneeStart, assigneeStop]}
-          content={assignee}
-          rtl={!rightToLeft}
-          type="return"
-          number={`${props.number}.${statements.length + 1}`}
-          textStyle={messageTextStyle}
-          normalizeText={syncMessageNormalizer}
-        />
-      )}
     </div>
   );
 };

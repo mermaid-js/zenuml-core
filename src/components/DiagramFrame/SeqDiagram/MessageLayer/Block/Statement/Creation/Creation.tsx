@@ -10,7 +10,7 @@ import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
 import { EventBus } from "@/EventBus";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
@@ -43,23 +43,6 @@ export const Creation = (props: {
 
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
-
-  const assignee = useMemo(() => {
-    function safeCodeGetter(context: any) {
-      return (context && context.getFormattedText()) || "";
-    }
-    const assignment = creation?.creationBody().assignment();
-    if (!assignment) return "";
-    const assignee = safeCodeGetter(assignment.assignee());
-    const type = safeCodeGetter(assignment.type());
-    return assignee + (type ? ":" + type : "");
-  }, [creation]);
-
-  const assigneeCtx = creation?.creationBody().assignment()?.assignee();
-  const [assigneeStart, assigneeStop] = [
-    assigneeCtx?.start.start,
-    assigneeCtx?.stop.stop,
-  ];
 
   const containerOffset =
     participantWidth / 2 - OCCURRENCE_BAR_SIDE_WIDTH - LIFELINE_WIDTH;
@@ -135,23 +118,11 @@ export const Creation = (props: {
         className="pointer-events-auto"
         participant={target}
         number={props.number}
+        textStyle={messageTextStyle}
+        messageClassNames={messageClassNames}
+        rtl={rightToLeft}
+        interactionWidth={interactionWidth}
       />
-      {assignee && (
-        <Message
-          className={cn(
-            "return transform -translate-y-full pointer-events-auto",
-            messageClassNames,
-          )}
-          context={creation}
-          labelPosition={[assigneeStart, assigneeStop]}
-          content={assignee}
-          rtl={!rightToLeft}
-          type="return"
-          number={`${props.number}.${creation.Statements().length + 1}`}
-          textStyle={messageTextStyle}
-          normalizeText={syncMessageNormalizer}
-        />
-      )}
     </div>
   );
 };
