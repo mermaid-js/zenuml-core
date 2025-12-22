@@ -1,4 +1,6 @@
 import { marked } from "marked";
+import DOMPurify from "dompurify";
+import Comment from "../../components/Comment/Comment";
 
 type GenericToken = ReturnType<typeof marked.lexer>[number];
 type ListItemToken = GenericToken & {
@@ -25,10 +27,23 @@ const commentBlockSpacing = tw(2);
  * same font metrics the browser would use.
  */
 export class MarkdownMeasurer {
-  measure(text: string | undefined | null): number {
-    if (!text || !text.trim()) {
+  measure(_text: string | undefined | null): number {
+    if (!_text || !_text.trim()) {
       return 0;
     }
+
+    const commentObj = new Comment(_text);
+    const text = DOMPurify.sanitize(
+      commentObj?.text && marked.parse(commentObj?.text),
+    );
+
+    // console.info(
+    //   "MarkdownMeasurer",
+    //   `comment ${_text}`,
+    //   `commentObj?.text ${commentObj?.text}`,
+    //   `markedComment ${text}`,
+    // );
+
     const tokens = marked.lexer(text, defaultTokensOptions);
     if (!tokens.length) {
       return 0;

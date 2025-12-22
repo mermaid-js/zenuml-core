@@ -18,16 +18,17 @@ export class SyncMessageStatementVM extends StatementVM {
     const commentHeight = this.measureComment(this.message);
     let cursor = top + commentHeight;
 
-    const source = this.message?.From?.() || _STARTER_;
-    const target = this.message?.Owner?.() || _STARTER_;
-    const block = this.message?.braceBlock?.()?.block?.();
-    // const assignee = this.message?.Assignment?.()?.getText?.();
+    const source = this.message.From?.() || _STARTER_;
+    const target = this.message.Owner?.() || _STARTER_;
+    const block = this.message.braceBlock?.()?.block?.();
 
-    const signature = this.message?.SignatureText?.() || "";
+    const signature = this.message.SignatureText?.() || "";
+    const assignee = this.message.Assignment?.()?.getText?.();
     console.info(
       "syncMessageVM::start",
       target,
       signature,
+      assignee,
       top,
       source,
       Boolean(block),
@@ -44,6 +45,11 @@ export class SyncMessageStatementVM extends StatementVM {
       cursor += 2; // .occurrence.border-2 for bottom
     } else {
       cursor += 22; // .occurrence, .min-h-6, .mt-[-2px]
+    }
+
+    if (assignee && !isSelf) {
+      // src/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Interaction/Interaction.tsx:99
+      cursor += 16;
     }
 
     const height = cursor - top;

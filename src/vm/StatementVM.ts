@@ -14,10 +14,8 @@ export abstract class StatementVM extends NodeVM {
   }
 
   protected measureComment(context: any = this.context): number {
-    if (!context?.getComment) return 0;
-    const rawComment = context.getComment() || "";
-    if (!rawComment) return 0;
-    return new MarkdownMeasurer().measure(rawComment);
+    if (!context?.getComment || !context.getComment()) return 0;
+    return new MarkdownMeasurer().measure(context.getComment());
   }
 
   protected resolveFragmentOrigin(fallbackOrigin: string): string {
