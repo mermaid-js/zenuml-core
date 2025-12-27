@@ -16,8 +16,7 @@ import {
 import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
 import { VERSION } from "./version.ts";
 import * as htmlToImage from "html-to-image";
-import RootContext from "./parser/index.js";
-import ErrorDetails from "./parser/index.js";
+import Parser from "./parser/index.js";
 
 import "./assets/tailwind.css";
 import "./assets/tailwind-preflight.less";
@@ -205,12 +204,12 @@ export default class ZenUml implements IZenUml {
     return new Promise((resolve) => {
       try {
         // Clear any previous errors
-        ErrorDetails.ErrorDetails.length = 0;
-        const result = RootContext.RootContext(codeOrText);
-        console.debug("errors", ErrorDetails.ErrorDetails);
-        const errors = [...ErrorDetails.ErrorDetails];
+        Parser.ErrorDetails.length = 0;
+        const result = Parser.RootContext(codeOrText);
+        console.debug("errors", Parser.ErrorDetails);
+        const errors = [...Parser.ErrorDetails];
         // Clear errors after reading
-        ErrorDetails.ErrorDetails.length = 0;
+        Parser.ErrorDetails.length = 0;
         if (errors.length > 0 || result === null) {
           // Return ParseResult indicating failure with structured error info
           const parseResult: ParseResult = {
