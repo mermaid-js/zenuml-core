@@ -26,11 +26,11 @@ export class SyncMessageStatementVM extends StatementVM {
     const assignee = this.message.Assignment?.()?.getText?.();
     console.info(
       "syncMessageVM::start",
-      target,
       signature,
+      source,
+      target,
       assignee,
       top,
-      source,
       Boolean(block),
     );
 
@@ -48,8 +48,9 @@ export class SyncMessageStatementVM extends StatementVM {
     }
 
     if (assignee && !isSelf) {
-      // src/components/DiagramFrame/SeqDiagram/MessageLayer/Block/Statement/Interaction/Interaction.tsx:99
+      // Interaction.tsx:99
       cursor += 16;
+      console.info("syncMessageVM::assignment", assignee);
     }
 
     const height = cursor - top;

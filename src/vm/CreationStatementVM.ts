@@ -21,6 +21,10 @@ export class CreationStatementVM extends StatementVM {
     // const enlog = participant === "b" || participant === "c";
 
     const commentHeight = this.measureComment(this.creation);
+    if (participant) {
+      this.runtime.updateCreationTop(participant, top + commentHeight);
+    }
+
     let cursor = top + commentHeight + CREATION_MESSAGE_HEIGHT;
     if (enlog)
       console.info(
@@ -49,10 +53,6 @@ export class CreationStatementVM extends StatementVM {
     if (assignment) {
       console.info(`creation::assignment::${participant}`);
       cursor += 16;
-    }
-
-    if (participant) {
-      this.runtime.updateCreationTop(participant, top + commentHeight);
     }
 
     const height = cursor - top;
