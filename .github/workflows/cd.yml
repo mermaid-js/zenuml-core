@@ -44,6 +44,9 @@ jobs:
   npm-publish:
     runs-on: ubuntu-22.04
     needs: test
+    permissions:
+      contents: write    # for git tag push
+      id-token: write    # for npm OIDC trusted publishing
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/publish'
     steps:
       - name: Checkout
@@ -57,6 +60,8 @@ jobs:
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
       - run: bun install
       - name: Bump Version
         id: bump
@@ -65,10 +70,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         run: bun run build
-      - name: Publish to npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      - name: Publish to npm with provenance
+        run: npm publish --provenance --access public
       - name: Create git tag
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
