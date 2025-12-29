@@ -1,4 +1,4 @@
-import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { StatementCoordinate } from "../StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
@@ -17,8 +17,6 @@ export class CreationStatementVM extends StatementVM {
 
   public measure(top: number, originParticipant: string): StatementCoordinate {
     const participant = this.creation?.Owner?.() || originParticipant;
-    const enlog = true;
-    // const enlog = participant === "b" || participant === "c";
 
     const commentHeight = this.measureComment(this.creation);
     if (participant) {
@@ -26,17 +24,8 @@ export class CreationStatementVM extends StatementVM {
     }
 
     let cursor = top + commentHeight + CREATION_MESSAGE_HEIGHT;
-    if (enlog)
-      console.info(
-        `creation::${participant}::start cursor:${cursor} commentHeight:${commentHeight}`,
-      );
-
-    // const occurrenceHeight = this.measureOccurrence(
-    //   creation,
-    //   cursor,
-    //   participant,
-    //   undefined,
-    //   this.metrics.creationOccurrenceContentInset,
+    // console.info(
+    //   `creation::${participant}::start cursor:${cursor} commentHeight:${commentHeight}`,
     // );
 
     const block = this.creation?.braceBlock?.()?.block?.();
@@ -56,10 +45,9 @@ export class CreationStatementVM extends StatementVM {
     }
 
     const height = cursor - top;
-    if (enlog)
-      console.info(
-        `creation::${participant}::end cursor:${cursor} height:${height}`,
-      );
+    // console.info(
+    //   `creation::${participant}::end cursor:${cursor} height:${height}`,
+    // );
 
     return {
       top,

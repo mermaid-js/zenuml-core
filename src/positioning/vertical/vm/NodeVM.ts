@@ -1,6 +1,6 @@
 import { BlockVM } from "./BlockVM";
 import type { LayoutRuntime } from "./types";
-import { StatementKind } from "@/positioning/vertical/StatementTypes";
+import type { StatementKind } from "../StatementTypes";
 
 export abstract class NodeVM {
   constructor(

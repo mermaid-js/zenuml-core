@@ -1,4 +1,4 @@
-import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { StatementCoordinate } from "../StatementCoordinate";
 import { FragmentVM } from "./FragmentVM";
 import type { LayoutRuntime } from "./types";
 
@@ -41,7 +41,7 @@ export class FragmentTryCatchVM extends FragmentVM {
     }
 
     cursor += this.metrics.fragmentPaddingBottom + 1; // .fragment =>padding-bottom: 10px
-    console.info("FragmentTryCatchVM::end", cursor, cursor - top);
+    // console.info("FragmentTryCatchVM::end", cursor, cursor - top);
 
     return {
       top,

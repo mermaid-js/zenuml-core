@@ -1,4 +1,4 @@
-import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { StatementCoordinate } from "../StatementCoordinate";
 import { FragmentVM } from "./FragmentVM";
 
 export class FragmentRefVM extends FragmentVM {
@@ -10,11 +10,6 @@ export class FragmentRefVM extends FragmentVM {
     const headerHeight = this.metrics.fragmentHeaderHeight;
     const height =
       commentHeight + headerHeight + this.metrics.fragmentPaddingBottom;
-    const meta: StatementCoordinate["meta"] = {
-      commentHeight,
-      headerHeight,
-      paddingBottom: this.metrics.fragmentPaddingBottom,
-    };
-    return { top, height, kind: this.kind, meta };
+    return { top, height, kind: this.kind };
   }
 }

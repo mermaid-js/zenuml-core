@@ -12,19 +12,11 @@ export abstract class FragmentVM extends StatementVM {
     };
   }
 
-  protected finalizeFragment(
-    top: number,
-    cursor: number,
-    meta: Record<string, number>,
-  ) {
+  protected finalizeFragment(top: number, cursor: number) {
     cursor += this.metrics.fragmentPaddingBottom;
     return {
       top,
       height: cursor - top,
-      meta: {
-        paddingBottom: this.metrics.fragmentPaddingBottom,
-        ...meta,
-      },
     } as const;
   }
 }

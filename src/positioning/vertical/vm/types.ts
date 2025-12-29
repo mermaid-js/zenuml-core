@@ -1,5 +1,5 @@
-import type { LayoutMetrics } from "@/positioning/vertical/LayoutMetrics";
-import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { LayoutMetrics } from "../LayoutMetrics";
+import type { StatementCoordinate } from "../StatementCoordinate";
 
 export interface LayoutRuntime {
   metrics: LayoutMetrics;

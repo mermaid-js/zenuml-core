@@ -104,4 +104,30 @@ test.describe("Rendering", () => {
       fullPage: true,
     });
   });
+
+  test("vertical-9", async ({ page }) => {
+    await page.goto("/cy/vertical-9.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    await expect(page).toHaveScreenshot("vertical-9.png", {
+      threshold: 0.02,
+      fullPage: true,
+    });
+  });
+
+  test("vertical-10", async ({ page }) => {
+    await page.goto("/cy/vertical-10.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    await expect(page).toHaveScreenshot("vertical-10.png", {
+      threshold: 0.02,
+      fullPage: true,
+    });
+  });
 });

@@ -4,15 +4,15 @@ import { RootContext, Participants } from "@/parser";
 import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
-import { CodeRange } from "../parser/CodeRange";
+import type { CodeRange } from "../parser/CodeRange";
 
 type VerticalMode = "server" | "browser";
 
 const resolveVerticalMode = (): VerticalMode => {
-  console.info(
-    "import.meta.env.VITE_VERTICAL_MODE",
-    import.meta.env.VITE_VERTICAL_MODE,
-  );
+  // console.info(
+  //   "import.meta.env.VITE_VERTICAL_MODE",
+  //   import.meta.env.VITE_VERTICAL_MODE,
+  // );
   return import.meta.env.VITE_VERTICAL_MODE === "browser"
     ? "browser"
     : "server";
@@ -23,7 +23,7 @@ const resolveVerticalMode = (): VerticalMode => {
  * Static: Compatible with Mermaid which renders once and never update. It also disables sticky participants and hides the footer
  * Dynamic: Render once and update when code changes
  */
-export const enum RenderMode {
+export enum RenderMode {
   Static = "static",
   Dynamic = "dynamic",
 }
@@ -58,7 +58,7 @@ export const verticalCoordinatesAtom = atom((get) => {
   if (!rootContext) {
     return null;
   }
-  return new VerticalCoordinates(rootContext, get(themeAtom));
+  return new VerticalCoordinates(rootContext);
 });
 
 export const themeAtom = atom("theme-default");

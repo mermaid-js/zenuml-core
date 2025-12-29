@@ -1,4 +1,4 @@
-import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { StatementCoordinate } from "../StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 
 export class EmptyStatementVM extends StatementVM {

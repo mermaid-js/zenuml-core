@@ -1,30 +1,26 @@
-import {
-  getLayoutMetrics,
-  type ThemeName,
-} from "@/positioning/vertical/LayoutMetrics";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
-import { BlockVM } from "@/vm/BlockVM";
-import type { LayoutRuntime } from "@/vm/types";
 import { AllMessages } from "@/parser/MessageCollector";
+import type { LayoutRuntime } from "./vertical/vm/types";
+import { BlockVM } from "./vertical/vm/BlockVM";
+import { DEFAULT_LAYOUT_METRICS as metrics } from "./vertical/LayoutMetrics";
 
 export class VerticalCoordinates {
   private readonly statementMap = new Map<string, StatementCoordinate>();
   private readonly creationTops = new Map<string, number>();
 
-  constructor(rootContext: any, theme?: ThemeName) {
+  constructor(rootContext: any) {
     const rootBlock = rootContext?.block?.() ?? rootContext;
 
     const participants = OrderedParticipants(rootContext).map((p) => p.name);
-    console.info("participants", participants);
+    // console.info("participants", participants);
 
     const messages = AllMessages(rootContext);
     // console.info("messages", JSON.stringify(messages));
     const originParticipant =
       messages.length === 0 ? _STARTER_ : messages[0].from || _STARTER_;
 
-    const metrics = getLayoutMetrics(theme);
     const runtime: LayoutRuntime = {
       metrics,
       rootBlock,
@@ -36,11 +32,8 @@ export class VerticalCoordinates {
       },
       updateCreationTop: (participant: string, top: number) => {
         const paddingTop = top - 8; // .life-line-layer, .pt-2
-        console.info(`updateCreationTop::${participant}`, paddingTop);
-        // const prev = this.creationTops.get(participant);
-        // if (prev == null || paddingTop < prev) {
+        // console.info(`updateCreationTop::${participant}`, paddingTop);
         this.creationTops.set(participant, paddingTop);
-        // }
       },
     };
 
@@ -51,20 +44,4 @@ export class VerticalCoordinates {
   getCreationTop(participant: string): number | undefined {
     return this.creationTops.get(participant);
   }
-
-  // getCreationTopComponents(participant: string): CreationTopComponent[] {
-  //   return this.creationTopComponents.get(participant) || [];
-  // }
-
-  // getCreationTopRecords(): CreationTopRecord[] {
-  //   const records: CreationTopRecord[] = [];
-  //   for (const [participant, finalTop] of this.creationTopByParticipant) {
-  //     records.push({
-  //       participant,
-  //       finalTop,
-  //       components: this.creationTopComponents.get(participant) || [],
-  //     });
-  //   }
-  //   return records;
-  // }
 }

@@ -1,5 +1,5 @@
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { StatementCoordinate } from "../StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
@@ -22,17 +22,17 @@ export class SyncMessageStatementVM extends StatementVM {
     const target = this.message.Owner?.() || _STARTER_;
     const block = this.message.braceBlock?.()?.block?.();
 
-    const signature = this.message.SignatureText?.() || "";
+    // const signature = this.message.SignatureText?.() || "";
     const assignee = this.message.Assignment?.()?.getText?.();
-    console.info(
-      "syncMessageVM::start",
-      signature,
-      source,
-      target,
-      assignee,
-      top,
-      Boolean(block),
-    );
+    // console.info(
+    //   "syncMessageVM::start",
+    //   signature,
+    //   source,
+    //   target,
+    //   assignee,
+    //   top,
+    //   Boolean(block),
+    // );
 
     const isSelf = source === target;
     const messageHeight = isSelf ? 30 : 16;
@@ -50,12 +50,11 @@ export class SyncMessageStatementVM extends StatementVM {
     if (assignee && !isSelf) {
       // Interaction.tsx:99
       cursor += 16;
-      console.info("syncMessageVM::assignment", assignee);
+      // console.info("syncMessageVM::assignment", assignee);
     }
 
     const height = cursor - top;
-
-    console.info("syncMessageVM::end", height, commentHeight, messageHeight);
+    // console.info("syncMessageVM::end", height, commentHeight, messageHeight);
 
     return { top, height, kind: this.kind };
   }

@@ -1,4 +1,4 @@
-import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
+import type { StatementCoordinate } from "../StatementCoordinate";
 import { FragmentVM } from "./FragmentVM";
 import type { LayoutRuntime } from "./types";
 
@@ -19,21 +19,21 @@ export class FragmentAltVM extends FragmentVM {
 
     const commentHeight = this.measureComment(this.alt);
     let cursor = top + 1 + this.metrics.fragmentHeaderHeight + commentHeight;
-    console.info("FragmentAltVM::start", leftParticipant, commentHeight);
+    // console.info("FragmentAltVM::start", leftParticipant, commentHeight);
 
     const ifBlock = this.alt?.ifBlock?.();
     if (ifBlock) {
-      console.info("FragmentAltVM::ifBlock::start", cursor);
+      // console.info("FragmentAltVM::ifBlock::start", cursor);
       cursor += 20; // .text-skin-fragment > label
       cursor = this.layoutBlock(
         ifBlock.braceBlock()?.block(),
         leftParticipant,
         cursor,
       );
-      console.info("FragmentAltVM::ifBlock::end", cursor);
+      // console.info("FragmentAltVM::ifBlock::end", cursor);
     }
     this.alt?.elseIfBlock?.()?.forEach((block: any) => {
-      console.info("FragmentAltVM::elseIfBlock::start", cursor);
+      // console.info("FragmentAltVM::elseIfBlock::start", cursor);
       cursor += 20; // .text-skin-fragment > label
       cursor += 1; // .segment.border-t.border-solid
       cursor = this.layoutBlock(
@@ -41,19 +41,19 @@ export class FragmentAltVM extends FragmentVM {
         leftParticipant,
         cursor,
       );
-      console.info("FragmentAltVM::elseIfBlock::end", cursor);
+      // console.info("FragmentAltVM::elseIfBlock::end", cursor);
     });
     const elseBlock = this.alt?.elseBlock?.()?.braceBlock?.()?.block?.();
     if (elseBlock) {
-      console.info("FragmentAltVM::elseBlock::start", cursor);
+      // console.info("FragmentAltVM::elseBlock::start", cursor);
       cursor += 20; // .text-skin-fragment > label
       cursor += 1; // .segment.border-t.border-solid
       cursor = this.layoutBlock(elseBlock, leftParticipant, cursor);
-      console.info("FragmentAltVM::elseBlock::end", cursor);
+      // console.info("FragmentAltVM::elseBlock::end", cursor);
     }
 
     cursor += this.metrics.fragmentPaddingBottom + 1; // .zenuml .fragment =>padding-bottom: 10px
-    console.info("FragmentAltVM::end", cursor, cursor - top);
+    // console.info("FragmentAltVM::end", cursor, cursor - top);
 
     return {
       top,
