@@ -23,7 +23,7 @@ const resolveVerticalMode = (): VerticalMode => {
  * Static: Compatible with Mermaid which renders once and never update. It also disables sticky participants and hides the footer
  * Dynamic: Render once and update when code changes
  */
-export enum RenderMode {
+export const enum RenderMode {
   Static = "static",
   Dynamic = "dynamic",
 }

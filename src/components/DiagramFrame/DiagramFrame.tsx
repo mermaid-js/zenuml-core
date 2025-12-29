@@ -17,6 +17,7 @@ import {
   useRef,
 } from "react";
 import { cn } from "@/utils";
+import { Debug } from "./Debug";
 import { Privacy } from "./Privacy";
 import { DiagramTitle } from "./DiagramTitle";
 import { TipsDialog } from "./Tutorial/TipsDialog";
@@ -93,7 +94,8 @@ export const DiagramFrame = ({
   };
   const setStyle = (style: string) => {
     const styleElementId = "zenuml-style";
-    const styleElement = document.createElement("style");
+    let styleElement: HTMLElement;
+    styleElement = document.createElement("style");
     styleElement.id = styleElementId;
     document.head.append(styleElement);
     styleElement.textContent = style;
@@ -120,7 +122,8 @@ export const DiagramFrame = ({
     }
     const remoteCssUrlId = "zenuml-remote-css";
     // check if remote css element exists
-    const remoteCssElement = document.createElement("link");
+    let remoteCssElement: HTMLLinkElement;
+    remoteCssElement = document.createElement("link");
     remoteCssElement.id = remoteCssUrlId;
     remoteCssElement.rel = "stylesheet";
     document.head.append(remoteCssElement);
@@ -146,6 +149,7 @@ export const DiagramFrame = ({
       ref={containerRef}
       className={cn("p-1 bg-skin-canvas inline-block", theme)}
     >
+      <Debug />
       <div className="frame text-skin-base bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded">
         <div ref={contentRef}>
           <div className="header text-skin-title bg-skin-title border-skin-frame border-b p-1 flex justify-between rounded-t">

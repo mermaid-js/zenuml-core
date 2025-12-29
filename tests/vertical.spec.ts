@@ -130,4 +130,17 @@ test.describe("Rendering", () => {
       fullPage: true,
     });
   });
+
+  test("vertical-11", async ({ page }) => {
+    await page.goto("/cy/vertical-11.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    await expect(page).toHaveScreenshot("vertical-11.png", {
+      threshold: 0.02,
+      fullPage: true,
+    });
+  });
 });
