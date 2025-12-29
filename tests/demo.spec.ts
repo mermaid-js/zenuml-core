@@ -1,5 +1,4 @@
 import { test, expect } from "./fixtures";
-import { initVerticalDebug, writeVerticalDebug } from "./utils/verticalDebug";
 
 const demos = [
   {
@@ -25,23 +24,16 @@ const demos = [
 demos.forEach((demo) => {
   test.describe(demo.name, () => {
     test("renders without visual regression", async ({ page }) => {
-      const didEnableDebug = await initVerticalDebug(page);
       await page.goto(demo.url);
 
       await expect(page.locator(".privacy>span>svg")).toBeVisible({
         timeout: 5000,
       });
 
-      try {
-        await expect(page).toHaveScreenshot(demo.snapshot, {
-          threshold: 0.02,
-          fullPage: true,
-        });
-      } finally {
-        if (didEnableDebug) {
-          await writeVerticalDebug(page, demo.debugSlug);
-        }
-      }
+      await expect(page).toHaveScreenshot(demo.snapshot, {
+        threshold: 0.02,
+        fullPage: true,
+      });
     });
   });
 });

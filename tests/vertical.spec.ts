@@ -78,4 +78,30 @@ test.describe("Rendering", () => {
       fullPage: true,
     });
   });
+
+  test("vertical-7", async ({ page }) => {
+    await page.goto("/cy/vertical-7.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    await expect(page).toHaveScreenshot("vertical-7.png", {
+      threshold: 0.02,
+      fullPage: true,
+    });
+  });
+
+  test("vertical-8", async ({ page }) => {
+    await page.goto("/cy/vertical-8.html");
+
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    await expect(page).toHaveScreenshot("vertical-8.png", {
+      threshold: 0.02,
+      fullPage: true,
+    });
+  });
 });
