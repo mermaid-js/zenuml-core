@@ -41,8 +41,8 @@
 
   .occurrence {
     .block {
-      > .statement-container:last-child {
-       .interaction.return {
+      > .statement-container {
+        .interaction.return {
           margin-bottom: -16px;
           bottom: -1px;
         }

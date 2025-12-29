@@ -15,7 +15,7 @@ group "B C" {@EC2 B @ECS C}
 new B
 ReturnType ret = ParticipantName.methodA(a, b) {
   critical("This is a critical message") {
-    // Customised style for RESTFul API - \`POST /order\` <br>
+    // Customised style for RESTFul API - \`POST /order\`
     ReturnType ret2 = selfCall() {
       B.syncCallWithinSelfCall() {
         ParticipantName.rightToLeftCall()
@@ -49,7 +49,7 @@ ReturnType ret = ParticipantName.methodA(a, b) {
         return C
       }
     } finally {
-      C: async call from implied source  
+      C: async call from implied source
     }
     =====divider can be anywhere=====
   } else if ("another condition") {

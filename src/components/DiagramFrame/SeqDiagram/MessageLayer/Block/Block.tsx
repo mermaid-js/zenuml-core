@@ -1,6 +1,7 @@
 import { increaseNumber } from "@/utils/Numbering";
 import { Statement } from "./Statement/Statement";
 import { cn } from "@/utils";
+import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 
 export const Block = (props: {
   origin?: string;
@@ -28,8 +29,9 @@ export const Block = (props: {
     >
       {statements.map((stat, index) => (
         <div
-          className={cn("statement-container my-4")}
+          className={cn("statement-container my-4 flex flex-col")}
           data-origin={props.origin}
+          data-statement-key={createStatementKey(stat)}
           key={index}
         >
           <Statement
