@@ -126,25 +126,29 @@ export const Occurrence = (props: {
         ></Block>
       )}
       {assigneeData && (!assigneeData.isMessage || !props.isSelf) && (
-        <Message
-          className={cn(
-            "return transform -translate-y-full pointer-events-auto",
-            props.messageClassNames,
-          )}
-          context={assigneeData.context}
-          labelPosition={assigneeData.labelPosition}
-          content={assigneeData.content}
-          rtl={!props.rtl}
-          type="return"
-          number={statementNumber}
-          textStyle={props.textStyle}
-          style={
-            props.interactionWidth !== undefined
-              ? { width: `${props.interactionWidth}px`, transform: `translateX(calc(-100% - 7px))` }
-              : undefined
-          }
-          normalizeText={syncMessageNormalizer}
-        />
+        <div className={cn("statement-container my-4")}>
+          <div className={cn("interaction return relative right-to-left text-left text-sm text-skin-message mb-[-16px] bottom-[-1px]")}>
+            <Message
+              className={cn(
+                "return transform -translate-y-full pointer-events-auto",
+                props.messageClassNames,
+              )}
+              context={assigneeData.context}
+              labelPosition={assigneeData.labelPosition}
+              content={assigneeData.content}
+              rtl={!props.rtl}
+              type="return"
+              number={statementNumber}
+              textStyle={props.textStyle}
+              style={
+                props.interactionWidth !== undefined
+                  ? { width: `${props.interactionWidth}px`, transform: props.rtl ? `translateX(7px)` : `translateX(calc(-100% - 7px))` }
+                  : undefined
+              }
+              normalizeText={syncMessageNormalizer}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
