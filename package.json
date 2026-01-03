@@ -55,12 +55,6 @@
       "autoprefixer": {}
     }
   },
-  "pnpm": {
-    "overrides": {
-      "react": "^19.0.0",
-      "react-dom": "^19.0.0"
-    }
-  },
   "dependencies": {
     "@floating-ui/react": "^0.27.8",
     "@headlessui/react": "^2.2.1",
