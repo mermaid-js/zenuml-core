@@ -6,18 +6,6 @@ import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { CodeRange } from "../parser/CodeRange";
 
-type VerticalMode = "server" | "browser";
-
-const resolveVerticalMode = (): VerticalMode => {
-  // console.info(
-  //   "import.meta.env.VITE_VERTICAL_MODE",
-  //   import.meta.env.VITE_VERTICAL_MODE,
-  // );
-  return import.meta.env.VITE_VERTICAL_MODE === "browser"
-    ? "browser"
-    : "server";
-};
-
 /*
  * RenderMode
  * Static: Compatible with Mermaid which renders once and never update. It also disables sticky participants and hides the footer
@@ -48,12 +36,7 @@ export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), WidthProviderOnBrowser),
 );
 
-export const verticalModeAtom = atom<VerticalMode>(resolveVerticalMode());
-
 export const verticalCoordinatesAtom = atom((get) => {
-  if (get(verticalModeAtom) === "browser") {
-    return null;
-  }
   const rootContext = get(rootContextAtom);
   if (!rootContext) {
     return null;
@@ -124,11 +107,3 @@ export const onThemeChangeAtom = atomWithFunctionValue<
 export const onEventEmitAtom = atomWithFunctionValue<
   (name: string, data: any) => void
 >(() => {});
-
-export const lifelineReadyAtom = atom<string[]>([]);
-
-export const renderingReadyAtom = atom((get) => {
-  const lifeLineReady = get(lifelineReadyAtom);
-  const { participants } = get(participantsAtom);
-  return lifeLineReady.length === Array.from(participants).length;
-});

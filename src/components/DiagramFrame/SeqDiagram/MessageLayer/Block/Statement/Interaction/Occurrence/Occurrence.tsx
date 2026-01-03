@@ -1,5 +1,4 @@
 import { CollapseButton } from "./CollapseButton";
-import { EventBus } from "@/EventBus";
 import { useEffect, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
@@ -38,10 +37,6 @@ export const Occurrence = (props: {
   };
   const toggle = () => {
     setCollapsed(!collapsed);
-
-    //update participant top in this cases: has child and sibling creation statement
-    //e.g. : a.call() { b = new B(); b.call() { c = new C() c.call(){return}}}
-    EventBus.emit("participant_set_top");
   };
 
   useEffect(() => {

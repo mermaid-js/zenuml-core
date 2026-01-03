@@ -3,12 +3,10 @@ import {
   codeAtom,
   enableMultiThemeAtom,
   enableScopedThemingAtom,
-  lifelineReadyAtom,
   modeAtom,
   onContentChangeAtom,
   onEventEmitAtom,
   onThemeChangeAtom,
-  renderingReadyAtom,
   RenderMode,
   stickyOffsetAtom,
   themeAtom,
@@ -153,15 +151,11 @@ export default class ZenUml implements IZenUml {
     if (this._code === this.store.get(codeAtom)) {
       return true;
     } else {
-      await new Promise((resolve) => {
-        this.store.set(lifelineReadyAtom, []);
-        this.store.sub(renderingReadyAtom, () => {
-          if (this.store.get(renderingReadyAtom)) {
-            resolve(true);
-          }
-        });
-        this.store.set(codeAtom, this._code || "");
-      });
+      // Set the code and wait for React to flush via a microtask.
+      // Vertical positions are computed deterministically from the AST,
+      // so we no longer need to wait for lifeline DOM elements to mount.
+      this.store.set(codeAtom, this._code || "");
+      await new Promise((resolve) => setTimeout(resolve, 0));
     }
     setTimeout(() => {
       this._lastRenderingCostMilliseconds = calculateCostTime(
