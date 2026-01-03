@@ -1,14 +1,9 @@
-import {
-  coordinatesAtom,
-  lifelineReadyAtom,
-  verticalCoordinatesAtom,
-} from "@/store/Store";
-import { useAtomValue, useSetAtom } from "jotai";
+import { coordinatesAtom, verticalCoordinatesAtom } from "@/store/Store";
+import { useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export const LifeLine = (props: {
   entity: any;
@@ -20,7 +15,6 @@ export const LifeLine = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const coordinates = useAtomValue(coordinatesAtom);
   const verticalCoordinates = useAtomValue(verticalCoordinatesAtom);
-  const setLifelineReady = useSetAtom(lifelineReadyAtom);
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
   const left =
@@ -35,17 +29,7 @@ export const LifeLine = (props: {
           : PARTICIPANT_TOP_SPACE_FOR_GROUP;
       setTop(resolvedTop);
     }
-
-    if (props.entity.name !== _STARTER_) {
-      setTimeout(() => {
-        setLifelineReady((prev) =>
-          prev.includes(props.entity.name)
-            ? prev
-            : [...prev, props.entity.name],
-        );
-      }, 0);
-    }
-  }, [props.entity.name, verticalCoordinates, setLifelineReady]);
+  }, [props.entity.name, verticalCoordinates]);
 
   return (
     <div
