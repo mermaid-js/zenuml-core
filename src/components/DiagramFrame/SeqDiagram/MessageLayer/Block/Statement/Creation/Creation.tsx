@@ -12,7 +12,6 @@ import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
-import { EventBus } from "@/EventBus";
 
 export const Creation = (props: {
   context: any;
@@ -67,13 +66,7 @@ export const Creation = (props: {
 
     // Get the actual width from the DOM element
     setParticipantWidth(participantElement.getBoundingClientRect().width);
-    console.debug(
-      `Found participant element for ${target}, width: ${participantWidth}px`,
-    );
-
-    EventBus.emit("participant_set_top");
-    console.debug(`Init or update message container for ${target}`);
-  }, [target, participantWidth]);
+  }, [target]);
 
   return (
     <div

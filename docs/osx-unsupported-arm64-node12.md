@@ -1,4 +1,4 @@
-Error when running 'yarn build'
+Error when running 'bun run build'
 
 ```shell
  ERROR  Failed to compile with 1 error                                                                                                                                                                                       10:15:37 AM
@@ -10,4 +10,4 @@ Missing binding /Users/pengxiao/workspaces/zenuml/vue-sequence/node_modules/node
 Node Sass could not find a binding for your current environment: OS X 64-bit with Node.js 14.x
 ```
 
-Remove 'node_modules' and re-run 'yarn build' under node 14.
+Remove 'node_modules' and re-run 'bun run build' under node 14.

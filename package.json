@@ -13,9 +13,11 @@
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
     "build": "bun run --bun vite build -c vite.config.lib.ts",
     "test": "bun test src test/unit",
-    "pw": "playwright test",
+    "pw": "playwright test --reporter=list",
     "pw:ci": "playwright test",
-    "pw:update": "playwright test --update-snapshots",
+    "measure:layout": "COLLECT_LAYOUT_METRICS=1 playwright test tests/layout-metrics.spec.ts --reporter=line --project=chromium",
+    "snapshots:dual": "node scripts/snapshot-dual.js",
+    "pw:update": "playwright test --update-snapshots --reporter=list",
     "pw:update-ci": "playwright test --update-snapshots --reporter=github",
     "pw:ui": "playwright test --ui",
     "pw:smoke": "playwright test smoke",
@@ -51,12 +53,6 @@
     "plugins": {
       "tailwindcss": {},
       "autoprefixer": {}
-    }
-  },
-  "pnpm": {
-    "overrides": {
-      "react": "^19.0.0",
-      "react-dom": "^19.0.0"
     }
   },
   "dependencies": {
@@ -112,6 +108,8 @@
     "happy-dom": "^18.0.1",
     "jsdom": "^26.1.0",
     "less": "^4.3.0",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
     "postcss": "^8.5.3",
     "prettier": "3.5.3",
     "rollup-plugin-visualizer": "^6.0.5",

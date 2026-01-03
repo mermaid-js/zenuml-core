@@ -3,6 +3,7 @@
 /playwright-report/
 /playwright/.cache/
 coverage
+tmp/
 
 .wrangler
 
@@ -34,8 +35,6 @@ src/generated-parser/sequenceLexer.interp
 
 # Log files
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Editor directories and files
 .idea
@@ -48,6 +47,5 @@ yarn-error.log*
 
 /playwright-report
 /test-results
-.pnpm-store
 *storybook.log
 storybook-static

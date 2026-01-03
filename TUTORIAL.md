@@ -18,7 +18,7 @@ npm install @zenuml/core
 or
 
 ```bash
-yarn add @zenuml/core
+bun add @zenuml/core
 ```
 
 ### Usage
