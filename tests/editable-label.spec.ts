@@ -1,8 +1,8 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Editable Label", () => {
   test("Special characters & extra spaces", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/smoke-editable-label.html");
+    await page.goto("/cy/smoke-editable-label.html");
     // This line is to make sure the privacy icon is loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -37,7 +37,7 @@ test.describe("Editable Label", () => {
   });
 
   test("Self message", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/smoke-editable-label.html");
+    await page.goto("/cy/smoke-editable-label.html");
     // This line is to make sure the privacy icon is loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -76,7 +76,7 @@ test.describe("Editable Label", () => {
   });
 
   test("Async message", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/smoke-editable-label.html");
+    await page.goto("/cy/smoke-editable-label.html");
     // This line is to make sure the privacy icon is loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -111,7 +111,7 @@ test.describe("Editable Label", () => {
   });
 
   test("Creation message", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/smoke-editable-label.html");
+    await page.goto("/cy/smoke-editable-label.html");
     // This line is to make sure the privacy icon is loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,

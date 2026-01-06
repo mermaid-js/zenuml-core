@@ -16,6 +16,7 @@ import {
 import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
 import { VERSION } from "./version.ts";
 import * as htmlToImage from "html-to-image";
+import Parser from "./parser/index.js";
 
 import "./assets/tailwind.css";
 import "./assets/tailwind-preflight.less";
@@ -44,9 +45,22 @@ interface Config {
   onEventEmit?: (name: string, data: unknown) => void;
   mode?: RenderMode;
 }
+
+export interface ParseResult {
+  pass: boolean;
+  errorDetails: ErrorDetail[];
+}
+export interface  ErrorDetail {
+  line: number;
+  column: number;
+  msg: string;
+}
+
+
 interface IZenUml {
   get code(): string | undefined;
   get theme(): string | undefined;
+  parse(text: string): Promise<ParseResult>;
   // Resolve after rendering is finished.
   render(
     code: string | undefined,
@@ -184,6 +198,40 @@ export default class ZenUml implements IZenUml {
 
   get theme(): string | undefined {
     return this._theme;
+  }
+
+  parse(codeOrText: string): Promise<ParseResult> {
+    return new Promise((resolve) => {
+      try {
+        // Clear any previous errors
+        Parser.ErrorDetails.length = 0;
+        const result = Parser.RootContext(codeOrText);
+        console.debug("errors", Parser.ErrorDetails);
+        const errors = [...Parser.ErrorDetails];
+        // Clear errors after reading
+        Parser.ErrorDetails.length = 0;
+        if (errors.length > 0 || result === null) {
+          // Return ParseResult indicating failure with structured error info
+          const parseResult: ParseResult = {
+            pass: false,
+            errorDetails: errors,
+          };
+          resolve(parseResult);
+          return;
+        }
+        const parseResult: ParseResult = {
+          pass: true,
+          errorDetails: [],
+        };
+        resolve(parseResult);
+      } catch (error) {
+        const parseResult: ParseResult = {
+          pass: false,
+          errorDetails: [],
+        };
+        resolve(parseResult);
+      }
+    });
   }
 
   async getPng(): Promise<string> {

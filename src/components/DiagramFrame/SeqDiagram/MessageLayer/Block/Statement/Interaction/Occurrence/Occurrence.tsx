@@ -127,7 +127,7 @@ export const Occurrence = (props: {
       )}
       {assigneeData && (!assigneeData.isMessage || !props.isSelf) && (
         <div className={cn("statement-container my-4")}>
-          <div className={cn("interaction return relative right-to-left text-left text-sm text-skin-message mb-[-16px] bottom-[-1px]")}>
+          <div className={cn("interaction return relative right-to-left text-left text-sm text-skin-message")}>
             <Message
               className={cn(
                 "return transform -translate-y-full pointer-events-auto",

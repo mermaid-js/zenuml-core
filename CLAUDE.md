@@ -90,11 +90,12 @@ Output formats:
 Uses Bun as the package manager and JavaScript runtime. Bun is a fast all-in-one JavaScript runtime that includes a package manager, test runner, and bundler.
 
 ### Test Configuration
-- **Unit tests with Bun**: `bun run test:bun` - Runs unit tests in `src/` and `test/unit/` folders (excludes `/tests` E2E folder)
-- **Vitest**: `bun run test` - Uses Vitest for compatibility with existing test suite
+- **Unit tests with Bun**: `bun test` (alias: `bun run test`) - Runs unit tests in `src/` and `test/unit/` folders (excludes `/tests` E2E folder)
+- **Vitest**: Tests also support Vitest for IDE integration compatibility
 - **E2E tests**: `bun pw` - Runs Playwright tests in `/tests` folder
-- Tests use `vi` mocking utilities which are mapped to Jest-compatible APIs in `test-setup.ts`
-- Coverage is disabled by default due to resource issues; enable with `bun test --coverage`
+- **Test setup**: `test/setup.ts` configures test environment (mocks IntersectionObserver, etc.)
+- Tests use `vi` mocking utilities from Vitest
+- Test files use `.spec.ts` extension and are co-located with source files
 
 ## Development Notes
 
