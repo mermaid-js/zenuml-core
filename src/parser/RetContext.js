@@ -6,7 +6,20 @@ const ProgContext = seqParser.ProgContext;
 const MessageContext = seqParser.MessageContext;
 const CreationContext = seqParser.CreationContext;
 
+RetContext.prototype.Signature = function () {
+  return (
+    this.asyncMessage()?.content()?.getFormattedText() ||
+    this.expr()?.getFormattedText()
+  );
+};
+
 RetContext.prototype.ReturnTo = function () {
+  // Check asyncMessage 'to' first
+  const asyncTo = this.asyncMessage()?.to()?.getFormattedText();
+  if (asyncTo) {
+    return asyncTo;
+  }
+
   const stat = this.parentCtx;
   const block = stat.parentCtx;
   const blockParent = block.parentCtx;

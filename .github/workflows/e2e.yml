@@ -23,7 +23,7 @@ jobs:
           path: |
             ~/.bun/install/cache
             node_modules
-          key: bun-deps-${{ hashFiles('bun.lockb') }}
+          key: bun-deps-${{ hashFiles('bun.lock') }}
           restore-keys: |
             bun-deps-
 
@@ -37,7 +37,7 @@ jobs:
         with:
           path: |
             ~/.cache/ms-playwright
-          key: playwright-browsers-${{ hashFiles('bun.lockb') }}
+          key: playwright-browsers-${{ hashFiles('bun.lock') }}
           restore-keys: |
             playwright-browsers-
 

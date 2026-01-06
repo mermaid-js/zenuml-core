@@ -40,7 +40,7 @@ body .zenuml.theme-dark {
   background: var(--background);
 }
 
-.zenuml.theme-dark .sequence-diagram .lifeline .participant label {
+.zenuml.theme-dark .sequence-diagram .lifeline .participant .name {
   color: var(--cyan);
 }
 

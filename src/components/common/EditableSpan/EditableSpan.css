@@ -1,0 +1,15 @@
+.editable-span-base {
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.editable-span-editing {
+  outline: 2px dashed #93c5fd;
+  background-color: #eff6ff;
+}
+
+.editable-span-hover {
+  outline: 2px dashed #d1d5db;
+  background-color: #f3f4f6;
+  cursor: text;
+}

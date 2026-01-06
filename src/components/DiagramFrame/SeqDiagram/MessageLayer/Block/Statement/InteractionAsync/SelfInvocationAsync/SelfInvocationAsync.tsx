@@ -1,7 +1,10 @@
-import { CSSProperties } from "react";
+import { CSSProperties, useRef } from "react";
 import { MessageLabel } from "../../../../MessageLabel";
 import { Numbering } from "../../../../Numbering";
 import { ArrowHead } from "../../Message/ArrowHead";
+import { asyncMessageNormalizer } from "@/utils/messageNormalizers";
+import { useAtomValue } from "jotai/index";
+import { onMessageClickAtom } from "@/store/Store.ts";
 
 export const SelfInvocationAsync = (props: {
   context?: any;
@@ -14,19 +17,29 @@ export const SelfInvocationAsync = (props: {
     if (!content) return [-1, -1];
     return [content.start.start, content.stop.stop];
   };
+  const messageRef = useRef(null);
+  const onMessageClick = useAtomValue(onMessageClickAtom);
+  const onClick = () => {
+    onMessageClick(props.context, messageRef.current!);
+  };
 
   return (
-    <div className="message self flex items-start flex-col !border-none">
+    <div
+      ref={messageRef}
+      className="message self flex items-start flex-col !border-none"
+      onClick={onClick}
+    >
       <label className="name group px-px min-h-[1em]">
         <Numbering number={props.number} />
-        <MessageLabel
-          style={props.textStyle}
-          className={props.classNames}
-          labelText={content?.getFormattedText()}
-          labelPosition={labelPosition()}
-          isAsync={true}
-          isSelf={true}
-        />
+        <div className="label" style={props.textStyle}>
+
+          <MessageLabel
+            className={props.classNames}
+            labelText={content?.getFormattedText()}
+            labelPosition={labelPosition()}
+            normalizeText={asyncMessageNormalizer}
+          />
+        </div>
       </label>
       <svg className="arrow text-skin-message-arrow" width="30" height="24">
         <path

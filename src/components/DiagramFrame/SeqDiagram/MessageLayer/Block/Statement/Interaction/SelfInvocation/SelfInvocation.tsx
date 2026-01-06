@@ -4,6 +4,7 @@ import { CSSProperties, useMemo, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
 import { MessageLabel } from "../../../../MessageLabel";
 import { ArrowHead } from "../../Message/ArrowHead";
+import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 
 export const SelfInvocation = (props: {
   context?: any;
@@ -33,7 +34,7 @@ export const SelfInvocation = (props: {
     >
       <label className="name text-left group px-px relative min-h-[1em] w-full">
         <Numbering number={props.number} />
-        <div className="label">
+        <div className="label" style={props.textStyle}>
           {assignee && (
             <span>
               <span className="assignee px-1">{assignee}</span>
@@ -41,11 +42,10 @@ export const SelfInvocation = (props: {
             </span>
           )}
           <MessageLabel
-            style={props.textStyle}
             className={props.classNames}
             labelText={props.context?.SignatureText()}
             labelPosition={labelPosition}
-            isSelf={true}
+            normalizeText={syncMessageNormalizer}
           />
         </div>
       </label>

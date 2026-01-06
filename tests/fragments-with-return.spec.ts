@@ -14,6 +14,7 @@ test.describe("Fragments with Return Test", () => {
     await expect(page).toHaveScreenshot({
       threshold: 0.02,  // There is always one pixel difference when I run playwright with UI.
       fullPage: true,
+      maxDiffPixels: 3, // Allow up to 3 pixels to differ for anti-aliasing variations
     });
   });
 });

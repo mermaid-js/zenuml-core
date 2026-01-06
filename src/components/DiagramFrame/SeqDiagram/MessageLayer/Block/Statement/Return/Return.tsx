@@ -1,13 +1,15 @@
 import CommentClass from "@/components/Comment/Comment";
 import { Comment } from "../Comment/Comment";
 import { cn } from "@/utils";
-import { Message } from "../Message";
+import { Message } from "../Message/Message";
 import { useAtomValue } from "jotai";
 import { onElementClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { CodeRange } from "@/parser/CodeRange";
 import { SyntheticEvent } from "react";
 import { useArrow } from "../useArrow";
+import { syncMessageNormalizer } from "@/utils/messageNormalizers";
+import sequenceParser from "@/generated-parser/sequenceParser";
 
 export const Return = (props: {
   context: any;
@@ -23,19 +25,19 @@ export const Return = (props: {
 
   const asyncMessage = ret?.asyncMessage();
 
-  const signature =
-    asyncMessage?.content()?.getFormattedText() ||
-    props.context?.ret()?.expr()?.getFormattedText();
-  const source = asyncMessage?.From() || ret?.From() || _STARTER_;
+  const signature = ret?.Signature();
+  const source = ret?.From() || _STARTER_;
 
-  const target =
-    // TODO: move this logic to the parser (ReturnTo)
-    asyncMessage?.to()?.getFormattedText() ||
-    props.context?.ret()?.ReturnTo() ||
-    _STARTER_;
+  const target = ret?.ReturnTo() || _STARTER_;
 
-  const messageContext =
-    asyncMessage?.content() || props.context?.ret()?.expr();
+  const messageContext = asyncMessage?.content() || ret?.expr();
+  let start = -1, stop = -1;
+  if (messageContext instanceof sequenceParser.AtomExprContext) {
+    const ret = messageContext.atom();
+    [start, stop] = [ret?.start.start, ret?.stop.stop];
+  } else if (messageContext instanceof sequenceParser.ContentContext) {
+    [start, stop] = [messageContext.start.start, messageContext.stop.stop];
+  }
 
   const { translateX, interactionWidth, rightToLeft, isSelf } = useArrow({
     context: props.context,
@@ -95,10 +97,12 @@ export const Return = (props: {
           className={cn(props.commentObj?.messageClassNames)}
           textStyle={props.commentObj?.messageStyle}
           context={messageContext}
+          labelPosition={[start, stop]}
           content={signature}
           rtl={rightToLeft}
           type="return"
           number={props.number}
+          normalizeText={syncMessageNormalizer}
         />
       )}
     </div>

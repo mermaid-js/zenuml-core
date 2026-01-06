@@ -1,13 +1,14 @@
 import CommentClass from "@/components/Comment/Comment";
 import { cn } from "@/utils";
 import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
-import { Message } from "../Message";
+import { Message } from "../Message/Message";
 import { Occurrence } from "./Occurrence/Occurrence";
 import { useAtomValue } from "jotai";
 import { cursorAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Comment } from "../Comment/Comment";
 import { useArrow } from "../useArrow";
+import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 
 export const Interaction = (props: {
   context: any;
@@ -20,14 +21,13 @@ export const Interaction = (props: {
   const messageTextStyle = props.commentObj?.messageStyle;
   const messageClassNames = props.commentObj?.messageClassNames;
   const message = props.context?.message();
-  const statements = message?.Statements();
-  const assignee = message?.Assignment()?.getText() || "";
   const signature = message?.SignatureText();
   const isCurrent = message?.isCurrent(cursor);
   const source = message?.From() || _STARTER_;
   const target = props.context?.message()?.Owner() || _STARTER_;
   const isSelf = source === target;
-
+  const signatureCtx = message?.messageBody().func()?.signature()[0];
+  const [start, stop] = [signatureCtx?.start.start, signatureCtx?.stop.stop];
   const {
     translateX,
     interactionWidth,
@@ -78,13 +78,15 @@ export const Interaction = (props: {
         />
       ) : (
         <Message
-          className={cn("text-center", messageClassNames)}
+          className={cn(messageClassNames)}
+          labelPosition={[start, stop]}
           textStyle={messageTextStyle}
           context={message}
           content={signature}
           rtl={rightToLeft}
           number={props.number}
           type="sync"
+          normalizeText={syncMessageNormalizer}
         />
       )}
       <Occurrence
@@ -92,21 +94,11 @@ export const Interaction = (props: {
         participant={target}
         rtl={rightToLeft}
         number={props.number}
+        textStyle={messageTextStyle}
+        messageClassNames={messageClassNames}
+        isSelf={isSelf}
+        interactionWidth={isSelf ? undefined : interactionWidth}
       />
-      {assignee && !isSelf && (
-        <Message
-          className={cn(
-            "return transform -translate-y-full",
-            messageClassNames,
-          )}
-          context={message}
-          content={assignee}
-          rtl={!rightToLeft}
-          type="return"
-          number={`${props.number}.${statements.length + 1}`}
-          textStyle={messageTextStyle}
-        />
-      )}
     </div>
   );
 };

@@ -1,11 +1,14 @@
 import { CollapseButton } from "./CollapseButton";
 import { EventBus } from "@/EventBus";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
 import { centerOf } from "../../utils";
 import { useAtomValue } from "jotai";
 import { coordinatesAtom } from "@/store/Store";
+import { Message } from "../../Message/Message";
+import { syncMessageNormalizer } from "@/utils/messageNormalizers";
+import { CSSProperties } from "react";
 
 export const Occurrence = (props: {
   context: any;
@@ -13,6 +16,10 @@ export const Occurrence = (props: {
   rtl?: boolean;
   number?: string;
   className?: string;
+  textStyle?: CSSProperties;
+  messageClassNames?: string[];
+  isSelf?: boolean;
+  interactionWidth?: number;
 }) => {
   const coordinates = useAtomValue(coordinatesAtom);
   const [collapsed, setCollapsed] = useState(false);
@@ -48,6 +55,43 @@ export const Occurrence = (props: {
     setCollapsed(false);
   }, [props.context]);
 
+  const assigneeData = useMemo(() => {
+    // Detect context type by checking available methods
+    const isCreation = typeof props.context?.creationBody === 'function';
+    const isMessage = typeof props.context?.messageBody === 'function' || typeof props.context?.Assignment === 'function';
+    
+    if (isCreation) {
+      const assignment = props.context?.creationBody()?.assignment();
+      if (!assignment) return null;
+      const assigneeCtx = assignment.assignee();
+      const typeCtx = assignment.type();
+      const assignee = assigneeCtx?.getFormattedText() || "";
+      const type = typeCtx?.getFormattedText() || "";
+      const content = assignee + (type ? ":" + type : "");
+      if (!content) return null;
+      const labelPosition: [number, number] = assigneeCtx 
+        ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
+        : [-1, -1];
+      return { content, labelPosition, context: props.context, isMessage: false };
+    }
+    
+    if (isMessage) {
+      const assignment = props.context?.Assignment();
+      if (!assignment) return null;
+      const assigneeCtx = props.context?.messageBody()?.assignment()?.assignee();
+      const content = assignment.getText() || "";
+      if (!content) return null;
+      const labelPosition: [number, number] = assigneeCtx
+        ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
+        : [-1, -1];
+      return { content, labelPosition, context: props.context, isMessage: true };
+    }
+    
+    return null;
+  }, [props.context]);
+
+  const statementNumber = props.number ? `${props.number}.${props.context?.Statements()?.length + 1}` : undefined;
+
   return (
     <div
       className={cn(
@@ -80,6 +124,31 @@ export const Occurrence = (props: {
           number={props.number}
           collapsed={collapsed}
         ></Block>
+      )}
+      {assigneeData && (!assigneeData.isMessage || !props.isSelf) && (
+        <div className={cn("statement-container my-4")}>
+          <div className={cn("interaction return relative right-to-left text-left text-sm text-skin-message")}>
+            <Message
+              className={cn(
+                "return transform -translate-y-full pointer-events-auto",
+                props.messageClassNames,
+              )}
+              context={assigneeData.context}
+              labelPosition={assigneeData.labelPosition}
+              content={assigneeData.content}
+              rtl={!props.rtl}
+              type="return"
+              number={statementNumber}
+              textStyle={props.textStyle}
+              style={
+                props.interactionWidth !== undefined
+                  ? { width: `${props.interactionWidth}px`, transform: props.rtl ? `translateX(7px)` : `translateX(calc(-100% - 7px))` }
+                  : undefined
+              }
+              normalizeText={syncMessageNormalizer}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

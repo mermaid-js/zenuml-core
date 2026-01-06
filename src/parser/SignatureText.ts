@@ -1,11 +1,5 @@
 import sequenceParser from "../generated-parser/sequenceParser";
-import type {
-  MessageContext,
-  AsyncMessageContext,
-  CreationContext,
-  RetContext,
-  Parameter,
-} from "./Parser.types";
+import type { AsyncMessageContext, CreationContext, MessageContext, Parameter, RetContext } from "./Parser.types";
 
 // Helper function to format a single parameter
 function formatParameter(param: Parameter): string {
@@ -78,14 +72,19 @@ AsyncMessageContext.prototype.SignatureText = function (
   return this.content()?.getFormattedText() ?? "";
 };
 
-CreationContext.prototype.SignatureText = function (
+CreationContext.prototype.ParametersText = function (
   this: CreationContext,
 ): string {
   const params = this.creationBody().parameters();
-  const text =
-    params?.parameter()?.length > 0 
-      ? formatParameters(params.parameter())
-      : "create";
+  return params?.parameter()?.length > 0
+    ? formatParameters(params.parameter())
+    : "";
+};
+
+CreationContext.prototype.SignatureText = function (
+  this: CreationContext,
+): string {
+  const text = this.ParametersText() || "create";
   return `«${text}»`;
 };
 

@@ -69,12 +69,13 @@
 import { cn } from "@/utils";
 import { Comment } from "../Comment/Comment";
 import { SelfInvocationAsync } from "./SelfInvocationAsync/SelfInvocationAsync";
-import { Message } from "../Message";
+import { Message } from "../Message/Message";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { CodeRange } from "@/parser/CodeRange";
 import { useArrow } from "../useArrow";
+import { asyncMessageNormalizer } from "@/utils/messageNormalizers";
 
 function isNullOrUndefined(value: any) {
   return value === null || value === undefined;
@@ -96,6 +97,9 @@ export const InteractionAsync = (props: {
   const source = providedSource || props.origin;
   const target = asyncMessage?.to()?.getFormattedText();
   const isSelf = source === target;
+
+  const content = asyncMessage?.content();
+  const [start, stop] = [content?.start.start, content?.stop.stop];
 
   const { translateX, interactionWidth, rightToLeft } = useArrow({
     context: props.context,
@@ -153,10 +157,12 @@ export const InteractionAsync = (props: {
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
           context={asyncMessage}
+          labelPosition={[start, stop]}
           content={signature}
           rtl={rightToLeft}
           type="async"
           number={props.number}
+          normalizeText={asyncMessageNormalizer}
         />
       )}
     </div>
