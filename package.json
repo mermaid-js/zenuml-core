@@ -63,7 +63,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "color-string": "^2.1.4",
-    "dompurify": "^3.2.5",
+    "dompurify": "^3.3.1",
     "highlight.js": "^10.7.3",
     "html-to-image": "^1.11.13",
     "immer": "^10.1.1",
