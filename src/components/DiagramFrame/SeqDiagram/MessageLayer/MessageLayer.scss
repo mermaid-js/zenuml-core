@@ -34,5 +34,19 @@
   .fragment {
     border-width: 1px;
     padding-bottom: 10px;
+    .segment {
+      display: flow-root;
+    }
+  }
+
+  .occurrence {
+    .block {
+      > .statement-container {
+        .interaction.return {
+          margin-bottom: -16px;
+          bottom: -1px;
+        }
+      }
+    }
   }
 }

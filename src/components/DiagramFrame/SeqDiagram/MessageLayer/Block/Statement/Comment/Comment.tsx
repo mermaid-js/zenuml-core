@@ -1,13 +1,19 @@
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 
-import highlightjs from "highlight.js";
+// Import ONLY the core (no languages) - reduces from 2.6 MB to ~30 KB!
+import highlightjs from "highlight.js/lib/core";
 
-// Languages import
+// Languages import - only ~5-10 KB each
 import plaintext from "highlight.js/lib/languages/plaintext";
 import javascript from "highlight.js/lib/languages/javascript";
 import bash from "highlight.js/lib/languages/bash";
 import yaml from "highlight.js/lib/languages/yaml";
+// Add more languages as needed:
+// import python from "highlight.js/lib/languages/python";
+// import java from "highlight.js/lib/languages/java";
+// import json from "highlight.js/lib/languages/json";
+
 import CommentClass from "@/components/Comment/Comment";
 import { cn } from "@/utils";
 
@@ -16,6 +22,9 @@ highlightjs.registerLanguage("plaintext", plaintext);
 highlightjs.registerLanguage("javascript", javascript);
 highlightjs.registerLanguage("bash", bash);
 highlightjs.registerLanguage("yaml", yaml);
+// highlightjs.registerLanguage("python", python);
+// highlightjs.registerLanguage("java", java);
+// highlightjs.registerLanguage("json", json);
 
 // Override function
 const renderer = {
@@ -58,7 +67,7 @@ export const Comment = (props: {
 }) => {
   const markedComment = DOMPurify.sanitize(
     (props.commentObj?.text && marked.parse(props.commentObj?.text)) ||
-      (props.comment && marked.parse(props.comment)),
+    (props.comment && marked.parse(props.comment)),
   );
 
   return (

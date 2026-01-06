@@ -1,1 +1,1 @@
-watch 'yarn antlr' src/g4
+watch 'bun run antlr' src/g4

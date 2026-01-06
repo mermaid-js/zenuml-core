@@ -1,19 +1,20 @@
 import {
   coordinatesAtom,
-  diagramElementAtom,
   lifelineReadyAtom,
+  verticalCoordinatesAtom,
+  verticalModeAtom,
+  diagramElementAtom,
   scaleAtom,
 } from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
-import parentLogger from "@/logger/logger";
-import { EventBus } from "@/EventBus";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { EventBus } from "@/EventBus";
 
-const logger = parentLogger.child({ name: "LifeLine" });
+// const logger = parentLogger.child({ name: "LifeLine" });
 
 export const LifeLine = (props: {
   entity: any;
@@ -23,41 +24,85 @@ export const LifeLine = (props: {
   className?: string;
 }) => {
   const elRef = useRef<HTMLDivElement>(null);
-  const scale = useAtomValue(scaleAtom);
-  const diagramElement = useAtomValue(diagramElementAtom);
   const coordinates = useAtomValue(coordinatesAtom);
+  const verticalCoordinates = useAtomValue(verticalCoordinatesAtom);
+  const verticalMode = useAtomValue(verticalModeAtom);
+  const diagramElement = useAtomValue(diagramElementAtom);
+  const scale = useAtomValue(scaleAtom);
   const setLifelineReady = useSetAtom(lifelineReadyAtom);
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
-
   const left =
     centerOf(coordinates, props.entity.name) - (props.groupLeft || 0);
 
-  const updateTop = useCallback(() => {
-    // escape entity name to avoid 'not a valid selector' error.
+  const updateTopFromBrowser = useCallback(() => {
+    // escape entity name to avoid invalid selector errors
     const escapedName = props.entity.name.replace(
-      // eslint-disable-next-line no-useless-escape
-      /([ #;&,.+*~\':"!^$[\]()=>|\/@])/g,
+      /([ #;&,.+*~':"!^$\[\]()=>|\/@])/g,
       "\\$1",
     );
     const firstMessage = diagramElement?.querySelector(
       `[data-to="${escapedName}"]`,
-    ) as any;
+    ) as HTMLElement | null;
     const isVisible = firstMessage?.offsetParent != null;
     if (
       firstMessage &&
-      firstMessage.attributes["data-type"]?.value === "creation" &&
+      firstMessage.getAttribute("data-type") === "creation" &&
       isVisible
     ) {
-      logger.debug(`First message to ${props.entity.name} is creation`);
       const rootY = elRef.current?.getBoundingClientRect().y || 0;
       const messageY = firstMessage.getBoundingClientRect().y;
-      setTop((messageY - rootY) / scale);
+      setTop((messageY - rootY) / (scale || 1));
     } else {
-      // A B.m {new A} => A B.m {new A1}
-      logger.debug(`First message to ${props.entity.name} is not creation`);
       setTop(PARTICIPANT_TOP_SPACE_FOR_GROUP);
     }
+  }, [diagramElement, props.entity.name, scale]);
+
+  useEffect(() => {
+    const resolveFromServer = () => {
+      if (!verticalCoordinates) return false;
+      const creationTop = verticalCoordinates.getCreationTop(props.entity.name);
+      const resolvedTop =
+        creationTop != null
+          ? Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, creationTop)
+          : PARTICIPANT_TOP_SPACE_FOR_GROUP;
+      // logger.debug(
+      //   `LifeLine top resolved for ${props.entity.name}: ${resolvedTop}px`,
+      // );
+      // if (
+      //   typeof window !== "undefined" &&
+      //   (window as any).__ZEN_CAPTURE_VERTICAL
+      // ) {
+      //   (window as any).__zenumlVerticalEntries = verticalCoordinates.entries();
+      //   const registry =
+      //     (window as any).__zenumlLifelineDebug ||
+      //     ((window as any).__zenumlLifelineDebug = {});
+      //   registry[props.entity.name] = {
+      //     creationTop,
+      //     resolvedTop,
+      //     8,
+      //     components: verticalCoordinates.getCreationTopComponents(
+      //       props.entity.name,
+      //     ),
+      //   };
+      //   // Also export the full creation top records for all participants
+      //   (window as any).__zenumlCreationTopRecords =
+      //     verticalCoordinates.getCreationTopRecords();
+      // }
+      setTop(resolvedTop);
+      return true;
+    };
+
+    // console.info("LifeLine:verticalMode", verticalMode);
+    if (verticalMode === "server") {
+      resolveFromServer();
+    } else {
+      const rerun = () => setTimeout(updateTopFromBrowser, 0);
+      setTimeout(updateTopFromBrowser, 0);
+      EventBus.on("participant_set_top", rerun);
+      return () => EventBus.off("participant_set_top", rerun);
+    }
+
     if (props.entity.name !== _STARTER_) {
       setTimeout(() => {
         setLifelineReady((prev) =>
@@ -67,17 +112,13 @@ export const LifeLine = (props: {
         );
       }, 0);
     }
-  }, [diagramElement, props.entity.name, scale]);
-
-  useEffect(() => {
-    logger.debug(`LifeLine mounted/update for ${props.entity.name}`);
-    setTimeout(() => {
-      updateTop();
-      logger.debug(`nextTick after updated for ${props.entity.name}`);
-    }, 0);
-
-    EventBus.on("participant_set_top", () => setTimeout(() => updateTop(), 0));
-  }, [props.entity, updateTop]);
+  }, [
+    props.entity.name,
+    verticalCoordinates,
+    verticalMode,
+    setLifelineReady,
+    updateTopFromBrowser,
+  ]);
 
   return (
     <div
