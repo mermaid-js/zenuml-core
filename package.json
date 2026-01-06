@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.16",
-    "@headlessui/react": "^2.2.1",
+    "@headlessui/react": "^2.2.9",
     "@headlessui/tailwindcss": "^0.2.2",
     "antlr4": "~4.11.0",
     "class-variance-authority": "^0.7.1",
