@@ -453,6 +453,8 @@ export default class sequenceLexer extends antlr4.Lexer {
         super(input)
         this._interp = new antlr4.atn.LexerATNSimulator(this, atn, decisionsToDFA, new antlr4.PredictionContextCache());
 
+          // 1. title must be at the beginning
+          // 2. title must not be followed by '.', '(', '='
           this.isTitle = function() {
             // Check if 'title' appears at the beginning (only whitespace/comments before it)
             const currentPos = this._tokenStartCharIndex;
