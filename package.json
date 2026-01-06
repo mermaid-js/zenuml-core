@@ -80,7 +80,7 @@
     "tailwindcss": "^3.4.19"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
+    "@eslint/js": "^9.39.2",
     "@happy-dom/global-registrator": "^18.0.1",
     "@playwright/test": "^1.54.1",
     "@storybook/addon-docs": "^9.0.16",
