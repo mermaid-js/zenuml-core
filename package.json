@@ -66,7 +66,7 @@
     "dompurify": "^3.3.1",
     "highlight.js": "^10.7.3",
     "html-to-image": "^1.11.13",
-    "immer": "^10.1.1",
+    "immer": "^10.2.0",
     "jotai": "^2.12.2",
     "lodash": "^4.17.21",
     "marked": "^4.3.0",
