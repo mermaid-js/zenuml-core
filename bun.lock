@@ -45,7 +45,7 @@
         "@types/ramda": "^0.28.25",
         "@types/react": "^19.2.7",
         "@types/react-dom": "^19.2.3",
-        "@vitejs/plugin-react": "^4.3.4",
+        "@vitejs/plugin-react": "^4.7.0",
         "autoprefixer": "^10.4.21",
         "eslint": "^9.21.0",
         "eslint-config-prettier": "^10.1.1",
