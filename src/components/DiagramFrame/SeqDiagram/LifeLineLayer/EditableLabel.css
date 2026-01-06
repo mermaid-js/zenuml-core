@@ -32,8 +32,8 @@
 /* Base styling for all editable labels to prevent layout shifts */
 .editable-label-base {
   border: 2px solid transparent !important;
-  padding: 2px 4px !important;
-  margin: -2px -4px !important;
+  padding: 0px 4px !important;
+  margin: 0px -4px !important;
   border-radius: 4px !important;
   transition: all 0.15s ease-in-out !important;
 }
