@@ -10,7 +10,7 @@
         "antlr4": "~4.11.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
-        "color-string": "^2.0.1",
+        "color-string": "^2.1.4",
         "dompurify": "^3.2.5",
         "highlight.js": "^10.7.3",
         "html-to-image": "^1.11.13",
@@ -651,7 +651,7 @@
 
     "color-name": ["color-name@2.0.0", "", {}, "sha512-SbtvAMWvASO5TE2QP07jHBMXKafgdZz8Vrsrn96fiL+O92/FN/PLARzUW5sKt013fjAprK2d2iCn2hk2Xb5oow=="],
 
-    "color-string": ["color-string@2.1.0", "", { "dependencies": { "color-name": "^2.0.0" } }, "sha512-gNVoDzpaSwvftp6Y8nqk97FtZoXP9Yj7KGYB8yIXuv0JcfqbYihTrd1OU5iZW9btfXde4YAOCRySBHT7O910MA=="],
+    "color-string": ["color-string@2.1.4", "", { "dependencies": { "color-name": "^2.0.0" } }, "sha512-Bb6Cq8oq0IjDOe8wJmi4JeNn763Xs9cfrBcaylK1tPypWzyoy2G3l90v9k64kjphl/ZJjPIShFztenRomi8WTg=="],
 
     "commander": ["commander@7.2.0", "", {}, "sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw=="],
 
