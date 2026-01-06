@@ -59,7 +59,7 @@
     "@floating-ui/react": "^0.27.16",
     "@headlessui/react": "^2.2.9",
     "@headlessui/tailwindcss": "^0.2.2",
-    "antlr4": "~4.11.0",
+    "antlr4": "~4.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "color-string": "^2.1.4",
