@@ -3,7 +3,20 @@ import { atomWithLocalStorage, atomWithFunctionValue } from "./utils.ts";
 import { RootContext, Participants } from "@/parser";
 import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
 import { Coordinates } from "../positioning/Coordinates";
-import { CodeRange } from "../parser/CodeRange";
+import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
+import type { CodeRange } from "../parser/CodeRange";
+
+type VerticalMode = "server" | "browser";
+
+const resolveVerticalMode = (): VerticalMode => {
+  // console.info(
+  //   "import.meta.env.VITE_VERTICAL_MODE",
+  //   import.meta.env.VITE_VERTICAL_MODE,
+  // );
+  return import.meta.env.VITE_VERTICAL_MODE === "browser"
+    ? "browser"
+    : "server";
+};
 
 /*
  * RenderMode
@@ -19,9 +32,13 @@ export const codeAtom = atom("");
 
 export const rootContextAtom = atom((get) => RootContext(get(codeAtom)));
 
-export const titleAtom = atom<string | null>((get) =>
-  get(rootContextAtom)?.title()?.content(),
-);
+export const titleAtom = atom<string | undefined>((get) => {
+  const titleContext = get(rootContextAtom)?.title();
+  if (!titleContext || typeof (titleContext as any).content !== "function") {
+    return undefined;
+  }
+  return (titleContext as any).content();
+});
 
 export const participantsAtom = atom((get) =>
   Participants(get(rootContextAtom)),
@@ -30,6 +47,19 @@ export const participantsAtom = atom((get) =>
 export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), WidthProviderOnBrowser),
 );
+
+export const verticalModeAtom = atom<VerticalMode>(resolveVerticalMode());
+
+export const verticalCoordinatesAtom = atom((get) => {
+  if (get(verticalModeAtom) === "browser") {
+    return null;
+  }
+  const rootContext = get(rootContextAtom);
+  if (!rootContext) {
+    return null;
+  }
+  return new VerticalCoordinates(rootContext);
+});
 
 export const themeAtom = atom("theme-default");
 

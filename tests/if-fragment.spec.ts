@@ -1,8 +1,8 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("If Fragment Test", () => {
   test("should render if fragment correctly", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/if-fragment.html");
+    await page.goto("/cy/if-fragment.html");
     // Wait for the privacy icon to be loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,

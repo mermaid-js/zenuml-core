@@ -1,12 +1,10 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Nested Interactions Test", () => {
   test("should render nested interactions with fragment and self-invocation correctly", async ({
     page,
   }) => {
-    await page.goto(
-      "http://127.0.0.1:8080/cy/nested-interaction-with-fragment.html",
-    );
+    await page.goto("/cy/nested-interaction-with-fragment.html");
     // Wait for the privacy icon to be loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -31,9 +29,7 @@ test.describe("Nested Interactions Test", () => {
   test("should render nested interactions with outbound message and fragment correctly", async ({
     page,
   }) => {
-    await page.goto(
-      "http://127.0.0.1:8080/cy/nested-interaction-with-outbound.html",
-    );
+    await page.goto("/cy/nested-interaction-with-outbound.html");
     // Wait for the privacy icon to be loaded
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,

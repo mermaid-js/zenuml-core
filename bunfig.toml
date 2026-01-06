@@ -41,7 +41,7 @@ auto = "auto"
 save = true
 
 # Print changes to lockfile
-print = "yarn"
+print = "bun"
 
 [run]
 # Bun runtime settings for scripts
