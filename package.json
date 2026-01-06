@@ -122,6 +122,6 @@
     "vite-plugin-svgr": "^4.5.0",
     "vite-svg-loader": "^5.1.0",
     "vitest": "^3.2.4",
-    "wrangler": "^4.25.0"
+    "wrangler": "^4.54.0"
   }
 }
