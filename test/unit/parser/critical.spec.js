@@ -11,8 +11,10 @@ test("Empty `critical`", () => {
 test("`critical` with parameter", () => {
   let critical = Fixture.firstStatement("critical(A) {}").critical();
   expectText(critical).toBe("critical(A){}");
-  let atom = critical.atom();
-  expectText(atom).toBe("A");
+  let parExpr = critical.parExpr();
+  expectText(parExpr).toBe("(A)");
+  let condition = parExpr.condition();
+  expectText(condition).toBe("A");
 });
 
 function expectText(context) {

@@ -1,60 +1,161 @@
-import { ref, nextTick } from "vue";
+import { FocusEvent, KeyboardEvent, MouseEvent, useState, useRef } from "react";
 
 export const specialCharRegex = /[!@#$%^&*()+-,.?''":{}|<>/\s]/;
 
-export const useEditLabel = (replaceTextFn: (e: Event) => void) => {
-  const editing = ref(false);
+export interface EditLabelOptions {
+  /**
+   * Enable single-click editing instead of double-click
+   * @default false
+   */
+  singleClick?: boolean;
 
-  function setEditing(_editing: boolean) {
-    editing.value = _editing;
-  }
+  /**
+   * Delay in ms before enabling editing on single click
+   * @default 300
+   */
+  clickDelay?: number;
 
-  async function handleDblClick(e: MouseEvent) {
+  /**
+   * Show hover indicator for editable elements
+   * @default true
+   */
+  showHoverHint?: boolean;
+}
+
+export const useEditLabelImproved = (
+  replaceTextFn: (e: FocusEvent | KeyboardEvent | MouseEvent) => void,
+  options: EditLabelOptions = {}
+) => {
+  const {
+    singleClick = false,
+    clickDelay = 300,
+    showHoverHint = true,
+  } = options;
+
+  const [editing, setEditing] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const clickCountRef = useRef(0);
+
+  const startEditing = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setEditing(true);
 
-    await nextTick();
-    const range = document.createRange();
+    // Focus and position cursor at the end
+    setTimeout(() => {
+      const target = e.target as HTMLElement;
+      if (!target) return;
 
-    // select the text and set the cursor at the end
-    if (!e.target) return;
-    range.selectNodeContents(e.target as Node);
-    range.collapse(false);
-    const sel = window.getSelection();
-    if (!sel) return;
-    sel?.removeAllRanges();
-    sel?.addRange(range);
-  }
+      target.focus();
 
-  async function handleBlur(e: FocusEvent) {
-    // avoid race condition with keyup event
-    await nextTick();
-    if (!editing.value) return;
-    setEditing(false);
-    replaceTextFn(e);
-  }
+      // Set cursor to end of text
+      const range = document.createRange();
+      range.selectNodeContents(target);
+      range.collapse(false);
 
-  function handleKeydown(e: KeyboardEvent) {
-    // prevent new line
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }, 0);
+  };
+
+  const handleClick = (e: MouseEvent) => {
+    if (editing) return;
+
+    if (singleClick) {
+      clickCountRef.current++;
+
+      // Clear existing timeout
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+
+      // Single click - start editing after delay
+      clickTimeoutRef.current = setTimeout(() => {
+        if (clickCountRef.current === 1) {
+          startEditing(e);
+        }
+        clickCountRef.current = 0;
+      }, clickDelay);
+    }
+  };
+
+  const handleDoubleClick = (e: MouseEvent) => {
+    if (editing) return;
+
+    // Clear single-click timeout if double-click occurs
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickCountRef.current = 0;
+    }
+
+    startEditing(e);
+  };
+
+  const handleMouseEnter = () => {
+    if (showHoverHint && !editing) {
+      setIsHovered(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
+  const handleBlur = (e: FocusEvent) => {
+    // Avoid race condition with keyup event
+    setTimeout(() => {
+      if (!editing) return;
+      setEditing(false);
+      setIsHovered(false);
+      replaceTextFn(e);
+    }, 0);
+  };
+
+  const handleKeydown = (e: KeyboardEvent) => {
+    // Prevent new line
     if (e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
     }
-  }
+  };
 
-  function handleKeyup(e: KeyboardEvent) {
+  const handleKeyup = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === "Escape" || e.key === "Tab") {
       setEditing(false);
+      setIsHovered(false);
       replaceTextFn(e);
     }
-  }
+  };
+
+  // Generate improved CSS classes
+  const getEditableClasses = (baseClasses = "") => {
+    const classes = [baseClasses, "editable-label-base"];
+
+    if (editing) {
+      classes.push("editable-label-editing");
+    } else if (isHovered && showHoverHint) {
+      classes.push("editable-label-hover");
+    } else {
+      classes.push("cursor-pointer");
+    }
+
+    return classes.filter(Boolean).join(" ");
+  };
 
   return {
     editing,
-    handleDblClick,
+    isHovered,
+    handleClick: singleClick ? handleClick : undefined,
+    handleDoubleClick,
+    handleMouseEnter,
+    handleMouseLeave,
     handleBlur,
     handleKeydown,
     handleKeyup,
+    getEditableClasses,
   };
 };

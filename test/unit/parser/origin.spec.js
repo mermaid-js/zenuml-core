@@ -26,7 +26,7 @@ describe("Origin Function", () => {
     expect(stat1.Origin()).toBeUndefined();
     let m1 = stat1.message();
     // expectText(m1).toBe('A.m1{B.m2}')
-    const stat2 = m1.braceBlock().block().stat()[1];
+    const stat2 = m1.Statements()[1];
     expect(stat2.Origin()).toBe("A");
     let m2 = stat2.message();
     expectText(m2).toBe("B.m2");
@@ -37,7 +37,7 @@ describe("Origin Function", () => {
     let m1 = stat1.message();
     expect(stat1.Origin()).toBeUndefined();
     expectText(m1).toBe("A.m1{B.m2}");
-    const stat2 = m1.braceBlock().block().stat()[0];
+    const stat2 = m1.Statements()[0];
     expect(stat2.Origin()).toBe("A");
     let m2 = stat2.message();
     expectText(m2).toBe("B.m2");
@@ -48,11 +48,11 @@ describe("Origin Function", () => {
     let m1 = stat1.message();
     expect(stat1.Origin()).toBeUndefined();
     expectText(m1).toBe("A.m1{B.m2{C.m3}}");
-    const stat2 = m1.braceBlock().block().stat()[0];
+    const stat2 = m1.Statements()[0];
     expect(stat2.Origin()).toBe("A");
     let m2 = stat2.message();
     expectText(m2).toBe("B.m2{C.m3}");
-    const stat3 = m2.braceBlock().block().stat()[0];
+    const stat3 = m2.Statements()[0];
     let m3 = stat3.message();
     expectText(m3).toBe("C.m3");
     expect(stat3.Origin()).toBe("B");
@@ -61,45 +61,43 @@ describe("Origin Function", () => {
   test("Embedded", () => {
     let m1 = Fixture.firstStatement('"A".m1 { B.m2 }').message();
     expectText(m1).toBe('"A".m1{B.m2}');
-    let m2 = m1.braceBlock().block().stat()[0].message();
+    let m2 = m1.Statements()[0].message();
     expectText(m2).toBe("B.m2");
-    expect(m1.braceBlock().block().stat()[0].Origin()).toBe("A");
+    expect(m1.Statements()[0].Origin()).toBe("A");
   });
 
   test("Embedded Self", () => {
     let m1 = Fixture.firstStatement("A.m1 { m2 }").message();
     expectText(m1).toBe("A.m1{m2}");
-    let m2 = m1.braceBlock().block().stat()[0].message();
+    let m2 = m1.Statements()[0].message();
     expectText(m2).toBe("m2");
-    expect(m1.braceBlock().block().stat()[0].Origin()).toBe("A");
+    expect(m1.Statements()[0].Origin()).toBe("A");
   });
 
   test("Embedded creation", () => {
     let creation = Fixture.firstStatement("new A { m2 }").creation();
     expectText(creation).toBe("newA{m2}");
-    let m2 = creation.braceBlock().block().stat()[0].message();
+    let m2 = creation.Statements()[0].message();
     expectText(m2).toBe("m2");
-    expect(creation.braceBlock().block().stat()[0].Origin()).toBe("A");
+    expect(creation.Statements()[0].Origin()).toBe("A");
   });
 
   test("Embedded incomplete creation", () => {
     let creation = Fixture.firstStatement("new { m2 }").creation();
     expectText(creation).toBe("new{m2}"); // invalid code, so
-    let m2 = creation.braceBlock().block().stat()[0].message();
+    let m2 = creation.Statements()[0].message();
     expectText(m2).toBe("m2");
-    expect(creation.braceBlock().block().stat()[0].Origin()).toBe(
-      "Missing Constructor",
-    );
+    expect(creation.Statements()[0].Origin()).toBe("Missing Constructor");
   });
 
   test("Embedded in if", () => {
     let m1 = Fixture.firstStatement("A.m1 { if(x) { m2 }}").message();
     expectText(m1).toBe("A.m1{if(x){m2}}");
-    let alt = m1.braceBlock().block().stat()[0].alt();
-    expect(m1.braceBlock().block().stat()[0].Origin()).toBe("A");
-    let m2 = alt.ifBlock().braceBlock().block().stat()[0].message();
+    let alt = m1.Statements()[0].alt();
+    expect(m1.Statements()[0].Origin()).toBe("A");
+    let m2 = alt.ifBlock().Statements()[0].message();
     expectText(m2).toBe("m2");
-    expect(alt.ifBlock().braceBlock().block().stat()[0].Origin()).toBe("A");
+    expect(alt.ifBlock().Statements()[0].Origin()).toBe("A");
   });
 
   test("Embedded in if at root", () => {
@@ -107,40 +105,36 @@ describe("Origin Function", () => {
     expect(
       Fixture.firstStatement("Fixture.firstStatement('A->B.m1')").Origin(),
     ).toBeUndefined();
-    let m1 = alt.ifBlock().braceBlock().block().stat()[0].message();
+    let m1 = alt.ifBlock().Statements()[0].message();
     expectText(m1).toBe("m1");
-    expect(
-      alt.ifBlock().braceBlock().block().stat()[0].Origin(),
-    ).toBeUndefined();
-    let m2 = alt.ifBlock().braceBlock().block().stat()[1].message();
+    expect(alt.ifBlock().Statements()[0].Origin()).toBeUndefined();
+    let m2 = alt.ifBlock().Statements()[1].message();
     expectText(m2).toBe("A.m2");
-    expect(
-      alt.ifBlock().braceBlock().block().stat()[1].Origin(),
-    ).toBeUndefined();
+    expect(alt.ifBlock().Statements()[1].Origin()).toBeUndefined();
   });
 
   test("Embedded in Self", () => {
     let m1 = Fixture.firstStatement("A.m1 { m2 {m3} }").message();
     expectText(m1).toBe("A.m1{m2{m3}}");
-    let m2 = m1.braceBlock().block().stat()[0].message();
+    let m2 = m1.Statements()[0].message();
     expectText(m2).toBe("m2{m3}");
-    let m3 = m2.braceBlock().block().stat()[0].message();
+    let m3 = m2.Statements()[0].message();
     expectText(m3).toBe("m3");
 
-    expect(m2.braceBlock().block().stat()[0].Origin()).toBe("A");
+    expect(m2.Statements()[0].Origin()).toBe("A");
   });
 
   test("Embedded in Self with Starter", () => {
     let m1 = Fixture.firstStatement("@Starter(X) m1 { m2 {m3} }").message();
     expectText(m1).toBe("m1{m2{m3}}");
-    const m2Stat = m1.braceBlock().block().stat()[0];
+    const m2Stat = m1.Statements()[0];
     let m2 = m2Stat.message();
     expectText(m2Stat).toBe("m2{m3}");
     expect(m2Stat.Origin()).toBe("X");
-    let m3 = m2.braceBlock().block().stat()[0].message();
+    let m3 = m2.Statements()[0].message();
     expectText(m3).toBe("m3");
 
-    expect(m2.braceBlock().block().stat()[0].Origin()).toBe("X");
+    expect(m2.Statements()[0].Origin()).toBe("X");
   });
 
   test("root with default _STARTER_", () => {

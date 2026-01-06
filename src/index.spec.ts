@@ -1,28 +1,26 @@
-import { createStore } from "vuex";
-import { VueSequence } from "./index";
+import { createStore } from "jotai";
+import { codeAtom, titleAtom } from "./store/Store";
+
+const store = createStore();
 
 describe("index (store)", () => {
   it("should have title", () => {
-    const storeInstance = VueSequence.Store();
-    const store = createStore(storeInstance);
-    store.commit("code", "title abcd");
-    expect(store.state.code).toBe("title abcd");
-    expect(store.getters.title).toBe("abcd");
+    store.set(codeAtom, "title abcd");
+    expect(store.get(codeAtom)).toBe("title abcd");
+    expect(store.get(titleAtom)).toBe("abcd");
   });
 
   it("may not have title", () => {
-    const storeInstance = VueSequence.Store();
-    const store = createStore(storeInstance);
-    store.commit("code", "title ");
-    expect(store.state.code).toBe("title ");
-    expect(store.getters.title).toBe("");
+    store.set(codeAtom, "title ");
+    expect(store.get(codeAtom)).toBe("title ");
+    expect(store.get(titleAtom)).toBe("");
 
-    store.commit("code", "A.m");
-    expect(store.state.code).toBe("A.m");
-    expect(store.getters.title).toBeUndefined();
+    store.set(codeAtom, "A.m");
+    expect(store.get(codeAtom)).toBe("A.m");
+    expect(store.get(titleAtom)).toBeUndefined();
 
-    store.commit("code", "");
-    expect(store.state.code).toBe("");
-    expect(store.getters.title).toBeUndefined();
+    store.set(codeAtom, "");
+    expect(store.get(codeAtom)).toBe("");
+    expect(store.get(titleAtom)).toBeUndefined();
   });
 });

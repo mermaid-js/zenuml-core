@@ -8,7 +8,6 @@ module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:vue/vue3-essential",
     "plugin:prettier/recommended",
   ],
   globals: {
@@ -30,9 +29,8 @@ module.exports = {
     parser: "@typescript-eslint/parser",
     sourceType: "module",
   },
-  plugins: ["@typescript-eslint", "vue", "html"],
+  plugins: ["@typescript-eslint", "html"],
   rules: {
-    "vue/multi-word-component-names": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-explicit-any": "off",

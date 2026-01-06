@@ -20,13 +20,10 @@ head
  | (group | participant)* starterExp
  ;
 
-// The following order is important.
-// It ensures group { A } will not be parsed as group + anonymouseBlock.
-// It seems that we should always put the longest rule at the top.
+// Left-factored for readability and fewer alternatives while preserving tolerance.
+// Keeps behavior that `group { A }` is parsed as a group declaration (not an anonymous block).
 group
- : GROUP name? OBRACE participant* CBRACE
- | GROUP name? OBRACE
- | GROUP name?
+ : GROUP name? (OBRACE participant* CBRACE?)?
  ;
 
 // [Perf] Changing starter to name does not help.
@@ -36,7 +33,7 @@ starterExp
  ;
 
 starter
- : ID | STRING
+ : name
  ;
 
 participant
@@ -61,7 +58,7 @@ participantType
  ;
 
 name
- : ID | STRING
+ : ID | CSTRING | USTRING
  ;
 
 width
@@ -109,21 +106,20 @@ stat
  | ret
  | divider
  | tcf
- | OTHER {console.log("unknown char: " + $OTHER.text);}
  ;
 
 par
- : PAR braceBlock
+ : PAR parExpr? braceBlock
  | PAR
  ;
 
 opt
- : OPT braceBlock
+ : OPT parExpr? braceBlock
  | OPT
  ;
 
 critical
-  : CRITICAL (OPAR atom? CPAR)? braceBlock
+  : CRITICAL parExpr? braceBlock
   | CRITICAL
  ;
 
@@ -159,10 +155,21 @@ message
  : messageBody (SCOL | braceBlock)?
  ;
 
+// Message body is structured to reduce backtracking and keep runtime API stable:
+// - assignment + func: supports forms like `ret = do()`
+// - assignment + fromTo (+ optional func): `ret = A->B.m()` or `ret = A->B.`
+// - fromTo (+ optional func): `A->B.m()` or `A->B.` and `B.m()` or `B.`
+// We flatten `func` at this rule level (not inside fromTo) so
+// messageBody().func() remains available for callers that rely on it.
 messageBody
- : assignment? ((from ARROW)? to DOT)? func
- | assignment
- | (from ARROW)? to DOT   // A->B. or B.
+ : assignment (fromTo (func)? | func)?
+ | fromTo (func)?
+ | func
+ ;
+
+// Only the target (from/to) and dot; func is flattened at messageBody level
+fromTo
+ : (from ARROW)? to DOT
  ;
 
 // func is also used in exp as parameter with expr: (to DOT)? func;
@@ -171,11 +178,11 @@ func
  ;
 
 from
- : ID | STRING
+ : name
  ;
 
 to
- : ID | STRING
+ : name
  ;
 
 signature
@@ -201,27 +208,34 @@ content
  ;
 
 construct
- : ID | STRING
+ : name
  ;
 
 type
- : ID | STRING
+ : name
  ;
 
 assignee
- : atom | (ID (COMMA ID)*) | STRING
+ : atom | (ID (COMMA ID)*) | CSTRING | USTRING
+ | NEW // allowing `new = method()`
  ;
 
 methodName
- : ID | STRING
+ : name
  ;
 
 parameters
  : parameter (COMMA parameter)* COMMA?
  ;
 
+// both namedParameter and expr could match 'a=1'.
+// namedParameter provides more semantic context and better error recovery.
 parameter
- : declaration | expr
+ : namedParameter | declaration | expr
+ ;
+
+namedParameter
+ : ID ASSIGN expr?
  ;
 
 declaration
@@ -268,10 +282,9 @@ braceBlock
  : OBRACE block? CBRACE
  ;
 
+// Simplified: tolerate missing parens and/or block during typing.
 loop
- : WHILE parExpr braceBlock
- | WHILE parExpr
- | WHILE
+ : WHILE parExpr? braceBlock?
  ;
 
 // [Perf tuning] Merging expr op expr does not help.
@@ -299,24 +312,26 @@ atom
  | MONEY          #moneyAtom
  | (TRUE | FALSE) #booleanAtom
  | ID             #idAtom
- | STRING         #stringAtom
+ | (CSTRING | USTRING) #stringAtom
  | NIL            #nilAtom
  ;
 
 // [Perf tuning] Removing alternative rules does not help.
 parExpr
- : OPAR condition CPAR
- | OPAR condition
- | OPAR CPAR
- | OPAR
+ : OPAR condition? CPAR?
  ;
 
 condition
  : atom
  | expr
  | inExpr
+ | textExpr
  ;
 
 inExpr
  : ID IN ID
+ ;
+
+textExpr
+ : ID+
  ;

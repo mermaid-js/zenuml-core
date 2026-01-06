@@ -1,54 +1,61 @@
 name: E2E
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: read
 
 jobs:
-  build:
-    runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [20] # Work with 18. https://github.com/cypress-io/github-action/issues/534#issuecomment-1115947632
+  playwright-tests:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          python-version: "3.12"
+          bun-version: latest
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        id: bun-cache
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: bun-deps-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            bun-deps-
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          sudo -H pip install setuptools
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install
 
-      - uses: pnpm/action-setup@v4
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
         with:
-          version: 9
+          path: |
+            ~/.cache/ms-playwright
+          key: playwright-browsers-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            playwright-browsers-
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          node-version: ${{ matrix.node-version }}
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: bun run pw:install
 
-      # Install NPM dependencies, cache them correctly
-      # and run all Cypress tests
-      - name: Cypress run
-        uses: cypress-io/github-action@v6.6.1
-        with:
-          browser: chrome
-          build: pnpm build:site
-          start: pnpm preview
-          command: pnpm run cy
-          wait-on: http://127.0.0.1:8080
-          auto-cancel-after-failures: 2
-      - name: Upload artifacts # Find artifacts under actions/jobs
+      - name: Run Playwright tests
+        run: bun run pw:ci
+        env:
+          CI: true
+
+      - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: snapshots
-          path: ./cypress/
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30

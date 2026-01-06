@@ -16,6 +16,9 @@ export default class Anchor2 {
     return other.rightEdgeOfRightWall() - this.centerOfRightWall();
   }
 
+  centerToCenter(other: Anchor2): number {
+    return other.centerOfRightWall() - this.centerOfRightWall();
+  }
   /**
    * edgeOffset is used for interactionWidth calculations.
    */

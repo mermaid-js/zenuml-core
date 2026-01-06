@@ -31,7 +31,7 @@ test("smoke test2", () => {
   expect(participant.ToValue()).toEqual({
     ...blankParticipant,
     name: "B 1",
-    comment: " comment\n",
+    comment: " comment",
     isStarter: true,
     explicit: true,
     stereotype: "A",

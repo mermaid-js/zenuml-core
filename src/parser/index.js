@@ -20,9 +20,15 @@ import "./AncestorPath";
 import { formatText } from "@/utils/StringUtil";
 
 const errors = [];
+const errorDetails = [];
 class SeqErrorListener extends antlr4.error.ErrorListener {
   syntaxError(recognizer, offendingSymbol, line, column, msg) {
     errors.push(`${offendingSymbol} line ${line}, col ${column}: ${msg}`);
+    errorDetails.push({
+      line,
+      column,
+      msg,
+    });
   }
 }
 
@@ -56,7 +62,7 @@ antlr4.ParserRuleContext.prototype.getComment = function () {
     hiddenTokensToLeft &&
     hiddenTokensToLeft
       .map((t) => t.text.substring(2)) // skip '//'
-      .join("")
+      .join("\n")
   );
 };
 
@@ -87,6 +93,7 @@ export default {
     return toCollector.getParticipants(ctx);
   },
   Errors: errors,
+  ErrorDetails: errorDetails,
   /**
    * @return {number} how many levels of embedded fragments
    */

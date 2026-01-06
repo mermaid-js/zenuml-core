@@ -38,7 +38,7 @@ export class Coordinates {
 
     const participant = this.getParticipantModel(participantName);
     if (!participant) {
-      console.error(`Participant ${participantName} not found`);
+      console.warn(`Participant ${participantName} not found`);
       return 0;
     }
 

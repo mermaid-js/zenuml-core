@@ -19,7 +19,7 @@ You can use it ZenUML on your favorite platforms and applications:
 # Integrations
 
 ZenUML can be integrated with your favorite tools and platforms as a library or an embeddable widget.
-Please follow the [integration guide](./docs/asciidoc/integration-guide.adoc) for detailed steps.
+Please follow the [integration tutorial](./TUTORIAL.md) for detailed steps.
 
 # Development
 
@@ -122,4 +122,4 @@ This repository contains both the DSL parser and the renderer.
 The parser is generated with Antlr4. You can find the definition at `src/g4`. Generated parser is at `src/generated-parser`.
 Parser enhancement with customised functionalities is in the `src/parser` folder.
 
-Almost everything else under src are for the renderer. The render is based on VueJs 3.x.
+Almost everything else under src are for the renderer. The render is based on React19.

@@ -4,7 +4,34 @@ channels {
   MODIFIER_CHANNEL
 }
 
-WS: [ \t] -> channel(HIDDEN);
+@members {
+  // 1. title must be at the beginning
+  // 2. title must not be followed by '.', '(', '='
+  this.isTitle = function() {
+    // Check if 'title' appears at the beginning (only whitespace/comments before it)
+    const currentPos = this._tokenStartCharIndex;
+    const preceding = this._input.getText(0, currentPos - 1)
+      .replace(/\/\/[^\n]*(?:\n|$)/g, '')
+      .trim();
+    if (preceding.length) return false;
+
+    // Look ahead past 'title' and any whitespace to check what follows
+    const SPACE = 32, TAB = 9, EOF = -1, DOT = 46, EQUALS = 61, OPEN_PAREN = 40;
+    let pos = 6, next = this._input.LA(pos);
+
+    // Skip past any whitespace
+    while (next === SPACE || next === TAB) {
+      ++pos;
+      next = this._input.LA(pos);
+    }
+
+    // Title directive if EOF or not followed by '.', '(', '='
+    return next === EOF || (next !== DOT && next !== EQUALS && next !== OPEN_PAREN);
+  };
+}
+
+fragment HWS: [ \t]; // Horizontal WhiteSpace
+WS: HWS+ -> channel(HIDDEN);
 
 // variable modifiers
 CONSTANT:   'const' -> channel(MODIFIER_CHANNEL);
@@ -15,7 +42,7 @@ STATIC:     'static' -> channel(MODIFIER_CHANNEL);
 AWAIT:      'await' -> channel(MODIFIER_CHANNEL);
 
 TITLE
- : 'title' -> pushMode(TITLE_MODE)
+ : {this.isTitle()}? 'title' -> pushMode(TITLE_MODE)
  ;
 
 COL
@@ -94,8 +121,11 @@ DOT
  : '.'
  ;
 
+// Support Unicode letters in identifiers
+// \p{L} matches any Unicode letter (including Chinese, Japanese, Korean, etc.)
+// \p{Nd} matches any Unicode decimal digit
 ID
- : [a-zA-Z_] [a-zA-Z_0-9]*
+ : [\p{L}_] [\p{L}\p{Nd}_]*
  ;
 
 fragment UNIT
@@ -123,11 +153,20 @@ NUMBER_UNIT
  : (INT | FLOAT) UNIT
  ;
 
-// As long as the text starts with double quotes, we treat it as a string before a closing double quote or change line
-// This is to allow the user to keep typing - A as "a long string before closing it with quote
-// Note that most of our editors will auto-complete the double quote anyway.
-STRING
- : '"' (~["\r\n] | '""')* ('"'|[\r\n])?
+// Strings are split into closed vs. unclosed to improve editor tolerance
+// and lexer predictability:
+// - CSTRING matches a normal double-quoted string that is properly closed.
+// - USTRING matches an in-progress string without a closing quote and stops
+//   at EOL/EOF. This prevents the lexer from consuming the newline and keeps
+//   incremental typing states parseable without introducing ambiguity.
+// Note: CSTRING is defined before USTRING so that when both could match,
+// the closed form (longer match including the closing quote) is preferred.
+CSTRING
+ : '"' ( '""' | ~["\r\n] )* '"'
+ ;
+
+USTRING
+ : '"' ( '""' | ~["\r\n] )*
  ;
 
 CR
@@ -135,7 +174,7 @@ CR
  ;
 
 COMMENT
- : '//' .*? '\n' -> channel(COMMENT_CHANNEL)
+ : '//' ~[\r\n]* -> channel(COMMENT_CHANNEL)
  ;
 OTHER
  : .
@@ -145,7 +184,7 @@ OTHER
 // Divider notes can be characters other than changeline.
 // So it must not be tokenized by other Lexer rules.
 // Thus this is not suitable for the parser to parse.
-DIVIDER: {this.column === 0}? WS* '==' ~[\r\n]*;
+DIVIDER: {this.column === 0}? HWS* '==' ~[\r\n]*;
 
 mode EVENT;
 EVENT_PAYLOAD_LXR

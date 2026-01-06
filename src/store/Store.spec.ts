@@ -1,8 +1,11 @@
-import Store from "./Store";
+import { createStore } from "jotai";
+import { showTipsAtom } from "./Store";
+
+const store = createStore();
 
 describe("Store", () => {
   it("should create an instance", () => {
-    expect(Store().state.showTips).toBeDefined();
-    expect(Store().state.showTips).toBeFalsy();
+    expect(store.get(showTipsAtom)).toBeDefined();
+    expect(store.get(showTipsAtom)).toBeFalsy();
   });
 });

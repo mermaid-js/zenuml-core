@@ -1,0 +1,50 @@
+name: Update Playwright Snapshots for Linux
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-snapshots:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Install Playwright browsers
+        run: bun run pw:install
+
+      - name: Build site
+        run: bun run build:site
+
+      - name: Generate Linux snapshots
+        run: bun run pw:update-ci
+        env:
+          CI: true
+
+      - name: Commit updated snapshots
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add tests/
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update Playwright snapshots for Linux CI
+
+            Generated Linux-specific snapshots for chromium-linux platform.
+            
+            🤖 Generated with [Claude Code](https://claude.ai/code)
+            
+            Co-Authored-By: Claude <noreply@anthropic.com>"
+            git push
+          else
+            echo "No snapshot changes to commit"
+          fi

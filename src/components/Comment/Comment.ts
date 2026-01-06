@@ -1,4 +1,4 @@
-import { CSSProperties } from "vue";
+import { CSSProperties } from "react";
 import { getStyle } from "@/utils/messageStyling";
 
 function parseLine(input: string): [string[], string[], string[], string] {
@@ -38,7 +38,7 @@ function parseLine(input: string): [string[], string[], string[], string] {
     input.slice(lastMatchIndex),
   ];
 }
-export default class Comment {
+export default class CommentClass {
   // define properties color and text
   public text: string = "";
   /** @deprecated use commentStyle or messageStyle instead */
@@ -53,7 +53,8 @@ export default class Comment {
 
   // Raw comment contains all spaces and newlines
   constructor(raw: string) {
-    const lines = raw.slice(0, -1).split("\n");
+    // Split by newlines, handling both with and without trailing newline
+    const lines = raw.trim().split("\n");
     const lastLine = lines[lines.length - 1];
     const [commentOnlyStyles, messageOnlyStyles, commonStyles, text] =
       parseLine(lastLine);

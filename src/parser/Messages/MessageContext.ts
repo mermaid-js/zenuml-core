@@ -2,6 +2,9 @@ import sequenceParser from "../../generated-parser/sequenceParser";
 
 const seqParser = sequenceParser;
 const MessageContext = seqParser.MessageContext;
+const CreationContext = seqParser.CreationContext;
+const IfBlockContext = seqParser.IfBlockContext;
+const LoopContext = seqParser.LoopContext;
 
 interface IAssignment {
   assignee: string | undefined;
@@ -36,4 +39,24 @@ MessageContext.prototype.Assignment = function () {
     return new Assignment(assignee, type);
   }
   return undefined;
+};
+
+// @ts-ignore
+MessageContext.prototype.Statements = function () {
+  return this.braceBlock()?.block()?.stat() || [];
+};
+
+// @ts-ignore
+CreationContext.prototype.Statements = function () {
+  return this.braceBlock()?.block()?.stat() || [];
+};
+
+// @ts-ignore
+IfBlockContext.prototype.Statements = function () {
+  return this.braceBlock()?.block()?.stat() || [];
+};
+
+// @ts-ignore
+LoopContext.prototype.Statements = function () {
+  return this.braceBlock()?.block()?.stat() || [];
 };
