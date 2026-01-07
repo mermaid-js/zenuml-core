@@ -98,7 +98,7 @@ export const Creation = (props: {
       >
         <Message
           className={cn(
-            "invocation transform -translate-y-1/2 pointer-events-auto",
+            "invocation transform -translate-y-[calc(50%-1px)] pointer-events-auto",
             messageClassNames,
           )}
           context={creation}

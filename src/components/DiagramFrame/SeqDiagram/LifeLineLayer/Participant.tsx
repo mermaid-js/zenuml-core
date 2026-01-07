@@ -21,6 +21,7 @@ import { AsyncIcon } from "../../Tutorial/AsyncIcon";
 // import iconPath from "../../Tutorial/Icons"; // Removed eager import
 
 const INTERSECTION_ERROR_MARGIN = 10;
+const PARTICIPANT_DEBUG = Boolean(localStorage.getItem("zenumlDebug"));
 
 export const Participant = (props: {
   entity: Record<string, string>;
@@ -105,6 +106,11 @@ export const Participant = (props: {
       onClick={() => onSelect(props.entity.name)}
       data-participant-id={props.entity.name}
     >
+      {PARTICIPANT_DEBUG && (
+        <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-8 h-[2px] bg-amber-700">
+          <div className="w-full h-full bg-black" />
+        </div>
+      )}
       <div className="flex items-center justify-center">
         {iconKey && (
           <AsyncIcon

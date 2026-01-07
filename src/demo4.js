@@ -1,6 +1,6 @@
 // Advanced functionality:
 // Move the Fragment to the left most participant
-export default `RET ret = A.methodA() {
+export default `ret = A.methodA() {
   B.method() {
     if (X) { 
       C.methodC() {
