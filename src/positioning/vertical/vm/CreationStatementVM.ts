@@ -41,7 +41,7 @@ export class CreationStatementVM extends StatementVM {
     const assignment = this.creation?.creationBody?.()?.assignment?.();
     if (assignment) {
       console.info(`creation::assignment::${participant}`);
-      cursor += 16;
+      cursor += 12;
     }
 
     const height = cursor - top;
