@@ -48,8 +48,7 @@ export class SyncMessageStatementVM extends StatementVM {
     }
 
     if (assignee && !isSelf) {
-      // Interaction.tsx:99
-      cursor += 16;
+      cursor += 11;
       // console.info("syncMessageVM::assignment", assignee);
     }
 

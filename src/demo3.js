@@ -3,7 +3,7 @@
 // Nested loop
 // Nested alt (self message)
 // Nested loop (self message)
-export default `RET ret = a:A.methodA() { 
+export default `ret = A.methodA() { 
   if (x) { 
     B.methodB() 
     if (y) { 
