@@ -35,8 +35,7 @@ export const MessageView = ({
   messageRef,
   children,
 }: MessageViewProps) => {
-  const isCreation = type === "creation";
-  const lineStyle = type === "creation" || type === "return" ? "dashed" : "solid";
+  const lineStyle = (type === "creation" || type === "return") ? "dashed" : "solid";
 
   return (
     <div
@@ -58,17 +57,13 @@ export const MessageView = ({
               children
             ) : editable ? (
               <>
-                {isCreation && <span>«</span>}
                 <MessageLabel
                   labelText={labelText}
                   labelPosition={labelPosition}
                   normalizeText={normalizeText}
                 />
-                {isCreation && <span>»</span>}
               </>
-            ) : (
-              <>{isCreation ? `«${labelText || "create"}»` : labelText}</>
-            )}
+            ) : (<>{labelText}</>)}
           </div>
         </div>
       </div>
