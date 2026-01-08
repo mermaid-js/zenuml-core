@@ -9,18 +9,21 @@ const LoopContext = seqParser.LoopContext;
 interface IAssignment {
   assignee: string | undefined;
   type: string | undefined;
+  labelPosition: [number, number];
 }
 
 export class Assignment implements IAssignment {
   assignee: string;
   type: string;
-  constructor(assignee: string | undefined, type: string | undefined) {
+  labelPosition: [number, number];
+  constructor(assignee: string | undefined, type: string | undefined, labelPosition: [number, number]) {
     // check if type is defined, assignee must be defined
     if (type && !assignee) {
       throw new Error("assignee must be defined if type is defined");
     }
     this.assignee = assignee || "";
     this.type = type || "";
+    this.labelPosition = labelPosition;
   }
 
   getText() {
@@ -35,8 +38,13 @@ MessageContext.prototype.Assignment = function () {
   const assignee = assignmentContext?.assignee()?.getFormattedText();
   // @ts-ignore
   const type = assignmentContext?.type()?.getFormattedText();
+  // @ts-ignore
+  const assigneeCtx = assignmentContext?.assignee();
+  const labelPosition: [number, number] = assigneeCtx
+    ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
+    : [-1, -1];
   if (assignee) {
-    return new Assignment(assignee, type);
+    return new Assignment(assignee, type, labelPosition);
   }
   return undefined;
 };

@@ -78,13 +78,9 @@ export const Occurrence = (props: {
     if (isMessage) {
       const assignment = props.context?.Assignment();
       if (!assignment) return null;
-      const assigneeCtx = props.context?.messageBody()?.assignment()?.assignee();
       const content = assignment.getText() || "";
       if (!content) return null;
-      const labelPosition: [number, number] = assigneeCtx
-        ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
-        : [-1, -1];
-      return { content, labelPosition };
+      return { content, labelPosition: assignment.labelPosition };
     }
     
     return null;

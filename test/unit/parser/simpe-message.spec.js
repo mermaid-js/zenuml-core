@@ -6,9 +6,9 @@ describe("message - complete", () => {
     let message = Fixture.firstStatement("200=A.m").message();
     expect(message.SignatureText()).toBe("m");
     expect(message.Assignment()).toBeDefined();
-    expect(message.Assignment()).toStrictEqual(
-      new Assignment("200", undefined),
-    );
+    // Don't check labelPosition as it will have real values from parser
+    expect(message.Assignment().assignee).toBe("200");
+    expect(message.Assignment().type).toBe("");
   });
 
   test.each([
@@ -17,22 +17,28 @@ describe("message - complete", () => {
     ["A.m(1)", "m(1)", undefined],
     ["A.m(1,2)", "m(1,2)", undefined],
     ['A.m(" const, static ")', 'm(" const,static ")', undefined], // See StringUtil.spec for why the space after ',' was removed
-    ["ret = A.m", "m", new Assignment("ret", undefined)],
-    ["new = A.m", "m", new Assignment("new", undefined)], // `new` can be used as an assignee
-    ["const ret = A.m", "m", new Assignment("ret", undefined)],
-    ["readonly ret = A.m", "m", new Assignment("ret", undefined)],
-    ["static ret = A.m", "m", new Assignment("ret", undefined)],
-    ["const ret = await A.m", "m", new Assignment("ret", undefined)],
-  ])(" %s, signature: %s and assignment: %s", (text, signature, assignment) => {
+    ["ret = A.m", "m", "ret"],
+    ["new = A.m", "m", "new"], // `new` can be used as an assignee
+    ["const ret = A.m", "m", "ret"],
+    ["readonly ret = A.m", "m", "ret"],
+    ["static ret = A.m", "m", "ret"],
+    ["const ret = await A.m", "m", "ret"],
+  ])(" %s, signature: %s and assignment: %s", (text, signature, expectedAssignee) => {
     let message = Fixture.firstStatement(text).message();
     expect(message.SignatureText()).toBe(signature);
     let actual = message.Assignment();
-    expect(actual).toStrictEqual(assignment);
+    if (expectedAssignee === undefined) {
+      expect(actual).toBeUndefined();
+    } else {
+      expect(actual).toBeDefined();
+      expect(actual.assignee).toBe(expectedAssignee);
+      expect(actual.type).toBe("");
+    }
   });
 
   test("compare assignment", () => {
-    const assignment1 = new Assignment("ret", undefined);
-    const assignment2 = new Assignment("ret", undefined);
+    const assignment1 = new Assignment("ret", undefined, [-1, -1]);
+    const assignment2 = new Assignment("ret", undefined, [-1, -1]);
     expect(assignment1).toStrictEqual(assignment2);
   });
 });
