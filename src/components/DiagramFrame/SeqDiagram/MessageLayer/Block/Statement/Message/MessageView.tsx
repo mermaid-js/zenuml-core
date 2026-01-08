@@ -2,13 +2,8 @@ import { cn } from "@/utils";
 import { CSSProperties, ReactNode, RefObject } from "react";
 import { ArrowHead } from "./ArrowHead";
 import { Numbering } from "../../../Numbering";
-import { MessageLabel } from "../../../MessageLabel";
 
 export type MessageViewProps = {
-  editable: boolean;
-  labelText: string;
-  labelPosition: [number, number];
-  normalizeText?: (text: string) => string;
   type?: string;
   textStyle?: CSSProperties;
   className?: string;
@@ -17,14 +12,10 @@ export type MessageViewProps = {
   rtl?: string | boolean;
   onClick?: () => void;
   messageRef?: RefObject<HTMLDivElement>;
-  children?: ReactNode;
+  children: ReactNode;
 };
 
 export const MessageView = ({
-  editable,
-  labelText,
-  labelPosition,
-  normalizeText,
   type = "",
   textStyle,
   className,
@@ -53,17 +44,7 @@ export const MessageView = ({
       <div className="name group text-center flex-grow relative">
         <div className="inline-block static min-h-[1em]">
           <div style={textStyle}>
-            {children ? (
-              children
-            ) : editable ? (
-              <>
-                <MessageLabel
-                  labelText={labelText}
-                  labelPosition={labelPosition}
-                  normalizeText={normalizeText}
-                />
-              </>
-            ) : (<>{labelText}</>)}
+            {children}
           </div>
         </div>
       </div>
