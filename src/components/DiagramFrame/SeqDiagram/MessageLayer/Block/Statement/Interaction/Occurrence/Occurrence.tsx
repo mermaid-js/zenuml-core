@@ -72,7 +72,7 @@ export const Occurrence = (props: {
       const labelPosition: [number, number] = assigneeCtx 
         ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
         : [-1, -1];
-      return { content, labelPosition, context: props.context, isMessage: false };
+      return { content, labelPosition };
     }
     
     if (isMessage) {
@@ -84,7 +84,7 @@ export const Occurrence = (props: {
       const labelPosition: [number, number] = assigneeCtx
         ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
         : [-1, -1];
-      return { content, labelPosition, context: props.context, isMessage: true };
+      return { content, labelPosition };
     }
     
     return null;
@@ -134,7 +134,7 @@ export const Occurrence = (props: {
                 "return transform -translate-y-full pointer-events-auto",
                 props.messageClassNames,
               )}
-              context={assigneeData.context}
+              context={props.context}
               labelPosition={assigneeData.labelPosition}
               content={assigneeData.content}
               rtl={!props.rtl}
