@@ -125,7 +125,8 @@ export const Occurrence = (props: {
           collapsed={collapsed}
         ></Block>
       )}
-      {assigneeData && (!assigneeData.isMessage || !props.isSelf) && (
+      {/* Render return statement for non-self sync message and creation */}
+      {assigneeData && !props.isSelf && (
         <div className={cn("statement-container my-4")}>
           <div className={cn("interaction return relative right-to-left text-left text-sm text-skin-message")}>
             <Message
