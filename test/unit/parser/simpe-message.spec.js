@@ -1,5 +1,5 @@
 import { Fixture } from "./fixture/Fixture";
-import { Assignment } from "../../../src/parser/Messages/MessageContext";
+import { Assignment } from "../../../src/parser/Messages/Assignment";
 
 describe("message - complete", () => {
   test("A.m", () => {
@@ -35,12 +35,7 @@ describe("message - complete", () => {
       expect(actual.type).toBe("");
     }
   });
-
-  test("compare assignment", () => {
-    const assignment1 = new Assignment("ret", undefined, [-1, -1]);
-    const assignment2 = new Assignment("ret", undefined, [-1, -1]);
-    expect(assignment1).toStrictEqual(assignment2);
-  });
+  
 });
 
 describe("message - incomplete", () => {

@@ -56,34 +56,16 @@ export const Occurrence = (props: {
   }, [props.context]);
 
   const assigneeData = useMemo(() => {
-    // Detect context type by checking available methods
-    const isCreation = typeof props.context?.creationBody === 'function';
-    const isMessage = typeof props.context?.messageBody === 'function' || typeof props.context?.Assignment === 'function';
-    
-    if (isCreation) {
-      const assignment = props.context?.creationBody()?.assignment();
-      if (!assignment) return null;
-      const assigneeCtx = assignment.assignee();
-      const typeCtx = assignment.type();
-      const assignee = assigneeCtx?.getFormattedText() || "";
-      const type = typeCtx?.getFormattedText() || "";
-      const content = assignee + (type ? ":" + type : "");
-      if (!content) return null;
-      const labelPosition: [number, number] = assigneeCtx 
-        ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
-        : [-1, -1];
-      return { content, labelPosition };
+    // Check if context has Assignment function (works for both CreationContext and MessageContext)
+    if (typeof props.context?.Assignment !== 'function') {
+      return null;
     }
     
-    if (isMessage) {
-      const assignment = props.context?.Assignment();
-      if (!assignment) return null;
-      const content = assignment.getText() || "";
-      if (!content) return null;
-      return { content, labelPosition: assignment.labelPosition };
-    }
-    
-    return null;
+    const assignment = props.context.Assignment();
+    if (!assignment) return null;
+    const content = assignment.getText() || "";
+    if (!content) return null;
+    return { content, labelPosition: assignment.labelPosition };
   }, [props.context]);
 
   const statementNumber = props.number ? `${props.number}.${props.context?.Statements()?.length + 1}` : undefined;
