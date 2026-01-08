@@ -8,20 +8,32 @@ interface IAssignment {
   assignee: string | undefined;
   type: string | undefined;
   labelPosition: [number, number];
+  assigneePosition: [number, number];
+  typePosition: [number, number];
 }
 
 export class Assignment implements IAssignment {
   assignee: string;
   type: string;
   labelPosition: [number, number];
-  constructor(assignee: string | undefined, type: string | undefined, labelPosition: [number, number]) {
+  assigneePosition: [number, number];
+  typePosition: [number, number];
+  constructor(
+    assignee: string | undefined, 
+    type: string | undefined, 
+    assigneePosition: [number, number],
+    typePosition: [number, number]
+  ) {
     // check if type is defined, assignee must be defined
     if (type && !assignee) {
       throw new Error("assignee must be defined if type is defined");
     }
     this.assignee = assignee || "";
     this.type = type || "";
-    this.labelPosition = labelPosition;
+    // For backward compatibility, labelPosition is the assigneePosition
+    this.labelPosition = assigneePosition;
+    this.assigneePosition = assigneePosition;
+    this.typePosition = typePosition;
   }
 
   getText() {
@@ -38,11 +50,16 @@ MessageContext.prototype.Assignment = function () {
   const type = assignmentContext?.type()?.getFormattedText();
   // @ts-ignore
   const assigneeCtx = assignmentContext?.assignee();
-  const labelPosition: [number, number] = assigneeCtx
+  const assigneePosition: [number, number] = assigneeCtx
     ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
     : [-1, -1];
+  // @ts-ignore
+  const typeCtx = assignmentContext?.type();
+  const typePosition: [number, number] = typeCtx
+    ? [typeCtx.start.start, typeCtx.stop.stop]
+    : [-1, -1];
   if (assignee) {
-    return new Assignment(assignee, type, labelPosition);
+    return new Assignment(assignee, type, assigneePosition, typePosition);
   }
   return undefined;
 };
@@ -56,11 +73,16 @@ CreationContext.prototype.Assignment = function () {
   const type = assignmentContext?.type()?.getFormattedText();
   // @ts-ignore
   const assigneeCtx = assignmentContext?.assignee();
-  const labelPosition: [number, number] = assigneeCtx
+  const assigneePosition: [number, number] = assigneeCtx
     ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
     : [-1, -1];
+  // @ts-ignore
+  const typeCtx = assignmentContext?.type();
+  const typePosition: [number, number] = typeCtx
+    ? [typeCtx.start.start, typeCtx.stop.stop]
+    : [-1, -1];
   if (assignee) {
-    return new Assignment(assignee, type, labelPosition);
+    return new Assignment(assignee, type, assigneePosition, typePosition);
   }
   return undefined;
 };

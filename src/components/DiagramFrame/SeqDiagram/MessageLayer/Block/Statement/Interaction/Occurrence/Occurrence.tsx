@@ -9,6 +9,7 @@ import { coordinatesAtom } from "@/store/Store";
 import { Message } from "../../Message/Message";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 import { CSSProperties } from "react";
+import { AssignmentReturnLabel } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/AssignmentReturnLabel";
 
 export const Occurrence = (props: {
   context: any;
@@ -63,9 +64,14 @@ export const Occurrence = (props: {
     
     const assignment = props.context.Assignment();
     if (!assignment) return null;
-    const content = assignment.getText() || "";
-    if (!content) return null;
-    return { content, labelPosition: assignment.labelPosition };
+    const assignee = assignment.assignee || "";
+    if (!assignee) return null;
+    return {
+      assignee: assignment.assignee,
+      type: assignment.type,
+      assigneePosition: assignment.assigneePosition,
+      typePosition: assignment.typePosition,
+    };
   }, [props.context]);
 
   const statementNumber = props.number ? `${props.number}.${props.context?.Statements()?.length + 1}` : undefined;
@@ -113,8 +119,6 @@ export const Occurrence = (props: {
                 props.messageClassNames,
               )}
               context={props.context}
-              labelPosition={assigneeData.labelPosition}
-              content={assigneeData.content}
               rtl={!props.rtl}
               type="return"
               number={statementNumber}
@@ -124,8 +128,15 @@ export const Occurrence = (props: {
                   ? { width: `${props.interactionWidth}px`, transform: props.rtl ? `translateX(7px)` : `translateX(calc(-100% - 7px))` }
                   : undefined
               }
-              normalizeText={syncMessageNormalizer}
-            />
+            >
+              <AssignmentReturnLabel
+                assignee={assigneeData.assignee}
+                type={assigneeData.type}
+                assigneePosition={assigneeData.assigneePosition}
+                typePosition={assigneeData.typePosition}
+                normalizeText={syncMessageNormalizer}
+              />
+            </Message>
           </div>
         </div>
       )}

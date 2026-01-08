@@ -35,7 +35,7 @@ describe("message - complete", () => {
       expect(actual.type).toBe("");
     }
   });
-  
+
 });
 
 describe("message - incomplete", () => {
