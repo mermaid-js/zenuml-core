@@ -43,9 +43,11 @@ describe("Creation", () => {
     expect(
       creationWrapper.container.querySelector("div")?.dataset.signature,
     ).toBe("«create»");
-    expect(
-      creationWrapper.container.querySelector(".message span")?.textContent,
-    ).toBe("a");
+    // The CreationMessageLabel renders: «create» when no parameters
+    // For "a = new A", ParametersText() returns empty string (no parameters)
+    // So it shows the default "create" text
+    const messageText = creationWrapper.container.querySelector(".message .name")?.textContent;
+    expect(messageText).toBe("«create»");
 
     // -------------==a:A==-
     // --<<create>>-->[]

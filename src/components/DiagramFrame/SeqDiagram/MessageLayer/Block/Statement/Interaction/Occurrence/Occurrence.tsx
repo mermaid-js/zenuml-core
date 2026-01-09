@@ -9,6 +9,7 @@ import { coordinatesAtom } from "@/store/Store";
 import { Message } from "../../Message/Message";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 import { CSSProperties } from "react";
+import { AssignmentReturnLabel } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/AssignmentReturnLabel";
 
 export const Occurrence = (props: {
   context: any;
@@ -56,38 +57,21 @@ export const Occurrence = (props: {
   }, [props.context]);
 
   const assigneeData = useMemo(() => {
-    // Detect context type by checking available methods
-    const isCreation = typeof props.context?.creationBody === 'function';
-    const isMessage = typeof props.context?.messageBody === 'function' || typeof props.context?.Assignment === 'function';
-    
-    if (isCreation) {
-      const assignment = props.context?.creationBody()?.assignment();
-      if (!assignment) return null;
-      const assigneeCtx = assignment.assignee();
-      const typeCtx = assignment.type();
-      const assignee = assigneeCtx?.getFormattedText() || "";
-      const type = typeCtx?.getFormattedText() || "";
-      const content = assignee + (type ? ":" + type : "");
-      if (!content) return null;
-      const labelPosition: [number, number] = assigneeCtx 
-        ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
-        : [-1, -1];
-      return { content, labelPosition, context: props.context, isMessage: false };
+    // Check if context has Assignment function (works for both CreationContext and MessageContext)
+    if (typeof props.context?.Assignment !== 'function') {
+      return null;
     }
     
-    if (isMessage) {
-      const assignment = props.context?.Assignment();
-      if (!assignment) return null;
-      const assigneeCtx = props.context?.messageBody()?.assignment()?.assignee();
-      const content = assignment.getText() || "";
-      if (!content) return null;
-      const labelPosition: [number, number] = assigneeCtx
-        ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
-        : [-1, -1];
-      return { content, labelPosition, context: props.context, isMessage: true };
-    }
-    
-    return null;
+    const assignment = props.context.Assignment();
+    if (!assignment) return null;
+    const assignee = assignment.assignee || "";
+    if (!assignee) return null;
+    return {
+      assignee: assignment.assignee,
+      type: assignment.type,
+      assigneePosition: assignment.assigneePosition,
+      typePosition: assignment.typePosition,
+    };
   }, [props.context]);
 
   const statementNumber = props.number ? `${props.number}.${props.context?.Statements()?.length + 1}` : undefined;
@@ -125,7 +109,8 @@ export const Occurrence = (props: {
           collapsed={collapsed}
         ></Block>
       )}
-      {assigneeData && (!assigneeData.isMessage || !props.isSelf) && (
+      {/* Render return statement for non-self sync message and creation */}
+      {assigneeData && !props.isSelf && (
         <div className={cn("statement-container my-4")}>
           <div className={cn("interaction return relative right-to-left text-left text-sm text-skin-message")}>
             <Message
@@ -133,9 +118,7 @@ export const Occurrence = (props: {
                 "return transform -translate-y-full pointer-events-auto",
                 props.messageClassNames,
               )}
-              context={assigneeData.context}
-              labelPosition={assigneeData.labelPosition}
-              content={assigneeData.content}
+              context={props.context}
               rtl={!props.rtl}
               type="return"
               number={statementNumber}
@@ -145,8 +128,15 @@ export const Occurrence = (props: {
                   ? { width: `${props.interactionWidth}px`, transform: props.rtl ? `translateX(7px)` : `translateX(calc(-100% - 7px))` }
                   : undefined
               }
-              normalizeText={syncMessageNormalizer}
-            />
+            >
+              <AssignmentReturnLabel
+                assignee={assigneeData.assignee}
+                type={assigneeData.type}
+                assigneePosition={assigneeData.assigneePosition}
+                typePosition={assigneeData.typePosition}
+                normalizeText={syncMessageNormalizer}
+              />
+            </Message>
           </div>
         </div>
       )}

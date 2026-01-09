@@ -38,10 +38,10 @@ export class CreationStatementVM extends StatementVM {
       cursor += 22; // .occurrence, .min-h-6, .mt-[-2px]
     }
 
-    const assignment = this.creation?.creationBody?.()?.assignment?.();
+    const assignment = this.creation?.Assignment?.();
     if (assignment) {
       console.info(`creation::assignment::${participant}`);
-      cursor += 16;
+      cursor += 12;
     }
 
     const height = cursor - top;

@@ -2,6 +2,7 @@ import CommentClass from "@/components/Comment/Comment";
 import { cn } from "@/utils";
 import { SelfInvocation } from "./SelfInvocation/SelfInvocation";
 import { Message } from "../Message/Message";
+import { MessageLabel } from "../../../MessageLabel";
 import { Occurrence } from "./Occurrence/Occurrence";
 import { useAtomValue } from "jotai";
 import { cursorAtom } from "@/store/Store";
@@ -79,15 +80,18 @@ export const Interaction = (props: {
       ) : (
         <Message
           className={cn(messageClassNames)}
-          labelPosition={[start, stop]}
           textStyle={messageTextStyle}
           context={message}
-          content={signature}
           rtl={rightToLeft}
           number={props.number}
           type="sync"
-          normalizeText={syncMessageNormalizer}
-        />
+        >
+          <MessageLabel
+            labelText={signature}
+            labelPosition={[start, stop]}
+            normalizeText={syncMessageNormalizer}
+          />
+        </Message>
       )}
       <Occurrence
         context={message}
