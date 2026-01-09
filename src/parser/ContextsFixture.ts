@@ -13,7 +13,7 @@ function createParser(code: any) {
   return parser;
 }
 
-// eslint-disable-next-line no-unused-vars
+ 
 function createParseFunction(parseMethod: (parser: sequenceParser) => any) {
   return (code: string) => {
     const parser = createParser(code);

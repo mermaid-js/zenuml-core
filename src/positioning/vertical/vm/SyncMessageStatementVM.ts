@@ -22,17 +22,7 @@ export class SyncMessageStatementVM extends StatementVM {
     const target = this.message.Owner?.() || _STARTER_;
     const block = this.message.braceBlock?.()?.block?.();
 
-    // const signature = this.message.SignatureText?.() || "";
-    const assignee = this.message.Assignment?.()?.getText?.();
-    // console.info(
-    //   "syncMessageVM::start",
-    //   signature,
-    //   source,
-    //   target,
-    //   assignee,
-    //   top,
-    //   Boolean(block),
-    // );
+    const assignee = this.message.Assignment?.();
 
     const isSelf = source === target;
     const messageHeight = isSelf ? 30 : 16;

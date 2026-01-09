@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
 import { EventBus } from "@/EventBus";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
+import { CreationMessageLabel } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/CreationMessageLabel";
 
 export const Creation = (props: {
   context: any;
@@ -102,16 +103,18 @@ export const Creation = (props: {
             messageClassNames,
           )}
           context={creation}
-          labelPosition={[start, stop]}
-          readonly={!props.context?.creation()?.isParamValid?.()}
-          content={creation?.ParametersText()}
           rtl={rightToLeft}
           type="creation"
           number={props.number}
           textStyle={messageTextStyle}
           style={{ width: `calc(100% - ${containerOffset}px)` }}
-          normalizeText={syncMessageNormalizer}
-        />
+        >
+          <CreationMessageLabel
+            labelText={creation?.ParametersText()}
+            labelPosition={[start, stop]}
+            normalizeText={syncMessageNormalizer}
+          />
+        </Message>
       </div>
       <Occurrence
         context={creation}

@@ -70,6 +70,7 @@ import { cn } from "@/utils";
 import { Comment } from "../Comment/Comment";
 import { SelfInvocationAsync } from "./SelfInvocationAsync/SelfInvocationAsync";
 import { Message } from "../Message/Message";
+import { MessageLabel } from "../../../MessageLabel";
 import CommentClass from "@/components/Comment/Comment";
 import { useAtomValue } from "jotai";
 import { cursorAtom, onElementClickAtom } from "@/store/Store";
@@ -157,13 +158,16 @@ export const InteractionAsync = (props: {
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
           context={asyncMessage}
-          labelPosition={[start, stop]}
-          content={signature}
           rtl={rightToLeft}
           type="async"
           number={props.number}
-          normalizeText={asyncMessageNormalizer}
-        />
+        >
+          <MessageLabel
+            labelText={signature}
+            labelPosition={[start, stop]}
+            normalizeText={asyncMessageNormalizer}
+          />
+        </Message>
       )}
     </div>
   );

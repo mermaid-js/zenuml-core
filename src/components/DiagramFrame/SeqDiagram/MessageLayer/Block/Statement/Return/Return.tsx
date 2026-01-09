@@ -2,6 +2,7 @@ import CommentClass from "@/components/Comment/Comment";
 import { Comment } from "../Comment/Comment";
 import { cn } from "@/utils";
 import { Message } from "../Message/Message";
+import { MessageLabel } from "../../../MessageLabel";
 import { useAtomValue } from "jotai";
 import { onElementClickAtom } from "@/store/Store";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
@@ -97,13 +98,16 @@ export const Return = (props: {
           className={cn(props.commentObj?.messageClassNames)}
           textStyle={props.commentObj?.messageStyle}
           context={messageContext}
-          labelPosition={[start, stop]}
-          content={signature}
           rtl={rightToLeft}
           type="return"
           number={props.number}
-          normalizeText={syncMessageNormalizer}
-        />
+        >
+          <MessageLabel
+            labelText={signature}
+            labelPosition={[start, stop]}
+            normalizeText={syncMessageNormalizer}
+          />
+        </Message>
       )}
     </div>
   );
