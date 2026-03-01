@@ -40,7 +40,7 @@ interface Config {
   enableScopedTheming?: boolean;
   onThemeChange?: (data: { theme: string; scoped?: boolean }) => void;
   enableMultiTheme?: boolean;
-  stickyOffset?: number;
+  stickyOffset?: number | false;
   onContentChange?: (code: string) => void;
   onEventEmit?: (name: string, data: unknown) => void;
   mode?: RenderMode;
@@ -131,7 +131,7 @@ export default class ZenUml implements IZenUml {
     logger.debug("rendering", code, config);
     this._code = code === undefined ? this._code : code;
     this._theme = config?.theme || this._theme;
-    this.store.set(stickyOffsetAtom, config?.stickyOffset || 0);
+    this.store.set(stickyOffsetAtom, config?.stickyOffset ?? 0);
     this.store.set(themeAtom, this._theme || "default");
     this.store.set(
       enableScopedThemingAtom,

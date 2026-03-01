@@ -1,17 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useEffect, useRef } from 'react'
-import ZenUml from './core'
+import ZenUml from '../../core'
 
-const ZenUmlWrapper = ({ 
-  code, 
+const ZenUmlWrapper = ({
+  code,
   theme = 'default',
-  enableScopedTheming = false,
-  mode = 'Dynamic' as any
 }: {
   code: string
   theme?: string
-  enableScopedTheming?: boolean
-  mode?: 'Static' | 'Dynamic'
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const zenUmlRef = useRef<ZenUml | null>(null)
@@ -24,19 +20,15 @@ const ZenUmlWrapper = ({
 
   useEffect(() => {
     if (zenUmlRef.current) {
-      zenUmlRef.current.render(code, {
-        theme,
-        enableScopedTheming,
-        mode: mode as any,
-      })
+      zenUmlRef.current.render(code, { theme, mode: 'Static' as any })
     }
-  }, [code, theme, enableScopedTheming, mode])
+  }, [code, theme])
 
   return <div ref={containerRef} style={{ width: '100%', height: '500px' }} />
 }
 
 const meta: Meta<typeof ZenUmlWrapper> = {
-  title: 'ZenUML/Complete Integration',
+  title: 'ZenUML/DSL Features',
   component: ZenUmlWrapper,
   parameters: {
     layout: 'fullscreen',
@@ -47,54 +39,11 @@ const meta: Meta<typeof ZenUmlWrapper> = {
       control: 'select',
       options: ['default', 'blue', 'black-white', 'star-uml', 'blue-river'],
     },
-    enableScopedTheming: { control: 'boolean' },
-    mode: {
-      control: 'select',
-      options: ['Static', 'Dynamic'],
-    },
   },
 }
 
 export default meta
 type Story = StoryObj<typeof meta>
-
-export const SimpleSequence: Story = {
-  args: {
-    code: `Alice -> Bob: Hello Bob
-Bob -> Alice: Hello Alice
-Alice -> Bob: How are you?
-Bob -> Alice: I'm fine, thank you!`,
-    theme: 'default',
-    enableScopedTheming: false,
-    mode: 'Static',
-  },
-}
-
-export const ComplexInteraction: Story = {
-  args: {
-    code: `@Actor Client #FFAAAA
-@Database Database #FFFFAA
-@Boundary WebServer #AAFFAA
-
-Client->WebServer.authenticate() {
-  WebServer->Database.checkCredentials() {
-    alt valid credentials {
-      Database->WebServer: User data
-      WebServer->Client: Login successful
-    } else invalid credentials {
-      Database->WebServer: Error
-      WebServer->Client: Login failed
-      opt retry {
-        Client->WebServer: Retry login
-      }
-    }
-  }
-}`,
-    theme: 'default',
-    enableScopedTheming: false,
-    mode: 'Static',
-  },
-}
 
 export const AsyncMessaging: Story = {
   args: {
@@ -105,8 +54,6 @@ Worker -->> MessageQueue: Job completed
 MessageQueue -->> Frontend: Notification
 Backend --> Frontend: Response`,
     theme: 'blue',
-    enableScopedTheming: false,
-    mode: 'Static',
   },
 }
 
@@ -116,23 +63,23 @@ export const NestedFragments: Story = {
 
 alt authentication {
   System -> Database: Validate credentials
-  
+
   alt valid {
     Database -> System: Success
-    
+
     opt remember me {
       System -> CacheService: Store session
       CacheService -> System: Cached
     }
-    
+
     System -> User: Login successful
   } else invalid {
     Database -> System: Failure
     System -> User: Login failed
-    
+
     critical rate limiting {
       System -> RateLimiter: Check attempts
-      
+
       alt too many attempts {
         RateLimiter -> System: Block user
         System -> User: Account locked
@@ -143,7 +90,42 @@ alt authentication {
   }
 }`,
     theme: 'default',
-    enableScopedTheming: false,
-    mode: 'Static',
+  },
+}
+
+export const Participants: Story = {
+  args: {
+    code: `@Actor User #FFAAAA
+@Boundary API #AAFFAA
+@Control Service #AAAAFF
+@Database DB #FFFFAA
+@Entity Cache #FFAAFF
+
+User -> API: Request
+API -> Service: Process
+Service -> DB: Query
+DB -> Service: Result
+Service -> Cache: Store
+Cache -> Service: OK
+Service -> API: Response
+API -> User: Result`,
+    theme: 'default',
+  },
+}
+
+export const Creation: Story = {
+  args: {
+    code: `Client -> Server: Connect
+new Session
+Server -> Session: Initialize
+Session -> Server: Ready
+Server -> Client: Connected
+
+Client -> Server: Request
+Server -> Session.process() {
+  Session -> Server: Done
+}
+Server -> Client: Response`,
+    theme: 'default',
   },
 }

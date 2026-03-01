@@ -2,41 +2,51 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { DiagramFrame } from './DiagramFrame'
 import { createStore, Provider } from 'jotai'
 import { codeAtom, modeAtom, RenderMode } from '../../store/Store'
+import { useMemo } from 'react'
+import '../../assets/tailwind.css'
 
-const store = createStore()
+const DiagramFrameWithCode = ({ code }: { code: string }) => {
+  const store = useMemo(() => {
+    const s = createStore()
+    s.set(codeAtom, code)
+    s.set(modeAtom, RenderMode.Static)
+    return s
+  }, [code])
 
-const meta: Meta<typeof DiagramFrame> = {
+  return (
+    <Provider store={store}>
+      <div className="zenuml" style={{ width: '100%', height: '600px' }}>
+        <DiagramFrame />
+      </div>
+    </Provider>
+  )
+}
+
+const meta: Meta<typeof DiagramFrameWithCode> = {
   title: 'Components/DiagramFrame',
-  component: DiagramFrame,
+  tags: ['autodocs'],
+  component: DiagramFrameWithCode,
   parameters: {
     layout: 'fullscreen',
   },
-  decorators: [
-    (Story) => (
-      <Provider store={store}>
-        <div style={{ width: '100%', height: '600px' }}>
-          <Story />
-        </div>
-      </Provider>
-    ),
-  ],
+  argTypes: {
+    code: { control: 'text' },
+  },
 }
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  render: () => {
-    store.set(codeAtom, `Alice -> Bob: Hello Bob
-Bob -> Alice: Hello Alice`)
-    store.set(modeAtom, RenderMode.Static)
-    return <DiagramFrame />
+  args: {
+    code: `Alice -> Bob: Hello Bob
+Bob -> Alice: Hello Alice`,
   },
 }
 
 export const ComplexSequence: Story = {
-  render: () => {
-    store.set(codeAtom, `@Actor Client #FFAAAA
+  args: {
+    code: `@Actor Client #FFAAAA
 @Database Database #FFFFAA
 @Boundary WebServer #AAFFAA
 
@@ -50,15 +60,13 @@ Client->WebServer.doPost() {
   }
 
   WebServer->Client: Response
-}`)
-    store.set(modeAtom, RenderMode.Static)
-    return <DiagramFrame />
+}`,
   },
 }
 
 export const WithFragments: Story = {
-  render: () => {
-    store.set(codeAtom, `Alice -> Bob: Authentication Request
+  args: {
+    code: `Alice -> Bob: Authentication Request
 
 alt successful case {
   Bob -> Alice: Authentication Accepted
@@ -72,19 +80,15 @@ alt successful case {
 }
 
 Alice -> Bob: Another authentication Request
-Alice <- Bob: another authentication Response`)
-    store.set(modeAtom, RenderMode.Static)
-    return <DiagramFrame />
+Alice <- Bob: another authentication Response`,
   },
 }
 
 export const AsyncMessages: Story = {
-  render: () => {
-    store.set(codeAtom, `A -> B: Sync message
+  args: {
+    code: `A -> B: Sync message
 A ->> B: Async message
 B -->> A: Async response
-B --> A: Sync response`)
-    store.set(modeAtom, RenderMode.Static)
-    return <DiagramFrame />
+B --> A: Sync response`,
   },
 }
