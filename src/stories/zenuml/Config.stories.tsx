@@ -1,12 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useEffect, useRef } from 'react'
-import ZenUml from './core'
+import ZenUml from '../../core'
+
+const sampleCode = `@Actor Client #FFAAAA
+@Database Database #FFFFAA
+
+Client -> Server: Request
+Server -> Database.query() {
+  Database -> Server: Result
+}
+Server -> Client: Response`
 
 const ZenUmlWrapper = ({
   code,
   theme = 'default',
   enableScopedTheming = false,
-  mode = 'Dynamic' as any,
+  mode = 'Static' as any,
   stickyOffset,
 }: {
   code: string
@@ -39,7 +48,7 @@ const ZenUmlWrapper = ({
 }
 
 const meta: Meta<typeof ZenUmlWrapper> = {
-  title: 'ZenUML/Complete Integration',
+  title: 'ZenUML/Config',
   component: ZenUmlWrapper,
   parameters: {
     layout: 'fullscreen',
@@ -66,93 +75,10 @@ const meta: Meta<typeof ZenUmlWrapper> = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const SimpleSequence: Story = {
+export const Themes: Story = {
   args: {
-    code: `Alice -> Bob: Hello Bob
-Bob -> Alice: Hello Alice
-Alice -> Bob: How are you?
-Bob -> Alice: I'm fine, thank you!`,
+    code: sampleCode,
     theme: 'default',
-    enableScopedTheming: false,
-    mode: 'Static',
-  },
-}
-
-export const ComplexInteraction: Story = {
-  args: {
-    code: `@Actor Client #FFAAAA
-@Database Database #FFFFAA
-@Boundary WebServer #AAFFAA
-
-Client->WebServer.authenticate() {
-  WebServer->Database.checkCredentials() {
-    alt valid credentials {
-      Database->WebServer: User data
-      WebServer->Client: Login successful
-    } else invalid credentials {
-      Database->WebServer: Error
-      WebServer->Client: Login failed
-      opt retry {
-        Client->WebServer: Retry login
-      }
-    }
-  }
-}`,
-    theme: 'default',
-    enableScopedTheming: false,
-    mode: 'Static',
-  },
-}
-
-export const AsyncMessaging: Story = {
-  args: {
-    code: `Frontend -> Backend: Sync request
-Frontend ->> MessageQueue: Async message
-MessageQueue ->> Worker: Process job
-Worker -->> MessageQueue: Job completed
-MessageQueue -->> Frontend: Notification
-Backend --> Frontend: Response`,
-    theme: 'blue',
-    enableScopedTheming: false,
-    mode: 'Static',
-  },
-}
-
-export const NestedFragments: Story = {
-  args: {
-    code: `User -> System: Login request
-
-alt authentication {
-  System -> Database: Validate credentials
-
-  alt valid {
-    Database -> System: Success
-
-    opt remember me {
-      System -> CacheService: Store session
-      CacheService -> System: Cached
-    }
-
-    System -> User: Login successful
-  } else invalid {
-    Database -> System: Failure
-    System -> User: Login failed
-
-    critical rate limiting {
-      System -> RateLimiter: Check attempts
-
-      alt too many attempts {
-        RateLimiter -> System: Block user
-        System -> User: Account locked
-      } else within limits {
-        RateLimiter -> System: Allow retry
-      }
-    }
-  }
-}`,
-    theme: 'default',
-    enableScopedTheming: false,
-    mode: 'Static',
   },
 }
 
@@ -202,4 +128,25 @@ export const StickyEnabled: StoryObj = {
 export const StickyDisabled: StoryObj = {
   render: () => <StickyDemoWrapper code={longCode} stickyOffset={false} />,
   parameters: { layout: 'fullscreen' },
+}
+
+export const StickyWithOffset: StoryObj = {
+  render: () => <StickyDemoWrapper code={longCode} stickyOffset={50} />,
+  parameters: { layout: 'fullscreen' },
+}
+
+export const RenderMode: Story = {
+  args: {
+    code: sampleCode,
+    mode: 'Dynamic',
+    theme: 'default',
+  },
+}
+
+export const ScopedTheming: Story = {
+  args: {
+    code: sampleCode,
+    theme: 'blue',
+    enableScopedTheming: true,
+  },
 }

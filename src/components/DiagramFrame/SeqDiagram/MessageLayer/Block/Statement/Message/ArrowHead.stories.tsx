@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { ArrowHead } from './ArrowHead'
 
 const meta: Meta<typeof ArrowHead> = {
-  title: 'Components/ArrowHead',
+  title: 'Components/Sequence Diagram/ArrowHead',
   component: ArrowHead,
   parameters: {
     layout: 'centered',

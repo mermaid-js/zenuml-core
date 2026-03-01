@@ -6,7 +6,7 @@ import { modeAtom, RenderMode } from '../../../../store/Store'
 const store = createStore();
 
 const meta: Meta<typeof ParticipantLabel> = {
-  title: 'Components/ParticipantLabel',
+  title: 'Components/Sequence Diagram/ParticipantLabel',
   component: ParticipantLabel,
   parameters: {
     layout: 'centered',
