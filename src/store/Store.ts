@@ -99,7 +99,7 @@ export const enableNumberingAtom = atomWithLocalStorage(
   true,
 );
 
-export const stickyOffsetAtom = atom(0);
+export const stickyOffsetAtom = atom<number | false>(0);
 
 export const diagramElementAtom = atom<HTMLElement | null>(null);
 

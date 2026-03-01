@@ -53,7 +53,7 @@ export const Participant = (props: {
   const calcOffset = () => {
     const participantOffsetTop = props.offsetTop2 || 0;
     let top = intersectionTop + scrollTop;
-    if (intersectionTop > INTERSECTION_ERROR_MARGIN && stickyOffset)
+    if (intersectionTop > INTERSECTION_ERROR_MARGIN && stickyOffset !== false)
       top += stickyOffset;
     const diagramHeight = diagramElement?.clientHeight || 0;
     const diagramTop = diagramElement
@@ -66,7 +66,8 @@ export const Participant = (props: {
     );
   };
 
-  const stickyVerticalOffset = mode === RenderMode.Static ? 0 : calcOffset();
+  // We use this method to simulate sticky behavior. CSS sticky is not working out of an iframe.
+  const stickyVerticalOffset = mode === RenderMode.Static || stickyOffset === false ? 0 : calcOffset();
 
   const backgroundColor = props.entity.color
     ? removeAlpha(props.entity.color)

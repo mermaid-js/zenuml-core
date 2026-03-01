@@ -2,16 +2,18 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { useEffect, useRef } from 'react'
 import ZenUml from './core'
 
-const ZenUmlWrapper = ({ 
-  code, 
+const ZenUmlWrapper = ({
+  code,
   theme = 'default',
   enableScopedTheming = false,
-  mode = 'Dynamic' as any
+  mode = 'Dynamic' as any,
+  stickyOffset,
 }: {
   code: string
   theme?: string
   enableScopedTheming?: boolean
   mode?: 'Static' | 'Dynamic'
+  stickyOffset?: number | false
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const zenUmlRef = useRef<ZenUml | null>(null)
@@ -28,9 +30,10 @@ const ZenUmlWrapper = ({
         theme,
         enableScopedTheming,
         mode: mode as any,
+        stickyOffset,
       })
     }
-  }, [code, theme, enableScopedTheming, mode])
+  }, [code, theme, enableScopedTheming, mode, stickyOffset])
 
   return <div ref={containerRef} style={{ width: '100%', height: '500px' }} />
 }
@@ -51,6 +54,11 @@ const meta: Meta<typeof ZenUmlWrapper> = {
     mode: {
       control: 'select',
       options: ['Static', 'Dynamic'],
+    },
+    stickyOffset: {
+      control: 'select',
+      options: [0, 50, false],
+      description: 'Sticky offset in pixels, or false to disable sticky participants',
     },
   },
 }
@@ -116,23 +124,23 @@ export const NestedFragments: Story = {
 
 alt authentication {
   System -> Database: Validate credentials
-  
+
   alt valid {
     Database -> System: Success
-    
+
     opt remember me {
       System -> CacheService: Store session
       CacheService -> System: Cached
     }
-    
+
     System -> User: Login successful
   } else invalid {
     Database -> System: Failure
     System -> User: Login failed
-    
+
     critical rate limiting {
       System -> RateLimiter: Check attempts
-      
+
       alt too many attempts {
         RateLimiter -> System: Block user
         System -> User: Account locked
@@ -146,4 +154,52 @@ alt authentication {
     enableScopedTheming: false,
     mode: 'Static',
   },
+}
+
+const longCode = Array.from({ length: 30 }, (_, i) =>
+  i % 2 === 0
+    ? `Alice -> Bob: Request ${i + 1}`
+    : `Bob -> Alice: Response ${i + 1}`
+).join('\n')
+
+const StickyDemoWrapper = ({
+  code,
+  stickyOffset,
+}: {
+  code: string
+  stickyOffset?: number | false
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const zenUmlRef = useRef<ZenUml | null>(null)
+
+  useEffect(() => {
+    if (containerRef.current && !zenUmlRef.current) {
+      zenUmlRef.current = new ZenUml(containerRef.current)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (zenUmlRef.current) {
+      zenUmlRef.current.render(code, { stickyOffset })
+    }
+  }, [code, stickyOffset])
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h2 style={{ marginBottom: '10px' }}>
+        stickyOffset: {String(stickyOffset)} — Scroll down to see the effect
+      </h2>
+      <div ref={containerRef} style={{ width: '100%' }} />
+    </div>
+  )
+}
+
+export const StickyEnabled: StoryObj = {
+  render: () => <StickyDemoWrapper code={longCode} stickyOffset={0} />,
+  parameters: { layout: 'fullscreen' },
+}
+
+export const StickyDisabled: StoryObj = {
+  render: () => <StickyDemoWrapper code={longCode} stickyOffset={false} />,
+  parameters: { layout: 'fullscreen' },
 }
