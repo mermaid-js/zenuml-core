@@ -1,44 +1,60 @@
 # Server-Side Vertical Coordinates
 
-This branch replaces browser-driven measurements with a deterministic, server-side pass that computes every vertical position in a sequence diagram. The goal is to make layout reproducible in CI without Playwright/Chromium while staying pixel‑aligned with the DOM renderer.
+This module replaces browser-driven measurements with a deterministic, server-side pass that computes every vertical position in a sequence diagram. The goal is to make layout reproducible without Playwright/Chromium while staying pixel-aligned with the DOM renderer.
 
 ## Entry Point: `VerticalCoordinates`
-- File: `src/positioning/VerticalCoordinates.ts`
-- Inputs: `rootContext` (parser AST), optional `theme`, `originParticipant`, and `participantOrder` (for fragment-origin decisions).
-- Outputs: `totalHeight` plus lookup helpers: `getStatementTop/Height/Anchors`, `getCreationTop`, `entries()`, and padding getters mirrored from theme metrics.
-- Statement keys are stable `(start.stop)` ranges via `vertical/StatementIdentifier.ts`, so browser and server agree on lookups.
+
+- **File**: `src/positioning/VerticalCoordinates.ts`
+- **Input**: `rootContext` (parser AST root)
+- **Constructor**: Parses participants and messages from the AST, then runs the VM layout pass starting at `top=56` (matching `.message-layer .pt-14`).
+
+### Public API
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getCreationTop(participant)` | `number \| undefined` | Earliest creation anchor for a participant (used for lifeline start positioning) |
+| `getStatementCoordinate(key)` | `StatementCoordinate \| undefined` | Lookup by statement key string |
+| `getStatementCoordinateFor(statement)` | `StatementCoordinate \| undefined` | Lookup by parser statement context (avoids key-format coupling) |
+| `entries()` | `Array<[string, StatementCoordinate]>` | Snapshot of all statement coordinates |
+| `getTotalHeight()` | `number` | Total layout height (from `BlockVM.layout()` return value) |
+
+### StatementCoordinate
+
+```typescript
+{ top: number; height: number; kind: StatementKind }
+```
+
+Where `StatementKind` is one of: `sync`, `async`, `creation`, `return`, `divider`, `empty`, `alt`, `loop`, `opt`, `par`, `critical`, `section`, `tcf`, `ref`.
+
+### Statement Keys
+
+Keys are `(start.stop)` token ranges via `vertical/StatementIdentifier.ts`, ensuring browser and server agree on lookups.
 
 ## Pipeline Overview
-1) **Metrics** — `vertical/LayoutMetrics.ts` codifies every CSS dimension (margins, paddings, message heights, fragment gaps, etc.). Theme overrides (e.g., `theme-clean-light`) merge on top of the defaults.
-2) **Markdown** — `vertical/MarkdownMeasurer.ts` tokenizes comments with `marked` and sums line heights (wrapping is ignored) using the same font metrics the renderer uses.
-3) **VM Layer** — `src/vm/*` mirrors the renderer’s stacking rules. `createBlockVM` walks `stat` nodes, instantiates a `StatementVM` per construct, and accumulates cursor positions with small offsets to match DOM quirks.
-4) **Recording** — Each `StatementVM.measure` returns a `StatementCoordinate` (top, height, anchors, meta). The runtime’s `recordCoordinate` stitches these into a map keyed by parser range; `updateCreationTop` captures the earliest creation anchor per participant for lifeline alignment.
 
-## Per-Statement Behaviours (highlights)
-- **Sync messages** (`SyncMessageStatementVM`): comment height first, then message height (self vs normal), then occurrence height (block content or min height). Adds `return` anchor/height when the message has an assignment target.
-- **Async messages** (`AsyncMessageStatementVM`): comment + async height (self vs normal). No occurrences are added here by design.
-- **Creations** (`CreationStatementVM`): fixed creation arrow + occurrence. Optionally appends return height when an assignment is present. Adjusts anchors for:
-  - Alt branches (`creationAltBranchOffset`/`creationAltBranchInset`)
-  - Try/catch segments (`creationTcfSegmentOffset`)
-  - Section fragments (`creationSectionOffset`)
-  - Subsequent siblings inside PAR (`creationParSiblingOffset`)
-  The final anchor also updates `creationTopByParticipant` for lifeline starts.
-- **Fragments** (`Fragment*VM`): shared header + optional condition line + body + padding. ALT/Try-catch add per-branch headers and gaps; PAR/LOOP/OPT/SECTION/CRITICAL reuse `FragmentSingleBlockVM`; REF is header-only.
-- **Returns/Dividers/Empty**: simple fixed heights from metrics; returns also include optional comment height.
-- **Block cursor tuning**: `BlockVM` applies small `cursorOffsets` and `heightOffsets` for loop/alt/par/opt/tcf to stay pixel-aligned with DOM stacking.
+1. **Metrics** — `vertical/LayoutMetrics.ts` codifies every CSS dimension (margins, paddings, message heights, fragment gaps). Theme overrides merge on top of defaults.
+2. **Markdown** — `vertical/MarkdownMeasurer.ts` tokenizes comments with `marked` and sums line heights (wrapping is ignored).
+3. **VM Layer** — `vertical/vm/` mirrors the renderer's stacking rules. `createStatementVM` walks `stat` nodes, instantiates a `StatementVM` per construct, and accumulates cursor positions.
+4. **Recording** — Each `StatementVM.measure(top, origin)` returns a `StatementCoordinate`. The runtime's `recordCoordinate` stitches these into a map; `updateCreationTop` captures creation anchors per participant.
+
+## Per-Statement Behaviours
+
+- **Sync messages** (`SyncMessageStatementVM`): comment height + message height (self vs normal) + occurrence height (block content or min height). Assignment adds return height.
+- **Async messages** (`AsyncMessageStatementVM`): comment + async height. No occurrences.
+- **Creations** (`CreationStatementVM`): fixed creation arrow + occurrence. Assignment appends return height. Updates `creationTopByParticipant` for lifeline starts.
+- **Fragments** (`Fragment*VM`): header + optional condition + body + padding. ALT/TCF add per-branch headers; PAR/LOOP/OPT/SECTION/CRITICAL use `FragmentSingleBlockVM`; REF is header-only.
+- **Returns/Dividers/Empty**: simple fixed heights from metrics.
 
 ## Consuming the Coordinates
-- Rendering: use anchors (`message | occurrence | comment | return`) to align message arrows, occurrences, comments, and return arrows between canvas/SVG layers.
-- Lifelines: call `getCreationTop(participant)` to position lifeline start points based on the earliest creation anchor.
-- Testing: `src/positioning/VerticalCoordinates.spec.ts` covers creation offsets, ALT alignment, try/catch adjustments, PAR sibling inset, and inline message/creation spacing.
-- Snapshots: run Playwright with `VERTICAL_MODE=browser` to bypass server-side coordinates and let DOM measurements drive layout when regenerating screenshots (`playwright test --update-snapshots`). Default is `server`. Note: this is a runtime variable injected via `window.__ZEN_VERTICAL_MODE`, not a Vite build-time variable.
+
+- **Rendering**: Use `getStatementCoordinateFor(statement)` to position elements.
+- **Lifelines**: Call `getCreationTop(participant)` for lifeline start points.
+- **Total sizing**: Use `getTotalHeight()` for diagram height.
+- **Testing**: `src/positioning/VerticalCoordinates.spec.ts` covers crash regression and API contract.
+- **Vertical mode**: Set `window.__ZEN_VERTICAL_MODE` to `"browser"` to bypass server-side coordinates (for Playwright snapshot regeneration). Default is `"server"`.
 
 ## Keeping It Accurate
-- Any CSS/tailwind spacing change must update `LayoutMetrics` (and theme overrides) to keep server math in sync with the DOM.
-- Comment heights assume no line wrapping; adjust `commentLineHeight`/`commentCodeLineHeight` in `LayoutMetrics` if fonts change.
-- When adding a new statement type, implement a `StatementVM`, register it in `createStatementVM`, and extend `StatementTypes`/tests to lock the expected coordinates.
 
-## What Changed From `main`
-- Removed reliance on Playwright/Chromium for vertical measurements; all math now happens during AST traversal on the server.
-- Introduced deterministic metrics + markdown measuring to reproduce DOM heights.
-- Added VM layer and coordinate map so renderers/tests can query positions without loading a browser.
+- Any CSS/Tailwind spacing change must update `LayoutMetrics` to keep server math in sync with DOM.
+- Comment heights assume no line wrapping; adjust `commentLineHeight`/`commentCodeLineHeight` in `LayoutMetrics` if fonts change.
+- When adding a new statement type: implement a `StatementVM`, register in `createStatementVM`, extend `StatementTypes`, and add tests.

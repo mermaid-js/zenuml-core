@@ -67,6 +67,15 @@ describe("VerticalCoordinates", () => {
       expect(first).toEqual(second);
     });
 
+    it("entries() returns a new snapshot each call (caller mutations don't affect internals)", () => {
+      const rootContext = RootContext("A.method()");
+      const vc = new VerticalCoordinates(rootContext);
+      const first = vc.entries();
+      first.length = 0; // mutate the returned array
+      const second = vc.entries();
+      expect(second.length).toBeGreaterThan(0);
+    });
+
     it("getTotalHeight() matches layout return value", () => {
       const rootContext = RootContext("A.a(){B.b()}");
       const vc = new VerticalCoordinates(rootContext);
