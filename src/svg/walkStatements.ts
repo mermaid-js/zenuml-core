@@ -37,6 +37,12 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       const to = message.Owner?.() || _STARTER_;
       const label = message.SignatureText?.() || "";
       results.push({ key, kind: "sync", from, to, label, isSelf: from === to });
+
+      // Recurse into nested block (e.g. A.m() { B.n() })
+      const nestedBlock = message.braceBlock?.()?.block?.();
+      if (nestedBlock) {
+        results.push(...walkBlock(nestedBlock, to));
+      }
       continue;
     }
 
@@ -55,6 +61,12 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       const to = creation.Owner?.() || "";
       const label = creation.getFormattedText?.() || "";
       results.push({ key, kind: "creation", from, to, label, isSelf: false });
+
+      // Recurse into creation block (e.g. new B() { C.method() })
+      const creationBlock = creation.braceBlock?.()?.block?.();
+      if (creationBlock) {
+        results.push(...walkBlock(creationBlock, to || currentOrigin));
+      }
       continue;
     }
 
@@ -72,9 +84,63 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       continue;
     }
 
-    // Fragments — just record their existence, deeper handling later
+    // Fragments — record and recurse into their blocks
     results.push({ key, kind: "fragment", from: "", to: "", label: "", isSelf: false });
+    walkFragmentBlocks(stat, currentOrigin, results);
   }
 
   return results;
+}
+
+/** Recurse into fragment inner blocks (loop, opt, alt, try/catch, etc.) */
+function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[]): void {
+  // Single-block fragments: loop, opt, par, critical, section
+  for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
+    const frag = stat[kind]?.();
+    if (frag) {
+      const block = frag.braceBlock?.()?.block?.();
+      if (block) results.push(...walkBlock(block, origin));
+      return;
+    }
+  }
+
+  // Alt (if/else if/else) — multiple blocks
+  const alt = stat.alt?.();
+  if (alt) {
+    const ifBlock = alt.ifBlock?.();
+    if (ifBlock) {
+      const block = ifBlock.braceBlock?.()?.block?.();
+      if (block) results.push(...walkBlock(block, origin));
+    }
+    for (const elseIf of alt.elseIfBlock?.() || []) {
+      const block = elseIf.braceBlock?.()?.block?.();
+      if (block) results.push(...walkBlock(block, origin));
+    }
+    const elseBlock = alt.elseBlock?.();
+    if (elseBlock) {
+      const block = elseBlock.braceBlock?.()?.block?.();
+      if (block) results.push(...walkBlock(block, origin));
+    }
+    return;
+  }
+
+  // Try/catch/finally — multiple blocks
+  const tcf = stat.tcf?.();
+  if (tcf) {
+    const tryBlock = tcf.tryBlock?.();
+    if (tryBlock) {
+      const block = tryBlock.braceBlock?.()?.block?.();
+      if (block) results.push(...walkBlock(block, origin));
+    }
+    for (const catchBlock of tcf.catchBlock?.() || []) {
+      const block = catchBlock.braceBlock?.()?.block?.();
+      if (block) results.push(...walkBlock(block, origin));
+    }
+    const finallyBlock = tcf.finallyBlock?.();
+    if (finallyBlock) {
+      const block = finallyBlock.braceBlock?.()?.block?.();
+      if (block) results.push(...walkBlock(block, origin));
+    }
+    return;
+  }
 }

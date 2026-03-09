@@ -4,11 +4,12 @@
  */
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
+import type { IParticipantModel } from "@/parser/IParticipantModel";
 import {
   PARTICIPANT_HEIGHT,
   PARTICIPANT_TOP_SPACE_FOR_GROUP,
 } from "@/positioning/Constants";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { walkStatements } from "./walkStatements";
 import type {
   DiagramGeometry,
@@ -27,11 +28,11 @@ export interface BuildGeometryInput {
 
 export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
   const { rootContext, coordinates, verticalCoordinates, title } = input;
-  const participantNames = coordinates.orderedParticipantNames();
+  const participantModels = OrderedParticipants(rootContext);
   const totalHeight = verticalCoordinates.getTotalHeight();
 
   const participants = buildParticipants(
-    participantNames,
+    participantModels,
     coordinates,
     verticalCoordinates,
   );
@@ -66,25 +67,25 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
 }
 
 function buildParticipants(
-  names: string[],
+  models: IParticipantModel[],
   coordinates: Coordinates,
   verticalCoordinates: VerticalCoordinates,
 ): ParticipantGeometry[] {
-  return names
-    .filter((name) => name !== _STARTER_)
-    .map((name) => {
-      const centerX = coordinates.getPosition(name);
-      const halfWidth = coordinates.half(name);
+  return models
+    .filter((m) => m.name !== _STARTER_)
+    .map((m) => {
+      const centerX = coordinates.getPosition(m.name);
+      const halfWidth = coordinates.half(m.name);
       const width = halfWidth * 2;
-      const creationTop = verticalCoordinates.getCreationTop(name);
+      const creationTop = verticalCoordinates.getCreationTop(m.name);
       const y =
         creationTop != null
           ? Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, creationTop)
           : PARTICIPANT_TOP_SPACE_FOR_GROUP;
 
       return {
-        name,
-        label: name,
+        name: m.name,
+        label: m.getDisplayName(),
         x: centerX,
         y,
         width,

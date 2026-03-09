@@ -85,9 +85,9 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
     parts.push(renderParticipant(p));
   }
 
-  // Bottom participants
+  // Bottom participants (placed at bottom of lifeline area, inside viewport)
   for (const p of g.participants) {
-    parts.push(renderParticipantBottom(p, g.height));
+    parts.push(renderParticipantBottom(p, g.height - p.height));
   }
 
   // Messages
