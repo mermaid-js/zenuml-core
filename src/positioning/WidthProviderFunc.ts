@@ -1,5 +1,57 @@
 import { TextType } from "@/positioning/Coordinate";
 import { getCache, setCache } from "./../utils/RenderingCache";
+
+const FONT_FAMILY = "Helvetica, Verdana, serif";
+const FONT_SIZE_MESSAGE = "14px"; // 0.875rem at 16px base
+const FONT_SIZE_PARTICIPANT = "16px"; // 1rem
+
+function getFontSpec(type: TextType): string {
+  const size =
+    type === TextType.MessageContent ? FONT_SIZE_MESSAGE : FONT_SIZE_PARTICIPANT;
+  return `${size} ${FONT_FAMILY}`;
+}
+
+let canvasCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
+
+function getCanvasContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null {
+  if (canvasCtx) return canvasCtx;
+  try {
+    if (typeof OffscreenCanvas !== "undefined") {
+      canvasCtx = new OffscreenCanvas(1, 1).getContext("2d");
+    } else if (typeof document !== "undefined") {
+      canvasCtx = document.createElement("canvas").getContext("2d");
+    }
+  } catch {
+    // no canvas available
+  }
+  return canvasCtx;
+}
+
+export function WidthProviderOnCanvas(
+  text: string,
+  type: TextType,
+): number {
+  const cacheKey = `WidthProviderOnCanvas_${text}_${type}`;
+  const cacheValue = getCache(cacheKey);
+  if (cacheValue != null) {
+    return cacheValue;
+  }
+
+  const ctx = getCanvasContext();
+  if (!ctx) {
+    // Fallback: estimate based on character count
+    const fontSize = type === TextType.MessageContent ? 14 : 16;
+    const width = Math.ceil(text.length * fontSize * 0.6);
+    setCache(cacheKey, width, true);
+    return width;
+  }
+
+  ctx.font = getFontSpec(type);
+  const width = Math.ceil(ctx.measureText(text).width);
+  setCache(cacheKey, width, true);
+  return width;
+}
+
 export default function WidthProviderOnBrowser(
   text: string,
   type: TextType,
