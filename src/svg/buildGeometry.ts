@@ -9,10 +9,13 @@ import {
   PARTICIPANT_TOP_SPACE_FOR_GROUP,
 } from "@/positioning/Constants";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { walkStatements } from "./walkStatements";
 import type {
   DiagramGeometry,
   ParticipantGeometry,
   LifelineGeometry,
+  MessageGeometry,
+  SelfCallGeometry,
 } from "./geometry";
 
 export interface BuildGeometryInput {
@@ -23,7 +26,7 @@ export interface BuildGeometryInput {
 }
 
 export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
-  const { coordinates, verticalCoordinates, title } = input;
+  const { rootContext, coordinates, verticalCoordinates, title } = input;
   const participantNames = coordinates.orderedParticipantNames();
   const totalHeight = verticalCoordinates.getTotalHeight();
 
@@ -37,6 +40,12 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     totalHeight,
   );
 
+  const { messages, selfCalls } = buildMessages(
+    rootContext,
+    coordinates,
+    verticalCoordinates,
+  );
+
   const diagramWidth = coordinates.getWidth();
   const diagramHeight = totalHeight + PARTICIPANT_HEIGHT; // bottom participant row
 
@@ -46,8 +55,8 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     title,
     participants,
     lifelines,
-    messages: [],
-    selfCalls: [],
+    messages,
+    selfCalls,
     occurrences: [],
     creations: [],
     fragments: [],
@@ -81,7 +90,7 @@ function buildParticipants(
         width,
         height: PARTICIPANT_HEIGHT,
         isStarter: false,
-        showBottom: creationTop == null, // only show bottom for non-created participants
+        showBottom: creationTop == null,
       };
     });
 }
@@ -97,4 +106,48 @@ function buildLifelines(
     bottomY: totalHeight,
     dashed: true,
   }));
+}
+
+function buildMessages(
+  rootContext: any,
+  coordinates: Coordinates,
+  verticalCoordinates: VerticalCoordinates,
+): { messages: MessageGeometry[]; selfCalls: SelfCallGeometry[] } {
+  const statements = walkStatements(rootContext);
+  const messages: MessageGeometry[] = [];
+  const selfCalls: SelfCallGeometry[] = [];
+
+  for (const info of statements) {
+    if (info.kind !== "sync" && info.kind !== "async") continue;
+
+    const coord = verticalCoordinates.getStatementCoordinate(info.key);
+    if (!coord) continue;
+
+    const fromX = coordinates.getPosition(info.from);
+    const toX = coordinates.getPosition(info.to);
+    const messageY = coord.top + 16; // approximate message line position within statement
+
+    if (info.isSelf) {
+      selfCalls.push({
+        x: fromX,
+        y: messageY,
+        width: 40,
+        height: 30,
+        label: info.label,
+        arrowStyle: info.kind === "async" ? "open" : "solid",
+      });
+    } else {
+      messages.push({
+        fromX,
+        toX,
+        y: messageY,
+        label: info.label,
+        arrowStyle: info.kind === "async" ? "open" : "solid",
+        isSelf: false,
+        isReverse: toX < fromX,
+      });
+    }
+  }
+
+  return { messages, selfCalls };
 }

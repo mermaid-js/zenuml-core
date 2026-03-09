@@ -10,6 +10,7 @@ import { WidthProviderOnCanvas } from "@/positioning/WidthProviderFunc";
 import { buildGeometry } from "./buildGeometry";
 import { renderParticipant, renderParticipantBottom } from "./components/participant";
 import { renderLifeline } from "./components/lifeline";
+import { renderMessage, renderSelfCall } from "./components/message";
 import type { DiagramGeometry } from "./geometry";
 
 export interface RenderOptions {
@@ -26,6 +27,9 @@ const DEFAULT_THEME_STYLES = `
   .participant-box { fill: #e2e2f0; stroke: #333; stroke-width: 1; }
   .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #333; }
   .lifeline { stroke: #999; stroke-width: 1; }
+  .message-line { stroke: #333; stroke-width: 1; }
+  .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; }
+  .arrow-head { fill: #333; stroke: #333; stroke-width: 1; }
 `;
 
 export function renderToSvg(code: string, options?: RenderOptions): RenderResult {
@@ -86,7 +90,17 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
     parts.push(renderParticipantBottom(p, g.height));
   }
 
-  // TODO: messages, occurrences, fragments, dividers, returns
+  // Messages
+  for (const m of g.messages) {
+    parts.push(renderMessage(m));
+  }
+
+  // Self-calls
+  for (const s of g.selfCalls) {
+    parts.push(renderSelfCall(s));
+  }
+
+  // TODO: occurrences, fragments, dividers, returns
 
   const titleSvg = g.title
     ? `<text x="${viewWidth / 2}" y="15" text-anchor="middle" class="diagram-title" font-size="18" font-weight="bold">${escXml(g.title)}</text>`

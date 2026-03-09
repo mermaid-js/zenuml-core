@@ -47,6 +47,21 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain('data-participant="C"');
   });
 
+  it("renders message lines and arrows", () => {
+    const result = renderToSvg("A -> B: hello");
+    expect(result.svg).toContain('class="message"');
+    expect(result.svg).toContain('class="message-line"');
+    expect(result.svg).toContain('class="arrow-head"');
+    expect(result.svg).toContain("hello");
+  });
+
+  it("renders async messages with open arrow", () => {
+    // ZenUML async syntax: A -> B: msg (no block body)
+    const result = renderToSvg("A -> B: async call");
+    expect(result.svg).toContain('class="message"');
+    expect(result.svg).toContain("async call");
+  });
+
   it("escapes special characters in labels", () => {
     const result = renderToSvg('"A<B>" -> "C&D": hello');
     // Participant names with special chars should be escaped
