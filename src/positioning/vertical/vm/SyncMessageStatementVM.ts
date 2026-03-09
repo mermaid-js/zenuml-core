@@ -14,7 +14,7 @@ export class SyncMessageStatementVM extends StatementVM {
     super(statement, runtime);
   }
 
-  public measure(top: number): StatementCoordinate {
+  public measure(top: number, origin: string): StatementCoordinate {
     const commentHeight = this.measureComment(this.message);
     let cursor = top + commentHeight;
 
