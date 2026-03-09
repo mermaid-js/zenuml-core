@@ -32,4 +32,48 @@ describe("VerticalCoordinates", () => {
     const rootContext = RootContext("A=new A()");
     expect(() => new VerticalCoordinates(rootContext)).not.toThrow();
   });
+
+  describe("public API", () => {
+    it("entries() returns statement coordinates", () => {
+      const rootContext = RootContext("A.method()");
+      const vc = new VerticalCoordinates(rootContext);
+      const entries = vc.entries();
+      expect(entries.length).toBeGreaterThan(0);
+      for (const [key, coord] of entries) {
+        expect(typeof key).toBe("string");
+        expect(typeof coord.top).toBe("number");
+        expect(typeof coord.height).toBe("number");
+        expect(typeof coord.kind).toBe("string");
+      }
+    });
+
+    it("getTotalHeight() returns a positive number", () => {
+      const rootContext = RootContext("A.method()");
+      const vc = new VerticalCoordinates(rootContext);
+      expect(vc.getTotalHeight()).toBeGreaterThan(0);
+    });
+
+    it("getStatementCoordinate() returns undefined for unknown key", () => {
+      const rootContext = RootContext("A.method()");
+      const vc = new VerticalCoordinates(rootContext);
+      expect(vc.getStatementCoordinate("nonexistent")).toBeUndefined();
+    });
+
+    it("entries() are stable across calls", () => {
+      const rootContext = RootContext("A.a()\nB.b()");
+      const vc = new VerticalCoordinates(rootContext);
+      const first = vc.entries();
+      const second = vc.entries();
+      expect(first).toEqual(second);
+    });
+
+    it("getTotalHeight() matches layout return value", () => {
+      const rootContext = RootContext("A.a(){B.b()}");
+      const vc = new VerticalCoordinates(rootContext);
+      const entries = vc.entries();
+      const maxBottom = Math.max(...entries.map(([, c]) => c.top + c.height));
+      // totalHeight comes from layout() which includes trailing margin
+      expect(vc.getTotalHeight()).toBeGreaterThanOrEqual(maxBottom);
+    });
+  });
 });
