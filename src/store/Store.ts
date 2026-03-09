@@ -17,9 +17,12 @@ const resolveVerticalMode = (): VerticalMode => {
 };
 
 export const resolveWidthProvider = (): WidthFunc => {
-  return import.meta.env.VITE_WIDTH_PROVIDER === "canvas"
-    ? WidthProviderOnCanvas
-    : WidthProviderOnBrowser;
+  const urlParam = typeof location !== "undefined"
+    ? new URLSearchParams(location.search).get("WIDTH_PROVIDER")
+    : null;
+  const mode = (urlParam || import.meta.env.VITE_WIDTH_PROVIDER) === "canvas" ? "canvas" : "browser";
+  console.debug(`[ZenUML] WidthProvider: ${mode}`);
+  return mode === "canvas" ? WidthProviderOnCanvas : WidthProviderOnBrowser;
 };
 
 /*

@@ -121,8 +121,9 @@
         <div
           class="bg-white rounded-lg shadow-lg editor-shadow overflow-hidden h-full col-span-2"
         >
-          <div class="bg-gray-800 text-white px-4 py-3">
+          <div class="bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
             <h3 class="font-medium">Preview</h3>
+            <button id="width-provider-toggle" class="text-xs px-2 py-1 rounded font-mono cursor-pointer hover:opacity-80 transition-opacity"></button>
           </div>
           <div style="height: calc(100% - 52px); overflow: auto" class="p-4">
             <pre class="zenuml" style="margin: 0"></pre>
@@ -226,6 +227,20 @@ WebApp --> Customer: Order confirmation`,
       } else {
         editor.setValue(examples.basic);
       }
+    </script>
+    <script type="module">
+      const params = new URLSearchParams(location.search);
+      const wp = params.get("WIDTH_PROVIDER") || import.meta.env.VITE_WIDTH_PROVIDER || "browser";
+      const toggle = document.getElementById("width-provider-toggle");
+      const isCanvas = wp === "canvas";
+      toggle.textContent = "WIDTH: " + wp;
+      toggle.className = toggle.className + (isCanvas ? " bg-green-700" : " bg-gray-700");
+      toggle.title = "Click to switch to " + (isCanvas ? "browser" : "canvas");
+      toggle.addEventListener("click", () => {
+        const next = isCanvas ? "browser" : "canvas";
+        params.set("WIDTH_PROVIDER", next);
+        location.search = params.toString();
+      });
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

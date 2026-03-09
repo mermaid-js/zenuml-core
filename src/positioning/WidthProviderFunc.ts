@@ -18,11 +18,15 @@ function getCanvasContext(): CanvasRenderingContext2D | OffscreenCanvasRendering
   try {
     if (typeof OffscreenCanvas !== "undefined") {
       canvasCtx = new OffscreenCanvas(1, 1).getContext("2d");
+      console.debug("[ZenUML] WidthProviderOnCanvas: using OffscreenCanvas");
     } else if (typeof document !== "undefined") {
       canvasCtx = document.createElement("canvas").getContext("2d");
+      console.debug("[ZenUML] WidthProviderOnCanvas: using <canvas> element");
+    } else {
+      console.debug("[ZenUML] WidthProviderOnCanvas: no canvas available, using character estimate fallback");
     }
   } catch {
-    // no canvas available
+    console.debug("[ZenUML] WidthProviderOnCanvas: canvas creation failed, using character estimate fallback");
   }
   return canvasCtx;
 }
