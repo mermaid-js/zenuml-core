@@ -15,6 +15,8 @@ export interface StatementInfo {
   to: string;
   label: string;
   isSelf: boolean;
+  /** Whether this statement has a block body (creates an occurrence on the target) */
+  hasBlock: boolean;
 }
 
 export function walkStatements(rootContext: any): StatementInfo[] {
@@ -36,10 +38,9 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       const from = message.From?.() || currentOrigin;
       const to = message.Owner?.() || _STARTER_;
       const label = message.SignatureText?.() || "";
-      results.push({ key, kind: "sync", from, to, label, isSelf: from === to });
-
-      // Recurse into nested block (e.g. A.m() { B.n() })
       const nestedBlock = message.braceBlock?.()?.block?.();
+      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock });
+
       if (nestedBlock) {
         results.push(...walkBlock(nestedBlock, to));
       }
@@ -51,7 +52,7 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       const from = asyncMsg.From?.() || asyncMsg.ProvidedFrom?.() || asyncMsg.Origin?.() || currentOrigin;
       const to = asyncMsg.Owner?.() || asyncMsg.to?.()?.getFormattedText?.() || from;
       const label = asyncMsg.content?.()?.getText?.() || asyncMsg.SignatureText?.() || "";
-      results.push({ key, kind: "async", from, to, label, isSelf: from === to });
+      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false });
       continue;
     }
 
@@ -60,10 +61,9 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       const from = creation.From?.() || currentOrigin;
       const to = creation.Owner?.() || "";
       const label = creation.getFormattedText?.() || "";
-      results.push({ key, kind: "creation", from, to, label, isSelf: false });
-
-      // Recurse into creation block (e.g. new B() { C.method() })
       const creationBlock = creation.braceBlock?.()?.block?.();
+      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock });
+
       if (creationBlock) {
         results.push(...walkBlock(creationBlock, to || currentOrigin));
       }
@@ -73,19 +73,19 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
     const ret = stat.ret?.();
     if (ret) {
       const label = ret.getFormattedText?.() || ret.retValue?.()?.getText?.() || "";
-      results.push({ key, kind: "return", from: "", to: "", label, isSelf: false });
+      results.push({ key, kind: "return", from: "", to: "", label, isSelf: false, hasBlock: false });
       continue;
     }
 
     const divider = stat.divider?.();
     if (divider) {
       const label = divider.getFormattedText?.() || divider.getText?.() || "";
-      results.push({ key, kind: "divider", from: "", to: "", label, isSelf: false });
+      results.push({ key, kind: "divider", from: "", to: "", label, isSelf: false, hasBlock: false });
       continue;
     }
 
     // Fragments — record and recurse into their blocks
-    results.push({ key, kind: "fragment", from: "", to: "", label: "", isSelf: false });
+    results.push({ key, kind: "fragment", from: "", to: "", label: "", isSelf: false, hasBlock: false });
     walkFragmentBlocks(stat, currentOrigin, results);
   }
 

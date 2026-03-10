@@ -11,6 +11,7 @@ import { buildGeometry } from "./buildGeometry";
 import { renderParticipant, renderParticipantBottom } from "./components/participant";
 import { renderLifeline } from "./components/lifeline";
 import { renderMessage, renderSelfCall } from "./components/message";
+import { renderOccurrence } from "./components/occurrence";
 import type { DiagramGeometry } from "./geometry";
 
 export interface RenderOptions {
@@ -30,6 +31,7 @@ const DEFAULT_THEME_STYLES = `
   .message-line { stroke: #333; stroke-width: 1; }
   .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; }
   .arrow-head { fill: #333; stroke: #333; stroke-width: 1; }
+  .occurrence { fill: #e2e2f0; stroke: #333; stroke-width: 2; rx: 2; }
 `;
 
 export function renderToSvg(code: string, options?: RenderOptions): RenderResult {
@@ -100,7 +102,12 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
     parts.push(renderSelfCall(s));
   }
 
-  // TODO: occurrences, fragments, dividers, returns
+  // Occurrences (activation boxes on lifelines)
+  for (const o of g.occurrences) {
+    parts.push(renderOccurrence(o));
+  }
+
+  // TODO: fragments, dividers, returns
 
   const titleSvg = g.title
     ? `<text x="${viewWidth / 2}" y="15" text-anchor="middle" class="diagram-title" font-size="18" font-weight="bold">${escXml(g.title)}</text>`

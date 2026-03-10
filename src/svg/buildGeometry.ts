@@ -8,6 +8,7 @@ import type { IParticipantModel } from "@/parser/IParticipantModel";
 import {
   PARTICIPANT_HEIGHT,
   PARTICIPANT_TOP_SPACE_FOR_GROUP,
+  OCCURRENCE_WIDTH,
 } from "@/positioning/Constants";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { walkStatements } from "./walkStatements";
@@ -17,6 +18,7 @@ import type {
   LifelineGeometry,
   MessageGeometry,
   SelfCallGeometry,
+  OccurrenceGeometry,
 } from "./geometry";
 
 export interface BuildGeometryInput {
@@ -41,7 +43,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     totalHeight,
   );
 
-  const { messages, selfCalls } = buildMessages(
+  const { messages, selfCalls, occurrences } = buildMessages(
     rootContext,
     coordinates,
     verticalCoordinates,
@@ -58,7 +60,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     lifelines,
     messages,
     selfCalls,
-    occurrences: [],
+    occurrences,
     creations: [],
     fragments: [],
     dividers: [],
@@ -113,10 +115,11 @@ function buildMessages(
   rootContext: any,
   coordinates: Coordinates,
   verticalCoordinates: VerticalCoordinates,
-): { messages: MessageGeometry[]; selfCalls: SelfCallGeometry[] } {
+): { messages: MessageGeometry[]; selfCalls: SelfCallGeometry[]; occurrences: OccurrenceGeometry[] } {
   const statements = walkStatements(rootContext);
   const messages: MessageGeometry[] = [];
   const selfCalls: SelfCallGeometry[] = [];
+  const occurrences: OccurrenceGeometry[] = [];
 
   for (const info of statements) {
     if (info.kind !== "sync" && info.kind !== "async") continue;
@@ -126,14 +129,15 @@ function buildMessages(
 
     const fromX = coordinates.getPosition(info.from);
     const toX = coordinates.getPosition(info.to);
-    const messageY = coord.top + 16; // approximate message line position within statement
+    const messageHeight = info.isSelf ? 30 : 16;
+    const messageY = coord.top + messageHeight;
 
     if (info.isSelf) {
       selfCalls.push({
         x: fromX,
-        y: messageY,
+        y: coord.top,
         width: 40,
-        height: 30,
+        height: messageHeight,
         label: info.label,
         arrowStyle: info.kind === "async" ? "open" : "solid",
       });
@@ -148,7 +152,23 @@ function buildMessages(
         isReverse: toX < fromX,
       });
     }
+
+    // Occurrence: activation box on the target participant's lifeline
+    if (info.kind === "sync") {
+      const occX = toX - OCCURRENCE_WIDTH / 2;
+      const occY = messageY;
+      const occHeight = coord.height - messageHeight;
+      if (occHeight > 0) {
+        occurrences.push({
+          x: occX,
+          y: occY,
+          width: OCCURRENCE_WIDTH,
+          height: occHeight,
+          participantName: info.to,
+        });
+      }
+    }
   }
 
-  return { messages, selfCalls };
+  return { messages, selfCalls, occurrences };
 }

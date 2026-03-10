@@ -115,6 +115,14 @@ describe("renderToSvg", () => {
     expect(messageCount).toBeGreaterThanOrEqual(1);
   });
 
+  it("renders occurrences for sync messages with blocks", () => {
+    const result = renderToSvg("A.method() {\n  B.inner()\n}");
+    expect(result.svg).toContain('class="occurrence"');
+    // Occurrence should be on A (target of the outer call)
+    const occurrences = result.svg.match(/class="occurrence"/g) || [];
+    expect(occurrences.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("renders messages in all try/catch/finally branches", () => {
     const result = renderToSvg(
       "try {\n  A.tryOp()\n} catch(e) {\n  B.catchOp()\n} finally {\n  C.finallyOp()\n}"
