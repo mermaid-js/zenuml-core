@@ -286,8 +286,13 @@ function buildMessages(
           const assignment = messageCtx?.Assignment?.();
           if (assignment?.assignee && !info.isSelf) {
             const occBottom = occY + occHeight;
+            // Return goes from target (toX) back to sender (fromX).
+            // Target always has occurrence; start from its near edge toward sender.
+            const isLTR = fromX < toX;
+            const retFromX = isLTR ? toX - OCCURRENCE_WIDTH / 2 : toX + OCCURRENCE_WIDTH / 2;
+            // Sender's fromX is already D4-adjusted for its occurrence edge
             returns.push({
-              fromX: toX, toX: fromX, y: occBottom + 5,
+              fromX: retFromX, toX: fromX, y: occBottom + 5,
               label: assignment.assignee, isReverse: fromX < toX,
             });
           }
@@ -354,8 +359,16 @@ function buildMessages(
         const creationAssign = creationCtx?.Assignment?.();
         if (creationAssign?.assignee) {
           const occBottom = occY + occHeight;
+          // Return goes from created (toX) back to sender (fromX).
+          // Created participant always has occurrence; start from its near edge.
+          const isLTR = fromX < toX;
+          const retFromX = isLTR ? toX - OCCURRENCE_WIDTH / 2 : toX + OCCURRENCE_WIDTH / 2;
+          // Sender has occurrence if senderHasOccurrence; end at its near edge.
+          const retToX = info.senderHasOccurrence
+            ? (isLTR ? fromX + OCCURRENCE_WIDTH / 2 : fromX - OCCURRENCE_WIDTH / 2)
+            : fromX;
           returns.push({
-            fromX: toX, toX: fromX, y: occBottom,
+            fromX: retFromX, toX: retToX, y: occBottom,
             label: creationAssign.assignee, isReverse: fromX < toX,
           });
         }
