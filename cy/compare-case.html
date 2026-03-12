@@ -713,8 +713,12 @@ B->A: So what`,
             htmlAnchorY = Math.round(r.top - seqRect.top);
           }
 
+          // SVG anchor: first named participant box (skip starter)
           const svgRectEls = svgElement ? [...svgElement.querySelectorAll("rect.participant-box")] : [];
-          const topRects = svgRectEls.filter(r => +r.getAttribute("y") < 100);
+          const topRects = svgRectEls.filter(r =>
+            +r.getAttribute("y") < 100 &&
+            !r.parentElement?.classList.contains("participant-starter")
+          );
           let svgAnchorX = 0, svgAnchorY = 0;
           if (topRects.length > 0) {
             const first = topRects.reduce((a, b) => +a.getAttribute("x") < +b.getAttribute("x") ? a : b);
