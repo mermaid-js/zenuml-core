@@ -60,9 +60,11 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     coordinates,
     verticalCoordinates,
   );
+  const diagramHeight = totalHeight + 28; // bottom reserve (smaller than PARTICIPANT_VISUAL_HEIGHT since bottom labels are not rendered)
+  const lifelineBottom = totalHeight + PARTICIPANT_VISUAL_HEIGHT; // lifelines extend to full HTML extent
   const lifelines = buildLifelines(
     participants,
-    totalHeight,
+    lifelineBottom,
   );
 
   const { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments } = buildMessages(
@@ -120,8 +122,6 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     }
   }
 
-  const diagramHeight = totalHeight + PARTICIPANT_VISUAL_HEIGHT; // keep lifeline area for parity
-
   return {
     width: diagramWidth,
     height: diagramHeight,
@@ -148,7 +148,8 @@ function buildParticipants(
     .map((m) => {
       const centerX = coordinates.getPosition(m.name);
       const halfWidth = coordinates.half(m.name);
-      const width = halfWidth * 2 - MARGIN; // visual box excludes positioning margin
+      let width = halfWidth * 2 - MARGIN; // visual box excludes positioning margin
+      if (m.name === _STARTER_) width = Math.min(width, 80); // match HTML min-width: 80px
       const creationTop = verticalCoordinates.getCreationTop(m.name);
       const isStarter = m.name === _STARTER_;
       // updateCreationTop subtracts 7px for HTML CSS padding (.life-line-layer .pt-2);
@@ -173,13 +174,13 @@ function buildParticipants(
 
 function buildLifelines(
   participants: ParticipantGeometry[],
-  totalHeight: number,
+  diagramHeight: number,
 ): LifelineGeometry[] {
   return participants.map((p) => ({
     participantName: p.name,
-    x: p.x,
-    topY: p.y + p.height, // starts at bottom of visual participant box
-    bottomY: totalHeight,
+    x: p.x, // align with occurrence bar center (same as participant center)
+    topY: p.y + p.height, // starts at bottom of participant box (visible part)
+    bottomY: diagramHeight,
     dashed: true,
   }));
 }

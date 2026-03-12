@@ -36,7 +36,8 @@ const FRAME_HEADER_HEIGHT = 28;
 const FRAME_BORDER_RADIUS = 4;
 
 const DEFAULT_THEME_STYLES = `
-  .frame-border { fill: #ffffff; stroke: #666; stroke-width: 1; }
+  .frame-border-outer { fill: #666; }
+  .frame-border-inner { fill: #ffffff; }
   .frame-header-bg { fill: #ffffff; }
   .frame-header-line { stroke: #666; stroke-width: 1; }
   .frame-title { font-family: Helvetica, Verdana, serif; font-size: 16px; font-weight: 600; fill: #222; }
@@ -47,7 +48,7 @@ const DEFAULT_THEME_STYLES = `
   .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .arrow-head { fill: #000; stroke: #000; stroke-width: 2; }
   .arrow-open { fill: none; }
-  .occurrence { fill: #dedede; stroke: #000; stroke-width: 2; rx: 2; }
+  .occurrence { fill: #dedede; stroke: #666; stroke-width: 2; rx: 2; }
   .fragment-border { fill: none; stroke: #666; stroke-width: 1; }
   .fragment-header { fill: #dedede7f; stroke: #666; stroke-width: 1; }
   .fragment-label { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: bold; fill: #222; }
@@ -96,8 +97,8 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
 function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult {
   const padding = 10;
   const headerH = FRAME_HEADER_HEIGHT;
-  const viewWidth = g.width + padding * 2;
-  const viewHeight = g.height + padding * 2 + headerH;
+  const viewWidth = g.width + padding * 2 + 1; // +1 to match HTML CSS border-box visual width
+  const viewHeight = g.height + padding * 2 + headerH - 1; // -1 to match HTML CSS border-box visual height
 
   const parts: string[] = [];
 
@@ -153,19 +154,25 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult 
     parts.push(renderComment(c));
   }
 
-  // Frame: border rect + header + title
+  // Frame: border as two nested rects (matches CSS border-box rendering)
   const r = FRAME_BORDER_RADIUS;
-  const frameSvg = `<rect class="frame-border" x="0.5" y="0.5" width="${viewWidth - 1}" height="${viewHeight - 1}" rx="${r}"/>`;
-  const headerLineSvg = `<line class="frame-header-line" x1="0.5" y1="${headerH}" x2="${viewWidth - 0.5}" y2="${headerH}"/>`;
+  const frameSvg = [
+    `<rect class="frame-border-outer" x="0" y="0" width="${viewWidth}" height="${viewHeight}" rx="${r}" fill="#666"/>`,
+    `<rect class="frame-border-inner" x="1" y="1" width="${viewWidth - 2}" height="${viewHeight - 2}" rx="${Math.max(0, r - 1)}" fill="#fff"/>`,
+  ].join("\n");
+  const contentPaddingTop = 6; // tuned to match HTML content Y offset (~34px below frame top)
+  const headerLineY = headerH + contentPaddingTop; // 34 — content group Y offset
+  const headerLineDrawY = headerLineY - 0.5; // 33.5 — half-pixel for crisp 1px line at pixel row 33, matching HTML header border-bottom
+  const headerLineSvg = `<line class="frame-header-line" x1="1" y1="${headerLineDrawY}" x2="${viewWidth - 1}" y2="${headerLineDrawY}"/>`;
   const titleSvg = g.title
-    ? `<text x="${padding}" y="${headerH / 2 + 1}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
+    ? `<text x="${padding}" y="${headerLineDrawY / 2}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
     : "";
 
   const viewBox = `0 0 ${viewWidth} ${viewHeight}`;
 
   const defs = `<defs>\n  <style>${DEFAULT_THEME_STYLES}</style>\n</defs>`;
   const frame = `${frameSvg}\n${headerLineSvg}\n${titleSvg}`;
-  const content = `<g transform="translate(${padding}, ${headerH + padding})">\n${parts.join("\n")}\n</g>`;
+  const content = `<g transform="translate(${padding}, ${headerLineY})">\n${parts.join("\n")}\n</g>`;
   const innerSvg = `${defs}\n${frame}\n${content}`;
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="${viewBox}">\n${innerSvg}\n</svg>`;

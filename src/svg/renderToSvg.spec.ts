@@ -20,7 +20,7 @@ describe("renderToSvg", () => {
   it("renders lifelines", () => {
     const result = renderToSvg("A -> B: hello");
     expect(result.svg).toContain('class="lifeline"');
-    expect(result.svg).toContain('stroke-dasharray="4,4"');
+    expect(result.svg).toContain('stroke-dasharray="5,5"');
   });
 
   it("does not render bottom participants (SVG omits mirrored labels)", () => {
@@ -136,11 +136,11 @@ describe("renderToSvg", () => {
 
   // --- Starter (actor) tests ---
 
-  it("renders starter participant as stick figure actor", () => {
+  it("renders starter participant with actor SVG icon", () => {
     const result = renderToSvg("A.method()");
     expect(result.svg).toContain("participant-starter");
-    // Should have circle (head) and lines (body/arms/legs)
-    expect(result.svg).toContain("<circle");
+    // Should have SVG path data from actor.svg icon
+    expect(result.svg).toContain("<path");
   });
 
   it("does not render starter at bottom of diagram", () => {

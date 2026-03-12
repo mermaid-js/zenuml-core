@@ -695,49 +695,32 @@ B->A: So what`,
           // Identify capture targets
           const seqDiagram = htmlEl.querySelector(".sequence-diagram");
           const svgElement = svgEl.querySelector("svg");
+          const htmlFrame = htmlEl.querySelector(".frame");
+          // Capture from .frame (includes border + header) to match SVG's full-frame output
+          const htmlCaptureTarget = htmlFrame || seqDiagram || htmlEl;
 
           // --- Element-based structural comparison ---
           const htmlElements = extractHtmlElements(seqDiagram || htmlEl);
           const svgElements = extractSvgElements(svgElement);
           const structural = computeStructuralMatch(htmlElements, svgElements);
 
-          // --- Anchor on frame top-left corner ---
-          const seqRect = (seqDiagram || htmlEl).getBoundingClientRect();
+          // --- Anchor: both capture from frame top-left, so anchors are (0,0) ---
+          // HTML captures from .frame element directly
+          // SVG's frame-border-outer rect starts at (0,0)
+          const htmlAnchorX = 0, htmlAnchorY = 0;
+          const svgAnchorX = 0, svgAnchorY = 0;
 
-          // HTML: use .frame element's top-left
-          let htmlAnchorX = 0, htmlAnchorY = 0;
-          const htmlFrame = htmlEl.querySelector(".frame");
-          if (htmlFrame) {
-            const r = htmlFrame.getBoundingClientRect();
-            htmlAnchorX = Math.round(r.left - seqRect.left);
-            htmlAnchorY = Math.round(r.top - seqRect.top);
-          }
-
-          // SVG: use rect.frame-border top-left
-          let svgAnchorX = 0, svgAnchorY = 0;
-          const svgFrame = svgElement ? svgElement.querySelector("rect.frame-border") : null;
-          if (svgFrame) {
-            let tx = 0, ty = 0;
-            let el = svgFrame.parentElement;
-            while (el && el !== svgElement) {
-              const t = el.getAttribute("transform");
-              if (t) {
-                const m = t.match(/translate\(\s*([\d.]+)\s*,\s*([\d.]+)\s*\)/);
-                if (m) { tx += +m[1]; ty += +m[2]; }
-              }
-              el = el.parentElement;
-            }
-            svgAnchorX = Math.round(+svgFrame.getAttribute("x") + tx);
-            svgAnchorY = Math.round(+svgFrame.getAttribute("y") + ty);
-          }
-
-          // --- Hide HTML chrome, strip SVG margins ---
+          // --- Hide HTML chrome, strip margins ---
           const hidden = [];
           function hideEl(el) { if (el) { hidden.push({ el, prev: el.style.display }); el.style.display = "none"; } }
+          const savedStyles = [];
+          function stripMargin(el) { if (el) { savedStyles.push({ el, prev: el.style.margin }); el.style.margin = "0"; } }
 
           hideEl(htmlEl.querySelector(".footer"));
+          // Strip frame margin so toPng captures from border edge
+          stripMargin(htmlFrame);
           // Hide bottom participant labels (SVG no longer renders them)
-          const captureEl = seqDiagram || htmlEl;
+          const captureEl = htmlFrame || seqDiagram || htmlEl;
           const captureRect = captureEl.getBoundingClientRect();
           const captureMidY = captureRect.top + captureRect.height * 0.7;
           captureEl.querySelectorAll(".participant").forEach(el => {
@@ -750,23 +733,24 @@ B->A: So what`,
           });
           // Hide fragment numbering (e.g. "1" before "Alt")
           captureEl.querySelectorAll(".header .absolute.text-xs").forEach(hideEl);
-          const frame = htmlEl.querySelector(".frame");
-          if (frame) {
-            // Hide small SVG icons (checkboxes etc.) but keep frame border
-            frame.querySelectorAll(":scope > div > svg").forEach(svg => {
+          if (htmlFrame) {
+            const frameRect2 = htmlFrame.getBoundingClientRect();
+            // Hide SVG icons in the header area (top 35px) — checkbox, etc.
+            htmlFrame.querySelectorAll("svg").forEach(svg => {
               const r = svg.getBoundingClientRect();
-              if (r.width > 15 && r.width < 30) hideEl(svg);
+              if (r.width > 0 && (r.top - frameRect2.top) < 35) hideEl(svg);
             });
           }
 
           // --- Capture ---
           const [htmlDataUrl, svgDataUrl] = await Promise.all([
-            toPng(seqDiagram || htmlEl, { pixelRatio: 1 }),
+            toPng(htmlCaptureTarget, { pixelRatio: 1 }),
             toPng(svgElement || svgEl, { pixelRatio: 1 }),
           ]);
 
           // --- Restore ---
           for (const { el, prev } of hidden) el.style.display = prev;
+          for (const { el, prev } of savedStyles) el.style.margin = prev;
 
           const [htmlImg, svgImg] = await Promise.all([
             loadImage(htmlDataUrl),
