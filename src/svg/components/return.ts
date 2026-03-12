@@ -3,16 +3,16 @@ import type { ReturnGeometry } from "../geometry";
 export function renderReturn(r: ReturnGeometry): string {
   const minX = Math.min(r.fromX, r.toX);
   const labelX = minX + Math.abs(r.toX - r.fromX) / 2;
-  const labelY = r.y - 5;
+  const labelY = r.y - 3;
 
-  // Open chevron arrowhead matching HTML renderer (7x10px)
+  // Match HTML renderer's ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
   const arrowTipX = r.toX;
-  const w = 7;
-  const h = 10;
+  const w = 5.15;
+  const halfH = 3.25;
   const dir = r.isReverse ? -1 : 1;
   const ax1 = arrowTipX - dir * w;
-  const ay1 = r.y - h / 2;
-  const ay2 = r.y + h / 2;
+  const ay1 = r.y - halfH;
+  const ay2 = r.y + halfH;
 
   return `<g class="return">
   <line x1="${r.fromX}" y1="${r.y}" x2="${r.toX}" y2="${r.y}" class="return-line"/>

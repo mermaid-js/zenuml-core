@@ -8,6 +8,7 @@ import type { IParticipantModel } from "@/parser/IParticipantModel";
 import {
   PARTICIPANT_TOP_SPACE_FOR_GROUP,
   OCCURRENCE_WIDTH,
+  OCCURRENCE_EMPTY_HEIGHT,
   FRAGMENT_MIN_WIDTH,
   MARGIN,
 } from "@/positioning/Constants";
@@ -67,10 +68,15 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
 
   // Expand width to fit labels that extend beyond the rightmost participant
   if (measureText) {
-    const SELF_CALL_LABEL_PAD = 10; // 5px gap from U-shape + 5px trailing
+    const SELF_CALL_LABEL_PAD = 10;
     for (const sc of selfCalls) {
       const labelWidth = measureText(sc.label, TextType.MessageContent);
-      const rightExtent = sc.x + sc.width + SELF_CALL_LABEL_PAD + labelWidth;
+      // Label is centered above the U-shape; check both right edge of U and right edge of label
+      const labelMidX = sc.x + sc.width / 2;
+      const rightExtent = Math.max(
+        sc.x + sc.width + SELF_CALL_LABEL_PAD,
+        labelMidX + labelWidth / 2 + SELF_CALL_LABEL_PAD,
+      );
       if (rightExtent > diagramWidth) {
         diagramWidth = rightExtent;
       }
@@ -210,37 +216,52 @@ function buildMessages(
 
     // --- Sync / Async messages ---
     if (info.kind === "sync" || info.kind === "async") {
-      const fromX = coordinates.getPosition(info.from);
+      let fromX = coordinates.getPosition(info.from);
       const toX = coordinates.getPosition(info.to);
       const messageHeight = info.isSelf ? 30 : 16;
       const messageY = coord.top + messageHeight;
+
+      // D4: When sender has an active occurrence, arrow starts from its near edge
+      if (info.senderHasOccurrence && !info.isSelf) {
+        const isLTR = fromX < toX;
+        fromX = isLTR ? fromX + OCCURRENCE_WIDTH / 2 : fromX - OCCURRENCE_WIDTH / 2;
+      }
 
       if (info.isSelf) {
         selfCalls.push({
           x: fromX,
           y: coord.top,
-          width: 40,
+          width: OCCURRENCE_WIDTH,
           height: messageHeight,
           label: info.label,
           arrowStyle: info.kind === "async" ? "open" : "solid",
         });
       } else {
+        // For sync messages with occurrence, arrow tip stops at near edge of occurrence bar
+        const isLTR = fromX < toX;
+        const arrowToX =
+          info.kind === "sync" && !info.isSelf
+            ? isLTR
+              ? toX - OCCURRENCE_WIDTH / 2
+              : toX + OCCURRENCE_WIDTH / 2
+            : toX;
+
         messages.push({
           fromX,
-          toX,
+          toX: arrowToX,
           y: messageY,
           label: info.label,
           arrowStyle: info.kind === "async" ? "open" : "solid",
           isSelf: false,
-          isReverse: toX < fromX,
+          isReverse: arrowToX < fromX,
         });
       }
 
       // Occurrence: activation box on the target participant's lifeline
       if (info.kind === "sync") {
         const occX = toX - OCCURRENCE_WIDTH / 2;
-        const occY = messageY;
-        const occHeight = coord.height - messageHeight;
+        const occY = messageY - 2;
+        const occHeight = coord.height - messageHeight + 2;
         if (occHeight > 0) {
           occurrences.push({
             x: occX,
@@ -293,8 +314,8 @@ function buildMessages(
       const occX = toX - OCCURRENCE_WIDTH / 2;
       const occY = coord.top + CREATION_MSG_HEIGHT;
       const occHeight = info.hasBlock
-        ? coord.height - CREATION_MSG_HEIGHT
-        : 22; // min-h-6 + mt-[-2px] from CreationStatementVM
+        ? Math.max(coord.height - PARTICIPANT_VISUAL_HEIGHT, OCCURRENCE_EMPTY_HEIGHT)
+        : OCCURRENCE_EMPTY_HEIGHT;
       if (occHeight > 0) {
         occurrences.push({
           x: occX,
@@ -358,11 +379,12 @@ function buildMessages(
     }
   }
 
-  // Separate overlapping return labels (minimum 20px gap)
+  // Separate overlapping return labels (minimum 32px gap, matching HTML's 16px margin-top + 16px margin-bottom)
+  const MIN_RETURN_GAP = 32;
   returns.sort((a, b) => a.y - b.y);
   for (let i = 1; i < returns.length; i++) {
-    if (returns[i].y - returns[i - 1].y < 20) {
-      returns[i] = { ...returns[i], y: returns[i - 1].y + 20 };
+    if (returns[i].y - returns[i - 1].y < MIN_RETURN_GAP) {
+      returns[i] = { ...returns[i], y: returns[i - 1].y + MIN_RETURN_GAP };
     }
   }
 

@@ -34,15 +34,17 @@ export interface StatementInfo {
   comment?: string;
   /** The ANTLR parse tree node — needed for local participant extraction */
   statNode?: any;
+  /** Whether the sender (from) has an active occurrence at this point */
+  senderHasOccurrence?: boolean;
 }
 
 export function walkStatements(rootContext: any): StatementInfo[] {
   const block = rootContext?.block?.();
   if (!block) return [];
-  return walkBlock(block, _STARTER_);
+  return walkBlock(block, _STARTER_, new Set());
 }
 
-function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
+function walkBlock(block: any, currentOrigin: string, activeOccurrences: Set<string>): StatementInfo[] {
   const statements = block?.stat?.() || [];
   const results: StatementInfo[] = [];
 
@@ -58,10 +60,12 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       const to = message.Owner?.() || _STARTER_;
       const label = message.SignatureText?.() || "";
       const nestedBlock = message.braceBlock?.()?.block?.();
-      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat });
+      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderHasOccurrence: activeOccurrences.has(from) });
 
       if (nestedBlock) {
-        results.push(...walkBlock(nestedBlock, to));
+        const innerOccs = new Set(activeOccurrences);
+        innerOccs.add(to);
+        results.push(...walkBlock(nestedBlock, to, innerOccs));
       }
       continue;
     }
@@ -71,7 +75,7 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       const from = asyncMsg.From?.() || asyncMsg.ProvidedFrom?.() || asyncMsg.Origin?.() || currentOrigin;
       const to = asyncMsg.Owner?.() || asyncMsg.to?.()?.getFormattedText?.() || from;
       const label = asyncMsg.content?.()?.getText?.() || asyncMsg.SignatureText?.() || "";
-      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false, comment });
+      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false, comment, senderHasOccurrence: activeOccurrences.has(from) });
       continue;
     }
 
@@ -81,10 +85,12 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       const to = creation.Owner?.() || "";
       const label = creation.SignatureText?.() || "«create»";
       const creationBlock = creation.braceBlock?.()?.block?.();
-      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat });
+      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat, senderHasOccurrence: activeOccurrences.has(from) });
 
       if (creationBlock) {
-        results.push(...walkBlock(creationBlock, to || currentOrigin));
+        const innerOccs = new Set(activeOccurrences);
+        innerOccs.add(to);
+        results.push(...walkBlock(creationBlock, to || currentOrigin, innerOccs));
       }
       continue;
     }
@@ -121,7 +127,7 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       fragmentSections: fragmentInfo.sections,
       statNode: stat,
     });
-    walkFragmentBlocks(stat, currentOrigin, results);
+    walkFragmentBlocks(stat, currentOrigin, results, activeOccurrences);
   }
 
   return results;
@@ -203,13 +209,13 @@ function extractFragmentInfo(stat: any, _origin: string): FragmentExtract {
 }
 
 /** Recurse into fragment inner blocks (loop, opt, alt, try/catch, etc.) */
-function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[]): void {
+function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[], activeOccurrences: Set<string>): void {
   // Single-block fragments: loop, opt, par, critical, section
   for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
     const frag = stat[kind]?.();
     if (frag) {
       const block = frag.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
       return;
     }
   }
@@ -220,16 +226,16 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[])
     const ifBlock = alt.ifBlock?.();
     if (ifBlock) {
       const block = ifBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
     }
     for (const elseIf of alt.elseIfBlock?.() || []) {
       const block = elseIf.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
     }
     const elseBlock = alt.elseBlock?.();
     if (elseBlock) {
       const block = elseBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
     }
     return;
   }
@@ -240,16 +246,16 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[])
     const tryBlock = tcf.tryBlock?.();
     if (tryBlock) {
       const block = tryBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
     }
     for (const catchBlock of tcf.catchBlock?.() || []) {
       const block = catchBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
     }
     const finallyBlock = tcf.finallyBlock?.();
     if (finallyBlock) {
       const block = finallyBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
     }
     return;
   }

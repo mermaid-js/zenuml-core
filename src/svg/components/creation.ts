@@ -21,12 +21,14 @@ export function renderCreation(c: CreationGeometry): string {
 }
 
 function renderOpenArrow(tipX: number, tipY: number, pointsLeft: boolean): string {
-  const size = 8;
+  // Match HTML renderer's ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
+  const w = 5.15;
+  const halfH = 3.25;
   const dir = pointsLeft ? 1 : -1;
-  const x1 = tipX + dir * size;
-  const y1 = tipY - size / 2;
-  const y2 = tipY + size / 2;
-  return `<polyline points="${x1},${y1} ${tipX},${tipY} ${x1},${y2}" fill="none" class="arrow-head"/>`;
+  const x1 = tipX + dir * w;
+  const y1 = tipY - halfH;
+  const y2 = tipY + halfH;
+  return `<polyline points="${x1},${y1} ${tipX},${tipY} ${x1},${y2}" fill="none" stroke-linecap="round" class="arrow-head arrow-open"/>`;
 }
 
 function esc(s: string): string {

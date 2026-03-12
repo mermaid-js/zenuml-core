@@ -3,7 +3,7 @@ import type { MessageGeometry, SelfCallGeometry } from "../geometry";
 export function renderMessage(m: MessageGeometry): string {
   const minX = Math.min(m.fromX, m.toX);
   const labelX = minX + Math.abs(m.toX - m.fromX) / 2;
-  const labelY = m.y - 5;
+  const labelY = m.y - 3;
 
   const dashAttr = m.arrowStyle === "dashed" ? ' stroke-dasharray="6,4"' : "";
 
@@ -19,13 +19,13 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   const x2 = s.x + s.width;
   const y1 = s.y;
   const y2 = s.y + s.height;
-  const labelX = x2 + 5;
-  const labelY = s.y + s.height / 2;
+  const labelX = (x1 + x2) / 2;
+  const labelY = y1 - 3;
 
   return `<g class="message self-call">
   <path d="M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y2} L ${x1} ${y2}" fill="none" class="message-line"/>
   ${renderArrowHead(x1, y2, true, s.arrowStyle)}
-  <text x="${labelX}" y="${labelY}" text-anchor="start" dominant-baseline="central" class="message-label">${esc(s.label)}</text>
+  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label">${esc(s.label)}</text>
 </g>`;
 }
 
@@ -35,20 +35,21 @@ function renderArrowHead(
   pointsLeft: boolean,
   style: string,
 ): string {
-  // Match HTML renderer's open chevron: 7x10px, stroke-only, round linecap
-  const w = 7;   // chevron width (horizontal extent)
-  const h = 10;  // chevron height (vertical extent)
+  // Match HTML renderer's ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
+  // dx = 6.15 - 1 = 5.15, dy = 4.5 - 1.25 = 3.25
+  const w = 5.15;
+  const halfH = 3.25;
   const dir = pointsLeft ? 1 : -1;
   const baseX = tipX + dir * w;
-  const y1 = tipY - h / 2;
-  const y2 = tipY + h / 2;
+  const y1 = tipY - halfH;
+  const y2 = tipY + halfH;
 
   if (style === "open") {
-    // Async: open chevron, same shape but thinner stroke (via class)
+    // Async: open chevron (stroke-only, no fill)
     return `<polyline points="${baseX},${y1} ${tipX},${tipY} ${baseX},${y2}" fill="none" stroke-linecap="round" class="arrow-head arrow-open"/>`;
   }
-  // Sync: open chevron matching HTML renderer (stroke-only, no fill)
-  return `<polyline points="${baseX},${y1} ${tipX},${tipY} ${baseX},${y2}" fill="none" stroke-linecap="round" class="arrow-head"/>`;
+  // Sync: filled triangle matching HTML renderer's ArrowHead(fill=true)
+  return `<polygon points="${baseX},${y1} ${tipX},${tipY} ${baseX},${y2}" class="arrow-head"/>`;
 }
 
 function esc(s: string): string {

@@ -20,7 +20,7 @@ describe("renderToSvg", () => {
   it("renders lifelines", () => {
     const result = renderToSvg("A -> B: hello");
     expect(result.svg).toContain('class="lifeline"');
-    expect(result.svg).toContain('stroke-dasharray="5,5"');
+    expect(result.svg).toContain('stroke-dasharray="4,4"');
   });
 
   it("renders bottom participants", () => {

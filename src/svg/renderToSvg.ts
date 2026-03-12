@@ -35,7 +35,8 @@ const DEFAULT_THEME_STYLES = `
   .lifeline { stroke: #666; stroke-width: 1; }
   .message-line { stroke: #000; stroke-width: 2; }
   .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
-  .arrow-head { fill: none; stroke: #000; stroke-width: 2; }
+  .arrow-head { fill: #000; stroke: #000; stroke-width: 2; }
+  .arrow-open { fill: none; }
   .occurrence { fill: #dedede; stroke: #000; stroke-width: 2; rx: 2; }
   .fragment-border { fill: none; stroke: #666; stroke-width: 1; }
   .fragment-header { fill: #dedede7f; stroke: #666; stroke-width: 1; }
@@ -100,11 +101,6 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
     parts.push(renderLifeline(l));
   }
 
-  // Fragments (behind messages, on top of lifelines)
-  for (const f of g.fragments) {
-    parts.push(renderFragment(f));
-  }
-
   // Participants (top)
   for (const p of g.participants) {
     parts.push(renderParticipant(p));
@@ -138,6 +134,11 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
   // Occurrences (activation boxes on lifelines)
   for (const o of g.occurrences) {
     parts.push(renderOccurrence(o));
+  }
+
+  // Fragments (on top of occurrences, below dividers/comments)
+  for (const f of g.fragments) {
+    parts.push(renderFragment(f));
   }
 
   // Dividers (full-width lines with labels)
