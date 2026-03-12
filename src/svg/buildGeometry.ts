@@ -112,7 +112,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     }
   }
 
-  const diagramHeight = totalHeight + PARTICIPANT_VISUAL_HEIGHT; // bottom participant row
+  const diagramHeight = totalHeight + PARTICIPANT_VISUAL_HEIGHT; // keep lifeline area for parity
 
   return {
     width: diagramWidth,
@@ -143,9 +143,11 @@ function buildParticipants(
       const width = halfWidth * 2 - MARGIN; // visual box excludes positioning margin
       const creationTop = verticalCoordinates.getCreationTop(m.name);
       const isStarter = m.name === _STARTER_;
+      // updateCreationTop subtracts 7px for HTML CSS padding (.life-line-layer .pt-2);
+      // SVG has no such padding, so add it back to close the gap between participant and occurrence
       const y =
         creationTop != null
-          ? Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, creationTop)
+          ? Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, creationTop + 7)
           : PARTICIPANT_TOP_SPACE_FOR_GROUP;
 
       return {
@@ -257,7 +259,7 @@ function buildMessages(
         });
       }
 
-      // Occurrence: activation box on the target participant's lifeline
+      // Occurrence: activation box centered on the target participant's lifeline
       if (info.kind === "sync") {
         const occX = toX - OCCURRENCE_WIDTH / 2;
         const occY = messageY - 2;

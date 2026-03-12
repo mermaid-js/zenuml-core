@@ -8,7 +8,7 @@ import { Coordinates } from "@/positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { WidthProviderOnCanvas } from "@/positioning/WidthProviderFunc";
 import { buildGeometry } from "./buildGeometry";
-import { renderParticipant, renderParticipantBottom } from "./components/participant";
+import { renderParticipant } from "./components/participant";
 import { renderLifeline } from "./components/lifeline";
 import { renderMessage, renderSelfCall } from "./components/message";
 import { renderOccurrence } from "./components/occurrence";
@@ -25,11 +25,21 @@ export interface RenderOptions {
 
 export interface RenderResult {
   svg: string;
+  /** Inner SVG content (defs + g) for embedding into an existing SVG container */
+  innerSvg: string;
   width: number;
   height: number;
+  viewBox: string;
 }
 
+const FRAME_HEADER_HEIGHT = 28;
+const FRAME_BORDER_RADIUS = 4;
+
 const DEFAULT_THEME_STYLES = `
+  .frame-border { fill: #ffffff; stroke: #666; stroke-width: 1; }
+  .frame-header-bg { fill: #ffffff; }
+  .frame-header-line { stroke: #666; stroke-width: 1; }
+  .frame-title { font-family: Helvetica, Verdana, serif; font-size: 16px; font-weight: 600; fill: #222; }
   .participant-box { fill: #ffffff; stroke: #666; stroke-width: 2; }
   .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #222; }
   .lifeline { stroke: #666; stroke-width: 1; }
@@ -56,7 +66,7 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
   // 1. Parse
   const rootContext = RootContext(code);
   if (!rootContext) {
-    return { svg: "<svg></svg>", width: 0, height: 0 };
+    return { svg: "<svg></svg>", innerSvg: "", width: 0, height: 0, viewBox: "0 0 0 0" };
   }
 
   // 2. Layout (uses canvas provider — no DOM)
@@ -80,19 +90,14 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
   });
 
   // 5. Render to SVG
-  const svg = composeSvg(geometry, options);
-
-  return {
-    svg,
-    width: geometry.width,
-    height: geometry.height,
-  };
+  return composeSvg(geometry, options);
 }
 
-function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
+function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult {
   const padding = 10;
+  const headerH = FRAME_HEADER_HEIGHT;
   const viewWidth = g.width + padding * 2;
-  const viewHeight = g.height + padding * 2;
+  const viewHeight = g.height + padding * 2 + headerH;
 
   const parts: string[] = [];
 
@@ -106,10 +111,7 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
     parts.push(renderParticipant(p));
   }
 
-  // Bottom participants (placed at bottom of lifeline area, inside viewport)
-  for (const p of g.participants) {
-    parts.push(renderParticipantBottom(p, g.height - p.height));
-  }
+  // Bottom participants removed — SVG output omits mirrored labels at the bottom
 
   // Messages
   for (const m of g.messages) {
@@ -151,19 +153,24 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
     parts.push(renderComment(c));
   }
 
+  // Frame: border rect + header + title
+  const r = FRAME_BORDER_RADIUS;
+  const frameSvg = `<rect class="frame-border" x="0.5" y="0.5" width="${viewWidth - 1}" height="${viewHeight - 1}" rx="${r}"/>`;
+  const headerLineSvg = `<line class="frame-header-line" x1="0.5" y1="${headerH}" x2="${viewWidth - 0.5}" y2="${headerH}"/>`;
   const titleSvg = g.title
-    ? `<text x="${viewWidth / 2}" y="15" text-anchor="middle" class="diagram-title" font-size="18" font-weight="bold">${escXml(g.title)}</text>`
+    ? `<text x="${padding}" y="${headerH / 2 + 1}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
     : "";
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="0 0 ${viewWidth} ${viewHeight}">
-<defs>
-  <style>${DEFAULT_THEME_STYLES}</style>
-</defs>
-<g transform="translate(${padding}, ${padding})">
-${titleSvg}
-${parts.join("\n")}
-</g>
-</svg>`;
+  const viewBox = `0 0 ${viewWidth} ${viewHeight}`;
+
+  const defs = `<defs>\n  <style>${DEFAULT_THEME_STYLES}</style>\n</defs>`;
+  const frame = `${frameSvg}\n${headerLineSvg}\n${titleSvg}`;
+  const content = `<g transform="translate(${padding}, ${headerH + padding})">\n${parts.join("\n")}\n</g>`;
+  const innerSvg = `${defs}\n${frame}\n${content}`;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="${viewBox}">\n${innerSvg}\n</svg>`;
+
+  return { svg, innerSvg, width: viewWidth, height: viewHeight, viewBox };
 }
 
 function escXml(s: string): string {

@@ -28,22 +28,29 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
 }
 
 function renderStarterParticipant(p: ParticipantGeometry): string {
-  // Stick figure "actor" icon scaled to fit within PARTICIPANT_VISUAL_HEIGHT (40px)
+  // Actor icon inside a participant box (matching HTML renderer)
+  const rx = 4;
+  const boxX = p.x - p.width / 2;
+
+  // Stick figure centered inside the box
   const cx = p.x;
-  const headR = 6;
-  const headCY = p.y + headR; // head top at p.y, center at p.y+6
-  const bodyTop = p.y + headR * 2; // 12
-  const bodyBottom = bodyTop + 12; // 24
-  const legBottom = bodyBottom + 12; // 36 — fits within 40px
-  const armY = bodyTop + 5;
-  const armSpan = 10;
+  const iconH = 24; // total icon height
+  const iconTop = p.y + (p.height - iconH) / 2; // vertically centered in box
+  const headR = 4;
+  const headCY = iconTop + headR;
+  const bodyTop = iconTop + headR * 2;
+  const bodyBottom = bodyTop + 8;
+  const legBottom = bodyBottom + 8;
+  const armY = bodyTop + 4;
+  const armSpan = 7;
 
   return `<g class="participant participant-starter" data-participant="${esc(p.name)}">
-  <circle cx="${cx}" cy="${headCY}" r="${headR}" fill="none" stroke="#666" stroke-width="2"/>
-  <line x1="${cx}" y1="${bodyTop}" x2="${cx}" y2="${bodyBottom}" stroke="#666" stroke-width="2"/>
-  <line x1="${cx - armSpan}" y1="${armY}" x2="${cx + armSpan}" y2="${armY}" stroke="#666" stroke-width="2"/>
-  <line x1="${cx}" y1="${bodyBottom}" x2="${cx - 8}" y2="${legBottom}" stroke="#666" stroke-width="2"/>
-  <line x1="${cx}" y1="${bodyBottom}" x2="${cx + 8}" y2="${legBottom}" stroke="#666" stroke-width="2"/>
+  <rect x="${boxX}" y="${p.y}" width="${p.width}" height="${p.height}" rx="${rx}" class="participant-box"/>
+  <circle cx="${cx}" cy="${headCY}" r="${headR}" fill="none" stroke="#666" stroke-width="1.5"/>
+  <line x1="${cx}" y1="${bodyTop}" x2="${cx}" y2="${bodyBottom}" stroke="#666" stroke-width="1.5"/>
+  <line x1="${cx - armSpan}" y1="${armY}" x2="${cx + armSpan}" y2="${armY}" stroke="#666" stroke-width="1.5"/>
+  <line x1="${cx}" y1="${bodyBottom}" x2="${cx - 6}" y2="${legBottom}" stroke="#666" stroke-width="1.5"/>
+  <line x1="${cx}" y1="${bodyBottom}" x2="${cx + 6}" y2="${legBottom}" stroke="#666" stroke-width="1.5"/>
 </g>`;
 }
 

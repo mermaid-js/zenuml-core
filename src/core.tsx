@@ -33,6 +33,8 @@ import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { createStore, Provider } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
+export { renderToSvg } from "./svg/renderToSvg";
+export type { RenderResult, RenderOptions } from "./svg/renderToSvg";
 const logger = parentLogger.child({ name: "core" });
 
 interface Config {

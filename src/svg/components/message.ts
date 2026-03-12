@@ -21,9 +21,11 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   const y2 = s.y + s.height;
   const labelX = (x1 + x2) / 2;
   const labelY = y1 - 3;
+  // Rounded corners matching HTML renderer's Q curves (radius 2px)
+  const r = 2;
 
   return `<g class="message self-call">
-  <path d="M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y2} L ${x1} ${y2}" fill="none" class="message-line"/>
+  <path d="M ${x1} ${y1} L ${x2 - r} ${y1} Q ${x2} ${y1}, ${x2} ${y1 + r} L ${x2} ${y2 - r} Q ${x2} ${y2}, ${x2 - r} ${y2} L ${x1} ${y2}" fill="none" class="message-line"/>
   ${renderArrowHead(x1, y2, true, s.arrowStyle)}
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label">${esc(s.label)}</text>
 </g>`;
