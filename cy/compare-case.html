@@ -701,29 +701,24 @@ B->A: So what`,
           const svgElements = extractSvgElements(svgElement);
           const structural = computeStructuralMatch(htmlElements, svgElements);
 
-          // --- Anchor on first participant box (both X and Y) for content alignment ---
+          // --- Anchor on frame top-left corner ---
           const seqRect = (seqDiagram || htmlEl).getBoundingClientRect();
 
-          const htmlBoxes = [...htmlEl.querySelectorAll(".bg-skin-participant")];
-          const htmlRef = htmlBoxes.find(el => el.textContent.trim().length > 0);
+          // HTML: use .frame element's top-left
           let htmlAnchorX = 0, htmlAnchorY = 0;
-          if (htmlRef) {
-            const r = htmlRef.getBoundingClientRect();
+          const htmlFrame = htmlEl.querySelector(".frame");
+          if (htmlFrame) {
+            const r = htmlFrame.getBoundingClientRect();
             htmlAnchorX = Math.round(r.left - seqRect.left);
             htmlAnchorY = Math.round(r.top - seqRect.top);
           }
 
-          // SVG anchor: first named participant box (skip starter)
-          const svgRectEls = svgElement ? [...svgElement.querySelectorAll("rect.participant-box")] : [];
-          const topRects = svgRectEls.filter(r =>
-            +r.getAttribute("y") < 100 &&
-            !r.parentElement?.classList.contains("participant-starter")
-          );
+          // SVG: use rect.frame-border top-left
           let svgAnchorX = 0, svgAnchorY = 0;
-          if (topRects.length > 0) {
-            const first = topRects.reduce((a, b) => +a.getAttribute("x") < +b.getAttribute("x") ? a : b);
+          const svgFrame = svgElement ? svgElement.querySelector("rect.frame-border") : null;
+          if (svgFrame) {
             let tx = 0, ty = 0;
-            let el = first.parentElement;
+            let el = svgFrame.parentElement;
             while (el && el !== svgElement) {
               const t = el.getAttribute("transform");
               if (t) {
@@ -732,8 +727,8 @@ B->A: So what`,
               }
               el = el.parentElement;
             }
-            svgAnchorX = Math.round(+first.getAttribute("x") + tx);
-            svgAnchorY = Math.round(+first.getAttribute("y") + ty);
+            svgAnchorX = Math.round(+svgFrame.getAttribute("x") + tx);
+            svgAnchorY = Math.round(+svgFrame.getAttribute("y") + ty);
           }
 
           // --- Hide HTML chrome, strip SVG margins ---
