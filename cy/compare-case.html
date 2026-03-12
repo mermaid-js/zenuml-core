@@ -804,33 +804,32 @@ B->A: So what`,
 
           let contentMatch = 0;
           let contentTotal = 0;
-          const LUMA_THRESHOLD = 200;
-          const CHANNEL_TOLERANCE = 32;
-          const POSITION_TOLERANCE = 3; // check ±3px neighborhood
+          const LUMA_THRESHOLD = 240; // only near-white is background
+          const CHANNEL_TOLERANCE = 12; // tight: anti-aliasing only
+          const POSITION_TOLERANCE = 1; // ±1px for subpixel/anti-aliasing shifts
 
-          // Helper: get pixel at (x,y) from image data
+          function luma(r, g, b) { return 0.3 * r + 0.59 * g + 0.11 * b; }
+
           function getPixel(data, x, y) {
             const i = (y * w + x) * 4;
             return [data[i], data[i+1], data[i+2]];
           }
 
-          function pixelsMatch(r1, g1, b1, r2, g2, b2) {
+          function pixelsClose(r1, g1, b1, r2, g2, b2) {
             return Math.abs(r1 - r2) <= CHANNEL_TOLERANCE &&
                    Math.abs(g1 - g2) <= CHANNEL_TOLERANCE &&
                    Math.abs(b1 - b2) <= CHANNEL_TOLERANCE;
           }
 
-          function luma(r, g, b) { return 0.3 * r + 0.59 * g + 0.11 * b; }
-
-          // For each content pixel, check if a matching pixel exists nearby
-          function fuzzyMatch(data1, data2, x, y) {
-            const [r1, g1, b1] = getPixel(data1, x, y);
+          // Check if a content pixel at (x,y) in src has a nearby match in dst
+          function hasNearbyMatch(src, dst, x, y) {
+            const [r1, g1, b1] = getPixel(src, x, y);
             for (let dy = -POSITION_TOLERANCE; dy <= POSITION_TOLERANCE; dy++) {
               for (let dx = -POSITION_TOLERANCE; dx <= POSITION_TOLERANCE; dx++) {
                 const nx = x + dx, ny = y + dy;
                 if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
-                const [r2, g2, b2] = getPixel(data2, nx, ny);
-                if (pixelsMatch(r1, g1, b1, r2, g2, b2)) return true;
+                const [r2, g2, b2] = getPixel(dst, nx, ny);
+                if (luma(r2, g2, b2) < LUMA_THRESHOLD && pixelsClose(r1, g1, b1, r2, g2, b2)) return true;
               }
             }
             return false;
@@ -845,24 +844,34 @@ B->A: So what`,
               const lum1 = luma(r1, g1, b1);
               const lum2 = luma(r2, g2, b2);
 
-              const isContent = lum1 < LUMA_THRESHOLD || lum2 < LUMA_THRESHOLD;
+              const isContent1 = lum1 < LUMA_THRESHOLD;
+              const isContent2 = lum2 < LUMA_THRESHOLD;
+              const isContent = isContent1 || isContent2;
 
-              if (isContent) {
-                contentTotal++;
-                // Fuzzy match: check if this pixel has a nearby match in the other image
-                const matched = fuzzyMatch(data1, data2, x, y) || fuzzyMatch(data2, data1, x, y);
-                if (matched) {
-                  const gray = Math.round(Math.min(lum1, lum2));
-                  diff[i] = gray; diff[i+1] = gray; diff[i+2] = gray; diff[i+3] = 255;
-                  contentMatch++;
-                } else {
-                  diff[i] = 255; diff[i+1] = 0; diff[i+2] = 255; diff[i+3] = 255;
-                }
+              if (!isContent) {
+                // Both background — light gray
+                diff[i] = 250; diff[i+1] = 250; diff[i+2] = 250; diff[i+3] = 255;
               } else {
-                if (pixelsMatch(r1, g1, b1, r2, g2, b2)) {
-                  diff[i] = 245; diff[i+1] = 245; diff[i+2] = 245; diff[i+3] = 255;
+                contentTotal++;
+                // Check fuzzy match (±1px neighborhood)
+                const matched = hasNearbyMatch(data1, data2, x, y) || hasNearbyMatch(data2, data1, x, y);
+                if (matched) {
+                  // Dark green — brightness tracks content darkness
+                  const l = Math.min(lum1, lum2);
+                  diff[i] = Math.round(l * 0.12);
+                  diff[i+1] = Math.round(60 + l * 0.3);
+                  diff[i+2] = Math.round(l * 0.12);
+                  diff[i+3] = 255;
+                  contentMatch++;
+                } else if (isContent1 && !isContent2) {
+                  // Only in HTML (red)
+                  diff[i] = 255; diff[i+1] = 60; diff[i+2] = 60; diff[i+3] = 255;
+                } else if (!isContent1 && isContent2) {
+                  // Only in SVG (blue)
+                  diff[i] = 60; diff[i+1] = 60; diff[i+2] = 255; diff[i+3] = 255;
                 } else {
-                  diff[i] = 255; diff[i+1] = 200; diff[i+2] = 255; diff[i+3] = 255;
+                  // Both content, different colors — magenta
+                  diff[i] = 255; diff[i+1] = 0; diff[i+2] = 255; diff[i+3] = 255;
                 }
               }
             }
@@ -878,9 +887,14 @@ B->A: So what`,
           panel.classList.add("visible");
 
           const pixelPct = contentTotal > 0 ? ((contentMatch / contentTotal) * 100).toFixed(1) : "100.0";
+          const mismatchCount = contentTotal - contentMatch;
           const structPct = (structural.score * 100).toFixed(0);
-          document.getElementById("match-badge").textContent =
-            `${structPct}% structural (${structural.matchedElements}/${structural.totalElements} elements) · ${pixelPct}% pixel`;
+          document.getElementById("match-badge").innerHTML =
+            `${structPct}% structural · <b>${pixelPct}%</b> content pixel (${contentMatch}/${contentTotal} px) ` +
+            `<span style="color:#1a6b1a">■</span> match ` +
+            `<span style="color:#ff3c3c">■</span> HTML-only ` +
+            `<span style="color:#3c3cff">■</span> SVG-only ` +
+            `<span style="color:#ff00ff">■</span> color diff`;
         } catch (err) {
           console.error("Diff failed:", err);
           document.getElementById("match-badge").textContent = "Diff failed";
