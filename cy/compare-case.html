@@ -589,6 +589,141 @@ B->A: So what`,
         }
       }
 
+      // ——— Element extraction for structural comparison ———
+
+      function extractHtmlElements(container) {
+        const elements = { participants: [], messages: [], selfCalls: [], creations: [], returns: [], fragments: [] };
+
+        // Participants
+        container.querySelectorAll("[data-participant-id]").forEach(el => {
+          const name = el.getAttribute("data-participant-id");
+          if (name) elements.participants.push(name);
+        });
+
+        // Messages (non-self, non-return, non-creation interactions)
+        container.querySelectorAll('.interaction:not(.return):not(.creation)').forEach(el => {
+          const isSelf = el.classList.contains("self-invocation") ||
+                         el.querySelector(".self-invocation") !== null ||
+                         el.classList.contains("self");
+          if (isSelf) return;
+          const sig = el.getAttribute("data-signature") || el.getAttribute("data-to") || "";
+          if (sig) elements.messages.push(sig);
+        });
+
+        // Self-calls
+        container.querySelectorAll('.self-invocation').forEach(el => {
+          const interaction = el.closest(".interaction");
+          const sig = interaction?.getAttribute("data-signature") || "";
+          if (sig) elements.selfCalls.push(sig);
+        });
+
+        // Creations
+        container.querySelectorAll('.interaction.creation').forEach(el => {
+          const sig = el.getAttribute("data-signature") || "";
+          if (sig) elements.creations.push(sig);
+        });
+
+        // Returns — match .interaction.return (some have data-type="return", some don't)
+        container.querySelectorAll('.interaction.return').forEach(el => {
+          const sig = el.getAttribute("data-signature") || "";
+          const msgDiv = el.querySelector(".message");
+          const label = sig || (msgDiv ? msgDiv.textContent.trim().replace(/[\d.]+$/, "").trim() : "");
+          if (label) elements.returns.push(label);
+        });
+
+        // Fragments
+        container.querySelectorAll(".fragment").forEach(el => {
+          const kind = [...el.classList].find(c => c.startsWith("fragment-"))?.replace("fragment-", "") ||
+                       [...el.classList].find(c => ["alt", "loop", "opt", "par", "tcf", "critical", "section", "ref"].includes(c)) || "unknown";
+          elements.fragments.push(kind);
+        });
+
+        return elements;
+      }
+
+      function extractSvgElements(svgElement) {
+        const elements = { participants: [], messages: [], selfCalls: [], creations: [], returns: [], fragments: [] };
+        if (!svgElement) return elements;
+
+        // Participants
+        svgElement.querySelectorAll("g.participant, g.participant-starter").forEach(g => {
+          const name = g.getAttribute("data-participant");
+          if (name) elements.participants.push(name);
+        });
+
+        // Messages (non-self)
+        svgElement.querySelectorAll("g.message").forEach(g => {
+          if (g.classList.contains("self-call")) return;
+          const text = g.querySelector("text.message-label");
+          elements.messages.push(text ? text.textContent.trim() : "");
+        });
+
+        // Self-calls
+        svgElement.querySelectorAll("g.message.self-call").forEach(g => {
+          const text = g.querySelector("text.message-label");
+          elements.selfCalls.push(text ? text.textContent.trim() : "");
+        });
+
+        // Creations
+        svgElement.querySelectorAll("g.creation").forEach(g => {
+          const text = g.querySelector("text.message-label");
+          elements.creations.push(text ? text.textContent.trim() : "");
+        });
+
+        // Returns
+        svgElement.querySelectorAll("g.return").forEach(g => {
+          const text = g.querySelector("text.return-label");
+          elements.returns.push(text ? text.textContent.trim() : "");
+        });
+
+        // Fragments
+        svgElement.querySelectorAll("g.fragment, g[class*='fragment-']").forEach(g => {
+          const kind = ([...g.classList].find(c => c.startsWith("fragment-")) || "").replace("fragment-", "") || "unknown";
+          elements.fragments.push(kind);
+        });
+
+        return elements;
+      }
+
+      function computeStructuralMatch(htmlElements, svgElements) {
+        const types = ["participants", "messages", "selfCalls", "creations", "returns", "fragments"];
+        let totalScore = 0;
+        let scoredTypes = 0;
+        let totalElements = 0;
+        let matchedElements = 0;
+        const details = {};
+
+        for (const type of types) {
+          const htmlList = htmlElements[type] || [];
+          const svgList = svgElements[type] || [];
+          const maxLen = Math.max(htmlList.length, svgList.length);
+
+          if (maxLen === 0) continue; // skip types with no elements in either
+
+          // Count matches by order
+          let matched = 0;
+          const minLen = Math.min(htmlList.length, svgList.length);
+          for (let i = 0; i < minLen; i++) {
+            matched++; // count as matched if present in both at same index
+          }
+
+          const score = matched / maxLen;
+          totalScore += score;
+          scoredTypes++;
+          totalElements += maxLen;
+          matchedElements += matched;
+
+          details[type] = { html: htmlList.length, svg: svgList.length, matched, score };
+        }
+
+        return {
+          score: scoredTypes > 0 ? totalScore / scoredTypes : 1,
+          totalElements,
+          matchedElements,
+          details,
+        };
+      }
+
       // Diff logic
       document.getElementById("diff-btn").addEventListener("click", async () => {
         const btn = document.getElementById("diff-btn");
@@ -603,10 +738,14 @@ B->A: So what`,
           const seqDiagram = htmlEl.querySelector(".sequence-diagram");
           const svgElement = svgEl.querySelector("svg");
 
-          // --- Compute anchor positions BEFORE any DOM changes ---
+          // --- Element-based structural comparison ---
+          const htmlElements = extractHtmlElements(seqDiagram || htmlEl);
+          const svgElements = extractSvgElements(svgElement);
+          const structural = computeStructuralMatch(htmlElements, svgElements);
+
+          // --- Anchor on first participant box (both X and Y) for content alignment ---
           const seqRect = (seqDiagram || htmlEl).getBoundingClientRect();
 
-          // HTML anchor: first named participant box, relative to sequence-diagram
           const htmlBoxes = [...htmlEl.querySelectorAll(".bg-skin-participant")];
           const htmlRef = htmlBoxes.find(el => el.textContent.trim().length > 0);
           let htmlAnchorX = 0, htmlAnchorY = 0;
@@ -616,14 +755,11 @@ B->A: So what`,
             htmlAnchorY = Math.round(r.top - seqRect.top);
           }
 
-          // SVG anchor: use internal SVG coordinates directly (not getBoundingClientRect)
-          // The SVG has a <g transform="translate(10,10)"> wrapper, so add 10 to rect coords
-          const svgRectEls = svgElement ? [...svgElement.querySelectorAll("rect")] : [];
+          const svgRectEls = svgElement ? [...svgElement.querySelectorAll("rect.participant-box")] : [];
           const topRects = svgRectEls.filter(r => +r.getAttribute("y") < 100);
           let svgAnchorX = 0, svgAnchorY = 0;
           if (topRects.length > 0) {
             const first = topRects.reduce((a, b) => +a.getAttribute("x") < +b.getAttribute("x") ? a : b);
-            // Account for parent <g> transforms by walking up
             let tx = 0, ty = 0;
             let el = first.parentElement;
             while (el && el !== svgElement) {
@@ -659,12 +795,11 @@ B->A: So what`,
           captureEl.querySelectorAll(".header .absolute.text-xs").forEach(hideEl);
           const frame = htmlEl.querySelector(".frame");
           if (frame) {
+            // Hide small SVG icons (checkboxes etc.) but keep frame border
             frame.querySelectorAll(":scope > div > svg").forEach(svg => {
               const r = svg.getBoundingClientRect();
               if (r.width > 15 && r.width < 30) hideEl(svg);
             });
-            frame.style.border = "none";
-            frame.style.borderRadius = "0";
           }
 
           // Strip SVG margins (set by alignSvgToHtml) so toPng captures clean
@@ -679,7 +814,6 @@ B->A: So what`,
 
           // --- Restore ---
           for (const { el, prev } of hidden) el.style.display = prev;
-          if (frame) { frame.style.border = ""; frame.style.borderRadius = ""; }
           if (svgElement) { svgElement.style.cssText = savedSvgMargin; }
 
           const [htmlImg, svgImg] = await Promise.all([
@@ -791,8 +925,10 @@ B->A: So what`,
           const panel = document.getElementById("diff-panel");
           panel.classList.add("visible");
 
-          const pct = contentTotal > 0 ? ((contentMatch / contentTotal) * 100).toFixed(1) : "100.0";
-          document.getElementById("match-badge").textContent = `${pct}% structural match (${contentMatch}/${contentTotal} content px)`;
+          const pixelPct = contentTotal > 0 ? ((contentMatch / contentTotal) * 100).toFixed(1) : "100.0";
+          const structPct = (structural.score * 100).toFixed(0);
+          document.getElementById("match-badge").textContent =
+            `${structPct}% structural (${structural.matchedElements}/${structural.totalElements} elements) · ${pixelPct}% pixel`;
         } catch (err) {
           console.error("Diff failed:", err);
           document.getElementById("match-badge").textContent = "Diff failed";
