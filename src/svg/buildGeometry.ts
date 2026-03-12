@@ -6,12 +6,20 @@ import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
 import {
-  PARTICIPANT_TOP_SPACE_FOR_GROUP,
+  PARTICIPANT_TOP_SPACE_FOR_GROUP as _HTML_PARTICIPANT_TOP,
   OCCURRENCE_WIDTH,
   OCCURRENCE_EMPTY_HEIGHT,
   FRAGMENT_MIN_WIDTH,
   MARGIN,
 } from "@/positioning/Constants";
+
+/**
+ * SVG-specific participant top offset.
+ * The HTML renderer's .life-line-layer has .pt-2 (8px) CSS padding that pushes
+ * participants down. SVG has no such padding, so we add 8px to match the effective
+ * HTML position and keep messages close to participant boxes.
+ */
+const PARTICIPANT_TOP_SPACE = _HTML_PARTICIPANT_TOP + 8;
 import { TextType } from "@/positioning/Coordinate";
 
 /** Visual height of participant box, matching HTML renderer's h-10 (40px) */
@@ -147,8 +155,8 @@ function buildParticipants(
       // SVG has no such padding, so add it back to close the gap between participant and occurrence
       const y =
         creationTop != null
-          ? Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, creationTop + 7)
-          : PARTICIPANT_TOP_SPACE_FOR_GROUP;
+          ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 7)
+          : PARTICIPANT_TOP_SPACE;
 
       return {
         name: m.name,
@@ -293,10 +301,14 @@ function buildMessages(
       const CREATION_MSG_HEIGHT = 40; // from CreationStatementVM.ts
       const fromX = coordinates.getPosition(info.from);
       const toX = coordinates.getPosition(info.to);
-      const messageY = coord.top + CREATION_MSG_HEIGHT / 2;
 
       // Find the already-built participant (buildParticipants handles creationTop)
       const targetParticipant = participants.find(p => p.name === info.to);
+      // Center the arrow on the participant box; coord.top doesn't include
+      // comment height, but targetParticipant.y does.
+      const messageY = targetParticipant
+        ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT / 2
+        : coord.top + CREATION_MSG_HEIGHT / 2;
       if (targetParticipant) {
         creations.push({
           participant: targetParticipant,
@@ -314,10 +326,16 @@ function buildMessages(
 
       // Creation always reserves occurrence space
       const occX = toX - OCCURRENCE_WIDTH / 2;
-      const occY = coord.top + CREATION_MSG_HEIGHT;
-      const occHeight = info.hasBlock
-        ? Math.max(coord.height - PARTICIPANT_VISUAL_HEIGHT, OCCURRENCE_EMPTY_HEIGHT)
-        : OCCURRENCE_EMPTY_HEIGHT;
+      // -2px matches HTML's Occurrence mt-[-2px] (same adjustment as sync messages)
+      const occY = targetParticipant
+        ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT - 2
+        : coord.top + CREATION_MSG_HEIGHT - 2;
+      // Compute occurrence from its top to the bottom of the statement coordinate.
+      // This correctly excludes comment height (which is above the participant box).
+      const occHeight = Math.max(
+        (coord.top + coord.height) - occY,
+        OCCURRENCE_EMPTY_HEIGHT,
+      );
       if (occHeight > 0) {
         occurrences.push({
           x: occX,
@@ -328,12 +346,16 @@ function buildMessages(
         });
 
         // Assignment return for creation: e.g. `b = new B()`
+        // Creation occurrences have minimal extra height in HTML (no block content gap),
+        // so the return line sits right at occurrence bottom — no +5 offset needed
+        // (contrast with sync assignment returns which need +5 to compensate for
+        // HTML occurrence being taller due to the return container's my-4 margins).
         const creationCtx = info.statNode?.creation?.();
         const creationAssign = creationCtx?.Assignment?.();
         if (creationAssign?.assignee) {
           const occBottom = occY + occHeight;
           returns.push({
-            fromX: toX, toX: fromX, y: occBottom + 5,
+            fromX: toX, toX: fromX, y: occBottom,
             label: creationAssign.assignee, isReverse: fromX < toX,
           });
         }
