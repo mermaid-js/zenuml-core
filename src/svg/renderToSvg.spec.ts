@@ -40,6 +40,17 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain('xmlns="http://www.w3.org/2000/svg"');
   });
 
+  it("viewBox width accommodates long message labels near right edge", () => {
+    const longLabel = "thisIsAVeryLongMethodNameThatExtendsWayBeyondTheParticipant";
+    const result = renderToSvg(`A -> B: ${longLabel}`);
+    const widthMatch = result.svg.match(/width="([\d.]+)"/);
+    expect(widthMatch).not.toBeNull();
+    const svgWidth = parseFloat(widthMatch![1]);
+    // Width should be large enough to not clip the long label
+    expect(svgWidth).toBeGreaterThan(300);
+    expect(result.svg).toContain(longLabel);
+  });
+
   it("handles three participants", () => {
     const result = renderToSvg("A -> B: msg1\nB -> C: msg2");
     expect(result.svg).toContain('data-participant="A"');
@@ -132,6 +143,31 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain("finallyOp");
   });
 
+  // --- Starter (actor) tests ---
+
+  it("renders starter participant as stick figure actor", () => {
+    const result = renderToSvg("A.method()");
+    expect(result.svg).toContain("participant-starter");
+    // Should have circle (head) and lines (body/arms/legs)
+    expect(result.svg).toContain("<circle");
+  });
+
+  it("does not render starter at bottom of diagram", () => {
+    const result = renderToSvg("A.method()");
+    // Starter should not appear in bottom participants
+    const bottomGroups = [...result.svg.matchAll(/class="participant participant-bottom"[^>]*data-participant="([^"]+)"/g)];
+    const starterAtBottom = bottomGroups.some(m => m[1] === "_STARTER_");
+    expect(starterAtBottom).toBe(false);
+  });
+
+  // --- Comment tests ---
+
+  it("renders inline comment text in SVG", () => {
+    const result = renderToSvg("// This is a comment\nA.method()");
+    expect(result.svg).toContain("comment-text");
+    expect(result.svg).toContain("This is a comment");
+  });
+
   // --- Fragment tests ---
 
   it("renders if/else fragment with border and header", () => {
@@ -197,6 +233,34 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain('class="return"');
     expect(result.svg).toContain('class="return-line"');
     expect(result.svg).toContain("result");
+  });
+
+  it("renders return label without 'return' keyword", () => {
+    const result = renderToSvg("A.method() {\n  return x\n}");
+    expect(result.svg).toContain("x");
+    expect(result.svg).not.toMatch(/class="return-label"[^>]*>return x</);
+  });
+
+  it("renders @return annotation label without keyword prefix", () => {
+    const result = renderToSvg("@return C->D: ret1_annotation_ltr");
+    expect(result.svg).toContain("ret1_annotation_ltr");
+  });
+
+  it("renders assignment return arrow for sync message", () => {
+    const result = renderToSvg("ret0 = A.method() {\n  B.inner()\n}");
+    // Should have a return arrow labeled "ret0"
+    expect(result.svg).toContain("ret0");
+    const returnCount = (result.svg.match(/class="return"/g) || []).length;
+    expect(returnCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it("does not render assignment return for self-call", () => {
+    const result = renderToSvg("A.m1() {\n  ret0 = A.m2() {\n    B.inner()\n  }\n}");
+    // Self-call assignment should NOT generate a return arrow
+    // (only the inner B.inner() occurrence matters)
+    const returnLabels = [...result.svg.matchAll(/class="return-label"[^>]*>([^<]*)</g)];
+    const hasRet0Return = returnLabels.some(m => m[1] === "ret0");
+    expect(hasRet0Return).toBe(false);
   });
 
   // --- Divider tests ---

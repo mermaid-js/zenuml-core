@@ -117,6 +117,14 @@ export interface ReturnGeometry {
   isReverse: boolean;
 }
 
+// ─── Comment ──────────────────────────────────────────────────────
+
+export interface CommentGeometry {
+  x: number;
+  y: number;
+  text: string;
+}
+
 // ─── Composed Diagram ──────────────────────────────────────────────
 
 export interface DiagramGeometry {
@@ -132,4 +140,5 @@ export interface DiagramGeometry {
   fragments: FragmentGeometry[];
   dividers: DividerGeometry[];
   returns: ReturnGeometry[];
+  comments: CommentGeometry[];
 }

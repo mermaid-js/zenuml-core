@@ -1,6 +1,8 @@
 import type { ParticipantGeometry } from "../geometry";
 
 export function renderParticipant(p: ParticipantGeometry): string {
+  if (p.isStarter) return renderStarterParticipant(p);
+
   const rx = 4;
   const x = p.x - p.width / 2;
   const textX = p.x;
@@ -13,7 +15,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
 }
 
 export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number): string {
-  if (!p.showBottom) return "";
+  if (!p.showBottom || p.isStarter) return "";
   const rx = 4;
   const x = p.x - p.width / 2;
   const textX = p.x;
@@ -22,6 +24,26 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
   return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${bottomY}" width="${p.width}" height="${p.height}" rx="${rx}" class="participant-box"/>
   <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label">${esc(p.label)}</text>
+</g>`;
+}
+
+function renderStarterParticipant(p: ParticipantGeometry): string {
+  // Stick figure "actor" icon centered at participant position
+  const cx = p.x;
+  const topY = p.y + 4;
+  const headR = 8;
+  const bodyTop = topY + headR * 2;
+  const bodyBottom = bodyTop + 12;
+  const legBottom = bodyBottom + 10;
+  const armY = bodyTop + 4;
+  const armSpan = 10;
+
+  return `<g class="participant participant-starter" data-participant="${esc(p.name)}">
+  <circle cx="${cx}" cy="${topY + headR}" r="${headR}" fill="none" stroke="#666" stroke-width="2"/>
+  <line x1="${cx}" y1="${bodyTop}" x2="${cx}" y2="${bodyBottom}" stroke="#666" stroke-width="2"/>
+  <line x1="${cx - armSpan}" y1="${armY}" x2="${cx + armSpan}" y2="${armY}" stroke="#666" stroke-width="2"/>
+  <line x1="${cx}" y1="${bodyBottom}" x2="${cx - 8}" y2="${legBottom}" stroke="#666" stroke-width="2"/>
+  <line x1="${cx}" y1="${bodyBottom}" x2="${cx + 8}" y2="${legBottom}" stroke="#666" stroke-width="2"/>
 </g>`;
 }
 

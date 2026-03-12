@@ -11,6 +11,7 @@ import {
   FRAGMENT_MIN_WIDTH,
   MARGIN,
 } from "@/positioning/Constants";
+import { TextType } from "@/positioning/Coordinate";
 
 /** Visual height of participant box, matching HTML renderer's h-10 (40px) */
 const PARTICIPANT_VISUAL_HEIGHT = 40;
@@ -29,6 +30,7 @@ import type {
   FragmentSectionGeometry,
   ReturnGeometry,
   DividerGeometry,
+  CommentGeometry,
 } from "./geometry";
 
 export interface BuildGeometryInput {
@@ -36,10 +38,11 @@ export interface BuildGeometryInput {
   coordinates: Coordinates;
   verticalCoordinates: VerticalCoordinates;
   title?: string;
+  measureText?: (text: string, type: TextType) => number;
 }
 
 export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
-  const { rootContext, coordinates, verticalCoordinates, title } = input;
+  const { rootContext, coordinates, verticalCoordinates, title, measureText } = input;
   const participantModels = OrderedParticipants(rootContext);
   const totalHeight = verticalCoordinates.getTotalHeight();
 
@@ -53,14 +56,56 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     totalHeight,
   );
 
-  const { messages, selfCalls, occurrences, creations, fragments, returns, dividers } = buildMessages(
+  const { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments } = buildMessages(
     rootContext,
     coordinates,
     verticalCoordinates,
     participants,
   );
 
-  const diagramWidth = coordinates.getWidth();
+  let diagramWidth = coordinates.getWidth();
+
+  // Expand width to fit labels that extend beyond the rightmost participant
+  if (measureText) {
+    const SELF_CALL_LABEL_PAD = 10; // 5px gap from U-shape + 5px trailing
+    for (const sc of selfCalls) {
+      const labelWidth = measureText(sc.label, TextType.MessageContent);
+      const rightExtent = sc.x + sc.width + SELF_CALL_LABEL_PAD + labelWidth;
+      if (rightExtent > diagramWidth) {
+        diagramWidth = rightExtent;
+      }
+    }
+
+    // Expand width to fit title text
+    if (title) {
+      const titleWidth = measureText(title, TextType.ParticipantName) * 1.15;
+      if (titleWidth > diagramWidth) {
+        diagramWidth = titleWidth;
+      }
+    }
+
+    // Expand for message labels extending beyond diagram edge
+    const LABEL_PAD = 10;
+    for (const msg of messages) {
+      const labelW = measureText(msg.label, TextType.MessageContent);
+      const midX = (msg.fromX + msg.toX) / 2;
+      const rightExtent = midX + labelW / 2 + LABEL_PAD;
+      if (rightExtent > diagramWidth) diagramWidth = rightExtent;
+    }
+    for (const ret of returns) {
+      const labelW = measureText(ret.label, TextType.MessageContent);
+      const midX = (ret.fromX + ret.toX) / 2;
+      const rightExtent = midX + labelW / 2 + LABEL_PAD;
+      if (rightExtent > diagramWidth) diagramWidth = rightExtent;
+    }
+    for (const cr of creations) {
+      const labelW = measureText(cr.message.label, TextType.MessageContent);
+      const midX = (cr.message.fromX + cr.message.toX) / 2;
+      const rightExtent = midX + labelW / 2 + LABEL_PAD;
+      if (rightExtent > diagramWidth) diagramWidth = rightExtent;
+    }
+  }
+
   const diagramHeight = totalHeight + PARTICIPANT_VISUAL_HEIGHT; // bottom participant row
 
   return {
@@ -76,6 +121,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     fragments,
     dividers,
     returns,
+    comments,
   };
 }
 
@@ -85,12 +131,12 @@ function buildParticipants(
   verticalCoordinates: VerticalCoordinates,
 ): ParticipantGeometry[] {
   return models
-    .filter((m) => m.name !== _STARTER_)
     .map((m) => {
       const centerX = coordinates.getPosition(m.name);
       const halfWidth = coordinates.half(m.name);
       const width = halfWidth * 2 - MARGIN; // visual box excludes positioning margin
       const creationTop = verticalCoordinates.getCreationTop(m.name);
+      const isStarter = m.name === _STARTER_;
       const y =
         creationTop != null
           ? Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, creationTop)
@@ -103,8 +149,8 @@ function buildParticipants(
         y,
         width,
         height: PARTICIPANT_VISUAL_HEIGHT,
-        isStarter: false,
-        showBottom: creationTop == null,
+        isStarter,
+        showBottom: creationTop == null && !isStarter,
       };
     });
 }
@@ -135,6 +181,7 @@ function buildMessages(
   fragments: FragmentGeometry[];
   returns: ReturnGeometry[];
   dividers: DividerGeometry[];
+  comments: CommentGeometry[];
 } {
   const statements = walkStatements(rootContext);
   const messages: MessageGeometry[] = [];
@@ -144,6 +191,7 @@ function buildMessages(
   const fragments: FragmentGeometry[] = [];
   const returns: ReturnGeometry[] = [];
   const dividers: DividerGeometry[] = [];
+  const comments: CommentGeometry[] = [];
 
   const diagramWidth = coordinates.getWidth();
   const allParticipants = coordinates.orderedParticipantNames();
@@ -151,6 +199,14 @@ function buildMessages(
   for (const info of statements) {
     const coord = verticalCoordinates.getStatementCoordinate(info.key);
     if (!coord) continue;
+
+    // --- Comments (inline, above the statement) ---
+    if (info.comment) {
+      const commentX = info.from
+        ? coordinates.getPosition(info.from)
+        : 10;
+      comments.push({ x: commentX + 5, y: coord.top, text: info.comment });
+    }
 
     // --- Sync / Async messages ---
     if (info.kind === "sync" || info.kind === "async") {
@@ -193,6 +249,17 @@ function buildMessages(
             height: occHeight,
             participantName: info.to,
           });
+
+          // Assignment return: e.g. `ret0 = C.method() { ... }`
+          const messageCtx = info.statNode?.message?.();
+          const assignment = messageCtx?.Assignment?.();
+          if (assignment?.assignee && !info.isSelf) {
+            const occBottom = occY + occHeight;
+            returns.push({
+              fromX: toX, toX: fromX, y: occBottom + 5,
+              label: assignment.assignee, isReverse: fromX < toX,
+            });
+          }
         }
       }
       continue;
@@ -236,6 +303,17 @@ function buildMessages(
           height: occHeight,
           participantName: info.to,
         });
+
+        // Assignment return for creation: e.g. `b = new B()`
+        const creationCtx = info.statNode?.creation?.();
+        const creationAssign = creationCtx?.Assignment?.();
+        if (creationAssign?.assignee) {
+          const occBottom = occY + occHeight;
+          returns.push({
+            fromX: toX, toX: fromX, y: occBottom + 5,
+            label: creationAssign.assignee, isReverse: fromX < toX,
+          });
+        }
       }
       continue;
     }
@@ -280,7 +358,15 @@ function buildMessages(
     }
   }
 
-  return { messages, selfCalls, occurrences, creations, fragments, returns, dividers };
+  // Separate overlapping return labels (minimum 20px gap)
+  returns.sort((a, b) => a.y - b.y);
+  for (let i = 1; i < returns.length; i++) {
+    if (returns[i].y - returns[i - 1].y < 20) {
+      returns[i] = { ...returns[i], y: returns[i - 1].y + 20 };
+    }
+  }
+
+  return { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments };
 }
 
 function buildFragmentGeometry(

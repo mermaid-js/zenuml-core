@@ -30,6 +30,8 @@ export interface StatementInfo {
   fragmentLabel?: string;
   /** For fragments: section info (for alt/tcf with multiple sections) */
   fragmentSections?: FragmentSectionInfo[];
+  /** Inline comment text (e.g. // String line) */
+  comment?: string;
   /** The ANTLR parse tree node — needed for local participant extraction */
   statNode?: any;
 }
@@ -48,13 +50,15 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
     const key = createStatementKey(stat);
     if (!key) continue;
 
+    const comment = stat.getComment?.() || "";
+
     const message = stat.message?.();
     if (message) {
       const from = message.From?.() || currentOrigin;
       const to = message.Owner?.() || _STARTER_;
       const label = message.SignatureText?.() || "";
       const nestedBlock = message.braceBlock?.()?.block?.();
-      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock });
+      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat });
 
       if (nestedBlock) {
         results.push(...walkBlock(nestedBlock, to));
@@ -67,7 +71,7 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       const from = asyncMsg.From?.() || asyncMsg.ProvidedFrom?.() || asyncMsg.Origin?.() || currentOrigin;
       const to = asyncMsg.Owner?.() || asyncMsg.to?.()?.getFormattedText?.() || from;
       const label = asyncMsg.content?.()?.getText?.() || asyncMsg.SignatureText?.() || "";
-      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false });
+      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false, comment });
       continue;
     }
 
@@ -77,7 +81,7 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       const to = creation.Owner?.() || "";
       const label = creation.SignatureText?.() || "«create»";
       const creationBlock = creation.braceBlock?.()?.block?.();
-      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock });
+      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat });
 
       if (creationBlock) {
         results.push(...walkBlock(creationBlock, to || currentOrigin));
@@ -87,11 +91,11 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
 
     const ret = stat.ret?.();
     if (ret) {
-      const label = ret.getFormattedText?.() || ret.retValue?.()?.getText?.() || "";
+      const label = ret.SignatureText?.() || "";
       const asyncMessage = ret?.asyncMessage?.();
       const from = asyncMessage?.From?.() || ret?.From?.() || currentOrigin;
       const to = asyncMessage?.to?.()?.getFormattedText?.() || ret?.ReturnTo?.() || _STARTER_;
-      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false });
+      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment });
       continue;
     }
 

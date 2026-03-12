@@ -16,6 +16,7 @@ import { renderFragment } from "./components/fragment";
 import { renderCreation } from "./components/creation";
 import { renderReturn } from "./components/return";
 import { renderDivider } from "./components/divider";
+import { renderComment } from "./components/comment";
 import type { DiagramGeometry } from "./geometry";
 
 export interface RenderOptions {
@@ -47,6 +48,7 @@ const DEFAULT_THEME_STYLES = `
   .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .divider-line { stroke: #666; stroke-width: 1; stroke-dasharray: 4,4; }
   .divider-label { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #666; }
+  .comment-text { font-family: Helvetica, Verdana, serif; font-size: 12px; font-style: italic; fill: #222; opacity: 0.5; }
 `;
 
 export function renderToSvg(code: string, options?: RenderOptions): RenderResult {
@@ -73,6 +75,7 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
     coordinates,
     verticalCoordinates,
     title,
+    measureText: WidthProviderOnCanvas,
   });
 
   // 5. Render to SVG
@@ -140,6 +143,11 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
   // Dividers (full-width lines with labels)
   for (const d of g.dividers) {
     parts.push(renderDivider(d));
+  }
+
+  // Comments (inline text above statements)
+  for (const c of g.comments) {
+    parts.push(renderComment(c));
   }
 
   const titleSvg = g.title

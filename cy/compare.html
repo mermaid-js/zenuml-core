@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SVG vs HTML Comparison</title>
+    <style>
+      body { margin: 0; font-family: sans-serif; }
+      .controls { padding: 10px; background: #1e293b; color: white; }
+      .controls select { font-size: 14px; padding: 4px; }
+      .container { display: flex; gap: 0; }
+      .panel { flex: 1; border-right: 1px solid #ccc; overflow: auto; }
+      .panel h3 { margin: 0; padding: 8px 16px; background: #334155; color: white; font-size: 13px; }
+      .panel-content { padding: 0; background: white; }
+      #html-panel iframe { width: 100%; height: 800px; border: none; }
+      #svg-output { padding: 0; background: white; }
+    </style>
+  </head>
+  <body>
+    <div class="controls">
+      <label>Test case: </label>
+      <select id="case-select"></select>
+    </div>
+    <div class="container">
+      <div class="panel" id="html-panel">
+        <h3>HTML/React Renderer (foreignObject)</h3>
+        <div class="panel-content">
+          <iframe id="html-frame"></iframe>
+        </div>
+      </div>
+      <div class="panel" id="svg-panel">
+        <h3>Native SVG Renderer</h3>
+        <div class="panel-content" id="svg-output"></div>
+      </div>
+    </div>
+    <script type="module">
+      import { renderToSvg } from "/src/svg/renderToSvg.ts";
+
+      const CASES = {
+        "smoke": `title ABCD Title
+// Generating Sequence Diagrams from Java code is experimental.
+// Please report errors to https://github.com/ZenUml/jetbrains-zenuml/discussions
+MarkdownJavaFxHtmlPanel
+MarkdownJavaFxHtmlPanel.readFromInputStream(inputStream) {
+  StringBuilder resultStringBuilder = new StringBuilder();
+  try {
+    // String line;
+    while((line = br.readLine()) != null) {
+      resultStringBuilder.append(line);
+    }
+  }
+  catch(IOException) {
+    return "";
+  }
+  return "resultStringBuilder.toString()";
+}`,
+        "simple-messages": `A -> B: hello
+B -> C: process
+C -> B: result
+B -> A: done`,
+        "if-fragment": `title Issue 232
+Client -> Server:SendRequest
+if(true){
+  Server -> Server: processRequest
+}`,
+        "creation": `title Title 1
+A.m {
+  new B(1,2,3,4)
+}`,
+        "fragments-return": `A.method {
+  if(x) {
+    return x
+  } else {
+    return y
+  }
+  try {
+    return 1
+  } catch {
+    return 2
+  } finally {
+    return 3
+  }
+}`,
+        "async": `A->A: async
+A->B: async
+A->C: async
+B->B: async
+B->C: async
+B->A: async
+C->C: async
+C->B: async
+C->A: async`,
+        "self-sync": `selfSync() {
+  A.method {
+    B.method
+  }
+}`,
+        "interaction": `if(x) {
+  A.method() {
+    B.method() {
+      BSelfMethod00000000000
+      A.method()
+    }
+    ASelf {
+      B->A.method
+    }
+  }
+}`,
+        "nested-fragment": `title Nested Interaction
+A.Read() {
+  B.Submit() {
+    Process() {
+      if (true) {
+        ProcessCallback() {
+          A.method
+        }
+      }
+    }
+  }
+}`,
+        "return": `A B C D
+A->B.method() {
+  ret0_assign_rtl =C.method_long_to_give_space {
+    @return C->D: ret1_annotation_ltr
+    ret5_assign_ltr = B.method
+    B.method2 {
+      return ret2_return_ltr
+    }
+  }
+  return ret2_return_rtl
+  @return B->A: ret4_annotation_rtl
+}`,
+      };
+
+      // Map case names to HTML fixture files
+      const HTML_MAP = {
+        "smoke": "/cy/smoke.html",
+        "simple-messages": null,
+        "if-fragment": "/cy/if-fragment.html",
+        "creation": "/cy/smoke-creation.html",
+        "fragments-return": "/cy/fragments-with-return.html",
+        "async": "/cy/async-message-1.html",
+        "self-sync": "/cy/self-sync-message-at-root.html",
+        "interaction": "/cy/smoke-interaction.html",
+        "nested-fragment": "/cy/nested-interaction-with-fragment.html",
+        "return": "/cy/return.html",
+      };
+
+      const select = document.getElementById("case-select");
+      const svgOutput = document.getElementById("svg-output");
+      const htmlFrame = document.getElementById("html-frame");
+
+      for (const name of Object.keys(CASES)) {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      }
+
+      function render(name) {
+        const code = CASES[name];
+        // SVG
+        const result = renderToSvg(code);
+        svgOutput.innerHTML = result.svg;
+        // HTML
+        const htmlFile = HTML_MAP[name];
+        if (htmlFile) {
+          htmlFrame.removeAttribute('srcdoc');
+          htmlFrame.src = htmlFile;
+        } else {
+          htmlFrame.removeAttribute('src');
+          htmlFrame.srcdoc = '<p style="padding:20px;color:#999">No HTML fixture for this case</p>';
+        }
+      }
+
+      select.addEventListener("change", () => render(select.value));
+      render(select.value);
+    </script>
+  </body>
+</html>
