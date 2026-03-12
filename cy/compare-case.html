@@ -1,0 +1,681 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Compare</title>
+    <style>
+      body { margin: 0; font-family: sans-serif; }
+      .compare-bar {
+        display: flex; align-items: center; gap: 12px;
+        padding: 8px 16px; background: #1e293b; color: white;
+      }
+      .compare-bar a { color: #93c5fd; text-decoration: none; font-size: 13px; }
+      .compare-bar a:hover { text-decoration: underline; }
+      .compare-bar h2 { margin: 0; font-size: 15px; font-weight: 500; }
+      .nav { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+      .nav a { padding: 4px 10px; background: #334155; border-radius: 4px; font-size: 12px; }
+      .nav button { padding: 4px 12px; background: #7c3aed; border: none; border-radius: 4px; color: white; font-size: 12px; cursor: pointer; }
+      .nav button:hover { background: #6d28d9; }
+      .nav button:disabled { background: #64748b; cursor: wait; }
+      .nav .match-badge { font-size: 11px; color: #94a3b8; }
+      .container { display: flex; gap: 0; }
+      .panel { flex: 1; overflow: auto; }
+      .panel > h3 { margin: 0; padding: 8px 16px; background: #334155; color: white; font-size: 13px; }
+      .panel-content { padding: 10px; background: white; }
+      .diff-panel { display: none; }
+      .diff-panel.visible { display: block; }
+      .diff-panel .panel-content canvas { max-width: 100%; }
+    </style>
+  </head>
+  <body>
+    <div class="compare-bar">
+      <a href="/cy/compare.html">&larr; All cases</a>
+      <h2 id="case-name"></h2>
+      <div class="nav">
+        <a id="prev-link" href="#">&larr; Prev</a>
+        <a id="next-link" href="#">Next &rarr;</a>
+        <button id="diff-btn">Diff</button>
+        <span class="match-badge" id="match-badge"></span>
+      </div>
+    </div>
+    <div class="container">
+      <div class="panel">
+        <h3>HTML/React Renderer (theme-default)</h3>
+        <div class="panel-content" id="html-output">
+          <div id="diagram"><pre class="zenuml" style="margin: 0"></pre></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Native SVG Renderer</h3>
+        <div class="panel-content" id="svg-output"></div>
+      </div>
+      <div class="panel diff-panel" id="diff-panel">
+        <h3>Pixel Diff</h3>
+        <div class="panel-content" id="diff-output"></div>
+      </div>
+    </div>
+    <script type="module">
+      import ZenUml from "/src/core.tsx";
+      import { renderToSvg } from "/src/svg/renderToSvg.ts";
+      import { toPng } from "html-to-image";
+
+      const CASES = {
+        "smoke": `title ABCD Title
+// Generating Sequence Diagrams from Java code is experimental.
+// Please report errors to https://github.com/ZenUml/jetbrains-zenuml/discussions
+MarkdownJavaFxHtmlPanel
+MarkdownJavaFxHtmlPanel.readFromInputStream(inputStream) {
+  StringBuilder resultStringBuilder = new StringBuilder();
+  try {
+    // String line;
+    while((line = br.readLine()) != null) {
+      resultStringBuilder.append(line);
+    }
+  }
+  catch(IOException) {
+    return "";
+  }
+  return "resultStringBuilder.toString()";
+}`,
+        "simple-messages": `A -> B: hello
+B -> C: process
+C -> B: result
+B -> A: done`,
+        "self-call": `A.method() {
+  B.method
+}`,
+        "if-fragment": `title Issue 232
+Client -> Server:SendRequest
+if(true){
+  Server -> Server: processRequest
+}`,
+        "fragment-loop": `A -> B: request
+loop(condition) {
+  B -> C: process
+}`,
+        "fragment-tcf": `A.method {
+  try {
+    B.process
+  } catch(error) {
+    C.handle
+  } finally {
+    D.cleanup
+  }
+}`,
+        "creation": `title Title 1
+A.m {
+  new B(1,2,3,4)
+}`,
+        "creation-rtl": `"b:B"
+a1 = A.method() {
+  // abcde
+  b = new B()
+}`,
+        "defect-406": `title Title 1
+A.m1 {
+  new B(1,2,3,4) {
+    if(x) {
+      C.m2
+    }
+    while(y) {
+      D.m3
+    }
+    par {
+      E.m4
+      F.m5
+    }
+    opt {
+      G.m6
+    }
+  }
+}`,
+        "fragment": `A
+B
+C
+if(x) {
+  loop(y) {
+    try {
+      par {
+        A.m();
+        B.m();
+      }
+    } catch(e) {
+      opt {
+        new C
+      }
+    } finally {
+      C.m
+    }
+  }
+}`,
+        "fragment-issue": `// This sample is carefully crafted. It shows a known issues: fragment stretched to
+// svc (should not), because parser thinks the return statement returns to svc.
+group Backend {@VPC svc @RDS rep}
+group { Client }
+Client->SGW."Get order by id" {
+  svc.Get(id) {
+    rep."load order" {
+      if(order == null) {
+        @return
+        SGW->Client:401
+      }
+    }
+  }
+}`,
+        "fragments-return": `A.method {
+  if(x) {
+    return x
+  } else {
+    return y
+  }
+  try {
+    return 1
+  } catch {
+    return 2
+  } finally {
+    return 3
+  }
+}`,
+        "interaction": `if(x) {
+  A.method() {
+    B.method() {
+      BSelfMethod00000000000
+      A.method()
+    }
+    ASelf {
+      B->A.method
+    }
+  }
+}`,
+        "async-1": `A->A: async
+A->B: async
+A->C: async
+B->B: async
+B->C: async
+B->A: async
+C->C: async
+C->B: async
+C->A: async`,
+        "async-2": `A.method {
+  A->A: async
+  A->B: async
+  A->C: async
+  B->B: async
+  B->C: async
+  B->A: async
+  C->C: async
+  C->B: async
+  C->A: async
+  B.method {
+    A->A: async
+    A->B: async
+    A->C: async
+    B->B: async
+    B->C: async
+    B->A: async
+    C->C: async
+    C->B: async
+    C->A: async
+  }
+}`,
+        "async-3": `A B C
+C.method {
+  A->C: async
+  C->A: async
+  C->B: async
+  B->C: async
+  B.method {
+    A->A: async
+    A->B: async
+    A->C: async
+    B->B: async
+    B->C: async
+    B->A: async
+    C->C: async
+    C->B: async
+    C->A: async
+  }
+}`,
+        "return": `A B C D
+A->B.method() {
+  ret0_assign_rtl =C.method_long_to_give_space {
+    @return C->D: ret1_annotation_ltr
+    ret5_assign_ltr = B.method
+    B.method2 {
+      return ret2_return_ltr
+    }
+  }
+  return ret2_return_rtl
+  @return B->A: ret4_annotation_rtl
+}`,
+        "self-sync": `selfSync() {
+  A.method {
+    B.method
+  }
+}`,
+        "nested-fragment": `title Nested Interaction
+A.Read() {
+  B.Submit() {
+    Process() {
+      if (true) {
+        ProcessCallback() {
+          A.method
+        }
+      }
+    }
+  }
+}`,
+        "nested-outbound": `title Nested Interaction with Outbound
+A.Read() {
+  B.Submit() {
+    C->B.method {
+      if (true) {
+        ProcessCallback() {
+          A.method
+        }
+      }
+    }
+  }
+}`,
+        "named-params": `title Named Parameters Test
+// Testing named parameter syntax (param=value)
+A.method(userId=123, name="John")
+B.create(type="User", active=true)
+C.mixedCall(1, name="Mixed", enabled=false)
+D.oldStyle(1, 2, 3)
+E.complex(first="value1", second=42, third=true, fourth="final")`,
+        "vertical-1": `// red
+// green
+a = A.m111
+new E`,
+        "vertical-2": `// [red]
+new B`,
+        "vertical-3": `if(x) {
+  // comment
+  new A
+} else {
+  new B
+}
+new C
+try {
+  new D
+} catch {
+  par {
+    new E
+    new F
+  }
+}`,
+        "vertical-4": `if(x) {
+  // comment
+  new A
+} else {
+  new B
+}
+new C
+try {
+  new D
+} catch {
+  par {
+    new E
+    new F
+    if(x) {
+      new X
+    } else {
+      new Y
+    }
+  }
+}`,
+        "vertical-5": `par {
+  new F
+  if(x) {
+    new X
+  } else {
+    try {
+      new Y
+    } catch {
+      par {
+        new G
+        if(x) {
+          new H
+        } else {
+          new I
+        }
+      }
+    }
+  }
+}`,
+        "vertical-6": `new a
+if(x) {
+	new b
+} else {
+	new c
+	new e
+}
+new D`,
+        "vertical-7": `A.method
+section(){
+    new B
+}`,
+        "vertical-8": `new Creation() {
+  return from_creation
+}
+return "from if to original source"
+try {
+  new AHasAVeryLongNameLongNameLongNameLongName() {
+    new CreatWithinCreat()
+  }
+}`,
+        "vertical-9": `A0->A0: self
+new A`,
+        "vertical-10": `new E
+E.messageA()
+new A {
+  if (x) {
+    new D
+  }
+  new B {
+    new C
+  }
+}`,
+        "vertical-11": `A.call {
+  // pre creation
+  A->B: prep
+  a = new A()
+  a->B: post
+}`,
+        "demo1-smoke": `// comments at the beginning should be ignored
+title This is a title
+@Lambda <<stereotype>> ParticipantName
+group "B C" {@EC2 B @ECS C}
+"bg color" #FF0000
+@Starter("OptionalStarter")
+new B
+ReturnType ret = ParticipantName.methodA(a, b) {
+  critical("This is a critical message") {
+    ReturnType ret2 = selfCall() {
+      B.syncCallWithinSelfCall() {
+        ParticipantName.rightToLeftCall()
+        return B
+      }
+      "space in name"->"bg color".syncMethod(from, to)
+    }
+  }
+  // A comment for alt
+  if (condition) {
+    // A comment for creation
+    ret = new CreatAndAssign()
+    "ret:CreatAndAssign".method(create, and, assign)
+    // A comment for async self
+    B->B: Self Async
+    // A comment for async message
+    B->C: Async Message within fragment
+    new Creation() {
+      return from_creation
+    }
+    return "from if to original source"
+    try {
+      new AHasAVeryLongNameLongNameLongNameLongName() {
+        new CreatWithinCreat()
+        C.rightToLeftFromCreation() {
+          B.FurtherRightToLeftFromCreation()
+        }
+      }
+    } catch (Exception) {
+      self {
+        return C
+      }
+    } finally {
+      C: async call from implied source
+    }
+    =====divider can be anywhere=====
+  } else if ("another condition") {
+    par {
+      B.method
+      C.method
+    }
+  } else {
+    // A comment for loop
+    forEach(Z) {
+      Z.method() {
+        return Z
+      }
+    }
+  }
+}`,
+        "demo3-nested-fragments": `ret = A.methodA() {
+  if (x) {
+    B.methodB()
+    if (y) {
+      C.methodC()
+    }
+  }
+  while (x) {
+    B.methodB()
+    while (y) {
+      C.methodC()
+    }
+  }
+  if (x) {
+    method()
+    if (y) {
+      method2()
+    }
+  }
+  while (x) {
+    method()
+    while (y) {
+      method2()
+    }
+  }
+  while (x) {
+    method()
+    if (y) {
+      method2()
+    }
+  }
+  if (x) {
+    method()
+    while (y) {
+      method2()
+    }
+  }
+}`,
+        "demo4-fragment-span": `ret = A.methodA() {
+  B.method() {
+    if (X) {
+      C.methodC() {
+        a = A.methodA() {
+          D.method()
+        }
+      }
+    }
+    while (Y) {
+      C.methodC() {
+        A.methodA()
+      }
+    }
+   }
+ }`,
+        "demo5-self-named": `A.methodA() { A.methodA1() }`,
+        "demo6-async-styled": `A->A:: Hello
+A->B:: Hello B
+B->A: So what`,
+      };
+
+      const caseNames = Object.keys(CASES);
+      const params = new URLSearchParams(window.location.search);
+      const caseName = params.get("case") || caseNames[0];
+      const code = CASES[caseName];
+
+      // Update title and header
+      document.title = `Compare: ${caseName}`;
+      document.getElementById("case-name").textContent = caseName;
+
+      // Prev/Next navigation
+      const idx = caseNames.indexOf(caseName);
+      const prevLink = document.getElementById("prev-link");
+      const nextLink = document.getElementById("next-link");
+      if (idx > 0) {
+        prevLink.href = `?case=${encodeURIComponent(caseNames[idx - 1])}`;
+      } else {
+        prevLink.style.visibility = "hidden";
+      }
+      if (idx < caseNames.length - 1) {
+        nextLink.href = `?case=${encodeURIComponent(caseNames[idx + 1])}`;
+      } else {
+        nextLink.style.visibility = "hidden";
+      }
+
+      if (!code) {
+        document.getElementById("svg-output").innerHTML = `<p style="color:red">Unknown case: ${caseName}</p>`;
+      } else {
+        // SVG side
+        const result = renderToSvg(code);
+        document.getElementById("svg-output").innerHTML = result.svg;
+
+        // HTML side — render with theme-default
+        const diagram = document.getElementById("diagram");
+        const pre = diagram.querySelector("pre.zenuml");
+        pre.textContent = code;
+        const zenUml = new ZenUml(pre);
+        await zenUml.render(code, { theme: "theme-default" });
+
+        // Align SVG top-left with HTML top-left by measuring first participant box positions
+        requestAnimationFrame(() => {
+          alignSvgToHtml();
+        });
+      }
+
+      function alignSvgToHtml() {
+        const htmlPanel = document.getElementById("html-output");
+        const svgPanel = document.getElementById("svg-output");
+        const svg = svgPanel.querySelector("svg");
+        if (!svg) return;
+
+        // Find first named participant box in HTML (skip starter icon which has no text)
+        const htmlBoxes = [...htmlPanel.querySelectorAll(".bg-skin-participant")];
+        const htmlRef = htmlBoxes.find(el => el.textContent.trim().length > 0);
+        if (!htmlRef) return;
+        const htmlPanelRect = htmlPanel.getBoundingClientRect();
+        const htmlRefRect = htmlRef.getBoundingClientRect();
+        const htmlX = htmlRefRect.left - htmlPanelRect.left;
+        const htmlY = htmlRefRect.top - htmlPanelRect.top;
+
+        // Find first top participant rect in SVG (these are named participants, not the starter)
+        const svgRects = [...svg.querySelectorAll("rect")];
+        const topRects = svgRects.filter(r => +r.getAttribute("y") < 100);
+        if (topRects.length === 0) return;
+        const firstRect = topRects.reduce((a, b) =>
+          +a.getAttribute("x") < +b.getAttribute("x") ? a : b
+        );
+
+        // SVG rect position in pixels from SVG element = rect coords + translate(10,10)
+        // From panel = SVG element offset (10px padding) + SVG internal position
+        const svgX = +firstRect.getAttribute("x") + 10 + 10; // rect x + g translate + panel padding
+        const svgY = +firstRect.getAttribute("y") + 10 + 10;
+
+        const dx = htmlX - svgX;
+        const dy = htmlY - svgY;
+
+        if (dx !== 0 || dy !== 0) {
+          svg.style.marginLeft = Math.max(0, dx) + "px";
+          svg.style.marginTop = Math.max(0, dy) + "px";
+        }
+      }
+
+      // Diff logic
+      document.getElementById("diff-btn").addEventListener("click", async () => {
+        const btn = document.getElementById("diff-btn");
+        btn.disabled = true;
+        btn.textContent = "Computing...";
+
+        try {
+          const htmlEl = document.getElementById("html-output");
+          const svgEl = document.getElementById("svg-output");
+
+          const [htmlDataUrl, svgDataUrl] = await Promise.all([
+            toPng(htmlEl),
+            toPng(svgEl),
+          ]);
+
+          const [htmlImg, svgImg] = await Promise.all([
+            loadImage(htmlDataUrl),
+            loadImage(svgDataUrl),
+          ]);
+
+          const w = Math.max(htmlImg.width, svgImg.width);
+          const h = Math.max(htmlImg.height, svgImg.height);
+
+          const canvas1 = drawToCanvas(htmlImg, w, h);
+          const canvas2 = drawToCanvas(svgImg, w, h);
+
+          const data1 = canvas1.getContext("2d").getImageData(0, 0, w, h).data;
+          const data2 = canvas2.getContext("2d").getImageData(0, 0, w, h).data;
+
+          const diffCanvas = document.createElement("canvas");
+          diffCanvas.width = w;
+          diffCanvas.height = h;
+          const ctx = diffCanvas.getContext("2d");
+          const diffImg = ctx.createImageData(w, h);
+          const diff = diffImg.data;
+
+          let matchCount = 0;
+          const totalPixels = w * h;
+
+          for (let i = 0; i < data1.length; i += 4) {
+            const r1 = data1[i], g1 = data1[i+1], b1 = data1[i+2];
+            const r2 = data2[i], g2 = data2[i+1], b2 = data2[i+2];
+
+            if (r1 === r2 && g1 === g2 && b1 === b2) {
+              // Match — dimmed gray
+              const gray = Math.round(0.3 * r1 + 0.59 * g1 + 0.11 * b1);
+              diff[i] = gray; diff[i+1] = gray; diff[i+2] = gray; diff[i+3] = 255;
+              matchCount++;
+            } else {
+              // Difference — magenta highlight
+              diff[i] = 255; diff[i+1] = 0; diff[i+2] = 255; diff[i+3] = 255;
+            }
+          }
+
+          ctx.putImageData(diffImg, 0, 0);
+
+          const diffOutput = document.getElementById("diff-output");
+          diffOutput.innerHTML = "";
+          diffOutput.appendChild(diffCanvas);
+
+          const panel = document.getElementById("diff-panel");
+          panel.classList.add("visible");
+
+          const pct = ((matchCount / totalPixels) * 100).toFixed(1);
+          document.getElementById("match-badge").textContent = `${pct}% match`;
+        } catch (err) {
+          console.error("Diff failed:", err);
+          document.getElementById("match-badge").textContent = "Diff failed";
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Diff";
+        }
+      });
+
+      function loadImage(dataUrl) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = dataUrl;
+        });
+      }
+
+      function drawToCanvas(img, w, h) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0);
+        return c;
+      }
+    </script>
+  </body>
+</html>

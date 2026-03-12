@@ -4,176 +4,64 @@
     <meta charset="utf-8" />
     <title>SVG vs HTML Comparison</title>
     <style>
-      body { margin: 0; font-family: sans-serif; }
-      .controls { padding: 10px; background: #1e293b; color: white; }
-      .controls select { font-size: 14px; padding: 4px; }
-      .container { display: flex; gap: 0; }
-      .panel { flex: 1; border-right: 1px solid #ccc; overflow: auto; }
-      .panel h3 { margin: 0; padding: 8px 16px; background: #334155; color: white; font-size: 13px; }
-      .panel-content { padding: 0; background: white; }
-      #html-panel iframe { width: 100%; height: 800px; border: none; }
-      #svg-output { padding: 0; background: white; }
+      body { margin: 0; font-family: sans-serif; background: #0f172a; color: #e2e8f0; }
+      h1 { margin: 0; padding: 16px 24px; font-size: 20px; font-weight: 600; border-bottom: 1px solid #334155; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; padding: 16px 24px; }
+      .card {
+        display: block; padding: 14px 18px; background: #1e293b; border-radius: 8px;
+        text-decoration: none; color: #e2e8f0; border: 1px solid #334155;
+        transition: border-color 0.15s, background 0.15s;
+      }
+      .card:hover { border-color: #60a5fa; background: #1e3a5f; }
+      .card .name { font-size: 15px; font-weight: 500; }
+      .card .preview { font-size: 12px; color: #94a3b8; margin-top: 6px; white-space: pre; overflow: hidden; max-height: 3.6em; line-height: 1.2em; }
     </style>
   </head>
   <body>
-    <div class="controls">
-      <label>Test case: </label>
-      <select id="case-select"></select>
-    </div>
-    <div class="container">
-      <div class="panel" id="html-panel">
-        <h3>HTML/React Renderer (foreignObject)</h3>
-        <div class="panel-content">
-          <iframe id="html-frame"></iframe>
-        </div>
-      </div>
-      <div class="panel" id="svg-panel">
-        <h3>Native SVG Renderer</h3>
-        <div class="panel-content" id="svg-output"></div>
-      </div>
-    </div>
+    <h1>SVG vs HTML Comparison</h1>
+    <div class="grid" id="grid"></div>
     <script type="module">
-      import { renderToSvg } from "/src/svg/renderToSvg.ts";
-
       const CASES = {
-        "smoke": `title ABCD Title
-// Generating Sequence Diagrams from Java code is experimental.
-// Please report errors to https://github.com/ZenUml/jetbrains-zenuml/discussions
-MarkdownJavaFxHtmlPanel
-MarkdownJavaFxHtmlPanel.readFromInputStream(inputStream) {
-  StringBuilder resultStringBuilder = new StringBuilder();
-  try {
-    // String line;
-    while((line = br.readLine()) != null) {
-      resultStringBuilder.append(line);
-    }
-  }
-  catch(IOException) {
-    return "";
-  }
-  return "resultStringBuilder.toString()";
-}`,
-        "simple-messages": `A -> B: hello
-B -> C: process
-C -> B: result
-B -> A: done`,
-        "if-fragment": `title Issue 232
-Client -> Server:SendRequest
-if(true){
-  Server -> Server: processRequest
-}`,
-        "creation": `title Title 1
-A.m {
-  new B(1,2,3,4)
-}`,
-        "fragments-return": `A.method {
-  if(x) {
-    return x
-  } else {
-    return y
-  }
-  try {
-    return 1
-  } catch {
-    return 2
-  } finally {
-    return 3
-  }
-}`,
-        "async": `A->A: async
-A->B: async
-A->C: async
-B->B: async
-B->C: async
-B->A: async
-C->C: async
-C->B: async
-C->A: async`,
-        "self-sync": `selfSync() {
-  A.method {
-    B.method
-  }
-}`,
-        "interaction": `if(x) {
-  A.method() {
-    B.method() {
-      BSelfMethod00000000000
-      A.method()
-    }
-    ASelf {
-      B->A.method
-    }
-  }
-}`,
-        "nested-fragment": `title Nested Interaction
-A.Read() {
-  B.Submit() {
-    Process() {
-      if (true) {
-        ProcessCallback() {
-          A.method
-        }
-      }
-    }
-  }
-}`,
-        "return": `A B C D
-A->B.method() {
-  ret0_assign_rtl =C.method_long_to_give_space {
-    @return C->D: ret1_annotation_ltr
-    ret5_assign_ltr = B.method
-    B.method2 {
-      return ret2_return_ltr
-    }
-  }
-  return ret2_return_rtl
-  @return B->A: ret4_annotation_rtl
-}`,
+        "smoke": `title ABCD Title\nMarkdownJavaFxHtmlPanel\nMarkdownJavaFxHtmlPanel.readFromInputStream(inputStream) {\n  StringBuilder resultStringBuilder = new StringBuilder();\n  try {\n    while((line = br.readLine()) != null) {\n      resultStringBuilder.append(line);\n    }\n  }\n  catch(IOException) {\n    return "";\n  }\n  return "resultStringBuilder.toString()";\n}`,
+        "simple-messages": `A -> B: hello\nB -> C: process\nC -> B: result\nB -> A: done`,
+        "self-call": `A.method() {\n  B.method\n}`,
+        "if-fragment": `title Issue 232\nClient -> Server:SendRequest\nif(true){\n  Server -> Server: processRequest\n}`,
+        "fragment-loop": `A -> B: request\nloop(condition) {\n  B -> C: process\n}`,
+        "fragment-tcf": `A.method {\n  try {\n    B.process\n  } catch(error) {\n    C.handle\n  } finally {\n    D.cleanup\n  }\n}`,
+        "creation": `title Title 1\nA.m {\n  new B(1,2,3,4)\n}`,
+        "creation-rtl": `"b:B"\na1 = A.method() {\n  // abcde\n  b = new B()\n}`,
+        "defect-406": `title Title 1\nA.m1 {\n  new B(1,2,3,4) {\n    if(x) {\n      C.m2\n    }\n    while(y) {\n      D.m3\n    }\n    par {\n      E.m4\n      F.m5\n    }\n    opt {\n      G.m6\n    }\n  }\n}`,
+        "fragment": `A\nB\nC\nif(x) {\n  loop(y) {\n    try {\n      par {\n        A.m();\n        B.m();\n      }\n    } catch(e) {\n      opt {\n        new C\n      }\n    } finally {\n      C.m\n    }\n  }\n}`,
+        "fragment-issue": `group Backend {@VPC svc @RDS rep}\ngroup { Client }\nClient->SGW."Get order by id" {\n  svc.Get(id) {\n    rep."load order" {\n      if(order == null) {\n        @return\n        SGW->Client:401\n      }\n    }\n  }\n}`,
+        "fragments-return": `A.method {\n  if(x) {\n    return x\n  } else {\n    return y\n  }\n  try {\n    return 1\n  } catch {\n    return 2\n  } finally {\n    return 3\n  }\n}`,
+        "interaction": `if(x) {\n  A.method() {\n    B.method() {\n      BSelfMethod00000000000\n      A.method()\n    }\n    ASelf {\n      B->A.method\n    }\n  }\n}`,
+        "async-1": `A->A: async\nA->B: async\nA->C: async\nB->B: async\nB->C: async\nB->A: async\nC->C: async\nC->B: async\nC->A: async`,
+        "async-2": `A.method {\n  A->A: async\n  A->B: async\n  A->C: async\n  B->B: async\n  B->C: async\n  B->A: async\n  C->C: async\n  C->B: async\n  C->A: async\n  B.method {\n    A->A: async\n    A->B: async\n    A->C: async\n    B->B: async\n    B->C: async\n    B->A: async\n    C->C: async\n    C->B: async\n    C->A: async\n  }\n}`,
+        "async-3": `A B C\nC.method {\n  A->C: async\n  C->A: async\n  C->B: async\n  B->C: async\n  B.method {\n    A->A: async\n    A->B: async\n    A->C: async\n    B->B: async\n    B->C: async\n    B->A: async\n    C->C: async\n    C->B: async\n    C->A: async\n  }\n}`,
+        "return": `A B C D\nA->B.method() {\n  ret0_assign_rtl =C.method_long_to_give_space {\n    @return C->D: ret1_annotation_ltr\n    ret5_assign_ltr = B.method\n    B.method2 {\n      return ret2_return_ltr\n    }\n  }\n  return ret2_return_rtl\n  @return B->A: ret4_annotation_rtl\n}`,
+        "self-sync": `selfSync() {\n  A.method {\n    B.method\n  }\n}`,
+        "nested-fragment": `title Nested Interaction\nA.Read() {\n  B.Submit() {\n    Process() {\n      if (true) {\n        ProcessCallback() {\n          A.method\n        }\n      }\n    }\n  }\n}`,
+        "nested-outbound": `title Nested Interaction with Outbound\nA.Read() {\n  B.Submit() {\n    C->B.method {\n      if (true) {\n        ProcessCallback() {\n          A.method\n        }\n      }\n    }\n  }\n}`,
+        "named-params": `title Named Parameters Test\nA.method(userId=123, name="John")\nB.create(type="User", active=true)\nC.mixedCall(1, name="Mixed", enabled=false)\nD.oldStyle(1, 2, 3)\nE.complex(first="value1", second=42, third=true, fourth="final")`,
+        "vertical-1": `// red\n// green\na = A.m111\nnew E`,
+        "vertical-2": `// [red]\nnew B`,
+        "vertical-3": `if(x) {\n  // comment\n  new A\n} else {\n  new B\n}\nnew C\ntry {\n  new D\n} catch {\n  par {\n    new E\n    new F\n  }\n}`,
+        "vertical-10": `new E\nE.messageA()\nnew A {\n  if (x) {\n    new D\n  }\n  new B {\n    new C\n  }\n}`,
+        "demo1-smoke": `title This is a title\n@Lambda <<stereotype>> ParticipantName\ngroup "B C" {@EC2 B @ECS C}\n"bg color" #FF0000\n@Starter("OptionalStarter")\nnew B\nReturnType ret = ParticipantName.methodA(a, b) {\n  critical("This is a critical message") {\n    ReturnType ret2 = selfCall() {\n      B.syncCallWithinSelfCall() {\n        ParticipantName.rightToLeftCall()\n        return B\n      }\n      "space in name"->"bg color".syncMethod(from, to)\n    }\n  }\n  if (condition) {\n    ret = new CreatAndAssign()\n    "ret:CreatAndAssign".method(create, and, assign)\n    B->B: Self Async\n    B->C: Async Message within fragment\n    new Creation() {\n      return from_creation\n    }\n    return "from if to original source"\n    try {\n      new AHasAVeryLongNameLongNameLongNameLongName() {\n        new CreatWithinCreat()\n        C.rightToLeftFromCreation() {\n          B.FurtherRightToLeftFromCreation()\n        }\n      }\n    } catch (Exception) {\n      self {\n        return C\n      }\n    } finally {\n      C: async call from implied source\n    }\n    =====divider can be anywhere=====\n  } else if ("another condition") {\n    par {\n      B.method\n      C.method\n    }\n  } else {\n    forEach(Z) {\n      Z.method() {\n        return Z\n      }\n    }\n  }\n}`,
+        "demo3-nested-fragments": `ret = A.methodA() {\n  if (x) {\n    B.methodB()\n    if (y) {\n      C.methodC()\n    }\n  }\n  while (x) {\n    B.methodB()\n    while (y) {\n      C.methodC()\n    }\n  }\n}`,
+        "demo4-fragment-span": `ret = A.methodA() {\n  B.method() {\n    if (X) {\n      C.methodC() {\n        a = A.methodA() {\n          D.method()\n        }\n      }\n    }\n    while (Y) {\n      C.methodC() {\n        A.methodA()\n      }\n    }\n  }\n}`,
+        "demo5-self-named": `A.methodA() { A.methodA1() }`,
+        "demo6-async-styled": `A->A:: Hello\nA->B:: Hello B\nB->A: So what`,
       };
 
-      // Map case names to HTML fixture files
-      const HTML_MAP = {
-        "smoke": "/cy/smoke.html",
-        "simple-messages": null,
-        "if-fragment": "/cy/if-fragment.html",
-        "creation": "/cy/smoke-creation.html",
-        "fragments-return": "/cy/fragments-with-return.html",
-        "async": "/cy/async-message-1.html",
-        "self-sync": "/cy/self-sync-message-at-root.html",
-        "interaction": "/cy/smoke-interaction.html",
-        "nested-fragment": "/cy/nested-interaction-with-fragment.html",
-        "return": "/cy/return.html",
-      };
-
-      const select = document.getElementById("case-select");
-      const svgOutput = document.getElementById("svg-output");
-      const htmlFrame = document.getElementById("html-frame");
-
-      for (const name of Object.keys(CASES)) {
-        const opt = document.createElement("option");
-        opt.value = name;
-        opt.textContent = name;
-        select.appendChild(opt);
+      const grid = document.getElementById("grid");
+      for (const [name, code] of Object.entries(CASES)) {
+        const a = document.createElement("a");
+        a.href = `/cy/compare-case.html?case=${encodeURIComponent(name)}`;
+        a.className = "card";
+        a.innerHTML = `<div class="name">${name}</div><div class="preview">${code.split("\n").slice(0, 3).join("\n")}</div>`;
+        grid.appendChild(a);
       }
-
-      function render(name) {
-        const code = CASES[name];
-        // SVG
-        const result = renderToSvg(code);
-        svgOutput.innerHTML = result.svg;
-        // HTML
-        const htmlFile = HTML_MAP[name];
-        if (htmlFile) {
-          htmlFrame.removeAttribute('srcdoc');
-          htmlFrame.src = htmlFile;
-        } else {
-          htmlFrame.removeAttribute('src');
-          htmlFrame.srcdoc = '<p style="padding:20px;color:#999">No HTML fixture for this case</p>';
-        }
-      }
-
-      select.addEventListener("change", () => render(select.value));
-      render(select.value);
     </script>
   </body>
 </html>
