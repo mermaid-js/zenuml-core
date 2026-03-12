@@ -545,48 +545,6 @@ B->A: So what`,
           const footer = document.querySelector("#html-output .footer");
           if (footer) footer.style.display = "none";
         });
-
-        // Align SVG top-left with HTML top-left by measuring first participant box positions
-        requestAnimationFrame(() => {
-          alignSvgToHtml();
-        });
-      }
-
-      function alignSvgToHtml() {
-        const htmlPanel = document.getElementById("html-output");
-        const svgPanel = document.getElementById("svg-output");
-        const svg = svgPanel.querySelector("svg");
-        if (!svg) return;
-
-        // Find first named participant box in HTML (skip starter icon which has no text)
-        const htmlBoxes = [...htmlPanel.querySelectorAll(".bg-skin-participant")];
-        const htmlRef = htmlBoxes.find(el => el.textContent.trim().length > 0);
-        if (!htmlRef) return;
-        const htmlPanelRect = htmlPanel.getBoundingClientRect();
-        const htmlRefRect = htmlRef.getBoundingClientRect();
-        const htmlX = htmlRefRect.left - htmlPanelRect.left;
-        const htmlY = htmlRefRect.top - htmlPanelRect.top;
-
-        // Find first top participant rect in SVG (these are named participants, not the starter)
-        const svgRects = [...svg.querySelectorAll("rect")];
-        const topRects = svgRects.filter(r => +r.getAttribute("y") < 100);
-        if (topRects.length === 0) return;
-        const firstRect = topRects.reduce((a, b) =>
-          +a.getAttribute("x") < +b.getAttribute("x") ? a : b
-        );
-
-        // SVG rect position in pixels from SVG element = rect coords + translate(10,10)
-        // From panel = SVG element offset (10px padding) + SVG internal position
-        const svgX = +firstRect.getAttribute("x") + 10 + 10; // rect x + g translate + panel padding
-        const svgY = +firstRect.getAttribute("y") + 10 + 10;
-
-        const dx = htmlX - svgX;
-        const dy = htmlY - svgY;
-
-        if (dx !== 0 || dy !== 0) {
-          svg.style.marginLeft = Math.max(0, dx) + "px";
-          svg.style.marginTop = Math.max(0, dy) + "px";
-        }
       }
 
       // ——— Element extraction for structural comparison ———
@@ -802,10 +760,6 @@ B->A: So what`,
             });
           }
 
-          // Strip SVG margins (set by alignSvgToHtml) so toPng captures clean
-          const savedSvgMargin = svgElement ? svgElement.style.cssText : "";
-          if (svgElement) { svgElement.style.margin = "0"; }
-
           // --- Capture ---
           const [htmlDataUrl, svgDataUrl] = await Promise.all([
             toPng(seqDiagram || htmlEl, { pixelRatio: 1 }),
@@ -814,7 +768,6 @@ B->A: So what`,
 
           // --- Restore ---
           for (const { el, prev } of hidden) el.style.display = prev;
-          if (svgElement) { svgElement.style.cssText = savedSvgMargin; }
 
           const [htmlImg, svgImg] = await Promise.all([
             loadImage(htmlDataUrl),
