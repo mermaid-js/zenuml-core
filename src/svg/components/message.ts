@@ -35,16 +35,20 @@ function renderArrowHead(
   pointsLeft: boolean,
   style: string,
 ): string {
-  const size = 8;
+  // Match HTML renderer's open chevron: 7x10px, stroke-only, round linecap
+  const w = 7;   // chevron width (horizontal extent)
+  const h = 10;  // chevron height (vertical extent)
   const dir = pointsLeft ? 1 : -1;
-  const x1 = tipX + dir * size;
-  const y1 = tipY - size / 2;
-  const y2 = tipY + size / 2;
+  const baseX = tipX + dir * w;
+  const y1 = tipY - h / 2;
+  const y2 = tipY + h / 2;
 
   if (style === "open") {
-    return `<polyline points="${x1},${y1} ${tipX},${tipY} ${x1},${y2}" fill="none" class="arrow-head"/>`;
+    // Async: open chevron, same shape but thinner stroke (via class)
+    return `<polyline points="${baseX},${y1} ${tipX},${tipY} ${baseX},${y2}" fill="none" stroke-linecap="round" class="arrow-head arrow-open"/>`;
   }
-  return `<polygon points="${tipX},${tipY} ${x1},${y1} ${x1},${y2}" class="arrow-head"/>`;
+  // Sync: open chevron matching HTML renderer (stroke-only, no fill)
+  return `<polyline points="${baseX},${y1} ${tipX},${tipY} ${baseX},${y2}" fill="none" stroke-linecap="round" class="arrow-head"/>`;
 }
 
 function esc(s: string): string {

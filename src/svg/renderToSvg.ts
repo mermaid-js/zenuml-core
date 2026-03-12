@@ -12,6 +12,10 @@ import { renderParticipant, renderParticipantBottom } from "./components/partici
 import { renderLifeline } from "./components/lifeline";
 import { renderMessage, renderSelfCall } from "./components/message";
 import { renderOccurrence } from "./components/occurrence";
+import { renderFragment } from "./components/fragment";
+import { renderCreation } from "./components/creation";
+import { renderReturn } from "./components/return";
+import { renderDivider } from "./components/divider";
 import type { DiagramGeometry } from "./geometry";
 
 export interface RenderOptions {
@@ -25,13 +29,24 @@ export interface RenderResult {
 }
 
 const DEFAULT_THEME_STYLES = `
-  .participant-box { fill: #e2e2f0; stroke: #333; stroke-width: 1; }
-  .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #333; }
-  .lifeline { stroke: #999; stroke-width: 1; }
-  .message-line { stroke: #333; stroke-width: 1; }
-  .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; }
-  .arrow-head { fill: #333; stroke: #333; stroke-width: 1; }
-  .occurrence { fill: #e2e2f0; stroke: #333; stroke-width: 2; rx: 2; }
+  .participant-box { fill: #ffffff; stroke: #666; stroke-width: 2; }
+  .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #222; }
+  .lifeline { stroke: #666; stroke-width: 1; }
+  .message-line { stroke: #000; stroke-width: 2; }
+  .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
+  .arrow-head { fill: none; stroke: #000; stroke-width: 2; }
+  .occurrence { fill: #dedede; stroke: #000; stroke-width: 2; rx: 2; }
+  .fragment-border { fill: none; stroke: #666; stroke-width: 1; }
+  .fragment-header { fill: #dedede7f; stroke: #666; stroke-width: 1; }
+  .fragment-label { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: bold; fill: #222; }
+  .fragment-condition { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #222; }
+  .fragment-separator { stroke: #666; stroke-width: 1; stroke-dasharray: 6,4; }
+  .fragment-section-label { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #222; }
+  .return-line { stroke: #000; stroke-width: 1; stroke-dasharray: 6,4; }
+  .return-arrow { stroke: #000; stroke-width: 1; }
+  .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
+  .divider-line { stroke: #666; stroke-width: 1; stroke-dasharray: 4,4; }
+  .divider-label { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #666; }
 `;
 
 export function renderToSvg(code: string, options?: RenderOptions): RenderResult {
@@ -82,6 +97,11 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
     parts.push(renderLifeline(l));
   }
 
+  // Fragments (behind messages, on top of lifelines)
+  for (const f of g.fragments) {
+    parts.push(renderFragment(f));
+  }
+
   // Participants (top)
   for (const p of g.participants) {
     parts.push(renderParticipant(p));
@@ -102,12 +122,25 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): string {
     parts.push(renderSelfCall(s));
   }
 
+  // Creation arrows (dashed line to newly created participant)
+  for (const c of g.creations) {
+    parts.push(renderCreation(c));
+  }
+
+  // Returns (dashed lines)
+  for (const r of g.returns) {
+    parts.push(renderReturn(r));
+  }
+
   // Occurrences (activation boxes on lifelines)
   for (const o of g.occurrences) {
     parts.push(renderOccurrence(o));
   }
 
-  // TODO: fragments, dividers, returns
+  // Dividers (full-width lines with labels)
+  for (const d of g.dividers) {
+    parts.push(renderDivider(d));
+  }
 
   const titleSvg = g.title
     ? `<text x="${viewWidth / 2}" y="15" text-anchor="middle" class="diagram-title" font-size="18" font-weight="bold">${escXml(g.title)}</text>`

@@ -1,7 +1,7 @@
 import type { ParticipantGeometry } from "../geometry";
 
 export function renderParticipant(p: ParticipantGeometry): string {
-  const rx = 3;
+  const rx = 4;
   const x = p.x - p.width / 2;
   const textX = p.x;
   const textY = p.y + p.height / 2;
@@ -14,7 +14,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
 export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number): string {
   if (!p.showBottom) return "";
-  const rx = 3;
+  const rx = 4;
   const x = p.x - p.width / 2;
   const textX = p.x;
   const textY = bottomY + p.height / 2;

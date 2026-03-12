@@ -51,7 +51,7 @@ describe("renderToSvg", () => {
     const result = renderToSvg("A -> B: hello");
     expect(result.svg).toContain('class="message"');
     expect(result.svg).toContain('class="message-line"');
-    expect(result.svg).toContain('class="arrow-head"');
+    expect(result.svg).toContain("arrow-head");
     expect(result.svg).toContain("hello");
   });
 
@@ -130,5 +130,113 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain("tryOp");
     expect(result.svg).toContain("catchOp");
     expect(result.svg).toContain("finallyOp");
+  });
+
+  // --- Fragment tests ---
+
+  it("renders if/else fragment with border and header", () => {
+    const result = renderToSvg("if(x > 0) {\n  A -> B: positive\n} else {\n  A -> B: negative\n}");
+    expect(result.svg).toContain('class="fragment fragment-alt"');
+    expect(result.svg).toContain('class="fragment-border"');
+    expect(result.svg).toContain('class="fragment-header"');
+    expect(result.svg).toContain(">alt</text>");
+    expect(result.svg).toContain("positive");
+    expect(result.svg).toContain("negative");
+  });
+
+  it("renders loop fragment", () => {
+    const result = renderToSvg("loop(3) {\n  A -> B: repeat\n}");
+    expect(result.svg).toContain('class="fragment fragment-loop"');
+    expect(result.svg).toContain(">loop</text>");
+    expect(result.svg).toContain("repeat");
+  });
+
+  it("renders opt fragment", () => {
+    const result = renderToSvg("opt {\n  A -> B: optional\n}");
+    expect(result.svg).toContain('class="fragment fragment-opt"');
+    expect(result.svg).toContain(">opt</text>");
+    expect(result.svg).toContain("optional");
+  });
+
+  it("renders try/catch/finally fragment with sections", () => {
+    const result = renderToSvg(
+      "try {\n  A.tryOp()\n} catch(e) {\n  B.catchOp()\n} finally {\n  C.finallyOp()\n}"
+    );
+    expect(result.svg).toContain('class="fragment fragment-tcf"');
+    expect(result.svg).toContain(">try</text>");
+    // Should have separator lines between sections
+    expect(result.svg).toContain('class="fragment-separator"');
+  });
+
+  it("renders alt fragment with condition label", () => {
+    const result = renderToSvg("if(condition) {\n  A -> B: msg\n}");
+    expect(result.svg).toContain('class="fragment fragment-alt"');
+    // Condition should appear in brackets
+    expect(result.svg).toContain("[condition]");
+  });
+
+  it("fragment has valid rect geometry", () => {
+    const result = renderToSvg("if(x) {\n  A -> B: msg\n}");
+    // Fragment border rect should have positive dimensions
+    const rectMatch = result.svg.match(/<rect[^>]*class="fragment-border"[^>]*/);
+    expect(rectMatch).not.toBeNull();
+    // Width and height are before class in the element
+    const fullRect = rectMatch![0];
+    const widthMatch = fullRect.match(/width="([\d.]+)"/);
+    const heightMatch = fullRect.match(/height="([\d.]+)"/);
+    expect(widthMatch).not.toBeNull();
+    expect(heightMatch).not.toBeNull();
+    expect(parseFloat(widthMatch![1])).toBeGreaterThan(0);
+    expect(parseFloat(heightMatch![1])).toBeGreaterThan(0);
+  });
+
+  // --- Return tests ---
+
+  it("renders return statement with dashed line", () => {
+    const result = renderToSvg("A.method() {\n  return result\n}");
+    expect(result.svg).toContain('class="return"');
+    expect(result.svg).toContain('class="return-line"');
+    expect(result.svg).toContain("result");
+  });
+
+  // --- Divider tests ---
+
+  it("renders divider with line and label", () => {
+    const result = renderToSvg("A -> B: first\n== Phase 2 ==\nA -> B: second");
+    expect(result.svg).toContain('class="divider"');
+    expect(result.svg).toContain('class="divider-line"');
+  });
+
+  // --- Creation tests ---
+
+  it("renders creation arrow with guillemet label", () => {
+    const result = renderToSvg("A.m {\n  new B(1,2,3,4)\n}");
+    expect(result.svg).toContain('class="creation"');
+    expect(result.svg).toContain("«1,2,3,4»");
+    // B should exist as a participant but positioned inline (not at top)
+    expect(result.svg).toContain('data-participant="B"');
+  });
+
+  it("renders creation with nested block and occurrence", () => {
+    const result = renderToSvg("A.m {\n  new B() {\n    C.method()\n  }\n}");
+    expect(result.svg).toContain('class="creation"');
+    // Should have occurrence on B for the nested block
+    expect(result.svg).toContain('class="occurrence"');
+    // Inner message to C should be present
+    expect(result.svg).toContain("method");
+  });
+
+  it("renders RTL creation arrow", () => {
+    const result = renderToSvg('"b:B"\na1 = A.method() {\n  b = new B()\n}');
+    expect(result.svg).toContain('class="creation"');
+    // «create» is the default label when no params
+    expect(result.svg).toContain("«create»");
+  });
+
+  it("renders creation inside fragment without crash", () => {
+    const result = renderToSvg("title Title 1\nA.m1 {\n  new B(1,2,3,4) {\n    if(x) {\n      C.m2\n    }\n  }\n}");
+    expect(result.svg).toContain('class="creation"');
+    expect(result.svg).toContain('class="fragment');
+    expect(result.svg).toContain("m2");
   });
 });

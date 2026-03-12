@@ -7,6 +7,13 @@
  */
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import type { FragmentKind } from "./geometry";
+
+export interface FragmentSectionInfo {
+  label: string;
+  /** The parse tree block node for this section (used for inner statement key lookups) */
+  blockNode: any;
+}
 
 export interface StatementInfo {
   key: string;
@@ -17,6 +24,14 @@ export interface StatementInfo {
   isSelf: boolean;
   /** Whether this statement has a block body (creates an occurrence on the target) */
   hasBlock: boolean;
+  /** For fragments: specific fragment type */
+  fragmentKind?: FragmentKind;
+  /** For fragments: condition/label text */
+  fragmentLabel?: string;
+  /** For fragments: section info (for alt/tcf with multiple sections) */
+  fragmentSections?: FragmentSectionInfo[];
+  /** The ANTLR parse tree node — needed for local participant extraction */
+  statNode?: any;
 }
 
 export function walkStatements(rootContext: any): StatementInfo[] {
@@ -60,7 +75,7 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
     if (creation) {
       const from = creation.From?.() || currentOrigin;
       const to = creation.Owner?.() || "";
-      const label = creation.getFormattedText?.() || "";
+      const label = creation.SignatureText?.() || "«create»";
       const creationBlock = creation.braceBlock?.()?.block?.();
       results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock });
 
@@ -73,7 +88,10 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
     const ret = stat.ret?.();
     if (ret) {
       const label = ret.getFormattedText?.() || ret.retValue?.()?.getText?.() || "";
-      results.push({ key, kind: "return", from: "", to: "", label, isSelf: false, hasBlock: false });
+      const asyncMessage = ret?.asyncMessage?.();
+      const from = asyncMessage?.From?.() || ret?.From?.() || currentOrigin;
+      const to = asyncMessage?.to?.()?.getFormattedText?.() || ret?.ReturnTo?.() || _STARTER_;
+      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false });
       continue;
     }
 
@@ -84,12 +102,100 @@ function walkBlock(block: any, currentOrigin: string): StatementInfo[] {
       continue;
     }
 
-    // Fragments — record and recurse into their blocks
-    results.push({ key, kind: "fragment", from: "", to: "", label: "", isSelf: false, hasBlock: false });
+    // Fragments — record with enriched metadata and recurse into their blocks
+    const fragmentInfo = extractFragmentInfo(stat, currentOrigin);
+    results.push({
+      key,
+      kind: "fragment",
+      from: "",
+      to: "",
+      label: fragmentInfo.label,
+      isSelf: false,
+      hasBlock: false,
+      fragmentKind: fragmentInfo.fragmentKind,
+      fragmentLabel: fragmentInfo.label,
+      fragmentSections: fragmentInfo.sections,
+      statNode: stat,
+    });
     walkFragmentBlocks(stat, currentOrigin, results);
   }
 
   return results;
+}
+
+interface FragmentExtract {
+  fragmentKind: FragmentKind;
+  label: string;
+  sections: FragmentSectionInfo[];
+}
+
+function extractFragmentInfo(stat: any, _origin: string): FragmentExtract {
+  // Single-block fragments: loop, opt, par, critical, section
+  for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
+    const frag = stat[kind]?.();
+    if (frag) {
+      const condition = frag.parExpr?.()?.condition?.();
+      const label = condition?.getFormattedText?.() || "";
+      return {
+        fragmentKind: kind,
+        label,
+        sections: [{ label, blockNode: frag.braceBlock?.()?.block?.() }],
+      };
+    }
+  }
+
+  // Alt (if/else if/else) — multiple sections
+  const alt = stat.alt?.();
+  if (alt) {
+    const sections: FragmentSectionInfo[] = [];
+    const ifBlock = alt.ifBlock?.();
+    if (ifBlock) {
+      const condition = ifBlock.parExpr?.()?.condition?.();
+      const label = condition?.getFormattedText?.() || "";
+      sections.push({ label, blockNode: ifBlock.braceBlock?.()?.block?.() });
+    }
+    for (const elseIf of alt.elseIfBlock?.() || []) {
+      const condition = elseIf.parExpr?.()?.condition?.();
+      const label = condition?.getFormattedText?.() || "";
+      sections.push({ label: `else if [${label}]`, blockNode: elseIf.braceBlock?.()?.block?.() });
+    }
+    const elseBlock = alt.elseBlock?.();
+    if (elseBlock) {
+      sections.push({ label: "[else]", blockNode: elseBlock.braceBlock?.()?.block?.() });
+    }
+
+    const firstLabel = sections.length > 0 ? sections[0].label : "";
+    return { fragmentKind: "alt", label: firstLabel, sections };
+  }
+
+  // Try/catch/finally — multiple sections
+  const tcf = stat.tcf?.();
+  if (tcf) {
+    const sections: FragmentSectionInfo[] = [];
+    const tryBlock = tcf.tryBlock?.();
+    if (tryBlock) {
+      sections.push({ label: "try", blockNode: tryBlock.braceBlock?.()?.block?.() });
+    }
+    for (const catchBlock of tcf.catchBlock?.() || []) {
+      const exception = catchBlock.invocation?.()?.parameters?.()?.getFormattedText?.() || "";
+      sections.push({ label: `catch ${exception}`, blockNode: catchBlock.braceBlock?.()?.block?.() });
+    }
+    const finallyBlock = tcf.finallyBlock?.();
+    if (finallyBlock) {
+      sections.push({ label: "finally", blockNode: finallyBlock.braceBlock?.()?.block?.() });
+    }
+
+    return { fragmentKind: "tcf", label: "try", sections };
+  }
+
+  // Ref fragment
+  const ref = stat.ref?.();
+  if (ref) {
+    const label = ref.getFormattedText?.() || "";
+    return { fragmentKind: "ref", label, sections: [] };
+  }
+
+  return { fragmentKind: "loop", label: "", sections: [] };
 }
 
 /** Recurse into fragment inner blocks (loop, opt, alt, try/catch, etc.) */
