@@ -118,6 +118,11 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult 
 
   // Bottom participants removed — SVG output omits mirrored labels at the bottom
 
+  // Occurrences (activation boxes on lifelines — before messages so arrows paint on top)
+  for (const o of g.occurrences) {
+    parts.push(renderOccurrence(o));
+  }
+
   // Messages
   for (const m of g.messages) {
     parts.push(renderMessage(m));
@@ -136,11 +141,6 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult 
   // Returns (dashed lines)
   for (const r of g.returns) {
     parts.push(renderReturn(r));
-  }
-
-  // Occurrences (activation boxes on lifelines)
-  for (const o of g.occurrences) {
-    parts.push(renderOccurrence(o));
   }
 
   // Fragments (on top of occurrences, below dividers/comments)
