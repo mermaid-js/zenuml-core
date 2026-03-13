@@ -543,7 +543,7 @@ test.describe("SVG Parity Tests", () => {
     test(`svg-${name}`, async ({ page }) => {
       await page.goto("/cy/svg-test.html");
       await page.evaluate((c) => (window as any).__renderSvg(c), code);
-      await expect(page.locator("svg")).toBeVisible({ timeout: 5000 });
+      await expect(page.locator("#svg-output > svg")).toBeVisible({ timeout: 5000 });
       await expect(page).toHaveScreenshot(`svg-${name}.png`, {
         threshold: 0.02,
         fullPage: true,
