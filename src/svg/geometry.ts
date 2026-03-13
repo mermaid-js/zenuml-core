@@ -97,6 +97,7 @@ export interface FragmentGeometry {
   width: number;
   height: number;
   sections: FragmentSectionGeometry[];
+  number?: string;
 }
 
 // ─── Divider ───────────────────────────────────────────────────────

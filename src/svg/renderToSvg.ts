@@ -39,21 +39,21 @@ const DEFAULT_THEME_STYLES = `
   .frame-border-outer { fill: #666; }
   .frame-border-inner { fill: #ffffff; }
   .frame-header-bg { fill: #ffffff; }
-  .frame-header-line { stroke: #666; stroke-width: 1; }
+  .frame-header-line { stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
   .frame-title { font-family: Helvetica, Verdana, serif; font-size: 16px; font-weight: 600; fill: #222; }
-  .participant-box { fill: #ffffff; stroke: #666; stroke-width: 2; }
+  .participant-box { fill: #ffffff; stroke: #666; stroke-width: 2; shape-rendering: crispEdges; }
   .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #222; }
   .lifeline { stroke: #666; stroke-width: 1; }
-  .message-line { stroke: #000; stroke-width: 2; }
+  .message-line { stroke: #000; stroke-width: 2; shape-rendering: crispEdges; }
   .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .arrow-head { fill: #000; stroke: #000; stroke-width: 2; }
   .arrow-open { fill: none; }
-  .occurrence { fill: #dedede; stroke: #666; stroke-width: 2; rx: 2; }
-  .fragment-border { fill: none; stroke: #666; stroke-width: 1; }
-  .fragment-header { fill: #dedede7f; stroke: #666; stroke-width: 1; }
+  .occurrence { fill: #dedede; stroke: #666; stroke-width: 2; shape-rendering: crispEdges; rx: 2; }
+  .fragment-border { fill: none; stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
+  .fragment-header { fill: #efefef; stroke: none; shape-rendering: crispEdges; }
   .fragment-label { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: bold; fill: #222; }
-  .fragment-condition { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #222; }
-  .fragment-separator { stroke: #666; stroke-width: 1; stroke-dasharray: 6,4; }
+  .fragment-condition { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
+  .fragment-separator { stroke: #666; stroke-width: 1; stroke-dasharray: 6,4; shape-rendering: crispEdges; }
   .fragment-section-label { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #222; }
   .return-line { stroke: #000; stroke-width: 1; stroke-dasharray: 6,4; }
   .return-arrow { stroke: #000; stroke-width: 1; }
@@ -61,6 +61,7 @@ const DEFAULT_THEME_STYLES = `
   .divider-line { stroke: #666; stroke-width: 1; stroke-dasharray: 4,4; }
   .divider-label { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #666; }
   .comment-text { font-family: Helvetica, Verdana, serif; font-size: 12px; font-style: italic; fill: #222; opacity: 0.5; }
+  .seq-number { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 100; fill: #6b7280; }
 `;
 
 export function renderToSvg(code: string, options?: RenderOptions): RenderResult {
@@ -168,7 +169,7 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult 
   const headerLineDrawY = headerLineY - 0.5; // 33.5 — half-pixel for crisp 1px line at pixel row 33, matching HTML header border-bottom
   const headerLineSvg = `<line class="frame-header-line" x1="1" y1="${headerLineDrawY}" x2="${viewWidth - 1}" y2="${headerLineDrawY}"/>`;
   const titleSvg = g.title
-    ? `<text x="${padding}" y="${headerLineDrawY / 2}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
+    ? `<text x="5" y="${headerLineDrawY / 2 + 0.25}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
     : "";
 
   const viewBox = `0 0 ${viewWidth} ${viewHeight}`;

@@ -166,7 +166,7 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain('class="fragment fragment-alt"');
     expect(result.svg).toContain('class="fragment-border"');
     expect(result.svg).toContain('class="fragment-header"');
-    expect(result.svg).toContain(">alt</text>");
+    expect(result.svg).toContain(">Alt</text>");
     expect(result.svg).toContain("positive");
     expect(result.svg).toContain("negative");
   });
@@ -174,14 +174,14 @@ describe("renderToSvg", () => {
   it("renders loop fragment", () => {
     const result = renderToSvg("loop(3) {\n  A -> B: repeat\n}");
     expect(result.svg).toContain('class="fragment fragment-loop"');
-    expect(result.svg).toContain(">loop</text>");
+    expect(result.svg).toContain(">Loop</text>");
     expect(result.svg).toContain("repeat");
   });
 
   it("renders opt fragment", () => {
     const result = renderToSvg("opt {\n  A -> B: optional\n}");
     expect(result.svg).toContain('class="fragment fragment-opt"');
-    expect(result.svg).toContain(">opt</text>");
+    expect(result.svg).toContain(">Opt</text>");
     expect(result.svg).toContain("optional");
   });
 
@@ -190,9 +190,15 @@ describe("renderToSvg", () => {
       "try {\n  A.tryOp()\n} catch(e) {\n  B.catchOp()\n} finally {\n  C.finallyOp()\n}"
     );
     expect(result.svg).toContain('class="fragment fragment-tcf"');
-    expect(result.svg).toContain(">try</text>");
+    expect(result.svg).toContain(">Try</text>");
     // Should have separator lines between sections
     expect(result.svg).toContain('class="fragment-separator"');
+  });
+
+  it("trims leading whitespace from rendered message labels", () => {
+    const result = renderToSvg("A -> B: hello");
+    expect(result.svg).toContain(">hello</text>");
+    expect(result.svg).not.toContain("> hello</text>");
   });
 
   it("renders alt fragment with condition label", () => {

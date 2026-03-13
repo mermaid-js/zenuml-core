@@ -740,6 +740,14 @@ B->A: So what`,
               const r = svg.getBoundingClientRect();
               if (r.width > 0 && (r.top - frameRect2.top) < 35) hideEl(svg);
             });
+            // Note: toPng artifact exists for self-call SVG (30x24) — viewport fill:black
+            // from CSS inheritance renders as black background. Cannot fix via fill
+            // attribute/style changes as toPng breaks path stroke rendering.
+          }
+
+          // Hide SVG sequence numbers (matching HTML numbering badge hiding above)
+          if (svgElement) {
+            svgElement.querySelectorAll(".seq-number").forEach(hideEl);
           }
 
           // --- Capture ---

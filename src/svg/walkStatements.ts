@@ -36,36 +36,47 @@ export interface StatementInfo {
   statNode?: any;
   /** Whether the sender (from) has an active occurrence at this point */
   senderHasOccurrence?: boolean;
+  /** Sequence number (e.g. "1", "2.1") computed from block nesting and statement index */
+  number?: string;
+  /** Nesting depth (0 = root block, 1 = first nested block, etc.) */
+  depth: number;
 }
 
 export function walkStatements(rootContext: any): StatementInfo[] {
   const block = rootContext?.block?.();
   if (!block) return [];
-  return walkBlock(block, _STARTER_, new Set());
+  return walkBlock(block, _STARTER_, new Set(), "", 0);
 }
 
-function walkBlock(block: any, currentOrigin: string, activeOccurrences: Set<string>): StatementInfo[] {
+function normalizeLabel(label: string): string {
+  return label.trim();
+}
+
+function walkBlock(block: any, currentOrigin: string, activeOccurrences: Set<string>, parentNumber: string, depth: number): StatementInfo[] {
   const statements = block?.stat?.() || [];
   const results: StatementInfo[] = [];
+  let index = 0;
 
   for (const stat of statements) {
     const key = createStatementKey(stat);
     if (!key) continue;
 
+    index++;
+    const number = parentNumber ? `${parentNumber}.${index}` : String(index);
     const comment = stat.getComment?.() || "";
 
     const message = stat.message?.();
     if (message) {
       const from = message.From?.() || currentOrigin;
       const to = message.Owner?.() || _STARTER_;
-      const label = message.SignatureText?.() || "";
+      const label = normalizeLabel(message.SignatureText?.() || "");
       const nestedBlock = message.braceBlock?.()?.block?.();
-      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderHasOccurrence: activeOccurrences.has(from) });
+      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderHasOccurrence: activeOccurrences.has(from), number, depth });
 
       if (nestedBlock) {
         const innerOccs = new Set(activeOccurrences);
         innerOccs.add(to);
-        results.push(...walkBlock(nestedBlock, to, innerOccs));
+        results.push(...walkBlock(nestedBlock, to, innerOccs, number, depth + 1));
       }
       continue;
     }
@@ -74,8 +85,8 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Set<str
     if (asyncMsg) {
       const from = asyncMsg.From?.() || asyncMsg.ProvidedFrom?.() || asyncMsg.Origin?.() || currentOrigin;
       const to = asyncMsg.Owner?.() || asyncMsg.to?.()?.getFormattedText?.() || from;
-      const label = asyncMsg.content?.()?.getText?.() || asyncMsg.SignatureText?.() || "";
-      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false, comment, senderHasOccurrence: activeOccurrences.has(from) });
+      const label = normalizeLabel(asyncMsg.content?.()?.getText?.() || asyncMsg.SignatureText?.() || "");
+      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false, comment, senderHasOccurrence: activeOccurrences.has(from), number, depth });
       continue;
     }
 
@@ -83,32 +94,32 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Set<str
     if (creation) {
       const from = creation.From?.() || currentOrigin;
       const to = creation.Owner?.() || "";
-      const label = creation.SignatureText?.() || "«create»";
+      const label = normalizeLabel(creation.SignatureText?.() || "«create»");
       const creationBlock = creation.braceBlock?.()?.block?.();
-      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat, senderHasOccurrence: activeOccurrences.has(from) });
+      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat, senderHasOccurrence: activeOccurrences.has(from), number, depth });
 
       if (creationBlock) {
         const innerOccs = new Set(activeOccurrences);
         innerOccs.add(to);
-        results.push(...walkBlock(creationBlock, to || currentOrigin, innerOccs));
+        results.push(...walkBlock(creationBlock, to || currentOrigin, innerOccs, number, depth + 1));
       }
       continue;
     }
 
     const ret = stat.ret?.();
     if (ret) {
-      const label = ret.SignatureText?.() || "";
+      const label = normalizeLabel(ret.SignatureText?.() || "");
       const asyncMessage = ret?.asyncMessage?.();
       const from = asyncMessage?.From?.() || ret?.From?.() || currentOrigin;
       const to = asyncMessage?.to?.()?.getFormattedText?.() || ret?.ReturnTo?.() || _STARTER_;
-      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment });
+      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment, number, depth });
       continue;
     }
 
     const divider = stat.divider?.();
     if (divider) {
-      const label = divider.getFormattedText?.() || divider.getText?.() || "";
-      results.push({ key, kind: "divider", from: "", to: "", label, isSelf: false, hasBlock: false });
+      const label = normalizeLabel(divider.getFormattedText?.() || divider.getText?.() || "");
+      results.push({ key, kind: "divider", from: "", to: "", label, isSelf: false, hasBlock: false, number, depth });
       continue;
     }
 
@@ -126,8 +137,10 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Set<str
       fragmentLabel: fragmentInfo.label,
       fragmentSections: fragmentInfo.sections,
       statNode: stat,
+      number,
+      depth,
     });
-    walkFragmentBlocks(stat, currentOrigin, results, activeOccurrences);
+    walkFragmentBlocks(stat, currentOrigin, results, activeOccurrences, number, depth);
   }
 
   return results;
@@ -209,13 +222,13 @@ function extractFragmentInfo(stat: any, _origin: string): FragmentExtract {
 }
 
 /** Recurse into fragment inner blocks (loop, opt, alt, try/catch, etc.) */
-function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[], activeOccurrences: Set<string>): void {
+function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[], activeOccurrences: Set<string>, parentNumber: string, depth: number): void {
   // Single-block fragments: loop, opt, par, critical, section
   for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
     const frag = stat[kind]?.();
     if (frag) {
       const block = frag.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
       return;
     }
   }
@@ -226,16 +239,16 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
     const ifBlock = alt.ifBlock?.();
     if (ifBlock) {
       const block = ifBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
     }
     for (const elseIf of alt.elseIfBlock?.() || []) {
       const block = elseIf.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
     }
     const elseBlock = alt.elseBlock?.();
     if (elseBlock) {
       const block = elseBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
     }
     return;
   }
@@ -246,16 +259,16 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
     const tryBlock = tcf.tryBlock?.();
     if (tryBlock) {
       const block = tryBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
     }
     for (const catchBlock of tcf.catchBlock?.() || []) {
       const block = catchBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
     }
     const finallyBlock = tcf.finallyBlock?.();
     if (finallyBlock) {
       const block = finallyBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
     }
     return;
   }

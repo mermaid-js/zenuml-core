@@ -46,6 +46,18 @@
   "main": "./dist/zenuml.js",
   "module": "./dist/zenuml.esm.mjs",
   "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/zenuml.esm.mjs"
+      },
+      "require": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/zenuml.js"
+      }
+    }
+  },
   "engines": {
     "node": ">=20"
   },
