@@ -130,6 +130,10 @@ export interface CommentGeometry {
 export interface DiagramGeometry {
   width: number;
   height: number;
+  /** Extra left padding from fragment nesting (FrameBorder.left) */
+  frameBorderLeft: number;
+  /** Extra right padding from fragment nesting (FrameBorder.right) */
+  frameBorderRight: number;
   title?: string;
   participants: ParticipantGeometry[];
   lifelines: LifelineGeometry[];

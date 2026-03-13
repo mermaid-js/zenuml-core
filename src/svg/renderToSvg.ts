@@ -97,7 +97,10 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
 function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult {
   const padding = 10;
   const headerH = FRAME_HEADER_HEIGHT;
-  const viewWidth = g.width + padding * 2 + 1; // +1 to match HTML CSS border-box visual width
+  // Content left offset = 1 (frame border) + 10 (seq-diagram px-2.5 padding) + frameBorderLeft
+  // This matches the HTML layout: .frame(1px border) > .sequence-diagram(px-2.5) > div(paddingLeft:frameBorderLeft) > content
+  const contentLeftMargin = 1 + padding + g.frameBorderLeft;
+  const viewWidth = g.width + contentLeftMargin + padding + g.frameBorderRight + 1;
   const viewHeight = g.height + padding * 2 + headerH - 1; // -1 to match HTML CSS border-box visual height
 
   const parts: string[] = [];
@@ -172,7 +175,7 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult 
 
   const defs = `<defs>\n  <style>${DEFAULT_THEME_STYLES}</style>\n</defs>`;
   const frame = `${frameSvg}\n${headerLineSvg}\n${titleSvg}`;
-  const content = `<g transform="translate(${padding}, ${headerLineY})">\n${parts.join("\n")}\n</g>`;
+  const content = `<g transform="translate(${contentLeftMargin}, ${headerLineY})">\n${parts.join("\n")}\n</g>`;
   const innerSvg = `${defs}\n${frame}\n${content}`;
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="${viewBox}">\n${innerSvg}\n</svg>`;
