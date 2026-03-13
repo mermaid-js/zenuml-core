@@ -367,6 +367,8 @@ function buildMessages(
           occHeight += Math.round(innerDebt * 0.75);
         }
 
+        const returnArrowY = occY + occHeight;
+
         if (occHeight > 0) {
           occurrences.push({
             x: occX,
@@ -380,14 +382,14 @@ function buildMessages(
           const messageCtx = info.statNode?.message?.();
           const assignment = messageCtx?.Assignment?.();
           if (assignment?.assignee && !info.isSelf) {
-            const occBottom = occY + occHeight;
             // Return goes from target (toX) back to sender (fromX).
             // Target always has occurrence; start from its near edge toward sender.
             const isLTR = fromX < toX;
             const retFromX = isLTR ? toX - OCCURRENCE_WIDTH / 2 : toX + OCCURRENCE_WIDTH / 2;
-            // Sender's fromX is already D4-adjusted for its occurrence edge
+            // Sender's fromX is already D4-adjusted for its occurrence edge.
+            // Use returnArrowY (pre-depth-correction) to match HTML return arrow position.
             returns.push({
-              fromX: retFromX, toX: fromX, y: occBottom + 5,
+              fromX: retFromX, toX: fromX, y: returnArrowY,
               label: assignment.assignee, isReverse: fromX < toX,
             });
           }
