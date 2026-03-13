@@ -239,13 +239,20 @@ function buildMessages(
       }
 
       if (info.isSelf) {
+        // Async self-calls: HTML renders label (20px) then a 30×24 SVG with internal
+        // U-shape path at M0,2→28,15 (width=28, height=13, radius=2).
+        // Match these exact dimensions: offset by label(20)+padding(2)=22, w=28, h=13.
+        const isAsync = info.kind === "async";
+        const selfYOffset = isAsync ? 22 : 0;
+        const selfWidth = isAsync ? 28 : OCCURRENCE_WIDTH;
+        const selfHeight = isAsync ? 13 : messageHeight;
         selfCalls.push({
           x: fromX,
-          y: coord.top,
-          width: OCCURRENCE_WIDTH,
-          height: messageHeight,
+          y: coord.top + selfYOffset,
+          width: selfWidth,
+          height: selfHeight,
           label: info.label,
-          arrowStyle: info.kind === "async" ? "open" : "solid",
+          arrowStyle: isAsync ? "open" : "solid",
         });
       } else {
         // For sync messages with occurrence, arrow tip stops at near edge of occurrence bar
