@@ -176,19 +176,37 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     }
   }
 
-  // Extend fragment left edges by frameBorder.left (matching HTML CSS where
-  // fragments use left: -frameBorderLeft to span into the padding area).
+  // Shift fragment left edges into the diagram padding area (matching HTML CSS
+  // where fragments use left: -frameBorderLeft). Position-only shift.
   for (const f of fragments) {
     f.x -= frameBorder.left;
-    f.width += frameBorder.left;
   }
 
-  // Extend fragment right edges to content right edge (matching HTML CSS where
-  // fragments fill available container width). Each nesting depth level reduces
-  // the target right edge by FRAGMENT_PADDING_X to match CSS containment.
+  // Compute spatial nesting depth for each fragment (how many other fragments
+  // fully contain it). This is more accurate than info.depth which includes
+  // message block nesting, not just fragment nesting.
+  const nestDepths = new Map<FragmentGeometry, number>();
+  for (const inner of fragments) {
+    let nestDepth = 0;
+    for (const outer of fragments) {
+      if (outer === inner) continue;
+      if (outer.x <= inner.x && outer.y <= inner.y &&
+          outer.x + outer.width >= inner.x + inner.width &&
+          outer.y + outer.height >= inner.y + inner.height) {
+        nestDepth++;
+      }
+    }
+    nestDepths.set(inner, nestDepth);
+    inner.x += nestDepth * FRAGMENT_PADDING_X;
+  }
+
+  // Extend fragment right edges to fill the content area (matching HTML CSS
+  // where fragments stretch to their container width). Fragments extend into
+  // the right frameBorder area. Each nesting level reduces the target.
   const contentRightEdge = diagramWidth + frameBorder.right;
   for (const f of fragments) {
-    const targetRight = contentRightEdge - f.depth * FRAGMENT_PADDING_X;
+    const nd = nestDepths.get(f) || 0;
+    const targetRight = contentRightEdge - nd * FRAGMENT_PADDING_X;
     if (f.x + f.width < targetRight) {
       f.width = targetRight - f.x;
     }
@@ -743,18 +761,15 @@ function buildFragmentGeometry(
       coordinates.distance(leftParticipant, rightParticipant) +
       coordinates.half(leftParticipant) +
       coordinates.half(rightParticipant);
-    fragWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH) + fragBorder.right;
+    fragWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH) + fragBorder.left + fragBorder.right;
     fragX = coordinates.getPosition(leftParticipant) - coordinates.half(leftParticipant);
   } else {
     fragWidth = Math.max(FRAGMENT_MIN_WIDTH, coordinates.getWidth());
     fragX = 0;
   }
 
-  // Apply nesting indentation: each depth level indents FRAGMENT_PADDING_X on each side,
-  // matching HTML CSS where nested fragments are contained within parent fragment padding.
-  const nestIndent = info.depth * FRAGMENT_PADDING_X;
-  fragX += nestIndent;
-  fragWidth -= 2 * nestIndent;
+  // No explicit nesting indent needed — fragBorder.left/right from FrameBorder
+  // already accounts for inner nesting depth, matching HTML's TotalWidth formula.
 
   // Build section geometry for multi-section fragments (alt, tcf)
   const sections: FragmentSectionGeometry[] = [];
