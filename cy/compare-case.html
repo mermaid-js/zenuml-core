@@ -25,6 +25,7 @@
       .diff-panel { display: none; }
       .diff-panel.visible { display: block; }
       .diff-panel .panel-content canvas { max-width: 100%; }
+      #html-output .footer { display: none !important; }
     </style>
   </head>
   <body>
@@ -60,6 +61,7 @@
       import { toPng } from "html-to-image";
 
       const CASES = {
+        "empty": ``,
         "smoke": `title ABCD Title
 // Generating Sequence Diagrams from Java code is experimental.
 // Please report errors to https://github.com/ZenUml/jetbrains-zenuml/discussions
@@ -548,7 +550,7 @@ A.method1{
         nextLink.style.visibility = "hidden";
       }
 
-      if (!code) {
+      if (code === undefined) {
         document.getElementById("svg-output").innerHTML = `<p style="color:red">Unknown case: ${caseName}</p>`;
       } else {
         // SVG side

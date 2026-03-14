@@ -22,6 +22,7 @@
     <div class="grid" id="grid"></div>
     <script type="module">
       const CASES = {
+        "empty": ``,
         "smoke": `title ABCD Title\nMarkdownJavaFxHtmlPanel\nMarkdownJavaFxHtmlPanel.readFromInputStream(inputStream) {\n  StringBuilder resultStringBuilder = new StringBuilder();\n  try {\n    while((line = br.readLine()) != null) {\n      resultStringBuilder.append(line);\n    }\n  }\n  catch(IOException) {\n    return "";\n  }\n  return "resultStringBuilder.toString()";\n}`,
         "simple-messages": `A -> B: hello\nB -> C: process\nC -> B: result\nB -> A: done`,
         "self-call": `A.method() {\n  B.method\n}`,

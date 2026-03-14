@@ -89,6 +89,7 @@
       import { toPng } from "html-to-image";
 
       const CASES = {
+        "empty": ``,
         "smoke": `title ABCD Title\n// Generating Sequence Diagrams from Java code is experimental.\n// Please report errors to https://github.com/ZenUml/jetbrains-zenuml/discussions\nMarkdownJavaFxHtmlPanel\nMarkdownJavaFxHtmlPanel.readFromInputStream(inputStream) {\n  StringBuilder resultStringBuilder = new StringBuilder();\n  try {\n    // String line;\n    while((line = br.readLine()) != null) {\n      resultStringBuilder.append(line);\n    }\n  }\n  catch(IOException) {\n    return "";\n  }\n  return "resultStringBuilder.toString()";\n}`,
         "simple-messages": `A -> B: hello\nB -> C: process\nC -> B: result\nB -> A: done`,
         "self-call": `A.method() {\n  B.method\n}`,
