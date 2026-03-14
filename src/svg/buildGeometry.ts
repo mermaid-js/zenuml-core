@@ -40,6 +40,7 @@ import { AllMessages } from "@/parser/MessageCollector";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { walkStatements } from "./walkStatements";
+import CommentClass from "@/components/Comment/Comment";
 import type {
   DiagramGeometry,
   ParticipantGeometry,
@@ -200,14 +201,18 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     inner.x += nestDepth * FRAGMENT_PADDING_X;
   }
 
-  // Extend fragment right edges to fill the content area (matching HTML CSS
-  // where fragments stretch to their container width). Fragments extend into
-  // the right frameBorder area. Each nesting level reduces the target.
+  // Extend fragment right edges into the frameBorder area ONLY when the
+  // fragment already spans (nearly) the full diagram width. Fragments whose
+  // local participants are a subset of all participants should keep their
+  // computed width — they don't stretch to the full diagram in HTML either.
   const contentRightEdge = diagramWidth + frameBorder.right;
   for (const f of fragments) {
     const nd = nestDepths.get(f) || 0;
     const targetRight = contentRightEdge - nd * FRAGMENT_PADDING_X;
-    if (f.x + f.width < targetRight) {
+    const currentRight = f.x + f.width;
+    // Only extend if the fragment is already within 20px of the target
+    // (i.e., it spans nearly all participants and just needs the frameBorder extension)
+    if (currentRight >= targetRight - 20 && currentRight < targetRight) {
       f.width = targetRight - f.x;
     }
   }
@@ -329,13 +334,27 @@ function buildMessages(
     if (!coord) continue;
     const adjust = adjustMap.get(info.key) || 0;
 
-    // --- Comments (inline, above the statement) ---
+    // --- Parse styling comments (e.g. // [red] text) ---
+    let commentObj: CommentClass | undefined;
     if (info.comment) {
+      commentObj = new CommentClass(info.comment);
+    }
+
+    // --- Comments (inline, above the statement) ---
+    if (commentObj?.text) {
       const commentX = info.from
         ? coordinates.getPosition(info.from)
         : 10;
-      comments.push({ x: commentX + 5, y: coord.top + adjust, text: info.comment });
+      comments.push({
+        x: commentX + 5,
+        y: coord.top + adjust,
+        text: commentObj.text,
+        style: cssToSvgStyle(commentObj.commentStyle),
+      });
     }
+
+    // Message style from styling comment (applied to message/self-call/creation labels)
+    const messageStyle = commentObj ? cssToSvgStyle(commentObj.messageStyle) : undefined;
 
     // --- Sync / Async messages ---
     if (info.kind === "sync" || info.kind === "async") {
@@ -378,6 +397,7 @@ function buildMessages(
           label: info.label,
           arrowStyle: isAsync ? "open" : "solid",
           number: info.number,
+          style: messageStyle,
         });
       } else {
         // For sync messages with occurrence, arrow tip stops at near edge of occurrence bar.
@@ -398,6 +418,7 @@ function buildMessages(
           isSelf: false,
           isReverse: arrowToX < fromX,
           number: info.number,
+          style: messageStyle,
         });
       }
 
@@ -485,6 +506,7 @@ function buildMessages(
             arrowStyle: "open",
             isSelf: false,
             isReverse: toX < fromX,
+            style: messageStyle,
           },
         });
       }
@@ -842,4 +864,27 @@ function findFragmentContext(stat: any): any {
 function createStatementKeyFromStat(statement: any): string {
   if (!statement?.start || !statement?.stop) return "";
   return `${statement.start.start}-${statement.stop.stop}`;
+}
+
+/**
+ * Convert React CSSProperties to SVG-compatible style record.
+ * Maps CSS property names to SVG equivalents (e.g., `color` → `fill` for text).
+ * Returns undefined if the style is empty.
+ */
+function cssToSvgStyle(css: import("react").CSSProperties): Record<string, string> | undefined {
+  const result: Record<string, string> = {};
+  let hasKeys = false;
+  for (const [key, value] of Object.entries(css)) {
+    if (value == null) continue;
+    hasKeys = true;
+    // SVG text uses `fill` for color, not CSS `color`
+    if (key === "color") {
+      result["fill"] = String(value);
+    } else {
+      // Convert camelCase to kebab-case for SVG style attribute
+      const svgKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
+      result[svgKey] = String(value);
+    }
+  }
+  return hasKeys ? result : undefined;
 }

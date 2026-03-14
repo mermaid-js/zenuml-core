@@ -13,10 +13,12 @@ export function renderCreation(c: CreationGeometry): string {
   const labelX = m.fromX + (adjustedToX - m.fromX) / 2;
   const labelY = m.y - 5;
 
+  const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
+
   return `<g class="creation">
   <line x1="${m.fromX}" y1="${m.y}" x2="${adjustedToX}" y2="${m.y}" class="message-line" stroke-dasharray="6,4"/>
   ${renderOpenArrow(adjustedToX, m.y, isRTL)}
-  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label">${esc(m.label)}</text>
+  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(m.label)}</text>
 </g>`;
 }
 
@@ -29,6 +31,12 @@ function renderOpenArrow(tipX: number, tipY: number, pointsLeft: boolean): strin
   const y1 = tipY - halfH;
   const y2 = tipY + halfH;
   return `<polyline points="${x1},${y1} ${tipX},${tipY} ${x1},${y2}" fill="none" stroke-linecap="round" class="arrow-head arrow-open"/>`;
+}
+
+function styleToAttr(style: Record<string, string>): string {
+  return Object.entries(style)
+    .map(([k, v]) => `${esc(k)}: ${esc(v)}`)
+    .join("; ");
 }
 
 function esc(s: string): string {

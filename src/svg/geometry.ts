@@ -40,6 +40,8 @@ export interface MessageGeometry {
   isSelf: boolean;
   isReverse: boolean; // right-to-left
   number?: string; // sequence number for numbering mode
+  /** Inline style from styling comments (e.g. // [red]) */
+  style?: Record<string, string>;
 }
 
 export interface SelfCallGeometry {
@@ -50,6 +52,8 @@ export interface SelfCallGeometry {
   label: string;
   arrowStyle: ArrowStyle;
   number?: string;
+  /** Inline style from styling comments (e.g. // [red]) */
+  style?: Record<string, string>;
 }
 
 // ─── Occurrences ───────────────────────────────────────────────────
@@ -126,6 +130,8 @@ export interface CommentGeometry {
   x: number;
   y: number;
   text: string;
+  /** Inline style from styling comments (e.g. // <red>) */
+  style?: Record<string, string>;
 }
 
 // ─── Composed Diagram ──────────────────────────────────────────────
