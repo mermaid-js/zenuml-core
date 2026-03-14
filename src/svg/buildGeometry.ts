@@ -183,14 +183,14 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     f.width += frameBorder.left;
   }
 
-  // Extend root-level fragment right edges to content right edge (matching HTML
-  // CSS where fragments fill available container width). Only root fragments
-  // (depth=0) get this treatment — nested fragments (inside message blocks)
-  // are sized by their local participants, matching HTML's CSS containment.
+  // Extend fragment right edges to content right edge (matching HTML CSS where
+  // fragments fill available container width). Each nesting depth level reduces
+  // the target right edge by FRAGMENT_PADDING_X to match CSS containment.
   const contentRightEdge = diagramWidth + frameBorder.right;
   for (const f of fragments) {
-    if (f.depth === 0 && f.x + f.width < contentRightEdge) {
-      f.width = contentRightEdge - f.x;
+    const targetRight = contentRightEdge - f.depth * FRAGMENT_PADDING_X;
+    if (f.x + f.width < targetRight) {
+      f.width = targetRight - f.x;
     }
   }
 
