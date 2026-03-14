@@ -28,38 +28,38 @@ export function renderMessage(m: MessageGeometry): string {
 
 export function renderSelfCall(s: SelfCallGeometry): string {
   const x1 = s.x;
-  // HTML self-call label: left-aligned near lifeline center
-  // Measured: HTML label starts at +2px from lifeline center, but +6 gives better overall pixel match
+  // HTML SelfInvocation layout (flex-col): label on top, SVG arrow below.
+  // s.y = coord.top = top of the self-invocation element.
+  // Label: 14px font, baseline ≈ 11px from top.
   const labelX = x1 + 6;
-  // HTML SelfInvocation: label at top, SVG arrow (30x24) below.
-  // HTML label top = y1 - 20 (content coords). Need bbox.y = y1 - 20, so y = y1 - 7.
-  const labelY = s.y - 7;
+  const labelY = s.y + 11;
 
   // Sequence number: positioned to the left of the self-call origin with 4px gap
   const numberSvg = s.number
     ? `<text x="${x1 - 4}" y="${labelY}" text-anchor="end" class="seq-number">${esc(s.number)}</text>`
     : "";
 
-  // Self-call arrow: U-path + arrowhead in absolute coordinates
-  // HTML uses nested <svg width="30" height="24"> at (serverCenter+1, s.y-2)
-  // Converting to absolute coords to avoid nested-SVG rendering differences
-  // +1 to match HTML CSS: self-call arrow starts 1px right of lifeline center
-  const ax = x1 + 1; // arrow origin X
-  const ay = s.y;     // arrow origin Y (top of U-path horizontal line)
-
-  // U-path: horizontal top, right curve, vertical down, bottom curve, horizontal bottom
-  const uPath = `M${ax},${ay} L${ax + 26},${ay} Q${ax + 28},${ay} ${ax + 28},${ay + 2} L${ax + 28},${ay + 11} Q${ax + 28},${ay + 13} ${ax + 26},${ay + 13} L${ax + 1},${ay + 13}`;
-
-  // Arrowhead (left-pointing): computed from HTML's mirrored 7x10 SVG at translate(0,10)
-  // viewBox "0 0 7 9" → 7x10 viewport: yOffset=+0.5 from preserveAspectRatio
-  // scale(-1,1) translate(-7,0) mirror: x'=7-x
-  // Path M1,1.25 L6.15,4.5 L1,7.75 → mirrored (6,1.75) (0.85,5.0) (6,8.25) → +translate(0,10) in 30x24
-  // Final absolute: offset by (ax, ay-2) since ay = s.y and the 30x24 SVG starts at s.y-2
-  const ahPath = `M${ax + 6},${ay + 9.75} L${ax + 0.85},${ay + 13} L${ax + 6},${ay + 16.25}`;
+  // Reuse the exact same SVG structure as the HTML SelfInvocation component:
+  //   <svg width="30" height="24">
+  //     <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 L14,15"/>
+  //     <g transform="translate(7, 10)"><ArrowHead fill rtl/></g>
+  //   </svg>
+  // Position: +1px right of s.x (matching HTML CSS border offset).
+  // SVG top = s.y + 14 (below the 14px label).
+  const svgX = x1;
+  const svgY = s.y + 14;
 
   return `<g class="message self-call">
-  <path d="${uPath}" fill="none" stroke="#000" stroke-width="2"/>
-  <path d="${ahPath}" stroke="#000" stroke-linecap="round" fill="none" stroke-width="2"/>
+  <svg x="${svgX}" y="${svgY}" width="30" height="24">
+    <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 L14,15" fill="none" stroke="#000" stroke-width="2"/>
+    <g transform="translate(7, 10)">
+      <svg height="10" width="7" viewBox="0 0 7 9">
+        <g transform="scale(-1, 1) translate(-7, 0)">
+          <path d="M1 1.25 L6.15 4.5 L1 7.75 Z" stroke="#000" stroke-linecap="round" fill="#000" stroke-width="2"/>
+        </g>
+      </svg>
+    </g>
+  </svg>
   <text x="${labelX}" y="${labelY}" text-anchor="start" class="message-label">${esc(s.label.trim())}</text>
   ${numberSvg}
 </g>`;

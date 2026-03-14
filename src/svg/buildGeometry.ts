@@ -310,6 +310,10 @@ function buildMessages(
         fromX = isLTR ? fromX + OCCURRENCE_WIDTH / 2 : fromX - OCCURRENCE_WIDTH / 2;
       }
 
+      // When target already has an active occurrence, the new occurrence is nested
+      // (stacked inward by OCCURRENCE_BAR_SIDE_WIDTH). Arrow endpoints shift accordingly.
+      const nestingOffset = info.targetHasOccurrence ? OCCURRENCE_BAR_SIDE_WIDTH : 0;
+
       if (info.isSelf) {
         // Async self-calls: HTML renders label (20px) then a 30×24 SVG with internal
         // U-shape path at M0,2→28,15 (width=28, height=13, radius=2).
@@ -318,8 +322,13 @@ function buildMessages(
         const selfYOffset = isAsync ? 22 : 0;
         const selfWidth = isAsync ? 28 : OCCURRENCE_WIDTH;
         const selfHeight = isAsync ? 13 : messageHeight;
+        // For sync self-calls inside an occurrence, the HTML component renders
+        // inside the occurrence div — starting at the occurrence's right edge.
+        const selfX = (!isAsync && info.senderHasOccurrence)
+          ? fromX + OCCURRENCE_WIDTH / 2
+          : fromX;
         selfCalls.push({
-          x: fromX,
+          x: selfX,
           y: coord.top + selfYOffset,
           width: selfWidth,
           height: selfHeight,
@@ -328,13 +337,13 @@ function buildMessages(
           number: info.number,
         });
       } else {
-        // For sync messages with occurrence, arrow tip stops at near edge of occurrence bar
+        // For sync messages with occurrence, arrow tip stops at near edge of occurrence bar.
         const isLTR = fromX < toX;
         const arrowToX =
           info.kind === "sync" && !info.isSelf
             ? isLTR
-              ? toX - OCCURRENCE_WIDTH / 2
-              : toX + OCCURRENCE_WIDTH / 2
+              ? toX - OCCURRENCE_WIDTH / 2 + nestingOffset
+              : toX + OCCURRENCE_WIDTH / 2 + nestingOffset
             : toX;
 
         messages.push({
@@ -384,8 +393,11 @@ function buildMessages(
           if (assignment?.assignee && !info.isSelf) {
             // Return goes from target (toX) back to sender (fromX).
             // Target always has occurrence; start from its near edge toward sender.
+            // When target has nested occurrence, shift by OCCURRENCE_BAR_SIDE_WIDTH.
             const isLTR = fromX < toX;
-            const retFromX = isLTR ? toX - OCCURRENCE_WIDTH / 2 : toX + OCCURRENCE_WIDTH / 2;
+            const retFromX = isLTR
+              ? toX - OCCURRENCE_WIDTH / 2 + nestingOffset
+              : toX + OCCURRENCE_WIDTH / 2 + nestingOffset;
             // Sender's fromX is already D4-adjusted for its occurrence edge.
             // Use returnArrowY (pre-depth-correction) to match HTML return arrow position.
             returns.push({
