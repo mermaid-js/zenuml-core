@@ -305,9 +305,11 @@ function buildMessages(
       const messageY = coord.top + adjust + messageHeight;
 
       // D4: When sender has an active occurrence, arrow starts from its near edge
-      if (info.senderHasOccurrence && !info.isSelf) {
+      // For nested occurrences (depth > 1), offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level
+      if (info.senderOccurrenceDepth >= 1 && !info.isSelf) {
+        const occOffset = OCCURRENCE_WIDTH / 2 + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
         const isLTR = fromX < toX;
-        fromX = isLTR ? fromX + OCCURRENCE_WIDTH / 2 : fromX - OCCURRENCE_WIDTH / 2;
+        fromX = isLTR ? fromX + occOffset : fromX - occOffset;
       }
 
       // When target already has an active occurrence, the new occurrence is nested
@@ -324,8 +326,9 @@ function buildMessages(
         const selfHeight = isAsync ? 13 : messageHeight;
         // For sync self-calls inside an occurrence, the HTML component renders
         // inside the occurrence div — starting at the occurrence's right edge.
-        const selfX = (!isAsync && info.senderHasOccurrence)
-          ? fromX + OCCURRENCE_WIDTH / 2
+        // For nested occurrences, offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level.
+        const selfX = (!isAsync && info.senderOccurrenceDepth >= 1)
+          ? fromX + OCCURRENCE_WIDTH / 2 + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH
           : fromX;
         selfCalls.push({
           x: selfX,
@@ -413,8 +416,16 @@ function buildMessages(
     // --- Creation arrows ---
     if (info.kind === "creation") {
       const CREATION_MSG_HEIGHT = 40; // from CreationStatementVM.ts
-      const fromX = coordinates.getPosition(info.from);
+      let fromX = coordinates.getPosition(info.from);
       const toX = coordinates.getPosition(info.to);
+
+      // When sender has an active occurrence, arrow starts from its near edge
+      // For nested occurrences, offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level
+      if (info.senderOccurrenceDepth >= 1) {
+        const occOffset = OCCURRENCE_WIDTH / 2 + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
+        const isLTR = fromX < toX;
+        fromX = isLTR ? fromX + occOffset : fromX - occOffset;
+      }
 
       // Find the already-built participant (buildParticipants handles creationTop)
       const targetParticipant = participants.find(p => p.name === info.to);
@@ -472,10 +483,9 @@ function buildMessages(
           // Created participant always has occurrence; start from its near edge.
           const isLTR = fromX < toX;
           const retFromX = isLTR ? toX - OCCURRENCE_WIDTH / 2 : toX + OCCURRENCE_WIDTH / 2;
-          // Sender has occurrence if senderHasOccurrence; end at its near edge.
-          const retToX = info.senderHasOccurrence
-            ? (isLTR ? fromX + OCCURRENCE_WIDTH / 2 : fromX - OCCURRENCE_WIDTH / 2)
-            : fromX;
+          // Sender has occurrence if senderOccurrenceDepth >= 1; end at its near edge.
+          // fromX is already adjusted for occurrence depth, so use it directly.
+          const retToX = fromX;
           returns.push({
             fromX: retFromX, toX: retToX, y: occBottom,
             label: creationAssign.assignee, isReverse: fromX < toX,

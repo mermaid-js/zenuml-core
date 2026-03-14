@@ -34,8 +34,10 @@ export interface StatementInfo {
   comment?: string;
   /** The ANTLR parse tree node — needed for local participant extraction */
   statNode?: any;
-  /** Whether the sender (from) has an active occurrence at this point */
-  senderHasOccurrence?: boolean;
+  /** Nesting depth of active occurrences on the sender (0 = none, 1 = one level, etc.) */
+  senderOccurrenceDepth: number;
+  /** Whether the target (to) already has an active occurrence (new one will be nested) */
+  targetHasOccurrence?: boolean;
   /** Sequence number (e.g. "1", "2.1") computed from block nesting and statement index */
   number?: string;
   /** Nesting depth (0 = root block, 1 = first nested block, etc.) */
@@ -45,14 +47,14 @@ export interface StatementInfo {
 export function walkStatements(rootContext: any): StatementInfo[] {
   const block = rootContext?.block?.();
   if (!block) return [];
-  return walkBlock(block, _STARTER_, new Set(), "", 0);
+  return walkBlock(block, _STARTER_, new Map(), "", 0);
 }
 
 function normalizeLabel(label: string): string {
   return label.trim();
 }
 
-function walkBlock(block: any, currentOrigin: string, activeOccurrences: Set<string>, parentNumber: string, depth: number): StatementInfo[] {
+function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<string, number>, parentNumber: string, depth: number): StatementInfo[] {
   const statements = block?.stat?.() || [];
   const results: StatementInfo[] = [];
   let index = 0;
@@ -71,11 +73,11 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Set<str
       const to = message.Owner?.() || _STARTER_;
       const label = normalizeLabel(message.SignatureText?.() || "");
       const nestedBlock = message.braceBlock?.()?.block?.();
-      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderHasOccurrence: activeOccurrences.has(from), number, depth });
+      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), number, depth });
 
       if (nestedBlock) {
-        const innerOccs = new Set(activeOccurrences);
-        innerOccs.add(to);
+        const innerOccs = new Map(activeOccurrences);
+        innerOccs.set(to, (innerOccs.get(to) || 0) + 1);
         results.push(...walkBlock(nestedBlock, to, innerOccs, number, depth + 1));
       }
       continue;
@@ -86,7 +88,7 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Set<str
       const from = asyncMsg.From?.() || asyncMsg.ProvidedFrom?.() || asyncMsg.Origin?.() || currentOrigin;
       const to = asyncMsg.Owner?.() || asyncMsg.to?.()?.getFormattedText?.() || from;
       const label = normalizeLabel(asyncMsg.content?.()?.getText?.() || asyncMsg.SignatureText?.() || "");
-      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false, comment, senderHasOccurrence: activeOccurrences.has(from), number, depth });
+      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false, comment, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), number, depth });
       continue;
     }
 
@@ -96,11 +98,11 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Set<str
       const to = creation.Owner?.() || "";
       const label = normalizeLabel(creation.SignatureText?.() || "«create»");
       const creationBlock = creation.braceBlock?.()?.block?.();
-      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat, senderHasOccurrence: activeOccurrences.has(from), number, depth });
+      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), number, depth });
 
       if (creationBlock) {
-        const innerOccs = new Set(activeOccurrences);
-        innerOccs.add(to);
+        const innerOccs = new Map(activeOccurrences);
+        innerOccs.set(to, (innerOccs.get(to) || 0) + 1);
         results.push(...walkBlock(creationBlock, to || currentOrigin, innerOccs, number, depth + 1));
       }
       continue;
@@ -222,7 +224,7 @@ function extractFragmentInfo(stat: any, _origin: string): FragmentExtract {
 }
 
 /** Recurse into fragment inner blocks (loop, opt, alt, try/catch, etc.) */
-function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[], activeOccurrences: Set<string>, parentNumber: string, depth: number): void {
+function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[], activeOccurrences: Map<string, number>, parentNumber: string, depth: number): void {
   // Single-block fragments: loop, opt, par, critical, section
   for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
     const frag = stat[kind]?.();
