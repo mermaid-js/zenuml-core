@@ -512,6 +512,16 @@ A.method1{
   }
   C.m
 }`,
+        "participant-width": `LongParticipantName.method`,
+        "nested-fragment-indent": `A.m {
+  try {
+    loop(x) {
+      B.m
+    }
+  } catch(e) {
+    B.m
+  }
+}`,
       };
 
       const caseNames = Object.keys(CASES);
