@@ -11,6 +11,7 @@ import {
   OCCURRENCE_BAR_SIDE_WIDTH,
   OCCURRENCE_EMPTY_HEIGHT,
   FRAGMENT_MIN_WIDTH,
+  FRAGMENT_PADDING_X,
   MARGIN,
   MIN_PARTICIPANT_WIDTH,
 } from "@/positioning/Constants";
@@ -748,6 +749,12 @@ function buildFragmentGeometry(
     fragWidth = Math.max(FRAGMENT_MIN_WIDTH, coordinates.getWidth());
     fragX = 0;
   }
+
+  // Apply nesting indentation: each depth level indents FRAGMENT_PADDING_X on each side,
+  // matching HTML CSS where nested fragments are contained within parent fragment padding.
+  const nestIndent = info.depth * FRAGMENT_PADDING_X;
+  fragX += nestIndent;
+  fragWidth -= 2 * nestIndent;
 
   // Build section geometry for multi-section fragments (alt, tcf)
   const sections: FragmentSectionGeometry[] = [];
