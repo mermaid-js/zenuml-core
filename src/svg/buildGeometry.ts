@@ -173,12 +173,13 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     f.width += frameBorder.left;
   }
 
-  // Extend fragment right edges to content right edge (matching HTML CSS where
-  // fragments fill available container width). The content area includes
-  // frameBorderRight (HTML's TotalWidth includes border.right).
+  // Extend root-level fragment right edges to content right edge (matching HTML
+  // CSS where fragments fill available container width). Only root fragments
+  // (depth=0) get this treatment — nested fragments (inside message blocks)
+  // are sized by their local participants, matching HTML's CSS containment.
   const contentRightEdge = diagramWidth + frameBorder.right;
   for (const f of fragments) {
-    if (f.x + f.width < contentRightEdge) {
+    if (f.depth === 0 && f.x + f.width < contentRightEdge) {
       f.width = contentRightEdge - f.x;
     }
   }
@@ -697,13 +698,21 @@ function buildFragmentGeometry(
       height: coord.height,
       sections: [],
       number: info.number,
+      depth: info.depth,
     };
   }
 
-  // Compute fragment width from local participants
+  // Compute fragment width from local participants, matching HTML's TotalWidth:
+  //   TotalWidth = max(participantWidth, FRAGMENT_MIN_WIDTH) + border.left + border.right
   const localNames = getLocalParticipantNames(fragmentCtx);
   const leftParticipant = allParticipants.find((p) => localNames.includes(p)) || "";
   const rightParticipant = allParticipants.slice().reverse().find((p) => localNames.includes(p)) || "";
+
+  // Fragment's own border — use statNode (not fragmentCtx) to match HTML's
+  // TotalWidth which receives the stat context containing the fragment.
+  const frameBuilder = new FrameBuilder(allParticipants as string[]);
+  const frame = frameBuilder.getFrame(statNode);
+  const fragBorder = FrameBorder(frame);
 
   let fragWidth: number;
   let fragX: number;
@@ -713,10 +722,8 @@ function buildFragmentGeometry(
       coordinates.distance(leftParticipant, rightParticipant) +
       coordinates.half(leftParticipant) +
       coordinates.half(rightParticipant);
-    fragWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH);
+    fragWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH) + fragBorder.right;
     fragX = coordinates.getPosition(leftParticipant) - coordinates.half(leftParticipant);
-    // Fragment right-edge extension is done post-hoc in buildGeometry()
-    // after final diagramWidth is computed (label expansion may widen it).
   } else {
     fragWidth = Math.max(FRAGMENT_MIN_WIDTH, coordinates.getWidth());
     fragX = 0;
@@ -771,6 +778,7 @@ function buildFragmentGeometry(
     height: coord.height,
     sections,
     number: info.number,
+    depth: info.depth,
   };
 }
 

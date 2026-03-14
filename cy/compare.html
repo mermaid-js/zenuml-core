@@ -52,6 +52,7 @@
         "demo4-fragment-span": `ret = A.methodA() {\n  B.method() {\n    if (X) {\n      C.methodC() {\n        a = A.methodA() {\n          D.method()\n        }\n      }\n    }\n    while (Y) {\n      C.methodC() {\n        A.methodA()\n      }\n    }\n  }\n}`,
         "demo5-self-named": `A.methodA() { A.methodA1() }`,
         "demo6-async-styled": `A->A:: Hello\nA->B:: Hello B\nB->A: So what`,
+        "nested-occurrence": `title Order Service\nA.method1{\n  B.method2 {\n    A->B.method3\n  }\n}`,
       };
 
       const grid = document.getElementById("grid");

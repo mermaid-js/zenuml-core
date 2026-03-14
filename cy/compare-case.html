@@ -500,6 +500,18 @@ ReturnType ret = ParticipantName.methodA(a, b) {
         "demo6-async-styled": `A->A:: Hello
 A->B:: Hello B
 B->A: So what`,
+        "nested-occurrence": `title Order Service
+A.method1{
+  B.method2 {
+    A->B.method3
+  }
+}`,
+        "if-then-continue": `A.m {
+  if(x) {
+    B.m
+  }
+  C.m
+}`,
       };
 
       const caseNames = Object.keys(CASES);

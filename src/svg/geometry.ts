@@ -98,6 +98,8 @@ export interface FragmentGeometry {
   height: number;
   sections: FragmentSectionGeometry[];
   number?: string;
+  /** Nesting depth (0 = root block, 1+ = inside a message block) */
+  depth: number;
 }
 
 // ─── Divider ───────────────────────────────────────────────────────
