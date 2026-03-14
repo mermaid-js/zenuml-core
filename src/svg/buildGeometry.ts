@@ -12,6 +12,7 @@ import {
   OCCURRENCE_EMPTY_HEIGHT,
   FRAGMENT_MIN_WIDTH,
   MARGIN,
+  MIN_PARTICIPANT_WIDTH,
 } from "@/positioning/Constants";
 
 /**
@@ -21,6 +22,13 @@ import {
  * HTML position and keep messages close to participant boxes.
  */
 const PARTICIPANT_TOP_SPACE = _HTML_PARTICIPANT_TOP + 8;
+
+/**
+ * Internal padding inside the HTML participant box that the positioning engine
+ * does not account for. The engine's labelWidth is pure text width, but the HTML
+ * box adds: 2×2px border + 2×2px padding + 2×4px inner text padding (px-1) = 16px.
+ */
+const PARTICIPANT_BOX_PADDING = 16;
 import { TextType } from "@/positioning/Coordinate";
 
 /** Visual height of participant box, matching HTML renderer's h-10 (40px) */
@@ -70,6 +78,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     participantModels,
     coordinates,
     verticalCoordinates,
+    measureText,
   );
   const buildResult = buildMessages(
     rootContext,
@@ -207,12 +216,23 @@ function buildParticipants(
   models: IParticipantModel[],
   coordinates: Coordinates,
   verticalCoordinates: VerticalCoordinates,
+  measureText?: (text: string, type: TextType) => number,
 ): ParticipantGeometry[] {
   return models
     .map((m) => {
       const centerX = coordinates.getPosition(m.name);
       const halfWidth = coordinates.half(m.name);
-      let width = halfWidth * 2 - MARGIN; // visual box excludes positioning margin
+      // Compute visual box width from raw text measurement + CSS decorations.
+      // The positioning engine clamps labelWidth to MIN_PARTICIPANT_WIDTH, losing
+      // the actual text width.  Re-measure here to get the correct box size.
+      // HTML box = max(textWidth + BOX_PADDING, MIN_PARTICIPANT_WIDTH).
+      let width: number;
+      if (measureText && m.name !== _STARTER_) {
+        const textWidth = measureText(m.getDisplayName(), TextType.ParticipantName);
+        width = Math.max(textWidth + PARTICIPANT_BOX_PADDING, MIN_PARTICIPANT_WIDTH);
+      } else {
+        width = halfWidth * 2 - MARGIN;
+      }
       if (m.name === _STARTER_) width = Math.min(width, 80); // match HTML min-width: 80px
       const creationTop = verticalCoordinates.getCreationTop(m.name);
       const isStarter = m.name === _STARTER_;
