@@ -111,16 +111,25 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult 
     parts.push(renderLifeline(l));
   }
 
-  // Participants (top)
+  // Participants — split into non-creation (painted before occurrences) and
+  // creation (painted after occurrences so the participant box covers the bar)
+  const creationNames = new Set(g.creations.map(c => c.participant.name));
   for (const p of g.participants) {
-    parts.push(renderParticipant(p));
+    if (!creationNames.has(p.name)) {
+      parts.push(renderParticipant(p));
+    }
   }
-
-  // Bottom participants removed — SVG output omits mirrored labels at the bottom
 
   // Occurrences (activation boxes on lifelines — before messages so arrows paint on top)
   for (const o of g.occurrences) {
     parts.push(renderOccurrence(o));
+  }
+
+  // Creation participants (painted after occurrences so they appear on top of bars)
+  for (const p of g.participants) {
+    if (creationNames.has(p.name)) {
+      parts.push(renderParticipant(p));
+    }
   }
 
   // Messages
