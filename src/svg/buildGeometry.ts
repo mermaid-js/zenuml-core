@@ -862,7 +862,7 @@ function buildFragmentGeometry(
               if (innerCoord) {
                 // Section separator is positioned above the first inner statement
                 // with header height (25px) and label space (20px)
-                sectionY = innerCoord.top - 20 - 8 - 1;
+                sectionY = innerCoord.top - 20 - 8 - 10;
               }
             }
           }
