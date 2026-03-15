@@ -42,8 +42,8 @@ export function renderSelfCall(s: SelfCallGeometry): string {
 
   // Reuse the exact same SVG structure as the HTML SelfInvocation component:
   //   <svg width="30" height="24">
-  //     <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 L14,15"/>
-  //     <g transform="translate(7, 10)"><ArrowHead fill rtl/></g>
+  //     <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 L{1|14},15"/>
+  //     <g transform="translate({0|7}, 10)"><ArrowHead {open|fill} rtl/></g>
   //   </svg>
   // Position: +1px right of s.x (matching HTML CSS border offset).
   // Async: HTML flex-col puts ~20px of label space above the arrow SVG.
@@ -52,13 +52,22 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   const svgX = x1;
   const svgY = s.y + (isAsync ? 20 : 14);
 
+  // Async: open arrowhead at left edge (L1,15, translate(0,10), fill=none, no Z)
+  // Sync: filled arrowhead at midpoint (L14,15, translate(7,10), fill=#000, Z)
+  const pathEnd = isAsync ? "L1,15" : "L14,15";
+  const arrowTx = isAsync ? 0 : 7;
+  const arrowFill = isAsync ? "none" : "#000";
+  const arrowPath = isAsync
+    ? 'M1 1.25 L6.15 4.5 L1 7.75'
+    : 'M1 1.25 L6.15 4.5 L1 7.75 Z';
+
   return `<g class="message self-call">
   <svg x="${svgX}" y="${svgY}" width="30" height="24">
-    <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 L14,15" fill="none" stroke="#000" stroke-width="2"/>
-    <g transform="translate(7, 10)">
+    <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 ${pathEnd}" fill="none" stroke="#000" stroke-width="2"/>
+    <g transform="translate(${arrowTx}, 10)">
       <svg height="10" width="7" viewBox="0 0 7 9">
         <g transform="scale(-1, 1) translate(-7, 0)">
-          <path d="M1 1.25 L6.15 4.5 L1 7.75 Z" stroke="#000" stroke-linecap="round" fill="#000" stroke-width="2"/>
+          <path d="${arrowPath}" stroke="#000" stroke-linecap="round" fill="${arrowFill}" stroke-width="2"/>
         </g>
       </svg>
     </g>
