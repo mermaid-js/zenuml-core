@@ -26,6 +26,7 @@
       .diff-panel.visible { display: block; }
       .diff-panel .panel-content canvas { max-width: 100%; }
       #html-output .footer { display: none !important; }
+      #html-output .privacy { visibility: hidden !important; }
     </style>
   </head>
   <body>
@@ -775,8 +776,9 @@ A.method1{
           }
 
           // --- Capture ---
+          const hideExportFilter = (node) => !node?.classList?.contains("hide-export");
           const [htmlDataUrl, svgDataUrl] = await Promise.all([
-            toPng(htmlCaptureTarget, { pixelRatio: 1 }),
+            toPng(htmlCaptureTarget, { pixelRatio: 1, filter: hideExportFilter }),
             toPng(svgElement || svgEl, { pixelRatio: 1 }),
           ]);
 
@@ -820,9 +822,10 @@ A.method1{
 
           let contentMatch = 0;
           let contentTotal = 0;
-          const LUMA_THRESHOLD = 240; // only near-white is background
-          const CHANNEL_TOLERANCE = 12; // tight: anti-aliasing only
-          const POSITION_TOLERANCE = 1; // ±1px for subpixel/anti-aliasing shifts
+          const urlParams = new URLSearchParams(window.location.search);
+          const LUMA_THRESHOLD = parseInt(urlParams.get('luma') || '240', 10); // only near-white is background
+          const CHANNEL_TOLERANCE = parseInt(urlParams.get('ctol') || '1', 10); // tight: anti-aliasing only
+          const POSITION_TOLERANCE = parseInt(urlParams.get('ptol') || '1', 10); // ±1px for subpixel/anti-aliasing shifts
 
           function luma(r, g, b) { return 0.3 * r + 0.59 * g + 0.11 * b; }
 
