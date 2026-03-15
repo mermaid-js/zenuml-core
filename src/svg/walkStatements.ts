@@ -114,14 +114,14 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
       const asyncMessage = ret?.asyncMessage?.();
       const from = asyncMessage?.From?.() || ret?.From?.() || currentOrigin;
       const to = asyncMessage?.to?.()?.getFormattedText?.() || ret?.ReturnTo?.() || _STARTER_;
-      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment, number, depth });
+      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment, senderOccurrenceDepth: activeOccurrences.get(from) || 0, number, depth });
       continue;
     }
 
     const divider = stat.divider?.();
     if (divider) {
       const label = normalizeLabel(divider.getFormattedText?.() || divider.getText?.() || "");
-      results.push({ key, kind: "divider", from: "", to: "", label, isSelf: false, hasBlock: false, number, depth });
+      results.push({ key, kind: "divider", from: "", to: "", label, isSelf: false, hasBlock: false, senderOccurrenceDepth: 0, number, depth });
       continue;
     }
 
@@ -130,7 +130,7 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
     results.push({
       key,
       kind: "fragment",
-      from: "",
+      from: currentOrigin,
       to: "",
       label: fragmentInfo.label,
       isSelf: false,
@@ -138,7 +138,9 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
       fragmentKind: fragmentInfo.fragmentKind,
       fragmentLabel: fragmentInfo.label,
       fragmentSections: fragmentInfo.sections,
+      comment,
       statNode: stat,
+      senderOccurrenceDepth: activeOccurrences.get(currentOrigin) || 0,
       number,
       depth,
     });

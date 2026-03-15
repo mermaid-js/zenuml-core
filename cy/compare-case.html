@@ -525,6 +525,25 @@ A.method1{
     B.m
   }
 }`,
+        "repro-participant-y": `A -> B: hello`,
+        "repro-occ-basics": `A.method()`,
+        "repro-occ-height": `A.B {
+  B.C {
+    C.D
+  }
+  B.E
+}`,
+        "repro-creation-width": `A.m {
+  b = new LongParticipantName()
+}`,
+        "repro-comment": `A.method {
+  try {
+    // String line;
+    B.process
+  } catch(e) {
+    C.handle
+  }
+}`,
       };
 
       const caseNames = Object.keys(CASES);

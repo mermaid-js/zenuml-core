@@ -25,11 +25,26 @@ import {
 const PARTICIPANT_TOP_SPACE = _HTML_PARTICIPANT_TOP + 8;
 
 /**
+ * Round an X coordinate to the nearest integer for pixel-aligned SVG rendering.
+ * The positioning engine can produce fractional positions (e.g., 55.5) when
+ * participant widths are odd. SVG elements with shape-rendering:crispEdges
+ * render sharply only at integer coordinates.
+ */
+function snapX(x: number): number {
+  return Math.round(x);
+}
+
+/**
  * Internal padding inside the HTML participant box that the positioning engine
  * does not account for. The engine's labelWidth is pure text width, but the HTML
  * box adds: 2×2px border + 2×2px padding + 2×4px inner text padding (px-1) = 16px.
+ *
+ * Assignee participants (e.g. "b:Type") render TWO EditableSpan components
+ * in HTML, each with 4px left + 4px right padding (from EditableSpan.css
+ * `.editable-span-base { padding: 0 4px }`). The extra span adds 8px.
  */
 const PARTICIPANT_BOX_PADDING = 16;
+const PARTICIPANT_BOX_PADDING_ASSIGNEE = 24;
 import { TextType } from "@/positioning/Coordinate";
 
 /** Visual height of participant box, matching HTML renderer's h-10 (40px) */
@@ -88,7 +103,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     verticalCoordinates,
     participants,
   );
-  const { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments, totalReturnDebt } = buildResult;
+  const { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments } = buildResult;
 
   // Compute diagram height from the positioning engine's totalHeight (primary) or
   // max rendered content Y (fallback). Returns need more bottom overhead than other elements
@@ -244,7 +259,7 @@ function buildParticipants(
 ): ParticipantGeometry[] {
   return models
     .map((m) => {
-      const centerX = coordinates.getPosition(m.name);
+      const centerX = snapX(coordinates.getPosition(m.name));
       const halfWidth = coordinates.half(m.name);
       // Compute visual box width from raw text measurement + CSS decorations.
       // The positioning engine clamps labelWidth to MIN_PARTICIPANT_WIDTH, losing
@@ -253,7 +268,11 @@ function buildParticipants(
       let width: number;
       if (measureText && m.name !== _STARTER_) {
         const textWidth = measureText(m.getDisplayName(), TextType.ParticipantName);
-        width = Math.max(textWidth + PARTICIPANT_BOX_PADDING, MIN_PARTICIPANT_WIDTH);
+        // Assignee participants (name contains ":") render two EditableSpan components
+        // in HTML, each with 8px horizontal padding (EditableSpan.css .editable-span-base).
+        const isAssignee = m.name.includes(":") && m.getDisplayName() === m.name;
+        const padding = isAssignee ? PARTICIPANT_BOX_PADDING_ASSIGNEE : PARTICIPANT_BOX_PADDING;
+        width = Math.max(textWidth + padding, MIN_PARTICIPANT_WIDTH);
       } else {
         width = halfWidth * 2 - MARGIN;
       }
@@ -343,7 +362,7 @@ function buildMessages(
     // --- Comments (inline, above the statement) ---
     if (commentObj?.text) {
       const commentX = info.from
-        ? coordinates.getPosition(info.from)
+        ? snapX(coordinates.getPosition(info.from))
         : 10;
       comments.push({
         x: commentX + 5,
@@ -358,8 +377,8 @@ function buildMessages(
 
     // --- Sync / Async messages ---
     if (info.kind === "sync" || info.kind === "async") {
-      let fromX = coordinates.getPosition(info.from);
-      const toX = coordinates.getPosition(info.to);
+      let fromX = snapX(coordinates.getPosition(info.from));
+      const toX = snapX(coordinates.getPosition(info.to));
       const messageHeight = info.isSelf ? 30 : 16;
       const messageY = coord.top + adjust + messageHeight;
 
@@ -425,8 +444,8 @@ function buildMessages(
       // Occurrence: activation box centered on the target participant's lifeline
       if (info.kind === "sync") {
         const occX = toX - OCCURRENCE_WIDTH / 2;
-        const occY = messageY - 2;
-        let occHeight = coord.height - messageHeight + 2;
+        const occY = messageY - 3;
+        let occHeight = coord.height - messageHeight + 4;
 
         // Adjust occurrence height for inner return debt.
         // The positioning engine underestimates block heights because non-self returns
@@ -477,8 +496,8 @@ function buildMessages(
     // --- Creation arrows ---
     if (info.kind === "creation") {
       const CREATION_MSG_HEIGHT = 40; // from CreationStatementVM.ts
-      let fromX = coordinates.getPosition(info.from);
-      const toX = coordinates.getPosition(info.to);
+      let fromX = snapX(coordinates.getPosition(info.from));
+      const toX = snapX(coordinates.getPosition(info.to));
 
       // When sender has an active occurrence, arrow starts from its near edge
       // For nested occurrences, offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level
@@ -513,14 +532,14 @@ function buildMessages(
 
       // Creation always reserves occurrence space
       const occX = toX - OCCURRENCE_WIDTH / 2;
-      // -2px matches HTML's Occurrence mt-[-2px] (same adjustment as sync messages)
+      // -3px matches HTML's Occurrence mt-[-2px] plus 1px CSS rounding (same as sync messages)
       const occY = targetParticipant
-        ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT - 2
-        : coord.top + CREATION_MSG_HEIGHT - 2;
+        ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT - 3
+        : coord.top + CREATION_MSG_HEIGHT - 3;
       // Compute occurrence from its top to the bottom of the statement coordinate.
-      // This correctly excludes comment height (which is above the participant box).
+      // +1 aligns the bottom edge with HTML's CSS-computed occurrence bottom.
       const occHeight = Math.max(
-        (coord.top + coord.height) - occY,
+        (coord.top + coord.height + 1) - occY,
         OCCURRENCE_EMPTY_HEIGHT,
       );
       if (occHeight > 0) {
@@ -575,8 +594,8 @@ function buildMessages(
 
     // --- Returns ---
     if (info.kind === "return") {
-      const fromX = coordinates.getPosition(info.from);
-      const toX = coordinates.getPosition(info.to);
+      const fromX = snapX(coordinates.getPosition(info.from));
+      const toX = snapX(coordinates.getPosition(info.to));
       returns.push({
         fromX,
         toX,
@@ -675,11 +694,15 @@ function computeReturnDebt(
       debtByDepth.pop();
       blockOwnerKeys.pop();
       maxDepth--;
-      // Propagate: parent block's subsequent statements are affected.
+      // Propagate debt to parent block only if the closing block belongs to a
+      // sync/creation statement (has an owner). Fragment blocks (ownerKey=null)
+      // already account for return visual height in their coord.height, so
+      // propagating their debt would double-count.
       // Scale by 0.75 — the CSS layout doesn't grow 1:1 with the positioning engine's
-      // cursor advancement due to margin collapsing and BFC effects. Full propagation
-      // overshoots by ~10px per block depth. 0.75 is empirically calibrated.
-      debtByDepth[maxDepth] = (debtByDepth[maxDepth] || 0) + Math.round(closedDebt * 0.75);
+      // cursor advancement due to margin collapsing and BFC effects.
+      if (ownerKey) {
+        debtByDepth[maxDepth] = (debtByDepth[maxDepth] || 0) + Math.round(closedDebt * 0.75);
+      }
     }
 
     // When depth increases, start fresh debt tracking for new block
@@ -716,7 +739,7 @@ function computeReturnDebt(
     }
   }
 
-  // Close remaining open blocks (same 0.75 propagation factor as main loop)
+  // Close remaining open blocks (same propagation rules as main loop)
   while (maxDepth > 0) {
     const closedDebt = debtByDepth[maxDepth] || 0;
     const ownerKey = blockOwnerKeys[maxDepth];
@@ -726,7 +749,10 @@ function computeReturnDebt(
     debtByDepth.pop();
     blockOwnerKeys.pop();
     maxDepth--;
-    debtByDepth[maxDepth] = (debtByDepth[maxDepth] || 0) + Math.round(closedDebt * 0.75);
+    // Only propagate from sync/creation blocks (see main loop comment)
+    if (ownerKey) {
+      debtByDepth[maxDepth] = (debtByDepth[maxDepth] || 0) + Math.round(closedDebt * 0.75);
+    }
   }
 
   // Store total root debt for diagram height adjustment
@@ -784,7 +810,7 @@ function buildFragmentGeometry(
       coordinates.half(leftParticipant) +
       coordinates.half(rightParticipant);
     fragWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH) + fragBorder.left + fragBorder.right;
-    fragX = coordinates.getPosition(leftParticipant) - coordinates.half(leftParticipant);
+    fragX = snapX(coordinates.getPosition(leftParticipant)) - coordinates.half(leftParticipant);
   } else {
     fragWidth = Math.max(FRAGMENT_MIN_WIDTH, coordinates.getWidth());
     fragX = 0;

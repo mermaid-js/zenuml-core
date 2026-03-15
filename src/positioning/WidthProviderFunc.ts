@@ -58,7 +58,7 @@ export function WidthProviderOnCanvas(
   }
 
   ctx.font = getFontSpec(type);
-  const width = Math.ceil(ctx.measureText(measured).width);
+  const width = Math.round(ctx.measureText(measured).width);
   setCache(cacheKey, width, true);
   return width;
 }
