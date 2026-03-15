@@ -10,8 +10,8 @@ export function renderCreation(c: CreationGeometry): string {
     ? p.x + p.width / 2
     : p.x - p.width / 2;
 
-  const labelX = m.fromX + (adjustedToX - m.fromX) / 2;
-  const labelY = m.y - 5;
+  const labelX = m.fromX + (adjustedToX - m.fromX) / 2 - 3;
+  const labelY = m.y - 3;
 
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
 
