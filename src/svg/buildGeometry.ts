@@ -384,7 +384,7 @@ function buildMessages(
       let fromX = snapX(coordinates.getPosition(info.from));
       const toX = snapX(coordinates.getPosition(info.to));
       const messageHeight = info.isSelf ? 30 : 16;
-      const messageY = coord.top + adjust + messageHeight;
+      const messageY = coord.top + adjust + messageHeight - 0.5;
 
       // D4: When sender has an active occurrence, arrow starts from its near edge
       // For nested occurrences (depth > 1), offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level
