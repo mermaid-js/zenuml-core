@@ -817,7 +817,16 @@ function buildFragmentGeometry(
       coordinates.distance(leftParticipant, rightParticipant) +
       coordinates.half(leftParticipant) +
       coordinates.half(rightParticipant);
-    fragWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH) + fragBorder.left + fragBorder.right;
+    // Self-call extra width — matches HTML's TotalWidth (WidthOfContext.ts)
+    const selfMessages = AllMessages(statNode).filter((m: any) => m.from === m.to);
+    const extraWidths = selfMessages.map(
+      (m: any) =>
+        coordinates.getMessageWidth(m) -
+        coordinates.distance(m.from || _STARTER_, rightParticipant) -
+        coordinates.half(rightParticipant),
+    );
+    const extraWidth = Math.max(0, ...extraWidths);
+    fragWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH) + fragBorder.left + fragBorder.right + extraWidth;
     fragX = snapX(coordinates.getPosition(leftParticipant)) - coordinates.half(leftParticipant);
   } else {
     fragWidth = Math.max(FRAGMENT_MIN_WIDTH, coordinates.getWidth());
