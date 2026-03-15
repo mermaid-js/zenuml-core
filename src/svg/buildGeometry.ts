@@ -121,13 +121,13 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
   for (const c of creations) maxOtherY = Math.max(maxOtherY, c.message.y + PARTICIPANT_VISUAL_HEIGHT);
   for (const f of fragments) maxOtherY = Math.max(maxOtherY, f.y + f.height);
   for (const d of dividers) maxOtherY = Math.max(maxOtherY, d.y);
-  let diagramHeight = Math.max(
+  const diagramHeight = Math.max(
     totalHeight + 28,
     maxOccBottom + 13,
     maxOtherY + 13,
     maxReturnY + 47,
   );
-  let lifelineBottom = diagramHeight + PARTICIPANT_VISUAL_HEIGHT - 28;
+  const lifelineBottom = diagramHeight + PARTICIPANT_VISUAL_HEIGHT - 28;
 
   // Build lifelines AFTER height adjustment so they extend to the correct bottom
   const lifelines = buildLifelines(
@@ -579,12 +579,18 @@ function buildMessages(
     // --- Fragments ---
     if (info.kind === "fragment" && info.fragmentKind) {
       const adjustedCoord = { top: coord.top + adjust, height: coord.height };
+      // Compute comment height: the HTML renderer places the header BELOW any
+      // inline comment. MarkdownMeasurer uses lines * 20 for height.
+      const fragmentCommentHeight = commentObj?.text
+        ? (info.comment?.trim().split("\n").length || 0) * 20
+        : 0;
       const fragmentGeom = buildFragmentGeometry(
         info,
         adjustedCoord,
         coordinates,
         verticalCoordinates,
         allParticipants,
+        fragmentCommentHeight,
       );
       if (fragmentGeom) {
         fragments.push(fragmentGeom);
@@ -767,6 +773,7 @@ function buildFragmentGeometry(
   coordinates: Coordinates,
   verticalCoordinates: VerticalCoordinates,
   allParticipants: string[],
+  commentHeight: number = 0,
 ): FragmentGeometry | null {
   // Get the fragment's parse tree node to find local participants
   const statNode = info.statNode;
@@ -783,6 +790,7 @@ function buildFragmentGeometry(
       y: coord.top,
       width: coordinates.getWidth(),
       height: coord.height,
+      headerY: coord.top + 1 + commentHeight,
       sections: [],
       number: info.number,
       depth: info.depth,
@@ -866,6 +874,7 @@ function buildFragmentGeometry(
     y: coord.top,
     width: fragWidth,
     height: coord.height,
+    headerY: coord.top + 1 + commentHeight,
     sections,
     number: info.number,
     depth: info.depth,

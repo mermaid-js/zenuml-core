@@ -100,6 +100,8 @@ export interface FragmentGeometry {
   y: number;
   width: number;
   height: number;
+  /** Y position of the fragment header (after any comment offset) */
+  headerY: number;
   sections: FragmentSectionGeometry[];
   number?: string;
   /** Nesting depth (0 = root block, 1+ = inside a message block) */

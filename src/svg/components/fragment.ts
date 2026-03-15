@@ -11,9 +11,9 @@ export function renderFragment(f: FragmentGeometry): string {
   );
 
   // Full-width header bar (matches HTML's bg-skin-fragment-header)
-  // 1px inside the border on all sides
+  // 1px inside the border on all sides, offset by any comment height
   const headerX = f.x + 1;
-  const headerY = f.y + 1;
+  const headerY = f.headerY;
   const headerW = f.width - 2;
   parts.push(
     `<rect x="${headerX}" y="${headerY}" width="${headerW}" height="${HEADER_HEIGHT}" class="fragment-header"/>`,
