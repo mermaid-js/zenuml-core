@@ -46,9 +46,11 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   //     <g transform="translate(7, 10)"><ArrowHead fill rtl/></g>
   //   </svg>
   // Position: +1px right of s.x (matching HTML CSS border offset).
-  // SVG top = s.y + 14 (below the 14px label).
+  // Async: HTML flex-col puts ~20px of label space above the arrow SVG.
+  // Sync: label is more compact, arrow starts at s.y + 14.
+  const isAsync = s.arrowStyle === "open";
   const svgX = x1;
-  const svgY = s.y + 14;
+  const svgY = s.y + (isAsync ? 20 : 14);
 
   return `<g class="message self-call">
   <svg x="${svgX}" y="${svgY}" width="30" height="24">

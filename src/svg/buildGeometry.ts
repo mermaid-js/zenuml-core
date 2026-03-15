@@ -49,6 +49,8 @@ import { TextType } from "@/positioning/Coordinate";
 
 /** Visual height of participant box, matching HTML renderer's h-10 (40px) */
 const PARTICIPANT_VISUAL_HEIGHT = 40;
+/** Max visual width of participant box, matching HTML CSS max-width: 250px (SeqDiagram.css) */
+const PARTICIPANT_MAX_WIDTH = 250;
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { AllMessages } from "@/parser/MessageCollector";
@@ -272,9 +274,9 @@ function buildParticipants(
         // in HTML, each with 8px horizontal padding (EditableSpan.css .editable-span-base).
         const isAssignee = m.name.includes(":") && m.getDisplayName() === m.name;
         const padding = isAssignee ? PARTICIPANT_BOX_PADDING_ASSIGNEE : PARTICIPANT_BOX_PADDING;
-        width = Math.max(textWidth + padding, MIN_PARTICIPANT_WIDTH);
+        width = Math.min(Math.max(textWidth + padding, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
       } else {
-        width = halfWidth * 2 - MARGIN;
+        width = Math.min(halfWidth * 2 - MARGIN, PARTICIPANT_MAX_WIDTH);
       }
       if (m.name === _STARTER_) width = Math.min(width, 80); // match HTML min-width: 80px
       const creationTop = verticalCoordinates.getCreationTop(m.name);
@@ -395,13 +397,14 @@ function buildMessages(
       const nestingOffset = info.targetHasOccurrence ? OCCURRENCE_BAR_SIDE_WIDTH : 0;
 
       if (info.isSelf) {
-        // Async self-calls: HTML renders label (20px) then a 30×24 SVG with internal
-        // U-shape path at M0,2→28,15 (width=28, height=13, radius=2).
-        // Match these exact dimensions: offset by label(20)+padding(2)=22, w=28, h=13.
+        // Async self-calls: HTML renders label (flex-col) then a 30×24 SVG arrow.
+        // The label and arrow are laid out by renderSelfCall from s.y, so no Y offset
+        // is needed here — otherwise the label height gets double-counted.
         const isAsync = info.kind === "async";
-        const selfYOffset = isAsync ? 22 : 0;
+        const selfYOffset = 0;
         const selfWidth = isAsync ? 28 : OCCURRENCE_WIDTH;
-        const selfHeight = isAsync ? 13 : messageHeight;
+        // Async: full visual extent = label(~20px) + arrow SVG(24px) = 44px
+        const selfHeight = isAsync ? 44 : messageHeight;
         // For sync self-calls inside an occurrence, the HTML component renders
         // inside the occurrence div — starting at the occurrence's right edge.
         // For nested occurrences, offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level.
