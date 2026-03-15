@@ -212,7 +212,7 @@ function extractFragmentInfo(stat: any, _origin: string): FragmentExtract {
       sections.push({ label: "finally", blockNode: finallyBlock.braceBlock?.()?.block?.() });
     }
 
-    return { fragmentKind: "tcf", label: "try", sections };
+    return { fragmentKind: "tcf", label: "", sections };
   }
 
   // Ref fragment
