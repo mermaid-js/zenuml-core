@@ -50,7 +50,7 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   // Position: +1px right of s.x (matching HTML CSS border offset).
   // Async: HTML flex-col puts ~20px of label space above the arrow SVG.
   // Sync: label is more compact, arrow starts at s.y + 14.
-  const svgX = x1;
+  const svgX = x1 + 1;
   const svgY = s.y + (isAsync ? 20 : 14);
 
   // Async: open arrowhead at left edge (L1,15, translate(0,10), fill=none, no Z)
