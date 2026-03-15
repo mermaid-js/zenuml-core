@@ -31,9 +31,12 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   const x1 = s.x;
   // HTML SelfInvocation layout (flex-col): label on top, SVG arrow below.
   // s.y = coord.top = top of the self-invocation element.
-  // Label: 14px font, baseline ≈ 11px from top.
+  // Label: 14px font, baseline ≈ 11px from top for sync.
+  // Async: HTML label element is 16px tall (14px font + 2px line-height),
+  // so the visual center is 2px lower. Shift baseline by +2 to match.
+  const isAsync = s.arrowStyle === "open";
   const labelX = x1 + 6;
-  const labelY = s.y + 11;
+  const labelY = s.y + (isAsync ? 13 : 11);
 
   // Sequence number: positioned to the left of the self-call origin with 4px gap
   const numberSvg = s.number
@@ -48,7 +51,6 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   // Position: +1px right of s.x (matching HTML CSS border offset).
   // Async: HTML flex-col puts ~20px of label space above the arrow SVG.
   // Sync: label is more compact, arrow starts at s.y + 14.
-  const isAsync = s.arrowStyle === "open";
   const svgX = x1;
   const svgY = s.y + (isAsync ? 20 : 14);
 
