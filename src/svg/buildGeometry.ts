@@ -363,8 +363,11 @@ function buildMessages(
 
     // --- Comments (inline, above the statement) ---
     if (commentObj?.text) {
-      const commentX = info.from
-        ? snapX(coordinates.getPosition(info.from))
+      // For creation statements, the comment renders inside the creation block
+      // at the target participant, not the sender.
+      const commentParticipant = info.kind === "creation" && info.to ? info.to : info.from;
+      const commentX = commentParticipant
+        ? snapX(coordinates.getPosition(commentParticipant))
         : 10;
       comments.push({
         x: commentX + 5,
