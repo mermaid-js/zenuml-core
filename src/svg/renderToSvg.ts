@@ -60,7 +60,7 @@ const DEFAULT_THEME_STYLES = `
   .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .divider-line { stroke: #666; stroke-width: 1; stroke-dasharray: 4,4; }
   .divider-label { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #666; }
-  .comment-text { font-family: Helvetica, Verdana, serif; font-size: 12px; font-style: italic; fill: #222; opacity: 0.5; }
+  .comment-text { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; opacity: 0.5; }
   .seq-number { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 100; fill: #6b7280; }
 `;
 

@@ -363,15 +363,14 @@ function buildMessages(
 
     // --- Comments (inline, above the statement) ---
     if (commentObj?.text) {
-      // For creation statements, the comment renders inside the creation block
-      // at the target participant, not the sender.
-      const commentParticipant = info.kind === "creation" && info.to ? info.to : info.from;
-      const commentX = commentParticipant
-        ? snapX(coordinates.getPosition(commentParticipant))
+      const commentX = info.from
+        ? snapX(coordinates.getPosition(info.from))
         : 10;
+      // SVG text y = baseline; HTML positions by visual top. Add font ascent (~12px for 14px text).
+      const COMMENT_FONT_ASCENT = 15;
       comments.push({
-        x: commentX + 5,
-        y: coord.top + adjust,
+        x: commentX + OCCURRENCE_WIDTH / 2,
+        y: coord.top + adjust + COMMENT_FONT_ASCENT,
         text: commentObj.text,
         style: cssToSvgStyle(commentObj.commentStyle),
       });
