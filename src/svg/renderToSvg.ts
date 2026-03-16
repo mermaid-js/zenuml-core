@@ -51,10 +51,10 @@ const DEFAULT_THEME_STYLES = `
   .occurrence { fill: #dedede; stroke: #666; stroke-width: 2; shape-rendering: crispEdges; rx: 2; }
   .fragment-border { fill: none; stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-header { fill: #dedede; fill-opacity: 0.498; stroke: none; shape-rendering: crispEdges; }
-  .fragment-label { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: bold; fill: #222; }
+  .fragment-label { font-family: Helvetica, Verdana, serif; font-size: 14px; font-weight: 600; fill: #000; }
   .fragment-condition { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .fragment-separator { stroke: #e5e7eb; stroke-width: 1; shape-rendering: crispEdges; }
-  .fragment-section-label { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #222; }
+  .fragment-section-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
   .return-line { stroke: #000; stroke-width: 2; stroke-dasharray: 6,4; }
   .return-arrow { stroke: #000; stroke-width: 2; fill: none; }
   .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }

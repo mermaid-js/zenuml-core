@@ -57,11 +57,37 @@ export function renderFragment(f: FragmentGeometry): string {
       parts.push(
         `<line x1="${f.x}" y1="${lineY}" x2="${f.x + f.width}" y2="${lineY}" class="fragment-separator"/>`,
       );
-      // Section label
+      // Section label — split into keyword + condition (e.g. "catch" + "error") as separate elements
+      // Both catch and finally have a semi-transparent white background (bg-skin-frame opacity-65)
       if (section.label) {
-        parts.push(
-          `<text x="${f.x + 8}" y="${lineY + 16}" class="fragment-section-label">${esc(section.label)}</text>`,
-        );
+        const labelY = lineY + 16;
+        const isFinally = section.label.startsWith("finally");
+        // Split "catch error" → ["catch", "error"], "else [cond]" → ["else", "[cond]"], "finally" → ["finally"]
+        const spaceIdx = section.label.indexOf(" ");
+        if (spaceIdx > 0 && !isFinally) {
+          const keyword = section.label.substring(0, spaceIdx);
+          const condition = section.label.substring(spaceIdx + 1);
+          const keywordX = f.x + 5;
+          // Group with opacity 0.65 matches HTML parent opacity (affects both bg and text together)
+          const bgWidth = (keyword.length + condition.length) * 7 + 9;
+          parts.push(
+            `<g opacity="0.65">` +
+            `<rect x="${keywordX - 4}" y="${lineY + 1}" width="${bgWidth}" height="20" fill="#fff"/>` +
+            `<text x="${keywordX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(keyword)}</text>` +
+            `<text x="${keywordX + keyword.length * 8}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(condition)}</text>` +
+            `</g>`,
+          );
+        } else {
+          const finallyX = f.x + 5;
+          const finallyY = labelY - 1;
+          const bgWidth = section.label.length * 6 + 2;
+          parts.push(
+            `<g opacity="0.65">` +
+            `<rect x="${finallyX - 4}" y="${lineY + 1}" width="${bgWidth}" height="20" fill="#fff"/>` +
+            `<text x="${finallyX}" y="${finallyY}" class="fragment-section-label">${esc(section.label)}</text>` +
+            `</g>`,
+          );
+        }
       }
     }
   }
