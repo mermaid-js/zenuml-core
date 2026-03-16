@@ -44,7 +44,7 @@ export function renderFragment(f: FragmentGeometry): string {
   if (f.label) {
     const condY = headerY + HEADER_HEIGHT + 5;
     parts.push(
-      `<text x="${headerX}" y="${condY}" dominant-baseline="hanging" class="fragment-condition">[${esc(f.label)}]</text>`,
+      `<text x="${headerX}" y="${condY}" dominant-baseline="hanging" class="fragment-condition"><tspan>[</tspan><tspan opacity="0.65">${esc(f.label)}</tspan><tspan>]</tspan></text>`,
     );
   }
 
