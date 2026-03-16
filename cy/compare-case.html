@@ -37,6 +37,7 @@
         <a id="prev-link" href="#">&larr; Prev</a>
         <a id="next-link" href="#">Next &rarr;</a>
         <button id="diff-btn">Diff</button>
+        <button id="diff-native-btn" title="Prepare for Playwright/MCP native screenshots">Diff (native)</button>
         <span class="match-badge" id="match-badge"></span>
       </div>
     </div>
@@ -547,6 +548,13 @@ A.method1{
         "repro-msg-y": `A -> B: msg`,
         "creation-long-name": `new AHasAVeryLongNameLongNameLongNameLongName()`,
         "async-self": `A->A: selfAsync`,
+        "async-self-nested": `A.method {
+  A->A: async
+}`,
+        "comment-creation": `A.method() {
+  // abcde
+  new B()
+}`,
       };
 
       const caseNames = Object.keys(CASES);
@@ -729,7 +737,210 @@ A.method1{
         };
       }
 
-      // Diff logic
+      // --- Reusable capture/diff API (also exposed on window for external tools) ---
+
+      // State for hide/restore cycle
+      let _hiddenEls = [];
+      let _savedStyles = [];
+
+      function _hideEl(el) {
+        if (el) { _hiddenEls.push({ el, prev: el.style.display }); el.style.display = "none"; }
+      }
+      function _stripMargin(el) {
+        if (el) { _savedStyles.push({ el, prev: el.style.margin }); el.style.margin = "0"; }
+      }
+
+      // Prepare HTML panel for screenshot: hide chrome, numbering, icons
+      window.prepareHtmlForCapture = function() {
+        _hiddenEls = [];
+        _savedStyles = [];
+
+        const htmlEl = document.getElementById("html-output");
+        const htmlFrame = htmlEl.querySelector(".frame");
+        const seqDiagram = htmlEl.querySelector(".sequence-diagram");
+        const svgElement = document.getElementById("svg-output").querySelector("svg");
+
+        _hideEl(htmlEl.querySelector(".footer"));
+        _stripMargin(htmlFrame);
+
+        // Hide bottom participant labels (SVG no longer renders them)
+        const captureEl = htmlFrame || seqDiagram || htmlEl;
+        const captureRect = captureEl.getBoundingClientRect();
+        const captureMidY = captureRect.top + captureRect.height * 0.7;
+        captureEl.querySelectorAll(".participant").forEach(el => {
+          const r = el.getBoundingClientRect();
+          if (r.top > captureMidY) _hideEl(el);
+        });
+
+        // Hide ALL numbering badges (messages, fragments, self-calls)
+        captureEl.querySelectorAll(".absolute.text-xs").forEach(el => {
+          if (/^[\d.]+$/.test(el.textContent.trim())) _hideEl(el);
+        });
+        // Hide fragment numbering (e.g. "1" before "Alt")
+        captureEl.querySelectorAll(".header .absolute.text-xs").forEach(_hideEl);
+
+        if (htmlFrame) {
+          const frameRect2 = htmlFrame.getBoundingClientRect();
+          // Hide SVG icons in the header area (top 35px) — checkbox, etc.
+          htmlFrame.querySelectorAll("svg").forEach(svg => {
+            const r = svg.getBoundingClientRect();
+            if (r.width > 0 && (r.top - frameRect2.top) < 35) _hideEl(svg);
+          });
+        }
+
+        // Hide SVG sequence numbers (matching HTML numbering badge hiding above)
+        if (svgElement) {
+          svgElement.querySelectorAll(".seq-number").forEach(_hideEl);
+        }
+
+        return { htmlSelector: "#html-output .frame, #html-output .sequence-diagram", svgSelector: "#svg-output svg" };
+      };
+
+      // Restore HTML panel after screenshot
+      window.restoreHtmlAfterCapture = function() {
+        for (const { el, prev } of _hiddenEls) el.style.display = prev;
+        for (const { el, prev } of _savedStyles) el.style.margin = prev;
+        _hiddenEls = [];
+        _savedStyles = [];
+      };
+
+      // Run pixel diff from two PNG data URLs and display results on the page.
+      // Returns { pixelPct, structPct, contentMatch, contentTotal }
+      window.diffFromImages = async function(htmlDataUrl, svgDataUrl) {
+        const htmlEl = document.getElementById("html-output");
+        const svgEl = document.getElementById("svg-output");
+        const seqDiagram = htmlEl.querySelector(".sequence-diagram");
+        const svgElement = svgEl.querySelector("svg");
+
+        // Structural comparison
+        const htmlElements = extractHtmlElements(seqDiagram || htmlEl);
+        const svgElements = extractSvgElements(svgElement);
+        const structural = computeStructuralMatch(htmlElements, svgElements);
+
+        // Load images
+        const [htmlImg, svgImg] = await Promise.all([
+          loadImage(htmlDataUrl),
+          loadImage(svgDataUrl),
+        ]);
+
+        // Align (both anchored at 0,0)
+        const dx = 0, dy = 0;
+        const w = Math.max(htmlImg.width, svgImg.width);
+        const h = Math.max(htmlImg.height, svgImg.height);
+
+        const canvas1 = document.createElement("canvas");
+        canvas1.width = w; canvas1.height = h;
+        const ctx1 = canvas1.getContext("2d");
+        ctx1.fillStyle = "white"; ctx1.fillRect(0, 0, w, h);
+        ctx1.drawImage(htmlImg, 0, 0);
+
+        const canvas2 = document.createElement("canvas");
+        canvas2.width = w; canvas2.height = h;
+        const ctx2 = canvas2.getContext("2d");
+        ctx2.fillStyle = "white"; ctx2.fillRect(0, 0, w, h);
+        ctx2.drawImage(svgImg, 0, 0);
+
+        const data1 = canvas1.getContext("2d").getImageData(0, 0, w, h).data;
+        const data2 = canvas2.getContext("2d").getImageData(0, 0, w, h).data;
+
+        const diffCanvas = document.createElement("canvas");
+        diffCanvas.width = w;
+        diffCanvas.height = h;
+        const ctx = diffCanvas.getContext("2d");
+        const diffImg = ctx.createImageData(w, h);
+        const diff = diffImg.data;
+
+        let contentMatch = 0;
+        let contentTotal = 0;
+        const urlParams = new URLSearchParams(window.location.search);
+        const LUMA_THRESHOLD = parseInt(urlParams.get('luma') || '240', 10);
+        const CHANNEL_TOLERANCE = parseInt(urlParams.get('ctol') || '1', 10);
+        const POSITION_TOLERANCE = parseInt(urlParams.get('ptol') || '1', 10);
+
+        function luma(r, g, b) { return 0.3 * r + 0.59 * g + 0.11 * b; }
+
+        function getPixel(data, x, y) {
+          const i = (y * w + x) * 4;
+          return [data[i], data[i+1], data[i+2]];
+        }
+
+        function pixelsClose(r1, g1, b1, r2, g2, b2) {
+          return Math.abs(r1 - r2) <= CHANNEL_TOLERANCE &&
+                 Math.abs(g1 - g2) <= CHANNEL_TOLERANCE &&
+                 Math.abs(b1 - b2) <= CHANNEL_TOLERANCE;
+        }
+
+        function hasNearbyMatch(src, dst, x, y) {
+          const [r1, g1, b1] = getPixel(src, x, y);
+          for (let dy = -POSITION_TOLERANCE; dy <= POSITION_TOLERANCE; dy++) {
+            for (let dx = -POSITION_TOLERANCE; dx <= POSITION_TOLERANCE; dx++) {
+              const nx = x + dx, ny = y + dy;
+              if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
+              const [r2, g2, b2] = getPixel(dst, nx, ny);
+              if (luma(r2, g2, b2) < LUMA_THRESHOLD && pixelsClose(r1, g1, b1, r2, g2, b2)) return true;
+            }
+          }
+          return false;
+        }
+
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * 4;
+            const r1 = data1[i], g1 = data1[i+1], b1 = data1[i+2];
+            const r2 = data2[i], g2 = data2[i+1], b2 = data2[i+2];
+
+            const lum1 = luma(r1, g1, b1);
+            const lum2 = luma(r2, g2, b2);
+
+            const isContent1 = lum1 < LUMA_THRESHOLD;
+            const isContent2 = lum2 < LUMA_THRESHOLD;
+            const isContent = isContent1 || isContent2;
+
+            if (!isContent) {
+              diff[i] = 250; diff[i+1] = 250; diff[i+2] = 250; diff[i+3] = 255;
+            } else {
+              contentTotal++;
+              const matched = hasNearbyMatch(data1, data2, x, y) || hasNearbyMatch(data2, data1, x, y);
+              if (matched) {
+                const l = Math.min(lum1, lum2);
+                diff[i] = Math.round(l * 0.12);
+                diff[i+1] = Math.round(60 + l * 0.3);
+                diff[i+2] = Math.round(l * 0.12);
+                diff[i+3] = 255;
+                contentMatch++;
+              } else if (isContent1 && !isContent2) {
+                diff[i] = 255; diff[i+1] = 60; diff[i+2] = 60; diff[i+3] = 255;
+              } else if (!isContent1 && isContent2) {
+                diff[i] = 60; diff[i+1] = 60; diff[i+2] = 255; diff[i+3] = 255;
+              } else {
+                diff[i] = 255; diff[i+1] = 0; diff[i+2] = 255; diff[i+3] = 255;
+              }
+            }
+          }
+        }
+
+        ctx.putImageData(diffImg, 0, 0);
+
+        const diffOutput = document.getElementById("diff-output");
+        diffOutput.innerHTML = "";
+        diffOutput.appendChild(diffCanvas);
+
+        const panel = document.getElementById("diff-panel");
+        panel.classList.add("visible");
+
+        const pixelPct = contentTotal > 0 ? ((contentMatch / contentTotal) * 100).toFixed(1) : "100.0";
+        const structPct = (structural.score * 100).toFixed(0);
+        document.getElementById("match-badge").innerHTML =
+          `${structPct}% structural · <b>${pixelPct}%</b> content pixel (${contentMatch}/${contentTotal} px) ` +
+          `<span style="color:#1a6b1a">■</span> match ` +
+          `<span style="color:#ff3c3c">■</span> HTML-only ` +
+          `<span style="color:#3c3cff">■</span> SVG-only ` +
+          `<span style="color:#ff00ff">■</span> color diff`;
+
+        return { pixelPct: parseFloat(pixelPct), structPct: parseFloat(structPct), contentMatch, contentTotal };
+      };
+
+      // --- Diff button (html-to-image capture) ---
       document.getElementById("diff-btn").addEventListener("click", async () => {
         const btn = document.getElementById("diff-btn");
         btn.disabled = true;
@@ -738,204 +949,22 @@ A.method1{
         try {
           const htmlEl = document.getElementById("html-output");
           const svgEl = document.getElementById("svg-output");
-
-          // Identify capture targets
-          const seqDiagram = htmlEl.querySelector(".sequence-diagram");
           const svgElement = svgEl.querySelector("svg");
           const htmlFrame = htmlEl.querySelector(".frame");
-          // Capture from .frame (includes border + header) to match SVG's full-frame output
+          const seqDiagram = htmlEl.querySelector(".sequence-diagram");
           const htmlCaptureTarget = htmlFrame || seqDiagram || htmlEl;
 
-          // --- Element-based structural comparison ---
-          const htmlElements = extractHtmlElements(seqDiagram || htmlEl);
-          const svgElements = extractSvgElements(svgElement);
-          const structural = computeStructuralMatch(htmlElements, svgElements);
+          window.prepareHtmlForCapture();
 
-          // --- Anchor: both capture from frame top-left, so anchors are (0,0) ---
-          // HTML captures from .frame element directly
-          // SVG's frame-border-outer rect starts at (0,0)
-          const htmlAnchorX = 0, htmlAnchorY = 0;
-          const svgAnchorX = 0, svgAnchorY = 0;
-
-          // --- Hide HTML chrome, strip margins ---
-          const hidden = [];
-          function hideEl(el) { if (el) { hidden.push({ el, prev: el.style.display }); el.style.display = "none"; } }
-          const savedStyles = [];
-          function stripMargin(el) { if (el) { savedStyles.push({ el, prev: el.style.margin }); el.style.margin = "0"; } }
-
-          hideEl(htmlEl.querySelector(".footer"));
-          // Strip frame margin so toPng captures from border edge
-          stripMargin(htmlFrame);
-          // Hide bottom participant labels (SVG no longer renders them)
-          const captureEl = htmlFrame || seqDiagram || htmlEl;
-          const captureRect = captureEl.getBoundingClientRect();
-          const captureMidY = captureRect.top + captureRect.height * 0.7;
-          captureEl.querySelectorAll(".participant").forEach(el => {
-            const r = el.getBoundingClientRect();
-            if (r.top > captureMidY) hideEl(el);
-          });
-          // Hide ALL numbering badges (messages, fragments, self-calls)
-          captureEl.querySelectorAll(".absolute.text-xs").forEach(el => {
-            if (/^[\d.]+$/.test(el.textContent.trim())) hideEl(el);
-          });
-          // Hide fragment numbering (e.g. "1" before "Alt")
-          captureEl.querySelectorAll(".header .absolute.text-xs").forEach(hideEl);
-          if (htmlFrame) {
-            const frameRect2 = htmlFrame.getBoundingClientRect();
-            // Hide SVG icons in the header area (top 35px) — checkbox, etc.
-            htmlFrame.querySelectorAll("svg").forEach(svg => {
-              const r = svg.getBoundingClientRect();
-              if (r.width > 0 && (r.top - frameRect2.top) < 35) hideEl(svg);
-            });
-            // Note: toPng artifact exists for self-call SVG (30x24) — viewport fill:black
-            // from CSS inheritance renders as black background. Cannot fix via fill
-            // attribute/style changes as toPng breaks path stroke rendering.
-          }
-
-          // Hide SVG sequence numbers (matching HTML numbering badge hiding above)
-          if (svgElement) {
-            svgElement.querySelectorAll(".seq-number").forEach(hideEl);
-          }
-
-          // --- Capture ---
           const hideExportFilter = (node) => !node?.classList?.contains("hide-export");
           const [htmlDataUrl, svgDataUrl] = await Promise.all([
             toPng(htmlCaptureTarget, { pixelRatio: 1, filter: hideExportFilter }),
             toPng(svgElement || svgEl, { pixelRatio: 1 }),
           ]);
 
-          // --- Restore ---
-          for (const { el, prev } of hidden) el.style.display = prev;
-          for (const { el, prev } of savedStyles) el.style.margin = prev;
+          window.restoreHtmlAfterCapture();
 
-          const [htmlImg, svgImg] = await Promise.all([
-            loadImage(htmlDataUrl),
-            loadImage(svgDataUrl),
-          ]);
-
-          // --- Align images so first participant boxes overlap ---
-          const dx = htmlAnchorX - svgAnchorX;
-          const dy = htmlAnchorY - svgAnchorY;
-
-          const w = Math.max(htmlImg.width + Math.max(0, -dx), svgImg.width + Math.max(0, dx));
-          const h = Math.max(htmlImg.height + Math.max(0, -dy), svgImg.height + Math.max(0, dy));
-
-          const canvas1 = document.createElement("canvas");
-          canvas1.width = w; canvas1.height = h;
-          const ctx1 = canvas1.getContext("2d");
-          ctx1.fillStyle = "white"; ctx1.fillRect(0, 0, w, h);
-          ctx1.drawImage(htmlImg, Math.max(0, -dx), Math.max(0, -dy));
-
-          const canvas2 = document.createElement("canvas");
-          canvas2.width = w; canvas2.height = h;
-          const ctx2 = canvas2.getContext("2d");
-          ctx2.fillStyle = "white"; ctx2.fillRect(0, 0, w, h);
-          ctx2.drawImage(svgImg, Math.max(0, dx), Math.max(0, dy));
-
-          const data1 = canvas1.getContext("2d").getImageData(0, 0, w, h).data;
-          const data2 = canvas2.getContext("2d").getImageData(0, 0, w, h).data;
-
-          const diffCanvas = document.createElement("canvas");
-          diffCanvas.width = w;
-          diffCanvas.height = h;
-          const ctx = diffCanvas.getContext("2d");
-          const diffImg = ctx.createImageData(w, h);
-          const diff = diffImg.data;
-
-          let contentMatch = 0;
-          let contentTotal = 0;
-          const urlParams = new URLSearchParams(window.location.search);
-          const LUMA_THRESHOLD = parseInt(urlParams.get('luma') || '240', 10); // only near-white is background
-          const CHANNEL_TOLERANCE = parseInt(urlParams.get('ctol') || '1', 10); // tight: anti-aliasing only
-          const POSITION_TOLERANCE = parseInt(urlParams.get('ptol') || '1', 10); // ±1px for subpixel/anti-aliasing shifts
-
-          function luma(r, g, b) { return 0.3 * r + 0.59 * g + 0.11 * b; }
-
-          function getPixel(data, x, y) {
-            const i = (y * w + x) * 4;
-            return [data[i], data[i+1], data[i+2]];
-          }
-
-          function pixelsClose(r1, g1, b1, r2, g2, b2) {
-            return Math.abs(r1 - r2) <= CHANNEL_TOLERANCE &&
-                   Math.abs(g1 - g2) <= CHANNEL_TOLERANCE &&
-                   Math.abs(b1 - b2) <= CHANNEL_TOLERANCE;
-          }
-
-          // Check if a content pixel at (x,y) in src has a nearby match in dst
-          function hasNearbyMatch(src, dst, x, y) {
-            const [r1, g1, b1] = getPixel(src, x, y);
-            for (let dy = -POSITION_TOLERANCE; dy <= POSITION_TOLERANCE; dy++) {
-              for (let dx = -POSITION_TOLERANCE; dx <= POSITION_TOLERANCE; dx++) {
-                const nx = x + dx, ny = y + dy;
-                if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
-                const [r2, g2, b2] = getPixel(dst, nx, ny);
-                if (luma(r2, g2, b2) < LUMA_THRESHOLD && pixelsClose(r1, g1, b1, r2, g2, b2)) return true;
-              }
-            }
-            return false;
-          }
-
-          for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-              const i = (y * w + x) * 4;
-              const r1 = data1[i], g1 = data1[i+1], b1 = data1[i+2];
-              const r2 = data2[i], g2 = data2[i+1], b2 = data2[i+2];
-
-              const lum1 = luma(r1, g1, b1);
-              const lum2 = luma(r2, g2, b2);
-
-              const isContent1 = lum1 < LUMA_THRESHOLD;
-              const isContent2 = lum2 < LUMA_THRESHOLD;
-              const isContent = isContent1 || isContent2;
-
-              if (!isContent) {
-                // Both background — light gray
-                diff[i] = 250; diff[i+1] = 250; diff[i+2] = 250; diff[i+3] = 255;
-              } else {
-                contentTotal++;
-                // Check fuzzy match (±1px neighborhood)
-                const matched = hasNearbyMatch(data1, data2, x, y) || hasNearbyMatch(data2, data1, x, y);
-                if (matched) {
-                  // Dark green — brightness tracks content darkness
-                  const l = Math.min(lum1, lum2);
-                  diff[i] = Math.round(l * 0.12);
-                  diff[i+1] = Math.round(60 + l * 0.3);
-                  diff[i+2] = Math.round(l * 0.12);
-                  diff[i+3] = 255;
-                  contentMatch++;
-                } else if (isContent1 && !isContent2) {
-                  // Only in HTML (red)
-                  diff[i] = 255; diff[i+1] = 60; diff[i+2] = 60; diff[i+3] = 255;
-                } else if (!isContent1 && isContent2) {
-                  // Only in SVG (blue)
-                  diff[i] = 60; diff[i+1] = 60; diff[i+2] = 255; diff[i+3] = 255;
-                } else {
-                  // Both content, different colors — magenta
-                  diff[i] = 255; diff[i+1] = 0; diff[i+2] = 255; diff[i+3] = 255;
-                }
-              }
-            }
-          }
-
-          ctx.putImageData(diffImg, 0, 0);
-
-          const diffOutput = document.getElementById("diff-output");
-          diffOutput.innerHTML = "";
-          diffOutput.appendChild(diffCanvas);
-
-          const panel = document.getElementById("diff-panel");
-          panel.classList.add("visible");
-
-          const pixelPct = contentTotal > 0 ? ((contentMatch / contentTotal) * 100).toFixed(1) : "100.0";
-          const mismatchCount = contentTotal - contentMatch;
-          const structPct = (structural.score * 100).toFixed(0);
-          document.getElementById("match-badge").innerHTML =
-            `${structPct}% structural · <b>${pixelPct}%</b> content pixel (${contentMatch}/${contentTotal} px) ` +
-            `<span style="color:#1a6b1a">■</span> match ` +
-            `<span style="color:#ff3c3c">■</span> HTML-only ` +
-            `<span style="color:#3c3cff">■</span> SVG-only ` +
-            `<span style="color:#ff00ff">■</span> color diff`;
+          await window.diffFromImages(htmlDataUrl, svgDataUrl);
         } catch (err) {
           console.error("Diff failed:", err);
           document.getElementById("match-badge").textContent = "Diff failed";
@@ -943,6 +972,16 @@ A.method1{
           btn.disabled = false;
           btn.textContent = "Diff";
         }
+      });
+
+      // --- Diff (native) button: uses the ZenUML Native Diff browser extension ---
+      // The extension captures the viewport via chrome.tabs.captureVisibleTab(),
+      // crops to each element's bounds, and calls diffFromImages() with real
+      // browser-rendered pixels (no html-to-image foreignObject serialization).
+      // Install the extension from cy/native-diff-ext/
+      document.getElementById("diff-native-btn").addEventListener("click", () => {
+        document.getElementById("match-badge").textContent =
+          "Click the extension icon (puzzle piece → ZenUML Native Diff) to run native diff";
       });
 
       function loadImage(dataUrl) {

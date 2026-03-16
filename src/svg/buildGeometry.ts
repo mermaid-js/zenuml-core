@@ -407,10 +407,10 @@ function buildMessages(
         const selfWidth = isAsync ? 28 : OCCURRENCE_WIDTH;
         // Async: full visual extent = label(~20px) + arrow SVG(24px) = 44px
         const selfHeight = isAsync ? 44 : messageHeight;
-        // For sync self-calls inside an occurrence, the HTML component renders
+        // For self-calls inside an occurrence, the HTML component renders
         // inside the occurrence div — starting at the occurrence's right edge.
         // For nested occurrences, offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level.
-        const selfX = (!isAsync && info.senderOccurrenceDepth >= 1)
+        const selfX = (info.senderOccurrenceDepth >= 1)
           ? fromX + OCCURRENCE_WIDTH / 2 + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH
           : fromX;
         selfCalls.push({
