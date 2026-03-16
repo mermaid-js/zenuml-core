@@ -110,6 +110,9 @@ loop(condition) {
 A.m {
   new B(1,2,3,4)
 }`,
+        "creation-return": `A.method() {
+  b = new B()
+}`,
         "creation-rtl": `"b:B"
 a1 = A.method() {
   // abcde

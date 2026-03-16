@@ -40,6 +40,9 @@ export default defineConfig(({ mode }) => ({
       "@": resolve(__dirname, "./src"),
     },
   },
+  server: {
+    allowedHosts: ["8080.diagramly.net"],
+  },
   plugins: [svgr(), react()],
   define: {
     "process.env.NODE_ENV": JSON.stringify(mode),
