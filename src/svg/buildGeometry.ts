@@ -449,7 +449,7 @@ function buildMessages(
       // Occurrence: activation box centered on the target participant's lifeline
       if (info.kind === "sync") {
         const occX = toX - OCCURRENCE_WIDTH / 2;
-        const occY = messageY - 3;
+        const occY = messageY - 2.5;
         let occHeight = coord.height - messageHeight + 4;
 
         // Adjust occurrence height for inner return debt.
