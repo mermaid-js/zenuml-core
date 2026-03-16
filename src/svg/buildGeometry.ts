@@ -657,17 +657,13 @@ function buildMessages(
           ? rawToX
           : (toLayers <= 1 ? rawToX : rawToX + OCCURRENCE_BAR_SIDE_WIDTH * (toLayers - 1)) - OCCURRENCE_BAR_SIDE_WIDTH;
       }
-      // In HTML, the return line container is positioned LIFELINE_WIDTH past the
-      // occurrence edge on both sides (from Anchor2.edgeOffset subtracting
-      // LIFELINE_WIDTH and CSS layout placing the container at the near edge).
-      // Shift both endpoints by LIFELINE_WIDTH to match this visual gap.
-      fromX += LIFELINE_WIDTH;
-      toX += LIFELINE_WIDTH;
+      // Note: no LIFELINE_WIDTH adjustment for standalone returns.
+      // HTML Anchor2.edgeOffset subtracts LIFELINE_WIDTH but the CSS layout
+      // re-adds it via container positioning. Net effect is ~0 for these returns.
       returns.push({
         fromX,
         toX,
-        // -0.5 compensates for SVG stroke centering (same as regular messages)
-        y: coord.top + adjust + 16 - 0.5,
+        y: coord.top + adjust + 16,
         label: info.label,
         isReverse,
       });
