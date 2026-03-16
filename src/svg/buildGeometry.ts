@@ -363,8 +363,16 @@ function buildMessages(
 
     // --- Comments (inline, above the statement) ---
     if (commentObj?.text) {
-      const commentX = info.from
-        ? snapX(coordinates.getPosition(info.from))
+      // For RTL creation statements, HTML positions the comment at the target (left side).
+      // For all other cases, the comment is at the sender's position.
+      let commentParticipant = info.from;
+      if (info.kind === "creation" && info.from && info.to) {
+        const fX = coordinates.getPosition(info.from);
+        const tX = coordinates.getPosition(info.to);
+        if (fX > tX) commentParticipant = info.to;
+      }
+      const commentX = commentParticipant
+        ? snapX(coordinates.getPosition(commentParticipant))
         : 10;
       // SVG text y = baseline; HTML positions by visual top. Add font ascent (~12px for 14px text).
       const COMMENT_FONT_ASCENT = 15;
