@@ -613,14 +613,43 @@ function buildMessages(
 
     // --- Returns ---
     if (info.kind === "return") {
-      const fromX = snapX(coordinates.getPosition(info.from));
-      const toX = snapX(coordinates.getPosition(info.to));
+      const rawFromX = snapX(coordinates.getPosition(info.from));
+      const rawToX = snapX(coordinates.getPosition(info.to));
+      const isReverse = rawToX < rawFromX;
+      // HTML Anchor2 positions return lines edge-to-edge between occurrence walls.
+      // rightEdgeOfRightWall = position + BAR_SIDE_WIDTH * layers
+      // leftEdgeOfRightWall  = layers === 0 ? position : centerOfRightWall - BAR_SIDE_WIDTH
+      //   where centerOfRightWall = layers <= 1 ? position : position + BAR_SIDE_WIDTH * (layers - 1)
+      // LTR: from.rightEdge → to;  RTL: to ← from.leftEdge
+      const fromLayers = info.senderOccurrenceDepth;
+      let fromX: number;
+      if (isReverse) {
+        // RTL: line starts from from's left edge of right wall
+        fromX = fromLayers === 0
+          ? rawFromX
+          : (fromLayers <= 1 ? rawFromX : rawFromX + OCCURRENCE_BAR_SIDE_WIDTH * (fromLayers - 1)) - OCCURRENCE_BAR_SIDE_WIDTH;
+      } else {
+        // LTR: line starts from from's right edge of right wall
+        fromX = rawFromX + OCCURRENCE_BAR_SIDE_WIDTH * fromLayers;
+      }
+      // Target also needs occurrence edge offset (Anchor2 uses the near edge facing the source)
+      const toLayers = info.targetOccurrenceDepth || 0;
+      let toX: number;
+      if (isReverse) {
+        // RTL: target is on the left, use its right edge
+        toX = rawToX + OCCURRENCE_BAR_SIDE_WIDTH * toLayers;
+      } else {
+        // LTR: target is on the right, use its left edge
+        toX = toLayers === 0
+          ? rawToX
+          : (toLayers <= 1 ? rawToX : rawToX + OCCURRENCE_BAR_SIDE_WIDTH * (toLayers - 1)) - OCCURRENCE_BAR_SIDE_WIDTH;
+      }
       returns.push({
         fromX,
         toX,
         y: coord.top + adjust + 16,
         label: info.label,
-        isReverse: toX < fromX,
+        isReverse,
       });
       continue;
     }

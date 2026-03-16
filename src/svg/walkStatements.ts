@@ -38,6 +38,8 @@ export interface StatementInfo {
   senderOccurrenceDepth: number;
   /** Whether the target (to) already has an active occurrence (new one will be nested) */
   targetHasOccurrence?: boolean;
+  /** Nesting depth of active occurrences on the target (0 = none, 1 = one level, etc.) */
+  targetOccurrenceDepth?: number;
   /** Sequence number (e.g. "1", "2.1") computed from block nesting and statement index */
   number?: string;
   /** Nesting depth (0 = root block, 1 = first nested block, etc.) */
@@ -114,7 +116,7 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
       const asyncMessage = ret?.asyncMessage?.();
       const from = asyncMessage?.From?.() || ret?.From?.() || currentOrigin;
       const to = asyncMessage?.to?.()?.getFormattedText?.() || ret?.ReturnTo?.() || _STARTER_;
-      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment, senderOccurrenceDepth: activeOccurrences.get(from) || 0, number, depth });
+      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetOccurrenceDepth: activeOccurrences.get(to) || 0, number, depth });
       continue;
     }
 
