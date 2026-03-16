@@ -9,6 +9,7 @@ import {
   PARTICIPANT_TOP_SPACE_FOR_GROUP as _HTML_PARTICIPANT_TOP,
   OCCURRENCE_WIDTH,
   OCCURRENCE_BAR_SIDE_WIDTH,
+  LIFELINE_WIDTH,
   OCCURRENCE_EMPTY_HEIGHT,
   FRAGMENT_MIN_WIDTH,
   FRAGMENT_PADDING_X,
@@ -572,17 +573,29 @@ function buildMessages(
         const creationCtx = info.statNode?.creation?.();
         const creationAssign = creationCtx?.Assignment?.();
         if (creationAssign?.assignee) {
-          const occBottom = occY + occHeight;
-          // Return goes from created (toX) back to sender (fromX).
-          // Created participant always has occurrence; start from its near edge.
-          const isLTR = fromX < toX;
-          const retFromX = isLTR ? toX - OCCURRENCE_WIDTH / 2 : toX + OCCURRENCE_WIDTH / 2;
-          // Sender has occurrence if senderOccurrenceDepth >= 1; end at its near edge.
-          // fromX is already adjusted for occurrence depth, so use it directly.
-          const retToX = fromX;
+          // -2 aligns with HTML return position: -1 for SVG stroke inset (occurrence.ts),
+          // -1 because HTML return sits 1px above occurrence bottom
+          const occBottom = occY + occHeight - 2;
+          // Compute both endpoints from raw lifeline centers.
+          // HTML return line starts 1px beyond sender occurrence edge (CSS gap),
+          // and ends at the created occurrence edge.
+          const rawFromX = snapX(coordinates.getPosition(info.from));
+          const isLTR = rawFromX < toX;
+          const occHalf = OCCURRENCE_WIDTH / 2;
+          // Sender (A) side: occurrence edge + LIFELINE_WIDTH CSS gap
+          const senderNest = Math.max(info.senderOccurrenceDepth - 1, 0) * OCCURRENCE_BAR_SIDE_WIDTH;
+          const senderRetX = info.senderOccurrenceDepth >= 1
+            ? rawFromX + senderNest + (isLTR ? occHalf + LIFELINE_WIDTH : -(occHalf + LIFELINE_WIDTH))
+            : rawFromX;
+          // Created (B) side: occurrence edge + LIFELINE_WIDTH CSS gap (into occ)
+          const createdRetX = isLTR
+            ? toX - occHalf + LIFELINE_WIDTH
+            : toX + occHalf - LIFELINE_WIDTH;
+          // fromX = line start (created side), toX = arrow tip (sender side)
+          // renderReturn places arrow head at toX
           returns.push({
-            fromX: retFromX, toX: retToX, y: occBottom,
-            label: creationAssign.assignee, isReverse: fromX < toX,
+            fromX: createdRetX, toX: senderRetX, y: occBottom,
+            label: creationAssign.assignee, isReverse: createdRetX > senderRetX,
           });
         }
       }
@@ -644,10 +657,17 @@ function buildMessages(
           ? rawToX
           : (toLayers <= 1 ? rawToX : rawToX + OCCURRENCE_BAR_SIDE_WIDTH * (toLayers - 1)) - OCCURRENCE_BAR_SIDE_WIDTH;
       }
+      // In HTML, the return line container is positioned LIFELINE_WIDTH past the
+      // occurrence edge on both sides (from Anchor2.edgeOffset subtracting
+      // LIFELINE_WIDTH and CSS layout placing the container at the near edge).
+      // Shift both endpoints by LIFELINE_WIDTH to match this visual gap.
+      fromX += LIFELINE_WIDTH;
+      toX += LIFELINE_WIDTH;
       returns.push({
         fromX,
         toX,
-        y: coord.top + adjust + 16,
+        // -0.5 compensates for SVG stroke centering (same as regular messages)
+        y: coord.top + adjust + 16 - 0.5,
         label: info.label,
         isReverse,
       });
