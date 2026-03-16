@@ -79,11 +79,9 @@ export function renderSelfCall(s: SelfCallGeometry): string {
 }
 
 /**
- * Renders an arrowhead using the exact same nested SVG structure as HTML ArrowHead.tsx.
- * HTML uses: <svg width="7" height="10" viewBox="0 0 7 9">
- *   <path d="M1 1.25 L6.15 4.5 L1 7.75" stroke="currentColor" stroke-linecap="round"/>
- * </svg>
- * The viewBox (0 0 7 9) → 7x10 pixels places the tip at pixel (6.15, 5.0).
+ * Renders an arrowhead as a polyline (open) or polygon (filled).
+ * Geometry derived from ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
+ * mapped to absolute coordinates with w=5.15 and halfH=3.25.
  */
 function renderArrowHead(
   tipX: number,
@@ -92,27 +90,18 @@ function renderArrowHead(
   style: string,
 ): string {
   const isFilled = style !== "open" && style !== "dashed";
-  const fillAttr = isFilled ? "#000" : "none";
-  const pathD = isFilled
-    ? "M1 1.25 L6.15 4.5 L1 7.75 Z"
-    : "M1 1.25 L6.15 4.5 L1 7.75";
+  const w = 5.15;
+  const halfH = 3.25;
+  const dir = pointsLeft ? 1 : -1; // wing direction is opposite to tip
+  const ax1 = tipX + dir * w;
+  const ay1 = tipY - halfH;
+  const ay2 = tipY + halfH;
+  const points = `${ax1},${ay1} ${tipX},${tipY} ${ax1},${ay2}`;
 
-  if (pointsLeft) {
-    // Mirrored: tip at pixel (7-6.15, 5.0) = (0.85, 5.0) within 7x10 SVG
-    const svgX = tipX - 0.85;
-    const svgY = tipY - 5.0;
-    return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9">
-    <g transform="scale(-1, 1) translate(-7, 0)">
-      <path d="${pathD}" stroke="#000" stroke-linecap="round" fill="${fillAttr}" stroke-width="2"/>
-    </g>
-  </svg>`;
+  if (isFilled) {
+    return `<polygon points="${points}" stroke="#000" stroke-linecap="round" stroke-width="2" class="arrow-head"/>`;
   }
-  // Normal (right-pointing): tip at pixel (6.15, 5.0) within 7x10 SVG
-  const svgX = tipX - 6.15;
-  const svgY = tipY - 5.0;
-  return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9">
-    <path d="${pathD}" stroke="#000" stroke-linecap="round" fill="${fillAttr}" stroke-width="2"/>
-  </svg>`;
+  return `<polyline points="${points}" fill="none" stroke="#000" stroke-linecap="round" stroke-width="2" class="arrow-head arrow-open"/>`;
 }
 
 function styleToAttr(style: Record<string, string>): string {
