@@ -660,9 +660,15 @@ function buildMessages(
           ? rawToX
           : (toLayers <= 1 ? rawToX : rawToX + OCCURRENCE_BAR_SIDE_WIDTH * (toLayers - 1)) - OCCURRENCE_BAR_SIDE_WIDTH;
       }
-      // Note: no LIFELINE_WIDTH adjustment for standalone returns.
-      // HTML Anchor2.edgeOffset subtracts LIFELINE_WIDTH but the CSS layout
-      // re-adds it via container positioning. Net effect is ~0 for these returns.
+      // HTML Anchor2.edgeOffset subtracts LIFELINE_WIDTH from the container width.
+      // For RTL returns, shift the arrow tip (toX) right by LIFELINE_WIDTH to match
+      // the HTML positioning where the container left edge is 1px past the occurrence.
+      // For LTR returns, shrink the right edge.
+      if (isReverse) {
+        toX += LIFELINE_WIDTH;  // RTL: move arrow tip right
+      } else {
+        toX -= LIFELINE_WIDTH;  // LTR: shrink right edge
+      }
       returns.push({
         fromX,
         toX,
