@@ -124,6 +124,7 @@ export interface ReturnGeometry {
   y: number;
   label: string;
   isReverse: boolean;
+  isSelf: boolean;
 }
 
 // ─── Comment ──────────────────────────────────────────────────────

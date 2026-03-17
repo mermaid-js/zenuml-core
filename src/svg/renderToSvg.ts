@@ -58,6 +58,7 @@ const DEFAULT_THEME_STYLES = `
   .return-line { stroke: #000; stroke-width: 2; stroke-dasharray: 6,4; }
   .return-arrow { stroke: #000; stroke-width: 2; fill: none; }
   .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
+  .return-icon { fill: #222; }
   .divider-line { stroke: #666; stroke-width: 1; stroke-dasharray: 4,4; }
   .divider-label { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #666; }
   .comment-text { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; opacity: 0.5; }

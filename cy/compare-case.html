@@ -366,7 +366,7 @@ section(){
         "vertical-8": `new Creation() {
   return from_creation
 }
-return "from if to original source"
+return "back to caller"
 try {
   new AHasAVeryLongNameLongNameLongNameLongName() {
     new CreatWithinCreat()
@@ -419,7 +419,7 @@ ReturnType ret = ParticipantName.methodA(a, b) {
     new Creation() {
       return from_creation
     }
-    return "from if to original source"
+    return "back to caller"
     try {
       new AHasAVeryLongNameLongNameLongNameLongName() {
         new CreatWithinCreat()
@@ -558,6 +558,10 @@ A.method1{
   // abcde
   new B()
 }`,
+        "repro-return-after-creation": `new B() {
+  return from_creation
+}
+return "back to caller"`,
       };
 
       const caseNames = Object.keys(CASES);

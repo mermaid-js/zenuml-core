@@ -502,7 +502,7 @@ function buildMessages(
             // Use returnArrowY (pre-depth-correction) to match HTML return arrow position.
             returns.push({
               fromX: retFromX, toX: fromX, y: returnArrowY,
-              label: assignment.assignee, isReverse: fromX < toX,
+              label: assignment.assignee, isReverse: fromX < toX, isSelf: false,
             });
           }
         }
@@ -598,7 +598,7 @@ function buildMessages(
           // renderReturn places arrow head at toX
           returns.push({
             fromX: createdRetX, toX: senderRetX, y: occBottom,
-            label: creationAssign.assignee, isReverse: createdRetX > senderRetX,
+            label: creationAssign.assignee, isReverse: createdRetX > senderRetX, isSelf: false,
           });
         }
       }
@@ -675,6 +675,7 @@ function buildMessages(
         y: coord.top + adjust + 16,
         label: info.label,
         isReverse,
+        isSelf: info.isSelf,
       });
       continue;
     }
@@ -752,6 +753,7 @@ function computeReturnDebt(
   // Track which sync/creation statements own each depth level
   // so we can assign inner debt when closing their blocks
   const blockOwnerKeys: (string | null)[] = [null]; // depth 0 = root (no owner)
+  const blockOwnerKinds: (string | null)[] = [null]; // "sync" | "creation" | null
 
   for (const info of statements) {
     const depth = info.depth;
@@ -760,20 +762,22 @@ function computeReturnDebt(
     while (maxDepth > depth) {
       const closedDebt = debtByDepth[maxDepth] || 0;
       const ownerKey = blockOwnerKeys[maxDepth];
+      const ownerKind = blockOwnerKinds[maxDepth];
       // Record inner debt on the block owner (for occurrence height adjustment)
       if (ownerKey) {
         result.set(`inner:${ownerKey}`, closedDebt);
       }
       debtByDepth.pop();
       blockOwnerKeys.pop();
+      blockOwnerKinds.pop();
       maxDepth--;
       // Propagate debt to parent block only if the closing block belongs to a
-      // sync/creation statement (has an owner). Fragment blocks (ownerKey=null)
-      // already account for return visual height in their coord.height, so
-      // propagating their debt would double-count.
+      // sync statement (has an owner). Fragment blocks (ownerKey=null) and
+      // creation blocks already account for return visual height in their
+      // coord.height, so propagating their debt would double-count.
       // Scale by 0.75 — the CSS layout doesn't grow 1:1 with the positioning engine's
       // cursor advancement due to margin collapsing and BFC effects.
-      if (ownerKey) {
+      if (ownerKey && ownerKind === "sync") {
         debtByDepth[maxDepth] = (debtByDepth[maxDepth] || 0) + Math.round(closedDebt * 0.75);
       }
     }
@@ -783,6 +787,7 @@ function computeReturnDebt(
       maxDepth++;
       debtByDepth.push(0);
       blockOwnerKeys.push(null);
+      blockOwnerKinds.push(null);
     }
 
     // Total adjustment = sum of all debt across all depths
@@ -805,8 +810,10 @@ function computeReturnDebt(
         maxDepth = depth + 1;
         debtByDepth.push(0);
         blockOwnerKeys.push(info.key);
+        blockOwnerKinds.push(info.kind);
       } else {
         blockOwnerKeys[depth + 1] = info.key;
+        blockOwnerKinds[depth + 1] = info.kind;
         debtByDepth[depth + 1] = 0; // reset for new block
       }
     }
@@ -816,14 +823,16 @@ function computeReturnDebt(
   while (maxDepth > 0) {
     const closedDebt = debtByDepth[maxDepth] || 0;
     const ownerKey = blockOwnerKeys[maxDepth];
+    const ownerKind = blockOwnerKinds[maxDepth];
     if (ownerKey) {
       result.set(`inner:${ownerKey}`, closedDebt);
     }
     debtByDepth.pop();
     blockOwnerKeys.pop();
+    blockOwnerKinds.pop();
     maxDepth--;
-    // Only propagate from sync/creation blocks (see main loop comment)
-    if (ownerKey) {
+    // Only propagate from sync blocks (see main loop comment)
+    if (ownerKey && ownerKind === "sync") {
       debtByDepth[maxDepth] = (debtByDepth[maxDepth] || 0) + Math.round(closedDebt * 0.75);
     }
   }
