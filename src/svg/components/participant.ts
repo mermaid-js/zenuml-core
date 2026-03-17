@@ -20,7 +20,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
   const rectW = p.width - STROKE_WIDTH;
   const rectH = p.height - STROKE_WIDTH;
   const textX = p.x;
-  const textY = p.y + p.height / 2;
+  const textY = p.y + p.height / 2 - 0.5; // -0.5: match HTML's vertical text centering
 
   return `<g class="participant" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"/>
