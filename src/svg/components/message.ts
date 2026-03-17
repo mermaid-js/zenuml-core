@@ -20,13 +20,13 @@ export function renderMessage(m: MessageGeometry): string {
     : "";
 
   // -0.5px Y: align with HTML's border-bottom line rendering (CSS renders at half-pixel)
-  // -0.5px length: shorten arrow tip to match HTML's arrow endpoint
+  // +0.5px X: shift line and head right to match HTML arrow position
   const lineY = m.y - 0.5;
-  const dir = m.isReverse ? -1 : 1;
-  const tipX = m.toX - dir * 0.5;
+  const fromX = m.fromX + 0.5;
+  const toX = m.toX + 0.5;
   return `<g class="message">
-  <line x1="${m.fromX}" y1="${lineY}" x2="${tipX}" y2="${lineY}" class="message-line"${dashAttr}/>
-  ${renderArrowHead(tipX, lineY, m.isReverse, m.arrowStyle)}
+  <line x1="${fromX}" y1="${lineY}" x2="${toX}" y2="${lineY}" class="message-line"${dashAttr}/>
+  ${renderArrowHead(toX - 1, lineY, m.isReverse, m.arrowStyle)}
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(m.label)}</text>
   ${numberSvg}
 </g>`;
@@ -111,7 +111,7 @@ function renderArrowHead(
   const svgY = tipY - tipDisplayY;
   const rtlTransform = pointsLeft ? ' transform="scale(-1, 1) translate(-7, 0)"' : "";
 
-  return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9" class="arrow-head${isFilled ? "" : " arrow-open"}">
+  return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9" overflow="visible" class="arrow-head${isFilled ? "" : " arrow-open"}">
     <g${rtlTransform}>
       <path d="${pathD}" stroke="#000" stroke-linecap="round" stroke-width="2" fill="${fillAttr}"/>
     </g>
