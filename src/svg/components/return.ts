@@ -2,7 +2,12 @@ import type { ReturnGeometry } from "../geometry";
 
 export function renderReturn(r: ReturnGeometry): string {
   const minX = Math.min(r.fromX, r.toX);
-  const labelX = minX + Math.abs(r.toX - r.fromX) / 2;
+  // HTML centers the label text within a container that has 7px padding on the
+  // arrow-tip side (for the arrowhead SVG). This shifts text center 3.5px away
+  // from the tip. SVG has no such padding, so offset the label accordingly.
+  const ARROW_PADDING_HALF = 3.5;
+  const labelX = minX + Math.abs(r.toX - r.fromX) / 2
+    + (r.isReverse ? ARROW_PADDING_HALF : -ARROW_PADDING_HALF);
   const labelY = r.y - 3;
 
   // Match HTML renderer's ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
