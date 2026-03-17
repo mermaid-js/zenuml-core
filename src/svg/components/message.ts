@@ -5,11 +5,11 @@ export function renderMessage(m: MessageGeometry): string {
   // Shift label center by half the arrowhead width (3.5px) toward the source participant.
   const arrowHalfW = 3.5;
   const direction = Math.sign(m.toX - m.fromX); // +1 right-pointing, -1 left-pointing
-  const labelX = (m.fromX + m.toX) / 2 - direction * arrowHalfW;
+  const labelX = (m.fromX + m.toX) / 2 - direction * arrowHalfW + 0.5; // +0.5: match HTML label centering
   // HTML renders label as a block element ABOVE the border-bottom line.
   // SVG text y = baseline. For 14px Helvetica, getBBox().y ≈ y - 13.
   // HTML label top = m.y - 17 (content coords). Need bbox.y = m.y - 17, so y = m.y - 4.
-  const labelY = m.y - 4;
+  const labelY = m.y - 3.5; // -3.5 instead of -4: +0.5 to shift label down
 
   const dashAttr = m.arrowStyle === "dashed" ? ' stroke-dasharray="6,4"' : "";
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
