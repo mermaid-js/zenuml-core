@@ -393,7 +393,12 @@ function buildMessages(
       let fromX = snapX(coordinates.getPosition(info.from));
       const toX = snapX(coordinates.getPosition(info.to));
       const messageHeight = info.isSelf ? 30 : 16;
-      const messageY = coord.top + adjust + messageHeight - 0.5;
+      // Comment height: HTML renders comment <p> above the message in CSS flow.
+      // coord.top doesn't include comment height, so offset manually (same as fragments).
+      const msgCommentHeight = commentObj?.text
+        ? (info.comment?.trim().split("\n").length || 0) * 20
+        : 0;
+      const messageY = coord.top + adjust + msgCommentHeight + messageHeight - 0.5;
 
       // D4: When sender has an active occurrence, arrow starts from its near edge
       // For nested occurrences (depth > 1), offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level
@@ -425,7 +430,7 @@ function buildMessages(
           : fromX;
         selfCalls.push({
           x: selfX,
-          y: coord.top + selfYOffset,
+          y: coord.top + selfYOffset + msgCommentHeight,
           width: selfWidth,
           height: selfHeight,
           label: info.label,

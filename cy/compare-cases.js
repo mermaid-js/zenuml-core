@@ -522,4 +522,8 @@ ReturnType ret = ParticipantName.methodA(a, b) {
     }
   }
 }`,
+  "repro-comment-async-self": `A.method() {
+  // A comment
+  A->A: Self Async
+}`,
 };
