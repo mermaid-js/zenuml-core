@@ -292,7 +292,7 @@ function buildParticipants(
       return {
         name: m.name,
         label: m.getDisplayName(),
-        x: centerX,
+        x: isStarter ? centerX - 0.5 : centerX, // starter: -0.5px to match HTML's whole-pixel centering
         y,
         width,
         height: PARTICIPANT_VISUAL_HEIGHT,
@@ -457,7 +457,7 @@ function buildMessages(
 
       // Occurrence: activation box centered on the target participant's lifeline
       if (info.kind === "sync") {
-        const occX = toX - OCCURRENCE_WIDTH / 2;
+        const occX = toX - OCCURRENCE_BAR_SIDE_WIDTH;
         const occY = messageY - 1.5;
         // +2: SVG stroke extends 1px beyond rect on each side (centered model).
         // renderOccurrence insets by 1px, so fill area = geometry - 2 matches
@@ -548,7 +548,7 @@ function buildMessages(
       }
 
       // Creation always reserves occurrence space
-      const occX = toX - OCCURRENCE_WIDTH / 2;
+      const occX = toX - OCCURRENCE_BAR_SIDE_WIDTH;
       // -3px matches HTML's Occurrence mt-[-2px] plus 1px CSS rounding (same as sync messages)
       const occY = targetParticipant
         ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT - 3
