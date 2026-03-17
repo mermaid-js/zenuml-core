@@ -704,19 +704,21 @@ function buildMessages(
 
   // Offset nested occurrences: in HTML, inner occurrences on the same participant
   // are rendered inside the outer occurrence DOM element, offset right by
-  // OCCURRENCE_BAR_SIDE_WIDTH (7px). Detect nesting by Y-range containment.
+  // OCCURRENCE_BAR_SIDE_WIDTH (7px) per nesting level. Detect nesting by Y-range containment.
   for (let i = 0; i < occurrences.length; i++) {
     const inner = occurrences[i];
+    let depth = 0;
     for (let j = 0; j < occurrences.length; j++) {
       if (i === j) continue;
       const outer = occurrences[j];
       if (outer.participantName === inner.participantName &&
           outer.y <= inner.y &&
           outer.y + outer.height >= inner.y + inner.height) {
-        // inner is nested inside outer — shift right
-        occurrences[i] = { ...inner, x: inner.x + OCCURRENCE_BAR_SIDE_WIDTH };
-        break;
+        depth++;
       }
+    }
+    if (depth > 0) {
+      occurrences[i] = { ...inner, x: inner.x + depth * OCCURRENCE_BAR_SIDE_WIDTH };
     }
   }
 
