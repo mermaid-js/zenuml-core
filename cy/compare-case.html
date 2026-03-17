@@ -85,7 +85,7 @@ MarkdownJavaFxHtmlPanel.readFromInputStream(inputStream) {
 B -> C: process
 C -> B: result
 B -> A: done`,
-        "self-call": `A.method() {
+        "nested-sync": `A.method() {
   B.method
 }`,
         "if-fragment": `title Issue 232

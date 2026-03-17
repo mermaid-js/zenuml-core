@@ -458,8 +458,11 @@ function buildMessages(
       // Occurrence: activation box centered on the target participant's lifeline
       if (info.kind === "sync") {
         const occX = toX - OCCURRENCE_WIDTH / 2;
-        const occY = messageY - 2.5;
-        let occHeight = coord.height - messageHeight + 4;
+        const occY = messageY - 1.5;
+        // +2: SVG stroke extends 1px beyond rect on each side (centered model).
+        // renderOccurrence insets by 1px, so fill area = geometry - 2 matches
+        // HTML border-box height. Stroke extends to geometry size visually.
+        let occHeight = coord.height - messageHeight + 2;
 
         // Adjust occurrence height for inner return debt.
         // The positioning engine underestimates block heights because non-self returns
