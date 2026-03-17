@@ -786,7 +786,10 @@ function computeReturnDebt(
       // Scale by 0.75 — the CSS layout doesn't grow 1:1 with the positioning engine's
       // cursor advancement due to margin collapsing and BFC effects.
       if (ownerKey && ownerKind === "sync") {
-        debtByDepth[maxDepth] = (debtByDepth[maxDepth] || 0) + Math.round(closedDebt * 0.75);
+        // Previously used 0.75 scaling, but measurements show this over-corrects:
+        // the positioning engine already accounts for child block sizes through
+        // recursive cursor advancement. Propagation double-counts return heights.
+        // Keep inner debt recording (for occurrence height) but don't propagate to parent Y.
       }
     }
 
@@ -839,9 +842,8 @@ function computeReturnDebt(
     blockOwnerKeys.pop();
     blockOwnerKinds.pop();
     maxDepth--;
-    // Only propagate from sync blocks (see main loop comment)
+    // No propagation — see main loop comment
     if (ownerKey && ownerKind === "sync") {
-      debtByDepth[maxDepth] = (debtByDepth[maxDepth] || 0) + Math.round(closedDebt * 0.75);
     }
   }
 

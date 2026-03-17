@@ -526,4 +526,13 @@ ReturnType ret = ParticipantName.methodA(a, b) {
   // A comment
   A->A: Self Async
 }`,
+  "repro-debt-drift": `A.method() {
+  selfCall() {
+    B.call() {
+      A.rtl()
+      return B
+    }
+  }
+  B.syncMethod(from,to)
+}`,
 };
