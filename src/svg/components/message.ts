@@ -84,9 +84,12 @@ export function renderSelfCall(s: SelfCallGeometry): string {
 }
 
 /**
- * Renders an arrowhead as a polyline (open) or polygon (filled).
- * Geometry derived from ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
- * mapped to absolute coordinates with w=5.15 and halfH=3.25.
+ * Renders an arrowhead using the exact same structure as HTML's ArrowHead.tsx:
+ * <svg width="7" height="10" viewBox="0 0 7 9"> with path M1,1.25 L6.15,4.5 L1,7.75
+ * RTL uses scale(-1,1) translate(-7,0) to mirror.
+ *
+ * The viewBox 7x9 → display 7x10 creates a slight vertical stretch (10/9)
+ * that matches HTML's rendering. The tip is at viewBox (6.15, 4.5).
  */
 function renderArrowHead(
   tipX: number,
@@ -95,18 +98,24 @@ function renderArrowHead(
   style: string,
 ): string {
   const isFilled = style !== "open" && style !== "dashed";
-  const w = 5.15;
-  const halfH = 3.25;
-  const dir = pointsLeft ? 1 : -1; // wing direction is opposite to tip
-  const ax1 = tipX + dir * w;
-  const ay1 = tipY - halfH;
-  const ay2 = tipY + halfH;
-  const points = `${ax1},${ay1} ${tipX},${tipY} ${ax1},${ay2}`;
+  const pathD = isFilled
+    ? "M1 1.25 L6.15 4.5 L1 7.75 Z"
+    : "M1 1.25 L6.15 4.5 L1 7.75";
+  const fillAttr = isFilled ? "#000" : "none";
 
-  if (isFilled) {
-    return `<polygon points="${points}" stroke="#000" stroke-linecap="round" stroke-width="2" class="arrow-head"/>`;
-  }
-  return `<polyline points="${points}" fill="none" stroke="#000" stroke-linecap="round" stroke-width="2" class="arrow-head arrow-open"/>`;
+  // Arrow tip in display coords: LTR at (6.15, 5.0), RTL at (0.85, 5.0)
+  // (viewBox y=4.5 scaled by 10/9 ≈ 5.0)
+  const tipDisplayX = pointsLeft ? 0.85 : 6.15;
+  const tipDisplayY = 5;
+  const svgX = tipX - tipDisplayX;
+  const svgY = tipY - tipDisplayY;
+  const rtlTransform = pointsLeft ? ' transform="scale(-1, 1) translate(-7, 0)"' : "";
+
+  return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9" class="arrow-head${isFilled ? "" : " arrow-open"}">
+    <g${rtlTransform}>
+      <path d="${pathD}" stroke="#000" stroke-linecap="round" stroke-width="2" fill="${fillAttr}"/>
+    </g>
+  </svg>`;
 }
 
 function styleToAttr(style: Record<string, string>): string {
