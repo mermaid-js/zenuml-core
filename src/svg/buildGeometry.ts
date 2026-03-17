@@ -378,7 +378,7 @@ function buildMessages(
       // SVG text y = baseline; HTML positions by visual top. Add font ascent (~12px for 14px text).
       const COMMENT_FONT_ASCENT = 15;
       comments.push({
-        x: commentX + OCCURRENCE_WIDTH / 2,
+        x: commentX + OCCURRENCE_BAR_SIDE_WIDTH,
         y: coord.top + adjust + COMMENT_FONT_ASCENT,
         text: commentObj.text,
         style: cssToSvgStyle(commentObj.commentStyle),
@@ -398,7 +398,7 @@ function buildMessages(
       // D4: When sender has an active occurrence, arrow starts from its near edge
       // For nested occurrences (depth > 1), offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level
       if (info.senderOccurrenceDepth >= 1 && !info.isSelf) {
-        const occOffset = OCCURRENCE_WIDTH / 2 + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
+        const occOffset = OCCURRENCE_BAR_SIDE_WIDTH + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
         const isLTR = fromX < toX;
         fromX = isLTR ? fromX + occOffset : fromX - occOffset;
       }
@@ -420,7 +420,7 @@ function buildMessages(
         // inside the occurrence div — starting at the occurrence's right edge.
         // For nested occurrences, offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level.
         const selfX = (info.senderOccurrenceDepth >= 1)
-          ? fromX + OCCURRENCE_WIDTH / 2 + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH
+          ? fromX + OCCURRENCE_BAR_SIDE_WIDTH + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH
           : fromX;
         selfCalls.push({
           x: selfX,
@@ -438,8 +438,8 @@ function buildMessages(
         const arrowToX =
           info.kind === "sync" && !info.isSelf
             ? isLTR
-              ? toX - OCCURRENCE_WIDTH / 2 + nestingOffset
-              : toX + OCCURRENCE_WIDTH / 2 + nestingOffset
+              ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
+              : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
             : toX;
 
         messages.push({
@@ -496,8 +496,8 @@ function buildMessages(
             // When target has nested occurrence, shift by OCCURRENCE_BAR_SIDE_WIDTH.
             const isLTR = fromX < toX;
             const retFromX = isLTR
-              ? toX - OCCURRENCE_WIDTH / 2 + nestingOffset
-              : toX + OCCURRENCE_WIDTH / 2 + nestingOffset;
+              ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
+              : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset;
             // Sender's fromX is already D4-adjusted for its occurrence edge.
             // Use returnArrowY (pre-depth-correction) to match HTML return arrow position.
             returns.push({
@@ -519,7 +519,7 @@ function buildMessages(
       // When sender has an active occurrence, arrow starts from its near edge
       // For nested occurrences, offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level
       if (info.senderOccurrenceDepth >= 1) {
-        const occOffset = OCCURRENCE_WIDTH / 2 + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
+        const occOffset = OCCURRENCE_BAR_SIDE_WIDTH + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
         const isLTR = fromX < toX;
         fromX = isLTR ? fromX + occOffset : fromX - occOffset;
       }
@@ -584,7 +584,7 @@ function buildMessages(
           // and ends at the created occurrence edge.
           const rawFromX = snapX(coordinates.getPosition(info.from));
           const isLTR = rawFromX < toX;
-          const occHalf = OCCURRENCE_WIDTH / 2;
+          const occHalf = OCCURRENCE_BAR_SIDE_WIDTH;
           // Sender (A) side: occurrence edge + LIFELINE_WIDTH CSS gap
           const senderNest = Math.max(info.senderOccurrenceDepth - 1, 0) * OCCURRENCE_BAR_SIDE_WIDTH;
           const senderRetX = info.senderOccurrenceDepth >= 1
