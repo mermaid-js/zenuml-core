@@ -403,9 +403,10 @@ function buildMessages(
         fromX = isLTR ? fromX + occOffset : fromX - occOffset;
       }
 
-      // When target already has an active occurrence, the new occurrence is nested
-      // (stacked inward by OCCURRENCE_BAR_SIDE_WIDTH). Arrow endpoints shift accordingly.
-      const nestingOffset = info.targetHasOccurrence ? OCCURRENCE_BAR_SIDE_WIDTH : 0;
+      // When target already has active occurrences, the new occurrence is nested
+      // (stacked inward by OCCURRENCE_BAR_SIDE_WIDTH per level). Arrow endpoints shift accordingly.
+      const targetDepth = info.targetOccurrenceDepth || (info.targetHasOccurrence ? 1 : 0);
+      const nestingOffset = targetDepth * OCCURRENCE_BAR_SIDE_WIDTH;
 
       if (info.isSelf) {
         // Async self-calls: HTML renders label (flex-col) then a 30×24 SVG arrow.

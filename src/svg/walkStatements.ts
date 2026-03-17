@@ -75,7 +75,7 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
       const to = message.Owner?.() || _STARTER_;
       const label = normalizeLabel(message.SignatureText?.() || "");
       const nestedBlock = message.braceBlock?.()?.block?.();
-      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), number, depth });
+      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), targetOccurrenceDepth: activeOccurrences.get(to) || 0, number, depth });
 
       if (nestedBlock) {
         const innerOccs = new Map(activeOccurrences);
