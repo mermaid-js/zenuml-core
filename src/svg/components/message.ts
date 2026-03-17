@@ -19,9 +19,11 @@ export function renderMessage(m: MessageGeometry): string {
     ? `<text x="${m.fromX - 4}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
     : "";
 
+  // -0.5px: align with HTML's border-bottom line rendering (CSS renders at half-pixel)
+  const lineY = m.y - 0.5;
   return `<g class="message">
-  <line x1="${m.fromX}" y1="${m.y}" x2="${m.toX}" y2="${m.y}" class="message-line"${dashAttr}/>
-  ${renderArrowHead(m.toX, m.y, m.isReverse, m.arrowStyle)}
+  <line x1="${m.fromX}" y1="${lineY}" x2="${m.toX}" y2="${lineY}" class="message-line"${dashAttr}/>
+  ${renderArrowHead(m.toX, lineY, m.isReverse, m.arrowStyle)}
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(m.label)}</text>
   ${numberSvg}
 </g>`;
