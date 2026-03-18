@@ -88,6 +88,9 @@
         nextLink.style.visibility = "hidden";
       }
 
+      // Expose DSL for the extension's batch mode to read
+      window.__currentDSL = code || "";
+
       if (code === undefined) {
         document.getElementById("svg-output").innerHTML = `<p style="color:red">Unknown case: ${caseName}</p>`;
       } else {

@@ -131,6 +131,25 @@ A->B:: Hello B
 B->A: So what`,
 
   // --- Fragments ---
+  "repro-alt-simple": `if(cond) {
+  A -> B: inIf
+} else {
+  A -> B: inElse
+}`,
+  "repro-alt-nested-tcf": `if(cond) {
+  A -> B: msg1
+  try {
+    B -> C: tryMsg
+  } catch(e) {
+    C -> B: catchMsg
+  } finally {
+    B -> A: finallyMsg
+  }
+} else if(cond2) {
+  A -> B: elseIfMsg
+} else {
+  A -> B: elseMsg
+}`,
   "if-fragment": `title Issue 232
 Client -> Server:SendRequest
 if(true){
@@ -555,5 +574,16 @@ ReturnType ret = ParticipantName.methodA(a, b) {
   } finally {
     A.inFinally()
   }
+}`,
+
+  // --- Occurrence bar length ---
+  "occ-bar-length": `A->B.method {
+  B->C.inner {
+    @return C->B: ret1
+    B->C.call2 {
+      return ret2
+    }
+  }
+  return ret3
 }`,
 };

@@ -472,14 +472,12 @@ function buildMessages(
 
         // Adjust occurrence height for inner return debt.
         // The positioning engine underestimates block heights because non-self returns
-        // have height=0. Scale by 0.75 (calibrated against HTML CSS layout, accounting
-        // for the 0.75 debt propagation factor in computeReturnDebt).
-        // Only apply for blocks with ≥2 inner returns (debt >= 24) — single-return
-        // blocks are already close to HTML sizes and the factor overcorrects them.
+        // have height=0. Each missing return adds exactly RETURN_VISUAL_HEIGHT (16px)
+        // of visual space in HTML that the positioning engine doesn't account for.
         const innerDebtKey = `inner:${info.key}`;
         const innerDebt = adjustMap.get(innerDebtKey) || 0;
-        if (innerDebt >= RETURN_VISUAL_HEIGHT * 1.5) {
-          occHeight += Math.round(innerDebt * 0.75);
+        if (innerDebt > 0) {
+          occHeight += innerDebt;
         }
 
         const returnArrowY = occY + occHeight;
@@ -762,6 +760,8 @@ function computeReturnDebt(
   // so we can assign inner debt when closing their blocks
   const blockOwnerKeys: (string | null)[] = [null]; // depth 0 = root (no owner)
   const blockOwnerKinds: (string | null)[] = [null]; // "sync" | "creation" | null
+  // Track whether each block has non-return children (for mixed-content detection)
+  const hasNonReturnChild: boolean[] = [false];
 
   for (const info of statements) {
     const depth = info.depth;
@@ -771,13 +771,17 @@ function computeReturnDebt(
       const closedDebt = debtByDepth[maxDepth] || 0;
       const ownerKey = blockOwnerKeys[maxDepth];
       const ownerKind = blockOwnerKinds[maxDepth];
-      // Record inner debt on the block owner (for occurrence height adjustment)
-      if (ownerKey) {
+      const hasMixedContent = hasNonReturnChild[maxDepth];
+      // Record inner debt on the block owner (for occurrence height adjustment).
+      // Only record if the block has mixed content (returns + non-returns).
+      // Return-only blocks already have correct height from minimum block sizing.
+      if (ownerKey && hasMixedContent) {
         result.set(`inner:${ownerKey}`, closedDebt);
       }
       debtByDepth.pop();
       blockOwnerKeys.pop();
       blockOwnerKinds.pop();
+      hasNonReturnChild.pop();
       maxDepth--;
       // Propagate debt to parent block only if the closing block belongs to a
       // sync statement (has an owner). Fragment blocks (ownerKey=null) and
@@ -799,6 +803,7 @@ function computeReturnDebt(
       debtByDepth.push(0);
       blockOwnerKeys.push(null);
       blockOwnerKinds.push(null);
+      hasNonReturnChild.push(false);
     }
 
     // Fragment section boundary: reset debt at this depth.
@@ -818,6 +823,11 @@ function computeReturnDebt(
     // Non-self returns add debt at their depth
     if (info.kind === "return" && !info.isSelf) {
       debtByDepth[depth] += returnHeight;
+    } else if (info.kind !== "return") {
+      // Track that this block has non-return children
+      if (depth < hasNonReturnChild.length) {
+        hasNonReturnChild[depth] = true;
+      }
     }
 
     // Sync/creation with blocks: the NEXT statement in the flat list at depth+1
@@ -829,10 +839,12 @@ function computeReturnDebt(
         debtByDepth.push(0);
         blockOwnerKeys.push(info.key);
         blockOwnerKinds.push(info.kind);
+        hasNonReturnChild.push(false);
       } else {
         blockOwnerKeys[depth + 1] = info.key;
         blockOwnerKinds[depth + 1] = info.kind;
         debtByDepth[depth + 1] = 0; // reset for new block
+        hasNonReturnChild[depth + 1] = false;
       }
     }
   }
@@ -842,12 +854,14 @@ function computeReturnDebt(
     const closedDebt = debtByDepth[maxDepth] || 0;
     const ownerKey = blockOwnerKeys[maxDepth];
     const ownerKind = blockOwnerKinds[maxDepth];
-    if (ownerKey) {
+    const hasMixedContent = hasNonReturnChild[maxDepth];
+    if (ownerKey && hasMixedContent) {
       result.set(`inner:${ownerKey}`, closedDebt);
     }
     debtByDepth.pop();
     blockOwnerKeys.pop();
     blockOwnerKinds.pop();
+    hasNonReturnChild.pop();
     maxDepth--;
     // No propagation — see main loop comment
     if (ownerKey && ownerKind === "sync") {
