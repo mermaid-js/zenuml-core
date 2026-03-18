@@ -2,6 +2,7 @@ import { test } from "./fixtures";
 import * as fs from "fs";
 import * as path from "path";
 import type { GeometryFixture } from "../src/svg/geometry-fixture";
+import { CASES } from "../cy/compare-cases";
 
 const CANONICAL_CASES = [
   "empty",
@@ -30,13 +31,15 @@ const FIXTURES_DIR = path.resolve(
 
 for (const caseName of CANONICAL_CASES) {
   test(`record HTML fixture: ${caseName}`, async ({ page }) => {
+    const caseCode = (CASES as Record<string, string>)[caseName] || "";
+
     await page.goto(
       `http://localhost:8080/cy/compare-case.html?case=${encodeURIComponent(caseName)}`,
       { waitUntil: "networkidle" },
     );
     await page.waitForTimeout(500);
 
-    const fixture = await page.evaluate((cName: string) => {
+    const fixture = await page.evaluate(({ cName, code }: { cName: string; code: string }) => {
       const htmlOutput = document.getElementById("html-output");
       if (!htmlOutput) {
         return {
@@ -59,10 +62,7 @@ for (const caseName of CANONICAL_CASES) {
       const seqDiagram = htmlOutput.querySelector(".sequence-diagram");
       if (!seqDiagram) {
         // Empty diagram case — no .sequence-diagram container
-        const code =
-          (window as any).__currentDSL ||
-          document.querySelector("pre.zenuml")?.textContent ||
-          "";
+        // code is passed from Playwright (from compare-cases.js import)
         return {
           case: cName,
           code,
@@ -93,11 +93,7 @@ for (const caseName of CANONICAL_CASES) {
         };
       }
 
-      // --- Code ---
-      const code =
-        (window as any).__currentDSL ||
-        document.querySelector("pre.zenuml")?.textContent ||
-        "";
+      // code is passed from Playwright via the { cName, code } parameter
 
       // --- Participants ---
       // Collect all .bg-skin-participant elements in the top participant layer
@@ -744,7 +740,7 @@ for (const caseName of CANONICAL_CASES) {
         comments,
         lifelines,
       };
-    }, caseName);
+    }, { cName: caseName, code: caseCode });
 
     // Write fixture to JSON file
     const filePath = path.join(FIXTURES_DIR, `${caseName}.json`);
