@@ -535,4 +535,13 @@ ReturnType ret = ParticipantName.methodA(a, b) {
   }
   B.syncMethod(from,to)
 }`,
+  "repro-fragment-section-debt": `A.method() {
+  if(x) {
+    B.call() {
+      return result
+    }
+  } else {
+    B.afterSection()
+  }
+}`,
 };

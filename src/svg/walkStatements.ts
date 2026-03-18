@@ -44,6 +44,9 @@ export interface StatementInfo {
   number?: string;
   /** Nesting depth (0 = root block, 1 = first nested block, etc.) */
   depth: number;
+  /** True on first statement of a non-first fragment section (else, catch, finally).
+   *  Used by computeReturnDebt to reset debt between independent CSS sections. */
+  sectionReset?: boolean;
 }
 
 export function walkStatements(rootContext: any): StatementInfo[] {
@@ -249,12 +252,20 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
     }
     for (const elseIf of alt.elseIfBlock?.() || []) {
       const block = elseIf.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
+      if (block) {
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1);
+        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
+        results.push(...sectionStmts);
+      }
     }
     const elseBlock = alt.elseBlock?.();
     if (elseBlock) {
       const block = elseBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
+      if (block) {
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1);
+        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
+        results.push(...sectionStmts);
+      }
     }
     return;
   }
@@ -269,12 +280,20 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
     }
     for (const catchBlock of tcf.catchBlock?.() || []) {
       const block = catchBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
+      if (block) {
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1);
+        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
+        results.push(...sectionStmts);
+      }
     }
     const finallyBlock = tcf.finallyBlock?.();
     if (finallyBlock) {
       const block = finallyBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
+      if (block) {
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1);
+        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
+        results.push(...sectionStmts);
+      }
     }
     return;
   }

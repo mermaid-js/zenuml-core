@@ -801,6 +801,13 @@ function computeReturnDebt(
       blockOwnerKinds.push(null);
     }
 
+    // Fragment section boundary: reset debt at this depth.
+    // Each fragment section (if/else, try/catch/finally) is independent in HTML CSS.
+    // Without reset, returns in earlier sections inflate Y positions of later sections.
+    if (info.sectionReset && depth < debtByDepth.length) {
+      debtByDepth[depth] = 0;
+    }
+
     // Total adjustment = sum of all debt across all depths
     let totalDebt = 0;
     for (let d = 0; d <= depth; d++) {
