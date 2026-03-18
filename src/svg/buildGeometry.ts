@@ -569,14 +569,13 @@ function buildMessages(
       // Creation always reserves occurrence space
       const occX = toX - OCCURRENCE_BAR_SIDE_WIDTH;
       // -3px matches HTML's Occurrence mt-[-2px] plus 1px CSS rounding (same as sync messages)
-      // Subtract 1 to undo the stroke offset added to targetParticipant.y
       const occY = targetParticipant
-        ? targetParticipant.y - 1 + PARTICIPANT_VISUAL_HEIGHT - 3
+        ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT - 3
         : coord.top + CREATION_MSG_HEIGHT - 3;
       // Compute occurrence from its top to the bottom of the statement coordinate.
-      // +1 aligns the bottom edge with HTML's CSS-computed occurrence bottom.
+      // Align the bottom edge with HTML's CSS-computed occurrence bottom.
       const occHeight = Math.max(
-        (coord.top + coord.height + 1) - occY,
+        (coord.top + coord.height) - occY,
         OCCURRENCE_EMPTY_HEIGHT,
       );
       if (occHeight > 0) {
