@@ -26,13 +26,11 @@ import {
 const PARTICIPANT_TOP_SPACE = _HTML_PARTICIPANT_TOP + 8;
 
 /**
- * Round an X coordinate to the nearest integer for pixel-aligned SVG rendering.
- * The positioning engine can produce fractional positions (e.g., 55.5) when
- * participant widths are odd. SVG elements with shape-rendering:crispEdges
- * render sharply only at integer coordinates.
+ * Pass through X coordinate without rounding — sub-pixel precision improves
+ * parity with the HTML renderer.
  */
 function snapX(x: number): number {
-  return Math.round(x);
+  return x;
 }
 
 /**
@@ -295,7 +293,7 @@ function buildParticipants(
       return {
         name: m.name,
         label: m.getDisplayName(),
-        x: isStarter ? centerX - 0.5 : centerX, // starter: -0.5px to match HTML's whole-pixel centering
+        x: centerX,
         y,
         width,
         height: PARTICIPANT_VISUAL_HEIGHT,
