@@ -480,7 +480,19 @@ function buildMessages(
           occHeight += innerDebt;
         }
 
+        // Assignment return Y uses the pre-compensation occurrence height.
+        // The occurrence bar needs to be taller than where the return arrow sits.
+        const messageCtx = info.statNode?.message?.();
+        const assignment = messageCtx?.Assignment?.();
         const returnArrowY = occY + occHeight;
+
+        // Assignment return compensation: the positioning engine adds +11 for
+        // assignee returns (SyncMessageStatementVM line 41), but HTML renders
+        // the assignment return as ~16px inside the occurrence. Add the 5px
+        // difference so the occurrence bar extends to match HTML.
+        if (assignment?.assignee && !info.isSelf) {
+          occHeight += 5;
+        }
 
         if (occHeight > 0) {
           occurrences.push({
@@ -492,8 +504,6 @@ function buildMessages(
           });
 
           // Assignment return: e.g. `ret0 = C.method() { ... }`
-          const messageCtx = info.statNode?.message?.();
-          const assignment = messageCtx?.Assignment?.();
           if (assignment?.assignee && !info.isSelf) {
             // Return goes from target (toX) back to sender (fromX).
             // Target always has occurrence; start from its near edge toward sender.
@@ -754,6 +764,8 @@ function computeReturnDebt(
 
   // Stack tracks per-depth cumulative debt. Index = depth.
   const debtByDepth: number[] = [0];
+  // Track only direct returns at each depth (excludes child-propagated debt)
+  const directDebtByDepth: number[] = [0];
   let maxDepth = 0;
 
   // Track which sync/creation statements own each depth level
@@ -778,22 +790,18 @@ function computeReturnDebt(
       if (ownerKey && hasMixedContent) {
         result.set(`inner:${ownerKey}`, closedDebt);
       }
+      const directDebt = directDebtByDepth[maxDepth] || 0;
       debtByDepth.pop();
+      directDebtByDepth.pop();
       blockOwnerKeys.pop();
       blockOwnerKinds.pop();
       hasNonReturnChild.pop();
       maxDepth--;
-      // Propagate debt to parent block only if the closing block belongs to a
-      // sync statement (has an owner). Fragment blocks (ownerKey=null) and
-      // creation blocks already account for return visual height in their
-      // coord.height, so propagating their debt would double-count.
-      // Scale by 0.75 — the CSS layout doesn't grow 1:1 with the positioning engine's
-      // cursor advancement due to margin collapsing and BFC effects.
+      // Propagate only DIRECT return debt (not child-cascaded debt) to parent
+      // depth so subsequent statements are shifted down to match HTML CSS layout.
+      // Using directDebt prevents double-counting from recursive propagation.
       if (ownerKey && ownerKind === "sync") {
-        // Previously used 0.75 scaling, but measurements show this over-corrects:
-        // the positioning engine already accounts for child block sizes through
-        // recursive cursor advancement. Propagation double-counts return heights.
-        // Keep inner debt recording (for occurrence height) but don't propagate to parent Y.
+        debtByDepth[maxDepth] += directDebt;
       }
     }
 
@@ -801,6 +809,7 @@ function computeReturnDebt(
     while (maxDepth < depth) {
       maxDepth++;
       debtByDepth.push(0);
+      directDebtByDepth.push(0);
       blockOwnerKeys.push(null);
       blockOwnerKinds.push(null);
       hasNonReturnChild.push(false);
@@ -811,6 +820,7 @@ function computeReturnDebt(
     // Without reset, returns in earlier sections inflate Y positions of later sections.
     if (info.sectionReset && depth < debtByDepth.length) {
       debtByDepth[depth] = 0;
+      directDebtByDepth[depth] = 0;
     }
 
     // Total adjustment = sum of all debt across all depths
@@ -823,6 +833,7 @@ function computeReturnDebt(
     // Non-self returns add debt at their depth
     if (info.kind === "return" && !info.isSelf) {
       debtByDepth[depth] += returnHeight;
+      directDebtByDepth[depth] += returnHeight;
     } else if (info.kind !== "return") {
       // Track that this block has non-return children
       if (depth < hasNonReturnChild.length) {
@@ -837,6 +848,7 @@ function computeReturnDebt(
       if (depth + 1 > maxDepth) {
         maxDepth = depth + 1;
         debtByDepth.push(0);
+        directDebtByDepth.push(0);
         blockOwnerKeys.push(info.key);
         blockOwnerKinds.push(info.kind);
         hasNonReturnChild.push(false);
@@ -844,6 +856,7 @@ function computeReturnDebt(
         blockOwnerKeys[depth + 1] = info.key;
         blockOwnerKinds[depth + 1] = info.kind;
         debtByDepth[depth + 1] = 0; // reset for new block
+        directDebtByDepth[depth + 1] = 0;
         hasNonReturnChild[depth + 1] = false;
       }
     }
@@ -858,13 +871,16 @@ function computeReturnDebt(
     if (ownerKey && hasMixedContent) {
       result.set(`inner:${ownerKey}`, closedDebt);
     }
+    const directDebt = directDebtByDepth[maxDepth] || 0;
     debtByDepth.pop();
+    directDebtByDepth.pop();
     blockOwnerKeys.pop();
     blockOwnerKinds.pop();
     hasNonReturnChild.pop();
     maxDepth--;
-    // No propagation — see main loop comment
+    // Propagate only direct debt — see main loop comment
     if (ownerKey && ownerKind === "sync") {
+      debtByDepth[maxDepth] += directDebt;
     }
   }
 

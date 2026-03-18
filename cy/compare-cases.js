@@ -586,4 +586,48 @@ ReturnType ret = ParticipantName.methodA(a, b) {
   }
   return ret3
 }`,
+
+  // --- Return Y after inner block ---
+  "return-after-block": `A->B.method {
+  B->C.inner {
+    @return C->B: ret_inside
+    C->B.call2
+    B->C.call3 {
+      return ret_nested
+    }
+  }
+  return ret_after
+  @return B->A: ret_annot
+}`,
+
+  // --- Assignment return: block with inner return ---
+  "repro-assign-return": `A->B.method {
+  ret0 = B->C.inner {
+    @return C->B: ret_inside
+  }
+}`,
+  // --- Occurrence height: empty block (no children) ---
+  "repro-occ-empty": `A->B.method {
+  B->C.inner {
+  }
+}`,
+  // --- Occurrence height: block with one sync message ---
+  "repro-occ-sync": `A->B.method {
+  B->C.inner {
+    C->B.call
+  }
+}`,
+  // --- Occurrence height: block with one non-self return ---
+  "repro-occ-return": `A->B.method {
+  B->C.inner {
+    @return C->B: ret
+  }
+}`,
+  // --- Occurrence height: block with sync + return ---
+  "repro-occ-mixed": `A->B.method {
+  B->C.inner {
+    C->B.call
+    @return C->B: ret
+  }
+}`,
 };
