@@ -544,4 +544,16 @@ ReturnType ret = ParticipantName.methodA(a, b) {
     B.afterSection()
   }
 }`,
+  "repro-creation-in-try": `A.method() {
+  try {
+    b = new B() {
+      B.inner()
+    }
+    A.afterCreation()
+  } catch(Exception) {
+    A.inCatch()
+  } finally {
+    A.inFinally()
+  }
+}`,
 };
