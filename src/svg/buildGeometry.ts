@@ -283,10 +283,13 @@ function buildParticipants(
       const creationTop = verticalCoordinates.getCreationTop(m.name);
       const isStarter = m.name === _STARTER_;
       // updateCreationTop subtracts 7px for HTML CSS padding (.life-line-layer .pt-2);
-      // SVG has no such padding, so add it back to close the gap between participant and occurrence
+      // SVG has no such padding, so add 8 back (7 + 1 for SVG centered stroke model:
+      // the renderer insets the fill rect by HALF_STROKE, so p.y+1 becomes the fill top,
+      // and the visual top = fill - halfStroke = p.y. With +8, visual top = creationTop+8,
+      // matching HTML border-box top).
       const y =
         creationTop != null
-          ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 7)
+          ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 8)
           : PARTICIPANT_TOP_SPACE;
 
       return {
@@ -540,10 +543,12 @@ function buildMessages(
 
       // Find the already-built participant (buildParticipants handles creationTop)
       const targetParticipant = participants.find(p => p.name === info.to);
-      // Center the arrow on the participant box; coord.top doesn't include
-      // comment height, but targetParticipant.y does.
+      // Center the arrow on the participant box visual center.
+      // targetParticipant.y includes the +1 stroke offset for SVG rendering;
+      // subtract 1 so the arrow center aligns with the visual center
+      // (which is the same as HTML's border-box center).
       const messageY = targetParticipant
-        ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT / 2
+        ? targetParticipant.y - 1 + PARTICIPANT_VISUAL_HEIGHT / 2
         : coord.top + CREATION_MSG_HEIGHT / 2;
       if (targetParticipant) {
         creations.push({
@@ -564,8 +569,9 @@ function buildMessages(
       // Creation always reserves occurrence space
       const occX = toX - OCCURRENCE_BAR_SIDE_WIDTH;
       // -3px matches HTML's Occurrence mt-[-2px] plus 1px CSS rounding (same as sync messages)
+      // Subtract 1 to undo the stroke offset added to targetParticipant.y
       const occY = targetParticipant
-        ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT - 3
+        ? targetParticipant.y - 1 + PARTICIPANT_VISUAL_HEIGHT - 3
         : coord.top + CREATION_MSG_HEIGHT - 3;
       // Compute occurrence from its top to the bottom of the statement coordinate.
       // +1 aligns the bottom edge with HTML's CSS-computed occurrence bottom.
