@@ -44,6 +44,8 @@ export interface StatementInfo {
   number?: string;
   /** Nesting depth (0 = root block, 1 = first nested block, etc.) */
   depth: number;
+  /** Kind of the parent block that contains this statement ("sync" | "creation" | null for root) */
+  parentBlockKind?: "sync" | "creation" | null;
   /** True on first statement of a non-first fragment section (else, catch, finally).
    *  Used by computeReturnDebt to reset debt between independent CSS sections. */
   sectionReset?: boolean;
@@ -52,14 +54,14 @@ export interface StatementInfo {
 export function walkStatements(rootContext: any): StatementInfo[] {
   const block = rootContext?.block?.();
   if (!block) return [];
-  return walkBlock(block, _STARTER_, new Map(), "", 0);
+  return walkBlock(block, _STARTER_, new Map(), "", 0, null);
 }
 
 function normalizeLabel(label: string): string {
   return label.trim();
 }
 
-function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<string, number>, parentNumber: string, depth: number): StatementInfo[] {
+function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<string, number>, parentNumber: string, depth: number, parentBlockKind: "sync" | "creation" | null): StatementInfo[] {
   const statements = block?.stat?.() || [];
   const results: StatementInfo[] = [];
   let index = 0;
@@ -78,12 +80,12 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
       const to = message.Owner?.() || _STARTER_;
       const label = normalizeLabel(message.SignatureText?.() || "");
       const nestedBlock = message.braceBlock?.()?.block?.();
-      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), targetOccurrenceDepth: activeOccurrences.get(to) || 0, number, depth });
+      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), targetOccurrenceDepth: activeOccurrences.get(to) || 0, number, depth, parentBlockKind });
 
       if (nestedBlock) {
         const innerOccs = new Map(activeOccurrences);
         innerOccs.set(to, (innerOccs.get(to) || 0) + 1);
-        results.push(...walkBlock(nestedBlock, to, innerOccs, number, depth + 1));
+        results.push(...walkBlock(nestedBlock, to, innerOccs, number, depth + 1, "sync"));
       }
       continue;
     }
@@ -103,12 +105,12 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
       const to = creation.Owner?.() || "";
       const label = normalizeLabel(creation.SignatureText?.() || "«create»");
       const creationBlock = creation.braceBlock?.()?.block?.();
-      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), number, depth });
+      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), number, depth, parentBlockKind });
 
       if (creationBlock) {
         const innerOccs = new Map(activeOccurrences);
         innerOccs.set(to, (innerOccs.get(to) || 0) + 1);
-        results.push(...walkBlock(creationBlock, to || currentOrigin, innerOccs, number, depth + 1));
+        results.push(...walkBlock(creationBlock, to || currentOrigin, innerOccs, number, depth + 1, "creation"));
       }
       continue;
     }
@@ -119,7 +121,7 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
       const asyncMessage = ret?.asyncMessage?.();
       const from = asyncMessage?.From?.() || ret?.From?.() || currentOrigin;
       const to = asyncMessage?.to?.()?.getFormattedText?.() || ret?.ReturnTo?.() || _STARTER_;
-      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetOccurrenceDepth: activeOccurrences.get(to) || 0, number, depth });
+      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetOccurrenceDepth: activeOccurrences.get(to) || 0, number, depth, parentBlockKind });
       continue;
     }
 
@@ -237,7 +239,7 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
     const frag = stat[kind]?.();
     if (frag) {
       const block = frag.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null));
       return;
     }
   }
@@ -248,12 +250,12 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
     const ifBlock = alt.ifBlock?.();
     if (ifBlock) {
       const block = ifBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null));
     }
     for (const elseIf of alt.elseIfBlock?.() || []) {
       const block = elseIf.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1);
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null);
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
       }
@@ -262,7 +264,7 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
     if (elseBlock) {
       const block = elseBlock.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1);
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null);
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
       }
@@ -276,12 +278,12 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
     const tryBlock = tcf.tryBlock?.();
     if (tryBlock) {
       const block = tryBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null));
     }
     for (const catchBlock of tcf.catchBlock?.() || []) {
       const block = catchBlock.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1);
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null);
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
       }
@@ -290,7 +292,7 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
     if (finallyBlock) {
       const block = finallyBlock.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1);
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null);
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
       }

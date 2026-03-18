@@ -686,10 +686,13 @@ function buildMessages(
       } else {
         toX -= LIFELINE_WIDTH;  // LTR: shrink right edge
       }
+      // First return inside a sync block renders 1px higher in HTML due to
+      // the occurrence's border-top offsetting the content area.
+      const returnOffset = (info.parentBlockKind === "sync" && adjust === 0) ? 15 : 16;
       returns.push({
         fromX,
         toX,
-        y: coord.top + adjust + 16,
+        y: coord.top + adjust + returnOffset,
         label: info.label,
         isReverse,
         isSelf: info.isSelf,
