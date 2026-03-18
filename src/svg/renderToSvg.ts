@@ -30,6 +30,8 @@ export interface RenderResult {
   width: number;
   height: number;
   viewBox: string;
+  /** The geometry IR used to produce this SVG (undefined for empty input) */
+  geometry?: DiagramGeometry;
 }
 
 const FRAME_HEADER_HEIGHT = 28;
@@ -69,7 +71,7 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
   // 1. Parse
   const rootContext = RootContext(code);
   if (!rootContext) {
-    return { svg: "<svg></svg>", innerSvg: "", width: 0, height: 0, viewBox: "0 0 0 0" };
+    return { svg: "<svg></svg>", innerSvg: "", width: 0, height: 0, viewBox: "0 0 0 0", geometry: undefined };
   }
 
   // 2. Layout (uses canvas provider — no DOM)
@@ -93,7 +95,7 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
   });
 
   // 5. Render to SVG
-  return composeSvg(geometry, options);
+  return { ...composeSvg(geometry, options), geometry };
 }
 
 function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult {

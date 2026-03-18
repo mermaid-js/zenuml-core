@@ -1,0 +1,163 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`geometry: returns positions a return line 1`] = `
+{
+  "fromX": 145,
+  "toX": 51,
+  "y": 119,
+}
+`;
+
+exports[`geometry: participants positions starter + one participant for A.m 1`] = `
+{
+  "a": {
+    "height": 40,
+    "width": 80,
+    "x": 157,
+    "y": 28,
+  },
+  "starter": {
+    "height": 40,
+    "width": 80,
+    "x": 53.5,
+    "y": 28,
+  },
+}
+`;
+
+exports[`geometry: participants positions 3 participants left-to-right 1`] = `
+{
+  "a": {
+    "height": 40,
+    "width": 80,
+    "x": 50,
+    "y": 28,
+  },
+  "b": {
+    "height": 40,
+    "width": 80,
+    "x": 150,
+    "y": 28,
+  },
+  "c": {
+    "height": 40,
+    "width": 80,
+    "x": 250,
+    "y": 28,
+  },
+}
+`;
+
+exports[`geometry: messages positions a simple LTR message 1`] = `
+{
+  "fromX": 50,
+  "toX": 150,
+  "y": 87.5,
+}
+`;
+
+exports[`geometry: messages positions a RTL message (fromX > toX) 1`] = `
+{
+  "fromX": 150,
+  "toX": 50,
+  "y": 87.5,
+}
+`;
+
+exports[`geometry: self-calls positions a self-call (A->A syntax) 1`] = `
+{
+  "height": 44,
+  "width": 28,
+  "x": 50,
+  "y": 72,
+}
+`;
+
+exports[`geometry: occurrences positions occurrence bars for nested calls 1`] = `
+[
+  {
+    "height": 74,
+    "participant": "A",
+    "width": 15,
+    "x": 150,
+    "y": 86,
+  },
+  {
+    "height": 24,
+    "participant": "B",
+    "width": 15,
+    "x": 250,
+    "y": 118,
+  },
+]
+`;
+
+exports[`geometry: fragments positions an if fragment 1`] = `
+{
+  "headerY": 73,
+  "height": 105,
+  "width": 220,
+  "x": -10,
+  "y": 72,
+}
+`;
+
+exports[`geometry: fragments positions if/else fragment with correct dimensions 1`] = `
+{
+  "headerY": 73,
+  "height": 105,
+  "sectionsCount": 0,
+  "width": 337,
+  "x": -10,
+  "y": 72,
+}
+`;
+
+exports[`geometry: creations creation participant has lower y than normal participants 1`] = `
+{
+  "createdWidth": 80,
+  "createdX": 309,
+  "createdY": 105,
+  "normalY": 28,
+}
+`;
+
+exports[`geometry: lifelines positions lifelines at participant centers 1`] = `
+[
+  {
+    "bottomY": 144,
+    "participant": "A",
+    "topY": 68,
+    "x": 50,
+  },
+  {
+    "bottomY": 144,
+    "participant": "B",
+    "topY": 68,
+    "x": 150,
+  },
+]
+`;
+
+exports[`geometry: dividers positions a divider between messages 1`] = `
+{
+  "width": 200,
+  "y": 124,
+}
+`;
+
+exports[`geometry: comments positions a comment 1`] = `
+{
+  "x": 60.5,
+  "y": 87,
+}
+`;
+
+exports[`geometry: dimensions reports overall width, height, and frame borders 1`] = `
+{
+  "frameBorderLeft": 0,
+  "frameBorderRight": 0,
+  "height": 154,
+  "width": 207,
+}
+`;
