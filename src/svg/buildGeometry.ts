@@ -784,13 +784,16 @@ function computeReturnDebt(
       const ownerKey = blockOwnerKeys[maxDepth];
       const ownerKind = blockOwnerKinds[maxDepth];
       const hasMixedContent = hasNonReturnChild[maxDepth];
-      // Record inner debt on the block owner (for occurrence height adjustment).
-      // Only record if the block has mixed content (returns + non-returns).
-      // Return-only blocks already have correct height from minimum block sizing.
-      if (ownerKey && hasMixedContent) {
-        result.set(`inner:${ownerKey}`, closedDebt);
-      }
       const directDebt = directDebtByDepth[maxDepth] || 0;
+      // Record NESTED inner debt on the block owner (for occurrence height).
+      // Only the nested portion (closedDebt - directDebt) is needed because
+      // direct returns at the block's own depth are already accounted for by
+      // the positioning engine's statementMarginY (16px) in BlockVM.layout.
+      // Return-only blocks (hasMixedContent=false) already have correct height.
+      const nestedDebt = closedDebt - directDebt;
+      if (ownerKey && hasMixedContent && nestedDebt > 0) {
+        result.set(`inner:${ownerKey}`, nestedDebt);
+      }
       debtByDepth.pop();
       directDebtByDepth.pop();
       blockOwnerKeys.pop();
@@ -868,10 +871,11 @@ function computeReturnDebt(
     const ownerKey = blockOwnerKeys[maxDepth];
     const ownerKind = blockOwnerKinds[maxDepth];
     const hasMixedContent = hasNonReturnChild[maxDepth];
-    if (ownerKey && hasMixedContent) {
-      result.set(`inner:${ownerKey}`, closedDebt);
+    const directDebtEnd = directDebtByDepth[maxDepth] || 0;
+    const nestedDebtEnd = closedDebt - directDebtEnd;
+    if (ownerKey && hasMixedContent && nestedDebtEnd > 0) {
+      result.set(`inner:${ownerKey}`, nestedDebtEnd);
     }
-    const directDebt = directDebtByDepth[maxDepth] || 0;
     debtByDepth.pop();
     directDebtByDepth.pop();
     blockOwnerKeys.pop();
@@ -880,7 +884,7 @@ function computeReturnDebt(
     maxDepth--;
     // Propagate only direct debt — see main loop comment
     if (ownerKey && ownerKind === "sync") {
-      debtByDepth[maxDepth] += directDebt;
+      debtByDepth[maxDepth] += directDebtEnd;
     }
   }
 

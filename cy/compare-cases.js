@@ -630,4 +630,27 @@ ReturnType ret = ParticipantName.methodA(a, b) {
     @return C->B: ret
   }
 }`,
+  // --- Occurrence height: sync + `return` keyword ---
+  "repro-occ-mixed-keyword": `A->B.method {
+  B->C.inner {
+    C->B.call
+    return ret_kw
+  }
+}`,
+  // --- Occurrence height: sync + two @returns ---
+  "repro-occ-mixed-2ret": `A->B.method {
+  B->C.inner {
+    C->B.call
+    @return C->B: ret1
+    @return C->B: ret2
+  }
+}`,
+  // --- Occurrence height: two syncs + one @return between them ---
+  "repro-occ-mixed-mid": `A->B.method {
+  B->C.inner {
+    C->B.call1
+    @return C->B: ret
+    C->B.call2
+  }
+}`,
 };
