@@ -1,0 +1,59 @@
+{
+  "case": "vertical-2",
+  "code": "// [red]\nnew B",
+  "anchor": {
+    "participant": "B",
+    "bottom": 113
+  },
+  "participants": [
+    {
+      "name": "B",
+      "x": 163,
+      "y": 73,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [],
+  "selfCalls": [],
+  "occurrences": [
+    {
+      "participant": "B",
+      "x": 196,
+      "y": 110,
+      "width": 15,
+      "height": 24
+    }
+  ],
+  "returns": [],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "B",
+      "x": 66,
+      "y1": 8,
+      "y2": 190
+    },
+    {
+      "participant": "B",
+      "x": 203,
+      "y1": 8,
+      "y2": 190
+    },
+    {
+      "participant": "B",
+      "x": 66,
+      "y1": 8,
+      "y2": 190
+    },
+    {
+      "participant": "B",
+      "x": 203,
+      "y1": 8,
+      "y2": 190
+    }
+  ]
+}

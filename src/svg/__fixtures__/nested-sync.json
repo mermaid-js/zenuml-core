@@ -1,0 +1,85 @@
+{
+  "case": "nested-sync",
+  "code": "A.method() {\n  B.method\n}",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "participants": [
+    {
+      "name": "A",
+      "x": 131,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "B",
+      "x": 231,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [],
+  "selfCalls": [],
+  "occurrences": [
+    {
+      "participant": "A",
+      "x": 164,
+      "y": 86,
+      "width": 15,
+      "height": 74
+    },
+    {
+      "participant": "B",
+      "x": 264,
+      "y": 118,
+      "width": 15,
+      "height": 24
+    }
+  ],
+  "returns": [],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 66,
+      "y1": 8,
+      "y2": 216
+    },
+    {
+      "participant": "A",
+      "x": 172,
+      "y1": 8,
+      "y2": 216
+    },
+    {
+      "participant": "B",
+      "x": 272,
+      "y1": 8,
+      "y2": 216
+    },
+    {
+      "participant": "A",
+      "x": 66,
+      "y1": 8,
+      "y2": 216
+    },
+    {
+      "participant": "A",
+      "x": 171,
+      "y1": 8,
+      "y2": 216
+    },
+    {
+      "participant": "B",
+      "x": 271,
+      "y1": 8,
+      "y2": 216
+    }
+  ]
+}

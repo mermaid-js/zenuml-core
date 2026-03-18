@@ -1,0 +1,65 @@
+{
+  "case": "repro-msg-y",
+  "code": "A -> B: msg",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "participants": [
+    {
+      "name": "A",
+      "x": 20,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "B",
+      "x": 120,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [
+    {
+      "label": "msg",
+      "fromX": 61,
+      "toX": 161,
+      "y": 87
+    }
+  ],
+  "selfCalls": [],
+  "occurrences": [],
+  "returns": [],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 61,
+      "y1": 8,
+      "y2": 144
+    },
+    {
+      "participant": "B",
+      "x": 161,
+      "y1": 8,
+      "y2": 144
+    },
+    {
+      "participant": "A",
+      "x": 60,
+      "y1": 8,
+      "y2": 144
+    },
+    {
+      "participant": "B",
+      "x": 160,
+      "y1": 8,
+      "y2": 144
+    }
+  ]
+}

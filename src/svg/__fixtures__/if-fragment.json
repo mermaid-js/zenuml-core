@@ -1,0 +1,80 @@
+{
+  "case": "if-fragment",
+  "code": "title Issue 232\nClient -> Server:SendRequest\nif(true){\n  Server -> Server: processRequest\n}",
+  "anchor": {
+    "participant": "Client",
+    "bottom": 68
+  },
+  "participants": [
+    {
+      "name": "Client",
+      "x": 30,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "Server",
+      "x": 152,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [
+    {
+      "label": "SendRequest",
+      "fromX": 71,
+      "toX": 171,
+      "y": 87
+    },
+    {
+      "label": "2.1 processRequest",
+      "fromX": 193,
+      "toX": 223,
+      "y": 198
+    }
+  ],
+  "selfCalls": [],
+  "occurrences": [],
+  "returns": [],
+  "creations": [],
+  "fragments": [
+    {
+      "kind": "2alt",
+      "x": 132,
+      "y": 104,
+      "width": 186,
+      "height": 133,
+      "sections": []
+    }
+  ],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "Client",
+      "x": 71,
+      "y1": 8,
+      "y2": 293
+    },
+    {
+      "participant": "Server",
+      "x": 193,
+      "y1": 8,
+      "y2": 293
+    },
+    {
+      "participant": "Client",
+      "x": 70,
+      "y1": 8,
+      "y2": 293
+    },
+    {
+      "participant": "Server",
+      "x": 192,
+      "y1": 8,
+      "y2": 293
+    }
+  ]
+}

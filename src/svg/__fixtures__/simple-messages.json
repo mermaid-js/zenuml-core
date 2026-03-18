@@ -1,0 +1,102 @@
+{
+  "case": "simple-messages",
+  "code": "A -> B: hello\nB -> C: process\nC -> B: result\nB -> A: done",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "participants": [
+    {
+      "name": "A",
+      "x": 20,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "B",
+      "x": 120,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "C",
+      "x": 220,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [
+    {
+      "label": "hello",
+      "fromX": 61,
+      "toX": 161,
+      "y": 87
+    },
+    {
+      "label": "process",
+      "fromX": 161,
+      "toX": 261,
+      "y": 119
+    },
+    {
+      "label": "result",
+      "fromX": 261,
+      "toX": 161,
+      "y": 151
+    },
+    {
+      "label": "done",
+      "fromX": 161,
+      "toX": 61,
+      "y": 183
+    }
+  ],
+  "selfCalls": [],
+  "occurrences": [],
+  "returns": [],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 61,
+      "y1": 8,
+      "y2": 240
+    },
+    {
+      "participant": "B",
+      "x": 161,
+      "y1": 8,
+      "y2": 240
+    },
+    {
+      "participant": "C",
+      "x": 261,
+      "y1": 8,
+      "y2": 240
+    },
+    {
+      "participant": "A",
+      "x": 60,
+      "y1": 8,
+      "y2": 240
+    },
+    {
+      "participant": "B",
+      "x": 160,
+      "y1": 8,
+      "y2": 240
+    },
+    {
+      "participant": "C",
+      "x": 260,
+      "y1": 8,
+      "y2": 240
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "case": "fragment-loop",
+  "code": "A -> B: request\nloop(condition) {\n  B -> C: process\n}",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "participants": [
+    {
+      "name": "A",
+      "x": 30,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "B",
+      "x": 130,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "C",
+      "x": 230,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [
+    {
+      "label": "request",
+      "fromX": 71,
+      "toX": 171,
+      "y": 87
+    },
+    {
+      "label": "process",
+      "fromX": 171,
+      "toX": 271,
+      "y": 181
+    }
+  ],
+  "selfCalls": [],
+  "occurrences": [],
+  "returns": [],
+  "creations": [],
+  "fragments": [
+    {
+      "kind": "2loop",
+      "x": 110,
+      "y": 104,
+      "width": 220,
+      "height": 105,
+      "sections": []
+    }
+  ],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 71,
+      "y1": 8,
+      "y2": 265
+    },
+    {
+      "participant": "B",
+      "x": 171,
+      "y1": 8,
+      "y2": 265
+    },
+    {
+      "participant": "C",
+      "x": 271,
+      "y1": 8,
+      "y2": 265
+    },
+    {
+      "participant": "A",
+      "x": 70,
+      "y1": 8,
+      "y2": 265
+    },
+    {
+      "participant": "B",
+      "x": 170,
+      "y1": 8,
+      "y2": 265
+    },
+    {
+      "participant": "C",
+      "x": 270,
+      "y1": 8,
+      "y2": 265
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "case": "async-1",
+  "code": "A->A: async\nA->B: async\nA->C: async\nB->B: async\nB->C: async\nB->A: async\nC->C: async\nC->B: async\nC->A: async",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "participants": [
+    {
+      "name": "A",
+      "x": 20,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "B",
+      "x": 120,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "C",
+      "x": 220,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [
+    {
+      "label": "1 async",
+      "fromX": 61,
+      "toX": 91,
+      "y": 104
+    },
+    {
+      "label": "async",
+      "fromX": 61,
+      "toX": 161,
+      "y": 147
+    },
+    {
+      "label": "async",
+      "fromX": 61,
+      "toX": 161,
+      "y": 179
+    },
+    {
+      "label": "4 async",
+      "fromX": 161,
+      "toX": 191,
+      "y": 228
+    },
+    {
+      "label": "async",
+      "fromX": 161,
+      "toX": 261,
+      "y": 271
+    },
+    {
+      "label": "async",
+      "fromX": 161,
+      "toX": 61,
+      "y": 303
+    },
+    {
+      "label": "7 async",
+      "fromX": 261,
+      "toX": 291,
+      "y": 352
+    },
+    {
+      "label": "async",
+      "fromX": 261,
+      "toX": 161,
+      "y": 395
+    },
+    {
+      "label": "async",
+      "fromX": 161,
+      "toX": 61,
+      "y": 427
+    }
+  ],
+  "selfCalls": [],
+  "occurrences": [],
+  "returns": [],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 61,
+      "y1": 8,
+      "y2": 484
+    },
+    {
+      "participant": "B",
+      "x": 161,
+      "y1": 8,
+      "y2": 484
+    },
+    {
+      "participant": "C",
+      "x": 261,
+      "y1": 8,
+      "y2": 484
+    },
+    {
+      "participant": "A",
+      "x": 60,
+      "y1": 8,
+      "y2": 484
+    },
+    {
+      "participant": "B",
+      "x": 160,
+      "y1": 8,
+      "y2": 484
+    },
+    {
+      "participant": "C",
+      "x": 260,
+      "y1": 8,
+      "y2": 484
+    }
+  ]
+}

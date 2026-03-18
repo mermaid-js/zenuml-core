@@ -1,0 +1,31 @@
+{
+  "case": "empty",
+  "code": " \n  \n    \n    \n  \n\n100%ZenUML.com",
+  "anchor": {
+    "participant": "",
+    "bottom": 0
+  },
+  "participants": [],
+  "messages": [],
+  "selfCalls": [],
+  "occurrences": [],
+  "returns": [],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "",
+      "x": 66,
+      "y1": 8,
+      "y2": 96
+    },
+    {
+      "participant": "",
+      "x": 66,
+      "y1": 8,
+      "y2": 96
+    }
+  ]
+}

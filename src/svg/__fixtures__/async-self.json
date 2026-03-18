@@ -1,0 +1,46 @@
+{
+  "case": "async-self",
+  "code": "A->A: selfAsync",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "participants": [
+    {
+      "name": "A",
+      "x": 20,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [
+    {
+      "label": "1 selfAsync",
+      "fromX": 61,
+      "toX": 91,
+      "y": 104
+    }
+  ],
+  "selfCalls": [],
+  "occurrences": [],
+  "returns": [],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 61,
+      "y1": 8,
+      "y2": 172
+    },
+    {
+      "participant": "A",
+      "x": 60,
+      "y1": 8,
+      "y2": 172
+    }
+  ]
+}

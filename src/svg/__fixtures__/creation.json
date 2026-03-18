@@ -1,0 +1,85 @@
+{
+  "case": "creation",
+  "code": "title Title 1\nA.m {\n  new B(1,2,3,4)\n}",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "participants": [
+    {
+      "name": "A",
+      "x": 131,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "B",
+      "x": 273,
+      "y": 105,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [],
+  "selfCalls": [],
+  "occurrences": [
+    {
+      "participant": "A",
+      "x": 164,
+      "y": 86,
+      "width": 15,
+      "height": 98
+    },
+    {
+      "participant": "B",
+      "x": 306,
+      "y": 142,
+      "width": 15,
+      "height": 24
+    }
+  ],
+  "returns": [],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 66,
+      "y1": 8,
+      "y2": 240
+    },
+    {
+      "participant": "A",
+      "x": 172,
+      "y1": 8,
+      "y2": 240
+    },
+    {
+      "participant": "B",
+      "x": 314,
+      "y1": 8,
+      "y2": 240
+    },
+    {
+      "participant": "A",
+      "x": 66,
+      "y1": 8,
+      "y2": 240
+    },
+    {
+      "participant": "A",
+      "x": 171,
+      "y1": 8,
+      "y2": 240
+    },
+    {
+      "participant": "B",
+      "x": 313,
+      "y1": 8,
+      "y2": 240
+    }
+  ]
+}

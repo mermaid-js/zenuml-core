@@ -1,0 +1,39 @@
+{
+  "case": "single-participant",
+  "code": "A",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "participants": [
+    {
+      "name": "A",
+      "x": 20,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [],
+  "selfCalls": [],
+  "occurrences": [],
+  "returns": [],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 61,
+      "y1": 8,
+      "y2": 96
+    },
+    {
+      "participant": "A",
+      "x": 60,
+      "y1": 8,
+      "y2": 96
+    }
+  ]
+}
