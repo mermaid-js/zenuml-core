@@ -1,0 +1,20 @@
+{
+  "_comment": "Minimum acceptable geometry score per case. Update after verified improvements.",
+  "empty": 0,
+  "single-participant": 49,
+  "simple-messages": 35,
+  "repro-msg-y": 42,
+  "demo5-self-named": 53,
+  "nested-sync": 52,
+  "nested-occurrence": 54,
+  "async-self": 37,
+  "async-1": 25,
+  "if-fragment": 39,
+  "fragment-loop": 44,
+  "fragment-tcf": 55,
+  "creation": 52,
+  "creation-rtl": 34,
+  "return": 27,
+  "repro-return-after-creation": 41,
+  "vertical-2": 49
+}
