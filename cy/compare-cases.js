@@ -275,6 +275,35 @@ A->B.method() {
   return ret2_return_rtl
   @return B->A: ret4_annotation_rtl
 }`,
+  // Minimal return isolation cases
+  "return-single-explicit": `A B
+A->B.method() {
+  return ret1
+}`,
+  "return-two-explicit": `A B
+A->B.method() {
+  B.inner
+  return ret1
+  @return B->A: ret2
+}`,
+  "return-nested-then-direct": `A B C
+A->B.method() {
+  B->C.nested() {
+    return nested_ret
+  }
+  return direct_ret
+}`,
+  "return-only-two": `A B
+A->B.method() {
+  return ret1
+  @return B->A: ret2
+}`,
+  "return-assign-rtl": `A B C
+A->B.method() {
+  ret0 = C.inner {
+    B.work
+  }
+}`,
   "repro-return-after-creation": `new B() {
   return from_creation
 }
@@ -653,4 +682,12 @@ ReturnType ret = ParticipantName.methodA(a, b) {
     C->B.call2
   }
 }`,
+  // --- Creation with params ---
+  "repro-creation-params": `new B(1)`,
+  // --- Just participant B (no creation) ---
+  "repro-just-B": `B`,
+  // --- Starter + B with message ---
+  "repro-starter-B": `B.m`,
+  // --- Starter + B with long method name ---
+  "repro-starter-B-long": `B.aVeryLongMethodThatShouldPushTheParticipant`,
 };

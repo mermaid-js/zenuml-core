@@ -786,16 +786,22 @@ function computeReturnDebt(
       const closedDebt = debtByDepth[maxDepth] || 0;
       const ownerKey = blockOwnerKeys[maxDepth];
       const ownerKind = blockOwnerKinds[maxDepth];
-      const hasMixedContent = hasNonReturnChild[maxDepth];
       const directDebt = directDebtByDepth[maxDepth] || 0;
-      // Record NESTED inner debt on the block owner (for occurrence height).
-      // Only the nested portion (closedDebt - directDebt) is needed because
-      // direct returns at the block's own depth are already accounted for by
-      // the positioning engine's statementMarginY (16px) in BlockVM.layout.
-      // Return-only blocks (hasMixedContent=false) already have correct height.
+      // Record inner debt on the block owner (for occurrence height).
+      // Two components:
+      // 1. nestedDebt: debt propagated from child blocks (closedDebt - directDebt).
+      //    The parent occurrence must grow to contain child content that the
+      //    positioning engine underestimates.
+      // 2. directShift: when 2+ direct returns exist at the same depth, each
+      //    return's debt shifts the NEXT return down via the adjust mechanism.
+      //    The last return is shifted by (N-1)*returnHeight = directDebt - returnHeight.
+      //    The occurrence must grow to contain this shifted last return.
+      // A single direct return has directShift=0 (its own debt doesn't shift itself).
       const nestedDebt = closedDebt - directDebt;
-      if (ownerKey && hasMixedContent && nestedDebt > 0) {
-        result.set(`inner:${ownerKey}`, nestedDebt);
+      const directShift = Math.max(directDebt - returnHeight, 0);
+      const occInnerDebt = nestedDebt + directShift;
+      if (ownerKey && occInnerDebt > 0) {
+        result.set(`inner:${ownerKey}`, occInnerDebt);
       }
       debtByDepth.pop();
       directDebtByDepth.pop();
@@ -873,11 +879,12 @@ function computeReturnDebt(
     const closedDebt = debtByDepth[maxDepth] || 0;
     const ownerKey = blockOwnerKeys[maxDepth];
     const ownerKind = blockOwnerKinds[maxDepth];
-    const hasMixedContent = hasNonReturnChild[maxDepth];
     const directDebtEnd = directDebtByDepth[maxDepth] || 0;
     const nestedDebtEnd = closedDebt - directDebtEnd;
-    if (ownerKey && hasMixedContent && nestedDebtEnd > 0) {
-      result.set(`inner:${ownerKey}`, nestedDebtEnd);
+    const directShiftEnd = Math.max(directDebtEnd - returnHeight, 0);
+    const occInnerDebtEnd = nestedDebtEnd + directShiftEnd;
+    if (ownerKey && occInnerDebtEnd > 0) {
+      result.set(`inner:${ownerKey}`, occInnerDebtEnd);
     }
     debtByDepth.pop();
     directDebtByDepth.pop();
