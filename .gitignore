@@ -1,3 +1,6 @@
+# Worktrees
+.worktrees/
+
 # Playwright test results and reports
 /test-results/
 /playwright-report/
