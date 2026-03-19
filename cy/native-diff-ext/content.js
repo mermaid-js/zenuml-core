@@ -137,7 +137,8 @@ async function nativeDiffAlgorithm(htmlDataUrl, svgDataUrl) {
   const h = Math.max(htmlImg.height, svgImg.height);
   console.log("[native-diff-ext] HTML:", htmlImg.width, "x", htmlImg.height, " SVG:", svgImg.width, "x", svgImg.height, " Compare:", w, "x", h);
 
-  // Draw each image onto a w×h white canvas so out-of-bounds reads are white
+  // Draw each image onto a w×h white canvas. If an image is smaller than
+  // w×h, the extra area stays white (= background, excluded from diff).
   const htmlData = getImageData(htmlImg, w, h);
   const svgData = getImageData(svgImg, w, h);
 
