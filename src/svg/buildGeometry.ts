@@ -531,8 +531,15 @@ function buildMessages(
               ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset + 1
               : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset + 1;
             // Sender's fromX is D4-adjusted for its occurrence edge.
+            // For bare lifelines (no occurrences), RTL needs +LIFELINE_WIDTH
+            // to match HTML Anchor2's edge offset (same as keyword returns).
+            // For occupied senders, D4 already positions at the correct edge.
+            let senderX = fromX;
+            if (!isLTR && info.senderOccurrenceDepth === 0) {
+              senderX += LIFELINE_WIDTH;
+            }
             returns.push({
-              fromX: retFromX, toX: fromX, y: returnArrowY,
+              fromX: retFromX, toX: senderX, y: returnArrowY,
               label: assignment.assignee, isReverse: fromX < toX, isSelf: false,
             });
           }
