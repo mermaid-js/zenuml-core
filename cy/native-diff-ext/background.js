@@ -41,12 +41,10 @@ async function screenshotNode(target, rootNodeId, selector) {
 
   const { model } = await cdp(target, "DOM.getBoxModel", { nodeId });
   const border = model.border;
-  const x = Math.floor(border[0]);
-  const y = Math.floor(border[1]);
-  // Ceil width/height so subpixel content at the edges is never clipped.
-  // Without this, a 246px SVG can lose its bottom border row.
-  const width = Math.ceil(border[2] - border[0]);
-  const height = Math.ceil(border[5] - border[1]);
+  const x = border[0];
+  const y = border[1];
+  const width = border[2] - border[0];
+  const height = border[5] - border[1];
 
   const { data } = await cdp(target, "Page.captureScreenshot", {
     format: "png",

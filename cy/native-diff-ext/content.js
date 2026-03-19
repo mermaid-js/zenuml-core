@@ -131,16 +131,12 @@ async function runNativeDiff() {
 async function nativeDiffAlgorithm(htmlDataUrl, svgDataUrl) {
   const [htmlImg, svgImg] = await Promise.all([loadImg(htmlDataUrl), loadImg(svgDataUrl)]);
 
-  // Use max dimensions so neither side is clipped — if one renderer is
-  // taller/wider, the extra pixels are compared against white (background).
-  const w = Math.max(htmlImg.width, svgImg.width);
-  const h = Math.max(htmlImg.height, svgImg.height);
+  const w = Math.min(htmlImg.width, svgImg.width);
+  const h = Math.min(htmlImg.height, svgImg.height);
   console.log("[native-diff-ext] HTML:", htmlImg.width, "x", htmlImg.height, " SVG:", svgImg.width, "x", svgImg.height, " Compare:", w, "x", h);
 
-  // Draw each image onto a w×h white canvas. If an image is smaller than
-  // w×h, the extra area stays white (= background, excluded from diff).
-  const htmlData = getImageData(htmlImg, w, h);
-  const svgData = getImageData(svgImg, w, h);
+  const htmlData = getImageData(htmlImg, htmlImg.width, htmlImg.height);
+  const svgData = getImageData(svgImg, svgImg.width, svgImg.height);
 
   const LUMA_THRESHOLD = 240;
   const CHANNEL_TOLERANCE = 12;
@@ -154,13 +150,13 @@ async function nativeDiffAlgorithm(htmlDataUrl, svgDataUrl) {
            Math.abs(a[2]-b[2]) <= CHANNEL_TOLERANCE;
   }
 
-  function hasNearbyMatch(srcData, dstData, x, y) {
-    const p1 = getPixel(srcData, w, x, y);
+  function hasNearbyMatch(srcData, srcW, dstData, dstW, x, y) {
+    const p1 = getPixel(srcData, srcW, x, y);
     for (let dy = -POSITION_TOLERANCE; dy <= POSITION_TOLERANCE; dy++) {
       for (let dx = -POSITION_TOLERANCE; dx <= POSITION_TOLERANCE; dx++) {
         const nx = x + dx, ny = y + dy;
         if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
-        const p2 = getPixel(dstData, w, nx, ny);
+        const p2 = getPixel(dstData, dstW, nx, ny);
         if (luma(...p2) < LUMA_THRESHOLD && pixelsClose(p1, p2)) return true;
       }
     }
@@ -178,8 +174,8 @@ async function nativeDiffAlgorithm(htmlDataUrl, svgDataUrl) {
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
-      const pA = getPixel(htmlData, w, x, y);
-      const pB = getPixel(svgData, w, x, y);
+      const pA = getPixel(htmlData, htmlImg.width, x, y);
+      const pB = getPixel(svgData, svgImg.width, x, y);
       const isA = luma(...pA) < LUMA_THRESHOLD;
       const isB = luma(...pB) < LUMA_THRESHOLD;
       const di = (y * w + x) * 4;
@@ -190,8 +186,8 @@ async function nativeDiffAlgorithm(htmlDataUrl, svgDataUrl) {
       }
 
       total++;
-      const matchAB = hasNearbyMatch(htmlData, svgData, x, y);
-      const matchBA = hasNearbyMatch(svgData, htmlData, x, y);
+      const matchAB = hasNearbyMatch(htmlData, htmlImg.width, svgData, svgImg.width, x, y);
+      const matchBA = hasNearbyMatch(svgData, svgImg.width, htmlData, htmlImg.width, x, y);
 
       if (isA && isB) {
         if (matchAB || matchBA) {
