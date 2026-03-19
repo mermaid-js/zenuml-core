@@ -493,7 +493,8 @@ function buildMessages(
         }
 
         // Assignment return Y sits near the occurrence bottom.
-        const returnArrowY = occY + occHeight;
+        // HTML places assignment returns at occBottom - 2 (inside the border).
+        const returnArrowY = occY + occHeight - 1;
 
         // Post-return-Y height corrections: these grow the occurrence box
         // but do NOT shift the assignment return arrow position.
@@ -526,8 +527,7 @@ function buildMessages(
             const retFromX = isLTR
               ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
               : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset;
-            // Sender's fromX is already D4-adjusted for its occurrence edge.
-            // Use returnArrowY (pre-depth-correction) to match HTML return arrow position.
+            // Sender's fromX is D4-adjusted for its occurrence edge.
             returns.push({
               fromX: retFromX, toX: fromX, y: returnArrowY,
               label: assignment.assignee, isReverse: fromX < toX, isSelf: false,
@@ -700,6 +700,8 @@ function buildMessages(
       } else if (toLayers > 0) {
         toX -= LIFELINE_WIDTH;
       }
+      // First return inside a sync block renders 1px higher in HTML due to
+      // the occurrence's border-top offsetting the content area.
       // First return inside a sync block renders 1px higher in HTML due to
       // the occurrence's border-top offsetting the content area.
       const returnOffset = (info.parentBlockKind === "sync" && adjust === 0) ? 15 : 16;
