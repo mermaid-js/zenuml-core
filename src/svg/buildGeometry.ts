@@ -675,8 +675,9 @@ function buildMessages(
           ? rawFromX
           : (fromLayers <= 1 ? rawFromX : rawFromX + OCCURRENCE_BAR_SIDE_WIDTH * (fromLayers - 1)) - OCCURRENCE_BAR_SIDE_WIDTH;
       } else {
-        // LTR: line starts from from's right edge of right wall
-        fromX = rawFromX + OCCURRENCE_BAR_SIDE_WIDTH * fromLayers;
+        // LTR: line starts from from's right edge of right wall.
+        // +1: occurrence stroke extends 1px beyond fill area (stroke-width=2, centered).
+        fromX = rawFromX + OCCURRENCE_BAR_SIDE_WIDTH * fromLayers + 1;
       }
       // Target also needs occurrence edge offset (Anchor2 uses the near edge facing the source)
       const toLayers = info.targetOccurrenceDepth || 0;
@@ -691,13 +692,13 @@ function buildMessages(
           : (toLayers <= 1 ? rawToX : rawToX + OCCURRENCE_BAR_SIDE_WIDTH * (toLayers - 1)) - OCCURRENCE_BAR_SIDE_WIDTH;
       }
       // HTML Anchor2.edgeOffset subtracts LIFELINE_WIDTH from the container width.
-      // For RTL returns, shift the arrow tip (toX) right by LIFELINE_WIDTH to match
-      // the HTML positioning where the container left edge is 1px past the occurrence.
-      // For LTR returns, shrink the right edge.
+      // For LTR returns to a bare lifeline (toLayers=0), the arrow goes directly
+      // to the lifeline center — no LIFELINE_WIDTH correction needed.
+      // For RTL returns, the correction is always needed (HTML CSS shifts the left edge).
       if (isReverse) {
-        toX += LIFELINE_WIDTH;  // RTL: move arrow tip right
-      } else {
-        toX -= LIFELINE_WIDTH;  // LTR: shrink right edge
+        toX += LIFELINE_WIDTH;
+      } else if (toLayers > 0) {
+        toX -= LIFELINE_WIDTH;
       }
       // First return inside a sync block renders 1px higher in HTML due to
       // the occurrence's border-top offsetting the content area.
