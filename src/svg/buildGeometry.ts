@@ -491,7 +491,8 @@ function buildMessages(
         // assignee returns (SyncMessageStatementVM line 41), but HTML renders
         // the assignment return as ~16px inside the occurrence. Add the 5px
         // difference so the occurrence bar extends to match HTML.
-        if (assignment?.assignee && !info.isSelf) {
+        // Only for block syncs — non-block syncs already have correct height.
+        if (assignment?.assignee && !info.isSelf && info.hasBlock) {
           occHeight += 5;
         }
 
