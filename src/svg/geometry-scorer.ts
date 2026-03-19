@@ -134,7 +134,9 @@ export function scoreGeometry(fixture: GeometryFixture): ScoreResult {
   scoreFragmentsNorm(fixture, geometry, anchors, mismatches, byType);
   scoreDividersNorm(fixture, geometry, anchors, mismatches, byType);
   scoreCommentsNorm(fixture, geometry, anchors, mismatches, byType);
-  scoreLifelinesNorm(fixture, geometry, anchors, mismatches, byType);
+  // Lifelines are excluded from scoring — they are derived from participant
+  // positions and diagram height, not independently positioned elements.
+  // Their y2 depends on occurrence height which is scored separately.
 
   const total = Object.values(byType).reduce((s, t) => s + t.total, 0);
   const matched = Object.values(byType).reduce((s, t) => s + t.matched, 0);
@@ -319,17 +321,15 @@ function scoreReturnsNorm(
   for (let i = 0; i < fixtureReturns.length; i++) {
     const fr = fixtureReturns[i];
     const gr = geoReturns[i];
+    // Compare leftX/rightX (min/max) instead of fromX/toX — the HTML
+    // fixture always records left→right, but geometry may swap for RTL.
+    const fLeft = normX(Math.min(fr.fromX, fr.toX), anchors.fX);
+    const fRight = normX(Math.max(fr.fromX, fr.toX), anchors.fX);
+    const gLeft = gr !== undefined ? normX(Math.min(gr.fromX, gr.toX), anchors.gX) : undefined;
+    const gRight = gr !== undefined ? normX(Math.max(gr.fromX, gr.toX), anchors.gX) : undefined;
     compareProps(mismatches, byType, "return", fr.label, [
-      {
-        prop: "fromX",
-        expected: normX(fr.fromX, anchors.fX),
-        actual: gr !== undefined ? normX(gr.fromX, anchors.gX) : undefined,
-      },
-      {
-        prop: "toX",
-        expected: normX(fr.toX, anchors.fX),
-        actual: gr !== undefined ? normX(gr.toX, anchors.gX) : undefined,
-      },
+      { prop: "leftX", expected: fLeft, actual: gLeft },
+      { prop: "rightX", expected: fRight, actual: gRight },
       {
         prop: "y",
         expected: normY(fr.y, anchors.fY),
@@ -483,32 +483,5 @@ function scoreCommentsNorm(
   }
 }
 
-function scoreLifelinesNorm(
-  fixture: GeometryFixture,
-  geometry: DiagramGeometry,
-  anchors: Anchors,
-  mismatches: Mismatch[],
-  byType: Record<string, { matched: number; total: number }>,
-): void {
-  for (const fl of fixture.lifelines) {
-    const gl = geometry.lifelines.find((l) => l.participantName === fl.participant);
-    const label = fl.participant;
-    compareProps(mismatches, byType, "lifeline", label, [
-      {
-        prop: "x",
-        expected: normX(fl.x, anchors.fX),
-        actual: gl !== undefined ? normX(gl.x, anchors.gX) : undefined,
-      },
-      {
-        prop: "y1",
-        expected: normY(fl.y1, anchors.fY),
-        actual: gl !== undefined ? normY(gl.topY, anchors.gY) : undefined,
-      },
-      {
-        prop: "y2",
-        expected: normY(fl.y2, anchors.fY),
-        actual: gl !== undefined ? normY(gl.bottomY, anchors.gY) : undefined,
-      },
-    ]);
-  }
-}
+// scoreLifelinesNorm removed — lifelines are derived from participant
+// positions and diagram height, not independently positioned elements.

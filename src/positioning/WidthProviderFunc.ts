@@ -16,6 +16,11 @@ function getFontSpec(_type: TextType): string {
 
 let canvasCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
 
+/** Inject a custom canvas context (e.g., from @napi-rs/canvas for accurate text measurement in Node/Bun). */
+export function setCanvasContext(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null): void {
+  canvasCtx = ctx;
+}
+
 function getCanvasContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null {
   if (canvasCtx) return canvasCtx;
   try {

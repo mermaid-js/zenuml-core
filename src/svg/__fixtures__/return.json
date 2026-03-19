@@ -71,37 +71,37 @@
     {
       "label": "ret1_annotation_ltr",
       "fromX": 456,
-      "toX": 556,
+      "toX": 606,
       "y": 151
     },
     {
       "label": "ret5_assign_ltr",
       "fromX": 233,
-      "toX": 333,
+      "toX": 441,
       "y": 216
     },
     {
       "label": "ret2_return_ltr",
       "fromX": 233,
-      "toX": 333,
+      "toX": 441,
       "y": 282
     },
     {
       "label": "ret0_assign_rtl",
-      "fromX": 327,
-      "toX": 227,
+      "fromX": 227,
+      "toX": 442,
       "y": 316
     },
     {
       "label": "ret2_return_rtl",
-      "fromX": 161,
-      "toX": 61,
+      "fromX": 61,
+      "toX": 211,
       "y": 349
     },
     {
       "label": "ret4_annotation_rtl",
-      "fromX": 161,
-      "toX": 61,
+      "fromX": 61,
+      "toX": 211,
       "y": 382
     }
   ],
@@ -112,50 +112,26 @@
   "lifelines": [
     {
       "participant": "A",
-      "x": 61,
-      "y1": 8,
-      "y2": 440
-    },
-    {
-      "participant": "B",
-      "x": 219,
-      "y1": 8,
-      "y2": 440
-    },
-    {
-      "participant": "C",
-      "x": 449,
-      "y1": 8,
-      "y2": 440
-    },
-    {
-      "participant": "D",
-      "x": 607,
-      "y1": 8,
-      "y2": 440
-    },
-    {
-      "participant": "A",
       "x": 60,
-      "y1": 8,
+      "y1": 68,
       "y2": 440
     },
     {
       "participant": "B",
       "x": 218,
-      "y1": 8,
+      "y1": 68,
       "y2": 440
     },
     {
       "participant": "C",
       "x": 448,
-      "y1": 8,
+      "y1": 68,
       "y2": 440
     },
     {
       "participant": "D",
       "x": 606,
-      "y1": 8,
+      "y1": 68,
       "y2": 440
     }
   ]

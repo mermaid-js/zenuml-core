@@ -54,26 +54,14 @@
   "lifelines": [
     {
       "participant": "Client",
-      "x": 71,
-      "y1": 8,
-      "y2": 293
-    },
-    {
-      "participant": "Server",
-      "x": 193,
-      "y1": 8,
-      "y2": 293
-    },
-    {
-      "participant": "Client",
       "x": 70,
-      "y1": 8,
+      "y1": 68,
       "y2": 293
     },
     {
       "participant": "Server",
       "x": 192,
-      "y1": 8,
+      "y1": 68,
       "y2": 293
     }
   ]

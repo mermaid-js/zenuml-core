@@ -5,6 +5,7 @@ import type { GeometryFixture } from "../src/svg/geometry-fixture";
 import { CASES } from "../cy/compare-cases";
 
 const CANONICAL_CASES = [
+  "sync-call",
   "empty",
   "single-participant",
   "simple-messages",
@@ -322,6 +323,8 @@ for (const caseName of CANONICAL_CASES) {
       }
 
       // --- Returns ---
+      // Return arrows use an SVG with a <line x1=0 x2=100%> — the SVG
+      // bounding box IS the arrow extent, so use left/right directly.
       const returnEls = Array.from(
         seqDiagram.querySelectorAll(".interaction.return"),
       );
@@ -342,56 +345,11 @@ for (const caseName of CANONICAL_CASES) {
         if (!arrowSvg) continue;
 
         const arrowRect = arrowSvg.getBoundingClientRect();
-        let fromX = r(arrowRect.left - containerRect.left);
-        let toX = r(arrowRect.right - containerRect.left);
+        const fromX = r(arrowRect.left - containerRect.left);
+        const toX = r(arrowRect.right - containerRect.left);
         const arrowY = r(
           arrowRect.top + arrowRect.height / 2 - containerRect.top,
         );
-
-        const polyline = arrowSvg.querySelector("polyline");
-        const line = arrowSvg.querySelector("line");
-        if (polyline) {
-          const points = polyline.getAttribute("points") || "";
-          const pts = points
-            .trim()
-            .split(/\s+/)
-            .map((p: string) => p.split(",").map(Number));
-          if (pts.length >= 2) {
-            const svgRect = arrowSvg.getBoundingClientRect();
-            const svgWidth = parseFloat(
-              arrowSvg.getAttribute("width") ||
-                String(svgRect.width),
-            );
-            const scale =
-              svgWidth > 0 ? svgRect.width / svgWidth : 1;
-            fromX = r(
-              svgRect.left +
-                (pts[0]?.[0] ?? 0) * scale -
-                containerRect.left,
-            );
-            toX = r(
-              svgRect.left +
-                (pts[pts.length - 1]?.[0] ?? 0) * scale -
-                containerRect.left,
-            );
-          }
-        } else if (line) {
-          const x1 = parseFloat(line.getAttribute("x1") || "0");
-          const x2 = parseFloat(line.getAttribute("x2") || "0");
-          const svgRect = arrowSvg.getBoundingClientRect();
-          const svgWidth = parseFloat(
-            arrowSvg.getAttribute("width") ||
-              String(svgRect.width),
-          );
-          const scale =
-            svgWidth > 0 ? svgRect.width / svgWidth : 1;
-          fromX = r(
-            svgRect.left + x1 * scale - containerRect.left,
-          );
-          toX = r(
-            svgRect.left + x2 * scale - containerRect.left,
-          );
-        }
 
         returns.push({ label, fromX, toX, y: arrowY });
       }
@@ -685,9 +643,12 @@ for (const caseName of CANONICAL_CASES) {
       }
 
       // --- Lifelines ---
+      // Use only lifelines that contain a .line child (the actual dashed line),
+      // not the duplicate participant-box containers from the second LifeLineLayer.
       const lifelineEls = Array.from(
         seqDiagram.querySelectorAll(".lifeline"),
-      );
+      ).filter(el => el.querySelector(":scope > .line") !== null);
+      const seenLifelineParticipants = new Set<string>();
       const lifelines: {
         participant: string;
         x: number;
@@ -697,29 +658,31 @@ for (const caseName of CANONICAL_CASES) {
 
       for (let i = 0; i < lifelineEls.length; i++) {
         const htmlEl = lifelineEls[i] as HTMLElement;
-        const rect = htmlEl.getBoundingClientRect();
-        const centerX = r(
-          rect.left + rect.width / 2 - containerRect.left,
-        );
 
-        // Match to nearest participant by center X
+        // Match to nearest participant by left position
         let bestName = "";
         let bestDist = Infinity;
         for (const part of participants) {
           const partCenterX = part.x + part.width / 2;
-          const dist = Math.abs(centerX - partCenterX);
+          const lifelineLeft = r(htmlEl.getBoundingClientRect().left - containerRect.left);
+          const dist = Math.abs(lifelineLeft - partCenterX);
           if (dist < bestDist) {
             bestDist = dist;
             bestName = part.name;
           }
         }
 
-        lifelines.push({
-          participant: bestName,
-          x: centerX,
-          y1: r(rect.top - containerRect.top),
-          y2: r(rect.bottom - containerRect.top),
-        });
+        // Deduplicate per participant
+        if (seenLifelineParticipants.has(bestName)) continue;
+        seenLifelineParticipants.add(bestName);
+
+        // Lifeline y1 = participant bottom (matching geometry's topY = p.y + p.height)
+        const matchedP = participants.find(p => p.name === bestName);
+        const y1 = matchedP ? matchedP.y + matchedP.height : r(htmlEl.getBoundingClientRect().top - containerRect.top);
+        const y2 = r(htmlEl.getBoundingClientRect().bottom - containerRect.top);
+        const x = matchedP ? matchedP.x + matchedP.width / 2 : r(htmlEl.getBoundingClientRect().left - containerRect.left);
+
+        lifelines.push({ participant: bestName, x, y1, y2 });
       }
 
       return {

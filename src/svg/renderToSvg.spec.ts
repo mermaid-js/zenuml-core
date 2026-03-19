@@ -265,7 +265,7 @@ describe("renderToSvg", () => {
     // to toEqual(expected_exact_width).
     expect(width).toBeGreaterThan(0);
     // Snapshot the actual width so regressions are caught
-    expect(width).toMatchInlineSnapshot(`94`);
+    expect(width).toMatchInlineSnapshot(`92`);
   });
 
   it("renders assignment return arrow for sync message", () => {

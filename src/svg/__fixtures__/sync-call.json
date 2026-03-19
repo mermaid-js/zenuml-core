@@ -1,6 +1,6 @@
 {
-  "case": "demo5-self-named",
-  "code": "A.methodA() { A.methodA1() }",
+  "case": "sync-call",
+  "code": "A.m",
   "anchor": {
     "participant": "A",
     "bottom": 68
@@ -22,13 +22,6 @@
       "x": 164,
       "y": 86,
       "width": 15,
-      "height": 88
-    },
-    {
-      "participant": "A",
-      "x": 171,
-      "y": 132,
-      "width": 15,
       "height": 24
     }
   ],
@@ -42,7 +35,7 @@
       "participant": "A",
       "x": 171,
       "y1": 68,
-      "y2": 230
+      "y2": 166
     }
   ]
 }

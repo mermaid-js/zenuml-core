@@ -94,6 +94,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@happy-dom/global-registrator": "^18.0.1",
+    "@napi-rs/canvas": "^0.1.97",
     "@playwright/test": "^1.57.0",
     "@storybook/addon-docs": "^9.1.17",
     "@storybook/addon-onboarding": "^9.1.17",

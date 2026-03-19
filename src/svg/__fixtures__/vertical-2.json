@@ -33,26 +33,8 @@
   "lifelines": [
     {
       "participant": "B",
-      "x": 66,
-      "y1": 8,
-      "y2": 190
-    },
-    {
-      "participant": "B",
       "x": 203,
-      "y1": 8,
-      "y2": 190
-    },
-    {
-      "participant": "B",
-      "x": 66,
-      "y1": 8,
-      "y2": 190
-    },
-    {
-      "participant": "B",
-      "x": 203,
-      "y1": 8,
+      "y1": 113,
       "y2": 190
     }
   ]

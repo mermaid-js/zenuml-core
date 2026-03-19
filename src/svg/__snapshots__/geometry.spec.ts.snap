@@ -1,25 +1,17 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`geometry: returns positions a return line 1`] = `
-{
-  "fromX": 145,
-  "toX": 51,
-  "y": 119,
-}
-`;
-
 exports[`geometry: participants positions starter + one participant for A.m 1`] = `
 {
   "a": {
     "height": 40,
     "width": 80,
-    "x": 157,
+    "x": 161,
     "y": 28,
   },
   "starter": {
     "height": 40,
     "width": 80,
-    "x": 53.5,
+    "x": 55.5,
     "y": 28,
   },
 }
@@ -79,14 +71,14 @@ exports[`geometry: occurrences positions occurrence bars for nested calls 1`] = 
     "height": 74,
     "participant": "A",
     "width": 15,
-    "x": 150,
+    "x": 154,
     "y": 86,
   },
   {
     "height": 24,
     "participant": "B",
     "width": 15,
-    "x": 250,
+    "x": 254,
     "y": 118,
   },
 ]
@@ -107,16 +99,24 @@ exports[`geometry: fragments positions if/else fragment with correct dimensions 
   "headerY": 73,
   "height": 105,
   "sectionsCount": 0,
-  "width": 337,
+  "width": 274,
   "x": -10,
   "y": 72,
+}
+`;
+
+exports[`geometry: returns positions a return line 1`] = `
+{
+  "fromX": 143,
+  "toX": 51,
+  "y": 119,
 }
 `;
 
 exports[`geometry: creations creation participant has lower y than normal participants 1`] = `
 {
   "createdWidth": 80,
-  "createdX": 309,
+  "createdX": 298,
   "createdY": 105,
   "normalY": 28,
 }
@@ -148,7 +148,7 @@ exports[`geometry: dividers positions a divider between messages 1`] = `
 
 exports[`geometry: comments positions a comment 1`] = `
 {
-  "x": 60.5,
+  "x": 62.5,
   "y": 87,
 }
 `;
@@ -158,6 +158,6 @@ exports[`geometry: dimensions reports overall width, height, and frame borders 1
   "frameBorderLeft": 0,
   "frameBorderRight": 0,
   "height": 154,
-  "width": 207,
+  "width": 211,
 }
 `;
