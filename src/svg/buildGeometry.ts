@@ -488,14 +488,25 @@ function buildMessages(
         // assignee returns (SyncMessageStatementVM line 41), but HTML renders
         // the assignment return as ~16px inside the occurrence. Add the 5px
         // difference so the occurrence bar extends to match HTML.
-        // Only for block syncs — non-block syncs already have correct height.
         if (assignment?.assignee && !info.isSelf && info.hasBlock) {
           occHeight += 5;
         }
 
         // Assignment return Y sits near the occurrence bottom.
-        // Computed after +5 compensation so it matches HTML's layout.
         const returnArrowY = occY + occHeight;
+
+        // Post-return-Y height corrections: these grow the occurrence box
+        // but do NOT shift the assignment return arrow position.
+        if (innerDebt > 0) {
+          // Each return-containing block's CSS border adds 1px that the
+          // positioning engine doesn't account for.
+          occHeight += 1;
+        }
+        if (assignment?.assignee && !info.isSelf && !info.hasBlock) {
+          // Non-block sync with assignment: positioning engine's coord.height
+          // is 1px short of HTML's occurrence height.
+          occHeight += 1;
+        }
 
         if (occHeight > 0) {
           occurrences.push({
