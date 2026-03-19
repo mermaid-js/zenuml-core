@@ -43,8 +43,8 @@ async function screenshotNode(target, rootNodeId, selector) {
   const border = model.border;
   const x = border[0];
   const y = border[1];
-  const width = border[2] - border[0];
-  const height = border[5] - border[1];
+  const width = Math.ceil(border[2] - border[0]);
+  const height = Math.ceil(border[5] - border[1]);
 
   const { data } = await cdp(target, "Page.captureScreenshot", {
     format: "png",

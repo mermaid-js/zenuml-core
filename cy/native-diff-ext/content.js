@@ -131,12 +131,15 @@ async function runNativeDiff() {
 async function nativeDiffAlgorithm(htmlDataUrl, svgDataUrl) {
   const [htmlImg, svgImg] = await Promise.all([loadImg(htmlDataUrl), loadImg(svgDataUrl)]);
 
-  const w = Math.min(htmlImg.width, svgImg.width);
-  const h = Math.min(htmlImg.height, svgImg.height);
+  const w = Math.max(htmlImg.width, svgImg.width);
+  const h = Math.max(htmlImg.height, svgImg.height);
   console.log("[native-diff-ext] HTML:", htmlImg.width, "x", htmlImg.height, " SVG:", svgImg.width, "x", svgImg.height, " Compare:", w, "x", h);
 
-  const htmlData = getImageData(htmlImg, htmlImg.width, htmlImg.height);
-  const svgData = getImageData(svgImg, svgImg.width, svgImg.height);
+  // Draw onto max-sized canvases; shorter side gets white padding (= background).
+  // Stride is w for both since canvas width = w. When widths match (normal case),
+  // htmlImg.width = svgImg.width = w, so existing stride references are correct.
+  const htmlData = getImageData(htmlImg, w, h);
+  const svgData = getImageData(svgImg, w, h);
 
   const LUMA_THRESHOLD = 240;
   const CHANNEL_TOLERANCE = 12;
