@@ -493,9 +493,10 @@ function buildMessages(
         }
 
         // Post-assignment height corrections: these grow the occurrence box.
-        if (innerDebt > 0) {
-          // Each return-containing block's CSS border adds 1px that the
-          // positioning engine doesn't account for.
+        if (innerDebt > 0 && adjustMap.has(`mixed:${info.key}`)) {
+          // Mixed-content blocks (returns + other statements) get a CSS border
+          // +1px that the positioning engine doesn't account for.
+          // Return-only blocks don't have this extra pixel.
           occHeight += 1;
         }
         if (assignment?.assignee && !info.isSelf && !info.hasBlock) {

@@ -23,6 +23,7 @@ const CANONICAL_CASES = [
   "return",
   "repro-return-after-creation",
   "vertical-2",
+  "return-only-two",
 ];
 
 const FIXTURES_DIR = path.resolve(
