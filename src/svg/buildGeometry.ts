@@ -492,12 +492,7 @@ function buildMessages(
           occHeight += 5;
         }
 
-        // Assignment return Y sits near the occurrence bottom.
-        // HTML places assignment returns at occBottom - 2 (inside the border).
-        const returnArrowY = occY + occHeight - 1;
-
-        // Post-return-Y height corrections: these grow the occurrence box
-        // but do NOT shift the assignment return arrow position.
+        // Post-assignment height corrections: these grow the occurrence box.
         if (innerDebt > 0) {
           // Each return-containing block's CSS border adds 1px that the
           // positioning engine doesn't account for.
@@ -508,6 +503,12 @@ function buildMessages(
           // is 1px short of HTML's occurrence height.
           occHeight += 1;
         }
+
+        // Assignment return Y: sits 2px above the occurrence bottom,
+        // matching HTML's return position inside the CSS border.
+        // Must be computed AFTER all height corrections so the gap is
+        // consistently 2px from the final occurrence bottom.
+        const returnArrowY = occY + occHeight - 2;
 
         if (occHeight > 0) {
           occurrences.push({
