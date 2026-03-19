@@ -617,15 +617,19 @@ function buildMessages(
           const rawFromX = snapX(coordinates.getPosition(info.from));
           const isLTR = rawFromX < toX;
           const occHalf = OCCURRENCE_BAR_SIDE_WIDTH;
-          // Sender (A) side: occurrence edge + LIFELINE_WIDTH CSS gap
+          // Sender (A) side: occurrence near edge facing the created participant.
+          // LTR: sender's right edge = rawFromX + occHalf + 1 (center pixel).
+          // RTL: sender's left edge = rawFromX - occHalf.
           const senderNest = Math.max(info.senderOccurrenceDepth - 1, 0) * OCCURRENCE_BAR_SIDE_WIDTH;
           const senderRetX = info.senderOccurrenceDepth >= 1
-            ? rawFromX + senderNest + (isLTR ? occHalf + LIFELINE_WIDTH : -(occHalf + LIFELINE_WIDTH))
+            ? rawFromX + senderNest + (isLTR ? occHalf + 1 : -occHalf)
             : rawFromX;
-          // Created (B) side: occurrence edge + LIFELINE_WIDTH CSS gap (into occ)
+          // Created (B) side: occurrence near edge facing the sender.
+          // LTR: created's left edge = toX - occHalf.
+          // RTL: created's right edge = toX + occHalf + 1 (center pixel).
           const createdRetX = isLTR
-            ? toX - occHalf + LIFELINE_WIDTH
-            : toX + occHalf - LIFELINE_WIDTH;
+            ? toX - occHalf
+            : toX + occHalf + 1;
           // fromX = line start (created side), toX = arrow tip (sender side)
           // renderReturn places arrow head at toX
           returns.push({
