@@ -481,11 +481,8 @@ function buildMessages(
           occHeight += innerDebt;
         }
 
-        // Assignment return Y uses the pre-compensation occurrence height.
-        // The occurrence bar needs to be taller than where the return arrow sits.
         const messageCtx = info.statNode?.message?.();
         const assignment = messageCtx?.Assignment?.();
-        const returnArrowY = occY + occHeight;
 
         // Assignment return compensation: the positioning engine adds +11 for
         // assignee returns (SyncMessageStatementVM line 41), but HTML renders
@@ -495,6 +492,10 @@ function buildMessages(
         if (assignment?.assignee && !info.isSelf && info.hasBlock) {
           occHeight += 5;
         }
+
+        // Assignment return Y sits near the occurrence bottom.
+        // Computed after +5 compensation so it matches HTML's layout.
+        const returnArrowY = occY + occHeight;
 
         if (occHeight > 0) {
           occurrences.push({
