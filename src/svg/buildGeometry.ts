@@ -531,12 +531,14 @@ function buildMessages(
               ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset + 1
               : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset + 1;
             // Sender's fromX is D4-adjusted for its occurrence edge.
-            // For bare lifelines (no occurrences), RTL needs +LIFELINE_WIDTH
-            // to match HTML Anchor2's edge offset (same as keyword returns).
+            // For bare lifelines (no occurrences), adjust to match HTML Anchor2's
+            // edge offset. HTML places the return endpoint at:
+            //   rightEdgeOfRightWall + LIFELINE_WIDTH + 1 (LTR message → RTL return)
+            //   position + LIFELINE_WIDTH (RTL message → LTR return)
             // For occupied senders, D4 already positions at the correct edge.
             let senderX = fromX;
-            if (!isLTR && info.senderOccurrenceDepth === 0) {
-              senderX += LIFELINE_WIDTH;
+            if (info.senderOccurrenceDepth === 0) {
+              senderX += isLTR ? LIFELINE_WIDTH + 1 : LIFELINE_WIDTH;
             }
             returns.push({
               fromX: retFromX, toX: senderX, y: returnArrowY,
@@ -843,6 +845,12 @@ function computeReturnDebt(
       if (ownerKey && occInnerDebt > 0) {
         result.set(`inner:${ownerKey}`, occInnerDebt);
       }
+      // Record whether block had mixed content (returns + non-return children).
+      // Return-only blocks don't get the CSS border +1px correction.
+      const hasMixed = hasNonReturnChild[maxDepth] || false;
+      if (ownerKey && hasMixed) {
+        result.set(`mixed:${ownerKey}`, 1);
+      }
       const hasAssign = blockHasAssignment[maxDepth] || false;
       debtByDepth.pop();
       directDebtByDepth.pop();
@@ -955,6 +963,10 @@ function computeReturnDebt(
     const occInnerDebtEnd = nestedDebtEnd + directShiftEnd;
     if (ownerKey && occInnerDebtEnd > 0) {
       result.set(`inner:${ownerKey}`, occInnerDebtEnd);
+    }
+    const hasMixedEnd = hasNonReturnChild[maxDepth] || false;
+    if (ownerKey && hasMixedEnd) {
+      result.set(`mixed:${ownerKey}`, 1);
     }
     const hasAssignEnd = blockHasAssignment[maxDepth] || false;
     debtByDepth.pop();
