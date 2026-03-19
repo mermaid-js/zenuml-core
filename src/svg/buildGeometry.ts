@@ -780,6 +780,10 @@ function computeReturnDebt(
   const blockOwnerKinds: (string | null)[] = [null]; // "sync" | "creation" | null
   // Track whether each block has non-return children (for mixed-content detection)
   const hasNonReturnChild: boolean[] = [false];
+  // Track whether each block owner has an assignment return (+5px compensation).
+  // The positioning engine adds +11 for assignment returns, but HTML renders ~16px.
+  // This +5 gap must be propagated as debt so subsequent statements shift down.
+  const blockHasAssignment: boolean[] = [false];
 
   for (const info of statements) {
     const depth = info.depth;
@@ -806,17 +810,25 @@ function computeReturnDebt(
       if (ownerKey && occInnerDebt > 0) {
         result.set(`inner:${ownerKey}`, occInnerDebt);
       }
+      const hasAssign = blockHasAssignment[maxDepth] || false;
       debtByDepth.pop();
       directDebtByDepth.pop();
       blockOwnerKeys.pop();
       blockOwnerKinds.pop();
       hasNonReturnChild.pop();
+      blockHasAssignment.pop();
       maxDepth--;
       // Propagate only DIRECT return debt (not child-cascaded debt) to parent
       // depth so subsequent statements are shifted down to match HTML CSS layout.
       // Using directDebt prevents double-counting from recursive propagation.
       if (ownerKey && ownerKind === "sync") {
         debtByDepth[maxDepth] += directDebt;
+        // Assignment return compensation: the occurrence gets +5 (11→16px gap),
+        // but the positioning engine doesn't account for this extra height.
+        // Propagate it as debt so subsequent statements shift down to match HTML.
+        if (hasAssign) {
+          debtByDepth[maxDepth] += 5;
+        }
       }
     }
 
@@ -828,6 +840,7 @@ function computeReturnDebt(
       blockOwnerKeys.push(null);
       blockOwnerKinds.push(null);
       hasNonReturnChild.push(false);
+      blockHasAssignment.push(false);
     }
 
     // Fragment section boundary: reset debt at this depth.
@@ -859,6 +872,9 @@ function computeReturnDebt(
     // Sync/creation with blocks: the NEXT statement in the flat list at depth+1
     // belongs to this statement's block. Record owner for debt propagation.
     if ((info.kind === "sync" || info.kind === "creation") && info.hasBlock) {
+      // Check if this sync has an assignment return (e.g. `ret = B.method { ... }`)
+      const msgCtx = info.statNode?.message?.();
+      const hasAssign = !!(msgCtx?.Assignment?.()?.assignee) && !info.isSelf;
       // The next depth level's block belongs to this statement
       if (depth + 1 > maxDepth) {
         maxDepth = depth + 1;
@@ -867,12 +883,14 @@ function computeReturnDebt(
         blockOwnerKeys.push(info.key);
         blockOwnerKinds.push(info.kind);
         hasNonReturnChild.push(false);
+        blockHasAssignment.push(hasAssign);
       } else {
         blockOwnerKeys[depth + 1] = info.key;
         blockOwnerKinds[depth + 1] = info.kind;
         debtByDepth[depth + 1] = 0; // reset for new block
         directDebtByDepth[depth + 1] = 0;
         hasNonReturnChild[depth + 1] = false;
+        blockHasAssignment[depth + 1] = hasAssign;
       }
     }
   }
@@ -889,15 +907,20 @@ function computeReturnDebt(
     if (ownerKey && occInnerDebtEnd > 0) {
       result.set(`inner:${ownerKey}`, occInnerDebtEnd);
     }
+    const hasAssignEnd = blockHasAssignment[maxDepth] || false;
     debtByDepth.pop();
     directDebtByDepth.pop();
     blockOwnerKeys.pop();
     blockOwnerKinds.pop();
     hasNonReturnChild.pop();
+    blockHasAssignment.pop();
     maxDepth--;
     // Propagate only direct debt — see main loop comment
     if (ownerKey && ownerKind === "sync") {
       debtByDepth[maxDepth] += directDebtEnd;
+      if (hasAssignEnd) {
+        debtByDepth[maxDepth] += 5;
+      }
     }
   }
 
