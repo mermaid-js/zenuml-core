@@ -797,6 +797,10 @@ function computeReturnDebt(
   const blockOwnerKinds: (string | null)[] = [null]; // "sync" | "creation" | null
   // Track whether each block has non-return children (for mixed-content detection)
   const hasNonReturnChild: boolean[] = [false];
+  // Non-block assignment shift: tracks +1px CSS height excess per depth.
+  // This shifts subsequent statements down but does NOT propagate as inner debt
+  // (parent occurrences shouldn't grow for this).
+  const nbAssignShift: number[] = [0];
   // Track whether each block owner has an assignment return (+5px compensation).
   // The positioning engine adds +11 for assignment returns, but HTML renders ~16px.
   // This +5 gap must be propagated as debt so subsequent statements shift down.
@@ -834,6 +838,7 @@ function computeReturnDebt(
       blockOwnerKinds.pop();
       hasNonReturnChild.pop();
       blockHasAssignment.pop();
+      nbAssignShift.pop();
       maxDepth--;
       // Propagate only DIRECT return debt (not child-cascaded debt) to parent
       // depth so subsequent statements are shifted down to match HTML CSS layout.
@@ -858,6 +863,7 @@ function computeReturnDebt(
       blockOwnerKinds.push(null);
       hasNonReturnChild.push(false);
       blockHasAssignment.push(false);
+      nbAssignShift.push(0);
     }
 
     // Fragment section boundary: reset debt at this depth.
@@ -869,9 +875,10 @@ function computeReturnDebt(
     }
 
     // Total adjustment = sum of all debt across all depths
+    // Include nbAssignShift (non-propagating) for Y positioning
     let totalDebt = 0;
     for (let d = 0; d <= depth; d++) {
-      totalDebt += debtByDepth[d] || 0;
+      totalDebt += (debtByDepth[d] || 0) + (nbAssignShift[d] || 0);
     }
     result.set(info.key, totalDebt);
 
@@ -883,6 +890,19 @@ function computeReturnDebt(
       // Track that this block has non-return children
       if (depth < hasNonReturnChild.length) {
         hasNonReturnChild[depth] = true;
+      }
+    }
+
+    // Non-block sync with assignment: HTML's CSS container is 1px taller than
+    // coord.height (50px vs 49px) because the assignment return's visual extent
+    // exceeds what the positioning engine allocates. Track this separately from
+    // return debt so it shifts subsequent statements but does NOT inflate parent
+    // occurrence height (which would overcorrect).
+    if (info.kind === "sync" && !info.hasBlock && !info.isSelf) {
+      const msgCtx = info.statNode?.message?.();
+      const hasAssign = !!(msgCtx?.Assignment?.()?.assignee);
+      if (hasAssign) {
+        nbAssignShift[depth] = (nbAssignShift[depth] || 0) + 1;
       }
     }
 
