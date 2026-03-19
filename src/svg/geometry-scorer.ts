@@ -9,11 +9,7 @@
  * so the horizontal coordinate origins are comparable.
  */
 
-import { RootContext } from "@/parser";
-import { Coordinates } from "@/positioning/Coordinates";
-import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
-import { WidthProviderOnCanvas } from "@/positioning/WidthProviderFunc";
-import { buildGeometry } from "./buildGeometry";
+import { renderToSvg } from "./renderToSvg";
 import type { DiagramGeometry } from "./geometry";
 import type { GeometryFixture } from "./geometry-fixture";
 
@@ -66,17 +62,10 @@ function match(expected: number, actual: number): boolean {
   return r(expected) === r(actual);
 }
 
-function getGeometry(code: string): DiagramGeometry {
-  const rootContext = RootContext(code)!;
-  const coordinates = new Coordinates(rootContext, WidthProviderOnCanvas);
-  const verticalCoordinates = new VerticalCoordinates(rootContext);
-  return buildGeometry({
-    rootContext,
-    coordinates,
-    verticalCoordinates,
-    title: undefined,
-    measureText: WidthProviderOnCanvas,
-  });
+function getRenderResult(code: string): { geometry: DiagramGeometry; viewBoxHeight: number } {
+  const result = renderToSvg(code);
+  if (!result.geometry) throw new Error("renderToSvg returned no geometry");
+  return { geometry: result.geometry, viewBoxHeight: result.height };
 }
 
 // ─── Utility ────────────────────────────────────────────────────────
@@ -103,7 +92,7 @@ interface Anchors {
 // ─── Main export ────────────────────────────────────────────────────
 
 export function scoreGeometry(fixture: GeometryFixture): ScoreResult {
-  const geometry = getGeometry(fixture.code);
+  const { geometry, viewBoxHeight } = getRenderResult(fixture.code);
 
   // Find anchor participant in both renderers for normalization
   const anchorGeo = geometry.participants.find(
@@ -134,9 +123,14 @@ export function scoreGeometry(fixture: GeometryFixture): ScoreResult {
   scoreFragmentsNorm(fixture, geometry, anchors, mismatches, byType);
   scoreDividersNorm(fixture, geometry, anchors, mismatches, byType);
   scoreCommentsNorm(fixture, geometry, anchors, mismatches, byType);
-  // Lifelines are excluded from scoring — they are derived from participant
-  // positions and diagram height, not independently positioned elements.
-  // Their y2 depends on occurrence height which is scored separately.
+
+  // Frame height: compare SVG viewBox height against HTML .frame height.
+  // viewBoxHeight comes directly from renderToSvg() — no magic numbers.
+  if (fixture.frameHeight && fixture.frameHeight > 0) {
+    compareProps(mismatches, byType, "frame", "diagram", [
+      { prop: "height", expected: fixture.frameHeight, actual: viewBoxHeight },
+    ]);
+  }
 
   const total = Object.values(byType).reduce((s, t) => s + t.total, 0);
   const matched = Object.values(byType).reduce((s, t) => s + t.matched, 0);

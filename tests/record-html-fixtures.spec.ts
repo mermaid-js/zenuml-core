@@ -141,6 +141,10 @@ for (const caseName of CANONICAL_CASES) {
         }
       }
 
+      // --- Frame height ---
+      const frameEl = htmlOutput.querySelector(".frame") as HTMLElement | null;
+      const frameHeight = frameEl ? r(frameEl.getBoundingClientRect().height) : 0;
+
       // --- Anchor: first non-creation participant ---
       let anchorParticipant = "";
       let anchorBottom = 0;
@@ -693,6 +697,7 @@ for (const caseName of CANONICAL_CASES) {
           participant: anchorParticipant,
           bottom: anchorBottom,
         },
+        frameHeight,
         participants,
         messages,
         selfCalls,

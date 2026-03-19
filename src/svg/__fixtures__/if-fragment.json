@@ -5,6 +5,7 @@
     "participant": "Client",
     "bottom": 68
   },
+  "frameHeight": 328,
   "participants": [
     {
       "name": "Client",

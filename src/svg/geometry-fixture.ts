@@ -80,6 +80,7 @@ export interface GeometryFixture {
   case: string;
   code: string;
   anchor: { participant: string; bottom: number };
+  frameHeight?: number;
   participants: FixtureParticipant[];
   messages: FixtureMessage[];
   selfCalls: FixtureSelfCall[];
