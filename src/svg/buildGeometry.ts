@@ -523,10 +523,12 @@ function buildMessages(
             // Return goes from target (toX) back to sender (fromX).
             // Target always has occurrence; start from its near edge toward sender.
             // When target has nested occurrence, shift by OCCURRENCE_BAR_SIDE_WIDTH.
+            // +1: OCCURRENCE_WIDTH (15) = 2*OCCURRENCE_BAR_SIDE_WIDTH (14) + 1 center pixel.
+            // The arrow starts from the occurrence edge (inner border in HTML, fill edge in SVG).
             const isLTR = fromX < toX;
             const retFromX = isLTR
-              ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
-              : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset;
+              ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset + 1
+              : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset + 1;
             // Sender's fromX is D4-adjusted for its occurrence edge.
             returns.push({
               fromX: retFromX, toX: fromX, y: returnArrowY,
@@ -692,13 +694,12 @@ function buildMessages(
           : (toLayers <= 1 ? rawToX : rawToX + OCCURRENCE_BAR_SIDE_WIDTH * (toLayers - 1)) - OCCURRENCE_BAR_SIDE_WIDTH;
       }
       // HTML Anchor2.edgeOffset subtracts LIFELINE_WIDTH from the container width.
-      // For LTR returns to a bare lifeline (toLayers=0), the arrow goes directly
-      // to the lifeline center — no LIFELINE_WIDTH correction needed.
-      // For RTL returns, the correction is always needed (HTML CSS shifts the left edge).
+      // For RTL returns, add LIFELINE_WIDTH to reach the inner edge of the target.
+      // For LTR returns, the +1 stroke correction on fromX (line 680) already
+      // accounts for the Anchor2 LIFELINE_WIDTH subtraction — applying it again
+      // on toX would double-count and shrink the arrow by 2px instead of 1px.
       if (isReverse) {
         toX += LIFELINE_WIDTH;
-      } else if (toLayers > 0) {
-        toX -= LIFELINE_WIDTH;
       }
       // First return inside a sync block renders 1px higher in HTML due to
       // the occurrence's border-top offsetting the content area.

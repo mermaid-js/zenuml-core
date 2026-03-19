@@ -304,6 +304,16 @@ A->B.method() {
     B.work
   }
 }`,
+  "return-assign-ltr": `A B C
+A->B.method() {
+  ret0 = B.inner
+}`,
+  "return-keyword-ltr": `A B C
+A->B.method() {
+  B->C.work {
+    return ret1
+  }
+}`,
   "repro-return-after-creation": `new B() {
   return from_creation
 }
