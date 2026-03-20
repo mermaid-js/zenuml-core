@@ -32,7 +32,10 @@ describe("Geometry Scoring — All Fixtures", () => {
       console.log(`[GEOM] ${fixture.case}: ${result.score}% (${result.matched}/${result.total}) baseline=${baseline}%`);
       if (result.mismatches.length > 0) {
         console.log(`  By type: ${Object.entries(result.byType).map(([t, s]) => `${t}:${s.matched}/${s.total}`).join(", ")}`);
-        console.log(`  Top mismatches: ${result.mismatches.slice(0, 5).map(m => `${m.elementType}.${m.label}.${m.property}: ${m.delta}px`).join(", ")}`);
+        console.log(`  All mismatches:`);
+        for (const m of result.mismatches) {
+          console.log(`    ${m.elementType}.${m.label}.${m.property}: ${m.delta}px`);
+        }
       }
       expect(result.score).toBeGreaterThanOrEqual(baseline);
     });
