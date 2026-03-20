@@ -210,7 +210,13 @@ function scoreMessagesNorm(
   mismatches: Mismatch[],
   byType: Record<string, { matched: number; total: number }>,
 ): void {
-  const fixtureMessages = [...fixture.messages].sort((a, b) => a.y - b.y);
+  // Filter out self-calls from fixture messages. The HTML fixture recorder puts
+  // all interactions (including self-calls) in messages[], but the geometry stores
+  // self-calls separately. Self-calls have |toX - fromX| ≤ 50 (arrow width ~30px).
+  const SELF_CALL_THRESHOLD = 50;
+  const fixtureMessages = [...fixture.messages]
+    .filter((m) => Math.abs(m.toX - m.fromX) > SELF_CALL_THRESHOLD)
+    .sort((a, b) => a.y - b.y);
   const geoMessages = geometry.messages.filter((m) => !m.isSelf).sort((a, b) => a.y - b.y);
 
   for (let i = 0; i < fixtureMessages.length; i++) {
@@ -251,26 +257,50 @@ function scoreSelfCallsNorm(
   mismatches: Mismatch[],
   byType: Record<string, { matched: number; total: number }>,
 ): void {
-  const fixtureSelfCalls = [...fixture.selfCalls].sort((a, b) => a.y - b.y);
+  // Self-calls may be in fixture.selfCalls or embedded in fixture.messages
+  // (the HTML recorder puts all interactions in messages[]). Extract self-calls
+  // from messages when selfCalls[] is empty: they have |toX - fromX| ≤ 50.
+  const SELF_CALL_THRESHOLD = 50;
+  let fixtureSelfCalls = [...fixture.selfCalls].sort((a, b) => a.y - b.y);
+  if (fixtureSelfCalls.length === 0 && fixture.messages.length > 0) {
+    // Async self-call layout: label(~20px) + arrow center(12px) = 32px from
+    // component top to arrow Y. Subtract to align with geometry's component top.
+    const SELF_CALL_Y_OFFSET = 32;
+    const selfMsgs = fixture.messages.filter((m) => Math.abs(m.toX - m.fromX) <= SELF_CALL_THRESHOLD);
+    fixtureSelfCalls = selfMsgs.map((m) => ({
+      label: m.label,
+      x: Math.min(m.fromX, m.toX),
+      y: m.y - SELF_CALL_Y_OFFSET,
+      width: Math.abs(m.toX - m.fromX),
+      height: 0, // not available from message format
+    })).sort((a, b) => a.y - b.y);
+  }
   const geoSelfCalls = [...geometry.selfCalls].sort((a, b) => a.y - b.y);
 
   for (let i = 0; i < fixtureSelfCalls.length; i++) {
     const fs = fixtureSelfCalls[i];
     const gs = geoSelfCalls[i];
-    compareProps(mismatches, byType, "selfCall", fs.label, [
+    // SVG self-call X uses participant center; HTML uses center+1 (same as messages).
+    const gsX = gs !== undefined ? gs.x + 1 : undefined;
+    const props: Array<{ prop: string; expected: number; actual: number | undefined }> = [
       {
         prop: "x",
         expected: normX(fs.x, anchors.fX),
-        actual: gs !== undefined ? normX(gs.x, anchors.gX) : undefined,
+        actual: gsX !== undefined ? normX(gsX, anchors.gX) : undefined,
       },
       {
         prop: "y",
         expected: normY(fs.y, anchors.fY),
         actual: gs !== undefined ? normY(gs.y, anchors.gY) : undefined,
       },
-      { prop: "width", expected: fs.width, actual: gs?.width },
-      { prop: "height", expected: fs.height, actual: gs?.height },
-    ]);
+    ];
+    // Only compare width/height when available from fixture (height=0 sentinel
+    // means self-call was extracted from messages[] without size info)
+    if (fs.height > 0) {
+      props.push({ prop: "width", expected: fs.width, actual: gs?.width });
+      props.push({ prop: "height", expected: fs.height, actual: gs?.height });
+    }
+    compareProps(mismatches, byType, "selfCall", fs.label, props);
   }
 }
 

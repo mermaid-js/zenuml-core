@@ -30,7 +30,7 @@ describe("scoreGeometry", () => {
       code: "A -> B: hello",
       anchor: { participant: "A", bottom: 48 },
       participants: [],
-      messages: [{ label: "hello", fromX: 999, toX: 999, y: 999 }],
+      messages: [{ label: "hello", fromX: 100, toX: 999, y: 999 }],
       selfCalls: [],
       occurrences: [],
       returns: [],
