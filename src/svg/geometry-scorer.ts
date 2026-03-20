@@ -225,11 +225,11 @@ function scoreMessagesNorm(
     // SVG sub-pixel corrections for message coordinates:
     // - Y: SVG uses -0.5 offset for crisp line rendering. Subtract 0.5
     //   before normalizing so the rounded value aligns with HTML.
-    // - X: SVG places endpoints at lifeline center; HTML measures at
-    //   center+1 (right edge of 2px lifeline). Add 1 to SVG X values.
+    // - X: SVG renderer already applies directional offset in message.ts
+    //   (left endpoint +1, right endpoint +0). No additional correction needed.
     const gmY = gm !== undefined ? gm.y - 0.5 : undefined;
-    const gmFromX = gm !== undefined ? gm.fromX + 1 : undefined;
-    const gmToX = gm !== undefined ? gm.toX + 1 : undefined;
+    const gmFromX = gm !== undefined ? gm.fromX : undefined;
+    const gmToX = gm !== undefined ? gm.toX : undefined;
     compareProps(mismatches, byType, "message", fm.label, [
       {
         prop: "fromX",
