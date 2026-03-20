@@ -73,15 +73,15 @@ A.Read() {
   "participant-width": `LongParticipantName.method`,
 
   // --- Async messages ---
-  "async-1": `A->A: async
-A->B: async
-A->C: async
-B->B: async
-B->C: async
-B->A: async
-C->C: async
-C->B: async
-C->A: async`,
+  "async-1": `A->A: selfA
+A->B: aToB
+A->C: aToC
+B->B: selfB
+B->C: bToC
+B->A: bToA
+C->C: selfC
+C->B: cToB
+C->A: cToA`,
   "async-2": `A.method {
   A->A: async
   A->B: async

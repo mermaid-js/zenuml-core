@@ -1,6 +1,6 @@
 {
   "case": "async-1",
-  "code": "A->A: async\nA->B: async\nA->C: async\nB->B: async\nB->C: async\nB->A: async\nC->C: async\nC->B: async\nC->A: async",
+  "code": "A->A: selfA\nA->B: aToB\nA->C: aToC\nB->B: selfB\nB->C: bToC\nB->A: bToA\nC->C: selfC\nC->B: cToB\nC->A: cToA",
   "anchor": {
     "participant": "A",
     "bottom": 68
@@ -31,55 +31,55 @@
   ],
   "messages": [
     {
-      "label": "1 async",
+      "label": "1 selfA",
       "fromX": 61,
       "toX": 91,
       "y": 104
     },
     {
-      "label": "async",
+      "label": "aToB",
       "fromX": 61,
       "toX": 160,
       "y": 147
     },
     {
-      "label": "async",
+      "label": "aToC",
       "fromX": 61,
       "toX": 260,
       "y": 179
     },
     {
-      "label": "4 async",
+      "label": "4 selfB",
       "fromX": 161,
       "toX": 191,
       "y": 228
     },
     {
-      "label": "async",
+      "label": "bToC",
       "fromX": 161,
       "toX": 260,
       "y": 271
     },
     {
-      "label": "async",
+      "label": "bToA",
       "fromX": 160,
       "toX": 61,
       "y": 303
     },
     {
-      "label": "7 async",
+      "label": "7 selfC",
       "fromX": 261,
       "toX": 291,
       "y": 352
     },
     {
-      "label": "async",
+      "label": "cToB",
       "fromX": 260,
       "toX": 161,
       "y": 395
     },
     {
-      "label": "async",
+      "label": "cToA",
       "fromX": 260,
       "toX": 61,
       "y": 427
