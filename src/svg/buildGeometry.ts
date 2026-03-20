@@ -1096,8 +1096,8 @@ function buildFragmentGeometry(
               const innerCoord = verticalCoordinates.getStatementCoordinate(firstStatKey);
               if (innerCoord) {
                 // Section separator is positioned above the first inner statement
-                // with header height (25px) and label space (20px)
-                sectionY = innerCoord.top - 20 - 8 - 8;
+                // with label space (20px) and padding (8+8+1px border)
+                sectionY = innerCoord.top - 20 - 8 - 8 - 1;
               }
             }
           }
