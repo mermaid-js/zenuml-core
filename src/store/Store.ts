@@ -11,9 +11,11 @@ import type { CodeRange } from "../parser/CodeRange";
 
 type VerticalMode = "server" | "browser";
 const resolveVerticalMode = (): VerticalMode => {
-  return import.meta.env.VITE_VERTICAL_MODE === "browser"
+  const mode = import.meta.env.VITE_VERTICAL_MODE === "browser"
     ? "browser"
     : "server";
+  console.info(`[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`);
+  return mode;
 };
 
 export const resolveWidthProvider = (): WidthFunc => {

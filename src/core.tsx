@@ -12,6 +12,7 @@ import {
   RenderMode,
   stickyOffsetAtom,
   themeAtom,
+  verticalModeAtom,
 } from "./store/Store";
 import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
 import { VERSION } from "./version.ts";
@@ -120,6 +121,10 @@ export default class ZenUml implements IZenUml {
     portalRootElement.className = "zenuml";
     portalRootElement.append(document.createElement("div"));
     document.body.append(portalRootElement);
+  }
+
+  setVerticalMode(mode: "server" | "browser") {
+    this.store.set(verticalModeAtom, mode);
   }
 
   async render(

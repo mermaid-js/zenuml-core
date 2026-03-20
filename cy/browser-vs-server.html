@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Browser vs Server Vertical Mode</title>
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; }
+      .page-header { padding: 8px 16px; background: #1e293b; color: white; display: flex; gap: 16px; align-items: center; }
+      .page-header h2 { margin: 0; font-size: 14px; font-weight: 600; }
+      .container { display: flex; gap: 0; }
+      .panel { flex: 1; overflow: auto; border-right: 1px solid #e2e8f0; }
+      .panel:last-child { border-right: none; }
+      .panel-header { padding: 6px 12px; background: #334155; color: white; font-size: 13px; font-weight: 600; }
+      .panel-content { padding: 0; background: white; }
+      .panel-info { padding: 8px 12px; background: #f1f5f9; font-size: 12px; font-family: monospace; color: #475569; border-top: 1px solid #e2e8f0; }
+      .delta { padding: 8px 16px; background: #fef3c7; font-size: 13px; font-family: monospace; color: #92400e; display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="page-header">
+      <h2>Vertical Mode Comparison: Server vs Browser</h2>
+    </div>
+    <div id="delta-bar" class="delta"></div>
+    <div class="container">
+      <div class="panel">
+        <div class="panel-header">Server Mode (VerticalCoordinates)</div>
+        <div class="panel-content" id="server-output"></div>
+        <div class="panel-info" id="server-info">Loading...</div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Browser Mode (DOM Measurement)</div>
+        <div class="panel-content" id="browser-output"></div>
+        <div class="panel-info" id="browser-info">Loading...</div>
+      </div>
+    </div>
+
+    <script type="module">
+      import ZenUml from "/src/core.tsx";
+
+      const code = `A.m {
+  if (condition) {
+    return ret
+    if(x) {
+      new B
+    }
+  }
+}`;
+
+      function createPanel(containerId, mode) {
+        const container = document.getElementById(containerId);
+        const pre = document.createElement("pre");
+        pre.className = "zenuml";
+        pre.style.margin = "0";
+        pre.textContent = code;
+        container.appendChild(pre);
+
+        const zenUml = new ZenUml(pre);
+        zenUml.setVerticalMode(mode);
+        zenUml.render(code, { theme: "theme-default" });
+        return zenUml;
+      }
+
+      function measurePanel(containerId) {
+        const container = document.getElementById(containerId);
+        const diagram = container.querySelector(".sequence-diagram");
+        if (!diagram) return null;
+
+        // Hide footer
+        const footer = container.querySelector(".footer");
+        if (footer) footer.style.display = "none";
+
+        const dRect = diagram.getBoundingClientRect();
+        const bBox = container.querySelector('[data-participant-id="B"]');
+        if (!bBox) return null;
+
+        const bRect = bBox.getBoundingClientRect();
+        return Math.round(bRect.top - dRect.top);
+      }
+
+      // Render both panels (fire-and-forget, don't await)
+      createPanel("server-output", "server");
+      createPanel("browser-output", "browser");
+
+      // Poll until both panels have participant B, then measure
+      const poll = setInterval(() => {
+        const serverB = document.querySelector('#server-output [data-participant-id="B"]');
+        const browserB = document.querySelector('#browser-output [data-participant-id="B"]');
+        if (!serverB || !browserB) return;
+
+        clearInterval(poll);
+
+        // Extra frame to let browser-mode DOM measurement settle
+        setTimeout(() => {
+          const serverTop = measurePanel("server-output");
+          const browserTop = measurePanel("browser-output");
+
+          document.getElementById("server-info").textContent =
+            serverTop != null ? `Participant B top: ${serverTop}px` : "Participant B not found";
+          document.getElementById("browser-info").textContent =
+            browserTop != null ? `Participant B top: ${browserTop}px` : "Participant B not found";
+
+          if (serverTop != null && browserTop != null) {
+            const delta = browserTop - serverTop;
+            const bar = document.getElementById("delta-bar");
+            bar.style.display = "block";
+            bar.textContent = delta === 0
+              ? `Participant B: identical (${serverTop}px)`
+              : `Participant B delta: ${delta}px (server=${serverTop}, browser=${browserTop})`;
+            bar.style.background = delta === 0 ? "#d1fae5" : "#fef3c7";
+            bar.style.color = delta === 0 ? "#065f46" : "#92400e";
+            console.info(`[Parity] Participant B: server=${serverTop}, browser=${browserTop}, delta=${delta}`);
+          }
+        }, 500);
+      }, 100);
+    </script>
+  </body>
+</html>

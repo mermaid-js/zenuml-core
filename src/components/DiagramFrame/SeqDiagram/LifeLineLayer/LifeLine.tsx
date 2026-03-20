@@ -89,6 +89,9 @@ export const LifeLine = (props: {
       //   (window as any).__zenumlCreationTopRecords =
       //     verticalCoordinates.getCreationTopRecords();
       // }
+      if (creationTop != null) {
+        console.info(`[LifeLine] creation participant="${props.entity.name}" creationTop=${creationTop} resolvedTop=${resolvedTop}`);
+      }
       setTop(resolvedTop);
       return true;
     };
