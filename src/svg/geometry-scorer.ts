@@ -347,8 +347,16 @@ function scoreReturnsNorm(
   mismatches: Mismatch[],
   byType: Record<string, { matched: number; total: number }>,
 ): void {
-  const fixtureReturns = [...fixture.returns].sort((a, b) => a.y - b.y);
-  const geoReturns = [...geometry.returns].sort((a, b) => a.y - b.y);
+  // Filter out self-returns: they render as self-call arrows, so their
+  // geometry fromX/toX (raw participant positions) aren't comparable to
+  // the fixture's HTML arrow endpoint measurements.
+  const SELF_RETURN_THRESHOLD = 15; // self-returns have |fromX-toX| ≤ ~12px
+  const fixtureReturns = [...fixture.returns]
+    .filter((r) => Math.abs(r.fromX - r.toX) > SELF_RETURN_THRESHOLD)
+    .sort((a, b) => a.y - b.y);
+  const geoReturns = [...geometry.returns]
+    .filter((r) => !r.isSelf)
+    .sort((a, b) => a.y - b.y);
 
   for (let i = 0; i < fixtureReturns.length; i++) {
     const fr = fixtureReturns[i];
