@@ -448,13 +448,6 @@ function scoreFragmentsNorm(
     const ff = fixtureFragments[i];
     const gf = geoFragments[i];
     const label = `${ff.kind}[${i}]`;
-    // Fragment SVG rendering: rect uses geometry width/height directly, but
-    // SVG stroke-width:1 is centered on the path (0.5px outside each edge).
-    // HTML uses border-box (border inside). So the SVG fragment renders
-    // 1px wider and 1px taller than the HTML equivalent. Apply +1 correction
-    // to geometry values to compare what the renderer actually outputs.
-    const gfWidth = gf !== undefined ? gf.width + 1 : undefined;
-    const gfHeight = gf !== undefined ? gf.height + 1 : undefined;
     compareProps(mismatches, byType, "fragment", label, [
       {
         prop: "x",
@@ -466,8 +459,8 @@ function scoreFragmentsNorm(
         expected: normY(ff.y, anchors.fY),
         actual: gf !== undefined ? normY(gf.y, anchors.gY) : undefined,
       },
-      { prop: "width", expected: ff.width, actual: gfWidth },
-      { prop: "height", expected: ff.height, actual: gfHeight },
+      { prop: "width", expected: ff.width, actual: gf?.width },
+      { prop: "height", expected: ff.height, actual: gf?.height },
     ]);
 
     // Sections

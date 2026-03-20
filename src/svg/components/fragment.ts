@@ -2,12 +2,23 @@ import type { FragmentGeometry } from "../geometry";
 
 const HEADER_HEIGHT = 25;
 
+/**
+ * Stroke inset for SVG border-box emulation.
+ * CSS border-box keeps the border INSIDE the element's width/height.
+ * SVG centered stroke extends half the stroke width OUTSIDE the rect.
+ * Inset the rect by half the stroke width on each side so the outer
+ * stroke edge aligns with the CSS border outer edge.
+ */
+const STROKE_WIDTH = 1;
+const HALF_STROKE = STROKE_WIDTH / 2; // 0.5px inset
+
 export function renderFragment(f: FragmentGeometry): string {
   const parts: string[] = [];
 
-  // Fragment border rect
+  // Fragment border rect — inset by half stroke width so outer stroke
+  // edge matches CSS border-box model (border inside the bounding box)
   parts.push(
-    `<rect x="${f.x}" y="${f.y}" width="${f.width}" height="${f.height}" rx="4" class="fragment-border"/>`,
+    `<rect x="${f.x + HALF_STROKE}" y="${f.y + HALF_STROKE}" width="${f.width - STROKE_WIDTH}" height="${f.height - STROKE_WIDTH}" rx="4" class="fragment-border"/>`,
   );
 
   // Full-width header bar (matches HTML's bg-skin-fragment-header)
