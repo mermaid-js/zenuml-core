@@ -39,8 +39,7 @@ export class SyncMessageStatementVM extends StatementVM {
     }
 
     if (assignee && !isSelf) {
-      cursor += 11;
-      // console.info("syncMessageVM::assignment", assignee);
+      cursor += 12;
     }
 
     const height = cursor - top;
