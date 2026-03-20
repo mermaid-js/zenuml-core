@@ -540,15 +540,19 @@ for (const caseName of CANONICAL_CASES) {
         const rect = htmlEl.getBoundingClientRect();
         const p = rel(rect);
 
-        // Determine fragment kind from header text or class
+        // Determine fragment kind and visible label from header.
+        // The header has a hidden seq number div and a visible .name div.
         const header = htmlEl.querySelector(".header");
         let kind = "unknown";
+        let headerLabel = "";
         if (header) {
-          const headerText = (
-            header as HTMLElement
-          ).textContent
-            ?.trim()
-            .toLowerCase();
+          // Use the visible .name element for kind detection
+          const nameEl = (header as HTMLElement).querySelector(".name");
+          const visibleText = nameEl
+            ? (nameEl as HTMLElement).textContent?.trim() || ""
+            : "";
+          headerLabel = visibleText; // e.g., "Alt", "Try", "Loop"
+          const headerText = visibleText.toLowerCase();
           if (headerText?.startsWith("alt") || headerText?.startsWith("if"))
             kind = "alt";
           else if (headerText?.startsWith("loop") || headerText?.startsWith("while") || headerText?.startsWith("foreach"))
@@ -564,17 +568,31 @@ for (const caseName of CANONICAL_CASES) {
           else kind = headerText?.split(/[\s(]/)[0] || "unknown";
         }
 
-        // Sections: look for section dividers within this fragment
+        // Sections: look for section dividers within this fragment.
+        // Two patterns: (1) direct child dividers (.section-divider, .fragment-divider, .divider)
+        // (2) .segment.border-t elements inside a block container (used by alt/if-else, try-catch-finally)
         const sections: {
           label: string;
           y: number;
           height: number;
         }[] = [];
-        const sectionDividers = Array.from(
+        let sectionDividers = Array.from(
           htmlEl.querySelectorAll(
             ":scope > .section-divider, :scope > .fragment-divider, :scope > .divider",
           ),
         );
+
+        // Fallback: look for .segment.border-t in the fragment's direct block container
+        // (alt/tcf sections). Only get segments that are direct children of the block,
+        // not segments inside nested fragments.
+        if (sectionDividers.length === 0) {
+          const blockContainer = htmlEl.querySelector(":scope > .block") || htmlEl.querySelector(":scope > div:not(.header)");
+          if (blockContainer) {
+            sectionDividers = Array.from(
+              blockContainer.querySelectorAll(":scope > .segment.border-t"),
+            );
+          }
+        }
 
         // First section starts at fragment top
         if (sectionDividers.length > 0) {
@@ -583,7 +601,7 @@ for (const caseName of CANONICAL_CASES) {
             sectionDividers[0] as HTMLElement
           ).getBoundingClientRect();
           sections.push({
-            label: kind,
+            label: headerLabel || kind,
             y: p.y,
             height: r(firstDivRect.top - rect.top),
           });
@@ -592,8 +610,28 @@ for (const caseName of CANONICAL_CASES) {
           for (let i = 0; i < sectionDividers.length; i++) {
             const divEl = sectionDividers[i] as HTMLElement;
             const divRect = divEl.getBoundingClientRect();
-            const divLabel =
-              divEl.textContent?.trim() || "";
+            // Extract the visible section label from the segment.
+            // The first child element (.text-skin-fragment) contains the label,
+            // but may have hidden elements (e.g., "else if" with class="hidden").
+            // Extract only visible text to match what the user sees.
+            const labelEl = divEl.firstElementChild as HTMLElement;
+            let divLabel = "";
+            if (labelEl) {
+              const visibleParts: string[] = [];
+              for (const child of Array.from(labelEl.childNodes)) {
+                if (child.nodeType === 3) {
+                  const t = (child as Text).textContent?.trim();
+                  if (t) visibleParts.push(t);
+                } else {
+                  const el = child as HTMLElement;
+                  const cs = window.getComputedStyle(el);
+                  if (cs.display === "none" || el.classList?.contains("hidden")) continue;
+                  const t = el.textContent?.trim();
+                  if (t) visibleParts.push(t);
+                }
+              }
+              divLabel = visibleParts.join(" ");
+            }
             const nextY = r(
               divRect.top - containerRect.top,
             );

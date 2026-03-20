@@ -73,20 +73,52 @@
   "creations": [],
   "fragments": [
     {
-      "kind": "1alt",
+      "kind": "alt",
       "x": 10,
       "y": 72,
       "width": 340,
       "height": 514,
-      "sections": []
+      "sections": [
+        {
+          "label": "Alt",
+          "y": 72,
+          "height": 357
+        },
+        {
+          "label": "[ cond2 ]",
+          "y": 429,
+          "height": 77
+        },
+        {
+          "label": "[else]",
+          "y": 506,
+          "height": 80
+        }
+      ]
     },
     {
-      "kind": "1.2try",
+      "kind": "try",
       "x": 20,
       "y": 166,
       "width": 320,
       "height": 239,
-      "sections": []
+      "sections": [
+        {
+          "label": "Try",
+          "y": 166,
+          "height": 82
+        },
+        {
+          "label": "catch e",
+          "y": 248,
+          "height": 77
+        },
+        {
+          "label": "finally",
+          "y": 325,
+          "height": 80
+        }
+      ]
     }
   ],
   "dividers": [],

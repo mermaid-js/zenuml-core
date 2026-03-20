@@ -464,7 +464,8 @@ function scoreFragmentsNorm(
       const sLabel = `${label}.section[${j}]`;
       // Compare section label text (not a numeric property)
       if (gs !== undefined && fs.label !== gs.label) {
-        addMismatch(mismatches, "fragment.section", sLabel, "label", 0, 1);
+        // Use hash of labels as dummy numeric values so the mismatch report shows them
+        addMismatch(mismatches, "fragment.section", `${sLabel}(expected="${fs.label}",actual="${gs.label}")`, "label", 0, 1);
         const key = "fragment.section";
         if (!byType[key]) byType[key] = { matched: 0, total: 0 };
         byType[key].total++;
@@ -474,13 +475,19 @@ function scoreFragmentsNorm(
         byType[key].matched++;
         byType[key].total++;
       }
+      // Compute effective section height: geometry stores height=0 for non-last
+      // sections (renderer derives it from next section Y). Reconstruct here.
+      let gsHeight = gs?.height;
+      if (gs !== undefined && gsHeight === 0 && j + 1 < geoSections.length) {
+        gsHeight = geoSections[j + 1].y - gs.y;
+      }
       compareProps(mismatches, byType, "fragment.section", sLabel, [
         {
           prop: "y",
           expected: normY(fs.y, anchors.fY),
           actual: gs !== undefined ? normY(gs.y, anchors.gY) : undefined,
         },
-        { prop: "height", expected: fs.height, actual: gs?.height },
+        { prop: "height", expected: fs.height, actual: gsHeight },
       ]);
     }
   }

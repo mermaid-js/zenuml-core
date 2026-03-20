@@ -49,7 +49,7 @@
   "creations": [],
   "fragments": [
     {
-      "kind": "2loop",
+      "kind": "loop",
       "x": 110,
       "y": 104,
       "width": 220,

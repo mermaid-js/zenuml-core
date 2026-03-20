@@ -72,12 +72,28 @@
   "creations": [],
   "fragments": [
     {
-      "kind": "1.1try",
+      "kind": "try",
       "x": 121,
       "y": 104,
       "width": 420,
       "height": 305,
-      "sections": []
+      "sections": [
+        {
+          "label": "Try",
+          "y": 104,
+          "height": 104
+        },
+        {
+          "label": "catch error",
+          "y": 208,
+          "height": 99
+        },
+        {
+          "label": "finally",
+          "y": 307,
+          "height": 102
+        }
+      ]
     }
   ],
   "dividers": [],
