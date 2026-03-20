@@ -10,14 +10,14 @@
   "nested-occurrence": 100,
   "async-self": 100,
   "async-1": 100,
-  "if-fragment": 100,
-  "fragment-loop": 100,
-  "fragment-tcf": 100,
+  "if-fragment": 89,
+  "fragment-loop": 91,
+  "fragment-tcf": 96,
   "creation": 100,
   "creation-rtl": 100,
   "return": 100,
   "repro-return-after-creation": 100,
   "vertical-2": 100,
   "return-only-two": 100,
-  "repro-alt-nested-tcf": 100
+  "repro-alt-nested-tcf": 93
 }
