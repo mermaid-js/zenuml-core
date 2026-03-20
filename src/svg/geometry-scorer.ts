@@ -462,6 +462,18 @@ function scoreFragmentsNorm(
       const fs = fixtureSections[j];
       const gs = geoSections[j];
       const sLabel = `${label}.section[${j}]`;
+      // Compare section label text (not a numeric property)
+      if (gs !== undefined && fs.label !== gs.label) {
+        addMismatch(mismatches, "fragment.section", sLabel, "label", 0, 1);
+        const key = "fragment.section";
+        if (!byType[key]) byType[key] = { matched: 0, total: 0 };
+        byType[key].total++;
+      } else if (gs !== undefined) {
+        const key = "fragment.section";
+        if (!byType[key]) byType[key] = { matched: 0, total: 0 };
+        byType[key].matched++;
+        byType[key].total++;
+      }
       compareProps(mismatches, byType, "fragment.section", sLabel, [
         {
           prop: "y",

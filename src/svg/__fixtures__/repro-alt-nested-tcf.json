@@ -1,0 +1,114 @@
+{
+  "case": "repro-alt-nested-tcf",
+  "code": "if(cond) {\n  A -> B: msg1\n  try {\n    B -> C: tryMsg\n  } catch(e) {\n    C -> B: catchMsg\n  } finally {\n    B -> A: finallyMsg\n  }\n} else if(cond2) {\n  A -> B: elseIfMsg\n} else {\n  A -> B: elseMsg\n}",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "frameHeight": 677,
+  "participants": [
+    {
+      "name": "A",
+      "x": 40,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "B",
+      "x": 140,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "C",
+      "x": 240,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [
+    {
+      "label": "msg1",
+      "fromX": 81,
+      "toX": 180,
+      "y": 149
+    },
+    {
+      "label": "tryMsg",
+      "fromX": 181,
+      "toX": 280,
+      "y": 223
+    },
+    {
+      "label": "catchMsg",
+      "fromX": 280,
+      "toX": 181,
+      "y": 300
+    },
+    {
+      "label": "finallyMsg",
+      "fromX": 180,
+      "toX": 81,
+      "y": 377
+    },
+    {
+      "label": "elseIfMsg",
+      "fromX": 81,
+      "toX": 180,
+      "y": 481
+    },
+    {
+      "label": "elseMsg",
+      "fromX": 81,
+      "toX": 180,
+      "y": 558
+    }
+  ],
+  "selfCalls": [],
+  "occurrences": [],
+  "returns": [],
+  "creations": [],
+  "fragments": [
+    {
+      "kind": "1alt",
+      "x": 10,
+      "y": 72,
+      "width": 340,
+      "height": 514,
+      "sections": []
+    },
+    {
+      "kind": "1.2try",
+      "x": 20,
+      "y": 166,
+      "width": 320,
+      "height": 239,
+      "sections": []
+    }
+  ],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 80,
+      "y1": 68,
+      "y2": 642
+    },
+    {
+      "participant": "B",
+      "x": 180,
+      "y1": 68,
+      "y2": 642
+    },
+    {
+      "participant": "C",
+      "x": 280,
+      "y1": 68,
+      "y2": 642
+    }
+  ]
+}
