@@ -20,13 +20,15 @@ export function renderMessage(m: MessageGeometry): string {
     : "";
 
   // -0.5px Y: align with HTML's border-bottom line rendering (CSS renders at half-pixel)
-  // +0.5px X: shift line and head right to match HTML arrow position
+  // HTML arrow SVG container spans from left_lifeline_center+1 to right_lifeline_center.
+  // Left endpoint = center+1 (right edge of 2px lifeline), right endpoint = center.
   const lineY = m.y - 0.5;
-  const fromX = m.fromX + 0.5;
-  const toX = m.toX + 0.5;
+  const isLTR = m.fromX < m.toX;
+  const fromX = isLTR ? m.fromX + 1 : m.fromX;
+  const toX = isLTR ? m.toX : m.toX + 1;
   return `<g class="message">
   <line x1="${fromX}" y1="${lineY}" x2="${toX}" y2="${lineY}" class="message-line"${dashAttr}/>
-  ${renderArrowHead(toX - 1, lineY, m.isReverse, m.arrowStyle)}
+  ${renderArrowHead(toX, lineY, m.isReverse, m.arrowStyle)}
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(m.label)}</text>
   ${numberSvg}
 </g>`;
