@@ -1,0 +1,95 @@
+{
+  "case": "repro-occ-mixed-2ret",
+  "code": "A->B.method {\n  B->C.inner {\n    C->B.call\n    @return C->B: ret1\n    @return C->B: ret2\n  }\n}",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "frameHeight": 333,
+  "participants": [
+    {
+      "name": "A",
+      "x": 20,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "B",
+      "x": 120,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "C",
+      "x": 220,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [],
+  "selfCalls": [],
+  "occurrences": [
+    {
+      "participant": "B",
+      "x": 153,
+      "y": 86,
+      "width": 15,
+      "height": 156
+    },
+    {
+      "participant": "C",
+      "x": 253,
+      "y": 118,
+      "width": 15,
+      "height": 106
+    },
+    {
+      "participant": "B",
+      "x": 160,
+      "y": 150,
+      "width": 15,
+      "height": 24
+    }
+  ],
+  "returns": [
+    {
+      "label": "ret1",
+      "fromX": 168,
+      "toX": 253,
+      "y": 206
+    },
+    {
+      "label": "ret2",
+      "fromX": 168,
+      "toX": 253,
+      "y": 222
+    }
+  ],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 60,
+      "y1": 68,
+      "y2": 298
+    },
+    {
+      "participant": "B",
+      "x": 160,
+      "y1": 68,
+      "y2": 298
+    },
+    {
+      "participant": "C",
+      "x": 260,
+      "y1": 68,
+      "y2": 298
+    }
+  ]
+}

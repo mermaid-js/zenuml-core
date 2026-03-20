@@ -55,6 +55,12 @@ export interface FixtureFragment {
   y: number;
   width: number;
   height: number;
+  /** Condition label (e.g. "[true]") position — x/y relative to container */
+  conditionLabel?: string;
+  conditionX?: number;
+  conditionY?: number;
+  /** Rendered width of the full condition text (e.g., "[true]") in px */
+  conditionTextWidth?: number;
   sections: { label: string; y: number; height: number }[];
 }
 

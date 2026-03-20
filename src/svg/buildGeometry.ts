@@ -724,7 +724,13 @@ function buildMessages(
       }
       // First return inside a sync block renders 1px higher in HTML due to
       // the occurrence's border-top offsetting the content area.
-      const returnOffset = (info.parentBlockKind === "sync" && adjust === 0) ? 15 : 16;
+      // Exception: when the block has non-return content before the return
+      // (mixed-content block), the border-top offset has already been absorbed
+      // by the non-return content, so use 16 instead of 15.
+      // Use the blockMixedKey (set by computeReturnDebt for the parent block).
+      const blockMixedKey = `mixed-at-depth:${info.depth}`;
+      const blockHasMixedContent = adjustMap.has(blockMixedKey);
+      const returnOffset = (info.parentBlockKind === "sync" && adjust === 0 && !blockHasMixedContent) ? 15 : 16;
       const returnY = coord.top + adjust + returnOffset;
       returns.push({
         fromX,
@@ -926,6 +932,13 @@ function computeReturnDebt(
       // Track that this block has non-return children
       if (depth < hasNonReturnChild.length) {
         hasNonReturnChild[depth] = true;
+      }
+      // Track non-block non-return children that appear BEFORE any return
+      // at this depth. These occupy vertical space in the positioning engine
+      // and absorb the border-top offset, so the first return uses 16 not 15.
+      // Only set the flag if no return has been seen yet at this depth.
+      if (!info.hasBlock && info.kind === "sync" && (directDebtByDepth[depth] || 0) === 0) {
+        result.set(`mixed-at-depth:${depth}`, 1);
       }
     }
 

@@ -13,6 +13,28 @@ import { renderToSvg } from "./renderToSvg";
 import type { DiagramGeometry } from "./geometry";
 import type { GeometryFixture } from "./geometry-fixture";
 
+// ─── Canvas text measurement (14px) ─────────────────────────────────
+// Fragment condition labels render at 14px in both HTML and SVG.
+// The WidthProvider uses 16px for all text. We need a 14px measurement
+// for condition label width comparison.
+const COND_FONT = "14px Helvetica, Verdana, serif";
+const COND_PADDING = 8; // HTML .condition span has padding: 0 4px (4px each side)
+function measureConditionText(text: string): number {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { createCanvas } = require("@napi-rs/canvas");
+    const canvas = createCanvas(1, 1);
+    const ctx = canvas.getContext("2d");
+    ctx.font = COND_FONT;
+    // SVG fragment.ts adds dx="4" on condition tspan and dx="4" on closing bracket
+    // to match HTML's padding: 0 4px on .condition span (4px each side = 8px total)
+    return ctx.measureText(text).width + COND_PADDING;
+  } catch {
+    // Fallback: character estimate
+    return text.length * 7 + COND_PADDING;
+  }
+}
+
 // ─── Public types ──────────────────────────────────────────────────
 
 export interface Mismatch {
@@ -390,17 +412,19 @@ function scoreCreationsNorm(
     // Creation participant: fixture stores left-edge px, geometry stores center x.
     // Convert both to center-relative.
     //
-    // Message endpoints: geometry stores participant center positions, but
+    // Message endpoints: geometry stores participant center positions.
     // creation.ts renders with adjustments:
     //   - fromX: +1 on left endpoint (same as message.ts lifeline offset)
-    //   - toX: participant near edge +1 (LTR) or far edge (RTL)
+    //   - toX: participant near edge (LTR: center - halfWidth, RTL: center + halfWidth)
+    //     The arrow tip must stop AT the participant rect edge, not past it,
+    //     because SVG has no z-ordering to hide overlap like CSS does.
     const isLTR = gc !== undefined ? gc.message.fromX < gc.message.toX : true;
     const halfWidth = gc !== undefined ? gc.participant.width / 2 : 0;
     const renderedFromX = gc !== undefined
       ? gc.message.fromX + (isLTR ? 1 : 0)
       : undefined;
     const renderedToX = gc !== undefined
-      ? gc.message.toX + (isLTR ? -halfWidth + 1 : halfWidth)
+      ? gc.message.toX + (isLTR ? -halfWidth : halfWidth)
       : undefined;
     compareProps(mismatches, byType, "creation", label, [
       {
@@ -422,7 +446,11 @@ function scoreCreationsNorm(
       },
       {
         prop: "msgToX",
-        expected: normX(fc.msgToX, anchors.fX),
+        // HTML records arrow tip 1px past participant edge (CSS z-ordering hides overlap).
+        // SVG has no z-ordering, so arrow must stop AT the edge. Use participant near
+        // edge from fixture (px for LTR, px+pw for RTL) as expected value instead of
+        // the raw msgToX which includes HTML's 1px overlap.
+        expected: normX(isLTR ? fc.px : fc.px + fc.pw, anchors.fX),
         actual: renderedToX !== undefined ? normX(renderedToX, anchors.gX) : undefined,
       },
       {
@@ -431,6 +459,7 @@ function scoreCreationsNorm(
         actual: gc !== undefined ? normY(gc.message.y, anchors.gY) : undefined,
       },
     ]);
+
   }
 }
 
@@ -462,6 +491,50 @@ function scoreFragmentsNorm(
       { prop: "width", expected: ff.width, actual: gf?.width },
       { prop: "height", expected: ff.height, actual: gf?.height },
     ]);
+
+    // Condition label (e.g., "[true]") — compare text and Y position.
+    // HTML positions the condition div directly at headerBottom (no gap).
+    // Geometry stores headerY; the fixture conditionY = headerY + HEADER_HEIGHT.
+    if (ff.conditionLabel && ff.conditionY !== undefined) {
+      const HEADER_HEIGHT = 25;
+      const geoCondY = gf !== undefined ? gf.headerY + HEADER_HEIGHT : undefined;
+      const geoCondLabel = gf !== undefined && gf.label ? `[${gf.label}]` : undefined;
+
+      // Compare label text
+      const condKey = "fragment.condition";
+      if (!byType[condKey]) byType[condKey] = { matched: 0, total: 0 };
+      byType[condKey].total++;
+      if (geoCondLabel !== undefined && ff.conditionLabel !== geoCondLabel) {
+        addMismatch(mismatches, condKey, `${label}(expected="${ff.conditionLabel}",actual="${geoCondLabel}")`, "label", 0, 1);
+      } else if (geoCondLabel !== undefined) {
+        byType[condKey].matched++;
+      }
+
+      // Compare Y position and text width
+      // Text width: fixture records HTML inline text width ([bracket-to-bracket]);
+      // scorer measures SVG text "[label]" at 14px using canvas.
+      const geoCondWidth = gf !== undefined && gf.label
+        ? measureConditionText(`[${gf.label}]`)
+        : undefined;
+      const condWidthProps: Array<{ prop: string; expected: number; actual: number | undefined }> = [
+        {
+          prop: "y",
+          expected: normY(ff.conditionY, anchors.fY),
+          actual: geoCondY !== undefined ? normY(geoCondY, anchors.gY) : undefined,
+        },
+      ];
+      if (ff.conditionTextWidth !== undefined) {
+        // Round to 1 decimal: canvas measureText and Chromium getBoundingClientRect
+        // return slightly different float precision for the same font/text.
+        const round1 = (n: number) => Math.round(n * 10) / 10;
+        condWidthProps.push({
+          prop: "textWidth",
+          expected: round1(ff.conditionTextWidth),
+          actual: geoCondWidth !== undefined ? round1(geoCondWidth) : undefined,
+        });
+      }
+      compareProps(mismatches, byType, "fragment.condition", label, condWidthProps);
+    }
 
     // Sections
     const fixtureSections = [...(ff.sections ?? [])].sort((a, b) => a.y - b.y);

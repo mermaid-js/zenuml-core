@@ -78,6 +78,10 @@
       "y": 72,
       "width": 340,
       "height": 514,
+      "conditionLabel": "[cond]",
+      "conditionX": 11,
+      "conditionY": 98,
+      "conditionTextWidth": 46.140625,
       "sections": [
         {
           "label": "Alt",

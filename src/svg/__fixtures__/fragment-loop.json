@@ -54,6 +54,10 @@
       "y": 104,
       "width": 220,
       "height": 105,
+      "conditionLabel": "[condition]",
+      "conditionX": 111,
+      "conditionY": 130,
+      "conditionTextWidth": 71.828125,
       "sections": []
     }
   ],

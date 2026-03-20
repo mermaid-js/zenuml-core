@@ -10,10 +10,11 @@ export function renderCreation(c: CreationGeometry): string {
     ? p.x + p.width / 2
     : p.x - p.width / 2;
 
-  // HTML arrow container spans from lifeline center+1 to participant edge+1.
-  // Apply same +1 offset to left endpoint (matching message.ts convention).
+  // fromX: +1 on left endpoint (matching message.ts lifeline offset convention).
+  // toX: stop AT the participant rect edge — no +1, because SVG has no
+  // z-ordering to hide arrowhead overlap like CSS does in HTML.
   const fromX = isRTL ? m.fromX : m.fromX + 1;
-  const toX = isRTL ? adjustedToX : adjustedToX + 1;
+  const toX = isRTL ? adjustedToX : adjustedToX;
 
   const labelX = fromX + (toX - fromX) / 2 - 3;
   const labelY = m.y - 3;

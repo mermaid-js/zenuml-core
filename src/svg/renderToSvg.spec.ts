@@ -205,7 +205,8 @@ describe("renderToSvg", () => {
     const result = renderToSvg("if(condition) {\n  A -> B: msg\n}");
     expect(result.svg).toContain('class="fragment fragment-alt"');
     // Condition should appear in brackets with opacity on the condition text
-    expect(result.svg).toContain('<tspan>[</tspan><tspan opacity="0.65">condition</tspan><tspan>]</tspan>');
+    // dx="4" on condition and closing bracket matches HTML .condition span padding: 0 4px
+    expect(result.svg).toContain('<tspan>[</tspan><tspan dx="4" opacity="0.65">condition</tspan><tspan dx="4">]</tspan>');
   });
 
   it("fragment has valid rect geometry", () => {

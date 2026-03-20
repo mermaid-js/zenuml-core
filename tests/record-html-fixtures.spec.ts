@@ -25,6 +25,7 @@ const CANONICAL_CASES = [
   "vertical-2",
   "return-only-two",
   "repro-alt-nested-tcf",
+  "repro-occ-mixed-2ret",
 ];
 
 const FIXTURES_DIR = path.resolve(
@@ -545,6 +546,10 @@ for (const caseName of CANONICAL_CASES) {
         y: number;
         width: number;
         height: number;
+        conditionLabel?: string;
+        conditionX?: number;
+        conditionY?: number;
+        conditionTextWidth?: number;
         sections: { label: string; y: number; height: number }[];
       }[] = [];
       for (const el of fragmentEls) {
@@ -662,12 +667,43 @@ for (const caseName of CANONICAL_CASES) {
           }
         }
 
+        // Condition label: the .text-skin-fragment div that contains a
+        // .condition span (e.g., "[true]", "[x > 0]").  Only alt/opt/loop
+        // fragments have conditions — try/catch/finally sections also use
+        // .text-skin-fragment but without a .condition child.
+        let conditionLabel: string | undefined;
+        let conditionX: number | undefined;
+        let conditionY: number | undefined;
+        let conditionTextWidth: number | undefined;
+        const condSpan = htmlEl.querySelector(".text-skin-fragment .condition");
+        if (condSpan) {
+          const condContainer = (condSpan as HTMLElement).closest(".text-skin-fragment") as HTMLElement;
+          const condText = condContainer?.textContent?.trim() || "";
+          if (condText) {
+            const condRect = condContainer.getBoundingClientRect();
+            conditionLabel = condText;
+            conditionX = condRect.left - containerRect.left;
+            conditionY = condRect.top - containerRect.top;
+            // Measure actual inline text width: from first <label> "[" to last <label> "]"
+            const labels = condContainer.querySelectorAll("label");
+            if (labels.length >= 2) {
+              const firstRect = labels[0].getBoundingClientRect();
+              const lastRect = labels[labels.length - 1].getBoundingClientRect();
+              conditionTextWidth = lastRect.right - firstRect.left;
+            }
+          }
+        }
+
         fragments.push({
           kind,
           x: p.x,
           y: p.y,
           width: p.width,
           height: p.height,
+          conditionLabel,
+          conditionX,
+          conditionY,
+          conditionTextWidth,
           sections,
         });
       }

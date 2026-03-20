@@ -19,5 +19,6 @@
   "repro-return-after-creation": 100,
   "vertical-2": 100,
   "return-only-two": 100,
-  "repro-alt-nested-tcf": 100
+  "repro-alt-nested-tcf": 100,
+  "repro-occ-mixed-2ret": 87
 }
