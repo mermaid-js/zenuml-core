@@ -5,20 +5,28 @@
     <title>Browser vs Server Vertical Mode</title>
     <style>
       body { margin: 0; font-family: system-ui, sans-serif; }
-      .page-header { padding: 8px 16px; background: #1e293b; color: white; display: flex; gap: 16px; align-items: center; }
+      .page-header { padding: 8px 16px; background: #1e293b; color: white; display: flex; gap: 12px; align-items: center; }
       .page-header h2 { margin: 0; font-size: 14px; font-weight: 600; }
+      .nav { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+      .nav a { color: #93c5fd; text-decoration: none; font-size: 12px; padding: 4px 10px; background: #334155; border-radius: 4px; }
+      .nav a:hover { text-decoration: underline; }
+      .nav a.hidden { visibility: hidden; }
       .container { display: flex; gap: 0; }
       .panel { flex: 1; overflow: auto; border-right: 1px solid #e2e8f0; }
       .panel:last-child { border-right: none; }
       .panel-header { padding: 6px 12px; background: #334155; color: white; font-size: 13px; font-weight: 600; }
       .panel-content { padding: 0; background: white; }
       .panel-info { padding: 8px 12px; background: #f1f5f9; font-size: 12px; font-family: monospace; color: #475569; border-top: 1px solid #e2e8f0; }
-      .delta { padding: 8px 16px; background: #fef3c7; font-size: 13px; font-family: monospace; color: #92400e; display: none; }
+      .delta { padding: 8px 16px; font-size: 13px; font-family: monospace; display: none; }
     </style>
   </head>
   <body>
     <div class="page-header">
-      <h2>Vertical Mode Comparison: Server vs Browser</h2>
+      <h2 id="case-name">Vertical Mode Comparison</h2>
+      <div class="nav">
+        <a id="prev-link" href="#">&larr; Prev</a>
+        <a id="next-link" href="#">Next &rarr;</a>
+      </div>
     </div>
     <div id="delta-bar" class="delta"></div>
     <div class="container">
@@ -37,81 +45,244 @@
     <script type="module">
       import ZenUml from "/src/core.tsx";
 
-      const code = `A.m {
+      const CASES = {
+        "return-in-nested-if": `A.m {
   if (condition) {
     return ret
     if(x) {
       new B
     }
   }
-}`;
+}`,
+        "vertical-1": `// red
+// green
+a = A.m111
+new E`,
+        "vertical-2": `// [red]
+new B`,
+        "vertical-3": `if(x) {
+  // comment
+  new A
+} else {
+  new B
+}
 
-      function createPanel(containerId, mode) {
-        const container = document.getElementById(containerId);
-        const pre = document.createElement("pre");
-        pre.className = "zenuml";
-        pre.style.margin = "0";
-        pre.textContent = code;
-        container.appendChild(pre);
+new C
+try {
+  new D
+} catch {
+  par {
+    new E
+    new F
+  }
+}`,
+        "vertical-4": `if(x) {
+  // comment
+  new A
+} else {
+  new B
+}
 
-        const zenUml = new ZenUml(pre);
-        zenUml.setVerticalMode(mode);
-        zenUml.render(code, { theme: "theme-default" });
-        return zenUml;
+new C
+try {
+  new D
+} catch {
+  par {
+    new E
+    new F
+    if(x) {
+      new X
+    } else {
+      new Y
+    }
+  }
+}`,
+        "vertical-5": `par {
+  new F
+  if(x) {
+    new X
+  } else {
+    try {
+      new Y
+    } catch {
+      par {
+        new G
+        if(x) {
+          new H
+        } else {
+          new I
+        }
+      }
+    }
+  }
+}`,
+        "vertical-6": `new a
+if(x) {
+	new b
+} else {
+	new c
+	new e
+}
+new D`,
+        "vertical-7": `A.method
+section(){
+    new B
+}`,
+        "vertical-8": `new Creation() {
+  return from_creation
+}
+return "from if to original source"
+try {
+  new AHasAVeryLongNameLongNameLongNameLongName() {
+    new CreatWithinCreat()
+  }
+}`,
+        "vertical-9": `A0->A0: self
+new A`,
+        "vertical-10": `new E
+E.messageA()
+new A {
+  if (x) {
+    new D
+  }
+  new B {
+    new C
+  }
+}`,
+        "vertical-11": `A.call {
+  // pre creation
+  A->B: prep
+  a = new A()
+  a->B: post
+}`,
+      };
+
+      const caseNames = Object.keys(CASES);
+      const params = new URLSearchParams(window.location.search);
+      const caseName = params.get("case") || caseNames[0];
+      const code = CASES[caseName];
+
+      // Update title
+      document.title = `Browser vs Server: ${caseName}`;
+      document.getElementById("case-name").textContent = caseName;
+
+      // Prev/Next navigation
+      const idx = caseNames.indexOf(caseName);
+      const prevLink = document.getElementById("prev-link");
+      const nextLink = document.getElementById("next-link");
+      if (idx > 0) {
+        prevLink.href = `?case=${encodeURIComponent(caseNames[idx - 1])}`;
+      } else {
+        prevLink.classList.add("hidden");
+      }
+      if (idx < caseNames.length - 1) {
+        nextLink.href = `?case=${encodeURIComponent(caseNames[idx + 1])}`;
+      } else {
+        nextLink.classList.add("hidden");
       }
 
-      function measurePanel(containerId) {
-        const container = document.getElementById(containerId);
-        const diagram = container.querySelector(".sequence-diagram");
-        if (!diagram) return null;
+      if (code === undefined) {
+        document.getElementById("server-output").innerHTML = `<p style="color:red">Unknown case: ${caseName}</p>`;
+      } else {
+        function createPanel(containerId, mode) {
+          const container = document.getElementById(containerId);
+          const pre = document.createElement("pre");
+          pre.className = "zenuml";
+          pre.style.margin = "0";
+          pre.textContent = code;
+          container.appendChild(pre);
 
-        // Hide footer
-        const footer = container.querySelector(".footer");
-        if (footer) footer.style.display = "none";
+          const zenUml = new ZenUml(pre);
+          zenUml.setVerticalMode(mode);
+          zenUml.render(code, { theme: "theme-default" });
+          return zenUml;
+        }
 
-        const dRect = diagram.getBoundingClientRect();
-        const bBox = container.querySelector('[data-participant-id="B"]');
-        if (!bBox) return null;
+        function measureCreationParticipants(containerId) {
+          const container = document.getElementById(containerId);
+          const diagram = container.querySelector(".sequence-diagram");
+          if (!diagram) return {};
 
-        const bRect = bBox.getBoundingClientRect();
-        return Math.round(bRect.top - dRect.top);
-      }
+          // Hide footer
+          const footer = container.querySelector(".footer");
+          if (footer) footer.style.display = "none";
 
-      // Render both panels (fire-and-forget, don't await)
-      createPanel("server-output", "server");
-      createPanel("browser-output", "browser");
+          const dRect = diagram.getBoundingClientRect();
+          const results = {};
+          container.querySelectorAll("[data-participant-id]").forEach(el => {
+            const name = el.getAttribute("data-participant-id");
+            // Check if this is a creation participant (lifeline paddingTop > 20)
+            const lifeline = container.querySelector(`[id="${name}"]`);
+            const pt = lifeline ? parseFloat(lifeline.style.paddingTop) : 0;
+            if (pt > 20) {
+              const rect = el.getBoundingClientRect();
+              results[name] = Math.round(rect.top - dRect.top);
+            }
+          });
+          return results;
+        }
 
-      // Poll until both panels have participant B, then measure
-      const poll = setInterval(() => {
-        const serverB = document.querySelector('#server-output [data-participant-id="B"]');
-        const browserB = document.querySelector('#browser-output [data-participant-id="B"]');
-        if (!serverB || !browserB) return;
+        // Render both panels
+        createPanel("server-output", "server");
+        createPanel("browser-output", "browser");
 
-        clearInterval(poll);
+        // Poll until both panels have .sequence-diagram, then measure
+        const poll = setInterval(() => {
+          const serverDiag = document.querySelector('#server-output .sequence-diagram');
+          const browserDiag = document.querySelector('#browser-output .sequence-diagram');
+          if (!serverDiag || !browserDiag) return;
 
-        // Extra frame to let browser-mode DOM measurement settle
-        setTimeout(() => {
-          const serverTop = measurePanel("server-output");
-          const browserTop = measurePanel("browser-output");
+          clearInterval(poll);
 
-          document.getElementById("server-info").textContent =
-            serverTop != null ? `Participant B top: ${serverTop}px` : "Participant B not found";
-          document.getElementById("browser-info").textContent =
-            browserTop != null ? `Participant B top: ${browserTop}px` : "Participant B not found";
+          setTimeout(() => {
+            const serverPositions = measureCreationParticipants("server-output");
+            const browserPositions = measureCreationParticipants("browser-output");
 
-          if (serverTop != null && browserTop != null) {
-            const delta = browserTop - serverTop;
+            const allNames = new Set([...Object.keys(serverPositions), ...Object.keys(browserPositions)]);
+
+            if (allNames.size === 0) {
+              document.getElementById("server-info").textContent = "No creation participants";
+              document.getElementById("browser-info").textContent = "No creation participants";
+              const bar = document.getElementById("delta-bar");
+              bar.style.display = "block";
+              bar.textContent = "No creation participants in this case";
+              bar.style.background = "#e2e8f0";
+              bar.style.color = "#475569";
+              return;
+            }
+
+            const serverLines = [];
+            const browserLines = [];
+            const deltaLines = [];
+            let allMatch = true;
+
+            for (const name of allNames) {
+              const s = serverPositions[name];
+              const b = browserPositions[name];
+              serverLines.push(`${name}: ${s != null ? s + 'px' : 'n/a'}`);
+              browserLines.push(`${name}: ${b != null ? b + 'px' : 'n/a'}`);
+              if (s != null && b != null) {
+                const delta = b - s;
+                if (delta !== 0) allMatch = false;
+                deltaLines.push(`${name}: ${delta === 0 ? 'identical' : delta + 'px'} (server=${s}, browser=${b})`);
+              }
+            }
+
+            document.getElementById("server-info").textContent = serverLines.join(' | ');
+            document.getElementById("browser-info").textContent = browserLines.join(' | ');
+
             const bar = document.getElementById("delta-bar");
             bar.style.display = "block";
-            bar.textContent = delta === 0
-              ? `Participant B: identical (${serverTop}px)`
-              : `Participant B delta: ${delta}px (server=${serverTop}, browser=${browserTop})`;
-            bar.style.background = delta === 0 ? "#d1fae5" : "#fef3c7";
-            bar.style.color = delta === 0 ? "#065f46" : "#92400e";
-            console.info(`[Parity] Participant B: server=${serverTop}, browser=${browserTop}, delta=${delta}`);
-          }
-        }, 500);
-      }, 100);
+            bar.textContent = allMatch
+              ? `All creation participants identical`
+              : deltaLines.join(' | ');
+            bar.style.background = allMatch ? "#d1fae5" : "#fef3c7";
+            bar.style.color = allMatch ? "#065f46" : "#92400e";
+
+            console.info(`[Parity] ${caseName}:`, allMatch ? "all identical" : deltaLines.join(', '));
+          }, 500);
+        }, 100);
+      }
     </script>
   </body>
 </html>
