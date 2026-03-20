@@ -28,6 +28,20 @@ export class ReturnStatementVM extends StatementVM {
 
     const messageHeight = isSelf ? 20 : 0;
     cursor += messageHeight;
+
+    // CSS: .occurrence .block > .statement-container:last-child > .interaction.return
+    // applies margin-bottom: -16px, collapsing the return's bottom space.
+    // The collapse only applies to direct-child returns in the last position.
+    // Non-last returns render with their full height (16px from .h-4 interaction).
+    if (!isSelf) {
+      const block = this.context?.parentCtx;
+      const siblings = block?.stat?.() || [];
+      const isLast = siblings[siblings.length - 1] === this.context;
+      if (!isLast) {
+        cursor += 16;
+      }
+    }
+
     const height = cursor - top;
     // console.info("returnVM::", top, commentHeight, source, target, height);
 

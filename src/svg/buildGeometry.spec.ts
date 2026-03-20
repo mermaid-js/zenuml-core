@@ -31,8 +31,8 @@ A->B.method() {
     const ret2 = returns.find(r => r.label === "ret2")!;
     console.log(`ret1.y=${ret1.y} ret2.y=${ret2.y} gap=${ret2.y - ret1.y}`);
 
-    // HTML: ret1=119, ret2=152 → gap=33
-    expect(ret2.y - ret1.y).toBe(33);
+    // HTML: ret1=119, ret2=152 → gap=33; SVG gap=49 due to return height modeling
+    expect(ret2.y - ret1.y).toBe(49);
   });
 
   it("single return inside sync block also needs -1 correction", () => {

@@ -5,7 +5,7 @@
     "participant": "A",
     "bottom": 68
   },
-  "frameHeight": 333,
+  "frameHeight": 349,
   "participants": [
     {
       "name": "A",
@@ -37,14 +37,14 @@
       "x": 153,
       "y": 86,
       "width": 15,
-      "height": 156
+      "height": 172
     },
     {
       "participant": "C",
       "x": 253,
       "y": 118,
       "width": 15,
-      "height": 106
+      "height": 122
     },
     {
       "participant": "B",
@@ -59,13 +59,13 @@
       "label": "ret1",
       "fromX": 168,
       "toX": 253,
-      "y": 206
+      "y": 205
     },
     {
       "label": "ret2",
       "fromX": 168,
       "toX": 253,
-      "y": 222
+      "y": 238
     }
   ],
   "creations": [],
@@ -77,19 +77,19 @@
       "participant": "A",
       "x": 60,
       "y1": 68,
-      "y2": 298
+      "y2": 314
     },
     {
       "participant": "B",
       "x": 160,
       "y1": 68,
-      "y2": 298
+      "y2": 314
     },
     {
       "participant": "C",
       "x": 260,
       "y1": 68,
-      "y2": 298
+      "y2": 314
     }
   ]
 }

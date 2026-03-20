@@ -33,6 +33,7 @@ export class SyncMessageStatementVM extends StatementVM {
         this.findLeftParticipant(this.message, origin) || origin;
       cursor = this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
       cursor += 2; // .occurrence.border-2 for bottom
+
     } else {
       cursor += 22; // .occurrence, .min-h-6, .mt-[-2px]
     }
