@@ -10,14 +10,19 @@ export function renderCreation(c: CreationGeometry): string {
     ? p.x + p.width / 2
     : p.x - p.width / 2;
 
-  const labelX = m.fromX + (adjustedToX - m.fromX) / 2 - 3;
+  // HTML arrow container spans from lifeline center+1 to participant edge+1.
+  // Apply same +1 offset to left endpoint (matching message.ts convention).
+  const fromX = isRTL ? m.fromX : m.fromX + 1;
+  const toX = isRTL ? adjustedToX : adjustedToX + 1;
+
+  const labelX = fromX + (toX - fromX) / 2 - 3;
   const labelY = m.y - 3;
 
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
 
   return `<g class="creation">
-  <line x1="${m.fromX}" y1="${m.y}" x2="${adjustedToX}" y2="${m.y}" class="message-line" stroke-dasharray="6,4"/>
-  ${renderOpenArrow(adjustedToX, m.y, isRTL)}
+  <line x1="${fromX}" y1="${m.y}" x2="${toX}" y2="${m.y}" class="message-line" stroke-dasharray="6,4"/>
+  ${renderOpenArrow(toX, m.y, isRTL)}
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(m.label)}</text>
 </g>`;
 }

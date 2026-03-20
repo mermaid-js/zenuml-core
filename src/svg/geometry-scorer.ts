@@ -390,15 +390,17 @@ function scoreCreationsNorm(
     // Creation participant: fixture stores left-edge px, geometry stores center x.
     // Convert both to center-relative.
     //
-    // Message endpoints: geometry stores participant center positions, but the
-    // renderer draws the arrow to the created participant's near edge (not center).
-    // Convert geometry toX to the rendered endpoint:
-    //   LTR (fromX < toX): arrow ends at participant left edge = centerX - halfWidth
-    //   RTL (fromX > toX): arrow ends at participant right edge = centerX + halfWidth
+    // Message endpoints: geometry stores participant center positions, but
+    // creation.ts renders with adjustments:
+    //   - fromX: +1 on left endpoint (same as message.ts lifeline offset)
+    //   - toX: participant near edge +1 (LTR) or far edge (RTL)
     const isLTR = gc !== undefined ? gc.message.fromX < gc.message.toX : true;
     const halfWidth = gc !== undefined ? gc.participant.width / 2 : 0;
+    const renderedFromX = gc !== undefined
+      ? gc.message.fromX + (isLTR ? 1 : 0)
+      : undefined;
     const renderedToX = gc !== undefined
-      ? gc.message.toX + (isLTR ? -halfWidth : halfWidth)
+      ? gc.message.toX + (isLTR ? -halfWidth + 1 : halfWidth)
       : undefined;
     compareProps(mismatches, byType, "creation", label, [
       {
@@ -409,14 +411,14 @@ function scoreCreationsNorm(
       {
         prop: "py",
         expected: normY(fc.py, anchors.fY),
-        actual: gc !== undefined ? normY(gc.participant.y, anchors.gY) : undefined,
+        actual: gc !== undefined ? normX(gc.participant.y, anchors.gY) : undefined,
       },
       { prop: "pw", expected: fc.pw, actual: gc?.participant.width },
       { prop: "ph", expected: fc.ph, actual: gc?.participant.height },
       {
         prop: "msgFromX",
         expected: normX(fc.msgFromX, anchors.fX),
-        actual: gc !== undefined ? normX(gc.message.fromX, anchors.gX) : undefined,
+        actual: renderedFromX !== undefined ? normX(renderedFromX, anchors.gX) : undefined,
       },
       {
         prop: "msgToX",
