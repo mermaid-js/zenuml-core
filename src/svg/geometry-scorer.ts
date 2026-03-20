@@ -216,21 +216,29 @@ function scoreMessagesNorm(
   for (let i = 0; i < fixtureMessages.length; i++) {
     const fm = fixtureMessages[i];
     const gm = geoMessages[i];
+    // SVG sub-pixel corrections for message coordinates:
+    // - Y: SVG uses -0.5 offset for crisp line rendering. Subtract 0.5
+    //   before normalizing so the rounded value aligns with HTML.
+    // - X: SVG places endpoints at lifeline center; HTML measures at
+    //   center+1 (right edge of 2px lifeline). Add 1 to SVG X values.
+    const gmY = gm !== undefined ? gm.y - 0.5 : undefined;
+    const gmFromX = gm !== undefined ? gm.fromX + 1 : undefined;
+    const gmToX = gm !== undefined ? gm.toX + 1 : undefined;
     compareProps(mismatches, byType, "message", fm.label, [
       {
         prop: "fromX",
         expected: normX(fm.fromX, anchors.fX),
-        actual: gm !== undefined ? normX(gm.fromX, anchors.gX) : undefined,
+        actual: gmFromX !== undefined ? normX(gmFromX, anchors.gX) : undefined,
       },
       {
         prop: "toX",
         expected: normX(fm.toX, anchors.fX),
-        actual: gm !== undefined ? normX(gm.toX, anchors.gX) : undefined,
+        actual: gmToX !== undefined ? normX(gmToX, anchors.gX) : undefined,
       },
       {
         prop: "y",
         expected: normY(fm.y, anchors.fY),
-        actual: gm !== undefined ? normY(gm.y, anchors.gY) : undefined,
+        actual: gmY !== undefined ? normY(gmY, anchors.gY) : undefined,
       },
     ]);
   }

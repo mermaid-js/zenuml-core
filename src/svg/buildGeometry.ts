@@ -113,10 +113,8 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
   // overhead) gives the right frame height matching HTML. Other content uses +13 (= SVG
   // bottom space = viewHeight_overhead(47) - headerLineY(34)).
   let maxOccBottom = 0;
-  let maxReturnY = 0;
   let maxOtherY = 0;
   for (const o of occurrences) maxOccBottom = Math.max(maxOccBottom, o.y + o.height);
-  for (const r of returns) maxReturnY = Math.max(maxReturnY, r.y);
   for (const m of messages) maxOtherY = Math.max(maxOtherY, m.y);
   for (const s of selfCalls) maxOtherY = Math.max(maxOtherY, s.y + s.height);
   for (const c of creations) maxOtherY = Math.max(maxOtherY, c.message.y + PARTICIPANT_VISUAL_HEIGHT);
@@ -126,7 +124,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     totalHeight + 28,
     maxOccBottom + 13,
     maxOtherY + 13,
-    maxReturnY + 47,
+    buildResult.maxReturnBottom,
   );
   const lifelineBottom = diagramHeight + PARTICIPANT_VISUAL_HEIGHT - 28;
 
@@ -331,6 +329,7 @@ function buildMessages(
   dividers: DividerGeometry[];
   comments: CommentGeometry[];
   totalReturnDebt: number;
+  maxReturnBottom: number;
 } {
   const statements = walkStatements(rootContext);
   const messages: MessageGeometry[] = [];
@@ -342,6 +341,7 @@ function buildMessages(
   const dividers: DividerGeometry[] = [];
   const comments: CommentGeometry[] = [];
 
+  let maxReturnBottom = 0;
   const diagramWidth = coordinates.getWidth();
   const allParticipants = coordinates.orderedParticipantNames();
 
@@ -536,15 +536,20 @@ function buildMessages(
             // edge offset. HTML places the return endpoint at:
             //   rightEdgeOfRightWall + LIFELINE_WIDTH + 1 (LTR message → RTL return)
             //   position + LIFELINE_WIDTH (RTL message → LTR return)
-            // For occupied senders, D4 already positions at the correct edge.
+            // For occupied senders, D4 positions at the fill edge; add +2 for the
+            // center pixel + stroke that extends beyond the occurrence rect
+            // (matching the keyword return's +1 at the right wall edge).
             let senderX = fromX;
             if (info.senderOccurrenceDepth === 0) {
               senderX += isLTR ? LIFELINE_WIDTH + 1 : LIFELINE_WIDTH;
+            } else if (isLTR) {
+              senderX += 2;
             }
             returns.push({
               fromX: retFromX, toX: senderX, y: returnArrowY,
               label: assignment.assignee, isReverse: fromX < toX, isSelf: false,
             });
+            maxReturnBottom = Math.max(maxReturnBottom, returnArrowY + 46);
           }
         }
       }
@@ -647,6 +652,7 @@ function buildMessages(
             fromX: createdRetX, toX: senderRetX, y: occBottom,
             label: creationAssign.assignee, isReverse: createdRetX > senderRetX, isSelf: false,
           });
+          maxReturnBottom = Math.max(maxReturnBottom, occBottom + 46);
         }
       }
       continue;
@@ -718,17 +724,17 @@ function buildMessages(
       }
       // First return inside a sync block renders 1px higher in HTML due to
       // the occurrence's border-top offsetting the content area.
-      // First return inside a sync block renders 1px higher in HTML due to
-      // the occurrence's border-top offsetting the content area.
       const returnOffset = (info.parentBlockKind === "sync" && adjust === 0) ? 15 : 16;
+      const returnY = coord.top + adjust + returnOffset;
       returns.push({
         fromX,
         toX,
-        y: coord.top + adjust + returnOffset,
+        y: returnY,
         label: info.label,
         isReverse,
         isSelf: info.isSelf,
       });
+      maxReturnBottom = Math.max(maxReturnBottom, returnY + (62 - returnOffset));
       continue;
     }
 
@@ -775,7 +781,7 @@ function buildMessages(
   }
 
   const totalReturnDebt = adjustMap.get("__totalDebt__") || 0;
-  return { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments, totalReturnDebt };
+  return { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments, totalReturnDebt, maxReturnBottom };
 }
 
 /**
@@ -905,8 +911,17 @@ function computeReturnDebt(
 
     // Non-self returns add debt at their depth
     if (info.kind === "return" && !info.isSelf) {
+      const isFirstAtDepth = (directDebtByDepth[depth] || 0) === 0;
       debtByDepth[depth] += returnHeight;
       directDebtByDepth[depth] += returnHeight;
+      // When the first return in a sync block has adjust>0 (from child-block
+      // debt), it uses returnOffset=16 instead of 15. This removes the 15→16
+      // transition that normally adds +1px to the gap between consecutive
+      // returns. Compensate with +1 via nbAssignShift (non-propagating) to
+      // avoid inflating inner debt / occurrence height calculations.
+      if (isFirstAtDepth && totalDebt !== 0 && info.parentBlockKind === "sync") {
+        nbAssignShift[depth] = (nbAssignShift[depth] || 0) + 1;
+      }
     } else if (info.kind !== "return") {
       // Track that this block has non-return children
       if (depth < hasNonReturnChild.length) {
