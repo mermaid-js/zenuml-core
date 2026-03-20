@@ -3,14 +3,14 @@
   "code": "// [red]\nnew B",
   "anchor": {
     "participant": "B",
-    "bottom": 113
+    "bottom": 112
   },
   "frameHeight": 225,
   "participants": [
     {
       "name": "B",
       "x": 162.5,
-      "y": 73,
+      "y": 72,
       "width": 80,
       "height": 40
     }
@@ -31,7 +31,7 @@
     {
       "participantName": "B",
       "px": 162.5,
-      "py": 73,
+      "py": 72,
       "pw": 80,
       "ph": 40,
       "msgFromX": 66.5,
@@ -46,7 +46,7 @@
     {
       "participant": "B",
       "x": 202.5,
-      "y1": 113,
+      "y1": 112,
       "y2": 190
     }
   ]

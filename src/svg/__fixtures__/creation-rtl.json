@@ -3,14 +3,14 @@
   "code": "\"b:B\"\na1 = A.method() {\n  // abcde\n  b = new B()\n}",
   "anchor": {
     "participant": "b:B",
-    "bottom": 165
+    "bottom": 164
   },
   "frameHeight": 323,
   "participants": [
     {
       "name": "b:B",
       "x": 131,
-      "y": 125,
+      "y": 124,
       "width": 80,
       "height": 40
     },
@@ -58,7 +58,7 @@
     {
       "participantName": "b:B",
       "px": 131,
-      "py": 125,
+      "py": 124,
       "pw": 80,
       "ph": 40,
       "msgFromX": 301,
@@ -73,7 +73,7 @@
     {
       "participant": "b:B",
       "x": 171,
-      "y1": 165,
+      "y1": 164,
       "y2": 288
     },
     {

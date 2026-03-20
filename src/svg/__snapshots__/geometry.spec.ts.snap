@@ -117,7 +117,7 @@ exports[`geometry: creations creation participant has lower y than normal partic
 {
   "createdWidth": 80,
   "createdX": 298,
-  "createdY": 105,
+  "createdY": 104,
   "normalY": 28,
 }
 `;

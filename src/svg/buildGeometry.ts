@@ -278,11 +278,9 @@ function buildParticipants(
       if (m.name === _STARTER_) width = Math.min(width, 80); // match HTML min-width: 80px
       const creationTop = verticalCoordinates.getCreationTop(m.name);
       const isStarter = m.name === _STARTER_;
-      // updateCreationTop subtracts 7px for HTML CSS padding (.life-line-layer .pt-2);
-      // SVG has no such padding, so add 8 back (7 + 1 for SVG centered stroke model:
-      // the renderer insets the fill rect by HALF_STROKE, so p.y+1 becomes the fill top,
-      // and the visual top = fill - halfStroke = p.y. With +8, visual top = creationTop+8,
-      // matching HTML border-box top).
+      // updateCreationTop subtracts 8px for HTML CSS padding (.life-line-layer .pt-2);
+      // SVG has no such padding, so add 8 back to recover the raw VM top, plus the
+      // SVG stroke-model offset is already accounted for by PARTICIPANT_TOP_SPACE.
       const y =
         creationTop != null
           ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 8)
