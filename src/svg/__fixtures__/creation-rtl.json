@@ -49,12 +49,23 @@
     },
     {
       "label": "a1",
-      "fromX": 68,
+      "fromX": 67.5,
       "toX": 302,
       "y": 230
     }
   ],
-  "creations": [],
+  "creations": [
+    {
+      "participantName": "b:B",
+      "px": 131,
+      "py": 125,
+      "pw": 80,
+      "ph": 40,
+      "msgFromX": 301,
+      "msgToX": 211,
+      "msgY": 144
+    }
+  ],
   "fragments": [],
   "dividers": [],
   "comments": [],

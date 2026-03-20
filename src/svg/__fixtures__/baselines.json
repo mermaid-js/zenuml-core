@@ -13,11 +13,11 @@
   "if-fragment": 100,
   "fragment-loop": 100,
   "fragment-tcf": 100,
-  "creation": 100,
+  "creation": 92,
   "creation-rtl": 100,
   "return": 100,
-  "repro-return-after-creation": 100,
-  "vertical-2": 100,
+  "repro-return-after-creation": 89,
+  "vertical-2": 88,
   "return-only-two": 100,
   "repro-alt-nested-tcf": 100
 }

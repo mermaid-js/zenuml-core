@@ -41,7 +41,18 @@
     }
   ],
   "returns": [],
-  "creations": [],
+  "creations": [
+    {
+      "participantName": "B",
+      "px": 273,
+      "py": 105,
+      "pw": 80,
+      "ph": 40,
+      "msgFromX": 179,
+      "msgToX": 274,
+      "msgY": 124
+    }
+  ],
   "fragments": [],
   "dividers": [],
   "comments": [],

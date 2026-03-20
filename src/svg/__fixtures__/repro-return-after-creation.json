@@ -9,7 +9,7 @@
   "participants": [
     {
       "name": "B",
-      "x": 163,
+      "x": 162.5,
       "y": 73,
       "width": 80,
       "height": 40
@@ -20,7 +20,7 @@
   "occurrences": [
     {
       "participant": "B",
-      "x": 196,
+      "x": 195.5,
       "y": 110,
       "width": 15,
       "height": 36
@@ -29,25 +29,36 @@
   "returns": [
     {
       "label": "from_creation",
-      "fromX": 67,
-      "toX": 196,
+      "fromX": 66.5,
+      "toX": 195.5,
       "y": 144
     },
     {
       "label": "back to caller",
-      "fromX": 71,
-      "toX": 83,
+      "fromX": 70.5,
+      "toX": 82.5,
       "y": 172
     }
   ],
-  "creations": [],
+  "creations": [
+    {
+      "participantName": "B",
+      "px": 162.5,
+      "py": 73,
+      "pw": 80,
+      "ph": 40,
+      "msgFromX": 66.5,
+      "msgToX": 163.5,
+      "msgY": 92
+    }
+  ],
   "fragments": [],
   "dividers": [],
   "comments": [],
   "lifelines": [
     {
       "participant": "B",
-      "x": 203,
+      "x": 202.5,
       "y1": 113,
       "y2": 238
     }

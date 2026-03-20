@@ -2,7 +2,7 @@
  * geometry-scorer.ts
  *
  * Compares buildGeometry() output against HTML-measured fixtures.
- * Uses Math.round() on both sides → effective ±0.5px tolerance.
+ * Exact comparison — no rounding tolerance. 0.5px is a mismatch.
  * Y values are normalized relative to the anchor participant bottom
  * so the HTML and SVG coordinate systems are comparable.
  * X values are normalized relative to the anchor participant center X
@@ -35,10 +35,6 @@ export interface ScoreResult {
 
 // ─── Internal helpers ───────────────────────────────────────────────
 
-function r(v: number): number {
-  return Math.round(v);
-}
-
 function addMismatch(
   mismatches: Mismatch[],
   elementType: string,
@@ -51,15 +47,15 @@ function addMismatch(
     elementType,
     label,
     property,
-    expected: r(expected),
-    actual: r(actual),
-    delta: Math.abs(r(actual) - r(expected)),
+    expected,
+    actual,
+    delta: Math.abs(actual - expected),
   });
 }
 
-/** Check two rounded values; return true if they match */
+/** Exact comparison — no rounding tolerance */
 function match(expected: number, actual: number): boolean {
-  return r(expected) === r(actual);
+  return expected === actual;
 }
 
 function getRenderResult(code: string): { geometry: DiagramGeometry; viewBoxHeight: number } {
@@ -393,6 +389,17 @@ function scoreCreationsNorm(
     const label = fc.participantName;
     // Creation participant: fixture stores left-edge px, geometry stores center x.
     // Convert both to center-relative.
+    //
+    // Message endpoints: geometry stores participant center positions, but the
+    // renderer draws the arrow to the created participant's near edge (not center).
+    // Convert geometry toX to the rendered endpoint:
+    //   LTR (fromX < toX): arrow ends at participant left edge = centerX - halfWidth
+    //   RTL (fromX > toX): arrow ends at participant right edge = centerX + halfWidth
+    const isLTR = gc !== undefined ? gc.message.fromX < gc.message.toX : true;
+    const halfWidth = gc !== undefined ? gc.participant.width / 2 : 0;
+    const renderedToX = gc !== undefined
+      ? gc.message.toX + (isLTR ? -halfWidth : halfWidth)
+      : undefined;
     compareProps(mismatches, byType, "creation", label, [
       {
         prop: "px",
@@ -414,7 +421,7 @@ function scoreCreationsNorm(
       {
         prop: "msgToX",
         expected: normX(fc.msgToX, anchors.fX),
-        actual: gc !== undefined ? normX(gc.message.toX, anchors.gX) : undefined,
+        actual: renderedToX !== undefined ? normX(renderedToX, anchors.gX) : undefined,
       },
       {
         prop: "msgY",

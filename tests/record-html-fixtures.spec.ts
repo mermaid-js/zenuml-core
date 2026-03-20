@@ -84,15 +84,14 @@ for (const caseName of CANONICAL_CASES) {
       }
 
       const containerRect = seqDiagram.getBoundingClientRect();
-      const r = Math.round;
 
-      // Helper: get position relative to container
+      // Helper: get position relative to container (raw floats, no rounding)
       function rel(rect: DOMRect) {
         return {
-          x: r(rect.left - containerRect.left),
-          y: r(rect.top - containerRect.top),
-          width: r(rect.width),
-          height: r(rect.height),
+          x: rect.left - containerRect.left,
+          y: rect.top - containerRect.top,
+          width: rect.width,
+          height: rect.height,
         };
       }
 
@@ -144,7 +143,7 @@ for (const caseName of CANONICAL_CASES) {
 
       // --- Frame height ---
       const frameEl = htmlOutput.querySelector(".frame") as HTMLElement | null;
-      const frameHeight = frameEl ? r(frameEl.getBoundingClientRect().height) : 0;
+      const frameHeight = frameEl ? frameEl.getBoundingClientRect().height : 0;
 
       // --- Anchor: first non-creation participant ---
       let anchorParticipant = "";
@@ -201,11 +200,10 @@ for (const caseName of CANONICAL_CASES) {
         if (!arrowSvg) continue;
 
         const arrowRect = arrowSvg.getBoundingClientRect();
-        const arrowLeft = r(arrowRect.left - containerRect.left);
-        const arrowRight = r(arrowRect.right - containerRect.left);
-        const arrowY = r(
-          arrowRect.top + arrowRect.height / 2 - containerRect.top,
-        );
+        const arrowLeft = arrowRect.left - containerRect.left;
+        const arrowRight = arrowRect.right - containerRect.left;
+        const arrowY =
+          arrowRect.top + arrowRect.height / 2 - containerRect.top;
 
         // Determine direction from the SVG polyline/line
         const polyline = arrowSvg.querySelector("polyline");
@@ -233,12 +231,10 @@ for (const caseName of CANONICAL_CASES) {
             );
             const scale =
               svgWidth > 0 ? svgRect.width / svgWidth : 1;
-            fromX = r(
-              svgRect.left + firstX * scale - containerRect.left,
-            );
-            toX = r(
-              svgRect.left + lastX * scale - containerRect.left,
-            );
+            fromX =
+              svgRect.left + firstX * scale - containerRect.left;
+            toX =
+              svgRect.left + lastX * scale - containerRect.left;
           }
         } else if (line) {
           const x1Raw = line.getAttribute("x1") || "0";
@@ -257,12 +253,10 @@ for (const caseName of CANONICAL_CASES) {
           const x2 = x2Raw.includes("%")
             ? svgWidth * (parseFloat(x2Raw) / 100)
             : parseFloat(x2Raw);
-          fromX = r(
-            svgRect.left + x1 * scale - containerRect.left,
-          );
-          toX = r(
-            svgRect.left + x2 * scale - containerRect.left,
-          );
+          fromX =
+            svgRect.left + x1 * scale - containerRect.left;
+          toX =
+            svgRect.left + x2 * scale - containerRect.left;
         }
 
         messages.push({ label, fromX, toX, y: arrowY });
@@ -358,11 +352,10 @@ for (const caseName of CANONICAL_CASES) {
         if (!arrowSvg) continue;
 
         const arrowRect = arrowSvg.getBoundingClientRect();
-        const fromX = r(arrowRect.left - containerRect.left);
-        const toX = r(arrowRect.right - containerRect.left);
-        const arrowY = r(
-          arrowRect.top + arrowRect.height / 2 - containerRect.top,
-        );
+        const fromX = arrowRect.left - containerRect.left;
+        const toX = arrowRect.right - containerRect.left;
+        const arrowY =
+          arrowRect.top + arrowRect.height / 2 - containerRect.top;
 
         returns.push({ label, fromX, toX, y: arrowY });
       }
@@ -423,19 +416,16 @@ for (const caseName of CANONICAL_CASES) {
         msgY: number;
       }[] = [];
       for (const cw of creationWrappers) {
-        const pEl = cw.querySelector(".bg-skin-participant");
-        if (!pEl) continue;
-        const pName =
-          (pEl as HTMLElement).textContent?.trim() || "";
-        const pRect = (
-          pEl as HTMLElement
-        ).getBoundingClientRect();
-        const pp = rel(pRect);
+        // The creation wrapper (.interaction.creation) contains the arrow,
+        // but the created participant box is in the life-line-layer, not
+        // inside .creation. First try direct child lookup, then fall back
+        // to matching via arrow endpoint → nearest participant center.
+        const interaction = (cw as HTMLElement).classList.contains("interaction")
+          ? (cw as HTMLElement)
+          : (cw as HTMLElement).closest(".interaction");
 
-        // Find the creation message arrow — it's in the parent interaction
-        const interaction = (
-          cw as HTMLElement
-        ).closest(".interaction");
+        // Extract arrow endpoints first — needed for both participant
+        // matching and the creation record itself.
         let msgFromX = 0,
           msgToX = 0,
           msgY = 0;
@@ -443,11 +433,10 @@ for (const caseName of CANONICAL_CASES) {
           const arrowSvg = interaction.querySelector("svg");
           if (arrowSvg) {
             const arrowRect = arrowSvg.getBoundingClientRect();
-            msgY = r(
+            msgY =
               arrowRect.top +
                 arrowRect.height / 2 -
-                containerRect.top,
-            );
+                containerRect.top;
 
             const polyline = arrowSvg.querySelector("polyline");
             const line = arrowSvg.querySelector("line");
@@ -469,24 +458,18 @@ for (const caseName of CANONICAL_CASES) {
                   svgWidth > 0
                     ? svgRect.width / svgWidth
                     : 1;
-                msgFromX = r(
+                msgFromX =
                   svgRect.left +
                     (pts[0]?.[0] ?? 0) * scale -
-                    containerRect.left,
-                );
-                msgToX = r(
+                    containerRect.left;
+                msgToX =
                   svgRect.left +
                     (pts[pts.length - 1]?.[0] ?? 0) * scale -
-                    containerRect.left,
-                );
+                    containerRect.left;
               }
             } else if (line) {
-              const x1 = parseFloat(
-                line.getAttribute("x1") || "0",
-              );
-              const x2 = parseFloat(
-                line.getAttribute("x2") || "0",
-              );
+              const x1Raw = line.getAttribute("x1") || "0";
+              const x2Raw = line.getAttribute("x2") || "0";
               const svgRect =
                 arrowSvg.getBoundingClientRect();
               const svgWidth = parseFloat(
@@ -497,19 +480,48 @@ for (const caseName of CANONICAL_CASES) {
                 svgWidth > 0
                   ? svgRect.width / svgWidth
                   : 1;
-              msgFromX = r(
+              // Handle percentage coordinates (e.g., x2="100%")
+              const x1 = x1Raw.includes("%")
+                ? svgWidth * (parseFloat(x1Raw) / 100)
+                : parseFloat(x1Raw);
+              const x2 = x2Raw.includes("%")
+                ? svgWidth * (parseFloat(x2Raw) / 100)
+                : parseFloat(x2Raw);
+              msgFromX =
                 svgRect.left +
                   x1 * scale -
-                  containerRect.left,
-              );
-              msgToX = r(
+                  containerRect.left;
+              msgToX =
                 svgRect.left +
                   x2 * scale -
-                  containerRect.left,
-              );
+                  containerRect.left;
             }
           }
         }
+
+        // Find the created participant. Try inside .creation first,
+        // then match by arrow toX → nearest creation participant center.
+        let pEl = cw.querySelector(".bg-skin-participant");
+        let pName = pEl ? (pEl as HTMLElement).textContent?.trim() || "" : "";
+        let pp = pEl ? rel((pEl as HTMLElement).getBoundingClientRect()) : null;
+
+        if (!pp && msgToX > 0) {
+          // The created participant box is in life-line-layer, not inside
+          // .creation. Match by arrow toX → nearest participant center X.
+          let bestDist = Infinity;
+          for (const cp of participants) {
+            if (!cp.name) continue; // skip unnamed starter
+            const cpCenterX = cp.x + cp.width / 2;
+            const dist = Math.abs(msgToX - cpCenterX);
+            if (dist < bestDist) {
+              bestDist = dist;
+              pName = cp.name;
+              pp = { x: cp.x, y: cp.y, width: cp.width, height: cp.height };
+            }
+          }
+        }
+
+        if (!pp) continue;
 
         creations.push({
           participantName: pName,
@@ -603,7 +615,7 @@ for (const caseName of CANONICAL_CASES) {
           sections.push({
             label: headerLabel || kind,
             y: p.y,
-            height: r(firstDivRect.top - rect.top),
+            height: firstDivRect.top - rect.top,
           });
 
           // Sections between dividers
@@ -632,9 +644,8 @@ for (const caseName of CANONICAL_CASES) {
               }
               divLabel = visibleParts.join(" ");
             }
-            const nextY = r(
-              divRect.top - containerRect.top,
-            );
+            const nextY =
+              divRect.top - containerRect.top;
             const nextBottom =
               i + 1 < sectionDividers.length
                 ? (
@@ -646,7 +657,7 @@ for (const caseName of CANONICAL_CASES) {
             sections.push({
               label: divLabel,
               y: nextY,
-              height: r(nextBottom - divRect.top),
+              height: nextBottom - divRect.top,
             });
           }
         }
@@ -672,7 +683,7 @@ for (const caseName of CANONICAL_CASES) {
         if (htmlEl.closest(".fragment")) continue;
         const rect = htmlEl.getBoundingClientRect();
         dividers.push({
-          y: r(rect.top - containerRect.top),
+          y: rect.top - containerRect.top,
           label: htmlEl.textContent?.trim() || "",
         });
       }
@@ -688,8 +699,8 @@ for (const caseName of CANONICAL_CASES) {
         const rect = htmlEl.getBoundingClientRect();
         comments.push({
           text: htmlEl.textContent?.trim() || "",
-          x: r(rect.left - containerRect.left),
-          y: r(rect.top - containerRect.top),
+          x: rect.left - containerRect.left,
+          y: rect.top - containerRect.top,
         });
       }
 
@@ -715,7 +726,7 @@ for (const caseName of CANONICAL_CASES) {
         let bestDist = Infinity;
         for (const part of participants) {
           const partCenterX = part.x + part.width / 2;
-          const lifelineLeft = r(htmlEl.getBoundingClientRect().left - containerRect.left);
+          const lifelineLeft = htmlEl.getBoundingClientRect().left - containerRect.left;
           const dist = Math.abs(lifelineLeft - partCenterX);
           if (dist < bestDist) {
             bestDist = dist;
@@ -729,9 +740,9 @@ for (const caseName of CANONICAL_CASES) {
 
         // Lifeline y1 = participant bottom (matching geometry's topY = p.y + p.height)
         const matchedP = participants.find(p => p.name === bestName);
-        const y1 = matchedP ? matchedP.y + matchedP.height : r(htmlEl.getBoundingClientRect().top - containerRect.top);
-        const y2 = r(htmlEl.getBoundingClientRect().bottom - containerRect.top);
-        const x = matchedP ? matchedP.x + matchedP.width / 2 : r(htmlEl.getBoundingClientRect().left - containerRect.left);
+        const y1 = matchedP ? matchedP.y + matchedP.height : htmlEl.getBoundingClientRect().top - containerRect.top;
+        const y2 = htmlEl.getBoundingClientRect().bottom - containerRect.top;
+        const x = matchedP ? matchedP.x + matchedP.width / 2 : htmlEl.getBoundingClientRect().left - containerRect.left;
 
         lifelines.push({ participant: bestName, x, y1, y2 });
       }
