@@ -240,8 +240,8 @@ for (const caseName of CANONICAL_CASES) {
             );
           }
         } else if (line) {
-          const x1 = parseFloat(line.getAttribute("x1") || "0");
-          const x2 = parseFloat(line.getAttribute("x2") || "0");
+          const x1Raw = line.getAttribute("x1") || "0";
+          const x2Raw = line.getAttribute("x2") || "0";
           const svgRect = arrowSvg.getBoundingClientRect();
           const svgWidth = parseFloat(
             arrowSvg.getAttribute("width") ||
@@ -249,6 +249,13 @@ for (const caseName of CANONICAL_CASES) {
           );
           const scale =
             svgWidth > 0 ? svgRect.width / svgWidth : 1;
+          // Handle percentage coordinates (e.g., x2="100%")
+          const x1 = x1Raw.includes("%")
+            ? svgWidth * (parseFloat(x1Raw) / 100)
+            : parseFloat(x1Raw);
+          const x2 = x2Raw.includes("%")
+            ? svgWidth * (parseFloat(x2Raw) / 100)
+            : parseFloat(x2Raw);
           fromX = r(
             svgRect.left + x1 * scale - containerRect.left,
           );

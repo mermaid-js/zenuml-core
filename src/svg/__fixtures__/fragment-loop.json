@@ -33,13 +33,13 @@
     {
       "label": "request",
       "fromX": 71,
-      "toX": 171,
+      "toX": 170,
       "y": 87
     },
     {
       "label": "process",
       "fromX": 171,
-      "toX": 271,
+      "toX": 270,
       "y": 181
     }
   ],

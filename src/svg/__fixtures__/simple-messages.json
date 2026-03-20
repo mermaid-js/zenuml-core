@@ -33,24 +33,24 @@
     {
       "label": "hello",
       "fromX": 61,
-      "toX": 161,
+      "toX": 160,
       "y": 87
     },
     {
       "label": "process",
       "fromX": 161,
-      "toX": 261,
+      "toX": 260,
       "y": 119
     },
     {
       "label": "result",
-      "fromX": 261,
+      "fromX": 260,
       "toX": 161,
       "y": 151
     },
     {
       "label": "done",
-      "fromX": 161,
+      "fromX": 160,
       "toX": 61,
       "y": 183
     }

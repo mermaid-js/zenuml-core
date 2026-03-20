@@ -39,13 +39,13 @@
     {
       "label": "async",
       "fromX": 61,
-      "toX": 161,
+      "toX": 160,
       "y": 147
     },
     {
       "label": "async",
       "fromX": 61,
-      "toX": 161,
+      "toX": 260,
       "y": 179
     },
     {
@@ -57,12 +57,12 @@
     {
       "label": "async",
       "fromX": 161,
-      "toX": 261,
+      "toX": 260,
       "y": 271
     },
     {
       "label": "async",
-      "fromX": 161,
+      "fromX": 160,
       "toX": 61,
       "y": 303
     },
@@ -74,13 +74,13 @@
     },
     {
       "label": "async",
-      "fromX": 261,
+      "fromX": 260,
       "toX": 161,
       "y": 395
     },
     {
       "label": "async",
-      "fromX": 161,
+      "fromX": 260,
       "toX": 61,
       "y": 427
     }
