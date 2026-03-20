@@ -34,8 +34,7 @@ describe("Geometry Scoring — All Fixtures", () => {
         console.log(`  By type: ${Object.entries(result.byType).map(([t, s]) => `${t}:${s.matched}/${s.total}`).join(", ")}`);
         console.log(`  All mismatches:`);
         for (const m of result.mismatches) {
-          const sign = m.actual > m.expected ? "+" : "-";
-          console.log(`    ${m.elementType}.${m.label}.${m.property}: expected=${m.expected} actual=${m.actual} (${sign}${m.delta}px)`);
+          console.log(`    ${m.elementType}.${m.label}.${m.property}: ${m.delta}px`);
         }
       }
       expect(result.score).toBeGreaterThanOrEqual(baseline);
