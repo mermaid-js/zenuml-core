@@ -179,36 +179,40 @@ function extractFragmentInfo(stat: any, _origin: string): FragmentExtract {
   }
 
   // Alt (if/else if/else) — multiple sections
+  // Section labels match HTML visible text: "Alt", "[cond2]", "[else]"
   const alt = stat.alt?.();
   if (alt) {
     const sections: FragmentSectionInfo[] = [];
     const ifBlock = alt.ifBlock?.();
     if (ifBlock) {
-      const condition = ifBlock.parExpr?.()?.condition?.();
-      const label = condition?.getFormattedText?.() || "";
-      sections.push({ label, blockNode: ifBlock.braceBlock?.()?.block?.() });
+      // First section label = kind name (matches HTML header visible text)
+      sections.push({ label: "Alt", blockNode: ifBlock.braceBlock?.()?.block?.() });
     }
     for (const elseIf of alt.elseIfBlock?.() || []) {
       const condition = elseIf.parExpr?.()?.condition?.();
       const label = condition?.getFormattedText?.() || "";
-      sections.push({ label: `else if [${label}]`, blockNode: elseIf.braceBlock?.()?.block?.() });
+      // HTML renders as "[ cond ]" (condition in brackets with spaces, "else if" is hidden)
+      sections.push({ label: `[ ${label} ]`, blockNode: elseIf.braceBlock?.()?.block?.() });
     }
     const elseBlock = alt.elseBlock?.();
     if (elseBlock) {
       sections.push({ label: "[else]", blockNode: elseBlock.braceBlock?.()?.block?.() });
     }
 
-    const firstLabel = sections.length > 0 ? sections[0].label : "";
+    const ifCondition = alt.ifBlock?.()?.parExpr?.()?.condition?.();
+    const firstLabel = ifCondition?.getFormattedText?.() || "";
     return { fragmentKind: "alt", label: firstLabel, sections };
   }
 
   // Try/catch/finally — multiple sections
+  // Section labels match HTML visible text: "Try", "catch e", "finally"
   const tcf = stat.tcf?.();
   if (tcf) {
     const sections: FragmentSectionInfo[] = [];
     const tryBlock = tcf.tryBlock?.();
     if (tryBlock) {
-      sections.push({ label: "try", blockNode: tryBlock.braceBlock?.()?.block?.() });
+      // First section label = capitalized kind name (matches HTML header)
+      sections.push({ label: "Try", blockNode: tryBlock.braceBlock?.()?.block?.() });
     }
     for (const catchBlock of tcf.catchBlock?.() || []) {
       const exception = catchBlock.invocation?.()?.parameters?.()?.getFormattedText?.() || "";
