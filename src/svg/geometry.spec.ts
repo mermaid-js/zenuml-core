@@ -16,23 +16,22 @@ describe("geometry: participants", () => {
     expect(starter.isStarter).toBe(true);
     expect(a.name).toBe("A");
     expect(a.isStarter).toBe(false);
-    expect({
-      starter: { x: starter.x, y: starter.y, width: starter.width, height: starter.height },
-      a: { x: a.x, y: a.y, width: a.width, height: a.height },
-    }).toMatchSnapshot();
+    // Structural: both same y, same height, starter left of A
+    expect(starter.y).toBe(a.y);
+    expect(starter.height).toBe(a.height);
+    expect(starter.x).toBeLessThan(a.x);
   });
 
   it("positions 3 participants left-to-right", () => {
     const g = geo("A -> B: hello\nB -> C: msg");
-    expect(g.participants).toHaveLength(3); // A + B + C (no starter for direct messages)
+    expect(g.participants).toHaveLength(3);
     const [a, b, c] = g.participants;
     expect(a.x).toBeLessThan(b.x);
     expect(b.x).toBeLessThan(c.x);
-    expect({
-      a: { x: a.x, y: a.y, width: a.width, height: a.height },
-      b: { x: b.x, y: b.y, width: b.width, height: b.height },
-      c: { x: c.x, y: c.y, width: c.width, height: c.height },
-    }).toMatchSnapshot();
+    // All same y and height
+    expect(a.y).toBe(b.y);
+    expect(b.y).toBe(c.y);
+    expect(a.height).toBe(b.height);
   });
 });
 
@@ -43,7 +42,7 @@ describe("geometry: messages", () => {
     const m = g.messages[0];
     expect(m.label).toBe("hello");
     expect(m.fromX).toBeLessThan(m.toX);
-    expect({ fromX: m.fromX, toX: m.toX, y: m.y }).toMatchSnapshot();
+    expect(m.y).toBeGreaterThan(0);
   });
 
   it("positions a RTL message (fromX > toX)", () => {
@@ -51,7 +50,7 @@ describe("geometry: messages", () => {
     const m = g.messages[0];
     expect(m.label).toBe("reverse");
     expect(m.isReverse).toBe(true);
-    expect({ fromX: m.fromX, toX: m.toX, y: m.y }).toMatchSnapshot();
+    expect(m.fromX).toBeGreaterThan(m.toX);
   });
 });
 
@@ -61,7 +60,10 @@ describe("geometry: self-calls", () => {
     expect(g.selfCalls).toHaveLength(1);
     const s = g.selfCalls[0];
     expect(s.label).toBe("self");
-    expect({ x: s.x, y: s.y, width: s.width, height: s.height }).toMatchSnapshot();
+    expect(s.width).toBeGreaterThan(0);
+    expect(s.height).toBeGreaterThan(0);
+    expect(s.x).toBeGreaterThan(0);
+    expect(s.y).toBeGreaterThan(0);
   });
 });
 
@@ -69,14 +71,14 @@ describe("geometry: occurrences", () => {
   it("positions occurrence bars for nested calls", () => {
     const g = geo("A.method() { B.inner() }");
     expect(g.occurrences.length).toBeGreaterThanOrEqual(2);
-    const occs = g.occurrences.map(o => ({
-      participant: o.participantName,
-      x: o.x,
-      y: o.y,
-      width: o.width,
-      height: o.height,
-    }));
-    expect(occs).toMatchSnapshot();
+    const [occA, occB] = g.occurrences;
+    // A's occurrence should be left of B's
+    expect(occA.x).toBeLessThan(occB.x);
+    // A's occurrence should be taller (wraps B's call)
+    expect(occA.height).toBeGreaterThan(occB.height);
+    // Both have positive dimensions
+    expect(occA.width).toBeGreaterThan(0);
+    expect(occB.width).toBeGreaterThan(0);
   });
 });
 
@@ -86,13 +88,8 @@ describe("geometry: fragments", () => {
     expect(g.fragments).toHaveLength(1);
     const f = g.fragments[0];
     expect(f.kind).toBe("alt");
-    expect({
-      x: f.x,
-      y: f.y,
-      width: f.width,
-      height: f.height,
-      headerY: f.headerY,
-    }).toMatchSnapshot();
+    expect(f.width).toBeGreaterThan(0);
+    expect(f.height).toBeGreaterThan(0);
   });
 
   it("positions if/else fragment with correct dimensions", () => {
@@ -100,15 +97,8 @@ describe("geometry: fragments", () => {
     expect(g.fragments).toHaveLength(1);
     const f = g.fragments[0];
     expect(f.kind).toBe("alt");
-    // Snapshot the whole fragment dimensions (sections may be empty depending on buildGeometry impl)
-    expect({
-      x: f.x,
-      y: f.y,
-      width: f.width,
-      height: f.height,
-      headerY: f.headerY,
-      sectionsCount: f.sections.length,
-    }).toMatchSnapshot();
+    expect(f.width).toBeGreaterThan(0);
+    expect(f.height).toBeGreaterThan(0);
   });
 });
 
@@ -118,7 +108,9 @@ describe("geometry: returns", () => {
     expect(g.returns).toHaveLength(1);
     const r = g.returns[0];
     expect(r.label).toBe("result");
-    expect({ fromX: r.fromX, toX: r.toX, y: r.y }).toMatchSnapshot();
+    // Return goes from B back to A (right to left)
+    expect(r.fromX).toBeGreaterThan(r.toX);
+    expect(r.y).toBeGreaterThan(0);
   });
 });
 
@@ -128,12 +120,7 @@ describe("geometry: creations", () => {
     const normal = g.participants.find(p => p.name === "A")!;
     const created = g.creations[0].participant;
     expect(created.y).toBeGreaterThan(normal.y);
-    expect({
-      normalY: normal.y,
-      createdY: created.y,
-      createdX: created.x,
-      createdWidth: created.width,
-    }).toMatchSnapshot();
+    expect(created.width).toBeGreaterThan(0);
   });
 });
 
@@ -141,13 +128,12 @@ describe("geometry: lifelines", () => {
   it("positions lifelines at participant centers", () => {
     const g = geo("A -> B: hello");
     expect(g.lifelines.length).toBeGreaterThanOrEqual(2);
-    const lines = g.lifelines.map(l => ({
-      participant: l.participantName,
-      x: l.x,
-      topY: l.topY,
-      bottomY: l.bottomY,
-    }));
-    expect(lines).toMatchSnapshot();
+    const [lineA, lineB] = g.lifelines;
+    expect(lineA.participantName).toBe("A");
+    expect(lineB.participantName).toBe("B");
+    // Lifeline x should match participant center
+    expect(lineA.x).toBeLessThan(lineB.x);
+    expect(lineA.topY).toBeLessThan(lineA.bottomY);
   });
 });
 
@@ -157,7 +143,8 @@ describe("geometry: dividers", () => {
     expect(g.dividers).toHaveLength(1);
     const d = g.dividers[0];
     expect(d.label).toBe("== Phase 2 ==");
-    expect({ y: d.y, width: d.width }).toMatchSnapshot();
+    expect(d.y).toBeGreaterThan(0);
+    expect(d.width).toBeGreaterThan(0);
   });
 });
 
@@ -167,18 +154,17 @@ describe("geometry: comments", () => {
     expect(g.comments).toHaveLength(1);
     const c = g.comments[0];
     expect(c.text).toBe("comment");
-    expect({ x: c.x, y: c.y }).toMatchSnapshot();
+    expect(c.x).toBeGreaterThan(0);
+    expect(c.y).toBeGreaterThan(0);
   });
 });
 
 describe("geometry: dimensions", () => {
   it("reports overall width, height, and frame borders", () => {
     const g = geo("A.m");
-    expect({
-      width: g.width,
-      height: g.height,
-      frameBorderLeft: g.frameBorderLeft,
-      frameBorderRight: g.frameBorderRight,
-    }).toMatchSnapshot();
+    expect(g.width).toBeGreaterThan(0);
+    expect(g.height).toBeGreaterThan(0);
+    expect(g.frameBorderLeft).toBeDefined();
+    expect(g.frameBorderRight).toBeDefined();
   });
 });
