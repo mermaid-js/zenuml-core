@@ -490,18 +490,9 @@ function buildMessages(
           occHeight += 4;
         }
 
-        // Post-assignment height corrections: these grow the occurrence box.
-        if (innerDebt > 0 && adjustMap.has(`mixed:${info.key}`)) {
-          // Mixed-content blocks (returns + other statements) get a CSS border
-          // +1px that the positioning engine doesn't account for.
-          // Return-only blocks don't have this extra pixel.
-          occHeight += 1;
-        }
-        if (assignment?.assignee && !info.isSelf && !info.hasBlock) {
-          // Non-block sync with assignment: positioning engine's coord.height
-          // is 1px short of HTML's occurrence height.
-          occHeight += 1;
-        }
+        // With cursor+=12, the positioning engine now correctly accounts for
+        // the CSS border height in both mixed-content and non-block assignment
+        // cases. No additional +1 corrections needed.
 
         // Assignment return Y: sits 2px above the occurrence bottom,
         // matching HTML's return position inside the CSS border.
@@ -937,18 +928,9 @@ function computeReturnDebt(
       }
     }
 
-    // Non-block sync with assignment: HTML's CSS container is 1px taller than
-    // coord.height (50px vs 49px) because the assignment return's visual extent
-    // exceeds what the positioning engine allocates. Track this separately from
-    // return debt so it shifts subsequent statements but does NOT inflate parent
-    // occurrence height (which would overcorrect).
-    if (info.kind === "sync" && !info.hasBlock && !info.isSelf) {
-      const msgCtx = info.statNode?.message?.();
-      const hasAssign = !!(msgCtx?.Assignment?.()?.assignee);
-      if (hasAssign) {
-        nbAssignShift[depth] = (nbAssignShift[depth] || 0) + 1;
-      }
-    }
+    // Non-block sync with assignment: with cursor+=12, the positioning engine's
+    // coord.height now matches HTML's CSS container height (both ~50px).
+    // No shift needed — the gap was from the old cursor+=11.
 
     // Sync/creation with blocks: the NEXT statement in the flat list at depth+1
     // belongs to this statement's block. Record owner for debt propagation.

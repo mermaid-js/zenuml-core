@@ -15,7 +15,7 @@
   "fragment-tcf": 100,
   "creation": 100,
   "creation-rtl": 100,
-  "return": 45,
+  "return": 100,
   "repro-return-after-creation": 100,
   "vertical-2": 100,
   "return-only-two": 100,
