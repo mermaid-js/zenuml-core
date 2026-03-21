@@ -376,8 +376,10 @@ function buildMessages(
         : 10;
       // SVG text y = baseline; HTML positions by visual top. Add font ascent (~12px for 14px text).
       const COMMENT_FONT_ASCENT = 15;
+      // +1: HTML comment is inside the occurrence's CSS border (border-2),
+      // so its content starts 1px past the occurrence edge.
       comments.push({
-        x: commentX + OCCURRENCE_BAR_SIDE_WIDTH,
+        x: commentX + OCCURRENCE_BAR_SIDE_WIDTH + 1,
         y: coord.top + adjust + COMMENT_FONT_ASCENT,
         text: commentObj.text,
         style: cssToSvgStyle(commentObj.commentStyle),

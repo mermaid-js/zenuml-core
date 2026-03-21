@@ -725,16 +725,20 @@ for (const caseName of CANONICAL_CASES) {
       }
 
       // --- Comments ---
+      // The React component uses class "comments" (plural), not "comment"
       const commentEls = Array.from(
-        seqDiagram.querySelectorAll(".comment"),
+        seqDiagram.querySelectorAll(".comments"),
       );
       const comments: { text: string; x: number; y: number }[] =
         [];
       for (const el of commentEls) {
         const htmlEl = el as HTMLElement;
+        const text = htmlEl.textContent?.trim() || "";
+        // Skip style-only comments (e.g. "// [red]") that have no visible text
+        if (!text) continue;
         const rect = htmlEl.getBoundingClientRect();
         comments.push({
-          text: htmlEl.textContent?.trim() || "",
+          text,
           x: rect.left - containerRect.left,
           y: rect.top - containerRect.top,
         });

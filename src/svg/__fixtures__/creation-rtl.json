@@ -68,7 +68,13 @@
   ],
   "fragments": [],
   "dividers": [],
-  "comments": [],
+  "comments": [
+    {
+      "text": "abcde",
+      "x": 179,
+      "y": 104
+    }
+  ],
   "lifelines": [
     {
       "participant": "b:B",

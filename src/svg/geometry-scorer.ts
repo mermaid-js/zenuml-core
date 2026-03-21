@@ -605,6 +605,11 @@ function scoreCommentsNorm(
   mismatches: Mismatch[],
   byType: Record<string, { matched: number; total: number }>,
 ): void {
+  // SVG text y = baseline; HTML fixture records visual top.
+  // buildGeometry adds COMMENT_FONT_ASCENT (15) to convert visual top → baseline.
+  // Subtract it back for comparison against the fixture's visual-top Y.
+  const COMMENT_FONT_ASCENT = 15;
+
   const fixtureComments = [...fixture.comments].sort((a, b) => a.y - b.y);
   const geoComments = [...geometry.comments].sort((a, b) => a.y - b.y);
 
@@ -620,7 +625,7 @@ function scoreCommentsNorm(
       {
         prop: "y",
         expected: normY(fc.y, anchors.fY),
-        actual: gc !== undefined ? normY(gc.y, anchors.gY) : undefined,
+        actual: gc !== undefined ? normY(gc.y - COMMENT_FONT_ASCENT, anchors.gY) : undefined,
       },
     ]);
   }
