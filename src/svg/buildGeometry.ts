@@ -482,12 +482,12 @@ function buildMessages(
         const messageCtx = info.statNode?.message?.();
         const assignment = messageCtx?.Assignment?.();
 
-        // Assignment return compensation: the positioning engine adds +11 for
+        // Assignment return compensation: the positioning engine adds +12 for
         // assignee returns (SyncMessageStatementVM line 41), but HTML renders
-        // the assignment return as ~16px inside the occurrence. Add the 5px
+        // the assignment return as ~16px inside the occurrence. Add the 4px
         // difference so the occurrence bar extends to match HTML.
         if (assignment?.assignee && !info.isSelf && info.hasBlock) {
-          occHeight += 5;
+          occHeight += 4;
         }
 
         // Post-assignment height corrections: these grow the occurrence box.
@@ -722,13 +722,12 @@ function buildMessages(
       }
       // First return inside a sync block renders 1px higher in HTML due to
       // the occurrence's border-top offsetting the content area.
-      // Exception: when the block has non-return content before the return
-      // (mixed-content block), the border-top offset has already been absorbed
-      // by the non-return content, so use 16 instead of 15.
-      // Use the blockMixedKey (set by computeReturnDebt for the parent block).
-      const blockMixedKey = `mixed-at-depth:${info.depth}`;
-      const blockHasMixedContent = adjustMap.has(blockMixedKey);
-      const returnOffset = (info.parentBlockKind === "sync" && adjust === 0 && !blockHasMixedContent) ? 15 : 16;
+      // The positioning engine gives the first return at a depth coord.height>0
+      // (typically 16px), while subsequent returns get height=0.
+      // Use coord.height as the authoritative indicator of "first return":
+      // coord.height>0 → first return → border-top offset applies → 15
+      // coord.height=0 → subsequent return → no offset → 16
+      const returnOffset = (info.parentBlockKind === "sync" && coord.height > 0) ? 15 : 16;
       const returnY = coord.top + adjust + returnOffset;
       returns.push({
         fromX,
@@ -805,7 +804,7 @@ function buildMessages(
  */
 function computeReturnDebt(
   statements: ReturnType<typeof walkStatements>,
-  _verticalCoordinates: VerticalCoordinates,
+  verticalCoordinates: VerticalCoordinates,
   returnHeight: number,
 ): Map<string, number> {
   const result = new Map<string, number>();
@@ -871,16 +870,17 @@ function computeReturnDebt(
       blockHasAssignment.pop();
       nbAssignShift.pop();
       maxDepth--;
-      // Propagate only DIRECT return debt (not child-cascaded debt) to parent
-      // depth so subsequent statements are shifted down to match HTML CSS layout.
-      // Using directDebt prevents double-counting from recursive propagation.
+      // Propagate the occurrence's actual inner growth to the parent depth,
+      // so subsequent statements are shifted down to match HTML CSS layout.
+      // Using occInnerDebt (not raw directDebt) prevents over-counting when
+      // the positioning engine already allocates height for some returns.
       if (ownerKey && ownerKind === "sync") {
-        debtByDepth[maxDepth] += directDebt;
-        // Assignment return compensation: the occurrence gets +5 (11→16px gap),
+        debtByDepth[maxDepth] += occInnerDebt;
+        // Assignment return compensation: the occurrence gets +4 (12→16px gap),
         // but the positioning engine doesn't account for this extra height.
         // Propagate it as debt so subsequent statements shift down to match HTML.
         if (hasAssign) {
-          debtByDepth[maxDepth] += 5;
+          debtByDepth[maxDepth] += 4;
         }
       }
     }
@@ -913,30 +913,30 @@ function computeReturnDebt(
     }
     result.set(info.key, totalDebt);
 
-    // Non-self returns add debt at their depth
+    // Non-self returns add debt at their depth — but only when the positioning
+    // engine gives them height=0. The first return at a depth typically gets
+    // coord.height>0 (the engine allocates 16px), so it doesn't need debt.
+    // Subsequent returns at the same depth get height=0 and need debt.
     if (info.kind === "return" && !info.isSelf) {
-      const isFirstAtDepth = (directDebtByDepth[depth] || 0) === 0;
-      debtByDepth[depth] += returnHeight;
-      directDebtByDepth[depth] += returnHeight;
-      // When the first return in a sync block has adjust>0 (from child-block
-      // debt), it uses returnOffset=16 instead of 15. This removes the 15→16
-      // transition that normally adds +1px to the gap between consecutive
-      // returns. Compensate with +1 via nbAssignShift (non-propagating) to
-      // avoid inflating inner debt / occurrence height calculations.
-      if (isFirstAtDepth && totalDebt !== 0 && info.parentBlockKind === "sync") {
-        nbAssignShift[depth] = (nbAssignShift[depth] || 0) + 1;
+      const returnCoord = verticalCoordinates.getStatementCoordinate(info.key);
+      const engineAllocatesHeight = returnCoord && returnCoord.height > 0;
+      if (!engineAllocatesHeight) {
+        const isFirstAtDepth = (directDebtByDepth[depth] || 0) === 0;
+        debtByDepth[depth] += returnHeight;
+        directDebtByDepth[depth] += returnHeight;
+        // When the first return in a sync block has adjust>0 (from child-block
+        // debt), it uses returnOffset=16 instead of 15. This removes the 15→16
+        // transition that normally adds +1px to the gap between consecutive
+        // returns. Compensate with +1 via nbAssignShift (non-propagating) to
+        // avoid inflating inner debt / occurrence height calculations.
+        if (isFirstAtDepth && totalDebt !== 0 && info.parentBlockKind === "sync") {
+          nbAssignShift[depth] = (nbAssignShift[depth] || 0) + 1;
+        }
       }
     } else if (info.kind !== "return") {
       // Track that this block has non-return children
       if (depth < hasNonReturnChild.length) {
         hasNonReturnChild[depth] = true;
-      }
-      // Track non-block non-return children that appear BEFORE any return
-      // at this depth. These occupy vertical space in the positioning engine
-      // and absorb the border-top offset, so the first return uses 16 not 15.
-      // Only set the flag if no return has been seen yet at this depth.
-      if (!info.hasBlock && info.kind === "sync" && (directDebtByDepth[depth] || 0) === 0) {
-        result.set(`mixed-at-depth:${depth}`, 1);
       }
     }
 
@@ -1003,11 +1003,11 @@ function computeReturnDebt(
     hasNonReturnChild.pop();
     blockHasAssignment.pop();
     maxDepth--;
-    // Propagate only direct debt — see main loop comment
+    // Propagate occurrence inner growth — see main loop comment
     if (ownerKey && ownerKind === "sync") {
-      debtByDepth[maxDepth] += directDebtEnd;
+      debtByDepth[maxDepth] += occInnerDebtEnd;
       if (hasAssignEnd) {
-        debtByDepth[maxDepth] += 5;
+        debtByDepth[maxDepth] += 4;
       }
     }
   }
