@@ -524,6 +524,22 @@ for (const caseName of CANONICAL_CASES) {
 
         if (!pp) continue;
 
+        // Find the «create» label text element to measure its center X.
+        // The label is a leaf div with text containing "create" inside the
+        // .interaction.creation wrapper.
+        let msgLabelCenterX: number | undefined;
+        if (interaction) {
+          const leafEls = interaction.querySelectorAll('*');
+          for (const le of leafEls) {
+            const leEl = le as HTMLElement;
+            if (leEl.children.length === 0 && leEl.textContent?.includes('create')) {
+              const leRect = leEl.getBoundingClientRect();
+              msgLabelCenterX = leRect.left + leRect.width / 2 - containerRect.left;
+              break;
+            }
+          }
+        }
+
         creations.push({
           participantName: pName,
           px: pp.x,
@@ -533,6 +549,7 @@ for (const caseName of CANONICAL_CASES) {
           msgFromX,
           msgToX,
           msgY,
+          msgLabelCenterX,
         });
       }
 

@@ -47,6 +47,8 @@ export interface FixtureCreation {
   msgFromX: number;
   msgToX: number;
   msgY: number;
+  /** Center X of the «create» label text */
+  msgLabelCenterX?: number;
 }
 
 export interface FixtureFragment {

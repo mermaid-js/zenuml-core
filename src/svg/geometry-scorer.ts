@@ -458,6 +458,17 @@ function scoreCreationsNorm(
         expected: normY(fc.msgY, anchors.fY),
         actual: gc !== undefined ? normY(gc.message.y, anchors.gY) : undefined,
       },
+      // Label center X: creation.ts renders the label at
+      //   labelX = fromX + (toX - fromX) / 2 - 3   (with text-anchor=middle)
+      // where fromX/toX are the rendered arrow endpoints (with +1 and edge corrections).
+      // Compare against HTML's measured label center.
+      // Round to nearest integer — HTML label positions have sub-pixel fractions
+      // from font metrics that aren't meaningful for comparison.
+      ...(fc.msgLabelCenterX != null && renderedFromX !== undefined && renderedToX !== undefined ? [{
+        prop: "msgLabelCenterX",
+        expected: Math.round(normX(fc.msgLabelCenterX, anchors.fX)),
+        actual: Math.round(normX(renderedFromX + (renderedToX - renderedFromX) / 2 - 3, anchors.gX)),
+      }] : []),
     ]);
 
   }

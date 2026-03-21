@@ -63,7 +63,8 @@
       "ph": 40,
       "msgFromX": 301,
       "msgToX": 211,
-      "msgY": 144
+      "msgY": 144,
+      "msgLabelCenterX": 259.4921875
     }
   ],
   "fragments": [],
