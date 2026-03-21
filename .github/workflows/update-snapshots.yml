@@ -49,6 +49,7 @@ jobs:
             echo "No snapshot changes to commit"
           fi
 
-  run-e2e:
-    needs: update-snapshots
-    uses: ./.github/workflows/e2e.yml
+      - name: Verify snapshots pass
+        run: bun run pw:ci
+        env:
+          CI: true
