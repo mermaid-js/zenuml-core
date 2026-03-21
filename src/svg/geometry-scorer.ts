@@ -276,14 +276,27 @@ function scoreMessagesNorm(
     // with pr-1 (padding-right: 4px). The fixture records the outer box right edge,
     // which equals the arrow's left endpoint. Both renderers place the number's right
     // edge at the arrow's left endpoint, so compare fixture numberX against SVG min(fromX, toX).
-    const numberProps: Array<{ prop: string; expected: number; actual: number | undefined }> = [];
+    const extraProps: Array<{ prop: string; expected: number; actual: number | undefined }> = [];
     if (fm.numberX !== undefined && gm !== undefined && gm.number) {
-      // Use rendered endpoints (with +1 lifeline correction) to match HTML fixture
       const renderedLeft = Math.min(gmFromX ?? gm.fromX, gmToX ?? gm.toX);
-      numberProps.push({
+      extraProps.push({
         prop: "numberX",
         expected: normX(fm.numberX, anchors.fX),
         actual: normX(renderedLeft, anchors.gX),
+      });
+    }
+    // Label center X: compare HTML label center against SVG computed labelX.
+    // SVG labelX = (fromX + toX) / 2 - direction * 3.5 + 0.5 + asyncLtrShift
+    // asyncLtrShift = -4 for async LTR (arrowStyle "open", direction +1), 0 otherwise
+    if (fm.labelCenterX !== undefined && gm !== undefined) {
+      const r1 = (n: number) => Math.round(n * 10) / 10;
+      const direction = Math.sign(gm.toX - gm.fromX);
+      const asyncLtrShift = (gm.arrowStyle === "open" && direction === 1) ? -4 : 0;
+      const svgLabelX = (gm.fromX + gm.toX) / 2 - direction * 3.5 + 0.5 + asyncLtrShift;
+      extraProps.push({
+        prop: "labelCenterX",
+        expected: r1(normX(fm.labelCenterX, anchors.fX)),
+        actual: r1(normX(svgLabelX, anchors.gX)),
       });
     }
 
@@ -303,7 +316,7 @@ function scoreMessagesNorm(
         expected: normY(fm.y, anchors.fY),
         actual: gmY !== undefined ? normY(gmY, anchors.gY) : undefined,
       },
-      ...numberProps,
+      ...extraProps,
     ]);
   }
 }

@@ -17,6 +17,8 @@ export interface FixtureMessage {
   y: number;
   /** Right edge X of the sequence number element (always left of the message) */
   numberX?: number;
+  /** Center X of the label text */
+  labelCenterX?: number;
 }
 
 export interface FixtureSelfCall {

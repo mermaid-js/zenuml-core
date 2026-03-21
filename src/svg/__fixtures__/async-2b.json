@@ -35,42 +35,48 @@
       "fromX": 66.5,
       "toX": 164,
       "y": 87,
-      "numberX": 66.5
+      "numberX": 66.5,
+      "labelCenterX": 115.25
     },
     {
       "label": "init",
       "fromX": 179,
       "toX": 271,
       "y": 119,
-      "numberX": 179
+      "numberX": 179,
+      "labelCenterX": 225
     },
     {
       "label": "method",
       "fromX": 179,
       "toX": 264,
       "y": 151,
-      "numberX": 179
+      "numberX": 179,
+      "labelCenterX": 221.5
     },
     {
       "label": "request",
       "fromX": 179,
       "toX": 264,
       "y": 183,
-      "numberX": 179
+      "numberX": 179,
+      "labelCenterX": 221.5
     },
     {
       "label": "delegate",
       "fromX": 279,
       "toX": 371,
       "y": 215,
-      "numberX": 279
+      "numberX": 279,
+      "labelCenterX": 325
     },
     {
       "label": "complete",
       "fromX": 371,
       "toX": 179,
       "y": 247,
-      "numberX": 179
+      "numberX": 179,
+      "labelCenterX": 275
     }
   ],
   "selfCalls": [],

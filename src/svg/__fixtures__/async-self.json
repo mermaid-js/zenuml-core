@@ -21,7 +21,8 @@
       "fromX": 61,
       "toX": 91,
       "y": 104,
-      "numberX": 61
+      "numberX": 61,
+      "labelCenterX": 95.9609375
     }
   ],
   "selfCalls": [],

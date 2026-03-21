@@ -35,21 +35,24 @@
       "fromX": 61,
       "toX": 153,
       "y": 87,
-      "numberX": 61
+      "numberX": 61,
+      "labelCenterX": 107
     },
     {
       "label": "inner",
       "fromX": 168,
       "toX": 253,
       "y": 119,
-      "numberX": 168
+      "numberX": 168,
+      "labelCenterX": 210.5
     },
     {
       "label": "call",
       "fromX": 253,
       "toX": 175,
       "y": 151,
-      "numberX": 175
+      "numberX": 175,
+      "labelCenterX": 214
     }
   ],
   "selfCalls": [],

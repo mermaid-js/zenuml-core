@@ -35,63 +35,72 @@
       "fromX": 61,
       "toX": 91,
       "y": 104,
-      "numberX": 61
+      "numberX": 61,
+      "labelCenterX": 81.5625
     },
     {
       "label": "aToB",
       "fromX": 61,
       "toX": 160,
       "y": 147,
-      "numberX": 61
+      "numberX": 61,
+      "labelCenterX": 110.5
     },
     {
       "label": "aToC",
       "fromX": 61,
       "toX": 260,
       "y": 179,
-      "numberX": 61
+      "numberX": 61,
+      "labelCenterX": 160.5
     },
     {
       "label": "4 selfB",
       "fromX": 161,
       "toX": 191,
       "y": 228,
-      "numberX": 161
+      "numberX": 161,
+      "labelCenterX": 181.5625
     },
     {
       "label": "bToC",
       "fromX": 161,
       "toX": 260,
       "y": 271,
-      "numberX": 161
+      "numberX": 161,
+      "labelCenterX": 210.5
     },
     {
       "label": "bToA",
       "fromX": 160,
       "toX": 61,
       "y": 303,
-      "numberX": 61
+      "numberX": 61,
+      "labelCenterX": 110.5
     },
     {
       "label": "7 selfC",
       "fromX": 261,
       "toX": 291,
       "y": 352,
-      "numberX": 261
+      "numberX": 261,
+      "labelCenterX": 281.953125
     },
     {
       "label": "cToB",
       "fromX": 260,
       "toX": 161,
       "y": 395,
-      "numberX": 161
+      "numberX": 161,
+      "labelCenterX": 210.5
     },
     {
       "label": "cToA",
       "fromX": 260,
       "toX": 61,
       "y": 427,
-      "numberX": 61
+      "numberX": 61,
+      "labelCenterX": 160.5
     }
   ],
   "selfCalls": [],

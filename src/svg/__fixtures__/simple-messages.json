@@ -35,28 +35,32 @@
       "fromX": 61,
       "toX": 160,
       "y": 87,
-      "numberX": 61
+      "numberX": 61,
+      "labelCenterX": 110.5
     },
     {
       "label": "process",
       "fromX": 161,
       "toX": 260,
       "y": 119,
-      "numberX": 161
+      "numberX": 161,
+      "labelCenterX": 210.5
     },
     {
       "label": "result",
       "fromX": 260,
       "toX": 161,
       "y": 151,
-      "numberX": 161
+      "numberX": 161,
+      "labelCenterX": 210.5
     },
     {
       "label": "done",
       "fromX": 160,
       "toX": 61,
       "y": 183,
-      "numberX": 61
+      "numberX": 61,
+      "labelCenterX": 110.5
     }
   ],
   "selfCalls": [],

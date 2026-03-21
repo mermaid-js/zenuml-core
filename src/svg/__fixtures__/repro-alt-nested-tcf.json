@@ -35,42 +35,48 @@
       "fromX": 81,
       "toX": 180,
       "y": 149,
-      "numberX": 81
+      "numberX": 81,
+      "labelCenterX": 130.5
     },
     {
       "label": "tryMsg",
       "fromX": 181,
       "toX": 280,
       "y": 223,
-      "numberX": 181
+      "numberX": 181,
+      "labelCenterX": 230.5
     },
     {
       "label": "catchMsg",
       "fromX": 280,
       "toX": 181,
       "y": 300,
-      "numberX": 181
+      "numberX": 181,
+      "labelCenterX": 230.5
     },
     {
       "label": "finallyMsg",
       "fromX": 180,
       "toX": 81,
       "y": 377,
-      "numberX": 81
+      "numberX": 81,
+      "labelCenterX": 130.5
     },
     {
       "label": "elseIfMsg",
       "fromX": 81,
       "toX": 180,
       "y": 481,
-      "numberX": 81
+      "numberX": 81,
+      "labelCenterX": 130.5
     },
     {
       "label": "elseMsg",
       "fromX": 81,
       "toX": 180,
       "y": 558,
-      "numberX": 81
+      "numberX": 81,
+      "labelCenterX": 130.5
     }
   ],
   "selfCalls": [],

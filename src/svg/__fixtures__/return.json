@@ -42,28 +42,32 @@
       "fromX": 61,
       "toX": 211,
       "y": 87,
-      "numberX": 61
+      "numberX": 61,
+      "labelCenterX": 136
     },
     {
       "label": "method_long_to_give_space",
       "fromX": 226,
       "toX": 441,
       "y": 119,
-      "numberX": 226
+      "numberX": 226,
+      "labelCenterX": 333.5
     },
     {
       "label": "method",
       "fromX": 441,
       "toX": 233,
       "y": 183,
-      "numberX": 233
+      "numberX": 233,
+      "labelCenterX": 337
     },
     {
       "label": "method2",
       "fromX": 441,
       "toX": 233,
       "y": 249,
-      "numberX": 233
+      "numberX": 233,
+      "labelCenterX": 337
     }
   ],
   "selfCalls": [],

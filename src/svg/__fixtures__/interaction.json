@@ -28,42 +28,48 @@
       "fromX": 76.5,
       "toX": 174,
       "y": 149,
-      "numberX": 76.5
+      "numberX": 76.5,
+      "labelCenterX": 125.25
     },
     {
       "label": "method()",
       "fromX": 189,
       "toX": 274,
       "y": 181,
-      "numberX": 189
+      "numberX": 189,
+      "labelCenterX": 231.5
     },
     {
       "label": "1.1.1.1BSelfMethod00000000000",
       "fromX": 289,
       "toX": 319,
       "y": 224,
-      "numberX": 289
+      "numberX": 289,
+      "labelCenterX": 291.5
     },
     {
       "label": "method()",
       "fromX": 274,
       "toX": 196,
       "y": 281,
-      "numberX": 196
+      "numberX": 196,
+      "labelCenterX": 235
     },
     {
       "label": "1.1.2ASelf",
       "fromX": 189,
       "toX": 219,
       "y": 364,
-      "numberX": 189
+      "numberX": 189,
+      "labelCenterX": 191.5
     },
     {
       "label": "method",
       "fromX": 281,
       "toX": 203,
       "y": 399,
-      "numberX": 203
+      "numberX": 203,
+      "labelCenterX": 242
     }
   ],
   "selfCalls": [],

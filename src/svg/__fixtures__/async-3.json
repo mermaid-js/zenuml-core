@@ -35,35 +35,40 @@
       "fromX": 66.5,
       "toX": 364,
       "y": 87,
-      "numberX": 66.5
+      "numberX": 66.5,
+      "labelCenterX": 215.25
     },
     {
       "label": "notify",
       "fromX": 172,
       "toX": 364,
       "y": 119,
-      "numberX": 172
+      "numberX": 172,
+      "labelCenterX": 268
     },
     {
       "label": "respond",
       "fromX": 364,
       "toX": 172,
       "y": 151,
-      "numberX": 172
+      "numberX": 172,
+      "labelCenterX": 268
     },
     {
       "label": "forward",
       "fromX": 364,
       "toX": 272,
       "y": 183,
-      "numberX": 272
+      "numberX": 272,
+      "labelCenterX": 318
     },
     {
       "label": "ack",
       "fromX": 272,
       "toX": 364,
       "y": 215,
-      "numberX": 272
+      "numberX": 272,
+      "labelCenterX": 318
     }
   ],
   "selfCalls": [],

@@ -306,7 +306,15 @@ for (const caseName of CANONICAL_CASES) {
           numberX = numRect.right - containerRect.left;
         }
 
-        messages.push({ label, fromX, toX, y: arrowY, numberX });
+        // Measure label center X
+        const labelEl = htmlEl.querySelector('.label span, .name');
+        let labelCenterX: number | undefined;
+        if (labelEl) {
+          const labelRect = (labelEl as HTMLElement).getBoundingClientRect();
+          labelCenterX = labelRect.left + labelRect.width / 2 - containerRect.left;
+        }
+
+        messages.push({ label, fromX, toX, y: arrowY, numberX, labelCenterX });
       }
 
       // --- Self-calls ---

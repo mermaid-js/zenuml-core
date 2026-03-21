@@ -35,14 +35,16 @@
       "fromX": 71,
       "toX": 170,
       "y": 87,
-      "numberX": 71
+      "numberX": 71,
+      "labelCenterX": 120.5
     },
     {
       "label": "process",
       "fromX": 171,
       "toX": 270,
       "y": 181,
-      "numberX": 171
+      "numberX": 171,
+      "labelCenterX": 220.5
     }
   ],
   "selfCalls": [],

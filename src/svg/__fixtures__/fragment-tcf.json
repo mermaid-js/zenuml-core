@@ -42,28 +42,32 @@
       "fromX": 76.5,
       "toX": 174,
       "y": 87,
-      "numberX": 76.5
+      "numberX": 76.5,
+      "labelCenterX": 125.25
     },
     {
       "label": "process",
       "fromX": 189,
       "toX": 274,
       "y": 161,
-      "numberX": 189
+      "numberX": 189,
+      "labelCenterX": 231.5
     },
     {
       "label": "handle",
       "fromX": 189,
       "toX": 374,
       "y": 260,
-      "numberX": 189
+      "numberX": 189,
+      "labelCenterX": 281.5
     },
     {
       "label": "cleanup",
       "fromX": 189,
       "toX": 474,
       "y": 359,
-      "numberX": 189
+      "numberX": 189,
+      "labelCenterX": 331.5
     }
   ],
   "selfCalls": [],
