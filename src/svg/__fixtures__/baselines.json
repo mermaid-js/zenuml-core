@@ -22,7 +22,8 @@
   "repro-alt-nested-tcf": 98,
   "repro-occ-mixed-2ret": 100,
   "creation-return": 100,
-  "async-2": 88,
+  "async-2a": 92,
+  "async-2b": 93,
   "async-3": 95,
   "interaction": 95
 }

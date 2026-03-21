@@ -27,7 +27,8 @@ const CANONICAL_CASES = [
   "repro-alt-nested-tcf",
   "repro-occ-mixed-2ret",
   "creation-return",
-  "async-2",
+  "async-2a",
+  "async-2b",
   "async-3",
   "interaction",
 ];

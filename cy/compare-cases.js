@@ -82,26 +82,23 @@ B->A: bToA
 C->C: selfC
 C->B: cToB
 C->A: cToA`,
-  "async-2": `A.method {
-  A->A: async
-  A->B: async
-  A->C: async
-  B->B: async
-  B->C: async
-  B->A: async
-  C->C: async
-  C->B: async
-  C->A: async
+  "async-2a": `A.method {
+  A->A: selfPing
+  A->B: send
+  A->C: broadcast
+  B->B: selfCheck
+  B->C: forward
+  B->A: reply
+  C->C: selfLog
+  C->B: respond
+  C->A: callback
+}`,
+  "async-2b": `A.method {
+  A->B: init
   B.method {
-    A->A: async
-    A->B: async
-    A->C: async
-    B->B: async
-    B->C: async
-    B->A: async
-    C->C: async
-    C->B: async
-    C->A: async
+    A->B: request
+    B->C: delegate
+    C->A: complete
   }
 }`,
   "async-3": `A B C
