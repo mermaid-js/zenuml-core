@@ -22,9 +22,17 @@ export function renderParticipant(p: ParticipantGeometry): string {
   const textX = p.x;
   const textY = p.y + p.height / 2 - 0.5; // -0.5: match HTML's vertical text centering
 
+  // Aliased labels (e.g. "b:B") — use textLength to pin the text extent to the
+  // measured glyph width. HTML renders the label at natural glyph width with CSS
+  // padding around it (not between characters). Setting textLength = glyphWidth
+  // ensures SVG matches the HTML glyph rendering without artificial stretching.
+  const textLengthAttr = p.labelWidth != null
+    ? ` textLength="${p.labelWidth}" lengthAdjust="spacing"`
+    : "";
+
   return `<g class="participant" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"/>
-  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label">${esc(p.label)}</text>
+  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}>${esc(p.label)}</text>
 </g>`;
 }
 
@@ -38,9 +46,13 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
   const textX = p.x;
   const textY = bottomY + p.height / 2;
 
+  const textLengthAttr = p.labelWidth != null
+    ? ` textLength="${p.labelWidth}" lengthAdjust="spacing"`
+    : "";
+
   return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"/>
-  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label">${esc(p.label)}</text>
+  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}>${esc(p.label)}</text>
 </g>`;
 }
 

@@ -15,7 +15,22 @@
       "height": 40
     }
   ],
-  "messages": [],
+  "messages": [
+    {
+      "label": "methodA()",
+      "fromX": 66.5,
+      "toX": 164,
+      "y": 87,
+      "numberX": 66.5
+    },
+    {
+      "label": "1.1methodA1()",
+      "fromX": 179,
+      "toX": 209,
+      "y": 130,
+      "numberX": 179
+    }
+  ],
   "selfCalls": [],
   "occurrences": [
     {

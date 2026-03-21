@@ -16,12 +16,14 @@ export function renderCreation(c: CreationGeometry): string {
   const fromX = isRTL ? m.fromX : m.fromX + 1;
   const toX = isRTL ? adjustedToX : adjustedToX;
 
-  const labelX = fromX + (toX - fromX) / 2 - 3.5;
+  // HTML label sits ~3px toward the sender side of the arrow midpoint.
+  // LTR fromX has +1 lifeline offset shifting midpoint +0.5px, so offset is -3.
+  // RTL fromX has no +1, so offset is +3.5 to match HTML positioning.
+  const labelX = fromX + (toX - fromX) / 2 + (isRTL ? 3.5 : -3);
   const labelY = m.y - 3;
 
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
 
-  // Sequence number: always to the left of the message
   const numberX = Math.min(fromX, toX) - 3;
   const numberSvg = m.number
     ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`

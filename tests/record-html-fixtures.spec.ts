@@ -27,6 +27,9 @@ const CANONICAL_CASES = [
   "repro-alt-nested-tcf",
   "repro-occ-mixed-2ret",
   "creation-return",
+  "async-2",
+  "async-3",
+  "interaction",
 ];
 
 const FIXTURES_DIR = path.resolve(
@@ -227,11 +230,8 @@ for (const caseName of CANONICAL_CASES) {
             ":scope > .flex > .occurrence",
           ) !== null;
 
-        // Self-calls have their arrow SVG looping to the same side
-        // We detect by checking if the interaction's inner structure
-        // has an occurrence (block/body) — that makes it a sync call
-        // For simple async messages (A->B: msg), there's no occurrence
-        if (hasOccurrenceChild) continue; // This is a sync/self call with block
+        // Note: sync calls with blocks (hasOccurrenceChild) are included —
+        // their arrow endpoints need to be compared for occurrence-edge parity.
 
         if (!arrowSvg) continue;
 

@@ -1,0 +1,216 @@
+{
+  "case": "async-2",
+  "code": "A.method {\n  A->A: async\n  A->B: async\n  A->C: async\n  B->B: async\n  B->C: async\n  B->A: async\n  C->C: async\n  C->B: async\n  C->A: async\n  B.method {\n    A->A: async\n    A->B: async\n    A->C: async\n    B->B: async\n    B->C: async\n    B->A: async\n    C->C: async\n    C->B: async\n    C->A: async\n  }\n}",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "frameHeight": 991,
+  "participants": [
+    {
+      "name": "A",
+      "x": 131,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "B",
+      "x": 231,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "C",
+      "x": 331,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [
+    {
+      "label": "method",
+      "fromX": 66.5,
+      "toX": 164,
+      "y": 87,
+      "numberX": 66.5
+    },
+    {
+      "label": "1.1 async",
+      "fromX": 179,
+      "toX": 209,
+      "y": 136,
+      "numberX": 179
+    },
+    {
+      "label": "async",
+      "fromX": 179,
+      "toX": 271,
+      "y": 179,
+      "numberX": 179
+    },
+    {
+      "label": "async",
+      "fromX": 179,
+      "toX": 371,
+      "y": 211,
+      "numberX": 179
+    },
+    {
+      "label": "1.4 async",
+      "fromX": 272,
+      "toX": 302,
+      "y": 260,
+      "numberX": 272
+    },
+    {
+      "label": "async",
+      "fromX": 272,
+      "toX": 371,
+      "y": 303,
+      "numberX": 272
+    },
+    {
+      "label": "async",
+      "fromX": 271,
+      "toX": 179,
+      "y": 335,
+      "numberX": 179
+    },
+    {
+      "label": "1.7 async",
+      "fromX": 372,
+      "toX": 402,
+      "y": 384,
+      "numberX": 372
+    },
+    {
+      "label": "async",
+      "fromX": 371,
+      "toX": 272,
+      "y": 427,
+      "numberX": 272
+    },
+    {
+      "label": "async",
+      "fromX": 371,
+      "toX": 179,
+      "y": 459,
+      "numberX": 179
+    },
+    {
+      "label": "method",
+      "fromX": 179,
+      "toX": 264,
+      "y": 491,
+      "numberX": 179
+    },
+    {
+      "label": "1.10.1 async",
+      "fromX": 179,
+      "toX": 209,
+      "y": 540,
+      "numberX": 179
+    },
+    {
+      "label": "async",
+      "fromX": 179,
+      "toX": 264,
+      "y": 583,
+      "numberX": 179
+    },
+    {
+      "label": "async",
+      "fromX": 179,
+      "toX": 371,
+      "y": 615,
+      "numberX": 179
+    },
+    {
+      "label": "1.10.4 async",
+      "fromX": 279,
+      "toX": 309,
+      "y": 664,
+      "numberX": 279
+    },
+    {
+      "label": "async",
+      "fromX": 279,
+      "toX": 371,
+      "y": 707,
+      "numberX": 279
+    },
+    {
+      "label": "async",
+      "fromX": 264,
+      "toX": 179,
+      "y": 739,
+      "numberX": 179
+    },
+    {
+      "label": "1.10.7 async",
+      "fromX": 372,
+      "toX": 402,
+      "y": 788,
+      "numberX": 372
+    },
+    {
+      "label": "async",
+      "fromX": 371,
+      "toX": 279,
+      "y": 831,
+      "numberX": 279
+    },
+    {
+      "label": "async",
+      "fromX": 371,
+      "toX": 179,
+      "y": 863,
+      "numberX": 179
+    }
+  ],
+  "selfCalls": [],
+  "occurrences": [
+    {
+      "participant": "A",
+      "x": 164,
+      "y": 86,
+      "width": 15,
+      "height": 814
+    },
+    {
+      "participant": "B",
+      "x": 264,
+      "y": 490,
+      "width": 15,
+      "height": 392
+    }
+  ],
+  "returns": [],
+  "creations": [],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 171,
+      "y1": 68,
+      "y2": 956
+    },
+    {
+      "participant": "B",
+      "x": 271,
+      "y1": 68,
+      "y2": 956
+    },
+    {
+      "participant": "C",
+      "x": 371,
+      "y1": 68,
+      "y2": 956
+    }
+  ]
+}

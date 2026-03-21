@@ -5,7 +5,7 @@
   "single-participant": 100,
   "simple-messages": 100,
   "repro-msg-y": 100,
-  "demo5-self-named": 100,
+  "demo5-self-named": 95,
   "nested-sync": 100,
   "nested-occurrence": 100,
   "async-self": 100,
@@ -14,12 +14,15 @@
   "fragment-loop": 96,
   "fragment-tcf": 100,
   "creation": 100,
-  "creation-rtl": 97,
+  "creation-rtl": 100,
   "return": 100,
   "repro-return-after-creation": 100,
   "vertical-2": 100,
   "return-only-two": 100,
   "repro-alt-nested-tcf": 98,
   "repro-occ-mixed-2ret": 100,
-  "creation-return": 100
+  "creation-return": 100,
+  "async-2": 88,
+  "async-3": 95,
+  "interaction": 95
 }

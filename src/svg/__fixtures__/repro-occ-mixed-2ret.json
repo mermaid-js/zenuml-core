@@ -29,7 +29,29 @@
       "height": 40
     }
   ],
-  "messages": [],
+  "messages": [
+    {
+      "label": "method",
+      "fromX": 61,
+      "toX": 153,
+      "y": 87,
+      "numberX": 61
+    },
+    {
+      "label": "inner",
+      "fromX": 168,
+      "toX": 253,
+      "y": 119,
+      "numberX": 168
+    },
+    {
+      "label": "call",
+      "fromX": 253,
+      "toX": 175,
+      "y": 151,
+      "numberX": 175
+    }
+  ],
   "selfCalls": [],
   "occurrences": [
     {

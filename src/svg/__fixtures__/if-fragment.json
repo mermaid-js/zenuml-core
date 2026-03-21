@@ -27,13 +27,15 @@
       "label": "SendRequest",
       "fromX": 71,
       "toX": 192,
-      "y": 87
+      "y": 87,
+      "numberX": 71
     },
     {
       "label": "2.1 processRequest",
       "fromX": 193,
       "toX": 223,
-      "y": 198
+      "y": 198,
+      "numberX": 193
     }
   ],
   "selfCalls": [],

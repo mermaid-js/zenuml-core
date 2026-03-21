@@ -34,55 +34,64 @@
       "label": "1 selfA",
       "fromX": 61,
       "toX": 91,
-      "y": 104
+      "y": 104,
+      "numberX": 61
     },
     {
       "label": "aToB",
       "fromX": 61,
       "toX": 160,
-      "y": 147
+      "y": 147,
+      "numberX": 61
     },
     {
       "label": "aToC",
       "fromX": 61,
       "toX": 260,
-      "y": 179
+      "y": 179,
+      "numberX": 61
     },
     {
       "label": "4 selfB",
       "fromX": 161,
       "toX": 191,
-      "y": 228
+      "y": 228,
+      "numberX": 161
     },
     {
       "label": "bToC",
       "fromX": 161,
       "toX": 260,
-      "y": 271
+      "y": 271,
+      "numberX": 161
     },
     {
       "label": "bToA",
       "fromX": 160,
       "toX": 61,
-      "y": 303
+      "y": 303,
+      "numberX": 61
     },
     {
       "label": "7 selfC",
       "fromX": 261,
       "toX": 291,
-      "y": 352
+      "y": 352,
+      "numberX": 261
     },
     {
       "label": "cToB",
       "fromX": 260,
       "toX": 161,
-      "y": 395
+      "y": 395,
+      "numberX": 161
     },
     {
       "label": "cToA",
       "fromX": 260,
       "toX": 61,
-      "y": 427
+      "y": 427,
+      "numberX": 61
     }
   ],
   "selfCalls": [],

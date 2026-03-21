@@ -27,7 +27,8 @@
       "label": "msg",
       "fromX": 61,
       "toX": 160,
-      "y": 87
+      "y": 87,
+      "numberX": 61
     }
   ],
   "selfCalls": [],

@@ -264,12 +264,14 @@ function buildParticipants(
       // The positioning engine clamps labelWidth to MIN_PARTICIPANT_WIDTH, losing
       // the actual text width.  Re-measure here to get the correct box size.
       // HTML box = max(textWidth + BOX_PADDING, MIN_PARTICIPANT_WIDTH).
+      // Assignee participants (name contains ":") render two EditableSpan components
+      // in HTML, each with 8px horizontal padding (EditableSpan.css .editable-span-base).
+      const isAssignee = m.name.includes(":") && m.getDisplayName() === m.name;
       let width: number;
+      let measuredTextWidth: number | undefined;
       if (measureText && m.name !== _STARTER_) {
         const textWidth = measureText(m.getDisplayName(), TextType.ParticipantName);
-        // Assignee participants (name contains ":") render two EditableSpan components
-        // in HTML, each with 8px horizontal padding (EditableSpan.css .editable-span-base).
-        const isAssignee = m.name.includes(":") && m.getDisplayName() === m.name;
+        if (isAssignee) measuredTextWidth = textWidth;
         const padding = isAssignee ? PARTICIPANT_BOX_PADDING_ASSIGNEE : PARTICIPANT_BOX_PADDING;
         width = Math.min(Math.max(textWidth + padding, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
       } else {
@@ -286,6 +288,8 @@ function buildParticipants(
           ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 8)
           : PARTICIPANT_TOP_SPACE;
 
+      // Store measured glyph width for aliased labels so renderer can set textLength
+
       return {
         name: m.name,
         label: m.getDisplayName(),
@@ -295,6 +299,7 @@ function buildParticipants(
         height: PARTICIPANT_VISUAL_HEIGHT,
         isStarter,
         showBottom: creationTop == null && !isStarter,
+        labelWidth: measuredTextWidth,
       };
     });
 }

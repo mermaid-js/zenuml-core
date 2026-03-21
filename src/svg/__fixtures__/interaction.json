@@ -1,0 +1,146 @@
+{
+  "case": "interaction",
+  "code": "if(x) {\n  A.method() {\n    B.method() {\n      BSelfMethod00000000000\n      A.method()\n    }\n    ASelf {\n      B->A.method\n    }\n  }\n}",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "frameHeight": 576,
+  "participants": [
+    {
+      "name": "A",
+      "x": 141,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "B",
+      "x": 241,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [
+    {
+      "label": "method()",
+      "fromX": 76.5,
+      "toX": 174,
+      "y": 149,
+      "numberX": 76.5
+    },
+    {
+      "label": "method()",
+      "fromX": 189,
+      "toX": 274,
+      "y": 181,
+      "numberX": 189
+    },
+    {
+      "label": "1.1.1.1BSelfMethod00000000000",
+      "fromX": 289,
+      "toX": 319,
+      "y": 224,
+      "numberX": 289
+    },
+    {
+      "label": "method()",
+      "fromX": 274,
+      "toX": 196,
+      "y": 281,
+      "numberX": 196
+    },
+    {
+      "label": "1.1.2ASelf",
+      "fromX": 189,
+      "toX": 219,
+      "y": 364,
+      "numberX": 189
+    },
+    {
+      "label": "method",
+      "fromX": 281,
+      "toX": 203,
+      "y": 399,
+      "numberX": 203
+    }
+  ],
+  "selfCalls": [],
+  "occurrences": [
+    {
+      "participant": "A",
+      "x": 174,
+      "y": 148,
+      "width": 15,
+      "height": 310
+    },
+    {
+      "participant": "B",
+      "x": 274,
+      "y": 180,
+      "width": 15,
+      "height": 142
+    },
+    {
+      "participant": "B",
+      "x": 281,
+      "y": 226,
+      "width": 15,
+      "height": 24
+    },
+    {
+      "participant": "A",
+      "x": 181,
+      "y": 280,
+      "width": 15,
+      "height": 24
+    },
+    {
+      "participant": "A",
+      "x": 181,
+      "y": 366,
+      "width": 15,
+      "height": 74
+    },
+    {
+      "participant": "A",
+      "x": 188,
+      "y": 398,
+      "width": 15,
+      "height": 24
+    }
+  ],
+  "returns": [],
+  "creations": [],
+  "fragments": [
+    {
+      "kind": "alt",
+      "x": 10,
+      "y": 72,
+      "width": 471,
+      "height": 413,
+      "conditionLabel": "[x]",
+      "conditionX": 11,
+      "conditionY": 98,
+      "conditionTextWidth": 22.78125,
+      "sections": []
+    }
+  ],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 181,
+      "y1": 68,
+      "y2": 541
+    },
+    {
+      "participant": "B",
+      "x": 281,
+      "y1": 68,
+      "y2": 541
+    }
+  ]
+}

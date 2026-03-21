@@ -251,7 +251,12 @@ function scoreMessagesNorm(
   const fixtureMessages = [...fixture.messages]
     .filter((m) => Math.abs(m.toX - m.fromX) > SELF_CALL_THRESHOLD)
     .sort((a, b) => a.y - b.y);
-  const geoMessages = geometry.messages.filter((m) => !m.isSelf).sort((a, b) => a.y - b.y);
+  // Geometry: include all non-self messages (sync call entries included).
+  // The fixture now records sync call messages too (their arrow endpoints
+  // need occurrence-edge parity checking).
+  const geoMessages = geometry.messages
+    .filter((m) => !m.isSelf)
+    .sort((a, b) => a.y - b.y);
 
   for (let i = 0; i < fixtureMessages.length; i++) {
     const fm = fixtureMessages[i];

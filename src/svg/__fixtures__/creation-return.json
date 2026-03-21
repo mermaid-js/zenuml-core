@@ -19,10 +19,19 @@
       "x": 268,
       "y": 104,
       "width": 80,
-      "height": 40
+      "height": 40,
+      "labelTextWidth": 24.03125
     }
   ],
-  "messages": [],
+  "messages": [
+    {
+      "label": "method()",
+      "fromX": 66.5,
+      "toX": 164,
+      "y": 87,
+      "numberX": 66.5
+    }
+  ],
   "selfCalls": [],
   "occurrences": [
     {

@@ -5,7 +5,9 @@ export function renderMessage(m: MessageGeometry): string {
   // Shift label center by half the arrowhead width (3.5px) toward the source participant.
   const arrowHalfW = 3.5;
   const direction = Math.sign(m.toX - m.fromX); // +1 right-pointing, -1 left-pointing
-  const labelX = (m.fromX + m.toX) / 2 - direction * arrowHalfW + 0.5; // +0.5: match HTML label centering
+  // Async LTR messages need an additional -3px shift to match HTML label centering
+  const asyncLtrShift = (m.arrowStyle === "open" && direction === 1) ? -4 : 0;
+  const labelX = (m.fromX + m.toX) / 2 - direction * arrowHalfW + 0.5 + asyncLtrShift;
   // HTML renders label as a block element ABOVE the border-bottom line.
   // SVG text y = baseline. For 14px Helvetica, getBBox().y ≈ y - 13.
   // HTML label top = m.y - 17 (content coords). Need bbox.y = m.y - 17, so y = m.y - 4.
@@ -16,7 +18,7 @@ export function renderMessage(m: MessageGeometry): string {
 
   // Sequence number: always positioned to the LEFT of the message with 4px gap (matching HTML pr-1).
   // HTML uses right-[100%] which places the number left of the message container regardless of direction.
-  const numberX = Math.min(m.fromX, m.toX) - 4;
+  const numberX = Math.min(m.fromX, m.toX) - 3;
   const numberSvg = m.number
     ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
     : "";

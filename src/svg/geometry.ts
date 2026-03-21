@@ -17,6 +17,8 @@ export interface ParticipantGeometry {
   isStarter: boolean;
   /** Duplicate at diagram bottom for long diagrams */
   showBottom: boolean;
+  /** Measured glyph-only label width (for textLength adjustment on aliased labels) */
+  labelWidth?: number;
 }
 
 export interface LifelineGeometry {

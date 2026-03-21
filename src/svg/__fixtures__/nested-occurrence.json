@@ -22,7 +22,29 @@
       "height": 40
     }
   ],
-  "messages": [],
+  "messages": [
+    {
+      "label": "method1",
+      "fromX": 66.5,
+      "toX": 164,
+      "y": 87,
+      "numberX": 66.5
+    },
+    {
+      "label": "method2",
+      "fromX": 179,
+      "toX": 264,
+      "y": 119,
+      "numberX": 179
+    },
+    {
+      "label": "method3",
+      "fromX": 179,
+      "toX": 271,
+      "y": 151,
+      "numberX": 179
+    }
+  ],
   "selfCalls": [],
   "occurrences": [
     {

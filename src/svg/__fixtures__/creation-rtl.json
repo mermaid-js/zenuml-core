@@ -12,7 +12,8 @@
       "x": 131,
       "y": 124,
       "width": 80,
-      "height": 40
+      "height": 40,
+      "labelTextWidth": 24.015625
     },
     {
       "name": "A",
@@ -22,7 +23,15 @@
       "height": 40
     }
   ],
-  "messages": [],
+  "messages": [
+    {
+      "label": "method()",
+      "fromX": 66.5,
+      "toX": 301,
+      "y": 87,
+      "numberX": 66.5
+    }
+  ],
   "selfCalls": [],
   "occurrences": [
     {

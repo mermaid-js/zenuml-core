@@ -36,7 +36,36 @@
       "height": 40
     }
   ],
-  "messages": [],
+  "messages": [
+    {
+      "label": "method",
+      "fromX": 76.5,
+      "toX": 174,
+      "y": 87,
+      "numberX": 76.5
+    },
+    {
+      "label": "process",
+      "fromX": 189,
+      "toX": 274,
+      "y": 161,
+      "numberX": 189
+    },
+    {
+      "label": "handle",
+      "fromX": 189,
+      "toX": 374,
+      "y": 260,
+      "numberX": 189
+    },
+    {
+      "label": "cleanup",
+      "fromX": 189,
+      "toX": 474,
+      "y": 359,
+      "numberX": 189
+    }
+  ],
   "selfCalls": [],
   "occurrences": [
     {

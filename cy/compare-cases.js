@@ -106,21 +106,10 @@ C->A: cToA`,
 }`,
   "async-3": `A B C
 C.method {
-  A->C: async
-  C->A: async
-  C->B: async
-  B->C: async
-  B.method {
-    A->A: async
-    A->B: async
-    A->C: async
-    B->B: async
-    B->C: async
-    B->A: async
-    C->C: async
-    C->B: async
-    C->A: async
-  }
+  A->C: notify
+  C->A: respond
+  C->B: forward
+  B->C: ack
 }`,
   "async-self": `A->A: selfAsync`,
   "async-self-nested": `A.method {

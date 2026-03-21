@@ -282,13 +282,6 @@
           if (r.top > captureMidY) _hideEl(el);
         });
 
-        // Hide ALL numbering badges (messages, fragments, self-calls)
-        captureEl.querySelectorAll(".absolute.text-xs").forEach(el => {
-          if (/^[\d.]+$/.test(el.textContent.trim())) _hideEl(el);
-        });
-        // Hide fragment numbering (e.g. "1" before "Alt")
-        captureEl.querySelectorAll(".header .absolute.text-xs").forEach(_hideEl);
-
         if (htmlFrame) {
           const frameRect2 = htmlFrame.getBoundingClientRect();
           // Hide SVG icons in the header area (top 35px) — checkbox, etc.
@@ -296,11 +289,6 @@
             const r = svg.getBoundingClientRect();
             if (r.width > 0 && (r.top - frameRect2.top) < 35) _hideEl(svg);
           });
-        }
-
-        // Hide SVG sequence numbers (matching HTML numbering badge hiding above)
-        if (svgElement) {
-          svgElement.querySelectorAll(".seq-number").forEach(_hideEl);
         }
 
         return { htmlSelector: "#html-output .frame, #html-output .sequence-diagram", svgSelector: "#svg-output svg" };

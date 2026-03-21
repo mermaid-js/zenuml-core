@@ -20,7 +20,8 @@
       "label": "1 selfAsync",
       "fromX": 61,
       "toX": 91,
-      "y": 104
+      "y": 104,
+      "numberX": 61
     }
   ],
   "selfCalls": [],
