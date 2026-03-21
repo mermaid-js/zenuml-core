@@ -208,7 +208,8 @@ function scoreParticipantsNorm(
     const gp = geometry.participants.find((p) => p.name === fp.name);
     // Fixture stores left-edge X; geometry stores center X.
     // Convert both to center-relative for comparison.
-    compareProps(mismatches, byType, "participant", fp.name, [
+    // Build props list
+    const props: Array<{ prop: string; expected: number; actual: number | undefined }> = [
       {
         prop: "x",
         expected: normX(fp.x + fp.width / 2, anchors.fX),
@@ -217,7 +218,22 @@ function scoreParticipantsNorm(
       { prop: "y", expected: fp.y, actual: gp?.y },
       { prop: "width", expected: fp.width, actual: gp?.width },
       { prop: "height", expected: fp.height, actual: gp?.height },
-    ]);
+    ];
+    // For aliased labels: compare HTML glyph width against SVG effective textLength.
+    // SVG renderer sets textLength = labelWidth for assignee participants.
+    // HTML renders at natural glyph width with CSS padding around it.
+    // Round to 1 decimal: canvas measureText and browser getBoundingClientRect
+    // return slightly different float precision for the same font/text.
+    if (fp.labelTextWidth != null && gp !== undefined) {
+      const r1 = (n: number) => Math.round(n * 10) / 10;
+      const svgEffectiveTextLength = gp.labelWidth != null ? r1(gp.labelWidth) : undefined;
+      props.push({
+        prop: "labelTextWidth",
+        expected: r1(fp.labelTextWidth),
+        actual: svgEffectiveTextLength,
+      });
+    }
+    compareProps(mismatches, byType, "participant", fp.name, props);
   }
 }
 
@@ -250,6 +266,22 @@ function scoreMessagesNorm(
     const isLTR = gm !== undefined ? gm.fromX < gm.toX : true;
     const gmFromX = gm !== undefined ? gm.fromX + (isLTR ? 1 : 0) : undefined;
     const gmToX = gm !== undefined ? gm.toX + (isLTR ? 0 : 1) : undefined;
+    // Sequence number X: SVG renders at Math.min(fromX, toX) - 4 with text-anchor="end".
+    // HTML Numbering component uses right-[100%] (outer box right edge = message left edge)
+    // with pr-1 (padding-right: 4px). The fixture records the outer box right edge,
+    // which equals the arrow's left endpoint. Both renderers place the number's right
+    // edge at the arrow's left endpoint, so compare fixture numberX against SVG min(fromX, toX).
+    const numberProps: Array<{ prop: string; expected: number; actual: number | undefined }> = [];
+    if (fm.numberX !== undefined && gm !== undefined && gm.number) {
+      // Use rendered endpoints (with +1 lifeline correction) to match HTML fixture
+      const renderedLeft = Math.min(gmFromX ?? gm.fromX, gmToX ?? gm.toX);
+      numberProps.push({
+        prop: "numberX",
+        expected: normX(fm.numberX, anchors.fX),
+        actual: normX(renderedLeft, anchors.gX),
+      });
+    }
+
     compareProps(mismatches, byType, "message", fm.label, [
       {
         prop: "fromX",
@@ -266,6 +298,7 @@ function scoreMessagesNorm(
         expected: normY(fm.y, anchors.fY),
         actual: gmY !== undefined ? normY(gmY, anchors.gY) : undefined,
       },
+      ...numberProps,
     ]);
   }
 }
@@ -458,17 +491,19 @@ function scoreCreationsNorm(
         expected: normY(fc.msgY, anchors.fY),
         actual: gc !== undefined ? normY(gc.message.y, anchors.gY) : undefined,
       },
-      // Label center X: creation.ts renders the label at
-      //   labelX = fromX + (toX - fromX) / 2 - 3   (with text-anchor=middle)
-      // where fromX/toX are the rendered arrow endpoints (with +1 and edge corrections).
-      // Compare against HTML's measured label center.
-      // Round to nearest integer — HTML label positions have sub-pixel fractions
-      // from font metrics that aren't meaningful for comparison.
-      ...(fc.msgLabelCenterX != null && renderedFromX !== undefined && renderedToX !== undefined ? [{
-        prop: "msgLabelCenterX",
-        expected: Math.round(normX(fc.msgLabelCenterX, anchors.fX)),
-        actual: Math.round(normX(renderedFromX + (renderedToX - renderedFromX) / 2 - 3.5, anchors.gX)),
-      }] : []),
+      // Label center X: creation.ts renders the label at the arrow midpoint,
+      // offset 3px toward the sender side (LTR: -3, RTL: +3).
+      // Compare with 1-decimal rounding — HTML getBoundingClientRect returns sub-pixel
+      // fractions from font metrics that aren't visually meaningful.
+      ...(fc.msgLabelCenterX != null && renderedFromX !== undefined && renderedToX !== undefined ? (() => {
+        const r1 = (n: number) => Math.round(n * 10) / 10;
+        const labelOffset = isLTR ? -3 : 3.5;
+        return [{
+          prop: "msgLabelCenterX",
+          expected: r1(normX(fc.msgLabelCenterX, anchors.fX)),
+          actual: r1(normX(renderedFromX + (renderedToX - renderedFromX) / 2 + labelOffset, anchors.gX)),
+        }];
+      })() : []),
     ]);
 
   }

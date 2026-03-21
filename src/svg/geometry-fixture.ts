@@ -6,6 +6,8 @@ export interface FixtureParticipant {
   y: number;
   width: number;
   height: number;
+  /** Text glyph width excluding CSS padding (only set for aliased labels like "b:B") */
+  labelTextWidth?: number;
 }
 
 export interface FixtureMessage {
@@ -13,6 +15,8 @@ export interface FixtureMessage {
   fromX: number;
   toX: number;
   y: number;
+  /** Right edge X of the sequence number element (always left of the message) */
+  numberX?: number;
 }
 
 export interface FixtureSelfCall {

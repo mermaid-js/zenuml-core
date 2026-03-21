@@ -21,10 +21,17 @@ export function renderCreation(c: CreationGeometry): string {
 
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
 
+  // Sequence number: always to the left of the message
+  const numberX = Math.min(fromX, toX) - 3;
+  const numberSvg = m.number
+    ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
+    : "";
+
   return `<g class="creation">
   <line x1="${fromX}" y1="${m.y}" x2="${toX}" y2="${m.y}" class="message-line" stroke-dasharray="6,4"/>
   ${renderOpenArrow(toX, m.y, isRTL)}
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(m.label)}</text>
+  ${numberSvg}
 </g>`;
 }
 

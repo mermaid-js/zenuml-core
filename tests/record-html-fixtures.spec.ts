@@ -112,6 +112,7 @@ for (const caseName of CANONICAL_CASES) {
         y: number;
         width: number;
         height: number;
+        labelTextWidth?: number;
       }[] = [];
       for (const el of participantEls) {
         const name = (el as HTMLElement).textContent?.trim() || "";
@@ -119,12 +120,44 @@ for (const caseName of CANONICAL_CASES) {
         seenParticipants.add(name);
         const rect = (el as HTMLElement).getBoundingClientRect();
         const p = rel(rect);
+        // For aliased labels (containing ":"), measure total glyph width excluding CSS padding.
+        // HTML may render as single span ("b:B" with px-1 padding) or 3 spans
+        // ("b" + ":" + "B" with per-span padding). Sum glyph widths across all spans.
+        let labelTextWidth: number | undefined;
+        if (name.includes(":")) {
+          const labelContainer = (el as HTMLElement).querySelector('.flex.items-center.justify-center');
+          if (labelContainer) {
+            const allSpans = labelContainer.querySelectorAll('span');
+            if (allSpans.length > 0) {
+              let totalGlyphWidth = 0;
+              for (const span of allSpans) {
+                const spanEl = span as HTMLElement;
+                const style = window.getComputedStyle(spanEl);
+                const pl = parseFloat(style.paddingLeft) || 0;
+                const pr = parseFloat(style.paddingRight) || 0;
+                totalGlyphWidth += spanEl.getBoundingClientRect().width - pl - pr;
+              }
+              labelTextWidth = totalGlyphWidth;
+            }
+          }
+          // Fallback: single editable span (no flex container)
+          if (labelTextWidth === undefined) {
+            const labelSpan = (el as HTMLElement).querySelector('[title="Double-click to edit"]') as HTMLElement | null;
+            if (labelSpan) {
+              const style = window.getComputedStyle(labelSpan);
+              const pl = parseFloat(style.paddingLeft) || 0;
+              const pr = parseFloat(style.paddingRight) || 0;
+              labelTextWidth = labelSpan.getBoundingClientRect().width - pl - pr;
+            }
+          }
+        }
         participants.push({
           name,
           x: p.x,
           y: p.y,
           width: p.width,
           height: p.height,
+          ...(labelTextWidth !== undefined ? { labelTextWidth } : {}),
         });
       }
 
@@ -170,6 +203,7 @@ for (const caseName of CANONICAL_CASES) {
         fromX: number;
         toX: number;
         y: number;
+        numberX?: number;
       }[] = [];
 
       for (const el of allInteractions) {
@@ -261,7 +295,17 @@ for (const caseName of CANONICAL_CASES) {
             svgRect.left + x2 * scale - containerRect.left;
         }
 
-        messages.push({ label, fromX, toX, y: arrowY });
+        // Measure sequence number position (Numbering component: text-gray-500 font-thin)
+        const numEl = htmlEl.querySelector('.text-gray-500.font-thin');
+        let numberX: number | undefined;
+        if (numEl) {
+          const numRect = (numEl as HTMLElement).getBoundingClientRect();
+          // Record the right edge of the number element — this is where the number text ends,
+          // which aligns with the left endpoint of the message arrow.
+          numberX = numRect.right - containerRect.left;
+        }
+
+        messages.push({ label, fromX, toX, y: arrowY, numberX });
       }
 
       // --- Self-calls ---

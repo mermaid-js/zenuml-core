@@ -14,9 +14,11 @@ export function renderMessage(m: MessageGeometry): string {
   const dashAttr = m.arrowStyle === "dashed" ? ' stroke-dasharray="6,4"' : "";
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
 
-  // Sequence number: positioned to the left of the message origin with 4px gap (matching HTML pr-1)
+  // Sequence number: always positioned to the LEFT of the message with 4px gap (matching HTML pr-1).
+  // HTML uses right-[100%] which places the number left of the message container regardless of direction.
+  const numberX = Math.min(m.fromX, m.toX) - 4;
   const numberSvg = m.number
-    ? `<text x="${m.fromX - 4}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
+    ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
     : "";
 
   // -0.5px Y: align with HTML's border-bottom line rendering (CSS renders at half-pixel)

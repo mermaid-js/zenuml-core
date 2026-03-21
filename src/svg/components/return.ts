@@ -23,10 +23,17 @@ export function renderReturn(r: ReturnGeometry): string {
   const ay1 = r.y - halfH;
   const ay2 = r.y + halfH;
 
+  // Sequence number: always to the left of the return
+  const numberX = Math.min(r.fromX, r.toX) - 3;
+  const numberSvg = r.number
+    ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(r.number)}</text>`
+    : "";
+
   return `<g class="return">
   <line x1="${r.fromX}" y1="${r.y}" x2="${r.toX}" y2="${r.y}" class="return-line"/>
   <polyline points="${ax1},${ay1} ${arrowTipX},${r.y} ${ax1},${ay2}" fill="none" stroke-linecap="round" class="return-arrow"/>
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="return-label">${esc(r.label)}</text>
+  ${numberSvg}
 </g>`;
 }
 

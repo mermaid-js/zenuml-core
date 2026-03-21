@@ -539,6 +539,7 @@ function buildMessages(
             returns.push({
               fromX: retFromX, toX: senderX, y: returnArrowY,
               label: assignment.assignee, isReverse: fromX < toX, isSelf: false,
+              number: info.number,
             });
             maxReturnBottom = Math.max(maxReturnBottom, returnArrowY + 46);
           }
@@ -578,6 +579,7 @@ function buildMessages(
             arrowStyle: "open",
             isSelf: false,
             isReverse: toX < fromX,
+            number: info.number,
             style: messageStyle,
           },
         });
@@ -639,6 +641,7 @@ function buildMessages(
           returns.push({
             fromX: createdRetX, toX: senderRetX, y: occBottom,
             label: creationAssign.assignee, isReverse: createdRetX > senderRetX, isSelf: false,
+            number: info.number,
           });
           maxReturnBottom = Math.max(maxReturnBottom, occBottom + 46);
         }
@@ -726,6 +729,7 @@ function buildMessages(
         label: info.label,
         isReverse,
         isSelf: info.isSelf,
+        number: info.number,
       });
       maxReturnBottom = Math.max(maxReturnBottom, returnY + (62 - returnOffset));
       continue;
