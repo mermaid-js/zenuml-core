@@ -113,6 +113,25 @@ function area(rect) {
   return Math.max(0, rect.w) * Math.max(0, rect.h);
 }
 
+function unionRect(rects) {
+  if (!rects || rects.length === 0) {
+    return { x: 0, y: 0, w: 0, h: 0 };
+  }
+  const left = Math.min(...rects.map((rect) => rect.x));
+  const top = Math.min(...rects.map((rect) => rect.y));
+  const right = Math.max(...rects.map((rect) => rect.x + rect.w));
+  const bottom = Math.max(...rects.map((rect) => rect.y + rect.h));
+  return { x: left, y: top, w: right - left, h: bottom - top };
+}
+
+function arrowEndpointsFromBox(box) {
+  return {
+    left_x: box.x,
+    right_x: box.x + box.w,
+    width: box.w,
+  };
+}
+
 function intersectionArea(a, b) {
   const left = Math.max(a.x, b.x);
   const top = Math.max(a.y, b.y);
@@ -357,6 +376,13 @@ function formatLetterSummary(letter) {
   return `${letter.grapheme}: dx=${dx}px dy=${dy}px`;
 }
 
+function formatArrowSummary(arrow) {
+  if (arrow.status !== "ok") {
+    return "ambiguous";
+  }
+  return `left_dx=${arrow.left_dx.toFixed(2)}px right_dx=${arrow.right_dx.toFixed(2)}px width_dx=${arrow.width_dx.toFixed(2)}px`;
+}
+
 async function collectLabelData(page) {
   return page.evaluate(async () => {
     await document.fonts.ready;
@@ -367,6 +393,25 @@ async function collectLabelData(page) {
         y: rect.top - rootRect.top,
         w: rect.width,
         h: rect.height,
+      };
+    }
+
+    function unionRect(rects) {
+      if (!rects || rects.length === 0) {
+        return { x: 0, y: 0, w: 0, h: 0 };
+      }
+      const left = Math.min(...rects.map((rect) => rect.x));
+      const top = Math.min(...rects.map((rect) => rect.y));
+      const right = Math.max(...rects.map((rect) => rect.x + rect.w));
+      const bottom = Math.max(...rects.map((rect) => rect.y + rect.h));
+      return { x: left, y: top, w: right - left, h: bottom - top };
+    }
+
+    function arrowEndpointsFromBox(box) {
+      return {
+        left_x: box.x,
+        right_x: box.x + box.w,
+        width: box.w,
       };
     }
 
@@ -521,6 +566,179 @@ async function collectLabelData(page) {
       return labels;
     }
 
+    function collectHtmlArrows(root, rootRect) {
+      const arrows = [];
+
+      function addArrow(kind, interaction, text, parts) {
+        if (!text || parts.length === 0) return;
+        const box = unionRect(parts.map((part) => part.box));
+        arrows.push({
+          side: "html",
+          kind,
+          text,
+          box,
+          ...arrowEndpointsFromBox(box),
+          labelText: (interaction.getAttribute("data-signature") || "").trim(),
+        });
+      }
+
+      for (const interaction of root.querySelectorAll(".interaction:not(.return):not(.creation):not(.self-invocation):not(.self)")) {
+        const text = (interaction.querySelector(":scope > .message > .absolute.text-xs")?.textContent || "").trim()
+          || (interaction.getAttribute("data-signature") || "").trim();
+        const messageEl = interaction.querySelector(":scope > .message");
+        if (!messageEl) continue;
+        const svgChildren = Array.from(messageEl.children).filter((child) => child.tagName?.toLowerCase() === "svg");
+        const parts = [];
+        if (svgChildren[0]) {
+          parts.push({ part: "line", box: relRect(svgChildren[0].getBoundingClientRect(), rootRect) });
+        }
+        if (svgChildren[1]) {
+          parts.push({ part: "head", box: relRect(svgChildren[1].getBoundingClientRect(), rootRect) });
+        }
+        addArrow("message", interaction, text, parts);
+      }
+
+      for (const interaction of root.querySelectorAll(".interaction.return")) {
+        const text = (interaction.querySelector(":scope > .message > .absolute.text-xs")?.textContent || "").trim()
+          || (interaction.getAttribute("data-signature") || "").trim();
+        const messageEl = interaction.querySelector(":scope > .message");
+        if (!messageEl) continue;
+        const svgChildren = Array.from(messageEl.children).filter((child) => child.tagName?.toLowerCase() === "svg");
+        const parts = [];
+        if (svgChildren[0]) {
+          parts.push({ part: "line", box: relRect(svgChildren[0].getBoundingClientRect(), rootRect) });
+        }
+        if (svgChildren[1]) {
+          parts.push({ part: "head", box: relRect(svgChildren[1].getBoundingClientRect(), rootRect) });
+        }
+        addArrow("return", interaction, text, parts);
+      }
+
+      for (const interaction of root.querySelectorAll(".interaction.self, .interaction.self-invocation")) {
+        const text = (interaction.querySelector(":scope > .message .absolute.text-xs, :scope > .self-invocation .absolute.text-xs")?.textContent || "").trim()
+          || (interaction.getAttribute("data-signature") || "").trim();
+        const arrowSvg = interaction.querySelector(":scope > .message > svg.arrow, :scope > .self-invocation > svg.arrow");
+        if (!arrowSvg) continue;
+        addArrow("self", interaction, text, [
+          { part: "loop", box: relRect(arrowSvg.getBoundingClientRect(), rootRect) },
+        ]);
+      }
+
+      return arrows;
+    }
+
+    function collectSvgArrows(root, rootRect) {
+      const arrows = [];
+
+      function addArrow(kind, group, text, parts) {
+        if (!text || parts.length === 0) return;
+        const box = unionRect(parts.map((part) => part.box));
+        arrows.push({
+          side: "svg",
+          kind,
+          text,
+          box,
+          ...arrowEndpointsFromBox(box),
+          labelText: (group.querySelector("text.message-label, text.return-label")?.textContent || "").trim(),
+        });
+      }
+
+      for (const group of root.querySelectorAll("g.message:not(.self-call)")) {
+        const text = (group.querySelector("text.seq-number")?.textContent || "").trim()
+          || (group.querySelector("text.message-label")?.textContent || "").trim();
+        const parts = [];
+        const lineEl = group.querySelector(":scope > line.message-line");
+        const headEl = group.querySelector(":scope > svg.arrow-head");
+        if (lineEl) parts.push({ part: "line", box: relRect(lineEl.getBoundingClientRect(), rootRect) });
+        if (headEl) parts.push({ part: "head", box: relRect(headEl.getBoundingClientRect(), rootRect) });
+        addArrow("message", group, text, parts);
+      }
+
+      for (const group of root.querySelectorAll("g.return")) {
+        const text = (group.querySelector("text.seq-number")?.textContent || "").trim()
+          || (group.querySelector("text.return-label")?.textContent || "").trim();
+        const parts = [];
+        const lineEl = group.querySelector(":scope > line.return-line");
+        const headEl = group.querySelector(":scope > polyline.return-arrow");
+        if (lineEl) parts.push({ part: "line", box: relRect(lineEl.getBoundingClientRect(), rootRect) });
+        if (headEl) parts.push({ part: "head", box: relRect(headEl.getBoundingClientRect(), rootRect) });
+        addArrow("return", group, text, parts);
+      }
+
+      for (const group of root.querySelectorAll("g.message.self-call")) {
+        const text = (group.querySelector("text.seq-number")?.textContent || "").trim()
+          || (group.querySelector("text.message-label")?.textContent || "").trim();
+        const loopEl = group.querySelector(":scope > svg");
+        if (!loopEl) continue;
+        addArrow("self", group, text, [
+          { part: "loop", box: relRect(loopEl.getBoundingClientRect(), rootRect) },
+        ]);
+      }
+
+      return arrows;
+    }
+
+    function collectHtmlNumbers(root, rootRect) {
+      const numbers = [];
+      const selectorPairs = [
+        {
+          kind: "message",
+          selector:
+            ".interaction:not(.return):not(.creation):not(.self-invocation):not(.self) > .message > .absolute.text-xs",
+        },
+        {
+          kind: "self",
+          selector:
+            ".interaction.self-invocation > .message .absolute.text-xs, .interaction.self > .self-invocation .absolute.text-xs",
+        },
+        {
+          kind: "return",
+          selector:
+            ".interaction.return > .message > .absolute.text-xs",
+        },
+      ];
+
+      for (const pair of selectorPairs) {
+        for (const numberEl of root.querySelectorAll(pair.selector)) {
+          const text = (numberEl.textContent ?? "").trim();
+          if (!text) continue;
+          numbers.push({
+            side: "html",
+            kind: pair.kind,
+            text,
+            box: relRect(numberEl.getBoundingClientRect(), rootRect),
+            font: fontInfo(numberEl),
+            letters: glyphBoxesForElement(numberEl, rootRect),
+          });
+        }
+      }
+      return numbers;
+    }
+
+    function collectSvgNumbers(root, rootRect) {
+      const numbers = [];
+      const pairs = [
+        { selector: "g.message:not(.self-call) > text.seq-number", kind: "message" },
+        { selector: "g.message.self-call > text.seq-number", kind: "self" },
+        { selector: "g.return > text.seq-number", kind: "return" },
+      ];
+      for (const pair of pairs) {
+        for (const numberEl of root.querySelectorAll(pair.selector)) {
+          const text = (numberEl.textContent ?? "").trim();
+          if (!text) continue;
+          numbers.push({
+            side: "svg",
+            kind: pair.kind,
+            text,
+            box: relRect(numberEl.getBoundingClientRect(), rootRect),
+            font: fontInfo(numberEl),
+            letters: glyphBoxesForElement(numberEl, rootRect),
+          });
+        }
+      }
+      return numbers;
+    }
+
     const prepared = typeof window.prepareHtmlForCapture === "function"
       ? window.prepareHtmlForCapture()
       : null;
@@ -539,6 +757,10 @@ async function collectLabelData(page) {
       svgRoot: { width: svgRootRect.width, height: svgRootRect.height },
       htmlLabels: collectHtmlLabels(htmlRoot, htmlRootRect),
       svgLabels: collectSvgLabels(svgRoot, svgRootRect),
+      htmlNumbers: collectHtmlNumbers(htmlRoot, htmlRootRect),
+      svgNumbers: collectSvgNumbers(svgRoot, svgRootRect),
+      htmlArrows: collectHtmlArrows(htmlRoot, htmlRootRect),
+      svgArrows: collectSvgArrows(svgRoot, svgRootRect),
     };
   });
 }
@@ -623,9 +845,9 @@ function scoreLetter(htmlLetter, svgLetter, diffImage) {
   };
 }
 
-function buildReport(caseName, htmlLabels, svgLabels, diffImage) {
-  const pairs = pairLabels(htmlLabels, svgLabels);
-  const labels = [];
+function buildSection(htmlItems, svgItems, diffImage) {
+  const pairs = pairLabels(htmlItems, svgItems);
+  const section = [];
 
   for (const pair of pairs) {
     const base = pair.html || pair.svg;
@@ -636,7 +858,7 @@ function buildReport(caseName, htmlLabels, svgLabels, diffImage) {
     };
 
     if (!pair.html || !pair.svg) {
-      labels.push({
+      section.push({
         key,
         status: "ambiguous",
         html_box: pair.html ? pair.html.box : null,
@@ -646,7 +868,7 @@ function buildReport(caseName, htmlLabels, svgLabels, diffImage) {
           svg: pair.svg?.font ?? null,
         },
         letters: [],
-        reason: "label missing on one side",
+        reason: "item missing on one side",
       });
       continue;
     }
@@ -675,7 +897,7 @@ function buildReport(caseName, htmlLabels, svgLabels, diffImage) {
 
     const okCount = letters.filter((letter) => letter.status === "ok").length;
     const status = okCount === letters.length ? "ok" : okCount > 0 ? "mixed" : "ambiguous";
-    labels.push({
+    section.push({
       key,
       status,
       html_box: {
@@ -698,10 +920,109 @@ function buildReport(caseName, htmlLabels, svgLabels, diffImage) {
     });
   }
 
+  return section;
+}
+
+function scoreArrowGeometry(htmlArrow, svgArrow, diffImage) {
+  const leftDx = svgArrow.left_x - htmlArrow.left_x;
+  const rightDx = svgArrow.right_x - htmlArrow.right_x;
+  const widthDx = svgArrow.width - htmlArrow.width;
+  const slot = {
+    x: Math.min(htmlArrow.box.x, svgArrow.box.x) - 2,
+    y: Math.min(htmlArrow.box.y, svgArrow.box.y) - 2,
+    w: Math.max(rectRight(htmlArrow.box), rectRight(svgArrow.box)) - Math.min(htmlArrow.box.x, svgArrow.box.x) + 4,
+    h: Math.max(rectBottom(htmlArrow.box), rectBottom(svgArrow.box)) - Math.min(htmlArrow.box.y, svgArrow.box.y) + 4,
+  };
+  const diff = analyzeDiffSlot(diffImage, slot);
+  const centroidDx = diff.redCentroid && diff.blueCentroid ? diff.blueCentroid.x - diff.redCentroid.x : null;
+  const nearZero = Math.abs(leftDx) < 0.75 && Math.abs(rightDx) < 0.75;
+  const enoughDiffPixels = diff.redCount >= 6 && diff.blueCount >= 6;
+  const dominantDx = Math.abs(rightDx) >= Math.abs(leftDx) ? rightDx : leftDx;
+  const xConsistent = centroidDx === null || Math.abs(dominantDx) < 0.75 || Math.sign(centroidDx) === Math.sign(dominantDx);
+  const overlap = iou(htmlArrow.box, svgArrow.box);
+  const status = nearZero || (enoughDiffPixels && xConsistent) || Math.abs(dominantDx) >= 0.75 ? "ok" : "ambiguous";
+  const confidence = round(Math.min(1, overlap * 0.45 + (enoughDiffPixels ? 0.55 : 0.2)), 3);
+
+  return {
+    status,
+    left_dx: status === "ok" ? normalizeOffset(leftDx) : null,
+    right_dx: status === "ok" ? normalizeOffset(rightDx) : null,
+    width_dx: status === "ok" ? normalizeOffset(widthDx) : null,
+    confidence,
+    html_box: {
+      x: round(htmlArrow.box.x),
+      y: round(htmlArrow.box.y),
+      w: round(htmlArrow.box.w),
+      h: round(htmlArrow.box.h),
+    },
+    svg_box: {
+      x: round(svgArrow.box.x),
+      y: round(svgArrow.box.y),
+      w: round(svgArrow.box.w),
+      h: round(svgArrow.box.h),
+    },
+    evidence: {
+      left_dx: normalizeOffset(leftDx),
+      right_dx: normalizeOffset(rightDx),
+      width_dx: normalizeOffset(widthDx),
+      overlap: round(overlap, 3),
+      diff_red: diff.redCount,
+      diff_blue: diff.blueCount,
+      diff_centroid_dx: centroidDx === null ? null : round(centroidDx),
+    },
+  };
+}
+
+function buildArrowSection(htmlItems, svgItems, diffImage) {
+  const htmlOrdered = enrichOrdering(htmlItems);
+  const svgOrdered = enrichOrdering(svgItems);
+  const htmlMap = new Map(htmlOrdered.map((item) => [keyForLabel(item), item]));
+  const svgMap = new Map(svgOrdered.map((item) => [keyForLabel(item), item]));
+  const allKeys = Array.from(new Set([...htmlMap.keys(), ...svgMap.keys()]));
+  const arrows = [];
+
+  for (const key of allKeys) {
+    const html = htmlMap.get(key) || null;
+    const svg = svgMap.get(key) || null;
+    const base = html || svg;
+    const arrow = {
+      key: {
+        kind: base?.kind ?? "message",
+        text: base?.text ?? "",
+        y_order: base?.yOrder ?? 0,
+      },
+      status: "ambiguous",
+    };
+
+    if (!html || !svg) {
+      arrow.reason = "arrow missing on one side";
+      arrows.push(arrow);
+      continue;
+    }
+
+    const scored = scoreArrowGeometry(html, svg, diffImage);
+    arrows.push({
+      ...arrow,
+      ...scored,
+      label_text: base?.labelText ?? null,
+    });
+  }
+
+  return arrows;
+}
+
+function buildReport(caseName, htmlLabels, svgLabels, htmlNumbers, svgNumbers, htmlArrows, svgArrows, diffImage) {
+  const labels = buildSection(htmlLabels, svgLabels, diffImage);
+  const numbers = buildSection(htmlNumbers, svgNumbers, diffImage);
+  const arrows = buildArrowSection(htmlArrows, svgArrows, diffImage);
   return {
     case: caseName,
     labels,
-    summary: labels.map((label) => `${label.key.kind}:${label.key.text} -> ${label.letters.map(formatLetterSummary).join(", ")}`),
+    numbers,
+    arrows,
+    summary: labels.map((label) => `label:${label.key.kind}:${label.key.text} -> ${label.letters.map(formatLetterSummary).join(", ")}`),
+    number_summary: numbers.map((number) => `number:${number.key.kind}:${number.key.text} -> ${number.letters.map(formatLetterSummary).join(", ")}`),
+    arrow_summary: arrows.map((arrow) => `arrow:${arrow.key.text} -> ${formatArrowSummary(arrow)}`),
   };
 }
 
@@ -763,7 +1084,16 @@ async function main() {
       channelTolerance: args.channelTolerance,
       positionTolerance: args.positionTolerance,
     });
-    const report = buildReport(extracted.caseName || args.caseName, extracted.htmlLabels, extracted.svgLabels, diffImage);
+    const report = buildReport(
+      extracted.caseName || args.caseName,
+      extracted.htmlLabels,
+      extracted.svgLabels,
+      extracted.htmlNumbers,
+      extracted.svgNumbers,
+      extracted.htmlArrows,
+      extracted.svgArrows,
+      diffImage,
+    );
     report.diff = diffImage.stats;
     report.capture = {
       url: compareUrl,
@@ -781,12 +1111,16 @@ async function main() {
 
     if (args.summaryOnly) {
       process.stdout.write(`${report.summary.join("\n")}\n`);
+      process.stdout.write(`${report.number_summary.join("\n")}\n`);
+      process.stdout.write(`${report.arrow_summary.join("\n")}\n`);
       return;
     }
 
     if (!args.jsonOnly) {
       process.stdout.write(`${JSON.stringify(report, null, 2)}\n\n`);
       process.stdout.write(`${report.summary.join("\n")}\n`);
+      process.stdout.write(`${report.number_summary.join("\n")}\n`);
+      process.stdout.write(`${report.arrow_summary.join("\n")}\n`);
       return;
     }
 
