@@ -16,7 +16,7 @@ export function renderCreation(c: CreationGeometry): string {
   const fromX = isRTL ? m.fromX : m.fromX + 1;
   const toX = isRTL ? adjustedToX : adjustedToX;
 
-  const labelX = fromX + (toX - fromX) / 2 - 3;
+  const labelX = fromX + (toX - fromX) / 2 - 3.5;
   const labelY = m.y - 3;
 
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";

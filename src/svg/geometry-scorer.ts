@@ -467,7 +467,7 @@ function scoreCreationsNorm(
       ...(fc.msgLabelCenterX != null && renderedFromX !== undefined && renderedToX !== undefined ? [{
         prop: "msgLabelCenterX",
         expected: Math.round(normX(fc.msgLabelCenterX, anchors.fX)),
-        actual: Math.round(normX(renderedFromX + (renderedToX - renderedFromX) / 2 - 3, anchors.gX)),
+        actual: Math.round(normX(renderedFromX + (renderedToX - renderedFromX) / 2 - 3.5, anchors.gX)),
       }] : []),
     ]);
 
