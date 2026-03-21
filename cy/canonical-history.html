@@ -496,22 +496,11 @@
         const legendEl = document.getElementById('chart-legend');
 
         if (selectedCases.size === 0) {
-          // --- Aggregate mode (common cases only) ---
-          // Only average over cases present in ALL runs, so averages are comparable
-          const commonCases = allCaseData
-            .filter(cd => cd.entries.length === allRuns.length)
-            .map(cd => cd.name);
-          const commonSet = new Set(commonCases);
+          // --- Aggregate mode: avg(all) per run ---
+          const avgs = allRuns.map(r => r.average);
 
-          const avgs = allRuns.map(r => {
-            const scores = Object.entries(r.cases)
-              .filter(([name]) => commonSet.has(name))
-              .map(([, d]) => typeof d === 'object' ? d.score : d);
-            return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-          });
-
-          titleEl.textContent = 'Average Score Trend (common cases)';
-          subtitleEl.textContent = commonCases.length + ' common cases across ' + allRuns.length + ' runs';
+          titleEl.textContent = 'Average Score Trend (canonical)';
+          subtitleEl.textContent = allRuns.length + ' runs';
           legendEl.innerHTML = '';
 
           if (avgs.length === 0) return;
@@ -550,20 +539,24 @@
           });
           ctx.stroke();
 
-          // Value labels (sparse)
+          // Value labels (sparse) + run labels for labeled runs
           const labelStep = Math.max(1, Math.floor(avgs.length / 10));
           ctx.font = '500 10px JetBrains Mono, monospace';
           ctx.textAlign = 'center';
           avgs.forEach((v, i) => {
-            if (i % labelStep !== 0 && i !== avgs.length - 1) return;
             const px = pad.left + (i / Math.max(1, avgs.length - 1)) * plotW;
             const py = pad.top + plotH - ((v - minY) / range) * plotH;
-            ctx.fillStyle = '#4a7cff';
-            ctx.beginPath();
-            ctx.arc(px, py, 2.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#8a95aa';
-            ctx.fillText(v.toFixed(1), px, py - 8);
+            const run = allRuns[i];
+            // Always show dot + value for labeled runs or sparse interval
+            const showValue = (i % labelStep === 0) || i === avgs.length - 1 || run.label;
+            if (showValue) {
+              ctx.fillStyle = run.label ? '#ff9944' : '#4a7cff';
+              ctx.beginPath();
+              ctx.arc(px, py, run.label ? 4 : 2.5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = '#8a95aa';
+              ctx.fillText(v.toFixed(1), px, py - 8);
+            }
           });
         } else {
           // --- Per-case mode ---
@@ -674,33 +667,20 @@
       }
 
       function renderAggregateTable(area) {
-        // Compute common cases for comparable averages
-        const commonCases = new Set(
-          allCaseData.filter(cd => cd.entries.length === allRuns.length).map(cd => cd.name)
-        );
-
         const newestFirst = [...allRuns].reverse();
         const table = document.createElement('table');
         table.innerHTML = `<thead><tr>
           <th style="width:28px"></th>
-          <th>Date</th><th>Avg (common)</th><th>Delta</th>
-          <th>Avg (all)</th><th>Cases</th><th>Time</th><th>Best</th><th>Worst</th>
+          <th>Date</th><th>Label</th><th>Avg</th><th>Delta</th>
+          <th>Cases</th><th>Time</th><th>Best</th><th>Worst</th>
         </tr></thead>`;
         const tbody = document.createElement('tbody');
 
-        // Precompute common averages
-        function commonAvg(run) {
-          const scores = Object.entries(run.cases)
-            .filter(([name]) => commonCases.has(name))
-            .map(([, d]) => typeof d === 'object' ? d.score : d);
-          return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-        }
-
         newestFirst.forEach((run, idx) => {
           const prev = idx < newestFirst.length - 1 ? newestFirst[idx + 1] : null;
-          const cAvg = commonAvg(run);
-          const prevCAvg = prev ? commonAvg(prev) : null;
-          const delta = prevCAvg !== null ? cAvg - prevCAvg : null;
+          const avg = run.average;
+          const prevAvg = prev ? prev.average : null;
+          const delta = prevAvg !== null ? avg - prevAvg : null;
           const scores = Object.entries(run.cases).map(([n, d]) => ({
             name: n, score: typeof d === 'object' ? d.score : d,
           })).sort((a, b) => b.score - a.score);
@@ -710,9 +690,9 @@
           tr.innerHTML = `
             <td><button class="expand-btn" data-idx="${idx}">+</button></td>
             <td class="ts">${fmtDate(run.timestamp)}</td>
-            <td class="${scoreClass(cAvg)}">${cAvg.toFixed(1)}%</td>
+            <td style="color:#8b9cc0;font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${run.label || ''}">${run.label || ''}</td>
+            <td class="${scoreClass(avg)}" style="font-weight:bold">${avg.toFixed(1)}%</td>
             <td>${deltaHtml(delta)}</td>
-            <td class="${scoreClass(run.average)}" style="opacity:0.5">${run.average.toFixed(1)}%</td>
             <td style="color:#5a6a85">${run.caseCount}</td>
             <td class="ts">${run.elapsed || '—'}s</td>
             <td class="${scoreClass(best.score)}">${best.name} ${best.score}%</td>
