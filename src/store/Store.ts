@@ -9,11 +9,11 @@ import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { CodeRange } from "../parser/CodeRange";
 
-type VerticalMode = "server" | "browser";
+type VerticalMode = "html" | "legacy";
 const resolveVerticalMode = (): VerticalMode => {
-  const mode = import.meta.env.VITE_VERTICAL_MODE === "browser"
-    ? "browser"
-    : "server";
+  const mode = import.meta.env.VITE_VERTICAL_MODE === "legacy"
+    ? "legacy"
+    : "html";
   console.info(`[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`);
   return mode;
 };
@@ -60,7 +60,7 @@ export const coordinatesAtom = atom(
 export const verticalModeAtom = atom<VerticalMode>(resolveVerticalMode());
 
 export const verticalCoordinatesAtom = atom((get) => {
-  if (get(verticalModeAtom) === "browser") {
+  if (get(verticalModeAtom) === "legacy") {
     return null;
   }
   const rootContext = get(rootContextAtom);

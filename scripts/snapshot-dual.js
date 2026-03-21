@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Generate two sets of Playwright snapshots (server & browser modes) and a diff overlay.
+// Generate two sets of Playwright snapshots (html & legacy modes) and a diff overlay.
 // Usage: node scripts/snapshot-dual.js -- tests/creation.spec.ts
 
 const { spawnSync } = require("node:child_process");
@@ -14,8 +14,8 @@ const testsArg = process.argv.slice(2);
 const tmpRoot = path.join(repoRoot, "tmp", "snapshots-dual");
 const paths = {
   original: path.join(tmpRoot, "original"),
-  server: path.join(tmpRoot, "server"),
-  browser: path.join(tmpRoot, "browser"),
+  html: path.join(tmpRoot, "html"),
+  legacy: path.join(tmpRoot, "legacy"),
   diff: path.join(tmpRoot, "diff"),
 };
 
@@ -58,48 +58,48 @@ function runPlaywright(mode) {
     stdio: "inherit",
   });
   if (result.status !== 0) {
-    throw new Error(`Playwright failed in ${mode} mode`);
+    throw new Error(`Playwright failed in "${mode}" mode`);
   }
 }
 
 async function diffImages() {
   const differences = [];
   await ensureDir(paths.diff);
-  const serverDirs = await fs.readdir(paths.server, { withFileTypes: true });
-  for (const dirent of serverDirs) {
+  const htmlDirs = await fs.readdir(paths.html, { withFileTypes: true });
+  for (const dirent of htmlDirs) {
     if (!dirent.isDirectory()) continue;
     const baseName = dirent.name;
-    const serverDir = path.join(paths.server, baseName);
-    const browserDir = path.join(paths.browser, baseName);
-    const files = await fs.readdir(serverDir);
+    const htmlDir = path.join(paths.html, baseName);
+    const legacyDir = path.join(paths.legacy, baseName);
+    const files = await fs.readdir(htmlDir);
     for (const file of files) {
       if (!file.endsWith(".png")) continue;
-      const serverPngPath = path.join(serverDir, file);
-      const browserPngPath = path.join(browserDir, file);
+      const htmlPngPath = path.join(htmlDir, file);
+      const legacyPngPath = path.join(legacyDir, file);
       try {
-        const [serverBuf, browserBuf] = await Promise.all([
-          fs.readFile(serverPngPath),
-          fs.readFile(browserPngPath),
+        const [htmlBuf, legacyBuf] = await Promise.all([
+          fs.readFile(htmlPngPath),
+          fs.readFile(legacyPngPath),
         ]);
-        const serverImg = PNG.sync.read(serverBuf);
-        const browserImg = PNG.sync.read(browserBuf);
+        const htmlImg = PNG.sync.read(htmlBuf);
+        const legacyImg = PNG.sync.read(legacyBuf);
         if (
-          serverImg.width !== browserImg.width ||
-          serverImg.height !== browserImg.height
+          htmlImg.width !== legacyImg.width ||
+          htmlImg.height !== legacyImg.height
         ) {
           console.warn(`Skipping ${file}: dimension mismatch`);
           continue;
         }
         const diff = new PNG({
-          width: serverImg.width,
-          height: serverImg.height,
+          width: htmlImg.width,
+          height: htmlImg.height,
         });
         const diffPixels = pixelmatch(
-          serverImg.data,
-          browserImg.data,
+          htmlImg.data,
+          legacyImg.data,
           diff.data,
-          serverImg.width,
-          serverImg.height,
+          htmlImg.width,
+          htmlImg.height,
           { threshold: 0.1 },
         );
         const outDir = path.join(paths.diff, baseName);
@@ -135,22 +135,22 @@ async function main() {
   // backup existing snapshots
   // await copySnapshotDirs(paths.original);
 
-  // browser mode
-  runPlaywright("browser");
-  await fs.rm(paths.browser, { recursive: true, force: true });
-  await copySnapshotDirs(paths.browser);
+  // legacy mode
+  runPlaywright("legacy");
+  await fs.rm(paths.legacy, { recursive: true, force: true });
+  await copySnapshotDirs(paths.legacy);
 
-  // server mode
-  runPlaywright("server");
-  await fs.rm(paths.server, { recursive: true, force: true });
-  await copySnapshotDirs(paths.server);
+  // html mode
+  runPlaywright("html");
+  await fs.rm(paths.html, { recursive: true, force: true });
+  await copySnapshotDirs(paths.html);
 
   // generate diffs
   const differences = await diffImages();
-  console.log(`Snapshots saved under ${paths.server} and ${paths.browser}`);
+  console.log(`Snapshots saved under ${paths.html} and ${paths.legacy}`);
   console.log(`Diff overlays saved under ${paths.diff}`);
   if (differences.length === 0) {
-    console.log("All snapshots match between server and browser modes.");
+    console.log("All snapshots match between html and legacy modes.");
   } else {
     console.log("Snapshots with differences:");
     const sorted = differences.sort((a, b) => {

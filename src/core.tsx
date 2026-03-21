@@ -123,7 +123,7 @@ export default class ZenUml implements IZenUml {
     document.body.append(portalRootElement);
   }
 
-  setVerticalMode(mode: "server" | "browser") {
+  setVerticalMode(mode: "html" | "legacy") {
     this.store.set(verticalModeAtom, mode);
   }
 

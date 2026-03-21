@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Browser vs Server Vertical Mode</title>
+    <title>Legacy vs HTML Vertical Mode</title>
     <style>
       body { margin: 0; font-family: system-ui, sans-serif; }
       .page-header { padding: 8px 16px; background: #1e293b; color: white; display: flex; gap: 12px; align-items: center; }
@@ -31,14 +31,14 @@
     <div id="delta-bar" class="delta"></div>
     <div class="container">
       <div class="panel">
-        <div class="panel-header">Server Mode (VerticalCoordinates)</div>
-        <div class="panel-content" id="server-output"></div>
-        <div class="panel-info" id="server-info">Loading...</div>
+        <div class="panel-header">HTML Mode (VerticalCoordinates)</div>
+        <div class="panel-content" id="html-output"></div>
+        <div class="panel-info" id="html-info">Loading...</div>
       </div>
       <div class="panel">
-        <div class="panel-header">Browser Mode (DOM Measurement)</div>
-        <div class="panel-content" id="browser-output"></div>
-        <div class="panel-info" id="browser-info">Loading...</div>
+        <div class="panel-header">Legacy Mode (DOM Measurement)</div>
+        <div class="panel-content" id="legacy-output"></div>
+        <div class="panel-info" id="legacy-info">Loading...</div>
       </div>
     </div>
 
@@ -163,7 +163,7 @@ new A {
       const code = CASES[caseName];
 
       // Update title
-      document.title = `Browser vs Server: ${caseName}`;
+      document.title = `Legacy vs HTML: ${caseName}`;
       document.getElementById("case-name").textContent = caseName;
 
       // Prev/Next navigation
@@ -182,7 +182,7 @@ new A {
       }
 
       if (code === undefined) {
-        document.getElementById("server-output").innerHTML = `<p style="color:red">Unknown case: ${caseName}</p>`;
+        document.getElementById("html-output").innerHTML = `<p style="color:red">Unknown case: ${caseName}</p>`;
       } else {
         function createPanel(containerId, mode) {
           const container = document.getElementById(containerId);
@@ -223,26 +223,26 @@ new A {
         }
 
         // Render both panels
-        createPanel("server-output", "server");
-        createPanel("browser-output", "browser");
+        createPanel("html-output", "html");
+        createPanel("legacy-output", "legacy");
 
         // Poll until both panels have .sequence-diagram, then measure
         const poll = setInterval(() => {
-          const serverDiag = document.querySelector('#server-output .sequence-diagram');
-          const browserDiag = document.querySelector('#browser-output .sequence-diagram');
-          if (!serverDiag || !browserDiag) return;
+          const htmlDiag = document.querySelector('#html-output .sequence-diagram');
+          const legacyDiag = document.querySelector('#legacy-output .sequence-diagram');
+          if (!htmlDiag || !legacyDiag) return;
 
           clearInterval(poll);
 
           setTimeout(() => {
-            const serverPositions = measureCreationParticipants("server-output");
-            const browserPositions = measureCreationParticipants("browser-output");
+            const htmlPositions = measureCreationParticipants("html-output");
+            const legacyPositions = measureCreationParticipants("legacy-output");
 
-            const allNames = new Set([...Object.keys(serverPositions), ...Object.keys(browserPositions)]);
+            const allNames = new Set([...Object.keys(htmlPositions), ...Object.keys(legacyPositions)]);
 
             if (allNames.size === 0) {
-              document.getElementById("server-info").textContent = "No creation participants";
-              document.getElementById("browser-info").textContent = "No creation participants";
+              document.getElementById("html-info").textContent = "No creation participants";
+              document.getElementById("legacy-info").textContent = "No creation participants";
               const bar = document.getElementById("delta-bar");
               bar.style.display = "block";
               bar.textContent = "No creation participants in this case";
@@ -251,25 +251,25 @@ new A {
               return;
             }
 
-            const serverLines = [];
-            const browserLines = [];
+            const htmlLines = [];
+            const legacyLines = [];
             const deltaLines = [];
             let allMatch = true;
 
             for (const name of allNames) {
-              const s = serverPositions[name];
-              const b = browserPositions[name];
-              serverLines.push(`${name}: ${s != null ? s + 'px' : 'n/a'}`);
-              browserLines.push(`${name}: ${b != null ? b + 'px' : 'n/a'}`);
-              if (s != null && b != null) {
-                const delta = b - s;
+              const h = htmlPositions[name];
+              const l = legacyPositions[name];
+              htmlLines.push(`${name}: ${h != null ? h + 'px' : 'n/a'}`);
+              legacyLines.push(`${name}: ${l != null ? l + 'px' : 'n/a'}`);
+              if (h != null && l != null) {
+                const delta = l - h;
                 if (delta !== 0) allMatch = false;
-                deltaLines.push(`${name}: ${delta === 0 ? 'identical' : delta + 'px'} (server=${s}, browser=${b})`);
+                deltaLines.push(`${name}: ${delta === 0 ? 'identical' : delta + 'px'} (html=${h}, legacy=${l})`);
               }
             }
 
-            document.getElementById("server-info").textContent = serverLines.join(' | ');
-            document.getElementById("browser-info").textContent = browserLines.join(' | ');
+            document.getElementById("html-info").textContent = htmlLines.join(' | ');
+            document.getElementById("legacy-info").textContent = legacyLines.join(' | ');
 
             const bar = document.getElementById("delta-bar");
             bar.style.display = "block";
