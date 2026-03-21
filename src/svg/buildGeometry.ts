@@ -626,13 +626,13 @@ function buildMessages(
           // RTL: sender's left edge = rawFromX - occHalf.
           const senderNest = Math.max(info.senderOccurrenceDepth - 1, 0) * OCCURRENCE_BAR_SIDE_WIDTH;
           const senderRetX = info.senderOccurrenceDepth >= 1
-            ? rawFromX + senderNest + (isLTR ? occHalf + 1 : -occHalf)
+            ? rawFromX + senderNest + (isLTR ? occHalf + 2 : -occHalf)
             : rawFromX;
           // Created (B) side: occurrence near edge facing the sender.
-          // LTR: created's left edge = toX - occHalf.
+          // LTR: created's left edge + 1 (HTML starts 1px past border).
           // RTL: created's right edge = toX + occHalf + 1 (center pixel).
           const createdRetX = isLTR
-            ? toX - occHalf
+            ? toX - occHalf + 1
             : toX + occHalf + 1;
           // fromX = line start (created side), toX = arrow tip (sender side)
           // renderReturn places arrow head at toX

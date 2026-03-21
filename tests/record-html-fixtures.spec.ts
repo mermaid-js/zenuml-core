@@ -26,6 +26,7 @@ const CANONICAL_CASES = [
   "return-only-two",
   "repro-alt-nested-tcf",
   "repro-occ-mixed-2ret",
+  "creation-return",
 ];
 
 const FIXTURES_DIR = path.resolve(

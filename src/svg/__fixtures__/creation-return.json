@@ -1,0 +1,81 @@
+{
+  "case": "creation-return",
+  "code": "A.method() {\n  b = new B()\n}",
+  "anchor": {
+    "participant": "A",
+    "bottom": 68
+  },
+  "frameHeight": 287,
+  "participants": [
+    {
+      "name": "A",
+      "x": 131,
+      "y": 28,
+      "width": 80,
+      "height": 40
+    },
+    {
+      "name": "b:B",
+      "x": 268,
+      "y": 104,
+      "width": 80,
+      "height": 40
+    }
+  ],
+  "messages": [],
+  "selfCalls": [],
+  "occurrences": [
+    {
+      "participant": "A",
+      "x": 164,
+      "y": 86,
+      "width": 15,
+      "height": 110
+    },
+    {
+      "participant": "b:B",
+      "x": 301,
+      "y": 142,
+      "width": 15,
+      "height": 36
+    }
+  ],
+  "returns": [
+    {
+      "label": "b",
+      "fromX": 180,
+      "toX": 302,
+      "y": 176
+    }
+  ],
+  "creations": [
+    {
+      "participantName": "b:B",
+      "px": 268,
+      "py": 104,
+      "pw": 80,
+      "ph": 40,
+      "msgFromX": 179,
+      "msgToX": 269,
+      "msgY": 124,
+      "msgLabelCenterX": 220.4921875
+    }
+  ],
+  "fragments": [],
+  "dividers": [],
+  "comments": [],
+  "lifelines": [
+    {
+      "participant": "A",
+      "x": 171,
+      "y1": 68,
+      "y2": 252
+    },
+    {
+      "participant": "b:B",
+      "x": 308,
+      "y1": 144,
+      "y2": 252
+    }
+  ]
+}
