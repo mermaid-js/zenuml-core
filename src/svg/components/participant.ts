@@ -51,7 +51,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
   </g>`;
   }
 
-  const textY = p.y + p.height / 2;
+  const textY = p.y + p.height / 2 - 0.25;
 
   // Aliased labels (e.g. "b:B") — use textLength to pin the text extent to the
   // measured glyph width. HTML renders the label at natural glyph width with CSS
@@ -77,7 +77,7 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
   const rectW = p.width - STROKE_WIDTH;
   const rectH = p.height - STROKE_WIDTH;
   const textX = p.x;
-  const textY = bottomY + p.height / 2;
+  const textY = bottomY + p.height / 2 - 0.25;
 
   const useTextLength = p.labelWidth != null && p.name.includes(":");
   const textLengthAttr = useTextLength
