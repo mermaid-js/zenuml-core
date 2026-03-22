@@ -1,35 +1,29 @@
 import type { MessageGeometry, SelfCallGeometry } from "../geometry";
 
 export function renderMessage(m: MessageGeometry): string {
-  // HTML centers the label between source lifeline and arrowhead (excluding arrow width).
-  // Shift label center by half the arrowhead width (3.5px) toward the source participant.
-  const arrowHalfW = 3.5;
-  const direction = Math.sign(m.toX - m.fromX); // +1 right-pointing, -1 left-pointing
-  // Async LTR messages need an additional -3px shift to match HTML label centering
-  const asyncLtrShift = (m.arrowStyle === "open" && direction === 1) ? -4 : 0;
-  const labelX = (m.fromX + m.toX) / 2 - direction * arrowHalfW + 0.5 + asyncLtrShift;
-  // HTML renders label as a block element ABOVE the border-bottom line.
-  // SVG text y = baseline. For 14px Helvetica, getBBox().y ≈ y - 13.
-  // HTML label top = m.y - 17 (content coords). Need bbox.y = m.y - 17, so y = m.y - 4.
-  const labelY = m.y - 3.5; // -3.5 instead of -4: +0.5 to shift label down
+  // HTML arrow SVG container spans from left_lifeline_center+1 to right_lifeline_center.
+  // Left endpoint = center+1 (right edge of 2px lifeline), right endpoint = center.
+  const isLTR = m.fromX < m.toX;
+  const fromX = isLTR ? m.fromX + 1 : m.fromX;
+  const toX = isLTR ? m.toX : m.toX + 1;
+
+  // HTML centers the label between source lifeline and arrowhead tip.
+  // The arrowhead is 7px wide, so CSS centering excludes half the arrowhead (3.5px),
+  // shifting the label center toward the source. +0.5 for lifeline width averaging.
+  const direction = Math.sign(m.toX - m.fromX);
+  const labelX = (m.fromX + m.toX) / 2 - direction * 3.5 + 0.5;
+  const labelY = m.y - 3.5;
 
   const dashAttr = m.arrowStyle === "dashed" ? ' stroke-dasharray="6,4"' : "";
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
 
-  // Sequence number: always positioned to the LEFT of the message with 4px gap (matching HTML pr-1).
-  // HTML uses right-[100%] which places the number left of the message container regardless of direction.
-  const numberX = Math.min(m.fromX, m.toX) - 3;
+  // Sequence number: positioned to the LEFT of the message with 4px gap (matching HTML pr-1).
+  const numberX = Math.min(fromX, toX) - 4;
   const numberSvg = m.number
     ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
     : "";
 
-  // -0.5px Y: align with HTML's border-bottom line rendering (CSS renders at half-pixel)
-  // HTML arrow SVG container spans from left_lifeline_center+1 to right_lifeline_center.
-  // Left endpoint = center+1 (right edge of 2px lifeline), right endpoint = center.
   const lineY = m.y - 0.5;
-  const isLTR = m.fromX < m.toX;
-  const fromX = isLTR ? m.fromX + 1 : m.fromX;
-  const toX = isLTR ? m.toX : m.toX + 1;
   return `<g class="message">
   <line x1="${fromX}" y1="${lineY}" x2="${toX}" y2="${lineY}" class="message-line"${dashAttr}/>
   ${renderArrowHead(toX, lineY, m.isReverse, m.arrowStyle)}
@@ -42,15 +36,18 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   const x1 = s.x;
   // HTML SelfInvocation layout (flex-col): label on top, SVG arrow below.
   // s.y = coord.top = top of the self-invocation element.
-  // Label: 14px font, baseline ≈ 11px from top.
-  // Native browser screenshot diff confirms same Y for both sync and async.
+  // Label: sync self calls sit 1px lower than async in the DOM.
   const isAsync = s.arrowStyle === "open";
   const labelX = x1 + 6;
-  const labelY = s.y + (isAsync ? 15 : 11);
+  const labelY = s.y + (isAsync ? 15 : 12);
 
-  // Sequence number: positioned to the left of the self-call origin with 4px gap
+  // Sequence number: positioned to the left of the self-call origin.
+  // HTML positions the number at the container top (flush), while the label is 2px below.
+  // For async, labelY = s.y + 15, but number should be at s.y + 11 (4px higher).
+  // For sync, labelY = s.y + 11, number at same Y (both flush with container).
+  const numberY = s.y + 12;
   const numberSvg = s.number
-    ? `<text x="${x1 - 4}" y="${labelY}" text-anchor="end" class="seq-number">${esc(s.number)}</text>`
+    ? `<text x="${x1 - 3}" y="${numberY}" text-anchor="end" class="seq-number">${esc(s.number)}</text>`
     : "";
 
   // Reuse the exact same SVG structure as the HTML SelfInvocation component:
@@ -59,8 +56,8 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   //     <g transform="translate({0|7}, 10)"><ArrowHead {open|fill} rtl/></g>
   //   </svg>
   // Position: +1px right of s.x (matching HTML CSS border offset).
-  // Async: HTML flex-col puts ~20px of label space above the arrow SVG.
-  // Sync: label is more compact, arrow starts at s.y + 14.
+  // Browser-native screenshots show sync self-call arrows need to sit 2px lower
+  // than the previous SVG placement, while async self-call arrows already match.
   const svgX = x1 + 1;
   const svgY = s.y + (isAsync ? 20 : 14);
 
@@ -113,7 +110,11 @@ function renderArrowHead(
   // (viewBox y=4.5 scaled by 10/9 ≈ 5.0)
   const tipDisplayX = pointsLeft ? 0.85 : 6.15;
   const tipDisplayY = 5;
-  const svgX = tipX - tipDisplayX;
+  // Filled sync arrowheads render slightly too far right at the shaft join if we
+  // place them purely by mathematical tip alignment. Pull them left by 0.75px to
+  // match the browser rasterization of the HTML renderer's absolutely positioned head.
+  const joinAdjustX = isFilled ? -0.75 : 0;
+  const svgX = tipX - tipDisplayX + joinAdjustX;
   const svgY = tipY - tipDisplayY;
   const rtlTransform = pointsLeft ? ' transform="scale(-1, 1) translate(-7, 0)"' : "";
 
