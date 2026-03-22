@@ -1,11 +1,11 @@
 ---
 name: dia-scoring
-description: Score HTML-vs-SVG diagram parity in compare-case pages, including message labels, sequence numbers, and arrows, using Playwright native screenshots plus diff confirmation.
+description: Score HTML-vs-SVG diagram parity in compare-case pages, including message labels, fragment labels, sequence numbers, arrows, and participant icons, using Playwright native screenshots plus diff confirmation.
 ---
 
 # Dia Scoring
 
-Use this skill when the task is to measure **message labels, sequence numbers, and message arrows** between the HTML renderer and the native SVG renderer on `compare-case.html`.
+Use this skill when the task is to measure **message labels, fragment labels, sequence numbers, message arrows, and participant icons** between the HTML renderer and the native SVG renderer on `compare-case.html`.
 
 The workflow is browser-native:
 
@@ -22,12 +22,21 @@ The workflow is browser-native:
   - normal messages
   - self messages
   - returns
+  - fragment conditions such as `[cond]`, `[else]`
+  - fragment section labels such as `catch`, `finally`
+  - participant icons (actor, database, sqs, sns, iam, boundary, control, entity)
 - For each supported message, include:
   - label text
-  - sequence number text
+  - fragment condition / section label text when present
+  - sequence number text, including fragment sequence numbers when present
   - arrow geometry keyed by sequence number
   - normal/return arrow endpoint deltas: `left_dx`, `right_dx`, `width_dx`
-  - self-arrow loop geometry deltas using the same arrow entry format
+  - self-arrow loop geometry from the painted loop path plus arrowhead, not the outer `svg` viewport
+  - self-arrow vertical deltas: `top_dy`, `bottom_dy`, `height_dy`
+- For participant icons, include:
+  - icon presence (HTML vs SVG)
+  - icon position relative to participant label
+  - icon visual match confirmation from diff image
 - Each reported letter must be backed by:
   - direct HTML-vs-SVG browser layout positions
   - diff-image confirmation from the native screenshot pair
