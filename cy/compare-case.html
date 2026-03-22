@@ -36,7 +36,6 @@
       <div class="nav">
         <a id="prev-link" href="#">&larr; Prev</a>
         <a id="next-link" href="#">Next &rarr;</a>
-        <button id="diff-btn">Diff</button>
         <span class="match-badge" id="match-badge"></span>
       </div>
     </div>
@@ -59,7 +58,6 @@
     <script type="module">
       import ZenUml from "/src/core.tsx";
       import { renderToSvg } from "/src/svg/renderToSvg.ts";
-      import { toPng } from "html-to-image";
 
       import { CASES } from "./compare-cases.js";
 
@@ -437,39 +435,6 @@
         return { pixelPct: parseFloat(pixelPct), structPct: parseFloat(structPct), contentMatch, contentTotal };
       };
 
-      // --- Diff button (html-to-image capture) ---
-      document.getElementById("diff-btn").addEventListener("click", async () => {
-        const btn = document.getElementById("diff-btn");
-        btn.disabled = true;
-        btn.textContent = "Computing...";
-
-        try {
-          const htmlEl = document.getElementById("html-output");
-          const svgEl = document.getElementById("svg-output");
-          const svgElement = svgEl.querySelector("svg");
-          const htmlFrame = htmlEl.querySelector(".frame");
-          const seqDiagram = htmlEl.querySelector(".sequence-diagram");
-          const htmlCaptureTarget = htmlFrame || seqDiagram || htmlEl;
-
-          window.prepareHtmlForCapture();
-
-          const hideExportFilter = (node) => !node?.classList?.contains("hide-export");
-          const [htmlDataUrl, svgDataUrl] = await Promise.all([
-            toPng(htmlCaptureTarget, { pixelRatio: 1, filter: hideExportFilter }),
-            toPng(svgElement || svgEl, { pixelRatio: 1 }),
-          ]);
-
-          window.restoreHtmlAfterCapture();
-
-          await window.diffFromImages(htmlDataUrl, svgDataUrl);
-        } catch (err) {
-          console.error("Diff failed:", err);
-          document.getElementById("match-badge").textContent = "Diff failed";
-        } finally {
-          btn.disabled = false;
-          btn.textContent = "Diff";
-        }
-      });
 
 
       function loadImage(dataUrl) {
