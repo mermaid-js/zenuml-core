@@ -26,21 +26,269 @@
       rel="stylesheet"
       href="/vendor/codemirror/material-darker.min.css"
     />
-    <title>ZenUML - Local Development</title>
+    <title>ZenUML Dev Workbench</title>
     <style>
+      :root {
+        --bg: #0f172a;
+        --bg-alt: #111827;
+        --panel: #ffffff;
+        --panel-alt: #f8fafc;
+        --panel-muted: #eef2f7;
+        --ink: #0f172a;
+        --muted: #526072;
+        --line: #d7deea;
+        --line-strong: #c4cedd;
+        --accent: #0f766e;
+        --accent-strong: #115e59;
+        --danger: #991b1b;
+        --shadow: 0 18px 48px rgba(15, 23, 42, 0.14);
+        --radius-lg: 14px;
+        --radius-md: 10px;
+        --editor-width: 420px;
+      }
+
       * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
         font-family:
-          "Inter",
-          -apple-system,
-          BlinkMacSystemFont,
+          "SF Pro Text",
           "Segoe UI",
-          "Roboto",
+          system-ui,
           sans-serif;
+        color: var(--ink);
+        background: linear-gradient(180deg, var(--bg) 0%, var(--bg-alt) 100%);
+      }
+
+      a {
+        color: inherit;
       }
 
       code,
-      .CodeMirror {
-        font-family: "JetBrains Mono", "Monaco", "Consolas", monospace;
+      .CodeMirror,
+      .tool-chip,
+      .tool-button,
+      .tool-link,
+      .stats-text,
+      .toolbar-label {
+        font-family:
+          "IBM Plex Mono",
+          "SFMono-Regular",
+          "Menlo",
+          "Monaco",
+          "Consolas",
+          monospace;
+      }
+
+      .app-shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 12px;
+        padding: 14px;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-lg);
+        background: rgba(15, 23, 42, 0.9);
+        color: #e5edf8;
+        box-shadow: var(--shadow);
+      }
+
+      .toolbar-title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 12px;
+      }
+
+      .toolbar-title strong {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+
+      .toolbar-title span {
+        color: #9fb1c7;
+        font-size: 12px;
+      }
+
+      .toolbar-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .toolbar-label {
+        color: #9fb1c7;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .workspace {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(280px, var(--editor-width)) 10px minmax(320px, 1fr) minmax(320px, 1fr);
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .panel {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        min-width: 0;
+        overflow: hidden;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .workspace-resizer {
+        position: relative;
+        min-height: 0;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.28);
+        cursor: col-resize;
+        touch-action: none;
+      }
+
+      .workspace-resizer::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 4px;
+        height: 56px;
+        border-radius: 999px;
+        background: rgba(15, 118, 110, 0.22);
+      }
+
+      .workspace-resizer:hover,
+      .workspace.is-resizing .workspace-resizer {
+        background: rgba(15, 118, 110, 0.2);
+      }
+
+      .workspace.is-resizing {
+        user-select: none;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel-alt);
+      }
+
+      .panel-title {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .panel-title h2,
+      .panel-title h3 {
+        margin: 0;
+        font-size: 14px;
+        letter-spacing: 0.01em;
+      }
+
+      .panel-title p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.3;
+      }
+
+      .panel-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .tool-button,
+      .tool-chip,
+      .tool-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        appearance: none;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: #fff;
+        color: var(--ink);
+        cursor: pointer;
+        text-decoration: none;
+        transition:
+          border-color 160ms ease,
+          background 160ms ease;
+        font-size: 11px;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+      }
+
+      .tool-button:hover,
+      .tool-chip:hover,
+      .tool-link:hover {
+        border-color: var(--line-strong);
+        background: var(--panel-muted);
+      }
+
+      .toolbar .tool-chip,
+      .toolbar .tool-link {
+        background: rgba(15, 23, 42, 0.55);
+        border-color: rgba(159, 177, 199, 0.25);
+        color: #e5edf8;
+      }
+
+      .toolbar .tool-chip:hover,
+      .toolbar .tool-link:hover {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(191, 209, 230, 0.4);
+      }
+
+      .tool-chip.is-active {
+        background: var(--accent);
+        border-color: var(--accent-strong);
+        color: #f8fffe;
+      }
+
+      .tool-button.primary {
+        background: var(--accent);
+        border-color: var(--accent-strong);
+        color: #f8fffe;
+      }
+
+      .panel-body {
+        flex: 1;
+        min-height: 0;
+      }
+
+      .editor-body {
+        background: #1d1d1b;
       }
 
       .CodeMirror {
@@ -58,84 +306,207 @@
         border-left-width: 2px;
       }
 
-      .gradient-text {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+      .preview-surface {
+        height: 100%;
+        overflow: auto;
+        padding: 12px;
+        background: var(--panel-muted);
       }
 
-      .editor-shadow {
-        box-shadow:
-          0 20px 25px -5px rgba(0, 0, 0, 0.1),
-          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      .html-surface {
+        position: relative;
+      }
+
+      .preview-stage {
+        min-height: 100%;
+        padding: 10px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .preview-stage pre {
+        margin: 0;
+      }
+
+      .preview-stage svg {
+        display: block;
+      }
+
+      .svg-stage {
+        display: block;
+      }
+
+      #svg-container {
+        width: max-content;
+        margin: 0 auto;
+        min-width: 100%;
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+      }
+
+      #svg-container svg {
+        display: block;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+      }
+
+      .stats-text {
+        color: #9fb1c7;
+        font-size: 11px;
+      }
+
+      .svg-error {
+        display: grid;
+        place-items: center;
+        min-height: 240px;
+        padding: 20px;
+        border-radius: var(--radius-md);
+        border: 1px dashed #d4b4b4;
+        color: var(--danger);
+        background: #fff7f7;
+        text-align: center;
+        line-height: 1.6;
+      }
+
+      .workspace.mode-svg,
+      .workspace.mode-dom {
+        grid-template-columns: minmax(280px, var(--editor-width)) 10px minmax(720px, 1fr);
+      }
+
+      .workspace.mode-svg .html-panel,
+      .workspace.mode-dom .svg-panel {
+        display: none;
+      }
+
+      @media (max-width: 1440px) {
+        .workspace,
+        .workspace.mode-svg,
+        .workspace.mode-dom {
+          grid-template-columns: minmax(280px, var(--editor-width)) 10px minmax(320px, 1fr);
+        }
+
+        .workspace.mode-split .svg-panel {
+          grid-column: 3;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .app-shell {
+          padding: 10px;
+        }
+
+        .toolbar {
+          grid-template-columns: 1fr;
+          align-items: start;
+        }
+
+        .workspace,
+        .workspace.mode-svg,
+        .workspace.mode-dom {
+          grid-template-columns: 1fr;
+        }
+
+        .workspace-resizer {
+          display: none;
+        }
+
+        .workspace.mode-split .svg-panel {
+          grid-column: auto;
+        }
+
+        .panel {
+          min-height: 360px;
+        }
       }
     </style>
     <script src="/vendor/tailwindcss/tailwindcss.js"></script>
   </head>
-  <body class="bg-gray-50">
-    <!-- Main Editor Section -->
-    <div class="w-full h-screen p-4">
-      <div class="grid grid-cols-3 gap-4 h-full" id="diagram1">
-        <!-- Editor Panel -->
-        <div
-          class="bg-white rounded-lg shadow-lg editor-shadow overflow-hidden h-full"
-        >
-          <div
-            class="bg-gray-800 text-white px-4 py-3 flex items-center justify-between"
-          >
-            <h3 class="font-medium">Editor</h3>
-            <div class="flex space-x-2">
-              <button
-                onclick="loadExample('basic')"
-                class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition-colors"
-              >
-                Basic
-              </button>
-              <button
-                onclick="loadExample('advanced')"
-                class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition-colors"
-              >
-                Advanced
-              </button>
-              <button
-                onclick="clearEditor()"
-                class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition-colors"
-              >
-                Clear
-              </button>
-              <button
-                onclick="exportDiagram()"
-                class="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition-colors"
-              >
-                Export PNG
-              </button>
-            </div>
-          </div>
-          <div style="height: calc(100% - 52px)">
-            <textarea id="text" style="display: none"></textarea>
-          </div>
+  <body>
+    <div class="app-shell">
+      <header class="toolbar">
+        <div class="toolbar-title">
+          <strong>ZenUML Dev Workbench</strong>
+          <span>default to native SVG, switch to DOM or split only when needed</span>
         </div>
+        <div class="toolbar-actions">
+          <span class="toolbar-label">View</span>
+          <button id="view-svg" class="tool-chip">SVG</button>
+          <button id="view-dom" class="tool-chip">DOM</button>
+          <button id="view-split" class="tool-chip">Split</button>
+          <button id="width-provider-toggle" class="tool-chip"></button>
+          <span id="svg-stats" class="stats-text">SVG: waiting</span>
+          <a class="tool-link" href="/cy/compare.html" target="_blank" rel="noreferrer">
+            Compare Cases
+          </a>
+          <a class="tool-link" href="/cy/svg-preview.html" target="_blank" rel="noreferrer">
+            SVG Only
+          </a>
+        </div>
+      </header>
 
-        <!-- Preview Panel -->
-        <div
-          class="bg-white rounded-lg shadow-lg editor-shadow overflow-hidden h-full col-span-2"
-        >
-          <div class="bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
-            <h3 class="font-medium">Preview</h3>
-            <button id="width-provider-toggle" class="text-xs px-2 py-1 rounded font-mono cursor-pointer hover:opacity-80 transition-opacity"></button>
-          </div>
-          <div style="height: calc(100% - 52px); overflow: auto" class="p-4">
-            <pre class="zenuml" style="margin: 0"></pre>
-          </div>
-        </div>
-      </div>
+      <main class="workspace mode-svg" id="workspace">
+          <article class="panel editor-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h2>Editor</h2>
+                <p>Persisted in <code>localStorage</code>.</p>
+              </div>
+              <div class="panel-actions">
+                <button onclick="loadExample('basic')" class="tool-button">Basic</button>
+                <button onclick="loadExample('advanced')" class="tool-button">Advanced</button>
+                <button onclick="clearEditor()" class="tool-button">Clear</button>
+                <button onclick="exportDiagram()" class="tool-button primary">Export PNG</button>
+              </div>
+            </div>
+            <div class="panel-body editor-body">
+              <textarea id="text" style="display: none"></textarea>
+            </div>
+          </article>
+
+          <div
+            id="editor-resizer"
+            class="workspace-resizer"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize editor"
+          ></div>
+
+          <article class="panel html-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h3>DOM preview</h3>
+                <p><code>window.zenUml.render()</code> output.</p>
+              </div>
+            </div>
+            <div class="panel-body preview-surface html-surface">
+              <div class="preview-stage">
+                <pre class="zenuml"></pre>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel svg-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h3>Native SVG preview</h3>
+                <p><code>renderToSvg()</code> output.</p>
+              </div>
+            </div>
+            <div class="panel-body preview-surface svg-surface">
+              <div class="preview-stage svg-stage">
+                <div id="svg-container"></div>
+              </div>
+            </div>
+          </article>
+      </main>
     </div>
 
     <script type="module">
       import { waitUntil, debounce } from "./src/utils.ts";
       import { createConfig } from "./src/config.ts";
       import { toPng } from "html-to-image";
+      import { renderToSvg } from "./src/svg/renderToSvg.ts";
 
       const editor = CodeMirror.fromTextArea(document.getElementById("text"), {
         lineNumbers: true,
@@ -145,7 +516,41 @@
         autofocus: true,
       });
 
-      const updateDiagram = debounce((content) => {
+      const svgContainer = document.getElementById("svg-container");
+      const svgStats = document.getElementById("svg-stats");
+      const workspace = document.getElementById("workspace");
+      const editorResizer = document.getElementById("editor-resizer");
+      const viewButtons = {
+        svg: document.getElementById("view-svg"),
+        dom: document.getElementById("view-dom"),
+        split: document.getElementById("view-split"),
+      };
+      const minEditorWidth = 280;
+
+      function clampEditorWidth(nextWidth) {
+        const maxEditorWidth = Math.max(minEditorWidth, Math.floor(window.innerWidth * 0.72));
+        return Math.min(Math.max(nextWidth, minEditorWidth), maxEditorWidth);
+      }
+
+      function setEditorWidth(nextWidth) {
+        const clampedWidth = clampEditorWidth(nextWidth);
+        document.documentElement.style.setProperty("--editor-width", `${clampedWidth}px`);
+        localStorage.setItem("zenuml-workbench-editor-width", String(clampedWidth));
+      }
+
+      function setViewMode(mode) {
+        const validMode = ["svg", "dom", "split"].includes(mode) ? mode : "svg";
+        workspace.classList.remove("mode-svg", "mode-dom", "mode-split");
+        workspace.classList.add(`mode-${validMode}`);
+
+        Object.entries(viewButtons).forEach(([key, button]) => {
+          button.classList.toggle("is-active", key === validMode);
+        });
+
+        localStorage.setItem("zenuml-workbench-view", validMode);
+      }
+
+      const updateHtmlPreview = debounce((content) => {
         const config = createConfig({
           onContentChange: (code) => editor.setValue(code),
         });
@@ -155,15 +560,83 @@
             .child({ name: "index.html" })
             .debug("render resolved", r);
         });
-      }, 500);
+      }, 400);
+
+      const updateSvgPreview = debounce((content) => {
+        try {
+          const t0 = performance.now();
+          const result = renderToSvg(content);
+          const dt = (performance.now() - t0).toFixed(1);
+
+          if (!result.svg || result.width === 0 || result.height === 0) {
+            svgContainer.innerHTML = `
+              <div class="svg-error">
+                Native SVG output is empty for the current input.
+              </div>
+            `;
+            svgStats.textContent = "SVG: empty";
+            return;
+          }
+
+          svgContainer.innerHTML = result.svg;
+          svgStats.textContent = `SVG ${result.width}x${result.height} | ${dt}ms`;
+        } catch (error) {
+          console.error("Failed to render native SVG preview:", error);
+          svgContainer.innerHTML = `
+            <div class="svg-error">
+              Native SVG preview failed. Check the console for details.
+            </div>
+          `;
+          svgStats.textContent = "SVG: error";
+        }
+      }, 180);
+
+      Object.entries(viewButtons).forEach(([mode, button]) => {
+        button.addEventListener("click", () => setViewMode(mode));
+      });
+
+      editorResizer.addEventListener("pointerdown", (event) => {
+        if (window.innerWidth <= 1024) {
+          return;
+        }
+
+        event.preventDefault();
+        workspace.classList.add("is-resizing");
+        editorResizer.setPointerCapture(event.pointerId);
+
+        const onPointerMove = (moveEvent) => {
+          setEditorWidth(moveEvent.clientX - workspace.getBoundingClientRect().left);
+        };
+
+        const stopResize = () => {
+          workspace.classList.remove("is-resizing");
+          editorResizer.removeEventListener("pointermove", onPointerMove);
+          editorResizer.removeEventListener("pointerup", stopResize);
+          editorResizer.removeEventListener("pointercancel", stopResize);
+        };
+
+        editorResizer.addEventListener("pointermove", onPointerMove);
+        editorResizer.addEventListener("pointerup", stopResize);
+        editorResizer.addEventListener("pointercancel", stopResize);
+      });
+
+      window.addEventListener("resize", () => {
+        const savedWidth = Number(localStorage.getItem("zenuml-workbench-editor-width"));
+        if (savedWidth) {
+          setEditorWidth(savedWidth);
+        }
+      });
 
       editor.on("change", function (cm) {
+        const content = cm.getValue();
+        updateSvgPreview(content);
+
         waitUntil(
           () => window.zenUml,
           () => {
-            updateDiagram(cm.getValue());
+            updateHtmlPreview(content);
             // Save to localStorage
-            localStorage.setItem("zenuml-cm-code", cm.getValue());
+            localStorage.setItem("zenuml-cm-code", content);
           },
         );
       });
@@ -227,6 +700,13 @@ WebApp --> Customer: Order confirmation`,
       } else {
         editor.setValue(examples.basic);
       }
+
+      const savedEditorWidth = Number(localStorage.getItem("zenuml-workbench-editor-width"));
+      if (savedEditorWidth) {
+        setEditorWidth(savedEditorWidth);
+      }
+
+      setViewMode(localStorage.getItem("zenuml-workbench-view") || "svg");
     </script>
     <script type="module">
       const params = new URLSearchParams(location.search);
@@ -234,7 +714,7 @@ WebApp --> Customer: Order confirmation`,
       const toggle = document.getElementById("width-provider-toggle");
       const isCanvas = wp === "canvas";
       toggle.textContent = "WIDTH: " + wp;
-      toggle.className = toggle.className + (isCanvas ? " bg-green-700" : " bg-gray-700");
+      toggle.classList.toggle("is-active", isCanvas);
       toggle.title = "Click to switch to " + (isCanvas ? "browser" : "canvas");
       toggle.addEventListener("click", () => {
         const next = isCanvas ? "browser" : "canvas";
