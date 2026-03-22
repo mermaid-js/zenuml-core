@@ -1,4 +1,5 @@
 import type { CreationGeometry } from "../geometry";
+import { escXml as esc, styleToAttr } from "../svg-utils";
 
 export function renderCreation(c: CreationGeometry): string {
   const m = c.message;
@@ -33,16 +34,3 @@ function renderOpenArrow(tipX: number, tipY: number, pointsLeft: boolean): strin
   return `<polyline points="${x1},${y1} ${tipX},${tipY} ${x1},${y2}" fill="none" stroke-linecap="round" class="arrow-head arrow-open"/>`;
 }
 
-function styleToAttr(style: Record<string, string>): string {
-  return Object.entries(style)
-    .map(([k, v]) => `${esc(k)}: ${esc(v)}`)
-    .join("; ");
-}
-
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

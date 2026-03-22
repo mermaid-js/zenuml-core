@@ -17,7 +17,7 @@ export interface FragmentSectionInfo {
 
 export interface StatementInfo {
   key: string;
-  kind: "sync" | "async" | "creation" | "return" | "divider" | "fragment" | "empty";
+  kind: "sync" | "async" | "creation" | "return" | "divider" | "fragment";
   from: string;
   to: string;
   label: string;

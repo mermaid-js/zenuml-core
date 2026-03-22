@@ -18,6 +18,7 @@ import { renderReturn } from "./components/return";
 import { renderDivider } from "./components/divider";
 import { renderComment } from "./components/comment";
 import type { DiagramGeometry } from "./geometry";
+import { escXml } from "./svg-utils";
 
 export interface RenderOptions {
   theme?: "theme-default" | "theme-mermaid";
@@ -193,10 +194,3 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult 
   return { svg, innerSvg, width: viewWidth, height: viewHeight, viewBox };
 }
 
-function escXml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

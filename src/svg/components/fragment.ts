@@ -1,4 +1,5 @@
 import type { FragmentGeometry } from "../geometry";
+import { escXml as esc } from "../svg-utils";
 
 const HEADER_HEIGHT = 25;
 
@@ -129,10 +130,3 @@ function getFragmentIcon(kind: string, x: number, y: number): string {
   }
 }
 
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

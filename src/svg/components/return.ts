@@ -1,4 +1,5 @@
 import type { ReturnGeometry } from "../geometry";
+import { escXml as esc } from "../svg-utils";
 
 export function renderReturn(r: ReturnGeometry): string {
   const minX = Math.min(r.fromX, r.toX);
@@ -21,10 +22,3 @@ export function renderReturn(r: ReturnGeometry): string {
 </g>`;
 }
 
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

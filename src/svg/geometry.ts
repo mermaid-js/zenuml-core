@@ -24,7 +24,6 @@ export interface LifelineGeometry {
   x: number; // center x (same as participant center)
   topY: number; // bottom of participant box (or creation-top)
   bottomY: number; // top of bottom participant box (or diagram bottom)
-  dashed: boolean;
 }
 
 // ─── Messages ──────────────────────────────────────────────────────

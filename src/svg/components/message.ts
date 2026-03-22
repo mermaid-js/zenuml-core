@@ -1,4 +1,5 @@
 import type { MessageGeometry, SelfCallGeometry } from "../geometry";
+import { escXml as esc, styleToAttr } from "../svg-utils";
 
 export function renderMessage(m: MessageGeometry): string {
   // HTML centers the label between source lifeline and arrowhead (excluding arrow width).
@@ -103,16 +104,3 @@ function renderArrowHead(
   </svg>`;
 }
 
-function styleToAttr(style: Record<string, string>): string {
-  return Object.entries(style)
-    .map(([k, v]) => `${esc(k)}: ${esc(v)}`)
-    .join("; ");
-}
-
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

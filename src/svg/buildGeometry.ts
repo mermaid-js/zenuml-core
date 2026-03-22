@@ -2,9 +2,12 @@
  * Builds DiagramGeometry from parser output + positioning engine.
  * Pure function — no DOM, no React, no side effects.
  */
+
+// ─── External imports ────────────────────────────────────────────────
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
+import { TextType } from "@/positioning/Coordinate";
 import {
   PARTICIPANT_TOP_SPACE_FOR_GROUP as _HTML_PARTICIPANT_TOP,
   OCCURRENCE_WIDTH,
@@ -15,6 +18,33 @@ import {
   MARGIN,
   MIN_PARTICIPANT_WIDTH,
 } from "@/positioning/Constants";
+import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
+import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
+import { AllMessages } from "@/parser/MessageCollector";
+import FrameBuilder from "@/parser/FrameBuilder";
+import FrameBorder from "@/positioning/FrameBorder";
+import CommentClass from "@/components/Comment/Comment";
+
+// ─── Local imports ───────────────────────────────────────────────────
+import { walkStatements } from "./walkStatements";
+import { computeReturnDebt } from "./computeReturnDebt";
+import { cssToSvgStyle } from "./cssToSvgStyle";
+import { buildFragmentGeometry } from "./buildFragmentGeometry";
+import type {
+  DiagramGeometry,
+  ParticipantGeometry,
+  LifelineGeometry,
+  MessageGeometry,
+  SelfCallGeometry,
+  OccurrenceGeometry,
+  CreationGeometry,
+  FragmentGeometry,
+  ReturnGeometry,
+  DividerGeometry,
+  CommentGeometry,
+} from "./geometry";
+
+// ─── SVG-specific constants ─────────────────────────────────────────
 
 /**
  * SVG-specific participant top offset.
@@ -30,31 +60,9 @@ const PARTICIPANT_TOP_SPACE = _HTML_PARTICIPANT_TOP + 8;
  * box adds: 2×2px border + 2×2px padding + 2×4px inner text padding (px-1) = 16px.
  */
 const PARTICIPANT_BOX_PADDING = 16;
-import { TextType } from "@/positioning/Coordinate";
 
 /** Visual height of participant box, matching HTML renderer's h-10 (40px) */
 const PARTICIPANT_VISUAL_HEIGHT = 40;
-import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
-import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { AllMessages } from "@/parser/MessageCollector";
-import FrameBuilder from "@/parser/FrameBuilder";
-import FrameBorder from "@/positioning/FrameBorder";
-import { walkStatements } from "./walkStatements";
-import CommentClass from "@/components/Comment/Comment";
-import type {
-  DiagramGeometry,
-  ParticipantGeometry,
-  LifelineGeometry,
-  MessageGeometry,
-  SelfCallGeometry,
-  OccurrenceGeometry,
-  CreationGeometry,
-  FragmentGeometry,
-  FragmentSectionGeometry,
-  ReturnGeometry,
-  DividerGeometry,
-  CommentGeometry,
-} from "./geometry";
 
 export interface BuildGeometryInput {
   rootContext: any;
@@ -88,7 +96,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     verticalCoordinates,
     participants,
   );
-  const { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments, totalReturnDebt } = buildResult;
+  const { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments } = buildResult;
 
   // Compute diagram height from the positioning engine's totalHeight (primary) or
   // max rendered content Y (fallback). Returns need more bottom overhead than other elements
@@ -289,7 +297,6 @@ function buildLifelines(
     x: p.x, // align with occurrence bar center (same as participant center)
     topY: p.y + p.height, // starts at bottom of participant box (visible part)
     bottomY: diagramHeight,
-    dashed: true,
   }));
 }
 
@@ -307,7 +314,6 @@ function buildMessages(
   returns: ReturnGeometry[];
   dividers: DividerGeometry[];
   comments: CommentGeometry[];
-  totalReturnDebt: number;
 } {
   const statements = walkStatements(rootContext);
   const messages: MessageGeometry[] = [];
@@ -327,7 +333,7 @@ function buildMessages(
   // the return element takes ~16px of visual space. This causes all subsequent
   // elements to be positioned too high. We compute a per-statement adjustment.
   const RETURN_VISUAL_HEIGHT = 16;
-  const adjustMap = computeReturnDebt(statements, verticalCoordinates, RETURN_VISUAL_HEIGHT);
+  const adjustMap = computeReturnDebt(statements, RETURN_VISUAL_HEIGHT);
 
   for (const info of statements) {
     const coord = verticalCoordinates.getStatementCoordinate(info.key);
@@ -627,264 +633,7 @@ function buildMessages(
     }
   }
 
-  const totalReturnDebt = adjustMap.get("__totalDebt__") || 0;
-  return { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments, totalReturnDebt };
+  return { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments };
 }
 
-/**
- * Compute per-statement Y adjustment to compensate for ReturnStatementVM.height=0.
- *
- * In the positioning engine, non-self return statements have height=0, but in HTML
- * they render as ~16px elements. This function walks the DFS-ordered statement list
- * and computes how much each statement's coord.top should be increased.
- *
- * The debt is scoped per block (identified by depth). When a block ends (depth decreases),
- * its accumulated debt propagates to the parent block — because the parent sync/creation
- * statement's coord.height is underestimated by the same amount.
- *
- * Returns a Map with:
- *   key -> adjustment for coord.top
- *   "inner:key" -> total inner debt for sync/creation statements (for occurrence height)
- */
-function computeReturnDebt(
-  statements: ReturnType<typeof walkStatements>,
-  _verticalCoordinates: VerticalCoordinates,
-  returnHeight: number,
-): Map<string, number> {
-  const result = new Map<string, number>();
 
-  // Stack tracks per-depth cumulative debt. Index = depth.
-  const debtByDepth: number[] = [0];
-  let maxDepth = 0;
-
-  // Track which sync/creation statements own each depth level
-  // so we can assign inner debt when closing their blocks
-  const blockOwnerKeys: (string | null)[] = [null]; // depth 0 = root (no owner)
-
-  for (const info of statements) {
-    const depth = info.depth;
-
-    // When depth decreases, close child blocks and propagate debt upward
-    while (maxDepth > depth) {
-      const closedDebt = debtByDepth[maxDepth] || 0;
-      const ownerKey = blockOwnerKeys[maxDepth];
-      // Record inner debt on the block owner (for occurrence height adjustment)
-      if (ownerKey) {
-        result.set(`inner:${ownerKey}`, closedDebt);
-      }
-      debtByDepth.pop();
-      blockOwnerKeys.pop();
-      maxDepth--;
-      // Propagate: parent block's subsequent statements are affected.
-      // Scale by 0.75 — the CSS layout doesn't grow 1:1 with the positioning engine's
-      // cursor advancement due to margin collapsing and BFC effects. Full propagation
-      // overshoots by ~10px per block depth. 0.75 is empirically calibrated.
-      debtByDepth[maxDepth] = (debtByDepth[maxDepth] || 0) + Math.round(closedDebt * 0.75);
-    }
-
-    // When depth increases, start fresh debt tracking for new block
-    while (maxDepth < depth) {
-      maxDepth++;
-      debtByDepth.push(0);
-      blockOwnerKeys.push(null);
-    }
-
-    // Total adjustment = sum of all debt across all depths
-    let totalDebt = 0;
-    for (let d = 0; d <= depth; d++) {
-      totalDebt += debtByDepth[d] || 0;
-    }
-    result.set(info.key, totalDebt);
-
-    // Non-self returns add debt at their depth
-    if (info.kind === "return" && !info.isSelf) {
-      debtByDepth[depth] += returnHeight;
-    }
-
-    // Sync/creation with blocks: the NEXT statement in the flat list at depth+1
-    // belongs to this statement's block. Record owner for debt propagation.
-    if ((info.kind === "sync" || info.kind === "creation") && info.hasBlock) {
-      // The next depth level's block belongs to this statement
-      if (depth + 1 > maxDepth) {
-        maxDepth = depth + 1;
-        debtByDepth.push(0);
-        blockOwnerKeys.push(info.key);
-      } else {
-        blockOwnerKeys[depth + 1] = info.key;
-        debtByDepth[depth + 1] = 0; // reset for new block
-      }
-    }
-  }
-
-  // Close remaining open blocks (same 0.75 propagation factor as main loop)
-  while (maxDepth > 0) {
-    const closedDebt = debtByDepth[maxDepth] || 0;
-    const ownerKey = blockOwnerKeys[maxDepth];
-    if (ownerKey) {
-      result.set(`inner:${ownerKey}`, closedDebt);
-    }
-    debtByDepth.pop();
-    blockOwnerKeys.pop();
-    maxDepth--;
-    debtByDepth[maxDepth] = (debtByDepth[maxDepth] || 0) + Math.round(closedDebt * 0.75);
-  }
-
-  // Store total root debt for diagram height adjustment
-  result.set("__totalDebt__", debtByDepth[0] || 0);
-
-  return result;
-}
-
-function buildFragmentGeometry(
-  info: ReturnType<typeof walkStatements>[number],
-  coord: { top: number; height: number },
-  coordinates: Coordinates,
-  verticalCoordinates: VerticalCoordinates,
-  allParticipants: string[],
-): FragmentGeometry | null {
-  // Get the fragment's parse tree node to find local participants
-  const statNode = info.statNode;
-  if (!statNode) return null;
-
-  // Find the fragment context node (loop, alt, opt, etc.)
-  const fragmentCtx = findFragmentContext(statNode);
-  if (!fragmentCtx) {
-    // Fallback: use full diagram width
-    return {
-      kind: info.fragmentKind!,
-      label: info.fragmentLabel || "",
-      x: 0,
-      y: coord.top,
-      width: coordinates.getWidth(),
-      height: coord.height,
-      sections: [],
-      number: info.number,
-      depth: info.depth,
-    };
-  }
-
-  // Compute fragment width from local participants, matching HTML's TotalWidth:
-  //   TotalWidth = max(participantWidth, FRAGMENT_MIN_WIDTH) + border.left + border.right
-  const localNames = getLocalParticipantNames(fragmentCtx);
-  const leftParticipant = allParticipants.find((p) => localNames.includes(p)) || "";
-  const rightParticipant = allParticipants.slice().reverse().find((p) => localNames.includes(p)) || "";
-
-  // Fragment's own border — use statNode (not fragmentCtx) to match HTML's
-  // TotalWidth which receives the stat context containing the fragment.
-  const frameBuilder = new FrameBuilder(allParticipants as string[]);
-  const frame = frameBuilder.getFrame(statNode);
-  const fragBorder = FrameBorder(frame);
-
-  let fragWidth: number;
-  let fragX: number;
-
-  if (leftParticipant && rightParticipant) {
-    const participantWidth =
-      coordinates.distance(leftParticipant, rightParticipant) +
-      coordinates.half(leftParticipant) +
-      coordinates.half(rightParticipant);
-    fragWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH) + fragBorder.left + fragBorder.right;
-    fragX = coordinates.getPosition(leftParticipant) - coordinates.half(leftParticipant);
-  } else {
-    fragWidth = Math.max(FRAGMENT_MIN_WIDTH, coordinates.getWidth());
-    fragX = 0;
-  }
-
-  // No explicit nesting indent needed — fragBorder.left/right from FrameBorder
-  // already accounts for inner nesting depth, matching HTML's TotalWidth formula.
-
-  // Build section geometry for multi-section fragments (alt, tcf)
-  const sections: FragmentSectionGeometry[] = [];
-  if (info.fragmentSections && info.fragmentSections.length > 1) {
-    // For multi-section fragments, compute section positions from inner block coordinates
-    let sectionY = coord.top;
-    for (let i = 0; i < info.fragmentSections.length; i++) {
-      const section = info.fragmentSections[i];
-      // First section starts at fragment top (no separator line)
-      // Subsequent sections need separator lines
-      if (i > 0) {
-        // Find the first statement key in this section's block to determine the divider Y
-        const sectionBlock = section.blockNode;
-        if (sectionBlock) {
-          const innerStats = sectionBlock.stat?.() || [];
-          if (innerStats.length > 0) {
-            const firstStatKey = createStatementKeyFromStat(innerStats[0]);
-            if (firstStatKey) {
-              const innerCoord = verticalCoordinates.getStatementCoordinate(firstStatKey);
-              if (innerCoord) {
-                // Section separator is positioned above the first inner statement
-                // with header height (25px) and label space (20px)
-                sectionY = innerCoord.top - 20 - 8 - 1;
-              }
-            }
-          }
-        }
-      }
-
-      const sectionHeight = i < info.fragmentSections.length - 1
-        ? 0  // Height computed by renderer from next section's Y
-        : coord.top + coord.height - sectionY;
-
-      sections.push({
-        label: section.label,
-        y: sectionY,
-        height: sectionHeight,
-      });
-    }
-  }
-
-  return {
-    kind: info.fragmentKind!,
-    label: info.fragmentLabel || "",
-    x: fragX,
-    y: coord.top,
-    width: fragWidth,
-    height: coord.height,
-    sections,
-    number: info.number,
-    depth: info.depth,
-  };
-}
-
-function findFragmentContext(stat: any): any {
-  for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
-    const frag = stat[kind]?.();
-    if (frag) return frag;
-  }
-  const alt = stat.alt?.();
-  if (alt) return alt;
-  const tcf = stat.tcf?.();
-  if (tcf) return tcf;
-  const ref = stat.ref?.();
-  if (ref) return ref;
-  return null;
-}
-
-/** Inline version of createStatementKey to avoid circular import issues */
-function createStatementKeyFromStat(statement: any): string {
-  if (!statement?.start || !statement?.stop) return "";
-  return `${statement.start.start}-${statement.stop.stop}`;
-}
-
-/**
- * Convert React CSSProperties to SVG-compatible style record.
- * Maps CSS property names to SVG equivalents (e.g., `color` → `fill` for text).
- * Returns undefined if the style is empty.
- */
-function cssToSvgStyle(css: import("react").CSSProperties): Record<string, string> | undefined {
-  const result: Record<string, string> = {};
-  let hasKeys = false;
-  for (const [key, value] of Object.entries(css)) {
-    if (value == null) continue;
-    hasKeys = true;
-    // SVG text uses `fill` for color, not CSS `color`
-    if (key === "color") {
-      result["fill"] = String(value);
-    } else {
-      // Convert camelCase to kebab-case for SVG style attribute
-      const svgKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      result[svgKey] = String(value);
-    }
-  }
-  return hasKeys ? result : undefined;
-}
