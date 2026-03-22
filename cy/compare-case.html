@@ -37,7 +37,6 @@
         <a id="prev-link" href="#">&larr; Prev</a>
         <a id="next-link" href="#">Next &rarr;</a>
         <button id="diff-btn">Diff</button>
-        <button id="diff-native-btn" title="Prepare for Playwright/MCP native screenshots">Diff (native)</button>
         <span class="match-badge" id="match-badge"></span>
       </div>
     </div>
@@ -472,15 +471,6 @@
         }
       });
 
-      // --- Diff (native) button: uses the ZenUML Native Diff browser extension ---
-      // The extension captures the viewport via chrome.tabs.captureVisibleTab(),
-      // crops to each element's bounds, and calls diffFromImages() with real
-      // browser-rendered pixels (no html-to-image foreignObject serialization).
-      // Install the extension from cy/native-diff-ext/
-      document.getElementById("diff-native-btn").addEventListener("click", () => {
-        document.getElementById("match-badge").textContent =
-          "Click the extension icon (puzzle piece → ZenUML Native Diff) to run native diff";
-      });
 
       function loadImage(dataUrl) {
         return new Promise((resolve, reject) => {
