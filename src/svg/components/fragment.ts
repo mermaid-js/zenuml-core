@@ -64,9 +64,10 @@ export function renderFragment(f: FragmentGeometry): string {
     for (let i = 1; i < f.sections.length; i++) {
       const section = f.sections[i];
       const lineY = section.y;
+      const separatorY = lineY + HALF_STROKE;
       // Dashed separator line
       parts.push(
-        `<line x1="${f.x}" y1="${lineY}" x2="${f.x + f.width}" y2="${lineY}" class="fragment-separator"/>`,
+        `<line x1="${f.x + 1}" y1="${separatorY}" x2="${f.x + f.width - 1}" y2="${separatorY}" class="fragment-separator"/>`,
       );
       // Section label — split into keyword + condition (e.g. "catch" + "error") as separate elements
       // Both catch and finally have a semi-transparent white background (bg-skin-frame opacity-65)
@@ -93,7 +94,7 @@ export function renderFragment(f: FragmentGeometry): string {
           const bgWidth = (section.keywordWidth ?? keyword.length * 7) + (section.detailWidth ?? condition.length * 7) + TEXT_PAD_X * 4;
           parts.push(
             `<g opacity="0.65">` +
-            `<rect x="${keywordX - TEXT_PAD_X}" y="${lineY - 1}" width="${bgWidth}" height="24" fill="#fff"/>` +
+            `<rect x="${keywordX - TEXT_PAD_X}" y="${lineY + 1}" width="${bgWidth}" height="20" fill="#fff"/>` +
             `<text x="${keywordX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(keyword)}</text>` +
             `<text x="${conditionX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(condition)}</text>` +
             `</g>`,

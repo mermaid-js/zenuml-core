@@ -122,6 +122,23 @@ B->A: So what`,
 } else {
   A -> B: inElse
 }`,
+  "repro-alt-branches": `if(cond) {
+  A -> B: msg1
+} else if(cond2) {
+  A -> B: elseIfMsg
+} else {
+  A -> B: elseMsg
+}`,
+  "repro-alt-tcf-only": `if(cond) {
+  A -> B: msg1
+  try {
+    B -> C: tryMsg
+  } catch(e) {
+    C -> B: catchMsg
+  } finally {
+    B -> A: finallyMsg
+  }
+}`,
   "repro-alt-nested-tcf": `if(cond) {
   A -> B: msg1
   try {
