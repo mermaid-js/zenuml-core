@@ -4,6 +4,7 @@
  */
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
+import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
 import {
   PARTICIPANT_TOP_SPACE_FOR_GROUP as _HTML_PARTICIPANT_TOP,
@@ -103,6 +104,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     coordinates,
     verticalCoordinates,
     participants,
+    measureText,
   );
   const { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments } = buildResult;
 
@@ -322,6 +324,7 @@ function buildMessages(
   coordinates: Coordinates,
   verticalCoordinates: VerticalCoordinates,
   participants: ParticipantGeometry[],
+  measureText?: (text: string, type: TextType) => number,
 ): {
   messages: MessageGeometry[];
   selfCalls: SelfCallGeometry[];
@@ -347,6 +350,19 @@ function buildMessages(
   let maxReturnBottom = 0;
   const diagramWidth = coordinates.getWidth();
   const allParticipants = coordinates.orderedParticipantNames();
+
+  // --- Block child count: how many direct children each parent number has ---
+  // Used to compute assignment return seq numbers (e.g. block with 3 children → return is N.4)
+  const blockChildCount = new Map<string, number>();
+  for (const s of statements) {
+    if (s.number) {
+      const lastDot = s.number.lastIndexOf(".");
+      const parent = lastDot >= 0 ? s.number.substring(0, lastDot) : "";
+      const ordinal = parseInt(s.number.substring(lastDot + 1), 10);
+      const prev = blockChildCount.get(parent) || 0;
+      if (ordinal > prev) blockChildCount.set(parent, ordinal);
+    }
+  }
 
   // --- Scope-aware return height debt computation ---
   // ReturnStatementVM.measure() reports height=0 for non-self returns, but in HTML
@@ -445,13 +461,23 @@ function buildMessages(
           style: messageStyle,
         });
       } else {
-        // For sync messages with occurrence, arrow tip stops at near edge of occurrence bar.
+        // Arrow tip stops at near edge of target's occurrence bar.
+        // Sync: creates new occ → toX ∓ OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
+        //   (points at inner edge where new occ starts)
+        // Async with existing target occ → toX ∓ nestingOffset
+        //   (points at outer edge of existing occ)
         const isLTR = fromX < toX;
+        const syncOffset = info.kind === "sync" && !info.isSelf;
+        const asyncTargetOcc = info.kind === "async" && !info.isSelf && targetDepth > 0;
         const arrowToX =
-          info.kind === "sync" && !info.isSelf
+          syncOffset
             ? isLTR
               ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
               : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
+          : asyncTargetOcc
+            ? isLTR
+              ? toX - nestingOffset
+              : toX + nestingOffset
             : toX;
 
         messages.push({
@@ -541,10 +567,16 @@ function buildMessages(
             } else if (isLTR) {
               senderX += 2;
             }
+            // Assignment return seq number: HTML numbers it as (blockChildCount + 1)
+            // For non-block sync (e.g. `ret = B.method`), it's N.1 (no block children).
+            // For block sync (e.g. `ret = B.method { ... }`), it's N.(children+1).
+            const assignReturnNumber = info.number
+              ? `${info.number}.${(blockChildCount.get(info.number) || 0) + 1}`
+              : undefined;
             returns.push({
               fromX: retFromX, toX: senderX, y: returnArrowY,
               label: assignment.assignee, isReverse: fromX < toX, isSelf: false,
-              number: info.number,
+              number: assignReturnNumber,
             });
             maxReturnBottom = Math.max(maxReturnBottom, returnArrowY + 46);
           }
@@ -646,7 +678,9 @@ function buildMessages(
           returns.push({
             fromX: createdRetX, toX: senderRetX, y: occBottom,
             label: creationAssign.assignee, isReverse: createdRetX > senderRetX, isSelf: false,
-            number: info.number,
+            number: info.number
+              ? `${info.number}.${(blockChildCount.get(info.number) || 0) + 1}`
+              : undefined,
           });
           maxReturnBottom = Math.max(maxReturnBottom, occBottom + 46);
         }
@@ -668,6 +702,7 @@ function buildMessages(
         coordinates,
         verticalCoordinates,
         allParticipants,
+        measureText,
         fragmentCommentHeight,
       );
       if (fragmentGeom) {
@@ -1014,6 +1049,7 @@ function buildFragmentGeometry(
   coordinates: Coordinates,
   verticalCoordinates: VerticalCoordinates,
   allParticipants: string[],
+  measureText?: (text: string, type: TextType) => number,
   commentHeight: number = 0,
 ): FragmentGeometry | null {
   // Get the fragment's parse tree node to find local participants
@@ -1027,6 +1063,7 @@ function buildFragmentGeometry(
     return {
       kind: info.fragmentKind!,
       label: info.fragmentLabel || "",
+      labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(info.fragmentLabel) : undefined,
       x: 0,
       y: coord.top,
       width: coordinates.getWidth(),
@@ -1113,6 +1150,39 @@ function buildFragmentGeometry(
         label: section.label,
         y: sectionY,
         height: sectionHeight,
+        labelWidth: section.label ? measureSvgFragmentLabelWidth(section.label) : undefined,
+        innerLabel: /^\[\s*.*\s*\]$/.test(section.label) ? section.label.slice(1, -1).trim() : undefined,
+        innerLabelWidth: /^\[\s*.*\s*\]$/.test(section.label)
+          ? measureSvgFragmentLabelWidth(section.label.slice(1, -1).trim())
+          : undefined,
+        keyword: (() => {
+          const spaceIdx = section.label.indexOf(" ");
+          if (spaceIdx > 0 && !section.label.startsWith("finally") && !section.label.startsWith("[")) {
+            return section.label.substring(0, spaceIdx);
+          }
+          return undefined;
+        })(),
+        keywordWidth: (() => {
+          const spaceIdx = section.label.indexOf(" ");
+          if (spaceIdx > 0 && !section.label.startsWith("finally") && !section.label.startsWith("[")) {
+            return measureSvgFragmentLabelWidth(section.label.substring(0, spaceIdx));
+          }
+          return undefined;
+        })(),
+        detail: (() => {
+          const spaceIdx = section.label.indexOf(" ");
+          if (spaceIdx > 0 && !section.label.startsWith("finally") && !section.label.startsWith("[")) {
+            return section.label.substring(spaceIdx + 1);
+          }
+          return undefined;
+        })(),
+        detailWidth: (() => {
+          const spaceIdx = section.label.indexOf(" ");
+          if (spaceIdx > 0 && !section.label.startsWith("finally") && !section.label.startsWith("[")) {
+            return measureSvgFragmentLabelWidth(section.label.substring(spaceIdx + 1));
+          }
+          return undefined;
+        })(),
       });
     }
   }
@@ -1120,6 +1190,7 @@ function buildFragmentGeometry(
   return {
     kind: info.fragmentKind!,
     label: info.fragmentLabel || "",
+    labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(info.fragmentLabel) : undefined,
     x: fragX,
     y: coord.top,
     width: fragWidth,
