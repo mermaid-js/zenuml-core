@@ -1,6 +1,8 @@
 import type { FragmentGeometry } from "../geometry";
 
 const HEADER_HEIGHT = 25;
+const BRACKET_WIDTH = 3.89;
+const TEXT_PAD_X = 4;
 
 /**
  * Stroke inset for SVG border-box emulation.
@@ -45,7 +47,7 @@ export function renderFragment(f: FragmentGeometry): string {
   // Sequence number: positioned to the left of the fragment with 4px gap (matching HTML pr-1)
   if (f.number) {
     parts.push(
-      `<text x="${f.x - 4}" y="${headerY + HEADER_HEIGHT / 2 - 0.5}" text-anchor="end" dominant-baseline="central" class="seq-number">${esc(f.number)}</text>`,
+      `<text x="${f.x - 3}" y="${headerY + HEADER_HEIGHT / 2 - 4.5}" text-anchor="end" dominant-baseline="central" class="seq-number">${esc(f.number)}</text>`,
     );
   }
 
@@ -53,10 +55,8 @@ export function renderFragment(f: FragmentGeometry): string {
   // HTML: .text-skin-fragment div top = headerBottom, span.condition top = headerBottom + 2 (padding)
   // SVG dominant-baseline="hanging" puts text top ~2.6px above y → need y = htmlTextTop + 2.6
   if (f.label) {
-    const condY = headerY + HEADER_HEIGHT + 5;
-    parts.push(
-      `<text x="${headerX}" y="${condY}" dominant-baseline="hanging" class="fragment-condition"><tspan>[</tspan><tspan dx="4" opacity="0.65">${esc(f.label)}</tspan><tspan dx="4">]</tspan></text>`,
-    );
+    const condY = headerY + HEADER_HEIGHT + 15;
+    parts.push(renderBracketedLabel(headerX, condY, f.label, f.labelWidth, "fragment-condition"));
   }
 
   // Section separator lines and labels (for multi-section fragments like alt, tcf)
@@ -73,28 +73,40 @@ export function renderFragment(f: FragmentGeometry): string {
       if (section.label) {
         const labelY = lineY + 16;
         const isFinally = section.label.startsWith("finally");
+        const isBracketed = !!section.innerLabel && section.label !== "[else]";
+        if (isBracketed) {
+          const labelX = f.x + 1;
+          parts.push(
+            renderBracketedLabel(labelX, labelY, section.innerLabel!, section.innerLabelWidth, "fragment-section-label"),
+          );
+          continue;
+        }
         // Split "catch error" → ["catch", "error"], "else [cond]" → ["else", "[cond]"], "finally" → ["finally"]
         const spaceIdx = section.label.indexOf(" ");
         if (spaceIdx > 0 && !isFinally) {
-          const keyword = section.label.substring(0, spaceIdx);
-          const condition = section.label.substring(spaceIdx + 1);
+          const keyword = section.keyword || section.label.substring(0, spaceIdx);
+          const condition = section.detail || section.label.substring(spaceIdx + 1);
+          const keywordWidth = section.keywordWidth ?? keyword.length * 7;
           const keywordX = f.x + 5;
+          const conditionX = keywordX + keywordWidth + TEXT_PAD_X * 2;
           // Group with opacity 0.65 matches HTML parent opacity (affects both bg and text together)
-          const bgWidth = (keyword.length + condition.length) * 7 + 9;
+          const bgWidth = (section.keywordWidth ?? keyword.length * 7) + (section.detailWidth ?? condition.length * 7) + TEXT_PAD_X * 4;
           parts.push(
             `<g opacity="0.65">` +
-            `<rect x="${keywordX - 4}" y="${lineY + 1}" width="${bgWidth}" height="20" fill="#fff"/>` +
+            `<rect x="${keywordX - TEXT_PAD_X}" y="${lineY - 1}" width="${bgWidth}" height="24" fill="#fff"/>` +
             `<text x="${keywordX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(keyword)}</text>` +
-            `<text x="${keywordX + keyword.length * 8}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(condition)}</text>` +
+            `<text x="${conditionX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(condition)}</text>` +
             `</g>`,
           );
         } else {
           const finallyX = f.x + 5;
-          const finallyY = labelY - 1;
-          const bgWidth = section.label.length * 6 + 2;
+          const finallyY = labelY;
+          const bgWidth = (section.labelWidth ?? section.label.length * 7) + TEXT_PAD_X * 2;
+          const bgY = section.label === "[else]" ? lineY - 1 : lineY + 1;
+          const bgHeight = section.label === "[else]" ? 24 : 20;
           parts.push(
             `<g opacity="0.65">` +
-            `<rect x="${finallyX - 4}" y="${lineY + 1}" width="${bgWidth}" height="20" fill="#fff"/>` +
+            `<rect x="${finallyX - TEXT_PAD_X}" y="${bgY}" width="${bgWidth}" height="${bgHeight}" fill="#fff"/>` +
             `<text x="${finallyX}" y="${finallyY}" class="fragment-section-label">${esc(section.label)}</text>` +
             `</g>`,
           );
@@ -104,6 +116,19 @@ export function renderFragment(f: FragmentGeometry): string {
   }
 
   return `<g class="fragment fragment-${f.kind}">\n  ${parts.join("\n  ")}\n</g>`;
+}
+
+function renderBracketedLabel(x: number, y: number, innerText: string, innerWidth?: number, cls: string = "fragment-condition"): string {
+  const measuredInnerWidth = innerWidth ?? innerText.length * 7;
+  const innerX = x + BRACKET_WIDTH + TEXT_PAD_X;
+  const closeX = innerX + measuredInnerWidth + TEXT_PAD_X;
+  return (
+    `<g>` +
+    `<text x="${x}" y="${y}" class="${cls}">[</text>` +
+    `<text x="${innerX}" y="${y}" class="${cls}" opacity="0.65">${esc(innerText)}</text>` +
+    `<text x="${closeX}" y="${y}" class="${cls}">]</text>` +
+    `</g>`
+  );
 }
 
 function getKindLabel(kind: string): string {

@@ -24,7 +24,7 @@ export function renderCreation(c: CreationGeometry): string {
 
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
 
-  const numberX = Math.min(fromX, toX) - 3;
+  const numberX = Math.min(fromX, toX) - 4;
   const numberSvg = m.number
     ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
     : "";

@@ -24,7 +24,7 @@ export function renderReturn(r: ReturnGeometry): string {
   const ay2 = r.y + halfH;
 
   // Sequence number: always to the left of the return
-  const numberX = Math.min(r.fromX, r.toX) - 3;
+  const numberX = Math.min(r.fromX, r.toX) - 4;
   const numberSvg = r.number
     ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(r.number)}</text>`
     : "";
