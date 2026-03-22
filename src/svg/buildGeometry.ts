@@ -4,7 +4,10 @@
  */
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
-import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
+import {
+  measureSvgFragmentLabelWidth,
+  measureSvgParticipantLabelWidth,
+} from "@/positioning/WidthProviderFunc";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
 import {
   PARTICIPANT_TOP_SPACE_FOR_GROUP as _HTML_PARTICIPANT_TOP,
@@ -45,6 +48,7 @@ function snapX(x: number): number {
  */
 const PARTICIPANT_BOX_PADDING = 16;
 const PARTICIPANT_BOX_PADDING_ASSIGNEE = 24;
+const PARTICIPANT_ICON_ROW_WIDTH = 28; // 24px icon + 4px right margin
 import { TextType } from "@/positioning/Coordinate";
 
 /** Visual height of participant box, matching HTML renderer's h-10 (40px) */
@@ -272,10 +276,11 @@ function buildParticipants(
       let width: number;
       let measuredTextWidth: number | undefined;
       if (measureText && m.name !== _STARTER_) {
-        const textWidth = measureText(m.getDisplayName(), TextType.ParticipantName);
-        if (isAssignee) measuredTextWidth = textWidth;
+        const textWidth = measureSvgParticipantLabelWidth(m.getDisplayName());
+        measuredTextWidth = textWidth;
         const padding = isAssignee ? PARTICIPANT_BOX_PADDING_ASSIGNEE : PARTICIPANT_BOX_PADDING;
-        width = Math.min(Math.max(textWidth + padding, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
+        const iconWidth = m.hasIcon() ? PARTICIPANT_ICON_ROW_WIDTH : 0;
+        width = Math.min(Math.max(textWidth + padding + iconWidth, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
       } else {
         width = Math.min(halfWidth * 2 - MARGIN, PARTICIPANT_MAX_WIDTH);
       }

@@ -3,6 +3,7 @@ import { getCache, setCache } from "./../utils/RenderingCache";
 
 const FONT_FAMILY = "Helvetica, Verdana, serif";
 const FONT_SIZE_PARTICIPANT = "16px"; // 1rem — used for ALL measurements (see getFontSpec comment)
+const FONT_SIZE_FRAGMENT = "14px";
 
 function getFontSpec(_type: TextType): string {
   // WidthProviderOnBrowser has a latent bug: it creates a hidden div with
@@ -66,6 +67,37 @@ export function WidthProviderOnCanvas(
   const width = Math.round(ctx.measureText(measured).width);
   setCache(cacheKey, width, true);
   return width;
+}
+
+export function measureTextWithFont(text: string, fontSize: string): number {
+  const measured = text.trim();
+  if (!measured) return 0;
+  const cacheKey = `measureTextWithFont_${fontSize}_${measured}`;
+  const cacheValue = getCache(cacheKey);
+  if (cacheValue != null) {
+    return cacheValue;
+  }
+
+  const ctx = getCanvasContext();
+  if (!ctx) {
+    const px = Number.parseFloat(fontSize) || 14;
+    const width = Math.ceil(measured.length * px * 0.6);
+    setCache(cacheKey, width, true);
+    return width;
+  }
+
+  ctx.font = `${fontSize} ${FONT_FAMILY}`;
+  const width = ctx.measureText(measured).width;
+  setCache(cacheKey, width, true);
+  return width;
+}
+
+export function measureSvgFragmentLabelWidth(text: string): number {
+  return measureTextWithFont(text, FONT_SIZE_FRAGMENT);
+}
+
+export function measureSvgParticipantLabelWidth(text: string): number {
+  return measureTextWithFont(text, FONT_SIZE_PARTICIPANT);
 }
 
 export default function WidthProviderOnBrowser(
