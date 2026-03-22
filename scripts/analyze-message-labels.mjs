@@ -98,7 +98,7 @@ function segmentGraphemes(text) {
 }
 
 function keyForLabel(label) {
-  return `${label.kind}\u0000${label.text}\u0000${label.textOrder}`;
+  return `${label.kind}\u0000${label.pairText ?? label.text}\u0000${label.textOrder}`;
 }
 
 function rectRight(rect) {
@@ -138,6 +138,13 @@ function intersectionArea(a, b) {
   const right = Math.min(rectRight(a), rectRight(b));
   const bottom = Math.min(rectBottom(a), rectBottom(b));
   return Math.max(0, right - left) * Math.max(0, bottom - top);
+}
+
+function rectCenter(rect) {
+  return {
+    x: rect.x + rect.w / 2,
+    y: rect.y + rect.h / 2,
+  };
 }
 
 function iou(a, b) {
@@ -358,7 +365,7 @@ function enrichOrdering(labels) {
     byKind.set(label.kind, kindCount + 1);
     label.yOrder = kindCount;
 
-    const textKey = `${label.kind}\u0000${label.text}`;
+    const textKey = `${label.kind}\u0000${label.pairText ?? label.text}`;
     const textCount = byText.get(textKey) || 0;
     byText.set(textKey, textCount + 1);
     label.textOrder = textCount;
@@ -376,11 +383,61 @@ function formatLetterSummary(letter) {
   return `${letter.grapheme}: dx=${dx}px dy=${dy}px`;
 }
 
+function formatSectionSummary(prefix, item) {
+  const notes = [];
+  if (item.owner_text) {
+    notes.push(`owner=${item.owner_text}`);
+  }
+  if (item.html_text && item.svg_text && item.html_text !== item.svg_text) {
+    notes.push(`text_mismatch(html=${item.html_text} svg=${item.svg_text})`);
+  }
+  const noteSuffix = notes.length > 0 ? ` [${notes.join("; ")}]` : "";
+  if (!item.letters || item.letters.length === 0) {
+    return `${prefix}:${item.key.kind}:${item.key.text}${noteSuffix} -> ambiguous`;
+  }
+  return `${prefix}:${item.key.kind}:${item.key.text}${noteSuffix} -> ${item.letters.map(formatLetterSummary).join(", ")}`;
+}
+
 function formatArrowSummary(arrow) {
   if (arrow.status !== "ok") {
     return "ambiguous";
   }
-  return `left_dx=${arrow.left_dx.toFixed(2)}px right_dx=${arrow.right_dx.toFixed(2)}px width_dx=${arrow.width_dx.toFixed(2)}px`;
+  const parts = [
+    `left_dx=${arrow.left_dx.toFixed(2)}px`,
+    `right_dx=${arrow.right_dx.toFixed(2)}px`,
+    `width_dx=${arrow.width_dx.toFixed(2)}px`,
+  ];
+  if (arrow.key?.kind === "self") {
+    parts.push(`top_dy=${arrow.top_dy.toFixed(2)}px`);
+    parts.push(`bottom_dy=${arrow.bottom_dy.toFixed(2)}px`);
+    parts.push(`height_dy=${arrow.height_dy.toFixed(2)}px`);
+  }
+  return parts.join(" ");
+}
+
+function formatParticipantIconSummary(icon) {
+  const notes = [];
+  if (icon.label_text) {
+    notes.push(`label=${icon.label_text}`);
+  }
+  if (icon.anchor_kind) {
+    notes.push(`anchor=${icon.anchor_kind}`);
+  }
+  if (icon.presence && icon.presence.html !== icon.presence.svg) {
+    notes.push(`presence_mismatch(html=${icon.presence.html} svg=${icon.presence.svg})`);
+  }
+  const noteSuffix = notes.length > 0 ? ` [${notes.join("; ")}]` : "";
+  if (icon.status !== "ok") {
+    return `icon:${icon.name}${noteSuffix} -> ambiguous`;
+  }
+  return `icon:${icon.name}${noteSuffix} -> icon_dx=${icon.icon_dx.toFixed(2)}px icon_dy=${icon.icon_dy.toFixed(2)}px relative_dx=${icon.relative_dx.toFixed(2)}px relative_dy=${icon.relative_dy.toFixed(2)}px`;
+}
+
+function formatParticipantBoxSummary(box) {
+  if (box.status !== "ok") {
+    return `participant-box:${box.name} -> ambiguous`;
+  }
+  return `participant-box:${box.name} -> dx=${box.dx.toFixed(2)}px dy=${box.dy.toFixed(2)}px dw=${box.dw.toFixed(2)}px dh=${box.dh.toFixed(2)}px`;
 }
 
 async function collectLabelData(page) {
@@ -394,6 +451,42 @@ async function collectLabelData(page) {
         w: rect.width,
         h: rect.height,
       };
+    }
+
+    function elementRect(el, rootRect) {
+      if (!el) {
+        return null;
+      }
+      const rect = el.getBoundingClientRect();
+      if (!rect || rect.width <= 0 || rect.height <= 0) {
+        return null;
+      }
+      return relRect(rect, rootRect);
+    }
+
+    function strokedElementOuterRect(el, rootRect) {
+      const box = elementRect(el, rootRect);
+      if (!box) {
+        return null;
+      }
+      const strokeWidth = parseFloat(getComputedStyle(el).strokeWidth || "0") || 0;
+      if (strokeWidth <= 0) {
+        return box;
+      }
+      const half = strokeWidth / 2;
+      return {
+        x: box.x - half,
+        y: box.y - half,
+        w: box.w + strokeWidth,
+        h: box.h + strokeWidth,
+      };
+    }
+
+    function pushBox(parts, part, box) {
+      if (!box || box.w <= 0 || box.h <= 0) {
+        return;
+      }
+      parts.push({ part, box });
     }
 
     function unionRect(rects) {
@@ -494,6 +587,40 @@ async function collectLabelData(page) {
       return boxes;
     }
 
+    function glyphBoxesForElements(elements, rootRect) {
+      const boxes = [];
+      let indexOffset = 0;
+      for (const el of elements) {
+        const elementBoxes = glyphBoxesForElement(el, rootRect);
+        for (const box of elementBoxes) {
+          boxes.push({
+            ...box,
+            index: box.index + indexOffset,
+          });
+        }
+        indexOffset += elementBoxes.length;
+      }
+      return boxes;
+    }
+
+    function measureTextEntry(el, rootRect, fontEl = el) {
+      const letters = glyphBoxesForElement(el, rootRect);
+      return {
+        box: letters.length > 0 ? unionRect(letters.map((letter) => letter.box)) : relRect(el.getBoundingClientRect(), rootRect),
+        font: fontInfo(fontEl),
+        letters,
+      };
+    }
+
+    function measureTextEntryFromElements(elements, rootRect, fallbackEl, fontEl = fallbackEl) {
+      const letters = glyphBoxesForElements(elements, rootRect);
+      return {
+        box: letters.length > 0 ? unionRect(letters.map((letter) => letter.box)) : relRect(fallbackEl.getBoundingClientRect(), rootRect),
+        font: fontInfo(fontEl),
+        letters,
+      };
+    }
+
     function fontInfo(el) {
       const style = getComputedStyle(el);
       return {
@@ -503,6 +630,63 @@ async function collectLabelData(page) {
         lineHeight: style.lineHeight,
         textAlign: style.textAlign,
       };
+    }
+
+    function textOrEmpty(el, selector) {
+      return (el?.querySelector(selector)?.textContent ?? "").trim();
+    }
+
+    function fragmentOwnerText(fragmentEl) {
+      return (
+        textOrEmpty(fragmentEl, ":scope > .header .name") ||
+        textOrEmpty(fragmentEl, ":scope > .header .text-skin-fragment span") ||
+        textOrEmpty(fragmentEl, ":scope > .header .text-skin-fragment")
+      );
+    }
+
+    function visibleChildren(el) {
+      return Array.from(el.children).filter((child) => getComputedStyle(child).display !== "none");
+    }
+
+    function textContentNormalized(el) {
+      return (el?.textContent ?? "").replace(/\s+/g, " ").trim();
+    }
+
+    function boxOrNull(box) {
+      if (!box || box.w <= 0 || box.h <= 0) {
+        return null;
+      }
+      return box;
+    }
+
+    function paintedBox(el, rootRect) {
+      if (!el) {
+        return null;
+      }
+      const shapeSelectors = "path, rect, circle, ellipse, polygon, polyline, line, use";
+      const rects = [];
+      for (const shape of el.querySelectorAll(shapeSelectors)) {
+        const rect = relRect(shape.getBoundingClientRect(), rootRect);
+        if (rect.w > 0 && rect.h > 0) {
+          rects.push(rect);
+        }
+      }
+      if (rects.length > 0) {
+        return unionRect(rects);
+      }
+      return boxOrNull(relRect(el.getBoundingClientRect(), rootRect));
+    }
+
+    function topParticipantsByName(entries) {
+      const ordered = [...entries].sort((a, b) => (a.participantBox.y - b.participantBox.y) || (a.participantBox.x - b.participantBox.x));
+      const byName = new Map();
+      for (const entry of ordered) {
+        if (!entry.name || byName.has(entry.name)) {
+          continue;
+        }
+        byName.set(entry.name, entry);
+      }
+      return Array.from(byName.values());
     }
 
     function collectHtmlLabels(root, rootRect) {
@@ -529,13 +713,54 @@ async function collectLabelData(page) {
         for (const labelEl of root.querySelectorAll(pair.selector)) {
           const text = (labelEl.textContent ?? "").trim();
           if (!text) continue;
+          const measured = measureTextEntry(labelEl, rootRect);
           labels.push({
             side: "html",
             kind: pair.kind,
             text,
-            box: relRect(labelEl.getBoundingClientRect(), rootRect),
-            font: fontInfo(labelEl),
-            letters: glyphBoxesForElement(labelEl, rootRect),
+            box: measured.box,
+            font: measured.font,
+            letters: measured.letters,
+          });
+        }
+      }
+
+      for (const conditionWrap of root.querySelectorAll(".fragment .segment > .text-skin-fragment:not(.finally)")) {
+        const children = visibleChildren(conditionWrap);
+        if (children.length === 0) continue;
+        const text = children.map((child) => (child.textContent ?? "").trim()).join("").trim();
+        if (!text) continue;
+        const measured = measureTextEntryFromElements(children, rootRect, conditionWrap, children[0]);
+        labels.push({
+          side: "html",
+          kind: "fragment-condition",
+          text,
+          ownerText: fragmentOwnerText(conditionWrap.closest(".fragment")) || null,
+          box: measured.box,
+          font: measured.font,
+          letters: measured.letters,
+        });
+      }
+
+      const sectionSelectors = [
+        ".fragment.fragment-tcf .segment > .header.inline-block.bg-skin-frame.opacity-65",
+        ".fragment.fragment-tcf .segment > .header.finally",
+      ];
+      for (const selector of sectionSelectors) {
+        for (const sectionEl of root.querySelectorAll(selector)) {
+          const children = visibleChildren(sectionEl);
+          if (children.length === 0) continue;
+          const text = children.map((child) => (child.textContent ?? "").trim()).join("").trim();
+          if (!text) continue;
+          const measured = measureTextEntryFromElements(children, rootRect, sectionEl, children[0]);
+          labels.push({
+            side: "html",
+            kind: "fragment-section",
+            text,
+            ownerText: fragmentOwnerText(sectionEl.closest(".fragment")) || null,
+            box: measured.box,
+            font: measured.font,
+            letters: measured.letters,
           });
         }
       }
@@ -553,17 +778,138 @@ async function collectLabelData(page) {
         for (const labelEl of root.querySelectorAll(pair.selector)) {
           const text = (labelEl.textContent ?? "").trim();
           if (!text) continue;
+          const measured = measureTextEntry(labelEl, rootRect);
           labels.push({
             side: "svg",
             kind: pair.kind,
             text,
-            box: relRect(labelEl.getBoundingClientRect(), rootRect),
-            font: fontInfo(labelEl),
-            letters: glyphBoxesForElement(labelEl, rootRect),
+            box: measured.box,
+            font: measured.font,
+            letters: measured.letters,
+          });
+        }
+      }
+
+      for (const labelEl of root.querySelectorAll("g.fragment > text.fragment-condition")) {
+        const text = (labelEl.textContent ?? "").trim();
+        if (!text) continue;
+        const measured = measureTextEntry(labelEl, rootRect);
+        labels.push({
+          side: "svg",
+          kind: "fragment-condition",
+          text,
+          ownerText: textOrEmpty(labelEl.closest("g.fragment"), ":scope > text.fragment-label") || null,
+          box: measured.box,
+          font: measured.font,
+          letters: measured.letters,
+        });
+      }
+
+      for (const fragmentEl of root.querySelectorAll("g.fragment")) {
+        for (const groupEl of fragmentEl.querySelectorAll(":scope > g")) {
+          const conditionTextEls = Array.from(groupEl.querySelectorAll(":scope > text.fragment-condition"));
+          if (conditionTextEls.length > 0) {
+            const text = conditionTextEls.map((el) => (el.textContent ?? "").trim()).join("").replace(/\s+\]/g, "]").trim();
+            if (!text) continue;
+            const measured = measureTextEntryFromElements(conditionTextEls, rootRect, groupEl, conditionTextEls[0]);
+            labels.push({
+              side: "svg",
+              kind: "fragment-condition",
+              text,
+              ownerText: textOrEmpty(fragmentEl, ":scope > text.fragment-label") || null,
+              box: measured.box,
+              font: measured.font,
+              letters: measured.letters,
+            });
+            continue;
+          }
+
+          const textEls = Array.from(groupEl.querySelectorAll("text.fragment-section-label"));
+          if (textEls.length === 0) continue;
+          const text = textEls.map((el) => (el.textContent ?? "").trim()).join("").replace(/\s+\]/g, "]").trim();
+          if (!text) continue;
+          const measured = measureTextEntryFromElements(textEls, rootRect, groupEl, textEls[0]);
+          labels.push({
+            side: "svg",
+            kind: text.startsWith("[") ? "fragment-condition" : "fragment-section",
+            text,
+            ownerText: textOrEmpty(fragmentEl, ":scope > text.fragment-label") || null,
+            box: measured.box,
+            font: measured.font,
+            letters: measured.letters,
           });
         }
       }
       return labels;
+    }
+
+    function collectHtmlParticipants(root, rootRect) {
+      const participants = [];
+      for (const participantEl of root.querySelectorAll(".participant[data-participant-id]")) {
+        const name = (participantEl.getAttribute("data-participant-id") ?? "").trim();
+        if (!name) continue;
+        const participantBox = boxOrNull(relRect(participantEl.getBoundingClientRect(), rootRect));
+        if (!participantBox) continue;
+
+        const rowEl = participantEl.querySelector(":scope > .flex.items-center.justify-center, :scope > div:last-child");
+        const firstChild = rowEl?.firstElementChild ?? null;
+        const iconHost = firstChild && (
+          firstChild.matches("[aria-description]") ||
+          firstChild.querySelector("svg") ||
+          /\bh-6\b/.test(firstChild.className || "")
+        )
+          ? firstChild
+          : null;
+        const labelEl = Array.from(participantEl.querySelectorAll(".name")).at(-1) ?? null;
+        const measuredLabel = labelEl ? measureTextEntry(labelEl, rootRect) : null;
+        const iconPaintRoot = iconHost?.querySelector("svg") ?? iconHost;
+
+        participants.push({
+          side: "html",
+          name,
+          labelText: textContentNormalized(labelEl),
+          participantBox,
+          labelBox: measuredLabel?.box ?? null,
+          labelFont: measuredLabel?.font ?? null,
+          labelLetters: measuredLabel?.letters ?? [],
+          iconBox: paintedBox(iconPaintRoot, rootRect),
+          anchorKind: measuredLabel?.box ? "label" : "participant-box",
+          anchorBox: measuredLabel?.box ?? participantBox,
+        });
+      }
+      return topParticipantsByName(participants);
+    }
+
+    function collectSvgParticipants(root, rootRect) {
+      const participants = [];
+      for (const participantEl of root.querySelectorAll("g.participant[data-participant]")) {
+        if (participantEl.classList.contains("participant-bottom")) {
+          continue;
+        }
+        const name = (participantEl.getAttribute("data-participant") ?? "").trim();
+        if (!name) continue;
+        const participantBoxEl = participantEl.querySelector(":scope > rect.participant-box");
+        const participantBox = boxOrNull(strokedElementOuterRect(participantBoxEl || participantEl, rootRect));
+        if (!participantBox) continue;
+
+        const labelEl = participantEl.querySelector(":scope > text.participant-label");
+        const measuredLabel = labelEl ? measureTextEntry(labelEl, rootRect) : null;
+        const iconEl = participantEl.querySelector(":scope > g[transform]");
+
+        participants.push({
+          side: "svg",
+          name,
+          labelText: textContentNormalized(labelEl),
+          participantBox,
+          labelBox: measuredLabel?.box ?? null,
+          labelFont: measuredLabel?.font ?? null,
+          labelLetters: measuredLabel?.letters ?? [],
+          iconBox: paintedBox(iconEl, rootRect),
+          anchorKind: measuredLabel?.box ? "label" : "participant-box",
+          anchorBox: measuredLabel?.box ?? participantBox,
+        });
+      }
+      return topParticipantsByName(participants);
     }
 
     function collectHtmlArrows(root, rootRect) {
@@ -572,13 +918,15 @@ async function collectLabelData(page) {
       function addArrow(kind, interaction, text, parts) {
         if (!text || parts.length === 0) return;
         const box = unionRect(parts.map((part) => part.box));
+        const labelText = (interaction.getAttribute("data-signature") || "").trim();
         arrows.push({
           side: "html",
           kind,
           text,
+          pairText: labelText || text,
           box,
           ...arrowEndpointsFromBox(box),
-          labelText: (interaction.getAttribute("data-signature") || "").trim(),
+          labelText,
         });
       }
 
@@ -619,9 +967,13 @@ async function collectLabelData(page) {
           || (interaction.getAttribute("data-signature") || "").trim();
         const arrowSvg = interaction.querySelector(":scope > .message > svg.arrow, :scope > .self-invocation > svg.arrow");
         if (!arrowSvg) continue;
-        addArrow("self", interaction, text, [
-          { part: "loop", box: relRect(arrowSvg.getBoundingClientRect(), rootRect) },
-        ]);
+        const parts = [];
+        pushBox(parts, "loop", elementRect(arrowSvg.querySelector(":scope > path, :scope > polyline"), rootRect));
+        pushBox(parts, "head", elementRect(arrowSvg.querySelector(":scope > g path, :scope > g polyline"), rootRect));
+        if (parts.length === 0) {
+          pushBox(parts, "loop", elementRect(arrowSvg, rootRect));
+        }
+        addArrow("self", interaction, text, parts);
       }
 
       return arrows;
@@ -633,13 +985,15 @@ async function collectLabelData(page) {
       function addArrow(kind, group, text, parts) {
         if (!text || parts.length === 0) return;
         const box = unionRect(parts.map((part) => part.box));
+        const labelText = (group.querySelector("text.message-label, text.return-label")?.textContent || "").trim();
         arrows.push({
           side: "svg",
           kind,
           text,
+          pairText: labelText || text,
           box,
           ...arrowEndpointsFromBox(box),
-          labelText: (group.querySelector("text.message-label, text.return-label")?.textContent || "").trim(),
+          labelText,
         });
       }
 
@@ -670,9 +1024,21 @@ async function collectLabelData(page) {
           || (group.querySelector("text.message-label")?.textContent || "").trim();
         const loopEl = group.querySelector(":scope > svg");
         if (!loopEl) continue;
-        addArrow("self", group, text, [
-          { part: "loop", box: relRect(loopEl.getBoundingClientRect(), rootRect) },
-        ]);
+        const parts = [];
+        pushBox(parts, "loop", elementRect(loopEl.querySelector(":scope > path, :scope > polyline"), rootRect));
+        pushBox(parts, "head", elementRect(loopEl.querySelector(":scope > g path, :scope > g polyline"), rootRect));
+        if (parts.length === 0) {
+          const loopRect = loopEl.getBoundingClientRect();
+          const attrW = parseFloat(loopEl.getAttribute("width"));
+          const attrH = parseFloat(loopEl.getAttribute("height"));
+          const box = relRect(loopRect, rootRect);
+          if (attrW && attrH) {
+            box.w = attrW;
+            box.h = attrH;
+          }
+          pushBox(parts, "loop", box);
+        }
+        addArrow("self", group, text, parts);
       }
 
       return arrows;
@@ -685,16 +1051,27 @@ async function collectLabelData(page) {
           kind: "message",
           selector:
             ".interaction:not(.return):not(.creation):not(.self-invocation):not(.self) > .message > .absolute.text-xs",
+          ownerText: (numberEl) => textOrEmpty(numberEl.closest(".interaction"), ":scope > .message .editable-span-base"),
         },
         {
           kind: "self",
           selector:
             ".interaction.self-invocation > .message .absolute.text-xs, .interaction.self > .self-invocation .absolute.text-xs",
+          ownerText: (numberEl) =>
+            textOrEmpty(numberEl.closest(".interaction"), ":scope > .message .editable-span-base, :scope > .self-invocation .editable-span-base"),
         },
         {
           kind: "return",
           selector:
             ".interaction.return > .message > .absolute.text-xs",
+          ownerText: (numberEl) =>
+            textOrEmpty(numberEl.closest(".interaction"), ":scope > .message .editable-span-base, :scope > .message .name"),
+        },
+        {
+          kind: "fragment",
+          selector:
+            ".fragment > .header > .absolute.text-xs",
+          ownerText: (numberEl) => fragmentOwnerText(numberEl.closest(".fragment")),
         },
       ];
 
@@ -706,6 +1083,8 @@ async function collectLabelData(page) {
             side: "html",
             kind: pair.kind,
             text,
+            pairText: pair.ownerText ? pair.ownerText(numberEl) || text : text,
+            ownerText: pair.ownerText ? pair.ownerText(numberEl) || null : null,
             box: relRect(numberEl.getBoundingClientRect(), rootRect),
             font: fontInfo(numberEl),
             letters: glyphBoxesForElement(numberEl, rootRect),
@@ -718,9 +1097,26 @@ async function collectLabelData(page) {
     function collectSvgNumbers(root, rootRect) {
       const numbers = [];
       const pairs = [
-        { selector: "g.message:not(.self-call) > text.seq-number", kind: "message" },
-        { selector: "g.message.self-call > text.seq-number", kind: "self" },
-        { selector: "g.return > text.seq-number", kind: "return" },
+        {
+          selector: "g.message:not(.self-call) > text.seq-number",
+          kind: "message",
+          ownerText: (numberEl) => textOrEmpty(numberEl.closest("g.message"), ":scope > text.message-label"),
+        },
+        {
+          selector: "g.message.self-call > text.seq-number",
+          kind: "self",
+          ownerText: (numberEl) => textOrEmpty(numberEl.closest("g.message"), ":scope > text.message-label"),
+        },
+        {
+          selector: "g.return > text.seq-number",
+          kind: "return",
+          ownerText: (numberEl) => textOrEmpty(numberEl.closest("g.return"), ":scope > text.return-label"),
+        },
+        {
+          selector: "g.fragment > text.seq-number",
+          kind: "fragment",
+          ownerText: (numberEl) => textOrEmpty(numberEl.closest("g.fragment"), ":scope > text.fragment-label"),
+        },
       ];
       for (const pair of pairs) {
         for (const numberEl of root.querySelectorAll(pair.selector)) {
@@ -730,6 +1126,8 @@ async function collectLabelData(page) {
             side: "svg",
             kind: pair.kind,
             text,
+            pairText: pair.ownerText ? pair.ownerText(numberEl) || text : text,
+            ownerText: pair.ownerText ? pair.ownerText(numberEl) || null : null,
             box: relRect(numberEl.getBoundingClientRect(), rootRect),
             font: fontInfo(numberEl),
             letters: glyphBoxesForElement(numberEl, rootRect),
@@ -761,6 +1159,8 @@ async function collectLabelData(page) {
       svgNumbers: collectSvgNumbers(svgRoot, svgRootRect),
       htmlArrows: collectHtmlArrows(htmlRoot, htmlRootRect),
       svgArrows: collectSvgArrows(svgRoot, svgRootRect),
+      htmlParticipants: collectHtmlParticipants(htmlRoot, htmlRootRect),
+      svgParticipants: collectSvgParticipants(svgRoot, svgRootRect),
     };
   });
 }
@@ -861,6 +1261,9 @@ function buildSection(htmlItems, svgItems, diffImage) {
       section.push({
         key,
         status: "ambiguous",
+        html_text: pair.html?.text ?? null,
+        svg_text: pair.svg?.text ?? null,
+        owner_text: pair.html?.ownerText ?? pair.svg?.ownerText ?? null,
         html_box: pair.html ? pair.html.box : null,
         svg_box: pair.svg ? pair.svg.box : null,
         font: {
@@ -900,6 +1303,9 @@ function buildSection(htmlItems, svgItems, diffImage) {
     section.push({
       key,
       status,
+      html_text: pair.html.text,
+      svg_text: pair.svg.text,
+      owner_text: pair.html.ownerText ?? pair.svg.ownerText ?? null,
       html_box: {
         x: round(pair.html.box.x),
         y: round(pair.html.box.y),
@@ -923,10 +1329,13 @@ function buildSection(htmlItems, svgItems, diffImage) {
   return section;
 }
 
-function scoreArrowGeometry(htmlArrow, svgArrow, diffImage) {
+function scoreArrowGeometry(htmlArrow, svgArrow, diffImage, kind = htmlArrow.kind ?? svgArrow.kind ?? "message") {
   const leftDx = svgArrow.left_x - htmlArrow.left_x;
   const rightDx = svgArrow.right_x - htmlArrow.right_x;
   const widthDx = svgArrow.width - htmlArrow.width;
+  const topDy = svgArrow.box.y - htmlArrow.box.y;
+  const bottomDy = rectBottom(svgArrow.box) - rectBottom(htmlArrow.box);
+  const heightDy = svgArrow.box.h - htmlArrow.box.h;
   const slot = {
     x: Math.min(htmlArrow.box.x, svgArrow.box.x) - 2,
     y: Math.min(htmlArrow.box.y, svgArrow.box.y) - 2,
@@ -935,12 +1344,20 @@ function scoreArrowGeometry(htmlArrow, svgArrow, diffImage) {
   };
   const diff = analyzeDiffSlot(diffImage, slot);
   const centroidDx = diff.redCentroid && diff.blueCentroid ? diff.blueCentroid.x - diff.redCentroid.x : null;
+  const centroidDy = diff.redCentroid && diff.blueCentroid ? diff.blueCentroid.y - diff.redCentroid.y : null;
   const nearZero = Math.abs(leftDx) < 0.75 && Math.abs(rightDx) < 0.75;
+  const nearZeroSelf = nearZero && Math.abs(topDy) < 0.75 && Math.abs(bottomDy) < 0.75 && Math.abs(heightDy) < 0.75;
   const enoughDiffPixels = diff.redCount >= 6 && diff.blueCount >= 6;
   const dominantDx = Math.abs(rightDx) >= Math.abs(leftDx) ? rightDx : leftDx;
+  const dominantDy = [topDy, bottomDy, heightDy].reduce((dominant, value) => (
+    Math.abs(value) > Math.abs(dominant) ? value : dominant
+  ), 0);
   const xConsistent = centroidDx === null || Math.abs(dominantDx) < 0.75 || Math.sign(centroidDx) === Math.sign(dominantDx);
+  const yConsistent = centroidDy === null || Math.abs(dominantDy) < 0.75 || Math.sign(centroidDy) === Math.sign(dominantDy);
   const overlap = iou(htmlArrow.box, svgArrow.box);
-  const status = nearZero || (enoughDiffPixels && xConsistent) || Math.abs(dominantDx) >= 0.75 ? "ok" : "ambiguous";
+  const status = kind === "self"
+    ? (nearZeroSelf || (enoughDiffPixels && xConsistent && yConsistent) || Math.abs(dominantDx) >= 0.75 || Math.abs(dominantDy) >= 0.75 ? "ok" : "ambiguous")
+    : (nearZero || (enoughDiffPixels && xConsistent) || Math.abs(dominantDx) >= 0.75 ? "ok" : "ambiguous");
   const confidence = round(Math.min(1, overlap * 0.45 + (enoughDiffPixels ? 0.55 : 0.2)), 3);
 
   return {
@@ -948,6 +1365,9 @@ function scoreArrowGeometry(htmlArrow, svgArrow, diffImage) {
     left_dx: status === "ok" ? normalizeOffset(leftDx) : null,
     right_dx: status === "ok" ? normalizeOffset(rightDx) : null,
     width_dx: status === "ok" ? normalizeOffset(widthDx) : null,
+    top_dy: kind === "self" && status === "ok" ? normalizeOffset(topDy) : null,
+    bottom_dy: kind === "self" && status === "ok" ? normalizeOffset(bottomDy) : null,
+    height_dy: kind === "self" && status === "ok" ? normalizeOffset(heightDy) : null,
     confidence,
     html_box: {
       x: round(htmlArrow.box.x),
@@ -965,10 +1385,14 @@ function scoreArrowGeometry(htmlArrow, svgArrow, diffImage) {
       left_dx: normalizeOffset(leftDx),
       right_dx: normalizeOffset(rightDx),
       width_dx: normalizeOffset(widthDx),
+      top_dy: normalizeOffset(topDy),
+      bottom_dy: normalizeOffset(bottomDy),
+      height_dy: normalizeOffset(heightDy),
       overlap: round(overlap, 3),
       diff_red: diff.redCount,
       diff_blue: diff.blueCount,
       diff_centroid_dx: centroidDx === null ? null : round(centroidDx),
+      diff_centroid_dy: centroidDy === null ? null : round(centroidDy),
     },
   };
 }
@@ -1000,7 +1424,7 @@ function buildArrowSection(htmlItems, svgItems, diffImage) {
       continue;
     }
 
-    const scored = scoreArrowGeometry(html, svg, diffImage);
+    const scored = scoreArrowGeometry(html, svg, diffImage, base?.kind);
     arrows.push({
       ...arrow,
       ...scored,
@@ -1011,18 +1435,230 @@ function buildArrowSection(htmlItems, svgItems, diffImage) {
   return arrows;
 }
 
-function buildReport(caseName, htmlLabels, svgLabels, htmlNumbers, svgNumbers, htmlArrows, svgArrows, diffImage) {
+function participantsWithIcons(htmlParticipants, svgParticipants) {
+  const htmlMap = new Map(htmlParticipants.map((participant) => [participant.name, participant]));
+  const svgMap = new Map(svgParticipants.map((participant) => [participant.name, participant]));
+  const byName = new Map();
+  for (const participant of [...htmlParticipants, ...svgParticipants]) {
+    if (!participant.name || !participant.iconBox) {
+      continue;
+    }
+    const html = htmlMap.get(participant.name) || null;
+    const svg = svgMap.get(participant.name) || null;
+    const hasLabel = Boolean(html?.labelText || svg?.labelText);
+    if (!hasLabel && participant.name === "_STARTER_") {
+      continue;
+    }
+    byName.set(participant.name, true);
+  }
+  return Array.from(byName.keys()).sort((a, b) => a.localeCompare(b));
+}
+
+function buildParticipantLabelItems(participants, iconNames) {
+  const include = new Set(iconNames);
+  return participants
+    .filter((participant) => include.has(participant.name) && participant.labelText && participant.labelBox)
+    .map((participant) => ({
+      side: participant.side,
+      kind: "participant",
+      text: participant.labelText,
+      pairText: participant.name,
+      ownerText: participant.name,
+      box: participant.labelBox,
+      font: participant.labelFont,
+      letters: participant.labelLetters,
+    }));
+}
+
+function scoreParticipantIcon(htmlParticipant, svgParticipant, diffImage) {
+  const iconPresentHtml = Boolean(htmlParticipant?.iconBox);
+  const iconPresentSvg = Boolean(svgParticipant?.iconBox);
+  const base = htmlParticipant || svgParticipant;
+  const participant = {
+    name: base?.name ?? "",
+    label_text: htmlParticipant?.labelText || svgParticipant?.labelText || null,
+    presence: {
+      html: iconPresentHtml,
+      svg: iconPresentSvg,
+    },
+    anchor_kind: htmlParticipant?.anchorKind || svgParticipant?.anchorKind || null,
+    status: "ambiguous",
+  };
+
+  if (!iconPresentHtml || !iconPresentSvg) {
+    participant.reason = "icon missing on one side";
+    return participant;
+  }
+
+  const htmlIconCenter = rectCenter(htmlParticipant.iconBox);
+  const svgIconCenter = rectCenter(svgParticipant.iconBox);
+  const htmlAnchorCenter = rectCenter(htmlParticipant.anchorBox);
+  const svgAnchorCenter = rectCenter(svgParticipant.anchorBox);
+  const directDx = svgIconCenter.x - htmlIconCenter.x;
+  const directDy = svgIconCenter.y - htmlIconCenter.y;
+  const relativeDx = (svgIconCenter.x - svgAnchorCenter.x) - (htmlIconCenter.x - htmlAnchorCenter.x);
+  const relativeDy = (svgIconCenter.y - svgAnchorCenter.y) - (htmlIconCenter.y - htmlAnchorCenter.y);
+  const slot = {
+    x: Math.min(htmlParticipant.iconBox.x, svgParticipant.iconBox.x) - 2,
+    y: Math.min(htmlParticipant.iconBox.y, svgParticipant.iconBox.y) - 2,
+    w: Math.max(rectRight(htmlParticipant.iconBox), rectRight(svgParticipant.iconBox)) - Math.min(htmlParticipant.iconBox.x, svgParticipant.iconBox.x) + 4,
+    h: Math.max(rectBottom(htmlParticipant.iconBox), rectBottom(svgParticipant.iconBox)) - Math.min(htmlParticipant.iconBox.y, svgParticipant.iconBox.y) + 4,
+  };
+  const diff = analyzeDiffSlot(diffImage, slot);
+  const centroidDx = diff.redCentroid && diff.blueCentroid ? diff.blueCentroid.x - diff.redCentroid.x : null;
+  const centroidDy = diff.redCentroid && diff.blueCentroid ? diff.blueCentroid.y - diff.redCentroid.y : null;
+  const nearZero = Math.abs(directDx) < 0.75
+    && Math.abs(directDy) < 0.75
+    && Math.abs(relativeDx) < 0.75
+    && Math.abs(relativeDy) < 0.75;
+  const enoughDiffPixels = diff.redCount >= 6 && diff.blueCount >= 6;
+  const xConsistent = centroidDx === null || Math.abs(directDx) < 0.75 || Math.sign(centroidDx) === Math.sign(directDx);
+  const yConsistent = centroidDy === null || Math.abs(directDy) < 0.75 || Math.sign(centroidDy) === Math.sign(directDy);
+  const overlap = iou(htmlParticipant.iconBox, svgParticipant.iconBox);
+  const status = nearZero
+    ? (overlap >= 0.15 ? "ok" : "ambiguous")
+    : ((enoughDiffPixels && xConsistent && yConsistent)
+      || Math.abs(directDx) >= 0.75
+      || Math.abs(directDy) >= 0.75
+      || Math.abs(relativeDx) >= 0.75
+      || Math.abs(relativeDy) >= 0.75
+      ? "ok"
+      : "ambiguous");
+  const confidence = round(Math.min(1, overlap * 0.45 + (enoughDiffPixels ? 0.55 : 0.2)), 3);
+
+  return {
+    ...participant,
+    status,
+    icon_dx: status === "ok" ? normalizeOffset(directDx) : null,
+    icon_dy: status === "ok" ? normalizeOffset(directDy) : null,
+    relative_dx: status === "ok" ? normalizeOffset(relativeDx) : null,
+    relative_dy: status === "ok" ? normalizeOffset(relativeDy) : null,
+    confidence,
+    html_icon_box: {
+      x: round(htmlParticipant.iconBox.x),
+      y: round(htmlParticipant.iconBox.y),
+      w: round(htmlParticipant.iconBox.w),
+      h: round(htmlParticipant.iconBox.h),
+    },
+    svg_icon_box: {
+      x: round(svgParticipant.iconBox.x),
+      y: round(svgParticipant.iconBox.y),
+      w: round(svgParticipant.iconBox.w),
+      h: round(svgParticipant.iconBox.h),
+    },
+    html_anchor_box: {
+      x: round(htmlParticipant.anchorBox.x),
+      y: round(htmlParticipant.anchorBox.y),
+      w: round(htmlParticipant.anchorBox.w),
+      h: round(htmlParticipant.anchorBox.h),
+    },
+    svg_anchor_box: {
+      x: round(svgParticipant.anchorBox.x),
+      y: round(svgParticipant.anchorBox.y),
+      w: round(svgParticipant.anchorBox.w),
+      h: round(svgParticipant.anchorBox.h),
+    },
+    evidence: {
+      icon_dx: normalizeOffset(directDx),
+      icon_dy: normalizeOffset(directDy),
+      relative_dx: normalizeOffset(relativeDx),
+      relative_dy: normalizeOffset(relativeDy),
+      overlap: round(overlap, 3),
+      diff_red: diff.redCount,
+      diff_blue: diff.blueCount,
+      diff_centroid_dx: centroidDx === null ? null : round(centroidDx),
+      diff_centroid_dy: centroidDy === null ? null : round(centroidDy),
+    },
+  };
+}
+
+function buildParticipantIconSection(htmlParticipants, svgParticipants, diffImage) {
+  const names = participantsWithIcons(htmlParticipants, svgParticipants);
+  const htmlMap = new Map(htmlParticipants.map((participant) => [participant.name, participant]));
+  const svgMap = new Map(svgParticipants.map((participant) => [participant.name, participant]));
+  return names.map((name) => scoreParticipantIcon(htmlMap.get(name) || null, svgMap.get(name) || null, diffImage));
+}
+
+function participantNames(htmlParticipants, svgParticipants) {
+  return Array.from(
+    new Set(
+      [...htmlParticipants, ...svgParticipants]
+        .map((participant) => participant.name)
+        .filter(Boolean),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+}
+
+function scoreParticipantBox(htmlParticipant, svgParticipant) {
+  const base = htmlParticipant || svgParticipant;
+  const item = {
+    name: base?.name ?? "",
+    status: "ambiguous",
+  };
+
+  if (!htmlParticipant?.participantBox || !svgParticipant?.participantBox) {
+    item.reason = "participant box missing on one side";
+    return item;
+  }
+
+  const dx = svgParticipant.participantBox.x - htmlParticipant.participantBox.x;
+  const dy = svgParticipant.participantBox.y - htmlParticipant.participantBox.y;
+  const dw = svgParticipant.participantBox.w - htmlParticipant.participantBox.w;
+  const dh = svgParticipant.participantBox.h - htmlParticipant.participantBox.h;
+
+  return {
+    ...item,
+    status: "ok",
+    dx: normalizeOffset(dx),
+    dy: normalizeOffset(dy),
+    dw: normalizeOffset(dw),
+    dh: normalizeOffset(dh),
+    html_box: {
+      x: round(htmlParticipant.participantBox.x),
+      y: round(htmlParticipant.participantBox.y),
+      w: round(htmlParticipant.participantBox.w),
+      h: round(htmlParticipant.participantBox.h),
+    },
+    svg_box: {
+      x: round(svgParticipant.participantBox.x),
+      y: round(svgParticipant.participantBox.y),
+      w: round(svgParticipant.participantBox.w),
+      h: round(svgParticipant.participantBox.h),
+    },
+  };
+}
+
+function buildParticipantBoxSection(htmlParticipants, svgParticipants) {
+  const names = participantNames(htmlParticipants, svgParticipants);
+  const htmlMap = new Map(htmlParticipants.map((participant) => [participant.name, participant]));
+  const svgMap = new Map(svgParticipants.map((participant) => [participant.name, participant]));
+  return names.map((name) => scoreParticipantBox(htmlMap.get(name) || null, svgMap.get(name) || null));
+}
+
+function buildReport(caseName, htmlLabels, svgLabels, htmlNumbers, svgNumbers, htmlArrows, svgArrows, htmlParticipants, svgParticipants, diffImage) {
+  const iconNames = participantsWithIcons(htmlParticipants, svgParticipants);
+  const htmlParticipantLabels = buildParticipantLabelItems(htmlParticipants, iconNames);
+  const svgParticipantLabels = buildParticipantLabelItems(svgParticipants, iconNames);
   const labels = buildSection(htmlLabels, svgLabels, diffImage);
   const numbers = buildSection(htmlNumbers, svgNumbers, diffImage);
   const arrows = buildArrowSection(htmlArrows, svgArrows, diffImage);
+  const participantLabels = buildSection(htmlParticipantLabels, svgParticipantLabels, diffImage);
+  const participantIcons = buildParticipantIconSection(htmlParticipants, svgParticipants, diffImage);
+  const participantBoxes = buildParticipantBoxSection(htmlParticipants, svgParticipants);
   return {
     case: caseName,
     labels,
     numbers,
     arrows,
-    summary: labels.map((label) => `label:${label.key.kind}:${label.key.text} -> ${label.letters.map(formatLetterSummary).join(", ")}`),
-    number_summary: numbers.map((number) => `number:${number.key.kind}:${number.key.text} -> ${number.letters.map(formatLetterSummary).join(", ")}`),
+    participant_labels: participantLabels,
+    participant_icons: participantIcons,
+    participant_boxes: participantBoxes,
+    summary: labels.map((label) => formatSectionSummary("label", label)),
+    number_summary: numbers.map((number) => formatSectionSummary("number", number)),
     arrow_summary: arrows.map((arrow) => `arrow:${arrow.key.text} -> ${formatArrowSummary(arrow)}`),
+    participant_label_summary: participantLabels.map((label) => formatSectionSummary("participant-label", label)),
+    participant_icon_summary: participantIcons.map((icon) => formatParticipantIconSummary(icon)),
+    participant_box_summary: participantBoxes.map((box) => formatParticipantBoxSummary(box)),
   };
 }
 
@@ -1092,6 +1728,8 @@ async function main() {
       extracted.svgNumbers,
       extracted.htmlArrows,
       extracted.svgArrows,
+      extracted.htmlParticipants,
+      extracted.svgParticipants,
       diffImage,
     );
     report.diff = diffImage.stats;
@@ -1113,6 +1751,9 @@ async function main() {
       process.stdout.write(`${report.summary.join("\n")}\n`);
       process.stdout.write(`${report.number_summary.join("\n")}\n`);
       process.stdout.write(`${report.arrow_summary.join("\n")}\n`);
+      process.stdout.write(`${report.participant_label_summary.join("\n")}\n`);
+      process.stdout.write(`${report.participant_icon_summary.join("\n")}\n`);
+      process.stdout.write(`${report.participant_box_summary.join("\n")}\n`);
       return;
     }
 
@@ -1121,6 +1762,9 @@ async function main() {
       process.stdout.write(`${report.summary.join("\n")}\n`);
       process.stdout.write(`${report.number_summary.join("\n")}\n`);
       process.stdout.write(`${report.arrow_summary.join("\n")}\n`);
+      process.stdout.write(`${report.participant_label_summary.join("\n")}\n`);
+      process.stdout.write(`${report.participant_icon_summary.join("\n")}\n`);
+      process.stdout.write(`${report.participant_box_summary.join("\n")}\n`);
       return;
     }
 

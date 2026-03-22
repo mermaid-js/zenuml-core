@@ -1,11 +1,11 @@
 ---
 name: dia-scoring
-description: Score HTML-vs-SVG diagram parity in compare-case pages, including message labels, fragment labels, sequence numbers, arrows, and participant icons, using Playwright native screenshots plus diff confirmation.
+description: Score HTML-vs-SVG diagram parity in compare-case pages, including message labels, fragment labels, sequence numbers, arrows, participant headers, and icons, using Playwright native screenshots plus diff confirmation.
 ---
 
 # Dia Scoring
 
-Use this skill when the task is to measure **message labels, fragment labels, sequence numbers, message arrows, and participant icons** between the HTML renderer and the native SVG renderer on `compare-case.html`.
+Use this skill when the task is to measure **message labels, fragment labels, sequence numbers, message arrows, participant labels, participant boxes, and participant icons** between the HTML renderer and the native SVG renderer on `compare-case.html`.
 
 The workflow is browser-native:
 
@@ -24,6 +24,7 @@ The workflow is browser-native:
   - returns
   - fragment conditions such as `[cond]`, `[else]`
   - fragment section labels such as `catch`, `finally`
+  - participant label text and participant box geometry
   - participant icons (actor, database, sqs, sns, iam, boundary, control, entity)
 - For each supported message, include:
   - label text
@@ -35,8 +36,13 @@ The workflow is browser-native:
   - self-arrow vertical deltas: `top_dy`, `bottom_dy`, `height_dy`
 - For participant icons, include:
   - icon presence (HTML vs SVG)
+  - participant label text when the participant has an icon
   - icon position relative to participant label
   - icon visual match confirmation from diff image
+- For participant boxes, include:
+  - `html_box` and `svg_box` with `x`, `y`, `w`, `h`
+  - box deltas `dx`, `dy`, `dw`, `dh`
+  - SVG measurement based on the painted outer bounds of the stroked box, not the inset rect geometry
 - Each reported letter must be backed by:
   - direct HTML-vs-SVG browser layout positions
   - diff-image confirmation from the native screenshot pair

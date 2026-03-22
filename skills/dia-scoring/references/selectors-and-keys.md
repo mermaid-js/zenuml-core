@@ -93,33 +93,65 @@ SVG sequence number extraction:
 
 ## Participant Icon Extraction
 
+## Participant Header Extraction
+
+HTML participant header extraction:
+
+- Participant root: `.participant[data-participant-id]`
+- Participant box: outer border box from the participant root element
+- Participant label: last `.name` descendant, measured by glyph boxes
+
+SVG participant header extraction:
+
+- Participant root: `g.participant[data-participant]`
+- Skip `g.participant-bottom`
+- Participant box element: `:scope > rect.participant-box`
+- Participant box measurement must use the painted outer bounds of the stroked rect, not the inset rect geometry
+- Participant label: `:scope > text.participant-label`
+
+Participant box pairing and scoring:
+
+- Pair by participant name
+- Report `html_box` and `svg_box` with `x`, `y`, `w`, `h`
+- Report box deltas:
+  - `dx`
+  - `dy`
+  - `dw`
+  - `dh`
+
 HTML icon extraction:
 
-- Icons are async-loaded SVG components within participant boxes
-- Container: `.bg-skin-participant` (the participant box)
-- Icon element: `svg` child within the participant box (first child before text label)
-- Icon types identified by component name or SVG content signature
-- Supported types: actor (stick figure), database, sqs, sns, iam, boundary, control, entity
+- Participant root: `.participant[data-participant-id]`
+- Top-row participant only: keep the top-most entry for each participant id
+- Icon host: first child inside the centered participant row when it is an async icon host
+  - `[aria-description]`
+  - or contains `svg`
+  - or has `h-6` sizing class from `AsyncIcon`
+- Icon box: union of painted SVG shapes when available, fallback to the host box
+- Participant label: last `.name` descendant, measured by glyph boxes
 
 SVG icon extraction:
 
-- Icons are inline SVG `<g>` elements within participant groups
-- Container: `g.participant[data-participant="<name>"]`
-- Icon element: `g` with `transform` attribute (positioned icon group) as first child
-- Icon content: SVG paths within the icon group
-- Icon size: 24×24px (standard for all icons)
-- Position: Left of participant label text with 4px margin
+- Participant root: `g.participant[data-participant]`
+- Skip `g.participant-bottom`
+- Icon element: `:scope > g[transform]`
+- Icon box: union of painted shapes within that transformed group
+- Participant label: `:scope > text.participant-label`
 
 Icon pairing:
 
-- Icons are paired by participant name using `data-participant` attribute (SVG) and text content (HTML)
-- Pairing key: `icon:<participant-name>`
-- Compare icon presence (both renderers should have icon or both should not)
+- Pair by participant name
+- Only report participant icon rows for participants where at least one side has an icon
+- Participant labels for icon-bearing participants are paired by participant name, not raw label text
 
 Icon scoring:
 
-- Compare icon position relative to participant label center
-- Compare icon visual appearance via diff image (paths should match within tolerance)
-- Report position deltas: `icon_dx`, `icon_dy` (icon center offset between HTML and SVG)
-- Report presence mismatch if one renderer has icon and the other doesn't
-- Visual match confirmed when diff image shows <5% red/blue pixels in icon bounding box
+- Absolute icon drift:
+  - `icon_dx`
+  - `icon_dy`
+- Relative icon drift against the participant label anchor:
+  - `relative_dx`
+  - `relative_dy`
+- If there is no participant label on one side, use the participant box center as the anchor
+- Report presence mismatch if one renderer has an icon and the other does not
+- Diff confirmation is taken from the native diff slot covering the union of the HTML and SVG icon boxes
