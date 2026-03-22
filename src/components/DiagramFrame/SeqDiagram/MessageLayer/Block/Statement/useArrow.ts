@@ -3,8 +3,18 @@ import { centerOf, distance2 } from "./utils";
 import Anchor2 from "@/positioning/Anchor2";
 import { coordinatesAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
+import { _STARTER_ } from "@/parser/OrderedParticipants";
 
-const depthOnParticipant = (context: any, participant: any): number => {
+const matchesImplicitStarterSelf = (ctx: any, participant: string) => {
+  return (
+    participant === _STARTER_ &&
+    ctx instanceof sequenceParser.MessageContext &&
+    ctx.Owner?.() === undefined &&
+    ctx.From?.() === undefined
+  );
+};
+
+export const depthOnParticipant = (context: any, participant: any): number => {
   return context?.getAncestors((ctx: any) => {
     const isSync = (ctx: any) => {
       const isMessageContext = ctx instanceof sequenceParser.MessageContext;
@@ -12,7 +22,9 @@ const depthOnParticipant = (context: any, participant: any): number => {
       return isMessageContext || isCreationContext;
     };
     if (isSync(ctx)) {
-      return ctx.Owner() === participant;
+      return (
+        ctx.Owner?.() === participant || matchesImplicitStarterSelf(ctx, participant)
+      );
     }
     return false;
   }).length;
