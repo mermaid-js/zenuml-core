@@ -19,6 +19,8 @@ export interface ParticipantGeometry {
   showBottom: boolean;
   /** Measured glyph-only label width (for textLength adjustment on aliased labels) */
   labelWidth?: number;
+  /** Icon type (e.g., "aws", "database") if participant has an icon */
+  type?: string;
 }
 
 export interface LifelineGeometry {
@@ -93,11 +95,27 @@ export interface FragmentSectionGeometry {
   label: string;
   y: number; // top of this section (separator line y)
   height: number;
+  /** Measured glyph width of the whole label at 14px message-content font */
+  labelWidth?: number;
+  /** For bracketed section labels like [cond2], the inner text without brackets */
+  innerLabel?: string;
+  /** Measured glyph width of innerLabel */
+  innerLabelWidth?: number;
+  /** For split labels like "catch e", the leading keyword */
+  keyword?: string;
+  /** Measured glyph width of keyword */
+  keywordWidth?: number;
+  /** For split labels like "catch e", the trailing detail text */
+  detail?: string;
+  /** Measured glyph width of detail */
+  detailWidth?: number;
 }
 
 export interface FragmentGeometry {
   kind: FragmentKind;
   label: string;
+  /** Measured glyph width of the primary fragment condition label */
+  labelWidth?: number;
   x: number;
   y: number;
   width: number;

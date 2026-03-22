@@ -1,4 +1,5 @@
 import type { ParticipantGeometry } from "../geometry";
+import { getIcon } from "../icons";
 
 /**
  * Stroke inset for SVG border-box emulation.
@@ -19,7 +20,28 @@ export function renderParticipant(p: ParticipantGeometry): string {
   const rectY = p.y + HALF_STROKE;
   const rectW = p.width - STROKE_WIDTH;
   const rectH = p.height - STROKE_WIDTH;
-  const textX = p.x;
+
+  // Icon positioning (if present)
+  const icon = getIcon(p.type);
+  const iconSize = 24; // matching HTML renderer's icon size (h-6 w-6 = 24px)
+  let iconSvg = "";
+  let textX = p.x;
+
+  if (icon) {
+    // Icon is on the left, text shifts right
+    // Match HTML: icon has mr-1 (4px margin), so total shift = iconSize/2 + 4
+    const iconX = p.x - iconSize / 2 - (p.labelWidth || 0) / 2 - 4;
+    const iconY = p.y + (p.height - iconSize) / 2;
+    textX = iconX + iconSize + 4; // icon left edge + icon width + margin
+
+    const [, , vbW, vbH] = (icon.viewBox || "0 0 24 24").split(" ").map(Number);
+    const scale = iconSize / Math.max(vbW, vbH);
+
+    iconSvg = `<g transform="translate(${iconX}, ${iconY}) scale(${scale})">
+    ${icon.content}
+  </g>`;
+  }
+
   const textY = p.y + p.height / 2 - 0.5; // -0.5: match HTML's vertical text centering
 
   // Aliased labels (e.g. "b:B") — use textLength to pin the text extent to the
@@ -32,7 +54,8 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
   return `<g class="participant" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"/>
-  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}>${esc(p.label)}</text>
+  ${iconSvg}
+  <text x="${textX}" y="${textY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="participant-label"${textLengthAttr}>${esc(p.label)}</text>
 </g>`;
 }
 

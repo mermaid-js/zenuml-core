@@ -204,9 +204,9 @@ describe("renderToSvg", () => {
   it("renders alt fragment with condition label", () => {
     const result = renderToSvg("if(condition) {\n  A -> B: msg\n}");
     expect(result.svg).toContain('class="fragment fragment-alt"');
-    // Condition should appear in brackets with opacity on the condition text
-    // dx="4" on condition and closing bracket matches HTML .condition span padding: 0 4px
-    expect(result.svg).toContain('<tspan>[</tspan><tspan dx="4" opacity="0.65">condition</tspan><tspan dx="4">]</tspan>');
+    // Condition should appear as three positioned text nodes matching the HTML bracket + padded span model.
+    expect(result.svg).toContain('class="fragment-condition">[</text>');
+    expect(result.svg).toContain('class="fragment-condition" opacity="0.65">condition</text>');
   });
 
   it("fragment has valid rect geometry", () => {
@@ -325,5 +325,40 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain('class="creation"');
     expect(result.svg).toContain('class="fragment');
     expect(result.svg).toContain("m2");
+  });
+
+  it("renders participant with database icon", () => {
+    const code = `@Database DB\nA.query() { DB.execute() }`;
+    const result = renderToSvg(code);
+
+    // Should contain participant with database icon
+    expect(result.svg).toContain('data-participant="DB"');
+    // Icon content should be present (database icon has "fill-rule" in its path)
+    expect(result.svg).toContain('fill-rule="evenodd"');
+  });
+
+  it("renders multiple participants with different icons", () => {
+    const code = `@Actor User\n@Database DB\n@Queue MQ\nUser.request() { DB.query()\nMQ.enqueue() }`;
+    const result = renderToSvg(code);
+
+    // Should have all three participants
+    expect(result.svg).toContain('data-participant="User"');
+    expect(result.svg).toContain('data-participant="DB"');
+    expect(result.svg).toContain('data-participant="MQ"');
+    // Should have icon SVG groups (transform with scale)
+    expect(result.svg).toMatch(/transform="translate.*scale/);
+  });
+
+  it("renders participant without icon when type is unknown", () => {
+    const code = `@UnknownType A\n@UnknownType B\nA.method() { B.execute() }`;
+    const result = renderToSvg(code);
+
+    // Should have participants
+    expect(result.svg).toContain('data-participant="A"');
+    expect(result.svg).toContain('data-participant="B"');
+    // UnknownType participants should not have icons, only _STARTER_ (actor) has one
+    // Count icon transforms - should only be 1 (for _STARTER_)
+    const iconTransforms = result.svg.match(/transform="translate\([^)]+\) scale/g);
+    expect(iconTransforms?.length).toBe(1); // Only _STARTER_ actor icon
   });
 });

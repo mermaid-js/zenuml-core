@@ -302,6 +302,7 @@ function buildParticipants(
         isStarter,
         showBottom: creationTop == null && !isStarter,
         labelWidth: measuredTextWidth,
+        type: m.type,
       };
     });
 }

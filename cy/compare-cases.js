@@ -686,4 +686,16 @@ ReturnType ret = ParticipantName.methodA(a, b) {
   "repro-starter-B": `B.m`,
   // --- Starter + B with long method name ---
   "repro-starter-B-long": `B.aVeryLongMethodThatShouldPushTheParticipant`,
+
+  // --- Icons ---
+  "icons": `@Actor User
+@Database DB
+@sqs MQ
+@sns Topic
+
+User.login() {
+  DB.verify()
+  MQ.enqueue()
+  Topic.publish()
+}`,
 };
