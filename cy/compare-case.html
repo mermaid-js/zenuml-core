@@ -524,6 +524,9 @@ A.method1{
 }`,
       };
 
+      // Wrap in async IIFE — top-level await is not supported by esbuild's
+      // build target (es2020), which breaks `bun build:site` and CI deploy.
+      (async () => {
       const caseNames = Object.keys(CASES);
       const params = new URLSearchParams(window.location.search);
       const caseName = params.get("case") || caseNames[0];
@@ -937,6 +940,7 @@ A.method1{
         ctx.drawImage(img, 0, 0);
         return c;
       }
+      })();
     </script>
   </body>
 </html>
