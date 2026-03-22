@@ -10,6 +10,11 @@ import { getIcon } from "../icons";
  */
 const STROKE_WIDTH = 2;
 const HALF_STROKE = STROKE_WIDTH / 2; // 1px inset
+const ICON_SIZE = 24;
+const ICON_MARGIN_RIGHT = 4;
+const ICON_PAINT_OFFSET_X = 4;
+const LABEL_PAD_LEFT = 8;
+const LABEL_HORIZONTAL_PADDING = 16;
 
 export function renderParticipant(p: ParticipantGeometry): string {
   if (p.isStarter) return renderStarterParticipant(p);
@@ -23,32 +28,37 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
   // Icon positioning (if present)
   const icon = getIcon(p.type);
-  const iconSize = 24; // matching HTML renderer's icon size (h-6 w-6 = 24px)
   let iconSvg = "";
   let textX = p.x;
 
   if (icon) {
-    // Icon is on the left, text shifts right
-    // Match HTML: icon has mr-1 (4px margin), so total shift = iconSize/2 + 4
-    const iconX = p.x - iconSize / 2 - (p.labelWidth || 0) / 2 - 4;
-    const iconY = p.y + (p.height - iconSize) / 2;
-    textX = iconX + iconSize + 4; // icon left edge + icon width + margin
+    const textWidth = p.labelWidth ?? 0;
+    // HTML centers the whole icon+label row. The label glyphs sit inside a span
+    // with 8px left/right inline padding, so SVG needs to place text from the
+    // padded glyph origin rather than the visual center of the participant box.
+    const groupWidth = ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_HORIZONTAL_PADDING + textWidth;
+    const groupX = p.x - groupWidth / 2;
+    const iconX = groupX + ICON_PAINT_OFFSET_X;
+    const iconY = p.y + (p.height - ICON_SIZE) / 2;
+    textX = groupX + ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_PAD_LEFT;
 
     const [, , vbW, vbH] = (icon.viewBox || "0 0 24 24").split(" ").map(Number);
-    const scale = iconSize / Math.max(vbW, vbH);
+    const scale = ICON_SIZE / Math.max(vbW, vbH);
+    const iconAttrs = icon.attributes ? ` ${icon.attributes}` : "";
 
-    iconSvg = `<g transform="translate(${iconX}, ${iconY}) scale(${scale})">
+    iconSvg = `<g class="participant-icon" transform="translate(${iconX}, ${iconY}) scale(${scale})"${iconAttrs}>
     ${icon.content}
   </g>`;
   }
 
-  const textY = p.y + p.height / 2 - 0.5; // -0.5: match HTML's vertical text centering
+  const textY = p.y + p.height / 2;
 
   // Aliased labels (e.g. "b:B") — use textLength to pin the text extent to the
   // measured glyph width. HTML renders the label at natural glyph width with CSS
   // padding around it (not between characters). Setting textLength = glyphWidth
   // ensures SVG matches the HTML glyph rendering without artificial stretching.
-  const textLengthAttr = p.labelWidth != null
+  const useTextLength = p.labelWidth != null && p.name.includes(":");
+  const textLengthAttr = useTextLength
     ? ` textLength="${p.labelWidth}" lengthAdjust="spacing"`
     : "";
 
@@ -69,7 +79,8 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
   const textX = p.x;
   const textY = bottomY + p.height / 2;
 
-  const textLengthAttr = p.labelWidth != null
+  const useTextLength = p.labelWidth != null && p.name.includes(":");
+  const textLengthAttr = useTextLength
     ? ` textLength="${p.labelWidth}" lengthAdjust="spacing"`
     : "";
 
@@ -80,24 +91,28 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
 }
 
 function renderStarterParticipant(p: ParticipantGeometry): string {
-  // Actor icon inside a participant box (matching HTML renderer's actor.svg)
+  const icon = getIcon("actor");
+  if (!icon) {
+    return "";
+  }
+
   const rx = 3;
   const boxX = p.x - p.width / 2 + HALF_STROKE;
   const rectY = p.y + HALF_STROKE;
   const rectW = p.width - STROKE_WIDTH;
   const rectH = p.height - STROKE_WIDTH;
 
-  // The actor.svg viewBox is 0 0 24 24. Scale and center it inside the participant box.
   // HTML renderer places icon 2px left of box center due to CSS box-model padding.
-  const iconSize = 24; // rendered size of the icon (matches HTML renderer's actor.svg)
-  const iconX = p.x - iconSize / 2 - 2;
-  const iconY = p.y + (p.height - iconSize) / 2;
+  const iconX = p.x - ICON_SIZE / 2 - 2;
+  const iconY = p.y + (p.height - ICON_SIZE) / 2;
+  const [, , vbW, vbH] = (icon.viewBox || "0 0 24 24").split(" ").map(Number);
+  const scale = ICON_SIZE / Math.max(vbW, vbH);
+  const iconAttrs = icon.attributes ? ` ${icon.attributes}` : "";
 
   return `<g class="participant participant-starter" data-participant="${esc(p.name)}">
   <rect x="${boxX}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"/>
-  <g transform="translate(${iconX}, ${iconY}) scale(${iconSize / 24})">
-    <path d="M15.5489 4.19771C15.5489 5.18773 15.1485 6.13721 14.4358 6.83726C13.7231 7.53731 12.7565 7.93058 11.7486 7.93058C10.7407 7.93058 9.77403 7.53731 9.06133 6.83726C8.34863 6.13721 7.94824 5.18773 7.94824 4.19771C7.94824 3.20768 8.34863 2.25822 9.06133 1.55818C9.77403 0.858126 10.7407 0.464844 11.7486 0.464844C12.7565 0.464844 13.7231 0.858126 14.4358 1.55818C15.1485 2.25822 15.5489 3.20768 15.5489 4.19771Z" fill="none" stroke="#222" stroke-width="1"/>
-    <path d="M6.54883 11.2152L17.2025 11.2073M11.7471 8.06641V19.5806V8.06641ZM11.7471 19.4385L6.79789 23.5738L11.7471 19.4385ZM11.7551 19.4385L17.1864 23.3055L11.7551 19.4385Z" fill="none" stroke="#222" stroke-width="1"/>
+  <g class="participant-icon" transform="translate(${iconX}, ${iconY}) scale(${scale})"${iconAttrs}>
+    ${icon.content}
   </g>
 </g>`;
 }

@@ -26,6 +26,10 @@ describe("Icon definitions", () => {
     });
   });
 
+  it("preserves root svg presentation attributes for stroke-only icons", () => {
+    expect(ICONS.actor.attributes).toContain('fill="none"');
+  });
+
   it("getIcon returns icon for valid type", () => {
     expect(getIcon("actor")).toBe(ICONS.actor);
     expect(getIcon("database")).toBe(ICONS.database);
