@@ -2,13 +2,16 @@ import { TextType } from "@/positioning/Coordinate";
 import { getCache, setCache } from "./../utils/RenderingCache";
 
 const FONT_FAMILY = "Helvetica, Verdana, serif";
-const FONT_SIZE_MESSAGE = "14px"; // 0.875rem at 16px base
-const FONT_SIZE_PARTICIPANT = "16px"; // 1rem
+const FONT_SIZE_PARTICIPANT = "16px"; // 1rem — used for ALL measurements (see getFontSpec comment)
 
-function getFontSpec(type: TextType): string {
-  const size =
-    type === TextType.MessageContent ? FONT_SIZE_MESSAGE : FONT_SIZE_PARTICIPANT;
-  return `${size} ${FONT_FAMILY}`;
+function getFontSpec(_type: TextType): string {
+  // WidthProviderOnBrowser has a latent bug: it creates a hidden div with
+  // fontSize set once on the first call (always 16px for participant names,
+  // since withParticipantGaps runs before withMessageGaps in Coordinates).
+  // The div is reused for all subsequent calls without updating fontSize,
+  // so ALL measurements effectively happen at 16px.
+  // To match HTML Coordinates output, we always use 16px here too.
+  return `${FONT_SIZE_PARTICIPANT} ${FONT_FAMILY}`;
 }
 
 let canvasCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
@@ -35,7 +38,12 @@ export function WidthProviderOnCanvas(
   text: string,
   type: TextType,
 ): number {
-  const cacheKey = `WidthProviderOnCanvas_${text}_${type}`;
+  // Trim whitespace to match browser behavior: DOM scrollWidth (used by
+  // WidthProviderOnBrowser) ignores leading/trailing spaces because the hidden
+  // div has display:inline + width:0px.  Canvas measureText includes them,
+  // so we trim to keep both providers consistent.
+  const measured = text.trim();
+  const cacheKey = `WidthProviderOnCanvas_${measured}_${type}`;
   const cacheValue = getCache(cacheKey);
   if (cacheValue != null) {
     return cacheValue;
@@ -43,15 +51,14 @@ export function WidthProviderOnCanvas(
 
   const ctx = getCanvasContext();
   if (!ctx) {
-    // Fallback: estimate based on character count
-    const fontSize = type === TextType.MessageContent ? 14 : 16;
-    const width = Math.ceil(text.length * fontSize * 0.6);
+    // Fallback: estimate based on character count (always 16px to match browser)
+    const width = Math.ceil(measured.length * 16 * 0.6);
     setCache(cacheKey, width, true);
     return width;
   }
 
   ctx.font = getFontSpec(type);
-  const width = Math.ceil(ctx.measureText(text).width);
+  const width = Math.ceil(ctx.measureText(measured).width);
   setCache(cacheKey, width, true);
   return width;
 }

@@ -24,12 +24,11 @@ describe("WidthProviderOnCanvas", () => {
     expect(long).toBeGreaterThan(short);
   });
 
-  it("participant name uses larger font than message content", () => {
+  it("matches browser width-provider behavior across text types", () => {
     const text = "SameText";
     const participant = WidthProviderOnCanvas(text, TextType.ParticipantName);
     const message = WidthProviderOnCanvas(text, TextType.MessageContent);
-    // 16px font should produce wider text than 14px font
-    expect(participant).toBeGreaterThanOrEqual(message);
+    expect(participant).toBe(message);
   });
 
   it("handles special characters", () => {

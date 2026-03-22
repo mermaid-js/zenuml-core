@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Start development server**: `bun dev` (runs on port 8080)
 - **Build library**: `bun build` (builds library with vite.config.lib.ts)
 - **Build site**: `bun build:site` (builds demo site with vite.config.ts)
-- **Run tests**: `bun run test:bun` (runs unit tests with Bun, excluding E2E) or `bun run test` (runs Vitest)
+- **Run tests**: `bun run test` (runs Vitest unit tests, excluding E2E). Do NOT use `bun test` — it picks up Playwright E2E files and reports false failures.
 - **Run E2E tests**: `bun pw` (runs Playwright tests)
 - **Run E2E tests (CI)**: `bun pw:ci` (runs with GitHub reporter for CI)
 - **Open Playwright UI**: `bun pw:ui`

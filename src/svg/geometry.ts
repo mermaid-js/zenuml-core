@@ -24,7 +24,6 @@ export interface LifelineGeometry {
   x: number; // center x (same as participant center)
   topY: number; // bottom of participant box (or creation-top)
   bottomY: number; // top of bottom participant box (or diagram bottom)
-  dashed: boolean;
 }
 
 // ─── Messages ──────────────────────────────────────────────────────
@@ -40,6 +39,8 @@ export interface MessageGeometry {
   isSelf: boolean;
   isReverse: boolean; // right-to-left
   number?: string; // sequence number for numbering mode
+  /** Inline style from styling comments (e.g. // [red]) */
+  style?: Record<string, string>;
 }
 
 export interface SelfCallGeometry {
@@ -50,6 +51,8 @@ export interface SelfCallGeometry {
   label: string;
   arrowStyle: ArrowStyle;
   number?: string;
+  /** Inline style from styling comments (e.g. // [red]) */
+  style?: Record<string, string>;
 }
 
 // ─── Occurrences ───────────────────────────────────────────────────
@@ -97,6 +100,9 @@ export interface FragmentGeometry {
   width: number;
   height: number;
   sections: FragmentSectionGeometry[];
+  number?: string;
+  /** Nesting depth (0 = root block, 1+ = inside a message block) */
+  depth: number;
 }
 
 // ─── Divider ───────────────────────────────────────────────────────
@@ -117,11 +123,25 @@ export interface ReturnGeometry {
   isReverse: boolean;
 }
 
+// ─── Comment ──────────────────────────────────────────────────────
+
+export interface CommentGeometry {
+  x: number;
+  y: number;
+  text: string;
+  /** Inline style from styling comments (e.g. // <red>) */
+  style?: Record<string, string>;
+}
+
 // ─── Composed Diagram ──────────────────────────────────────────────
 
 export interface DiagramGeometry {
   width: number;
   height: number;
+  /** Extra left padding from fragment nesting (FrameBorder.left) */
+  frameBorderLeft: number;
+  /** Extra right padding from fragment nesting (FrameBorder.right) */
+  frameBorderRight: number;
   title?: string;
   participants: ParticipantGeometry[];
   lifelines: LifelineGeometry[];
@@ -132,4 +152,5 @@ export interface DiagramGeometry {
   fragments: FragmentGeometry[];
   dividers: DividerGeometry[];
   returns: ReturnGeometry[];
+  comments: CommentGeometry[];
 }
