@@ -106,16 +106,12 @@ function renderArrowHead(
     : "M1 1.25 L6.15 4.5 L1 7.75";
   const fillAttr = isFilled ? "#000" : "none";
 
-  // Arrow tip in display coords: LTR at (6.15, 5.0), RTL at (0.85, 5.0)
-  // (viewBox y=4.5 scaled by 10/9 ≈ 5.0)
-  const tipDisplayX = pointsLeft ? 0.85 : 6.15;
-  const tipDisplayY = 5;
-  // Filled sync arrowheads render slightly too far right at the shaft join if we
-  // place them purely by mathematical tip alignment. Pull them left by 0.75px to
-  // match the browser rasterization of the HTML renderer's absolutely positioned head.
-  const joinAdjustX = isFilled ? -0.75 : 0;
-  const svgX = tipX - tipDisplayX + joinAdjustX;
-  const svgY = tipY - tipDisplayY;
+  // Match the HTML renderer's placement exactly: the 7x10 arrowhead SVG is
+  // anchored flush to the message edge, and the path sits inside that box.
+  // Aligning the mathematical tip directly makes the native SVG paint about
+  // 0.85px too far outward on both LTR and RTL arrows.
+  const svgX = pointsLeft ? tipX : tipX - 7;
+  const svgY = tipY - 5;
   const rtlTransform = pointsLeft ? ' transform="scale(-1, 1) translate(-7, 0)"' : "";
 
   return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9" overflow="visible" class="arrow-head${isFilled ? "" : " arrow-open"}">
