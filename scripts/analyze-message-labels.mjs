@@ -440,6 +440,16 @@ function formatParticipantBoxSummary(box) {
   return `participant-box:${box.name} -> dx=${box.dx.toFixed(2)}px dy=${box.dy.toFixed(2)}px dw=${box.dw.toFixed(2)}px dh=${box.dh.toFixed(2)}px`;
 }
 
+function formatResidualScopeSummary(scope) {
+  const htmlTarget = scope.html_target
+    ? `${scope.html_target.category}:${scope.html_target.name}`
+    : "none";
+  const svgTarget = scope.svg_target
+    ? `${scope.svg_target.category}:${scope.svg_target.name}`
+    : "none";
+  return `${scope.class}:${scope.size}px @ (${scope.centroid.x.toFixed(1)},${scope.centroid.y.toFixed(1)}) -> html=${htmlTarget} svg=${svgTarget}`;
+}
+
 async function collectLabelData(page) {
   return page.evaluate(async () => {
     await document.fonts.ready;
@@ -1145,6 +1155,7 @@ async function collectLabelData(page) {
     const svgRoot = document.querySelector("#svg-output > svg") || document.querySelector("#svg-output svg");
     const htmlRootRect = htmlRoot.getBoundingClientRect();
     const svgRootRect = svgRoot.getBoundingClientRect();
+    const svgFrameBorderEl = svgRoot.querySelector("rect.frame-border-inner, rect.frame-border, rect.frame-box");
 
     return {
       caseName: new URLSearchParams(window.location.search).get("case") || "",
@@ -1153,6 +1164,9 @@ async function collectLabelData(page) {
       prepared: Boolean(prepared),
       htmlRoot: { width: htmlRootRect.width, height: htmlRootRect.height },
       svgRoot: { width: svgRootRect.width, height: svgRootRect.height },
+      htmlRootBox: { x: 0, y: 0, w: htmlRootRect.width, h: htmlRootRect.height },
+      svgRootBox: { x: 0, y: 0, w: svgRootRect.width, h: svgRootRect.height },
+      svgFrameBorderBox: boxOrNull(strokedElementOuterRect(svgFrameBorderEl, svgRootRect)),
       htmlLabels: collectHtmlLabels(htmlRoot, htmlRootRect),
       svgLabels: collectSvgLabels(svgRoot, svgRootRect),
       htmlNumbers: collectHtmlNumbers(htmlRoot, htmlRootRect),
@@ -1635,7 +1649,271 @@ function buildParticipantBoxSection(htmlParticipants, svgParticipants) {
   return names.map((name) => scoreParticipantBox(htmlMap.get(name) || null, svgMap.get(name) || null));
 }
 
-function buildReport(caseName, htmlLabels, svgLabels, htmlNumbers, svgNumbers, htmlArrows, svgArrows, htmlParticipants, svgParticipants, diffImage) {
+function scopePriority(category) {
+  switch (category) {
+    case "participant-icon":
+      return 8;
+    case "label":
+    case "number":
+    case "participant-label":
+      return 7;
+    case "arrow":
+      return 6;
+    case "participant-box":
+      return 5;
+    case "frame-border":
+      return 2;
+    case "diagram-root":
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+function pointInRect(point, rect) {
+  return point.x >= rect.x && point.x <= rectRight(rect) && point.y >= rect.y && point.y <= rectBottom(rect);
+}
+
+function distanceToRect(point, rect) {
+  const dx = point.x < rect.x ? rect.x - point.x : point.x > rectRight(rect) ? point.x - rectRight(rect) : 0;
+  const dy = point.y < rect.y ? rect.y - point.y : point.y > rectBottom(rect) ? point.y - rectBottom(rect) : 0;
+  return Math.hypot(dx, dy);
+}
+
+function formatScopeName(item) {
+  if (item.owner_text && item.text && item.owner_text !== item.text) {
+    return `${item.owner_text}:${item.text}`;
+  }
+  return item.name ?? item.text ?? item.kind ?? item.category ?? "unknown";
+}
+
+function buildScopeItems(side, extracted) {
+  const items = [];
+
+  function push(category, name, box, extra = {}) {
+    if (!box || box.w <= 0 || box.h <= 0) {
+      return;
+    }
+    items.push({
+      side,
+      category,
+      name,
+      box,
+      ...extra,
+    });
+  }
+
+  const sideKey = side === "html" ? "html" : "svg";
+  const labels = side === "html" ? extracted.htmlLabels : extracted.svgLabels;
+  const numbers = side === "html" ? extracted.htmlNumbers : extracted.svgNumbers;
+  const arrows = side === "html" ? extracted.htmlArrows : extracted.svgArrows;
+  const participants = side === "html" ? extracted.htmlParticipants : extracted.svgParticipants;
+
+  for (const label of labels) {
+    push("label", formatScopeName(label), label.box, {
+      kind: label.kind,
+      text: label.text,
+      owner_text: label.ownerText ?? null,
+    });
+  }
+  for (const number of numbers) {
+    push("number", formatScopeName(number), number.box, {
+      kind: number.kind,
+      text: number.text,
+      owner_text: number.ownerText ?? null,
+    });
+  }
+  for (const arrow of arrows) {
+    push("arrow", formatScopeName(arrow), arrow.box, {
+      kind: arrow.kind,
+      text: arrow.text,
+      owner_text: arrow.labelText ?? null,
+    });
+  }
+  for (const participant of participants) {
+    push("participant-box", participant.name, participant.participantBox, {
+      kind: "participant",
+      text: participant.labelText ?? participant.name,
+      owner_text: participant.name,
+    });
+    push("participant-label", participant.name, participant.labelBox, {
+      kind: "participant",
+      text: participant.labelText ?? participant.name,
+      owner_text: participant.name,
+    });
+    push("participant-icon", participant.name, participant.iconBox, {
+      kind: "participant",
+      text: participant.labelText ?? participant.name,
+      owner_text: participant.name,
+    });
+  }
+
+  if (sideKey === "html") {
+    push("diagram-root", "html-root", extracted.htmlRootBox, { kind: "root" });
+  } else {
+    push("frame-border", "frame-border", extracted.svgFrameBorderBox, { kind: "frame" });
+    push("diagram-root", "svg-root", extracted.svgRootBox, { kind: "root" });
+  }
+
+  return items;
+}
+
+function buildDiffClusters(diffImage, targetClass) {
+  const visited = new Uint8Array(diffImage.width * diffImage.height);
+  const clusters = [];
+  const offsets = [-1, 0, 1, 0, -1];
+
+  for (let index = 0; index < diffImage.classData.length; index++) {
+    if (visited[index] || diffImage.classData[index] !== targetClass) {
+      continue;
+    }
+    visited[index] = 1;
+    const queue = [index];
+    let head = 0;
+    let size = 0;
+    let sumX = 0;
+    let sumY = 0;
+    let left = diffImage.width;
+    let top = diffImage.height;
+    let right = -1;
+    let bottom = -1;
+
+    while (head < queue.length) {
+      const current = queue[head++];
+      const x = current % diffImage.width;
+      const y = Math.floor(current / diffImage.width);
+      size++;
+      sumX += x + 0.5;
+      sumY += y + 0.5;
+      left = Math.min(left, x);
+      top = Math.min(top, y);
+      right = Math.max(right, x);
+      bottom = Math.max(bottom, y);
+
+      for (let dir = 0; dir < 4; dir++) {
+        const nx = x + offsets[dir];
+        const ny = y + offsets[dir + 1];
+        if (nx < 0 || nx >= diffImage.width || ny < 0 || ny >= diffImage.height) {
+          continue;
+        }
+        const nextIndex = ny * diffImage.width + nx;
+        if (visited[nextIndex] || diffImage.classData[nextIndex] !== targetClass) {
+          continue;
+        }
+        visited[nextIndex] = 1;
+        queue.push(nextIndex);
+      }
+    }
+
+    clusters.push({
+      class: targetClass === 2 ? "html-only" : "svg-only",
+      size,
+      bbox: {
+        x: left,
+        y: top,
+        w: right - left + 1,
+        h: bottom - top + 1,
+      },
+      centroid: {
+        x: sumX / size,
+        y: sumY / size,
+      },
+    });
+  }
+
+  return clusters.sort((a, b) => b.size - a.size);
+}
+
+function pickScopeTarget(cluster, items) {
+  const centroid = cluster.centroid;
+  let best = null;
+  let bestScore = -Infinity;
+
+  for (const item of items) {
+    const contains = pointInRect(centroid, item.box);
+    const distance = distanceToRect(centroid, item.box);
+    const overlap = intersectionArea(cluster.bbox, item.box);
+    const score = (contains ? 10000 : 0)
+      + overlap * 10
+      - distance * 100
+      + scopePriority(item.category) * 1000
+      - area(item.box) * 0.01;
+
+    if (score > bestScore) {
+      bestScore = score;
+      best = {
+        category: item.category,
+        name: item.name,
+        kind: item.kind ?? null,
+        text: item.text ?? null,
+        owner_text: item.owner_text ?? null,
+        contains_centroid: contains,
+        overlap_area: round(overlap),
+        distance: round(distance),
+        box: {
+          x: round(item.box.x),
+          y: round(item.box.y),
+          w: round(item.box.w),
+          h: round(item.box.h),
+        },
+      };
+    }
+  }
+
+  return best;
+}
+
+function buildResidualScopes(extracted, diffImage) {
+  const htmlItems = buildScopeItems("html", extracted);
+  const svgItems = buildScopeItems("svg", extracted);
+  const clusters = [
+    ...buildDiffClusters(diffImage, 2),
+    ...buildDiffClusters(diffImage, 3),
+  ].sort((a, b) => b.size - a.size);
+
+  const residualScopes = clusters.map((cluster, index) => ({
+    rank: index + 1,
+    class: cluster.class,
+    size: cluster.size,
+    centroid: {
+      x: round(cluster.centroid.x),
+      y: round(cluster.centroid.y),
+    },
+    bbox: {
+      x: round(cluster.bbox.x),
+      y: round(cluster.bbox.y),
+      w: round(cluster.bbox.w),
+      h: round(cluster.bbox.h),
+    },
+    html_target: pickScopeTarget(cluster, htmlItems),
+    svg_target: pickScopeTarget(cluster, svgItems),
+  }));
+
+  const byClass = residualScopes.reduce((acc, scope) => {
+    acc[scope.class] = acc[scope.class] || [];
+    acc[scope.class].push(scope);
+    return acc;
+  }, {});
+
+  return {
+    scopes: residualScopes,
+    summary: residualScopes.slice(0, 20).map((scope) => formatResidualScopeSummary(scope)),
+    html_only_top: (byClass["html-only"] || []).slice(0, 10),
+    svg_only_top: (byClass["svg-only"] || []).slice(0, 10),
+  };
+}
+
+function buildReport(caseName, extracted, diffImage) {
+  const {
+    htmlLabels,
+    svgLabels,
+    htmlNumbers,
+    svgNumbers,
+    htmlArrows,
+    svgArrows,
+    htmlParticipants,
+    svgParticipants,
+  } = extracted;
   const iconNames = participantsWithIcons(htmlParticipants, svgParticipants);
   const htmlParticipantLabels = buildParticipantLabelItems(htmlParticipants, iconNames);
   const svgParticipantLabels = buildParticipantLabelItems(svgParticipants, iconNames);
@@ -1645,6 +1923,7 @@ function buildReport(caseName, htmlLabels, svgLabels, htmlNumbers, svgNumbers, h
   const participantLabels = buildSection(htmlParticipantLabels, svgParticipantLabels, diffImage);
   const participantIcons = buildParticipantIconSection(htmlParticipants, svgParticipants, diffImage);
   const participantBoxes = buildParticipantBoxSection(htmlParticipants, svgParticipants);
+  const residualScopes = buildResidualScopes(extracted, diffImage);
   return {
     case: caseName,
     labels,
@@ -1653,12 +1932,16 @@ function buildReport(caseName, htmlLabels, svgLabels, htmlNumbers, svgNumbers, h
     participant_labels: participantLabels,
     participant_icons: participantIcons,
     participant_boxes: participantBoxes,
+    residual_scopes: residualScopes.scopes,
     summary: labels.map((label) => formatSectionSummary("label", label)),
     number_summary: numbers.map((number) => formatSectionSummary("number", number)),
     arrow_summary: arrows.map((arrow) => `arrow:${arrow.key.text} -> ${formatArrowSummary(arrow)}`),
     participant_label_summary: participantLabels.map((label) => formatSectionSummary("participant-label", label)),
     participant_icon_summary: participantIcons.map((icon) => formatParticipantIconSummary(icon)),
     participant_box_summary: participantBoxes.map((box) => formatParticipantBoxSummary(box)),
+    residual_scope_summary: residualScopes.summary,
+    residual_scope_html_only_top: residualScopes.html_only_top,
+    residual_scope_svg_only_top: residualScopes.svg_only_top,
   };
 }
 
@@ -1720,18 +2003,7 @@ async function main() {
       channelTolerance: args.channelTolerance,
       positionTolerance: args.positionTolerance,
     });
-    const report = buildReport(
-      extracted.caseName || args.caseName,
-      extracted.htmlLabels,
-      extracted.svgLabels,
-      extracted.htmlNumbers,
-      extracted.svgNumbers,
-      extracted.htmlArrows,
-      extracted.svgArrows,
-      extracted.htmlParticipants,
-      extracted.svgParticipants,
-      diffImage,
-    );
+    const report = buildReport(extracted.caseName || args.caseName, extracted, diffImage);
     report.diff = diffImage.stats;
     report.capture = {
       url: compareUrl,
@@ -1754,6 +2026,7 @@ async function main() {
       process.stdout.write(`${report.participant_label_summary.join("\n")}\n`);
       process.stdout.write(`${report.participant_icon_summary.join("\n")}\n`);
       process.stdout.write(`${report.participant_box_summary.join("\n")}\n`);
+      process.stdout.write(`${report.residual_scope_summary.join("\n")}\n`);
       return;
     }
 
@@ -1765,6 +2038,7 @@ async function main() {
       process.stdout.write(`${report.participant_label_summary.join("\n")}\n`);
       process.stdout.write(`${report.participant_icon_summary.join("\n")}\n`);
       process.stdout.write(`${report.participant_box_summary.join("\n")}\n`);
+      process.stdout.write(`${report.residual_scope_summary.join("\n")}\n`);
       return;
     }
 

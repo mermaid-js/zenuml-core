@@ -155,3 +155,71 @@ Icon scoring:
 - If there is no participant label on one side, use the participant box center as the anchor
 - Report presence mismatch if one renderer has an icon and the other does not
 - Diff confirmation is taken from the native diff slot covering the union of the HTML and SVG icon boxes
+
+## Residual Scope Attribution
+
+Residual scope extraction:
+
+- Build connected clusters from the analyzer's native diff classes:
+  - `html-only`
+  - `svg-only`
+- Ignore `match` and `color diff` pixels for positional scoping
+- Each cluster reports:
+  - `size`
+  - `bbox`
+  - `centroid`
+- These analyzer-side clusters are only candidate hotspots.
+- Final residual attribution must be checked against the live native diff panel canvas on the page.
+
+Residual scope candidates:
+
+- HTML side:
+  - labels
+  - numbers
+  - arrows
+  - participant labels
+  - participant icons
+  - participant boxes
+  - diagram root fallback
+- SVG side:
+  - labels
+  - numbers
+  - arrows
+  - participant labels
+  - participant icons
+  - participant boxes
+  - `rect.frame-border-inner`, fallback `rect.frame-border` / `rect.frame-box`
+  - diagram root fallback
+
+Residual scope attribution:
+
+- Pick the closest candidate to the cluster centroid on each side
+- Prefer targets that contain the centroid
+- Prefer more specific categories over large containers:
+  - `participant-icon`
+  - `label`, `number`, `participant-label`
+  - `arrow`
+  - `participant-box`
+  - `frame-border`
+  - `diagram-root`
+- Use cluster/target overlap and centroid distance as tie-breakers
+
+Residual scope output:
+
+- `residual_scopes`: all attributed clusters
+- `residual_scope_summary`: top 20 concise lines for terminal use
+- `residual_scope_html_only_top`: top 10 `html-only` clusters
+- `residual_scope_svg_only_top`: top 10 `svg-only` clusters
+- When answering from the live panel, also report:
+  - the largest red clusters from `#diff-panel canvas`
+  - the largest blue clusters from `#diff-panel canvas`
+  - approximate diagram-space positions or bounding boxes
+  - attributed HTML and SVG targets for those clusters
+  - a short grouped summary of where the red and blue pixels are concentrated
+
+Live panel validation:
+
+- Source of truth for residual hotspots is `#diff-panel canvas`
+- Confirm the candidate hotspot by reading the panel's actual red and blue pixels at that area
+- If the panel shows no red or blue pixels there, do not report that hotspot as a real residual diff
+- If the panel shows non-zero red or blue totals, do not stop at the totals alone; locate the dominant clusters and report them
