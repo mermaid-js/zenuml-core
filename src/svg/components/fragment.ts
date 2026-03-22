@@ -102,9 +102,15 @@ export function renderFragment(f: FragmentGeometry): string {
         } else {
           const finallyX = f.x + 5;
           const finallyY = labelY;
+          if (section.label === "[else]") {
+            parts.push(
+              `<text x="${finallyX}" y="${finallyY}" class="fragment-section-label">${esc(section.label)}</text>`,
+            );
+            continue;
+          }
           const bgWidth = (section.labelWidth ?? section.label.length * 7) + TEXT_PAD_X * 2;
-          const bgY = section.label === "[else]" ? lineY - 1 : lineY + 1;
-          const bgHeight = section.label === "[else]" ? 24 : 20;
+          const bgY = lineY + 1;
+          const bgHeight = 20;
           parts.push(
             `<g opacity="0.65">` +
             `<rect x="${finallyX - TEXT_PAD_X}" y="${bgY}" width="${bgWidth}" height="${bgHeight}" fill="#fff"/>` +
