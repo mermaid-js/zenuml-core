@@ -1,4 +1,8 @@
 name: Update Playwright Snapshots for Linux
+# Usage (for AI agents and humans):
+#   gh workflow run update-snapshots.yml --ref <branch>
+# Generates Linux-specific Playwright snapshots on the given branch,
+# commits them, pushes, then re-runs E2E to verify.
 
 on:
   workflow_dispatch:
