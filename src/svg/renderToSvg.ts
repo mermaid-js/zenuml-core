@@ -43,7 +43,7 @@ const DEFAULT_THEME_STYLES = `
   .frame-header-bg { fill: #ffffff; }
   .frame-header-line { stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
   .frame-title { font-family: Helvetica, Verdana, serif; font-size: 16px; font-weight: 600; fill: #222; }
-  .participant-box { fill: #ffffff; stroke: #666; stroke-width: 2; shape-rendering: crispEdges; }
+  .participant-box { fill: #ffffff; stroke: #666; stroke-width: 2; }
   .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #222; }
   .participant-icon { color: #222; }
   .lifeline { stroke: #666; stroke-width: 1; }
