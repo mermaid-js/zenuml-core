@@ -387,6 +387,23 @@
           ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
       }
 
+      function caseScore(entry) {
+        return typeof entry === 'object' ? entry.score : entry;
+      }
+
+      function casePosScore(entry) {
+        if (typeof entry === 'object' && typeof entry.posScore === 'number') return entry.posScore;
+        return caseScore(entry);
+      }
+
+      function runAveragePos(run) {
+        if (typeof run.averagePos === 'number') return run.averagePos;
+        const scores = Object.values(run.cases || {}).map(casePosScore);
+        return scores.length
+          ? parseFloat((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1))
+          : (typeof run.average === 'number' ? run.average : 0);
+      }
+
       async function loadHistory() {
         if (typeof window.__getCanonicalHistory === 'function') {
           return await window.__getCanonicalHistory();
@@ -423,7 +440,7 @@
           const entries = [];
           sorted.forEach(r => {
             const d = r.cases[name];
-            if (d != null) entries.push({ timestamp: r.timestamp, score: typeof d === 'object' ? d.score : d });
+            if (d != null) entries.push({ timestamp: r.timestamp, score: caseScore(d), posScore: casePosScore(d) });
           });
           const scores = entries.map(e => e.score);
           const latest = scores[scores.length - 1];
@@ -671,7 +688,7 @@
         const table = document.createElement('table');
         table.innerHTML = `<thead><tr>
           <th style="width:28px"></th>
-          <th>Date</th><th>Label</th><th>Avg</th><th>Delta</th>
+          <th>Date</th><th>Label</th><th>Avg</th><th>Pos Avg</th><th>Delta</th>
           <th>Cases</th><th>Time</th><th>Best</th><th>Worst</th>
         </tr></thead>`;
         const tbody = document.createElement('tbody');
@@ -679,10 +696,11 @@
         newestFirst.forEach((run, idx) => {
           const prev = idx < newestFirst.length - 1 ? newestFirst[idx + 1] : null;
           const avg = run.average;
+          const avgPos = runAveragePos(run);
           const prevAvg = prev ? prev.average : null;
           const delta = prevAvg !== null ? avg - prevAvg : null;
           const scores = Object.entries(run.cases).map(([n, d]) => ({
-            name: n, score: typeof d === 'object' ? d.score : d,
+            name: n, score: caseScore(d), posScore: casePosScore(d),
           })).sort((a, b) => b.score - a.score);
           const best = scores[0], worst = scores[scores.length - 1];
 
@@ -692,6 +710,7 @@
             <td class="ts">${fmtDate(run.timestamp)}</td>
             <td style="color:#8b9cc0;font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${run.label || ''}">${run.label || ''}</td>
             <td class="${scoreClass(avg)}" style="font-weight:bold">${avg.toFixed(1)}%</td>
+            <td class="${scoreClass(avgPos)}" style="font-weight:bold">${avgPos.toFixed(1)}%</td>
             <td>${deltaHtml(delta)}</td>
             <td style="color:#5a6a85">${run.caseCount}</td>
             <td class="ts">${run.elapsed || '—'}s</td>
@@ -703,8 +722,8 @@
           const detailTr = document.createElement('tr');
           detailTr.className = 'detail-row';
           detailTr.id = `detail-${idx}`;
-          detailTr.innerHTML = `<td colspan="9"><div class="case-grid">${
-            scores.map(s => `<div class="case-grid-item"><span class="case-grid-name">${s.name}</span><span class="${scoreClass(s.score)}">${s.score}%</span></div>`).join('')
+          detailTr.innerHTML = `<td colspan="10"><div class="case-grid">${
+            scores.map(s => `<div class="case-grid-item"><span class="case-grid-name">${s.name}</span><span class="${scoreClass(s.score)}">${s.score}% / ${s.posScore.toFixed(1)}%</span></div>`).join('')
           }</div></td>`;
           tbody.appendChild(detailTr);
         });
@@ -815,7 +834,7 @@
           const latest = allRuns[allRuns.length - 1];
           if (latest) {
             document.getElementById('summary').textContent =
-              latest.average.toFixed(1) + '% avg / ' + latest.caseCount + ' cases';
+              latest.average.toFixed(1) + '% px avg / ' + runAveragePos(latest).toFixed(1) + '% pos avg / ' + latest.caseCount + ' cases';
           }
           renderCaseList();
           renderTable();

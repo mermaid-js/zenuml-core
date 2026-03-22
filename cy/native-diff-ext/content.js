@@ -86,7 +86,7 @@ async function runNativeDiff() {
 
   // 6. Run diff
   const result = await nativeDiffAlgorithm(htmlCapture.dataUrl, svgCapture.dataUrl);
-  console.log("[native-diff-ext] Done!", result.pixelPct + "% pixel match");
+  console.log("[native-diff-ext] Done!", result.pixelPct + "% pixel match", result.posPct + "% position-only match");
 
   // Post result back for icon-click flow
   window.postMessage({ type: "native-diff-result", result }, "*");
@@ -102,10 +102,10 @@ async function runNativeDiff() {
         // Get the DSL for this case from the page (exposed by compare-case.html)
         const dsl = window.__currentDSL || "";
 
-        results[currentCase] = { score: result.pixelPct, dsl };
+        results[currentCase] = { score: result.pixelPct, posScore: result.posPct, dsl };
         localStorage.setItem("__cr_results", JSON.stringify(results));
         const doneCount = Object.keys(results).length;
-        console.log(`[native-diff-ext] Batch: ${currentCase}=${result.pixelPct}% (${doneCount}/${cases.length})`);
+        console.log(`[native-diff-ext] Batch: ${currentCase}=${result.pixelPct}% px / ${result.posPct}% pos (${doneCount}/${cases.length})`);
         if (doneCount < cases.length) {
           const idx = cases.indexOf(currentCase);
           if (idx >= 0 && idx + 1 < cases.length) {
@@ -224,14 +224,16 @@ async function nativeDiffAlgorithm(htmlDataUrl, svgDataUrl) {
   document.getElementById("diff-panel").classList.add("visible");
 
   const pixelPct = total > 0 ? (matched / total * 100).toFixed(1) : "0.0";
+  const posMatched = matched + colorDiff;
+  const posPct = total > 0 ? (posMatched / total * 100).toFixed(1) : "0.0";
   document.getElementById("match-badge").innerHTML =
-    `<b>${pixelPct}%</b> native pixel match (${matched}/${total} px) ` +
+    `<b>${pixelPct}%</b> native pixel match / <b>${posPct}%</b> pos-only (${matched}/${total} px) ` +
     `<span style="color:#006400">■</span> match ` +
     `<span style="color:#ff0000">■</span> HTML-only (${htmlOnly}) ` +
     `<span style="color:#0000ff">■</span> SVG-only (${svgOnly}) ` +
     `<span style="color:#ff00ff">■</span> color diff (${colorDiff})`;
 
-  return { pixelPct: parseFloat(pixelPct), matched, total, htmlOnly, svgOnly, colorDiff };
+  return { pixelPct: parseFloat(pixelPct), posPct: parseFloat(posPct), matched, posMatched, total, htmlOnly, svgOnly, colorDiff };
 }
 
 function loadImg(dataUrl) {
@@ -276,15 +278,23 @@ async function saveBatchToHistory(results, elapsed) {
   try {
     const db = await openHistoryDB();
     const scores = Object.values(results).map(r => typeof r === "object" ? r.score : r);
+    const posScores = Object.values(results).map(r => {
+      if (typeof r === "object" && typeof r.posScore === "number") return r.posScore;
+      return typeof r === "object" ? r.score : r;
+    });
     const average = scores.length > 0
       ? parseFloat((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1))
       : 0;
+    const averagePos = posScores.length > 0
+      ? parseFloat((posScores.reduce((a, b) => a + b, 0) / posScores.length).toFixed(1))
+      : average;
 
     const record = {
       timestamp: new Date().toISOString(),
       elapsed,
       cases: results,
       average,
+      averagePos,
       caseCount: Object.keys(results).length,
     };
 
@@ -295,7 +305,7 @@ async function saveBatchToHistory(results, elapsed) {
       tx.onerror = () => reject(tx.error);
     });
 
-    console.log(`[native-diff-ext] History saved: avg=${average}%, ${Object.keys(results).length} cases`);
+    console.log(`[native-diff-ext] History saved: avg=${average}% px / ${averagePos}% pos, ${Object.keys(results).length} cases`);
     db.close();
   } catch (e) {
     console.error("[native-diff-ext] Failed to save history:", e);
