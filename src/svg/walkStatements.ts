@@ -54,14 +54,22 @@ export interface StatementInfo {
 export function walkStatements(rootContext: any): StatementInfo[] {
   const block = rootContext?.block?.();
   if (!block) return [];
-  return walkBlock(block, _STARTER_, new Map(), "", 0, null);
+  return walkBlock(block, _STARTER_, new Map(), "", 0, null, 0);
 }
 
 function normalizeLabel(label: string): string {
   return label.trim();
 }
 
-function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<string, number>, parentNumber: string, depth: number, parentBlockKind: "sync" | "creation" | null): StatementInfo[] {
+function walkBlock(
+  block: any,
+  currentOrigin: string,
+  activeOccurrences: Map<string, number>,
+  parentNumber: string,
+  depth: number,
+  parentBlockKind: "sync" | "creation" | null,
+  indexOffset: number,
+): StatementInfo[] {
   const statements = block?.stat?.() || [];
   const results: StatementInfo[] = [];
   let index = 0;
@@ -71,7 +79,8 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
     if (!key) continue;
 
     index++;
-    const number = parentNumber ? `${parentNumber}.${index}` : String(index);
+    const ordinal = indexOffset + index;
+    const number = parentNumber ? `${parentNumber}.${ordinal}` : String(ordinal);
     const comment = stat.getComment?.() || "";
 
     const message = stat.message?.();
@@ -85,7 +94,7 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
       if (nestedBlock) {
         const innerOccs = new Map(activeOccurrences);
         innerOccs.set(to, (innerOccs.get(to) || 0) + 1);
-        results.push(...walkBlock(nestedBlock, to, innerOccs, number, depth + 1, "sync"));
+        results.push(...walkBlock(nestedBlock, to, innerOccs, number, depth + 1, "sync", 0));
       }
       continue;
     }
@@ -110,7 +119,7 @@ function walkBlock(block: any, currentOrigin: string, activeOccurrences: Map<str
       if (creationBlock) {
         const innerOccs = new Map(activeOccurrences);
         innerOccs.set(to, (innerOccs.get(to) || 0) + 1);
-        results.push(...walkBlock(creationBlock, to || currentOrigin, innerOccs, number, depth + 1, "creation"));
+        results.push(...walkBlock(creationBlock, to || currentOrigin, innerOccs, number, depth + 1, "creation", 0));
       }
       continue;
     }
@@ -236,6 +245,10 @@ function extractFragmentInfo(stat: any, _origin: string): FragmentExtract {
   return { fragmentKind: "loop", label: "", sections: [] };
 }
 
+function blockLength(block: any): number {
+  return (block?.stat?.() || []).filter((stat: any) => !!createStatementKey(stat)).length;
+}
+
 /** Recurse into fragment inner blocks (loop, opt, alt, try/catch, etc.) */
 function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[], activeOccurrences: Map<string, number>, parentNumber: string, depth: number): void {
   // Single-block fragments: loop, opt, par, critical, section
@@ -243,7 +256,7 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
     const frag = stat[kind]?.();
     if (frag) {
       const block = frag.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null));
+      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, 0));
       return;
     }
   }
@@ -252,23 +265,28 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
   const alt = stat.alt?.();
   if (alt) {
     const ifBlock = alt.ifBlock?.();
+    let sectionOffset = 0;
     if (ifBlock) {
       const block = ifBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null));
+      if (block) {
+        results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset));
+        sectionOffset += blockLength(block);
+      }
     }
     for (const elseIf of alt.elseIfBlock?.() || []) {
       const block = elseIf.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null);
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
+        sectionOffset += blockLength(block);
       }
     }
     const elseBlock = alt.elseBlock?.();
     if (elseBlock) {
       const block = elseBlock.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null);
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
       }
@@ -280,23 +298,28 @@ function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[],
   const tcf = stat.tcf?.();
   if (tcf) {
     const tryBlock = tcf.tryBlock?.();
+    let sectionOffset = 0;
     if (tryBlock) {
       const block = tryBlock.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null));
+      if (block) {
+        results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset));
+        sectionOffset += blockLength(block);
+      }
     }
     for (const catchBlock of tcf.catchBlock?.() || []) {
       const block = catchBlock.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null);
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
+        sectionOffset += blockLength(block);
       }
     }
     const finallyBlock = tcf.finallyBlock?.();
     if (finallyBlock) {
       const block = finallyBlock.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null);
+        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
       }

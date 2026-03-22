@@ -5,17 +5,21 @@ import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { WidthProviderOnCanvas } from "@/positioning/WidthProviderFunc";
 import { buildGeometry } from "./buildGeometry";
 
-function getReturns(code: string) {
+function getGeometry(code: string) {
   const rootContext = RootContext(code)!;
   const coordinates = new Coordinates(rootContext, WidthProviderOnCanvas);
   const verticalCoordinates = new VerticalCoordinates(rootContext);
-  const geometry = buildGeometry({
+  return buildGeometry({
     rootContext,
     coordinates,
     verticalCoordinates,
     title: undefined,
     measureText: WidthProviderOnCanvas,
   });
+}
+
+function getReturns(code: string) {
+  const geometry = getGeometry(code);
   return geometry.returns;
 }
 
@@ -57,5 +61,31 @@ A->B.method()
     expect(returns).toHaveLength(1);
     const ret = returns[0];
     console.log(`root-level return: y=${ret.y}`);
+  });
+
+  it("keeps cumulative numbering across alt and tcf sections", () => {
+    const code = `if(cond) {
+  A -> B: msg1
+  try {
+    B -> C: tryMsg
+  } catch(e) {
+    C -> B: catchMsg
+  } finally {
+    B -> A: finallyMsg
+  }
+} else if(cond2) {
+  A -> B: elseIfMsg
+} else {
+  A -> B: elseMsg
+}`;
+    const geometry = getGeometry(code);
+    const messageNumbers = Object.fromEntries(geometry.messages.map((m) => [m.label, m.number]));
+
+    expect(messageNumbers.msg1).toBe("1.1");
+    expect(messageNumbers.tryMsg).toBe("1.2.1");
+    expect(messageNumbers.catchMsg).toBe("1.2.2");
+    expect(messageNumbers.finallyMsg).toBe("1.2.3");
+    expect(messageNumbers.elseIfMsg).toBe("1.3");
+    expect(messageNumbers.elseMsg).toBe("1.4");
   });
 });
