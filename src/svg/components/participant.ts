@@ -16,7 +16,11 @@ const ICON_PAINT_OFFSET_X = 4;
 const LABEL_PAD_LEFT = 8;
 const LABEL_HORIZONTAL_PADDING = 16;
 const STEREOTYPE_VERTICAL_OFFSET = 8;
+const STEREOTYPE_ICON_X_TWEAK = 1;
+const STEREOTYPE_Y_TWEAK = 1;
+const STEREOTYPE_FONT_SIZE = 16;
 const BOUNDARY_ICON_VERTICAL_TWEAK = 2.75;
+const PARTICIPANT_TEXT_FILL = "#222";
 
 export function renderParticipant(p: ParticipantGeometry): string {
   if (p.isStarter) return renderStarterParticipant(p);
@@ -57,11 +61,16 @@ export function renderParticipant(p: ParticipantGeometry): string {
   const textY = p.y + p.height / 2 - 0.25;
   const labelY = p.stereotype ? textY + STEREOTYPE_VERTICAL_OFFSET : textY;
 
-  // Stereotype label (e.g., «BFF») — rendered above the main label in smaller font
+  // Match the current HTML renderer: stereotypes inherit the same 16px text styling
+  // and theme-default participant text color rather than SVG-side contrast heuristics.
   let stereotypeSvg = "";
   if (p.stereotype) {
-    const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET;
-    stereotypeSvg = `<text x="${textX}" y="${stereoY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="stereotype-label" font-size="12"${stereotypeTextStyle(p.color)}>${esc("«" + p.stereotype + "»")}</text>`;
+    const stereoX = icon && p.labelWidth != null
+      ? textX + p.labelWidth / 2 + STEREOTYPE_ICON_X_TWEAK
+      : textX;
+    const stereoAnchor = icon && p.labelWidth != null ? "middle" : icon ? "start" : "middle";
+    const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET + STEREOTYPE_Y_TWEAK;
+    stereotypeSvg = `<text x="${stereoX}" y="${stereoY}" text-anchor="${stereoAnchor}" dominant-baseline="central" class="stereotype-label" font-size="${STEREOTYPE_FONT_SIZE}"${participantTextStyle()}>${esc("«" + p.stereotype + "»")}</text>`;
   }
 
   // Aliased labels (e.g. "b:B") — use textLength to pin the text extent to the
@@ -143,20 +152,6 @@ function normalizeHexColor(color: string): string {
 }
 
 /**
- * Compute perceived brightness from a hex color string.
- * Uses the same formula as the HTML renderer (Color.ts brightnessIgnoreAlpha):
- * (R*299 + G*587 + B*114) / 1000
- * Returns a value 0-255; > 128 means light background.
- */
-function hexBrightness(hex: string): number {
-  const h = hex.startsWith("#") ? hex.slice(1) : hex;
-  const r = parseInt(h.substring(0, 2), 16) || 0;
-  const g = parseInt(h.substring(2, 4), 16) || 0;
-  const b = parseInt(h.substring(4, 6), 16) || 0;
-  return (r * 299 + g * 587 + b * 114) / 1000;
-}
-
-/**
  * Build fill and text-color style attributes for a participant with a background color.
  */
 function colorAttrs(color: string | undefined): { fillStyle: string; textStyle: string } {
@@ -164,20 +159,14 @@ function colorAttrs(color: string | undefined): { fillStyle: string; textStyle: 
     return { fillStyle: "", textStyle: "" };
   }
   const hex = normalizeHexColor(color);
-  const textColor = hexBrightness(hex) > 128 ? "#000" : "#fff";
   return {
     fillStyle: ` style="fill:${hex};"`,
-    textStyle: ` style="fill:${textColor};"`,
+    textStyle: participantTextStyle(),
   };
 }
 
-function stereotypeTextStyle(color: string | undefined): string {
-  if (!color) {
-    return ` style="fill:#222;"`;
-  }
-  const hex = normalizeHexColor(color);
-  const textColor = hexBrightness(hex) > 128 ? "#000" : "#fff";
-  return ` style="fill:${textColor};"`;
+function participantTextStyle(): string {
+  return ` style="fill:${PARTICIPANT_TEXT_FILL};"`;
 }
 
 function esc(s: string): string {

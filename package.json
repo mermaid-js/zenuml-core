@@ -21,7 +21,7 @@
     "pw:update-ci": "playwright test --update-snapshots --reporter=github",
     "pw:ui": "playwright test --ui",
     "pw:smoke": "playwright test smoke",
-    "analyze:message-labels": "node scripts/analyze-message-labels.mjs",
+    "analyze:compare-case": "node scripts/analyze-compare-case.mjs",
     "pw:install": "playwright install-deps && playwright install chromium",
     "antlr:setup": "python3 -m pip install antlr4-tools",
     "antlr:generate": "pwd && cd ./src/g4-units/hello-world && antlr4 Hello.g4",

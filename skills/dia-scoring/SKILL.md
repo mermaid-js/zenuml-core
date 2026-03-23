@@ -10,7 +10,7 @@ Use this skill when the task is to measure **message labels, fragment labels, se
 The workflow is browser-native:
 
 1. Open `http://localhost:8080/cy/compare-case.html?case=<name>`.
-2. Use the analyzer script at [../../scripts/analyze-message-labels.mjs](../../scripts/analyze-message-labels.mjs).
+2. Use the analyzer script at [../../scripts/analyze-compare-case.mjs](../../scripts/analyze-compare-case.mjs).
 3. Prefer `--json` when the next step is automated processing.
 4. Prefer `--output-dir <dir>` when you need saved `html.png`, `svg.png`, `diff.png`, and `report.json`.
 5. Treat residual diff scopes as live-panel work: validate them against the page's native diff panel before reporting them as real.
@@ -65,9 +65,9 @@ The workflow is browser-native:
 Run from [../..](../..):
 
 ```bash
-node scripts/analyze-message-labels.mjs --case async-2a
-node scripts/analyze-message-labels.mjs --case async-2a --json
-node scripts/analyze-message-labels.mjs --case async-2a --output-dir tmp/message-elements/async-2a
+node scripts/analyze-compare-case.mjs --case async-2a
+node scripts/analyze-compare-case.mjs --case async-2a --json
+node scripts/analyze-compare-case.mjs --case async-2a --output-dir tmp/message-elements/async-2a
 ```
 
 ## References
