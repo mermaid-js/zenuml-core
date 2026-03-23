@@ -57,6 +57,7 @@ const PARTICIPANT_VISUAL_HEIGHT = 40;
 const PARTICIPANT_MAX_WIDTH = 250;
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
+import { Participants } from "@/parser/index.js";
 import { AllMessages } from "@/parser/MessageCollector";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
@@ -1081,9 +1082,10 @@ function buildFragmentGeometry(
     };
   }
 
-  // Compute fragment width from local participants, matching HTML's TotalWidth:
-  //   TotalWidth = max(participantWidth, FRAGMENT_MIN_WIDTH) + border.left + border.right
-  const localNames = getLocalParticipantNames(fragmentCtx);
+  // Compute fragment width from local participants, including nested fragments.
+  // getLocalParticipantNames only does shallow extraction; we also walk inner
+  // section blocks to capture participants inside nested par/alt/loop/etc.
+  const localNames = getDeepParticipantNames(fragmentCtx, info.fragmentSections);
   const leftParticipant = allParticipants.find((p) => localNames.includes(p)) || "";
   const rightParticipant = allParticipants.slice().reverse().find((p) => localNames.includes(p)) || "";
 
@@ -1249,4 +1251,27 @@ function cssToSvgStyle(css: import("react").CSSProperties): Record<string, strin
     }
   }
   return hasKeys ? result : undefined;
+}
+
+/**
+ * Collects participants from the fragment context and recursively from
+ * inner section blocks.  getLocalParticipantNames only does shallow
+ * extraction, so nested fragments (e.g. par inside alt) are missed.
+ */
+function getDeepParticipantNames(
+  fragmentCtx: any,
+  sections?: { label: string; blockNode: any }[],
+): string[] {
+  const names = new Set(getLocalParticipantNames(fragmentCtx));
+
+  // Walk each section's inner block to find participants in nested content
+  if (sections) {
+    for (const section of sections) {
+      if (!section.blockNode) continue;
+      const innerNames = Participants(section.blockNode).Names() as string[];
+      for (const n of innerNames) names.add(n);
+    }
+  }
+
+  return [...names];
 }

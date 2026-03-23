@@ -704,6 +704,32 @@ ReturnType ret = ParticipantName.methodA(a, b) {
   // --- Starter + B with long method name ---
   "repro-starter-B-long": `B.aVeryLongMethodThatShouldPushTheParticipant`,
 
+  // --- Order Service (comments + nested fragments) ---
+  "order-service": `title Order Service
+@Actor Client #FFEBE6
+@Boundary OrderController #0747A6
+@EC2 <<BFF>> OrderService #E3FCEF
+group BusinessService {
+  @Lambda PurchaseService
+  @AzureFunction InvoiceService
+}
+@Starter(Client)
+// \`POST /orders\`
+OrderController.post(payload) {
+  // comment to
+  OrderService.create(payload) {
+    // comment3
+    order = new Order(payload)
+    // comment 4
+    if(order != null) {
+      par {
+        PurchaseService.createPO(order)
+        InvoiceService.createInvoice(order)
+      }
+    }
+  }
+}`,
+
   // --- Icons ---
   "icons": `@Actor User
 @Database DB
