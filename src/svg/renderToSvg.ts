@@ -17,6 +17,7 @@ import { renderCreation } from "./components/creation";
 import { renderReturn } from "./components/return";
 import { renderDivider } from "./components/divider";
 import { renderComment } from "./components/comment";
+import { renderGroup } from "./components/group";
 import type { DiagramGeometry } from "./geometry";
 
 export interface RenderOptions {
@@ -110,7 +111,12 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult 
 
   const parts: string[] = [];
 
-  // Lifelines (behind everything)
+  // Groups (behind everything, dashed outline containers)
+  for (const grp of g.groups) {
+    parts.push(renderGroup(grp));
+  }
+
+  // Lifelines (behind everything except groups)
   for (const l of g.lifelines) {
     parts.push(renderLifeline(l));
   }

@@ -372,4 +372,15 @@ describe("renderToSvg", () => {
     // Color should appear as fill on participant rect
     expect(result.innerSvg).toMatch(/fill="#FFEBE6"/i);
   });
+
+  it("renders participant group container", () => {
+    const code = 'group BusinessService {\n  @Lambda A\n  @Database B\n}\nA.method()';
+    const result = renderToSvg(code);
+    expect(result.innerSvg).toContain("BusinessService");
+    // Group should have a dashed outline
+    expect(result.innerSvg).toContain("stroke-dasharray");
+    // Group geometry should be present
+    expect(result.geometry?.groups.length).toBe(1);
+    expect(result.geometry?.groups[0].name).toBe("BusinessService");
+  });
 });

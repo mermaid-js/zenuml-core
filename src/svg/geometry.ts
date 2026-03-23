@@ -25,6 +25,8 @@ export interface ParticipantGeometry {
   stereotype?: string;
   /** Background color (hex string, e.g. "#FFEBE6") */
   color?: string;
+  /** Group ID this participant belongs to (if any) */
+  groupId?: string | number;
 }
 
 export interface LifelineGeometry {
@@ -162,6 +164,16 @@ export interface CommentGeometry {
   style?: Record<string, string>;
 }
 
+// ─── Group ────────────────────────────────────────────────────────
+
+export interface GroupGeometry {
+  name: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 // ─── Composed Diagram ──────────────────────────────────────────────
 
 export interface DiagramGeometry {
@@ -182,4 +194,5 @@ export interface DiagramGeometry {
   dividers: DividerGeometry[];
   returns: ReturnGeometry[];
   comments: CommentGeometry[];
+  groups: GroupGeometry[];
 }

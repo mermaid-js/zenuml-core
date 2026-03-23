@@ -76,6 +76,7 @@ import type {
   ReturnGeometry,
   DividerGeometry,
   CommentGeometry,
+  GroupGeometry,
 } from "./geometry";
 
 export interface BuildGeometryInput {
@@ -238,6 +239,9 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     }
   }
 
+  // Build group geometry from participants that share a groupId
+  const groups = buildGroups(participants, diagramHeight);
+
   return {
     width: diagramWidth,
     height: diagramHeight,
@@ -254,6 +258,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     dividers,
     returns,
     comments,
+    groups,
   };
 }
 
@@ -311,6 +316,7 @@ function buildParticipants(
         type: m.type,
         stereotype: m.stereotype,
         color: m.color,
+        groupId: m.groupId,
       };
     });
 }
@@ -326,6 +332,69 @@ function buildLifelines(
     bottomY: diagramHeight,
     dashed: true,
   }));
+}
+
+/**
+ * Build group geometry by grouping participants that share the same groupId.
+ * Each group gets a bounding box from leftmost to rightmost participant,
+ * with a small margin matching the HTML renderer's LIFELINE_GROUP_OUTLINE_MARGIN.
+ */
+function buildGroups(
+  participants: ParticipantGeometry[],
+  diagramHeight: number,
+): GroupGeometry[] {
+  const GROUP_OUTLINE_MARGIN = 2; // matches HTML's LIFELINE_GROUP_OUTLINE_MARGIN
+  const TITLE_BAR_HEIGHT = 20;
+
+  // Collect participants by groupId
+  const groupMap = new Map<string | number, ParticipantGeometry[]>();
+  for (const p of participants) {
+    if (p.groupId != null) {
+      const existing = groupMap.get(p.groupId);
+      if (existing) {
+        existing.push(p);
+      } else {
+        groupMap.set(p.groupId, [p]);
+      }
+    }
+  }
+
+  const groups: GroupGeometry[] = [];
+  for (const [groupId, members] of groupMap) {
+    if (members.length === 0) continue;
+
+    // Find bounding box from leftmost to rightmost participant
+    let minLeft = Infinity;
+    let maxRight = -Infinity;
+    let minY = Infinity;
+    for (const m of members) {
+      const left = m.x - m.width / 2;
+      const right = m.x + m.width / 2;
+      if (left < minLeft) minLeft = left;
+      if (right > maxRight) maxRight = right;
+      if (m.y < minY) minY = m.y;
+    }
+
+    // Group box: from leftmost participant left edge to rightmost participant right edge,
+    // with a small margin inset (matching HTML's outline positioning)
+    const x = minLeft + GROUP_OUTLINE_MARGIN;
+    const width = maxRight - minLeft - 2 * GROUP_OUTLINE_MARGIN;
+    // Group starts above participants to leave room for the title bar
+    const y = minY - TITLE_BAR_HEIGHT;
+    // Group extends to the full diagram height (matching HTML's h-full on group container)
+    const height = diagramHeight - y + PARTICIPANT_VISUAL_HEIGHT;
+
+    // Use groupId as the display name (the parser sets groupId = group name from DSL)
+    groups.push({
+      name: String(groupId),
+      x,
+      y,
+      width,
+      height,
+    });
+  }
+
+  return groups;
 }
 
 function buildMessages(
