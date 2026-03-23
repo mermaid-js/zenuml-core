@@ -21,6 +21,10 @@ export interface ParticipantGeometry {
   labelWidth?: number;
   /** Icon type (e.g., "aws", "database") if participant has an icon */
   type?: string;
+  /** Stereotype label (e.g., "BFF") rendered as «BFF» above the name */
+  stereotype?: string;
+  /** Background color (hex string, e.g. "#FFEBE6") */
+  color?: string;
 }
 
 export interface LifelineGeometry {

@@ -53,6 +53,13 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
   const textY = p.y + p.height / 2 - 0.25;
 
+  // Stereotype label (e.g., «BFF») — rendered above the main label in smaller font
+  let stereotypeSvg = "";
+  if (p.stereotype) {
+    const stereoY = textY - 14;
+    stereotypeSvg = `<text x="${textX}" y="${stereoY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="stereotype-label" font-size="12" fill="#666">${esc("«" + p.stereotype + "»")}</text>`;
+  }
+
   // Aliased labels (e.g. "b:B") — use textLength to pin the text extent to the
   // measured glyph width. HTML renders the label at natural glyph width with CSS
   // padding around it (not between characters). Setting textLength = glyphWidth
@@ -62,10 +69,13 @@ export function renderParticipant(p: ParticipantGeometry): string {
     ? ` textLength="${p.labelWidth}" lengthAdjust="spacing"`
     : "";
 
+  const { fillAttr, textFill } = colorAttrs(p.color);
+
   return `<g class="participant" data-participant="${esc(p.name)}">
-  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"/>
+  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillAttr}/>
   ${iconSvg}
-  <text x="${textX}" y="${textY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="participant-label"${textLengthAttr}>${esc(p.label)}</text>
+  ${stereotypeSvg}
+  <text x="${textX}" y="${textY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="participant-label"${textLengthAttr}${textFill}>${esc(p.label)}</text>
 </g>`;
 }
 
@@ -84,9 +94,11 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
     ? ` textLength="${p.labelWidth}" lengthAdjust="spacing"`
     : "";
 
+  const { fillAttr, textFill } = colorAttrs(p.color);
+
   return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
-  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"/>
-  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}>${esc(p.label)}</text>
+  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillAttr}/>
+  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}${textFill}>${esc(p.label)}</text>
 </g>`;
 }
 
@@ -115,6 +127,44 @@ function renderStarterParticipant(p: ParticipantGeometry): string {
     ${icon.content}
   </g>
 </g>`;
+}
+
+/**
+ * Normalize a color string to a # prefixed hex value.
+ * Parser may provide "FFEBE6" or "#FFEBE6".
+ */
+function normalizeHexColor(color: string): string {
+  const c = color.startsWith("#") ? color : `#${color}`;
+  return c;
+}
+
+/**
+ * Compute perceived brightness from a hex color string.
+ * Uses the same formula as the HTML renderer (Color.ts brightnessIgnoreAlpha):
+ * (R*299 + G*587 + B*114) / 1000
+ * Returns a value 0-255; > 128 means light background.
+ */
+function hexBrightness(hex: string): number {
+  const h = hex.startsWith("#") ? hex.slice(1) : hex;
+  const r = parseInt(h.substring(0, 2), 16) || 0;
+  const g = parseInt(h.substring(2, 4), 16) || 0;
+  const b = parseInt(h.substring(4, 6), 16) || 0;
+  return (r * 299 + g * 587 + b * 114) / 1000;
+}
+
+/**
+ * Build fill and text-color style attributes for a participant with a background color.
+ */
+function colorAttrs(color: string | undefined): { fillAttr: string; textFill: string } {
+  if (!color) {
+    return { fillAttr: "", textFill: "" };
+  }
+  const hex = normalizeHexColor(color);
+  const textColor = hexBrightness(hex) > 128 ? "#000" : "#fff";
+  return {
+    fillAttr: ` fill="${hex}"`,
+    textFill: ` fill="${textColor}"`,
+  };
 }
 
 function esc(s: string): string {

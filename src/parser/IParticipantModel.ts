@@ -6,6 +6,8 @@ export interface IParticipantModel {
   left: string;
   label?: string;
   type?: string;
+  stereotype?: string;
+  color?: string;
 
   /**
    * Returns the display name of the participant, which is the label if it exists, otherwise the name

@@ -309,6 +309,8 @@ function buildParticipants(
         showBottom: creationTop == null && !isStarter,
         labelWidth: measuredTextWidth,
         type: m.type,
+        stereotype: m.stereotype,
+        color: m.color,
       };
     });
 }

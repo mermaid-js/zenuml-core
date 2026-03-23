@@ -349,6 +349,11 @@ describe("renderToSvg", () => {
     expect(result.svg).toMatch(/transform="translate.*scale/);
   });
 
+  it("renders stereotype label on participant", () => {
+    const result = renderToSvg('@EC2 <<BFF>> OrderService\nOrderService.method()');
+    expect(result.innerSvg).toContain("«BFF»");
+  });
+
   it("renders participant without icon when type is unknown", () => {
     const code = `@UnknownType A\n@UnknownType B\nA.method() { B.execute() }`;
     const result = renderToSvg(code);
@@ -360,5 +365,11 @@ describe("renderToSvg", () => {
     // Count icon transforms - should only be 1 (for _STARTER_)
     const iconTransforms = result.svg.match(/transform="translate\([^)]+\) scale/g);
     expect(iconTransforms?.length).toBe(1); // Only _STARTER_ actor icon
+  });
+
+  it("renders participant with background color", () => {
+    const result = renderToSvg("@Actor Client #FFEBE6\nClient.method()");
+    // Color should appear as fill on participant rect
+    expect(result.innerSvg).toMatch(/fill="#FFEBE6"/i);
   });
 });
