@@ -15,6 +15,8 @@ const ICON_MARGIN_RIGHT = 4;
 const ICON_PAINT_OFFSET_X = 4;
 const LABEL_PAD_LEFT = 8;
 const LABEL_HORIZONTAL_PADDING = 16;
+const STEREOTYPE_VERTICAL_OFFSET = 8;
+const BOUNDARY_ICON_VERTICAL_TWEAK = 2.75;
 
 export function renderParticipant(p: ParticipantGeometry): string {
   if (p.isStarter) return renderStarterParticipant(p);
@@ -39,7 +41,8 @@ export function renderParticipant(p: ParticipantGeometry): string {
     const groupWidth = ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_HORIZONTAL_PADDING + textWidth;
     const groupX = p.x - groupWidth / 2;
     const iconX = groupX + ICON_PAINT_OFFSET_X;
-    const iconY = p.y + (p.height - ICON_SIZE) / 2;
+    const iconType = p.type?.toLowerCase();
+    const iconY = p.y + (p.height - ICON_SIZE) / 2 + (iconType === "boundary" ? BOUNDARY_ICON_VERTICAL_TWEAK : 0);
     textX = groupX + ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_PAD_LEFT;
 
     const [, , vbW, vbH] = (icon.viewBox || "0 0 24 24").split(" ").map(Number);
@@ -52,12 +55,13 @@ export function renderParticipant(p: ParticipantGeometry): string {
   }
 
   const textY = p.y + p.height / 2 - 0.25;
+  const labelY = p.stereotype ? textY + STEREOTYPE_VERTICAL_OFFSET : textY;
 
   // Stereotype label (e.g., «BFF») — rendered above the main label in smaller font
   let stereotypeSvg = "";
   if (p.stereotype) {
-    const stereoY = textY - 14;
-    stereotypeSvg = `<text x="${textX}" y="${stereoY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="stereotype-label" font-size="12" fill="#666">${esc("«" + p.stereotype + "»")}</text>`;
+    const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET;
+    stereotypeSvg = `<text x="${textX}" y="${stereoY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="stereotype-label" font-size="12"${stereotypeTextStyle(p.color)}>${esc("«" + p.stereotype + "»")}</text>`;
   }
 
   // Aliased labels (e.g. "b:B") — use textLength to pin the text extent to the
@@ -69,13 +73,13 @@ export function renderParticipant(p: ParticipantGeometry): string {
     ? ` textLength="${p.labelWidth}" lengthAdjust="spacing"`
     : "";
 
-  const { fillAttr, textFill } = colorAttrs(p.color);
+  const { fillStyle, textStyle } = colorAttrs(p.color);
 
   return `<g class="participant" data-participant="${esc(p.name)}">
-  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillAttr}/>
+  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
   ${iconSvg}
   ${stereotypeSvg}
-  <text x="${textX}" y="${textY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="participant-label"${textLengthAttr}${textFill}>${esc(p.label)}</text>
+  <text x="${textX}" y="${labelY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
 </g>`;
 }
 
@@ -94,11 +98,11 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
     ? ` textLength="${p.labelWidth}" lengthAdjust="spacing"`
     : "";
 
-  const { fillAttr, textFill } = colorAttrs(p.color);
+  const { fillStyle, textStyle } = colorAttrs(p.color);
 
   return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
-  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillAttr}/>
-  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}${textFill}>${esc(p.label)}</text>
+  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
+  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
 </g>`;
 }
 
@@ -155,16 +159,25 @@ function hexBrightness(hex: string): number {
 /**
  * Build fill and text-color style attributes for a participant with a background color.
  */
-function colorAttrs(color: string | undefined): { fillAttr: string; textFill: string } {
+function colorAttrs(color: string | undefined): { fillStyle: string; textStyle: string } {
   if (!color) {
-    return { fillAttr: "", textFill: "" };
+    return { fillStyle: "", textStyle: "" };
   }
   const hex = normalizeHexColor(color);
   const textColor = hexBrightness(hex) > 128 ? "#000" : "#fff";
   return {
-    fillAttr: ` fill="${hex}"`,
-    textFill: ` fill="${textColor}"`,
+    fillStyle: ` style="fill:${hex};"`,
+    textStyle: ` style="fill:${textColor};"`,
   };
+}
+
+function stereotypeTextStyle(color: string | undefined): string {
+  if (!color) {
+    return ` style="fill:#222;"`;
+  }
+  const hex = normalizeHexColor(color);
+  const textColor = hexBrightness(hex) > 128 ? "#000" : "#fff";
+  return ` style="fill:${textColor};"`;
 }
 
 function esc(s: string): string {

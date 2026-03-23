@@ -9,9 +9,12 @@ import BoundarySvg from "@/assets/Robustness_Diagram_Boundary.svg?raw";
 import ControlSvg from "@/assets/Robustness_Diagram_Control.svg?raw";
 import DatabaseSvg from "@/assets/database.svg?raw";
 import EntitySvg from "@/assets/Robustness_Diagram_Entity.svg?raw";
+import Ec2Svg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_Amazon-EC2_Instance_48.svg?raw";
 import IamSvg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Security-Identity-Compliance/Res_AWS-Identity-Access-Management_IAM-Access-Analyzer_48.svg?raw";
+import LambdaSvg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_AWS-Lambda_Lambda-Function_48.svg?raw";
 import SnsSvg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-Simple-Notification-Service_Topic_48.svg?raw";
 import SqsSvg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-Simple-Queue-Service_Queue_48.svg?raw";
+import AzureFunctionSvg from "@/assets/Azure_Public_Service_Icons/Icons/Compute/10029-icon-service-Function-Apps.svg?raw";
 
 export interface IconDefinition {
   /** ViewBox for the icon (default "0 0 24 24") */
@@ -65,6 +68,9 @@ function parseRawSvg(raw: string): IconDefinition {
 export const ICONS: Record<string, IconDefinition> = {
   actor: parseRawSvg(ActorSvg),
   database: parseRawSvg(DatabaseSvg),
+  ec2: parseRawSvg(Ec2Svg),
+  lambda: parseRawSvg(LambdaSvg),
+  azurefunction: parseRawSvg(AzureFunctionSvg),
   sqs: parseRawSvg(SqsSvg),
   sns: parseRawSvg(SnsSvg),
   iam: parseRawSvg(IamSvg),

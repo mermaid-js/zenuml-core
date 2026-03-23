@@ -6,10 +6,15 @@ import type { GroupGeometry } from "../geometry";
  */
 export function renderGroup(g: GroupGeometry): string {
   const titleBarHeight = 20;
+  const outlineStroke = "var(--color-outline-primary, #666)";
+  const titleFill = "var(--color-bg-frame, #fff)";
+  const titleTextFill = "var(--color-text-message, var(--color-text-base, #000))";
+  const titleY = g.y + titleBarHeight / 2;
+  const titleText = g.name ? escXml(g.name) : "";
   return `<g class="participant-group">
-  <rect x="${g.x}" y="${g.y}" width="${g.width}" height="${g.height}" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="4 2" rx="2"/>
-  <rect x="${g.x}" y="${g.y}" width="${g.width}" height="${titleBarHeight}" fill="#f5f5f5" stroke="#999" stroke-width="1" rx="2"/>
-  <text x="${g.x + g.width / 2}" y="${g.y + 14}" text-anchor="middle" font-size="12" font-weight="600" fill="#666">${escXml(g.name)}</text>
+  <rect x="${g.x}" y="${g.y}" width="${g.width}" height="${g.height}" fill="none" stroke="${outlineStroke}" stroke-width="1" stroke-dasharray="4 2"/>
+  ${titleText ? `<rect x="${g.x}" y="${g.y}" width="${g.width}" height="${titleBarHeight}" fill="${titleFill}" stroke="none"/>` : ""}
+  ${titleText ? `<text x="${g.x + g.width / 2}" y="${titleY}" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="600" fill="${titleTextFill}">${titleText}</text>` : ""}
 </g>`;
 }
 

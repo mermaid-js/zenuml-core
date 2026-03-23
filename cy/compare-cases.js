@@ -703,6 +703,23 @@ ReturnType ret = ParticipantName.methodA(a, b) {
   "repro-starter-B": `B.m`,
   // --- Starter + B with long method name ---
   "repro-starter-B-long": `B.aVeryLongMethodThatShouldPushTheParticipant`,
+  // --- Participant colors on supported icons ---
+  "repro-color-boundary": `@Actor Client #FFEBE6
+@Boundary OrderController #0747A6
+Client->OrderController: post`,
+  // --- Stereotype + color + EC2 icon header layout ---
+  "repro-ec2-stereotype-color": `@EC2 <<BFF>> OrderService #E3FCEF
+OrderService.create(payload)`,
+  // --- Cloud service icons without group geometry ---
+  "repro-service-icons": `@Lambda PurchaseService
+@AzureFunction InvoiceService
+PurchaseService->InvoiceService: createInvoice(order)`,
+  // --- Group container without unsupported icon noise ---
+  "repro-group-container": `group BusinessService {
+  @Actor Client
+  @Boundary OrderController
+}
+Client->OrderController: post`,
 
   // --- Order Service (comments + nested fragments) ---
   "order-service": `title Order Service

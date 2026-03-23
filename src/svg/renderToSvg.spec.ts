@@ -352,6 +352,8 @@ describe("renderToSvg", () => {
   it("renders stereotype label on participant", () => {
     const result = renderToSvg('@EC2 <<BFF>> OrderService\nOrderService.method()');
     expect(result.innerSvg).toContain("«BFF»");
+    expect(result.innerSvg).toContain('data-participant="OrderService"');
+    expect(result.innerSvg).toMatch(/class="participant-icon" transform="translate\([^)]+\) scale/);
   });
 
   it("renders participant without icon when type is unknown", () => {
@@ -368,13 +370,13 @@ describe("renderToSvg", () => {
   });
 
   it("renders participant with background color", () => {
-    const result = renderToSvg("@Actor Client #FFEBE6\nClient.method()");
-    // Color should appear as fill on participant rect
-    expect(result.innerSvg).toMatch(/fill="#FFEBE6"/i);
+    const result = renderToSvg("@Boundary OrderController #0747A6\nOrderController.method()");
+    expect(result.innerSvg).toContain('style="fill:#0747A6;"');
+    expect(result.innerSvg).toContain('class="participant-label" style="fill:#fff;"');
   });
 
   it("renders participant group container", () => {
-    const code = 'group BusinessService {\n  @Lambda A\n  @Database B\n}\nA.method()';
+    const code = 'group BusinessService {\n  @Actor Client\n  @Boundary OrderController\n}\nClient->OrderController: post';
     const result = renderToSvg(code);
     expect(result.innerSvg).toContain("BusinessService");
     // Group should have a dashed outline
@@ -382,5 +384,15 @@ describe("renderToSvg", () => {
     // Group geometry should be present
     expect(result.geometry?.groups.length).toBe(1);
     expect(result.geometry?.groups[0].name).toBe("BusinessService");
+  });
+
+  it("renders cloud service participant icons used by order-service", () => {
+    const code = `@Lambda PurchaseService\n@AzureFunction InvoiceService\nPurchaseService->InvoiceService: createInvoice(order)`;
+    const result = renderToSvg(code);
+
+    expect(result.svg).toContain('data-participant="PurchaseService"');
+    expect(result.svg).toContain('data-participant="InvoiceService"');
+    const iconTransforms = result.svg.match(/class="participant-icon" transform="translate\([^)]+\) scale/g);
+    expect(iconTransforms?.length).toBe(2);
   });
 });

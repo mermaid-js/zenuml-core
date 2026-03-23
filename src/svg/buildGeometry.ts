@@ -344,7 +344,6 @@ function buildGroups(
   diagramHeight: number,
 ): GroupGeometry[] {
   const GROUP_OUTLINE_MARGIN = 2; // matches HTML's LIFELINE_GROUP_OUTLINE_MARGIN
-  const TITLE_BAR_HEIGHT = 20;
 
   // Collect participants by groupId
   const groupMap = new Map<string | number, ParticipantGeometry[]>();
@@ -376,13 +375,14 @@ function buildGroups(
     }
 
     // Group box: from leftmost participant left edge to rightmost participant right edge,
-    // with a small margin inset (matching HTML's outline positioning)
+    // with a small margin inset (matching HTML's outline positioning).
     const x = minLeft + GROUP_OUTLINE_MARGIN;
     const width = maxRight - minLeft - 2 * GROUP_OUTLINE_MARGIN;
-    // Group starts above participants to leave room for the title bar
-    const y = minY - TITLE_BAR_HEIGHT;
-    // Group extends to the full diagram height (matching HTML's h-full on group container)
-    const height = diagramHeight - y + PARTICIPANT_VISUAL_HEIGHT;
+    // The HTML group container starts at the top of the content region and uses an
+    // absolutely-positioned title strip, so the outer outline should stop at the
+    // content bottom rather than adding a separate header band to its height.
+    const y = minY - 20;
+    const height = Math.max(0, diagramHeight - y);
 
     // Use groupId as the display name (the parser sets groupId = group name from DSL)
     groups.push({
