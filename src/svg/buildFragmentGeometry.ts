@@ -29,7 +29,7 @@ function snapX(x: number): number {
   return x;
 }
 
-const COMMENT_FONT_ASCENT = 15.5;
+const COMMENT_FONT_ASCENT = 15;
 
 export function buildFragmentGeometry(
   info: StatementInfo,

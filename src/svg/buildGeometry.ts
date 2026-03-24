@@ -486,11 +486,15 @@ function buildMessages(
         ? snapX(coordinates.getPosition(commentParticipant))
         : 10;
       // SVG text y = baseline; HTML positions by visual top. Add font ascent (~12px for 14px text).
-      const COMMENT_FONT_ASCENT = 15.5;
-      // +1: HTML comment is inside the occurrence's CSS border (border-2),
-      // so its content starts 1px past the occurrence edge.
+      const COMMENT_FONT_ASCENT = 15;
+      // Inside an occurrence, HTML positions the comment at the occurrence
+      // bar's inner edge (OCCURRENCE_BAR_SIDE_WIDTH + 1). At the top level
+      // (no active occurrence), the comment sits near the lifeline center.
+      const commentXOffset = info.senderOccurrenceDepth >= 1
+        ? OCCURRENCE_BAR_SIDE_WIDTH + 1
+        : 1;
       comments.push({
-        x: commentX + OCCURRENCE_BAR_SIDE_WIDTH + 1,
+        x: commentX + commentXOffset,
         y: coord.top + adjust + COMMENT_FONT_ASCENT,
         text: commentObj.text,
         style: cssToSvgStyle(commentObj.commentStyle),
