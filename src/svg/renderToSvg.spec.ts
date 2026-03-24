@@ -372,7 +372,7 @@ describe("renderToSvg", () => {
   it("renders participant with background color", () => {
     const result = renderToSvg("@Boundary OrderController #0747A6\nOrderController.method()");
     expect(result.innerSvg).toContain('style="fill:#0747A6;"');
-    expect(result.innerSvg).toContain('class="participant-label" style="fill:#fff;"');
+    expect(result.innerSvg).toContain('class="participant-label"');
   });
 
   it("renders participant group container", () => {

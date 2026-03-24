@@ -474,7 +474,7 @@ function buildMessages(
         ? snapX(coordinates.getPosition(commentParticipant))
         : 10;
       // SVG text y = baseline; HTML positions by visual top. Add font ascent (~12px for 14px text).
-      const COMMENT_FONT_ASCENT = 15;
+      const COMMENT_FONT_ASCENT = 15.5;
       // +1: HTML comment is inside the occurrence's CSS border (border-2),
       // so its content starts 1px past the occurrence edge.
       comments.push({
