@@ -747,6 +747,55 @@ OrderController.post(payload) {
   }
 }`,
 
+  // --- Repro: order-service issue groups ---
+
+  // Group 1: message label dy=-0.5 (backtick comment triggers it)
+  "repro-label-dy": `@Starter(Client)
+// \`POST /orders\`
+A.post(payload) {
+  B.create(payload) {
+    c = new C(payload)
+  }
+}`,
+
+  // Group 2: creation-return arrow geometry (ambiguous return arrows)
+  "repro-creation-return-arrow": `A.method() {
+  b = new B(payload)
+  return b
+}`,
+
+  // Group 3: comment positioning (comments above messages and fragments)
+  "repro-comment-pos": `// comment above message
+A -> B: doWork
+// comment above fragment
+if(cond) {
+  B -> C: inner
+}`,
+
+  // Group 4: fragment body geometry (nested alt+par with comments)
+  "repro-nested-fragment": `A.call() {
+  B.process() {
+    // comment before if
+    if(x) {
+      par {
+        C.task1()
+        D.task2()
+      }
+    }
+  }
+}`,
+
+  // Group 5: icon + stereotype + color + group (with occurrences)
+  "repro-icon-stereo-group": `@EC2 <<BFF>> OrderService #E3FCEF
+group BusinessService {
+  @Lambda PurchaseService
+  @AzureFunction InvoiceService
+}
+OrderService.handle() {
+  PurchaseService.create()
+  InvoiceService.invoice()
+}`,
+
   // --- Icons ---
   "icons": `@Actor User
 @Database DB
