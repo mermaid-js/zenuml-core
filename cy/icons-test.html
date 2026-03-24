@@ -1,0 +1,8 @@
+@Actor User
+@Database DB <<database>>
+@Queue MQ <<sqs>>
+
+User.login() {
+  DB.verify()
+  MQ.enqueue()
+}

@@ -118,7 +118,7 @@ function find_optimal(matrix: Array<Array<number>>) {
   for (let j = 1; j < n; j++) {
     gaps.push(Dual(0, 1));
   }
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     const [delta, table] = longestPathTable(graph, gaps);
     if (delta == Infinity) {

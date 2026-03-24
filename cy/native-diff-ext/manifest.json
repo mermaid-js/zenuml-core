@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "ZenUML Native Diff",
+  "version": "1.0",
+  "description": "Pixel-level diff between HTML and SVG renderers on compare-case.html",
+  "permissions": ["activeTab", "debugger"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost:8080/cy/compare-case.html*"],
+      "js": ["bridge.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["http://localhost:8080/cy/compare-case.html*"],
+      "js": ["content.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_title": "Run Native Diff"
+  }
+}

@@ -21,6 +21,7 @@
     "pw:update-ci": "playwright test --update-snapshots --reporter=github",
     "pw:ui": "playwright test --ui",
     "pw:smoke": "playwright test smoke",
+    "analyze:compare-case": "node scripts/analyze-compare-case.mjs",
     "pw:install": "playwright install-deps && playwright install chromium",
     "antlr:setup": "python3 -m pip install antlr4-tools",
     "antlr:generate": "pwd && cd ./src/g4-units/hello-world && antlr4 Hello.g4",
@@ -46,6 +47,18 @@
   "main": "./dist/zenuml.js",
   "module": "./dist/zenuml.esm.mjs",
   "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/zenuml.esm.mjs"
+      },
+      "require": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/zenuml.js"
+      }
+    }
+  },
   "engines": {
     "node": ">=20"
   },
@@ -82,6 +95,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@happy-dom/global-registrator": "^18.0.1",
+    "@napi-rs/canvas": "^0.1.97",
     "@playwright/test": "^1.57.0",
     "@storybook/addon-docs": "^9.1.17",
     "@storybook/addon-onboarding": "^9.1.17",

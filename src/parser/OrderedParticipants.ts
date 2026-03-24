@@ -11,12 +11,18 @@ class Participant implements IParticipantModel {
   left: string;
   label?: string;
   type?: string;
+  stereotype?: string;
+  color?: string;
+  groupId?: string | number;
 
-  constructor(name: string, left: string, label?: string, type?: string) {
+  constructor(name: string, left: string, label?: string, type?: string, stereotype?: string, color?: string, groupId?: string | number) {
     this.name = name;
     this.left = left;
     this.label = label;
     this.type = type;
+    this.stereotype = stereotype;
+    this.color = color;
+    this.groupId = groupId;
   }
 
   getDisplayName(): string {
@@ -55,6 +61,9 @@ export function OrderedParticipants(rootContext: any): IParticipantModel[] {
       previousName,
       participant.label,
       participant.type,
+      participant.stereotype,
+      participant.color,
+      participant.groupId,
     );
   });
 }

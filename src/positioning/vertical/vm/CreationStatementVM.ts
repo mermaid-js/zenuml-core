@@ -31,7 +31,7 @@ export class CreationStatementVM extends StatementVM {
     const block = this.creation?.braceBlock?.()?.block?.();
     if (block) {
       const fragmentOrigin =
-        this.findLeftParticipant(this.creation, origin) || origin;
+        this.findLeftParticipant(this.creation, originParticipant) || originParticipant;
       cursor = this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
       cursor += 2; // .occurrence.border-2 for bottom
     } else {

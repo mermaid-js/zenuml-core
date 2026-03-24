@@ -12,6 +12,7 @@ import {
   RenderMode,
   stickyOffsetAtom,
   themeAtom,
+  verticalModeAtom,
 } from "./store/Store";
 import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
 import { VERSION } from "./version.ts";
@@ -33,6 +34,8 @@ import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { createStore, Provider } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
+export { renderToSvg } from "./svg/renderToSvg";
+export type { RenderResult, RenderOptions } from "./svg/renderToSvg";
 const logger = parentLogger.child({ name: "core" });
 
 interface Config {
@@ -118,6 +121,10 @@ export default class ZenUml implements IZenUml {
     portalRootElement.className = "zenuml";
     portalRootElement.append(document.createElement("div"));
     document.body.append(portalRootElement);
+  }
+
+  setVerticalMode(mode: "html" | "legacy") {
+    this.store.set(verticalModeAtom, mode);
   }
 
   async render(

@@ -1,0 +1,461 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Compare</title>
+    <style>
+      body { margin: 0; font-family: sans-serif; }
+      .compare-bar {
+        display: flex; align-items: center; gap: 12px;
+        padding: 8px 16px; background: #1e293b; color: white;
+      }
+      .compare-bar a { color: #93c5fd; text-decoration: none; font-size: 13px; }
+      .compare-bar a:hover { text-decoration: underline; }
+      .compare-bar h2 { margin: 0; font-size: 15px; font-weight: 500; }
+      .nav { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+      .nav a { padding: 4px 10px; background: #334155; border-radius: 4px; font-size: 12px; }
+      .nav button { padding: 4px 12px; background: #7c3aed; border: none; border-radius: 4px; color: white; font-size: 12px; cursor: pointer; }
+      .nav button:hover { background: #6d28d9; }
+      .nav button:disabled { background: #64748b; cursor: wait; }
+      .nav .match-badge { font-size: 11px; color: #94a3b8; }
+      .container { display: flex; gap: 0; }
+      .panel { flex: 1; overflow: auto; }
+      .panel > h3 { margin: 0; padding: 8px 16px; background: #334155; color: white; font-size: 13px; }
+      .panel-content { padding: 10px; background: white; }
+      .diff-panel { display: none; }
+      .diff-panel.visible { display: block; }
+      .diff-panel .panel-content canvas { max-width: 100%; }
+      #html-output .footer { display: none !important; }
+      #html-output .privacy { visibility: hidden !important; }
+    </style>
+  </head>
+  <body>
+    <div class="compare-bar">
+      <a href="/cy/compare.html">&larr; All cases</a>
+      <h2 id="case-name"></h2>
+      <div class="nav">
+        <a id="prev-link" href="#">&larr; Prev</a>
+        <a id="next-link" href="#">Next &rarr;</a>
+        <span class="match-badge" id="match-badge"></span>
+      </div>
+    </div>
+    <div class="container">
+      <div class="panel">
+        <h3>HTML/React Renderer (theme-default)</h3>
+        <div class="panel-content" id="html-output">
+          <div id="diagram"><pre class="zenuml" style="margin: 0"></pre></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Native SVG Renderer</h3>
+        <div class="panel-content" id="svg-output"></div>
+      </div>
+      <div class="panel diff-panel" id="diff-panel">
+        <h3>Pixel Diff</h3>
+        <div class="panel-content" id="diff-output"></div>
+      </div>
+    </div>
+    <script type="module">
+      import ZenUml from "/src/core.tsx";
+      import { renderToSvg } from "/src/svg/renderToSvg.ts";
+
+      import { CASES } from "./compare-cases.js";
+
+      const caseNames = Object.keys(CASES);
+      const params = new URLSearchParams(window.location.search);
+      const caseName = params.get("case") || caseNames[0];
+      const code = CASES[caseName];
+
+      // Update title and header
+      document.title = `Compare: ${caseName}`;
+      document.getElementById("case-name").textContent = caseName;
+
+      // Prev/Next navigation
+      const idx = caseNames.indexOf(caseName);
+      const prevLink = document.getElementById("prev-link");
+      const nextLink = document.getElementById("next-link");
+      if (idx > 0) {
+        prevLink.href = `?case=${encodeURIComponent(caseNames[idx - 1])}`;
+      } else {
+        prevLink.style.visibility = "hidden";
+      }
+      if (idx < caseNames.length - 1) {
+        nextLink.href = `?case=${encodeURIComponent(caseNames[idx + 1])}`;
+      } else {
+        nextLink.style.visibility = "hidden";
+      }
+
+      // Expose DSL for the extension's batch mode to read
+      window.__currentDSL = code || "";
+
+      if (code === undefined) {
+        document.getElementById("svg-output").innerHTML = `<p style="color:red">Unknown case: ${caseName}</p>`;
+      } else {
+        // SVG side
+        const result = renderToSvg(code);
+        document.getElementById("svg-output").innerHTML = result.svg;
+
+        // HTML side — render with theme-default
+        const diagram = document.getElementById("diagram");
+        const pre = diagram.querySelector("pre.zenuml");
+        pre.textContent = code;
+        const zenUml = new ZenUml(pre);
+        await zenUml.render(code, { theme: "theme-default" });
+
+        // Hide footer in HTML output (SVG has no footer equivalent)
+        requestAnimationFrame(() => {
+          const footer = document.querySelector("#html-output .footer");
+          if (footer) footer.style.display = "none";
+        });
+      }
+
+      // ——— Element extraction for structural comparison ———
+
+      function extractHtmlElements(container) {
+        const elements = { participants: [], messages: [], selfCalls: [], creations: [], returns: [], fragments: [] };
+
+        // Participants
+        container.querySelectorAll("[data-participant-id]").forEach(el => {
+          const name = el.getAttribute("data-participant-id");
+          if (name) elements.participants.push(name);
+        });
+
+        // Messages (non-self, non-return, non-creation interactions)
+        container.querySelectorAll('.interaction:not(.return):not(.creation)').forEach(el => {
+          const isSelf = el.classList.contains("self-invocation") ||
+                         el.querySelector(".self-invocation") !== null ||
+                         el.classList.contains("self");
+          if (isSelf) return;
+          const sig = el.getAttribute("data-signature") || el.getAttribute("data-to") || "";
+          if (sig) elements.messages.push(sig);
+        });
+
+        // Self-calls
+        container.querySelectorAll('.self-invocation').forEach(el => {
+          const interaction = el.closest(".interaction");
+          const sig = interaction?.getAttribute("data-signature") || "";
+          if (sig) elements.selfCalls.push(sig);
+        });
+
+        // Creations
+        container.querySelectorAll('.interaction.creation').forEach(el => {
+          const sig = el.getAttribute("data-signature") || "";
+          if (sig) elements.creations.push(sig);
+        });
+
+        // Returns — match .interaction.return (some have data-type="return", some don't)
+        container.querySelectorAll('.interaction.return').forEach(el => {
+          const sig = el.getAttribute("data-signature") || "";
+          const msgDiv = el.querySelector(".message");
+          const label = sig || (msgDiv ? msgDiv.textContent.trim().replace(/[\d.]+$/, "").trim() : "");
+          if (label) elements.returns.push(label);
+        });
+
+        // Fragments
+        container.querySelectorAll(".fragment").forEach(el => {
+          const kind = [...el.classList].find(c => c.startsWith("fragment-"))?.replace("fragment-", "") ||
+                       [...el.classList].find(c => ["alt", "loop", "opt", "par", "tcf", "critical", "section", "ref"].includes(c)) || "unknown";
+          elements.fragments.push(kind);
+        });
+
+        return elements;
+      }
+
+      function extractSvgElements(svgElement) {
+        const elements = { participants: [], messages: [], selfCalls: [], creations: [], returns: [], fragments: [] };
+        if (!svgElement) return elements;
+
+        // Participants
+        svgElement.querySelectorAll("g.participant, g.participant-starter").forEach(g => {
+          const name = g.getAttribute("data-participant");
+          if (name) elements.participants.push(name);
+        });
+
+        // Messages (non-self)
+        svgElement.querySelectorAll("g.message").forEach(g => {
+          if (g.classList.contains("self-call")) return;
+          const text = g.querySelector("text.message-label");
+          elements.messages.push(text ? text.textContent.trim() : "");
+        });
+
+        // Self-calls
+        svgElement.querySelectorAll("g.message.self-call").forEach(g => {
+          const text = g.querySelector("text.message-label");
+          elements.selfCalls.push(text ? text.textContent.trim() : "");
+        });
+
+        // Creations
+        svgElement.querySelectorAll("g.creation").forEach(g => {
+          const text = g.querySelector("text.message-label");
+          elements.creations.push(text ? text.textContent.trim() : "");
+        });
+
+        // Returns
+        svgElement.querySelectorAll("g.return").forEach(g => {
+          const text = g.querySelector("text.return-label");
+          elements.returns.push(text ? text.textContent.trim() : "");
+        });
+
+        // Fragments
+        svgElement.querySelectorAll("g.fragment, g[class*='fragment-']").forEach(g => {
+          const kind = ([...g.classList].find(c => c.startsWith("fragment-")) || "").replace("fragment-", "") || "unknown";
+          elements.fragments.push(kind);
+        });
+
+        return elements;
+      }
+
+      function computeStructuralMatch(htmlElements, svgElements) {
+        const types = ["participants", "messages", "selfCalls", "creations", "returns", "fragments"];
+        let totalScore = 0;
+        let scoredTypes = 0;
+        let totalElements = 0;
+        let matchedElements = 0;
+        const details = {};
+
+        for (const type of types) {
+          const htmlList = htmlElements[type] || [];
+          const svgList = svgElements[type] || [];
+          const maxLen = Math.max(htmlList.length, svgList.length);
+
+          if (maxLen === 0) continue; // skip types with no elements in either
+
+          // Count matches by order
+          let matched = 0;
+          const minLen = Math.min(htmlList.length, svgList.length);
+          for (let i = 0; i < minLen; i++) {
+            matched++; // count as matched if present in both at same index
+          }
+
+          const score = matched / maxLen;
+          totalScore += score;
+          scoredTypes++;
+          totalElements += maxLen;
+          matchedElements += matched;
+
+          details[type] = { html: htmlList.length, svg: svgList.length, matched, score };
+        }
+
+        return {
+          score: scoredTypes > 0 ? totalScore / scoredTypes : 1,
+          totalElements,
+          matchedElements,
+          details,
+        };
+      }
+
+      // --- Reusable capture/diff API (also exposed on window for external tools) ---
+
+      // State for hide/restore cycle
+      let _hiddenEls = [];
+      let _savedStyles = [];
+
+      function _hideEl(el) {
+        if (el) { _hiddenEls.push({ el, prev: el.style.display }); el.style.display = "none"; }
+      }
+      function _stripMargin(el) {
+        if (el) { _savedStyles.push({ el, prev: el.style.margin }); el.style.margin = "0"; }
+      }
+
+      // Prepare HTML panel for screenshot: hide chrome, numbering, icons
+      window.prepareHtmlForCapture = function() {
+        _hiddenEls = [];
+        _savedStyles = [];
+
+        const htmlEl = document.getElementById("html-output");
+        const htmlFrame = htmlEl.querySelector(".frame");
+        const seqDiagram = htmlEl.querySelector(".sequence-diagram");
+        const svgElement = document.getElementById("svg-output").querySelector("svg");
+
+        _hideEl(htmlEl.querySelector(".footer"));
+        _stripMargin(htmlFrame);
+
+        // Hide bottom participant labels (SVG no longer renders them)
+        const captureEl = htmlFrame || seqDiagram || htmlEl;
+        const captureRect = captureEl.getBoundingClientRect();
+        const captureMidY = captureRect.top + captureRect.height * 0.7;
+        captureEl.querySelectorAll(".participant").forEach(el => {
+          const r = el.getBoundingClientRect();
+          if (r.top > captureMidY) _hideEl(el);
+        });
+
+        if (htmlFrame) {
+          const frameRect2 = htmlFrame.getBoundingClientRect();
+          // Hide SVG icons in the header area (top 35px) — checkbox, etc.
+          htmlFrame.querySelectorAll("svg").forEach(svg => {
+            const r = svg.getBoundingClientRect();
+            if (r.width > 0 && (r.top - frameRect2.top) < 35) _hideEl(svg);
+          });
+        }
+
+        return { htmlSelector: "#html-output .frame, #html-output .sequence-diagram", svgSelector: "#svg-output svg" };
+      };
+
+      // Restore HTML panel after screenshot
+      window.restoreHtmlAfterCapture = function() {
+        for (const { el, prev } of _hiddenEls) el.style.display = prev;
+        for (const { el, prev } of _savedStyles) el.style.margin = prev;
+        _hiddenEls = [];
+        _savedStyles = [];
+      };
+
+      // Run pixel diff from two PNG data URLs and display results on the page.
+      // Returns { pixelPct, structPct, contentMatch, contentTotal }
+      window.diffFromImages = async function(htmlDataUrl, svgDataUrl) {
+        const htmlEl = document.getElementById("html-output");
+        const svgEl = document.getElementById("svg-output");
+        const seqDiagram = htmlEl.querySelector(".sequence-diagram");
+        const svgElement = svgEl.querySelector("svg");
+
+        // Structural comparison
+        const htmlElements = extractHtmlElements(seqDiagram || htmlEl);
+        const svgElements = extractSvgElements(svgElement);
+        const structural = computeStructuralMatch(htmlElements, svgElements);
+
+        // Load images
+        const [htmlImg, svgImg] = await Promise.all([
+          loadImage(htmlDataUrl),
+          loadImage(svgDataUrl),
+        ]);
+
+        // Align (both anchored at 0,0)
+        const dx = 0, dy = 0;
+        const w = Math.max(htmlImg.width, svgImg.width);
+        const h = Math.max(htmlImg.height, svgImg.height);
+
+        const canvas1 = document.createElement("canvas");
+        canvas1.width = w; canvas1.height = h;
+        const ctx1 = canvas1.getContext("2d");
+        ctx1.fillStyle = "white"; ctx1.fillRect(0, 0, w, h);
+        ctx1.drawImage(htmlImg, 0, 0);
+
+        const canvas2 = document.createElement("canvas");
+        canvas2.width = w; canvas2.height = h;
+        const ctx2 = canvas2.getContext("2d");
+        ctx2.fillStyle = "white"; ctx2.fillRect(0, 0, w, h);
+        ctx2.drawImage(svgImg, 0, 0);
+
+        const data1 = canvas1.getContext("2d").getImageData(0, 0, w, h).data;
+        const data2 = canvas2.getContext("2d").getImageData(0, 0, w, h).data;
+
+        const diffCanvas = document.createElement("canvas");
+        diffCanvas.width = w;
+        diffCanvas.height = h;
+        const ctx = diffCanvas.getContext("2d");
+        const diffImg = ctx.createImageData(w, h);
+        const diff = diffImg.data;
+
+        let contentMatch = 0;
+        let contentTotal = 0;
+        const urlParams = new URLSearchParams(window.location.search);
+        const LUMA_THRESHOLD = parseInt(urlParams.get('luma') || '240', 10);
+        const CHANNEL_TOLERANCE = parseInt(urlParams.get('ctol') || '1', 10);
+        const POSITION_TOLERANCE = parseInt(urlParams.get('ptol') || '1', 10);
+
+        function luma(r, g, b) { return 0.3 * r + 0.59 * g + 0.11 * b; }
+
+        function getPixel(data, x, y) {
+          const i = (y * w + x) * 4;
+          return [data[i], data[i+1], data[i+2]];
+        }
+
+        function pixelsClose(r1, g1, b1, r2, g2, b2) {
+          return Math.abs(r1 - r2) <= CHANNEL_TOLERANCE &&
+                 Math.abs(g1 - g2) <= CHANNEL_TOLERANCE &&
+                 Math.abs(b1 - b2) <= CHANNEL_TOLERANCE;
+        }
+
+        function hasNearbyMatch(src, dst, x, y) {
+          const [r1, g1, b1] = getPixel(src, x, y);
+          for (let dy = -POSITION_TOLERANCE; dy <= POSITION_TOLERANCE; dy++) {
+            for (let dx = -POSITION_TOLERANCE; dx <= POSITION_TOLERANCE; dx++) {
+              const nx = x + dx, ny = y + dy;
+              if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
+              const [r2, g2, b2] = getPixel(dst, nx, ny);
+              if (luma(r2, g2, b2) < LUMA_THRESHOLD && pixelsClose(r1, g1, b1, r2, g2, b2)) return true;
+            }
+          }
+          return false;
+        }
+
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * 4;
+            const r1 = data1[i], g1 = data1[i+1], b1 = data1[i+2];
+            const r2 = data2[i], g2 = data2[i+1], b2 = data2[i+2];
+
+            const lum1 = luma(r1, g1, b1);
+            const lum2 = luma(r2, g2, b2);
+
+            const isContent1 = lum1 < LUMA_THRESHOLD;
+            const isContent2 = lum2 < LUMA_THRESHOLD;
+            const isContent = isContent1 || isContent2;
+
+            if (!isContent) {
+              diff[i] = 250; diff[i+1] = 250; diff[i+2] = 250; diff[i+3] = 255;
+            } else {
+              contentTotal++;
+              const matched = hasNearbyMatch(data1, data2, x, y) || hasNearbyMatch(data2, data1, x, y);
+              if (matched) {
+                const l = Math.min(lum1, lum2);
+                diff[i] = Math.round(l * 0.12);
+                diff[i+1] = Math.round(60 + l * 0.3);
+                diff[i+2] = Math.round(l * 0.12);
+                diff[i+3] = 255;
+                contentMatch++;
+              } else if (isContent1 && !isContent2) {
+                diff[i] = 255; diff[i+1] = 60; diff[i+2] = 60; diff[i+3] = 255;
+              } else if (!isContent1 && isContent2) {
+                diff[i] = 60; diff[i+1] = 60; diff[i+2] = 255; diff[i+3] = 255;
+              } else {
+                diff[i] = 255; diff[i+1] = 0; diff[i+2] = 255; diff[i+3] = 255;
+              }
+            }
+          }
+        }
+
+        ctx.putImageData(diffImg, 0, 0);
+
+        const diffOutput = document.getElementById("diff-output");
+        diffOutput.innerHTML = "";
+        diffOutput.appendChild(diffCanvas);
+
+        const panel = document.getElementById("diff-panel");
+        panel.classList.add("visible");
+
+        const pixelPct = contentTotal > 0 ? ((contentMatch / contentTotal) * 100).toFixed(1) : "100.0";
+        const structPct = (structural.score * 100).toFixed(0);
+        document.getElementById("match-badge").innerHTML =
+          `${structPct}% structural · <b>${pixelPct}%</b> content pixel (${contentMatch}/${contentTotal} px) ` +
+          `<span style="color:#1a6b1a">■</span> match ` +
+          `<span style="color:#ff3c3c">■</span> HTML-only ` +
+          `<span style="color:#3c3cff">■</span> SVG-only ` +
+          `<span style="color:#ff00ff">■</span> color diff`;
+
+        return { pixelPct: parseFloat(pixelPct), structPct: parseFloat(structPct), contentMatch, contentTotal };
+      };
+
+
+
+      function loadImage(dataUrl) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = dataUrl;
+        });
+      }
+
+      function drawToCanvas(img, w, h) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0);
+        return c;
+      }
+    </script>
+  </body>
+</html>

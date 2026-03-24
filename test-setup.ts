@@ -97,6 +97,14 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {}
 };
 
+// Inject @napi-rs/canvas for accurate text measurement in all tests.
+// happy-dom's canvas doesn't do real text measurement, which causes
+// WidthProviderOnCanvas to return inaccurate widths.
+import { createCanvas } from "@napi-rs/canvas";
+import { setCanvasContext } from "./src/positioning/WidthProviderFunc";
+const _napiCanvas = createCanvas(1, 1);
+setCanvasContext(_napiCanvas.getContext("2d") as unknown as CanvasRenderingContext2D);
+
 // Add custom matchers or global test utilities here
 // For example:
 // expect.extend({

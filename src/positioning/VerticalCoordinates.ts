@@ -9,6 +9,7 @@ import { DEFAULT_LAYOUT_METRICS as metrics } from "./vertical/LayoutMetrics";
 export class VerticalCoordinates {
   private readonly statementMap = new Map<string, StatementCoordinate>();
   private readonly creationTops = new Map<string, number>();
+  private readonly totalHeight: number;
 
   constructor(rootContext: any) {
     const rootBlock = rootContext?.block?.() ?? rootContext;
@@ -31,17 +32,33 @@ export class VerticalCoordinates {
         this.statementMap.set(key, coordinate);
       },
       updateCreationTop: (participant: string, top: number) => {
-        const paddingTop = top - 7; // .life-line-layer, .pt-2
-        // console.info(`updateCreationTop::${participant}`, paddingTop);
+        const paddingTop = top - 8; // .life-line-layer, .pt-2
+        console.info(`[VerticalCoordinates] updateCreationTop participant="${participant}" raw=${top} paddingTop=${paddingTop}`);
         this.creationTops.set(participant, paddingTop);
       },
     };
 
     const rootBlockVM = new BlockVM(rootBlock, runtime);
-    rootBlockVM.layout(originParticipant, 56); // .message-layer, .pt-14 => 56px
+    this.totalHeight = rootBlockVM.layout(originParticipant, 56); // .message-layer, .pt-14 => 56px
   }
 
   getCreationTop(participant: string): number | undefined {
     return this.creationTops.get(participant);
+  }
+
+  getStatementCoordinate(key: string): StatementCoordinate | undefined {
+    return this.statementMap.get(key);
+  }
+
+  getStatementCoordinateFor(statement: any): StatementCoordinate | undefined {
+    return this.statementMap.get(createStatementKey(statement));
+  }
+
+  entries(): Array<[string, StatementCoordinate]> {
+    return Array.from(this.statementMap.entries());
+  }
+
+  getTotalHeight(): number {
+    return this.totalHeight;
   }
 }

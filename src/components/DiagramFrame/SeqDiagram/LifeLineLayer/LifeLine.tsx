@@ -35,7 +35,7 @@ export const LifeLine = (props: {
   const left =
     centerOf(coordinates, props.entity.name) - (props.groupLeft || 0);
 
-  const updateTopFromBrowser = useCallback(() => {
+  const measureFromDOM = useCallback(() => {
     // escape entity name to avoid invalid selector errors
     const escapedName = props.entity.name.replace(
       /([ #;&,.+*~':"!^$\[\]()=>|\/@])/g,
@@ -59,7 +59,7 @@ export const LifeLine = (props: {
   }, [diagramElement, props.entity.name, scale]);
 
   useEffect(() => {
-    const resolveFromServer = () => {
+    const resolveFromVM = () => {
       if (!verticalCoordinates) return false;
       const creationTop = verticalCoordinates.getCreationTop(props.entity.name);
       const resolvedTop =
@@ -89,16 +89,19 @@ export const LifeLine = (props: {
       //   (window as any).__zenumlCreationTopRecords =
       //     verticalCoordinates.getCreationTopRecords();
       // }
+      if (creationTop != null) {
+        console.info(`[LifeLine] creation participant="${props.entity.name}" creationTop=${creationTop} resolvedTop=${resolvedTop}`);
+      }
       setTop(resolvedTop);
       return true;
     };
 
     // console.info("LifeLine:verticalMode", verticalMode);
-    if (verticalMode === "server") {
-      resolveFromServer();
+    if (verticalMode === "html") {
+      resolveFromVM();
     } else {
-      const rerun = () => setTimeout(updateTopFromBrowser, 0);
-      setTimeout(updateTopFromBrowser, 0);
+      const rerun = () => setTimeout(measureFromDOM, 0);
+      setTimeout(measureFromDOM, 0);
       EventBus.on("participant_set_top", rerun);
       return () => EventBus.off("participant_set_top", rerun);
     }
@@ -117,7 +120,7 @@ export const LifeLine = (props: {
     verticalCoordinates,
     verticalMode,
     setLifelineReady,
-    updateTopFromBrowser,
+    measureFromDOM,
   ]);
 
   return (

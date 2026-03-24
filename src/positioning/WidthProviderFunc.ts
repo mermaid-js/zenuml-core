@@ -1,5 +1,105 @@
 import { TextType } from "@/positioning/Coordinate";
 import { getCache, setCache } from "./../utils/RenderingCache";
+
+const FONT_FAMILY = "Helvetica, Verdana, serif";
+const FONT_SIZE_PARTICIPANT = "16px"; // 1rem — used for ALL measurements (see getFontSpec comment)
+const FONT_SIZE_FRAGMENT = "14px";
+
+function getFontSpec(_type: TextType): string {
+  // WidthProviderOnBrowser has a latent bug: it creates a hidden div with
+  // fontSize set once on the first call (always 16px for participant names,
+  // since withParticipantGaps runs before withMessageGaps in Coordinates).
+  // The div is reused for all subsequent calls without updating fontSize,
+  // so ALL measurements effectively happen at 16px.
+  // To match HTML Coordinates output, we always use 16px here too.
+  return `${FONT_SIZE_PARTICIPANT} ${FONT_FAMILY}`;
+}
+
+let canvasCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
+
+/** Inject a custom canvas context (e.g., from @napi-rs/canvas for accurate text measurement in Node/Bun). */
+export function setCanvasContext(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null): void {
+  canvasCtx = ctx;
+}
+
+function getCanvasContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null {
+  if (canvasCtx) return canvasCtx;
+  try {
+    if (typeof OffscreenCanvas !== "undefined") {
+      canvasCtx = new OffscreenCanvas(1, 1).getContext("2d");
+      console.debug("[ZenUML] WidthProviderOnCanvas: using OffscreenCanvas");
+    } else if (typeof document !== "undefined") {
+      canvasCtx = document.createElement("canvas").getContext("2d");
+      console.debug("[ZenUML] WidthProviderOnCanvas: using <canvas> element");
+    } else {
+      console.debug("[ZenUML] WidthProviderOnCanvas: no canvas available, using character estimate fallback");
+    }
+  } catch {
+    console.debug("[ZenUML] WidthProviderOnCanvas: canvas creation failed, using character estimate fallback");
+  }
+  return canvasCtx;
+}
+
+export function WidthProviderOnCanvas(
+  text: string,
+  type: TextType,
+): number {
+  // Trim whitespace to match browser behavior: DOM scrollWidth (used by
+  // WidthProviderOnBrowser) ignores leading/trailing spaces because the hidden
+  // div has display:inline + width:0px.  Canvas measureText includes them,
+  // so we trim to keep both providers consistent.
+  const measured = text.trim();
+  const cacheKey = `WidthProviderOnCanvas_${measured}_${type}`;
+  const cacheValue = getCache(cacheKey);
+  if (cacheValue != null) {
+    return cacheValue;
+  }
+
+  const ctx = getCanvasContext();
+  if (!ctx) {
+    // Fallback: estimate based on character count (always 16px to match browser)
+    const width = Math.ceil(measured.length * 16 * 0.6);
+    setCache(cacheKey, width, true);
+    return width;
+  }
+
+  ctx.font = getFontSpec(type);
+  const width = Math.round(ctx.measureText(measured).width);
+  setCache(cacheKey, width, true);
+  return width;
+}
+
+export function measureTextWithFont(text: string, fontSize: string): number {
+  const measured = text.trim();
+  if (!measured) return 0;
+  const cacheKey = `measureTextWithFont_${fontSize}_${measured}`;
+  const cacheValue = getCache(cacheKey);
+  if (cacheValue != null) {
+    return cacheValue;
+  }
+
+  const ctx = getCanvasContext();
+  if (!ctx) {
+    const px = Number.parseFloat(fontSize) || 14;
+    const width = Math.ceil(measured.length * px * 0.6);
+    setCache(cacheKey, width, true);
+    return width;
+  }
+
+  ctx.font = `${fontSize} ${FONT_FAMILY}`;
+  const width = ctx.measureText(measured).width;
+  setCache(cacheKey, width, true);
+  return width;
+}
+
+export function measureSvgFragmentLabelWidth(text: string): number {
+  return measureTextWithFont(text, FONT_SIZE_FRAGMENT);
+}
+
+export function measureSvgParticipantLabelWidth(text: string): number {
+  return measureTextWithFont(text, FONT_SIZE_PARTICIPANT);
+}
+
 export default function WidthProviderOnBrowser(
   text: string,
   type: TextType,
