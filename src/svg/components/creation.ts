@@ -29,12 +29,26 @@ export function renderCreation(c: CreationGeometry): string {
     ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
     : "";
 
+  // Creation labels like «payload» are rendered by HTML as three spans:
+  // <span>«</span><span class="editable-span-base" padding:4px>payload</span><span>»</span>
+  // The 4px padding makes HTML wider. Replicate with tspan dx offsets.
+  const labelContent = renderGuillemets(m.label, styleAttr);
+
   return `<g class="creation">
   <line x1="${fromX}" y1="${m.y}" x2="${toX}" y2="${m.y}" class="message-line" stroke-dasharray="6,4"/>
   ${renderOpenArrow(toX, m.y, isRTL)}
-  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(m.label)}</text>
+  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label">${labelContent}</text>
   ${numberSvg}
 </g>`;
+}
+
+function renderGuillemets(label: string, styleAttr: string): string {
+  const match = label.match(/^«(.+)»$/);
+  if (match) {
+    const inner = match[1];
+    return `<tspan${styleAttr}>${esc("«")}</tspan><tspan dx="4"${styleAttr}>${esc(inner)}</tspan><tspan dx="4"${styleAttr}>${esc("»")}</tspan>`;
+  }
+  return `<tspan${styleAttr}>${esc(label)}</tspan>`;
 }
 
 function renderOpenArrow(tipX: number, tipY: number, pointsLeft: boolean): string {

@@ -299,7 +299,10 @@ describe("renderToSvg", () => {
   it("renders creation arrow with guillemet label", () => {
     const result = renderToSvg("A.m {\n  new B(1,2,3,4)\n}");
     expect(result.svg).toContain('class="creation"');
-    expect(result.svg).toContain("«1,2,3,4»");
+    // Guillemets are rendered as separate tspan elements with dx spacing
+    expect(result.svg).toContain("<tspan>«</tspan>");
+    expect(result.svg).toContain("1,2,3,4");
+    expect(result.svg).toContain("<tspan dx=\"4\">»</tspan>");
     // B should exist as a participant but positioned inline (not at top)
     expect(result.svg).toContain('data-participant="B"');
   });
@@ -317,7 +320,8 @@ describe("renderToSvg", () => {
     const result = renderToSvg('"b:B"\na1 = A.method() {\n  b = new B()\n}');
     expect(result.svg).toContain('class="creation"');
     // «create» is the default label when no params
-    expect(result.svg).toContain("«create»");
+    expect(result.svg).toContain("<tspan>«</tspan>");
+    expect(result.svg).toContain("create");
   });
 
   it("renders creation inside fragment without crash", () => {
