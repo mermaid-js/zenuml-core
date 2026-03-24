@@ -118,6 +118,10 @@ async function runNativeDiff() {
           console.log(`[native-diff-ext] Batch DONE in ${elapsed}s`);
           // Save to IndexedDB for history tracking
           saveBatchToHistory(results, elapsed);
+          // Clear batch vars so extension doesn't re-trigger on subsequent page loads
+          localStorage.removeItem("__cr_cases");
+          localStorage.removeItem("__cr_results");
+          localStorage.removeItem("__cr_start");
         }
       }
     }
