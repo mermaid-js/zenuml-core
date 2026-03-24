@@ -57,30 +57,19 @@ async function runNativeDiff() {
     : "#html-output .sequence-diagram";
   const svgSelector = "#svg-output > svg";
 
-  const htmlPanel = document.querySelector("#html-output").closest(".panel");
-  const svgPanel = document.querySelector("#svg-output").closest(".panel");
-  const diffPanel = document.getElementById("diff-panel");
-
-  // 3. Screenshot HTML: hide SVG panel so it doesn't bleed into the clip region
+  // 3. Screenshot HTML (CDP clip isolates the element — no need to hide siblings)
   console.log("[native-diff-ext] Taking HTML screenshot...");
-  svgPanel.style.display = "none";
-  if (diffPanel) diffPanel.style.display = "none";
   const htmlCapture = await screenshotOne(htmlSelector);
-  svgPanel.style.display = "";
 
   if (htmlCapture.error) {
     console.error("[native-diff-ext] HTML screenshot failed:", htmlCapture.error);
     window.restoreHtmlAfterCapture();
-    if (diffPanel) diffPanel.style.display = "";
     return;
   }
 
-  // 4. Screenshot SVG: hide HTML panel
+  // 4. Screenshot SVG
   console.log("[native-diff-ext] Taking SVG screenshot...");
-  htmlPanel.style.display = "none";
   const svgCapture = await screenshotOne(svgSelector);
-  htmlPanel.style.display = "";
-  if (diffPanel) diffPanel.style.display = "";
 
   // 5. Restore HTML chrome
   window.restoreHtmlAfterCapture();
