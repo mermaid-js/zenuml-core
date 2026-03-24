@@ -343,7 +343,9 @@ function buildGroups(
   participants: ParticipantGeometry[],
   diagramHeight: number,
 ): GroupGeometry[] {
-  const GROUP_OUTLINE_MARGIN = 2; // matches HTML's LIFELINE_GROUP_OUTLINE_MARGIN
+  // HTML's outline-dashed extends ~6px outside the participant bounding box.
+  // Use negative margin to push SVG group outline outward to match.
+  const GROUP_OUTLINE_MARGIN = -6;
 
   // Collect participants by groupId
   const groupMap = new Map<string | number, ParticipantGeometry[]>();
@@ -382,7 +384,9 @@ function buildGroups(
     // absolutely-positioned title strip, so the outer outline should stop at the
     // content bottom rather than adding a separate header band to its height.
     const y = minY - 20;
-    const height = Math.max(0, diagramHeight - y);
+    // HTML group extends to the full diagram height plus bottom padding.
+    // Add 12.5px to match HTML's h-full container which includes extra bottom space.
+    const height = Math.max(0, diagramHeight - y + 12.5);
 
     // Use groupId as the display name (the parser sets groupId = group name from DSL)
     groups.push({
