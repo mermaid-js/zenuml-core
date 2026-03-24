@@ -47,7 +47,10 @@ function snapX(x: number): number {
  * `.editable-span-base { padding: 0 4px }`). The extra span adds 8px.
  */
 const PARTICIPANT_BOX_PADDING = 16;
-const PARTICIPANT_BOX_PADDING_ASSIGNEE = 24;
+// HTML assignee participants render "assignee" ":" "label" as separate spans.
+// The SVG measures the full "assignee:label" string, which is narrower than the
+// sum of the individual HTML spans. Use 14px padding to match HTML's box width.
+const PARTICIPANT_BOX_PADDING_ASSIGNEE = 16;
 const PARTICIPANT_ICON_ROW_WIDTH = 28; // 24px icon + 4px right margin
 import { TextType } from "@/positioning/Coordinate";
 
