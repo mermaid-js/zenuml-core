@@ -102,8 +102,8 @@ function scoreLetter(htmlLetter, svgLetter, diffImage) {
     index: htmlLetter.index,
     grapheme: htmlLetter.grapheme,
     status,
-    dx: status === "ok" ? normalizeOffset(directDx) : null,
-    dy: status === "ok" ? normalizeOffset(directDy) : null,
+    dx: normalizeOffset(directDx),
+    dy: normalizeOffset(directDy),
     confidence,
     html_box: {
       x: round(htmlLetter.box.x),

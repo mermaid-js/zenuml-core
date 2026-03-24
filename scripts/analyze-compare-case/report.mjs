@@ -21,7 +21,7 @@ import { buildResidualScopes } from "./residual-scopes.mjs";
 import { buildScoredSections } from "./scoring.mjs";
 
 function formatLetterSummary(letter) {
-  if (letter.status !== "ok") {
+  if (letter.dx == null || letter.dy == null) {
     return `${letter.grapheme}: ambiguous`;
   }
   const dx = letter.dx.toFixed(2);
