@@ -5,6 +5,13 @@ The analyzer uses these roots:
 - HTML root: `#html-output .frame`, fallback `#html-output .sequence-diagram`
 - SVG root: `#svg-output > svg`
 
+Offset anchor:
+
+- All reported offsets use the outermost frame root's top-left corner
+- HTML side: `#html-output .frame`, fallback `#html-output .sequence-diagram`
+- SVG side: `#svg-output > svg`
+- Do not emit final `dx` / `dy` values from participant-local or other nested-container anchors
+
 HTML label extraction:
 
 - Normal messages: iterate `.interaction`, skip `.return`, `.creation`, and self interactions, then read `.message .editable-span-base`
@@ -99,6 +106,7 @@ HTML participant header extraction:
 
 - Participant root: `.participant[data-participant-id]`
 - Participant box: outer border box from the participant root element
+- Participant stereotype: `label.interface`, when present
 - Participant label: last `.name` descendant, measured by glyph boxes
 
 SVG participant header extraction:
@@ -107,12 +115,28 @@ SVG participant header extraction:
 - Skip `g.participant-bottom`
 - Participant box element: `:scope > rect.participant-box`
 - Participant box measurement must use the painted outer bounds of the stroked rect, not the inset rect geometry
+- Participant stereotype:
+  - prefer `:scope > text.stereotype-label`
+  - fallback: top-most direct `text` child above `text.participant-label`
 - Participant label: `:scope > text.participant-label`
+
+Participant stereotype pairing and scoring:
+
+- Pair by participant name
+- Validate text equality, for example `«BFF»`
+- Measure stereotype offset by per-letter glyph boxes relative to the outermost frame root, not by participant-local anchors or whole-word box centroids
+- Report:
+  - `letter_deltas`
+  - concise aggregate only when the per-letter evidence agrees
+- Do not mark the stereotype clean from glyph boxes alone
+- Also check the live `#diff-panel canvas` over the union of the HTML and SVG stereotype glyph boxes
+- If localized red or blue pixels persist in that stereotype region while glyph-box deltas are `0/0`, classify it as `ambiguous` or `paint-level residual`
 
 Participant box pairing and scoring:
 
 - Pair by participant name
 - Report `html_box` and `svg_box` with `x`, `y`, `w`, `h`
+- Box `x` / `y` values are frame-anchor-relative
 - Report box deltas:
   - `dx`
   - `dy`
@@ -149,27 +173,27 @@ Icon scoring:
 - Absolute icon drift:
   - `icon_dx`
   - `icon_dy`
+- Absolute icon drift is measured from the outermost frame anchor
 - Relative icon drift against the participant label anchor:
   - `relative_dx`
   - `relative_dy`
 - If there is no participant label on one side, use the participant box center as the anchor
 - Report presence mismatch if one renderer has an icon and the other does not
-- Diff confirmation is taken from the native diff slot covering the union of the HTML and SVG icon boxes
+- Diff confirmation is taken from `#diff-panel canvas`, scoped to the union of the HTML and SVG icon boxes
 
 ## Residual Scope Attribution
 
 Residual scope extraction:
 
-- Build connected clusters from the analyzer's native diff classes:
-  - `html-only`
-  - `svg-only`
-- Ignore `match` and `color diff` pixels for positional scoping
+- Build connected clusters from the live `#diff-panel canvas` colors:
+  - red = `html-only`
+  - blue = `svg-only`
+- Ignore green `match` and magenta `color diff` pixels for positional scoping
 - Each cluster reports:
   - `size`
   - `bbox`
   - `centroid`
-- These analyzer-side clusters are only candidate hotspots.
-- Final residual attribution must be checked against the live native diff panel canvas on the page.
+- These panel-derived clusters are the source of truth for residual hotspots.
 
 Residual scope candidates:
 
@@ -177,6 +201,7 @@ Residual scope candidates:
   - labels
   - numbers
   - arrows
+  - participant stereotypes
   - participant labels
   - participant icons
   - participant boxes
@@ -185,6 +210,7 @@ Residual scope candidates:
   - labels
   - numbers
   - arrows
+  - participant stereotypes
   - participant labels
   - participant icons
   - participant boxes
@@ -197,6 +223,7 @@ Residual scope attribution:
 - Prefer targets that contain the centroid
 - Prefer more specific categories over large containers:
   - `participant-icon`
+  - `participant-stereotype`
   - `label`, `number`, `participant-label`
   - `arrow`
   - `participant-box`
@@ -220,6 +247,7 @@ Residual scope output:
 Live panel validation:
 
 - Source of truth for residual hotspots is `#diff-panel canvas`
-- Confirm the candidate hotspot by reading the panel's actual red and blue pixels at that area
+- Confirm the hotspot by reading the panel's actual red and blue pixels at that area
 - If the panel shows no red or blue pixels there, do not report that hotspot as a real residual diff
 - If the panel shows non-zero red or blue totals, do not stop at the totals alone; locate the dominant clusters and report them
+- Do not build or rely on a separate screenshot-to-screenshot diff for pixel comparison when `#diff-panel canvas` is available on the page

@@ -16,8 +16,6 @@ const ICON_PAINT_OFFSET_X = 4;
 const LABEL_PAD_LEFT = 8;
 const LABEL_HORIZONTAL_PADDING = 16;
 const STEREOTYPE_VERTICAL_OFFSET = 8;
-const STEREOTYPE_ICON_X_TWEAK = 1;
-const STEREOTYPE_Y_TWEAK = 1;
 const STEREOTYPE_FONT_SIZE = 16;
 const BOUNDARY_ICON_VERTICAL_TWEAK = 2.75;
 const PARTICIPANT_TEXT_FILL = "#222";
@@ -66,10 +64,10 @@ export function renderParticipant(p: ParticipantGeometry): string {
   let stereotypeSvg = "";
   if (p.stereotype) {
     const stereoX = icon && p.labelWidth != null
-      ? textX + p.labelWidth / 2 + STEREOTYPE_ICON_X_TWEAK
+      ? textX + p.labelWidth / 2
       : textX;
     const stereoAnchor = icon && p.labelWidth != null ? "middle" : icon ? "start" : "middle";
-    const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET + STEREOTYPE_Y_TWEAK;
+    const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET;
     stereotypeSvg = `<text x="${stereoX}" y="${stereoY}" text-anchor="${stereoAnchor}" dominant-baseline="central" class="stereotype-label" font-size="${STEREOTYPE_FONT_SIZE}"${participantTextStyle()}>${esc("«" + p.stereotype + "»")}</text>`;
   }
 
