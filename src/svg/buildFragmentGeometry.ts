@@ -8,6 +8,7 @@ import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
 import {
   FRAGMENT_MIN_WIDTH,
+  OCCURRENCE_BAR_SIDE_WIDTH,
 } from "@/positioning/Constants";
 import type { TextType } from "@/positioning/Coordinate";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
@@ -16,12 +17,19 @@ import { Participants } from "@/parser/index.js";
 import { AllMessages } from "@/parser/MessageCollector";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
-import type { FragmentGeometry, FragmentSectionGeometry } from "./geometry";
+import type { FragmentGeometry, FragmentSectionGeometry, CommentGeometry } from "./geometry";
 import type { StatementInfo } from "./walkStatements";
+
+export interface BuildFragmentResult {
+  fragment: FragmentGeometry;
+  comment?: CommentGeometry;
+}
 
 function snapX(x: number): number {
   return x;
 }
+
+const COMMENT_FONT_ASCENT = 15.5;
 
 export function buildFragmentGeometry(
   info: StatementInfo,
@@ -31,7 +39,10 @@ export function buildFragmentGeometry(
   allParticipants: string[],
   measureText?: (text: string, type: TextType) => number,
   commentHeight: number = 0,
-): FragmentGeometry | null {
+  commentText?: string,
+  commentStyle?: Record<string, string>,
+  commentYBase?: number,
+): BuildFragmentResult | null {
   // Get the fragment's parse tree node to find local participants
   const statNode = info.statNode;
   if (!statNode) return null;
@@ -41,17 +52,26 @@ export function buildFragmentGeometry(
   if (!fragmentCtx) {
     // Fallback: use full diagram width
     return {
-      kind: info.fragmentKind!,
-      label: info.fragmentLabel || "",
-      labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(info.fragmentLabel) : undefined,
-      x: 0,
-      y: coord.top,
-      width: coordinates.getWidth(),
-      height: coord.height,
-      headerY: coord.top + 1 + commentHeight,
-      sections: [],
-      number: info.number,
-      depth: info.depth,
+      fragment: {
+        kind: info.fragmentKind!,
+        label: info.fragmentLabel || "",
+        labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(info.fragmentLabel) : undefined,
+        x: 0,
+        y: coord.top,
+        width: coordinates.getWidth(),
+        height: coord.height,
+        headerY: coord.top + 1 + commentHeight,
+        sections: [],
+        number: info.number,
+        depth: info.depth,
+      },
+      comment: commentText && commentYBase != null ? {
+        x: 1,
+        y: commentYBase + COMMENT_FONT_ASCENT,
+        text: commentText,
+        style: commentStyle,
+        fragmentComment: true,
+      } : undefined,
     };
   }
 
@@ -168,18 +188,35 @@ export function buildFragmentGeometry(
     }
   }
 
+  // Fragment comment: positioned at the fragment's left border edge (fragX),
+  // not at the sender's lifeline. HTML renders fragment comments inside the
+  // fragment container, aligned with its left edge.
+  let fragmentComment: CommentGeometry | undefined;
+  if (commentText && commentYBase != null) {
+    fragmentComment = {
+      x: fragX + 1,
+      y: commentYBase + COMMENT_FONT_ASCENT,
+      text: commentText,
+      style: commentStyle,
+      fragmentComment: true,
+    };
+  }
+
   return {
-    kind: info.fragmentKind!,
-    label: info.fragmentLabel || "",
-    labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(info.fragmentLabel) : undefined,
-    x: fragX,
-    y: coord.top,
-    width: fragWidth,
-    height: coord.height,
-    headerY: coord.top + 1 + commentHeight,
-    sections,
-    number: info.number,
-    depth: info.depth,
+    fragment: {
+      kind: info.fragmentKind!,
+      label: info.fragmentLabel || "",
+      labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(info.fragmentLabel) : undefined,
+      x: fragX,
+      y: coord.top,
+      width: fragWidth,
+      height: coord.height,
+      headerY: coord.top + 1 + commentHeight,
+      sections,
+      number: info.number,
+      depth: info.depth,
+    },
+    comment: fragmentComment,
   };
 }
 

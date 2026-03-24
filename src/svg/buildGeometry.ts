@@ -202,8 +202,14 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
 
   // Shift fragment left edges into the diagram padding area (matching HTML CSS
   // where fragments use left: -frameBorderLeft). Position-only shift.
+  // Also shift fragment-level comments by the same amount so they stay aligned.
   for (const f of fragments) {
     f.x -= frameBorder.left;
+  }
+  for (const c of comments) {
+    if (c.fragmentComment) {
+      c.x -= frameBorder.left;
+    }
   }
 
   // Compute spatial nesting depth for each fragment (how many other fragments
@@ -466,7 +472,8 @@ function buildMessages(
     }
 
     // --- Comments (inline, above the statement) ---
-    if (commentObj?.text) {
+    // Fragment comments are positioned inside buildFragmentGeometry (at fragX, not sender lifeline).
+    if (commentObj?.text && info.kind !== "fragment") {
       // For RTL creation statements, HTML positions the comment at the target (left side).
       // For all other cases, the comment is at the sender's position.
       let commentParticipant = info.from;
@@ -779,7 +786,7 @@ function buildMessages(
       const fragmentCommentHeight = commentObj?.text
         ? (info.comment?.trim().split("\n").length || 0) * 20
         : 0;
-      const fragmentGeom = buildFragmentGeometry(
+      const fragmentResult = buildFragmentGeometry(
         info,
         adjustedCoord,
         coordinates,
@@ -787,9 +794,15 @@ function buildMessages(
         allParticipants,
         measureText,
         fragmentCommentHeight,
+        commentObj?.text,
+        commentObj?.commentStyle ? cssToSvgStyle(commentObj.commentStyle) : undefined,
+        coord.top + adjust,
       );
-      if (fragmentGeom) {
-        fragments.push(fragmentGeom);
+      if (fragmentResult) {
+        fragments.push(fragmentResult.fragment);
+        if (fragmentResult.comment) {
+          comments.push(fragmentResult.comment);
+        }
       }
       continue;
     }

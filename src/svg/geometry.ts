@@ -162,6 +162,8 @@ export interface CommentGeometry {
   text: string;
   /** Inline style from styling comments (e.g. // <red>) */
   style?: Record<string, string>;
+  /** True for comments above fragments — needs frameBorder.left shift */
+  fragmentComment?: boolean;
 }
 
 // ─── Group ────────────────────────────────────────────────────────
