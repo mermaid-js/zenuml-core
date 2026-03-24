@@ -291,6 +291,11 @@ export async function collectLabelData(page) {
           selector:
             ".interaction.return > .message .editable-span-base, .interaction.return > .flex.items-center > .name",
         },
+        {
+          kind: "creation",
+          selector:
+            ".interaction.creation .message .name",
+        },
       ];
 
       for (const pair of selectorPairs) {
@@ -357,6 +362,7 @@ export async function collectLabelData(page) {
         { selector: "g.message:not(.self-call) > text.message-label", kind: "message" },
         { selector: "g.message.self-call > text.message-label", kind: "self" },
         { selector: "g.return > text.return-label", kind: "return" },
+        { selector: "g.creation > text.message-label", kind: "creation" },
       ];
       for (const pair of pairs) {
         for (const labelEl of root.querySelectorAll(pair.selector)) {
