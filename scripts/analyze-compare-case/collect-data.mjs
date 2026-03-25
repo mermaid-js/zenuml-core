@@ -861,6 +861,31 @@ export async function collectLabelData(page) {
       return occurrences;
     }
 
+    function collectHtmlFragmentDividers(root, rootRect) {
+      const dividers = [];
+      for (const seg of root.querySelectorAll(".segment.border-t")) {
+        const r = seg.getBoundingClientRect();
+        const y = r.top - rootRect.top;
+        const x = r.left - rootRect.left;
+        const w = r.width;
+        const label = (seg.querySelector(".text-skin-fragment")?.textContent ?? "").trim();
+        dividers.push({ side: "html", idx: dividers.length, y, x, width: w, label });
+      }
+      return dividers;
+    }
+
+    function collectSvgFragmentDividers(root, rootRect) {
+      const dividers = [];
+      for (const line of root.querySelectorAll("line.fragment-separator")) {
+        const lineRect = line.getBoundingClientRect();
+        const y = lineRect.top - rootRect.top + lineRect.height / 2;
+        const x = lineRect.left - rootRect.left;
+        const w = lineRect.width;
+        dividers.push({ side: "svg", idx: dividers.length, y, x, width: w, label: "" });
+      }
+      return dividers;
+    }
+
     const prepared = typeof window.prepareHtmlForCapture === "function"
       ? window.prepareHtmlForCapture()
       : null;
@@ -895,6 +920,8 @@ export async function collectLabelData(page) {
       svgGroups: collectSvgGroups(svgRoot, svgRootRect),
       htmlOccurrences: collectHtmlOccurrences(htmlRoot, htmlRootRect),
       svgOccurrences: collectSvgOccurrences(svgRoot, svgRootRect),
+      htmlFragmentDividers: collectHtmlFragmentDividers(htmlRoot, htmlRootRect),
+      svgFragmentDividers: collectSvgFragmentDividers(svgRoot, svgRootRect),
     };
   });
 }

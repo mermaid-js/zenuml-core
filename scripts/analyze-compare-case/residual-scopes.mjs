@@ -32,6 +32,7 @@ function scopePriority(category) {
     case "participant-label":
       return 7;
     case "arrow":
+    case "fragment-divider":
       return 6;
     case "occurrence":
     case "participant-box":
@@ -87,6 +88,7 @@ function buildScopeItems(side, extracted) {
   const comments = side === "html" ? extracted.htmlComments : extracted.svgComments;
   const groups = side === "html" ? extracted.htmlGroups : extracted.svgGroups;
   const occurrences = side === "html" ? (extracted.htmlOccurrences || []) : (extracted.svgOccurrences || []);
+  const fragmentDividers = side === "html" ? (extracted.htmlFragmentDividers || []) : (extracted.svgFragmentDividers || []);
 
   for (const label of labels) {
     push("label", formatScopeName(label), label.box, {
@@ -148,6 +150,12 @@ function buildScopeItems(side, extracted) {
       kind: "occurrence",
       text: occ.participant,
       owner_text: occ.participant,
+    });
+  }
+  for (const div of fragmentDividers) {
+    push("fragment-divider", `divider#${div.idx}`, { x: div.x, y: div.y, w: div.width, h: 1 }, {
+      kind: "divider",
+      text: div.label || `divider#${div.idx}`,
     });
   }
 

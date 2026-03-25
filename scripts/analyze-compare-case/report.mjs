@@ -110,6 +110,13 @@ function formatOccurrenceSummary(occ) {
   return `occurrence:${occ.participant}#${occ.idx} -> dx=${occ.dx.toFixed(2)}px dy=${occ.dy.toFixed(2)}px dw=${occ.dw.toFixed(2)}px dh=${occ.dh.toFixed(2)}px`;
 }
 
+function formatFragmentDividerSummary(div) {
+  if (div.status !== "ok") {
+    return `fragment-divider:#${div.idx} -> ambiguous`;
+  }
+  return `fragment-divider:#${div.idx} -> dx=${div.dx.toFixed(2)}px dy=${div.dy.toFixed(2)}px dw=${div.dw.toFixed(2)}px`;
+}
+
 export function buildReport(caseName, extracted, diffImage) {
   const sections = buildScoredSections(extracted, diffImage);
   const residualScopes = buildResidualScopes(extracted, diffImage);
@@ -127,6 +134,7 @@ export function buildReport(caseName, extracted, diffImage) {
     comments: sections.comments,
     participant_groups: sections.groups,
     occurrences: sections.occurrences,
+    fragment_dividers: sections.fragmentDividers,
     residual_scopes: residualScopes.scopes,
     summary: sections.labels.map((label) => formatSectionSummary("label", label)),
     number_summary: sections.numbers.map((number) => formatSectionSummary("number", number)),
@@ -139,6 +147,7 @@ export function buildReport(caseName, extracted, diffImage) {
     comment_summary: sections.comments.map((comment) => formatSectionSummary("comment", comment)),
     participant_group_summary: sections.groups.map((group) => formatGroupSummary(group)),
     occurrence_summary: sections.occurrences.map((occ) => formatOccurrenceSummary(occ)),
+    fragment_divider_summary: sections.fragmentDividers.map((div) => formatFragmentDividerSummary(div)),
     residual_scope_summary: residualScopes.summary,
     residual_scope_html_only_top: residualScopes.html_only_top,
     residual_scope_svg_only_top: residualScopes.svg_only_top,

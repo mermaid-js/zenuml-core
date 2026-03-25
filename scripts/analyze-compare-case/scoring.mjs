@@ -695,6 +695,47 @@ function buildOccurrenceSection(htmlOccurrences, svgOccurrences) {
   return results;
 }
 
+function scoreFragmentDivider(htmlDiv, svgDiv) {
+  const base = htmlDiv || svgDiv;
+  const item = {
+    idx: base?.idx ?? 0,
+    label: base?.label ?? "",
+    status: "ambiguous",
+  };
+
+  if (!htmlDiv || !svgDiv) {
+    item.reason = `divider missing on ${!htmlDiv ? "html" : "svg"} side`;
+    return item;
+  }
+
+  const dx = svgDiv.x - htmlDiv.x;
+  const dy = svgDiv.y - htmlDiv.y;
+  const dw = svgDiv.width - htmlDiv.width;
+
+  return {
+    ...item,
+    status: "ok",
+    dx: normalizeOffset(dx),
+    dy: normalizeOffset(dy),
+    dw: normalizeOffset(dw),
+    html_y: round(htmlDiv.y),
+    svg_y: round(svgDiv.y),
+    html_x: round(htmlDiv.x),
+    svg_x: round(svgDiv.x),
+    html_width: round(htmlDiv.width),
+    svg_width: round(svgDiv.width),
+  };
+}
+
+function buildFragmentDividerSection(htmlDividers, svgDividers) {
+  const maxLen = Math.max(htmlDividers.length, svgDividers.length);
+  const results = [];
+  for (let i = 0; i < maxLen; i++) {
+    results.push(scoreFragmentDivider(htmlDividers[i] || null, svgDividers[i] || null));
+  }
+  return results;
+}
+
 export function buildScoredSections(extracted, diffImage) {
   const {
     htmlLabels,
@@ -711,6 +752,8 @@ export function buildScoredSections(extracted, diffImage) {
     svgGroups,
     htmlOccurrences,
     svgOccurrences,
+    htmlFragmentDividers,
+    svgFragmentDividers,
   } = extracted;
 
   const iconNames = participantsWithIcons(htmlParticipants, svgParticipants);
@@ -731,5 +774,6 @@ export function buildScoredSections(extracted, diffImage) {
     comments: buildSection(htmlComments, svgComments, diffImage),
     groups: buildGroupSection(htmlGroups, svgGroups),
     occurrences: buildOccurrenceSection(htmlOccurrences || [], svgOccurrences || []),
+    fragmentDividers: buildFragmentDividerSection(htmlFragmentDividers || [], svgFragmentDividers || []),
   };
 }

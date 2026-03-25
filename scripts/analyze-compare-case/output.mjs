@@ -55,6 +55,7 @@ export function writeReportOutput(stdout, report, options) {
     report.comment_summary,
     report.participant_group_summary,
     report.occurrence_summary,
+    report.fragment_divider_summary,
     report.residual_scope_summary,
   ].flat().join("\n");
 
