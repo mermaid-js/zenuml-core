@@ -188,6 +188,37 @@ export function buildFragmentGeometry(
     }
   }
 
+  // Par fragment dividers: HTML renders a 1px border-top between par child statements.
+  // The par block has a flat list of statements; add separator sections so the renderer
+  // draws lines between them. The renderer iterates from sections[1] onwards, drawing
+  // a separator line at each section.y, so we need a dummy first section + one per divider.
+  if (info.fragmentKind === "par" && sections.length === 0) {
+    const parBlock = info.fragmentSections?.[0]?.blockNode;
+    const innerStats = parBlock?.stat?.() || [];
+    if (innerStats.length > 1) {
+      // Dummy first section (renderer skips i=0)
+      sections.push({ label: "", y: coord.top, height: 0 });
+      for (let i = 1; i < innerStats.length; i++) {
+        const statKey = createStatementKeyFromStat(innerStats[i]);
+        if (!statKey) continue;
+        const innerCoord = verticalCoordinates.getStatementCoordinate(statKey);
+        if (!innerCoord) continue;
+        // HTML par divider: border-top on .statement-container with .my-4 (16px margin).
+        // CSS margin collapse makes the gap 16px between statements.
+        // The border-top sits at the statement-container's top edge, which is
+        // messageY - messageHeight/2 in the vertical coordinate system.
+        // Empirically: innerCoord.top - 1.5 matches the HTML border position.
+        const dividerY = innerCoord.top - 1.5;
+        sections.push({
+          label: "",
+          y: dividerY,
+          height: 0,
+          contentInsetLeft: fragBorder.left + coordinates.half(leftParticipant),
+        });
+      }
+    }
+  }
+
   // Fragment comment: positioned at the fragment's left border edge (fragX),
   // not at the sender's lifeline. HTML renders fragment comments inside the
   // fragment container, aligned with its left edge.
