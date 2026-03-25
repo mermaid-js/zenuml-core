@@ -390,10 +390,10 @@ function buildGroups(
     // The HTML group container starts at the top of the content region and uses an
     // absolutely-positioned title strip, so the outer outline should stop at the
     // content bottom rather than adding a separate header band to its height.
-    const y = minY - 20;
+    const y = minY - 20 + 0.75;
     // HTML group extends to the full diagram height plus bottom padding.
-    // Add 12.5px to match HTML's h-full container which includes extra bottom space.
-    const height = Math.max(0, diagramHeight - y + 12.5);
+    // Add 12px to match HTML's h-full container which includes extra bottom space.
+    const height = Math.max(0, diagramHeight - y + 12);
 
     // Use groupId as the display name (the parser sets groupId = group name from DSL)
     groups.push({
@@ -493,8 +493,11 @@ function buildMessages(
       const commentXOffset = info.senderOccurrenceDepth >= 1
         ? OCCURRENCE_BAR_SIDE_WIDTH + 1
         : 1;
+      // HTML wraps backtick text in <code> with padding:2px (Cosmetic.scss).
+      // Add the same left-padding offset so SVG text aligns with HTML.
+      const codeSpanPadding = commentObj.text.trimStart().startsWith("`") ? 2 : 0;
       comments.push({
-        x: commentX + commentXOffset,
+        x: commentX + commentXOffset + codeSpanPadding,
         y: coord.top + adjust + COMMENT_FONT_ASCENT,
         text: commentObj.text,
         style: cssToSvgStyle(commentObj.commentStyle),
