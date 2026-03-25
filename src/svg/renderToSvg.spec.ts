@@ -319,9 +319,8 @@ describe("renderToSvg", () => {
   it("renders RTL creation arrow", () => {
     const result = renderToSvg('"b:B"\na1 = A.method() {\n  b = new B()\n}');
     expect(result.svg).toContain('class="creation"');
-    // «create» is the default label when no params
-    expect(result.svg).toContain("<tspan>«</tspan>");
-    expect(result.svg).toContain("create");
+    // «create» is the default label when no params — rendered as single tspan (no dx spacing)
+    expect(result.svg).toContain("«create»");
   });
 
   it("renders creation inside fragment without crash", () => {

@@ -46,6 +46,12 @@ function renderGuillemets(label: string, styleAttr: string): string {
   const match = label.match(/^«(.+)»$/);
   if (match) {
     const inner = match[1];
+    // HTML renders «create» (default, no params) as a single element.
+    // Only «param» labels (with arguments) use three separate spans with
+    // 4px padding on the middle editable-span. Skip dx for the default label.
+    if (inner === "create") {
+      return `<tspan${styleAttr}>${esc(label)}</tspan>`;
+    }
     return `<tspan${styleAttr}>${esc("«")}</tspan><tspan dx="4"${styleAttr}>${esc(inner)}</tspan><tspan dx="4"${styleAttr}>${esc("»")}</tspan>`;
   }
   return `<tspan${styleAttr}>${esc(label)}</tspan>`;
