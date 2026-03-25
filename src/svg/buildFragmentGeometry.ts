@@ -67,7 +67,7 @@ export function buildFragmentGeometry(
       },
       comment: commentText && commentYBase != null ? {
         x: 1,
-        y: commentYBase + COMMENT_FONT_ASCENT,
+        y: commentYBase + 1 + COMMENT_FONT_ASCENT,
         text: commentText,
         style: commentStyle,
         fragmentComment: true,
@@ -195,7 +195,7 @@ export function buildFragmentGeometry(
   if (commentText && commentYBase != null) {
     fragmentComment = {
       x: fragX + 1,
-      y: commentYBase + COMMENT_FONT_ASCENT,
+      y: commentYBase + 1 + COMMENT_FONT_ASCENT,
       text: commentText,
       style: commentStyle,
       fragmentComment: true,
