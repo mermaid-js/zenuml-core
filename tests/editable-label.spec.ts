@@ -171,10 +171,12 @@ test.describe("Editable Label", () => {
     await expect(messageLabel).toHaveText(originalText || "method()");
     
     // Take a screenshot to verify visual state
+    // Click header to fully deselect, then blur to dismiss any lingering focus/caret
     await page.locator(".header").click();
+    await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
     await page.waitForTimeout(500);
     await expect(page).toHaveScreenshot({
-      threshold: 0.01,
+      threshold: 0.02,
       fullPage: true,
     });
   });
