@@ -33,6 +33,7 @@ function scopePriority(category) {
       return 7;
     case "arrow":
       return 6;
+    case "occurrence":
     case "participant-box":
     case "participant-group":
       return 5;
@@ -85,6 +86,7 @@ function buildScopeItems(side, extracted) {
   const participants = side === "html" ? extracted.htmlParticipants : extracted.svgParticipants;
   const comments = side === "html" ? extracted.htmlComments : extracted.svgComments;
   const groups = side === "html" ? extracted.htmlGroups : extracted.svgGroups;
+  const occurrences = side === "html" ? (extracted.htmlOccurrences || []) : (extracted.svgOccurrences || []);
 
   for (const label of labels) {
     push("label", formatScopeName(label), label.box, {
@@ -139,6 +141,13 @@ function buildScopeItems(side, extracted) {
     push("participant-group", group.name || "group", group.box, {
       kind: "group",
       text: group.name,
+    });
+  }
+  for (const occ of occurrences) {
+    push("occurrence", `${occ.participant}#${occ.idx}`, occ.box, {
+      kind: "occurrence",
+      text: occ.participant,
+      owner_text: occ.participant,
     });
   }
 

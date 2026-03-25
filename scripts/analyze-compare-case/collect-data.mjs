@@ -829,6 +829,38 @@ export async function collectLabelData(page) {
       return numbers;
     }
 
+    function collectHtmlOccurrences(root, rootRect) {
+      const occurrences = [];
+      for (const el of root.querySelectorAll('[data-el-type="occurrence"]')) {
+        const participant = (el.getAttribute("data-belongs-to") ?? "").trim();
+        const box = boxOrNull(relRect(el.getBoundingClientRect(), rootRect));
+        if (!box) continue;
+        occurrences.push({
+          side: "html",
+          participant,
+          idx: occurrences.length,
+          box,
+        });
+      }
+      return occurrences;
+    }
+
+    function collectSvgOccurrences(root, rootRect) {
+      const occurrences = [];
+      for (const el of root.querySelectorAll("rect.occurrence")) {
+        const participant = (el.getAttribute("data-participant") ?? "").trim();
+        const box = boxOrNull(strokedElementOuterRect(el, rootRect));
+        if (!box) continue;
+        occurrences.push({
+          side: "svg",
+          participant,
+          idx: occurrences.length,
+          box,
+        });
+      }
+      return occurrences;
+    }
+
     const prepared = typeof window.prepareHtmlForCapture === "function"
       ? window.prepareHtmlForCapture()
       : null;
@@ -861,6 +893,8 @@ export async function collectLabelData(page) {
       svgComments: collectSvgComments(svgRoot, svgRootRect),
       htmlGroups: collectHtmlGroups(htmlRoot, htmlRootRect),
       svgGroups: collectSvgGroups(svgRoot, svgRootRect),
+      htmlOccurrences: collectHtmlOccurrences(htmlRoot, htmlRootRect),
+      svgOccurrences: collectSvgOccurrences(svgRoot, svgRootRect),
     };
   });
 }

@@ -646,6 +646,55 @@ function buildGroupSection(htmlGroups, svgGroups) {
   return names.map((name) => scoreGroup(htmlMap.get(name) || null, svgMap.get(name) || null));
 }
 
+function scoreOccurrence(htmlOcc, svgOcc) {
+  const base = htmlOcc || svgOcc;
+  const item = {
+    participant: base?.participant ?? "",
+    idx: base?.idx ?? 0,
+    status: "ambiguous",
+  };
+
+  if (!htmlOcc?.box || !svgOcc?.box) {
+    item.reason = `occurrence missing on ${!htmlOcc ? "html" : "svg"} side`;
+    return item;
+  }
+
+  const dx = svgOcc.box.x - htmlOcc.box.x;
+  const dy = svgOcc.box.y - htmlOcc.box.y;
+  const dw = svgOcc.box.w - htmlOcc.box.w;
+  const dh = svgOcc.box.h - htmlOcc.box.h;
+
+  return {
+    ...item,
+    status: "ok",
+    dx: normalizeOffset(dx),
+    dy: normalizeOffset(dy),
+    dw: normalizeOffset(dw),
+    dh: normalizeOffset(dh),
+    html_box: {
+      x: round(htmlOcc.box.x),
+      y: round(htmlOcc.box.y),
+      w: round(htmlOcc.box.w),
+      h: round(htmlOcc.box.h),
+    },
+    svg_box: {
+      x: round(svgOcc.box.x),
+      y: round(svgOcc.box.y),
+      w: round(svgOcc.box.w),
+      h: round(svgOcc.box.h),
+    },
+  };
+}
+
+function buildOccurrenceSection(htmlOccurrences, svgOccurrences) {
+  const maxLen = Math.max(htmlOccurrences.length, svgOccurrences.length);
+  const results = [];
+  for (let i = 0; i < maxLen; i++) {
+    results.push(scoreOccurrence(htmlOccurrences[i] || null, svgOccurrences[i] || null));
+  }
+  return results;
+}
+
 export function buildScoredSections(extracted, diffImage) {
   const {
     htmlLabels,
@@ -660,6 +709,8 @@ export function buildScoredSections(extracted, diffImage) {
     svgComments,
     htmlGroups,
     svgGroups,
+    htmlOccurrences,
+    svgOccurrences,
   } = extracted;
 
   const iconNames = participantsWithIcons(htmlParticipants, svgParticipants);
@@ -679,5 +730,6 @@ export function buildScoredSections(extracted, diffImage) {
     participantColors: buildParticipantColorSection(htmlParticipants, svgParticipants),
     comments: buildSection(htmlComments, svgComments, diffImage),
     groups: buildGroupSection(htmlGroups, svgGroups),
+    occurrences: buildOccurrenceSection(htmlOccurrences || [], svgOccurrences || []),
   };
 }

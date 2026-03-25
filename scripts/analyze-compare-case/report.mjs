@@ -103,6 +103,13 @@ function formatGroupSummary(group) {
   return `participant-group:${group.name} -> dx=${group.dx.toFixed(2)}px dy=${group.dy.toFixed(2)}px dw=${group.dw.toFixed(2)}px dh=${group.dh.toFixed(2)}px ${namePart}`;
 }
 
+function formatOccurrenceSummary(occ) {
+  if (occ.status !== "ok") {
+    return `occurrence:${occ.participant}#${occ.idx} -> ambiguous`;
+  }
+  return `occurrence:${occ.participant}#${occ.idx} -> dx=${occ.dx.toFixed(2)}px dy=${occ.dy.toFixed(2)}px dw=${occ.dw.toFixed(2)}px dh=${occ.dh.toFixed(2)}px`;
+}
+
 export function buildReport(caseName, extracted, diffImage) {
   const sections = buildScoredSections(extracted, diffImage);
   const residualScopes = buildResidualScopes(extracted, diffImage);
@@ -119,6 +126,7 @@ export function buildReport(caseName, extracted, diffImage) {
     participant_colors: sections.participantColors,
     comments: sections.comments,
     participant_groups: sections.groups,
+    occurrences: sections.occurrences,
     residual_scopes: residualScopes.scopes,
     summary: sections.labels.map((label) => formatSectionSummary("label", label)),
     number_summary: sections.numbers.map((number) => formatSectionSummary("number", number)),
@@ -130,6 +138,7 @@ export function buildReport(caseName, extracted, diffImage) {
     participant_color_summary: sections.participantColors.map((color) => formatParticipantColorSummary(color)),
     comment_summary: sections.comments.map((comment) => formatSectionSummary("comment", comment)),
     participant_group_summary: sections.groups.map((group) => formatGroupSummary(group)),
+    occurrence_summary: sections.occurrences.map((occ) => formatOccurrenceSummary(occ)),
     residual_scope_summary: residualScopes.summary,
     residual_scope_html_only_top: residualScopes.html_only_top,
     residual_scope_svg_only_top: residualScopes.svg_only_top,
