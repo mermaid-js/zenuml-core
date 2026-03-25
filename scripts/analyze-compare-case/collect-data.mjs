@@ -814,13 +814,18 @@ export async function collectLabelData(page) {
         for (const numberEl of root.querySelectorAll(pair.selector)) {
           const text = (numberEl.textContent ?? "").trim();
           if (!text) continue;
+          // SVG <text> getBoundingClientRect returns glyph bounds (height ~14px for 12px font).
+          // HTML <div> with line-height:16px adds 2px top padding ((16-12)/2).
+          // Adjust SVG box Y by -1 to align with HTML's line-height-padded top edge.
+          const rawBox = relRect(numberEl.getBoundingClientRect(), rootRect);
+          const adjustedBox = { ...rawBox, y: rawBox.y - 1, h: rawBox.h + 2 };
           numbers.push({
             side: "svg",
             kind: pair.kind,
             text,
             pairText: pair.ownerText ? pair.ownerText(numberEl) || text : text,
             ownerText: pair.ownerText ? pair.ownerText(numberEl) || null : null,
-            box: relRect(numberEl.getBoundingClientRect(), rootRect),
+            box: adjustedBox,
             font: fontInfo(numberEl),
             letters: glyphBoxesForElement(numberEl, rootRect),
           });
