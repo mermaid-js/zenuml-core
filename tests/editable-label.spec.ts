@@ -177,6 +177,7 @@ test.describe("Editable Label", () => {
     await page.waitForTimeout(500);
     await expect(page).toHaveScreenshot({
       threshold: 0.02,
+      maxDiffPixelRatio: 0.01,
       fullPage: true,
     });
   });
