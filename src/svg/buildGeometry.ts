@@ -597,7 +597,10 @@ function buildMessages(
         // +2: SVG stroke extends 1px beyond rect on each side (centered model).
         // renderOccurrence insets by 1px, so fill area = geometry - 2 matches
         // HTML border-box height. Stroke extends to geometry size visually.
-        let occHeight = coord.height - messageHeight + 2;
+        // Subtract msgCommentHeight: coord.height includes the comment above the
+        // message, but the occurrence starts BELOW the comment (at messageY - 1.5),
+        // so the comment height must not inflate the occurrence bar.
+        let occHeight = coord.height - messageHeight - msgCommentHeight + 2;
 
         // Adjust occurrence height for inner return debt.
         // The positioning engine underestimates block heights because non-self returns
