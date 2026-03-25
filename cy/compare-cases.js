@@ -796,6 +796,14 @@ OrderService.handle() {
   InvoiceService.invoice()
 }`,
 
+  // Group 6: par fragment divider (missing in SVG)
+  "repro-par-divider": `A.call() {
+  par {
+    B.task1()
+    C.task2()
+  }
+}`,
+
   // --- Icons ---
   "icons": `@Actor User
 @Database DB
