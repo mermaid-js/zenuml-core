@@ -863,14 +863,28 @@ export async function collectLabelData(page) {
 
     function collectHtmlFragmentDividers(root, rootRect) {
       const dividers = [];
+      // Alt/tcf dividers: .segment.border-t
       for (const seg of root.querySelectorAll(".segment.border-t")) {
         const r = seg.getBoundingClientRect();
         const y = r.top - rootRect.top;
         const x = r.left - rootRect.left;
         const w = r.width;
         const label = (seg.querySelector(".text-skin-fragment")?.textContent ?? "").trim();
-        dividers.push({ side: "html", idx: dividers.length, y, x, width: w, label });
+        dividers.push({ side: "html", idx: dividers.length, y, x, width: w, label, source: "segment" });
       }
+      // Par dividers: .statement-container with computed border-top inside .par
+      for (const sc of root.querySelectorAll(".par .statement-container")) {
+        const style = getComputedStyle(sc);
+        if (parseFloat(style.borderTopWidth) < 1) continue;
+        const r = sc.getBoundingClientRect();
+        const y = r.top - rootRect.top;
+        const x = r.left - rootRect.left;
+        const w = r.width;
+        dividers.push({ side: "html", idx: dividers.length, y, x, width: w, label: "", source: "par" });
+      }
+      // Sort by Y position for consistent pairing
+      dividers.sort((a, b) => a.y - b.y);
+      dividers.forEach((d, i) => { d.idx = i; });
       return dividers;
     }
 
