@@ -8,13 +8,14 @@ import type { WidthFunc } from "../positioning/Coordinate";
 import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { CodeRange } from "../parser/CodeRange";
+import logger from "@/logger/logger";
 
 type VerticalMode = "html" | "legacy";
 const resolveVerticalMode = (): VerticalMode => {
   const mode = import.meta.env.VITE_VERTICAL_MODE === "legacy"
     ? "legacy"
     : "html";
-  console.info(`[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`);
+  logger.info(`[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`);
   return mode;
 };
 
@@ -23,7 +24,7 @@ export const resolveWidthProvider = (): WidthFunc => {
     ? new URLSearchParams(location.search).get("WIDTH_PROVIDER")
     : null;
   const mode = (urlParam || import.meta.env.VITE_WIDTH_PROVIDER) === "canvas" ? "canvas" : "browser";
-  console.debug(`[ZenUML] WidthProvider: ${mode}`);
+  logger.debug(`[ZenUML] WidthProvider: ${mode}`);
   return mode === "canvas" ? WidthProviderOnCanvas : WidthProviderOnBrowser;
 };
 
@@ -114,7 +115,7 @@ export const diagramElementAtom = atom<HTMLElement | null>(null);
 
 export const onElementClickAtom = atomWithFunctionValue(
   (codeRange: CodeRange) => {
-    console.log("Element clicked", codeRange);
+    logger.debug("Element clicked", codeRange);
   },
 );
 

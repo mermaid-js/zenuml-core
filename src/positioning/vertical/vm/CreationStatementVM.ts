@@ -1,6 +1,7 @@
 import type { StatementCoordinate } from "../StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
+import logger from "@/logger/logger";
 
 const CREATION_MESSAGE_HEIGHT = 40; // [data-type="creation"], .h-10
 
@@ -40,7 +41,7 @@ export class CreationStatementVM extends StatementVM {
 
     const assignment = this.creation?.Assignment?.();
     if (assignment) {
-      console.info(`creation::assignment::${participant}`);
+      logger.info(`creation::assignment::${participant}`);
       cursor += 12;
     }
 

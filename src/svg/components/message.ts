@@ -1,4 +1,5 @@
 import type { MessageGeometry, SelfCallGeometry } from "../geometry";
+import { esc, styleToAttr } from "./svgUtils";
 
 export function renderMessage(m: MessageGeometry): string {
   // HTML arrow SVG container spans from left_lifeline_center+1 to right_lifeline_center.
@@ -121,16 +122,3 @@ function renderArrowHead(
   </svg>`;
 }
 
-function styleToAttr(style: Record<string, string>): string {
-  return Object.entries(style)
-    .map(([k, v]) => `${esc(k)}: ${esc(v)}`)
-    .join("; ");
-}
-
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

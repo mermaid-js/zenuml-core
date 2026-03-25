@@ -1,4 +1,5 @@
 import type { ReturnGeometry } from "../geometry";
+import { esc } from "./svgUtils";
 
 export function renderReturn(r: ReturnGeometry): string {
   if (r.isSelf) {
@@ -62,10 +63,3 @@ function renderSelfReturn(r: ReturnGeometry): string {
 </g>`;
 }
 
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

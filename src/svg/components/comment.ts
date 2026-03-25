@@ -1,5 +1,6 @@
 import { marked } from "marked";
 import type { CommentGeometry } from "../geometry";
+import { esc, styleToAttr } from "./svgUtils";
 
 /**
  * Convert markdown text to SVG-safe content using the same parser (marked)
@@ -44,16 +45,3 @@ export function renderComment(c: CommentGeometry): string {
   return `<text x="${c.x}" y="${c.y}" class="comment-text"${styleAttr}>${markdownToSvgContent(c.text)}</text>`;
 }
 
-function styleToAttr(style: Record<string, string>): string {
-  return Object.entries(style)
-    .map(([k, v]) => `${esc(k)}: ${esc(v)}`)
-    .join("; ");
-}
-
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

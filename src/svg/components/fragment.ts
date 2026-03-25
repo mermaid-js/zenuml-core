@@ -1,4 +1,5 @@
 import type { FragmentGeometry } from "../geometry";
+import { esc } from "./svgUtils";
 
 const HEADER_HEIGHT = 25;
 const BRACKET_WIDTH = 3.89;
@@ -200,10 +201,3 @@ function getFragmentIcon(kind: string, x: number, y: number): string {
   }
 }
 
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

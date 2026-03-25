@@ -4,7 +4,7 @@ import { Comment } from "../Comment/Comment";
 import { Numbering } from "../../../Numbering";
 import { CollapseButton } from "./CollapseButton";
 import { Block } from "../../Block";
-import { capitalize } from "radash";
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 import { cn } from "@/utils";
 import "./FragmentSection.css";
 import Icon from "@/components/Icon/Icons";
