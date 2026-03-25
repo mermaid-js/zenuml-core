@@ -207,8 +207,10 @@ export function buildFragmentGeometry(
         // CSS margin collapse makes the gap 16px between statements.
         // The border-top sits at the statement-container's top edge, which is
         // messageY - messageHeight/2 in the vertical coordinate system.
-        // Empirically: innerCoord.top - 1.5 matches the HTML border position.
-        const dividerY = innerCoord.top - 1.5;
+        // fragment.ts adds HALF_STROKE (+0.5) to separator Y for stroke centering.
+        // Net Y = innerCoord.top - 1 + 0.5 = innerCoord.top - 0.5, which places
+        // the stroke center 0.5px above the HTML border — matching the pixel row.
+        const dividerY = innerCoord.top - 1;
         sections.push({
           label: "",
           y: dividerY,
