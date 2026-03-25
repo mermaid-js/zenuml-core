@@ -892,7 +892,11 @@ export async function collectLabelData(page) {
       const dividers = [];
       for (const line of root.querySelectorAll("line.fragment-separator")) {
         const lineRect = line.getBoundingClientRect();
-        const y = lineRect.top - rootRect.top + lineRect.height / 2;
+        const strokeWidth = parseFloat(getComputedStyle(line).strokeWidth || "0") || 0;
+        const half = strokeWidth / 2;
+        // The painted top edge of the stroke = center - half.
+        // This matches HTML border-top measurement (top edge of the 1px border).
+        const y = (lineRect.top - rootRect.top) - half;
         const x = lineRect.left - rootRect.left;
         const w = lineRect.width;
         dividers.push({ side: "svg", idx: dividers.length, y, x, width: w, label: "" });
