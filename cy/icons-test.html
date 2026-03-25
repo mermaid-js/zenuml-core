@@ -15,8 +15,8 @@
     <div id="diagram" class="diagram">
       <pre class="zenuml" style="margin: 0">
 @Actor User
-@Database DB <<database>>
-@Queue MQ <<sqs>>
+@Database DB &lt;&lt;database&gt;&gt;
+@Queue MQ &lt;&lt;sqs&gt;&gt;
 
 User.login() {
   DB.verify()
