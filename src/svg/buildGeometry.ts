@@ -158,6 +158,8 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
   // Compute spatial nesting depth for each fragment (how many other fragments
   // fully contain it). This is more accurate than info.depth which includes
   // message block nesting, not just fragment nesting.
+  // Important: compute ALL depths before mutating any x values, because the
+  // containment check uses original positions.
   const nestDepths = new Map<FragmentGeometry, number>();
   for (const inner of fragments) {
     let nestDepth = 0;
@@ -170,7 +172,9 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
       }
     }
     nestDepths.set(inner, nestDepth);
-    inner.x += nestDepth * FRAGMENT_PADDING_X;
+  }
+  for (const f of fragments) {
+    f.x += (nestDepths.get(f) || 0) * FRAGMENT_PADDING_X;
   }
 
   // Shift fragment comments by the same nesting depth as their owning fragment.

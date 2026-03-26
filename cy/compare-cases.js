@@ -814,6 +814,21 @@ if(order != null) {
   }
 }`,
 
+  // --- 3-level nested fragments with comments ---
+  "nested-3-level": `// outer comment
+if(valid) {
+  // inner comment
+  par {
+    // deep comment
+    loop(3) {
+      OrderService.process()
+      PaymentService.charge()
+    }
+    NotifyService.send()
+  }
+  AuditService.log()
+}`,
+
   // --- Icons ---
   "icons": `@Actor User
 @Database DB
