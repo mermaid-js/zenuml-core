@@ -40,6 +40,8 @@ export const Divider = (props: {
     return { style: getStyle([]), note: note };
   }, [note]);
 
+  const cleanNote = messageStyle.note.replace(/^=+\s*|\s*=+$/g, "").trim();
+
   return (
     <div
       className={cn("divider", props.className)}
@@ -47,16 +49,28 @@ export const Divider = (props: {
       style={{
         width: width + "px",
         transform: "translateX(" + (-1 * centerOfOrigin + 10) + "px)",
+        display: "flex",
+        alignItems: "center",
+        gap: 0,
       }}
     >
-      <div className="left bg-skin-divider"></div>
+      <div className="left" style={{ flex: 1, height: 1, backgroundColor: "#aaaa33" }}></div>
       <div
-        style={messageStyle.style.textStyle}
+        style={{
+          ...messageStyle.style.textStyle,
+          backgroundColor: "#fff5ad",
+          border: "1px solid #aaaa33",
+          borderRadius: 2,
+          padding: "4px 8px",
+          fontSize: 14,
+          color: "#333",
+          whiteSpace: "nowrap",
+        }}
         className={cn("name", messageStyle.style.classNames)}
       >
-        {messageStyle.note}
+        {cleanNote}
       </div>
-      <div className="right bg-skin-divider"></div>
+      <div className="right" style={{ flex: 1, height: 1, backgroundColor: "#aaaa33" }}></div>
     </div>
   );
 };

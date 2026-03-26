@@ -909,6 +909,45 @@ export async function collectLabelData(page) {
       return dividers;
     }
 
+    function collectHtmlDividers(root, rootRect) {
+      const dividers = [];
+      for (const el of root.querySelectorAll(".divider")) {
+        const nameEl = el.querySelector(".name");
+        if (!nameEl) continue;
+        const r = el.getBoundingClientRect();
+        const nr = nameEl.getBoundingClientRect();
+        dividers.push({
+          side: "html",
+          idx: dividers.length,
+          label: nameEl.textContent.trim(),
+          y: Math.round((r.top - rootRect.top + r.bottom - rootRect.top) / 2),
+          box: { x: Math.round(r.left - rootRect.left), y: Math.round(r.top - rootRect.top), w: Math.round(r.width), h: Math.round(r.height) },
+          label_box: { x: Math.round(nr.left - rootRect.left), y: Math.round(nr.top - rootRect.top), w: Math.round(nr.width), h: Math.round(nr.height) },
+        });
+      }
+      return dividers;
+    }
+
+    function collectSvgDividers(root, rootRect) {
+      const dividers = [];
+      for (const g of root.querySelectorAll("g.divider")) {
+        const label = g.querySelector(".divider-label");
+        const bg = g.querySelector(".divider-bg");
+        if (!label) continue;
+        const lr = label.getBoundingClientRect();
+        const gr = bg ? bg.getBoundingClientRect() : lr;
+        dividers.push({
+          side: "svg",
+          idx: dividers.length,
+          label: label.textContent.trim(),
+          y: Math.round(lr.top - rootRect.top + lr.height / 2),
+          box: bg ? { x: Math.round(gr.left - rootRect.left), y: Math.round(gr.top - rootRect.top), w: Math.round(gr.width), h: Math.round(gr.height) } : null,
+          label_box: { x: Math.round(lr.left - rootRect.left), y: Math.round(lr.top - rootRect.top), w: Math.round(lr.width), h: Math.round(lr.height) },
+        });
+      }
+      return dividers;
+    }
+
     const prepared = typeof window.prepareHtmlForCapture === "function"
       ? window.prepareHtmlForCapture()
       : null;
@@ -945,6 +984,8 @@ export async function collectLabelData(page) {
       svgOccurrences: collectSvgOccurrences(svgRoot, svgRootRect),
       htmlFragmentDividers: collectHtmlFragmentDividers(htmlRoot, htmlRootRect),
       svgFragmentDividers: collectSvgFragmentDividers(svgRoot, svgRootRect),
+      htmlDividers: collectHtmlDividers(htmlRoot, htmlRootRect),
+      svgDividers: collectSvgDividers(svgRoot, svgRootRect),
     };
   });
 }

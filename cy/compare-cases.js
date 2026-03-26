@@ -804,6 +804,12 @@ OrderService.handle() {
   }
 }`,
 
+  // --- Divider ---
+  "divider": `A -> B: request
+==Phase 2==
+B -> C: forward
+==Done==`,
+
   // --- Icons ---
   "icons": `@Actor User
 @Database DB

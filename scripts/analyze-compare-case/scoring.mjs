@@ -727,6 +727,40 @@ function scoreFragmentDivider(htmlDiv, svgDiv) {
   };
 }
 
+function scoreDivider(htmlDiv, svgDiv) {
+  const base = htmlDiv || svgDiv;
+  const item = {
+    idx: base?.idx ?? 0,
+    label: base?.label ?? "",
+    status: "ambiguous",
+  };
+
+  if (!htmlDiv || !svgDiv) {
+    item.reason = `divider missing on ${!htmlDiv ? "html" : "svg"} side`;
+    return item;
+  }
+
+  const dy = round(svgDiv.y - htmlDiv.y);
+  return {
+    ...item,
+    status: dy === 0 ? "ok" : "ambiguous",
+    dy,
+    html_box: htmlDiv.box,
+    svg_box: svgDiv.box,
+    html_label_box: htmlDiv.label_box,
+    svg_label_box: svgDiv.label_box,
+  };
+}
+
+function buildDividerSection(htmlDividers, svgDividers) {
+  const maxLen = Math.max(htmlDividers.length, svgDividers.length);
+  const results = [];
+  for (let i = 0; i < maxLen; i++) {
+    results.push(scoreDivider(htmlDividers[i] || null, svgDividers[i] || null));
+  }
+  return results;
+}
+
 function buildFragmentDividerSection(htmlDividers, svgDividers) {
   const maxLen = Math.max(htmlDividers.length, svgDividers.length);
   const results = [];
@@ -754,6 +788,8 @@ export function buildScoredSections(extracted, diffImage) {
     svgOccurrences,
     htmlFragmentDividers,
     svgFragmentDividers,
+    htmlDividers,
+    svgDividers,
   } = extracted;
 
   const iconNames = participantsWithIcons(htmlParticipants, svgParticipants);
@@ -775,5 +811,6 @@ export function buildScoredSections(extracted, diffImage) {
     groups: buildGroupSection(htmlGroups, svgGroups),
     occurrences: buildOccurrenceSection(htmlOccurrences || [], svgOccurrences || []),
     fragmentDividers: buildFragmentDividerSection(htmlFragmentDividers || [], svgFragmentDividers || []),
+    dividers: buildDividerSection(htmlDividers || [], svgDividers || []),
   };
 }

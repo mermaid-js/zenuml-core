@@ -63,8 +63,9 @@ const DEFAULT_THEME_STYLES = `
   .return-arrow { stroke: #000; stroke-width: 2; fill: none; }
   .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .return-icon { fill: #222; }
-  .divider-line { stroke: #666; stroke-width: 1; stroke-dasharray: 4,4; }
-  .divider-label { font-family: Helvetica, Verdana, serif; font-size: 12px; fill: #666; }
+  .divider-line { stroke: #aaaa33; stroke-width: 1; }
+  .divider-bg { fill: #fff5ad; stroke: #aaaa33; stroke-width: 1; }
+  .divider-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; }
   .comment-text { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; opacity: 0.5; }
   .seq-number { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 100; fill: #6b7280; }
 `;
