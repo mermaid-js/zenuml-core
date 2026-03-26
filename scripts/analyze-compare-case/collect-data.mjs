@@ -37,7 +37,7 @@ export async function collectLabelData(page) {
         return null;
       }
       const rect = el.getBoundingClientRect();
-      if (!rect || rect.width <= 0 || rect.height <= 0) {
+      if (!rect || (rect.width <= 0 && rect.height <= 0)) {
         return null;
       }
       return relRect(rect, rootRect);
@@ -909,6 +909,46 @@ export async function collectLabelData(page) {
       return dividers;
     }
 
+    function collectHtmlTitle(root, rootRect) {
+      const titleEl = root.querySelector(".header .title, .header .text-skin-title");
+      if (!titleEl) {
+        return null;
+      }
+      const text = textContentNormalized(titleEl);
+      if (!text) {
+        return null;
+      }
+      const measured = measureTextEntry(titleEl, rootRect);
+      return {
+        side: "html",
+        kind: "title",
+        text,
+        box: measured.box,
+        font: measured.font,
+        letters: measured.letters,
+      };
+    }
+
+    function collectSvgTitle(root, rootRect) {
+      const titleEl = root.querySelector("text.frame-title");
+      if (!titleEl) {
+        return null;
+      }
+      const text = textContentNormalized(titleEl);
+      if (!text) {
+        return null;
+      }
+      const measured = measureTextEntry(titleEl, rootRect);
+      return {
+        side: "svg",
+        kind: "title",
+        text,
+        box: measured.box,
+        font: measured.font,
+        letters: measured.letters,
+      };
+    }
+
     const prepared = typeof window.prepareHtmlForCapture === "function"
       ? window.prepareHtmlForCapture()
       : null;
@@ -917,7 +957,18 @@ export async function collectLabelData(page) {
     const svgRoot = document.querySelector("#svg-output > svg") || document.querySelector("#svg-output svg");
     const htmlRootRect = htmlRoot.getBoundingClientRect();
     const svgRootRect = svgRoot.getBoundingClientRect();
-    const svgFrameBorderEl = svgRoot.querySelector("rect.frame-border-inner, rect.frame-border, rect.frame-box");
+    const htmlHeaderEl = htmlRoot.querySelector(".header");
+    const svgFrameBorderEl = svgRoot.querySelector("rect.frame-border-outer, rect.frame-border-inner, rect.frame-border, rect.frame-box");
+    const svgHeaderLineEl = svgRoot.querySelector("line.frame-header-line");
+    const svgHeaderLineBox = boxOrNull(strokedElementOuterRect(svgHeaderLineEl, svgRootRect));
+    const svgHeaderBox = svgHeaderLineBox
+      ? {
+        x: 1,
+        y: 1,
+        w: Math.max(0, svgRootRect.width - 2),
+        h: Math.max(0, svgHeaderLineBox.y - 1 + svgHeaderLineBox.h),
+      }
+      : null;
 
     return {
       caseName: new URLSearchParams(window.location.search).get("case") || "",
@@ -928,6 +979,13 @@ export async function collectLabelData(page) {
       svgRoot: { width: svgRootRect.width, height: svgRootRect.height },
       htmlRootBox: { x: 0, y: 0, w: htmlRootRect.width, h: htmlRootRect.height },
       svgRootBox: { x: 0, y: 0, w: svgRootRect.width, h: svgRootRect.height },
+      htmlFrameBox: { x: 0, y: 0, w: htmlRootRect.width, h: htmlRootRect.height },
+      svgFrameBox: boxOrNull(strokedElementOuterRect(svgFrameBorderEl, svgRootRect)) || { x: 0, y: 0, w: svgRootRect.width, h: svgRootRect.height },
+      htmlHeaderBox: boxOrNull(elementRect(htmlHeaderEl, htmlRootRect)),
+      svgHeaderLineBox,
+      svgHeaderBox,
+      htmlTitle: collectHtmlTitle(htmlRoot, htmlRootRect),
+      svgTitle: collectSvgTitle(svgRoot, svgRootRect),
       svgFrameBorderBox: boxOrNull(strokedElementOuterRect(svgFrameBorderEl, svgRootRect)),
       htmlLabels: collectHtmlLabels(htmlRoot, htmlRootRect),
       svgLabels: collectSvgLabels(svgRoot, svgRootRect),

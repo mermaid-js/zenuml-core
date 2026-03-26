@@ -18,8 +18,8 @@
       .nav button:hover { background: #6d28d9; }
       .nav button:disabled { background: #64748b; cursor: wait; }
       .nav .match-badge { font-size: 11px; color: #94a3b8; }
-      .container { display: flex; gap: 0; }
-      .container.stacked { flex-direction: column; }
+      .container { display: flex; flex-direction: row; gap: 0; }
+      .container.layout-top-down { flex-direction: column; }
       .panel { flex: 1; overflow: auto; }
       .panel > h3 { margin: 0; padding: 8px 16px; background: #334155; color: white; font-size: 13px; }
       .panel-content { padding: 10px; background: white; }
@@ -60,13 +60,20 @@
       import ZenUml from "/src/core.tsx";
       import { renderToSvg } from "/src/svg/renderToSvg.ts";
 
-      import { CASES } from "./compare-cases.js";
+      import { CASES, CASE_PANEL_LAYOUTS } from "./compare-cases.js";
       import { diffImages, DEFAULTS } from "./diff-algorithm.js";
 
       const caseNames = Object.keys(CASES);
       const params = new URLSearchParams(window.location.search);
       const caseName = params.get("case") || caseNames[0];
       const code = CASES[caseName];
+      const panelLayout = CASE_PANEL_LAYOUTS[caseName] || "left-to-right";
+      const container = document.querySelector(".container");
+      if (panelLayout === "top-down") {
+        container.classList.add("layout-top-down");
+      } else {
+        container.classList.remove("layout-top-down");
+      }
 
       // Update title and header
       document.title = `Compare: ${caseName}`;
@@ -102,21 +109,14 @@
         const pre = diagram.querySelector("pre.zenuml");
         pre.textContent = code;
         const zenUml = new ZenUml(pre);
+        // Compare pages must use the deterministic vertical layout path explicitly.
+        zenUml.setVerticalMode("html");
         await zenUml.render(code, { theme: "theme-default" });
 
         // Hide footer in HTML output (SVG has no footer equivalent)
         requestAnimationFrame(() => {
           const footer = document.querySelector("#html-output .footer");
           if (footer) footer.style.display = "none";
-
-          // Stack panels vertically when diagram is wider than half the viewport.
-          // This prevents overflow clipping in CDP screenshots for wide diagrams.
-          const frame = document.querySelector("#html-output .frame, #html-output .sequence-diagram");
-          const svgEl = document.querySelector("#svg-output > svg");
-          const maxW = Math.max(frame?.offsetWidth || 0, svgEl?.offsetWidth || 0);
-          if (maxW > window.innerWidth / 2 - 40) {
-            document.querySelector(".container").classList.add("stacked");
-          }
         });
       }
 

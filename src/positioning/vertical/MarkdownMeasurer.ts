@@ -14,9 +14,10 @@ export class MarkdownMeasurer {
     }
 
     const commentObj = new Comment(_text);
-    const text = DOMPurify.sanitize(
-      commentObj?.text && marked.parse(commentObj?.text),
-    );
+    const parsed = (commentObj?.text && marked.parse(commentObj?.text)) || "";
+    const text = typeof DOMPurify.sanitize === "function"
+      ? DOMPurify.sanitize(parsed)
+      : parsed;
 
     const tokens = marked.lexer(text, defaultTokensOptions);
     if (!tokens.length) {

@@ -44,6 +44,9 @@ export async function maybeWriteArtifacts(outputDir, htmlBuffer, svgBuffer, diff
 
 export function writeReportOutput(stdout, report, options) {
   const summaryBlock = [
+    report.frame_summary,
+    report.header_summary,
+    report.title_summary,
     report.summary,
     report.number_summary,
     report.arrow_summary,

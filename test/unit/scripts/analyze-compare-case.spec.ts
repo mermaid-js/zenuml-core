@@ -148,6 +148,13 @@ describe("analyze-compare-case/panel-diff", () => {
 describe("analyze-compare-case/report", () => {
   it("builds an empty report for empty extracted data", () => {
     const extracted = {
+      htmlFrameBox: { x: 0, y: 0, w: 100, h: 40 },
+      svgFrameBox: { x: 0, y: 0, w: 100, h: 40 },
+      htmlHeaderBox: null,
+      svgHeaderBox: null,
+      svgHeaderLineBox: null,
+      htmlTitle: null,
+      svgTitle: null,
       htmlLabels: [],
       svgLabels: [],
       htmlNumbers: [],
@@ -183,6 +190,20 @@ describe("analyze-compare-case/report", () => {
     const report = buildReport("demo", extracted, diffImage);
 
     expect(report.case).toBe("demo");
+    expect(report.frames).toEqual([
+      {
+        name: "frame",
+        status: "ok",
+        dx: 0,
+        dy: 0,
+        dw: 0,
+        dh: 0,
+        html_box: { x: 0, y: 0, w: 100, h: 40 },
+        svg_box: { x: 0, y: 0, w: 100, h: 40 },
+      },
+    ]);
+    expect(report.headers).toEqual([{ name: "header", status: "ambiguous", reason: "header missing on one side" }]);
+    expect(report.titles).toEqual([]);
     expect(report.labels).toEqual([]);
     expect(report.numbers).toEqual([]);
     expect(report.arrows).toEqual([]);
@@ -204,6 +225,9 @@ describe("analyze-compare-case/report", () => {
 describe("analyze-compare-case/output", () => {
   const report = {
     case: "demo",
+    frame_summary: ["frame:frame -> dx=0.00px dy=0.00px dw=0.00px dh=0.00px"],
+    header_summary: ["header:header -> dx=0.00px dy=0.00px dw=0.00px dh=0.00px line_dy=0.00px"],
+    title_summary: ["title:title:Demo -> D: dx=0.00px dy=0.00px"],
     summary: ["label:message:ok -> A: dx=0.00px dy=0.00px"],
     number_summary: ["number:message:1 -> 1: dx=0.00px dy=0.00px"],
     arrow_summary: ["arrow:1 -> left_dx=0.00px right_dx=0.00px width_dx=0.00px"],
@@ -222,6 +246,7 @@ describe("analyze-compare-case/output", () => {
     writeReportOutput(stdout, report, { summaryOnly: true, jsonOnly: false });
 
     expect(stdout.chunks.join("")).toContain("label:message:ok");
+    expect(stdout.chunks.join("")).toContain("frame:frame");
     expect(stdout.chunks.join("")).not.toContain("\"case\"");
   });
 

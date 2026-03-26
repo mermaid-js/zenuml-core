@@ -86,6 +86,21 @@ function formatParticipantBoxSummary(box) {
   return `participant-box:${box.name} -> dx=${box.dx.toFixed(2)}px dy=${box.dy.toFixed(2)}px dw=${box.dw.toFixed(2)}px dh=${box.dh.toFixed(2)}px`;
 }
 
+function formatFrameSummary(frame) {
+  if (frame.status !== "ok") {
+    return `frame:${frame.name} -> ambiguous`;
+  }
+  return `frame:${frame.name} -> dx=${frame.dx.toFixed(2)}px dy=${frame.dy.toFixed(2)}px dw=${frame.dw.toFixed(2)}px dh=${frame.dh.toFixed(2)}px`;
+}
+
+function formatHeaderSummary(header) {
+  if (header.status !== "ok") {
+    return `header:${header.name} -> ambiguous`;
+  }
+  const linePart = header.line_dy === null ? "line_dy=ambiguous" : `line_dy=${header.line_dy.toFixed(2)}px`;
+  return `header:${header.name} -> dx=${header.dx.toFixed(2)}px dy=${header.dy.toFixed(2)}px dw=${header.dw.toFixed(2)}px dh=${header.dh.toFixed(2)}px ${linePart}`;
+}
+
 function formatParticipantColorSummary(color) {
   if (color.status !== "ok") {
     return `participant-color:${color.name} -> ambiguous`;
@@ -123,6 +138,9 @@ export function buildReport(caseName, extracted, diffImage) {
 
   return {
     case: caseName,
+    frames: sections.frames,
+    headers: sections.headers,
+    titles: sections.titles,
     labels: sections.labels,
     numbers: sections.numbers,
     arrows: sections.arrows,
@@ -136,6 +154,9 @@ export function buildReport(caseName, extracted, diffImage) {
     occurrences: sections.occurrences,
     fragment_dividers: sections.fragmentDividers,
     residual_scopes: residualScopes.scopes,
+    frame_summary: sections.frames.map((frame) => formatFrameSummary(frame)),
+    header_summary: sections.headers.map((header) => formatHeaderSummary(header)),
+    title_summary: sections.titles.map((title) => formatSectionSummary("title", title)),
     summary: sections.labels.map((label) => formatSectionSummary("label", label)),
     number_summary: sections.numbers.map((number) => formatSectionSummary("number", number)),
     arrow_summary: sections.arrows.map((arrow) => `arrow:${arrow.key.text} -> ${formatArrowSummary(arrow)}`),

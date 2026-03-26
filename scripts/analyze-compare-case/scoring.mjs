@@ -354,6 +354,44 @@ function buildParticipantLabelItems(participants, iconNames) {
     }));
 }
 
+function scoreBoxPair(base, htmlBox, svgBox, reason) {
+  const item = {
+    ...base,
+    status: "ambiguous",
+  };
+
+  if (!htmlBox || !svgBox) {
+    item.reason = reason;
+    return item;
+  }
+
+  const dx = svgBox.x - htmlBox.x;
+  const dy = svgBox.y - htmlBox.y;
+  const dw = svgBox.w - htmlBox.w;
+  const dh = svgBox.h - htmlBox.h;
+
+  return {
+    ...item,
+    status: "ok",
+    dx: normalizeOffset(dx),
+    dy: normalizeOffset(dy),
+    dw: normalizeOffset(dw),
+    dh: normalizeOffset(dh),
+    html_box: {
+      x: round(htmlBox.x),
+      y: round(htmlBox.y),
+      w: round(htmlBox.w),
+      h: round(htmlBox.h),
+    },
+    svg_box: {
+      x: round(svgBox.x),
+      y: round(svgBox.y),
+      w: round(svgBox.w),
+      h: round(svgBox.h),
+    },
+  };
+}
+
 function buildParticipantStereotypeItems(participants) {
   return participants
     .filter((participant) => participant.stereotypeText && participant.stereotypeBox)
@@ -490,41 +528,9 @@ function participantNames(htmlParticipants, svgParticipants) {
 
 function scoreParticipantBox(htmlParticipant, svgParticipant) {
   const base = htmlParticipant || svgParticipant;
-  const item = {
+  return scoreBoxPair({
     name: base?.name ?? "",
-    status: "ambiguous",
-  };
-
-  if (!htmlParticipant?.participantBox || !svgParticipant?.participantBox) {
-    item.reason = "participant box missing on one side";
-    return item;
-  }
-
-  const dx = svgParticipant.participantBox.x - htmlParticipant.participantBox.x;
-  const dy = svgParticipant.participantBox.y - htmlParticipant.participantBox.y;
-  const dw = svgParticipant.participantBox.w - htmlParticipant.participantBox.w;
-  const dh = svgParticipant.participantBox.h - htmlParticipant.participantBox.h;
-
-  return {
-    ...item,
-    status: "ok",
-    dx: normalizeOffset(dx),
-    dy: normalizeOffset(dy),
-    dw: normalizeOffset(dw),
-    dh: normalizeOffset(dh),
-    html_box: {
-      x: round(htmlParticipant.participantBox.x),
-      y: round(htmlParticipant.participantBox.y),
-      w: round(htmlParticipant.participantBox.w),
-      h: round(htmlParticipant.participantBox.h),
-    },
-    svg_box: {
-      x: round(svgParticipant.participantBox.x),
-      y: round(svgParticipant.participantBox.y),
-      w: round(svgParticipant.participantBox.w),
-      h: round(svgParticipant.participantBox.h),
-    },
-  };
+  }, htmlParticipant?.participantBox, svgParticipant?.participantBox, "participant box missing on one side");
 }
 
 function buildParticipantBoxSection(htmlParticipants, svgParticipants) {
@@ -736,8 +742,54 @@ function buildFragmentDividerSection(htmlDividers, svgDividers) {
   return results;
 }
 
+function buildFrameSection(htmlFrameBox, svgFrameBox) {
+  return [
+    scoreBoxPair(
+      { name: "frame" },
+      htmlFrameBox || null,
+      svgFrameBox || null,
+      "frame missing on one side",
+    ),
+  ];
+}
+
+function buildHeaderSection(htmlHeaderBox, svgHeaderBox, svgHeaderLineBox) {
+  const header = scoreBoxPair(
+    { name: "header" },
+    htmlHeaderBox || null,
+    svgHeaderBox || null,
+    "header missing on one side",
+  );
+
+  if (header.status !== "ok") {
+    return [header];
+  }
+
+  const lineDy = htmlHeaderBox && svgHeaderLineBox
+    ? rectBottom(svgHeaderLineBox) - rectBottom(htmlHeaderBox)
+    : null;
+
+  return [{
+    ...header,
+    line_dy: lineDy === null ? null : normalizeOffset(lineDy),
+    svg_line_box: svgHeaderLineBox ? {
+      x: round(svgHeaderLineBox.x),
+      y: round(svgHeaderLineBox.y),
+      w: round(svgHeaderLineBox.w),
+      h: round(svgHeaderLineBox.h),
+    } : null,
+  }];
+}
+
 export function buildScoredSections(extracted, diffImage) {
   const {
+    htmlFrameBox,
+    svgFrameBox,
+    htmlHeaderBox,
+    svgHeaderBox,
+    svgHeaderLineBox,
+    htmlTitle,
+    svgTitle,
     htmlLabels,
     svgLabels,
     htmlNumbers,
@@ -761,8 +813,13 @@ export function buildScoredSections(extracted, diffImage) {
   const svgParticipantLabels = buildParticipantLabelItems(svgParticipants, iconNames);
   const htmlParticipantStereotypes = buildParticipantStereotypeItems(htmlParticipants);
   const svgParticipantStereotypes = buildParticipantStereotypeItems(svgParticipants);
+  const htmlTitles = htmlTitle ? [htmlTitle] : [];
+  const svgTitles = svgTitle ? [svgTitle] : [];
 
   return {
+    frames: buildFrameSection(htmlFrameBox, svgFrameBox),
+    headers: buildHeaderSection(htmlHeaderBox, svgHeaderBox, svgHeaderLineBox),
+    titles: buildSection(htmlTitles, svgTitles, diffImage),
     labels: buildSection(htmlLabels, svgLabels, diffImage),
     numbers: buildSection(htmlNumbers, svgNumbers, diffImage),
     arrows: buildArrowSection(htmlArrows, svgArrows, diffImage),

@@ -34,10 +34,16 @@ function scopePriority(category) {
     case "arrow":
     case "fragment-divider":
       return 6;
+    case "title":
+      return 5;
+    case "header":
+      return 4;
     case "occurrence":
     case "participant-box":
     case "participant-group":
       return 5;
+    case "frame":
+      return 3;
     case "frame-border":
       return 2;
     case "diagram-root":
@@ -89,6 +95,7 @@ function buildScopeItems(side, extracted) {
   const groups = side === "html" ? extracted.htmlGroups : extracted.svgGroups;
   const occurrences = side === "html" ? (extracted.htmlOccurrences || []) : (extracted.svgOccurrences || []);
   const fragmentDividers = side === "html" ? (extracted.htmlFragmentDividers || []) : (extracted.svgFragmentDividers || []);
+  const title = side === "html" ? extracted.htmlTitle : extracted.svgTitle;
 
   for (const label of labels) {
     push("label", formatScopeName(label), label.box, {
@@ -158,10 +165,18 @@ function buildScopeItems(side, extracted) {
       text: div.label || `divider#${div.idx}`,
     });
   }
+  push("title", "title", title?.box, {
+    kind: "title",
+    text: title?.text ?? null,
+  });
 
   if (sideKey === "html") {
+    push("header", "header", extracted.htmlHeaderBox, { kind: "header" });
+    push("frame", "frame", extracted.htmlFrameBox, { kind: "frame" });
     push("diagram-root", "html-root", extracted.htmlRootBox, { kind: "root" });
   } else {
+    push("header", "header", extracted.svgHeaderBox, { kind: "header" });
+    push("frame", "frame", extracted.svgFrameBox, { kind: "frame" });
     push("frame-border", "frame-border", extracted.svgFrameBorderBox, { kind: "frame" });
     push("diagram-root", "svg-root", extracted.svgRootBox, { kind: "root" });
   }

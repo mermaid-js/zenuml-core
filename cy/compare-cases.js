@@ -832,3 +832,7 @@ Browser->Auth0: 5. validate id_token and get user profile
 Browser->"Your API": 6. call API sending JWT in Authorization header
 "Your API"->"Your API": 7. validate token`,
 };
+
+export const CASE_PANEL_LAYOUTS = {
+  "mermaid-async-auth": "top-down",
+};
