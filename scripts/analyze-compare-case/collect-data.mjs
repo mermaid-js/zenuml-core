@@ -935,13 +935,13 @@ export async function collectLabelData(page) {
         const bg = g.querySelector(".divider-bg");
         if (!label) continue;
         const lr = label.getBoundingClientRect();
-        const gr = bg ? bg.getBoundingClientRect() : lr;
+        const bgRect = bg ? strokedElementOuterRect(bg, rootRect) : null;
         dividers.push({
           side: "svg",
           idx: dividers.length,
           label: label.textContent.trim(),
           y: Math.round(lr.top - rootRect.top + lr.height / 2),
-          box: bg ? { x: Math.round(gr.left - rootRect.left), y: Math.round(gr.top - rootRect.top), w: Math.round(gr.width), h: Math.round(gr.height) } : null,
+          box: bgRect ? { x: Math.round(bgRect.x), y: Math.round(bgRect.y), w: Math.round(bgRect.w), h: Math.round(bgRect.h) } : null,
           label_box: { x: Math.round(lr.left - rootRect.left), y: Math.round(lr.top - rootRect.top), w: Math.round(lr.width), h: Math.round(lr.height) },
         });
       }
