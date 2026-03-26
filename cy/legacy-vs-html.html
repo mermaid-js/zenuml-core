@@ -182,7 +182,10 @@ new A {
       }
 
       if (code === undefined) {
-        document.getElementById("html-output").innerHTML = `<p style="color:red">Unknown case: ${caseName}</p>`;
+        const errP = document.createElement("p");
+        errP.style.color = "red";
+        errP.textContent = "Unknown case: " + caseName;
+        document.getElementById("html-output").appendChild(errP);
       } else {
         function createPanel(containerId, mode) {
           const container = document.getElementById(containerId);
@@ -279,7 +282,7 @@ new A {
             bar.style.background = allMatch ? "#d1fae5" : "#fef3c7";
             bar.style.color = allMatch ? "#065f46" : "#92400e";
 
-            console.info(`[Parity] ${caseName}:`, allMatch ? "all identical" : deltaLines.join(', '));
+            console.info("[Parity] %s: %s", caseName, allMatch ? "all identical" : deltaLines.join(", "));
           }, 500);
         }, 100);
       }
