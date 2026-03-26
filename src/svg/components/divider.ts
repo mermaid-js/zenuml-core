@@ -29,4 +29,3 @@ export function renderDivider(d: DividerGeometry): string {
   <text x="${centerX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="divider-label">${esc(label)}</text>
 </g>`;
 }
-
