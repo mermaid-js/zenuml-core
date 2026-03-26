@@ -12,6 +12,7 @@ import {
 } from "@/positioning/Constants";
 import { TextType } from "@/positioning/Coordinate";
 import { buildFragmentGeometry } from "./buildFragmentGeometry";
+import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
 import { walkStatements } from "./walkStatements";
 import { computeReturnDebt } from "./computeReturnDebt";
 import CommentClass from "@/components/Comment/Comment";
@@ -506,10 +507,12 @@ export function buildMessages(
 
     // --- Dividers ---
     if (info.kind === "divider") {
+      const cleanLabel = info.label.replace(/^=+\s*|\s*=+$/g, "").trim();
       dividers.push({
         y: coord.top + adjust + coord.height / 2,
         width: diagramWidth,
         label: info.label,
+        labelWidth: measureSvgFragmentLabelWidth(cleanLabel),
       });
       continue;
     }

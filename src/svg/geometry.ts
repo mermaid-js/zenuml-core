@@ -142,6 +142,7 @@ export interface DividerGeometry {
   y: number;
   width: number;
   label: string;
+  labelWidth?: number;
 }
 
 // ─── Return ────────────────────────────────────────────────────────

@@ -7,16 +7,25 @@ const BOX_HEIGHT = 28;
 export function renderDivider(d: DividerGeometry): string {
   const label = d.label.replace(/^=+\s*|\s*=+$/g, "").trim();
   const centerX = d.width / 2;
-  const textWidth = label.length * 8;
-  const boxWidth = textWidth + PAD_X * 2;
-  const boxX = centerX - boxWidth / 2;
-  const boxY = d.y - BOX_HEIGHT / 2;
+  const textWidth = d.labelWidth ?? label.length * 8;
+  // Match HTML box-sizing: border-box with 1px border.
+  // Total visual width = textWidth + 2*padding + 2*border = textWidth + 18.
+  // SVG stroke is centered on the rect edge (0.5px inside, 0.5px outside),
+  // so the rect dimensions are the border-box dimensions minus the stroke overshoot.
+  const borderWidth = 1;
+  const totalWidth = textWidth + PAD_X * 2 + borderWidth * 2;
+  const innerWidth = totalWidth - borderWidth; // rect width (stroke centered)
+  const innerHeight = BOX_HEIGHT - borderWidth;
+  const boxX = centerX - innerWidth / 2;
+  const boxY = d.y - innerHeight / 2;
+  const outerLeft = boxX - borderWidth / 2; // visual left edge of stroke
+  const outerRight = boxX + innerWidth + borderWidth / 2; // visual right edge
   const textY = d.y;
 
   return `<g class="divider">
-  <line x1="0" y1="${d.y}" x2="${boxX}" y2="${d.y}" class="divider-line"/>
-  <line x1="${boxX + boxWidth}" y1="${d.y}" x2="${d.width}" y2="${d.y}" class="divider-line"/>
-  <rect x="${boxX}" y="${boxY}" width="${boxWidth}" height="${BOX_HEIGHT}" rx="2" class="divider-bg"/>
+  <line x1="0" y1="${d.y}" x2="${outerLeft}" y2="${d.y}" class="divider-line"/>
+  <line x1="${outerRight}" y1="${d.y}" x2="${d.width}" y2="${d.y}" class="divider-line"/>
+  <rect x="${boxX}" y="${boxY}" width="${innerWidth}" height="${innerHeight}" rx="2" class="divider-bg"/>
   <text x="${centerX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="divider-label">${esc(label)}</text>
 </g>`;
 }
