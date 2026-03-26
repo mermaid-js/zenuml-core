@@ -51,6 +51,7 @@ export const Divider = (props: {
         transform: "translateX(" + (-1 * centerOfOrigin + 10) + "px)",
         display: "flex",
         alignItems: "center",
+        height: 40,
         gap: 0,
       }}
     >
