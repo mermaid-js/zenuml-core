@@ -40,8 +40,21 @@ function walkToken(token: marked.Token): string {
   }
 }
 
+const LINE_HEIGHT = 20; // matches HTML renderer's line-height for comments
+
 export function renderComment(c: CommentGeometry): string {
   const styleAttr = c.style ? ` style="${styleToAttr(c.style)}"` : "";
-  return `<text x="${c.x}" y="${c.y}" class="comment-text"${styleAttr}>${markdownToSvgContent(c.text)}</text>`;
+  const content = markdownToSvgContent(c.text);
+  const lines = content.split("\n");
+
+  if (lines.length <= 1) {
+    return `<text x="${c.x}" y="${c.y}" class="comment-text"${styleAttr}>${content}</text>`;
+  }
+
+  // Multi-line: use tspan elements with dy offsets
+  const tspans = lines.map((line, i) =>
+    `<tspan x="${c.x}"${i === 0 ? "" : ` dy="${LINE_HEIGHT}"`}>${line}</tspan>`
+  ).join("");
+  return `<text x="${c.x}" y="${c.y}" class="comment-text"${styleAttr}>${tspans}</text>`;
 }
 
