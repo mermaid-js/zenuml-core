@@ -804,6 +804,16 @@ OrderService.handle() {
   }
 }`,
 
+  // --- Par with comments ---
+  "par-comment": `// comment 1
+if(order != null) {
+  // commment 2
+  par {
+    PurchaseService.createPO(order)
+    InvoiceService.createInvoice(order)
+  }
+}`,
+
   // --- Icons ---
   "icons": `@Actor User
 @Database DB

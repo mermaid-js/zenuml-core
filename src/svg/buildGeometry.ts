@@ -173,6 +173,26 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     inner.x += nestDepth * FRAGMENT_PADDING_X;
   }
 
+  // Shift fragment comments by the same nesting depth as their owning fragment.
+  // Match each fragment comment to its fragment by Y proximity (comment Y is
+  // just above fragment Y).
+  for (const c of comments) {
+    if (!c.fragmentComment) continue;
+    let bestFrag: FragmentGeometry | undefined;
+    let bestDist = Infinity;
+    for (const f of fragments) {
+      const dist = Math.abs(c.y - f.y);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestFrag = f;
+      }
+    }
+    if (bestFrag) {
+      const nd = nestDepths.get(bestFrag) || 0;
+      c.x += nd * FRAGMENT_PADDING_X;
+    }
+  }
+
   // Extend fragment right edges into the frameBorder area ONLY when the
   // fragment already spans (nearly) the full diagram width. Fragments whose
   // local participants are a subset of all participants should keep their
