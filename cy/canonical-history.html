@@ -1,0 +1,908 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Canonical Score History</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+      * { box-sizing: border-box; margin: 0; }
+      body {
+        font-family: 'DM Sans', sans-serif;
+        background: #0a0e1a;
+        color: #c8d1e0;
+        min-height: 100vh;
+      }
+
+      /* Header */
+      .header {
+        padding: 20px 28px 16px;
+        border-bottom: 1px solid #1a2035;
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+      }
+      .header h1 {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 16px;
+        font-weight: 600;
+        color: #e8ecf4;
+        letter-spacing: -0.3px;
+      }
+      .header .summary {
+        font-size: 12px;
+        color: #5a6a85;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .header .back-link {
+        margin-left: auto;
+        font-size: 12px;
+        color: #4a7cff;
+        text-decoration: none;
+        opacity: 0.7;
+        transition: opacity 0.15s;
+      }
+      .header .back-link:hover { opacity: 1; }
+
+      /* Main layout */
+      .layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        height: calc(100vh - 57px);
+        transition: grid-template-columns 0.2s ease;
+      }
+      .layout.collapsed {
+        grid-template-columns: 0px 1fr;
+      }
+
+      /* Sidebar toggle */
+      .sidebar-toggle {
+        background: #1a2035;
+        border: 1px solid #2a3555;
+        color: #8899bb;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: color 0.15s;
+      }
+      .sidebar-toggle:hover { color: #e8ecf4; }
+
+      /* Case selector panel */
+      .case-panel {
+        border-right: 1px solid #1a2035;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-width: 0;
+      }
+      .layout.collapsed .case-panel {
+        visibility: hidden;
+      }
+      .case-panel-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid #1a2035;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .case-panel-title {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #5a6a85;
+      }
+      .case-panel-actions {
+        display: flex;
+        gap: 6px;
+      }
+      .case-panel-actions button {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        padding: 3px 8px;
+        border: 1px solid #1e2a42;
+        border-radius: 4px;
+        background: transparent;
+        color: #5a6a85;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .case-panel-actions button:hover {
+        border-color: #4a7cff;
+        color: #4a7cff;
+      }
+      .case-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 4px 0;
+      }
+      .case-list::-webkit-scrollbar { width: 4px; }
+      .case-list::-webkit-scrollbar-track { background: transparent; }
+      .case-list::-webkit-scrollbar-thumb { background: #1e2a42; border-radius: 2px; }
+
+      .case-item {
+        display: grid;
+        grid-template-columns: 28px 1fr 52px;
+        align-items: center;
+        padding: 5px 12px 5px 8px;
+        cursor: pointer;
+        transition: background 0.1s;
+        gap: 4px;
+      }
+      .case-item:hover { background: #0f1525; }
+      .case-item.checked { background: #0d1428; }
+
+      .case-item input[type="checkbox"] {
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border: 1.5px solid #2a3550;
+        border-radius: 3px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.15s;
+        justify-self: center;
+      }
+      .case-item input[type="checkbox"]:checked {
+        border-color: var(--case-color, #4a7cff);
+        background: var(--case-color, #4a7cff);
+      }
+      .case-item input[type="checkbox"]:checked::after {
+        content: '';
+        position: absolute;
+        left: 3px; top: 1px;
+        width: 4px; height: 7px;
+        border: solid #fff;
+        border-width: 0 1.5px 1.5px 0;
+        transform: rotate(45deg);
+      }
+
+      .case-item-name {
+        font-size: 12px;
+        color: #8a95aa;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: color 0.15s;
+      }
+      .case-item.checked .case-item-name { color: #c8d1e0; }
+
+      .case-item-score {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Color coding */
+      .sc-100 { color: #34d399; }
+      .sc-90  { color: #6ee7b7; }
+      .sc-80  { color: #fbbf24; }
+      .sc-70  { color: #f97316; }
+      .sc-low { color: #ef4444; }
+
+      /* Main content */
+      .main {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* Chart area */
+      .chart-area {
+        padding: 20px 24px 12px;
+        flex-shrink: 0;
+      }
+      .chart-info {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .chart-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #e8ecf4;
+      }
+      .chart-subtitle {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: #5a6a85;
+      }
+      .chart-legend {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-left: auto;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        color: #8a95aa;
+      }
+      .legend-dot {
+        width: 8px;
+        height: 3px;
+        border-radius: 1px;
+      }
+      .chart-wrap {
+        background: #0d1220;
+        border: 1px solid #151d30;
+        border-radius: 6px;
+        padding: 16px 12px 8px;
+      }
+      .chart-wrap canvas {
+        width: 100%;
+        height: 240px;
+        display: block;
+      }
+
+      /* History table */
+      .table-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px 24px 24px;
+      }
+      .table-area::-webkit-scrollbar { width: 5px; }
+      .table-area::-webkit-scrollbar-track { background: transparent; }
+      .table-area::-webkit-scrollbar-thumb { background: #1e2a42; border-radius: 3px; }
+
+      table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      th {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px solid #1a2035;
+        color: #5a6a85;
+        font-weight: 500;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: sticky;
+        top: 0;
+        background: #0a0e1a;
+        z-index: 1;
+      }
+      td {
+        padding: 6px 10px;
+        border-bottom: 1px solid #0f1525;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+      }
+      tr:hover td { background: #0d1220; }
+      .ts { color: #4a5568; font-size: 11px; }
+      .d-pos { color: #34d399; }
+      .d-neg { color: #ef4444; }
+      .d-zero { color: #2a3550; }
+
+      .expand-btn {
+        cursor: pointer;
+        color: #4a7cff;
+        border: none;
+        background: none;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        padding: 2px 6px;
+        opacity: 0.6;
+        transition: opacity 0.15s;
+      }
+      .expand-btn:hover { opacity: 1; }
+      .detail-row { display: none; }
+      .detail-row.visible { display: table-row; }
+      .detail-row td { padding: 10px; }
+      .case-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 3px 16px;
+        font-size: 11px;
+      }
+      .case-grid-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 0;
+      }
+      .case-grid-name { color: #5a6a85; }
+
+      /* Case table header dot */
+      .th-case-dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-right: 4px;
+        vertical-align: middle;
+      }
+
+      .no-data {
+        text-align: center;
+        padding: 60px 24px;
+        color: #2a3550;
+        font-size: 13px;
+      }
+
+      /* Selection indicator */
+      .selection-count {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        color: #4a7cff;
+        background: #0d1428;
+        border: 1px solid #1a2540;
+        padding: 2px 7px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">&#9776;</button>
+      <h1>canonical scores</h1>
+      <span class="summary" id="summary"></span>
+      <a href="/cy/compare.html" class="back-link">compare cases &rarr;</a>
+    </div>
+
+    <div class="layout">
+      <!-- Case selector -->
+      <div class="case-panel">
+        <div class="case-panel-header">
+          <span class="case-panel-title">Cases</span>
+          <div class="case-panel-actions">
+            <button id="btn-clear">clear</button>
+            <button id="btn-all">all</button>
+          </div>
+        </div>
+        <div class="case-list" id="case-list"></div>
+      </div>
+
+      <!-- Main area -->
+      <div class="main">
+        <div class="chart-area">
+          <div class="chart-info">
+            <span class="chart-title" id="chart-title">Average Score Trend</span>
+            <span class="chart-subtitle" id="chart-subtitle"></span>
+            <div class="chart-legend" id="chart-legend"></div>
+            <button id="metric-toggle" style="
+              background: #1a2035; border: 1px solid #2a3555; border-radius: 4px;
+              color: #8a95aa; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+              padding: 3px 10px; cursor: pointer; margin-left: 8px;
+              transition: all 0.15s;
+            " onmouseover="this.style.borderColor='#4a7cff';this.style.color='#c8d1e0'"
+               onmouseout="this.style.borderColor='#2a3555';this.style.color='#8a95aa'"
+            >pos avg</button>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="main-chart" height="240"></canvas>
+          </div>
+        </div>
+
+        <div class="table-area" id="table-area">
+          <div class="no-data" id="no-data" style="display:none">No runs recorded yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- Sidebar toggle ---
+      document.getElementById('sidebar-toggle').addEventListener('click', () => {
+        document.querySelector('.layout').classList.toggle('collapsed');
+      });
+
+      // --- Chart metric toggle ---
+      let chartMetric = 'pos'; // 'pixel' or 'pos'
+      function getRunAvg(run) {
+        return chartMetric === 'pos' ? runAveragePos(run) : run.average;
+      }
+      document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('metric-toggle');
+        const updateBtn = () => {
+          btn.textContent = chartMetric === 'pos' ? 'show pixel avg' : 'show pos avg';
+        };
+        updateBtn();
+        btn.addEventListener('click', () => {
+          chartMetric = chartMetric === 'pos' ? 'pixel' : 'pos';
+          updateBtn();
+          redrawChart();
+        });
+      });
+
+      // --- Color palette for case lines ---
+      const PALETTE = [
+        '#4a7cff','#34d399','#f97316','#a78bfa','#f472b6',
+        '#22d3ee','#facc15','#fb7185','#38bdf8','#a3e635',
+        '#e879f9','#2dd4bf','#f87171','#818cf8','#fbbf24',
+        '#67e8f9','#c084fc','#4ade80','#fb923c','#e2e8f0',
+      ];
+
+      function scoreClass(s) {
+        if (s >= 100) return 'sc-100';
+        if (s >= 90) return 'sc-90';
+        if (s >= 80) return 'sc-80';
+        if (s >= 70) return 'sc-70';
+        return 'sc-low';
+      }
+
+      function deltaHtml(d) {
+        if (d === null) return '<span class="d-zero">&mdash;</span>';
+        const sign = d > 0 ? '+' : '';
+        const cls = d > 0 ? 'd-pos' : d < 0 ? 'd-neg' : 'd-zero';
+        return `<span class="${cls}">${sign}${d.toFixed(1)}</span>`;
+      }
+
+      function fmtDate(iso) {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+          ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+      }
+
+      function caseScore(entry) {
+        return typeof entry === 'object' ? entry.score : entry;
+      }
+
+      function casePosScore(entry) {
+        if (typeof entry === 'object' && typeof entry.posScore === 'number') return entry.posScore;
+        return caseScore(entry);
+      }
+
+      function runAveragePos(run) {
+        if (typeof run.averagePos === 'number') return run.averagePos;
+        const scores = Object.values(run.cases || {}).map(casePosScore);
+        return scores.length
+          ? parseFloat((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1))
+          : (typeof run.average === 'number' ? run.average : 0);
+      }
+
+      async function loadHistory() {
+        if (typeof window.__getCanonicalHistory === 'function') {
+          return await window.__getCanonicalHistory();
+        }
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open('canonical-history', 1);
+          req.onupgradeneeded = () => req.result.createObjectStore('runs', { keyPath: 'timestamp' });
+          req.onsuccess = () => {
+            const db = req.result;
+            const tx = db.transaction('runs', 'readonly');
+            const store = tx.objectStore('runs');
+            const getAll = store.getAll();
+            getAll.onsuccess = () => { db.close(); resolve(getAll.result); };
+            getAll.onerror = () => { db.close(); reject(getAll.error); };
+          };
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      // --- Global state ---
+      let allRuns = [];       // oldest first
+      let allCaseData = [];   // { name, entries, scores, latest, delta, min, max, color }
+      let selectedCases = new Set();
+
+      // --- Build case data ---
+      function buildCaseData(runs) {
+        const sorted = [...runs].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+        const names = new Set();
+        sorted.forEach(r => Object.keys(r.cases).forEach(k => names.add(k)));
+
+        const data = [];
+        let colorIdx = 0;
+        for (const name of names) {
+          const entries = [];
+          sorted.forEach(r => {
+            const d = r.cases[name];
+            if (d != null) entries.push({ timestamp: r.timestamp, score: caseScore(d), posScore: casePosScore(d) });
+          });
+          const scores = entries.map(e => e.score);
+          const latest = scores[scores.length - 1];
+          const prev = scores.length >= 2 ? scores[scores.length - 2] : null;
+          data.push({
+            name, entries, scores, latest,
+            delta: prev !== null ? latest - prev : null,
+            min: Math.min(...scores),
+            max: Math.max(...scores),
+            color: PALETTE[colorIdx % PALETTE.length],
+          });
+          colorIdx++;
+        }
+        data.sort((a, b) => b.latest - a.latest);
+        return data;
+      }
+
+      // --- Render case selector ---
+      function renderCaseList() {
+        const container = document.getElementById('case-list');
+        container.innerHTML = '';
+
+        allCaseData.forEach((cd, idx) => {
+          const div = document.createElement('div');
+          div.className = 'case-item';
+          div.innerHTML = `
+            <input type="checkbox" id="cb-${idx}" style="--case-color:${cd.color}">
+            <span class="case-item-name" title="${cd.name}">${cd.name}</span>
+            <span class="case-item-score ${scoreClass(cd.latest)}">${cd.latest.toFixed(1)}%</span>
+          `;
+
+          const cb = div.querySelector('input');
+          div.addEventListener('click', (e) => {
+            if (e.target === cb) return;
+            cb.checked = !cb.checked;
+            cb.dispatchEvent(new Event('change'));
+          });
+          cb.addEventListener('change', () => {
+            if (cb.checked) {
+              selectedCases.add(cd.name);
+              div.classList.add('checked');
+            } else {
+              selectedCases.delete(cd.name);
+              div.classList.remove('checked');
+            }
+            onSelectionChanged();
+          });
+
+          container.appendChild(div);
+        });
+      }
+
+      // --- Chart drawing ---
+      function redrawChart() {
+        const canvas = document.getElementById('main-chart');
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        const w = rect.width, h = rect.height;
+        const pad = { top: 24, right: 16, bottom: 28, left: 42 };
+        const plotW = w - pad.left - pad.right;
+        const plotH = h - pad.top - pad.bottom;
+
+        const titleEl = document.getElementById('chart-title');
+        const subtitleEl = document.getElementById('chart-subtitle');
+        const legendEl = document.getElementById('chart-legend');
+
+        if (selectedCases.size === 0) {
+          // --- Aggregate mode: avg(all) per run ---
+          const avgs = allRuns.map(r => getRunAvg(r));
+          const metricLabel = chartMetric === 'pos' ? 'Pos Avg' : 'Pixel Avg';
+
+          titleEl.textContent = metricLabel + ' Score Trend (canonical)';
+          subtitleEl.textContent = allRuns.length + ' runs';
+          legendEl.innerHTML = '';
+
+          if (avgs.length === 0) return;
+
+          const minY = Math.max(0, Math.floor((Math.min(...avgs) - 5) / 5) * 5);
+          const maxY = 100;
+          const range = maxY - minY || 1;
+
+          drawGrid(ctx, w, h, pad, plotW, plotH, minY, maxY, range);
+          drawXLabels(ctx, allRuns.map(r => r.timestamp), w, h, pad, plotW);
+
+          // Area fill
+          const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + plotH);
+          grad.addColorStop(0, 'rgba(74,124,255,0.12)');
+          grad.addColorStop(1, 'rgba(74,124,255,0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          avgs.forEach((v, i) => {
+            const px = pad.left + (i / Math.max(1, avgs.length - 1)) * plotW;
+            const py = pad.top + plotH - ((v - minY) / range) * plotH;
+            i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+          });
+          ctx.lineTo(pad.left + plotW, pad.top + plotH);
+          ctx.lineTo(pad.left, pad.top + plotH);
+          ctx.closePath();
+          ctx.fill();
+
+          // Line
+          ctx.strokeStyle = '#4a7cff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          avgs.forEach((v, i) => {
+            const px = pad.left + (i / Math.max(1, avgs.length - 1)) * plotW;
+            const py = pad.top + plotH - ((v - minY) / range) * plotH;
+            i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+          });
+          ctx.stroke();
+
+          // Value labels (sparse) + run labels for labeled runs
+          const labelStep = Math.max(1, Math.floor(avgs.length / 10));
+          ctx.font = '500 10px JetBrains Mono, monospace';
+          ctx.textAlign = 'center';
+          avgs.forEach((v, i) => {
+            const px = pad.left + (i / Math.max(1, avgs.length - 1)) * plotW;
+            const py = pad.top + plotH - ((v - minY) / range) * plotH;
+            const run = allRuns[i];
+            // Always show dot + value for labeled runs or sparse interval
+            const showValue = (i % labelStep === 0) || i === avgs.length - 1 || run.label;
+            if (showValue) {
+              ctx.fillStyle = run.label ? '#ff9944' : '#4a7cff';
+              ctx.beginPath();
+              ctx.arc(px, py, run.label ? 4 : 2.5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = '#8a95aa';
+              ctx.fillText(v.toFixed(1), px, py - 8);
+            }
+          });
+        } else {
+          // --- Per-case mode ---
+          const selected = allCaseData.filter(cd => selectedCases.has(cd.name));
+          titleEl.textContent = selected.length === 1 ? selected[0].name : selected.length + ' cases selected';
+          subtitleEl.textContent = '';
+
+          // Build legend
+          legendEl.innerHTML = selected.map(cd =>
+            `<span class="legend-item"><span class="legend-dot" style="background:${cd.color}"></span>${cd.name}</span>`
+          ).join('');
+
+          // Compute Y range across all selected
+          let allScores = [];
+          selected.forEach(cd => allScores.push(...cd.scores));
+          const minY = Math.max(0, Math.floor((Math.min(...allScores) - 5) / 5) * 5);
+          const maxY = 100;
+          const range = maxY - minY || 1;
+
+          // Use the run timestamps as X axis (all runs, oldest first)
+          const timestamps = allRuns.map(r => r.timestamp);
+
+          drawGrid(ctx, w, h, pad, plotW, plotH, minY, maxY, range);
+          drawXLabels(ctx, timestamps, w, h, pad, plotW);
+
+          // Draw each case line
+          selected.forEach(cd => {
+            // Map entries to run indices
+            const scoreMap = {};
+            cd.entries.forEach(e => { scoreMap[e.timestamp] = e.score; });
+
+            ctx.strokeStyle = cd.color;
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            let started = false;
+            timestamps.forEach((ts, i) => {
+              if (scoreMap[ts] == null) return;
+              const px = pad.left + (i / Math.max(1, timestamps.length - 1)) * plotW;
+              const py = pad.top + plotH - ((scoreMap[ts] - minY) / range) * plotH;
+              if (!started) { ctx.moveTo(px, py); started = true; }
+              else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+
+            // Latest dot
+            const lastEntry = cd.entries[cd.entries.length - 1];
+            const lastIdx = timestamps.indexOf(lastEntry.timestamp);
+            if (lastIdx >= 0) {
+              const px = pad.left + (lastIdx / Math.max(1, timestamps.length - 1)) * plotW;
+              const py = pad.top + plotH - ((lastEntry.score - minY) / range) * plotH;
+              ctx.fillStyle = cd.color;
+              ctx.beginPath();
+              ctx.arc(px, py, 3, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.font = '500 10px JetBrains Mono, monospace';
+              ctx.textAlign = 'center';
+              ctx.fillText(lastEntry.score.toFixed(1), px, py - 8);
+            }
+          });
+        }
+      }
+
+      function drawGrid(ctx, w, h, pad, plotW, plotH, minY, maxY, range) {
+        ctx.strokeStyle = '#141b2d';
+        ctx.lineWidth = 0.5;
+        ctx.font = '10px JetBrains Mono, monospace';
+        ctx.fillStyle = '#3a4560';
+        ctx.textAlign = 'right';
+        for (let y = minY; y <= maxY; y += 10) {
+          const py = pad.top + plotH - ((y - minY) / range) * plotH;
+          ctx.beginPath();
+          ctx.moveTo(pad.left, py);
+          ctx.lineTo(w - pad.right, py);
+          ctx.stroke();
+          ctx.fillText(y + '%', pad.left - 6, py + 3);
+        }
+      }
+
+      function drawXLabels(ctx, timestamps, w, h, pad, plotW) {
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#3a4560';
+        ctx.font = '10px JetBrains Mono, monospace';
+        const step = Math.max(1, Math.floor(timestamps.length / 8));
+        timestamps.forEach((ts, i) => {
+          if (i % step !== 0 && i !== timestamps.length - 1) return;
+          const px = pad.left + (i / Math.max(1, timestamps.length - 1)) * plotW;
+          const d = new Date(ts);
+          ctx.fillText(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), px, h - 4);
+        });
+      }
+
+      // --- Table rendering (reactive) ---
+      function renderTable() {
+        const area = document.getElementById('table-area');
+        const noData = document.getElementById('no-data');
+
+        if (allRuns.length === 0) {
+          noData.style.display = '';
+          return;
+        }
+        noData.style.display = 'none';
+
+        if (selectedCases.size === 0) {
+          renderAggregateTable(area);
+        } else {
+          renderCaseTable(area);
+        }
+      }
+
+      function renderAggregateTable(area) {
+        const newestFirst = [...allRuns].reverse();
+        const table = document.createElement('table');
+        table.innerHTML = `<thead><tr>
+          <th style="width:28px"></th>
+          <th>Date</th><th style="width:40%">Label</th><th>Avg</th><th>Pos Avg</th><th>Delta</th>
+          <th>Cases</th><th>Time</th><th style="width:80px">Best</th><th style="width:80px">Worst</th>
+        </tr></thead>`;
+        const tbody = document.createElement('tbody');
+
+        newestFirst.forEach((run, idx) => {
+          const prev = idx < newestFirst.length - 1 ? newestFirst[idx + 1] : null;
+          const avg = run.average;
+          const avgPos = runAveragePos(run);
+          const prevAvgPos = prev ? runAveragePos(prev) : null;
+          const delta = prevAvgPos !== null ? avgPos - prevAvgPos : null;
+          const scores = Object.entries(run.cases).map(([n, d]) => ({
+            name: n, score: caseScore(d), posScore: casePosScore(d),
+          })).sort((a, b) => b.posScore - a.posScore);
+          const best = scores[0], worst = scores[scores.length - 1];
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><button class="expand-btn" data-idx="${idx}">+</button></td>
+            <td class="ts">${fmtDate(run.timestamp)}</td>
+            <td style="color:#8b9cc0;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${run.label || ''}">${run.label || ''}</td>
+            <td class="${scoreClass(avg)}" style="font-weight:bold">${avg.toFixed(1)}%</td>
+            <td class="${scoreClass(avgPos)}" style="font-weight:bold">${avgPos.toFixed(1)}%</td>
+            <td>${deltaHtml(delta)}</td>
+            <td style="color:#5a6a85">${run.caseCount}</td>
+            <td class="ts">${run.elapsed || '—'}s</td>
+            <td class="${scoreClass(best.posScore)}" style="font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${best.name} ${best.posScore.toFixed(1)}%">${best.name} ${best.posScore.toFixed(1)}%</td>
+            <td class="${scoreClass(worst.posScore)}" style="font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${worst.name} ${worst.posScore.toFixed(1)}%">${worst.name} ${worst.posScore.toFixed(1)}%</td>
+          `;
+          tbody.appendChild(tr);
+
+          const detailTr = document.createElement('tr');
+          detailTr.className = 'detail-row';
+          detailTr.id = `detail-${idx}`;
+          detailTr.innerHTML = `<td colspan="10"><div class="case-grid">${
+            scores.map(s => `<div class="case-grid-item"><span class="case-grid-name">${s.name}</span><span class="${scoreClass(s.score)}">${s.score}% / ${s.posScore.toFixed(1)}%</span></div>`).join('')
+          }</div></td>`;
+          tbody.appendChild(detailTr);
+        });
+
+        tbody.addEventListener('click', (e) => {
+          const btn = e.target.closest('.expand-btn');
+          if (!btn) return;
+          const detail = document.getElementById(`detail-${btn.dataset.idx}`);
+          detail.classList.toggle('visible');
+          btn.textContent = detail.classList.contains('visible') ? '−' : '+';
+        });
+
+        table.appendChild(tbody);
+        // Replace table only, keep no-data div
+        const oldTable = area.querySelector('table');
+        if (oldTable) oldTable.remove();
+        area.prepend(table);
+      }
+
+      function renderCaseTable(area) {
+        const selected = allCaseData.filter(cd => selectedCases.has(cd.name));
+        // Collect all unique timestamps where any selected case has data, newest first
+        const tsSet = new Set();
+        selected.forEach(cd => cd.entries.forEach(e => tsSet.add(e.timestamp)));
+        const timestamps = [...tsSet].sort((a, b) => b.localeCompare(a));
+
+        // Build score lookup per case: { timestamp -> score }
+        const lookups = selected.map(cd => {
+          const map = {};
+          cd.entries.forEach(e => { map[e.timestamp] = e.score; });
+          return map;
+        });
+
+        // Build prev-score lookup for deltas
+        const prevLookups = selected.map(cd => {
+          const map = {};
+          for (let i = 1; i < cd.entries.length; i++) {
+            map[cd.entries[i].timestamp] = cd.entries[i - 1].score;
+          }
+          return map;
+        });
+
+        const table = document.createElement('table');
+        // Header: Date + one column per selected case (score + delta subcolumns)
+        let headerHtml = '<thead><tr><th>Date</th>';
+        selected.forEach(cd => {
+          headerHtml += `<th><span class="th-case-dot" style="background:${cd.color}"></span>${cd.name}</th>`;
+          headerHtml += `<th style="width:50px">\u0394</th>`;
+        });
+        headerHtml += '</tr></thead>';
+        table.innerHTML = headerHtml;
+
+        const tbody = document.createElement('tbody');
+        timestamps.forEach(ts => {
+          const tr = document.createElement('tr');
+          let cells = `<td class="ts">${fmtDate(ts)}</td>`;
+          selected.forEach((cd, i) => {
+            const score = lookups[i][ts];
+            const prev = prevLookups[i][ts];
+            if (score != null) {
+              const delta = prev != null ? score - prev : null;
+              cells += `<td class="${scoreClass(score)}">${score.toFixed(1)}%</td>`;
+              cells += `<td>${deltaHtml(delta)}</td>`;
+            } else {
+              cells += `<td class="d-zero">—</td><td></td>`;
+            }
+          });
+          tr.innerHTML = cells;
+          tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        const oldTable = area.querySelector('table');
+        if (oldTable) oldTable.remove();
+        area.prepend(table);
+      }
+
+      // --- Button handlers ---
+      document.getElementById('btn-clear').addEventListener('click', () => {
+        selectedCases.clear();
+        document.querySelectorAll('.case-item').forEach(el => {
+          el.classList.remove('checked');
+          el.querySelector('input').checked = false;
+        });
+        onSelectionChanged();
+      });
+
+      document.getElementById('btn-all').addEventListener('click', () => {
+        allCaseData.forEach(cd => selectedCases.add(cd.name));
+        document.querySelectorAll('.case-item').forEach(el => {
+          el.classList.add('checked');
+          el.querySelector('input').checked = true;
+        });
+        onSelectionChanged();
+      });
+
+      function onSelectionChanged() {
+        redrawChart();
+        renderTable();
+      }
+
+      // --- Init ---
+      setTimeout(async () => {
+        try {
+          const runs = await loadHistory();
+          allRuns = [...runs].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+          allCaseData = buildCaseData(runs);
+          const latest = allRuns[allRuns.length - 1];
+          if (latest) {
+            document.getElementById('summary').textContent =
+              latest.average.toFixed(1) + '% px avg / ' + runAveragePos(latest).toFixed(1) + '% pos avg / ' + latest.caseCount + ' cases';
+          }
+          renderCaseList();
+          renderTable();
+          redrawChart();
+        } catch (e) {
+          console.error('Failed to load history:', e);
+          document.getElementById('no-data').style.display = '';
+          document.getElementById('no-data').textContent = 'Error: ' + e.message;
+        }
+      }, 500);
+
+      // Resize handling
+      window.addEventListener('resize', () => redrawChart());
+    </script>
+  </body>
+</html>

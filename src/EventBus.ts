@@ -1,5 +1,6 @@
 import { createStore } from "jotai";
 import { onEventEmitAtom } from "./store/Store";
+import logger from "@/logger/logger";
 
 type Callback = (...args: any[]) => any;
 class EventEmitter {
@@ -9,14 +10,14 @@ class EventEmitter {
     if (!this.events[event]) {
       this.events[event] = new Set<Callback>();
     }
-    console.debug(`Event ${event} ${callback} added`);
-    console.debug(this.events);
+    logger.debug(`Event ${event} ${callback} added`);
+    logger.debug(this.events);
     this.events[event].add(callback);
   }
 
   off(event: string, callback: Callback) {
-    console.debug(`Event ${event} ${callback} removed`);
-    console.debug(this.events);
+    logger.debug(`Event ${event} ${callback} removed`);
+    logger.debug(this.events);
     this.events[event]?.delete(callback);
   }
 

@@ -2,7 +2,7 @@ import { coordinatesAtom, participantsAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { getStyle } from "@/utils/messageStyling";
 import { useAtomValue } from "jotai";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { centerOf } from "../utils";
 
 export const Divider = (props: {
@@ -10,15 +10,11 @@ export const Divider = (props: {
   origin: string;
   className?: string;
 }) => {
-  const participants = useAtomValue(participantsAtom);
-    const coordinates = useAtomValue(coordinatesAtom);
-
-  const width = useMemo(() => {
-    // TODO: with should be the width of the whole diagram
-    const rearParticipant = participants.Names().pop();
-    // 20px for the right margin of the participant
-    return centerOf(coordinates, rearParticipant) + 10;
-  }, [participants]);
+  useAtomValue(participantsAtom);
+  const coordinates = useAtomValue(coordinatesAtom);
+  const diagramWidth = useMemo(() => {
+    return coordinates.getWidth();
+  }, [coordinates]);
 
   const centerOfOrigin = centerOf(coordinates, props.origin);
 
@@ -40,23 +36,54 @@ export const Divider = (props: {
     return { style: getStyle([]), note: note };
   }, [note]);
 
+  const cleanNote = messageStyle.note.replace(/^=+\s*|\s*=+$/g, "").trim();
+
+  // Align with the lifeline-layer (same x=0 as SVG coordinate system).
+  // The block has padding-left that positions the statement-container;
+  // we need to offset back by that full padding to reach the content origin.
+  const refCallback = useCallback((el: HTMLDivElement | null) => {
+    if (!el) return;
+    const stmtContainer = el.parentElement;
+    const block = stmtContainer?.parentElement;
+    if (!block) return;
+    const blockPadding = parseFloat(getComputedStyle(block).paddingLeft) || 0;
+    el.style.transform = `translateX(-${blockPadding}px)`;
+  }, []);
+
   return (
     <div
+      ref={refCallback}
       className={cn("divider", props.className)}
       data-origin={props.origin}
       style={{
-        width: width + "px",
-        transform: "translateX(" + (-1 * centerOfOrigin + 10) + "px)",
+        width: diagramWidth + "px",
+        transform: "translateX(" + (-1 * centerOfOrigin) + "px)",
+        display: "flex",
+        alignItems: "center",
+        height: 40,
+        gap: 0,
       }}
     >
-      <div className="left bg-skin-divider"></div>
+      <div className="left" style={{ flex: 1, height: 1, backgroundColor: "#aaaa33" }}></div>
       <div
-        style={messageStyle.style.textStyle}
+        style={{
+          ...messageStyle.style.textStyle,
+          backgroundColor: "#fff5ad",
+          border: "1px solid #aaaa33",
+          borderRadius: 2,
+          boxSizing: "border-box" as const,
+          height: 28,
+          padding: "0 8px",
+          fontSize: 14,
+          lineHeight: "26px",
+          color: "#333",
+          whiteSpace: "nowrap",
+        }}
         className={cn("name", messageStyle.style.classNames)}
       >
-        {messageStyle.note}
+        {cleanNote}
       </div>
-      <div className="right bg-skin-divider"></div>
+      <div className="right" style={{ flex: 1, height: 1, backgroundColor: "#aaaa33" }}></div>
     </div>
   );
 };

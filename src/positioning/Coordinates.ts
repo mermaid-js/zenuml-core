@@ -8,6 +8,7 @@ import { TextType } from "./Coordinate";
 import type { WidthFunc } from "./Coordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
+import logger from "@/logger/logger";
 import { find_optimal } from "./david/DavidEisenstat";
 import { AllMessages } from "@/parser/MessageCollector";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
@@ -55,7 +56,7 @@ export class Coordinates {
     // const leftGap = 0;
     const position = leftGap + find_optimal(this.m)[pIndex];
     setCache(cacheKey, position);
-    console.debug(`Position of ${participantName} is ${position}`);
+    logger.debug(`Position of ${participantName} is ${position}`);
     return position;
   }
 
@@ -170,7 +171,7 @@ export class Coordinates {
       Math.max(labelWidth + iconWidth, MIN_PARTICIPANT_WIDTH) + MARGIN;
 
     setCache(cacheKey, participantWidth);
-    console.debug(
+    logger.debug(
       `Width of ${participant.name} is ${participantWidth}; labelWidth: ${labelWidth}`,
     );
     return participantWidth;

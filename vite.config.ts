@@ -31,6 +31,7 @@ const cypressHtmlFiles = getCypressHtmlFiles();
 export default defineConfig(({ mode }) => ({
   base: mode === "gh-pages" ? "/zenuml-core/" : "/",
   build: {
+    target: "esnext",
     rollupOptions: {
       input: ["index.html", "embed.html", "renderer.html", "test-compression.html", ...cypressHtmlFiles],
     },
@@ -39,6 +40,9 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": resolve(__dirname, "./src"),
     },
+  },
+  server: {
+    allowedHosts: ["8080.diagramly.net"],
   },
   plugins: [svgr(), react()],
   define: {

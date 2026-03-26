@@ -43,7 +43,7 @@
     /* Return statements in the last statement-container of a block */
     .block {
       > .statement-container:last-child {
-        .interaction.return {
+        >.interaction.return {
           margin-bottom: -16px;
           bottom: -1px;
         }
@@ -51,7 +51,7 @@
     }
     /* Assignment-created return statement (always last child of occurrence) */
     > .statement-container:last-child {
-      .interaction.return {
+      >.interaction.return {
         margin-bottom: -16px;
         bottom: -1px;
       }

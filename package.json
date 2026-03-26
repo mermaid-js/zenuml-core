@@ -21,6 +21,7 @@
     "pw:update-ci": "playwright test --update-snapshots --reporter=github",
     "pw:ui": "playwright test --ui",
     "pw:smoke": "playwright test smoke",
+    "analyze:compare-case": "node scripts/analyze-compare-case.mjs",
     "pw:install": "playwright install-deps && playwright install chromium",
     "antlr:setup": "python3 -m pip install antlr4-tools",
     "antlr:generate": "pwd && cd ./src/g4-units/hello-world && antlr4 Hello.g4",
@@ -46,6 +47,18 @@
   "main": "./dist/zenuml.js",
   "module": "./dist/zenuml.esm.mjs",
   "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/zenuml.esm.mjs"
+      },
+      "require": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/zenuml.js"
+      }
+    }
+  },
   "engines": {
     "node": ">=20"
   },
@@ -72,8 +85,6 @@
     "marked": "^4.3.0",
     "pako": "^2.1.0",
     "pino": "^8.21.0",
-    "radash": "^12.1.1",
-    "ramda": "^0.28.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tailwind-merge": "^3.4.0",
@@ -82,6 +93,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@happy-dom/global-registrator": "^18.0.1",
+    "@napi-rs/canvas": "^0.1.97",
     "@playwright/test": "^1.57.0",
     "@storybook/addon-docs": "^9.1.17",
     "@storybook/addon-onboarding": "^9.1.17",
@@ -94,7 +106,6 @@
     "@types/jsdom": "^21.1.7",
     "@types/marked": "^4.3.2",
     "@types/node": "^22.19.3",
-    "@types/ramda": "^0.28.25",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.7.0",

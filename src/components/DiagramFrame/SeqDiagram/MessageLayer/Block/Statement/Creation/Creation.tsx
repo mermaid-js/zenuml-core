@@ -1,3 +1,4 @@
+import logger from "@/logger/logger";
 import { cn } from "@/utils";
 import { Message } from "../Message/Message";
 import { Occurrence } from "../Interaction/Occurrence/Occurrence";
@@ -61,12 +62,12 @@ export const Creation = (props: {
 
     // Get the actual width from the DOM element
     setParticipantWidth(participantElement.getBoundingClientRect().width);
-    console.debug(
+    logger.debug(
       `Found participant element for ${target}, width: ${participantWidth}px`,
     );
 
     EventBus.emit("participant_set_top");
-    console.debug(`Init or update message container for ${target}`);
+    logger.debug(`Init or update message container for ${target}`);
   }, [target, participantWidth]);
 
   return (

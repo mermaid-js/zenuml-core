@@ -10,10 +10,10 @@ jobs:
   update-snapshots:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
@@ -49,6 +49,7 @@ jobs:
             echo "No snapshot changes to commit"
           fi
 
-  run-e2e:
-    needs: update-snapshots
-    uses: ./.github/workflows/e2e.yml
+      - name: Verify snapshots pass
+        run: bun run pw:ci
+        env:
+          CI: true

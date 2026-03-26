@@ -1,0 +1,71 @@
+import type { CreationGeometry } from "../geometry";
+import { esc, styleToAttr } from "./svgUtils";
+
+export function renderCreation(c: CreationGeometry): string {
+  const m = c.message;
+  const p = c.participant;
+
+  // Arrow stops at participant box edge (not center)
+  const isRTL = m.toX < m.fromX;
+  const adjustedToX = isRTL
+    ? p.x + p.width / 2
+    : p.x - p.width / 2;
+
+  // fromX: +1 on left endpoint (matching message.ts lifeline offset convention).
+  // toX: stop AT the participant rect edge — no +1, because SVG has no
+  // z-ordering to hide arrowhead overlap like CSS does in HTML.
+  const fromX = isRTL ? m.fromX : m.fromX + 1;
+  const toX = isRTL ? adjustedToX : adjustedToX;
+
+  // HTML label sits ~3px toward the sender side of the arrow midpoint.
+  // LTR fromX has +1 lifeline offset shifting midpoint +0.5px, so offset is -3.
+  // RTL fromX has no +1, so offset is +3.5 to match HTML positioning.
+  const labelX = fromX + (toX - fromX) / 2 + (isRTL ? 3.5 : -3);
+  const labelY = m.y - 3;
+
+  const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
+
+  const numberX = Math.min(fromX, toX) - 4;
+  const numberSvg = m.number
+    ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
+    : "";
+
+  // Creation labels like «payload» are rendered by HTML as three spans:
+  // <span>«</span><span class="editable-span-base" padding:4px>payload</span><span>»</span>
+  // The 4px padding makes HTML wider. Replicate with tspan dx offsets.
+  const labelContent = renderGuillemets(m.label, styleAttr);
+
+  return `<g class="creation">
+  <line x1="${fromX}" y1="${m.y}" x2="${toX}" y2="${m.y}" class="message-line" stroke-dasharray="6,4"/>
+  ${renderOpenArrow(toX, m.y, isRTL)}
+  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label">${labelContent}</text>
+  ${numberSvg}
+</g>`;
+}
+
+function renderGuillemets(label: string, styleAttr: string): string {
+  const match = label.match(/^«(.+)»$/);
+  if (match) {
+    const inner = match[1];
+    // HTML renders «create» (default, no params) as a single element.
+    // Only «param» labels (with arguments) use three separate spans with
+    // 4px padding on the middle editable-span. Skip dx for the default label.
+    if (inner === "create") {
+      return `<tspan${styleAttr}>${esc(label)}</tspan>`;
+    }
+    return `<tspan${styleAttr}>${esc("«")}</tspan><tspan dx="4"${styleAttr}>${esc(inner)}</tspan><tspan dx="4"${styleAttr}>${esc("»")}</tspan>`;
+  }
+  return `<tspan${styleAttr}>${esc(label)}</tspan>`;
+}
+
+function renderOpenArrow(tipX: number, tipY: number, pointsLeft: boolean): string {
+  // Match HTML renderer's ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
+  const w = 5.15;
+  const halfH = 3.25;
+  const dir = pointsLeft ? 1 : -1;
+  const x1 = tipX + dir * w;
+  const y1 = tipY - halfH;
+  const y2 = tipY + halfH;
+  return `<polyline points="${x1},${y1} ${tipX},${tipY} ${x1},${y2}" fill="none" stroke-linecap="round" class="arrow-head arrow-open"/>`;
+}
+

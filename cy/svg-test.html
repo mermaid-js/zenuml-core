@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>SVG Parity Test</title>
+    <style>
+      body { margin: 0; background: white; }
+    </style>
+  </head>
+  <body>
+    <div id="svg-output"></div>
+    <script type="module">
+      import { renderToSvg } from "/src/svg/renderToSvg.ts";
+      window.__renderSvg = (code) => {
+        const result = renderToSvg(code);
+        document.getElementById("svg-output").innerHTML = result.svg;
+      };
+    </script>
+  </body>
+</html>

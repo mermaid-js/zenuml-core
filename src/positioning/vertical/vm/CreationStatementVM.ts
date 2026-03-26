@@ -1,6 +1,7 @@
 import type { StatementCoordinate } from "../StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
+import logger from "@/logger/logger";
 
 const CREATION_MESSAGE_HEIGHT = 40; // [data-type="creation"], .h-10
 
@@ -31,7 +32,7 @@ export class CreationStatementVM extends StatementVM {
     const block = this.creation?.braceBlock?.()?.block?.();
     if (block) {
       const fragmentOrigin =
-        this.findLeftParticipant(this.creation, origin) || origin;
+        this.findLeftParticipant(this.creation, originParticipant) || originParticipant;
       cursor = this.layoutBlock(block, fragmentOrigin, cursor, this.kind);
       cursor += 2; // .occurrence.border-2 for bottom
     } else {
@@ -40,7 +41,7 @@ export class CreationStatementVM extends StatementVM {
 
     const assignment = this.creation?.Assignment?.();
     if (assignment) {
-      console.info(`creation::assignment::${participant}`);
+      logger.info(`creation::assignment::${participant}`);
       cursor += 12;
     }
 

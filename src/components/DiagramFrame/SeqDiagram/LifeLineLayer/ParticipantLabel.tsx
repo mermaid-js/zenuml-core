@@ -25,6 +25,49 @@ export const ParticipantLabel = (props: {
     mode === RenderMode.Dynamic &&
     UneditableText.indexOf(props.labelText) === -1;
   const assigneeIsEditable = mode === RenderMode.Dynamic;
+  const displayText = props.assignee
+    ? `${props.assignee}:${props.labelText}`
+    : props.labelText;
+
+  const normalizeEditableText = (text: string) => {
+    let processedText = text;
+
+    if (processedText.includes(" ")) {
+      processedText = processedText.replace(/\s+/g, " ");
+    }
+
+    if (specialCharRegex.test(processedText)) {
+      processedText = processedText.replace(/"/g, "");
+      processedText = `"${processedText}"`;
+      specialCharRegex.lastIndex = 0;
+    }
+
+    return processedText;
+  };
+
+  const replaceCodeAtPositions = (
+    replacements: Array<{ positions: Array<Position>; text: string }>,
+  ) => {
+    const edits = replacements
+      .flatMap(({ positions, text }) =>
+        positions.map((position) => ({
+          position,
+          text: normalizeEditableText(text),
+        })),
+      )
+      .sort((a, b) => b.position[0] - a.position[0]);
+
+    if (edits.length === 0) return;
+
+    let newCode = code;
+    for (const { position, text } of edits) {
+      const [start, end] = position;
+      newCode = newCode.slice(0, start) + text + newCode.slice(end);
+    }
+
+    setCode(newCode);
+    onContentChange(newCode);
+  };
 
   const createSaveHandler = (positions: Array<Position>, originalText: string) => {
     return (newText: string) => {
@@ -33,53 +76,52 @@ export const ParticipantLabel = (props: {
         return;
       }
 
-      let processedText = newText;
+      replaceCodeAtPositions([{ positions, text: newText }]);
+    };
+  };
 
-      if (processedText.includes(" ")) {
-        processedText = processedText.replace(/\s+/g, " "); // remove extra spaces
+  const createCombinedSaveHandler = (originalText: string) => {
+    return (newText: string) => {
+      if (newText === "" || newText === originalText) {
+        return;
       }
 
-      // If text has special characters or space, we wrap it with double quotes
-      if (specialCharRegex.test(processedText)) {
-        processedText = processedText.replace(/"/g, ""); // remove existing double quotes
-        processedText = `"${processedText}"`;
-        specialCharRegex.lastIndex = 0;
+      let nextAssignee = props.assignee ?? "";
+      let nextLabel = newText;
+      const separatorIndex = newText.indexOf(":");
+
+      if (separatorIndex >= 0) {
+        const parsedAssignee = newText.slice(0, separatorIndex).trim();
+        const parsedLabel = newText.slice(separatorIndex + 1).trim();
+
+        if (parsedAssignee) {
+          nextAssignee = parsedAssignee;
+        }
+        if (parsedLabel) {
+          nextLabel = parsedLabel;
+        } else {
+          nextLabel = props.labelText;
+        }
       }
 
-      if (!positions || positions.length === 0) return;
-
-      let newCode = code;
-      for (const position of positions) {
-        const [start, end] = position;
-        newCode = newCode.slice(0, start) + processedText + newCode.slice(end);
-      }
-      setCode(newCode);
-      onContentChange(newCode);
+      replaceCodeAtPositions([
+        { positions: props.assigneePositions ?? [], text: nextAssignee },
+        { positions: props.labelPositions ?? [], text: nextLabel },
+      ]);
     };
   };
 
   return (
     <div className="flex items-center justify-center">
-      {props.assignee && (
-        <>
-          <EditableSpan
-            text={props.assignee}
-            isEditable={assigneeIsEditable}
-            className="name pl-1 leading-4 right"
-            onSave={createSaveHandler(props.assigneePositions ?? [], props.assignee)}
-            title="Double-click to edit"
-          />
-          <span>:</span>
-        </>
-      )}
       <EditableSpan
-        text={props.labelText}
-        isEditable={participantIsEditable}
-        className={cn(
-          "name leading-4 right",
-          props.assignee ? "pr-1" : "px-1"
-        )}
-        onSave={createSaveHandler(props.labelPositions ?? [], props.labelText)}
+        text={displayText}
+        isEditable={props.assignee ? assigneeIsEditable : participantIsEditable}
+        className={cn("name leading-4 right px-1")}
+        onSave={
+          props.assignee
+            ? createCombinedSaveHandler(displayText)
+            : createSaveHandler(props.labelPositions ?? [], props.labelText)
+        }
         title="Double-click to edit"
       />
     </div>

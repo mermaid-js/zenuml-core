@@ -1,3 +1,5 @@
+import logger from "@/logger/logger";
+
 function buildCostDesc(diff: number): string {
   const seconds = Math.floor(diff / 1000);
   const milliseconds = Math.floor(diff % 1000);
@@ -11,7 +13,7 @@ export const calculateCostTime = (
 ) => {
   const now = getStartTime();
   const diff = now - processStartTime;
-  console.debug(processName + " cost: " + buildCostDesc(diff));
+  logger.debug(processName + " cost: " + buildCostDesc(diff));
   return diff;
 };
 

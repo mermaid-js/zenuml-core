@@ -12,8 +12,10 @@ import {
   RenderMode,
   stickyOffsetAtom,
   themeAtom,
+  verticalModeAtom,
 } from "./store/Store";
 import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { VERSION } from "./version.ts";
 import * as htmlToImage from "html-to-image";
 import Parser from "./parser/index.js";
@@ -33,6 +35,8 @@ import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { createStore, Provider } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
+export { renderToSvg } from "./svg/renderToSvg";
+export type { RenderResult, RenderOptions } from "./svg/renderToSvg";
 const logger = parentLogger.child({ name: "core" });
 
 interface Config {
@@ -101,8 +105,9 @@ export default class ZenUml implements IZenUml {
               (like DiagramFrame) will only work when they are descendants of an element with the
               .zenuml class. This provides scoped styling for the ZenUML library. */}
           <div className="zenuml">
-            {" "}
-            {naked ? <SeqDiagram /> : <DiagramFrame />}
+            <ErrorBoundary>
+              {naked ? <SeqDiagram /> : <DiagramFrame />}
+            </ErrorBoundary>
           </div>
         </Provider>
       </StrictMode>,
@@ -120,12 +125,16 @@ export default class ZenUml implements IZenUml {
     document.body.append(portalRootElement);
   }
 
+  setVerticalMode(mode: "html" | "legacy") {
+    this.store.set(verticalModeAtom, mode);
+  }
+
   async render(
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml> {
     if (this._currentTimeout) {
-      console.debug("rendering clearTimeout");
+      logger.debug("rendering clearTimeout");
       clearTimeout(this._currentTimeout);
     }
     logger.debug("rendering", code, config);
@@ -155,7 +164,7 @@ export default class ZenUml implements IZenUml {
   }
 
   async doRender(config: Config | undefined) {
-    console.debug("rendering start");
+    logger.debug("rendering start");
     const start = getStartTime();
     clearCache();
     this.store.set(onContentChangeAtom, config?.onContentChange || (() => {}));
@@ -188,7 +197,7 @@ export default class ZenUml implements IZenUml {
   calculateDebounceMilliseconds(): number {
     let debounce = this._lastRenderingCostMilliseconds;
     if (debounce > 2000) debounce = 2000;
-    console.debug("rendering debounce: " + debounce + "ms");
+    logger.debug("rendering debounce: " + debounce + "ms");
     return debounce;
   }
 
@@ -206,7 +215,7 @@ export default class ZenUml implements IZenUml {
         // Clear any previous errors
         Parser.ErrorDetails.length = 0;
         const result = Parser.RootContext(codeOrText);
-        console.debug("errors", Parser.ErrorDetails);
+        logger.debug("errors", Parser.ErrorDetails);
         const errors = [...Parser.ErrorDetails];
         // Clear errors after reading
         Parser.ErrorDetails.length = 0;

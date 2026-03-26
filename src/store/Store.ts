@@ -1,21 +1,31 @@
 import { atom } from "jotai";
 import { atomWithLocalStorage, atomWithFunctionValue } from "./utils.ts";
 import { RootContext, Participants } from "@/parser";
-import WidthProviderOnBrowser from "../positioning/WidthProviderFunc";
+import WidthProviderOnBrowser, {
+  WidthProviderOnCanvas,
+} from "../positioning/WidthProviderFunc";
+import type { WidthFunc } from "../positioning/Coordinate";
 import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { CodeRange } from "../parser/CodeRange";
+import logger from "@/logger/logger";
 
-type VerticalMode = "server" | "browser";
-
+type VerticalMode = "html" | "legacy";
 const resolveVerticalMode = (): VerticalMode => {
-  // console.info(
-  //   "import.meta.env.VITE_VERTICAL_MODE",
-  //   import.meta.env.VITE_VERTICAL_MODE,
-  // );
-  return import.meta.env.VITE_VERTICAL_MODE === "browser"
-    ? "browser"
-    : "server";
+  const mode = import.meta.env.VITE_VERTICAL_MODE === "legacy"
+    ? "legacy"
+    : "html";
+  logger.info(`[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`);
+  return mode;
+};
+
+export const resolveWidthProvider = (): WidthFunc => {
+  const urlParam = typeof location !== "undefined"
+    ? new URLSearchParams(location.search).get("WIDTH_PROVIDER")
+    : null;
+  const mode = (urlParam || import.meta.env.VITE_WIDTH_PROVIDER) === "canvas" ? "canvas" : "browser";
+  logger.debug(`[ZenUML] WidthProvider: ${mode}`);
+  return mode === "canvas" ? WidthProviderOnCanvas : WidthProviderOnBrowser;
 };
 
 /*
@@ -45,13 +55,13 @@ export const participantsAtom = atom((get) =>
 );
 
 export const coordinatesAtom = atom(
-  (get) => new Coordinates(get(rootContextAtom), WidthProviderOnBrowser),
+  (get) => new Coordinates(get(rootContextAtom), resolveWidthProvider()),
 );
 
 export const verticalModeAtom = atom<VerticalMode>(resolveVerticalMode());
 
 export const verticalCoordinatesAtom = atom((get) => {
-  if (get(verticalModeAtom) === "browser") {
+  if (get(verticalModeAtom) === "legacy") {
     return null;
   }
   const rootContext = get(rootContextAtom);
@@ -105,7 +115,7 @@ export const diagramElementAtom = atom<HTMLElement | null>(null);
 
 export const onElementClickAtom = atomWithFunctionValue(
   (codeRange: CodeRange) => {
-    console.log("Element clicked", codeRange);
+    logger.debug("Element clicked", codeRange);
   },
 );
 
