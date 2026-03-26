@@ -18,7 +18,7 @@ This skill targets **mermaid-js/zenuml-core** only. Run all git and GitHub comma
 
 ## Dependency
 
-This skill depends on the repo-local `$babysit-pr` skill in `zenuml-core/skills/babysit-pr` for the CI monitoring and fix loop after the PR is opened.
+This skill depends on the repo-local `$babysit-pr` skill in `zenuml-core/.claude/skills/babysit-pr` for the CI monitoring and fix loop after the PR is opened.
 
 - If `$babysit-pr` is unavailable, stop after creating the PR and report that the babysitting step could not be delegated.
 - Do not silently skip the babysitting step.

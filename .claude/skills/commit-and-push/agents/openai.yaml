@@ -1,0 +1,7 @@
+interface:
+  display_name: "Commit and Push"
+  short_description: "Commit intended changes and push branch"
+  default_prompt: "Use $commit-and-push to review the current branch, commit only the intended changes, and push safely to origin."
+
+policy:
+  allow_implicit_invocation: true
