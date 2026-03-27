@@ -8,40 +8,92 @@ import { esc, styleToAttr } from "./svgUtils";
  * their backticks stripped, bold/italic get SVG-equivalent tspan styling,
  * and the rendered text content matches what HTML shows.
  */
-function markdownToSvgContent(text: string): string {
+function markdownToSvgLines(text: string): string[] {
   const tokens = marked.lexer(text, { gfm: true, breaks: true });
-  return walkTokens(tokens);
+  return collectLines(tokens);
 }
 
-function walkTokens(tokens: marked.TokensList | marked.Token[]): string {
-  return tokens.map((t) => walkToken(t)).join("");
-}
+function collectLines(tokens: marked.TokensList | marked.Token[]): string[] {
+  const lines: string[][] = [[]];
 
-function walkToken(token: marked.Token): string {
-  switch (token.type) {
-    case "paragraph":
-      return walkTokens(token.tokens || []);
-    case "codespan":
-      // marked strips backticks and gives us the inner text
-      return esc(token.text);
-    case "strong":
-      return `<tspan font-weight="bold">${walkTokens(token.tokens || [])}</tspan>`;
-    case "em":
-      return `<tspan font-style="italic">${walkTokens(token.tokens || [])}</tspan>`;
-    case "text":
-      if ("tokens" in token && token.tokens) {
-        return walkTokens(token.tokens);
+  const pushFragment = (fragment: string) => {
+    if (fragment) {
+      lines[lines.length - 1].push(fragment);
+    }
+  };
+
+  const pushLineBreak = () => {
+    lines.push([]);
+  };
+
+  const walkTokens = (tokenList: marked.TokensList | marked.Token[]) => {
+    tokenList.forEach((token, index) => {
+      walkToken(token);
+
+      if (
+        index < tokenList.length - 1 &&
+        (token.type === "paragraph" || token.type === "code")
+      ) {
+        pushLineBreak();
       }
-      return esc(token.raw);
-    case "space":
-      return "";
-    default:
-      return esc(token.raw || "");
-  }
+    });
+  };
+
+  const walkToken = (token: marked.Token): void => {
+    switch (token.type) {
+      case "paragraph":
+        walkTokens(token.tokens || []);
+        return;
+      case "code": {
+        const codeLines = token.text.split("\n");
+        codeLines.forEach((line, index) => {
+          if (index > 0) {
+            pushLineBreak();
+          }
+          pushFragment(`<tspan font-family="monospace">${esc(line)}</tspan>`);
+        });
+        return;
+      }
+      case "codespan":
+        pushFragment(esc(token.text));
+        return;
+      case "strong":
+        pushFragment(`<tspan font-weight="bold">${collectLines(token.tokens || []).join("")}</tspan>`);
+        return;
+      case "em":
+        pushFragment(`<tspan font-style="italic">${collectLines(token.tokens || []).join("")}</tspan>`);
+        return;
+      case "text":
+        if ("tokens" in token && token.tokens) {
+          walkTokens(token.tokens);
+          return;
+        }
+        pushFragment(esc(token.raw));
+        return;
+      case "br":
+        pushLineBreak();
+        return;
+      case "space":
+        return;
+      default:
+        pushFragment(esc(token.raw || ""));
+    }
+  };
+
+  walkTokens(tokens);
+
+  return lines.map((line) => line.join(""));
 }
 
 export function renderComment(c: CommentGeometry): string {
   const styleAttr = c.style ? ` style="${styleToAttr(c.style)}"` : "";
-  return `<text x="${c.x}" y="${c.y}" class="comment-text"${styleAttr}>${markdownToSvgContent(c.text)}</text>`;
+  const lines = markdownToSvgLines(c.text);
+  const tspans = lines
+    .map((line, index) =>
+      index === 0
+        ? `<tspan x="${c.x}" y="${c.y}">${line || " "}</tspan>`
+        : `<tspan x="${c.x}" dy="20">${line || " "}</tspan>`,
+    )
+    .join("");
+  return `<text class="comment-text"${styleAttr}>${tspans}</text>`;
 }
-
