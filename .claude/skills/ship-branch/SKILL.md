@@ -10,8 +10,6 @@ Orchestrate the full path from local branch to npm release. This skill composes 
 ## Flow
 
 ```
-rebase on origin/main → CONFLICT → stop, report
-     | CLEAN
 validate-branch → FAIL → stop, report
      | PASS
 submit-branch → FAIL → stop, report
@@ -37,6 +35,7 @@ git rebase origin/main
 ```
 
 If the rebase has conflicts, stop immediately and report. The developer must resolve conflicts manually before shipping.
+
 
 ### Step 1: Validate locally
 
