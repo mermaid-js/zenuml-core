@@ -1,27 +1,21 @@
 ---
 name: dia-scoring
-description: Score HTML-vs-SVG diagram parity in compare-case pages, including message labels, fragment labels, sequence numbers, arrows, participant headers, icons, stereotypes, participant colors, participant groups, comments, and residual diff scopes. Use Playwright for page inspection and semantic attribution.
+description: Score HTML-vs-SVG diagram parity in compare-case pages, including message labels, fragment labels, sequence numbers, arrows, participant headers, icons, stereotypes, participant colors, participant groups, comments, and residual diff scopes. Use Playwright for page inspection and semantic attribution; use the live `#diff-panel canvas` as the sole pixel-diff source of truth.
 ---
 
 # Dia Scoring
 
-Use this skill when the task is to measure **message labels, fragment labels, sequence numbers, message arrows, participant labels, participant boxes, participant icons, stereotypes, participant colors, participant groups, inline comments, and residual diff hotspots** between the HTML renderer and the native SVG renderer on `compare-case.html`.
+Use this skill when the task is to measure **message labels, fragment labels, sequence numbers, message arrows, participant labels, participant boxes, participant icons, stereotypes, participant colors, participant groups, inline comments, and residual diff hotspots** between the HTML renderer and the native SVG renderer on `compare-case.html`. Use Playwright page inspection only to inspect the page and semantically attribute diffs to letters or elements. Use the live `#diff-panel canvas` as the sole pixel-diff source of truth.
 
-## Diff Source of Truth
+The workflow is browser-native:
 
-The `native-diff-ext` Chrome extension is the absolute source of truth for pixel diff. The analyzer script (`scripts/analyze-compare-case.mjs`) uses the same CDP screenshot capture method and the same diff algorithm (`cy/diff-algorithm.js`), producing identical results when run against the same viewport.
-
-- Use the **analyzer script** as the primary scoring tool (automated, reproducible, CLI-driven)
-- Use the **extension** for live interactive inspection in the browser
-- Both use CDP `Page.captureScreenshot` with `DOM.getBoxModel` border-box clip
-- When calibrating the skill, verify against the extension's live `#diff-panel canvas`
-
-The workflow:
-
-1. Run `node scripts/analyze-compare-case.mjs --case <name> --json` for structured data.
-2. Use `--output-dir <dir>` when you need saved `html.png`, `svg.png`, `diff.png`, and `report.json`.
-3. For live browser inspection, navigate to `http://localhost:8080/cy/compare-case.html?case=<name>` and use the extension's `#diff-panel canvas`.
-4. Use Playwright page inspection for semantic attribution (element positions, font metrics, DOM structure).
+1. Open `http://localhost:8080/cy/compare-case.html?case=<name>`.
+2. Treat the `native-diff-ext` extension as required for pixel diff work: it generates the live `#diff-panel canvas` on page load.
+3. Use the analyzer script at [../../scripts/analyze-compare-case.mjs](../../scripts/analyze-compare-case.mjs).
+4. Prefer `--json` when the next step is automated processing.
+5. Prefer `--output-dir <dir>` when you need saved `html.png`, `svg.png`, `diff.png`, and `report.json`.
+6. Treat all pixel-diff comparison and residual scoping as live-panel work sourced from `#diff-panel canvas`.
+7. When recalibrating or correcting this skill itself, use the live `#diff-panel canvas` to calibrate the skill's measurement rules and reporting language.
 
 ## Offset Anchor
 
@@ -46,14 +40,16 @@ Use **Playwright browser tools only** for browser interaction in this workflow.
 - Do not use `html-to-image` for capture.
 - Use browser-native screenshots only.
 - Use Playwright for browser-native screenshots and page inspection.
+- Use the extension-generated live `#diff-panel canvas` as the sole source for pixel diff comparison and residual validation.
 - All offset calculations must be anchored to the outermost frame's top-left corner.
-- When recalibrating the skill itself, verify against the extension's live `#diff-panel canvas`.
+- When re-checking, recalibrating, or correcting `dia-scoring` itself, calibrate the skill against the live `#diff-panel canvas`, not against a separately-built diff or memory of prior results.
+- If `#diff-panel canvas` is absent, do not recalibrate or correct `dia-scoring` itself.
+- Never build or trust a local screenshot-to-screenshot pixel diff when `#diff-panel canvas` is the question.
 - Do not use Chrome DevTools browser tools for this workflow.
 - Scope:
   - normal messages
   - self messages
   - returns
-  - creation messages (e.g., `«payload»`, `new Order()`)
   - fragment conditions such as `[cond]`, `[else]`
   - fragment section labels such as `catch`, `finally`
   - participant label text and participant box geometry
@@ -97,11 +93,11 @@ Use **Playwright browser tools only** for browser interaction in this workflow.
   - comment text presence and position (above the associated statement)
   - comment Y offset from the message/fragment it belongs to
   - fragment-level comments (e.g. `// comment 4` before `if(...)`) positioned above fragment header
-  - when all letters are `ambiguous` due to large positional offset (e.g. fragment comments at wrong X), the analyzer reports `box_dx` / `box_dy` from the bounding boxes instead of suppressing the measurement
   - styled comment color application (e.g. `// [red] text`)
-- For participant boxes, use the analyzer script output directly:
-  - Report `html_box`, `svg_box`, `dx`, `dy`, `dw`, `dh` from the script's `participant_boxes` section
-  - The script already applies stroke correction (`strokedElementOuterRect`) — do not re-measure with `browser_evaluate`
+- For participant boxes, include:
+  - `html_box` and `svg_box` with `x`, `y`, `w`, `h`
+  - box deltas `dx`, `dy`, `dw`, `dh`
+  - SVG measurement based on the painted outer bounds of the stroked box, not the inset rect geometry
 - For residual scopes, include:
   - connected `html-only` and `svg-only` diff clusters from `#diff-panel canvas`
   - cluster `size`, `bbox`, and `centroid`
@@ -117,12 +113,6 @@ Use **Playwright browser tools only** for browser interaction in this workflow.
   - pixel-panel confirmation from `#diff-panel canvas`
 - Participant stereotypes are first-class targets, not just part of `participant-box` or `participant-label`.
 - If the evidence is weak or contradictory, keep the letter `ambiguous`.
-
-## Known Analyzer Internals
-
-### Arrow pairing by sequence number
-
-The analyzer pairs arrows by sequence number (`text` field), not by label text (`pairText`). Calibrated on `repro-creation-return-arrow` (2026-03-24).
 
 ## Commands
 

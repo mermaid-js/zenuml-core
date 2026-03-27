@@ -1,0 +1,7 @@
+interface:
+  display_name: "Release App"
+  short_description: "Run tests, open PR, babysit CI, merge"
+  default_prompt: "Use $release-app to validate zenuml-core with bun tests, open or reuse a PR, hand CI monitoring to $babysit-pr, merge when green, and watch the post-merge main actions."
+
+policy:
+  allow_implicit_invocation: true
