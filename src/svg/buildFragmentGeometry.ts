@@ -8,7 +8,6 @@ import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
 import {
   FRAGMENT_MIN_WIDTH,
-  OCCURRENCE_BAR_SIDE_WIDTH,
 } from "@/positioning/Constants";
 import type { TextType } from "@/positioning/Coordinate";
 import { _STARTER_ } from "@/parser/OrderedParticipants";

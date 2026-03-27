@@ -1,4 +1,4 @@
-import type { StoryObj } from '@storybook/react'
+import type { StoryObj } from '@storybook/react-vite'
 import { useEffect, useRef, useState } from 'react'
 import ZenUml from '../../core'
 

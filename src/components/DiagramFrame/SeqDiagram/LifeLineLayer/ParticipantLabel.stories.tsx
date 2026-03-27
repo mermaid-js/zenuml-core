@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { ParticipantLabel } from './ParticipantLabel'
 import { createStore, Provider } from 'jotai'
 import { modeAtom, RenderMode } from '../../../../store/Store'

@@ -233,7 +233,7 @@ export default class ZenUml implements IZenUml {
           errorDetails: [],
         };
         resolve(parseResult);
-      } catch (error) {
+      } catch {
         const parseResult: ParseResult = {
           pass: false,
           errorDetails: [],

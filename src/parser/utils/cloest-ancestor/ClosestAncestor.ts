@@ -5,8 +5,11 @@ const seqParser = sequenceParser;
 const StatContext = seqParser.StatContext;
 
 antlr4.ParserRuleContext.prototype.ClosestAncestorStat = function () {
-  let current = this;
-  while (!(current instanceof StatContext)) {
+  if (this instanceof StatContext) {
+    return this;
+  }
+  let current = this.parentCtx;
+  while (current && !(current instanceof StatContext)) {
     current = current.parentCtx;
   }
   if (current instanceof StatContext) {

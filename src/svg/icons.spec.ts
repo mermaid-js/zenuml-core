@@ -19,7 +19,7 @@ describe("Icon definitions", () => {
   });
 
   it("each icon has viewBox and content", () => {
-    Object.entries(ICONS).forEach(([key, icon]) => {
+    Object.entries(ICONS).forEach(([, icon]) => {
       expect(icon.content).toBeDefined();
       expect(icon.content.length).toBeGreaterThan(0);
       // viewBox is optional but if present should be valid
