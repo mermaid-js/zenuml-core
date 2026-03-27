@@ -14,7 +14,7 @@ test.describe("SVG Parity Tests", () => {
       const code = TEST_CASES[name];
       if (!code) throw new Error(`Missing test case: ${name}`);
 
-      await page.goto("/cy/svg-test.html");
+      await page.goto("/e2e/fixtures/svg-test.html");
       await page.evaluate((c) => (window as any).__renderSvg(c), code);
       await expect(page.locator("#svg-output > svg")).toBeVisible({ timeout: 5000 });
       await expect(page).toHaveScreenshot(`svg-${name}.png`, {

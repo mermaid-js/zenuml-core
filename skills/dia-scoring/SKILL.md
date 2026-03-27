@@ -9,7 +9,7 @@ Use this skill when the task is to measure **message labels, fragment labels, se
 
 The workflow is browser-native:
 
-1. Open `http://localhost:8080/cy/compare-case.html?case=<name>`.
+1. Open `http://localhost:8080/e2e/tools/compare-case.html?case=<name>`.
 2. Treat the `native-diff-ext` extension as required for pixel diff work: it generates the live `#diff-panel canvas` on page load.
 3. Use the analyzer script at [../../scripts/analyze-compare-case.mjs](../../scripts/analyze-compare-case.mjs).
 4. Prefer `--json` when the next step is automated processing.

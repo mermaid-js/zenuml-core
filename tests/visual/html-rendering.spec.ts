@@ -4,7 +4,7 @@ import { HTML_VISUAL_CASES, DEFAULT_THRESHOLD } from "../test-cases";
 test.describe("HTML Rendering", () => {
   for (const { name, threshold } of HTML_VISUAL_CASES) {
     test(name, async ({ page }) => {
-      await page.goto(`/cy/fixture.html?case=${name}`);
+      await page.goto(`/e2e/fixtures/fixture.html?case=${name}`);
 
       // Wait for diagram to render
       await expect(page.locator(".privacy>span>svg")).toBeVisible({

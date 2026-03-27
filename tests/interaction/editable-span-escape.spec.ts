@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("EditableSpan ESC Key Behavior", () => {
   test("ESC reverts changes without saving", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/editable-span-test.html");
+    await page.goto("http://127.0.0.1:8080/e2e/fixtures/editable-span.html");
     await page.waitForLoadState("networkidle");
     
     const span1 = page.locator('[data-testid="test1-span"] .editable-span-base');
@@ -28,7 +28,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
   });
 
   test("Enter saves changes", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/editable-span-test.html");
+    await page.goto("http://127.0.0.1:8080/e2e/fixtures/editable-span.html");
     await page.waitForLoadState("networkidle");
     
     const span2 = page.locator('[data-testid="test2-span"] .editable-span-base');
@@ -52,7 +52,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
   });
 
   test("Blur saves changes", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/editable-span-test.html");
+    await page.goto("http://127.0.0.1:8080/e2e/fixtures/editable-span.html");
     await page.waitForLoadState("networkidle");
     
     const span3 = page.locator('[data-testid="test3-span"] .editable-span-base');
@@ -77,7 +77,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
   });
 
   test("Multiple ESC presses work correctly", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/editable-span-test.html");
+    await page.goto("http://127.0.0.1:8080/e2e/fixtures/editable-span.html");
     await page.waitForLoadState("networkidle");
     
     const span1 = page.locator('[data-testid="test1-span"] .editable-span-base');
@@ -106,7 +106,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
   });
 
   test("ESC after partial edit reverts correctly", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/editable-span-test.html");
+    await page.goto("http://127.0.0.1:8080/e2e/fixtures/editable-span.html");
     await page.waitForLoadState("networkidle");
     
     const span1 = page.locator('[data-testid="test1-span"] .editable-span-base');
@@ -126,7 +126,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
   });
 
   test("Tab saves changes", async ({ page }) => {
-    await page.goto("http://127.0.0.1:8080/cy/editable-span-test.html");
+    await page.goto("http://127.0.0.1:8080/e2e/fixtures/editable-span.html");
     await page.waitForLoadState("networkidle");
     
     const span2 = page.locator('[data-testid="test2-span"] .editable-span-base');

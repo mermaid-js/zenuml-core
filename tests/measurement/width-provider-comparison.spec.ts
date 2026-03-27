@@ -15,7 +15,7 @@ const TEST_CORPUS = [
 
 test.describe("Width Provider Comparison", () => {
   test("canvas vs browser measurement accuracy", async ({ page }) => {
-    await page.goto("/cy/fixture.html?case=smoke");
+    await page.goto("/e2e/fixtures/fixture.html?case=smoke");
     await page.waitForTimeout(1000);
 
     const results = await page.evaluate((corpus) => {

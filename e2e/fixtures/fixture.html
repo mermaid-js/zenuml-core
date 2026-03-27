@@ -16,7 +16,7 @@
       <pre class="zenuml" style="margin: 0" id="zenuml-code"></pre>
     </div>
     <script type="module">
-      import { CASES } from "./compare-cases.js";
+      import { CASES } from "../data/compare-cases.js";
       const params = new URLSearchParams(window.location.search);
       const caseName = params.get("case");
       if (caseName && CASES[caseName]) {
@@ -26,6 +26,6 @@
           "// Case not found: " + caseName;
       }
     </script>
-    <script type="module" src="/src/main-cy.ts"></script>
+    <script type="module" src="/src/main-e2e.ts"></script>
   </body>
 </html>

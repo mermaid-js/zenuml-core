@@ -2,7 +2,7 @@
 // Uses CDP element screenshots via bridge.js → background.js
 // Hides neighboring panels before each screenshot to prevent overlap.
 //
-// Diff algorithm lives in cy/diff-algorithm.js, loaded by compare-case.html
+// Diff algorithm lives in e2e/data/diff-algorithm.js, loaded by compare-case.html
 // and exposed as window.diffFromImages. This script only handles screenshots
 // and orchestration.
 
@@ -107,7 +107,7 @@ async function runNativeDiff() {
           const idx = cases.indexOf(currentCase);
           if (idx >= 0 && idx + 1 < cases.length) {
             setTimeout(() => {
-              window.location.href = `/cy/compare-case.html?case=${cases[idx + 1]}`;
+              window.location.href = `/e2e/tools/compare-case.html?case=${cases[idx + 1]}`;
             }, 200);
           }
         } else {
