@@ -32,7 +32,7 @@
   </head>
   <body>
     <div class="compare-bar">
-      <a href="/cy/compare.html">&larr; All cases</a>
+      <a href="/e2e/tools/compare.html">&larr; All cases</a>
       <h2 id="case-name"></h2>
       <div class="nav">
         <a id="prev-link" href="#">&larr; Prev</a>
@@ -60,8 +60,8 @@
       import ZenUml from "/src/core.tsx";
       import { renderToSvg } from "/src/svg/renderToSvg.ts";
 
-      import { CASES } from "./compare-cases.js";
-      import { diffImages, DEFAULTS } from "./diff-algorithm.js";
+      import { CASES } from "../data/compare-cases.js";
+      import { diffImages, DEFAULTS } from "../data/diff-algorithm.js";
 
       const caseNames = Object.keys(CASES);
       const params = new URLSearchParams(window.location.search);

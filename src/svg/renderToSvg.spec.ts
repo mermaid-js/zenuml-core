@@ -159,6 +159,25 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain("This is a comment");
   });
 
+  it("renders fenced code comments as multiple SVG lines without fence markers", () => {
+    const result = renderToSvg(
+      [
+        "title Async Messages (SPA Authentication)",
+        "// ```",
+        "// GET https://${account.namespace}/authorize/?",
+        "// response_type=token",
+        "// &client_id=${account.clientId}",
+        "// ```",
+        "Browser->Auth0: 1. initiate the authentication",
+      ].join("\n"),
+    );
+
+    expect(result.svg).toContain("GET https://${account.namespace}/authorize/?");
+    expect(result.svg).toContain("response_type=token");
+    expect(result.svg).not.toContain("```");
+    expect((result.svg.match(/<tspan x=\"[^\"]+\"(?: y=\"[^\"]+\"| dy=\"20\")>/g) || []).length).toBeGreaterThan(1);
+  });
+
   // --- Fragment tests ---
 
   it("renders if/else fragment with border and header", () => {

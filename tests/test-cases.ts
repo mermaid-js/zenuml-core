@@ -1,7 +1,7 @@
 // Re-export compare-cases with type safety for use in spec files.
 // compare-cases.js is the single source of truth for all DSL test data.
 
-import { CASES } from "../cy/compare-cases.js";
+import { CASES } from "../e2e/data/compare-cases.js";
 
 export const TEST_CASES: Record<string, string> = CASES;
 

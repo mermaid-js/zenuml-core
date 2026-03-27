@@ -8,7 +8,7 @@ test.describe("Defect 406", () => {
   });
 
   test("Fragments under Creation", async ({ page }) => {
-    await page.goto("/cy/fixture.html?case=defect-406");
+    await page.goto("/e2e/fixtures/fixture.html?case=defect-406");
     await expect(page.locator('[data-signature="m6"]')).toBeVisible({
       timeout: 5000,
     });

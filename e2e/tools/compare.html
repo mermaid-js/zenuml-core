@@ -20,12 +20,12 @@
     <h1>SVG vs HTML Comparison</h1>
     <div class="grid" id="grid"></div>
     <script type="module">
-      import { CASES } from "./compare-cases.js";
+      import { CASES } from "../data/compare-cases.js";
 
       const grid = document.getElementById("grid");
       for (const name of Object.keys(CASES)) {
         const a = document.createElement("a");
-        a.href = `/cy/compare-case.html?case=${encodeURIComponent(name)}`;
+        a.href = `/e2e/tools/compare-case.html?case=${encodeURIComponent(name)}`;
         a.className = "card";
         a.innerHTML = `<div class="name">${name}</div>`;
         grid.appendChild(a);

@@ -21,7 +21,7 @@
 | `src/svg/components/participant.ts` | SVG participant renderer | Render stereotype label, apply color fill |
 | `src/svg/components/group.ts` | **New** — SVG group renderer | Render dashed outline + title bar |
 | `src/svg/composeSvg.ts` | SVG compositor | Render group elements |
-| `cy/compare-cases.js` | Test cases | order-service case already added |
+| `e2e/data/compare-cases.js` | Test cases | order-service case already added |
 
 ---
 
@@ -243,7 +243,7 @@ Expected: PASS
 
 - [ ] **Step 8: Visual verification**
 
-Run: `bun dev` → open `http://localhost:8080/cy/compare-case.html?case=order-service`
+Run: `bun dev` → open `http://localhost:8080/e2e/tools/compare-case.html?case=order-service`
 Verify: "BusinessService" group container visible around PurchaseService and InvoiceService
 
 - [ ] **Step 9: Commit**
@@ -263,7 +263,7 @@ Expected: All tests pass
 
 - [ ] **Step 2: Check order-service compare case**
 
-Open `http://localhost:8080/cy/compare-case.html?case=order-service`
+Open `http://localhost:8080/e2e/tools/compare-case.html?case=order-service`
 Verify:
 - Stereotype `«BFF»` appears on OrderService
 - Client has pink (#FFEBE6) background
@@ -273,8 +273,8 @@ Verify:
 
 - [ ] **Step 3: Check existing cases for regressions**
 
-Open `http://localhost:8080/cy/compare-case.html?case=self-sync` — should still be ~98%
-Open `http://localhost:8080/cy/compare-case.html?case=demo1-smoke` — check icons + groups
+Open `http://localhost:8080/e2e/tools/compare-case.html?case=self-sync` — should still be ~98%
+Open `http://localhost:8080/e2e/tools/compare-case.html?case=demo1-smoke` — check icons + groups
 
 - [ ] **Step 4: Final commit if any fixes needed**
 

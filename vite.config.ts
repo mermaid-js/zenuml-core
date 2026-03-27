@@ -16,9 +16,9 @@ const packageJson = JSON.parse(
   readFileSync(resolve(__dirname, "package.json"), "utf-8"),
 );
 
-function getCypressHtmlFiles() {
-  const cypressFolder = resolve(__dirname, "cy");
-  const strings = execSync(`find ${cypressFolder} -name '*.html'`)
+function getE2eHtmlFiles() {
+  const e2eFolder = resolve(__dirname, "e2e");
+  const strings = execSync(`find ${e2eFolder} -name '*.html'`)
     .toString()
     .split("\n");
   // remove empty string
@@ -26,14 +26,14 @@ function getCypressHtmlFiles() {
   return strings;
 }
 
-const cypressHtmlFiles = getCypressHtmlFiles();
+const e2eHtmlFiles = getE2eHtmlFiles();
 
 export default defineConfig(({ mode }) => ({
   base: mode === "gh-pages" ? "/zenuml-core/" : "/",
   build: {
     target: "esnext",
     rollupOptions: {
-      input: ["index.html", "embed.html", "renderer.html", "test-compression.html", ...cypressHtmlFiles],
+      input: ["index.html", "embed.html", "renderer.html", "test-compression.html", ...e2eHtmlFiles],
     },
   },
   resolve: {
