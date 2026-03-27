@@ -1,23 +1,11 @@
-import pipe from "ramda/src/pipe";
-import replace from "ramda/src/replace";
-
-const removeChangeLines = replace(/[\n\r]/g, " ");
-const removeExtraSpaces = replace(/\s+/g, " ");
-const removeSpaceBeforeAndAfterPunctuation = replace(/\s*([,;.])\s*/g, "$1");
-const removeSpacesBeforeAndInsideBrackets = replace(
-  /\s*(\()\s*|\s*(\))/g,
-  "$1$2",
-);
-const removeTrailingSpace = replace(/\s+$/g, "");
-const removeLeadingAndEndingQuotes = replace(/^"(.*)"$/, "$1");
-export const formatText = pipe(
-  removeChangeLines,
-  removeExtraSpaces,
-  removeSpaceBeforeAndAfterPunctuation,
-  removeSpacesBeforeAndInsideBrackets,
-  removeTrailingSpace,
-  removeLeadingAndEndingQuotes,
-);
+export const formatText = (text: string): string =>
+  text
+    .replace(/[\n\r]/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\s*([,;.])\s*/g, "$1")
+    .replace(/\s*(\()\s*|\s*(\))/g, "$1$2")
+    .replace(/\s+$/g, "")
+    .replace(/^"(.*)"$/, "$1");
 
 export const getLineHead = (code: string, position: number) => {
   let i = position;

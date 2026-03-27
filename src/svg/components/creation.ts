@@ -1,4 +1,5 @@
 import type { CreationGeometry } from "../geometry";
+import { esc, styleToAttr } from "./svgUtils";
 
 export function renderCreation(c: CreationGeometry): string {
   const m = c.message;
@@ -29,12 +30,32 @@ export function renderCreation(c: CreationGeometry): string {
     ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
     : "";
 
+  // Creation labels like «payload» are rendered by HTML as three spans:
+  // <span>«</span><span class="editable-span-base" padding:4px>payload</span><span>»</span>
+  // The 4px padding makes HTML wider. Replicate with tspan dx offsets.
+  const labelContent = renderGuillemets(m.label, styleAttr);
+
   return `<g class="creation">
   <line x1="${fromX}" y1="${m.y}" x2="${toX}" y2="${m.y}" class="message-line" stroke-dasharray="6,4"/>
   ${renderOpenArrow(toX, m.y, isRTL)}
-  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(m.label)}</text>
+  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label">${labelContent}</text>
   ${numberSvg}
 </g>`;
+}
+
+function renderGuillemets(label: string, styleAttr: string): string {
+  const match = label.match(/^«(.+)»$/);
+  if (match) {
+    const inner = match[1];
+    // HTML renders «create» (default, no params) as a single element.
+    // Only «param» labels (with arguments) use three separate spans with
+    // 4px padding on the middle editable-span. Skip dx for the default label.
+    if (inner === "create") {
+      return `<tspan${styleAttr}>${esc(label)}</tspan>`;
+    }
+    return `<tspan${styleAttr}>${esc("«")}</tspan><tspan dx="4"${styleAttr}>${esc(inner)}</tspan><tspan dx="4"${styleAttr}>${esc("»")}</tspan>`;
+  }
+  return `<tspan${styleAttr}>${esc(label)}</tspan>`;
 }
 
 function renderOpenArrow(tipX: number, tipY: number, pointsLeft: boolean): string {
@@ -48,16 +69,3 @@ function renderOpenArrow(tipX: number, tipY: number, pointsLeft: boolean): strin
   return `<polyline points="${x1},${y1} ${tipX},${tipY} ${x1},${y2}" fill="none" stroke-linecap="round" class="arrow-head arrow-open"/>`;
 }
 
-function styleToAttr(style: Record<string, string>): string {
-  return Object.entries(style)
-    .map(([k, v]) => `${esc(k)}: ${esc(v)}`)
-    .join("; ");
-}
-
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

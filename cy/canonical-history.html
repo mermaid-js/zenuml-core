@@ -49,7 +49,24 @@
         display: grid;
         grid-template-columns: 280px 1fr;
         height: calc(100vh - 57px);
+        transition: grid-template-columns 0.2s ease;
       }
+      .layout.collapsed {
+        grid-template-columns: 0px 1fr;
+      }
+
+      /* Sidebar toggle */
+      .sidebar-toggle {
+        background: #1a2035;
+        border: 1px solid #2a3555;
+        color: #8899bb;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: color 0.15s;
+      }
+      .sidebar-toggle:hover { color: #e8ecf4; }
 
       /* Case selector panel */
       .case-panel {
@@ -57,6 +74,10 @@
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        min-width: 0;
+      }
+      .layout.collapsed .case-panel {
+        visibility: hidden;
       }
       .case-panel-header {
         padding: 12px 16px;
@@ -232,6 +253,7 @@
 
       table {
         width: 100%;
+        table-layout: fixed;
         border-collapse: collapse;
         font-size: 12px;
       }
@@ -320,6 +342,7 @@
   </head>
   <body>
     <div class="header">
+      <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">&#9776;</button>
       <h1>canonical scores</h1>
       <span class="summary" id="summary"></span>
       <a href="/cy/compare.html" class="back-link">compare cases &rarr;</a>
@@ -345,6 +368,14 @@
             <span class="chart-title" id="chart-title">Average Score Trend</span>
             <span class="chart-subtitle" id="chart-subtitle"></span>
             <div class="chart-legend" id="chart-legend"></div>
+            <button id="metric-toggle" style="
+              background: #1a2035; border: 1px solid #2a3555; border-radius: 4px;
+              color: #8a95aa; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+              padding: 3px 10px; cursor: pointer; margin-left: 8px;
+              transition: all 0.15s;
+            " onmouseover="this.style.borderColor='#4a7cff';this.style.color='#c8d1e0'"
+               onmouseout="this.style.borderColor='#2a3555';this.style.color='#8a95aa'"
+            >pos avg</button>
           </div>
           <div class="chart-wrap">
             <canvas id="main-chart" height="240"></canvas>
@@ -358,6 +389,29 @@
     </div>
 
     <script>
+      // --- Sidebar toggle ---
+      document.getElementById('sidebar-toggle').addEventListener('click', () => {
+        document.querySelector('.layout').classList.toggle('collapsed');
+      });
+
+      // --- Chart metric toggle ---
+      let chartMetric = 'pos'; // 'pixel' or 'pos'
+      function getRunAvg(run) {
+        return chartMetric === 'pos' ? runAveragePos(run) : run.average;
+      }
+      document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('metric-toggle');
+        const updateBtn = () => {
+          btn.textContent = chartMetric === 'pos' ? 'show pixel avg' : 'show pos avg';
+        };
+        updateBtn();
+        btn.addEventListener('click', () => {
+          chartMetric = chartMetric === 'pos' ? 'pixel' : 'pos';
+          updateBtn();
+          redrawChart();
+        });
+      });
+
       // --- Color palette for case lines ---
       const PALETTE = [
         '#4a7cff','#34d399','#f97316','#a78bfa','#f472b6',
@@ -514,9 +568,10 @@
 
         if (selectedCases.size === 0) {
           // --- Aggregate mode: avg(all) per run ---
-          const avgs = allRuns.map(r => r.average);
+          const avgs = allRuns.map(r => getRunAvg(r));
+          const metricLabel = chartMetric === 'pos' ? 'Pos Avg' : 'Pixel Avg';
 
-          titleEl.textContent = 'Average Score Trend (canonical)';
+          titleEl.textContent = metricLabel + ' Score Trend (canonical)';
           subtitleEl.textContent = allRuns.length + ' runs';
           legendEl.innerHTML = '';
 
@@ -688,8 +743,8 @@
         const table = document.createElement('table');
         table.innerHTML = `<thead><tr>
           <th style="width:28px"></th>
-          <th>Date</th><th>Label</th><th>Avg</th><th>Pos Avg</th><th>Delta</th>
-          <th>Cases</th><th>Time</th><th>Best</th><th>Worst</th>
+          <th>Date</th><th style="width:40%">Label</th><th>Avg</th><th>Pos Avg</th><th>Delta</th>
+          <th>Cases</th><th>Time</th><th style="width:80px">Best</th><th style="width:80px">Worst</th>
         </tr></thead>`;
         const tbody = document.createElement('tbody');
 
@@ -697,25 +752,25 @@
           const prev = idx < newestFirst.length - 1 ? newestFirst[idx + 1] : null;
           const avg = run.average;
           const avgPos = runAveragePos(run);
-          const prevAvg = prev ? prev.average : null;
-          const delta = prevAvg !== null ? avg - prevAvg : null;
+          const prevAvgPos = prev ? runAveragePos(prev) : null;
+          const delta = prevAvgPos !== null ? avgPos - prevAvgPos : null;
           const scores = Object.entries(run.cases).map(([n, d]) => ({
             name: n, score: caseScore(d), posScore: casePosScore(d),
-          })).sort((a, b) => b.score - a.score);
+          })).sort((a, b) => b.posScore - a.posScore);
           const best = scores[0], worst = scores[scores.length - 1];
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><button class="expand-btn" data-idx="${idx}">+</button></td>
             <td class="ts">${fmtDate(run.timestamp)}</td>
-            <td style="color:#8b9cc0;font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${run.label || ''}">${run.label || ''}</td>
+            <td style="color:#8b9cc0;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${run.label || ''}">${run.label || ''}</td>
             <td class="${scoreClass(avg)}" style="font-weight:bold">${avg.toFixed(1)}%</td>
             <td class="${scoreClass(avgPos)}" style="font-weight:bold">${avgPos.toFixed(1)}%</td>
             <td>${deltaHtml(delta)}</td>
             <td style="color:#5a6a85">${run.caseCount}</td>
             <td class="ts">${run.elapsed || '—'}s</td>
-            <td class="${scoreClass(best.score)}">${best.name} ${best.score}%</td>
-            <td class="${scoreClass(worst.score)}">${worst.name} ${worst.score}%</td>
+            <td class="${scoreClass(best.posScore)}" style="font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${best.name} ${best.posScore.toFixed(1)}%">${best.name} ${best.posScore.toFixed(1)}%</td>
+            <td class="${scoreClass(worst.posScore)}" style="font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${worst.name} ${worst.posScore.toFixed(1)}%">${worst.name} ${worst.posScore.toFixed(1)}%</td>
           `;
           tbody.appendChild(tr);
 

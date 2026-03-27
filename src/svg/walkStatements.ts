@@ -8,11 +8,12 @@
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import type { FragmentKind } from "./geometry";
+import type { RootContextNode, BlockNode, StatNode } from "@/parser/AntlrTypes";
 
 export interface FragmentSectionInfo {
   label: string;
   /** The parse tree block node for this section (used for inner statement key lookups) */
-  blockNode: any;
+  blockNode: BlockNode | undefined;
 }
 
 export interface StatementInfo {
@@ -33,7 +34,7 @@ export interface StatementInfo {
   /** Inline comment text (e.g. // String line) */
   comment?: string;
   /** The ANTLR parse tree node — needed for local participant extraction */
-  statNode?: any;
+  statNode?: StatNode;
   /** Nesting depth of active occurrences on the sender (0 = none, 1 = one level, etc.) */
   senderOccurrenceDepth: number;
   /** Whether the target (to) already has an active occurrence (new one will be nested) */
@@ -51,7 +52,7 @@ export interface StatementInfo {
   sectionReset?: boolean;
 }
 
-export function walkStatements(rootContext: any): StatementInfo[] {
+export function walkStatements(rootContext: RootContextNode): StatementInfo[] {
   const block = rootContext?.block?.();
   if (!block) return [];
   return walkBlock(block, _STARTER_, new Map(), "", 0, null, 0);
@@ -62,7 +63,7 @@ function normalizeLabel(label: string): string {
 }
 
 function walkBlock(
-  block: any,
+  block: BlockNode,
   currentOrigin: string,
   activeOccurrences: Map<string, number>,
   parentNumber: string,
@@ -172,7 +173,7 @@ interface FragmentExtract {
   sections: FragmentSectionInfo[];
 }
 
-function extractFragmentInfo(stat: any, _origin: string): FragmentExtract {
+function extractFragmentInfo(stat: StatNode, _origin: string): FragmentExtract {
   // Single-block fragments: loop, opt, par, critical, section
   for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
     const frag = stat[kind]?.();
@@ -245,12 +246,12 @@ function extractFragmentInfo(stat: any, _origin: string): FragmentExtract {
   return { fragmentKind: "loop", label: "", sections: [] };
 }
 
-function blockLength(block: any): number {
-  return (block?.stat?.() || []).filter((stat: any) => !!createStatementKey(stat)).length;
+function blockLength(block: BlockNode): number {
+  return (block?.stat?.() || []).filter((stat: StatNode) => !!createStatementKey(stat)).length;
 }
 
 /** Recurse into fragment inner blocks (loop, opt, alt, try/catch, etc.) */
-function walkFragmentBlocks(stat: any, origin: string, results: StatementInfo[], activeOccurrences: Map<string, number>, parentNumber: string, depth: number): void {
+function walkFragmentBlocks(stat: StatNode, origin: string, results: StatementInfo[], activeOccurrences: Map<string, number>, parentNumber: string, depth: number): void {
   // Single-block fragments: loop, opt, par, critical, section
   for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
     const frag = stat[kind]?.();

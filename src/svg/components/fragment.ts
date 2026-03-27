@@ -1,4 +1,5 @@
 import type { FragmentGeometry } from "../geometry";
+import { esc } from "./svgUtils";
 
 const HEADER_HEIGHT = 25;
 const BRACKET_WIDTH = 3.89;
@@ -65,9 +66,11 @@ export function renderFragment(f: FragmentGeometry): string {
       const section = f.sections[i];
       const lineY = section.y;
       const separatorY = lineY + HALF_STROKE;
-      // Dashed separator line
+      // Separator line (inset for par content areas, full width for alt/tcf)
+      const sepX1 = f.x + 1 + (section.contentInsetLeft ?? 0);
+      const sepX2 = f.x + f.width - 1;
       parts.push(
-        `<line x1="${f.x + 1}" y1="${separatorY}" x2="${f.x + f.width - 1}" y2="${separatorY}" class="fragment-separator"/>`,
+        `<line x1="${sepX1}" y1="${separatorY}" x2="${sepX2}" y2="${separatorY}" class="fragment-separator"/>`,
       );
       // Section label — split into keyword + condition (e.g. "catch" + "error") as separate elements
       // Both catch and finally have a semi-transparent white background (bg-skin-frame opacity-65)
@@ -198,10 +201,3 @@ function getFragmentIcon(kind: string, x: number, y: number): string {
   }
 }
 
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

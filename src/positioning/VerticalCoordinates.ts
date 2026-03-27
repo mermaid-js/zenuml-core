@@ -3,6 +3,7 @@ import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordi
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { AllMessages } from "@/parser/MessageCollector";
 import type { LayoutRuntime } from "./vertical/vm/types";
+import logger from "@/logger/logger";
 import { BlockVM } from "./vertical/vm/BlockVM";
 import { DEFAULT_LAYOUT_METRICS as metrics } from "./vertical/LayoutMetrics";
 
@@ -33,7 +34,7 @@ export class VerticalCoordinates {
       },
       updateCreationTop: (participant: string, top: number) => {
         const paddingTop = top - 8; // .life-line-layer, .pt-2
-        console.info(`[VerticalCoordinates] updateCreationTop participant="${participant}" raw=${top} paddingTop=${paddingTop}`);
+        logger.info(`[VerticalCoordinates] updateCreationTop participant="${participant}" raw=${top} paddingTop=${paddingTop}`);
         this.creationTops.set(participant, paddingTop);
       },
     };

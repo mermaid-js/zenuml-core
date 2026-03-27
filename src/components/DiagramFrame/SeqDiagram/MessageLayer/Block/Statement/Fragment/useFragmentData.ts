@@ -3,6 +3,7 @@ import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { coordinatesAtom } from "@/store/Store";
+import logger from "@/logger/logger";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { useEffect, useState } from "react";
 import sequenceParser from "@/generated-parser/sequenceParser";
@@ -47,7 +48,7 @@ const getOffsetX = (store: Store, context: any, origin: string) => {
 
   // If leftParticipant and origin are the same, no additional offset needed
   if (leftParticipant === origin || !origin) {
-    console.debug(
+    logger.debug(
       `left participant: ${leftParticipant} ${halfLeftParticipant}`,
     );
     return getBorder(store, context).left + halfLeftParticipant;

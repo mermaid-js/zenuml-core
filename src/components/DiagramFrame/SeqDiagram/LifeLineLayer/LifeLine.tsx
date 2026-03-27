@@ -1,3 +1,4 @@
+import logger from "@/logger/logger";
 import {
   coordinatesAtom,
   lifelineReadyAtom,
@@ -90,7 +91,7 @@ export const LifeLine = (props: {
       //     verticalCoordinates.getCreationTopRecords();
       // }
       if (creationTop != null) {
-        console.info(`[LifeLine] creation participant="${props.entity.name}" creationTop=${creationTop} resolvedTop=${resolvedTop}`);
+        logger.info(`[LifeLine] creation participant="${props.entity.name}" creationTop=${creationTop} resolvedTop=${resolvedTop}`);
       }
       setTop(resolvedTop);
       return true;

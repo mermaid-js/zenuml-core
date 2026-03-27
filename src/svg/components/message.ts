@@ -1,4 +1,6 @@
 import type { MessageGeometry, SelfCallGeometry } from "../geometry";
+import { formatText } from "@/utils/StringUtil";
+import { esc, styleToAttr } from "./svgUtils";
 
 export function renderMessage(m: MessageGeometry): string {
   // HTML arrow SVG container spans from left_lifeline_center+1 to right_lifeline_center.
@@ -16,6 +18,7 @@ export function renderMessage(m: MessageGeometry): string {
 
   const dashAttr = m.arrowStyle === "dashed" ? ' stroke-dasharray="6,4"' : "";
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
+  const labelText = formatText(m.label);
 
   // Sequence number: positioned to the LEFT of the message with 4px gap (matching HTML pr-1).
   const numberX = Math.min(fromX, toX) - 4;
@@ -27,7 +30,7 @@ export function renderMessage(m: MessageGeometry): string {
   return `<g class="message">
   <line x1="${fromX}" y1="${lineY}" x2="${toX}" y2="${lineY}" class="message-line"${dashAttr}/>
   ${renderArrowHead(toX, lineY, m.isReverse, m.arrowStyle)}
-  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(m.label)}</text>
+  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(labelText)}</text>
   ${numberSvg}
 </g>`;
 }
@@ -40,6 +43,7 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   const isAsync = s.arrowStyle === "open";
   const labelX = x1 + 6;
   const labelY = s.y + (isAsync ? 15 : 12);
+  const labelText = formatText(s.label.trim());
 
   // Sequence number: positioned to the left of the self-call origin.
   // HTML positions the number at the container top (flush), while the label is 2px below.
@@ -81,7 +85,7 @@ export function renderSelfCall(s: SelfCallGeometry): string {
       </svg>
     </g>
   </svg>
-  <text x="${labelX}" y="${labelY}" text-anchor="start" class="message-label"${s.style ? ` style="${styleToAttr(s.style)}"` : ""}>${esc(s.label.trim())}</text>
+  <text x="${labelX}" y="${labelY}" text-anchor="start" class="message-label"${s.style ? ` style="${styleToAttr(s.style)}"` : ""}>${esc(labelText)}</text>
   ${numberSvg}
 </g>`;
 }
@@ -119,18 +123,4 @@ function renderArrowHead(
       <path d="${pathD}" stroke="#000" stroke-linecap="round" stroke-width="2" fill="${fillAttr}"/>
     </g>
   </svg>`;
-}
-
-function styleToAttr(style: Record<string, string>): string {
-  return Object.entries(style)
-    .map(([k, v]) => `${esc(k)}: ${esc(v)}`)
-    .join("; ");
-}
-
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }

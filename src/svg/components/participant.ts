@@ -1,5 +1,6 @@
 import type { ParticipantGeometry } from "../geometry";
 import { getIcon } from "../icons";
+import { esc } from "./svgUtils";
 
 /**
  * Stroke inset for SVG border-box emulation.
@@ -167,10 +168,3 @@ function participantTextStyle(): string {
   return ` style="fill:${PARTICIPANT_TEXT_FILL};"`;
 }
 
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

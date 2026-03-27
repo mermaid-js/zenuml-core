@@ -18,7 +18,8 @@
       .nav button:hover { background: #6d28d9; }
       .nav button:disabled { background: #64748b; cursor: wait; }
       .nav .match-badge { font-size: 11px; color: #94a3b8; }
-      .container { display: flex; gap: 0; }
+      .container { display: flex; flex-direction: row; gap: 0; }
+      .container.layout-top-down { flex-direction: column; }
       .panel { flex: 1; overflow: auto; }
       .panel > h3 { margin: 0; padding: 8px 16px; background: #334155; color: white; font-size: 13px; }
       .panel-content { padding: 10px; background: white; }
@@ -59,12 +60,20 @@
       import ZenUml from "/src/core.tsx";
       import { renderToSvg } from "/src/svg/renderToSvg.ts";
 
-      import { CASES } from "./compare-cases.js";
+      import { CASES, CASE_PANEL_LAYOUTS } from "./compare-cases.js";
+      import { diffImages, DEFAULTS } from "./diff-algorithm.js";
 
       const caseNames = Object.keys(CASES);
       const params = new URLSearchParams(window.location.search);
       const caseName = params.get("case") || caseNames[0];
       const code = CASES[caseName];
+      const panelLayout = CASE_PANEL_LAYOUTS[caseName] || "left-to-right";
+      const container = document.querySelector(".container");
+      if (panelLayout === "top-down") {
+        container.classList.add("layout-top-down");
+      } else {
+        container.classList.remove("layout-top-down");
+      }
 
       // Update title and header
       document.title = `Compare: ${caseName}`;
@@ -100,6 +109,8 @@
         const pre = diagram.querySelector("pre.zenuml");
         pre.textContent = code;
         const zenUml = new ZenUml(pre);
+        // Compare pages must use the deterministic vertical layout path explicitly.
+        zenUml.setVerticalMode("html");
         await zenUml.render(code, { theme: "theme-default" });
 
         // Hide footer in HTML output (SVG has no footer equivalent)
@@ -300,7 +311,7 @@
       };
 
       // Run pixel diff from two PNG data URLs and display results on the page.
-      // Returns { pixelPct, structPct, contentMatch, contentTotal }
+      // Returns { pixelPct, posPct, structPct, matched, total, htmlOnly, svgOnly, colorDiff }
       window.diffFromImages = async function(htmlDataUrl, svgDataUrl) {
         const htmlEl = document.getElementById("html-output");
         const svgEl = document.getElementById("svg-output");
@@ -312,109 +323,15 @@
         const svgElements = extractSvgElements(svgElement);
         const structural = computeStructuralMatch(htmlElements, svgElements);
 
-        // Load images
-        const [htmlImg, svgImg] = await Promise.all([
-          loadImage(htmlDataUrl),
-          loadImage(svgDataUrl),
-        ]);
-
-        // Align (both anchored at 0,0)
-        const dx = 0, dy = 0;
-        const w = Math.max(htmlImg.width, svgImg.width);
-        const h = Math.max(htmlImg.height, svgImg.height);
-
-        const canvas1 = document.createElement("canvas");
-        canvas1.width = w; canvas1.height = h;
-        const ctx1 = canvas1.getContext("2d");
-        ctx1.fillStyle = "white"; ctx1.fillRect(0, 0, w, h);
-        ctx1.drawImage(htmlImg, 0, 0);
-
-        const canvas2 = document.createElement("canvas");
-        canvas2.width = w; canvas2.height = h;
-        const ctx2 = canvas2.getContext("2d");
-        ctx2.fillStyle = "white"; ctx2.fillRect(0, 0, w, h);
-        ctx2.drawImage(svgImg, 0, 0);
-
-        const data1 = canvas1.getContext("2d").getImageData(0, 0, w, h).data;
-        const data2 = canvas2.getContext("2d").getImageData(0, 0, w, h).data;
-
-        const diffCanvas = document.createElement("canvas");
-        diffCanvas.width = w;
-        diffCanvas.height = h;
-        const ctx = diffCanvas.getContext("2d");
-        const diffImg = ctx.createImageData(w, h);
-        const diff = diffImg.data;
-
-        let contentMatch = 0;
-        let contentTotal = 0;
+        // Allow URL param overrides for debugging
         const urlParams = new URLSearchParams(window.location.search);
-        const LUMA_THRESHOLD = parseInt(urlParams.get('luma') || '240', 10);
-        const CHANNEL_TOLERANCE = parseInt(urlParams.get('ctol') || '1', 10);
-        const POSITION_TOLERANCE = parseInt(urlParams.get('ptol') || '1', 10);
+        const opts = {
+          LUMA_THRESHOLD: parseInt(urlParams.get('luma') || DEFAULTS.LUMA_THRESHOLD, 10),
+          CHANNEL_TOLERANCE: parseInt(urlParams.get('ctol') || DEFAULTS.CHANNEL_TOLERANCE, 10),
+          POSITION_TOLERANCE: parseInt(urlParams.get('ptol') || DEFAULTS.POSITION_TOLERANCE, 10),
+        };
 
-        function luma(r, g, b) { return 0.3 * r + 0.59 * g + 0.11 * b; }
-
-        function getPixel(data, x, y) {
-          const i = (y * w + x) * 4;
-          return [data[i], data[i+1], data[i+2]];
-        }
-
-        function pixelsClose(r1, g1, b1, r2, g2, b2) {
-          return Math.abs(r1 - r2) <= CHANNEL_TOLERANCE &&
-                 Math.abs(g1 - g2) <= CHANNEL_TOLERANCE &&
-                 Math.abs(b1 - b2) <= CHANNEL_TOLERANCE;
-        }
-
-        function hasNearbyMatch(src, dst, x, y) {
-          const [r1, g1, b1] = getPixel(src, x, y);
-          for (let dy = -POSITION_TOLERANCE; dy <= POSITION_TOLERANCE; dy++) {
-            for (let dx = -POSITION_TOLERANCE; dx <= POSITION_TOLERANCE; dx++) {
-              const nx = x + dx, ny = y + dy;
-              if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
-              const [r2, g2, b2] = getPixel(dst, nx, ny);
-              if (luma(r2, g2, b2) < LUMA_THRESHOLD && pixelsClose(r1, g1, b1, r2, g2, b2)) return true;
-            }
-          }
-          return false;
-        }
-
-        for (let y = 0; y < h; y++) {
-          for (let x = 0; x < w; x++) {
-            const i = (y * w + x) * 4;
-            const r1 = data1[i], g1 = data1[i+1], b1 = data1[i+2];
-            const r2 = data2[i], g2 = data2[i+1], b2 = data2[i+2];
-
-            const lum1 = luma(r1, g1, b1);
-            const lum2 = luma(r2, g2, b2);
-
-            const isContent1 = lum1 < LUMA_THRESHOLD;
-            const isContent2 = lum2 < LUMA_THRESHOLD;
-            const isContent = isContent1 || isContent2;
-
-            if (!isContent) {
-              diff[i] = 250; diff[i+1] = 250; diff[i+2] = 250; diff[i+3] = 255;
-            } else {
-              contentTotal++;
-              const matched = hasNearbyMatch(data1, data2, x, y) || hasNearbyMatch(data2, data1, x, y);
-              if (matched) {
-                const l = Math.min(lum1, lum2);
-                diff[i] = Math.round(l * 0.12);
-                diff[i+1] = Math.round(60 + l * 0.3);
-                diff[i+2] = Math.round(l * 0.12);
-                diff[i+3] = 255;
-                contentMatch++;
-              } else if (isContent1 && !isContent2) {
-                diff[i] = 255; diff[i+1] = 60; diff[i+2] = 60; diff[i+3] = 255;
-              } else if (!isContent1 && isContent2) {
-                diff[i] = 60; diff[i+1] = 60; diff[i+2] = 255; diff[i+3] = 255;
-              } else {
-                diff[i] = 255; diff[i+1] = 0; diff[i+2] = 255; diff[i+3] = 255;
-              }
-            }
-          }
-        }
-
-        ctx.putImageData(diffImg, 0, 0);
+        const { canvas: diffCanvas, stats, badgeHtml } = await diffImages(htmlDataUrl, svgDataUrl, opts);
 
         const diffOutput = document.getElementById("diff-output");
         diffOutput.innerHTML = "";
@@ -423,39 +340,15 @@
         const panel = document.getElementById("diff-panel");
         panel.classList.add("visible");
 
-        const pixelPct = contentTotal > 0 ? ((contentMatch / contentTotal) * 100).toFixed(1) : "100.0";
         const structPct = (structural.score * 100).toFixed(0);
         document.getElementById("match-badge").innerHTML =
-          `${structPct}% structural · <b>${pixelPct}%</b> content pixel (${contentMatch}/${contentTotal} px) ` +
-          `<span style="color:#1a6b1a">■</span> match ` +
-          `<span style="color:#ff3c3c">■</span> HTML-only ` +
-          `<span style="color:#3c3cff">■</span> SVG-only ` +
-          `<span style="color:#ff00ff">■</span> color diff`;
+          `${structPct}% structural · ${badgeHtml}`;
 
-        return { pixelPct: parseFloat(pixelPct), structPct: parseFloat(structPct), contentMatch, contentTotal };
+        return { pixelPct: stats.pixelPct, posPct: stats.posPct, structPct: parseFloat(structPct), ...stats };
       };
 
 
 
-      function loadImage(dataUrl) {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = dataUrl;
-        });
-      }
-
-      function drawToCanvas(img, w, h) {
-        const c = document.createElement("canvas");
-        c.width = w;
-        c.height = h;
-        const ctx = c.getContext("2d");
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(img, 0, 0);
-        return c;
-      }
     </script>
   </body>
 </html>

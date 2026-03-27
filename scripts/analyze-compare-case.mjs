@@ -49,7 +49,7 @@ export async function main(argv = process.argv.slice(2), stdout = process.stdout
     channel: args.browserChannel || undefined,
     headless: args.headless,
     viewport: args.viewport,
-    deviceScaleFactor: 1,
+    deviceScaleFactor: 2,
     args: chromiumArgs,
   };
   const persistentContext = args.userDataDir
@@ -62,7 +62,7 @@ export async function main(argv = process.argv.slice(2), stdout = process.stdout
   });
   const context = persistentContext || await browser.newContext({
     viewport: args.viewport,
-    deviceScaleFactor: 1,
+    deviceScaleFactor: 2,
   });
   const page = persistentContext
     ? context.pages()[0] || await context.newPage()
@@ -74,12 +74,37 @@ export async function main(argv = process.argv.slice(2), stdout = process.stdout
     await page.waitForSelector("#svg-output svg");
 
     const extracted = await collectLabelData(page);
-    const htmlLocator = page.locator(extracted.htmlRootSelector);
-    const svgLocator = page.locator(extracted.svgRootSelector);
-    const [htmlBuffer, svgBuffer] = await Promise.all([
-      htmlLocator.screenshot({ type: "png", animations: "disabled" }),
-      svgLocator.screenshot({ type: "png", animations: "disabled" }),
-    ]);
+
+    // Use CDP screenshots to match native-diff-ext (source of truth).
+    // The extension uses DOM.getBoxModel border-box + Page.captureScreenshot
+    // with clip and scale:1. Playwright's locator.screenshot() differs subtly
+    // in how it clips elements, so we replicate the extension's exact logic.
+    const cdpSession = await page.context().newCDPSession(page);
+    async function cdpScreenshotElement(selector) {
+      const { root } = await cdpSession.send("DOM.getDocument", {});
+      const { nodeId } = await cdpSession.send("DOM.querySelector", {
+        nodeId: root.nodeId,
+        selector,
+      });
+      if (!nodeId) throw new Error(`Element not found: ${selector}`);
+      const { model } = await cdpSession.send("DOM.getBoxModel", { nodeId });
+      const border = model.border;
+      const x = border[0];
+      const y = border[1];
+      const width = Math.ceil(border[2] - border[0]);
+      const height = Math.ceil(border[5] - border[1]);
+      const { data } = await cdpSession.send("Page.captureScreenshot", {
+        format: "png",
+        clip: { x, y, width, height, scale: 1 },
+        captureBeyondViewport: true,
+      });
+      return Buffer.from(data, "base64");
+    }
+
+    const htmlBuffer = await cdpScreenshotElement(extracted.htmlRootSelector);
+    const svgBuffer = await cdpScreenshotElement(extracted.svgRootSelector);
+    await cdpSession.detach();
+
     await page.evaluate(() => {
       if (typeof window.restoreHtmlAfterCapture === "function") {
         window.restoreHtmlAfterCapture();

@@ -39,8 +39,7 @@ const FRAME_HEADER_HEIGHT = 28;
 const FRAME_BORDER_RADIUS = 4;
 
 const DEFAULT_THEME_STYLES = `
-  .frame-border-outer { fill: #666; }
-  .frame-border-inner { fill: #ffffff; }
+  .frame-border-outer { fill: #ffffff; stroke: #666; stroke-width: 1; }
   .frame-header-bg { fill: #ffffff; }
   .frame-header-line { stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
   .frame-title { font-family: Helvetica, Verdana, serif; font-size: 16px; font-weight: 600; fill: #222; }
@@ -177,18 +176,16 @@ function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult 
     parts.push(renderComment(c));
   }
 
-  // Frame: border as two nested rects (matches CSS border-box rendering)
+  // Frame: render a single stroked rect inset by 0.5px so the painted border
+  // occupies the same 1px border-box footprint as the HTML frame.
   const r = FRAME_BORDER_RADIUS;
-  const frameSvg = [
-    `<rect class="frame-border-outer" x="0" y="0" width="${viewWidth}" height="${viewHeight}" rx="${r}" fill="#666"/>`,
-    `<rect class="frame-border-inner" x="1" y="1" width="${viewWidth - 2}" height="${viewHeight - 2}" rx="${Math.max(0, r - 1)}" fill="#fff"/>`,
-  ].join("\n");
+  const frameSvg = `<rect class="frame-border-outer" x="0.5" y="0.5" width="${viewWidth - 1}" height="${viewHeight - 1}" rx="${Math.max(0, r - 0.5)}"/>`;
   const contentPaddingTop = 6; // tuned to match HTML content Y offset (~34px below frame top)
   const headerLineY = headerH + contentPaddingTop; // 34 — content group Y offset
   const headerLineDrawY = headerLineY - 0.5; // 33.5 — half-pixel for crisp 1px line at pixel row 33, matching HTML header border-bottom
   const headerLineSvg = `<line class="frame-header-line" x1="1" y1="${headerLineDrawY}" x2="${viewWidth - 1}" y2="${headerLineDrawY}"/>`;
   const titleSvg = g.title
-    ? `<text x="5" y="${headerLineDrawY / 2 + 0.25}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
+    ? `<text x="5" y="${headerLineDrawY / 2}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
     : "";
 
   const viewBox = `0 0 ${viewWidth} ${viewHeight}`;

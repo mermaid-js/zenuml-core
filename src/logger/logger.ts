@@ -9,34 +9,38 @@ const logger = pino({
   level: "warn",
 });
 
-const LEVELS = ["log", "trace", "debug", "info", "warn", "error"];
+const LEVELS = ["log", "trace", "debug", "info", "warn", "error"] as const;
 
-function bind(logger: any, level: string) {
-  // @ts-ignore
-  logger[level] = (console[level] || console["log"]).bind(console);
+type LoggerLike = Record<string, (...args: unknown[]) => void> & {
+  child: (opts: { name?: string }) => LoggerLike;
+};
+
+function bind(target: LoggerLike, level: string) {
+  const consoleFn = level in console
+    ? (console[level as keyof Console] as (...args: unknown[]) => void)
+    : console.log;
+  target[level] = consoleFn.bind(console);
 }
 
-function bind2(logger: any, level: string, args: any[]) {
-  // @ts-ignore
-  logger[level] = (console[level] || console["log"]).bind(
-    console,
-    args[0],
-    args[1],
-  );
+function bind2(target: LoggerLike, level: string, prefix: [string, string]) {
+  const consoleFn = level in console
+    ? (console[level as keyof Console] as (...args: unknown[]) => void)
+    : console.log;
+  target[level] = consoleFn.bind(console, prefix[0], prefix[1]);
 }
 
-function prettify(logger: any): typeof logger {
-  LEVELS.forEach((level) => bind(logger, level));
-  const childFn = logger.child;
-  logger.child = function (opts: any) {
-    const child = childFn.call(logger, opts);
+function prettify(target: LoggerLike): LoggerLike {
+  LEVELS.forEach((level) => bind(target, level));
+  const childFn = target.child;
+  target.child = function (opts: { name?: string }) {
+    const child = childFn.call(target, opts);
     LEVELS.forEach((level) =>
-      bind2(child, level, ["%c" + opts.name || "", "color: #00f"]),
+      bind2(child, level, ["%c" + (opts.name || ""), "color: #00f"]),
     );
     return child;
   };
-  return logger;
+  return target;
 }
 
-const rootLogger = prettify(logger);
+const rootLogger = prettify(logger as unknown as LoggerLike);
 export default rootLogger;

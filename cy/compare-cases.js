@@ -747,6 +747,63 @@ OrderController.post(payload) {
   }
 }`,
 
+  // --- Repro: order-service issue groups ---
+
+  // Group 1: message label dy=-0.5 (backtick comment triggers it)
+  "repro-label-dy": `@Starter(Client)
+// \`POST /orders\`
+A.post(payload) {
+  B.create(payload) {
+    c = new C(payload)
+  }
+}`,
+
+  // Group 2: creation-return arrow geometry (ambiguous return arrows)
+  "repro-creation-return-arrow": `A.method() {
+  b = new B(payload)
+  return b
+}`,
+
+  // Group 3: comment positioning (comments above messages and fragments)
+  "repro-comment-pos": `// comment above message
+A -> B: doWork
+// comment above fragment
+if(cond) {
+  B -> C: inner
+}`,
+
+  // Group 4: fragment body geometry (nested alt+par with comments)
+  "repro-nested-fragment": `A.call() {
+  B.process() {
+    // comment before if
+    if(x) {
+      par {
+        C.task1()
+        D.task2()
+      }
+    }
+  }
+}`,
+
+  // Group 5: icon + stereotype + color + group (with occurrences)
+  "repro-icon-stereo-group": `@EC2 <<BFF>> OrderService #E3FCEF
+group BusinessService {
+  @Lambda PurchaseService
+  @AzureFunction InvoiceService
+}
+OrderService.handle() {
+  PurchaseService.create()
+  InvoiceService.invoice()
+}`,
+
+  // Group 6: par fragment divider (missing in SVG)
+  "repro-par-divider": `A.call() {
+  par {
+    B.task1()
+    C.task2()
+  }
+}`,
+
   // --- Icons ---
   "icons": `@Actor User
 @Database DB
@@ -758,4 +815,24 @@ User.login() {
   MQ.enqueue()
   Topic.publish()
 }`,
+
+  // --- Mermaid demo: async messages with multi-line comment ---
+  "mermaid-async-auth": `title Async Messages (SPA Authentication)
+// GET https://\${account.namespace}/authorize/?
+// response_type=token
+// &client_id=\${account.clientId}
+// &redirect_url=YOUR_CALLBACK_URL
+// &state=VALUE_THAT_SURVIVES_REDIRECTS
+// &scope=openid
+Browser->Auth0: 1. initiate the authentication
+Auth0->"Identity Provider": 2. OAuth2 / SAML, etc
+"Identity Provider"->"Identity Provider": 3. user gets authenticated
+Auth0->Browser: 4. redirect to \${YOUR_CALLBACK_URL}/#id_token=e68...
+Browser->Auth0: 5. validate id_token and get user profile
+Browser->"Your API": 6. call API sending JWT in Authorization header
+"Your API"->"Your API": 7. validate token`,
+};
+
+export const CASE_PANEL_LAYOUTS = {
+  "mermaid-async-auth": "top-down",
 };

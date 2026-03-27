@@ -115,6 +115,8 @@ export interface FragmentSectionGeometry {
   detail?: string;
   /** Measured glyph width of detail */
   detailWidth?: number;
+  /** Left inset for par separators (matches HTML paddingLeft on statement block) */
+  contentInsetLeft?: number;
 }
 
 export interface FragmentGeometry {
@@ -162,6 +164,8 @@ export interface CommentGeometry {
   text: string;
   /** Inline style from styling comments (e.g. // <red>) */
   style?: Record<string, string>;
+  /** True for comments above fragments — needs frameBorder.left shift */
+  fragmentComment?: boolean;
 }
 
 // ─── Group ────────────────────────────────────────────────────────

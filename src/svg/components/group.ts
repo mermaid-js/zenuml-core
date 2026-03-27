@@ -1,4 +1,5 @@
 import type { GroupGeometry } from "../geometry";
+import { esc } from "./svgUtils";
 
 /**
  * Renders a participant group as a dashed outline with a title bar,
@@ -10,7 +11,7 @@ export function renderGroup(g: GroupGeometry): string {
   const titleFill = "var(--color-bg-frame, #fff)";
   const titleTextFill = "var(--color-text-message, var(--color-text-base, #000))";
   const titleY = g.y + titleBarHeight / 2;
-  const titleText = g.name ? escXml(g.name) : "";
+  const titleText = g.name ? esc(g.name) : "";
   return `<g class="participant-group">
   <rect x="${g.x}" y="${g.y}" width="${g.width}" height="${g.height}" fill="none" stroke="${outlineStroke}" stroke-width="1" stroke-dasharray="4 2"/>
   ${titleText ? `<rect x="${g.x}" y="${g.y}" width="${g.width}" height="${titleBarHeight}" fill="${titleFill}" stroke="none"/>` : ""}
@@ -18,10 +19,3 @@ export function renderGroup(g: GroupGeometry): string {
 </g>`;
 }
 
-function escXml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
