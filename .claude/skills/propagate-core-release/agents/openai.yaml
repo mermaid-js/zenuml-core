@@ -1,0 +1,7 @@
+interface:
+  display_name: "Propagate Core Release"
+  short_description: "Open downstream draft PRs for a published core version"
+  default_prompt: "Use $propagate-core-release after @zenuml/core has been published to update the configured downstream repos on per-repo branches and open or reuse draft PRs. Do not merge the downstream PRs."
+
+policy:
+  allow_implicit_invocation: true
