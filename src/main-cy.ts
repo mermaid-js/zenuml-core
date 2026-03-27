@@ -11,11 +11,11 @@ const code =
 // comment
 A
 A.method`;
-// @ts-ignore
+// @ts-expect-error -- dynamic import
 const zenUml = new ZenUml(elm);
 console.log("set zenUML to window");
 
-// @ts-ignore
+// @ts-expect-error -- dynamic import
 window.zenUml = zenUml;
 zenUml.render(code, { theme: "theme-nab",
   onContentChange: code1 => {
@@ -24,5 +24,5 @@ zenUml.render(code, { theme: "theme-nab",
 }).then((r) => {
   logger.debug("render resolved", r);
 });
-// @ts-ignore
+// @ts-expect-error -- dynamic import
 window.parentLogger = parentLogger;

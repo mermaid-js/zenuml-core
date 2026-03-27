@@ -18,9 +18,9 @@ export function initZenUml(element: HTMLElement) {
   const zenUml = new ZenUml(element);
 
   // Expose ZenUML version to window for easy access in developer console
-  // @ts-ignore
+  // @ts-expect-error -- dynamic import
   window.ZENUML_VERSION = ZenUml.version;
-  // @ts-ignore
+  // @ts-expect-error -- dynamic import
   window.zenUml = zenUml;
 
   // Override the render method to always use our config
@@ -44,7 +44,7 @@ if (elm) {
   initZenUml(elm);
 }
 
-// @ts-ignore
+// @ts-expect-error -- dynamic import
 window.parentLogger = parentLogger;
-// @ts-ignore
+// @ts-expect-error -- dynamic import
 window.initZenUml = initZenUml;

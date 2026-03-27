@@ -29,7 +29,7 @@ export class MessageCollector extends sequenceParserListener {
     const owner = ctx?.Owner();
     let signature = ctx?.SignatureText();
     if (from === owner && ctx.Assignment) {
-      // @ts-ignore
+      // @ts-expect-error -- ANTLR generated code
       const assignment = ctx.Assignment();
       if (assignment) {
         signature = `${assignment.getText()} = ${signature}`;

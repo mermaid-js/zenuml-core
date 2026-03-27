@@ -3,9 +3,9 @@ import sequenceParser from "../../generated-parser/sequenceParser";
 const seqParser = sequenceParser;
 const DividerContext = seqParser.DividerContext;
 
-// @ts-ignore
+// @ts-expect-error -- ANTLR generated code
 DividerContext.prototype.Note = function () {
-  // @ts-ignore
+  // @ts-expect-error -- ANTLR generated code
   const formattedText = this.dividerNote()?.getFormattedText().trim();
   // throw error if formattedText does not start with '=='
   if (!formattedText.startsWith("==")) {
