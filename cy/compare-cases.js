@@ -10,8 +10,13 @@ export const CASES = {
 B -> C: process
 C -> B: result
 B -> A: done`,
-  "named-params": `A.method(userId=123, name="John")
-B.create(type="User", active=true)`,
+  "named-params": `title Named Parameters Test
+// Testing named parameter syntax (param=value)
+A.method(userId=123, name="John")
+B.create(type="User", active=true)
+C.mixedCall(1, name="Mixed", enabled=false)
+D.oldStyle(1, 2, 3)
+E.complex(first="value1", second=42, third=true, fourth="final")`,
 
   // --- Sync calls & self-calls ---
   "nested-sync": `A.method() {
@@ -40,7 +45,7 @@ A.method1{
     }
   }
 }`,
-  "nested-fragment": `title Nested Interaction
+  "nested-fragment": `title Nested Interaction with Fragment and Self-Invocation
 A.Read() {
   B.Submit() {
     Process() {
@@ -52,7 +57,7 @@ A.Read() {
     }
   }
 }`,
-  "nested-outbound": `title Nested Interaction with Outbound
+  "nested-outbound": `title Nested Interaction with Outbound Message and Fragment
 A.Read() {
   B.Submit() {
     C->B.method {
@@ -73,40 +78,54 @@ A.Read() {
   "participant-width": `LongParticipantName.method`,
 
   // --- Async messages ---
-  "async-1": `A->A: selfA
-A->B: aToB
-A->C: aToC
-B->B: selfB
-B->C: bToC
-B->A: bToA
-C->C: selfC
-C->B: cToB
-C->A: cToA`,
-  "async-2a": `A.method {
-  A->A: selfPing
-  A->B: send
-  A->C: broadcast
-  B->B: selfCheck
-  B->C: forward
-  B->A: reply
-  C->C: selfLog
-  C->B: respond
-  C->A: callback
-}`,
-  "async-2b": `A.method {
-  A->B: init
+  "async-1": `A->A: async
+A->B: async
+A->C: async
+B->B: async
+B->C: async
+B->A: async
+C->C: async
+C->B: async
+C->A: async`,
+  "async-2": `A.method {
+  A->A: async
+  A->B: async
+  A->C: async
+  B->B: async
+  B->C: async
+  B->A: async
+  C->C: async
+  C->B: async
+  C->A: async
   B.method {
-    A->B: request
-    B->C: delegate
-    C->A: complete
+    A->A: async
+    A->B: async
+    A->C: async
+    B->B: async
+    B->C: async
+    B->A: async
+    C->C: async
+    C->B: async
+    C->A: async
   }
 }`,
   "async-3": `A B C
 C.method {
-  A->C: notify
-  C->A: respond
-  C->B: forward
-  B->C: ack
+  A->C: async
+  C->A: async
+  C->B: async
+  B->C: async
+  B.method {
+    A->A: async
+    A->B: async
+    A->C: async
+    B->B: async
+    B->C: async
+    B->A: async
+    C->C: async
+    C->B: async
+    C->A: async
+  }
 }`,
   "async-self": `A->A: selfAsync`,
   "async-self-nested": `A.method {
@@ -153,8 +172,9 @@ B->A: So what`,
 } else {
   A -> B: elseMsg
 }`,
-  "if-fragment": `title Issue 232
+  "if-fragment": `title Issue 232 - wrong layout for if-fragment
 Client -> Server:SendRequest
+
 if(true){
   Server -> Server: processRequest
 }`,
@@ -173,7 +193,7 @@ loop(condition) {
 }`,
   "fragment": `A
 B
-C
+C #FF0000  // we style it to make it more important in image comparison
 if(x) {
   loop(y) {
     try {
@@ -267,6 +287,7 @@ A.m1 {
 
   // --- Return ---
   "return": `A B C D
+
 A->B.method() {
   ret0_assign_rtl =C.method_long_to_give_space {
     @return C->D: ret1_annotation_ltr
@@ -275,8 +296,17 @@ A->B.method() {
       return ret2_return_ltr
     }
   }
+
   return ret2_return_rtl
   @return B->A: ret4_annotation_rtl
+}`,
+  "return-in-nested-if": `A.m {
+  if (condition) {
+    return ret
+    if(x) {
+      new B
+    }
+  }
 }`,
   // Minimal return isolation cases
   "return-single-explicit": `A B
@@ -335,6 +365,7 @@ new B`,
 } else {
   new B
 }
+
 new C
 try {
   new D
@@ -350,6 +381,7 @@ try {
 } else {
   new B
 }
+
 new C
 try {
   new D
@@ -398,7 +430,7 @@ section(){
   "vertical-8": `new Creation() {
   return from_creation
 }
-return "back to caller"
+return "from if to original source"
 try {
   new AHasAVeryLongNameLongNameLongNameLongName() {
     new CreatWithinCreat()
@@ -450,6 +482,7 @@ group "B C" {@EC2 B @ECS C}
 new B
 ReturnType ret = ParticipantName.methodA(a, b) {
   critical("This is a critical message") {
+    // Customised style for RESTFul API - \`POST /order\`
     ReturnType ret2 = selfCall() {
       B.syncCallWithinSelfCall() {
         ParticipantName.rightToLeftCall()
@@ -470,7 +503,7 @@ ReturnType ret = ParticipantName.methodA(a, b) {
     new Creation() {
       return from_creation
     }
-    return "back to caller"
+    return "from if to original source"
     try {
       new AHasAVeryLongNameLongNameLongNameLongName() {
         new CreatWithinCreat()
