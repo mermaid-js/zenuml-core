@@ -1,7 +1,6 @@
 // Re-export compare-cases with type safety for use in spec files.
 // compare-cases.js is the single source of truth for all DSL test data.
 
-// @ts-expect-error — JS module without types
 import { CASES } from "../cy/compare-cases.js";
 
 export const TEST_CASES: Record<string, string> = CASES;
