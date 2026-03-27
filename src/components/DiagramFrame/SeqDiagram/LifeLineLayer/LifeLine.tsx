@@ -38,10 +38,7 @@ export const LifeLine = (props: {
 
   const measureFromDOM = useCallback(() => {
     // escape entity name to avoid invalid selector errors
-    const escapedName = props.entity.name.replace(
-      /([ #;&,.+*~':"!^$\[\]()=>|\/@])/g,
-      "\\$1",
-    );
+    const escapedName = props.entity.name.replace(/[^A-Za-z0-9_-]/g, "\\$&");
     const firstMessage = diagramElement?.querySelector(
       `[data-to="${escapedName}"]`,
     ) as HTMLElement | null;

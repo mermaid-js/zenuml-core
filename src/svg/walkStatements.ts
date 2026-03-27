@@ -143,7 +143,7 @@ function walkBlock(
     }
 
     // Fragments — record with enriched metadata and recurse into their blocks
-    const fragmentInfo = extractFragmentInfo(stat, currentOrigin);
+    const fragmentInfo = extractFragmentInfo(stat);
     results.push({
       key,
       kind: "fragment",
@@ -173,7 +173,7 @@ interface FragmentExtract {
   sections: FragmentSectionInfo[];
 }
 
-function extractFragmentInfo(stat: StatNode, _origin: string): FragmentExtract {
+function extractFragmentInfo(stat: StatNode): FragmentExtract {
   // Single-block fragments: loop, opt, par, critical, section
   for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
     const frag = stat[kind]?.();

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { DiagramFrame } from './DiagramFrame'
 import { createStore, Provider } from 'jotai'
 import { codeAtom, modeAtom, RenderMode } from '../../store/Store'

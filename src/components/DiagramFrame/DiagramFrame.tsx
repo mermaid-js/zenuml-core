@@ -94,8 +94,7 @@ export const DiagramFrame = ({
   };
   const setStyle = (style: string) => {
     const styleElementId = "zenuml-style";
-    let styleElement: HTMLElement;
-    styleElement = document.createElement("style");
+    const styleElement = document.createElement("style");
     styleElement.id = styleElementId;
     document.head.append(styleElement);
     styleElement.textContent = style;
@@ -122,8 +121,7 @@ export const DiagramFrame = ({
     }
     const remoteCssUrlId = "zenuml-remote-css";
     // check if remote css element exists
-    let remoteCssElement: HTMLLinkElement;
-    remoteCssElement = document.createElement("link");
+    const remoteCssElement = document.createElement("link");
     remoteCssElement.id = remoteCssUrlId;
     remoteCssElement.rel = "stylesheet";
     document.head.append(remoteCssElement);

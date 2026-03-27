@@ -28,17 +28,39 @@ If any precondition fails, report which one and stop. Do not attempt to fix — 
 
 Run the precondition checks above. If anything is not green, stop and report.
 
-### 2. Squash merge
+### 2. Decide merge strategy
 
-This repo uses squash merges. The merge commit message should summarize the PR.
+Inspect the branch's commit history to decide between squash and merge:
 
 ```bash
+git log main..HEAD --oneline
+```
+
+**Auto-squash if ANY of these are true:**
+- Only 1 commit on the branch
+- Commit messages contain noise patterns: "wip", "fixup", "temp", "oops", "try again", "fix lint", "fix test", duplicate messages
+- More than half the commits have the same or very similar messages
+
+**Merge (preserve commits) if ALL of these are true:**
+- 2+ commits with distinct, meaningful messages
+- Each commit describes a self-contained step (not just iterations on the same change)
+- Commits follow a logical progression (e.g., "add X" → "refactor Y" → "delete Z")
+
+Announce the decision and why: "Squashing — 3 of 5 commits are fixups" or "Merging — 8 clean commits with distinct steps".
+
+### 3. Execute merge
+
+```bash
+# If squash:
 gh pr merge <PR_NUMBER> --squash --auto
+
+# If merge:
+gh pr merge <PR_NUMBER> --merge --auto
 ```
 
 Using `--auto` arms auto-merge so GitHub merges when all checks pass. If checks are already green, it merges immediately.
 
-### 3. Wait for merge
+### 4. Wait for merge
 
 If auto-merge was armed, wait for it:
 
@@ -48,7 +70,7 @@ gh pr view <PR_NUMBER> --json state
 
 Poll until state is `MERGED`. Timeout after 5 minutes — if not merged by then, report and stop.
 
-### 4. Monitor npm publish
+### 5. Monitor npm publish
 
 After merge, the `Build, Test, npm Publish, and Deploy` workflow runs on `main`. Watch it:
 
@@ -62,7 +84,7 @@ Wait for the run to complete:
 gh run watch <RUN_ID> --repo mermaid-js/zenuml-core
 ```
 
-### 5. Verify npm publish
+### 6. Verify npm publish
 
 Check that the new version appeared on npm:
 

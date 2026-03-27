@@ -101,7 +101,8 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
   return { ...composeSvg(geometry, options), geometry };
 }
 
-function composeSvg(g: DiagramGeometry, _options?: RenderOptions): RenderResult {
+function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
+  void options;
   const padding = 10;
   const headerH = FRAME_HEADER_HEIGHT;
   // Content left offset = 1 (frame border) + 10 (seq-diagram px-2.5 padding) + frameBorderLeft

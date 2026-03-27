@@ -10,6 +10,8 @@ Orchestrate the full path from local branch to npm release. This skill composes 
 ## Flow
 
 ```
+rebase on origin/main → CONFLICT → stop, report
+     | CLEAN
 validate-branch → FAIL → stop, report
      | PASS
 submit-branch → FAIL → stop, report
@@ -24,6 +26,17 @@ land-pr → PUBLISH FAIL → alert, stop
 ```
 
 ## Steps
+
+### Step 0: Rebase on remote main
+
+Fetch and rebase onto `origin/main` to ensure the branch is up to date before validating.
+
+```bash
+git fetch origin main
+git rebase origin/main
+```
+
+If the rebase has conflicts, stop immediately and report. The developer must resolve conflicts manually before shipping.
 
 ### Step 1: Validate locally
 

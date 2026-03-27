@@ -6,7 +6,7 @@ const FONT_FAMILY = "Helvetica, Verdana, serif";
 const FONT_SIZE_PARTICIPANT = "16px"; // 1rem — used for ALL measurements (see getFontSpec comment)
 const FONT_SIZE_FRAGMENT = "14px";
 
-function getFontSpec(_type: TextType): string {
+function getFontSpec(): string {
   // WidthProviderOnBrowser has a latent bug: it creates a hidden div with
   // fontSize set once on the first call (always 16px for participant names,
   // since withParticipantGaps runs before withMessageGaps in Coordinates).
@@ -64,7 +64,7 @@ export function WidthProviderOnCanvas(
     return width;
   }
 
-  ctx.font = getFontSpec(type);
+  ctx.font = getFontSpec();
   const width = Math.round(ctx.measureText(measured).width);
   setCache(cacheKey, width, true);
   return width;

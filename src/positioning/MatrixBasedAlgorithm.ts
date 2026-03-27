@@ -12,7 +12,7 @@ const range = memoize((to: number, from = 0) => {
 
 function neighbourGap(right: number, minDistanceMatrix: Array<Array<number>>) {
   return Math.max(
-    ...range(right, 0).map((l, _) => {
+    ...range(right, 0).map((l) => {
       return (
         minDistanceMatrix[l][right] - distance(l, right - 1, minDistanceMatrix)
       );

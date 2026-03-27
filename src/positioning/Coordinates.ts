@@ -127,7 +127,7 @@ export class Coordinates {
           messageWidth + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH,
           this.m[leftIndex][rightIndex],
         );
-      } catch (e) {
+      } catch {
         console.warn(
           `Could not set message gap between ${message.from} and ${message.to}`,
         );

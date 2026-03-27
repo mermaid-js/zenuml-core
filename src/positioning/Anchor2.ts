@@ -25,18 +25,12 @@ export default class Anchor2 {
   edgeOffset(other: Anchor2): number {
     const isRightToLeft = other.position < this.position;
 
-    let leftAnchor: Anchor2;
-    let rightAnchor: Anchor2;
-    if (isRightToLeft) {
-      leftAnchor = other;
-      rightAnchor = this;
-    } else {
-      leftAnchor = this;
-      rightAnchor = other;
-    }
-
-    const rightEdgeOfLeftAnchor = leftAnchor.rightEdgeOfRightWall();
-    const leftEdgeOfRightAnchor = rightAnchor.leftEdgeOfRightWall();
+    const rightEdgeOfLeftAnchor = isRightToLeft
+      ? other.rightEdgeOfRightWall()
+      : this.rightEdgeOfRightWall();
+    const leftEdgeOfRightAnchor = isRightToLeft
+      ? this.leftEdgeOfRightWall()
+      : other.leftEdgeOfRightWall();
     const distance =
       leftEdgeOfRightAnchor - rightEdgeOfLeftAnchor - LIFELINE_WIDTH;
     return isRightToLeft ? distance * -1 : distance;
