@@ -98,7 +98,10 @@
       window.__currentDSL = code || "";
 
       if (code === undefined) {
-        document.getElementById("svg-output").innerHTML = `<p style="color:red">Unknown case: ${caseName}</p>`;
+        const errP = document.createElement("p");
+        errP.style.color = "red";
+        errP.textContent = "Unknown case: " + caseName;
+        document.getElementById("svg-output").appendChild(errP);
       } else {
         // SVG side
         const result = renderToSvg(code);
