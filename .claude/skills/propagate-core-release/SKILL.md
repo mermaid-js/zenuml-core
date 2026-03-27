@@ -26,6 +26,11 @@ It should not:
 - merge downstream PRs
 - auto-fix unrelated downstream test failures beyond straightforward dependency-update fallout
 
+Renderer integration rule:
+
+- Only `mermaid-js/mermaid` and `mermaid-js/mermaid-live-editor` should be treated as SVG-renderer integration work for `@zenuml/core` API changes.
+- All other downstreams remain HTML-renderer consumers. Do not migrate them to `renderToSvg` or other SVG-renderer APIs during propagation.
+
 ## Downstream Repos
 
 Read [references/downstreams.md](references/downstreams.md) before starting. It contains the canonical downstream repo list and repo slug assumptions.
@@ -153,6 +158,12 @@ For each repo:
 2. Run the **lockfile refresh** (`pnpm install` or `yarn install`) — always commit the updated lockfile
 3. Run the **Verify Command** from the table — if it fails, report the failure and move on
 4. Commit only the dependency change + lockfile — nothing else
+
+Special handling for renderer API changes:
+
+- `mermaid-js/mermaid` is the direct `@zenuml/core` SVG-renderer integration. When core export APIs change, it may require code updates in `packages/mermaid-zenuml`, not just a dependency bump.
+- `mermaid-js/mermaid-live-editor` is an indirect SVG-renderer consumer through `@mermaid-js/mermaid-zenuml`. Do not add `@zenuml/core` directly there just to follow a core release.
+- `web-sequence`, `confluence-plugin-cloud`, `diagramly.ai`, and similar downstreams stay on the HTML-renderer path unless the user explicitly asks for a renderer migration.
 
 Prefer the smallest change that updates the downstream safely:
 
