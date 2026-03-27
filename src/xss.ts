@@ -6,12 +6,12 @@ const logger = parentLogger.child({ name: "main" });
 const elm = document.querySelector("#diagram");
 // get the code from the element
 const code = `"><img src=x onerror=alert(1)>`;
-// @ts-ignore
+// @ts-expect-error -- dynamic import
 const zenUml = new ZenUml(elm);
-// @ts-ignore
+// @ts-expect-error -- dynamic import
 window.zenUml = zenUml;
 zenUml.render(code, { theme: "theme-default" }).then((r) => {
   logger.debug("render resolved", r);
 });
-// @ts-ignore
+// @ts-expect-error -- dynamic import
 window.parentLogger = parentLogger;

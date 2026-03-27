@@ -7,42 +7,42 @@ const MessageContext = seqParser.MessageContext;
 const AsyncMessageContext = seqParser.AsyncMessageContext;
 const RetContext = seqParser.RetContext;
 
-// @ts-ignore
+// @ts-expect-error -- ANTLR generated code
 CreationContext.prototype.From = function () {
-  // @ts-ignore
+  // @ts-expect-error -- ANTLR generated code
   if (this.parentCtx instanceof StatContext) {
-    // @ts-ignore
+    // @ts-expect-error -- ANTLR generated code
     return this.ClosestAncestorStat().Origin();
   }
   return undefined;
 };
 
-// @ts-ignore
+// @ts-expect-error -- ANTLR generated code
 MessageContext.prototype.ProvidedFrom = function () {
-  // @ts-ignore
+  // @ts-expect-error -- ANTLR generated code
   return this.messageBody()?.fromTo()?.from()?.getFormattedText();
 };
-// @ts-ignore
+// @ts-expect-error -- ANTLR generated code
 MessageContext.prototype.From = function () {
-  // @ts-ignore
+  // @ts-expect-error -- ANTLR generated code
   return this.ProvidedFrom() || this.ClosestAncestorStat().Origin();
 };
 
-// @ts-ignore
+// @ts-expect-error -- ANTLR generated code
 AsyncMessageContext.prototype.ProvidedFrom = function () {
-  // @ts-ignore
+  // @ts-expect-error -- ANTLR generated code
   return this.from()?.getFormattedText();
 };
 
-// @ts-ignore
+// @ts-expect-error -- ANTLR generated code
 AsyncMessageContext.prototype.From = function () {
-  // @ts-ignore
+  // @ts-expect-error -- ANTLR generated code
   return this.ProvidedFrom() || this.ClosestAncestorStat().Origin();
 };
 
-// @ts-ignore
+// @ts-expect-error -- ANTLR generated code
 RetContext.prototype.From = function () {
-  // @ts-ignore
+  // @ts-expect-error -- ANTLR generated code
   return this.asyncMessage()?.From() || this.ClosestAncestorStat().Origin();
 };
 export {};
