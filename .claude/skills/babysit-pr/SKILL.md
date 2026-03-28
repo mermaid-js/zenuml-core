@@ -64,6 +64,24 @@ Categorize the failure:
 git fetch origin && git checkout <PR_BRANCH> && git pull origin <PR_BRANCH>
 ```
 
+Before any local `bun pw` run in this workflow, verify that port `8080` is either free or already owned by a dev server started from this repo. `playwright.config.ts` reuses existing servers outside CI, so a Vite server from another repo will produce invalid local results.
+
+```bash
+PORT="${PORT:-8080}"
+THIS_REPO="$(pwd -P)"
+LISTENER_PID="$(lsof -tiTCP:${PORT} -sTCP:LISTEN 2>/dev/null | head -n1 || true)"
+
+if [ -n "$LISTENER_PID" ]; then
+  LISTENER_CMD="$(ps -p "$LISTENER_PID" -o command=)"
+  if [[ "$LISTENER_CMD" != *"$THIS_REPO"* ]]; then
+    echo "Port ${PORT} is owned by another repo; killing PID ${LISTENER_PID}"
+    kill "$LISTENER_PID"
+  fi
+fi
+```
+
+If you killed a different repo's server, do **not** start Vite manually. Let `bun pw` launch the correct dev server from this folder.
+
 ### Fix by Category
 
 #### Playwright Snapshot Mismatch (Linux)
@@ -93,6 +111,7 @@ This is the most common CI-only failure because snapshots are platform-specific.
 
 1. **Reproduce locally first**:
    ```bash
+   # Run the 8080 ownership preflight above first.
    bun pw --grep "<test name pattern>"
    ```
 2. **Read the failing test** to understand what it expects
@@ -151,6 +170,7 @@ After applying a fix:
 1. **Run the full local test suite** before pushing (when the failure category allows local reproduction):
    ```bash
    bun run test --run   # unit tests
+   # Run the 8080 ownership preflight above first.
    bun pw               # playwright (local, macOS — won't catch Linux snapshot diffs)
    bun eslint           # lint
    ```
