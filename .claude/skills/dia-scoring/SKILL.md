@@ -20,7 +20,7 @@ The workflow:
 
 1. Run `node scripts/analyze-compare-case.mjs --case <name> --json` for structured data.
 2. Use `--output-dir <dir>` when you need saved `html.png`, `svg.png`, `diff.png`, and `report.json`.
-3. For live browser inspection, navigate to `http://localhost:8080/cy/compare-case.html?case=<name>` and use the extension's `#diff-panel canvas`.
+3. For live browser inspection, navigate to `http://localhost:8080/e2e/tools/compare-case.html?case=<name>` and use the extension's `#diff-panel canvas`.
 4. Use Playwright page inspection for semantic attribution (element positions, font metrics, DOM structure).
 
 ## Offset Anchor

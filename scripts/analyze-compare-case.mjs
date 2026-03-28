@@ -41,7 +41,7 @@ export async function main(argv = process.argv.slice(2), stdout = process.stdout
   if (args.profileDirectory && !args.userDataDir) {
     throw new Error("--profile-directory requires --user-data-dir");
   }
-  const compareUrl = `${args.baseUrl.replace(/\/$/, "")}/cy/compare-case.html?case=${encodeURIComponent(args.caseName)}`;
+  const compareUrl = `${args.baseUrl.replace(/\/$/, "")}/e2e/tools/compare-case.html?case=${encodeURIComponent(args.caseName)}`;
   const chromiumArgs = args.profileDirectory
     ? [`--profile-directory=${args.profileDirectory}`]
     : [];

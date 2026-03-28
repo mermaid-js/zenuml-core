@@ -14,7 +14,7 @@
  *
  * Example input:
  * A Playwright `page` already loaded with
- * `http://localhost:8080/cy/compare-case.html?case=async-2a`
+ * `http://localhost:8080/e2e/tools/compare-case.html?case=async-2a`
  *
  * Example output:
  * `{ htmlLabels, svgLabels, htmlNumbers, svgNumbers, htmlArrows, svgArrows, htmlParticipants, svgParticipants, ... }`

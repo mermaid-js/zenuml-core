@@ -1,0 +1,357 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Compare</title>
+    <style>
+      body { margin: 0; font-family: sans-serif; }
+      .compare-bar {
+        display: flex; align-items: center; gap: 12px;
+        padding: 8px 16px; background: #1e293b; color: white;
+      }
+      .compare-bar a { color: #93c5fd; text-decoration: none; font-size: 13px; }
+      .compare-bar a:hover { text-decoration: underline; }
+      .compare-bar h2 { margin: 0; font-size: 15px; font-weight: 500; }
+      .nav { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+      .nav a { padding: 4px 10px; background: #334155; border-radius: 4px; font-size: 12px; }
+      .nav button { padding: 4px 12px; background: #7c3aed; border: none; border-radius: 4px; color: white; font-size: 12px; cursor: pointer; }
+      .nav button:hover { background: #6d28d9; }
+      .nav button:disabled { background: #64748b; cursor: wait; }
+      .nav .match-badge { font-size: 11px; color: #94a3b8; }
+      .container { display: flex; gap: 0; }
+      .container.stacked { flex-direction: column; }
+      .panel { flex: 1; overflow: auto; }
+      .panel > h3 { margin: 0; padding: 8px 16px; background: #334155; color: white; font-size: 13px; }
+      .panel-content { padding: 10px; background: white; }
+      .diff-panel { display: none; }
+      .diff-panel.visible { display: block; }
+      .diff-panel .panel-content canvas { max-width: 100%; }
+      #html-output .footer { display: none !important; }
+      #html-output .privacy { visibility: hidden !important; }
+    </style>
+  </head>
+  <body>
+    <div class="compare-bar">
+      <a href="/e2e/tools/compare.html">&larr; All cases</a>
+      <h2 id="case-name"></h2>
+      <div class="nav">
+        <a id="prev-link" href="#">&larr; Prev</a>
+        <a id="next-link" href="#">Next &rarr;</a>
+        <span class="match-badge" id="match-badge"></span>
+      </div>
+    </div>
+    <div class="container">
+      <div class="panel">
+        <h3>HTML/React Renderer (theme-default)</h3>
+        <div class="panel-content" id="html-output">
+          <div id="diagram"><pre class="zenuml" style="margin: 0"></pre></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Native SVG Renderer</h3>
+        <div class="panel-content" id="svg-output"></div>
+      </div>
+      <div class="panel diff-panel" id="diff-panel">
+        <h3>Pixel Diff</h3>
+        <div class="panel-content" id="diff-output"></div>
+      </div>
+    </div>
+    <script type="module">
+      import ZenUml from "/src/core.tsx";
+      import { renderToSvg } from "/src/svg/renderToSvg.ts";
+
+      import { CASES } from "../data/compare-cases.js";
+      import { diffImages, DEFAULTS } from "../data/diff-algorithm.js";
+
+      const caseNames = Object.keys(CASES);
+      const params = new URLSearchParams(window.location.search);
+      const caseName = params.get("case") || caseNames[0];
+      const code = CASES[caseName];
+
+      // Update title and header
+      document.title = `Compare: ${caseName}`;
+      document.getElementById("case-name").textContent = caseName;
+
+      // Prev/Next navigation
+      const idx = caseNames.indexOf(caseName);
+      const prevLink = document.getElementById("prev-link");
+      const nextLink = document.getElementById("next-link");
+      if (idx > 0) {
+        prevLink.href = `?case=${encodeURIComponent(caseNames[idx - 1])}`;
+      } else {
+        prevLink.style.visibility = "hidden";
+      }
+      if (idx < caseNames.length - 1) {
+        nextLink.href = `?case=${encodeURIComponent(caseNames[idx + 1])}`;
+      } else {
+        nextLink.style.visibility = "hidden";
+      }
+
+      // Expose DSL for the extension's batch mode to read
+      window.__currentDSL = code || "";
+
+      if (code === undefined) {
+        const errP = document.createElement("p");
+        errP.style.color = "red";
+        errP.textContent = "Unknown case: " + caseName;
+        document.getElementById("svg-output").appendChild(errP);
+      } else {
+        // SVG side
+        const result = renderToSvg(code);
+        document.getElementById("svg-output").innerHTML = result.svg;
+
+        // HTML side — render with theme-default
+        const diagram = document.getElementById("diagram");
+        const pre = diagram.querySelector("pre.zenuml");
+        pre.textContent = code;
+        const zenUml = new ZenUml(pre);
+        await zenUml.render(code, { theme: "theme-default" });
+
+        // Hide footer in HTML output (SVG has no footer equivalent)
+        requestAnimationFrame(() => {
+          const footer = document.querySelector("#html-output .footer");
+          if (footer) footer.style.display = "none";
+
+          // Stack panels vertically when diagram is wider than half the viewport.
+          // This prevents overflow clipping in CDP screenshots for wide diagrams.
+          const frame = document.querySelector("#html-output .frame, #html-output .sequence-diagram");
+          const svgEl = document.querySelector("#svg-output > svg");
+          const maxW = Math.max(frame?.offsetWidth || 0, svgEl?.offsetWidth || 0);
+          if (maxW > window.innerWidth / 2 - 40) {
+            document.querySelector(".container").classList.add("stacked");
+          }
+        });
+      }
+
+      // ——— Element extraction for structural comparison ———
+
+      function extractHtmlElements(container) {
+        const elements = { participants: [], messages: [], selfCalls: [], creations: [], returns: [], fragments: [] };
+
+        // Participants
+        container.querySelectorAll("[data-participant-id]").forEach(el => {
+          const name = el.getAttribute("data-participant-id");
+          if (name) elements.participants.push(name);
+        });
+
+        // Messages (non-self, non-return, non-creation interactions)
+        container.querySelectorAll('.interaction:not(.return):not(.creation)').forEach(el => {
+          const isSelf = el.classList.contains("self-invocation") ||
+                         el.querySelector(".self-invocation") !== null ||
+                         el.classList.contains("self");
+          if (isSelf) return;
+          const sig = el.getAttribute("data-signature") || el.getAttribute("data-to") || "";
+          if (sig) elements.messages.push(sig);
+        });
+
+        // Self-calls
+        container.querySelectorAll('.self-invocation').forEach(el => {
+          const interaction = el.closest(".interaction");
+          const sig = interaction?.getAttribute("data-signature") || "";
+          if (sig) elements.selfCalls.push(sig);
+        });
+
+        // Creations
+        container.querySelectorAll('.interaction.creation').forEach(el => {
+          const sig = el.getAttribute("data-signature") || "";
+          if (sig) elements.creations.push(sig);
+        });
+
+        // Returns — match .interaction.return (some have data-type="return", some don't)
+        container.querySelectorAll('.interaction.return').forEach(el => {
+          const sig = el.getAttribute("data-signature") || "";
+          const msgDiv = el.querySelector(".message");
+          const label = sig || (msgDiv ? msgDiv.textContent.trim().replace(/[\d.]+$/, "").trim() : "");
+          if (label) elements.returns.push(label);
+        });
+
+        // Fragments
+        container.querySelectorAll(".fragment").forEach(el => {
+          const kind = [...el.classList].find(c => c.startsWith("fragment-"))?.replace("fragment-", "") ||
+                       [...el.classList].find(c => ["alt", "loop", "opt", "par", "tcf", "critical", "section", "ref"].includes(c)) || "unknown";
+          elements.fragments.push(kind);
+        });
+
+        return elements;
+      }
+
+      function extractSvgElements(svgElement) {
+        const elements = { participants: [], messages: [], selfCalls: [], creations: [], returns: [], fragments: [] };
+        if (!svgElement) return elements;
+
+        // Participants
+        svgElement.querySelectorAll("g.participant, g.participant-starter").forEach(g => {
+          const name = g.getAttribute("data-participant");
+          if (name) elements.participants.push(name);
+        });
+
+        // Messages (non-self)
+        svgElement.querySelectorAll("g.message").forEach(g => {
+          if (g.classList.contains("self-call")) return;
+          const text = g.querySelector("text.message-label");
+          elements.messages.push(text ? text.textContent.trim() : "");
+        });
+
+        // Self-calls
+        svgElement.querySelectorAll("g.message.self-call").forEach(g => {
+          const text = g.querySelector("text.message-label");
+          elements.selfCalls.push(text ? text.textContent.trim() : "");
+        });
+
+        // Creations
+        svgElement.querySelectorAll("g.creation").forEach(g => {
+          const text = g.querySelector("text.message-label");
+          elements.creations.push(text ? text.textContent.trim() : "");
+        });
+
+        // Returns
+        svgElement.querySelectorAll("g.return").forEach(g => {
+          const text = g.querySelector("text.return-label");
+          elements.returns.push(text ? text.textContent.trim() : "");
+        });
+
+        // Fragments
+        svgElement.querySelectorAll("g.fragment, g[class*='fragment-']").forEach(g => {
+          const kind = ([...g.classList].find(c => c.startsWith("fragment-")) || "").replace("fragment-", "") || "unknown";
+          elements.fragments.push(kind);
+        });
+
+        return elements;
+      }
+
+      function computeStructuralMatch(htmlElements, svgElements) {
+        const types = ["participants", "messages", "selfCalls", "creations", "returns", "fragments"];
+        let totalScore = 0;
+        let scoredTypes = 0;
+        let totalElements = 0;
+        let matchedElements = 0;
+        const details = {};
+
+        for (const type of types) {
+          const htmlList = htmlElements[type] || [];
+          const svgList = svgElements[type] || [];
+          const maxLen = Math.max(htmlList.length, svgList.length);
+
+          if (maxLen === 0) continue; // skip types with no elements in either
+
+          // Count matches by order
+          let matched = 0;
+          const minLen = Math.min(htmlList.length, svgList.length);
+          for (let i = 0; i < minLen; i++) {
+            matched++; // count as matched if present in both at same index
+          }
+
+          const score = matched / maxLen;
+          totalScore += score;
+          scoredTypes++;
+          totalElements += maxLen;
+          matchedElements += matched;
+
+          details[type] = { html: htmlList.length, svg: svgList.length, matched, score };
+        }
+
+        return {
+          score: scoredTypes > 0 ? totalScore / scoredTypes : 1,
+          totalElements,
+          matchedElements,
+          details,
+        };
+      }
+
+      // --- Reusable capture/diff API (also exposed on window for external tools) ---
+
+      // State for hide/restore cycle
+      let _hiddenEls = [];
+      let _savedStyles = [];
+
+      function _hideEl(el) {
+        if (el) { _hiddenEls.push({ el, prev: el.style.display }); el.style.display = "none"; }
+      }
+      function _stripMargin(el) {
+        if (el) { _savedStyles.push({ el, prev: el.style.margin }); el.style.margin = "0"; }
+      }
+
+      // Prepare HTML panel for screenshot: hide chrome, numbering, icons
+      window.prepareHtmlForCapture = function() {
+        _hiddenEls = [];
+        _savedStyles = [];
+
+        const htmlEl = document.getElementById("html-output");
+        const htmlFrame = htmlEl.querySelector(".frame");
+        const seqDiagram = htmlEl.querySelector(".sequence-diagram");
+        const svgElement = document.getElementById("svg-output").querySelector("svg");
+
+        _hideEl(htmlEl.querySelector(".footer"));
+        _stripMargin(htmlFrame);
+
+        // Hide bottom participant labels (SVG no longer renders them)
+        const captureEl = htmlFrame || seqDiagram || htmlEl;
+        const captureRect = captureEl.getBoundingClientRect();
+        const captureMidY = captureRect.top + captureRect.height * 0.7;
+        captureEl.querySelectorAll(".participant").forEach(el => {
+          const r = el.getBoundingClientRect();
+          if (r.top > captureMidY) _hideEl(el);
+        });
+
+        if (htmlFrame) {
+          const frameRect2 = htmlFrame.getBoundingClientRect();
+          // Hide SVG icons in the header area (top 35px) — checkbox, etc.
+          htmlFrame.querySelectorAll("svg").forEach(svg => {
+            const r = svg.getBoundingClientRect();
+            if (r.width > 0 && (r.top - frameRect2.top) < 35) _hideEl(svg);
+          });
+        }
+
+        return { htmlSelector: "#html-output .frame, #html-output .sequence-diagram", svgSelector: "#svg-output svg" };
+      };
+
+      // Restore HTML panel after screenshot
+      window.restoreHtmlAfterCapture = function() {
+        for (const { el, prev } of _hiddenEls) el.style.display = prev;
+        for (const { el, prev } of _savedStyles) el.style.margin = prev;
+        _hiddenEls = [];
+        _savedStyles = [];
+      };
+
+      // Run pixel diff from two PNG data URLs and display results on the page.
+      // Returns { pixelPct, posPct, structPct, matched, total, htmlOnly, svgOnly, colorDiff }
+      window.diffFromImages = async function(htmlDataUrl, svgDataUrl) {
+        const htmlEl = document.getElementById("html-output");
+        const svgEl = document.getElementById("svg-output");
+        const seqDiagram = htmlEl.querySelector(".sequence-diagram");
+        const svgElement = svgEl.querySelector("svg");
+
+        // Structural comparison
+        const htmlElements = extractHtmlElements(seqDiagram || htmlEl);
+        const svgElements = extractSvgElements(svgElement);
+        const structural = computeStructuralMatch(htmlElements, svgElements);
+
+        // Allow URL param overrides for debugging
+        const urlParams = new URLSearchParams(window.location.search);
+        const opts = {
+          LUMA_THRESHOLD: parseInt(urlParams.get('luma') || DEFAULTS.LUMA_THRESHOLD, 10),
+          CHANNEL_TOLERANCE: parseInt(urlParams.get('ctol') || DEFAULTS.CHANNEL_TOLERANCE, 10),
+          POSITION_TOLERANCE: parseInt(urlParams.get('ptol') || DEFAULTS.POSITION_TOLERANCE, 10),
+        };
+
+        const { canvas: diffCanvas, stats, badgeHtml } = await diffImages(htmlDataUrl, svgDataUrl, opts);
+
+        const diffOutput = document.getElementById("diff-output");
+        diffOutput.innerHTML = "";
+        diffOutput.appendChild(diffCanvas);
+
+        const panel = document.getElementById("diff-panel");
+        panel.classList.add("visible");
+
+        const structPct = (structural.score * 100).toFixed(0);
+        document.getElementById("match-badge").innerHTML =
+          `${structPct}% structural · ${badgeHtml}`;
+
+        return { pixelPct: stats.pixelPct, posPct: stats.posPct, structPct: parseFloat(structPct), ...stats };
+      };
+
+
+
+    </script>
+  </body>
+</html>
