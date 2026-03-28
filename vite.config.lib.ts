@@ -20,6 +20,20 @@ const gitBranch = process.env.DOCKER
   ? ""
   : execSync("git branch --show-current").toString().trim();
 
+// Merge all cloud-provider icon SVGs into a single chunk instead of 500+
+function manualChunks(id: string) {
+  if (
+    id.includes("AWS-Asset-Package") ||
+    id.includes("Architecture-Service-Icons") ||
+    id.includes("google-cloud-icons") ||
+    id.includes("Azure_Public_Service_Icons") ||
+    id.includes("HLD-Architecture") ||
+    id.includes("CloudIcons")
+  ) {
+    return "cloud-icons";
+  }
+}
+
 export default defineConfig({
   build: {
     // https://vitejs.dev/guide/build.html#library-mode
@@ -35,15 +49,11 @@ export default defineConfig({
       output: [
         {
           format: "esm",
-          // https://rollupjs.org/guide/en/#outputentryfilenames
-          // It will use the file name in `build.lib.entry` without extension as `[name]` if `[name].xxx.yyy` is provided.
-          // So we hard code as zenuml. We may consider rename `core.ts` to `zenuml.ts`.
-          // If this field is not provided, result with be ${build.lib.filename}.esm.js.
-          // Mermaid's build.ts output hardcoded esm file as '.mjs', thus we need this config.
           entryFileNames: `zenuml.esm.mjs`,
+          manualChunks,
         },
         {
-          name: "zenuml", //  it is the global variable name representing your bundle. https://rollupjs.org/guide/en/#outputname
+          name: "zenuml",
           format: "umd",
           entryFileNames: `zenuml.js`,
         },

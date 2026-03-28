@@ -11,6 +11,7 @@ Canonical downstream targets for propagating a published `@zenuml/core` release.
 | `ZenUml/web-sequence` | `~/workspaces/zenuml/web-sequence` | yarn | `yarn upgrade @zenuml/core` | `yarn build` | HTML-renderer consumer. Do not migrate to SVG-renderer APIs during routine propagation. |
 | `ZenUml/confluence-plugin-cloud` | `~/workspaces/zenuml/confluence-plugin-cloud` | pnpm | `pnpm update @zenuml/core` | `pnpm build:full` | HTML-renderer consumer. Do not migrate to SVG-renderer APIs during routine propagation. |
 | `ZenUml/diagramly.ai` | `~/workspaces/diagramly/diagramly.ai` | pnpm | `pnpm update @zenuml/core --filter <pkg>` | `pnpm build` | HTML-renderer consumer. Do not migrate to SVG-renderer APIs during routine propagation. |
+| `ZenUml/codemirror-extensions` | `~/workspaces/zenuml/codemirror-extensions` | pnpm | `pnpm update @zenuml/core` | `pnpm build` | CodeMirror language extensions for ZenUML DSL. HTML-renderer consumer. |
 | `ZenUml/jetbrains-zenuml` | `~/workspaces/zenuml/jetbrains-zenuml` | — | See notes | — | **Not an npm consumer.** Vendors a built JS bundle. Update by copying the new `dist/` output from core's build. Skip if unsure and report. |
 
 ## Lockfile Handling
