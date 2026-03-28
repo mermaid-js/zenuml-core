@@ -97,6 +97,17 @@ Uses Bun as the package manager and JavaScript runtime. Bun is a fast all-in-one
 - Tests use `vi` mocking utilities from Vitest
 - Test files use `.spec.ts` extension and are co-located with source files
 
+## Bug Fix Process
+
+When starting work on a bug (especially from a GitHub issue):
+
+1. **Reproduce first** — write a minimal test case (unit test or Playwright E2E) that demonstrates the bug. The test must fail before any code changes.
+2. **Capture a baseline** — if the bug is visual, take a Playwright snapshot or screenshot of the broken state before fixing. This serves as evidence of what changed.
+3. **Fix the code** — make the minimal change to fix the bug.
+4. **Verify the fix** — the failing test from step 1 must now pass. All other existing tests must still pass.
+
+Never skip the reproduction step. If you can't reproduce it, you don't understand the bug well enough to fix it.
+
 ## Development Notes
 
 - The project builds both a library and a demo site

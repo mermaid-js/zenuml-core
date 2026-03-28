@@ -11,6 +11,9 @@ test.describe("HTML Rendering", () => {
         timeout: 5000,
       });
 
+      // Wait for async icon imports to complete (stereotypes like @VPC, @RDS)
+      await page.waitForLoadState("networkidle");
+
       await expect(page).toHaveScreenshot(`${name}.png`, {
         threshold: threshold ?? DEFAULT_THRESHOLD,
         fullPage: true,
