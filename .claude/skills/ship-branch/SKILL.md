@@ -56,7 +56,18 @@ On success, the PR is green and ready to merge.
 
 ### Step 4: Land and verify release
 
-Invoke `/land-pr` with the PR number. If merge is blocked (pending reviews, failed checks), stop and report.
+Merging to main triggers an npm publish — this is irreversible. To prevent the orchestrator from skipping the land-pr skill's merge strategy logic (which has happened before), **spawn an Agent** for this step:
+
+```
+Spawn an Agent with this prompt:
+"Use the Skill tool to invoke the land-pr skill, then follow it to land PR #<PR_NUMBER>
+on mermaid-js/zenuml-core. Follow every step including the merge strategy evaluation.
+Report back the merge SHA and npm version, or the reason it was blocked."
+```
+
+Replace `<PR_NUMBER>` with the actual PR number from Step 2.
+
+Do NOT run `gh pr merge` directly from the main conversation — the land-pr skill contains merge strategy decision logic that must be evaluated by the Agent.
 
 If merge succeeds but npm publish fails, alert immediately with the failure details. Do NOT auto-rollback.
 
@@ -78,7 +89,7 @@ Final report:
 - Validation: PASS
 - PR: #<number> (<url>)
 - CI: GREEN (attempt <N>)
-- Merge: SQUASHED into main (<sha>)
+- Merge: <SQUASHED|MERGED> into main (<sha>)
 - npm: @zenuml/core@<version> published
 ```
 
