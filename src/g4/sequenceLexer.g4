@@ -57,6 +57,10 @@ SCLOSE
  : '>>'
  ;
 
+RETURN_ARROW
+ : '-->'
+ ;
+
 ARROW
  : '->'
  ;

@@ -75,6 +75,12 @@ block
 ret
  : RETURN expr? SCOL?
  | ANNOTATION_RET asyncMessage EVENT_END?
+ | returnAsyncMessage EVENT_END?
+ ;
+
+returnAsyncMessage
+ : from RETURN_ARROW to COL content?
+ | from RETURN_ARROW to?
  ;
 
 // Design considerations:

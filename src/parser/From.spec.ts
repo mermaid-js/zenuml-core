@@ -27,6 +27,24 @@ describe("From", () => {
   });
 });
 
+describe("Return arrow shortcut (-->)", () => {
+  it("should parse A-->B:msg as a return message", () => {
+    const ret = Fixture.firstStatement("A-->B:msg").ret();
+    expect(ret).toBeTruthy();
+    expect(ret.returnAsyncMessage()).toBeTruthy();
+    expect(ret.From()).toBe("A");
+    expect(ret.ReturnTo()).toBe("B");
+    expect(ret.Signature()).toBe("msg");
+  });
+
+  it("should work inside a message block", () => {
+    const ret = Fixture.firstChild("A->B.method {\n  B-->A: response\n}").ret();
+    expect(ret).toBeTruthy();
+    expect(ret.ReturnTo()).toBe("A");
+    expect(ret.Signature()).toBe(" response");
+  });
+});
+
 describe("ProvidedFrom for MessageContext Only", () => {
   it("should parse ProvidedFrom for a Message", () => {
     expect(Fixture.firstStatement("A.method").message().ProvidedFrom()).toBe(

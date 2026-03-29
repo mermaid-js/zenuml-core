@@ -97,9 +97,14 @@ CreationContext.prototype.isParamValid = function (
 RetContext.prototype.SignatureText = function (this: RetContext): string {
   return (
     this.asyncMessage()?.content()?.getFormattedText() ??
+    this.returnAsyncMessage()?.content()?.getFormattedText() ??
     this.expr()?.getFormattedText() ??
     ""
   );
+};
+
+sequenceParser.ReturnAsyncMessageContext.prototype.SignatureText = function (): string {
+  return this.content()?.getFormattedText() ?? "";
 };
 
 // Enhance ParametersContext to properly format named parameters

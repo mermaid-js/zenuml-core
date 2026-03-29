@@ -13,9 +13,11 @@ export class MessageCollector extends sequenceParserListener {
     this._addOwnedMessage(OwnableMessageType.AsyncMessage)(ctx);
   enterCreation = (ctx: any) =>
     this._addOwnedMessage(OwnableMessageType.CreationMessage)(ctx);
+  enterReturnAsyncMessage = (ctx: any) =>
+    this._addOwnedMessage(OwnableMessageType.ReturnMessage)(ctx);
   enterRet = (ctx: any) => {
-    if (ctx.asyncMessage()) {
-      // it will visit the asyncMessage later
+    if (ctx.asyncMessage() || ctx.returnAsyncMessage()) {
+      // it will visit the asyncMessage/returnAsyncMessage later
       return;
     }
     this._addOwnedMessage(OwnableMessageType.ReturnMessage)(ctx);
