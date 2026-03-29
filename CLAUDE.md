@@ -108,6 +108,13 @@ When starting work on a bug (especially from a GitHub issue):
 
 Never skip the reproduction step. If you can't reproduce it, you don't understand the bug well enough to fix it.
 
+## No Speculative Codebase Claims
+
+**NEVER** claim what the codebase does, uses, or contains without first verifying by reading or grepping the code. Phrases like "if we're currently using X", "since we already have Y", or "the codebase uses Z pattern" are forbidden unless you have Read/Grep/Glob evidence from this conversation.
+
+- Before making a claim about codebase state, verify it — use a subagent (Explore) if needed.
+- General programming knowledge is fine. Claims about *this* codebase require evidence.
+
 ## Development Notes
 
 - The project builds both a library and a demo site
