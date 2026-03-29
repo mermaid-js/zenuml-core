@@ -9,13 +9,16 @@ const CreationContext = seqParser.CreationContext;
 RetContext.prototype.Signature = function () {
   return (
     this.asyncMessage()?.content()?.getFormattedText() ||
+    this.returnAsyncMessage()?.content()?.getFormattedText() ||
     this.expr()?.getFormattedText()
   );
 };
 
 RetContext.prototype.ReturnTo = function () {
   // Check asyncMessage 'to' first
-  const asyncTo = this.asyncMessage()?.to()?.getFormattedText();
+  const asyncTo =
+    this.asyncMessage()?.to()?.getFormattedText() ||
+    this.returnAsyncMessage()?.to()?.getFormattedText();
   if (asyncTo) {
     return asyncTo;
   }

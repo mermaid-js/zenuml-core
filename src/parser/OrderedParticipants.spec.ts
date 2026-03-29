@@ -66,6 +66,13 @@ describe("Participants.Order", () => {
       { name: "B", left: "A" },
     ]);
   });
+
+  it("return arrow shortcut A-->B:m", () => {
+    expect(getTestParticipants("A-->B:m")).toEqual([
+      { name: "A", left: "" },
+      { name: "B", left: "A" },
+    ]);
+  });
   it("should return the order of participants", () => {
     expect(getTestParticipants("A as A1 B C.m")).toEqual([
       { name: _STARTER_, left: "" },

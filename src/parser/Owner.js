@@ -11,6 +11,7 @@ const seqParser = sequenceParser;
 const CreationContext = seqParser.CreationContext;
 const MessageContext = seqParser.MessageContext;
 const AsyncMessageContext = seqParser.AsyncMessageContext;
+const ReturnAsyncMessageContext = seqParser.ReturnAsyncMessageContext;
 const RetMessageContext = seqParser.RetContext;
 
 CreationContext.prototype.Assignee = function () {
@@ -65,6 +66,14 @@ AsyncMessageContext.prototype.To = function () {
 };
 
 AsyncMessageContext.prototype.Owner = function () {
+  return this.To() || getOwnerFromAncestor(this.parentCtx);
+};
+
+ReturnAsyncMessageContext.prototype.To = function () {
+  return this.to()?.getFormattedText();
+};
+
+ReturnAsyncMessageContext.prototype.Owner = function () {
   return this.To() || getOwnerFromAncestor(this.parentCtx);
 };
 

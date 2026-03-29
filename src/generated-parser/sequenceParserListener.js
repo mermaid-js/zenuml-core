@@ -131,6 +131,15 @@ export default class sequenceParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by sequenceParser#returnAsyncMessage.
+	enterReturnAsyncMessage(ctx) {
+	}
+
+	// Exit a parse tree produced by sequenceParser#returnAsyncMessage.
+	exitReturnAsyncMessage(ctx) {
+	}
+
+
 	// Enter a parse tree produced by sequenceParser#divider.
 	enterDivider(ctx) {
 	}

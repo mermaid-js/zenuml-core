@@ -5,6 +5,7 @@ const CreationContext = seqParser.CreationContext;
 const StatContext = seqParser.StatContext;
 const MessageContext = seqParser.MessageContext;
 const AsyncMessageContext = seqParser.AsyncMessageContext;
+const ReturnAsyncMessageContext = seqParser.ReturnAsyncMessageContext;
 const RetContext = seqParser.RetContext;
 
 // @ts-expect-error -- ANTLR generated code
@@ -41,8 +42,20 @@ AsyncMessageContext.prototype.From = function () {
 };
 
 // @ts-expect-error -- ANTLR generated code
+ReturnAsyncMessageContext.prototype.ProvidedFrom = function () {
+  // @ts-expect-error -- ANTLR generated code
+  return this.from()?.getFormattedText();
+};
+
+// @ts-expect-error -- ANTLR generated code
+ReturnAsyncMessageContext.prototype.From = function () {
+  // @ts-expect-error -- ANTLR generated code
+  return this.ProvidedFrom() || this.ClosestAncestorStat().Origin();
+};
+
+// @ts-expect-error -- ANTLR generated code
 RetContext.prototype.From = function () {
   // @ts-expect-error -- ANTLR generated code
-  return this.asyncMessage()?.From() || this.ClosestAncestorStat().Origin();
+  return this.asyncMessage()?.From() || this.returnAsyncMessage()?.From() || this.ClosestAncestorStat().Origin();
 };
 export {};

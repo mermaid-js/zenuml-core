@@ -24,7 +24,7 @@ export const Return = (props: {
 
   const ret = props.context?.ret();
 
-  const asyncMessage = ret?.asyncMessage();
+  const asyncMessage = ret?.asyncMessage() || ret?.returnAsyncMessage();
 
   const signature = ret?.Signature();
   const source = ret?.From() || _STARTER_;
