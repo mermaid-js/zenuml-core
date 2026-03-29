@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--extension"],
+      "env": {
+        "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "<your-token-here>"
+      }
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp"],
+      "env": {}
+    }
+  }
+}

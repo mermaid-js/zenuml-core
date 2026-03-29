@@ -36,6 +36,9 @@ src/generated-parser/sequenceLexer.interp
 .env.local
 .env.*.local
 
+# MCP config (contains tokens)
+.mcp.json
+
 # Log files
 npm-debug.log*
 
