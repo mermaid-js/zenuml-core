@@ -215,12 +215,21 @@ Key: "type:database"     // built-in type
 Key: "emoji:rocket"      // emoji
 ```
 
+### Edge Cases
+
+**One emoji per bracket pair.** Comma inside brackets is already established as multi-style separator (`[red, bold]`). For multiple emoji, use multiple brackets: `[rocket][fire] Production`.
+
+**Unknown shortcodes.** If `[word]` matches neither a CSS style nor a known emoji shortcode, it becomes a CSS class only with no visual effect. The brackets are consumed (not rendered as literal text).
+
+**Future: emoji recoloring.** PlantUML supports `<#red:sun:>` to recolor emoji. Their implementation selectively recolors monochrome SVG paths while preserving multi-colored parts. This is complex, unpredictable for multi-colored emoji, and narrow in use case. Deferred — the comma syntax (`[rocket, red]`) is reserved for this if we add it later.
+
 ### What's NOT in scope
 
+- Emoji recoloring (`[rocket, red]` — reserved syntax but not implemented)
 - Emoji autocomplete in editor
 - Custom user-defined emoji
-- Twemoji color customization
 - Animated emoji
+- Multiple emoji per bracket pair (`[rocket, fire]`)
 - Namespace registration UI (future)
 
 ## Testing Strategy
