@@ -19,26 +19,29 @@ import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
 import { formatText } from "@/utils/StringUtil";
 
-const errors = [];
-const errorDetails = [];
 class SeqErrorListener extends antlr4.error.ErrorListener {
+  constructor() {
+    super();
+    this.errors = [];
+  }
   syntaxError(recognizer, offendingSymbol, line, column, msg) {
-    errors.push(`${offendingSymbol} line ${line}, col ${column}: ${msg}`);
-    errorDetails.push({
-      line,
-      column,
-      msg,
-    });
+    this.errors.push({ line, column, msg });
   }
 }
 
-function rootContext(code) {
+function parse(code) {
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
   const tokens = new antlr4.CommonTokenStream(lexer);
   const parser = new sequenceParser(tokens);
-  parser.addErrorListener(new SeqErrorListener());
-  return parser._syntaxErrors ? null : parser.prog();
+  const errorListener = new SeqErrorListener();
+  parser.addErrorListener(errorListener);
+  const tree = parser.prog();
+  return { tree, errors: errorListener.errors };
+}
+
+function rootContext(code) {
+  return parse(code).tree;
 }
 
 antlr4.ParserRuleContext.prototype.getFormattedText = function () {
@@ -72,6 +75,7 @@ antlr4.ParserRuleContext.prototype.returnedValue = function () {
 
 export const ProgContext = sequenceParser.ProgContext;
 export const RootContext = rootContext;
+export const Parse = parse;
 export const GroupContext = sequenceParser.GroupContext;
 export const ParticipantContext = sequenceParser.ParticipantContext;
 export const Depth = function (ctx) {
@@ -92,8 +96,7 @@ export default {
     const toCollector = ToCollector;
     return toCollector.getParticipants(ctx);
   },
-  Errors: errors,
-  ErrorDetails: errorDetails,
+  Parse: parse,
   /**
    * @return {number} how many levels of embedded fragments
    */

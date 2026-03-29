@@ -212,33 +212,15 @@ export default class ZenUml implements IZenUml {
   parse(codeOrText: string): Promise<ParseResult> {
     return new Promise((resolve) => {
       try {
-        // Clear any previous errors
-        Parser.ErrorDetails.length = 0;
-        const result = Parser.RootContext(codeOrText);
-        logger.debug("errors", Parser.ErrorDetails);
-        const errors = [...Parser.ErrorDetails];
-        // Clear errors after reading
-        Parser.ErrorDetails.length = 0;
-        if (errors.length > 0 || result === null) {
-          // Return ParseResult indicating failure with structured error info
-          const parseResult: ParseResult = {
-            pass: false,
-            errorDetails: errors,
-          };
-          resolve(parseResult);
+        const { tree, errors } = Parser.Parse(codeOrText);
+        logger.debug("errors", errors);
+        if (errors.length > 0 || tree === null) {
+          resolve({ pass: false, errorDetails: errors });
           return;
         }
-        const parseResult: ParseResult = {
-          pass: true,
-          errorDetails: [],
-        };
-        resolve(parseResult);
+        resolve({ pass: true, errorDetails: [] });
       } catch {
-        const parseResult: ParseResult = {
-          pass: false,
-          errorDetails: [],
-        };
-        resolve(parseResult);
+        resolve({ pass: false, errorDetails: [] });
       }
     });
   }

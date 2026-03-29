@@ -7,6 +7,24 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain("<svg");
   });
 
+  it("does not crash on invalid input and reports errors", () => {
+    const result = renderToSvg("title Demo\nJohn%->Alice: Great ds! fd\nAlice->John: See you later!");
+    expect(result.svg).toContain("<svg");
+    expect(result.width).toBeGreaterThanOrEqual(0);
+    expect(result.height).toBeGreaterThanOrEqual(0);
+    // Parse errors are surfaced on the result
+    expect(result.errors).toBeDefined();
+    expect(result.errors!.length).toBeGreaterThan(0);
+    expect(result.errors![0]).toHaveProperty("line");
+    expect(result.errors![0]).toHaveProperty("column");
+    expect(result.errors![0]).toHaveProperty("msg");
+  });
+
+  it("has no errors for valid input", () => {
+    const result = renderToSvg("A -> B: hello");
+    expect(result.errors).toBeUndefined();
+  });
+
   it("renders participants for a simple message", () => {
     const result = renderToSvg("A -> B: hello");
     expect(result.svg).toContain('data-participant="A"');

@@ -3,7 +3,7 @@
  *
  * Pipeline: parse → layout → geometry IR → SVG primitives → compose
  */
-import { RootContext } from "@/parser";
+import { Parse } from "@/parser";
 import { Coordinates } from "@/positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { WidthProviderOnCanvas } from "@/positioning/WidthProviderFunc";
@@ -24,6 +24,12 @@ export interface RenderOptions {
   theme?: "theme-default" | "theme-mermaid";
 }
 
+export interface ParseError {
+  line: number;
+  column: number;
+  msg: string;
+}
+
 export interface RenderResult {
   svg: string;
   /** Inner SVG content (defs + g) for embedding into an existing SVG container */
@@ -33,6 +39,8 @@ export interface RenderResult {
   viewBox: string;
   /** The geometry IR used to produce this SVG (undefined for empty input) */
   geometry?: DiagramGeometry;
+  /** Syntax errors from parsing. Present even when a partial diagram was rendered. */
+  errors?: ParseError[];
 }
 
 const FRAME_HEADER_HEIGHT = 28;
@@ -70,35 +78,47 @@ const DEFAULT_THEME_STYLES = `
   .seq-number { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 100; fill: #6b7280; }
 `;
 
+function emptyResult(errors?: ParseError[]): RenderResult {
+  return { svg: "<svg></svg>", innerSvg: "", width: 0, height: 0, viewBox: "0 0 0 0", geometry: undefined, errors };
+}
+
 export function renderToSvg(code: string, options?: RenderOptions): RenderResult {
-  // 1. Parse
-  const rootContext = RootContext(code);
+  // 1. Parse (best-effort — returns partial tree even with syntax errors)
+  const { tree: rootContext, errors } = Parse(code);
+  const parseErrors = errors.length > 0 ? errors : undefined;
+
   if (!rootContext) {
-    return { svg: "<svg></svg>", innerSvg: "", width: 0, height: 0, viewBox: "0 0 0 0", geometry: undefined };
+    return emptyResult(parseErrors);
   }
 
-  // 2. Layout (uses canvas provider — no DOM)
-  const coordinates = new Coordinates(rootContext, WidthProviderOnCanvas);
-  const verticalCoordinates = new VerticalCoordinates(rootContext);
+  try {
+    // 2. Layout (uses canvas provider — no DOM)
+    const coordinates = new Coordinates(rootContext, WidthProviderOnCanvas);
+    const verticalCoordinates = new VerticalCoordinates(rootContext);
 
-  // 3. Extract title
-  const titleContext = rootContext.title?.();
-  const title =
-    titleContext && typeof titleContext.content === "function"
-      ? titleContext.content()
-      : undefined;
+    // 3. Extract title
+    const titleContext = rootContext.title?.();
+    const title =
+      titleContext && typeof titleContext.content === "function"
+        ? titleContext.content()
+        : undefined;
 
-  // 4. Build geometry IR
-  const geometry = buildGeometry({
-    rootContext,
-    coordinates,
-    verticalCoordinates,
-    title,
-    measureText: WidthProviderOnCanvas,
-  });
+    // 4. Build geometry IR
+    const geometry = buildGeometry({
+      rootContext,
+      coordinates,
+      verticalCoordinates,
+      title,
+      measureText: WidthProviderOnCanvas,
+    });
 
-  // 5. Render to SVG
-  return { ...composeSvg(geometry, options), geometry };
+    // 5. Render to SVG (best-effort result + any parse errors)
+    return { ...composeSvg(geometry, options), geometry, errors: parseErrors };
+  } catch {
+    // Parse trees from invalid input can cause layout/geometry crashes.
+    // Return empty fallback with the parse errors that likely caused the crash.
+    return emptyResult(parseErrors);
+  }
 }
 
 function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
