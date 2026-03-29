@@ -3,8 +3,10 @@ import {
   MouseEvent,
   useState,
   useRef,
+  useMemo,
 } from "react";
 import "./EditableSpan.css";
+import { convertEmojiShortcodes } from "@/utils/emoji";
 
 export interface EditableSpanProps {
   text: string;
@@ -26,6 +28,7 @@ export const EditableSpan = ({
   const originalTextRef = useRef("");
   const spanRef = useRef<HTMLSpanElement>(null);
   const cancelRef = useRef(false);
+  const displayText = useMemo(() => convertEmojiShortcodes(text), [text]);
 
   const startEditing = (e: MouseEvent | KeyboardEvent) => {
     if (!isEditable) return;
@@ -171,7 +174,7 @@ export const EditableSpan = ({
       onKeyUp={handleKeyup}
       onKeyDown={handleKeydown}
     >
-      {text}
+      {displayText}
     </span>
   );
 };

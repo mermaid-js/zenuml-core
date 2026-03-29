@@ -125,11 +125,12 @@ DOT
  : '.'
  ;
 
-// Support Unicode letters in identifiers
+// Support Unicode letters and emoji in identifiers
 // \p{L} matches any Unicode letter (including Chinese, Japanese, Korean, etc.)
 // \p{Nd} matches any Unicode decimal digit
+// \p{So} matches Symbol, Other (covers most emoji like 🦄, 🔥, ✅, etc.)
 ID
- : [\p{L}_] [\p{L}\p{Nd}_]*
+ : [\p{L}\p{So}_] [\p{L}\p{Nd}\p{So}_]*
  ;
 
 fragment UNIT

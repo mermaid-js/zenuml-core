@@ -4,6 +4,7 @@ import { getStyle } from "@/utils/messageStyling";
 import { useAtomValue } from "jotai";
 import { useCallback, useMemo } from "react";
 import { centerOf } from "../utils";
+import { convertEmojiShortcodes } from "@/utils/emoji";
 
 export const Divider = (props: {
   context: any;
@@ -81,7 +82,7 @@ export const Divider = (props: {
         }}
         className={cn("name", messageStyle.style.classNames)}
       >
-        {cleanNote}
+        {convertEmojiShortcodes(cleanNote)}
       </div>
       <div className="right" style={{ flex: 1, height: 1, backgroundColor: "#aaaa33" }}></div>
     </div>
