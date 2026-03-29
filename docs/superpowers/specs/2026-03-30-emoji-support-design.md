@@ -221,15 +221,21 @@ Key: "emoji:rocket"      // emoji
 
 **Unknown shortcodes.** If `[word]` matches neither a CSS style nor a known emoji shortcode, it becomes a CSS class only with no visual effect. The brackets are consumed (not rendered as literal text).
 
-**Future: emoji recoloring.** PlantUML supports `<#red:sun:>` to recolor emoji. Their implementation selectively recolors monochrome SVG paths while preserving multi-colored parts. This is complex, unpredictable for multi-colored emoji, and narrow in use case. Deferred — the comma syntax (`[rocket, red]`) is reserved for this if we add it later.
+**Comma-separated values.** Each value in `[a, b]` is resolved independently. If a value matches CSS, it applies as style. If it matches emoji, it renders as emoji. Both can coexist:
+
+| Input | Result |
+|-------|--------|
+| `[red, bold]` | CSS color + weight, no emoji |
+| `[rocket, red]` | 🚀 emoji + red text color + class="rocket red" |
+| `[rocket, fire]` | 🚀 emoji + 🔥 emoji + class="rocket fire" |
+| `[rocket, bold, red]` | 🚀 emoji + bold red text + class="rocket bold red" |
 
 ### What's NOT in scope
 
-- Emoji recoloring (`[rocket, red]` — reserved syntax but not implemented)
+- Emoji recoloring (changing the color of the emoji SVG itself)
 - Emoji autocomplete in editor
 - Custom user-defined emoji
 - Animated emoji
-- Multiple emoji per bracket pair (`[rocket, fire]`)
 - Namespace registration UI (future)
 
 ## Testing Strategy
