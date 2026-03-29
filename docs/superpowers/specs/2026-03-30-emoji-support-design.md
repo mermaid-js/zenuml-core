@@ -230,6 +230,16 @@ Key: "emoji:rocket"      // emoji
 | `[rocket, fire]` | 🚀 emoji + 🔥 emoji + class="rocket fire" |
 | `[rocket, bold, red]` | 🚀 emoji + bold red text + class="rocket bold red" |
 
+**Consistent resolution across all contexts.** The same resolution engine applies everywhere — participants, messages, conditions, comments, and dividers. CSS styles apply to the accompanying text in each context:
+
+| Context | `[rocket, red] text` | Rendered |
+|---------|---------------------|----------|
+| Participant | `[rocket, red] Service` | 🚀 + "Service" in red |
+| Message | `A->B: [rocket, red] alert` | 🚀 + "alert" in red |
+| Condition | `alt [rocket, red] success` | 🚀 + "success" in red |
+| Comment | `// [rocket, red] note` | 🚀 + "note" in red |
+| Divider | `== [rocket, red] Phase ==` | 🚀 + "Phase" in red |
+
 ### What's NOT in scope
 
 - Emoji recoloring (changing the color of the emoji SVG itself)
