@@ -71,6 +71,9 @@ const DEFAULT_THEME_STYLES = `
   .divider-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; }
   .comment-text { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; opacity: 0.5; }
   .seq-number { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 100; fill: #6b7280; }
+  .group-outline { fill: none; stroke: #666; stroke-width: 1.5; }
+  .group-title-bg { fill: #ffffff; stroke: none; }
+  .group-title-text { font-family: Helvetica, Verdana, serif; font-size: 16px; font-weight: 600; fill: #222; }
 `;
 
 export function renderToSvg(code: string, options?: RenderOptions): RenderResult {

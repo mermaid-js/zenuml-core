@@ -159,10 +159,13 @@ export function buildGroups(
     // The HTML group container starts at the top of the content region and uses an
     // absolutely-positioned title strip, so the outer outline should stop at the
     // content bottom rather than adding a separate header band to its height.
-    const y = minY - 20 + 0.75;
+    const y = minY - 20 + 1.5;
     // HTML group extends to the full diagram height plus bottom padding.
     // Add 12px to match HTML's h-full container which includes extra bottom space.
-    const height = Math.max(0, diagramHeight - y + 12);
+    // Offset matches renderToSvg.ts: viewBox height = diagramHeight + 47, content translate-y = 34.
+    // Group bottom outer stroke edge = 34 + y + height + 0.75. For it to be clipped by viewBox:
+    // height > (diagramHeight + 47) - 34 - y - 0.75 = diagramHeight - y + 12.25. Use +14 to be safe.
+    const height = Math.max(0, diagramHeight - y + 14);
 
     // Use groupId as the display name (the parser sets groupId = group name from DSL)
     groups.push({
