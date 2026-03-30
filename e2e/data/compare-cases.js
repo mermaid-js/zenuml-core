@@ -927,4 +927,11 @@ Admin->HotDB.query()`,
   "emoji-long-names": `[rocket]ProductionServer->[lock]AuthService.validate()
 AuthService->[database]UserDB.find()
 UserDB-->AuthService: [check] found`,
+  "emoji-simple-async": `[rocket]A->[lock]B: hello
+B-->A: [check] done`,
+  "emoji-self-call": `[gear]Processor.init() {
+  Processor.validate()
+}`,
+  "emoji-title": `title [rocket] Deploy Pipeline
+[lock]A->[database]B.save()`,
 };
