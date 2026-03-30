@@ -843,6 +843,39 @@ OrderService.handle() {
 B -> C: forward
 ==Done==`,
 
+  // --- Emoji ---
+  "emoji-participant": `[rocket] Production
+Production.deploy()`,
+  "emoji-multi-participants": `[rocket] Production
+[lock] Auth
+[fire] Cache
+Production->Auth: validate
+Auth->Cache: lookup`,
+  "emoji-with-type": `@Database [fire] HotDB
+@Actor [eyes] Reviewer
+Reviewer->HotDB: query`,
+  "emoji-with-stereotype": `<<service>> [lock] Auth
+<<gateway>> [rocket] API
+API->Auth: authenticate`,
+  "emoji-no-emoji-baseline": `Production
+Auth
+Cache
+Production->Auth: validate
+Auth->Cache: lookup`,
+  "emoji-async-message": `A
+B
+A->B: [rocket] launching`,
+  "emoji-alt-condition": `A
+B
+A->B: [check] start
+if(success) {
+  A->B: [rocket] proceed
+}`,
+  "emoji-comment": `A
+B
+// [eyes] review this
+A->B: process`,
+
   // --- Icons ---
   "icons": `@Actor User
 @Database DB
@@ -854,4 +887,44 @@ User.login() {
   MQ.enqueue()
   Topic.publish()
 }`,
+
+  // --- Emoji parity cases ---
+  "emoji-sync-call": `[rocket]A.method() {
+  [database]B.query()
+}`,
+  "emoji-nested-calls": `[globe]API.handle() {
+  [lock]Auth.validate() {
+    [database]DB.lookup()
+  }
+}`,
+  "emoji-async-return": `[globe]API->[lock]Auth: validate
+Auth->[database]DB: lookup
+DB-->Auth: [check] found
+Auth-->API: [check] authorized`,
+  "emoji-with-fragment": `[rocket]Client->[lock]Server.request()
+if(authorized) {
+  Server->[database]DB.query()
+  DB-->Server: [check] result
+} else {
+  Server-->Client: [x] denied
+}`,
+  "emoji-divider-case": `[rocket]A->[lock]B.start()
+== [fire] Deploy Phase ==
+B->[database]C.migrate()`,
+  "emoji-group-case": `group Backend {[database]DB [cache]Redis}
+[globe]Gateway->DB.query()
+Gateway->Redis.get()`,
+  "emoji-comment-styled": `// [eyes] monitoring
+[rocket]A->[lock]B.deploy()
+// [rocket, red] critical path
+B->[database]C.write()`,
+  "emoji-colon-override": `[:red:] Alert
+[rocket] Normal
+Alert->Normal.notify()`,
+  "emoji-icon-combo": `@Actor [star] Admin
+@Database [fire] HotDB
+Admin->HotDB.query()`,
+  "emoji-long-names": `[rocket]ProductionServer->[lock]AuthService.validate()
+AuthService->[database]UserDB.find()
+UserDB-->AuthService: [check] found`,
 };
