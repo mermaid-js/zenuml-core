@@ -1018,4 +1018,42 @@ if(authorized) {
   A->[database]B.check()
   B-->A: [check] status
 }`,
+  "emoji-opt-critical": `[rocket]A->[lock]B.request()
+opt {
+  B.[gear]process()
+}
+critical([warning] important) {
+  B->[database]C.save()
+}`,
+  "emoji-nested-mixed": `[globe]Client->[lock]Server.handle() {
+  if([check] cached) {
+    Server->[cache]Redis.[rocket]get()
+  } else {
+    Server->[database]DB.[fire]query() {
+      try {
+        DB.[gear]process()
+      } catch([x] timeout) {
+        DB-->Server: [warning] retry
+      }
+    }
+  }
+}`,
+  "emoji-all-features": `title [rocket] System Overview
+@Actor [star] Admin
+@Database [fire] DB
+<<service>> [lock] Auth
+[globe] API
+
+// [eyes] authentication flow
+Admin->API.[key]login(credentials)
+API->Auth.[lock]validate(token) {
+  if([check] valid) {
+    Auth->DB.[fire]query(userId)
+    DB-->Auth: [check] found
+  } else {
+    Auth-->API: [x] denied
+  }
+}
+== [rocket] deploy phase ==
+API->[gear]Worker: [rocket] process`,
 };
