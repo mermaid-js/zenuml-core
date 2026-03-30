@@ -425,8 +425,8 @@ describe("renderToSvg", () => {
     const code = "[rocket] Production\nProduction.deploy()";
     const result = renderToSvg(code);
     expect(result.svg).toContain('data-participant="Production"');
-    // Emoji rendered as tspan with emoji font fallback + space before participant name
-    expect(result.svg).toContain(">🚀</tspan> Production</text>");
+    // Emoji rendered as tspan with emoji font fallback, dy adjustment, and reset tspan before participant name
+    expect(result.svg).toContain('>🚀</tspan><tspan dy="-0.1em"> </tspan>Production</text>');
   });
 
   it("renders participant without emoji when none specified", () => {
