@@ -2,8 +2,12 @@ import type { EmojiCache } from "./types";
 import type { IconDefinition } from "@/svg/icons";
 import { setKnownEmojis } from "./resolveEmoji";
 
-const DEFAULT_SERVICE_URL = "https://icons.zenuml.com";
-let serviceUrl = DEFAULT_SERVICE_URL;
+const PRODUCTION_URL = "https://icons.zenuml.com";
+const LOCAL_DEV_URL = "http://localhost:8787";
+
+// Auto-detect local dev: if running on localhost dev server, use local registry
+const isLocalDev = typeof window !== "undefined" && window.location?.hostname === "localhost";
+let serviceUrl = isLocalDev ? LOCAL_DEV_URL : PRODUCTION_URL;
 
 export function setEmojiServiceUrl(url: string) {
   serviceUrl = url;
