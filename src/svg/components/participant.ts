@@ -84,15 +84,16 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
   const { fillStyle, textStyle } = colorAttrs(p.color);
 
-  const displayLabel = p.emoji
-    ? `${getEmojiUnicode(p.emoji)} ${p.label}`
-    : p.label;
+  const EMOJI_FONT = `font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Twemoji Mozilla',sans-serif"`;
+  const emojiTspan = p.emoji
+    ? `<tspan ${EMOJI_FONT}>${esc(getEmojiUnicode(p.emoji))}</tspan> `
+    : "";
 
   return `<g class="participant" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
   ${iconSvg}
   ${stereotypeSvg}
-  <text x="${textX}" y="${labelY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(displayLabel)}</text>
+  <text x="${textX}" y="${labelY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${emojiTspan}${esc(p.label)}</text>
 </g>`;
 }
 
@@ -113,13 +114,14 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
 
   const { fillStyle, textStyle } = colorAttrs(p.color);
 
-  const displayLabel = p.emoji
-    ? `${getEmojiUnicode(p.emoji)} ${p.label}`
-    : p.label;
+  const EMOJI_FONT = `font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Twemoji Mozilla',sans-serif"`;
+  const emojiTspan = p.emoji
+    ? `<tspan ${EMOJI_FONT}>${esc(getEmojiUnicode(p.emoji))}</tspan> `
+    : "";
 
   return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
-  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(displayLabel)}</text>
+  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${emojiTspan}${esc(p.label)}</text>
 </g>`;
 }
 
