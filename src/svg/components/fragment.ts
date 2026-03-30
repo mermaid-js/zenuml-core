@@ -100,7 +100,7 @@ export function renderFragment(f: FragmentGeometry): string {
             `<g opacity="0.65">` +
             `<rect x="${keywordX - TEXT_PAD_X}" y="${lineY + 1}" width="${bgWidth}" height="20" fill="#fff"/>` +
             `<text x="${keywordX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(keyword)}</text>` +
-            `<text x="${conditionX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(resolveEmojiInText(condition))}</text>` +
+            `<text x="${conditionX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(condition)}</text>` +
             `</g>`,
           );
         } else {

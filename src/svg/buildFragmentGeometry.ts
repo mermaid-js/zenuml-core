@@ -6,6 +6,7 @@
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import {
   FRAGMENT_MIN_WIDTH,
 } from "@/positioning/Constants";
@@ -54,7 +55,7 @@ export function buildFragmentGeometry(
       fragment: {
         kind: info.fragmentKind!,
         label: info.fragmentLabel || "",
-        labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(info.fragmentLabel) : undefined,
+        labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(resolveEmojiInText(info.fragmentLabel)) : undefined,
         x: 0,
         y: coord.top,
         width: coordinates.getWidth(),
@@ -150,10 +151,10 @@ export function buildFragmentGeometry(
         label: section.label,
         y: sectionY,
         height: sectionHeight,
-        labelWidth: section.label ? measureSvgFragmentLabelWidth(section.label) : undefined,
+        labelWidth: section.label ? measureSvgFragmentLabelWidth(resolveEmojiInText(section.label)) : undefined,
         innerLabel: /^\[\s*.*\s*\]$/.test(section.label) ? section.label.slice(1, -1).trim() : undefined,
         innerLabelWidth: /^\[\s*.*\s*\]$/.test(section.label)
-          ? measureSvgFragmentLabelWidth(section.label.slice(1, -1).trim())
+          ? measureSvgFragmentLabelWidth(resolveEmojiInText(section.label.slice(1, -1).trim()))
           : undefined,
         keyword: (() => {
           const spaceIdx = section.label.indexOf(" ");
@@ -238,7 +239,7 @@ export function buildFragmentGeometry(
     fragment: {
       kind: info.fragmentKind!,
       label: info.fragmentLabel || "",
-      labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(info.fragmentLabel) : undefined,
+      labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(resolveEmojiInText(info.fragmentLabel)) : undefined,
       x: fragX,
       y: coord.top,
       width: fragWidth,

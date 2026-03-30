@@ -14,7 +14,7 @@ export function renderReturn(r: ReturnGeometry): string {
   const ARROW_PADDING_HALF = 3.5;
   const labelX = minX + Math.abs(r.toX - r.fromX) / 2
     + (r.isReverse ? ARROW_PADDING_HALF : -ARROW_PADDING_HALF);
-  const labelY = r.y - 3;
+  const labelY = r.y - 3.5;
 
   // Match HTML renderer's ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
   const arrowTipX = r.toX;

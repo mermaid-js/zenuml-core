@@ -414,6 +414,21 @@ export async function collectLabelData(page) {
       }
 
       for (const fragmentEl of root.querySelectorAll("g.fragment")) {
+        // Detect direct text.fragment-section-label children (e.g. [else] rendered without a <g> wrapper)
+        for (const directLabel of fragmentEl.querySelectorAll(":scope > text.fragment-section-label")) {
+          const text = (directLabel.textContent ?? "").trim();
+          if (!text) continue;
+          const measured = measureTextEntry(directLabel, rootRect);
+          labels.push({
+            side: "svg",
+            kind: text.startsWith("[") ? "fragment-condition" : "fragment-section",
+            text,
+            ownerText: textOrEmpty(fragmentEl, ":scope > text.fragment-label") || null,
+            box: measured.box,
+            font: measured.font,
+            letters: measured.letters,
+          });
+        }
         for (const groupEl of fragmentEl.querySelectorAll(":scope > g")) {
           const conditionTextEls = Array.from(groupEl.querySelectorAll(":scope > text.fragment-condition"));
           if (conditionTextEls.length > 0) {

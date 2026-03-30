@@ -70,13 +70,48 @@ export function WidthProviderOnCanvas(
   return width;
 }
 
+const EMOJI_PATTERN = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
+
+/**
+ * Measure text width using SVG <text> element (accurate for emoji).
+ * Canvas measureText returns wider values for emoji than SVG actually renders.
+ */
+function measureWithSvg(text: string, fontSize: string): number | null {
+  if (typeof document === "undefined") return null;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("style", "position:absolute;left:-9999px;top:-9999px");
+  const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  textEl.setAttribute("font-family", FONT_FAMILY);
+  textEl.setAttribute("font-size", fontSize);
+  textEl.textContent = text;
+  svg.appendChild(textEl);
+  document.body.appendChild(svg);
+  const width = textEl.getBBox().width;
+  document.body.removeChild(svg);
+  return width;
+}
+
 export function measureTextWithFont(text: string, fontSize: string): number {
   const measured = text.trim();
   if (!measured) return 0;
-  const cacheKey = `measureTextWithFont_${fontSize}_${measured}`;
+
+  // Use SVG measurement for text containing emoji — canvas measureText
+  // returns wider values for emoji glyphs than SVG <text> actually renders.
+  const hasEmoji = EMOJI_PATTERN.test(measured);
+  const cacheKey = hasEmoji
+    ? `measureTextWithFont_svg_${fontSize}_${measured}`
+    : `measureTextWithFont_${fontSize}_${measured}`;
   const cacheValue = getCache(cacheKey);
   if (cacheValue != null) {
     return cacheValue;
+  }
+
+  if (hasEmoji) {
+    const svgWidth = measureWithSvg(measured, fontSize);
+    if (svgWidth != null) {
+      setCache(cacheKey, svgWidth, true);
+      return svgWidth;
+    }
   }
 
   const ctx = getCanvasContext();
