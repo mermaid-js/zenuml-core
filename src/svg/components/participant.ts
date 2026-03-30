@@ -86,7 +86,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
   const EMOJI_FONT = `font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Twemoji Mozilla',sans-serif"`;
   const emojiTspan = p.emoji
-    ? `<tspan ${EMOJI_FONT}>${esc(getEmojiUnicode(p.emoji))}</tspan>&#x2002;`
+    ? `<tspan ${EMOJI_FONT}>${esc(getEmojiUnicode(p.emoji))}</tspan>&#x2003;`
     : "";
 
   return `<g class="participant" data-participant="${esc(p.name)}">
@@ -116,7 +116,7 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
 
   const EMOJI_FONT = `font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Twemoji Mozilla',sans-serif"`;
   const emojiTspan = p.emoji
-    ? `<tspan ${EMOJI_FONT}>${esc(getEmojiUnicode(p.emoji))}</tspan>&#x2002;`
+    ? `<tspan ${EMOJI_FONT}>${esc(getEmojiUnicode(p.emoji))}</tspan>&#x2003;`
     : "";
 
   return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
