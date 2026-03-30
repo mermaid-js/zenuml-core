@@ -934,4 +934,58 @@ B-->A: [check] done`,
 }`,
   "emoji-title": `title [rocket] Deploy Pipeline
 [lock]A->[database]B.save()`,
+  // emoji variants of existing patterns
+  "emoji-nested-sync-deep": `[rocket]A.methodA() {
+  [lock]B.methodB() {
+    [database]C.methodC() {
+      [fire]D.process()
+    }
+  }
+}`,
+  "emoji-async-many": `[rocket]A [lock]B [database]C
+A->B: [check] msg1
+B->C: [fire] msg2
+C->B: [check] result
+B->A: [check] done`,
+  "emoji-if-else": `[rocket]Client->[lock]Server.request()
+if(valid) {
+  Server->[database]DB.query()
+} else {
+  Server-->Client: [x] denied
+}`,
+  "emoji-tcf": `[globe]A.process() {
+  try {
+    [database]B.save()
+  } catch(e) {
+    [warning]C.handle()
+  } finally {
+    [gear]D.cleanup()
+  }
+}`,
+  "emoji-loop": `[rocket]A->[lock]B.fetch()
+loop(retries < 3) {
+  B->[database]C.query()
+  C-->B: [check] ok
+}`,
+  "emoji-par": `[rocket]Orchestrator.run() {
+  par {
+    [database]DB.write()
+    [cache]Redis.flush()
+  }
+}`,
+  "emoji-return-chain": `[globe]API->[lock]Auth.check() {
+  Auth->[database]DB.query() {
+    DB-->Auth: [check] found
+  }
+  Auth-->API: [check] valid
+}`,
+  "emoji-creation-simple": `[rocket]A.init() {
+  new B()
+}`,
+  "emoji-color": `[rocket] Prod #FF6600
+[lock] Auth #0747A6
+Prod->Auth.validate()`,
+  "emoji-stereotype-only": `<<service>> [lock] Auth
+<<gateway>> [globe] API
+API->Auth.check()`,
 };
