@@ -25,6 +25,8 @@ export interface ParticipantGeometry {
   stereotype?: string;
   /** Background color (hex string, e.g. "#FFEBE6") */
   color?: string;
+  /** Emoji shortcode (e.g. "rocket") to render before participant name */
+  emoji?: string;
   /** Group ID this participant belongs to (if any) */
   groupId?: string | number;
 }

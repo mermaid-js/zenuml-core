@@ -22,6 +22,8 @@ import type { DiagramGeometry } from "./geometry";
 
 export interface RenderOptions {
   theme?: "theme-default" | "theme-mermaid";
+  /** Optional emoji shortcode-to-Unicode cache (for future use by Task 8) */
+  emojiCache?: Map<string, string>;
 }
 
 export interface RenderResult {

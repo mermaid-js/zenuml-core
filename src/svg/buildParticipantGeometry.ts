@@ -79,6 +79,7 @@ export function buildParticipants(
         type: m.type,
         stereotype: m.stereotype,
         color: m.color,
+        emoji: m.emoji,
         groupId: m.groupId,
       };
     });

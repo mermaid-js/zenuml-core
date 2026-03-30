@@ -418,4 +418,30 @@ describe("renderToSvg", () => {
     const iconTransforms = result.svg.match(/class="participant-icon" transform="translate\([^)]+\) scale/g);
     expect(iconTransforms?.length).toBe(2);
   });
+
+  // --- Emoji tests ---
+
+  it("renders emoji shortcode before participant name", () => {
+    const code = "[rocket] Production\nProduction.deploy()";
+    const result = renderToSvg(code);
+    expect(result.svg).toContain('data-participant="Production"');
+    // Emoji shortcode should appear as text prefix before the participant name
+    expect(result.svg).toContain(">rocket Production</text>");
+  });
+
+  it("renders participant without emoji when none specified", () => {
+    const code = "A -> B: hello";
+    const result = renderToSvg(code);
+    // Labels should be plain names without emoji prefix
+    expect(result.svg).toContain(">A</text>");
+    expect(result.svg).toContain(">B</text>");
+  });
+
+  it("passes emoji through geometry pipeline", () => {
+    const code = "[fire] Server\nServer.start()";
+    const result = renderToSvg(code);
+    // Verify emoji is in geometry
+    const serverGeom = result.geometry?.participants.find(p => p.name === "Server");
+    expect(serverGeom?.emoji).toBe("fire");
+  });
 });
