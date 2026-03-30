@@ -57,11 +57,23 @@ export const BUILTIN_EMOJIS: Record<string, string> = {
   thumbsup: "👍",
   thumbsdown: "👎",
 
-  // Tech
+  // Tech / Architecture
   computer: "💻",
   iphone: "📱",
   robot: "🤖",
   bug: "🐛",
+  database: "🗄️",
+  server: "🖥️",
+  api: "🔌",
+  gateway: "🚪",
+  queue: "📬",
+  cache: "⚡",
+  service: "⚙️",
+  processor: "🔄",
+  store: "🏪",
+  worker: "👷",
+  container: "📦",
+  network: "🌐",
 
   // Data
   chart: "📊",
