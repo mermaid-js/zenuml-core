@@ -113,6 +113,15 @@ export default class sequenceParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by sequenceParser#emoji.
+	enterEmoji(ctx) {
+	}
+
+	// Exit a parse tree produced by sequenceParser#emoji.
+	exitEmoji(ctx) {
+	}
+
+
 	// Enter a parse tree produced by sequenceParser#block.
 	enterBlock(ctx) {
 	}

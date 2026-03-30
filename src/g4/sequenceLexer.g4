@@ -73,6 +73,14 @@ COLOR
  : '#' HEX+
  ;
 
+LBRACKET
+ : '['
+ ;
+
+RBRACKET
+ : ']'
+ ;
+
 OR : '||';
 AND : '&&';
 EQ : '==';

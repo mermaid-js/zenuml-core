@@ -37,7 +37,7 @@ starter
  ;
 
 participant
- : participantType? stereotype? name width? label? COLOR?
+ : participantType? stereotype? emoji? name width? label? COLOR?
  | stereotype
  | participantType
  ;
@@ -63,6 +63,10 @@ name
 
 width
  : INT
+ ;
+
+emoji
+ : LBRACKET name RBRACKET
  ;
 
 // [Perf tuning] changed from stat* to stat+ according to
@@ -184,11 +188,11 @@ func
  ;
 
 from
- : name
+ : emoji? name
  ;
 
 to
- : name
+ : emoji? name
  ;
 
 signature
