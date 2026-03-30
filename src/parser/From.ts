@@ -21,7 +21,8 @@ CreationContext.prototype.From = function () {
 // @ts-expect-error -- ANTLR generated code
 MessageContext.prototype.ProvidedFrom = function () {
   // @ts-expect-error -- ANTLR generated code
-  return this.messageBody()?.fromTo()?.from()?.getFormattedText();
+  const fromCtx = this.messageBody()?.fromTo()?.from();
+  return fromCtx?.name?.()?.getFormattedText() || fromCtx?.getFormattedText();
 };
 // @ts-expect-error -- ANTLR generated code
 MessageContext.prototype.From = function () {
@@ -32,7 +33,8 @@ MessageContext.prototype.From = function () {
 // @ts-expect-error -- ANTLR generated code
 AsyncMessageContext.prototype.ProvidedFrom = function () {
   // @ts-expect-error -- ANTLR generated code
-  return this.from()?.getFormattedText();
+  const fromCtx = this.from();
+  return fromCtx?.name?.()?.getFormattedText() || fromCtx?.getFormattedText();
 };
 
 // @ts-expect-error -- ANTLR generated code
@@ -44,7 +46,8 @@ AsyncMessageContext.prototype.From = function () {
 // @ts-expect-error -- ANTLR generated code
 ReturnAsyncMessageContext.prototype.ProvidedFrom = function () {
   // @ts-expect-error -- ANTLR generated code
-  return this.from()?.getFormattedText();
+  const fromCtx = this.from();
+  return fromCtx?.name?.()?.getFormattedText() || fromCtx?.getFormattedText();
 };
 
 // @ts-expect-error -- ANTLR generated code

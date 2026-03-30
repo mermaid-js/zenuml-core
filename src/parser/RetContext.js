@@ -42,6 +42,7 @@ RetContext.prototype.ReturnTo = function () {
     }
     if (ctx instanceof MessageContext) {
       return (
+        ctx.messageBody()?.fromTo()?.from()?.name?.()?.getFormattedText() ||
         ctx.messageBody()?.fromTo()?.from()?.getFormattedText() ||
         ctx.ClosestAncestorStat().Origin()
       );
