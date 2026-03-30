@@ -63,7 +63,8 @@ function getOwnerFromAncestor(ctx) {
 }
 
 AsyncMessageContext.prototype.To = function () {
-  return this.to()?.getFormattedText();
+  const toCtx = this.to();
+  return toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
 };
 
 AsyncMessageContext.prototype.Owner = function () {
@@ -71,7 +72,8 @@ AsyncMessageContext.prototype.Owner = function () {
 };
 
 ReturnAsyncMessageContext.prototype.To = function () {
-  return this.to()?.getFormattedText();
+  const toCtx = this.to();
+  return toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
 };
 
 ReturnAsyncMessageContext.prototype.Owner = function () {
