@@ -244,7 +244,7 @@ Key: "emoji:rocket"      // emoji
 
 - **Emoji on `new` creation targets** — `new [database]DB()` causes parse error. Use `@Database DB` + `new DB()` instead.
 - **Emoji in `return` keyword values** — `return [check] valid` causes parse error. Use `A-->B: [check] valid` instead.
-- **Emoji in fragment conditions** — `if([check] success)` causes parse error. Use emoji in messages within the fragment instead.
+- **Emoji in fragment conditions** — `if([check] success)`, `catch([x] error)`, `while([rocket] running)` all work. Emoji is resolved at the rendering layer.
 
 ### What's NOT in scope
 

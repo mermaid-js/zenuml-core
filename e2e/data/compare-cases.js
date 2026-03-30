@@ -998,4 +998,24 @@ if(authorized) {
 } else {
   Server-->Client: [x] denied
 }`,
+  "emoji-in-conditions": `if([check] authorized) {
+  A.proceed()
+} else if([warning] rate limited) {
+  A.wait()
+} else {
+  A.deny()
+}`,
+  "emoji-tcf-labels": `A.process() {
+  try {
+    B.save()
+  } catch([x] DatabaseError) {
+    C.rollback()
+  } finally {
+    D.cleanup()
+  }
+}`,
+  "emoji-loop-condition": `while([rocket] deploying) {
+  A->[database]B.check()
+  B-->A: [check] status
+}`,
 };
