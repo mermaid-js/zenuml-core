@@ -425,8 +425,8 @@ describe("renderToSvg", () => {
     const code = "[rocket] Production\nProduction.deploy()";
     const result = renderToSvg(code);
     expect(result.svg).toContain('data-participant="Production"');
-    // Emoji shortcode should appear as text prefix before the participant name
-    expect(result.svg).toContain(">rocket Production</text>");
+    // Emoji shortcode should resolve to Unicode and appear before the participant name
+    expect(result.svg).toContain(">🚀 Production</text>");
   });
 
   it("renders participant without emoji when none specified", () => {

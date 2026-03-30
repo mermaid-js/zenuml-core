@@ -1,7 +1,8 @@
 import { getStyle } from "@/utils/messageStyling";
-import type { EmojiResolution } from "./types";
+import type { EmojiCache, EmojiResolution } from "./types";
+import { BUILTIN_EMOJIS } from "./builtinEmojis";
 
-let knownEmojis: Set<string> = new Set();
+let knownEmojis: Set<string> = new Set(Object.keys(BUILTIN_EMOJIS));
 
 export function setKnownEmojis(names: Iterable<string>) {
   knownEmojis = new Set(names);
@@ -48,4 +49,18 @@ export function resolveBracketContent(raw: string): EmojiResolution {
   }
 
   return result;
+}
+
+/**
+ * Get the Unicode character for an emoji shortcode.
+ * Checks the runtime cache first, then falls back to the builtin map.
+ * Returns the raw shortcode if no mapping is found.
+ */
+export function getEmojiUnicode(
+  shortcode: string,
+  cache?: EmojiCache,
+): string {
+  const cached = cache?.get(shortcode);
+  if (cached) return cached.unicode;
+  return BUILTIN_EMOJIS[shortcode] || shortcode;
 }

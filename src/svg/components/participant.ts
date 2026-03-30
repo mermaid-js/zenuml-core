@@ -1,3 +1,4 @@
+import { getEmojiUnicode } from "@/emoji/resolveEmoji";
 import type { ParticipantGeometry } from "../geometry";
 import { getIcon } from "../icons";
 import { esc } from "./svgUtils";
@@ -83,7 +84,9 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
   const { fillStyle, textStyle } = colorAttrs(p.color);
 
-  const displayLabel = p.emoji ? `${p.emoji} ${p.label}` : p.label;
+  const displayLabel = p.emoji
+    ? `${getEmojiUnicode(p.emoji)} ${p.label}`
+    : p.label;
 
   return `<g class="participant" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
@@ -110,7 +113,9 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
 
   const { fillStyle, textStyle } = colorAttrs(p.color);
 
-  const displayLabel = p.emoji ? `${p.emoji} ${p.label}` : p.label;
+  const displayLabel = p.emoji
+    ? `${getEmojiUnicode(p.emoji)} ${p.label}`
+    : p.label;
 
   return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
