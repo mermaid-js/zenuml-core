@@ -8,6 +8,7 @@ export interface IParticipantModel {
   type?: string;
   stereotype?: string;
   color?: string;
+  emoji?: string;
   groupId?: string | number;
 
   /**
