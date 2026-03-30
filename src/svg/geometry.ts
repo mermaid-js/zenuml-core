@@ -23,6 +23,8 @@ export interface ParticipantGeometry {
   type?: string;
   /** Stereotype label (e.g., "BFF") rendered as «BFF» above the name */
   stereotype?: string;
+  /** Measured glyph width of the stereotype text (including «» guillemets) */
+  stereotypeWidth?: number;
   /** Background color (hex string, e.g. "#FFEBE6") */
   color?: string;
   /** Emoji shortcode (e.g. "rocket") to render before participant name */

@@ -538,13 +538,19 @@ export async function collectLabelData(page) {
           || null;
         const measuredStereotype = stereotypeEl ? measureTextEntry(stereotypeEl, rootRect) : null;
         const iconEl = participantEl.querySelector(":scope > g[transform]");
-        // Detect emoji icon: first tspan in participant-label containing emoji codepoints
+        // Detect emoji icon: separate text.participant-emoji element (emoji-only participants)
+        // or first tspan in participant-label containing emoji codepoints (icon+emoji participants)
         const emojiPattern = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
-        const emojiTspan = !iconEl && labelEl
+        const emojiTextEl = !iconEl
+          ? participantEl.querySelector(":scope > text.participant-emoji")
+          : null;
+        const emojiTspan = !iconEl && !emojiTextEl && labelEl
           ? Array.from(labelEl.querySelectorAll("tspan")).find((ts) => emojiPattern.test(ts.textContent))
           : null;
-        const svgEmojiText = emojiTspan ? emojiTspan.textContent.trim() : null;
-        const iconTarget = iconEl || emojiTspan;
+        const svgEmojiText = (emojiTextEl || emojiTspan)
+          ? (emojiTextEl || emojiTspan).textContent.trim()
+          : null;
+        const iconTarget = iconEl || emojiTextEl || emojiTspan;
         const participantBoxStyle = participantBoxEl ? getComputedStyle(participantBoxEl) : null;
 
         participants.push({

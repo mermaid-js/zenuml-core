@@ -155,11 +155,13 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
   const EMOJI_FONT_ATTRS = `font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Twemoji Mozilla',sans-serif"`;
   const icon = getIcon(p.type);
 
-  // Emoji-only bottom participant: render emoji as separate element, same as top box
+  // Emoji-only bottom participant: render emoji as separate element, same as top box.
+  // Apply same inner-column centering as top box: innerColWidth = max(emojiRowWidth, stereotypeGlyphWidth).
   if (p.emoji && !icon) {
     const textWidth = p.labelWidth ?? 0;
     const groupWidth = PARTICIPANT_EMOJI_WIDTH + 8 + textWidth;
-    const groupX = p.x - groupWidth / 2;
+    const innerColWidth = Math.max(groupWidth, p.stereotypeWidth ?? 0);
+    const groupX = p.x - innerColWidth / 2;
     const emojiTextX = groupX;
     const textX = groupX + PARTICIPANT_EMOJI_WIDTH + 4;
     const emojiIconSvg = `<text x="${emojiTextX}" y="${textY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;

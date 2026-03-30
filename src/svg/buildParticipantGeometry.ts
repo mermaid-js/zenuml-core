@@ -45,13 +45,24 @@ export function buildParticipants(
       const isAssignee = m.name.includes(":") && m.getDisplayName() === m.name;
       let width: number;
       let measuredTextWidth: number | undefined;
+      let measuredStereotypeWidth: number | undefined;
       if (measureText && m.name !== _STARTER_) {
         const textWidth = measureSvgParticipantLabelWidth(m.getDisplayName());
         measuredTextWidth = textWidth;
         const padding = isAssignee ? PARTICIPANT_BOX_PADDING_ASSIGNEE : PARTICIPANT_BOX_PADDING;
         const iconWidth = m.hasIcon() ? PARTICIPANT_ICON_ROW_WIDTH : 0;
         const emojiWidth = m.emoji ? PARTICIPANT_EMOJI_WIDTH : 0;
-        width = Math.min(Math.max(textWidth + padding + iconWidth + emojiWidth, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
+        // When a stereotype is present, the participant box must be wide enough to fit the
+        // stereotype text. HTML's box = max(contentRowWidth + padding, stereotypeGlyphWidth + 8, minWidth).
+        // The +8 = 4px box padding (2px * 2) + 4px border (2px * 2), both included in border-box sizing.
+        const STEREOTYPE_BOX_OVERHEAD = 8;
+        if (m.stereotype) {
+          measuredStereotypeWidth = measureSvgParticipantLabelWidth(`«${m.stereotype}»`);
+        }
+        const stereotypeBoxWidth = measuredStereotypeWidth != null
+          ? measuredStereotypeWidth + STEREOTYPE_BOX_OVERHEAD
+          : 0;
+        width = Math.min(Math.max(textWidth + padding + iconWidth + emojiWidth, stereotypeBoxWidth, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
       } else {
         width = Math.min(halfWidth * 2 - MARGIN, PARTICIPANT_MAX_WIDTH);
       }
@@ -66,8 +77,6 @@ export function buildParticipants(
           ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 8)
           : PARTICIPANT_TOP_SPACE;
 
-      // Store measured glyph width for aliased labels so renderer can set textLength
-
       return {
         name: m.name,
         label: m.getDisplayName(),
@@ -80,6 +89,7 @@ export function buildParticipants(
         labelWidth: measuredTextWidth,
         type: m.type,
         stereotype: m.stereotype,
+        stereotypeWidth: measuredStereotypeWidth,
         color: m.color,
         emoji: m.emoji,
         groupId: m.groupId,

@@ -501,7 +501,7 @@ export function buildMessages(
         isSelf: info.isSelf,
         number: info.number,
       });
-      maxReturnBottom = Math.max(maxReturnBottom, returnY + (62 - returnOffset));
+      maxReturnBottom = Math.max(maxReturnBottom, returnY + (60 - returnOffset));
       continue;
     }
 
