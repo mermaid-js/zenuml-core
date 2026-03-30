@@ -119,9 +119,9 @@ export function buildGroups(
   participants: ParticipantGeometry[],
   diagramHeight: number,
 ): GroupGeometry[] {
-  // HTML's outline-dashed extends ~6px outside the participant bounding box.
+  // HTML's outline-dashed extends 8px outside the participant bounding box.
   // Use negative margin to push SVG group outline outward to match.
-  const GROUP_OUTLINE_MARGIN = -6;
+  const GROUP_OUTLINE_MARGIN = -8;
 
   // Collect participants by groupId
   const groupMap = new Map<string | number, ParticipantGeometry[]>();
