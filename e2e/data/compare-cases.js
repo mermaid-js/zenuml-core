@@ -988,4 +988,14 @@ Prod->Auth.validate()`,
   "emoji-stereotype-only": `<<service>> [lock] Auth
 <<gateway>> [globe] API
 API->Auth.check()`,
+  "emoji-method-name": `A.[rocket]deploy()
+A.[lock]validate()
+A->[database]B.[fire]save()`,
+  "emoji-condition-label": `[rocket]Client->[lock]Server.request()
+if(authorized) {
+  Server->[database]DB.query()
+  DB-->Server: [check] result
+} else {
+  Server-->Client: [x] denied
+}`,
 };
