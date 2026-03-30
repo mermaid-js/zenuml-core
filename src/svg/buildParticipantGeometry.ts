@@ -20,6 +20,7 @@ import {
   PARTICIPANT_BOX_PADDING,
   PARTICIPANT_BOX_PADDING_ASSIGNEE,
   PARTICIPANT_ICON_ROW_WIDTH,
+  PARTICIPANT_EMOJI_WIDTH,
   PARTICIPANT_VISUAL_HEIGHT,
   PARTICIPANT_MAX_WIDTH,
   snapX,
@@ -49,7 +50,8 @@ export function buildParticipants(
         measuredTextWidth = textWidth;
         const padding = isAssignee ? PARTICIPANT_BOX_PADDING_ASSIGNEE : PARTICIPANT_BOX_PADDING;
         const iconWidth = m.hasIcon() ? PARTICIPANT_ICON_ROW_WIDTH : 0;
-        width = Math.min(Math.max(textWidth + padding + iconWidth, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
+        const emojiWidth = m.emoji ? PARTICIPANT_EMOJI_WIDTH : 0;
+        width = Math.min(Math.max(textWidth + padding + iconWidth + emojiWidth, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
       } else {
         width = Math.min(halfWidth * 2 - MARGIN, PARTICIPANT_MAX_WIDTH);
       }
