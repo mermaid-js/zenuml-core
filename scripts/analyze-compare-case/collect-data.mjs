@@ -477,20 +477,22 @@ export async function collectLabelData(page) {
         const rowEl = participantEl.querySelector(":scope > .flex.items-center.justify-center, :scope > div:last-child");
         const firstChild = rowEl?.firstElementChild ?? null;
         // Find emoji span (span.mr-1.flex-shrink-0 containing emoji text)
-        const emojiSpan = participantEl.querySelector("span.mr-1.flex-shrink-0");
+        const emojiSpan = participantEl.querySelector("span.mr-1.flex-shrink-0, span[data-testid='participant-emoji']");
         const emojiText = emojiSpan ? emojiSpan.textContent.trim() : null;
-        const iconHost = emojiSpan || (firstChild && (
+        // Find type icon div (div with aria-description or h-6.w-6 containing an SVG icon)
+        const typeIconDiv = firstChild && (
           firstChild.matches("[aria-description]") ||
           firstChild.querySelector("svg") ||
           /\bh-6\b/.test(firstChild.className || "")
-        )
-          ? firstChild
-          : null);
+        ) ? firstChild : null;
+        const iconHost = typeIconDiv || emojiSpan || null;
         const labelEl = Array.from(participantEl.querySelectorAll(".name")).at(-1) ?? null;
         const measuredLabel = labelEl ? measureTextEntry(labelEl, rootRect) : null;
         const stereotypeEl = participantEl.querySelector("label.interface");
         const measuredStereotype = stereotypeEl ? measureTextEntry(stereotypeEl, rootRect) : null;
-        const iconPaintRoot = emojiSpan || (iconHost?.querySelector("svg") ?? iconHost);
+        // For icon measurement: prefer type icon (so we compare type icon vs type icon across renderers).
+        // Fall back to emoji span for emoji-only participants.
+        const iconPaintRoot = typeIconDiv ? (typeIconDiv.querySelector("svg") ?? typeIconDiv) : (emojiSpan || null);
         const participantStyle = getComputedStyle(participantEl);
 
         participants.push({
@@ -537,19 +539,19 @@ export async function collectLabelData(page) {
             .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0]
           || null;
         const measuredStereotype = stereotypeEl ? measureTextEntry(stereotypeEl, rootRect) : null;
-        const iconEl = participantEl.querySelector(":scope > g[transform]");
-        // Detect emoji icon: separate text.participant-emoji element (emoji-only participants)
-        // or first tspan in participant-label containing emoji codepoints (icon+emoji participants)
+        const iconEl = participantEl.querySelector(":scope > g.participant-icon[transform]");
+        // Detect emoji: separate text.participant-emoji element (present for both emoji-only AND icon+emoji participants)
+        // or first tspan in participant-label containing emoji codepoints (legacy inline-tspan format)
         const emojiPattern = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
-        const emojiTextEl = !iconEl
-          ? participantEl.querySelector(":scope > text.participant-emoji")
-          : null;
-        const emojiTspan = !iconEl && !emojiTextEl && labelEl
+        const emojiTextEl = participantEl.querySelector(":scope > text.participant-emoji") ?? null;
+        const emojiTspan = !emojiTextEl && labelEl
           ? Array.from(labelEl.querySelectorAll("tspan")).find((ts) => emojiPattern.test(ts.textContent))
           : null;
         const svgEmojiText = (emojiTextEl || emojiTspan)
           ? (emojiTextEl || emojiTspan).textContent.trim()
           : null;
+        // For icon measurement: prefer type icon so we compare type icon vs type icon across renderers.
+        // Fall back to emoji element for emoji-only participants.
         const iconTarget = iconEl || emojiTextEl || emojiTspan;
         const participantBoxStyle = participantBoxEl ? getComputedStyle(participantBoxEl) : null;
 

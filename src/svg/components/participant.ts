@@ -63,9 +63,9 @@ export function renderParticipant(p: ParticipantGeometry): string {
       // When both type icon and emoji are present, render the emoji as a separate
       // <text> element (like emoji-only participants) positioned immediately after
       // the type icon. The label text starts after the emoji + gap.
-      // HTML layout: [4px iconOffset][icon 24px][4px iconMargin][emoji 16px][4px gap][labelText]
+      // HTML layout: [4px iconOffset][icon 24px][4px iconMargin][emoji 16px][4px mr-1 margin][4px px-1 padding][labelText]
       const emojiTextX = iconX + ICON_SIZE + ICON_MARGIN_RIGHT;
-      textX = emojiTextX + PARTICIPANT_EMOJI_WIDTH;
+      textX = emojiTextX + PARTICIPANT_EMOJI_WIDTH + 4;
       emojiIconSvg = `<text x="${emojiTextX}" y="${labelY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
     } else {
       textX = groupX + ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_PAD_LEFT;
@@ -180,7 +180,7 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
     const groupX = p.x - groupWidth / 2;
     const iconX = groupX + ICON_PAINT_OFFSET_X;
     const emojiTextX = iconX + ICON_SIZE + ICON_MARGIN_RIGHT;
-    const textX = emojiTextX + PARTICIPANT_EMOJI_WIDTH;
+    const textX = emojiTextX + PARTICIPANT_EMOJI_WIDTH + 4;
     const emojiIconSvg = `<text x="${emojiTextX}" y="${textY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
     return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
