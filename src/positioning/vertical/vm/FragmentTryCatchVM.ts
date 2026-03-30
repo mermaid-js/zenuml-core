@@ -27,8 +27,7 @@ export class FragmentTryCatchVM extends FragmentVM {
 
     const catchBlocks = this.tcf?.catchBlock?.() || [];
     catchBlocks.forEach((catchBlock: any) => {
-      const catchCondText = catchBlock?.invocation?.()?.parameters?.()?.getFormattedText?.() ?? "";
-      cursor += this.conditionLabelHeight(catchCondText); // .text-skin-fragment > label
+      cursor += 20; // .text-skin-fragment > label
       cursor += 8; // .mt-2
       cursor += 1; // .segment.border-t.border-solid
       const block = catchBlock?.braceBlock?.()?.block?.();
@@ -37,7 +36,7 @@ export class FragmentTryCatchVM extends FragmentVM {
 
     const finallyBlock = this.tcf?.finallyBlock?.()?.braceBlock?.()?.block?.();
     if (finallyBlock) {
-      cursor += this.conditionLabelHeight("finally"); // .text-skin-fragment > label
+      cursor += 20; // .text-skin-fragment > label
       cursor += 8; // .mt-2
       cursor += 1; // .segment.border-t.border-solid
       cursor = this.layoutBlock(finallyBlock, leftParticipant, cursor);
