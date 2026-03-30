@@ -1065,4 +1065,18 @@ API->[gear]Worker: [rocket] process`,
 B->[database]C: [gear] step 2
 C->[globe]D: [check] step 3
 D-->A: [check] all done`,
+  "emoji-named-params": `[rocket]A.[lock]method(userId=123, name="John")
+[database]B.[fire]create(type="User", active=true)`,
+  "emoji-self-sync": `[gear]selfSync() {
+  [rocket]A.[lock]method() {
+    [database]B.save()
+  }
+}`,
+  "emoji-fragments-return": `[rocket]A.[lock]method() {
+  if([check] x) {
+    return [check] success
+  } else {
+    return [x] failure
+  }
+}`,
 };
