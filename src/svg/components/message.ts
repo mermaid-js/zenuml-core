@@ -1,5 +1,6 @@
 import type { MessageGeometry, SelfCallGeometry } from "../geometry";
 import { esc, styleToAttr } from "./svgUtils";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 
 export function renderMessage(m: MessageGeometry): string {
   // HTML arrow SVG container spans from left_lifeline_center+1 to right_lifeline_center.
@@ -28,7 +29,7 @@ export function renderMessage(m: MessageGeometry): string {
   return `<g class="message">
   <line x1="${fromX}" y1="${lineY}" x2="${toX}" y2="${lineY}" class="message-line"${dashAttr}/>
   ${renderArrowHead(toX, lineY, m.isReverse, m.arrowStyle)}
-  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(m.label)}</text>
+  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(resolveEmojiInText(m.label))}</text>
   ${numberSvg}
 </g>`;
 }
@@ -82,7 +83,7 @@ export function renderSelfCall(s: SelfCallGeometry): string {
       </svg>
     </g>
   </svg>
-  <text x="${labelX}" y="${labelY}" text-anchor="start" class="message-label"${s.style ? ` style="${styleToAttr(s.style)}"` : ""}>${esc(s.label.trim())}</text>
+  <text x="${labelX}" y="${labelY}" text-anchor="start" class="message-label"${s.style ? ` style="${styleToAttr(s.style)}"` : ""}>${esc(resolveEmojiInText(s.label.trim()))}</text>
   ${numberSvg}
 </g>`;
 }

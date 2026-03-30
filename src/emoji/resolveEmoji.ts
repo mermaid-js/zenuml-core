@@ -56,6 +56,22 @@ export function resolveBracketContent(raw: string): EmojiResolution {
  * Checks the runtime cache first, then falls back to the builtin map.
  * Returns the raw shortcode if no mapping is found.
  */
+/**
+ * Resolve [shortcode] patterns within free text (messages, conditions).
+ * Replaces each [shortcode] with its emoji unicode character.
+ */
+export function resolveEmojiInText(text: string): string {
+  return text.replace(/\[([^\]]+)\]/g, (match, content) => {
+    const resolution = resolveBracketContent(content);
+    if (resolution.emojis.length > 0) {
+      return resolution.emojis
+        .map((name) => getEmojiUnicode(name))
+        .join("");
+    }
+    return match; // Not an emoji — leave bracket text as-is
+  });
+}
+
 export function getEmojiUnicode(
   shortcode: string,
   cache?: EmojiCache,

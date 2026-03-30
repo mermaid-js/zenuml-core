@@ -1,5 +1,6 @@
 import type { FragmentGeometry } from "../geometry";
 import { esc } from "./svgUtils";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 
 const HEADER_HEIGHT = 25;
 const BRACKET_WIDTH = 3.89;
@@ -99,7 +100,7 @@ export function renderFragment(f: FragmentGeometry): string {
             `<g opacity="0.65">` +
             `<rect x="${keywordX - TEXT_PAD_X}" y="${lineY + 1}" width="${bgWidth}" height="20" fill="#fff"/>` +
             `<text x="${keywordX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(keyword)}</text>` +
-            `<text x="${conditionX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(condition)}</text>` +
+            `<text x="${conditionX}" y="${labelY}" class="fragment-section-label" fill="#222">${esc(resolveEmojiInText(condition))}</text>` +
             `</g>`,
           );
         } else {
@@ -135,7 +136,7 @@ function renderBracketedLabel(x: number, y: number, innerText: string, innerWidt
   return (
     `<g>` +
     `<text x="${x}" y="${y}" class="${cls}">[</text>` +
-    `<text x="${innerX}" y="${y}" class="${cls}" opacity="0.65">${esc(innerText)}</text>` +
+    `<text x="${innerX}" y="${y}" class="${cls}" opacity="0.65">${esc(resolveEmojiInText(innerText))}</text>` +
     `<text x="${closeX}" y="${y}" class="${cls}">]</text>` +
     `</g>`
   );

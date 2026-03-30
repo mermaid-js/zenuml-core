@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { resolveBracketContent, setKnownEmojis } from "./resolveEmoji";
+import { resolveBracketContent, resolveEmojiInText, setKnownEmojis } from "./resolveEmoji";
 
 beforeEach(() => {
   setKnownEmojis(["rocket", "fire", "check", "red", "eyes", "warning"]);
@@ -75,5 +75,38 @@ describe("resolveBracketContent", () => {
     const result = resolveBracketContent("text-red-500");
     expect(result.emojis).toEqual([]);
     expect(result.classNames).toContain("text-red-500");
+  });
+});
+
+describe("resolveEmojiInText", () => {
+  it("replaces [rocket] with emoji unicode in text", () => {
+    const result = resolveEmojiInText("[rocket] launching");
+    expect(result).toBe("🚀 launching");
+  });
+
+  it("replaces multiple [shortcodes] in text", () => {
+    const result = resolveEmojiInText("[check] step 1 [fire] step 2");
+    expect(result).toContain("✅");
+    expect(result).toContain("🔥");
+  });
+
+  it("leaves text without brackets unchanged", () => {
+    const result = resolveEmojiInText("plain message");
+    expect(result).toBe("plain message");
+  });
+
+  it("leaves unknown shortcodes as literal brackets", () => {
+    const result = resolveEmojiInText("[unknown_xyz] message");
+    expect(result).toBe("[unknown_xyz] message");
+  });
+
+  it("handles CSS-matching names as styles, not emoji", () => {
+    const result = resolveEmojiInText("[red] important");
+    expect(result).toBe("[red] important"); // red is CSS, not emoji
+  });
+
+  it("resolves [:red:] as emoji via colon override in text", () => {
+    const result = resolveEmojiInText("[:red:] alert");
+    expect(result).toBe("🔴 alert");
   });
 });

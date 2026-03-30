@@ -81,6 +81,7 @@ export const BUILTIN_EMOJIS: Record<string, string> = {
   // Symbols
   heavy_check_mark: "✔️",
   heavy_multiplication_x: "✖️",
+  red: "🔴",
   red_circle: "🔴",
   green_circle: "🟢",
   blue_circle: "🔵",

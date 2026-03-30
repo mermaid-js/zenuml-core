@@ -4,6 +4,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { formatText } from "@/utils/StringUtil";
 import { EditableSpan } from "@/components/common/EditableSpan";
 import { RenderMode } from "@/store/Store";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 
 interface EditableLabelFieldProps {
   text: string;
@@ -24,7 +25,7 @@ export const EditableLabelField = ({
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const isEditable = mode !== RenderMode.Static;
-  const formattedText = formatText(text ?? "");
+  const formattedText = resolveEmojiInText(formatText(text ?? ""));
 
   const handleSave = (newText: string) => {
     // If text is empty or same as the original text, bail out
