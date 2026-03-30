@@ -90,8 +90,8 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
   // 3. Extract title (resolve emoji shortcodes)
   const titleContext = rootContext.title?.();
   const rawTitle =
-    titleContext && typeof titleContext.content === "function"
-      ? titleContext.content()
+    titleContext && typeof (titleContext as any).content === "function"
+      ? (titleContext as any).content()
       : undefined;
   const title = rawTitle ? resolveEmojiInText(rawTitle) : undefined;
 
