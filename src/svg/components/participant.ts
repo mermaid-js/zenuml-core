@@ -59,7 +59,17 @@ export function renderParticipant(p: ParticipantGeometry): string {
     const iconX = groupX + ICON_PAINT_OFFSET_X;
     const iconType = p.type?.toLowerCase();
     const iconY = p.y + (p.height - ICON_SIZE) / 2 + (iconType === "boundary" ? BOUNDARY_ICON_VERTICAL_TWEAK : 0);
-    textX = groupX + ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_PAD_LEFT;
+    if (p.emoji) {
+      // When both type icon and emoji are present, render the emoji as a separate
+      // <text> element (like emoji-only participants) positioned immediately after
+      // the type icon. The label text starts after the emoji + gap.
+      // HTML layout: [4px iconOffset][icon 24px][4px iconMargin][emoji 16px][4px gap][labelText]
+      const emojiTextX = iconX + ICON_SIZE + ICON_MARGIN_RIGHT;
+      textX = emojiTextX + PARTICIPANT_EMOJI_WIDTH;
+      emojiIconSvg = `<text x="${emojiTextX}" y="${labelY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
+    } else {
+      textX = groupX + ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_PAD_LEFT;
+    }
     textAnchor = "start";
 
     const [, , vbW, vbH] = (icon.viewBox || "0 0 24 24").split(" ").map(Number);
@@ -74,9 +84,12 @@ export function renderParticipant(p: ParticipantGeometry): string {
     // positioned to the left of the label, matching HTML's flex row layout.
     // HTML layout: [emoji:16px][gap:4px][leftpad:4px][labelText][rightpad:4px]
     // PARTICIPANT_EMOJI_WIDTH (20) covers emoji(16) + gap(4).
+    // When a stereotype is present, the inner column width = max(emojiRowWidth, stereotypeGlyphWidth).
+    // The entire inner column is centered at p.x: emojiX = p.x - innerColWidth/2.
     const textWidth = p.labelWidth ?? 0;
     const groupWidth = PARTICIPANT_EMOJI_WIDTH + 8 + textWidth; // 8 = leftpad(4) + rightpad(4)
-    const groupX = p.x - groupWidth / 2;
+    const innerColWidth = Math.max(groupWidth, p.stereotypeWidth ?? 0);
+    const groupX = p.x - innerColWidth / 2;
     const emojiTextX = groupX;
     textX = groupX + PARTICIPANT_EMOJI_WIDTH + 4; // after emoji(16)+gap(4)=20, then leftpad(4)
     textAnchor = "start";
@@ -110,12 +123,9 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
   const { fillStyle, textStyle } = colorAttrs(p.color);
 
-  // When emoji is rendered as a separate element (emoji-only, no icon), do not
-  // include it as a tspan inside the label text element. For icon+emoji cases,
-  // the emoji tspan is still included in the label text.
-  const emojiTspan = p.emoji && icon
-    ? `<tspan ${EMOJI_FONT_ATTRS} dominant-baseline="central" dy="0.1em">${esc(getEmojiUnicode(p.emoji))}</tspan><tspan dy="-0.1em"> </tspan>`
-    : "";
+  // When emoji is rendered as a separate <text> element (either emoji-only or icon+emoji),
+  // do not include it as a tspan inside the label text element.
+  const emojiTspan = "";
 
   return `<g class="participant" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
@@ -160,14 +170,26 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
 </g>`;
   }
 
-  // Icon+emoji case: emoji as tspan in label text
-  const emojiTspan = p.emoji && icon
-    ? `<tspan ${EMOJI_FONT_ATTRS} dominant-baseline="central" dy="0.1em">${esc(getEmojiUnicode(p.emoji))}</tspan><tspan dy="-0.1em"> </tspan>`
-    : "";
+  // Icon+emoji case: render emoji as a separate element, same as top box
+  if (p.emoji && icon) {
+    const textWidth = p.labelWidth ?? 0;
+    const emojiExtra = PARTICIPANT_EMOJI_WIDTH;
+    const groupWidth = ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_HORIZONTAL_PADDING + textWidth + emojiExtra;
+    const groupX = p.x - groupWidth / 2;
+    const iconX = groupX + ICON_PAINT_OFFSET_X;
+    const emojiTextX = iconX + ICON_SIZE + ICON_MARGIN_RIGHT;
+    const textX = emojiTextX + PARTICIPANT_EMOJI_WIDTH;
+    const emojiIconSvg = `<text x="${emojiTextX}" y="${textY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
+    return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
+  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
+  ${emojiIconSvg}
+  <text x="${textX}" y="${textY}" text-anchor="start" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
+</g>`;
+  }
 
   return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
-  <text x="${p.x}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${emojiTspan}${esc(p.label)}</text>
+  <text x="${p.x}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
 </g>`;
 }
 
