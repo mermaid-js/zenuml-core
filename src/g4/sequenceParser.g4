@@ -67,6 +67,7 @@ width
 
 emoji
  : LBRACKET name RBRACKET
+ | EMOJI_SHORTCODE
  ;
 
 // [Perf tuning] changed from stat* to stat+ according to
@@ -231,7 +232,7 @@ assignee
  ;
 
 methodName
- : name
+ : emoji? name
  ;
 
 parameters
