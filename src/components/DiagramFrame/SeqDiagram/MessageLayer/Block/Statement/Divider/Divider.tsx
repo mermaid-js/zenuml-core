@@ -1,6 +1,7 @@
 import { coordinatesAtom, participantsAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { getStyle } from "@/utils/messageStyling";
+import { resolveBracketContent, getEmojiUnicode } from "@/emoji/resolveEmoji";
 import { useAtomValue } from "jotai";
 import { useCallback, useMemo } from "react";
 import { centerOf } from "../utils";
@@ -24,13 +25,19 @@ export const Divider = (props: {
     if (note.trim().indexOf("[") === 0 && note.indexOf("]") !== -1) {
       const startIndex = note.indexOf("[");
       const endIndex = note.indexOf("]");
-      const [style, _note] = [
-        note.slice(startIndex + 1, endIndex),
-        note.slice(endIndex + 1),
-      ];
+      const bracketContent = note.slice(startIndex + 1, endIndex);
+      const remainingNote = note.slice(endIndex + 1);
+
+      const resolution = resolveBracketContent(bracketContent);
+      const emojiPrefix = resolution.emojis
+        .map((name) => getEmojiUnicode(name))
+        .join("") + (resolution.emojis.length > 0 ? " " : "");
+
+      // Build CSS style from resolution (non-emoji values)
+      const cssValues = resolution.classNames.filter((c) => !resolution.emojis.includes(c));
       return {
-        style: getStyle(style.split(",").map((s: string) => s.trim())),
-        note: _note,
+        style: getStyle(cssValues),
+        note: emojiPrefix + remainingNote,
       };
     }
     return { style: getStyle([]), note: note };

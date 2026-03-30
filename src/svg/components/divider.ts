@@ -1,11 +1,13 @@
 import type { DividerGeometry } from "../geometry";
 import { esc } from "./svgUtils";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 
 const PAD_X = 8;
 const BOX_HEIGHT = 28;
 
 export function renderDivider(d: DividerGeometry): string {
-  const label = d.label.replace(/^=+\s*|\s*=+$/g, "").trim();
+  const rawLabel = d.label.replace(/^=+\s*|\s*=+$/g, "").trim();
+  const label = resolveEmojiInText(rawLabel);
   const centerX = d.width / 2;
   const textWidth = d.labelWidth ?? label.length * 8;
   // Match HTML box-sizing: border-box with 1px border.
