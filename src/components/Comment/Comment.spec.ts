@@ -93,7 +93,7 @@ describe("Comment", function () {
     // Emoji in comments
     [
       "[rocket] deploy note\n",
-      "deploy note",
+      "🚀 deploy note",
       {},
       {},
       [],
@@ -102,7 +102,7 @@ describe("Comment", function () {
     ],
     [
       "[rocket, red] alert\n",
-      "alert",
+      "🚀 alert",
       { color: "red" },
       { color: "red" },
       [],
@@ -111,7 +111,7 @@ describe("Comment", function () {
     ],
     [
       "[:red:] note\n",
-      "note",
+      "🔴 note",
       {},
       {},
       [],

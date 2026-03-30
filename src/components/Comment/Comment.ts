@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 import { getStyle } from "@/utils/messageStyling";
-import { resolveBracketContent } from "@/emoji/resolveEmoji";
+import { resolveBracketContent, getEmojiUnicode } from "@/emoji/resolveEmoji";
 
 function parseLine(input: string): [string[], string[], string[], string] {
   // <red> controls comment only;
@@ -80,11 +80,18 @@ export default class CommentClass {
     const { textStyle: commonStyle, classNames: commonClassNames } =
       getStyle(stylesForGetStyle);
 
-    this.text = (
+    const baseText = (
       lines.slice(0, lines.length - 1).join("\n") +
       "\n" +
       text
     ).trim();
+    const emojiPrefix = this.emojis
+      .map((name) => getEmojiUnicode(name))
+      .join("");
+    this.text =
+      emojiPrefix && baseText
+        ? `${emojiPrefix} ${baseText}`
+        : emojiPrefix || baseText;
     this.textStyle = { ...commonStyle, ...commentStyle, ...messageStyle };
     this.classNames = [
       ...commonClassNames,
