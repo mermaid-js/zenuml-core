@@ -31,31 +31,13 @@ export class ReturnStatementVM extends StatementVM {
 
     // CSS: .occurrence .block > .statement-container:last-child > .interaction.return
     // applies margin-bottom: -16px, collapsing the return's bottom space.
-    // The collapse only applies to direct-child returns in the last position AND
-    // only when the block is (directly or indirectly) inside an occurrence element
-    // (i.e. a sync message or creation with a braceBlock body).
-    //
-    // If the return's fragment section block is NOT inside any occurrence, the CSS
-    // ancestor selector `.occurrence .block` does not match, so the return occupies
-    // its full 16px height in HTML.
+    // The collapse only applies to direct-child returns in the last position.
+    // Non-last returns render with their full height (16px from .h-4 interaction).
     if (!isSelf) {
       const block = this.context?.parentCtx;
       const siblings = block?.stat?.() || [];
       const isLast = siblings[siblings.length - 1] === this.context;
-      // Walk up to check if any ancestor context is a message/creation (occurrence body).
-      // `message` context has a `messageBody()` method; `creation` has `creationBody()`.
-      // Root-level or fragment-only contexts (alt/tcf/loop/etc.) have neither.
-      const isInsideOccurrence = (() => {
-        let ctx = block?.parentCtx; // start from braceBlock upward
-        while (ctx) {
-          if (typeof ctx.messageBody === "function" || typeof ctx.creationBody === "function") {
-            return true;
-          }
-          ctx = ctx.parentCtx;
-        }
-        return false;
-      })();
-      if (!isLast || !isInsideOccurrence) {
+      if (!isLast) {
         cursor += 16;
       }
     }

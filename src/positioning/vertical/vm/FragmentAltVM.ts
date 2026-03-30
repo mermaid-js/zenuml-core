@@ -24,7 +24,8 @@ export class FragmentAltVM extends FragmentVM {
     const ifBlock = this.alt?.ifBlock?.();
     if (ifBlock) {
       // console.info("FragmentAltVM::ifBlock::start", cursor);
-      cursor += 20; // .text-skin-fragment > label
+      const ifCondText = ifBlock?.parExpr?.()?.condition?.()?.getFormattedText?.() ?? "";
+      cursor += this.conditionLabelHeight(ifCondText); // .text-skin-fragment > label
       cursor = this.layoutBlock(
         ifBlock.braceBlock()?.block(),
         leftParticipant,
@@ -34,7 +35,8 @@ export class FragmentAltVM extends FragmentVM {
     }
     this.alt?.elseIfBlock?.()?.forEach((block: any) => {
       // console.info("FragmentAltVM::elseIfBlock::start", cursor);
-      cursor += 20; // .text-skin-fragment > label
+      const elseIfCondText = block?.parExpr?.()?.condition?.()?.getFormattedText?.() ?? "";
+      cursor += this.conditionLabelHeight(elseIfCondText); // .text-skin-fragment > label
       cursor += 8; // .mt-2
       cursor += 1; // .segment.border-t.border-solid
       cursor = this.layoutBlock(
@@ -47,7 +49,7 @@ export class FragmentAltVM extends FragmentVM {
     const elseBlock = this.alt?.elseBlock?.()?.braceBlock?.()?.block?.();
     if (elseBlock) {
       // console.info("FragmentAltVM::elseBlock::start", cursor);
-      cursor += 20; // .text-skin-fragment > label
+      cursor += this.conditionLabelHeight("[else]"); // .text-skin-fragment > label
       cursor += 8; // .mt-2
       cursor += 1; // .segment.border-t.border-solid
       cursor = this.layoutBlock(elseBlock, leftParticipant, cursor);

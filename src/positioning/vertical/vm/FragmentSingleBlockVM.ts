@@ -18,8 +18,11 @@ export abstract class FragmentSingleBlockVM extends FragmentVM {
     const commentHeight = this.measureComment(this.fragment);
     let cursor = top + 1 + this.metrics.fragmentHeaderHeight + commentHeight;
 
-    const hasCondition = Boolean(this.fragment?.parExpr?.()?.condition?.());
-    if (hasCondition) cursor += 20;
+    const conditionNode = this.fragment?.parExpr?.()?.condition?.();
+    if (conditionNode) {
+      const condText = conditionNode.getFormattedText?.() ?? "";
+      cursor += this.conditionLabelHeight(condText);
+    }
 
     const block = this.fragment?.braceBlock?.()?.block?.();
     if (block) {
