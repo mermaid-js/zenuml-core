@@ -240,6 +240,12 @@ Key: "emoji:rocket"      // emoji
 | Comment | `// [rocket, red] note` | 🚀 + "note" in red |
 | Divider | `== [rocket, red] Phase ==` | 🚀 + "Phase" in red |
 
+### Known Limitations
+
+- **Emoji on `new` creation targets** — `new [database]DB()` causes parse error. Use `@Database DB` + `new DB()` instead.
+- **Emoji in `return` keyword values** — `return [check] valid` causes parse error. Use `A-->B: [check] valid` instead.
+- **Emoji in fragment conditions** — `if([check] success)` causes parse error. Use emoji in messages within the fragment instead.
+
 ### What's NOT in scope
 
 - Emoji recoloring (changing the color of the emoji SVG itself)
