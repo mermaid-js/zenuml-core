@@ -18,6 +18,7 @@ import { renderReturn } from "./components/return";
 import { renderDivider } from "./components/divider";
 import { renderComment } from "./components/comment";
 import { renderGroup } from "./components/group";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import type { DiagramGeometry } from "./geometry";
 
 export interface RenderOptions {
@@ -83,12 +84,13 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
   const coordinates = new Coordinates(rootContext, WidthProviderOnCanvas);
   const verticalCoordinates = new VerticalCoordinates(rootContext);
 
-  // 3. Extract title
+  // 3. Extract title (resolve emoji shortcodes)
   const titleContext = rootContext.title?.();
-  const title =
+  const rawTitle =
     titleContext && typeof titleContext.content === "function"
       ? titleContext.content()
       : undefined;
+  const title = rawTitle ? resolveEmojiInText(rawTitle) : undefined;
 
   // 4. Build geometry IR
   const geometry = buildGeometry({
