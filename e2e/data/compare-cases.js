@@ -1056,4 +1056,13 @@ API->Auth.[lock]validate(token) {
 }
 == [rocket] deploy phase ==
 API->[gear]Worker: [rocket] process`,
+  "emoji-chained-calls": `[rocket]A.[lock]auth().[fire]process().[check]save()`,
+  "emoji-assign-return": `[globe]API->[lock]Auth.check() {
+  result = [database]DB.query()
+  return [check] authorized
+}`,
+  "emoji-multi-async": `[rocket]A->[lock]B: [fire] step 1
+B->[database]C: [gear] step 2
+C->[globe]D: [check] step 3
+D-->A: [check] all done`,
 };
