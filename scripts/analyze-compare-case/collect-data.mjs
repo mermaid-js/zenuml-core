@@ -461,18 +461,21 @@ export async function collectLabelData(page) {
 
         const rowEl = participantEl.querySelector(":scope > .flex.items-center.justify-center, :scope > div:last-child");
         const firstChild = rowEl?.firstElementChild ?? null;
-        const iconHost = firstChild && (
+        // Find emoji span (span.mr-1.flex-shrink-0 containing emoji text)
+        const emojiSpan = participantEl.querySelector("span.mr-1.flex-shrink-0");
+        const emojiText = emojiSpan ? emojiSpan.textContent.trim() : null;
+        const iconHost = emojiSpan || (firstChild && (
           firstChild.matches("[aria-description]") ||
           firstChild.querySelector("svg") ||
           /\bh-6\b/.test(firstChild.className || "")
         )
           ? firstChild
-          : null;
+          : null);
         const labelEl = Array.from(participantEl.querySelectorAll(".name")).at(-1) ?? null;
         const measuredLabel = labelEl ? measureTextEntry(labelEl, rootRect) : null;
         const stereotypeEl = participantEl.querySelector("label.interface");
         const measuredStereotype = stereotypeEl ? measureTextEntry(stereotypeEl, rootRect) : null;
-        const iconPaintRoot = iconHost?.querySelector("svg") ?? iconHost;
+        const iconPaintRoot = emojiSpan || (iconHost?.querySelector("svg") ?? iconHost);
         const participantStyle = getComputedStyle(participantEl);
 
         participants.push({
@@ -488,6 +491,7 @@ export async function collectLabelData(page) {
           stereotypeFont: measuredStereotype?.font ?? null,
           stereotypeLetters: measuredStereotype?.letters ?? [],
           iconBox: paintedBox(iconPaintRoot, rootRect),
+          emojiText: emojiText || null,
           anchorKind: measuredLabel?.box ? "label" : "participant-box",
           anchorBox: measuredLabel?.box ?? participantBox,
           backgroundColor: normalizeColorValue(participantStyle.backgroundColor),
@@ -519,6 +523,13 @@ export async function collectLabelData(page) {
           || null;
         const measuredStereotype = stereotypeEl ? measureTextEntry(stereotypeEl, rootRect) : null;
         const iconEl = participantEl.querySelector(":scope > g[transform]");
+        // Detect emoji icon: first tspan in participant-label containing emoji codepoints
+        const emojiPattern = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
+        const emojiTspan = !iconEl && labelEl
+          ? Array.from(labelEl.querySelectorAll("tspan")).find((ts) => emojiPattern.test(ts.textContent))
+          : null;
+        const svgEmojiText = emojiTspan ? emojiTspan.textContent.trim() : null;
+        const iconTarget = iconEl || emojiTspan;
         const participantBoxStyle = participantBoxEl ? getComputedStyle(participantBoxEl) : null;
 
         participants.push({
@@ -533,7 +544,8 @@ export async function collectLabelData(page) {
           stereotypeBox: measuredStereotype?.box ?? null,
           stereotypeFont: measuredStereotype?.font ?? null,
           stereotypeLetters: measuredStereotype?.letters ?? [],
-          iconBox: paintedBox(iconEl, rootRect),
+          iconBox: paintedBox(iconTarget, rootRect),
+          emojiText: svgEmojiText || null,
           anchorKind: measuredLabel?.box ? "label" : "participant-box",
           anchorBox: measuredLabel?.box ?? participantBox,
           backgroundColor: normalizeColorValue(participantBoxStyle?.fill || participantBoxEl?.getAttribute("fill")),
