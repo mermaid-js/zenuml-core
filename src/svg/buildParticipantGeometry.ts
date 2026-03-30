@@ -159,6 +159,8 @@ export function buildGroups(
     // The HTML group container starts at the top of the content region and uses an
     // absolutely-positioned title strip, so the outer outline should stop at the
     // content bottom rather than adding a separate header band to its height.
+    // +1.5 corrects for the SVG dominant-baseline="middle" rendering offset so that
+    // the title text screen position matches the HTML title bar center exactly.
     const y = minY - 20 + 1.5;
     // HTML group extends to the full diagram height plus bottom padding.
     // Add 12px to match HTML's h-full container which includes extra bottom space.

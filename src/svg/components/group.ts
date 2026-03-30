@@ -9,18 +9,31 @@ import { esc } from "./svgUtils";
  */
 export function renderGroup(g: GroupGeometry): string {
   const titleBarHeight = 18.5;
+  const sw = 1.5;   // stroke-width
+  const sw2 = sw / 2; // 0.75 — half stroke-width
+  // g.y includes a +1.5 offset (vs the HTML div top) that corrects for SVG text rendering.
+  // The HTML div top is at g.y - 1.5 (in SVG content coords). CSS outline is drawn
+  // OUTSIDE the div, so HTML outline center is at (g.y - 1.5) - sw2 = g.y - 2.25.
+  // To align the SVG stroke center with the HTML outline center: rectY = g.y - 2.25.
+  // Equivalently: move rect left/up by (sw + sw2 = 2.25) to compensate for both the
+  // +1.5 geometry offset and the sw2 stroke centering.
+  const rectX = g.x - sw2;           // align horizontal stroke center with HTML outline center
+  const rectY = g.y - sw - sw2;      // = g.y - 2.25: align vertical stroke with HTML outline
+  const rectW = g.width + sw;
+  const rectH = g.height + sw + sw2; // extend bottom (clipped by viewBox)
+  // Title text: g.y + titleBarHeight/2 gives the correct screen position because g.y
+  // includes the +1.5 dominant-baseline correction.
   const titleY = g.y + titleBarHeight / 2;
   const titleText = g.name ? esc(g.name) : "";
-  // The title background rect must cover the stroke's outer edges (stroke-width=1.5 → 0.75 on each side).
-  // Extend 0.75px beyond the rect boundary on all sides to ensure the dashed stroke is hidden
-  // behind the white title bar, matching the HTML renderer where the title div covers the outline.
-  const sw2 = 0.75; // half of stroke-width (1.5)
-  const tbX = g.x - sw2;
-  const tbY = g.y - sw2;
-  const tbWidth = g.width + 2 * sw2;
-  const tbHeight = titleBarHeight + sw2; // extend top but not bottom (bottom edge intentionally dashed)
+  // Title background covers the interior of the group rect, from the HTML div top
+  // (= g.y - 1.5, the inner stroke edge) through the title bar height.
+  // This matches HTML where the title div is inside the group div from y=g.y-1.5.
+  const tbX = g.x;
+  const tbY = g.y - sw;      // = HTML div top = inner stroke top edge
+  const tbWidth = g.width;
+  const tbHeight = titleBarHeight + sw2; // cover through the title bar plus a bit extra for the stroke
   return `<g class="participant-group">
-  <rect x="${g.x}" y="${g.y}" width="${g.width}" height="${g.height}" class="group-outline" stroke-dasharray="4 3"/>
+  <rect x="${rectX}" y="${rectY}" width="${rectW}" height="${rectH}" class="group-outline" stroke-dasharray="4 3"/>
   ${titleText ? `<rect x="${tbX}" y="${tbY}" width="${tbWidth}" height="${tbHeight}" class="group-title-bg"/>` : ""}
   ${titleText ? `<text x="${g.x + g.width / 2}" y="${titleY}" text-anchor="middle" dominant-baseline="middle" class="group-title-text">${titleText}</text>` : ""}
 </g>`;
