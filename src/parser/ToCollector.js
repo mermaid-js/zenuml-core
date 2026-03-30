@@ -17,6 +17,7 @@ const onParticipant = function (ctx) {
   const participant =
     ctx?.name()?.getFormattedText() || "Missing `Participant`";
   const stereotype = ctx.stereotype()?.name()?.getFormattedText();
+  const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
   const width =
     (ctx.width && ctx.width() && Number.parseInt(ctx.width().getText())) ||
     undefined;
@@ -44,6 +45,7 @@ const onParticipant = function (ctx) {
     isStarter: false,
     type,
     stereotype,
+    emoji,
     width,
     groupId,
     label,
@@ -57,12 +59,13 @@ ToCollector.enterParticipant = onParticipant;
 
 const onTo = function (ctx) {
   if (isBlind) return;
-  let participant = ctx.getFormattedText();
+  let participant = ctx.name?.()?.getFormattedText() || ctx.getFormattedText();
+  const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
   const participantInstance = participants.Get(participant);
 
   // Skip adding participant position if label is present
   if (participantInstance?.label) {
-    participants.Add(participant, { isStarter: false });
+    participants.Add(participant, { isStarter: false, emoji });
   } else if (participantInstance?.assignee) {
     // If the participant has an assignee, calculate the position of the ctor and store it only.
     // Let's say the participant name is `"${assignee}:${type}"`, we need to get the position of ${type}
@@ -75,12 +78,14 @@ const onTo = function (ctx) {
     ];
     participants.Add(participant, {
       isStarter: false,
+      emoji,
       position: position,
       assigneePosition: assigneePosition,
     });
   } else {
     participants.Add(participant, {
       isStarter: false,
+      emoji,
       position: [ctx.start.start, ctx.stop.stop + 1],
     });
   }
