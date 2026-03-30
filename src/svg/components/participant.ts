@@ -88,10 +88,13 @@ export function renderParticipant(p: ParticipantGeometry): string {
   // and theme-default participant text color rather than SVG-side contrast heuristics.
   let stereotypeSvg = "";
   if (p.stereotype) {
+    // Stereotype is always centered over the full participant box (text-anchor="middle").
+    // When a type icon is present, center over the label portion only.
+    // When no icon (plain or emoji-only), center at p.x (participant center).
     const stereoX = icon && p.labelWidth != null
       ? textX + p.labelWidth / 2
-      : textX;
-    const stereoAnchor = icon && p.labelWidth != null ? "middle" : icon ? "start" : "middle";
+      : p.x;
+    const stereoAnchor = "middle";
     const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET;
     stereotypeSvg = `<text x="${stereoX}" y="${stereoY}" text-anchor="${stereoAnchor}" dominant-baseline="central" class="stereotype-label" font-size="${STEREOTYPE_FONT_SIZE}"${participantTextStyle()}>${esc("«" + p.stereotype + "»")}</text>`;
   }
