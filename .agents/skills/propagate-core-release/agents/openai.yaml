@@ -1,0 +1,7 @@
+interface:
+  display_name: "Propagate Core Release"
+  short_description: "Open downstream rollout issues for a published core version"
+  default_prompt: "Use $propagate-core-release after @zenuml/core has been published to open or reuse per-repo downstream issues with explicit rollout instructions. Do not update downstream repos directly and do not open PRs on their behalf."
+
+policy:
+  allow_implicit_invocation: true
