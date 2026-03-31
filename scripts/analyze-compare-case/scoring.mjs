@@ -770,8 +770,19 @@ function buildFragmentDividerSection(htmlDividers, svgDividers) {
   return results;
 }
 
+function buildTitleSection(htmlTitle, svgTitle, diffImage) {
+  if (!htmlTitle && !svgTitle) return null;
+  // Wrap as single-element arrays and reuse buildSection
+  const htmlItems = htmlTitle ? [htmlTitle] : [];
+  const svgItems = svgTitle ? [svgTitle] : [];
+  const results = buildSection(htmlItems, svgItems, diffImage);
+  return results.length > 0 ? results[0] : null;
+}
+
 export function buildScoredSections(extracted, diffImage) {
   const {
+    htmlTitle,
+    svgTitle,
     htmlLabels,
     svgLabels,
     htmlNumbers,
@@ -799,6 +810,7 @@ export function buildScoredSections(extracted, diffImage) {
   const svgParticipantStereotypes = buildParticipantStereotypeItems(svgParticipants);
 
   return {
+    title: buildTitleSection(htmlTitle || null, svgTitle || null, diffImage),
     labels: buildSection(htmlLabels, svgLabels, diffImage),
     numbers: buildSection(htmlNumbers, svgNumbers, diffImage),
     arrows: buildArrowSection(htmlArrows, svgArrows, diffImage),

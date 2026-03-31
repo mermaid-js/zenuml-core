@@ -113,13 +113,10 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
 
   // Expand width to fit labels that extend beyond
   if (measureText) {
-    // Expand width to fit title text
-    if (title) {
-      const titleWidth = measureText(title, TextType.ParticipantName) * 1.15;
-      if (titleWidth > diagramWidth) {
-        diagramWidth = titleWidth;
-      }
-    }
+    // Title does not expand diagramWidth. The HTML renderer does not expand the
+    // sequence diagram width for the title — TotalWidth() is participant-based only.
+    // The frame may expand via CSS whitespace-nowrap for very long titles, but the
+    // old * 1.15 multiplier grossly over-corrected, causing 28px+ mismatches.
 
     // Expand for message labels extending beyond diagram edge
     const LABEL_PAD = 10;

@@ -123,6 +123,7 @@ export function buildReport(caseName, extracted, diffImage) {
 
   return {
     case: caseName,
+    title: sections.title,
     labels: sections.labels,
     numbers: sections.numbers,
     arrows: sections.arrows,
@@ -137,6 +138,7 @@ export function buildReport(caseName, extracted, diffImage) {
     fragment_dividers: sections.fragmentDividers,
     dividers: sections.dividers,
     residual_scopes: residualScopes.scopes,
+    title_summary: sections.title ? formatSectionSummary("title", sections.title) : null,
     summary: sections.labels.map((label) => formatSectionSummary("label", label)),
     number_summary: sections.numbers.map((number) => formatSectionSummary("number", number)),
     arrow_summary: sections.arrows.map((arrow) => `arrow:${arrow.key.text} -> ${formatArrowSummary(arrow)}`),

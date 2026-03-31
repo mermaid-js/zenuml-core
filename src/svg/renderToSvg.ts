@@ -190,7 +190,7 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
   const headerLineDrawY = headerLineY - 0.5; // 33.5 — half-pixel for crisp 1px line at pixel row 33, matching HTML header border-bottom
   const headerLineSvg = `<line class="frame-header-line" x1="1" y1="${headerLineDrawY}" x2="${viewWidth - 1}" y2="${headerLineDrawY}"/>`;
   const titleSvg = g.title
-    ? `<text x="5" y="${headerLineDrawY / 2 + 0.25}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
+    ? `<text x="5" y="${headerLineDrawY / 2}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
     : "";
 
   const viewBox = `0 0 ${viewWidth} ${viewHeight}`;
