@@ -50,6 +50,7 @@ const DEFAULT_THEME_STYLES = `
   .participant-box { fill: #ffffff; stroke: #666; stroke-width: 2; }
   .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #222; }
   .participant-icon { color: #222; }
+  .participant-icon [fill="currentColor"]:not([stroke]) { stroke: #666; stroke-width: 1; }
   .lifeline { stroke: #666; stroke-width: 1; }
   .message-line { stroke: #000; stroke-width: 2; shape-rendering: crispEdges; }
   .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
