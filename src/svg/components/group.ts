@@ -23,13 +23,12 @@ export function renderGroup(g: GroupGeometry): string {
   // includes the +1.5 dominant-baseline correction.
   const titleY = g.y + titleBarHeight / 2;
   const titleText = g.name ? esc(g.name) : "";
-  // Title background covers the interior of the group rect, from the HTML div top
-  // (= g.y - 1.5, the inner stroke edge) through the title bar height.
-  // This matches HTML where the title div is inside the group div from y=g.y-1.5.
-  const tbX = g.x;
-  const tbY = g.y - sw - 0.5;  // = HTML div top = inner stroke top edge (aligned with rectY)
-  const tbWidth = g.width;
-  const tbHeight = titleBarHeight + sw2 + 0.5; // cover through the title bar plus a bit extra for the stroke
+  // Title background is inset by sw2 from the outline rect on all sides so the
+  // full dashed border (including the inner half of the centered stroke) stays visible.
+  const tbX = g.x + sw2;
+  const tbY = rectY + sw2;      // inner edge of top stroke
+  const tbWidth = g.width - sw;  // inset sw2 on each side
+  const tbHeight = titleBarHeight + 0.5 + sw2; // cover through the title bar
   return `<g class="participant-group">
   <rect x="${rectX}" y="${rectY}" width="${rectW}" height="${rectH}" class="group-outline" stroke-dasharray="4 3"/>
   ${titleText ? `<rect x="${tbX}" y="${tbY}" width="${tbWidth}" height="${tbHeight}" class="group-title-bg"/>` : ""}

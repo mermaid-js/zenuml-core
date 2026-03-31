@@ -296,7 +296,9 @@
         if (htmlFrame) {
           const frameRect2 = htmlFrame.getBoundingClientRect();
           // Hide SVG icons in the header area (top 35px) — checkbox, etc.
+          // Skip group outline overlays (data-group-overlay) which are functional rendering elements.
           htmlFrame.querySelectorAll("svg").forEach(svg => {
+            if (svg.hasAttribute("data-group-overlay")) return;
             const r = svg.getBoundingClientRect();
             if (r.width > 0 && (r.top - frameRect2.top) < 35) _hideEl(svg);
           });
