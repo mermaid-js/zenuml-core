@@ -9,14 +9,14 @@ import { esc } from "./svgUtils";
  */
 export function renderGroup(g: GroupGeometry): string {
   const titleBarHeight = 18.5;
-  const sw = 3;     // stroke-width — matches HTML outline-width: 3px
-  const sw2 = sw / 2; // 1.5 — half stroke-width
+  const sw = 1.5;   // stroke-width
+  const sw2 = sw / 2; // 0.75 — half stroke-width
   // SVG stroke is centered on the rect boundary. To align the stroke's outer edge with
   // HTML's CSS outline outer edge (which is drawn outside the border-box), the SVG rect
   // must be shifted outward by sw2 on each side. This aligns visual strokes at the cost
-  // of a 1.5px offset in the measured bounding box (dx=-1.5 in analyzer output).
+  // of a 0.75px offset in the measured bounding box (dx=-0.75 in analyzer output).
   const rectX = g.x - sw2;
-  const rectY = g.y - sw;            // g.y - 3: aligns rendered top with HTML group top
+  const rectY = g.y - sw;            // g.y - 1.5: aligns rendered top with HTML group top
   const rectW = g.width + sw;
   const rectH = g.height + sw;
   // Title text: g.y + titleBarHeight/2 gives the correct screen position because g.y
@@ -31,7 +31,7 @@ export function renderGroup(g: GroupGeometry): string {
   const tbWidth = g.width;
   const tbHeight = titleBarHeight + sw2; // cover through the title bar plus a bit extra for the stroke
   return `<g class="participant-group">
-  <rect x="${rectX}" y="${rectY}" width="${rectW}" height="${rectH}" class="group-outline" stroke-dasharray="3 3"/>
+  <rect x="${rectX}" y="${rectY}" width="${rectW}" height="${rectH}" class="group-outline" stroke-dasharray="4 3"/>
   ${titleText ? `<rect x="${tbX}" y="${tbY}" width="${tbWidth}" height="${tbHeight}" class="group-title-bg"/>` : ""}
   ${titleText ? `<text x="${g.x + g.width / 2}" y="${titleY}" text-anchor="middle" dominant-baseline="middle" class="group-title-text">${titleText}</text>` : ""}
 </g>`;

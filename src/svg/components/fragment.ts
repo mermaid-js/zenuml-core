@@ -62,16 +62,6 @@ export function renderFragment(f: FragmentGeometry): string {
     parts.push(renderBracketedLabel(headerX, condY, f.label, f.labelWidth, "fragment-condition"));
   }
 
-  // Critical fragment: extra 2px header-bottom border
-  // HTML .fragment-critical .header::before applies border-bottom: 2px solid (color: var(--color-border-base) = #666)
-  // This creates a thicker header separator unique to the critical kind.
-  if (f.kind === "critical") {
-    const headerBottomY = headerY + HEADER_HEIGHT;
-    parts.push(
-      `<line x1="${headerX}" y1="${headerBottomY}" x2="${headerX + headerW}" y2="${headerBottomY}" stroke="#666" stroke-width="2" shape-rendering="crispEdges"/>`,
-    );
-  }
-
   // Section separator lines and labels (for multi-section fragments like alt, tcf)
   if (f.sections.length > 1) {
     for (let i = 1; i < f.sections.length; i++) {
