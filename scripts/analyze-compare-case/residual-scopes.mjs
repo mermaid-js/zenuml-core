@@ -235,6 +235,22 @@ function buildDiffClusters(diffImage, targetClass) {
   return clusters.sort((a, b) => b.size - a.size);
 }
 
+function normalizeClusterToFrameSpace(cluster, scaleX, scaleY) {
+  return {
+    ...cluster,
+    bbox: {
+      x: cluster.bbox.x / scaleX,
+      y: cluster.bbox.y / scaleY,
+      w: cluster.bbox.w / scaleX,
+      h: cluster.bbox.h / scaleY,
+    },
+    centroid: {
+      x: cluster.centroid.x / scaleX,
+      y: cluster.centroid.y / scaleY,
+    },
+  };
+}
+
 function pickScopeTarget(cluster, items) {
   const centroid = cluster.centroid;
   let best = null;
@@ -287,10 +303,16 @@ function formatResidualScopeSummary(scope) {
 export function buildResidualScopes(extracted, diffImage) {
   const htmlItems = buildScopeItems("html", extracted);
   const svgItems = buildScopeItems("svg", extracted);
+  const frameWidth = extracted.htmlRootBox?.w || extracted.svgRootBox?.w || diffImage.width;
+  const frameHeight = extracted.htmlRootBox?.h || extracted.svgRootBox?.h || diffImage.height;
+  const scaleX = frameWidth > 0 ? diffImage.width / frameWidth : 1;
+  const scaleY = frameHeight > 0 ? diffImage.height / frameHeight : 1;
   const clusters = [
     ...buildDiffClusters(diffImage, 2),
     ...buildDiffClusters(diffImage, 3),
-  ].sort((a, b) => b.size - a.size);
+  ]
+    .map((cluster) => normalizeClusterToFrameSpace(cluster, scaleX, scaleY))
+    .sort((a, b) => b.size - a.size);
 
   const residualScopes = clusters.map((cluster, index) => ({
     rank: index + 1,
