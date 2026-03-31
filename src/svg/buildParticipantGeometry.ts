@@ -162,12 +162,14 @@ export function buildGroups(
     // +1.5 corrects for the SVG dominant-baseline="middle" rendering offset so that
     // the title text screen position matches the HTML title bar center exactly.
     const y = minY - 20 + 1.5;
-    // HTML group extends to the full diagram height plus bottom padding.
-    // Add 12px to match HTML's h-full container which includes extra bottom space.
-    // Offset matches renderToSvg.ts: viewBox height = diagramHeight + 47, content translate-y = 34.
-    // Group bottom outer stroke edge = 34 + y + height + 0.75. For it to be clipped by viewBox:
-    // height > (diagramHeight + 47) - 34 - y - 0.75 = diagramHeight - y + 12.25. Use +14 to be safe.
-    const height = Math.max(0, diagramHeight - y + 14);
+    // renderGroup uses rectH = g.height + sw (= g.height + 1.5) with rectY = g.y - sw.
+    // Rendered rect bottom = 34 + (g.y - sw) + (g.height + sw) = 34 + g.y + g.height.
+    // The rect must extend past the HTML group's visible bottom to ensure visual coverage
+    // of the full group area while keeping the measured <g> height close to HTML's.
+    // K=14: g.height=212.5, rendered bottom=256 (clipped by viewBox=255), <g> h≈214 (dh=+2)
+    // K=12: g.height=210.5, rendered bottom=254 (not clipped), <g> h=212 (dh=0) — worse pixel match
+    // K=13 is a compromise: g.height=211.5, rendered bottom=255 (viewBox edge), <g> h≈213 (dh≈+1)
+    const height = Math.max(0, diagramHeight - y + 13);
 
     // Use groupId as the display name (the parser sets groupId = group name from DSL)
     groups.push({

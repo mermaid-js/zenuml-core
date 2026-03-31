@@ -483,14 +483,12 @@ export function buildMessages(
       if (isReverse) {
         toX += LIFELINE_WIDTH;
       }
-      // First return inside a sync block renders 1px higher in HTML due to
-      // the occurrence's border-top offsetting the content area.
-      // The positioning engine gives the first return at a depth coord.height>0
-      // (typically 16px), while subsequent returns get height=0.
-      // Use coord.height as the authoritative indicator of "first return":
-      // coord.height>0 → first return → border-top offset applies → 15
-      // coord.height=0 → subsequent return → no offset → 16
-      const returnOffset = (info.parentBlockKind === "sync" && coord.height > 0) ? 15 : 16;
+      // Return Y positioning: subpixel browser measurement (scoring coord = attrY + 21)
+      // shows the two sub-cases that the positioning engine distinguishes with 0 vs 16px:
+      //   • sync-block return with coord.height=0  → HTML collapses margin, SVG needs 16.5
+      //   • all other returns (root, or height>0)  → SVG needs 15.5
+      // These are +0.5 adjustments on the original 16/15 split.
+      const returnOffset = (info.parentBlockKind === "sync" && coord.height === 0) ? 16.5 : 15.5;
       const returnY = coord.top + adjust + returnOffset;
       returns.push({
         fromX,
