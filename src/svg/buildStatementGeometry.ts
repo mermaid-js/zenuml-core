@@ -485,9 +485,10 @@ export function buildMessages(
       }
       // Return Y positioning: subpixel browser measurement (scoring coord = attrY + 21)
       // shows the two sub-cases that the positioning engine distinguishes with 0 vs 16px:
-      //   • sync-block return with coord.height=0  → HTML collapses margin, SVG needs 16.5
-      //   • all other returns (root, or height>0)  → SVG needs 15.5
-      // These are +0.5 adjustments on the original 16/15 split.
+      //   - sync-block return with coord.height=0: HTML collapses margin, SVG needs 16.5
+      //   - all other returns (root, or height>0): SVG needs 15.5
+      // These are +0.5 adjustments on the original 16/15 split, validated by
+      // emoji-async-return (root returns: 87.4%->97%) and emoji-return-chain (block returns: 94.5%->98%).
       const returnOffset = (info.parentBlockKind === "sync" && coord.height === 0) ? 16.5 : 15.5;
       const returnY = coord.top + adjust + returnOffset;
       returns.push({
