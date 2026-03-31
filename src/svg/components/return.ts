@@ -14,10 +14,14 @@ export function renderReturn(r: ReturnGeometry): string {
   const ARROW_PADDING_HALF = 3.5;
   const labelX = minX + Math.abs(r.toX - r.fromX) / 2
     + (r.isReverse ? ARROW_PADDING_HALF : -ARROW_PADDING_HALF);
-  const labelY = r.y - 3.5;
   // HTML CSS snaps the return line to integer CSS pixels. SVG may produce fractional
   // coordinates (e.g. 153.5). Floor to match HTML's integer-snapped line position.
   const lineY = Math.floor(r.y);
+  // Label sits 3px above the line. Use lineY (floored integer) so that both integer
+  // r.y (assignment returns) and half-pixel r.y (keyword returns) produce the same
+  // integer labelY that matches HTML. Previously "-3.5 from r.y" caused a -0.5px
+  // offset when r.y is an integer (assignment return case).
+  const labelY = lineY - 3;
 
   // Match HTML renderer's ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
   const arrowTipX = r.toX;
