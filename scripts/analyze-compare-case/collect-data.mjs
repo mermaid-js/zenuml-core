@@ -273,6 +273,24 @@ export async function collectLabelData(page) {
       return Array.from(byName.values());
     }
 
+    function collectHtmlTitle(root, rootRect) {
+      const titleEl = root.querySelector(".title");
+      if (!titleEl) return null;
+      const text = (titleEl.textContent ?? "").trim();
+      if (!text) return null;
+      const measured = measureTextEntry(titleEl, rootRect);
+      return { side: "html", kind: "title", text, box: measured.box, font: measured.font, letters: measured.letters };
+    }
+
+    function collectSvgTitle(root, rootRect) {
+      const titleEl = root.querySelector("text.frame-title");
+      if (!titleEl) return null;
+      const text = (titleEl.textContent ?? "").trim();
+      if (!text) return null;
+      const measured = measureTextEntry(titleEl, rootRect);
+      return { side: "svg", kind: "title", text, box: measured.box, font: measured.font, letters: measured.letters };
+    }
+
     function collectHtmlLabels(root, rootRect) {
       const labels = [];
       const selectorPairs = [
@@ -968,6 +986,8 @@ export async function collectLabelData(page) {
       htmlRootBox: { x: 0, y: 0, w: htmlRootRect.width, h: htmlRootRect.height },
       svgRootBox: { x: 0, y: 0, w: svgRootRect.width, h: svgRootRect.height },
       svgFrameBorderBox: boxOrNull(strokedElementOuterRect(svgFrameBorderEl, svgRootRect)),
+      htmlTitle: collectHtmlTitle(htmlRoot, htmlRootRect),
+      svgTitle: collectSvgTitle(svgRoot, svgRootRect),
       htmlLabels: collectHtmlLabels(htmlRoot, htmlRootRect),
       svgLabels: collectSvgLabels(svgRoot, svgRootRect),
       htmlNumbers: collectHtmlNumbers(htmlRoot, htmlRootRect),
