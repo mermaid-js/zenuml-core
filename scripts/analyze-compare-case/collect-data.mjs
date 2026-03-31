@@ -1001,6 +1001,73 @@ export async function collectLabelData(page) {
       return dividers;
     }
 
+    /**
+     * Critical fragment header color calibration.
+     * HTML renders .fragment-critical .header::before with border-bottom: 2px solid
+     * (the unique thick header separator not present on other fragment types).
+     * SVG renders no extra border for critical kind.
+     * This collects the header bounding box + color style from both sides for comparison.
+     */
+    function collectHtmlCriticalFragmentHeaders(root, rootRect) {
+      const results = [];
+      for (const frag of root.querySelectorAll(".fragment.fragment-critical")) {
+        const header = frag.querySelector(":scope > .header");
+        if (!header) continue;
+        const r = header.getBoundingClientRect();
+        const box = {
+          x: Math.round(r.left - rootRect.left),
+          y: Math.round(r.top - rootRect.top),
+          w: Math.round(r.width),
+          h: Math.round(r.height),
+        };
+        // ::before pseudo-element carries the border-bottom: 2px solid style
+        const pseudoStyle = window.getComputedStyle(header, "::before");
+        const borderBottomWidth = parseFloat(pseudoStyle.borderBottomWidth || "0") || 0;
+        const borderBottomColor = pseudoStyle.borderBottomColor || "";
+        results.push({
+          side: "html",
+          idx: results.length,
+          box,
+          headerBottomY: box.y + box.h,
+          borderBottomWidth,
+          borderBottomColor,
+        });
+      }
+      return results;
+    }
+
+    function collectSvgCriticalFragmentHeaders(root, rootRect) {
+      const results = [];
+      for (const frag of root.querySelectorAll("g.fragment.fragment-critical")) {
+        const headerRect_el = frag.querySelector("rect.fragment-header");
+        if (!headerRect_el) continue;
+        const r = headerRect_el.getBoundingClientRect();
+        const box = {
+          x: Math.round(r.left - rootRect.left),
+          y: Math.round(r.top - rootRect.top),
+          w: Math.round(r.width),
+          h: Math.round(r.height),
+        };
+        const headerBottomY = box.y + box.h;
+        // Look for a line element at the header bottom edge (within 2px)
+        const lines = Array.from(frag.querySelectorAll("line"));
+        const borderLine = lines.find(l => {
+          const lr = l.getBoundingClientRect();
+          return Math.abs((lr.top - rootRect.top) - headerBottomY) < 3;
+        });
+        results.push({
+          side: "svg",
+          idx: results.length,
+          box,
+          headerBottomY,
+          hasHeaderBottomLine: !!borderLine,
+          headerBottomLineColor: borderLine ? (borderLine.getAttribute("stroke") || getComputedStyle(borderLine).stroke || "") : null,
+          headerBottomLineWidth: borderLine ? (parseFloat(borderLine.getAttribute("stroke-width") || getComputedStyle(borderLine).strokeWidth || "0") || 0) : null,
+        });
+      }
+      return results;
+    }
+
     const prepared = typeof window.prepareHtmlForCapture === "function"
       ? window.prepareHtmlForCapture()
       : null;
@@ -1041,6 +1108,8 @@ export async function collectLabelData(page) {
       svgFragmentDividers: collectSvgFragmentDividers(svgRoot, svgRootRect),
       htmlDividers: collectHtmlDividers(htmlRoot, htmlRootRect),
       svgDividers: collectSvgDividers(svgRoot, svgRootRect),
+      htmlCriticalFragmentHeaders: collectHtmlCriticalFragmentHeaders(htmlRoot, htmlRootRect),
+      svgCriticalFragmentHeaders: collectSvgCriticalFragmentHeaders(svgRoot, svgRootRect),
     };
   });
 }
