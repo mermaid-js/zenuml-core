@@ -1008,7 +1008,7 @@ if(authorized) {
   "emoji-tcf-labels": `A.process() {
   try {
     B.save()
-  } catch([x] DatabaseError) {
+  } catch(DatabaseError) {
     C.rollback()
   } finally {
     D.cleanup()
@@ -1032,7 +1032,7 @@ critical([warning] important) {
     Server->[database]DB.[fire]query() {
       try {
         DB.[gear]process()
-      } catch([x] timeout) {
+      } catch(timeout) {
         DB-->Server: [warning] retry
       }
     }
