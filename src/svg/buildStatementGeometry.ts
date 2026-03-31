@@ -13,6 +13,7 @@ import {
 import { TextType } from "@/positioning/Coordinate";
 import { buildFragmentGeometry } from "./buildFragmentGeometry";
 import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import { walkStatements } from "./walkStatements";
 import { computeReturnDebt } from "./computeReturnDebt";
 import CommentClass from "@/components/Comment/Comment";
@@ -514,7 +515,7 @@ export function buildMessages(
         y: coord.top + adjust + coord.height / 2,
         width: diagramWidth,
         label: info.label,
-        labelWidth: measureSvgFragmentLabelWidth(cleanLabel),
+        labelWidth: measureSvgFragmentLabelWidth(resolveEmojiInText(cleanLabel)),
       });
       continue;
     }
