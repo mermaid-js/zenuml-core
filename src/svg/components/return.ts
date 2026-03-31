@@ -15,6 +15,9 @@ export function renderReturn(r: ReturnGeometry): string {
   const labelX = minX + Math.abs(r.toX - r.fromX) / 2
     + (r.isReverse ? ARROW_PADDING_HALF : -ARROW_PADDING_HALF);
   const labelY = r.y - 3.5;
+  // HTML CSS snaps the return line to integer CSS pixels. SVG may produce fractional
+  // coordinates (e.g. 153.5). Floor to match HTML's integer-snapped line position.
+  const lineY = Math.floor(r.y);
 
   // Match HTML renderer's ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
   const arrowTipX = r.toX;
@@ -22,8 +25,8 @@ export function renderReturn(r: ReturnGeometry): string {
   const halfH = 3.25;
   const dir = r.isReverse ? -1 : 1;
   const ax1 = arrowTipX - dir * w;
-  const ay1 = r.y - halfH;
-  const ay2 = r.y + halfH;
+  const ay1 = lineY - halfH;
+  const ay2 = lineY + halfH;
 
   // Sequence number: always to the left of the return
   const numberX = Math.min(r.fromX, r.toX) - 4;
@@ -32,8 +35,8 @@ export function renderReturn(r: ReturnGeometry): string {
     : "";
 
   return `<g class="return">
-  <line x1="${r.fromX}" y1="${r.y}" x2="${r.toX}" y2="${r.y}" class="return-line"/>
-  <polyline points="${ax1},${ay1} ${arrowTipX},${r.y} ${ax1},${ay2}" fill="none" stroke-linecap="round" class="return-arrow"/>
+  <line x1="${r.fromX}" y1="${lineY}" x2="${r.toX}" y2="${lineY}" class="return-line"/>
+  <polyline points="${ax1},${ay1} ${arrowTipX},${lineY} ${ax1},${ay2}" fill="none" stroke-linecap="round" class="return-arrow"/>
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="return-label">${esc(resolveEmojiInText(r.label))}</text>
   ${numberSvg}
 </g>`;

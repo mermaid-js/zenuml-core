@@ -62,7 +62,7 @@ const DEFAULT_THEME_STYLES = `
   .fragment-condition { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
   .fragment-separator { stroke: #e5e7eb; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-section-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
-  .return-line { stroke: #000; stroke-width: 2; stroke-dasharray: 6,4; }
+  .return-line { stroke: #000; stroke-width: 2; stroke-dasharray: 6,4; shape-rendering: crispEdges; }
   .return-arrow { stroke: #000; stroke-width: 2; fill: none; }
   .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .return-icon { fill: #222; }
