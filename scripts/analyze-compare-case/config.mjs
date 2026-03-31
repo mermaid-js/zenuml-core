@@ -15,7 +15,7 @@
  */
 export const DEFAULTS = {
   caseName: "async-2a",
-  baseUrl: "http://localhost:8080",
+  baseUrl: "http://localhost:4000",
   lumaThreshold: 240,
   channelTolerance: 12,
   positionTolerance: 0,

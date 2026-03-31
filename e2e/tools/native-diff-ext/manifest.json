@@ -9,12 +9,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://localhost:8080/e2e/tools/compare-case.html*"],
+      "matches": ["http://localhost:*/e2e/tools/compare-case.html*"],
       "js": ["bridge.js"],
       "run_at": "document_start"
     },
     {
-      "matches": ["http://localhost:8080/e2e/tools/compare-case.html*"],
+      "matches": ["http://localhost:*/e2e/tools/compare-case.html*"],
       "js": ["content.js"],
       "world": "MAIN",
       "run_at": "document_start"
