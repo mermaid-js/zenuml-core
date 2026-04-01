@@ -70,6 +70,7 @@ export function WidthProviderOnCanvas(
   return width;
 }
 
+// eslint-disable-next-line no-misleading-character-class
 const EMOJI_PATTERN = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
 
 /**
