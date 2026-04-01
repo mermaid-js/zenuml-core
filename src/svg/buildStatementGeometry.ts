@@ -144,12 +144,19 @@ export function buildMessages(
         : 0;
       const messageY = coord.top + adjust + msgCommentHeight + messageHeight - 0.5;
 
-      // D4: When sender has an active occurrence, arrow starts from its near edge
-      // For nested occurrences (depth > 1), offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level
+      // D4: When sender has an active occurrence, arrow starts from its near edge.
+      // LTR: near edge is the RIGHT side → center + depth*side (each level shifts bar right).
+      // RTL: near edge is the LEFT side → center - side + (depth-1)*side = center + (depth-2)*side.
+      //   depth=1: center - side (outer bar left edge)
+      //   depth=2: center            (second bar left edge)
+      //   depth=3: center + side     (third bar left edge)
       if (info.senderOccurrenceDepth >= 1 && !info.isSelf) {
-        const occOffset = OCCURRENCE_BAR_SIDE_WIDTH + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
+        const depth = info.senderOccurrenceDepth;
+        const occOffset = depth * OCCURRENCE_BAR_SIDE_WIDTH;
         const isLTR = fromX < toX;
-        fromX = isLTR ? fromX + occOffset : fromX - occOffset;
+        fromX = isLTR
+          ? fromX + occOffset
+          : fromX - OCCURRENCE_BAR_SIDE_WIDTH + (depth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
       }
 
       // When target already has active occurrences, the new occurrence is nested
