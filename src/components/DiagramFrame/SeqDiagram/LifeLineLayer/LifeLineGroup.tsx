@@ -132,17 +132,14 @@ export const LifeLineGroup = (props: {
   const right =
     coordinates.right(entities[entities.length - 1].name) -
     LIFELINE_GROUP_OUTLINE_MARGIN;
-  // Shift the div 0.5px left to better align with SVG group box
-  const divLeft = groupLeft - 0.5;
-
   const name = props.context?.name()?.getFormattedText();
   return (
     <div
       ref={containerRef}
       className="lifeline-group-container absolute flex flex-col flex-grow h-full"
       style={{
-        left: `${divLeft}px`,
-        width: `${right - groupLeft + 0.5}px`,
+        left: `${groupLeft}px`,
+        width: `${right - groupLeft}px`,
       }}
     >
       {props.renderLifeLine && overlayRect && (
