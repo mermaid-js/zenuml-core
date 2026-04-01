@@ -11,6 +11,7 @@ interface ParticipantOptions {
   color?: string;
   comment?: string;
   assignee?: string;
+  emoji?: string;
   position?: Position;
   assigneePosition?: Position;
 }
@@ -27,6 +28,7 @@ export const blankParticipant = {
   type: undefined,
   width: undefined,
   assignee: undefined,
+  emoji: undefined,
   positions: new Set(),
   assigneePositions: new Set(),
 };
@@ -43,6 +45,7 @@ export class Participant {
   private color: string | undefined;
   private comment: string | undefined;
   private assignee: string | undefined;
+  private emoji: string | undefined;
   positions: Set<Position> = new Set();
   assigneePositions: Set<Position> = new Set();
 
@@ -63,6 +66,7 @@ export class Participant {
       color,
       comment,
       assignee,
+      emoji,
     } = options;
     this.stereotype ||= stereotype;
     this.width ||= width;
@@ -74,6 +78,7 @@ export class Participant {
     this.color ||= color;
     this.comment ||= comment;
     this.assignee ||= assignee;
+    this.emoji ||= emoji;
   }
   public AddPosition(position: Position) {
     this.positions.add(position);
@@ -92,6 +97,7 @@ export class Participant {
       color: this.color,
       comment: this.comment,
       assignee: this.assignee,
+      emoji: this.emoji,
       positions: this.positions,
       assigneePositions: this.assigneePositions,
     };

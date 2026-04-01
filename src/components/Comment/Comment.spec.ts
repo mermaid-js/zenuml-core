@@ -1,12 +1,18 @@
 import Comment from "./Comment";
+import { setKnownEmojis } from "@/emoji/resolveEmoji";
 
 describe("Comment", function () {
+  beforeAll(() => {
+    setKnownEmojis(["rocket", "red", "fire"]);
+  });
+
   test.each([
     [
       "[red] comment1 \n",
       "comment1",
       { color: "red" },
       { color: "red" },
+      [],
       [],
       [],
     ],
@@ -17,15 +23,25 @@ describe("Comment", function () {
       {},
       [],
       [],
+      [],
     ],
-    ["comment \n", "comment", {}, {}, [], []],
-    ["[red] \n", "", { color: "red" }, { color: "red" }, [], []],
-    ["[bold] \n", "", { fontWeight: "bold" }, { fontWeight: "bold" }, [], []],
+    ["comment \n", "comment", {}, {}, [], [], []],
+    ["[red] \n", "", { color: "red" }, { color: "red" }, [], [], []],
+    [
+      "[bold] \n",
+      "",
+      { fontWeight: "bold" },
+      { fontWeight: "bold" },
+      [],
+      [],
+      [],
+    ],
     [
       "[italic] \n",
       "",
       { fontStyle: "italic" },
       { fontStyle: "italic" },
+      [],
       [],
       [],
     ],
@@ -36,6 +52,7 @@ describe("Comment", function () {
       { textDecoration: "underline" },
       [],
       [],
+      [],
     ],
     [
       "[red, bold] \n",
@@ -44,8 +61,17 @@ describe("Comment", function () {
       { color: "red", fontWeight: "bold" },
       [],
       [],
+      [],
     ],
-    ["<red> (bold) \ncomment \n", "<red> (bold) \ncomment", {}, {}, [], []],
+    [
+      "<red> (bold) \ncomment \n",
+      "<red> (bold) \ncomment",
+      {},
+      {},
+      [],
+      [],
+      [],
+    ],
     [
       "<red> (bold) comment \n",
       "comment",
@@ -53,8 +79,45 @@ describe("Comment", function () {
       { fontWeight: "bold" },
       [],
       [],
+      [],
     ],
-    ["[color-red] comment \n", "comment", {}, {}, ["color-red"], ["color-red"]],
+    [
+      "[color-red] comment \n",
+      "comment",
+      {},
+      {},
+      ["color-red"],
+      ["color-red"],
+      [],
+    ],
+    // Emoji in comments
+    [
+      "[rocket] deploy note\n",
+      "🚀 deploy note",
+      {},
+      {},
+      [],
+      [],
+      ["rocket"],
+    ],
+    [
+      "[rocket, red] alert\n",
+      "🚀 alert",
+      { color: "red" },
+      { color: "red" },
+      [],
+      [],
+      ["rocket"],
+    ],
+    [
+      "[:red:] note\n",
+      "🔴 note",
+      {},
+      {},
+      [],
+      [],
+      ["red"],
+    ],
   ])(
     "parse %s as text %s and color %s",
     function (
@@ -64,6 +127,7 @@ describe("Comment", function () {
       messageStyle,
       commentClassNames,
       messageClassNames,
+      emojis,
     ) {
       const comment = new Comment(raw);
       expect(comment.commentStyle).toEqual(commentStyle);
@@ -71,6 +135,7 @@ describe("Comment", function () {
       expect(comment.commentClassNames).toEqual(commentClassNames);
       expect(comment.messageClassNames).toEqual(messageClassNames);
       expect(comment.text).toBe(text);
+      expect(comment.emojis).toEqual(emojis);
     },
   );
 });

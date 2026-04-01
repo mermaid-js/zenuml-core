@@ -843,6 +843,39 @@ OrderService.handle() {
 B -> C: forward
 ==Done==`,
 
+  // --- Emoji ---
+  "emoji-participant": `[rocket] Production
+Production.deploy()`,
+  "emoji-multi-participants": `[rocket] Production
+[lock] Auth
+[fire] Cache
+Production->Auth: validate
+Auth->Cache: lookup`,
+  "emoji-with-type": `@Database [fire] HotDB
+@Actor [eyes] Reviewer
+Reviewer->HotDB: query`,
+  "emoji-with-stereotype": `<<service>> [lock] Auth
+<<gateway>> [rocket] API
+API->Auth: authenticate`,
+  "emoji-no-emoji-baseline": `Production
+Auth
+Cache
+Production->Auth: validate
+Auth->Cache: lookup`,
+  "emoji-async-message": `A
+B
+A->B: [rocket] launching`,
+  "emoji-alt-condition": `A
+B
+A->B: [check] start
+if(success) {
+  A->B: [rocket] proceed
+}`,
+  "emoji-comment": `A
+B
+// [eyes] review this
+A->B: process`,
+
   // --- Icons ---
   "icons": `@Actor User
 @Database DB
@@ -853,5 +886,205 @@ User.login() {
   DB.verify()
   MQ.enqueue()
   Topic.publish()
+}`,
+
+  // --- Emoji parity cases ---
+  "emoji-sync-call": `[rocket]A.method() {
+  [database]B.query()
+}`,
+  "emoji-nested-calls": `[globe]API.handle() {
+  [lock]Auth.validate() {
+    [database]DB.lookup()
+  }
+}`,
+  "emoji-async-return": `[globe]API->[lock]Auth: validate
+Auth->[database]DB: lookup
+DB-->Auth: [check] found
+Auth-->API: [check] authorized`,
+  "emoji-with-fragment": `[rocket]Client->[lock]Server.request()
+if(authorized) {
+  Server->[database]DB.query()
+  DB-->Server: [check] result
+} else {
+  Server-->Client: [x] denied
+}`,
+  "emoji-divider-case": `[rocket]A->[lock]B.start()
+== [fire] Deploy Phase ==
+B->[database]C.migrate()`,
+  "emoji-group-case": `group Backend {[database]DB [cache]Redis}
+[globe]Gateway->DB.query()
+Gateway->Redis.get()`,
+  "emoji-group-case-2groups": `group Backend {[database]DB [cache]Redis}
+group Frontend {[globe]Gateway}
+Gateway->DB.query()
+Gateway->Redis.get()`,
+  "group-minimal": `group x {a}`,
+  "group-single-participant": `group Frontend {[globe]Gateway}
+group Backend {[database]DB}
+Gateway->DB.query()`,
+  "emoji-comment-styled": `// [eyes] monitoring
+[rocket]A->[lock]B.deploy()
+// [rocket, red] critical path
+B->[database]C.write()`,
+  "emoji-colon-override": `[:red:] Alert
+[rocket] Normal
+Alert->Normal.notify()`,
+  "emoji-icon-combo": `@Actor [star] Admin
+@Database [fire] HotDB
+Admin->HotDB.query()`,
+  "emoji-long-names": `[rocket]ProductionServer->[lock]AuthService.validate()
+AuthService->[database]UserDB.find()
+UserDB-->AuthService: [check] found`,
+  "emoji-simple-async": `[rocket]A->[lock]B: hello
+B-->A: [check] done`,
+  "emoji-self-call": `[gear]Processor.init() {
+  Processor.validate()
+}`,
+  "emoji-title": `title [rocket] Deploy Pipeline
+[lock]A->[database]B.save()`,
+  // emoji variants of existing patterns
+  "emoji-nested-sync-deep": `[rocket]A.methodA() {
+  [lock]B.methodB() {
+    [database]C.methodC() {
+      [fire]D.process()
+    }
+  }
+}`,
+  "emoji-async-many": `[rocket]A [lock]B [database]C
+A->B: [check] msg1
+B->C: [fire] msg2
+C->B: [check] result
+B->A: [check] done`,
+  "emoji-if-else": `[rocket]Client->[lock]Server.request()
+if(valid) {
+  Server->[database]DB.query()
+} else {
+  Server-->Client: [x] denied
+}`,
+  "emoji-tcf": `[globe]A.process() {
+  try {
+    [database]B.save()
+  } catch(e) {
+    [warning]C.handle()
+  } finally {
+    [gear]D.cleanup()
+  }
+}`,
+  "emoji-loop": `[rocket]A->[lock]B.fetch()
+loop(retries < 3) {
+  B->[database]C.query()
+  C-->B: [check] ok
+}`,
+  "emoji-par": `[rocket]Orchestrator.run() {
+  par {
+    [database]DB.write()
+    [cache]Redis.flush()
+  }
+}`,
+  "emoji-return-chain": `[globe]API->[lock]Auth.check() {
+  Auth->[database]DB.query() {
+    DB-->Auth: [check] found
+  }
+  Auth-->API: [check] valid
+}`,
+  "emoji-creation-simple": `[rocket]A.init() {
+  new B()
+}`,
+  "emoji-color": `[rocket] Prod #FF6600
+[lock] Auth #0747A6
+Prod->Auth.validate()`,
+  "emoji-stereotype-only": `<<service>> [lock] Auth
+<<gateway>> [globe] API
+API->Auth.check()`,
+  "emoji-method-name": `A.[rocket]deploy()
+A.[lock]validate()
+A->[database]B.[fire]save()`,
+  "emoji-condition-label": `[rocket]Client->[lock]Server.request()
+if(authorized) {
+  Server->[database]DB.query()
+  DB-->Server: [check] result
+} else {
+  Server-->Client: [x] denied
+}`,
+  "emoji-in-conditions": `if([check] authorized) {
+  A.proceed()
+} else if([warning] rate limited) {
+  A.wait()
+} else {
+  A.deny()
+}`,
+  "emoji-tcf-labels": `A.process() {
+  try {
+    B.save()
+  } catch(DatabaseError) {
+    C.rollback()
+  } finally {
+    D.cleanup()
+  }
+}`,
+  "emoji-loop-condition": `while([rocket] deploying) {
+  A->[database]B.check()
+  B-->A: [check] status
+}`,
+  "emoji-opt-critical": `[rocket]A->[lock]B.request()
+opt {
+  B.[gear]process()
+}
+critical([warning] important) {
+  B->[database]C.save()
+}`,
+  "emoji-nested-mixed": `[globe]Client->[lock]Server.handle() {
+  if([check] cached) {
+    Server->[cache]Redis.[rocket]get()
+  } else {
+    Server->[database]DB.[fire]query() {
+      try {
+        DB.[gear]process()
+      } catch(timeout) {
+        DB-->Server: [warning] retry
+      }
+    }
+  }
+}`,
+  "emoji-all-features": `title [rocket] System Overview
+@Actor [star] Admin
+@Database [fire] DB
+<<service>> [lock] Auth
+[globe] API
+
+// [eyes] authentication flow
+Admin->API.[key]login(credentials)
+API->Auth.[lock]validate(token) {
+  if([check] valid) {
+    Auth->DB.[fire]query(userId)
+    DB-->Auth: [check] found
+  } else {
+    Auth-->API: [x] denied
+  }
+}
+== [rocket] deploy phase ==
+API->[gear]Worker: [rocket] process`,
+  "emoji-chained-calls": `[rocket]A.[lock]auth().[fire]process().[check]save()`,
+  "emoji-assign-return": `[globe]API->[lock]Auth.check() {
+  result = [database]DB.query()
+  return [check] authorized
+}`,
+  "emoji-multi-async": `[rocket]A->[lock]B: [fire] step 1
+B->[database]C: [gear] step 2
+C->[globe]D: [check] step 3
+D-->A: [check] all done`,
+  "emoji-named-params": `[rocket]A.[lock]method(userId=123, name="John")
+[database]B.[fire]create(type="User", active=true)`,
+  "emoji-self-sync": `[gear]selfSync() {
+  [rocket]A.[lock]method() {
+    [database]B.save()
+  }
+}`,
+  "emoji-fragments-return": `[rocket]A.[lock]method() {
+  if([check] x) {
+    return [check] success
+  } else {
+    return [x] failure
+  }
 }`,
 };

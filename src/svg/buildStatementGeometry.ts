@@ -13,6 +13,7 @@ import {
 import { TextType } from "@/positioning/Coordinate";
 import { buildFragmentGeometry } from "./buildFragmentGeometry";
 import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import { walkStatements } from "./walkStatements";
 import { computeReturnDebt } from "./computeReturnDebt";
 import CommentClass from "@/components/Comment/Comment";
@@ -143,12 +144,19 @@ export function buildMessages(
         : 0;
       const messageY = coord.top + adjust + msgCommentHeight + messageHeight - 0.5;
 
-      // D4: When sender has an active occurrence, arrow starts from its near edge
-      // For nested occurrences (depth > 1), offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level
+      // D4: When sender has an active occurrence, arrow starts from its near edge.
+      // LTR: near edge is the RIGHT side → center + depth*side (each level shifts bar right).
+      // RTL: near edge is the LEFT side → center - side + (depth-1)*side = center + (depth-2)*side.
+      //   depth=1: center - side (outer bar left edge)
+      //   depth=2: center            (second bar left edge)
+      //   depth=3: center + side     (third bar left edge)
       if (info.senderOccurrenceDepth >= 1 && !info.isSelf) {
-        const occOffset = OCCURRENCE_BAR_SIDE_WIDTH + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
+        const depth = info.senderOccurrenceDepth;
+        const occOffset = depth * OCCURRENCE_BAR_SIDE_WIDTH;
         const isLTR = fromX < toX;
-        fromX = isLTR ? fromX + occOffset : fromX - occOffset;
+        fromX = isLTR
+          ? fromX + occOffset
+          : fromX - OCCURRENCE_BAR_SIDE_WIDTH + (depth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
       }
 
       // When target already has active occurrences, the new occurrence is nested
@@ -483,14 +491,16 @@ export function buildMessages(
       if (isReverse) {
         toX += LIFELINE_WIDTH;
       }
-      // First return inside a sync block renders 1px higher in HTML due to
-      // the occurrence's border-top offsetting the content area.
-      // The positioning engine gives the first return at a depth coord.height>0
-      // (typically 16px), while subsequent returns get height=0.
-      // Use coord.height as the authoritative indicator of "first return":
-      // coord.height>0 → first return → border-top offset applies → 15
-      // coord.height=0 → subsequent return → no offset → 16
-      const returnOffset = (info.parentBlockKind === "sync" && coord.height > 0) ? 15 : 16;
+      // Return Y positioning: subpixel browser measurement (scoring coord = attrY + 21)
+      // shows the two sub-cases that the positioning engine distinguishes with 0 vs 16px:
+      //   - return with coord.height=0: HTML collapses margin (CSS margin-bottom:-16px on
+      //     last child inside occurrence), SVG needs 16.5. This applies to returns inside
+      //     sync blocks AND returns inside fragment sections that are themselves inside an
+      //     occurrence (e.g. Alt inside a sync method call).
+      //   - all other returns (root/async, or height>0): SVG needs 15.5
+      // These are +0.5 adjustments on the original 16/15 split, validated by
+      // emoji-async-return (root returns: 87.4%->97%) and emoji-return-chain (block returns: 94.5%->98%).
+      const returnOffset = coord.height === 0 ? 16.5 : 15.5;
       const returnY = coord.top + adjust + returnOffset;
       returns.push({
         fromX,
@@ -501,7 +511,8 @@ export function buildMessages(
         isSelf: info.isSelf,
         number: info.number,
       });
-      maxReturnBottom = Math.max(maxReturnBottom, returnY + (62 - returnOffset));
+      const returnBottomPad = coord.height === 0 ? 45.5 : 44.5;
+      maxReturnBottom = Math.max(maxReturnBottom, returnY + returnBottomPad);
       continue;
     }
 
@@ -512,7 +523,7 @@ export function buildMessages(
         y: coord.top + adjust + coord.height / 2,
         width: diagramWidth,
         label: info.label,
-        labelWidth: measureSvgFragmentLabelWidth(cleanLabel),
+        labelWidth: measureSvgFragmentLabelWidth(resolveEmojiInText(cleanLabel)),
       });
       continue;
     }

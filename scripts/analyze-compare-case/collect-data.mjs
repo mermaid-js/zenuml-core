@@ -414,6 +414,21 @@ export async function collectLabelData(page) {
       }
 
       for (const fragmentEl of root.querySelectorAll("g.fragment")) {
+        // Detect direct text.fragment-section-label children (e.g. [else] rendered without a <g> wrapper)
+        for (const directLabel of fragmentEl.querySelectorAll(":scope > text.fragment-section-label")) {
+          const text = (directLabel.textContent ?? "").trim();
+          if (!text) continue;
+          const measured = measureTextEntry(directLabel, rootRect);
+          labels.push({
+            side: "svg",
+            kind: text.startsWith("[") ? "fragment-condition" : "fragment-section",
+            text,
+            ownerText: textOrEmpty(fragmentEl, ":scope > text.fragment-label") || null,
+            box: measured.box,
+            font: measured.font,
+            letters: measured.letters,
+          });
+        }
         for (const groupEl of fragmentEl.querySelectorAll(":scope > g")) {
           const conditionTextEls = Array.from(groupEl.querySelectorAll(":scope > text.fragment-condition"));
           if (conditionTextEls.length > 0) {
@@ -461,18 +476,23 @@ export async function collectLabelData(page) {
 
         const rowEl = participantEl.querySelector(":scope > .flex.items-center.justify-center, :scope > div:last-child");
         const firstChild = rowEl?.firstElementChild ?? null;
-        const iconHost = firstChild && (
+        // Find emoji span (span.mr-1.flex-shrink-0 containing emoji text)
+        const emojiSpan = participantEl.querySelector("span.mr-1.flex-shrink-0, span[data-testid='participant-emoji']");
+        const emojiText = emojiSpan ? emojiSpan.textContent.trim() : null;
+        // Find type icon div (div with aria-description or h-6.w-6 containing an SVG icon)
+        const typeIconDiv = firstChild && (
           firstChild.matches("[aria-description]") ||
           firstChild.querySelector("svg") ||
           /\bh-6\b/.test(firstChild.className || "")
-        )
-          ? firstChild
-          : null;
+        ) ? firstChild : null;
+        const iconHost = typeIconDiv || emojiSpan || null;
         const labelEl = Array.from(participantEl.querySelectorAll(".name")).at(-1) ?? null;
         const measuredLabel = labelEl ? measureTextEntry(labelEl, rootRect) : null;
         const stereotypeEl = participantEl.querySelector("label.interface");
         const measuredStereotype = stereotypeEl ? measureTextEntry(stereotypeEl, rootRect) : null;
-        const iconPaintRoot = iconHost?.querySelector("svg") ?? iconHost;
+        // For icon measurement: prefer type icon (so we compare type icon vs type icon across renderers).
+        // Fall back to emoji span for emoji-only participants.
+        const iconPaintRoot = typeIconDiv ? (typeIconDiv.querySelector("svg") ?? typeIconDiv) : (emojiSpan || null);
         const participantStyle = getComputedStyle(participantEl);
 
         participants.push({
@@ -488,6 +508,7 @@ export async function collectLabelData(page) {
           stereotypeFont: measuredStereotype?.font ?? null,
           stereotypeLetters: measuredStereotype?.letters ?? [],
           iconBox: paintedBox(iconPaintRoot, rootRect),
+          emojiText: emojiText || null,
           anchorKind: measuredLabel?.box ? "label" : "participant-box",
           anchorBox: measuredLabel?.box ?? participantBox,
           backgroundColor: normalizeColorValue(participantStyle.backgroundColor),
@@ -518,7 +539,20 @@ export async function collectLabelData(page) {
             .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0]
           || null;
         const measuredStereotype = stereotypeEl ? measureTextEntry(stereotypeEl, rootRect) : null;
-        const iconEl = participantEl.querySelector(":scope > g[transform]");
+        const iconEl = participantEl.querySelector(":scope > g.participant-icon[transform]");
+        // Detect emoji: separate text.participant-emoji element (present for both emoji-only AND icon+emoji participants)
+        // or first tspan in participant-label containing emoji codepoints (legacy inline-tspan format)
+        const emojiPattern = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
+        const emojiTextEl = participantEl.querySelector(":scope > text.participant-emoji") ?? null;
+        const emojiTspan = !emojiTextEl && labelEl
+          ? Array.from(labelEl.querySelectorAll("tspan")).find((ts) => emojiPattern.test(ts.textContent))
+          : null;
+        const svgEmojiText = (emojiTextEl || emojiTspan)
+          ? (emojiTextEl || emojiTspan).textContent.trim()
+          : null;
+        // For icon measurement: prefer type icon so we compare type icon vs type icon across renderers.
+        // Fall back to emoji element for emoji-only participants.
+        const iconTarget = iconEl || emojiTextEl || emojiTspan;
         const participantBoxStyle = participantBoxEl ? getComputedStyle(participantBoxEl) : null;
 
         participants.push({
@@ -533,7 +567,8 @@ export async function collectLabelData(page) {
           stereotypeBox: measuredStereotype?.box ?? null,
           stereotypeFont: measuredStereotype?.font ?? null,
           stereotypeLetters: measuredStereotype?.letters ?? [],
-          iconBox: paintedBox(iconEl, rootRect),
+          iconBox: paintedBox(iconTarget, rootRect),
+          emojiText: svgEmojiText || null,
           anchorKind: measuredLabel?.box ? "label" : "participant-box",
           anchorBox: measuredLabel?.box ?? participantBox,
           backgroundColor: normalizeColorValue(participantBoxStyle?.fill || participantBoxEl?.getAttribute("fill")),
@@ -583,20 +618,36 @@ export async function collectLabelData(page) {
     }
 
     function collectHtmlGroups(root, rootRect) {
-      const groups = [];
+      // Group containers appear twice: once in participant layer (has name label, no overlay)
+      // and once in lifeline layer (has overlay rect, no name label).
+      // Collect name data from participant-layer containers and outline boxes from
+      // lifeline-layer containers, then merge by index order.
+      const nameEntries = [];
+      const boxEntries = [];
       for (const groupEl of root.querySelectorAll(".lifeline-group-container")) {
         const nameEl = groupEl.querySelector(".text-skin-lifeline-group-name");
-        const name = textContentNormalized(nameEl);
-        const box = boxOrNull(relRect(groupEl.getBoundingClientRect(), rootRect));
+        const outlineRect = groupEl.querySelector("[data-group-overlay] rect");
+        if (nameEl) {
+          nameEntries.push({
+            name: textContentNormalized(nameEl),
+            measuredName: measureTextEntry(nameEl, rootRect),
+          });
+        }
+        if (outlineRect) {
+          boxEntries.push(boxOrNull(relRect(outlineRect.getBoundingClientRect(), rootRect)));
+        }
+      }
+      const groups = [];
+      for (let i = 0; i < nameEntries.length; i++) {
+        const box = boxEntries[i] || null;
         if (!box) continue;
-        const measuredName = nameEl ? measureTextEntry(nameEl, rootRect) : null;
         groups.push({
           side: "html",
-          name,
+          name: nameEntries[i].name,
           box,
-          nameBox: measuredName?.box ?? null,
-          nameFont: measuredName?.font ?? null,
-          nameLetters: measuredName?.letters ?? [],
+          nameBox: nameEntries[i].measuredName?.box ?? null,
+          nameFont: nameEntries[i].measuredName?.font ?? null,
+          nameLetters: nameEntries[i].measuredName?.letters ?? [],
         });
       }
       return groups;
@@ -607,7 +658,10 @@ export async function collectLabelData(page) {
       for (const groupEl of root.querySelectorAll("g.participant-group")) {
         const nameEl = groupEl.querySelector(":scope > text");
         const name = textContentNormalized(nameEl);
-        const box = boxOrNull(relRect(groupEl.getBoundingClientRect(), rootRect));
+        // Measure the outline <rect> directly — consistent with HTML side measurement.
+        const outlineRect = groupEl.querySelector("rect.group-outline");
+        const measureEl = outlineRect || groupEl;
+        const box = boxOrNull(relRect(measureEl.getBoundingClientRect(), rootRect));
         if (!box) continue;
         const measuredName = nameEl ? measureTextEntry(nameEl, rootRect) : null;
         groups.push({
@@ -966,6 +1020,73 @@ export async function collectLabelData(page) {
       return dividers;
     }
 
+    /**
+     * Critical fragment header color calibration.
+     * HTML renders .fragment-critical .header::before with border-bottom: 2px solid
+     * (the unique thick header separator not present on other fragment types).
+     * SVG renders no extra border for critical kind.
+     * This collects the header bounding box + color style from both sides for comparison.
+     */
+    function collectHtmlCriticalFragmentHeaders(root, rootRect) {
+      const results = [];
+      for (const frag of root.querySelectorAll(".fragment.fragment-critical")) {
+        const header = frag.querySelector(":scope > .header");
+        if (!header) continue;
+        const r = header.getBoundingClientRect();
+        const box = {
+          x: Math.round(r.left - rootRect.left),
+          y: Math.round(r.top - rootRect.top),
+          w: Math.round(r.width),
+          h: Math.round(r.height),
+        };
+        // ::before pseudo-element carries the border-bottom: 2px solid style
+        const pseudoStyle = window.getComputedStyle(header, "::before");
+        const borderBottomWidth = parseFloat(pseudoStyle.borderBottomWidth || "0") || 0;
+        const borderBottomColor = pseudoStyle.borderBottomColor || "";
+        results.push({
+          side: "html",
+          idx: results.length,
+          box,
+          headerBottomY: box.y + box.h,
+          borderBottomWidth,
+          borderBottomColor,
+        });
+      }
+      return results;
+    }
+
+    function collectSvgCriticalFragmentHeaders(root, rootRect) {
+      const results = [];
+      for (const frag of root.querySelectorAll("g.fragment.fragment-critical")) {
+        const headerRect_el = frag.querySelector("rect.fragment-header");
+        if (!headerRect_el) continue;
+        const r = headerRect_el.getBoundingClientRect();
+        const box = {
+          x: Math.round(r.left - rootRect.left),
+          y: Math.round(r.top - rootRect.top),
+          w: Math.round(r.width),
+          h: Math.round(r.height),
+        };
+        const headerBottomY = box.y + box.h;
+        // Look for a line element at the header bottom edge (within 2px)
+        const lines = Array.from(frag.querySelectorAll("line"));
+        const borderLine = lines.find(l => {
+          const lr = l.getBoundingClientRect();
+          return Math.abs((lr.top - rootRect.top) - headerBottomY) < 3;
+        });
+        results.push({
+          side: "svg",
+          idx: results.length,
+          box,
+          headerBottomY,
+          hasHeaderBottomLine: !!borderLine,
+          headerBottomLineColor: borderLine ? (borderLine.getAttribute("stroke") || getComputedStyle(borderLine).stroke || "") : null,
+          headerBottomLineWidth: borderLine ? (parseFloat(borderLine.getAttribute("stroke-width") || getComputedStyle(borderLine).strokeWidth || "0") || 0) : null,
+        });
+      }
+      return results;
+    }
+
     const prepared = typeof window.prepareHtmlForCapture === "function"
       ? window.prepareHtmlForCapture()
       : null;
@@ -1006,6 +1127,8 @@ export async function collectLabelData(page) {
       svgFragmentDividers: collectSvgFragmentDividers(svgRoot, svgRootRect),
       htmlDividers: collectHtmlDividers(htmlRoot, htmlRootRect),
       svgDividers: collectSvgDividers(svgRoot, svgRootRect),
+      htmlCriticalFragmentHeaders: collectHtmlCriticalFragmentHeaders(htmlRoot, htmlRootRect),
+      svgCriticalFragmentHeaders: collectSvgCriticalFragmentHeaders(svgRoot, svgRootRect),
     };
   });
 }

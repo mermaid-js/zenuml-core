@@ -20,6 +20,7 @@ import {
   PARTICIPANT_BOX_PADDING,
   PARTICIPANT_BOX_PADDING_ASSIGNEE,
   PARTICIPANT_ICON_ROW_WIDTH,
+  PARTICIPANT_EMOJI_WIDTH,
   PARTICIPANT_VISUAL_HEIGHT,
   PARTICIPANT_MAX_WIDTH,
   snapX,
@@ -44,12 +45,24 @@ export function buildParticipants(
       const isAssignee = m.name.includes(":") && m.getDisplayName() === m.name;
       let width: number;
       let measuredTextWidth: number | undefined;
+      let measuredStereotypeWidth: number | undefined;
       if (measureText && m.name !== _STARTER_) {
         const textWidth = measureSvgParticipantLabelWidth(m.getDisplayName());
         measuredTextWidth = textWidth;
         const padding = isAssignee ? PARTICIPANT_BOX_PADDING_ASSIGNEE : PARTICIPANT_BOX_PADDING;
         const iconWidth = m.hasIcon() ? PARTICIPANT_ICON_ROW_WIDTH : 0;
-        width = Math.min(Math.max(textWidth + padding + iconWidth, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
+        const emojiWidth = m.emoji ? PARTICIPANT_EMOJI_WIDTH : 0;
+        // When a stereotype is present, the participant box must be wide enough to fit the
+        // stereotype text. HTML's box = max(contentRowWidth + padding, stereotypeGlyphWidth + 8, minWidth).
+        // The +8 = 4px box padding (2px * 2) + 4px border (2px * 2), both included in border-box sizing.
+        const STEREOTYPE_BOX_OVERHEAD = 8;
+        if (m.stereotype) {
+          measuredStereotypeWidth = measureSvgParticipantLabelWidth(`«${m.stereotype}»`);
+        }
+        const stereotypeBoxWidth = measuredStereotypeWidth != null
+          ? measuredStereotypeWidth + STEREOTYPE_BOX_OVERHEAD
+          : 0;
+        width = Math.min(Math.max(textWidth + padding + iconWidth + emojiWidth, stereotypeBoxWidth, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
       } else {
         width = Math.min(halfWidth * 2 - MARGIN, PARTICIPANT_MAX_WIDTH);
       }
@@ -64,8 +77,6 @@ export function buildParticipants(
           ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 8)
           : PARTICIPANT_TOP_SPACE;
 
-      // Store measured glyph width for aliased labels so renderer can set textLength
-
       return {
         name: m.name,
         label: m.getDisplayName(),
@@ -78,7 +89,9 @@ export function buildParticipants(
         labelWidth: measuredTextWidth,
         type: m.type,
         stereotype: m.stereotype,
+        stereotypeWidth: measuredStereotypeWidth,
         color: m.color,
+        emoji: m.emoji,
         groupId: m.groupId,
       };
     });
@@ -106,9 +119,8 @@ export function buildGroups(
   participants: ParticipantGeometry[],
   diagramHeight: number,
 ): GroupGeometry[] {
-  // HTML's outline-dashed extends ~6px outside the participant bounding box.
-  // Use negative margin to push SVG group outline outward to match.
-  const GROUP_OUTLINE_MARGIN = -6;
+  // Group outline extends 2px outside the participant bounding box on each side.
+  const GROUP_OUTLINE_MARGIN = -2;
 
   // Collect participants by groupId
   const groupMap = new Map<string | number, ParticipantGeometry[]>();
@@ -146,10 +158,17 @@ export function buildGroups(
     // The HTML group container starts at the top of the content region and uses an
     // absolutely-positioned title strip, so the outer outline should stop at the
     // content bottom rather than adding a separate header band to its height.
-    const y = minY - 20 + 0.75;
-    // HTML group extends to the full diagram height plus bottom padding.
-    // Add 12px to match HTML's h-full container which includes extra bottom space.
-    const height = Math.max(0, diagramHeight - y + 12);
+    // +1.5 corrects for the SVG dominant-baseline="middle" rendering offset so that
+    // the title text screen position matches the HTML title bar center exactly.
+    const y = minY - 20 + 1.5;
+    // renderGroup uses rectH = g.height + sw (= g.height + 1.5) with rectY = g.y - sw.
+    // Rendered rect bottom = 34 + (g.y - sw) + (g.height + sw) = 34 + g.y + g.height.
+    // The rect must extend past the HTML group's visible bottom to ensure visual coverage
+    // of the full group area while keeping the measured <g> height close to HTML's.
+    // K=14: g.height=212.5, rendered bottom=256 (clipped by viewBox=255), <g> h≈214 (dh=+2)
+    // K=12: g.height=210.5, rendered bottom=254 (not clipped), <g> h=212 (dh=0) — worse pixel match
+    // K=13 is a compromise: g.height=211.5, rendered bottom=255 (viewBox edge), <g> h≈213 (dh≈+1)
+    const height = Math.max(0, diagramHeight - y + 13);
 
     // Use groupId as the display name (the parser sets groupId = group name from DSL)
     groups.push({

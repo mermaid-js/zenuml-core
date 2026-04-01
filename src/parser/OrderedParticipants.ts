@@ -13,9 +13,10 @@ class Participant implements IParticipantModel {
   type?: string;
   stereotype?: string;
   color?: string;
+  emoji?: string;
   groupId?: string | number;
 
-  constructor(name: string, left: string, label?: string, type?: string, stereotype?: string, color?: string, groupId?: string | number) {
+  constructor(name: string, left: string, label?: string, type?: string, stereotype?: string, color?: string, groupId?: string | number, emoji?: string) {
     this.name = name;
     this.left = left;
     this.label = label;
@@ -23,6 +24,7 @@ class Participant implements IParticipantModel {
     this.stereotype = stereotype;
     this.color = color;
     this.groupId = groupId;
+    this.emoji = emoji;
   }
 
   getDisplayName(): string {
@@ -64,6 +66,7 @@ export function OrderedParticipants(rootContext: any): IParticipantModel[] {
       participant.stereotype,
       participant.color,
       participant.groupId,
+      participant.emoji,
     );
   });
 }

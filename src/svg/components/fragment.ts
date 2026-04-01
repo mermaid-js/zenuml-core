@@ -1,5 +1,6 @@
 import type { FragmentGeometry } from "../geometry";
 import { esc } from "./svgUtils";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 
 const HEADER_HEIGHT = 25;
 const BRACKET_WIDTH = 3.89;
@@ -32,6 +33,7 @@ export function renderFragment(f: FragmentGeometry): string {
   parts.push(
     `<rect x="${headerX}" y="${headerY}" width="${headerW}" height="${HEADER_HEIGHT}" class="fragment-header"/>`,
   );
+
 
   // Kind-specific icon inside the header bar
   // Each fragment type uses its own icon matching the HTML/React renderer
@@ -135,7 +137,7 @@ function renderBracketedLabel(x: number, y: number, innerText: string, innerWidt
   return (
     `<g>` +
     `<text x="${x}" y="${y}" class="${cls}">[</text>` +
-    `<text x="${innerX}" y="${y}" class="${cls}" opacity="0.65">${esc(innerText)}</text>` +
+    `<text x="${innerX}" y="${y}" class="${cls}" opacity="0.65">${esc(resolveEmojiInText(innerText))}</text>` +
     `<text x="${closeX}" y="${y}" class="${cls}">]</text>` +
     `</g>`
   );

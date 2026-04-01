@@ -63,6 +63,9 @@ function formatArrowSummary(arrow) {
 
 function formatParticipantIconSummary(icon) {
   const notes = [];
+  if (icon.emoji) {
+    notes.push(`emoji=${icon.emoji}`);
+  }
   if (icon.label_text) {
     notes.push(`label=${icon.label_text}`);
   }

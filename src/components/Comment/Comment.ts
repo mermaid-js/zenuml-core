@@ -1,5 +1,6 @@
 import { CSSProperties } from "react";
 import { getStyle } from "@/utils/messageStyling";
+import { resolveBracketContent, getEmojiUnicode } from "@/emoji/resolveEmoji";
 
 function parseLine(input: string): [string[], string[], string[], string] {
   // <red> controls comment only;
@@ -50,6 +51,7 @@ export default class CommentClass {
   public messageStyle: CSSProperties = {};
   public commentClassNames: string[] = [];
   public messageClassNames: string[] = [];
+  public emojis: string[] = [];
 
   // Raw comment contains all spaces and newlines
   constructor(raw: string) {
@@ -59,18 +61,37 @@ export default class CommentClass {
     const [commentOnlyStyles, messageOnlyStyles, commonStyles, text] =
       parseLine(lastLine);
 
+    // Resolve emoji from the common ([] bracket) styles
+    const resolved = resolveBracketContent(commonStyles.join(", "));
+    this.emojis = resolved.emojis;
+    // Filter emoji-only values from styles passed to getStyle
+    const emojiSet = new Set(this.emojis);
+    const stylesForGetStyle = commonStyles.filter((s) => {
+      // Remove colon-wrapped values (emoji override syntax like :red:)
+      if (/^:.+:$/.test(s)) return false;
+      // Remove values that resolved as emoji but not as CSS
+      return !emojiSet.has(s);
+    });
+
     const { textStyle: commentStyle, classNames: commentClassNames } =
       getStyle(commentOnlyStyles);
     const { textStyle: messageStyle, classNames: messageClassNames } =
       getStyle(messageOnlyStyles);
     const { textStyle: commonStyle, classNames: commonClassNames } =
-      getStyle(commonStyles);
+      getStyle(stylesForGetStyle);
 
-    this.text = (
+    const baseText = (
       lines.slice(0, lines.length - 1).join("\n") +
       "\n" +
       text
     ).trim();
+    const emojiPrefix = this.emojis
+      .map((name) => getEmojiUnicode(name))
+      .join("");
+    this.text =
+      emojiPrefix && baseText
+        ? `${emojiPrefix} ${baseText}`
+        : emojiPrefix || baseText;
     this.textStyle = { ...commonStyle, ...commentStyle, ...messageStyle };
     this.classNames = [
       ...commonClassNames,

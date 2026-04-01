@@ -1,0 +1,7 @@
+interface:
+  display_name: "Dia Scoring"
+  short_description: "Diagram label, number, and arrow offsets"
+  default_prompt: "Use $dia-scoring to measure message label, sequence-number, and arrow parity for a compare-case page."
+
+policy:
+  allow_implicit_invocation: true

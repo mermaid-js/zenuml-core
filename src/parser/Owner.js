@@ -44,7 +44,8 @@ CreationContext.prototype.Owner = function () {
 };
 
 MessageContext.prototype.To = function () {
-  return this.messageBody()?.fromTo()?.to()?.getFormattedText();
+  const toCtx = this.messageBody()?.fromTo()?.to();
+  return toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
 };
 
 MessageContext.prototype.Owner = function () {
@@ -62,7 +63,8 @@ function getOwnerFromAncestor(ctx) {
 }
 
 AsyncMessageContext.prototype.To = function () {
-  return this.to()?.getFormattedText();
+  const toCtx = this.to();
+  return toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
 };
 
 AsyncMessageContext.prototype.Owner = function () {
@@ -70,7 +72,8 @@ AsyncMessageContext.prototype.Owner = function () {
 };
 
 ReturnAsyncMessageContext.prototype.To = function () {
-  return this.to()?.getFormattedText();
+  const toCtx = this.to();
+  return toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
 };
 
 ReturnAsyncMessageContext.prototype.Owner = function () {

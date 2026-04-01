@@ -16,9 +16,8 @@ RetContext.prototype.Signature = function () {
 
 RetContext.prototype.ReturnTo = function () {
   // Check asyncMessage 'to' first
-  const asyncTo =
-    this.asyncMessage()?.to()?.getFormattedText() ||
-    this.returnAsyncMessage()?.to()?.getFormattedText();
+  const asyncToCtx = this.asyncMessage()?.to() || this.returnAsyncMessage()?.to();
+  const asyncTo = asyncToCtx?.name?.()?.getFormattedText() || asyncToCtx?.getFormattedText();
   if (asyncTo) {
     return asyncTo;
   }
@@ -42,6 +41,7 @@ RetContext.prototype.ReturnTo = function () {
     }
     if (ctx instanceof MessageContext) {
       return (
+        ctx.messageBody()?.fromTo()?.from()?.name?.()?.getFormattedText() ||
         ctx.messageBody()?.fromTo()?.from()?.getFormattedText() ||
         ctx.ClosestAncestorStat().Origin()
       );

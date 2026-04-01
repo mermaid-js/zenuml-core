@@ -7,6 +7,7 @@ import {
 } from "@/store/Store";
 import { specialCharRegex } from "@/utils/messageNormalizers";
 import { EditableSpan } from "@/components/common/EditableSpan";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 
 const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
 
@@ -48,7 +49,7 @@ export const ConditionLabel = (props: { condition: any }) => {
     <>
       <label>[</label>
       <EditableSpan
-        text={labelText}
+        text={resolveEmojiInText(labelText)}
         isEditable={isEditable}
         className="bg-skin-frame opacity-65 condition"
         onSave={handleSave}

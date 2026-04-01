@@ -1,4 +1,5 @@
 import type { ReturnGeometry } from "../geometry";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import { esc } from "./svgUtils";
 
 export function renderReturn(r: ReturnGeometry): string {
@@ -13,7 +14,14 @@ export function renderReturn(r: ReturnGeometry): string {
   const ARROW_PADDING_HALF = 3.5;
   const labelX = minX + Math.abs(r.toX - r.fromX) / 2
     + (r.isReverse ? ARROW_PADDING_HALF : -ARROW_PADDING_HALF);
-  const labelY = r.y - 3;
+  // HTML CSS snaps the return line to integer CSS pixels. SVG may produce fractional
+  // coordinates (e.g. 153.5). Floor to match HTML's integer-snapped line position.
+  const lineY = Math.floor(r.y);
+  // Label sits 3px above the line. Use lineY (floored integer) so that both integer
+  // r.y (assignment returns) and half-pixel r.y (keyword returns) produce the same
+  // integer labelY that matches HTML. Previously "-3.5 from r.y" caused a -0.5px
+  // offset when r.y is an integer (assignment return case).
+  const labelY = lineY - 3;
 
   // Match HTML renderer's ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
   const arrowTipX = r.toX;
@@ -21,8 +29,8 @@ export function renderReturn(r: ReturnGeometry): string {
   const halfH = 3.25;
   const dir = r.isReverse ? -1 : 1;
   const ax1 = arrowTipX - dir * w;
-  const ay1 = r.y - halfH;
-  const ay2 = r.y + halfH;
+  const ay1 = lineY - halfH;
+  const ay2 = lineY + halfH;
 
   // Sequence number: always to the left of the return
   const numberX = Math.min(r.fromX, r.toX) - 4;
@@ -31,9 +39,9 @@ export function renderReturn(r: ReturnGeometry): string {
     : "";
 
   return `<g class="return">
-  <line x1="${r.fromX}" y1="${r.y}" x2="${r.toX}" y2="${r.y}" class="return-line"/>
-  <polyline points="${ax1},${ay1} ${arrowTipX},${r.y} ${ax1},${ay2}" fill="none" stroke-linecap="round" class="return-arrow"/>
-  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="return-label">${esc(r.label)}</text>
+  <line x1="${r.fromX}" y1="${lineY}" x2="${r.toX}" y2="${lineY}" class="return-line"/>
+  <polyline points="${ax1},${ay1} ${arrowTipX},${lineY} ${ax1},${ay2}" fill="none" stroke-linecap="round" class="return-arrow"/>
+  <text x="${labelX}" y="${labelY}" text-anchor="middle" class="return-label">${esc(resolveEmojiInText(r.label))}</text>
   ${numberSvg}
 </g>`;
 }
@@ -59,7 +67,7 @@ function renderSelfReturn(r: ReturnGeometry): string {
     <path d="M256 0C114.84 0 0 114.84 0 256s114.84 256 256 256 256-114.84 256-256S397.16 0 256 0Zm0 469.33c-117.63 0-213.33-95.7-213.33-213.33S138.37 42.67 256 42.67 469.33 138.37 469.33 256 373.63 469.33 256 469.33Z" class="return-icon"/>
     <path d="M288 192h-87.16l27.58-27.58a21.33 21.33 0 1 0-30.17-30.17l-64 64a21.33 21.33 0 0 0 0 30.17l64 64a21.33 21.33 0 0 0 30.17-30.17l-27.58-27.58H288a53.33 53.33 0 0 1 0 106.67h-32a21.33 21.33 0 0 0 0 42.66h32a96 96 0 0 0 0-192Z" class="return-icon"/>
   </g>
-  <text x="${labelX}" y="${labelY}" text-anchor="start" class="return-label">${esc(r.label)}</text>
+  <text x="${labelX}" y="${labelY}" text-anchor="start" class="return-label">${esc(resolveEmojiInText(r.label))}</text>
 </g>`;
 }
 

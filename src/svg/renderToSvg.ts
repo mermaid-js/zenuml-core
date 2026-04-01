@@ -18,10 +18,13 @@ import { renderReturn } from "./components/return";
 import { renderDivider } from "./components/divider";
 import { renderComment } from "./components/comment";
 import { renderGroup } from "./components/group";
+import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import type { DiagramGeometry } from "./geometry";
 
 export interface RenderOptions {
   theme?: "theme-default" | "theme-mermaid";
+  /** Optional emoji shortcode-to-Unicode cache (for future use by Task 8) */
+  emojiCache?: Map<string, string>;
 }
 
 export interface RenderResult {
@@ -47,6 +50,7 @@ const DEFAULT_THEME_STYLES = `
   .participant-box { fill: #ffffff; stroke: #666; stroke-width: 2; }
   .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #222; }
   .participant-icon { color: #222; }
+  .participant-icon [fill="currentColor"]:not([stroke]) { stroke: #666; stroke-width: 1; }
   .lifeline { stroke: #666; stroke-width: 1; }
   .message-line { stroke: #000; stroke-width: 2; shape-rendering: crispEdges; }
   .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
@@ -59,7 +63,7 @@ const DEFAULT_THEME_STYLES = `
   .fragment-condition { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
   .fragment-separator { stroke: #e5e7eb; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-section-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
-  .return-line { stroke: #000; stroke-width: 2; stroke-dasharray: 6,4; }
+  .return-line { stroke: #000; stroke-width: 2; stroke-dasharray: 6,4; shape-rendering: crispEdges; }
   .return-arrow { stroke: #000; stroke-width: 2; fill: none; }
   .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .return-icon { fill: #222; }
@@ -68,6 +72,9 @@ const DEFAULT_THEME_STYLES = `
   .divider-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; }
   .comment-text { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; opacity: 0.5; }
   .seq-number { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 100; fill: #6b7280; }
+  .group-outline { fill: none; stroke: #666; }
+  .group-title-bg { fill: #ffffff; stroke: none; }
+  .group-title-text { font-family: Helvetica, Verdana, serif; font-size: 13px; font-weight: 400; fill: #222; }
 `;
 
 export function renderToSvg(code: string, options?: RenderOptions): RenderResult {
@@ -81,12 +88,13 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
   const coordinates = new Coordinates(rootContext, WidthProviderOnCanvas);
   const verticalCoordinates = new VerticalCoordinates(rootContext);
 
-  // 3. Extract title
+  // 3. Extract title (resolve emoji shortcodes)
   const titleContext = rootContext.title?.();
-  const title =
-    titleContext && typeof titleContext.content === "function"
-      ? titleContext.content()
+  const rawTitle =
+    titleContext && typeof (titleContext as any).content === "function"
+      ? (titleContext as any).content()
       : undefined;
+  const title = rawTitle ? resolveEmojiInText(rawTitle) : undefined;
 
   // 4. Build geometry IR
   const geometry = buildGeometry({

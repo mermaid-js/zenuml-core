@@ -376,6 +376,7 @@ function scoreParticipantIcon(htmlParticipant, svgParticipant, diffImage) {
   const participant = {
     name: base?.name ?? "",
     label_text: htmlParticipant?.labelText || svgParticipant?.labelText || null,
+    emoji: htmlParticipant?.emojiText || svgParticipant?.emojiText || null,
     presence: {
       html: iconPresentHtml,
       svg: iconPresentSvg,

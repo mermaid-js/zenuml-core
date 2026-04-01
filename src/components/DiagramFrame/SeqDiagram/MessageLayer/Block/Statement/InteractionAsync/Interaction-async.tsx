@@ -96,7 +96,8 @@ export const InteractionAsync = (props: {
   const signature = asyncMessage?.content()?.getFormattedText();
   const providedSource = asyncMessage?.ProvidedFrom();
   const source = providedSource || props.origin;
-  const target = asyncMessage?.to()?.getFormattedText();
+  const toCtx = asyncMessage?.to();
+  const target = toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
   const isSelf = source === target;
 
   const content = asyncMessage?.content();

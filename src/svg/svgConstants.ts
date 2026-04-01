@@ -29,6 +29,13 @@ export const PARTICIPANT_BOX_PADDING = 16;
 // sum of the individual HTML spans. Use 14px padding to match HTML's box width.
 export const PARTICIPANT_BOX_PADDING_ASSIGNEE = 16;
 export const PARTICIPANT_ICON_ROW_WIDTH = 28; // 24px icon + 4px right margin
+/**
+ * Extra width for an emoji prefix in the participant label.
+ * The SVG renderer prepends a `<tspan>` with one emoji character (~16px at 16px font)
+ * plus an em-space (&#x2003; ≈ 16px), but the label text measurement only covers
+ * the plain name. Add ~20px to account for both glyphs.
+ */
+export const PARTICIPANT_EMOJI_WIDTH = 20;
 
 /** Visual height of participant box, matching HTML renderer's h-10 (40px) */
 export const PARTICIPANT_VISUAL_HEIGHT = 40;

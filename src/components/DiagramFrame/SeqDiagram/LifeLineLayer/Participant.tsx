@@ -1,3 +1,4 @@
+import { getEmojiUnicode } from "@/emoji/resolveEmoji";
 import useDocumentScroll from "@/functions/useDocumentScroll";
 import useIntersectionTop from "@/functions/useIntersectionTop";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
@@ -128,16 +129,23 @@ export const Participant = (props: {
                 «{props.entity.stereotype}»
               </label>
             )}
-            <ParticipantLabel
-              labelText={
-                props.entity.assignee
-                  ? props.entity.name.split(":")[1]
-                  : props.entity.label || props.entity.name
-              }
-              labelPositions={labelPositions}
-              assignee={props.entity.assignee}
-              assigneePositions={assigneePositions}
-            />
+            <div className="flex items-center">
+              {props.entity.emoji && (
+                <span className="mr-1 flex-shrink-0" data-testid="participant-emoji">
+                  {getEmojiUnicode(props.entity.emoji)}
+                </span>
+              )}
+              <ParticipantLabel
+                labelText={
+                  props.entity.assignee
+                    ? props.entity.name.split(":")[1]
+                    : props.entity.label || props.entity.name
+                }
+                labelPositions={labelPositions}
+                assignee={props.entity.assignee}
+                assigneePositions={assigneePositions}
+              />
+            </div>
           </div>
         )}
       </div>

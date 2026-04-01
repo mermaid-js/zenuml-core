@@ -1,5 +1,7 @@
+import { getEmojiUnicode } from "@/emoji/resolveEmoji";
 import type { ParticipantGeometry } from "../geometry";
 import { getIcon } from "../icons";
+import { PARTICIPANT_EMOJI_WIDTH } from "../svgConstants";
 import { esc } from "./svgUtils";
 
 /**
@@ -31,22 +33,44 @@ export function renderParticipant(p: ParticipantGeometry): string {
   const rectW = p.width - STROKE_WIDTH;
   const rectH = p.height - STROKE_WIDTH;
 
+  const EMOJI_FONT_ATTRS = `font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Twemoji Mozilla',sans-serif"`;
+
   // Icon positioning (if present)
   const icon = getIcon(p.type);
   let iconSvg = "";
+  let emojiIconSvg = "";
   let textX = p.x;
+  let textAnchor: "start" | "middle" = "middle";
+
+  const textY = p.y + p.height / 2 - 0.25;
+  const labelY = p.stereotype ? textY + STEREOTYPE_VERTICAL_OFFSET : textY;
 
   if (icon) {
     const textWidth = p.labelWidth ?? 0;
     // HTML centers the whole icon+label row. The label glyphs sit inside a span
     // with 8px left/right inline padding, so SVG needs to place text from the
     // padded glyph origin rather than the visual center of the participant box.
-    const groupWidth = ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_HORIZONTAL_PADDING + textWidth;
+    // When both a type icon and emoji are present, the emoji tspan is rendered
+    // inside the <text> element but textWidth only covers the plain label.
+    // Add PARTICIPANT_EMOJI_WIDTH to account for the emoji glyph + space.
+    const emojiExtra = p.emoji ? PARTICIPANT_EMOJI_WIDTH : 0;
+    const groupWidth = ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_HORIZONTAL_PADDING + textWidth + emojiExtra;
     const groupX = p.x - groupWidth / 2;
     const iconX = groupX + ICON_PAINT_OFFSET_X;
     const iconType = p.type?.toLowerCase();
     const iconY = p.y + (p.height - ICON_SIZE) / 2 + (iconType === "boundary" ? BOUNDARY_ICON_VERTICAL_TWEAK : 0);
-    textX = groupX + ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_PAD_LEFT;
+    if (p.emoji) {
+      // When both type icon and emoji are present, render the emoji as a separate
+      // <text> element (like emoji-only participants) positioned immediately after
+      // the type icon. The label text starts after the emoji + gap.
+      // HTML layout: [4px iconOffset][icon 24px][4px iconMargin][emoji 16px][4px mr-1 margin][4px px-1 padding][labelText]
+      const emojiTextX = iconX + ICON_SIZE + ICON_MARGIN_RIGHT;
+      textX = emojiTextX + PARTICIPANT_EMOJI_WIDTH + 4;
+      emojiIconSvg = `<text x="${emojiTextX}" y="${labelY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
+    } else {
+      textX = groupX + ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_PAD_LEFT;
+    }
+    textAnchor = "start";
 
     const [, , vbW, vbH] = (icon.viewBox || "0 0 24 24").split(" ").map(Number);
     const scale = ICON_SIZE / Math.max(vbW, vbH);
@@ -55,19 +79,35 @@ export function renderParticipant(p: ParticipantGeometry): string {
     iconSvg = `<g class="participant-icon" transform="translate(${iconX}, ${iconY}) scale(${scale})"${iconAttrs}>
     ${icon.content}
   </g>`;
-  }
+  } else if (p.emoji) {
+    // Emoji-only participant (no SVG type icon): render emoji as a separate text element
+    // positioned to the left of the label, matching HTML's flex row layout.
+    // HTML layout: [emoji:16px][gap:4px][leftpad:4px][labelText][rightpad:4px]
+    // PARTICIPANT_EMOJI_WIDTH (20) covers emoji(16) + gap(4).
+    // When a stereotype is present, the inner column width = max(emojiRowWidth, stereotypeGlyphWidth).
+    // The entire inner column is centered at p.x: emojiX = p.x - innerColWidth/2.
+    const textWidth = p.labelWidth ?? 0;
+    const groupWidth = PARTICIPANT_EMOJI_WIDTH + 8 + textWidth; // 8 = leftpad(4) + rightpad(4)
+    const innerColWidth = Math.max(groupWidth, p.stereotypeWidth ?? 0);
+    const groupX = p.x - innerColWidth / 2;
+    const emojiTextX = groupX;
+    textX = groupX + PARTICIPANT_EMOJI_WIDTH + 4; // after emoji(16)+gap(4)=20, then leftpad(4)
+    textAnchor = "start";
 
-  const textY = p.y + p.height / 2 - 0.25;
-  const labelY = p.stereotype ? textY + STEREOTYPE_VERTICAL_OFFSET : textY;
+    emojiIconSvg = `<text x="${emojiTextX}" y="${labelY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
+  }
 
   // Match the current HTML renderer: stereotypes inherit the same 16px text styling
   // and theme-default participant text color rather than SVG-side contrast heuristics.
   let stereotypeSvg = "";
   if (p.stereotype) {
+    // Stereotype is always centered over the full participant box (text-anchor="middle").
+    // When a type icon is present, center over the label portion only.
+    // When no icon (plain or emoji-only), center at p.x (participant center).
     const stereoX = icon && p.labelWidth != null
       ? textX + p.labelWidth / 2
-      : textX;
-    const stereoAnchor = icon && p.labelWidth != null ? "middle" : icon ? "start" : "middle";
+      : p.x;
+    const stereoAnchor = "middle";
     const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET;
     stereotypeSvg = `<text x="${stereoX}" y="${stereoY}" text-anchor="${stereoAnchor}" dominant-baseline="central" class="stereotype-label" font-size="${STEREOTYPE_FONT_SIZE}"${participantTextStyle()}>${esc("«" + p.stereotype + "»")}</text>`;
   }
@@ -83,11 +123,16 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
   const { fillStyle, textStyle } = colorAttrs(p.color);
 
+  // When emoji is rendered as a separate <text> element (either emoji-only or icon+emoji),
+  // do not include it as a tspan inside the label text element.
+  const emojiTspan = "";
+
   return `<g class="participant" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
   ${iconSvg}
+  ${emojiIconSvg}
   ${stereotypeSvg}
-  <text x="${textX}" y="${labelY}" text-anchor="${icon ? 'start' : 'middle'}" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
+  <text x="${textX}" y="${labelY}" text-anchor="${textAnchor}" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${emojiTspan}${esc(p.label)}</text>
 </g>`;
 }
 
@@ -98,7 +143,6 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
   const rectY = bottomY + HALF_STROKE;
   const rectW = p.width - STROKE_WIDTH;
   const rectH = p.height - STROKE_WIDTH;
-  const textX = p.x;
   const textY = bottomY + p.height / 2 - 0.25;
 
   const useTextLength = p.labelWidth != null && p.name.includes(":");
@@ -108,9 +152,46 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
 
   const { fillStyle, textStyle } = colorAttrs(p.color);
 
+  const EMOJI_FONT_ATTRS = `font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Twemoji Mozilla',sans-serif"`;
+  const icon = getIcon(p.type);
+
+  // Emoji-only bottom participant: render emoji as separate element, same as top box.
+  // Apply same inner-column centering as top box: innerColWidth = max(emojiRowWidth, stereotypeGlyphWidth).
+  if (p.emoji && !icon) {
+    const textWidth = p.labelWidth ?? 0;
+    const groupWidth = PARTICIPANT_EMOJI_WIDTH + 8 + textWidth;
+    const innerColWidth = Math.max(groupWidth, p.stereotypeWidth ?? 0);
+    const groupX = p.x - innerColWidth / 2;
+    const emojiTextX = groupX;
+    const textX = groupX + PARTICIPANT_EMOJI_WIDTH + 4;
+    const emojiIconSvg = `<text x="${emojiTextX}" y="${textY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
+    return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
+  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
+  ${emojiIconSvg}
+  <text x="${textX}" y="${textY}" text-anchor="start" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
+</g>`;
+  }
+
+  // Icon+emoji case: render emoji as a separate element, same as top box
+  if (p.emoji && icon) {
+    const textWidth = p.labelWidth ?? 0;
+    const emojiExtra = PARTICIPANT_EMOJI_WIDTH;
+    const groupWidth = ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_HORIZONTAL_PADDING + textWidth + emojiExtra;
+    const groupX = p.x - groupWidth / 2;
+    const iconX = groupX + ICON_PAINT_OFFSET_X;
+    const emojiTextX = iconX + ICON_SIZE + ICON_MARGIN_RIGHT;
+    const textX = emojiTextX + PARTICIPANT_EMOJI_WIDTH + 4;
+    const emojiIconSvg = `<text x="${emojiTextX}" y="${textY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
+    return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
+  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
+  ${emojiIconSvg}
+  <text x="${textX}" y="${textY}" text-anchor="start" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
+</g>`;
+  }
+
   return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
   <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>
-  <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
+  <text x="${p.x}" y="${textY}" text-anchor="middle" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
 </g>`;
 }
 

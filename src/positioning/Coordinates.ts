@@ -162,13 +162,15 @@ export class Coordinates {
     // Icon's total width is 32px (24px for icon + 8px for margin)
     const hasIcon = participant.hasIcon();
     const iconWidth = hasIcon ? 40 : 0;
+    // Emoji character (~16px glyph + em-space) adds width when present
+    const emojiWidth = participant.emoji ? 24 : 0;
 
     const labelWidth = this.widthProvider(
       participant.getDisplayName(),
       TextType.ParticipantName,
     );
     const participantWidth =
-      Math.max(labelWidth + iconWidth, MIN_PARTICIPANT_WIDTH) + MARGIN;
+      Math.max(labelWidth + iconWidth + emojiWidth, MIN_PARTICIPANT_WIDTH) + MARGIN;
 
     setCache(cacheKey, participantWidth);
     logger.debug(
