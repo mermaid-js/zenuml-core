@@ -73,6 +73,14 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain("async call");
   });
 
+  it("renders return messages with dashed lines and open arrowheads", () => {
+    const result = renderToSvg("A-->B: response");
+    expect(result.svg).toContain('class="return"');
+    expect(result.svg).toContain('class="return-line"');
+    expect(result.svg).toContain('class="return-arrow"');
+    expect(result.svg).toContain("response");
+  });
+
   it("escapes special characters in labels", () => {
     const result = renderToSvg('"A<B>" -> "C&D": hello');
     // Participant names with special chars should be escaped

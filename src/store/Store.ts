@@ -127,6 +127,12 @@ export const onContentChangeAtom = atomWithFunctionValue<
   (code: string) => void
 >(() => {});
 
+export const pendingEditableRangeAtom = atom<{
+  start: number;
+  end: number;
+  token: number;
+} | null>(null);
+
 export const onThemeChangeAtom = atomWithFunctionValue<
   (data: { theme: string; scoped: boolean }) => void
 >(() => {});

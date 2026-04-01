@@ -3,11 +3,13 @@ import {
   codeAtom,
   modeAtom,
   onContentChangeAtom,
+  pendingEditableRangeAtom,
   RenderMode,
 } from "@/store/Store";
 import { specialCharRegex } from "@/utils/messageNormalizers";
 import { EditableSpan } from "@/components/common/EditableSpan";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
+import { useSetAtom } from "jotai";
 
 const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
 
@@ -15,8 +17,18 @@ export const ConditionLabel = (props: { condition: any }) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
+  const pendingEditableRange = useAtomValue(pendingEditableRangeAtom);
+  const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
   const labelText = props.condition?.getFormattedText() ?? "";
   const isEditable = mode === RenderMode.Dynamic;
+  const [start, end] = [
+    props.condition?.start?.start,
+    props.condition?.stop?.stop,
+  ];
+  const shouldAutoEdit =
+    pendingEditableRange?.start === start && pendingEditableRange?.end === end
+      ? pendingEditableRange.token
+      : undefined;
 
   const handleSave = (newText: string) => {
     // if text is empty, bail out
@@ -32,10 +44,6 @@ export const ConditionLabel = (props: { condition: any }) => {
       processedText = `"${processedText}"`;
     }
 
-    const [start, end] = [
-      props.condition?.start?.start,
-      props.condition?.stop?.stop,
-    ];
     if (start === -1 || end === -1) {
       console.warn("labelPosition is not set");
       return;
@@ -43,6 +51,9 @@ export const ConditionLabel = (props: { condition: any }) => {
     const newCode = code.slice(0, start) + processedText + code.slice(end + 1);
     setCode(newCode);
     onContentChange(newCode);
+    if (shouldAutoEdit) {
+      setPendingEditableRange(null);
+    }
   };
 
   return (
@@ -54,6 +65,7 @@ export const ConditionLabel = (props: { condition: any }) => {
         className="bg-skin-frame opacity-65 condition"
         onSave={handleSave}
         title="Double-click to edit"
+        autoEditToken={shouldAutoEdit}
       />
       <label>]</label>
     </>

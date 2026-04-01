@@ -11,6 +11,8 @@ import { Fragment, useMemo } from "react";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { blankParticipant } from "@/parser/Participants";
 import { GroupContext, ParticipantContext, Participants } from "@/parser";
+import { ParticipantInsertControls } from "./ParticipantInsertControls";
+import { MessageCreateControls } from "./MessageCreateControls";
 
 export const LifeLineLayer = (props: {
   context: any;
@@ -87,6 +89,12 @@ export const LifeLineLayer = (props: {
             renderLifeLine={props.renderLifeLine}
           />
         ))}
+        {props.renderParticipants && (
+          <>
+            <ParticipantInsertControls />
+            <MessageCreateControls />
+          </>
+        )}
       </div>
     </div>
   );

@@ -19,6 +19,8 @@ console.log("set zenUML to window");
 window.zenUml = zenUml;
 zenUml.render(code, { theme: "theme-nab",
   onContentChange: code1 => {
+    // @ts-expect-error -- e2e inspection hook
+    window.__lastContentChange = code1;
     console.log('onContentChange', code1);
   }
 }).then((r) => {

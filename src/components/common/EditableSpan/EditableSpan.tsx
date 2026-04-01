@@ -1,6 +1,7 @@
 import {
   KeyboardEvent,
   MouseEvent,
+  useEffect,
   useState,
   useRef,
 } from "react";
@@ -12,6 +13,7 @@ export interface EditableSpanProps {
   className?: string;
   onSave: (newText: string) => void;
   title?: string;
+  autoEditToken?: number;
 }
 
 export const EditableSpan = ({
@@ -20,12 +22,57 @@ export const EditableSpan = ({
   className = "",
   onSave,
   title = "Double-click to edit",
+  autoEditToken,
 }: EditableSpanProps) => {
   const [editing, setEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const originalTextRef = useRef("");
   const spanRef = useRef<HTMLSpanElement>(null);
   const cancelRef = useRef(false);
+
+  const focusEditable = (clickPoint?: { x: number; y: number } | null) => {
+    setTimeout(() => {
+      const target = spanRef.current;
+      if (!target) return;
+
+      target.focus();
+
+      if (!clickPoint) {
+        const selection = window.getSelection();
+        if (!selection) return;
+        const range = document.createRange();
+        range.selectNodeContents(target);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        return;
+      }
+
+      const selection = window.getSelection();
+      if (!selection) return;
+
+      let range = document.caretRangeFromPoint?.(
+        clickPoint.x,
+        clickPoint.y
+      );
+
+      if (!range && (document as any).caretPositionFromPoint) {
+        const pos = (document as any).caretPositionFromPoint(
+          clickPoint.x,
+          clickPoint.y
+        );
+        if (pos) {
+          range = document.createRange();
+          range.setStart(pos.offsetNode, pos.offset);
+        }
+      }
+
+      if (range) {
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }, 0);
+  };
 
   const startEditing = (e: MouseEvent | KeyboardEvent) => {
     if (!isEditable) return;
@@ -43,40 +90,7 @@ export const EditableSpan = ({
     }
 
     setEditing(true);
-
-    setTimeout(() => {
-      const target = e.target as HTMLElement;
-      if (!target) return;
-
-      target.focus();
-
-      if (clickPoint) {
-        const selection = window.getSelection();
-        if (!selection) return;
-
-        let range = document.caretRangeFromPoint?.(
-          clickPoint.x,
-          clickPoint.y
-        );
-
-        if (!range && (document as any).caretPositionFromPoint) {
-          const pos = (document as any).caretPositionFromPoint(
-            clickPoint.x,
-            clickPoint.y
-          );
-          if (pos) {
-            range = document.createRange();
-            range.setStart(pos.offsetNode, pos.offset);
-          }
-        }
-
-        if (range) {
-          range.collapse(true);
-          selection.removeAllRanges();
-          selection.addRange(range);
-        }
-      }
-    }, 0);
+    focusEditable(clickPoint);
   };
 
   const handleDoubleClick = (e: MouseEvent) => {
@@ -156,6 +170,16 @@ export const EditableSpan = ({
 
     return classes.filter(Boolean).join(" ");
   };
+
+  useEffect(() => {
+    if (!autoEditToken || !isEditable) {
+      return;
+    }
+    originalTextRef.current = spanRef.current?.innerText ?? text;
+    cancelRef.current = false;
+    setEditing(true);
+    focusEditable(null);
+  }, [autoEditToken, isEditable, text]);
 
   return (
     <span
