@@ -17,6 +17,9 @@
       .nav button { padding: 4px 12px; background: #7c3aed; border: none; border-radius: 4px; color: white; font-size: 12px; cursor: pointer; }
       .nav button:hover { background: #6d28d9; }
       .nav button:disabled { background: #64748b; cursor: wait; }
+      .nav-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #334155; border: none; border-radius: 4px; color: white; font-size: 16px; cursor: pointer; text-decoration: none; line-height: 1; }
+      .nav-btn:hover { background: #475569; }
+      .nav-btn[style*="hidden"] { visibility: hidden; }
       .nav .match-badge { font-size: 11px; color: #94a3b8; }
       .container { display: flex; gap: 0; }
       .container.stacked { flex-direction: column; }
@@ -35,8 +38,8 @@
       <a href="/e2e/tools/compare.html">&larr; All cases</a>
       <h2 id="case-name"></h2>
       <div class="nav">
-        <a id="prev-link" href="#">&larr; Prev</a>
-        <a id="next-link" href="#">Next &rarr;</a>
+        <a id="prev-link" class="nav-btn" href="#" title="Previous case">&#8249;</a>
+        <a id="next-link" class="nav-btn" href="#" title="Next case">&#8250;</a>
         <span class="match-badge" id="match-badge"></span>
       </div>
     </div>
@@ -86,6 +89,15 @@
       } else {
         nextLink.style.visibility = "hidden";
       }
+
+      // Keyboard navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft" && prevLink.style.visibility !== "hidden") {
+          window.location.href = prevLink.href;
+        } else if (e.key === "ArrowRight" && nextLink.style.visibility !== "hidden") {
+          window.location.href = nextLink.href;
+        }
+      });
 
       // Expose DSL for the extension's batch mode to read
       window.__currentDSL = code || "";
