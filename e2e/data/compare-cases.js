@@ -914,6 +914,14 @@ B->[database]C.migrate()`,
   "emoji-group-case": `group Backend {[database]DB [cache]Redis}
 [globe]Gateway->DB.query()
 Gateway->Redis.get()`,
+  "emoji-group-case-2groups": `group Backend {[database]DB [cache]Redis}
+group Frontend {[globe]Gateway}
+Gateway->DB.query()
+Gateway->Redis.get()`,
+  "group-minimal": `group x {a}`,
+  "group-single-participant": `group Frontend {[globe]Gateway}
+group Backend {[database]DB}
+Gateway->DB.query()`,
   "emoji-comment-styled": `// [eyes] monitoring
 [rocket]A->[lock]B.deploy()
 // [rocket, red] critical path

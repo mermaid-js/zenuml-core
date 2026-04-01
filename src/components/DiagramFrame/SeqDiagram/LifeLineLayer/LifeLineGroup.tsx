@@ -11,8 +11,8 @@ const GROUP_SW2 = GROUP_STROKE_WIDTH / 2; // 0.75
 const GROUP_STROKE_COLOR = "#666";
 const GROUP_DASH_ARRAY = "4 3";
 
-// SVG renderer's GROUP_OUTLINE_MARGIN (buildParticipantGeometry.ts)
-const SVG_GROUP_OUTLINE_MARGIN = 8;
+// Must match SVG renderer's GROUP_OUTLINE_MARGIN (buildParticipantGeometry.ts)
+const SVG_GROUP_OUTLINE_MARGIN = 2;
 
 const GroupOutline = (props: {
   left: number;
@@ -22,12 +22,13 @@ const GroupOutline = (props: {
 }) => (
   <svg
     data-group-overlay=""
+    width={props.width}
+    height={props.height}
+    viewBox={`0 0 ${props.width} ${props.height}`}
     style={{
       position: "absolute",
       top: props.top,
       left: props.left,
-      width: props.width,
-      height: props.height,
       pointerEvents: "none",
       overflow: "visible",
     }}
@@ -35,8 +36,8 @@ const GroupOutline = (props: {
     <rect
       x="0"
       y="0"
-      width="100%"
-      height="100%"
+      width={props.width}
+      height={props.height}
       fill="none"
       stroke={GROUP_STROKE_COLOR}
       strokeWidth={GROUP_STROKE_WIDTH}
@@ -151,8 +152,8 @@ export const LifeLineGroup = (props: {
         />
       )}
       {props.renderParticipants && name && (
-        <div className="z-10 absolute flex items-center justify-center w-full bg-skin-frame">
-          <span className="font-semibold text-skin-lifeline-group-name">
+        <div className="z-10 absolute left-1/2 -translate-x-1/2 bg-skin-frame px-1" style={{ top: '-1px' }}>
+          <span className="text-skin-lifeline-group-name" style={{ fontSize: '13px', fontWeight: 400 }}>
             {name}
           </span>
         </div>

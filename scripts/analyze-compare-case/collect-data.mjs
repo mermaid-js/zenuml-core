@@ -618,20 +618,36 @@ export async function collectLabelData(page) {
     }
 
     function collectHtmlGroups(root, rootRect) {
-      const groups = [];
+      // Group containers appear twice: once in participant layer (has name label, no overlay)
+      // and once in lifeline layer (has overlay rect, no name label).
+      // Collect name data from participant-layer containers and outline boxes from
+      // lifeline-layer containers, then merge by index order.
+      const nameEntries = [];
+      const boxEntries = [];
       for (const groupEl of root.querySelectorAll(".lifeline-group-container")) {
         const nameEl = groupEl.querySelector(".text-skin-lifeline-group-name");
-        const name = textContentNormalized(nameEl);
-        const box = boxOrNull(relRect(groupEl.getBoundingClientRect(), rootRect));
+        const outlineRect = groupEl.querySelector("[data-group-overlay] rect");
+        if (nameEl) {
+          nameEntries.push({
+            name: textContentNormalized(nameEl),
+            measuredName: measureTextEntry(nameEl, rootRect),
+          });
+        }
+        if (outlineRect) {
+          boxEntries.push(boxOrNull(relRect(outlineRect.getBoundingClientRect(), rootRect)));
+        }
+      }
+      const groups = [];
+      for (let i = 0; i < nameEntries.length; i++) {
+        const box = boxEntries[i] || null;
         if (!box) continue;
-        const measuredName = nameEl ? measureTextEntry(nameEl, rootRect) : null;
         groups.push({
           side: "html",
-          name,
+          name: nameEntries[i].name,
           box,
-          nameBox: measuredName?.box ?? null,
-          nameFont: measuredName?.font ?? null,
-          nameLetters: measuredName?.letters ?? [],
+          nameBox: nameEntries[i].measuredName?.box ?? null,
+          nameFont: nameEntries[i].measuredName?.font ?? null,
+          nameLetters: nameEntries[i].measuredName?.letters ?? [],
         });
       }
       return groups;
@@ -642,7 +658,10 @@ export async function collectLabelData(page) {
       for (const groupEl of root.querySelectorAll("g.participant-group")) {
         const nameEl = groupEl.querySelector(":scope > text");
         const name = textContentNormalized(nameEl);
-        const box = boxOrNull(relRect(groupEl.getBoundingClientRect(), rootRect));
+        // Measure the outline <rect> directly — consistent with HTML side measurement.
+        const outlineRect = groupEl.querySelector("rect.group-outline");
+        const measureEl = outlineRect || groupEl;
+        const box = boxOrNull(relRect(measureEl.getBoundingClientRect(), rootRect));
         if (!box) continue;
         const measuredName = nameEl ? measureTextEntry(nameEl, rootRect) : null;
         groups.push({

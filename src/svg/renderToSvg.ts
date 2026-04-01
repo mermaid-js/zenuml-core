@@ -74,7 +74,7 @@ const DEFAULT_THEME_STYLES = `
   .seq-number { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 100; fill: #6b7280; }
   .group-outline { fill: none; stroke: #666; stroke-width: 1.5; }
   .group-title-bg { fill: #ffffff; stroke: none; }
-  .group-title-text { font-family: Helvetica, Verdana, serif; font-size: 16px; font-weight: 600; fill: #222; }
+  .group-title-text { font-family: Helvetica, Verdana, serif; font-size: 13px; font-weight: 400; fill: #222; }
 `;
 
 export function renderToSvg(code: string, options?: RenderOptions): RenderResult {
