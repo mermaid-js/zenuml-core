@@ -6,8 +6,8 @@ import { useRef, useState, useLayoutEffect, useCallback } from "react";
 
 // Constants — match SVG renderer's group.ts stroke model
 const LIFELINE_GROUP_OUTLINE_MARGIN = 2;
-const GROUP_STROKE_WIDTH = 1.5;
-const GROUP_SW2 = GROUP_STROKE_WIDTH / 2; // 0.75
+const GROUP_STROKE_WIDTH = 1;
+const GROUP_SW2 = GROUP_STROKE_WIDTH / 2; // 0.5
 const GROUP_STROKE_COLOR = "#666";
 const GROUP_DASH_ARRAY = "4 3";
 
@@ -96,8 +96,9 @@ export const LifeLineGroup = (props: {
     const outlineLeft = relMinLeft - SVG_GROUP_OUTLINE_MARGIN - GROUP_SW2;
     const outlineRight = relMaxRight + SVG_GROUP_OUTLINE_MARGIN + GROUP_SW2;
     // SVG: rectY = g.y - sw - 0.5, where g.y = minY - 20 + 1.5
-    // Relative to the container top, this is -sw2 + 0.25 = -0.5
-    const outlineTop = -GROUP_SW2 + 0.25;
+    // Relative to the container top, this should be -0.5px for sw=1,
+    // so the top border sits above the title chip rather than under it.
+    const outlineTop = -GROUP_SW2;
     const outlineHeight = containerRect.height + GROUP_STROKE_WIDTH;
 
     setOverlayRect((prev) => {
@@ -152,7 +153,7 @@ export const LifeLineGroup = (props: {
         />
       )}
       {props.renderParticipants && name && (
-        <div className="z-10 absolute left-1/2 -translate-x-1/2 bg-skin-frame px-1" style={{ top: '-1px' }}>
+        <div className="z-10 absolute left-1/2 -translate-x-1/2 bg-skin-frame px-1">
           <span className="text-skin-lifeline-group-name" style={{ fontSize: '13px', fontWeight: 400 }}>
             {name}
           </span>
