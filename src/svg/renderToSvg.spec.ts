@@ -7,6 +7,14 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain("<svg");
   });
 
+  it("returns the empty fallback for invalid input", () => {
+    const result = renderToSvg("title Demo\nJohn%->Alice: Great ds! fd\nAlice->John: See you later!");
+    expect(result.width).toBe(0);
+    expect(result.height).toBe(0);
+    expect(result.viewBox).toBe("0 0 0 0");
+    expect(result.innerSvg).toBe("");
+  });
+
   it("renders participants for a simple message", () => {
     const result = renderToSvg("A -> B: hello");
     expect(result.svg).toContain('data-participant="A"');
