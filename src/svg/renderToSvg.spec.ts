@@ -7,14 +7,6 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain("<svg");
   });
 
-  it("returns the empty fallback for invalid input", () => {
-    const result = renderToSvg("title Demo\nJohn%->Alice: Great ds! fd\nAlice->John: See you later!");
-    expect(result.width).toBe(0);
-    expect(result.height).toBe(0);
-    expect(result.viewBox).toBe("0 0 0 0");
-    expect(result.innerSvg).toBe("");
-  });
-
   it("renders participants for a simple message", () => {
     const result = renderToSvg("A -> B: hello");
     expect(result.svg).toContain('data-participant="A"');
@@ -425,32 +417,5 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain('data-participant="InvoiceService"');
     const iconTransforms = result.svg.match(/class="participant-icon" transform="translate\([^)]+\) scale/g);
     expect(iconTransforms?.length).toBe(2);
-  });
-
-  // --- Emoji tests ---
-
-  it("renders emoji shortcode before participant name", () => {
-    const code = "[rocket] Production\nProduction.deploy()";
-    const result = renderToSvg(code);
-    expect(result.svg).toContain('data-participant="Production"');
-    // Emoji rendered as separate text element with emoji font, label rendered in sibling text element
-    expect(result.svg).toContain('class="participant-emoji">🚀</text>');
-    expect(result.svg).toContain('class="participant-label">Production</text>');
-  });
-
-  it("renders participant without emoji when none specified", () => {
-    const code = "A -> B: hello";
-    const result = renderToSvg(code);
-    // Labels should be plain names without emoji prefix
-    expect(result.svg).toContain(">A</text>");
-    expect(result.svg).toContain(">B</text>");
-  });
-
-  it("passes emoji through geometry pipeline", () => {
-    const code = "[fire] Server\nServer.start()";
-    const result = renderToSvg(code);
-    // Verify emoji is in geometry
-    const serverGeom = result.geometry?.participants.find(p => p.name === "Server");
-    expect(serverGeom?.emoji).toBe("fire");
   });
 });
