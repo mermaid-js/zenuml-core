@@ -511,7 +511,8 @@ export function buildMessages(
         isSelf: info.isSelf,
         number: info.number,
       });
-      maxReturnBottom = Math.max(maxReturnBottom, returnY + (60 - returnOffset));
+      const returnBottomPad = coord.height === 0 ? 45.5 : 44.5;
+      maxReturnBottom = Math.max(maxReturnBottom, returnY + returnBottomPad);
       continue;
     }
 
