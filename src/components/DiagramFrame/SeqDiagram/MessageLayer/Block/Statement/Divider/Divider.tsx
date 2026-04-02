@@ -1,8 +1,16 @@
-import { coordinatesAtom, participantsAtom } from "@/store/Store";
+import {
+  codeAtom,
+  coordinatesAtom,
+  modeAtom,
+  onContentChangeAtom,
+  participantsAtom,
+  RenderMode,
+} from "@/store/Store";
 import { cn } from "@/utils";
 import { getStyle } from "@/utils/messageStyling";
 import { resolveBracketContent, getEmojiUnicode } from "@/emoji/resolveEmoji";
-import { useAtomValue } from "jotai";
+import { EditableSpan } from "@/components/common/EditableSpan";
+import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useMemo } from "react";
 import { centerOf } from "../utils";
 
@@ -13,6 +21,9 @@ export const Divider = (props: {
 }) => {
   useAtomValue(participantsAtom);
   const coordinates = useAtomValue(coordinatesAtom);
+  const mode = useAtomValue(modeAtom);
+  const [code, setCode] = useAtom(codeAtom);
+  const onContentChange = useAtomValue(onContentChangeAtom);
   const diagramWidth = useMemo(() => {
     return coordinates.getWidth();
   }, [coordinates]);
@@ -44,6 +55,17 @@ export const Divider = (props: {
   }, [note]);
 
   const cleanNote = messageStyle.note.replace(/^=+\s*|\s*=+$/g, "").trim();
+  const isEditable = mode !== RenderMode.Static;
+
+  const handleSave = (newText: string) => {
+    if (!newText || newText === cleanNote) return;
+    const dividerNote = props.context.divider().dividerNote();
+    const start = dividerNote.start.start;
+    const end = dividerNote.stop.stop + 1;
+    const newCode = code.slice(0, start) + `==${newText}==` + code.slice(end);
+    setCode(newCode);
+    onContentChange(newCode);
+  };
 
   // Align with the lifeline-layer (same x=0 as SVG coordinate system).
   // The block has padding-left that positions the statement-container;
@@ -88,7 +110,16 @@ export const Divider = (props: {
         }}
         className={cn("name", messageStyle.style.classNames)}
       >
-        {cleanNote}
+        {isEditable ? (
+          <EditableSpan
+            text={cleanNote}
+            isEditable={true}
+            onSave={handleSave}
+            title="Click to edit divider label"
+          />
+        ) : (
+          cleanNote
+        )}
       </div>
       <div className="right" style={{ flex: 1, height: 1, backgroundColor: "#aaaa33" }}></div>
     </div>

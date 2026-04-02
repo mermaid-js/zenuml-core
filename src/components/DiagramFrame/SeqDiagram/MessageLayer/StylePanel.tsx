@@ -126,6 +126,15 @@ export const StylePanel = () => {
 
   const handleTypeClick = (targetType: MessageArrowType) => {
     const message = messageData.current;
+    if (message.currentType === targetType) return;
+    if (!canTransformMessageType({
+      line: message.line,
+      currentType: message.currentType,
+      targetType,
+      source: message.source,
+      target: message.target,
+      signature: message.signature,
+    })) return;
     const nextLine = transformMessageType({
       line: message.line,
       currentType: message.currentType,
@@ -231,7 +240,9 @@ export const StylePanel = () => {
         const signatureCtx = context?.messageBody?.()?.func?.()?.signature?.()?.[0];
         const asyncContent = context?.content?.();
         const creationParams = context?.creationBody?.()?.parameters?.();
-        message.currentType = classList?.contains("return")
+        message.currentType = classList?.contains("creation")
+          ? "creation"
+          : classList?.contains("return")
           ? "return"
           : classList?.contains("async")
           ? "async"
@@ -291,19 +302,23 @@ export const StylePanel = () => {
         <div className="flex items-center bg-white shadow-md z-10 rounded-md p-1 gap-1">
           <div className="flex">
             {btns.map((btn) => (
-              <div onClick={() => handleClick(btn.class)} key={btn.name}>
-                <div
-                  className={cn(
-                    "w-6 mx-1 py-1 rounded-md text-black text-center cursor-pointer hover:bg-gray-200",
-                    [
-                      btn.class,
-                      { "bg-gray-100": existingStyles.includes(btn.class) },
-                    ],
-                  )}
-                >
-                  {btn.content}
-                </div>
-              </div>
+              <button
+                type="button"
+                key={btn.name}
+                aria-label={btn.name}
+                aria-pressed={existingStyles.includes(btn.class)}
+                title={existingStyles.includes(btn.class) ? `Remove ${btn.name}` : `Apply ${btn.name}`}
+                onClick={() => handleClick(btn.class)}
+                className={cn(
+                  "w-6 mx-1 py-1 rounded-md text-black text-center cursor-pointer hover:bg-gray-200",
+                  [
+                    btn.class,
+                    { "bg-gray-100": existingStyles.includes(btn.class) },
+                  ],
+                )}
+              >
+                {btn.content}
+              </button>
             ))}
           </div>
           <div className="w-px self-stretch bg-gray-200" />
@@ -319,6 +334,12 @@ export const StylePanel = () => {
                     messageData.current.labelEnd < 0,
                 },
               )}
+              title={
+                messageData.current.labelStart < 0 ||
+                messageData.current.labelEnd < 0
+                  ? "Cannot rename: message has no label"
+                  : "Rename message label"
+              }
               onClick={handleRenameClick}
             >
               Rename
@@ -326,32 +347,47 @@ export const StylePanel = () => {
           </div>
           <div className="w-px self-stretch bg-gray-200" />
           <div className="flex items-center gap-1 pr-1">
-            {(["sync", "async", "return"] as MessageArrowType[]).map((type) => (
-              <div
-                key={type}
-                onClick={() => handleTypeClick(type)}
-              >
-                <div
+            {(["sync", "async", "return", "creation"] as MessageArrowType[]).map((type) => {
+              const canTransform = canTransformMessageType({
+                line: messageData.current.line,
+                currentType: messageData.current.currentType,
+                targetType: type,
+                source: messageData.current.source,
+                target: messageData.current.target,
+                signature: messageData.current.signature,
+              });
+              const isCurrent = messageData.current.currentType === type;
+              const disabledTitle = isCurrent
+                ? `Already ${type}`
+                : !canTransform && type === "sync"
+                ? "Label must be a valid method name (no spaces) to switch to sync"
+                : !canTransform && messageData.current.currentType === "creation"
+                ? "Cannot convert creation messages"
+                : !canTransform
+                ? `Cannot convert to ${type}`
+                : undefined;
+              return (
+                <button
+                  type="button"
+                  key={type}
                   data-testid={`message-type-${type}`}
+                  aria-label={`Change to ${type} message type`}
+                  aria-pressed={isCurrent}
+                  title={disabledTitle}
+                  onClick={() => handleTypeClick(type)}
                   className={cn(
-                    "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                    "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center hover:bg-gray-200",
                     {
-                      "bg-gray-100": messageData.current.currentType === type,
-                      "opacity-40 pointer-events-none": !canTransformMessageType({
-                        line: messageData.current.line,
-                        currentType: messageData.current.currentType,
-                        targetType: type,
-                        source: messageData.current.source,
-                        target: messageData.current.target,
-                        signature: messageData.current.signature,
-                      }),
+                      "bg-gray-100 cursor-default": isCurrent,
+                      "opacity-40 cursor-not-allowed": !canTransform,
+                      "cursor-pointer": canTransform && !isCurrent,
                     },
                   )}
                 >
                   {type}
-                </div>
-              </div>
-            ))}
+                </button>
+              );
+            })}
           </div>
           <div className="w-px self-stretch bg-gray-200" />
           <div className="flex items-center gap-1 pr-1">
@@ -361,6 +397,8 @@ export const StylePanel = () => {
                 key={type}
                 data-testid={`message-wrap-${type}`}
                 className="px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200"
+                title={`Wrap in ${type} fragment`}
+                aria-label={`Wrap in ${type} fragment`}
                 onClick={() => handleWrapClick(type)}
               >
                 {type}

@@ -50,7 +50,7 @@ describe("ParticipantLabel", () => {
     const editableSpan = container.querySelector(".editable-span-base");
     expect(editableSpan).not.toBeNull();
 
-    fireEvent.doubleClick(editableSpan!);
+    fireEvent.click(editableSpan!);
 
     await waitFor(() => {
       expect(editableSpan?.getAttribute("contenteditable")).toBe("true");

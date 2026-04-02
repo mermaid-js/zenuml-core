@@ -25,6 +25,7 @@ import { cn } from "@/utils";
 import { LifeLineLayer } from "./LifeLineLayer/LifeLineLayer";
 import { MessageLayer } from "./MessageLayer/MessageLayer";
 import { ParticipantInsertControls } from "./LifeLineLayer/ParticipantInsertControls";
+import { ParticipantStylePanel } from "./LifeLineLayer/ParticipantStylePanel";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -127,6 +128,7 @@ export const SeqDiagram = (props: {
                 <ParticipantInsertControls />
               </div>
             </div>
+            <ParticipantStylePanel />
           </>
         ) : (
           <>

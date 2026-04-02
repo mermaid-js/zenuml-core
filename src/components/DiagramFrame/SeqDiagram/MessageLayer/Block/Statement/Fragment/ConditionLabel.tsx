@@ -19,7 +19,11 @@ export const ConditionLabel = (props: { condition: any }) => {
   const onContentChange = useAtomValue(onContentChangeAtom);
   const pendingEditableRange = useAtomValue(pendingEditableRangeAtom);
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
-  const labelText = props.condition?.getFormattedText() ?? "";
+  const rawLabelText = props.condition?.getFormattedText() ?? "";
+  // Strip surrounding quotes added by auto-quoting so user edits the clean value
+  const labelText = rawLabelText.startsWith('"') && rawLabelText.endsWith('"') && rawLabelText.length > 2
+    ? rawLabelText.slice(1, -1)
+    : rawLabelText;
   const isEditable = mode === RenderMode.Dynamic;
   const [start, end] = [
     props.condition?.start?.start,
@@ -31,7 +35,7 @@ export const ConditionLabel = (props: { condition: any }) => {
       : undefined;
 
   const handleSave = (newText: string) => {
-    // if text is empty, bail out
+    // if text is empty or unchanged (compare against stripped display value), bail out
     if (newText === "" || newText === labelText) {
       return;
     }
@@ -64,7 +68,7 @@ export const ConditionLabel = (props: { condition: any }) => {
         isEditable={isEditable}
         className="bg-skin-frame opacity-65 condition"
         onSave={handleSave}
-        title="Double-click to edit"
+        title="Click to edit condition"
         autoEditToken={shouldAutoEdit}
       />
       <label>]</label>

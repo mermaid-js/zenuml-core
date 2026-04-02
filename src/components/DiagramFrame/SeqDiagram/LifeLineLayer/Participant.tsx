@@ -96,7 +96,11 @@ export const Participant = (props: {
     <div
       className={cn(
         "participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8",
-        { selected: selected.includes(props.entity.name) },
+        {
+          selected: selected.includes(props.entity.name),
+          "ring-2 ring-sky-400": selected.includes(props.entity.name),
+          "cursor-pointer": mode === RenderMode.Dynamic && !isDefaultStarter,
+        },
       )}
       ref={elRef}
       style={{
@@ -105,6 +109,15 @@ export const Participant = (props: {
         transform: `translateY(${stickyVerticalOffset}px)`,
       }}
       onClick={() => onSelect(props.entity.name)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(props.entity.name);
+        }
+      }}
+      tabIndex={mode === RenderMode.Dynamic && !isDefaultStarter ? 0 : undefined}
+      role={mode === RenderMode.Dynamic && !isDefaultStarter ? "button" : undefined}
+      title={mode === RenderMode.Dynamic && !isDefaultStarter ? "Click to style participant" : undefined}
       data-participant-id={props.entity.name}
       data-selected={selected.includes(props.entity.name) ? "true" : "false"}
     >
