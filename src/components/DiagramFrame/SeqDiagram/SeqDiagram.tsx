@@ -24,6 +24,7 @@ import "./SeqDiagram.css";
 import { cn } from "@/utils";
 import { LifeLineLayer } from "./LifeLineLayer/LifeLineLayer";
 import { MessageLayer } from "./MessageLayer/MessageLayer";
+import { ParticipantInsertControls } from "./LifeLineLayer/ParticipantInsertControls";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -111,6 +112,21 @@ export const SeqDiagram = (props: {
               context={rootContext?.head()}
               renderParticipants
             />
+            {/* Insert controls on a separate layer above participants.
+               pointer-events: none lets clicks pass through to the participant
+               layer below; individual "+" buttons opt back in. */}
+            <div
+              className="absolute h-full top-0 pt-2"
+              style={{
+                width: `calc(100% - ${frameBorderLeft}px)`,
+                pointerEvents: "none",
+                zIndex: 40,
+              }}
+            >
+              <div className="relative grow h-full">
+                <ParticipantInsertControls />
+              </div>
+            </div>
           </>
         ) : (
           <>
