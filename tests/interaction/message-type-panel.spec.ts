@@ -24,6 +24,12 @@ test.describe("Message Type Panel", () => {
     await expect(page.locator(".interaction.return .message .editable-span-base").filter({
       hasText: "Hello Bob",
     })).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.locator('.interaction.return .message[data-selected="true"]').filter({
+        hasText: "Hello Bob",
+      }),
+    ).toHaveAttribute("data-selected", "true");
+    await expect(page.getByTestId("message-type-return")).toBeVisible();
 
     expect(logs.some((line) => line.includes("D-->C: Hello Bob"))).toBe(true);
   });
@@ -51,6 +57,12 @@ test.describe("Message Type Panel", () => {
     await expect(page.locator(".interaction.async .message .editable-span-base").filter({
       hasText: "Response payload",
     })).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.locator('.interaction.async .message[data-selected="true"]').filter({
+        hasText: "Response payload",
+      }),
+    ).toHaveAttribute("data-selected", "true");
+    await expect(page.getByTestId("message-type-async")).toBeVisible();
 
     expect(logs.some((line) => line.includes("D->C: Response payload"))).toBe(true);
   });

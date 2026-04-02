@@ -125,7 +125,6 @@ export const StylePanel = () => {
   };
 
   const handleTypeClick = (targetType: MessageArrowType) => {
-    setIsOpen(false);
     const message = messageData.current;
     const nextLine = transformMessageType({
       line: message.line,
@@ -140,11 +139,21 @@ export const StylePanel = () => {
     }
 
     const lineTail = message.lineHead + message.line.length;
+    const labelText = message.signature;
+    const labelOffset = labelText ? nextLine.lastIndexOf(labelText) : -1;
     updateCode(
       code.slice(0, message.lineHead) +
         nextLine +
         code.slice(lineTail),
     );
+    message.currentType = targetType;
+    if (labelOffset >= 0 && labelText) {
+      setSelectedMessage({
+        start: message.lineHead + labelOffset,
+        end: message.lineHead + labelOffset + labelText.length - 1,
+        token: Date.now(),
+      });
+    }
   };
 
   const handleRenameClick = () => {
@@ -170,6 +179,7 @@ export const StylePanel = () => {
       type,
     });
     updateCode(next.code);
+    setSelectedMessage(null);
     setPendingEditableRange({
       start: next.conditionPosition[0],
       end: next.conditionPosition[1],

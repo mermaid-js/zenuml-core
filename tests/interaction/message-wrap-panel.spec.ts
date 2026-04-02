@@ -18,6 +18,7 @@ test.describe("Message Wrap Panel", () => {
 
     const condition = page.locator(".fragment-alt .condition").first();
     await expect(condition).toHaveAttribute("contenteditable", "true");
+    await expect(page.getByTestId("message-wrap-alt")).toHaveCount(0);
     await page.keyboard.type("approved");
     await page.keyboard.press("Enter");
 
