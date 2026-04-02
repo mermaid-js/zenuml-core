@@ -50,6 +50,11 @@ test.describe("Message Rename Panel", () => {
         .filter({ hasText: "Hello Alice" })
         .first(),
     ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.locator('.interaction.async .message[data-selected="true"]').filter({
+        hasText: "Hello Alice",
+      }),
+    ).toHaveAttribute("data-selected", "true");
     await expect
       .poll(() => page.evaluate(() => (window as any).__lastContentChange ?? null))
       .toContain("D->C:Hello Alice");

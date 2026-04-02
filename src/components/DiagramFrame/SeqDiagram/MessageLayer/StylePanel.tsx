@@ -245,8 +245,8 @@ export const StylePanel = () => {
         }
         setSelectedParticipants([]);
         setSelectedMessage({
-          start: message.start,
-          end: context?.stop?.stop ?? message.start,
+          start: message.labelStart >= 0 ? message.labelStart : message.start,
+          end: message.labelEnd >= 0 ? message.labelEnd : (context?.stop?.stop ?? message.start),
           token: Date.now(),
         });
         refs.setReference(element);

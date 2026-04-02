@@ -13,6 +13,7 @@ type Context = any;
 
 export const Message = (props: {
   context?: Context;
+  selectionRange?: [number, number];
   rtl?: string | boolean;
   type?: string;
   textStyle?: CSSProperties;
@@ -23,6 +24,7 @@ export const Message = (props: {
 }) => {
   const {
     context,
+    selectionRange,
     rtl,
     type = "",
     textStyle,
@@ -36,8 +38,10 @@ export const Message = (props: {
   const selectedMessage = useAtomValue(selectedMessageAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const stylable = mode !== RenderMode.Static;
-  const rangeStart = context?.start?.start;
-  const rangeEnd = context?.stop?.stop;
+  const [rangeStart, rangeEnd] = selectionRange ?? [
+    context?.start?.start,
+    context?.stop?.stop,
+  ];
   const isSelected =
     selectedMessage?.start === rangeStart && selectedMessage?.end === rangeEnd;
 

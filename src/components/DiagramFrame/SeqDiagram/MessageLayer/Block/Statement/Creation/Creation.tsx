@@ -104,6 +104,7 @@ export const Creation = (props: {
             messageClassNames,
           )}
           context={creation}
+          selectionRange={[start, stop]}
           rtl={rightToLeft}
           type="creation"
           number={props.number}

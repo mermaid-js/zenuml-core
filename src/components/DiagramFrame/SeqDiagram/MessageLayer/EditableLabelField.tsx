@@ -3,6 +3,7 @@ import {
   modeAtom,
   onContentChangeAtom,
   pendingEditableRangeAtom,
+  selectedMessageAtom,
 } from "@/store/Store";
 import { cn } from "@/utils";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -31,6 +32,7 @@ export const EditableLabelField = ({
   const onContentChange = useAtomValue(onContentChangeAtom);
   const pendingEditableRange = useAtomValue(pendingEditableRangeAtom);
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
+  const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const isEditable = mode !== RenderMode.Static;
   const formattedText = resolveEmojiInText(formatText(text ?? ""));
   const shouldAutoEdit =
@@ -57,6 +59,11 @@ export const EditableLabelField = ({
     const newCode = code.slice(0, start) + normalizedText + code.slice(end + 1);
     setCode(newCode);
     onContentChange(newCode);
+    setSelectedMessage({
+      start,
+      end: start + normalizedText.length - 1,
+      token: Date.now(),
+    });
     if (shouldAutoEdit) {
       setPendingEditableRange(null);
     }
