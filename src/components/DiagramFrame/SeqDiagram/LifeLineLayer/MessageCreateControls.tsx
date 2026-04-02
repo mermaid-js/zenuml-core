@@ -9,13 +9,10 @@ import {
   RenderMode,
   rootContextAtom,
   selectedAtom,
-  selectedMessageAtom,
 } from "@/store/Store";
-import { createSyncMessageInDsl } from "@/utils/messageCreateTransform";
+import { insertMessageInDsl } from "@/utils/insertMessageInDsl";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef } from "react";
-
-const HANDLE_TOP = 54;
 
 export const MessageCreateControls = () => {
   const mode = useAtomValue(modeAtom);
@@ -24,11 +21,11 @@ export const MessageCreateControls = () => {
   const onContentChange = useAtomValue(onContentChangeAtom);
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
   const [, setSelectedParticipants] = useAtom(selectedAtom);
-  const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const [code, setCode] = useAtom(codeAtom);
   const [dragState, setDragState] = useAtom(createMessageDragAtom);
   const dragStateRef = useRef<typeof dragState>(null);
   const dragHandledRef = useRef(false);
+  const participantScreenXRef = useRef<Map<string, number>>(new Map());
 
   const participants = useMemo(
     () =>
@@ -44,27 +41,56 @@ export const MessageCreateControls = () => {
 
   useEffect(() => {
     if (!dragState || !diagramElement) {
+      dragHandledRef.current = false;
+      participantScreenXRef.current = new Map();
       return;
     }
+
+    if (participantScreenXRef.current.size === 0) {
+      const map = new Map<string, number>();
+      for (const p of participants) {
+        const el = diagramElement.querySelector(
+          `[data-participant-id="${p.name}"]`,
+        ) as HTMLElement | null;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          map.set(p.name, rect.left + rect.width / 2);
+        }
+      }
+      participantScreenXRef.current = map;
+    }
+
+    const findNearest = (clientX: number, source: string): string | null => {
+      let nearest: string | null = null;
+      let minDist = Infinity;
+      for (const [name, cx] of participantScreenXRef.current) {
+        if (name === source) continue;
+        const dist = Math.abs(clientX - cx);
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = name;
+        }
+      }
+      return nearest;
+    };
 
     const rect = diagramElement.getBoundingClientRect();
 
     const onPointerMove = (event: PointerEvent) => {
-      const targetElement = document
-        .elementFromPoint(event.clientX, event.clientY)
-        ?.closest("[data-participant-id]");
-      const target = targetElement?.getAttribute("data-participant-id");
+      const current = dragStateRef.current;
+      if (!current) return;
 
-      setDragState((current) =>
-        current
+      const target = findNearest(event.clientX, current.source);
+
+      setDragState((prev) =>
+        prev
           ? {
-              ...current,
+              ...prev,
               pointerX: event.clientX - rect.left,
               pointerY: event.clientY - rect.top,
-              hoverTarget:
-                target && target !== current.source ? target : null,
+              hoverTarget: target,
             }
-          : current,
+          : prev,
       );
     };
 
@@ -74,15 +100,15 @@ export const MessageCreateControls = () => {
         return;
       }
       dragHandledRef.current = true;
-      const targetElement = document
-        .elementFromPoint(event.clientX, event.clientY)
-        ?.closest("[data-participant-id]");
-      const target = targetElement?.getAttribute("data-participant-id");
-      if (target && target !== current.source) {
-        const next = createSyncMessageInDsl({
+
+      const target = findNearest(event.clientX, current.source);
+      if (target) {
+        const next = insertMessageInDsl({
           code,
           from: current.source,
           to: target,
+          blockContext: current.blockContext,
+          insertIndex: current.insertIndex,
         });
         setCode(next.code);
         onContentChange(next.code);
@@ -112,7 +138,7 @@ export const MessageCreateControls = () => {
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [code, diagramElement, dragState, onContentChange, setCode, setPendingEditableRange, setDragState, setSelectedParticipants]);
+  }, [code, diagramElement, dragState, onContentChange, participants, setCode, setPendingEditableRange, setDragState, setSelectedParticipants]);
 
   if (mode !== RenderMode.Dynamic || !diagramElement || participants.length === 0) {
     return null;
@@ -122,49 +148,6 @@ export const MessageCreateControls = () => {
 
   return (
     <>
-      {participants.map((participant) => {
-        const element = diagramElement.querySelector(
-          `[data-participant-id="${participant.name}"]`,
-        ) as HTMLElement | null;
-        if (!element) {
-          return null;
-        }
-        const rect = element.getBoundingClientRect();
-        const left = rect.right - diagramRect.left + 6;
-        return (
-          <button
-            key={participant.name}
-            type="button"
-            data-testid={`message-create-handle-${participant.name}`}
-            title="Drag to create message"
-            className="absolute z-40 h-8 w-8 rounded-full border border-sky-300 bg-white text-sky-600 shadow-sm hover:bg-sky-50 opacity-45 hover:opacity-100"
-            style={{
-              left,
-              top: HANDLE_TOP,
-              pointerEvents: "auto",
-            }}
-            onPointerDown={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              dragHandledRef.current = false;
-              setSelectedMessage(null);
-              setSelectedParticipants([participant.name]);
-              const sourceX = rect.right - diagramRect.left;
-              const sourceY = rect.top - diagramRect.top + rect.height / 2;
-              setDragState({
-                source: participant.name,
-                sourceX,
-                sourceY,
-                pointerX: sourceX,
-                pointerY: sourceY,
-                hoverTarget: null,
-              });
-            }}
-          >
-            →
-          </button>
-        );
-      })}
       {dragState && (
         <svg
           className="absolute inset-0 z-30"

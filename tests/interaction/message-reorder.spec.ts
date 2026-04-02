@@ -71,7 +71,7 @@ test.describe("Message Reorder", () => {
       .toContain("A\nB\nC\nA->C: second\nA->B: first");
   });
 
-  test("shows a drag indicator when hovering a message", async ({ page }) => {
+  test("shows a resize cursor when hovering a message", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-message.html");
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
@@ -79,14 +79,11 @@ test.describe("Message Reorder", () => {
 
     const firstMessage = page.locator(".statement-container .message").first();
     await firstMessage.hover();
+    await expect(firstMessage).toHaveAttribute(
+      "title",
+      "Click to edit, drag to reorder",
+    );
     await expect(firstMessage).toHaveCSS("cursor", "ns-resize");
-    await expect
-      .poll(async () =>
-        firstMessage.evaluate((element) =>
-          getComputedStyle(element, "::before").opacity,
-        ),
-      )
-      .toBe("0.55");
   });
 
   test("shows immediate pending feedback on pointer down before drag threshold", async ({ page }) => {

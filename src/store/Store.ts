@@ -136,6 +136,8 @@ export const createMessageDragAtom = atom<{
   pointerX: number;
   pointerY: number;
   hoverTarget: string | null;
+  insertIndex: number;
+  blockContext: any;
 } | null>(null);
 
 export const onContentChangeAtom = atomWithFunctionValue<

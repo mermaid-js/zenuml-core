@@ -19,7 +19,6 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useRef } from "react";
 import { ParticipantLabel } from "./ParticipantLabel";
 import { AsyncIcon } from "../../Tutorial/AsyncIcon";
-// import iconPath from "../../Tutorial/Icons"; // Removed eager import
 
 const INTERSECTION_ERROR_MARGIN = 10;
 const PARTICIPANT_DEBUG = Boolean(localStorage.getItem("zenumlDebug"));

@@ -64,6 +64,7 @@ export const Message = (props: {
       onClick={onClick}
       messageRef={messageRef}
       data-selected={isSelected ? "true" : "false"}
+      title={stylable ? "Click to edit, drag to reorder" : undefined}
       children={children}
     />
   );

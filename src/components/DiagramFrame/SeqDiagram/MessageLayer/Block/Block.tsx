@@ -6,7 +6,8 @@ import { useAtom } from "jotai";
 import { codeAtom, onContentChangeAtom } from "@/store/Store";
 import { reorderMessageInDsl } from "@/utils/messageReorderTransform";
 import { useAtomValue } from "jotai";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { GapHandleZone } from "../GapHandleZone";
 
 const DRAG_THRESHOLD = 4;
 
@@ -118,12 +119,22 @@ export const Block = (props: {
     }
     return String(index + 1);
   };
+  const enableGapHandles = enableReorder;
+
   return (
     <div
       className={cn("block", props.className)}
       style={props.style}
       data-origin={props.origin}
     >
+      {enableGapHandles && statements.length === 0 && (
+        <GapHandleZone
+          insertIndex={0}
+          blockContext={props.context}
+          origin={props.origin || ""}
+          isEmpty
+        />
+      )}
       {statements.map((stat, index) => {
         const statementKey = createStatementKey(stat);
         const reorderState =
@@ -133,61 +144,76 @@ export const Block = (props: {
             ? "pending"
             : "idle";
         return (
-        <div
-          className={cn("statement-container my-4 flex flex-col relative", {
-            "select-none": reorderState !== "idle",
-          })}
-          data-origin={props.origin}
-          data-statement-key={statementKey}
-          data-reorder-state={reorderState}
-          key={index}
-          onPointerDown={(event) => {
-            if (!enableReorder) {
-              return;
-            }
-            const target = event.target as HTMLElement | null;
-            if (
-              !target?.closest(".message") ||
-              target.closest("[contenteditable='true']")
-            ) {
-              return;
-            }
-            setPendingDrag({
-              key: statementKey,
-              startX: event.clientX,
-              startY: event.clientY,
-            });
-            setDropState(null);
-          }}
-          onPointerMove={(event) => {
-            if (!enableReorder || !dragKey) {
-              return;
-            }
-            if (statementKey === dragKey) {
-              return;
-            }
-            const rect = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
-            setDropState({
-              key: statementKey,
-              place: event.clientY < rect.top + rect.height / 2 ? "before" : "after",
-            });
-          }}
-        >
-          {dropState?.key === statementKey && (
-            <div
-              className="absolute left-0 right-0 h-0.5 bg-sky-500 z-20"
-              style={{ [dropState.place === "before" ? "top" : "bottom"]: -8 }}
+        <Fragment key={index}>
+          {enableGapHandles && (
+            <GapHandleZone
+              insertIndex={index}
+              blockContext={props.context}
+              origin={props.origin || ""}
             />
           )}
-          <Statement
-            origin={props.origin || ""}
-            context={stat}
-            collapsed={Boolean(props.collapsed)}
-            number={getNumber(index)}
-          />
-        </div>
+          <div
+            className={cn("statement-container my-4 flex flex-col relative", {
+              "select-none": reorderState !== "idle",
+            })}
+            data-origin={props.origin}
+            data-statement-key={statementKey}
+            data-reorder-state={reorderState}
+            onPointerDown={(event) => {
+              if (!enableReorder) {
+                return;
+              }
+              const target = event.target as HTMLElement | null;
+              if (
+                !target?.closest(".message") ||
+                target.closest("[contenteditable='true']")
+              ) {
+                return;
+              }
+              setPendingDrag({
+                key: statementKey,
+                startX: event.clientX,
+                startY: event.clientY,
+              });
+              setDropState(null);
+            }}
+            onPointerMove={(event) => {
+              if (!enableReorder || !dragKey) {
+                return;
+              }
+              if (statementKey === dragKey) {
+                return;
+              }
+              const rect = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
+              setDropState({
+                key: statementKey,
+                place: event.clientY < rect.top + rect.height / 2 ? "before" : "after",
+              });
+            }}
+          >
+            {dropState?.key === statementKey && (
+              <div
+                className="absolute left-0 right-0 h-0.5 bg-sky-500 z-20"
+                style={{ [dropState.place === "before" ? "top" : "bottom"]: -8 }}
+              />
+            )}
+            <Statement
+              origin={props.origin || ""}
+              context={stat}
+              collapsed={Boolean(props.collapsed)}
+              number={getNumber(index)}
+            />
+          </div>
+        </Fragment>
         );
       })}
+      {enableGapHandles && statements.length > 0 && (
+        <GapHandleZone
+          insertIndex={statements.length}
+          blockContext={props.context}
+          origin={props.origin || ""}
+        />
+      )}
     </div>
   );
 };
