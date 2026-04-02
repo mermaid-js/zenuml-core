@@ -16,8 +16,8 @@ export const DiagramTitle = (props: { context: any }) => {
   const hasTitle = Boolean(displayTitle);
 
   const handleSave = (newText: string) => {
-    // Ignore if unchanged or user typed the placeholder text literally
-    const trimmed = newText === PLACEHOLDER ? "" : newText;
+    const sanitized = newText === PLACEHOLDER ? "" : newText.replace(/[\r\n]+/g, " ");
+    const trimmed = sanitized.trim();
     if (trimmed === displayTitle) return;
 
     if (props.context) {
