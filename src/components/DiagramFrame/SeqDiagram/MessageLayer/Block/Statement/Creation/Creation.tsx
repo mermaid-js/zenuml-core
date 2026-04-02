@@ -82,6 +82,8 @@ export const Creation = (props: {
         props.className,
       )}
       onClick={() => onElementClick(CodeRange.from(props.context))}
+      data-source={props.origin}
+      data-target={target}
       data-signature={creation?.SignatureText()}
       style={{
         transform: "translateX(" + translateX + "px)",

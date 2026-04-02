@@ -25,7 +25,7 @@ export const AssignmentReturnLabel = ({
         position={assigneePosition}
         normalizeText={normalizeText}
         className="right"
-        title="Double-click to edit assignee"
+        title="Click to edit assignee"
       />
       {type && (
         <>
@@ -34,7 +34,7 @@ export const AssignmentReturnLabel = ({
             text={type}
             position={typePosition}
             className="right"
-            title="Double-click to edit type"
+            title="Click to edit type"
           />
         </>
       )}

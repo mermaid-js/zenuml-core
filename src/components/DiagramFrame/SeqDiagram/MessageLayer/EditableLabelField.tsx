@@ -25,7 +25,7 @@ export const EditableLabelField = ({
   position,
   normalizeText,
   className,
-  title = "Double-click to edit",
+  title = "Click to edit",
 }: EditableLabelFieldProps) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);

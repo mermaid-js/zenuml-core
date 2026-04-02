@@ -47,6 +47,7 @@ const Icon = (props: {
   name: keyof typeof icons;
   className?: string;
   onClick?: () => void;
+  title?: string;
 }) => {
   const Component = icons[props.name];
 
@@ -59,6 +60,7 @@ const Icon = (props: {
         props.className,
       )}
       onClick={props.onClick}
+      title={props.title}
     >
       <Component />
     </span>

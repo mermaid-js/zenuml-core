@@ -38,6 +38,7 @@ export const CreationMessageLabel = ({
         position={labelPosition}
         normalizeText={normalizeText}
         className={cn("right", className)}
+        title="Click to edit creation label"
       />
       <span>»</span>
     </>
