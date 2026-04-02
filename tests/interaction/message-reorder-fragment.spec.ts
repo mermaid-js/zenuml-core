@@ -46,7 +46,82 @@ test.describe("Message Reorder in Fragment", () => {
     const message = page.locator(".fragment-alt .statement-container .message").first();
     await message.hover();
 
-    await expect(message).toHaveAttribute("title", "Click to edit, drag to reorder");
+    await expect(message).toHaveAttribute("title", "Click to select · drag to reorder");
     await expect(message).toHaveCSS("cursor", "ns-resize");
+  });
+
+  test("moves a top-level message into a fragment by dragging onto a fragment message", async ({ page }) => {
+    await page.goto("/e2e/fixtures/reorder-cross-fragment.html");
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    const outside = page.locator(".statement-container .message").filter({
+      hasText: "outside()",
+    });
+    const alpha = page.locator(".fragment-alt .statement-container .message").filter({ hasText: "alpha()" });
+
+    const sourceBox = await outside.boundingBox();
+    const targetBox = await alpha.boundingBox();
+    if (!sourceBox || !targetBox) throw new Error("missing bounding boxes");
+
+    await page.mouse.move(
+      sourceBox.x + sourceBox.width / 2,
+      sourceBox.y + sourceBox.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      targetBox.x + targetBox.width / 2,
+      targetBox.y + 2,
+      { steps: 12 },
+    );
+    await page.mouse.up();
+
+    await expect
+      .poll(() => page.evaluate(() => (window as any).__lastContentChange ?? null))
+      .toContain(`if(ready) {
+  B->A.outside()
+  A->B.alpha()
+  A->C.beta()
+}`);
+  });
+
+  test("moves a fragment message out to the top level by dragging onto a top-level message", async ({ page }) => {
+    await page.goto("/e2e/fixtures/reorder-cross-fragment.html");
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    const alpha = page.locator(".fragment-alt .statement-container .message").filter({ hasText: "alpha()" });
+    const outside = page.locator(".statement-container .message").filter({
+      hasText: "outside()",
+    });
+
+    const sourceBox = await alpha.boundingBox();
+    const targetBox = await outside.boundingBox();
+    if (!sourceBox || !targetBox) throw new Error("missing bounding boxes");
+
+    await page.mouse.move(
+      sourceBox.x + sourceBox.width / 2,
+      sourceBox.y + sourceBox.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      targetBox.x + targetBox.width / 2,
+      targetBox.y + 2,
+      { steps: 12 },
+    );
+    await page.mouse.up();
+
+    await expect
+      .poll(() => page.evaluate(() => (window as any).__lastContentChange ?? null))
+      .toContain(`A
+B
+C
+A->B.alpha()
+B->A.outside()
+if(ready) {
+  A->C.beta()
+}`);
   });
 });

@@ -3,7 +3,13 @@ import { Statement } from "./Statement/Statement";
 import { cn } from "@/utils";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { useAtom } from "jotai";
-import { codeAtom, onContentChangeAtom } from "@/store/Store";
+import {
+  codeAtom,
+  messageReorderDragAtom,
+  messageReorderDropAtom,
+  messageReorderPendingAtom,
+  onContentChangeAtom,
+} from "@/store/Store";
 import { reorderMessageInDsl } from "@/utils/messageReorderTransform";
 import { useAtomValue } from "jotai";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -19,22 +25,16 @@ export const Block = (props: {
   collapsed?: boolean;
   style?: React.CSSProperties;
   className?: string;
+  isRoot?: boolean;
 }) => {
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const statements: any[] = props.context?.stat() || [];
   const enableReorder = true;
-  const [dragKey, setDragKey] = useState<string | null>(null);
+  const [dragKey, setDragKey] = useAtom(messageReorderDragAtom);
   const dragKeyRef = useRef<string | null>(null);
-  const [pendingDrag, setPendingDrag] = useState<{
-    key: string;
-    startX: number;
-    startY: number;
-  } | null>(null);
-  const [dropState, setDropState] = useState<{
-    key: string;
-    place: "before" | "after";
-  } | null>(null);
+  const [pendingDrag, setPendingDrag] = useAtom(messageReorderPendingAtom);
+  const [dropState, setDropState] = useAtom(messageReorderDropAtom);
 
   useEffect(() => {
     dragKeyRef.current = dragKey;
@@ -54,6 +54,9 @@ export const Block = (props: {
   }, [dragKey, pendingDrag]);
 
   useEffect(() => {
+    if (!props.isRoot) {
+      return;
+    }
     if (!pendingDrag || dragKey) {
       return;
     }
@@ -78,9 +81,12 @@ export const Block = (props: {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
     };
-  }, [dragKey, pendingDrag]);
+  }, [dragKey, pendingDrag, props.isRoot, setDragKey, setPendingDrag]);
 
   useEffect(() => {
+    if (!props.isRoot) {
+      return;
+    }
     if (!dragKey) {
       return;
     }
@@ -109,7 +115,7 @@ export const Block = (props: {
     return () => {
       window.removeEventListener("pointerup", onPointerUp);
     };
-  }, [code, dragKey, dropState, onContentChange, setCode]);
+  }, [code, dragKey, dropState, onContentChange, props.isRoot, setCode, setDragKey, setDropState]);
 
   const getNumber = (index: number) => {
     if (props.number) {
@@ -171,6 +177,7 @@ export const Block = (props: {
               ) {
                 return;
               }
+              event.stopPropagation();
               setPendingDrag({
                 key: statementKey,
                 startX: event.clientX,
@@ -185,6 +192,7 @@ export const Block = (props: {
               if (statementKey === dragKey) {
                 return;
               }
+              event.stopPropagation();
               const rect = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
               setDropState({
                 key: statementKey,
