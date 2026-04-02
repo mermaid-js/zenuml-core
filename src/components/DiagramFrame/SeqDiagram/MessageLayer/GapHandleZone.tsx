@@ -74,6 +74,26 @@ export const GapHandleZone = (props: {
 
   const paddingLeft = centerOf(coordinates, props.origin) + 1;
 
+  const insertDivider = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const result = insertDividerInDsl({
+        code,
+        blockContext: props.blockContext,
+        insertIndex: props.insertIndex,
+      });
+      setCode(result.code);
+      onContentChange(result.code);
+      setPendingEditableRange({
+        start: result.labelPosition[0],
+        end: result.labelPosition[1],
+        token: Date.now(),
+      });
+    },
+    [code, onContentChange, props.blockContext, props.insertIndex, setCode, setPendingEditableRange],
+  );
+
   if (mode !== RenderMode.Dynamic || participants.length < 2) {
     return null;
   }
@@ -105,26 +125,6 @@ export const GapHandleZone = (props: {
       blockContext: props.blockContext,
     });
   };
-
-  const insertDivider = useCallback(
-    (event: React.MouseEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const result = insertDividerInDsl({
-        code,
-        blockContext: props.blockContext,
-        insertIndex: props.insertIndex,
-      });
-      setCode(result.code);
-      onContentChange(result.code);
-      setPendingEditableRange({
-        start: result.labelPosition[0],
-        end: result.labelPosition[1],
-        token: Date.now(),
-      });
-    },
-    [code, onContentChange, props.blockContext, props.insertIndex, setCode, setPendingEditableRange],
-  );
 
   const showHandles = hovered && !dragState;
 
