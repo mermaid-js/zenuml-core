@@ -14,8 +14,10 @@ import { codeAtom } from "@/store/Store";
 import { useMemo } from "react";
 
 const BUTTON_CENTER_Y = 40;
-const BUTTON_SIZE = 22;
-const BUTTON_TOP = BUTTON_CENTER_Y - BUTTON_SIZE / 2;
+const BUTTON_SIZE = 16;
+const HIT_AREA_SIZE = 36;
+const HIT_AREA_TOP = BUTTON_CENTER_Y - HIT_AREA_SIZE / 2;
+const BUTTON_INSET = (HIT_AREA_SIZE - BUTTON_SIZE) / 2;
 
 const generateName = (existingNames: Set<string>) => {
   for (let i = 1; ; i++) {
@@ -86,28 +88,33 @@ export const ParticipantInsertControls = () => {
   return (
     <>
       {gapAnchors.map((left, index) => (
-        <button
+        <div
           key={index}
-          type="button"
-          data-testid={`participant-insert-button-${index}`}
-          title="Add participant"
-          className={cn(
-            "absolute -translate-x-1/2 flex items-center justify-center rounded-full border border-sky-300 bg-white text-sky-600 shadow-sm text-lg font-bold leading-none transition-opacity hover:bg-sky-50",
-            selectedParticipants.length > 0
-              ? "opacity-70 hover:opacity-100"
-              : "opacity-40 hover:opacity-100",
-          )}
+          className="group absolute -translate-x-1/2"
           style={{
             left,
-            top: BUTTON_TOP,
-            width: BUTTON_SIZE,
-            height: BUTTON_SIZE,
+            top: HIT_AREA_TOP,
+            width: HIT_AREA_SIZE,
+            height: HIT_AREA_SIZE,
             pointerEvents: "auto",
           }}
-          onClick={() => handleInsert(index + 1)}
         >
-          +
-        </button>
+          <button
+            type="button"
+            data-testid={`participant-insert-button-${index}`}
+            title="Add participant"
+            className="absolute flex items-center justify-center rounded-full border border-slate-300 bg-white text-slate-400 text-xs leading-none opacity-0 transition-all group-hover:opacity-80 hover:!opacity-100 hover:border-sky-400 hover:text-sky-500 hover:shadow-sm"
+            style={{
+              top: BUTTON_INSET,
+              left: BUTTON_INSET,
+              width: BUTTON_SIZE,
+              height: BUTTON_SIZE,
+            }}
+            onClick={() => handleInsert(index + 1)}
+          >
+            +
+          </button>
+        </div>
       ))}
     </>
   );

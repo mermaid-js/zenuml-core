@@ -1,13 +1,24 @@
 import { test, expect } from "../fixtures";
 
 test.describe("Participant Insert", () => {
-  test("shows insert affordance between participants", async ({ page }) => {
+  test("shows insert button on hover between participants", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
     });
 
-    await expect(page.getByTestId("participant-insert-button-0")).toBeVisible();
+    const button = page.getByTestId("participant-insert-button-0");
+    await expect(button).toHaveCSS("opacity", "0");
+
+    const participantA = page.locator('#A .participant');
+    const participantC = page.locator('#C .participant');
+    const aBox = await participantA.boundingBox();
+    const cBox = await participantC.boundingBox();
+    const midX = (aBox!.x + aBox!.width + cBox!.x) / 2;
+    const midY = aBox!.y + aBox!.height / 2;
+    await page.mouse.move(midX, midY);
+
+    await expect(button).not.toHaveCSS("opacity", "0");
   });
 
   test("one-click inserts a participant between two lifelines and rewrites DSL", async ({ page }) => {
@@ -15,6 +26,14 @@ test.describe("Participant Insert", () => {
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
     });
+
+    const participantA = page.locator('#A .participant');
+    const participantC = page.locator('#C .participant');
+    const aBox = await participantA.boundingBox();
+    const cBox = await participantC.boundingBox();
+    const midX = (aBox!.x + aBox!.width + cBox!.x) / 2;
+    const midY = aBox!.y + aBox!.height / 2;
+    await page.mouse.move(midX, midY);
 
     const addButton = page.getByTestId("participant-insert-button-0");
     await expect(addButton).toBeVisible();
@@ -50,6 +69,17 @@ test.describe("Participant Insert", () => {
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
     });
+
+    const participantA = page.locator('#A .participant');
+    const participantC = page.locator('#C .participant');
+    const aBox = await participantA.boundingBox();
+    const cBox = await participantC.boundingBox();
+    const midX = (aBox!.x + aBox!.width + cBox!.x) / 2;
+    const midY = aBox!.y + aBox!.height / 2;
+    await page.mouse.move(midX, midY);
+
+    const button = page.getByTestId("participant-insert-button-0");
+    await expect(button).toBeVisible();
 
     const geometry = await page.evaluate(() => {
       const participantA = document.querySelector('#A .participant')?.getBoundingClientRect();
