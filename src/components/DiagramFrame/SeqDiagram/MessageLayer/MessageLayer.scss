@@ -18,6 +18,10 @@
     cursor: ns-resize;
     user-select: none;
     -webkit-user-select: none;
+    transition:
+      box-shadow 120ms ease,
+      transform 120ms ease,
+      background-color 120ms ease;
   }
 
   .statement-container .message::before {
@@ -39,6 +43,19 @@
   .statement-container:hover .message::before,
   .statement-container .message[data-selected="true"]::before {
     opacity: 0.55;
+  }
+
+  .statement-container[data-reorder-state="pending"] .message,
+  .statement-container[data-reorder-state="dragging"] .message {
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.28);
+    background-color: rgba(224, 242, 254, 0.45);
+    transform: translateY(-1px);
+    cursor: grabbing;
+  }
+
+  .statement-container[data-reorder-state="pending"] .message::before,
+  .statement-container[data-reorder-state="dragging"] .message::before {
+    opacity: 0.95;
   }
 
   .interaction.right-to-left > .occurrence {

@@ -40,6 +40,19 @@ export const Block = (props: {
   }, [dragKey]);
 
   useEffect(() => {
+    if (!pendingDrag && !dragKey) {
+      return;
+    }
+
+    const previousCursor = document.body.style.cursor;
+    document.body.style.cursor = "grabbing";
+
+    return () => {
+      document.body.style.cursor = previousCursor;
+    };
+  }, [dragKey, pendingDrag]);
+
+  useEffect(() => {
     if (!pendingDrag || dragKey) {
       return;
     }
@@ -111,13 +124,22 @@ export const Block = (props: {
       style={props.style}
       data-origin={props.origin}
     >
-      {statements.map((stat, index) => (
+      {statements.map((stat, index) => {
+        const statementKey = createStatementKey(stat);
+        const reorderState =
+          dragKey === statementKey
+            ? "dragging"
+            : pendingDrag?.key === statementKey
+            ? "pending"
+            : "idle";
+        return (
         <div
           className={cn("statement-container my-4 flex flex-col relative", {
-            "select-none": dragKey === createStatementKey(stat) || pendingDrag?.key === createStatementKey(stat),
+            "select-none": reorderState !== "idle",
           })}
           data-origin={props.origin}
-          data-statement-key={createStatementKey(stat)}
+          data-statement-key={statementKey}
+          data-reorder-state={reorderState}
           key={index}
           onPointerDown={(event) => {
             if (!enableReorder) {
@@ -131,7 +153,7 @@ export const Block = (props: {
               return;
             }
             setPendingDrag({
-              key: createStatementKey(stat),
+              key: statementKey,
               startX: event.clientX,
               startY: event.clientY,
             });
@@ -141,18 +163,17 @@ export const Block = (props: {
             if (!enableReorder || !dragKey) {
               return;
             }
-            const key = createStatementKey(stat);
-            if (key === dragKey) {
+            if (statementKey === dragKey) {
               return;
             }
             const rect = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
             setDropState({
-              key,
+              key: statementKey,
               place: event.clientY < rect.top + rect.height / 2 ? "before" : "after",
             });
           }}
         >
-          {dropState?.key === createStatementKey(stat) && (
+          {dropState?.key === statementKey && (
             <div
               className="absolute left-0 right-0 h-0.5 bg-sky-500 z-20"
               style={{ [dropState.place === "before" ? "top" : "bottom"]: -8 }}
@@ -165,7 +186,8 @@ export const Block = (props: {
             number={getNumber(index)}
           />
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
