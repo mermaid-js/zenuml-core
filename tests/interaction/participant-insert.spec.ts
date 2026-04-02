@@ -16,9 +16,6 @@ test.describe("Participant Insert", () => {
       timeout: 5000,
     });
 
-    const middleGap = page.getByTestId("participant-insert-gap-1");
-    await middleGap.hover();
-
     const addButton = page.getByTestId("participant-insert-button-1");
     await expect(addButton).toBeVisible();
     await addButton.click();

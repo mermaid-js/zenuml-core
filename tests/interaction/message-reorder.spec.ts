@@ -7,14 +7,14 @@ test.describe("Message Reorder", () => {
       timeout: 5000,
     });
 
-    const handles = page.locator('[data-testid^="message-reorder-handle-"]');
-    const count = await handles.count();
+    const messages = page.locator(".statement-container .message");
+    const count = await messages.count();
     expect(count).toBeGreaterThanOrEqual(2);
 
-    const secondHandle = handles.nth(1);
-    const firstHandle = handles.nth(0);
-    const sourceBox = await secondHandle.boundingBox();
-    const targetBox = await firstHandle.boundingBox();
+    const secondMessage = messages.nth(1);
+    const firstMessage = messages.nth(0);
+    const sourceBox = await secondMessage.boundingBox();
+    const targetBox = await firstMessage.boundingBox();
 
     expect(sourceBox).toBeTruthy();
     expect(targetBox).toBeTruthy();
@@ -42,14 +42,14 @@ test.describe("Message Reorder", () => {
       timeout: 5000,
     });
 
-    const handles = page.locator('[data-testid^="message-reorder-handle-"]');
-    const count = await handles.count();
+    const messages = page.locator(".statement-container .message");
+    const count = await messages.count();
     expect(count).toBeGreaterThanOrEqual(2);
 
-    const firstHandle = handles.nth(0);
-    const secondHandle = handles.nth(1);
-    const sourceBox = await firstHandle.boundingBox();
-    const targetBox = await secondHandle.boundingBox();
+    const firstMessage = messages.nth(0);
+    const secondMessage = messages.nth(1);
+    const sourceBox = await firstMessage.boundingBox();
+    const targetBox = await secondMessage.boundingBox();
 
     expect(sourceBox).toBeTruthy();
     expect(targetBox).toBeTruthy();
@@ -71,13 +71,21 @@ test.describe("Message Reorder", () => {
       .toContain("A\nB\nC\nA->C: second\nA->B: first");
   });
 
-  test("shows a reorder-specific tooltip on the drag handle", async ({ page }) => {
+  test("shows a drag indicator when hovering a message", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-message.html");
     await expect(page.locator(".privacy>span>svg")).toBeVisible({
       timeout: 5000,
     });
 
-    await expect(page.locator('[data-testid^="message-reorder-handle-"]').first())
-      .toHaveAttribute("title", "Drag to reorder message");
+    const firstMessage = page.locator(".statement-container .message").first();
+    await firstMessage.hover();
+    await expect(firstMessage).toHaveCSS("cursor", "ns-resize");
+    await expect
+      .poll(async () =>
+        firstMessage.evaluate((element) =>
+          getComputedStyle(element, "::before").opacity,
+        ),
+      )
+      .toBe("0.55");
   });
 });

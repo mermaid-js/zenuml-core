@@ -97,7 +97,7 @@ export const ParticipantInsertControls = () => {
           key={index}
           data-testid={`participant-insert-gap-${index}`}
           className="group absolute -translate-x-1/2 w-8 h-12"
-          style={{ left, top: BUTTON_TOP - 8, pointerEvents: "auto" }}
+          style={{ left, top: BUTTON_TOP - 8, pointerEvents: "none" }}
           onMouseEnter={() => {
             if (activeGap == null) {
               setName("");
@@ -118,7 +118,7 @@ export const ParticipantInsertControls = () => {
                 ? "opacity-70 group-hover:opacity-100"
                 : "opacity-40 group-hover:opacity-100",
             )}
-            style={{ top: BUTTON_TOP }}
+            style={{ top: BUTTON_TOP, pointerEvents: "auto" }}
             onClick={() => {
               setActiveGap(index);
               setName("");

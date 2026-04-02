@@ -9,13 +9,36 @@
     border: dashed transparent 0;
   }
 
-  .interaction:hover {
-    cursor: pointer;
-  }
-
   .message {
     position: relative;
     /* positioning Point */
+  }
+
+  .statement-container .message {
+    cursor: ns-resize;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .statement-container .message::before {
+    content: "";
+    position: absolute;
+    left: -18px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 120ms ease;
+    pointer-events: none;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='4 20 15 20 15 26.17 12.41 23.59 11 25 16 30 21 25 19.59 23.59 17 26.17 17 20 28 20 28 18 4 18 4 20'/%3E%3Cpolygon points='11 7 12.41 8.41 15 5.83 15 12 4 12 4 14 28 14 28 12 17 12 17 5.83 19.59 8.41 21 7 16 2 11 7'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='4 20 15 20 15 26.17 12.41 23.59 11 25 16 30 21 25 19.59 23.59 17 26.17 17 20 28 20 28 18 4 18 4 20'/%3E%3Cpolygon points='11 7 12.41 8.41 15 5.83 15 12 4 12 4 14 28 14 28 12 17 12 17 5.83 19.59 8.41 21 7 16 2 11 7'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+
+  .statement-container:hover .message::before,
+  .statement-container .message[data-selected="true"]::before {
+    opacity: 0.55;
   }
 
   .interaction.right-to-left > .occurrence {
