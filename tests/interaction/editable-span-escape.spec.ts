@@ -10,7 +10,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
     
     await expect(span1).toHaveText("Original Text");
     
-    await span1.dblclick();
+    await span1.click();
     await page.waitForTimeout(100);
     
     await page.keyboard.press("End");
@@ -36,7 +36,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
     
     await expect(span2).toHaveText("Press Enter");
     
-    await span2.dblclick();
+    await span2.click();
     await page.waitForTimeout(100);
     
     await page.keyboard.press("End");
@@ -61,7 +61,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
     
     await expect(span3).toHaveText("Click Outside");
     
-    await span3.dblclick();
+    await span3.click();
     await page.waitForTimeout(100);
     
     await page.keyboard.press("End");
@@ -83,7 +83,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
     const span1 = page.locator('[data-testid="test1-span"] .editable-span-base');
     const log1 = page.locator('[data-testid="test1-log"]');
     
-    await span1.dblclick();
+    await span1.click();
     await page.waitForTimeout(100);
     await page.keyboard.press("End");
     await page.keyboard.type(" First");
@@ -92,7 +92,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
     
     await expect(span1).toHaveText("Original Text");
     
-    await span1.dblclick();
+    await span1.click();
     await page.waitForTimeout(100);
     await page.keyboard.press("End");
     await page.keyboard.type(" Second");
@@ -111,7 +111,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
     
     const span1 = page.locator('[data-testid="test1-span"] .editable-span-base');
     
-    await span1.dblclick();
+    await span1.click();
     await page.waitForTimeout(100);
     
     await page.keyboard.press("Control+A");
@@ -132,7 +132,7 @@ test.describe("EditableSpan ESC Key Behavior", () => {
     const span2 = page.locator('[data-testid="test2-span"] .editable-span-base');
     const log2 = page.locator('[data-testid="test2-log"]');
     
-    await span2.dblclick();
+    await span2.click();
     await page.waitForTimeout(100);
     
     await page.keyboard.press("End");

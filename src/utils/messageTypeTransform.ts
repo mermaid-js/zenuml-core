@@ -1,4 +1,4 @@
-export type MessageArrowType = "sync" | "async" | "return";
+export type MessageArrowType = "sync" | "async" | "return" | "creation";
 
 type TransformMessageTypeInput = {
   line: string;
@@ -37,6 +37,20 @@ const colonMessageParts = (line: string) => {
   };
 };
 
+const creationLineParts = (line: string) => {
+  const { indent, body, semicolon } = splitLine(line);
+  const match = body.match(/^new\s+(\w+)\s*\(([^)]*)\)$/);
+  if (!match) return null;
+  return { indent, target: match[1], args: match[2].trim(), semicolon };
+};
+
+const isSyncableContent = (content: string): boolean => {
+  const trimmed = content.trim();
+  if (!trimmed) return false;
+  const methodName = trimmed.replace(/\(.*\)$/, "");
+  return methodName.length > 0 && !/\s/.test(methodName);
+};
+
 export const canTransformMessageType = ({
   line,
   currentType,
@@ -58,13 +72,21 @@ export const canTransformMessageType = ({
     if (!signature) {
       return false;
     }
-    if (targetType === "async") {
+    if (targetType === "async" || targetType === "creation") {
       return true;
     }
     return Boolean(source && source !== STARTER);
   }
+  if (currentType === "creation" && targetType === "sync") {
+    const parts = creationLineParts(line);
+    if (!parts || !source || source === STARTER) return false;
+    // args must be a valid method name (identifier, no spaces)
+    return parts.args.length > 0 && /^\w+$/.test(parts.args);
+  }
   if (targetType === "sync") {
-    return false;
+    const parts = colonMessageParts(line);
+    if (!parts) return false;
+    return isSyncableContent(parts.content);
   }
   return Boolean(
     source &&
@@ -101,13 +123,32 @@ export const transformMessageType = ({
       const prefix = source && source !== STARTER ? `${source}->${target}` : target;
       return `${indent}${prefix}: ${signature}${semicolon}`;
     }
+    if (targetType === "creation") {
+      return `${indent}new ${target}(${signature})${semicolon}`;
+    }
     return `${indent}${source}-->${target}: ${signature}${semicolon}`;
+  }
+
+  if (currentType === "creation" && targetType === "sync") {
+    const parts = creationLineParts(line);
+    if (!parts || !source) return null;
+    return `${parts.indent}${source}->${parts.target}.${parts.args}()${parts.semicolon}`;
   }
 
   const colonParts = colonMessageParts(line);
   if (!colonParts) {
     return null;
   }
+
+  if (targetType === "sync") {
+    const content = colonParts.content.trim();
+    const methodCall = content.endsWith(")") ? content : `${content}()`;
+    const prefix = colonParts.from
+      ? `${colonParts.from}->${colonParts.to}`
+      : colonParts.to;
+    return `${colonParts.indent}${prefix}.${methodCall}${colonParts.semicolon}`;
+  }
+
   const arrow = targetType === "return" ? "-->" : "->";
   return `${colonParts.indent}${colonParts.from}${arrow}${colonParts.to}:${colonParts.content}${colonParts.semicolon}`;
 };

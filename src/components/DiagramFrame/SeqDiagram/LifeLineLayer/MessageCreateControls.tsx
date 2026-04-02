@@ -26,6 +26,7 @@ export const MessageCreateControls = () => {
   const dragStateRef = useRef<typeof dragState>(null);
   const dragHandledRef = useRef(false);
   const participantScreenXRef = useRef<Map<string, number>>(new Map());
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const participants = useMemo(
     () =>
@@ -145,9 +146,12 @@ export const MessageCreateControls = () => {
   }
 
   const diagramRect = diagramElement.getBoundingClientRect();
+  const containerRect = containerRef.current?.getBoundingClientRect();
+  const offsetX = containerRect ? containerRect.left - diagramRect.left : 0;
+  const offsetY = containerRect ? containerRect.top - diagramRect.top : 0;
 
   return (
-    <>
+    <div ref={containerRef} className="absolute inset-0" style={{ pointerEvents: "none" }}>
       {dragState && (
         <svg
           className="absolute inset-0 z-30"
@@ -155,26 +159,26 @@ export const MessageCreateControls = () => {
         >
           <line
             x1={dragState.sourceX}
-            y1={dragState.sourceY}
-            x2={dragState.pointerX}
-            y2={dragState.pointerY}
-            stroke="#0284c7"
+            y1={dragState.sourceY - offsetY}
+            x2={dragState.pointerX - offsetX}
+            y2={dragState.sourceY - offsetY}
+            stroke="#d97706"
             strokeWidth="2"
             strokeDasharray="5 4"
           />
           <circle
-            cx={dragState.pointerX}
-            cy={dragState.pointerY}
+            cx={dragState.pointerX - offsetX}
+            cy={dragState.sourceY - offsetY}
             r="4"
-            fill="#0284c7"
+            fill="#d97706"
           />
         </svg>
       )}
       {dragState &&
         participants.map((participant) => {
-          if (participant.name === dragState.source || participant.name !== dragState.hoverTarget) {
-            return null;
-          }
+          const isSource = participant.name === dragState.source;
+          const isTarget = participant.name === dragState.hoverTarget;
+          if (!isSource && !isTarget) return null;
           const element = diagramElement.querySelector(
             `[data-participant-id="${participant.name}"]`,
           ) as HTMLElement | null;
@@ -185,17 +189,19 @@ export const MessageCreateControls = () => {
           return (
             <div
               key={`highlight-${participant.name}`}
-              data-testid={`message-create-target-${participant.name}`}
-              className="absolute z-20 rounded-md border-2 border-sky-400 bg-sky-100/40 pointer-events-none"
+              data-testid={isTarget ? `message-create-target-${participant.name}` : undefined}
+              className={isTarget
+                ? "absolute z-20 rounded-md border-2 border-amber-400 bg-amber-100/40 pointer-events-none"
+                : "absolute z-20 rounded-md border-2 border-sky-400 bg-sky-100/40 pointer-events-none"}
               style={{
-                left: rect.left - diagramRect.left - 4,
-                top: rect.top - diagramRect.top - 4,
+                left: rect.left - (containerRect?.left ?? diagramRect.left) - 4,
+                top: rect.top - (containerRect?.top ?? diagramRect.top) - 4,
                 width: rect.width + 8,
                 height: rect.height + 8,
               }}
             />
           );
         })}
-    </>
+    </div>
   );
 };

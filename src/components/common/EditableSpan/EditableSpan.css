@@ -5,11 +5,14 @@
 
 .editable-span-editing {
   outline: 2px dashed #93c5fd;
-  background-color: #eff6ff;
 }
 
 .editable-span-hover {
   outline: 2px dashed #d1d5db;
-  background-color: #f3f4f6;
   cursor: text;
+}
+
+.editable-span-base:focus-visible:not(.editable-span-editing) {
+  outline: 2px solid #60a5fa;
+  background-color: #eff6ff;
 }

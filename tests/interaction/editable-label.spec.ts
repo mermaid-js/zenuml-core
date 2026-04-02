@@ -13,7 +13,7 @@ test.describe("Editable Label", () => {
     // Edit the message - use stable locator
     const messageLabel = page.locator(".interaction.sync .message .editable-span-base").first();
     await expect(messageLabel).toHaveText("method()");
-    await messageLabel.dblclick();
+    await messageLabel.click();
 
     // Wait for edit mode to be active
     await page.waitForTimeout(100);
@@ -46,12 +46,12 @@ test.describe("Editable Label", () => {
     // Edit the message - use a stable locator that won't change with text
     const messageLabel = page.locator(".self-invocation .editable-span-base");
     await expect(messageLabel).toHaveText("SelfMessage");
-    await messageLabel.dblclick();
+    await messageLabel.click();
 
     // Wait for edit mode to be active
     await page.waitForTimeout(100);
 
-    // Move cursor to end before typing (double-click may select word or place cursor in middle)
+    // Move cursor to end before typing (click places cursor at click point)
     await page.keyboard.press("End");
     
     // Use page.keyboard instead of element methods to avoid stale locator issues
@@ -85,7 +85,7 @@ test.describe("Editable Label", () => {
     // Edit the message - use stable locator with text filter
     const messageLabel = page.locator(".interaction.async .message .editable-span-base").filter({ hasText: "Hello Bob" });
     await expect(messageLabel).toBeVisible();
-    await messageLabel.dblclick();
+    await messageLabel.click();
 
     // Wait for edit mode to be active
     await page.waitForTimeout(100);
@@ -120,7 +120,7 @@ test.describe("Editable Label", () => {
     // Edit the message - use stable locator
     const messageLabel = page.locator(".interaction.creation .message .editable-span-base");
     await expect(messageLabel).toHaveText("create");
-    await messageLabel.dblclick();
+    await messageLabel.click();
 
     // Wait for edit mode to be active
     await page.waitForTimeout(100);
@@ -149,7 +149,7 @@ test.describe("Editable Label", () => {
     await expect(messageLabel).toHaveText("method()");
     
     // Start editing
-    await messageLabel.dblclick();
+    await messageLabel.click();
 
     // Wait for edit mode to be active
     await page.waitForTimeout(100);

@@ -23,7 +23,7 @@ export const Block = (props: {
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const statements: any[] = props.context?.stat() || [];
-  const enableReorder = !props.number;
+  const enableReorder = true;
   const [dragKey, setDragKey] = useState<string | null>(null);
   const dragKeyRef = useRef<string | null>(null);
   const [pendingDrag, setPendingDrag] = useState<{
@@ -119,7 +119,7 @@ export const Block = (props: {
     }
     return String(index + 1);
   };
-  const enableGapHandles = enableReorder;
+  const enableGapHandles = true;
 
   return (
     <div
@@ -153,8 +153,9 @@ export const Block = (props: {
             />
           )}
           <div
-            className={cn("statement-container my-4 flex flex-col relative", {
+            className={cn("statement-container group/stmt my-4 flex flex-col relative", {
               "select-none": reorderState !== "idle",
+              "cursor-grabbing": reorderState === "dragging",
             })}
             data-origin={props.origin}
             data-statement-key={statementKey}
@@ -196,6 +197,22 @@ export const Block = (props: {
                 className="absolute left-0 right-0 h-0.5 bg-sky-500 z-20"
                 style={{ [dropState.place === "before" ? "top" : "bottom"]: -8 }}
               />
+            )}
+            {enableReorder && (
+              <div
+                className="reorder-grip absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover/stmt:opacity-40 transition-opacity pointer-events-none"
+                data-testid="reorder-grip"
+                aria-hidden="true"
+              >
+                <svg width="6" height="10" viewBox="0 0 6 10" fill="currentColor" className="text-slate-400">
+                  <circle cx="1.5" cy="1.5" r="1" />
+                  <circle cx="4.5" cy="1.5" r="1" />
+                  <circle cx="1.5" cy="5" r="1" />
+                  <circle cx="4.5" cy="5" r="1" />
+                  <circle cx="1.5" cy="8.5" r="1" />
+                  <circle cx="4.5" cy="8.5" r="1" />
+                </svg>
+              </div>
             )}
             <Statement
               origin={props.origin || ""}

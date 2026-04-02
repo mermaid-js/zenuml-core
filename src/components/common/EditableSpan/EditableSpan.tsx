@@ -14,6 +14,7 @@ export interface EditableSpanProps {
   onSave: (newText: string) => void;
   title?: string;
   autoEditToken?: number;
+  selectAllOnEdit?: boolean;
 }
 
 export const EditableSpan = ({
@@ -21,8 +22,9 @@ export const EditableSpan = ({
   isEditable = true,
   className = "",
   onSave,
-  title = "Double-click to edit",
+  title = "Click to edit",
   autoEditToken,
+  selectAllOnEdit = false,
 }: EditableSpanProps) => {
   const [editing, setEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -82,9 +84,9 @@ export const EditableSpan = ({
     cancelRef.current = false;
     const target = e.target as HTMLElement | null;
     const clickPoint =
-      "clientX" in e
-        ? { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY }
-        : null;
+      selectAllOnEdit || !("clientX" in e)
+        ? null
+        : { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
     if (target) {
       originalTextRef.current = target.innerText ?? "";
     }
@@ -93,8 +95,14 @@ export const EditableSpan = ({
     focusEditable(clickPoint);
   };
 
-  const handleDoubleClick = (e: MouseEvent) => {
+  const handleClick = (e: MouseEvent) => {
     if (editing || !isEditable) return;
+    // If inside a message, only start editing when that message is already
+    // selected. Otherwise let the click propagate to select it first.
+    const message = (e.currentTarget as HTMLElement).closest(".message");
+    if (message && message.getAttribute("data-selected") !== "true") {
+      return;
+    }
     startEditing(e);
   };
 
@@ -124,7 +132,12 @@ export const EditableSpan = ({
 
   const handleKeydown = (e: KeyboardEvent) => {
     if (!isEditable) return;
-    if (!editing) return;
+    if (!editing) {
+      if (e.key === "Enter" || e.key === " ") {
+        startEditing(e);
+      }
+      return;
+    }
 
     if (e.key === "Escape") {
       e.preventDefault();
@@ -188,7 +201,9 @@ export const EditableSpan = ({
       className={getEditableClasses()}
       contentEditable={editing && isEditable}
       suppressContentEditableWarning={true}
-      onDoubleClick={handleDoubleClick}
+      tabIndex={isEditable && !editing ? 0 : undefined}
+      role={isEditable && !editing ? "button" : undefined}
+      onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onBlur={handleBlur}
