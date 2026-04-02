@@ -1,6 +1,13 @@
 import { useOutsideClick } from "@/functions/useOutsideClick";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
-import { coordinatesAtom, modeAtom, onContentChangeAtom, RenderMode, rootContextAtom } from "@/store/Store";
+import {
+  coordinatesAtom,
+  modeAtom,
+  onContentChangeAtom,
+  RenderMode,
+  rootContextAtom,
+  selectedAtom,
+} from "@/store/Store";
 import type { ParticipantInsertType } from "@/utils/participantInsertTransform";
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
 import { cn } from "@/utils";
@@ -26,6 +33,7 @@ export const ParticipantInsertControls = () => {
   const coordinates = useAtomValue(coordinatesAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
+  const selectedParticipants = useAtomValue(selectedAtom);
   const [code, setCode] = useAtom(codeAtom);
   const panelRef = useRef<HTMLDivElement>(null);
   const [activeGap, setActiveGap] = useState<number | null>(null);
@@ -100,12 +108,15 @@ export const ParticipantInsertControls = () => {
           <button
             type="button"
             data-testid={`participant-insert-button-${index}`}
+            title="Add participant"
             className={cn(
-              "absolute left-1/2 -translate-x-1/2 h-8 w-8 rounded-full border border-sky-300 bg-white text-sky-600 shadow-sm transition-opacity",
+              "absolute left-1/2 -translate-x-1/2 h-9 w-9 rounded-full border border-sky-300 bg-white text-sky-600 shadow-sm transition-opacity",
               "hover:bg-sky-50",
               activeGap === index
                 ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100",
+                : selectedParticipants.length > 0
+                ? "opacity-70 group-hover:opacity-100"
+                : "opacity-40 group-hover:opacity-100",
             )}
             style={{ top: BUTTON_TOP }}
             onClick={() => {

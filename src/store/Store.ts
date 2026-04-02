@@ -123,6 +123,21 @@ export const onMessageClickAtom = atomWithFunctionValue<
   (context: any, element: HTMLElement) => void
 >(() => {});
 
+export const selectedMessageAtom = atom<{
+  start: number;
+  end: number;
+  token: number;
+} | null>(null);
+
+export const createMessageDragAtom = atom<{
+  source: string;
+  sourceX: number;
+  sourceY: number;
+  pointerX: number;
+  pointerY: number;
+  hoverTarget: string | null;
+} | null>(null);
+
 export const onContentChangeAtom = atomWithFunctionValue<
   (code: string) => void
 >(() => {});

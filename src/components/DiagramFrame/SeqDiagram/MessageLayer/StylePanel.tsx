@@ -15,6 +15,8 @@ import {
   onContentChangeAtom,
   onMessageClickAtom,
   pendingEditableRangeAtom,
+  selectedAtom,
+  selectedMessageAtom,
 } from "@/store/Store";
 import { useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
@@ -50,6 +52,8 @@ export const StylePanel = () => {
   const onContentChange = useAtomValue(onContentChangeAtom);
   const setOnMessageClick = useSetAtom(onMessageClickAtom);
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
+  const setSelectedParticipants = useSetAtom(selectedAtom);
+  const [selectedMessage, setSelectedMessage] = useAtom(selectedMessageAtom);
   const [isOpen, setIsOpen] = useState(false);
   const [existingStyles, setExistingStyles] = useState<string[]>([]);
   const [hasMessageContext, setHasMessageContext] = useState(false);
@@ -175,6 +179,7 @@ export const StylePanel = () => {
 
   useOutsideClick(refs.floating.current, () => {
     setIsOpen(false);
+    setSelectedMessage(null);
   });
 
   useEffect(() => {
@@ -238,12 +243,37 @@ export const StylePanel = () => {
           message.labelStart = signatureCtx?.start.start ?? -1;
           message.labelEnd = signatureCtx?.stop.stop ?? -1;
         }
+        setSelectedParticipants([]);
+        setSelectedMessage({
+          start: message.start,
+          end: context?.stop?.stop ?? message.start,
+          token: Date.now(),
+        });
         refs.setReference(element);
         setHasMessageContext(Boolean(context));
         setIsOpen(true);
       }, 0);
     });
-  }, [code, refs, setOnMessageClick]);
+  }, [code, refs, setOnMessageClick, setSelectedMessage, setSelectedParticipants]);
+
+  useEffect(() => {
+    if (!selectedMessage) {
+      setIsOpen(false);
+    }
+  }, [selectedMessage]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+      setIsOpen(false);
+      setSelectedMessage(null);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [setSelectedMessage]);
 
   return (
     <div id="style-panel" ref={refs.setFloating} style={floatingStyles}>

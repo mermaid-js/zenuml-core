@@ -11,6 +11,7 @@ export type MessageViewProps = {
   rtl?: string | boolean;
   onClick?: () => void;
   messageRef?: RefObject<HTMLDivElement>;
+  "data-selected"?: string;
   children: ReactNode;
 };
 
@@ -32,6 +33,7 @@ export const MessageView = ({
   rtl,
   onClick,
   messageRef,
+  "data-selected": dataSelected,
   children,
 }: MessageViewProps) => {
   const isDashed = type === "creation" || type === "return";
@@ -49,6 +51,7 @@ export const MessageView = ({
       style={style}
       onClick={onClick}
       ref={messageRef}
+      data-selected={dataSelected}
     >
       {/* Line spanning full width */}
       <svg

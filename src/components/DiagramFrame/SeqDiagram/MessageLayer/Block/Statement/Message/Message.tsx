@@ -1,4 +1,9 @@
-import { modeAtom, onMessageClickAtom, RenderMode } from "@/store/Store";
+import {
+  modeAtom,
+  onMessageClickAtom,
+  RenderMode,
+  selectedMessageAtom,
+} from "@/store/Store";
 import { CSSProperties, ReactNode, useRef } from "react";
 import { useAtomValue } from "jotai";
 import { MessageView } from "./MessageView";
@@ -28,8 +33,13 @@ export const Message = (props: {
   } = props;
   const mode = useAtomValue(modeAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
+  const selectedMessage = useAtomValue(selectedMessageAtom);
   const messageRef = useRef<HTMLDivElement>(null);
   const stylable = mode !== RenderMode.Static;
+  const rangeStart = context?.start?.start;
+  const rangeEnd = context?.stop?.stop;
+  const isSelected =
+    selectedMessage?.start === rangeStart && selectedMessage?.end === rangeEnd;
 
   const onClick = () => {
     if (!stylable || !messageRef.current) return;
@@ -40,12 +50,16 @@ export const Message = (props: {
     <MessageView
       type={type}
       textStyle={textStyle}
-      className={cn({"cursor-pointer": stylable}, className)}
+      className={cn(
+        { "cursor-pointer": stylable, "ring-2 ring-sky-400 rounded-md": isSelected },
+        className,
+      )}
       style={style}
       number={number}
       rtl={rtl}
       onClick={onClick}
       messageRef={messageRef}
+      data-selected={isSelected ? "true" : "false"}
       children={children}
     />
   );

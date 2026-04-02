@@ -1,6 +1,15 @@
 import { test, expect } from "../fixtures";
 
 test.describe("Participant Insert", () => {
+  test("shows insert affordance before hover", async ({ page }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    await expect(page.getByTestId("participant-insert-button-1")).toBeVisible();
+  });
+
   test("inserts a participant between two lifelines and rewrites DSL", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     await expect(page.locator(".privacy>span>svg")).toBeVisible({

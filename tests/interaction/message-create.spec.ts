@@ -1,6 +1,49 @@
 import { test, expect } from "../fixtures";
 
 test.describe("Message Create", () => {
+  test("shows create affordance before hover", async ({ page }) => {
+    await page.goto("/e2e/fixtures/create-message.html");
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    await expect(page.getByTestId("message-create-handle-A")).toBeVisible();
+  });
+
+  test("highlights valid target during drag and supports escape cancel", async ({ page }) => {
+    await page.goto("/e2e/fixtures/create-message.html");
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    const sourceHandle = page.getByTestId("message-create-handle-A");
+    const targetParticipant = page.locator('[data-participant-id="B"]');
+    const sourceBox = await sourceHandle.boundingBox();
+    const targetBox = await targetParticipant.boundingBox();
+
+    expect(sourceBox).toBeTruthy();
+    expect(targetBox).toBeTruthy();
+
+    await page.mouse.move(
+      sourceBox!.x + sourceBox!.width / 2,
+      sourceBox!.y + sourceBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      targetBox!.x + targetBox!.width / 2,
+      targetBox!.y + targetBox!.height / 2,
+      { steps: 12 },
+    );
+
+    await expect(page.getByTestId("message-create-target-B")).toBeVisible();
+    await page.keyboard.press("Escape");
+
+    await expect(page.getByTestId("message-create-target-B")).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => (window as any).__lastContentChange ?? null))
+      .toBeNull();
+  });
+
   test("drags from one participant to another, creates a sync message, and focuses the label", async ({ page }) => {
     await page.goto("/e2e/fixtures/create-message.html");
     await expect(page.locator(".privacy>span>svg")).toBeVisible({

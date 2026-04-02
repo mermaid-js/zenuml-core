@@ -107,6 +107,7 @@ export const Participant = (props: {
       }}
       onClick={() => onSelect(props.entity.name)}
       data-participant-id={props.entity.name}
+      data-selected={selected.includes(props.entity.name) ? "true" : "false"}
     >
       {PARTICIPANT_DEBUG && (
         <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-8 h-[2px] bg-amber-700">
