@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const GAP_HEIGHT_EMPTY = 48;
 const HANDLE_SIZE = 24;
+const GAP_OFFSET_UP = 5;
 
 export const GapHandleZone = (props: {
   insertIndex: number;
@@ -160,7 +161,7 @@ export const GapHandleZone = (props: {
       <div
         className="absolute left-0 right-0"
         style={{
-          top: -(HANDLE_SIZE / 2),
+          top: -(HANDLE_SIZE / 2) - GAP_OFFSET_UP,
           height: HANDLE_SIZE,
           pointerEvents: "auto",
         }}
