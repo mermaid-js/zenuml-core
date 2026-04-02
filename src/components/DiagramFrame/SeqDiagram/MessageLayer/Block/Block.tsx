@@ -102,7 +102,9 @@ export const Block = (props: {
             <button
               type="button"
               data-testid={`message-reorder-handle-${createStatementKey(stat)}`}
-              className="absolute -left-4 top-1/2 z-20 -translate-y-1/2 h-6 w-6 rounded-full border border-sky-300 bg-white text-sky-600 shadow-sm hover:bg-sky-50"
+              title="Drag to reorder message"
+              aria-label="Drag to reorder message"
+              className="absolute -left-4 top-1/2 z-20 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-sky-600"
               onPointerDown={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -110,7 +112,20 @@ export const Block = (props: {
                 setDropState(null);
               }}
             >
-              ≡
+              <svg
+                viewBox="0 0 32 32"
+                className="h-4 w-4"
+                aria-hidden="true"
+              >
+                <polygon
+                  fill="currentColor"
+                  points="4 20 15 20 15 26.17 12.41 23.59 11 25 16 30 21 25 19.59 23.59 17 26.17 17 20 28 20 28 18 4 18 4 20"
+                />
+                <polygon
+                  fill="currentColor"
+                  points="11 7 12.41 8.41 15 5.83 15 12 4 12 4 14 28 14 28 12 17 12 17 5.83 19.59 8.41 21 7 16 2 11 7"
+                />
+              </svg>
             </button>
           )}
           {dropState?.key === createStatementKey(stat) && (

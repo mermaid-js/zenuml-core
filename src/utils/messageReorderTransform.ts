@@ -32,17 +32,27 @@ export const reorderMessageInDsl = ({
   const sourceText = code.slice(sourceLineStart, sourceLineEnd);
   const withoutSource = code.slice(0, sourceLineStart) + code.slice(sourceLineEnd);
   const sourceBeforeTarget = sourceLineStart < targetLineStart;
-  const adjustedTargetStart = sourceBeforeTarget
+  const targetLineStartInWithoutSource = sourceBeforeTarget
     ? targetLineStart - sourceText.length
     : targetLineStart;
-  const adjustedTargetEnd = sourceBeforeTarget
-    ? targetLineEnd - sourceText.length
-    : targetLineEnd;
-  const insertionPoint = place === "before" ? adjustedTargetStart : adjustedTargetEnd;
-  const movedText =
-    insertionPoint < withoutSource.length && !sourceText.endsWith("\n")
-      ? `${sourceText}\n`
-      : sourceText;
+  const targetLineEndInWithoutSource = lineTail(
+    withoutSource,
+    targetLineStartInWithoutSource,
+  );
+  const insertionPoint = place === "before"
+    ? targetLineStartInWithoutSource
+    : targetLineEndInWithoutSource;
+  const needsLeadingNewline =
+    insertionPoint > 0 &&
+    withoutSource[insertionPoint - 1] !== "\n" &&
+    !sourceText.startsWith("\n");
+  const needsTrailingNewline =
+    insertionPoint < withoutSource.length &&
+    withoutSource[insertionPoint] !== "\n" &&
+    !sourceText.endsWith("\n");
+  const movedText = `${needsLeadingNewline ? "\n" : ""}${sourceText}${
+    needsTrailingNewline ? "\n" : ""
+  }`;
 
   return (
     withoutSource.slice(0, insertionPoint) +

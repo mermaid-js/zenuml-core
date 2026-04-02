@@ -21,6 +21,26 @@ test.describe("Message Rename Panel", () => {
     await expect(page.getByTestId("message-rename")).toHaveCount(0);
   });
 
+  test("clears message selection with escape", async ({ page }) => {
+    await page.goto("/e2e/fixtures/editable-label.html");
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      timeout: 5000,
+    });
+
+    const asyncMessage = page
+      .locator(".interaction.async .message")
+      .filter({ hasText: "Hello Bob" });
+    await asyncMessage.click();
+
+    await expect(asyncMessage).toHaveAttribute("data-selected", "true");
+    await expect(page.getByTestId("message-rename")).toBeVisible();
+
+    await page.keyboard.press("Escape");
+
+    await expect(asyncMessage).toHaveAttribute("data-selected", "false");
+    await expect(page.getByTestId("message-rename")).toHaveCount(0);
+  });
+
   test("renames an async message from the toolbar", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
     await expect(page.locator(".privacy>span>svg")).toBeVisible({

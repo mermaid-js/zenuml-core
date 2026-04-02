@@ -12,4 +12,26 @@ describe("messageReorderTransform", () => {
       }),
     ).toBe("A\nB\nC\nA->C: second\nA->B: first\n");
   });
+
+  it("moves one message after another", () => {
+    expect(
+      reorderMessageInDsl({
+        code: "A\nB\nC\nA->B: first\nA->C: second\n",
+        sourceRange: [6, 17],
+        targetRange: [19, 31],
+        place: "after",
+      }),
+    ).toBe("A\nB\nC\nA->C: second\nA->B: first\n");
+  });
+
+  it("moves one message after another when the file has no trailing newline", () => {
+    expect(
+      reorderMessageInDsl({
+        code: "A\nB\nC\nA->B: first\nA->C: second",
+        sourceRange: [6, 17],
+        targetRange: [19, 31],
+        place: "after",
+      }),
+    ).toBe("A\nB\nC\nA->C: second\nA->B: first\n");
+  });
 });
