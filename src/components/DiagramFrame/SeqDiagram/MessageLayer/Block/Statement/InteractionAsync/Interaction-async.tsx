@@ -101,7 +101,7 @@ export const InteractionAsync = (props: {
   const isSelf = source === target;
 
   const content = asyncMessage?.content();
-  const [start, stop] = [content?.start.start, content?.stop.stop];
+  const [start, stop] = [content?.start?.start, content?.stop?.stop];
 
   const { translateX, interactionWidth, rightToLeft } = useArrow({
     context: props.context,

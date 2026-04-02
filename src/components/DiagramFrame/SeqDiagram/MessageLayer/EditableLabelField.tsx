@@ -36,8 +36,9 @@ export const EditableLabelField = ({
   const isEditable = mode !== RenderMode.Static;
   const formattedText = resolveEmojiInText(formatText(text ?? ""));
   const shouldAutoEdit =
-    pendingEditableRange?.start === position[0] &&
-    pendingEditableRange?.end === position[1]
+    pendingEditableRange !== null &&
+    pendingEditableRange.start === position[0] &&
+    pendingEditableRange.end === position[1]
       ? pendingEditableRange.token
       : undefined;
 

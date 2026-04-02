@@ -33,7 +33,7 @@ export const Creation = (props: {
   const target = creation?.Owner();
   const isCurrent = creation?.isCurrent(cursor);
   const signature = creation?.creationBody()?.parameters();
-  const [start, stop] = [signature?.start.start, signature?.stop.stop];
+  const [start, stop] = [signature?.start?.start, signature?.stop?.stop];
 
 
   const { translateX, interactionWidth, rightToLeft } = useArrow({

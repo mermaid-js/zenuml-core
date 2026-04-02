@@ -28,7 +28,7 @@ export const Interaction = (props: {
   const target = props.context?.message()?.Owner() || _STARTER_;
   const isSelf = source === target;
   const signatureCtx = message?.messageBody().func()?.signature()[0];
-  const [start, stop] = [signatureCtx?.start.start, signatureCtx?.stop.stop];
+  const [start, stop] = [signatureCtx?.start?.start, signatureCtx?.stop?.stop];
   const {
     translateX,
     interactionWidth,

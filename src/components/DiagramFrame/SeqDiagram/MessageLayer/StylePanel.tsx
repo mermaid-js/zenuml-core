@@ -261,8 +261,8 @@ export const StylePanel = () => {
           message.labelStart = context?.start?.start ?? -1;
           message.labelEnd = context?.stop?.stop ?? -1;
         } else {
-          message.labelStart = signatureCtx?.start.start ?? -1;
-          message.labelEnd = signatureCtx?.stop.stop ?? -1;
+          message.labelStart = signatureCtx?.start?.start ?? -1;
+          message.labelEnd = signatureCtx?.stop?.stop ?? -1;
         }
         setSelectedParticipants([]);
         setSelectedMessage({
