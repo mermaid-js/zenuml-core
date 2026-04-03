@@ -25,6 +25,7 @@ import { LifeLineLayer } from "./LifeLineLayer/LifeLineLayer";
 import { MessageLayer } from "./MessageLayer/MessageLayer";
 import { ParticipantInsertControls } from "./LifeLineLayer/ParticipantInsertControls";
 import { ParticipantStylePanel } from "./LifeLineLayer/ParticipantStylePanel";
+import { EmptyDiagramPrompt } from "./EmptyDiagramPrompt";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -35,6 +36,10 @@ export const SeqDiagram = (props: {
   const mode = useAtomValue(modeAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
+  const isEmpty = useMemo(
+    () => coordinates.orderedParticipantNames().length === 0,
+    [coordinates],
+  );
   const setDiagramElement = useSetAtom(diagramElementAtom);
   const setSelectedParticipants = useSetAtom(selectedAtom);
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
@@ -93,6 +98,7 @@ export const SeqDiagram = (props: {
       >
         {mode === RenderMode.Dynamic ? (
           <>
+            {isEmpty && <EmptyDiagramPrompt />}
             {/* Why do we have two `life-line-layer`s? This is introduced when we add support of
               floating participant. Essentially, the Participant labels must be on the top
               of message layer and the lines of lifelines must be under the message layer. */}
