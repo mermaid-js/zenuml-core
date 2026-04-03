@@ -35,7 +35,7 @@ export const Return = (props: {
   let start = -1, stop = -1;
   if (messageContext instanceof sequenceParser.AtomExprContext) {
     const ret = messageContext.atom();
-    [start, stop] = [ret?.start.start, ret?.stop.stop];
+    [start, stop] = [ret?.start?.start, ret?.stop?.stop];
   } else if (messageContext instanceof sequenceParser.ContentContext) {
     [start, stop] = [messageContext.start.start, messageContext.stop.stop];
   }
