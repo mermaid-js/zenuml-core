@@ -43,7 +43,9 @@ export const LifeLineLayer = (props: {
       style={{
         minWidth: mode === RenderMode.Dynamic ? "200px" : "auto",
         width: `calc(100% - ${props.leftGap}px)`,
-        pointerEvents: props.renderParticipants ? "none" : "all",
+        // Always pass through pointer events at the container level.
+        // Participant boxes opt back in via pointerEvents: "auto".
+        pointerEvents: "none",
       }}
     >
       <div className="z-lifeline-container relative grow">

@@ -104,6 +104,7 @@ export const Participant = (props: {
         backgroundColor: isDefaultStarter ? undefined : backgroundColor,
         color: isDefaultStarter ? undefined : color,
         transform: `translateY(${stickyVerticalOffset}px)`,
+        pointerEvents: "auto",
       }}
       onClick={() => onSelect(props.entity.name)}
       data-participant-id={props.entity.name}
