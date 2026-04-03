@@ -46,6 +46,7 @@ export const MessageLayer = (props: {
         style={{ paddingLeft: `${paddingLeft}px` }}
         origin={origin}
         enableGapHandles={mode === RenderMode.Dynamic}
+        isRoot
       />
       <StylePanel />
     </div>

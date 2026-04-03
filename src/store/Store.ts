@@ -158,6 +158,19 @@ export const createMessageDragAtom = atom<{
   blockContext: any;
 } | null>(null);
 
+export const messageReorderDragAtom = atom<string | null>(null);
+
+export const messageReorderPendingAtom = atom<{
+  key: string;
+  startX: number;
+  startY: number;
+} | null>(null);
+
+export const messageReorderDropAtom = atom<{
+  key: string;
+  place: "before" | "after";
+} | null>(null);
+
 export const lifelineReadyAtom = atom<string[]>([]);
 
 export const renderingReadyAtom = atom((get) => {
