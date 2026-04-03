@@ -169,6 +169,8 @@ export const EditableSpan = ({
     if (!editing) return;
 
     if (e.key === "Enter" || e.key === "Tab") {
+      // Prevent handleBlur from calling saveText again (stale closure double-save)
+      cancelRef.current = true;
       setEditing(false);
       setIsHovered(false);
       saveText();

@@ -147,6 +147,17 @@ export const onEventEmitAtom = atomWithFunctionValue<
   (name: string, data: any) => void
 >(() => {});
 
+export const createMessageDragAtom = atom<{
+  source: string;
+  sourceX: number;
+  sourceY: number;
+  pointerX: number;
+  pointerY: number;
+  hoverTarget: string | null;
+  insertIndex: number;
+  blockContext: any;
+} | null>(null);
+
 export const lifelineReadyAtom = atom<string[]>([]);
 
 export const renderingReadyAtom = atom((get) => {

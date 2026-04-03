@@ -7,6 +7,7 @@ import {
 import { useAtomValue } from "jotai";
 import { LifeLine } from "./LifeLine";
 import { LifeLineGroup } from "./LifeLineGroup";
+import { MessageCreateControls } from "./MessageCreateControls";
 import { Fragment, useMemo } from "react";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { blankParticipant } from "@/parser/Participants";
@@ -89,6 +90,7 @@ export const LifeLineLayer = (props: {
             renderLifeLine={props.renderLifeLine}
           />
         ))}
+        {props.renderParticipants && <MessageCreateControls />}
       </div>
     </div>
   );
