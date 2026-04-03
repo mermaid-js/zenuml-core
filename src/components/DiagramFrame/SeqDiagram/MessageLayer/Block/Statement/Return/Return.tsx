@@ -98,6 +98,7 @@ export const Return = (props: {
           className={cn(props.commentObj?.messageClassNames)}
           textStyle={props.commentObj?.messageStyle}
           context={messageContext}
+          selectionRange={[start, stop]}
           rtl={rightToLeft}
           type="return"
           number={props.number}

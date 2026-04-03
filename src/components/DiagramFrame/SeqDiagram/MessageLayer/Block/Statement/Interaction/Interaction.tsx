@@ -82,6 +82,7 @@ export const Interaction = (props: {
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
           context={message}
+          selectionRange={[start, stop]}
           rtl={rightToLeft}
           number={props.number}
           type="sync"

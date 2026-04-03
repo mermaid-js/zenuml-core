@@ -159,6 +159,7 @@ export const InteractionAsync = (props: {
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
           context={asyncMessage}
+          selectionRange={[start, stop]}
           rtl={rightToLeft}
           type="async"
           number={props.number}
