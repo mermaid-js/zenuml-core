@@ -18,7 +18,7 @@ import {
   selectedAtom,
   selectedMessageAtom,
 } from "@/store/Store";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
 
@@ -297,6 +297,23 @@ export const StylePanel = () => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [setSelectedMessage]);
 
+  const [openSubmenu, setOpenSubmenu] = useState<"type" | "wrap" | null>(null);
+  const submenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const openSub = useCallback((menu: "type" | "wrap") => {
+    if (submenuTimer.current) { clearTimeout(submenuTimer.current); submenuTimer.current = null; }
+    setOpenSubmenu(menu);
+  }, []);
+
+  const closeSub = useCallback(() => {
+    submenuTimer.current = setTimeout(() => setOpenSubmenu(null), 120);
+  }, []);
+
+  // Reset submenu when panel closes
+  useEffect(() => {
+    if (!isOpen) setOpenSubmenu(null);
+  }, [isOpen]);
+
   return (
     <div id="style-panel" ref={refs.setFloating} style={floatingStyles}>
       {isOpen && (
@@ -347,64 +364,110 @@ export const StylePanel = () => {
             </button>
           </div>
           <div className="w-px self-stretch bg-gray-200" />
-          <div className="flex items-center gap-1 pr-1">
-            {(["sync", "async", "return", "creation"] as MessageArrowType[]).map((type) => {
-              const canTransform = canTransformMessageType({
-                line: messageData.current.line,
-                currentType: messageData.current.currentType,
-                targetType: type,
-                source: messageData.current.source,
-                target: messageData.current.target,
-                signature: messageData.current.signature,
-              });
-              const isCurrent = messageData.current.currentType === type;
-              const disabledTitle = isCurrent
-                ? `Already ${type}`
-                : !canTransform && type === "sync"
-                ? "Label must be a valid method name (no spaces) to switch to sync"
-                : !canTransform && messageData.current.currentType === "creation"
-                ? "Cannot convert creation messages"
-                : !canTransform
-                ? `Cannot convert to ${type}`
-                : undefined;
-              return (
-                <button
-                  type="button"
-                  key={type}
-                  data-testid={`message-type-${type}`}
-                  aria-label={`Change to ${type} message type`}
-                  aria-pressed={isCurrent}
-                  title={disabledTitle}
-                  onClick={() => handleTypeClick(type)}
-                  className={cn(
-                    "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center hover:bg-gray-200",
-                    {
-                      "bg-gray-100 cursor-default": isCurrent,
-                      "opacity-40 cursor-not-allowed": !canTransform,
-                      "cursor-pointer": canTransform && !isCurrent,
-                    },
-                  )}
-                >
-                  {type}
-                </button>
-              );
-            })}
+          {/* Type submenu trigger */}
+          <div
+            className="relative"
+            onPointerEnter={() => openSub("type")}
+            onPointerLeave={closeSub}
+          >
+            <button
+              type="button"
+              data-testid="message-type-menu"
+              className={cn(
+                "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                { "bg-gray-100": openSubmenu === "type" },
+              )}
+              title="Change message type"
+              aria-expanded={openSubmenu === "type"}
+              aria-haspopup="true"
+              onClick={() => setOpenSubmenu(openSubmenu === "type" ? null : "type")}
+            >
+              {messageData.current.currentType} ▾
+            </button>
+            {openSubmenu === "type" && (
+              <div className="absolute left-0 top-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[90px]">
+                {(["sync", "async", "return", "creation"] as MessageArrowType[]).map((type) => {
+                  const canTransform = canTransformMessageType({
+                    line: messageData.current.line,
+                    currentType: messageData.current.currentType,
+                    targetType: type,
+                    source: messageData.current.source,
+                    target: messageData.current.target,
+                    signature: messageData.current.signature,
+                  });
+                  const isCurrent = messageData.current.currentType === type;
+                  const disabledTitle = isCurrent
+                    ? `Already ${type}`
+                    : !canTransform && type === "sync"
+                    ? "Label must be a valid method name (no spaces) to switch to sync"
+                    : !canTransform && messageData.current.currentType === "creation"
+                    ? "Cannot convert creation messages"
+                    : !canTransform
+                    ? `Cannot convert to ${type}`
+                    : undefined;
+                  return (
+                    <button
+                      type="button"
+                      key={type}
+                      data-testid={`message-type-${type}`}
+                      aria-label={`Change to ${type} message type`}
+                      aria-pressed={isCurrent}
+                      title={disabledTitle}
+                      onClick={() => { handleTypeClick(type); setOpenSubmenu(null); }}
+                      className={cn(
+                        "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100",
+                        {
+                          "bg-gray-100 font-semibold": isCurrent,
+                          "opacity-40 cursor-not-allowed": !canTransform,
+                          "cursor-pointer": canTransform && !isCurrent,
+                        },
+                      )}
+                    >
+                      {type}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
           <div className="w-px self-stretch bg-gray-200" />
-          <div className="flex items-center gap-1 pr-1">
-            {wrapTypes.map((type) => (
-              <button
-                type="button"
-                key={type}
-                data-testid={`message-wrap-${type}`}
-                className="px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200"
-                title={`Wrap in ${type} fragment`}
-                aria-label={`Wrap in ${type} fragment`}
-                onClick={() => handleWrapClick(type)}
-              >
-                {type}
-              </button>
-            ))}
+          {/* Wrap submenu trigger */}
+          <div
+            className="relative"
+            onPointerEnter={() => openSub("wrap")}
+            onPointerLeave={closeSub}
+          >
+            <button
+              type="button"
+              data-testid="message-wrap-menu"
+              className={cn(
+                "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                { "bg-gray-100": openSubmenu === "wrap" },
+              )}
+              title="Wrap in fragment"
+              aria-expanded={openSubmenu === "wrap"}
+              aria-haspopup="true"
+              onClick={() => setOpenSubmenu(openSubmenu === "wrap" ? null : "wrap")}
+            >
+              Wrap ▾
+            </button>
+            {openSubmenu === "wrap" && (
+              <div className="absolute left-0 top-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[70px]">
+                {wrapTypes.map((type) => (
+                  <button
+                    type="button"
+                    key={type}
+                    data-testid={`message-wrap-${type}`}
+                    className="px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100"
+                    title={`Wrap in ${type} fragment`}
+                    aria-label={`Wrap in ${type} fragment`}
+                    onClick={() => handleWrapClick(type)}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

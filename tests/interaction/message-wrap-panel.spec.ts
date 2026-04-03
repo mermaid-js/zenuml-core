@@ -12,13 +12,14 @@ test.describe("Message Wrap Panel", () => {
       .filter({ hasText: "Hello Bob" });
     await asyncMessage.click();
 
+    await page.getByTestId("message-wrap-menu").click();
     const wrapButton = page.getByTestId("message-wrap-alt");
     await expect(wrapButton).toBeVisible();
     await wrapButton.click();
 
     const condition = page.locator(".fragment-alt .condition").first();
     await expect(condition).toHaveAttribute("contenteditable", "true");
-    await expect(page.getByTestId("message-wrap-alt")).toHaveCount(0);
+    await expect(page.getByTestId("message-wrap-menu")).toHaveCount(0);
     await page.keyboard.type("approved");
     await page.keyboard.press("Enter");
 
@@ -39,6 +40,7 @@ test.describe("Message Wrap Panel", () => {
       .filter({ hasText: "Hello Bob" });
     await asyncMessage.click();
 
+    await page.getByTestId("message-wrap-menu").click();
     const wrapButton = page.getByTestId("message-wrap-loop");
     await expect(wrapButton).toBeVisible();
     await wrapButton.click();
@@ -65,6 +67,7 @@ test.describe("Message Wrap Panel", () => {
       .filter({ hasText: "Hello Bob" });
     await asyncMessage.click();
 
+    await page.getByTestId("message-wrap-menu").click();
     const wrapButton = page.getByTestId("message-wrap-opt");
     await expect(wrapButton).toBeVisible();
     await wrapButton.click();
@@ -91,6 +94,7 @@ test.describe("Message Wrap Panel", () => {
       .filter({ hasText: "Hello Bob" });
     await asyncMessage.click();
 
+    await page.getByTestId("message-wrap-menu").click();
     const wrapButton = page.getByTestId("message-wrap-par");
     await expect(wrapButton).toBeVisible();
     await wrapButton.click();

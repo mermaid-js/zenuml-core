@@ -17,6 +17,7 @@ test.describe("Message Type Panel", () => {
     });
     await asyncMessage.click();
 
+    await page.getByTestId("message-type-menu").click();
     const returnButton = page.getByTestId("message-type-return");
     await expect(returnButton).toBeVisible();
     await returnButton.click();
@@ -29,7 +30,7 @@ test.describe("Message Type Panel", () => {
         hasText: "Hello Bob",
       }),
     ).toHaveAttribute("data-selected", "true");
-    await expect(page.getByTestId("message-type-return")).toBeVisible();
+    await expect(page.getByTestId("message-type-menu")).toBeVisible();
 
     expect(logs.some((line) => line.includes("D-->C: Hello Bob"))).toBe(true);
   });
@@ -50,6 +51,7 @@ test.describe("Message Type Panel", () => {
     });
     await returnMessage.click();
 
+    await page.getByTestId("message-type-menu").click();
     const asyncButton = page.getByTestId("message-type-async");
     await expect(asyncButton).toBeVisible();
     await asyncButton.click();
@@ -62,7 +64,7 @@ test.describe("Message Type Panel", () => {
         hasText: "Response payload",
       }),
     ).toHaveAttribute("data-selected", "true");
-    await expect(page.getByTestId("message-type-async")).toBeVisible();
+    await expect(page.getByTestId("message-type-menu")).toBeVisible();
 
     expect(logs.some((line) => line.includes("D->C: Response payload"))).toBe(true);
   });
@@ -78,6 +80,7 @@ test.describe("Message Type Panel", () => {
     });
     await syncMessage.click();
 
+    await page.getByTestId("message-type-menu").click();
     const asyncButton = page.getByTestId("message-type-async");
     await expect(asyncButton).toBeVisible();
     await asyncButton.click();
@@ -90,6 +93,7 @@ test.describe("Message Type Panel", () => {
       hasText: "login",
     }).click();
 
+    await page.getByTestId("message-type-menu").click();
     const syncButton = page.getByTestId("message-type-sync");
     await expect(syncButton).toBeVisible();
     await syncButton.click();
@@ -114,6 +118,7 @@ test.describe("Message Type Panel", () => {
     });
     await asyncMessage.click();
 
+    await page.getByTestId("message-type-menu").click();
     const syncButton = page.getByTestId("message-type-sync");
     await expect(syncButton).toBeVisible();
     await syncButton.click();
@@ -138,6 +143,7 @@ test.describe("Message Type Panel", () => {
     });
     await syncMessage.click();
 
+    await page.getByTestId("message-type-menu").click();
     const returnButton = page.getByTestId("message-type-return");
     await expect(returnButton).toBeVisible();
     await returnButton.click();
@@ -162,6 +168,7 @@ test.describe("Message Type Panel", () => {
     });
     await returnMessage.click();
 
+    await page.getByTestId("message-type-menu").click();
     const syncButton = page.getByTestId("message-type-sync");
     await expect(syncButton).toBeVisible();
     await syncButton.click();
@@ -186,6 +193,7 @@ test.describe("Message Type Panel", () => {
     });
     await asyncMessage.click();
 
+    await page.getByTestId("message-type-menu").click();
     const syncButton = page.getByTestId("message-type-sync");
     await expect(syncButton).toBeVisible();
     await expect(syncButton).toHaveClass(/opacity-40/);
@@ -201,6 +209,7 @@ test.describe("Message Type Panel", () => {
     const creationMessage = page.locator(".interaction.creation .message");
     await creationMessage.click();
 
+    await page.getByTestId("message-type-menu").click();
     const creationButton = page.getByTestId("message-type-creation");
     await expect(creationButton).toBeVisible();
     await expect(creationButton).toHaveAttribute("aria-pressed", "true");
@@ -222,6 +231,7 @@ test.describe("Message Type Panel", () => {
     });
     await syncMessage.click();
 
+    await page.getByTestId("message-type-menu").click();
     const creationButton = page.getByTestId("message-type-creation");
     await expect(creationButton).toBeVisible();
     await creationButton.click();
