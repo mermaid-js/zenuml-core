@@ -156,6 +156,7 @@ export const StylePanel = () => {
         code.slice(lineTail),
     );
     message.currentType = targetType;
+    message.line = nextLine;
     if (labelOffset >= 0 && labelText) {
       setSelectedMessage({
         start: message.lineHead + labelOffset,
