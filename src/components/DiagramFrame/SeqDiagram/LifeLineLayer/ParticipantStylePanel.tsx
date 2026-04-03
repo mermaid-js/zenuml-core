@@ -1,5 +1,6 @@
 import {
   codeAtom,
+  createMessageDragAtom,
   diagramElementAtom,
   modeAtom,
   onContentChangeAtom,
@@ -42,6 +43,7 @@ export const ParticipantStylePanel = () => {
   const rootContext = useAtomValue(rootContextAtom);
   const [selected, setSelected] = useAtom(selectedAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
+  const dragState = useAtomValue(createMessageDragAtom);
   const [isOpen, setIsOpen] = useState(false);
   const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -54,7 +56,7 @@ export const ParticipantStylePanel = () => {
   const currentType = currentParticipant?.type ?? null;
 
   useEffect(() => {
-    if (selected.length === 1 && diagramElement) {
+    if (selected.length === 1 && diagramElement && !dragState) {
       const el = diagramElement.querySelector(
         `[data-participant-id="${selected[0]}"]`,
       ) as HTMLElement | null;
@@ -67,7 +69,7 @@ export const ParticipantStylePanel = () => {
       setIsOpen(false);
       setPanelPos(null);
     }
-  }, [selected, diagramElement]);
+  }, [selected, diagramElement, dragState]);
 
   // Clamp panel position to stay within viewport after it renders
   useEffect(() => {
