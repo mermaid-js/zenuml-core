@@ -125,7 +125,7 @@ export const InteractionAsync = (props: {
   };
   return (
     <div
-      data-origin={origin}
+      data-origin={props.origin}
       data-to={target}
       data-source={source}
       data-target={target}
