@@ -6,6 +6,8 @@ import {
   modeAtom,
   RenderMode,
   rootContextAtom,
+  selectedAtom,
+  selectedMessageAtom,
   themeAtom,
 } from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -21,6 +23,7 @@ import "./SeqDiagram.css";
 import { cn } from "@/utils";
 import { LifeLineLayer } from "./LifeLineLayer/LifeLineLayer";
 import { MessageLayer } from "./MessageLayer/MessageLayer";
+import { ParticipantInsertControls } from "./LifeLineLayer/ParticipantInsertControls";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -32,6 +35,8 @@ export const SeqDiagram = (props: {
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const setDiagramElement = useSetAtom(diagramElementAtom);
+  const setSelectedParticipants = useSetAtom(selectedAtom);
+  const setSelectedMessage = useSetAtom(selectedMessageAtom);
 
   const diagramRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -66,6 +71,18 @@ export const SeqDiagram = (props: {
       )}
       style={props.style}
       ref={diagramRef}
+      onClick={(event) => {
+        const target = event.target as HTMLElement | null;
+        if (
+          target?.closest(".interaction") ||
+          target?.closest(".participant") ||
+          target?.closest("#style-panel")
+        ) {
+          return;
+        }
+        setSelectedParticipants([]);
+        setSelectedMessage(null);
+      }}
     >
       {/* .zenuml is used to make sure tailwind css takes effect when naked == true;
       .bg-skin-base is repeated because .zenuml reset it to default theme. */}
@@ -92,6 +109,21 @@ export const SeqDiagram = (props: {
               context={rootContext?.head()}
               renderParticipants
             />
+            {/* Insert controls on a separate layer above participants.
+               pointer-events: none lets clicks pass through to the participant
+               layer below; individual "+" buttons opt back in. */}
+            <div
+              className="absolute h-full top-0 pt-2"
+              style={{
+                width: `calc(100% - ${frameBorderLeft}px)`,
+                pointerEvents: "none",
+                zIndex: 40,
+              }}
+            >
+              <div className="relative grow h-full">
+                <ParticipantInsertControls />
+              </div>
+            </div>
           </>
         ) : (
           <>
