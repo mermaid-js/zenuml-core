@@ -202,20 +202,6 @@ export const Block = (props: {
                   style={{ [dropState.place === "before" ? "top" : "bottom"]: -8 }}
                 />
               )}
-              <div
-                className="reorder-grip absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover/stmt:opacity-40 transition-opacity pointer-events-none"
-                data-testid="reorder-grip"
-                aria-hidden="true"
-              >
-                <svg width="6" height="10" viewBox="0 0 6 10" fill="currentColor" className="text-slate-400">
-                  <circle cx="1.5" cy="1.5" r="1" />
-                  <circle cx="4.5" cy="1.5" r="1" />
-                  <circle cx="1.5" cy="5" r="1" />
-                  <circle cx="4.5" cy="5" r="1" />
-                  <circle cx="1.5" cy="8.5" r="1" />
-                  <circle cx="4.5" cy="8.5" r="1" />
-                </svg>
-              </div>
               <Statement
                 origin={props.origin || ""}
                 context={stat}
