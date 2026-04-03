@@ -107,6 +107,10 @@ export const Participant = (props: {
         backgroundColor: isDefaultStarter ? undefined : backgroundColor,
         color: isDefaultStarter ? undefined : color,
         transform: `translateY(${stickyVerticalOffset}px)`,
+        // The parent LifeLineLayer has pointerEvents:none so that transparent
+        // gaps pass through to the MessageLayer below. Re-enable events here so
+        // the participant box itself remains interactive.
+        pointerEvents: "auto",
       }}
       onClick={() => onSelect(props.entity.name)}
       onKeyDown={(e) => {

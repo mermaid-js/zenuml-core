@@ -139,6 +139,11 @@ export const EditableSpan = ({
       return;
     }
 
+    // Prevent key events from bubbling to parent button elements (e.g. MessageView)
+    // while the span is in edit mode. Without this, space would trigger the outer
+    // button's click handler instead of being inserted into the editable text.
+    e.stopPropagation();
+
     if (e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();

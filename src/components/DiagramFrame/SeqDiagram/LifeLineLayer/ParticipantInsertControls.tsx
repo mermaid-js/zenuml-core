@@ -5,10 +5,8 @@ import {
   onContentChangeAtom,
   RenderMode,
   rootContextAtom,
-  selectedAtom,
 } from "@/store/Store";
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
-import { cn } from "@/utils";
 import { useAtom, useAtomValue } from "jotai";
 import { codeAtom } from "@/store/Store";
 import { useMemo } from "react";
@@ -37,7 +35,6 @@ export const ParticipantInsertControls = () => {
   const coordinates = useAtomValue(coordinatesAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
-  const selectedParticipants = useAtomValue(selectedAtom);
   const [code, setCode] = useAtom(codeAtom);
 
   const participantModels = useMemo(
@@ -52,8 +49,6 @@ export const ParticipantInsertControls = () => {
     [participantModels],
   );
 
-  const GAP_MARGIN = 4;
-
   const gapAnchors = useMemo(() => {
     if (participantModels.length < 2) return [];
     const anchors: number[] = [];
@@ -65,6 +60,13 @@ export const ParticipantInsertControls = () => {
     }
 
     return anchors;
+  }, [coordinates, participantModels]);
+
+  // Anchor for appending a new participant after the last one
+  const appendAnchor = useMemo(() => {
+    if (participantModels.length === 0) return null;
+    const last = participantModels[participantModels.length - 1];
+    return coordinates.right(last.name) - BUTTON_SIZE / 2;
   }, [coordinates, participantModels]);
 
   const handleInsert = (insertIndex: number) => {
@@ -85,6 +87,9 @@ export const ParticipantInsertControls = () => {
     return null;
   }
 
+  const insertButtonClass = "absolute flex items-center justify-center rounded-full border border-slate-300 bg-white text-slate-400 text-xs leading-none opacity-0 transition-all group-hover:opacity-80 hover:!opacity-100 hover:border-sky-400 hover:text-sky-500 hover:shadow-sm focus-visible:opacity-100 focus-visible:border-sky-400 focus-visible:text-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300";
+  const insertButtonStyle = { top: BUTTON_INSET, left: BUTTON_INSET, width: BUTTON_SIZE, height: BUTTON_SIZE };
+
   return (
     <>
       {gapAnchors.map((left, index) => (
@@ -104,19 +109,38 @@ export const ParticipantInsertControls = () => {
             data-testid={`participant-insert-button-${index}`}
             title={`Insert participant between ${participantModels[index].name} and ${participantModels[index + 1].name}`}
             aria-label={`Insert participant between ${participantModels[index].name} and ${participantModels[index + 1].name}`}
-            className="absolute flex items-center justify-center rounded-full border border-slate-300 bg-white text-slate-400 text-xs leading-none opacity-0 transition-all group-hover:opacity-80 hover:!opacity-100 hover:border-sky-400 hover:text-sky-500 hover:shadow-sm focus-visible:opacity-100 focus-visible:border-sky-400 focus-visible:text-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
-            style={{
-              top: BUTTON_INSET,
-              left: BUTTON_INSET,
-              width: BUTTON_SIZE,
-              height: BUTTON_SIZE,
-            }}
+            className={insertButtonClass}
+            style={insertButtonStyle}
             onClick={() => handleInsert(index + 1)}
           >
             +
           </button>
         </div>
       ))}
+      {appendAnchor !== null && (
+        <div
+          className="group absolute -translate-x-1/2"
+          style={{
+            left: appendAnchor,
+            top: HIT_AREA_TOP,
+            width: HIT_AREA_SIZE,
+            height: HIT_AREA_SIZE,
+            pointerEvents: "auto",
+          }}
+        >
+          <button
+            type="button"
+            data-testid="participant-append-button"
+            title="Add participant"
+            aria-label="Add participant"
+            className={insertButtonClass}
+            style={insertButtonStyle}
+            onClick={() => handleInsert(participantModels.length)}
+          >
+            +
+          </button>
+        </div>
+      )}
     </>
   );
 };

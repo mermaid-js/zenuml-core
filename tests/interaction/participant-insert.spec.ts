@@ -1,5 +1,24 @@
 import { test, expect } from "../fixtures";
 
+test.describe("Empty Diagram Prompt", () => {
+  test("clicking the empty diagram prompt adds the first participant", async ({ page }) => {
+    await page.goto("/e2e/fixtures/empty-diagram.html");
+    await expect(page.locator(".privacy>span>svg")).toBeVisible({ timeout: 5000 });
+
+    const prompt = page.getByTestId("empty-diagram-prompt");
+    await expect(prompt).toBeVisible();
+    await prompt.click();
+
+    // Participant A should appear
+    await expect(page.locator('[data-participant-id="A"]')).toBeVisible({ timeout: 5000 });
+
+    // DSL should be updated
+    await expect
+      .poll(() => page.evaluate(() => (window as any).__lastContentChange ?? null))
+      .toContain("A");
+  });
+});
+
 test.describe("Participant Insert", () => {
   test("shows insert button on hover between participants", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");

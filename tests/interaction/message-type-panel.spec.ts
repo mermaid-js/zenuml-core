@@ -189,7 +189,7 @@ test.describe("Message Type Panel", () => {
     const syncButton = page.getByTestId("message-type-sync");
     await expect(syncButton).toBeVisible();
     await expect(syncButton).toHaveClass(/opacity-40/);
-    await expect(syncButton).toHaveClass(/pointer-events-none/);
+    await expect(syncButton).toHaveClass(/cursor-not-allowed/);
   });
 
   test("highlights creation button when a creation message is selected", async ({ page }) => {
@@ -205,8 +205,8 @@ test.describe("Message Type Panel", () => {
     await expect(creationButton).toBeVisible();
     await expect(creationButton).toHaveAttribute("aria-pressed", "true");
 
-    // All transform buttons should be disabled for creation messages
-    await expect(page.getByTestId("message-type-sync")).toHaveClass(/opacity-40/);
+    // async and return buttons should be disabled for creation messages
+    // sync is enabled when creation args is a valid method name (e.g. "create")
     await expect(page.getByTestId("message-type-async")).toHaveClass(/opacity-40/);
     await expect(page.getByTestId("message-type-return")).toHaveClass(/opacity-40/);
   });

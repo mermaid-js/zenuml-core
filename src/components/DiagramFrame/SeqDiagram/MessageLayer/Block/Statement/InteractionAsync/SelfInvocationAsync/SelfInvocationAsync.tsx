@@ -4,7 +4,7 @@ import { Numbering } from "../../../../Numbering";
 import { ArrowHead } from "../../Message/ArrowHead";
 import { asyncMessageNormalizer } from "@/utils/messageNormalizers";
 import { useAtomValue } from "jotai/index";
-import { onMessageClickAtom } from "@/store/Store.ts";
+import { onMessageClickAtom, selectedMessageAtom } from "@/store/Store.ts";
 
 export const SelfInvocationAsync = (props: {
   context?: any;
@@ -19,6 +19,14 @@ export const SelfInvocationAsync = (props: {
   };
   const messageRef = useRef(null);
   const onMessageClick = useAtomValue(onMessageClickAtom);
+  const selectedMessage = useAtomValue(selectedMessageAtom);
+
+  const pos = labelPosition();
+  const isSelected =
+    selectedMessage !== null &&
+    selectedMessage.start === pos[0] &&
+    selectedMessage.end === pos[1];
+
   const onClick = () => {
     onMessageClick(props.context, messageRef.current!);
   };
@@ -28,6 +36,7 @@ export const SelfInvocationAsync = (props: {
       ref={messageRef}
       className="message self flex items-start flex-col !border-none"
       onClick={onClick}
+      data-selected={isSelected ? "true" : "false"}
     >
       <label className="name group px-px min-h-[1em]">
         <Numbering number={props.number} />

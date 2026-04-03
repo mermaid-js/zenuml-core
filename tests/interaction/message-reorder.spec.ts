@@ -81,7 +81,7 @@ test.describe("Message Reorder", () => {
     await firstMessage.hover();
     await expect(firstMessage).toHaveAttribute(
       "title",
-      "Click to edit, drag to reorder",
+      "Click to select · drag to reorder",
     );
     await expect(firstMessage).toHaveCSS("cursor", "ns-resize");
   });

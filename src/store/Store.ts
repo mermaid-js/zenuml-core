@@ -40,7 +40,11 @@ export const enum RenderMode {
 
 export const codeAtom = atom("");
 
-export const rootContextAtom = atom((get) => RootContext(get(codeAtom)));
+export const rootContextAtom = atom((get) => {
+  const code = get(codeAtom);
+  if (!code.trim()) return null;
+  return RootContext(code);
+});
 
 export const titleAtom = atom<string | undefined>((get) => {
   const titleContext = get(rootContextAtom)?.title();
@@ -50,9 +54,11 @@ export const titleAtom = atom<string | undefined>((get) => {
   return (titleContext as any).content();
 });
 
-export const participantsAtom = atom((get) =>
-  Participants(get(rootContextAtom)),
-);
+export const participantsAtom = atom((get) => {
+  const rootContext = get(rootContextAtom);
+  if (!rootContext) return Participants(null);
+  return Participants(rootContext);
+});
 
 export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), resolveWidthProvider()),

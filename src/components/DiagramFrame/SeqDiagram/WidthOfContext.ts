@@ -8,6 +8,7 @@ import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export function TotalWidth(ctx: any, coordinates: Coordinates) {
   const allParticipants = coordinates.orderedParticipantNames();
+  if (!ctx || allParticipants.length === 0) return 0;
   const localParticipants = getLocalParticipantNames(ctx);
   const leftParticipant =
     allParticipants.find((p) => localParticipants.includes(p)) || "";

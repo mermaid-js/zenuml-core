@@ -31,7 +31,6 @@ export class MessageCollector extends sequenceParserListener {
     const owner = ctx?.Owner();
     let signature = ctx?.SignatureText();
     if (from === owner && ctx.Assignment) {
-      // @ts-expect-error -- ANTLR generated code
       const assignment = ctx.Assignment();
       if (assignment) {
         signature = `${assignment.getText()} = ${signature}`;
@@ -60,6 +59,7 @@ export class MessageCollector extends sequenceParserListener {
 
 // Returns all messages grouped by owner participant
 export function AllMessages(ctx: any) {
+  if (!ctx) return [];
   const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
   const listener = new MessageCollector();

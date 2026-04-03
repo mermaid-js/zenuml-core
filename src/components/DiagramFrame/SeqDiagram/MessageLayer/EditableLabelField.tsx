@@ -43,8 +43,8 @@ export const EditableLabelField = ({
       : undefined;
 
   const handleSave = (newText: string) => {
-    // If text is empty or same as the original text, bail out
-    if (newText === "" || newText === text) {
+    // If text is empty or same as what was displayed, bail out
+    if (newText === "" || newText === formattedText) {
       return;
     }
 
@@ -52,7 +52,7 @@ export const EditableLabelField = ({
     const normalizedText = normalizeText?.(newText) ?? newText;
 
     const [start, end] = position;
-    if (start === -1 || end === -1) {
+    if (start == null || end == null || start === -1 || end === -1) {
       console.warn("labelPosition is not set");
       return;
     }

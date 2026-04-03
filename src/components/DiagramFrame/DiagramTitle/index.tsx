@@ -36,14 +36,14 @@ export const DiagramTitle = (props: { context: any }) => {
   };
 
   return (
-    <div className="title text-skin-title text-base font-semibold">
+    <div className={`title text-skin-title text-base font-semibold${!hasTitle && isEditable ? " group min-w-[8rem]" : ""}`}>
       {isEditable ? (
         <EditableSpan
           text={hasTitle ? displayTitle : PLACEHOLDER}
           isEditable={true}
           onSave={handleSave}
           title={hasTitle ? "Click to edit title" : "Click to add title"}
-          className={hasTitle ? "" : "text-gray-400 italic font-normal text-sm"}
+          className={hasTitle ? "" : "text-gray-400 italic font-normal text-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"}
           selectAllOnEdit={!hasTitle}
         />
       ) : (
