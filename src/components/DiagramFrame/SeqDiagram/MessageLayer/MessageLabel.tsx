@@ -13,6 +13,7 @@ export const MessageLabel = (props: {
       position={props.labelPosition}
       normalizeText={props.normalizeText}
       className={cn("px-1 right", props.className)}
+      title="Click to edit message label"
     />
   );
 };

@@ -33,7 +33,7 @@ export const FragmentLoop = (props: {
   return (
     <div className={props.className}>
       <div
-        data-origin={origin}
+        data-origin={props.origin}
         data-left-participant={leftParticipant}
         data-frame-padding-left={border.left}
         data-frame-padding-right={border.right}

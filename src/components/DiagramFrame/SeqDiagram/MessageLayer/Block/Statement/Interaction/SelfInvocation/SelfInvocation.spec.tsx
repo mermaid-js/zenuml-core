@@ -1,6 +1,28 @@
 import { Fixture } from "@/../test/unit/parser/fixture/Fixture";
 import { render } from "@testing-library/react";
 import { SelfInvocation } from "./SelfInvocation";
+import { vi } from "vitest";
+
+// EditableLabelField.spec.tsx (loaded earlier) registers a vi.mock for
+// EditableSpan that strips the `editable-span-base` class. Override it here
+// with a minimal implementation that preserves the class so our test can find
+// the element.
+vi.mock("@/components/common/EditableSpan", () => ({
+  EditableSpan: ({
+    text,
+    className,
+  }: {
+    text: string;
+    className?: string;
+    isEditable?: boolean;
+    onSave: (t: string) => void;
+    title?: string;
+  }) => (
+    <span className={`${className ?? ""} editable-span-base`.trim()}>
+      {text}
+    </span>
+  ),
+}));
 
 describe("SelfInvocation", () => {
   const selfInvocationWrapper = render(

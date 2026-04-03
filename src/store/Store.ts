@@ -40,7 +40,11 @@ export const enum RenderMode {
 
 export const codeAtom = atom("");
 
-export const rootContextAtom = atom((get) => RootContext(get(codeAtom)));
+export const rootContextAtom = atom((get) => {
+  const code = get(codeAtom);
+  if (!code.trim()) return null;
+  return RootContext(code);
+});
 
 export const titleAtom = atom<string | undefined>((get) => {
   const titleContext = get(rootContextAtom)?.title();
@@ -50,9 +54,11 @@ export const titleAtom = atom<string | undefined>((get) => {
   return (titleContext as any).content();
 });
 
-export const participantsAtom = atom((get) =>
-  Participants(get(rootContextAtom)),
-);
+export const participantsAtom = atom((get) => {
+  const rootContext = get(rootContextAtom);
+  if (!rootContext) return Participants(null);
+  return Participants(rootContext);
+});
 
 export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), resolveWidthProvider()),
@@ -123,9 +129,45 @@ export const onMessageClickAtom = atomWithFunctionValue<
   (context: any, element: HTMLElement) => void
 >(() => {});
 
+export const selectedMessageAtom = atom<{
+  start: number;
+  end: number;
+  token: number;
+} | null>(null);
+
+export const createMessageDragAtom = atom<{
+  source: string;
+  sourceX: number;
+  sourceY: number;
+  pointerX: number;
+  pointerY: number;
+  hoverTarget: string | null;
+  insertIndex: number;
+  blockContext: any;
+} | null>(null);
+
+export const messageReorderDragAtom = atom<string | null>(null);
+
+export const messageReorderPendingAtom = atom<{
+  key: string;
+  startX: number;
+  startY: number;
+} | null>(null);
+
+export const messageReorderDropAtom = atom<{
+  key: string;
+  place: "before" | "after";
+} | null>(null);
+
 export const onContentChangeAtom = atomWithFunctionValue<
   (code: string) => void
 >(() => {});
+
+export const pendingEditableRangeAtom = atom<{
+  start: number;
+  end: number;
+  token: number;
+} | null>(null);
 
 export const onThemeChangeAtom = atomWithFunctionValue<
   (data: { theme: string; scoped: boolean }) => void

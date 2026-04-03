@@ -23,6 +23,7 @@ export const CollapseButton = (props: {
           name="collapse-unexpanded"
           className="w-4 h-4 cursor-pointer"
           onClick={props.onClick}
+          title="Click to expand"
         />
       ) : (
         <Icon
@@ -32,6 +33,7 @@ export const CollapseButton = (props: {
             props.collapsed && "inline-block",
           )}
           onClick={props.onClick}
+          title="Click to collapse"
         />
       )}
     </div>

@@ -19,7 +19,6 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useRef } from "react";
 import { ParticipantLabel } from "./ParticipantLabel";
 import { AsyncIcon } from "../../Tutorial/AsyncIcon";
-// import iconPath from "../../Tutorial/Icons"; // Removed eager import
 
 const INTERSECTION_ERROR_MARGIN = 10;
 const PARTICIPANT_DEBUG = Boolean(localStorage.getItem("zenumlDebug"));
@@ -97,16 +96,34 @@ export const Participant = (props: {
     <div
       className={cn(
         "participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8",
-        { selected: selected.includes(props.entity.name) },
+        {
+          selected: selected.includes(props.entity.name),
+          "ring-2 ring-sky-400": selected.includes(props.entity.name),
+          "cursor-pointer": mode === RenderMode.Dynamic && !isDefaultStarter,
+        },
       )}
       ref={elRef}
       style={{
         backgroundColor: isDefaultStarter ? undefined : backgroundColor,
         color: isDefaultStarter ? undefined : color,
         transform: `translateY(${stickyVerticalOffset}px)`,
+        // The parent LifeLineLayer has pointerEvents:none so that transparent
+        // gaps pass through to the MessageLayer below. Re-enable events here so
+        // the participant box itself remains interactive.
+        pointerEvents: "auto",
       }}
       onClick={() => onSelect(props.entity.name)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(props.entity.name);
+        }
+      }}
+      tabIndex={mode === RenderMode.Dynamic && !isDefaultStarter ? 0 : undefined}
+      role={mode === RenderMode.Dynamic && !isDefaultStarter ? "button" : undefined}
+      title={mode === RenderMode.Dynamic && !isDefaultStarter ? "Click to style participant" : undefined}
       data-participant-id={props.entity.name}
+      data-selected={selected.includes(props.entity.name) ? "true" : "false"}
     >
       {PARTICIPANT_DEBUG && (
         <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-8 h-[2px] bg-amber-700">

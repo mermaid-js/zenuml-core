@@ -11,6 +11,7 @@ import { Fragment, useMemo } from "react";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { blankParticipant } from "@/parser/Participants";
 import { GroupContext, ParticipantContext, Participants } from "@/parser";
+import { MessageCreateControls } from "./MessageCreateControls";
 
 export const LifeLineLayer = (props: {
   context: any;
@@ -43,7 +44,13 @@ export const LifeLineLayer = (props: {
       style={{
         minWidth: mode === RenderMode.Dynamic ? "200px" : "auto",
         width: `calc(100% - ${props.leftGap}px)`,
-        pointerEvents: props.renderParticipants ? "none" : "all",
+        // Always pass through pointer events at the container level.
+        // When rendering participant boxes, the boxes themselves opt back in via
+        // pointerEvents: "auto" on the Participant component.
+        // When rendering lifelines only (decorative dashed lines), no pointer
+        // events are needed and passing through lets the EmptyDiagramPrompt
+        // and MessageLayer below remain clickable.
+        pointerEvents: "none",
       }}
     >
       <div className="z-lifeline-container relative grow">
@@ -87,6 +94,7 @@ export const LifeLineLayer = (props: {
             renderLifeLine={props.renderLifeLine}
           />
         ))}
+        {props.renderParticipants && <MessageCreateControls />}
       </div>
     </div>
   );

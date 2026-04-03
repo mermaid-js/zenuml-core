@@ -122,7 +122,7 @@ export const ParticipantLabel = (props: {
             ? createCombinedSaveHandler(displayText)
             : createSaveHandler(props.labelPositions ?? [], props.labelText)
         }
-        title="Double-click to edit"
+        title={props.assignee ? "Click to rename variable" : "Click to rename participant"}
       />
     </div>
   );

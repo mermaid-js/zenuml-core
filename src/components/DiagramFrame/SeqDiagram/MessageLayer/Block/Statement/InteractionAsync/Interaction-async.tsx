@@ -101,7 +101,7 @@ export const InteractionAsync = (props: {
   const isSelf = source === target;
 
   const content = asyncMessage?.content();
-  const [start, stop] = [content?.start.start, content?.stop.stop];
+  const [start, stop] = [content?.start?.start, content?.stop?.stop];
 
   const { translateX, interactionWidth, rightToLeft } = useArrow({
     context: props.context,
@@ -125,7 +125,7 @@ export const InteractionAsync = (props: {
   };
   return (
     <div
-      data-origin={origin}
+      data-origin={props.origin}
       data-to={target}
       data-source={source}
       data-target={target}
@@ -159,6 +159,7 @@ export const InteractionAsync = (props: {
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
           context={asyncMessage}
+          selectionRange={[start, stop]}
           rtl={rightToLeft}
           type="async"
           number={props.number}
