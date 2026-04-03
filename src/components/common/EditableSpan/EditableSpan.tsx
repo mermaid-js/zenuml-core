@@ -2,6 +2,7 @@ import {
   KeyboardEvent,
   MouseEvent,
   useEffect,
+  useLayoutEffect,
   useState,
   useRef,
 } from "react";
@@ -143,11 +144,6 @@ export const EditableSpan = ({
       e.preventDefault();
       e.stopPropagation();
       cancelRef.current = true;
-      
-      const target = e.target as HTMLElement | null;
-      if (target) {
-        target.innerText = originalTextRef.current;
-      }
       setEditing(false);
       setIsHovered(false);
       return;
@@ -183,6 +179,16 @@ export const EditableSpan = ({
 
     return classes.filter(Boolean).join(" ");
   };
+
+  // When editing ends, synchronously reset the DOM content to the text prop
+  // before the browser paints. This avoids any flash of unstyled/incorrect
+  // content that occurs when the user cancels editing (Escape), because the
+  // DOM may have been modified by contentEditable input.
+  useLayoutEffect(() => {
+    if (!editing && spanRef.current) {
+      spanRef.current.textContent = text;
+    }
+  }, [editing, text]);
 
   useEffect(() => {
     if (!autoEditToken || !isEditable) {
