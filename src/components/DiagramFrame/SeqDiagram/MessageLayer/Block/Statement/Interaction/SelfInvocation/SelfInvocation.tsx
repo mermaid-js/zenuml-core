@@ -1,5 +1,5 @@
-import { onMessageClickAtom } from "@/store/Store";
-import { useAtomValue } from "jotai";
+import { onMessageClickAtom, selectedMessageAtom } from "@/store/Store";
+import { useAtomValue, useSetAtom } from "jotai";
 import { CSSProperties, useMemo, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
 import { MessageLabel } from "../../../../MessageLabel";
@@ -14,6 +14,8 @@ export const SelfInvocation = (props: {
 }) => {
   const messageRef = useRef(null);
   const onMessageClick = useAtomValue(onMessageClickAtom);
+  const selectedMessage = useAtomValue(selectedMessageAtom);
+  const setSelectedMessage = useSetAtom(selectedMessageAtom);
 
   const assignee = props.context?.Assignment()?.getText() || "";
   const labelPosition: [number, number] = useMemo(() => {
@@ -22,7 +24,17 @@ export const SelfInvocation = (props: {
     return [func.start.start, func.stop.stop];
   }, [props.context]);
 
+  const isSelected =
+    selectedMessage !== null &&
+    selectedMessage.start === labelPosition[0] &&
+    selectedMessage.end === labelPosition[1];
+
   const onClick = () => {
+    setSelectedMessage(
+      labelPosition[0] !== -1
+        ? { start: labelPosition[0], end: labelPosition[1], token: Date.now() }
+        : null,
+    );
     onMessageClick(props.context, messageRef.current!);
   };
 
@@ -31,6 +43,7 @@ export const SelfInvocation = (props: {
       ref={messageRef}
       className="self-invocation message leading-none self flex items-start flex-col border-none"
       onClick={onClick}
+      data-selected={isSelected ? "true" : "false"}
     >
       <label className="name text-left group px-px relative min-h-[1em] w-full">
         <Numbering number={props.number} />

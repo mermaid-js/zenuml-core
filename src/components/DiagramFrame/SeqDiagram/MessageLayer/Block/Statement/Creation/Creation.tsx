@@ -33,7 +33,7 @@ export const Creation = (props: {
   const target = creation?.Owner();
   const isCurrent = creation?.isCurrent(cursor);
   const signature = creation?.creationBody()?.parameters();
-  const [start, stop] = [signature?.start.start, signature?.stop.stop];
+  const [start, stop] = [signature?.start?.start, signature?.stop?.stop];
 
 
   const { translateX, interactionWidth, rightToLeft } = useArrow({
@@ -82,6 +82,8 @@ export const Creation = (props: {
         props.className,
       )}
       onClick={() => onElementClick(CodeRange.from(props.context))}
+      data-source={props.origin}
+      data-target={target}
       data-signature={creation?.SignatureText()}
       style={{
         transform: "translateX(" + translateX + "px)",
@@ -104,6 +106,7 @@ export const Creation = (props: {
             messageClassNames,
           )}
           context={creation}
+          selectionRange={[start, stop]}
           rtl={rightToLeft}
           type="creation"
           number={props.number}

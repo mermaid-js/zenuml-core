@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>reorder cross fragment</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="diagram" class="diagram">
+      <pre class="zenuml" style="margin: 0">
+A
+B
+C
+B->A.outside()
+if(ready) {
+  A->B.alpha()
+  A->C.beta()
+}
+C->A.omega()
+      </pre>
+    </div>
+    <script type="module" src="/src/main-e2e.ts"></script>
+  </body>
+</html>

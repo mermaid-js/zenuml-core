@@ -28,7 +28,7 @@ export const Interaction = (props: {
   const target = props.context?.message()?.Owner() || _STARTER_;
   const isSelf = source === target;
   const signatureCtx = message?.messageBody().func()?.signature()[0];
-  const [start, stop] = [signatureCtx?.start.start, signatureCtx?.stop.stop];
+  const [start, stop] = [signatureCtx?.start?.start, signatureCtx?.stop?.stop];
   const {
     translateX,
     interactionWidth,
@@ -82,6 +82,7 @@ export const Interaction = (props: {
           className={cn(messageClassNames)}
           textStyle={messageTextStyle}
           context={message}
+          selectionRange={[start, stop]}
           rtl={rightToLeft}
           number={props.number}
           type="sync"

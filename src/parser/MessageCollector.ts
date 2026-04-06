@@ -60,6 +60,7 @@ export class MessageCollector extends sequenceParserListener {
 
 // Returns all messages grouped by owner participant
 export function AllMessages(ctx: any) {
+  if (!ctx) return [];
   const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
   const listener = new MessageCollector();

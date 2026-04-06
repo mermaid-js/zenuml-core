@@ -6,7 +6,7 @@ const logger = parentLogger.child({ name: "main" });
 const elm = document.querySelector("pre.zenuml");
 // get the code from the element
 const code =
-  elm?.textContent?.trim() ||
+  elm?.textContent?.trim() ??
   `
 // comment
 A
@@ -19,6 +19,8 @@ console.log("set zenUML to window");
 window.zenUml = zenUml;
 zenUml.render(code, { theme: "theme-nab",
   onContentChange: code1 => {
+    // @ts-expect-error -- e2e inspection hook
+    window.__lastContentChange = code1;
     console.log('onContentChange', code1);
   }
 }).then((r) => {

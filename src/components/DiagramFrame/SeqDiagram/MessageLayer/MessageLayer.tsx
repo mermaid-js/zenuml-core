@@ -3,7 +3,7 @@ import { Block } from "./Block/Block";
 import { centerOf } from "./Block/Statement/utils";
 import { StylePanel } from "./StylePanel";
 import { useAtomValue } from "jotai";
-import { coordinatesAtom, rootContextAtom } from "@/store/Store";
+import { coordinatesAtom, modeAtom, RenderMode, rootContextAtom } from "@/store/Store";
 import { AllMessages } from "@/parser/MessageCollector";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import "./MessageLayer.scss";
@@ -17,6 +17,7 @@ export const MessageLayer = (props: {
 }) => {
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
+  const mode = useAtomValue(modeAtom);
 
   const origin = useMemo(() => {
     const ownableMessages = AllMessages(rootContext);
@@ -44,6 +45,8 @@ export const MessageLayer = (props: {
         context={props.context}
         style={{ paddingLeft: `${paddingLeft}px` }}
         origin={origin}
+        enableGapHandles={mode === RenderMode.Dynamic}
+        isRoot
       />
       <StylePanel />
     </div>
