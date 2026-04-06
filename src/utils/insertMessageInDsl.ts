@@ -14,6 +14,13 @@ const lineTail = (code: string, index: number) => {
   return next === -1 ? code.length : next + 1;
 };
 
+const quoteParticipantIfNecessary = (participant: string) => {
+  if (participant.includes(" ")) {
+    return `"${participant}"`;
+  }
+  return participant;
+};
+
 export const insertMessageInDsl = ({
   code,
   from,
@@ -23,12 +30,14 @@ export const insertMessageInDsl = ({
   insertIndex,
 }: InsertMessageInput) => {
   const statements: any[] = blockContext?.stat() || [];
-  const line = `${from}->${to}.${signature}`;
+  const quotedFrom = quoteParticipantIfNecessary(from);
+  const quotedTo = quoteParticipantIfNecessary(to);
+  const line = `${quotedFrom}->${quotedTo}.${signature}`;
 
   if (statements.length === 0) {
     const prefix =
       code.endsWith("\n") || code.length === 0 ? code : `${code}\n`;
-    const start = prefix.length + `${from}->${to}.`.length;
+    const start = prefix.length + `${quotedFrom}->${quotedTo}.`.length;
     const end = start + signature.length - 1;
     return {
       code: `${prefix}${line}`,
@@ -56,7 +65,7 @@ export const insertMessageInDsl = ({
     code.slice(0, insertionOffset) + insertedText + code.slice(insertionOffset);
 
   const actualLineStart = insertionOffset + (needsLeadingNewline ? 1 : 0);
-  const labelStart = actualLineStart + `${from}->${to}.`.length;
+  const labelStart = actualLineStart + `${quotedFrom}->${quotedTo}.`.length;
   const labelEnd = labelStart + signature.length - 1;
 
   return {
