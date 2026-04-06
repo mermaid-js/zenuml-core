@@ -13,6 +13,7 @@ import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
+import { FloatingPortal } from "@floating-ui/react";
 
 const PRESET_COLORS: { hex: string; name: string }[] = [
   { hex: "#ef4444", name: "Red" },
@@ -154,10 +155,11 @@ export const ParticipantStylePanel = () => {
   };
 
   return (
+    <FloatingPortal>
     <div
       ref={panelRef}
-      className="fixed z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-2 flex flex-col gap-2"
-      style={{ minWidth: 180, top: panelPos.top, left: panelPos.left }}
+      className="bg-white rounded-lg shadow-lg border border-gray-200 p-2 flex flex-col gap-2"
+      style={{ position: "fixed", zIndex: 50, minWidth: 180, top: panelPos.top, left: panelPos.left }}
       data-testid="participant-style-panel"
     >
       <div className="text-[10px] uppercase tracking-wide text-gray-400 font-semibold px-1">Color</div>
@@ -227,5 +229,6 @@ export const ParticipantStylePanel = () => {
         </button>
       </div>
     </div>
+    </FloatingPortal>
   );
 };
