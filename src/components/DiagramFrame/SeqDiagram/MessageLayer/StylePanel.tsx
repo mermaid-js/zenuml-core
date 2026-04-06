@@ -19,7 +19,7 @@ import {
   selectedMessageAtom,
 } from "@/store/Store";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useFloating } from "@floating-ui/react";
+import { FloatingPortal, useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
 
 const btns = [
@@ -315,9 +315,10 @@ export const StylePanel = () => {
   }, [isOpen]);
 
   return (
-    <div id="style-panel" ref={refs.setFloating} style={floatingStyles}>
+    <FloatingPortal>
+    <div id="style-panel" ref={refs.setFloating} style={{ ...floatingStyles, zIndex: 40 }}>
       {isOpen && (
-        <div className="flex items-center bg-white shadow-md z-10 rounded-md p-1 gap-1">
+        <div className="flex items-center bg-white shadow-md z-40 rounded-md p-1 gap-1">
           <div className="flex">
             {btns.map((btn) => (
               <button
@@ -472,5 +473,6 @@ export const StylePanel = () => {
         </div>
       )}
     </div>
+    </FloatingPortal>
   );
 };
