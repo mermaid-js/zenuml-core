@@ -1,7 +1,11 @@
 import { describe, it, expect, afterEach } from "bun:test";
 import { readFileSync, writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { resolve, join } from "node:path";
+import { PNG } from "pngjs";
+import pixelmatchModule from "pixelmatch";
 import { extractZenumlBlocks, startWatchMode } from "./zenuml";
+
+const pixelmatch = (pixelmatchModule as any).default ?? pixelmatchModule;
 
 const CLI_PATH = resolve(import.meta.dir, "zenuml.ts");
 const FIXTURES_DIR = resolve(import.meta.dir, "../../test/fixtures/cli");
@@ -1066,5 +1070,118 @@ describe("zenuml CLI", () => {
     for (const count of closeCallCounts) {
       expect(count).toBe(1);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// PNG snapshot tests — pixel-by-pixel regression
+// ---------------------------------------------------------------------------
+// Snapshots are platform-specific (chromium rendering differs between OS).
+// Set UPDATE_SNAPSHOTS=1 to regenerate snapshots.
+//
+// Update: UPDATE_SNAPSHOTS=1 bun run test --run
+// ---------------------------------------------------------------------------
+
+const SNAPSHOT_DIR = resolve(import.meta.dir, "../../test/fixtures/cli/snapshots");
+const PLATFORM_SUFFIX = process.platform === "linux" ? "-linux" : "-darwin";
+const UPDATE = process.env["UPDATE_SNAPSHOTS"] === "1";
+
+mkdirSync(SNAPSHOT_DIR, { recursive: true });
+
+function snapshotPath(name: string): string {
+  return join(SNAPSHOT_DIR, `${name}${PLATFORM_SUFFIX}.png`);
+}
+
+async function assertMatchesSnapshot(actualBuf: Buffer, name: string): Promise<void> {
+  const snapPath = snapshotPath(name);
+
+  if (UPDATE || !existsSync(snapPath)) {
+    writeFileSync(snapPath, actualBuf);
+    console.log(`Snapshot ${UPDATE ? "updated" : "created"}: ${snapPath}`);
+    return;
+  }
+
+  const expected = PNG.sync.read(readFileSync(snapPath));
+  const actual = PNG.sync.read(actualBuf);
+
+  if (expected.width !== actual.width || expected.height !== actual.height) {
+    throw new Error(
+      `Snapshot "${name}" dimension mismatch: expected ${expected.width}x${expected.height}, got ${actual.width}x${actual.height}`,
+    );
+  }
+
+  const diff = new PNG({ width: expected.width, height: expected.height });
+  const diffPixels = pixelmatch(
+    expected.data, actual.data, diff.data,
+    expected.width, expected.height,
+    { threshold: 0.1 },
+  );
+
+  if (diffPixels > 0) {
+    const diffPath = join(SNAPSHOT_DIR, `${name}${PLATFORM_SUFFIX}.diff.png`);
+    writeFileSync(diffPath, PNG.sync.write(diff));
+    throw new Error(
+      `Snapshot "${name}" has ${diffPixels} differing pixels (diff saved to ${diffPath}). Run with UPDATE_SNAPSHOTS=1 to update.`,
+    );
+  }
+}
+
+describe("zenuml CLI — PNG snapshots", () => {
+  const tempPngs: string[] = [];
+
+  afterEach(() => {
+    for (const f of tempPngs) {
+      try { unlinkSync(f); } catch {}
+    }
+    tempPngs.length = 0;
+  });
+
+  it("basic render matches snapshot", async () => {
+    const inputPath = join(SNAPSHOT_DIR, "_snap-basic.zenuml");
+    const outputPath = join(SNAPSHOT_DIR, "_snap-basic.png");
+    tempPngs.push(inputPath, outputPath);
+
+    writeFileSync(inputPath, "A -> B: hello", "utf-8");
+    const proc = Bun.spawn(
+      ["bun", "run", resolve(import.meta.dir, "zenuml.ts"), "-i", inputPath, "-o", outputPath],
+      { cwd: resolve(import.meta.dir, "../.."), stdout: "pipe", stderr: "pipe" },
+    );
+    await proc.exited;
+    expect(proc.exitCode).toBe(0);
+
+    await assertMatchesSnapshot(readFileSync(outputPath), "basic");
+  });
+
+  it("3x scale render matches snapshot", async () => {
+    const inputPath = join(SNAPSHOT_DIR, "_snap-scale3.zenuml");
+    const outputPath = join(SNAPSHOT_DIR, "_snap-scale3.png");
+    tempPngs.push(inputPath, outputPath);
+
+    writeFileSync(inputPath, "A -> B: hello", "utf-8");
+    const proc = Bun.spawn(
+      ["bun", "run", resolve(import.meta.dir, "zenuml.ts"), "-i", inputPath, "-o", outputPath, "-s", "3"],
+      { cwd: resolve(import.meta.dir, "../.."), stdout: "pipe", stderr: "pipe" },
+    );
+    await proc.exited;
+    expect(proc.exitCode).toBe(0);
+
+    await assertMatchesSnapshot(readFileSync(outputPath), "scale3");
+  });
+
+  it("multi-participant diagram matches snapshot", async () => {
+    const inputPath = join(SNAPSHOT_DIR, "_snap-multi.zenuml");
+    const outputPath = join(SNAPSHOT_DIR, "_snap-multi.png");
+    tempPngs.push(inputPath, outputPath);
+
+    const dsl = "Client -> Server: request\nServer -> DB: query\nDB --> Server: result\nServer --> Client: response";
+    writeFileSync(inputPath, dsl, "utf-8");
+    const proc = Bun.spawn(
+      ["bun", "run", resolve(import.meta.dir, "zenuml.ts"), "-i", inputPath, "-o", outputPath],
+      { cwd: resolve(import.meta.dir, "../.."), stdout: "pipe", stderr: "pipe" },
+    );
+    await proc.exited;
+    expect(proc.exitCode).toBe(0);
+
+    await assertMatchesSnapshot(readFileSync(outputPath), "multi-participant");
   });
 });
