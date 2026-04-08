@@ -23,21 +23,30 @@ jobs:
       - name: Install Playwright browsers
         run: bun run pw:install
 
+      - name: Install Playwright Chromium for CLI PNG tests
+        run: npx playwright-core install --with-deps chromium
+
       - name: Build site
         run: bun run build:site
 
-      - name: Generate Linux snapshots
+      - name: Generate Linux Playwright snapshots
         run: bun run pw:update-ci
         env:
           CI: true
+
+      - name: Generate Linux CLI PNG snapshots
+        run: bun run test --run
+        env:
+          CI: true
+          UPDATE_SNAPSHOTS: "1"
 
       - name: Commit updated snapshots
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add tests/
+          git add tests/ test/fixtures/cli/snapshots/
           if ! git diff --staged --quiet; then
-            git commit -m "chore: update Playwright snapshots for Linux CI
+            git commit -m "chore: update Playwright and CLI PNG snapshots for Linux CI
 
             Generated Linux-specific snapshots for chromium-linux platform.
 
@@ -51,5 +60,10 @@ jobs:
 
       - name: Verify snapshots pass
         run: bun run pw:ci
+        env:
+          CI: true
+
+      - name: Verify CLI PNG snapshots pass
+        run: bun run test --run
         env:
           CI: true
