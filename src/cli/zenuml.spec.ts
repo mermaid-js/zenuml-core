@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from "bun:test";
 import { readFileSync, writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { resolve, join } from "node:path";
+import { extractZenumlBlocks } from "./zenuml";
 
 const CLI_PATH = resolve(import.meta.dir, "zenuml.ts");
 const FIXTURES_DIR = resolve(import.meta.dir, "../../test/fixtures/cli");
@@ -657,5 +658,213 @@ describe("zenuml CLI", () => {
     expect(terminal).not.toBeNull();
     expect(terminal.text).toBeDefined();
     expect(typeof terminal.text).toBe("string");
+  });
+
+  // -------------------------------------------------------------------------
+  // Sprint 5: Markdown mode tests
+  // -------------------------------------------------------------------------
+
+  // Unit tests for extractZenumlBlocks (no subprocess needed)
+  describe("extractZenumlBlocks", () => {
+    it("extracts a block with a title", () => {
+      const md = "# Hello\n\n```zenuml Auth Flow\nA -> B: login\n```\n";
+      const blocks = extractZenumlBlocks(md);
+      expect(blocks.length).toBe(1);
+      expect(blocks[0].title).toBe("Auth Flow");
+      expect(blocks[0].code).toBe("A -> B: login");
+      expect(blocks[0].index).toBe(0);
+      expect(blocks[0].empty).toBe(false);
+    });
+
+    it("extracts a block without title — title is empty string", () => {
+      const md = "```zenuml\nA -> B: hello\n```\n";
+      const blocks = extractZenumlBlocks(md);
+      expect(blocks.length).toBe(1);
+      expect(blocks[0].title).toBe("");
+      expect(blocks[0].empty).toBe(false);
+    });
+
+    it("flags empty blocks as empty: true", () => {
+      const md = "```zenuml\n\n```\n";
+      const blocks = extractZenumlBlocks(md);
+      expect(blocks.length).toBe(1);
+      expect(blocks[0].empty).toBe(true);
+    });
+
+    it("raw round-trip: raw contains opening and closing fence", () => {
+      const md = "```zenuml\nA -> B: hello\n```\n";
+      const blocks = extractZenumlBlocks(md);
+      expect(blocks[0].raw).toContain("```zenuml");
+      expect(blocks[0].raw).toContain("A -> B: hello");
+      expect(blocks[0].raw).toContain("```");
+      // raw should be a substring of the original
+      expect(md).toContain(blocks[0].raw);
+    });
+
+    it("extracts multiple blocks with correct indices", () => {
+      const md = "```zenuml\nA -> B\n```\n\nsome text\n\n```zenuml Title\nC -> D\n```\n";
+      const blocks = extractZenumlBlocks(md);
+      expect(blocks.length).toBe(2);
+      expect(blocks[0].index).toBe(0);
+      expect(blocks[1].index).toBe(1);
+      expect(blocks[1].title).toBe("Title");
+    });
+  });
+
+  // (ak) Auto-detect .md + 2 blocks → 2 SVG files + output.md with `![` references
+  it("(ak) auto-detects .md extension, renders 2 blocks to SVG, writes output.md with ![", async () => {
+    const inputPath = tmpFile("auto-md.md");
+    const expectedOutput = join(FIXTURES_DIR, "auto-md-rendered.md");
+    const imgA = join(FIXTURES_DIR, "auto-md-zenuml-0.svg");
+    const imgB = join(FIXTURES_DIR, "auto-md-zenuml-1.svg");
+    tempFiles.push(expectedOutput, imgA, imgB);
+
+    const md = `# Docs\n\n\`\`\`zenuml\nA -> B: hello\n\`\`\`\n\nSome text.\n\n\`\`\`zenuml\nB -> C: world\n\`\`\`\n`;
+    writeFileSync(inputPath, md, "utf-8");
+
+    const { exitCode, stderr } = await runCli(["-i", inputPath]);
+    expect(exitCode).toBe(0);
+    expect(existsSync(imgA)).toBe(true);
+    expect(existsSync(imgB)).toBe(true);
+    expect(existsSync(expectedOutput)).toBe(true);
+
+    const outputMd = readFileSync(expectedOutput, "utf-8");
+    expect(outputMd).toContain("![");
+    expect(outputMd).toContain("auto-md-zenuml-0.svg");
+    expect(outputMd).toContain("auto-md-zenuml-1.svg");
+
+    const svgA = readFileSync(imgA, "utf-8");
+    expect(svgA).toContain("<svg xmlns=");
+  });
+
+  // (al) --md explicit → default output {stem}-rendered.md
+  it("(al) --md flag produces {stem}-rendered.md by default", async () => {
+    const inputPath = tmpFile("explicit-md.md");
+    const expectedOutput = join(FIXTURES_DIR, "explicit-md-rendered.md");
+    const img = join(FIXTURES_DIR, "explicit-md-zenuml-0.svg");
+    tempFiles.push(expectedOutput, img);
+
+    writeFileSync(inputPath, "```zenuml\nA -> B: hi\n```\n", "utf-8");
+
+    const { exitCode } = await runCli(["--md", "-i", inputPath]);
+    expect(exitCode).toBe(0);
+    expect(existsSync(expectedOutput)).toBe(true);
+    const outputMd = readFileSync(expectedOutput, "utf-8");
+    expect(outputMd).toContain("![");
+  });
+
+  // (am) -e png → .png file with valid PNG magic bytes
+  it("(am) -e png in markdown mode produces .png images with valid PNG magic bytes", async () => {
+    const inputPath = tmpFile("png-md.md");
+    const expectedOutput = join(FIXTURES_DIR, "png-md-rendered.md");
+    const img = join(FIXTURES_DIR, "png-md-zenuml-0.png");
+    tempFiles.push(expectedOutput, img);
+
+    writeFileSync(inputPath, "```zenuml\nA -> B: hi\n```\n", "utf-8");
+
+    const { exitCode } = await runCli(["-i", inputPath, "-e", "png"]);
+    expect(exitCode).toBe(0);
+    expect(existsSync(img)).toBe(true);
+
+    const buf = readFileSync(img);
+    expect(buf[0]).toBe(0x89);
+    expect(buf[1]).toBe(0x50);
+    expect(buf[2]).toBe(0x4E);
+    expect(buf[3]).toBe(0x47);
+  });
+
+  // (an) Empty block skipped → 1 image only, empty block absent
+  it("(an) empty zenuml block is skipped — 1 image rendered, empty block removed from output", async () => {
+    const inputPath = tmpFile("empty-block.md");
+    const expectedOutput = join(FIXTURES_DIR, "empty-block-rendered.md");
+    const img0 = join(FIXTURES_DIR, "empty-block-zenuml-0.svg");
+    const img1 = join(FIXTURES_DIR, "empty-block-zenuml-1.svg");
+    tempFiles.push(expectedOutput, img0, img1);
+
+    const md = "```zenuml\nA -> B: hi\n```\n\n```zenuml\n\n```\n";
+    writeFileSync(inputPath, md, "utf-8");
+
+    const { exitCode } = await runCli(["-i", inputPath]);
+    expect(exitCode).toBe(0);
+    expect(existsSync(img0)).toBe(true);
+    expect(existsSync(img1)).toBe(false); // empty block, no image
+
+    const outputMd = readFileSync(expectedOutput, "utf-8");
+    // Only one image reference
+    const imgRefs = (outputMd.match(/!\[/g) || []).length;
+    expect(imgRefs).toBe(1);
+    // Empty block's raw fence should be gone
+    expect(outputMd).not.toContain("```zenuml");
+  });
+
+  // (ao) Title as alt text: ```zenuml Auth Flow → ![Auth Flow](
+  it("(ao) block title used as alt text in Markdown image reference", async () => {
+    const inputPath = tmpFile("titled-block.md");
+    const expectedOutput = join(FIXTURES_DIR, "titled-block-rendered.md");
+    const img = join(FIXTURES_DIR, "titled-block-zenuml-0.svg");
+    tempFiles.push(expectedOutput, img);
+
+    writeFileSync(inputPath, "```zenuml Auth Flow\nA -> B: login\n```\n", "utf-8");
+
+    const { exitCode } = await runCli(["-i", inputPath]);
+    expect(exitCode).toBe(0);
+
+    const outputMd = readFileSync(expectedOutput, "utf-8");
+    expect(outputMd).toContain("![Auth Flow](");
+  });
+
+  // (ap) --md + multiple -i → exit 1
+  it("(ap) --md with multiple -i inputs exits 1", async () => {
+    const f1 = tmpFile("md-multi-1.md");
+    const f2 = tmpFile("md-multi-2.md");
+    writeFileSync(f1, "```zenuml\nA -> B\n```\n", "utf-8");
+    writeFileSync(f2, "```zenuml\nB -> C\n```\n", "utf-8");
+
+    const { exitCode, stderr } = await runCli(["--md", "-i", f1, "-i", f2]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("single input");
+  });
+
+  // (aq) -o - → transformed Markdown to stdout
+  it("(aq) -o - in markdown mode writes transformed Markdown to stdout", async () => {
+    const inputPath = tmpFile("stdout-md.md");
+    tempFiles.push(); // no output file
+
+    writeFileSync(inputPath, "```zenuml\nA -> B: hi\n```\n", "utf-8");
+
+    const { exitCode, stdout } = await runCli(["-i", inputPath, "-o", "-"]);
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain("![");
+    expect(stdout).toContain("stdout-md-zenuml-0.svg");
+  });
+
+  // (ar) --md + non-.md input → exit 1
+  it("(ar) --md flag with non-.md input exits 1", async () => {
+    const inputPath = tmpFile("wrong-ext.zenuml");
+    writeFileSync(inputPath, "A -> B: hello", "utf-8");
+
+    const { exitCode, stderr } = await runCli(["--md", "-i", inputPath]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain(".md");
+  });
+
+  // (as) -o /tmp/out.md → images in /tmp/ not input dir
+  it("(as) -o /tmp/out.md places images in the output file's directory", async () => {
+    const inputPath = tmpFile("place-test.md");
+    const outMd = join("/tmp", "zenuml-sprint5-test-out.md");
+    const outImg = join("/tmp", "place-test-zenuml-0.svg");
+
+    writeFileSync(inputPath, "```zenuml\nA -> B: hi\n```\n", "utf-8");
+
+    const { exitCode } = await runCli(["-i", inputPath, "-o", outMd]);
+    expect(exitCode).toBe(0);
+    expect(existsSync(outImg)).toBe(true);
+
+    const outputMd = readFileSync(outMd, "utf-8");
+    expect(outputMd).toContain("place-test-zenuml-0.svg");
+
+    // Cleanup
+    try { unlinkSync(outMd); } catch {}
+    try { unlinkSync(outImg); } catch {}
   });
 });

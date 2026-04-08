@@ -49,6 +49,7 @@ Options:
   -b, --backgroundColor <col>  Background color (default: "white" for PNG, "transparent" for SVG)
   -t, --theme <name>           Theme name passed to renderer (e.g. "theme-default")
   -c, --configFile <file>      JSON config file with { theme, scale, backgroundColor, outputFormat }
+  --md                         Markdown mode: render zenuml code blocks and produce output Markdown
   --check                      Validate syntax without rendering (exit 0 if valid, 1 if errors)
   --parse                      Parse input and output AST as JSON (exit 0 if valid, 1 if errors)
   --json                       Machine-readable JSON output for --check mode
@@ -69,8 +70,49 @@ Examples:
   zenuml --check -i file1.zenuml -i file2.zenuml
   zenuml --check --json -i file1.zenuml -i file2.zenuml
   zenuml --parse -i diagram.zenuml
+  zenuml -i readme.md --md
+  zenuml -i readme.md --md -e png
 `.trimStart();
   process.stdout.write(help);
+}
+
+// ---------------------------------------------------------------------------
+// Markdown block extractor
+// ---------------------------------------------------------------------------
+
+export interface ZenumlBlock {
+  /** Zero-based index of this block among all zenuml blocks in the document */
+  index: number;
+  /** The ZenUML DSL code inside the fence (may be empty string for empty blocks) */
+  code: string;
+  /** Title extracted from the info string after "zenuml" (trimmed), or empty string */
+  title: string;
+  /** The full raw fence text including the opening and closing ``` lines */
+  raw: string;
+  /** True if the code (trimmed) is empty — these blocks should be excluded from rendering */
+  empty: boolean;
+}
+
+/**
+ * Extract all ```zenuml ... ``` fenced code blocks from Markdown text.
+ * Returns one ZenumlBlock per block, in document order.
+ */
+export function extractZenumlBlocks(md: string): ZenumlBlock[] {
+  const results: ZenumlBlock[] = [];
+  // Match fenced code blocks that start with ```zenuml (with optional title after)
+  // Handles both ``` and ~~~ fences but we only care about backtick fences for ZenUML
+  const fencePattern = /^(`{3,})zenuml([^\n]*)\n([\s\S]*?)\n?\1\s*$/gm;
+  let match: RegExpExecArray | null;
+  let blockIndex = 0;
+  while ((match = fencePattern.exec(md)) !== null) {
+    const raw = match[0];
+    const infoExtra = match[2]; // everything after "zenuml" on the opening line
+    const code = match[3]; // content between fences
+    const title = infoExtra.trim();
+    const empty = code.trim().length === 0;
+    results.push({ index: blockIndex++, code, title, raw, empty });
+  }
+  return results;
 }
 
 // ---------------------------------------------------------------------------
@@ -134,10 +176,11 @@ interface CliArgs {
   quiet: boolean;
   help: boolean;
   version: boolean;
+  md: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { inputs: [], check: false, parse: false, json: false, quiet: false, help: false, version: false };
+  const args: CliArgs = { inputs: [], check: false, parse: false, json: false, quiet: false, help: false, version: false, md: false };
   let i = 0;
   while (i < argv.length) {
     const arg = argv[i];
@@ -176,6 +219,9 @@ function parseArgs(argv: string[]): CliArgs {
       case "--configFile":
         i++;
         args.configFile = argv[i];
+        break;
+      case "--md":
+        args.md = true;
         break;
       case "--check":
         args.check = true;
@@ -468,6 +514,175 @@ async function main(): Promise<void> {
   }
 
   // ---------------------------------------------------------------------------
+  // --md mode: render Markdown with zenuml code blocks
+  // ---------------------------------------------------------------------------
+  // Determine if we're in Markdown mode: explicit --md flag or auto-detect from extension
+  const isMdMode = args.md || expandedInputs.some(
+    (f) => f !== "-" && /\.(?:md|markdown)$/i.test(f),
+  );
+
+  if (isMdMode) {
+    // Validate: --md with multiple inputs is an error
+    if (expandedInputs.length > 1) {
+      process.stderr.write("Error: --md mode supports only a single input file.\n");
+      process.exit(1);
+    }
+    const inputArg = expandedInputs[0];
+
+    // Validate: --md with non-.md input is an error (only when --md was explicitly passed)
+    if (args.md && inputArg !== "-") {
+      const ext = extname(inputArg).toLowerCase();
+      if (ext !== ".md" && ext !== ".markdown") {
+        process.stderr.write(`Error: --md flag requires a .md or .markdown input file, got: ${inputArg}\n`);
+        process.exit(1);
+      }
+    }
+
+    // Read markdown content
+    let mdContent: string;
+    try {
+      mdContent = await readCode(inputArg);
+    } catch (err: any) {
+      process.stderr.write(`Error: ${err.message}\n`);
+      process.exit(1);
+    }
+
+    // Effective format for diagram images
+    const effectiveFormat = args.outputFormat ?? "svg";
+    if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
+      process.stderr.write(`Error: Unsupported output format: "${effectiveFormat}". Use "svg" or "png".\n`);
+      process.exit(1);
+    }
+
+    // Determine output dir for images:
+    // If -o is given (and not stdout), use that file's directory
+    // Otherwise if input is a file, use input's directory
+    // For -o - (stdout), images go adjacent to the input file (or cwd for stdin)
+    let imageDir: string;
+    let mdOutputPath: string;
+
+    if (args.output && args.output !== "-") {
+      const resolvedOutput = resolve(args.output);
+      imageDir = dirname(resolvedOutput);
+      mdOutputPath = resolvedOutput;
+    } else if (args.output === "-") {
+      // stdout: images go adjacent to input or cwd
+      if (inputArg !== "-") {
+        imageDir = dirname(resolve(inputArg));
+      } else {
+        imageDir = process.cwd();
+      }
+      mdOutputPath = "-";
+    } else {
+      // No -o: default output is {stem}-rendered.md adjacent to input
+      if (inputArg !== "-") {
+        const resolvedInput = resolve(inputArg);
+        const inputDir = dirname(resolvedInput);
+        const ext = extname(inputArg);
+        const stem = basename(inputArg, ext);
+        imageDir = inputDir;
+        mdOutputPath = join(inputDir, `${stem}-rendered.md`);
+      } else {
+        imageDir = process.cwd();
+        mdOutputPath = "-";
+      }
+    }
+
+    // Determine stem for image file names (from input or output path)
+    let imageStem: string;
+    if (inputArg !== "-") {
+      const ext = extname(inputArg);
+      imageStem = basename(inputArg, ext);
+    } else if (mdOutputPath !== "-") {
+      const ext = extname(mdOutputPath);
+      imageStem = basename(mdOutputPath, ext);
+    } else {
+      imageStem = "diagram";
+    }
+
+    // Extract zenuml blocks
+    const blocks = extractZenumlBlocks(mdContent);
+
+    // Effective render options
+    const effectiveScale = args.scale ?? 2;
+    const effectiveBackgroundColor =
+      args.backgroundColor ?? (effectiveFormat === "png" ? "white" : "transparent");
+    const effectiveTheme = args.theme;
+    const renderOptions: RenderOptions = {};
+    if (effectiveTheme) {
+      renderOptions.theme = effectiveTheme as RenderOptions["theme"];
+    }
+
+    // Render each non-empty block and collect image paths
+    const imageFiles: Map<number, string> = new Map();
+    for (const block of blocks) {
+      if (block.empty) continue;
+      const imageFilename = `${imageStem}-zenuml-${block.index}.${effectiveFormat}`;
+      const imageFilePath = join(imageDir, imageFilename);
+
+      let svg: string;
+      let svgWidth: number;
+      let svgHeight: number;
+      try {
+        const result = renderToSvg(block.code, renderOptions);
+        svg = result.svg;
+        svgWidth = result.width;
+        svgHeight = result.height;
+      } catch (err: any) {
+        process.stderr.write(`Error: Failed to render zenuml block ${block.index}: ${err.message}\n`);
+        process.exit(1);
+      }
+
+      // Ensure image directory exists
+      mkdirSync(imageDir, { recursive: true });
+
+      if (effectiveFormat === "png") {
+        const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale, effectiveBackgroundColor);
+        writeFileSync(imageFilePath, pngBuffer);
+      } else {
+        writeFileSync(imageFilePath, svg, "utf-8");
+      }
+
+      if (!args.quiet) {
+        process.stderr.write(`Wrote ${imageFilePath}\n`);
+      }
+
+      imageFiles.set(block.index, imageFilename);
+    }
+
+    // Replace blocks in the Markdown
+    let outputMd = mdContent;
+    // Process blocks in reverse order so that string offsets remain valid
+    // We need to find and replace each raw block
+    // Re-scan in reverse order to replace correctly
+    const sortedBlocks = [...blocks].reverse();
+    for (const block of sortedBlocks) {
+      const altText = block.title || `diagram ${block.index + 1}`;
+      if (block.empty) {
+        // Remove empty blocks entirely
+        outputMd = outputMd.replace(block.raw, "");
+      } else {
+        const imageFilename = imageFiles.get(block.index)!;
+        const replacement = `![${altText}](${imageFilename})`;
+        outputMd = outputMd.replace(block.raw, replacement);
+      }
+    }
+
+    // Write output Markdown
+    if (mdOutputPath === "-") {
+      process.stdout.write(outputMd);
+    } else {
+      mkdirSync(dirname(mdOutputPath), { recursive: true });
+      writeFileSync(mdOutputPath, outputMd, "utf-8");
+      if (!args.quiet) {
+        process.stderr.write(`Wrote ${mdOutputPath}\n`);
+      }
+    }
+
+    process.exit(0);
+  }
+
+  // ---------------------------------------------------------------------------
   // Config file merging: config file < CLI flags
   // ---------------------------------------------------------------------------
   let configScale: number | undefined;
@@ -669,4 +884,6 @@ async function readStdin(): Promise<string> {
   return Buffer.concat(chunks).toString("utf-8");
 }
 
-main();
+if (import.meta.main) {
+  main();
+}
