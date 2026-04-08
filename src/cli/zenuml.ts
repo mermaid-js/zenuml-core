@@ -15,7 +15,7 @@
 import { renderToSvg } from "@/svg/renderToSvg";
 import type { RenderOptions } from "@/svg/renderToSvg";
 import Parser from "@/parser/index.js";
-import { readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, statSync, watch as fsWatch } from "node:fs";
 import { resolve, basename, extname, dirname, join, relative } from "node:path";
 
 // ---------------------------------------------------------------------------
@@ -53,6 +53,7 @@ Options:
   --check                      Validate syntax without rendering (exit 0 if valid, 1 if errors)
   --parse                      Parse input and output AST as JSON (exit 0 if valid, 1 if errors)
   --json                       Machine-readable JSON output for --check mode
+  -w, --watch                  Watch input files and re-render on change (incompatible with --check, --parse, stdin)
   -q, --quiet                  Suppress non-error output
   -h, --help                   Show this help message
   -V, --version                Show version number
@@ -177,10 +178,11 @@ interface CliArgs {
   help: boolean;
   version: boolean;
   md: boolean;
+  watch: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { inputs: [], check: false, parse: false, json: false, quiet: false, help: false, version: false, md: false };
+  const args: CliArgs = { inputs: [], check: false, parse: false, json: false, quiet: false, help: false, version: false, md: false, watch: false };
   let i = 0;
   while (i < argv.length) {
     const arg = argv[i];
@@ -243,6 +245,10 @@ function parseArgs(argv: string[]): CliArgs {
       case "-V":
       case "--version":
         args.version = true;
+        break;
+      case "-w":
+      case "--watch":
+        args.watch = true;
         break;
       default:
         process.stderr.write(`Unknown option: ${arg}\n`);
@@ -445,6 +451,24 @@ async function main(): Promise<void> {
   } catch (err: any) {
     process.stderr.write(`Error: ${err.message}\n`);
     process.exit(1);
+  }
+
+  // ---------------------------------------------------------------------------
+  // --watch incompatibility checks
+  // ---------------------------------------------------------------------------
+  if (args.watch) {
+    if (args.check) {
+      process.stderr.write("Error: --watch is incompatible with --check.\n");
+      process.exit(1);
+    }
+    if (args.parse) {
+      process.stderr.write("Error: --watch is incompatible with --parse.\n");
+      process.exit(1);
+    }
+    if (expandedInputs.includes("-")) {
+      process.stderr.write("Error: --watch is incompatible with stdin input.\n");
+      process.exit(1);
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -709,6 +733,133 @@ async function main(): Promise<void> {
   }
 
   // ---------------------------------------------------------------------------
+  // --watch mode
+  // ---------------------------------------------------------------------------
+  if (args.watch) {
+    const renderForWatch = async (inputArg: string): Promise<void> => {
+      await renderOneFile(inputArg, args, {
+        configScale,
+        configBackgroundColor,
+        configTheme,
+        configOutputFormat,
+        multipleInputs,
+      });
+    };
+
+    const renderMdForWatch = async (inputArg: string): Promise<void> => {
+      // Re-invoke main md render for this file by delegating back through renderOneFile
+      // but we need md-specific rendering — so call the same md render path.
+      // For simplicity, we re-read and re-run the md render inline.
+      let mdContent: string;
+      try {
+        mdContent = readFileSync(resolve(inputArg), "utf-8");
+      } catch (err: any) {
+        throw new Error(`Cannot read input file: ${resolve(inputArg)}`);
+      }
+
+      const effectiveFormat = args.outputFormat ?? "svg";
+      if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
+        throw new Error(`Unsupported output format: "${effectiveFormat}". Use "svg" or "png".`);
+      }
+
+      let mdOutputPath: string;
+      let imageDir: string;
+
+      if (args.output && args.output !== "-") {
+        const resolvedOutput = resolve(args.output);
+        imageDir = dirname(resolvedOutput);
+        mdOutputPath = resolvedOutput;
+      } else if (args.output === "-") {
+        imageDir = dirname(resolve(inputArg));
+        mdOutputPath = "-";
+      } else {
+        const resolvedInput = resolve(inputArg);
+        const inputDir = dirname(resolvedInput);
+        const ext = extname(inputArg);
+        const stem = basename(inputArg, ext);
+        imageDir = inputDir;
+        mdOutputPath = join(inputDir, `${stem}-rendered.md`);
+      }
+
+      const ext = extname(inputArg);
+      const imageStem = basename(inputArg, ext);
+      const blocks = extractZenumlBlocks(mdContent);
+
+      const effectiveScale = args.scale ?? configScale ?? 2;
+      const effectiveBackgroundColor =
+        args.backgroundColor ?? configBackgroundColor ?? (effectiveFormat === "png" ? "white" : "transparent");
+      const effectiveTheme = args.theme ?? configTheme;
+      const renderOptions: RenderOptions = {};
+      if (effectiveTheme) {
+        renderOptions.theme = effectiveTheme as RenderOptions["theme"];
+      }
+
+      const imageFiles: Map<number, string> = new Map();
+      for (const block of blocks) {
+        if (block.empty) continue;
+        const imageFilename = `${imageStem}-zenuml-${block.index}.${effectiveFormat}`;
+        const imageFilePath = join(imageDir, imageFilename);
+
+        const result = renderToSvg(block.code, renderOptions);
+        const { svg, width: svgWidth, height: svgHeight } = result;
+
+        mkdirSync(imageDir, { recursive: true });
+
+        if (effectiveFormat === "png") {
+          const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale, effectiveBackgroundColor);
+          writeFileSync(imageFilePath, pngBuffer);
+        } else {
+          writeFileSync(imageFilePath, svg, "utf-8");
+        }
+
+        imageFiles.set(block.index, imageFilename);
+      }
+
+      let outputMd = mdContent;
+      const sortedBlocks = [...blocks].reverse();
+      for (const block of sortedBlocks) {
+        const altText = block.title || `diagram ${block.index + 1}`;
+        if (block.empty) {
+          outputMd = outputMd.replace(block.raw, "");
+        } else {
+          const imageFilename = imageFiles.get(block.index)!;
+          const replacement = `![${altText}](${imageFilename})`;
+          outputMd = outputMd.replace(block.raw, replacement);
+        }
+      }
+
+      if (mdOutputPath === "-") {
+        process.stdout.write(outputMd);
+      } else {
+        mkdirSync(dirname(mdOutputPath), { recursive: true });
+        writeFileSync(mdOutputPath, outputMd, "utf-8");
+      }
+    };
+
+    // Detect md inputs
+    const hasMdInputs = expandedInputs.some((f) => /\.(?:md|markdown)$/i.test(f));
+    const renderMdFnForWatch = hasMdInputs ? renderMdForWatch : undefined;
+
+    const watchHandle = await startWatchMode(
+      expandedInputs,
+      renderForWatch,
+      undefined,
+      undefined,
+      undefined,
+      renderMdFnForWatch,
+    );
+
+    process.on("SIGINT", () => {
+      watchHandle.shutdown();
+      process.exit(0);
+    });
+
+    // Keep the process alive (watch mode runs indefinitely)
+    await new Promise<void>(() => {});
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
   // Render mode — iterate all expanded inputs
   // ---------------------------------------------------------------------------
   let rendered = 0;
@@ -882,6 +1033,111 @@ async function readStdin(): Promise<string> {
     chunks.push(chunk as Uint8Array);
   }
   return Buffer.concat(chunks).toString("utf-8");
+}
+
+// ---------------------------------------------------------------------------
+// Watch mode
+// ---------------------------------------------------------------------------
+
+/** Return a timestamp string in [HH:MM:SS] format using local time. */
+function watchTimestamp(): string {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const ss = String(now.getSeconds()).padStart(2, "0");
+  return `[${hh}:${mm}:${ss}]`;
+}
+
+export interface WatchHandle {
+  shutdown: () => void;
+}
+
+/**
+ * Start watch mode.
+ *
+ * @param inputs      Resolved file paths to watch and render.
+ * @param renderFn    Called with a file path to re-render it. Must return a Promise.
+ * @param watchFn     Factory for a watcher. Defaults to node:fs.watch. Must return { close() }.
+ * @param log         Log function for render messages. Defaults to process.stderr.write.
+ * @param delayMs     Debounce delay in milliseconds. Defaults to 100.
+ * @param renderMdFn  Optional alternative render function for .md files. When provided,
+ *                    .md inputs are rendered with this function instead of renderFn.
+ */
+export async function startWatchMode(
+  inputs: string[],
+  renderFn: (path: string) => Promise<void>,
+  watchFn?: (path: string, handler: () => void) => { close(): void },
+  log?: (msg: string) => void,
+  delayMs?: number,
+  renderMdFn?: (path: string) => Promise<void>,
+): Promise<WatchHandle> {
+  const logFn = log ?? ((msg: string) => process.stderr.write(msg + "\n"));
+  const delay = delayMs ?? 100;
+
+  // Default watcher using node:fs.watch
+  const watchFactory = watchFn ?? ((path: string, handler: () => void) => {
+    const watcher = fsWatch(path, () => handler());
+    return { close: () => watcher.close() };
+  });
+
+  // Pick which render function to use for a given file
+  function pickRender(p: string): (path: string) => Promise<void> {
+    if (renderMdFn && /\.(?:md|markdown)$/i.test(p)) {
+      return renderMdFn;
+    }
+    return renderFn;
+  }
+
+  // Perform initial render for all inputs
+  for (const input of inputs) {
+    const rf = pickRender(input);
+    const ts = watchTimestamp();
+    try {
+      await rf(input);
+      logFn(`${ts} Rendered ${input} -> done`);
+    } catch (err: any) {
+      logFn(`${ts} Error: ${input}: ${err.message}`);
+    }
+  }
+
+  // Set up per-file debounced watchers
+  const handles: Array<{ close(): void }> = [];
+  const timers = new Map<string, ReturnType<typeof setTimeout>>();
+
+  for (const input of inputs) {
+    const rf = pickRender(input);
+    const handle = watchFactory(input, () => {
+      // Debounce: clear any pending timer for this file
+      const existing = timers.get(input);
+      if (existing !== undefined) clearTimeout(existing);
+      const t = setTimeout(async () => {
+        timers.delete(input);
+        const ts = watchTimestamp();
+        try {
+          await rf(input);
+          logFn(`${ts} Rendered ${input} -> done`);
+        } catch (err: any) {
+          logFn(`${ts} Error: ${input}: ${err.message}`);
+        }
+      }, delay);
+      timers.set(input, t);
+    });
+    handles.push(handle);
+  }
+
+  function shutdown(): void {
+    // Cancel pending debounce timers
+    for (const t of timers.values()) {
+      clearTimeout(t);
+    }
+    timers.clear();
+    // Close all watchers
+    for (const h of handles) {
+      h.close();
+    }
+  }
+
+  return { shutdown };
 }
 
 if (import.meta.main) {

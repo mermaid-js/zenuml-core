@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "bun:test";
 import { readFileSync, writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { resolve, join } from "node:path";
-import { extractZenumlBlocks } from "./zenuml";
+import { extractZenumlBlocks, startWatchMode } from "./zenuml";
 
 const CLI_PATH = resolve(import.meta.dir, "zenuml.ts");
 const FIXTURES_DIR = resolve(import.meta.dir, "../../test/fixtures/cli");
@@ -866,5 +866,222 @@ describe("zenuml CLI", () => {
     // Cleanup
     try { unlinkSync(outMd); } catch {}
     try { unlinkSync(outImg); } catch {}
+  });
+
+  // -------------------------------------------------------------------------
+  // Sprint 6: Watch mode tests
+  // -------------------------------------------------------------------------
+
+  // Test 1: -h contains -w, --watch
+  it("(w1) -h includes -w, --watch flag documentation", async () => {
+    const { stdout, exitCode } = await runCli(["-h"]);
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain("-w, --watch");
+  });
+
+  // Test 2: --watch --check -i file → exit 1
+  it("(w2) --watch --check exits 1 (incompatible flags)", async () => {
+    const inputPath = tmpFile("watch-check.zenuml");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode, stderr } = await runCli(["--watch", "--check", "-i", inputPath]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("incompatible");
+  });
+
+  // Test 3: --watch --parse -i file → exit 1
+  it("(w3) --watch --parse exits 1 (incompatible flags)", async () => {
+    const inputPath = tmpFile("watch-parse.zenuml");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode, stderr } = await runCli(["--watch", "--parse", "-i", inputPath]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("incompatible");
+  });
+
+  // Test 4: stdin + --watch → exit 1
+  it("(w4) --watch with stdin input exits 1 (incompatible)", async () => {
+    const { exitCode, stderr } = await runCli(["--watch", "-i", "-", "-o", "-"], {
+      stdin: SAMPLE_DSL,
+    });
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("incompatible");
+  });
+
+  // Test 5: 3 inputs, stub never fires → renderFn called exactly 3× (initial render, D3)
+  it("(w5) unit: 3 inputs, stub never fires → renderFn called exactly 3x (initial render)", async () => {
+    const calls: string[] = [];
+    const renderFn = async (p: string) => { calls.push(p); };
+
+    // Stub watchFn: never fires the handler
+    const watchFn = (_path: string, _handler: () => void) => ({ close: () => {} });
+
+    const handle = await startWatchMode(
+      ["a.zenuml", "b.zenuml", "c.zenuml"],
+      renderFn,
+      watchFn,
+      () => {},
+      0,
+    );
+    handle.shutdown();
+
+    expect(calls.length).toBe(3);
+    expect(calls).toContain("a.zenuml");
+    expect(calls).toContain("b.zenuml");
+    expect(calls).toContain("c.zenuml");
+  });
+
+  // Test 6: stub fires 3× with 0ms delay → renderFn called exactly 1× (debounce, D4)
+  it("(w6) unit: stub fires 3x rapidly with 0ms delay → renderFn called exactly 1x after debounce", async () => {
+    let handler: (() => void) | undefined;
+    const watchFn = (_path: string, h: () => void) => {
+      handler = h;
+      return { close: () => {} };
+    };
+
+    const renderCalls: string[] = [];
+    // renderFn counts calls after initial
+    let initialDone = false;
+    const renderFn = async (p: string) => {
+      if (!initialDone) { initialDone = true; return; }
+      renderCalls.push(p);
+    };
+
+    const handle = await startWatchMode(
+      ["single.zenuml"],
+      renderFn,
+      watchFn,
+      () => {},
+      0,
+    );
+
+    // Fire handler 3 times rapidly — all within the same event loop tick
+    handler!();
+    handler!();
+    handler!();
+
+    // Wait for the debounced callback to fire (delay=0, so next microtask/timer)
+    await new Promise((r) => setTimeout(r, 20));
+
+    handle.shutdown();
+
+    // Despite 3 fires, only 1 render should happen (debounced)
+    expect(renderCalls.length).toBe(1);
+  });
+
+  // Test 7: success → log matches /\[\d{2}:\d{2}:\d{2}\].*->/ (D5 success)
+  it("(w7) unit: success render logs timestamp and arrow", async () => {
+    const logs: string[] = [];
+    const logFn = (msg: string) => { logs.push(msg); };
+
+    const watchFn = (_path: string, _h: () => void) => ({ close: () => {} });
+    const renderFn = async (_p: string) => { /* success */ };
+
+    const handle = await startWatchMode(
+      ["ok.zenuml"],
+      renderFn,
+      watchFn,
+      logFn,
+      0,
+    );
+    handle.shutdown();
+
+    expect(logs.length).toBeGreaterThan(0);
+    const successLog = logs.find((l) => l.includes("->"));
+    expect(successLog).toBeDefined();
+    expect(successLog!).toMatch(/\[\d{2}:\d{2}:\d{2}\].*->/);
+  });
+
+  // Test 8: renderFn throws → log matches /\[\d{2}:\d{2}:\d{2}\] Error:.*:/ (D5 error)
+  it("(w8) unit: renderFn throws → log matches error pattern with timestamp", async () => {
+    const logs: string[] = [];
+    const logFn = (msg: string) => { logs.push(msg); };
+
+    const watchFn = (_path: string, _h: () => void) => ({ close: () => {} });
+    const renderFn = async (_p: string) => { throw new Error("render failed"); };
+
+    const handle = await startWatchMode(
+      ["bad.zenuml"],
+      renderFn,
+      watchFn,
+      logFn,
+      0,
+    );
+    handle.shutdown();
+
+    expect(logs.length).toBeGreaterThan(0);
+    const errorLog = logs.find((l) => l.includes("Error:"));
+    expect(errorLog).toBeDefined();
+    expect(errorLog!).toMatch(/\[\d{2}:\d{2}:\d{2}\] Error:.*:/);
+  });
+
+  // Test 9: md mode, stub fires once → md render 1×, single-file 0× (D6)
+  it("(w9) unit: md file uses renderMdFn, not renderFn", async () => {
+    let handler: (() => void) | undefined;
+    let closeCalled = false;
+    const watchFn = (_path: string, h: () => void) => {
+      handler = h;
+      return { close: () => { closeCalled = true; } };
+    };
+
+    const renderCalls: string[] = [];
+    const mdRenderCalls: string[] = [];
+
+    // For initial render, we track separately
+    let initialRenderCount = 0;
+    let initialMdCount = 0;
+
+    const renderFn = async (p: string) => { renderCalls.push(p); };
+    const renderMdFn = async (p: string) => { mdRenderCalls.push(p); };
+
+    const handle = await startWatchMode(
+      ["diagram.md"],
+      renderFn,
+      watchFn,
+      () => {},
+      0,
+      renderMdFn,
+    );
+
+    // Fire handler once
+    handler!();
+    await new Promise((r) => setTimeout(r, 20));
+
+    handle.shutdown();
+
+    // md file: renderFn should never be called, renderMdFn called for initial + 1 change
+    expect(renderCalls.length).toBe(0);
+    expect(mdRenderCalls.length).toBe(2); // 1 initial + 1 change
+  });
+
+  // Test 10: shutdown() → all stub watchers .close() called (D7)
+  it("(w10) unit: shutdown() calls .close() on all watchers", async () => {
+    const closeCallCounts: number[] = [];
+
+    const watchFn = (_path: string, _h: () => void) => {
+      const idx = closeCallCounts.length;
+      closeCallCounts.push(0);
+      return {
+        close: () => { closeCallCounts[idx]++; },
+      };
+    };
+
+    const renderFn = async (_p: string) => {};
+
+    const handle = await startWatchMode(
+      ["file1.zenuml", "file2.zenuml", "file3.zenuml"],
+      renderFn,
+      watchFn,
+      () => {},
+      0,
+    );
+
+    handle.shutdown();
+
+    // All 3 watchers should have been closed
+    expect(closeCallCounts.length).toBe(3);
+    for (const count of closeCallCounts) {
+      expect(count).toBe(1);
+    }
   });
 });
