@@ -41,7 +41,7 @@ Usage: zenuml [options]
 
 Render ZenUML DSL text to SVG or PNG.
 
-Options:
+Rendering:
   -i, --input <file>           Input file (use "-" for stdin; repeatable)
   -o, --output <file>          Output file (use "-" for stdout; default: <input>.svg)
   -e, --outputFormat <format>  Output format: "svg" (default) or "png"
@@ -50,10 +50,16 @@ Options:
   -t, --theme <name>           Theme name passed to renderer (e.g. "theme-default")
   -c, --configFile <file>      JSON config file with { theme, scale, backgroundColor, outputFormat }
   --md                         Markdown mode: render zenuml code blocks and produce output Markdown
+
+Validation:
   --check                      Validate syntax without rendering (exit 0 if valid, 1 if errors)
   --parse                      Parse input and output AST as JSON (exit 0 if valid, 1 if errors)
   --json                       Machine-readable JSON output for --check mode
+
+Batch & Watch:
   -w, --watch                  Watch input files and re-render on change (incompatible with --check, --parse, stdin)
+
+General:
   -q, --quiet                  Suppress non-error output
   -h, --help                   Show this help message
   -V, --version                Show version number
@@ -251,7 +257,7 @@ function parseArgs(argv: string[]): CliArgs {
         args.watch = true;
         break;
       default:
-        process.stderr.write(`Unknown option: ${arg}\n`);
+        process.stderr.write(`Unknown option: ${arg}\nRun "zenuml --help" for usage.\n`);
         process.exit(1);
     }
     i++;

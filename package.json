@@ -6,8 +6,14 @@
   "repository": {
     "url": "https://github.com/mermaid-js/zenuml-core"
   },
+  "files": [
+    "dist/",
+    "types/",
+    "src/cli/"
+  ],
   "scripts": {
     "dev": "vite dev --port 4000 --host 0.0.0.0",
+    "cli": "bun src/cli/zenuml.ts",
     "preview": "bun run --bun vite preview --port 4000 --host",
     "build:site": "bun run --bun vite build",
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
