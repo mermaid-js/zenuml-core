@@ -46,6 +46,9 @@
     "worker:deploy": "bun run build:site && bun run --bun wrangler deploy -e production",
     "worker:deploy:staging": "bun run build:site && bun run --bun wrangler deploy --env staging"
   },
+  "bin": {
+    "zenuml": "./src/cli/zenuml.ts"
+  },
   "main": "./dist/zenuml.js",
   "module": "./dist/zenuml.esm.mjs",
   "types": "./types/index.d.ts",
