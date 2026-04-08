@@ -288,7 +288,25 @@ function loadConfigFile(filePath: string): Record<string, unknown> {
   }
 }
 
-/** Rasterize an SVG string to PNG bytes using @napi-rs/canvas. */
+/** Shared Playwright browser instance — launched once, reused across renders. */
+let _browser: Awaited<ReturnType<typeof import("playwright-core")["chromium"]["launch"]>> | null = null;
+
+async function getPlaywrightBrowser() {
+  if (_browser) return _browser;
+  const { chromium } = await import("playwright-core");
+  _browser = await chromium.launch();
+  return _browser;
+}
+
+/** Shut down the shared browser (call before process exit). */
+async function closeBrowser() {
+  if (_browser) {
+    await _browser.close();
+    _browser = null;
+  }
+}
+
+/** Rasterize an SVG string to PNG bytes using headless Chromium (Playwright). */
 async function rasterizeToPng(
   svgString: string,
   svgWidth: number,
@@ -296,25 +314,34 @@ async function rasterizeToPng(
   scale: number,
   backgroundColor: string,
 ): Promise<Buffer> {
-  // Dynamic import so SVG-only runs don't need the native module loaded
-  const { createCanvas, Image } = await import("@napi-rs/canvas");
-  const canvasWidth = Math.round(svgWidth * scale);
-  const canvasHeight = Math.round(svgHeight * scale);
-  const canvas = createCanvas(canvasWidth, canvasHeight);
-  const ctx = canvas.getContext("2d");
+  const browser = await getPlaywrightBrowser();
+  const page = await browser.newPage({
+    viewport: {
+      width: Math.ceil(svgWidth),
+      height: Math.ceil(svgHeight),
+    },
+    deviceScaleFactor: scale,
+  });
 
-  // Fill background
-  if (backgroundColor && backgroundColor !== "transparent") {
-    ctx.fillStyle = backgroundColor;
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+  try {
+    const bgColor = backgroundColor && backgroundColor !== "transparent"
+      ? backgroundColor
+      : "transparent";
+    const html = `<!DOCTYPE html>
+<html><head><style>
+  html, body { margin: 0; padding: 0; background: ${bgColor}; overflow: hidden; }
+  svg { display: block; width: ${svgWidth}px; height: ${svgHeight}px; }
+</style></head><body>${svgString}</body></html>`;
+
+    await page.setContent(html, { waitUntil: "load" });
+    const png = await page.screenshot({
+      type: "png",
+      omitBackground: bgColor === "transparent",
+    });
+    return Buffer.from(png);
+  } finally {
+    await page.close();
   }
-
-  // Draw SVG onto canvas
-  const img = new Image();
-  img.src = Buffer.from(svgString, "utf-8");
-  ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
-
-  return canvas.toBuffer("image/png") as Buffer;
 }
 
 // ---------------------------------------------------------------------------
@@ -1160,5 +1187,5 @@ export async function startWatchMode(
 }
 
 if (import.meta.main) {
-  main();
+  main().finally(() => closeBrowser());
 }

@@ -94,6 +94,7 @@
     "marked": "^4.3.0",
     "pako": "^2.1.0",
     "pino": "^8.21.0",
+    "playwright-core": "^1.59.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tailwind-merge": "^3.4.0",
