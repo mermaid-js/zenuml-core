@@ -225,22 +225,6 @@ describe("zenuml CLI", () => {
   });
 
   // (l) Background color flag accepted, produces valid PNG (smoke test)
-  it("accepts -b backgroundColor and produces valid PNG", async () => {
-    const inputPath = tmpFile("bgcolor-test.zenuml");
-    const outputPath = tmpFile("bgcolor-test.png");
-    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
-
-    const { exitCode } = await runCli(["-i", inputPath, "-o", outputPath, "-e", "png", "-b", "red"]);
-    expect(exitCode).toBe(0);
-    expect(existsSync(outputPath)).toBe(true);
-
-    const buf = readFileSync(outputPath);
-    expect(buf[0]).toBe(0x89);
-    expect(buf[1]).toBe(0x50);
-    expect(buf[2]).toBe(0x4E);
-    expect(buf[3]).toBe(0x47);
-  });
-
   // (m) Config file merging with CLI flag override
   it("merges config file values and allows CLI flag to override", async () => {
     const inputPath = tmpFile("config-test.zenuml");
@@ -290,7 +274,6 @@ describe("zenuml CLI", () => {
     expect(exitCode).toBe(0);
     expect(stdout).toContain("-e, --outputFormat");
     expect(stdout).toContain("-s, --scale");
-    expect(stdout).toContain("-b, --backgroundColor");
     expect(stdout).toContain("-t, --theme");
     expect(stdout).toContain("-c, --configFile");
   });
@@ -423,12 +406,12 @@ describe("zenuml CLI", () => {
   });
 
   // (y) --check with rendering flags (-t, -s, -b) → exit 0, no rendering
-  it("--check silently ignores rendering flags (-t, -s, -b) and validates correctly", async () => {
+  it("--check silently ignores rendering flags (-t, -s) and validates correctly", async () => {
     const inputPath = tmpFile("check-render-flags.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
     const { exitCode, stderr } = await runCli([
-      "--check", "-i", inputPath, "-t", "theme-default", "-s", "3", "-b", "blue",
+      "--check", "-i", inputPath, "-t", "theme-default", "-s", "3",
     ]);
     expect(exitCode).toBe(0);
     expect(stderr).toBe("");

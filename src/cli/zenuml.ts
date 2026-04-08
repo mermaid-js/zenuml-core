@@ -47,9 +47,8 @@ Rendering:
   -o, --output <file>          Output file (use "-" for stdout; default: <input>.svg)
   -e, --outputFormat <format>  Output format: "svg" (default) or "png"
   -s, --scale <factor>         Pixel scale factor for PNG (default: 2; ignored for SVG)
-  -b, --backgroundColor <col>  Background color (default: "white" for PNG, "transparent" for SVG)
   -t, --theme <name>           Theme name passed to renderer (e.g. "theme-default")
-  -c, --configFile <file>      JSON config file with { theme, scale, backgroundColor, outputFormat }
+  -c, --configFile <file>      JSON config file with { theme, scale, outputFormat }
   --md                         Markdown mode: render zenuml code blocks and produce output Markdown
 
 Validation:
@@ -66,7 +65,7 @@ General:
   -V, --version                Show version number
 
 Config file values are overridden by CLI flags.
-Rendering flags (-o, -e, -t, -s, -b) are silently ignored in --check and --parse modes.
+Rendering flags (-o, -e, -t, -s) are silently ignored in --check and --parse modes.
 
 Examples:
   zenuml -i diagram.zenuml
@@ -175,7 +174,6 @@ interface CliArgs {
   output?: string;
   outputFormat?: string;
   scale?: number;
-  backgroundColor?: string;
   theme?: string;
   configFile?: string;
   check: boolean;
@@ -213,11 +211,6 @@ function parseArgs(argv: string[]): CliArgs {
       case "--scale":
         i++;
         args.scale = Number(argv[i]);
-        break;
-      case "-b":
-      case "--backgroundColor":
-        i++;
-        args.backgroundColor = argv[i];
         break;
       case "-t":
       case "--theme":
@@ -312,7 +305,6 @@ async function rasterizeToPng(
   svgWidth: number,
   svgHeight: number,
   scale: number,
-  backgroundColor: string,
 ): Promise<Buffer> {
   const browser = await getPlaywrightBrowser();
   const page = await browser.newPage({
@@ -324,20 +316,14 @@ async function rasterizeToPng(
   });
 
   try {
-    const bgColor = backgroundColor && backgroundColor !== "transparent"
-      ? backgroundColor
-      : "transparent";
     const html = `<!DOCTYPE html>
 <html><head><style>
-  html, body { margin: 0; padding: 0; background: ${bgColor}; overflow: hidden; }
+  html, body { margin: 0; padding: 0; background: white; overflow: hidden; }
   svg { display: block; width: ${svgWidth}px; height: ${svgHeight}px; }
 </style></head><body>${svgString}</body></html>`;
 
     await page.setContent(html, { waitUntil: "load" });
-    const png = await page.screenshot({
-      type: "png",
-      omitBackground: bgColor === "transparent",
-    });
+    const png = await page.screenshot({ type: "png" });
     return Buffer.from(png);
   } finally {
     await page.close();
@@ -675,8 +661,6 @@ async function main(): Promise<void> {
 
     // Effective render options
     const effectiveScale = args.scale ?? 2;
-    const effectiveBackgroundColor =
-      args.backgroundColor ?? (effectiveFormat === "png" ? "white" : "transparent");
     const effectiveTheme = args.theme;
     const renderOptions: RenderOptions = {};
     if (effectiveTheme) {
@@ -707,7 +691,7 @@ async function main(): Promise<void> {
       mkdirSync(imageDir, { recursive: true });
 
       if (effectiveFormat === "png") {
-        const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale, effectiveBackgroundColor);
+        const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale);
         writeFileSync(imageFilePath, pngBuffer);
       } else {
         writeFileSync(imageFilePath, svg, "utf-8");
@@ -756,14 +740,12 @@ async function main(): Promise<void> {
   // Config file merging: config file < CLI flags
   // ---------------------------------------------------------------------------
   let configScale: number | undefined;
-  let configBackgroundColor: string | undefined;
   let configTheme: string | undefined;
   let configOutputFormat: string | undefined;
 
   if (args.configFile) {
     const cfg = loadConfigFile(args.configFile);
     if (typeof cfg.scale === "number") configScale = cfg.scale;
-    if (typeof cfg.backgroundColor === "string") configBackgroundColor = cfg.backgroundColor;
     if (typeof cfg.theme === "string") configTheme = cfg.theme;
     if (typeof cfg.outputFormat === "string") configOutputFormat = cfg.outputFormat;
   }
@@ -785,7 +767,6 @@ async function main(): Promise<void> {
     const renderForWatch = async (inputArg: string): Promise<void> => {
       await renderOneFile(inputArg, args, {
         configScale,
-        configBackgroundColor,
         configTheme,
         configOutputFormat,
         multipleInputs,
@@ -832,8 +813,6 @@ async function main(): Promise<void> {
       const blocks = extractZenumlBlocks(mdContent);
 
       const effectiveScale = args.scale ?? configScale ?? 2;
-      const effectiveBackgroundColor =
-        args.backgroundColor ?? configBackgroundColor ?? (effectiveFormat === "png" ? "white" : "transparent");
       const effectiveTheme = args.theme ?? configTheme;
       const renderOptions: RenderOptions = {};
       if (effectiveTheme) {
@@ -852,7 +831,7 @@ async function main(): Promise<void> {
         mkdirSync(imageDir, { recursive: true });
 
         if (effectiveFormat === "png") {
-          const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale, effectiveBackgroundColor);
+          const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale);
           writeFileSync(imageFilePath, pngBuffer);
         } else {
           writeFileSync(imageFilePath, svg, "utf-8");
@@ -921,7 +900,6 @@ async function main(): Promise<void> {
     try {
       await renderOneFile(inputArg, args, {
         configScale,
-        configBackgroundColor,
         configTheme,
         configOutputFormat,
         multipleInputs,
@@ -949,7 +927,6 @@ async function renderOneFile(
   args: CliArgs,
   config: {
     configScale?: number;
-    configBackgroundColor?: string;
     configTheme?: string;
     configOutputFormat?: string;
     multipleInputs: boolean;
@@ -966,10 +943,6 @@ async function renderOneFile(
   }
 
   const effectiveScale = args.scale ?? config.configScale ?? 2;
-  const effectiveBackgroundColor =
-    args.backgroundColor ??
-    config.configBackgroundColor ??
-    (effectiveFormat === "png" ? "white" : "transparent");
   const effectiveTheme = args.theme ?? config.configTheme;
 
   // Read input
@@ -1022,7 +995,7 @@ async function renderOneFile(
 
   // Write output
   if (effectiveFormat === "png") {
-    const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale, effectiveBackgroundColor);
+    const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale);
     if (finalOutputPath === "-") {
       process.stdout.write(pngBuffer);
     } else {
