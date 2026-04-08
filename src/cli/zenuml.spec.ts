@@ -13,7 +13,7 @@ const SAMPLE_DSL = "A -> B: hello";
 async function runCli(
   args: string[],
   options?: { stdin?: string },
-): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+): Promise<{ stdout: string; stderr: string; exitCode: number; stdoutBytes?: Buffer }> {
   const proc = Bun.spawn(["bun", "run", CLI_PATH, ...args], {
     cwd: resolve(import.meta.dir, "../.."),
     stdout: "pipe",
@@ -28,12 +28,14 @@ async function runCli(
     proc.stdin.end();
   }
 
-  const [stdout, stderr] = await Promise.all([
-    new Response(proc.stdout).text(),
+  const [stdoutBuf, stderr] = await Promise.all([
+    new Response(proc.stdout).arrayBuffer(),
     new Response(proc.stderr).text(),
   ]);
   const exitCode = await proc.exited;
-  return { stdout, stderr, exitCode };
+  const stdoutBytes = Buffer.from(stdoutBuf);
+  const stdout = stdoutBytes.toString("utf-8");
+  return { stdout, stderr, exitCode, stdoutBytes };
 }
 
 // Track temp files for cleanup
@@ -153,5 +155,153 @@ describe("zenuml CLI", () => {
     const svg = readFileSync(expectedOutput, "utf-8");
     expect(svg).toContain('<svg xmlns=');
     expect(svg).toContain("</svg>");
+  });
+
+  // -------------------------------------------------------------------------
+  // Sprint 2: Output format, scale, background, theme, config file tests
+  // -------------------------------------------------------------------------
+
+  // (i) PNG output produces valid PNG header bytes (0x89 P N G)
+  it("produces valid PNG with correct header bytes when -e png is used", async () => {
+    const inputPath = tmpFile("png-test.zenuml");
+    const outputPath = tmpFile("png-test.png");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode } = await runCli(["-i", inputPath, "-o", outputPath, "-e", "png"]);
+    expect(exitCode).toBe(0);
+    expect(existsSync(outputPath)).toBe(true);
+
+    const buf = readFileSync(outputPath);
+    // PNG magic bytes: 0x89 0x50 0x4E 0x47
+    expect(buf[0]).toBe(0x89);
+    expect(buf[1]).toBe(0x50);
+    expect(buf[2]).toBe(0x4E);
+    expect(buf[3]).toBe(0x47);
+  });
+
+  // (j) Auto-format detection from .png output extension (no -e flag)
+  it("auto-detects PNG format from .png output extension without -e flag", async () => {
+    const inputPath = tmpFile("auto-png.zenuml");
+    const outputPath = tmpFile("auto-png.png");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode } = await runCli(["-i", inputPath, "-o", outputPath]);
+    expect(exitCode).toBe(0);
+    expect(existsSync(outputPath)).toBe(true);
+
+    const buf = readFileSync(outputPath);
+    // Should be PNG, not SVG
+    expect(buf[0]).toBe(0x89);
+    expect(buf[1]).toBe(0x50);
+    expect(buf[2]).toBe(0x4E);
+    expect(buf[3]).toBe(0x47);
+  });
+
+  // (k) Scale flag: PNG IHDR dimensions differ between --scale 1 and --scale 3
+  it("produces different IHDR dimensions for --scale 1 vs --scale 3", async () => {
+    const inputPath = tmpFile("scale-test.zenuml");
+    const outScale1 = tmpFile("scale1.png");
+    const outScale3 = tmpFile("scale3.png");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const r1 = await runCli(["-i", inputPath, "-o", outScale1, "-e", "png", "-s", "1"]);
+    expect(r1.exitCode).toBe(0);
+
+    const r3 = await runCli(["-i", inputPath, "-o", outScale3, "-e", "png", "-s", "3"]);
+    expect(r3.exitCode).toBe(0);
+
+    // Parse IHDR chunk: bytes 16-19 = width (big-endian), 20-23 = height (big-endian)
+    const buf1 = readFileSync(outScale1);
+    const buf3 = readFileSync(outScale3);
+
+    const width1 = buf1.readUInt32BE(16);
+    const height1 = buf1.readUInt32BE(20);
+    const width3 = buf3.readUInt32BE(16);
+    const height3 = buf3.readUInt32BE(20);
+
+    // scale 3 should be 3x scale 1
+    expect(width3).toBe(width1 * 3);
+    expect(height3).toBe(height1 * 3);
+  });
+
+  // (l) Background color flag accepted, produces valid PNG (smoke test)
+  it("accepts -b backgroundColor and produces valid PNG", async () => {
+    const inputPath = tmpFile("bgcolor-test.zenuml");
+    const outputPath = tmpFile("bgcolor-test.png");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode } = await runCli(["-i", inputPath, "-o", outputPath, "-e", "png", "-b", "red"]);
+    expect(exitCode).toBe(0);
+    expect(existsSync(outputPath)).toBe(true);
+
+    const buf = readFileSync(outputPath);
+    expect(buf[0]).toBe(0x89);
+    expect(buf[1]).toBe(0x50);
+    expect(buf[2]).toBe(0x4E);
+    expect(buf[3]).toBe(0x47);
+  });
+
+  // (m) Config file merging with CLI flag override
+  it("merges config file values and allows CLI flag to override", async () => {
+    const inputPath = tmpFile("config-test.zenuml");
+    const outputPath = tmpFile("config-test.png");
+    const configPath = tmpFile("config-test.json");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+    writeFileSync(configPath, JSON.stringify({ outputFormat: "svg", scale: 1 }), "utf-8");
+
+    // Config says SVG, but -e png overrides it → output should be PNG
+    const { exitCode } = await runCli(["-i", inputPath, "-o", outputPath, "-c", configPath, "-e", "png"]);
+    expect(exitCode).toBe(0);
+    expect(existsSync(outputPath)).toBe(true);
+
+    const buf = readFileSync(outputPath);
+    expect(buf[0]).toBe(0x89);
+    expect(buf[1]).toBe(0x50);
+    expect(buf[2]).toBe(0x4E);
+    expect(buf[3]).toBe(0x47);
+  });
+
+  // (n) Config file missing/invalid exits code 1 with error on stderr
+  it("exits with code 1 and error when config file is missing", async () => {
+    const inputPath = tmpFile("config-missing.zenuml");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode, stderr } = await runCli(["-i", inputPath, "-c", "nonexistent.json"]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("Error");
+    expect(stderr).toContain("config file");
+  });
+
+  it("exits with code 1 and error when config file has invalid JSON", async () => {
+    const inputPath = tmpFile("config-invalid.zenuml");
+    const configPath = tmpFile("config-invalid.json");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+    writeFileSync(configPath, "{ not valid json }", "utf-8");
+
+    const { exitCode, stderr } = await runCli(["-i", inputPath, "-c", configPath]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("Error");
+    expect(stderr).toContain("Invalid JSON");
+  });
+
+  // (o) Help text includes all new flags
+  it("help text documents all Sprint 2 flags (-e, -s, -b, -t, -c)", async () => {
+    const { stdout, exitCode } = await runCli(["-h"]);
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain("-e, --outputFormat");
+    expect(stdout).toContain("-s, --scale");
+    expect(stdout).toContain("-b, --backgroundColor");
+    expect(stdout).toContain("-t, --theme");
+    expect(stdout).toContain("-c, --configFile");
+  });
+
+  // (p) Invalid format exits with code 1
+  it("exits with code 1 for invalid output format", async () => {
+    const inputPath = tmpFile("bad-format.zenuml");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode, stderr } = await runCli(["-i", inputPath, "-e", "pdf"]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("Unsupported output format");
   });
 });
