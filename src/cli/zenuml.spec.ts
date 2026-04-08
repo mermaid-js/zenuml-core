@@ -47,7 +47,6 @@ function tmpFile(name: string): string {
 }
 
 // Ensure fixtures directory exists
-import { mkdirSync } from "node:fs";
 mkdirSync(FIXTURES_DIR, { recursive: true });
 
 afterEach(() => {
@@ -464,13 +463,15 @@ describe("zenuml CLI", () => {
     const { exitCode, stderr } = await runCli(["-i", globPattern, "-o", outDir]);
     expect(exitCode).toBe(0);
 
-    // Output files should exist in the output directory
-    // The files are relative to cwd, so the output mirrors the relative path
-    const relA = join(outDir, subDir.replace(resolve(import.meta.dir, "../..") + "/", ""), "a.svg").replace(
-      resolve(import.meta.dir, "../..") + "/", ""
-    );
+    // Output files should exist directly in the output directory
+    const outA = join(outDir, "a.svg");
+    const outB = join(outDir, "b.svg");
+    expect(existsSync(outA)).toBe(true);
+    expect(existsSync(outB)).toBe(true);
 
-    // Simpler check: just look for SVG files in outDir tree
+    const svgA = readFileSync(outA, "utf-8");
+    expect(svgA).toContain("<svg xmlns=");
+
     expect(stderr).toContain("Rendered 2 files (0 errors)");
     expect(stderr).toContain("Rendering");
 
@@ -515,17 +516,13 @@ describe("zenuml CLI", () => {
     mkdirSync(subDir, { recursive: true });
 
     const good = join(subDir, "good.zenuml");
-    const bad = join(subDir, "bad.zenuml");
+    const nonexistent = join(subDir, "nonexistent.zenuml");
     writeFileSync(good, "A -> B: hello", "utf-8");
-    writeFileSync(bad, "A -> B: hello", "utf-8");
 
-    // Make the bad file's output location unwritable by creating a directory
-    // where the output file would go — actually, simpler: use -i with a literal
-    // non-existent file alongside glob. We use two -i flags: one glob, one bad literal.
+    // Use a glob for the good file plus a literal non-existent file to trigger an error
     const globPattern = join(subDir, "good.zenuml");
-    const badLiteral = join(subDir, "nonexistent.zenuml");
 
-    const { exitCode, stderr } = await runCli(["-i", globPattern, "-i", badLiteral]);
+    const { exitCode, stderr } = await runCli(["-i", globPattern, "-i", nonexistent]);
     expect(exitCode).toBe(1);
     expect(stderr).toContain("1 errors");
     expect(stderr).toContain("Rendered 1 files");
