@@ -14,6 +14,7 @@
  */
 import { renderToSvg } from "@/svg/renderToSvg";
 import type { RenderOptions } from "@/svg/renderToSvg";
+import { setCanvasContext } from "@/positioning/WidthProviderFunc";
 import Parser from "@/parser/index.js";
 import { readFileSync, writeFileSync, mkdirSync, statSync, watch as fsWatch } from "node:fs";
 import { resolve, basename, extname, dirname, join, relative } from "node:path";
@@ -426,6 +427,18 @@ async function checkOne(input: string): Promise<FileCheckResult> {
 // ---------------------------------------------------------------------------
 
 async function main(): Promise<void> {
+  // Inject @napi-rs/canvas context for accurate text measurement in renderToSvg.
+  // Without this, WidthProviderOnCanvas falls back to character estimates which
+  // produces incorrect layout (wrong participant spacing and message positioning).
+  if (!globalThis.OffscreenCanvas && typeof document === "undefined") {
+    try {
+      const { createCanvas } = await import("@napi-rs/canvas");
+      setCanvasContext(createCanvas(1, 1).getContext("2d") as any);
+    } catch {
+      // If @napi-rs/canvas is unavailable, fall back to character estimates
+    }
+  }
+
   // Skip the first two entries (bun executable + script path).
   const rawArgs = process.argv.slice(2);
   const args = parseArgs(rawArgs);
