@@ -304,4 +304,179 @@ describe("zenuml CLI", () => {
     expect(exitCode).toBe(1);
     expect(stderr).toContain("Unsupported output format");
   });
+
+  // -------------------------------------------------------------------------
+  // Sprint 3: --check, --parse, --json modes
+  // -------------------------------------------------------------------------
+
+  // Invalid DSL that should trigger parse errors
+  const INVALID_DSL = "{{{{invalid syntax !@#$ }}}}";
+
+  // (q) --check valid → exit 0, empty stderr
+  it("--check with valid input exits 0 with empty stderr", async () => {
+    const inputPath = tmpFile("check-valid.zenuml");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode, stderr, stdout } = await runCli(["--check", "-i", inputPath]);
+    expect(exitCode).toBe(0);
+    expect(stderr).toBe("");
+  });
+
+  // (r) --check invalid → exit 1, stderr has line/column/message
+  it("--check with invalid input exits 1 with error details on stderr", async () => {
+    const inputPath = tmpFile("check-invalid.zenuml");
+    writeFileSync(inputPath, INVALID_DSL, "utf-8");
+
+    const { exitCode, stderr } = await runCli(["--check", "-i", inputPath]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("line");
+    expect(stderr).toContain("col");
+  });
+
+  // (s) --check multiple files (all valid) → exit 0
+  it("--check with multiple valid files exits 0", async () => {
+    const f1 = tmpFile("check-multi-v1.zenuml");
+    const f2 = tmpFile("check-multi-v2.zenuml");
+    writeFileSync(f1, "A -> B: hello", "utf-8");
+    writeFileSync(f2, "B -> C: world", "utf-8");
+
+    const { exitCode, stderr } = await runCli(["--check", "-i", f1, "-i", f2]);
+    expect(exitCode).toBe(0);
+    expect(stderr).toBe("");
+  });
+
+  // (t) --check multiple files (mixed) → exit 1, errors for invalid
+  it("--check with mixed valid/invalid files exits 1 with grouped errors", async () => {
+    const valid = tmpFile("check-mix-valid.zenuml");
+    const invalid = tmpFile("check-mix-invalid.zenuml");
+    writeFileSync(valid, "A -> B: hello", "utf-8");
+    writeFileSync(invalid, INVALID_DSL, "utf-8");
+
+    const { exitCode, stderr } = await runCli(["--check", "-i", valid, "-i", invalid]);
+    expect(exitCode).toBe(1);
+    // Errors should mention the invalid file
+    expect(stderr).toContain("check-mix-invalid.zenuml");
+    expect(stderr).toContain("line");
+  });
+
+  // (u) --check --json valid → exit 0, stdout JSON with pass: true
+  it("--check --json with valid input outputs JSON with pass: true", async () => {
+    const inputPath = tmpFile("check-json-valid.zenuml");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode, stdout } = await runCli(["--check", "--json", "-i", inputPath]);
+    expect(exitCode).toBe(0);
+    const results = JSON.parse(stdout);
+    expect(Array.isArray(results)).toBe(true);
+    expect(results.length).toBe(1);
+    expect(results[0].pass).toBe(true);
+    expect(results[0].errors).toEqual([]);
+  });
+
+  // (v) --check --json mixed → stdout JSON with per-file pass/fail
+  it("--check --json with mixed files outputs per-file results", async () => {
+    const valid = tmpFile("check-json-mix-v.zenuml");
+    const invalid = tmpFile("check-json-mix-i.zenuml");
+    writeFileSync(valid, "A -> B: hello", "utf-8");
+    writeFileSync(invalid, INVALID_DSL, "utf-8");
+
+    const { exitCode, stdout } = await runCli(["--check", "--json", "-i", valid, "-i", invalid]);
+    expect(exitCode).toBe(1);
+    const results = JSON.parse(stdout);
+    expect(results.length).toBe(2);
+    // First file should pass
+    expect(results[0].pass).toBe(true);
+    expect(results[0].file).toContain("check-json-mix-v.zenuml");
+    // Second file should fail with errors
+    expect(results[1].pass).toBe(false);
+    expect(results[1].file).toContain("check-json-mix-i.zenuml");
+    expect(results[1].errors.length).toBeGreaterThan(0);
+    expect(results[1].errors[0]).toHaveProperty("line");
+    expect(results[1].errors[0]).toHaveProperty("column");
+    expect(results[1].errors[0]).toHaveProperty("msg");
+  });
+
+  // (w) --parse valid → exit 0, stdout JSON with root structure (type/ruleName, children)
+  it("--parse with valid input outputs AST JSON with type/ruleName and children", async () => {
+    const inputPath = tmpFile("parse-valid.zenuml");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode, stdout, stderr } = await runCli(["--parse", "-i", inputPath]);
+    expect(exitCode).toBe(0);
+    const ast = JSON.parse(stdout);
+    expect(ast.type).toBe("rule");
+    expect(ast.ruleName).toBe("prog");
+    expect(ast.children).toBeDefined();
+    expect(Array.isArray(ast.children)).toBe(true);
+    expect(ast.children.length).toBeGreaterThan(0);
+  });
+
+  // (x) --parse invalid → exit 1, stderr errors
+  it("--parse with invalid input exits 1 with errors on stderr", async () => {
+    const inputPath = tmpFile("parse-invalid.zenuml");
+    writeFileSync(inputPath, INVALID_DSL, "utf-8");
+
+    const { exitCode, stderr, stdout } = await runCli(["--parse", "-i", inputPath]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("line");
+    expect(stderr).toContain("col");
+  });
+
+  // (y) --check with rendering flags (-t, -s, -b) → exit 0, no rendering
+  it("--check silently ignores rendering flags (-t, -s, -b) and validates correctly", async () => {
+    const inputPath = tmpFile("check-render-flags.zenuml");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode, stderr } = await runCli([
+      "--check", "-i", inputPath, "-t", "theme-default", "-s", "3", "-b", "blue",
+    ]);
+    expect(exitCode).toBe(0);
+    expect(stderr).toBe("");
+  });
+
+  // (z) --help has --check, --parse, --json
+  it("help text documents --check, --parse, and --json flags", async () => {
+    const { stdout, exitCode } = await runCli(["-h"]);
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain("--check");
+    expect(stdout).toContain("--parse");
+    expect(stdout).toContain("--json");
+  });
+
+  // (aa) --check --json with stdin uses <stdin> as file field
+  it("--check --json with stdin input uses '<stdin>' as file field", async () => {
+    const { exitCode, stdout } = await runCli(["--check", "--json", "-i", "-"], {
+      stdin: SAMPLE_DSL,
+    });
+    expect(exitCode).toBe(0);
+    const results = JSON.parse(stdout);
+    expect(results[0].file).toBe("<stdin>");
+    expect(results[0].pass).toBe(true);
+  });
+
+  // (ab) --parse AST has terminal nodes with text
+  it("--parse AST contains terminal nodes with text property", async () => {
+    const inputPath = tmpFile("parse-terminals.zenuml");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode, stdout } = await runCli(["--parse", "-i", inputPath]);
+    expect(exitCode).toBe(0);
+    const ast = JSON.parse(stdout);
+
+    // Walk the tree to find at least one terminal node
+    function findTerminal(node: any): any {
+      if (node.type === "terminal") return node;
+      if (node.children) {
+        for (const child of node.children) {
+          const found = findTerminal(child);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+    const terminal = findTerminal(ast);
+    expect(terminal).not.toBeNull();
+    expect(terminal.text).toBeDefined();
+    expect(typeof terminal.text).toBe("string");
+  });
 });
