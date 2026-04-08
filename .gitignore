@@ -55,3 +55,6 @@ npm-debug.log*
 /test-results
 *storybook.log
 storybook-static
+
+# Harness coordination files
+docs/harness/
