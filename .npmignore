@@ -33,4 +33,49 @@ yarn-error.log
 .npmignore
 .gitignore
 
+# Internal tooling dirs
+.agents/
+.claude/
+.kiro/
+skills/
+docs/
+scripts/
+e2e/
+playground/
+.storybook/
 
+# Other internal files
+AGENTS.md
+CLAUDE.md
+DEPLOYMENT.md
+IMPLEMENTATION_PLAN.md
+MCP-ASSISTANT-RULES.md
+TUTORIAL.md
+README_CN.md
+Dockerfile
+.dockerignore
+.devcontainer/
+.github/
+bunfig.toml
+wrangler.toml
+tailwind.config.js
+eslint.config.mjs
+playwright.config.ts
+tsconfig.app.json
+tsconfig.node.json
+tsconfig.test.json
+test-setup.ts
+test-compression.html
+test-mermaid-zenuml.html
+test-url-params.html
+embed.html
+renderer.html
+index.html
+iframe-container-demo/
+Integration/
+newsletter/
+antlr/
+bun.lock
+*.png
+*.snapshot.md
+firebase-debug.log
