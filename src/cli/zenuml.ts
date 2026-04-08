@@ -15,8 +15,8 @@
 import { renderToSvg } from "@/svg/renderToSvg";
 import type { RenderOptions } from "@/svg/renderToSvg";
 import Parser from "@/parser/index.js";
-import { readFileSync, writeFileSync } from "node:fs";
-import { resolve, basename, extname, dirname, join } from "node:path";
+import { readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
+import { resolve, basename, extname, dirname, join, relative } from "node:path";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -71,6 +71,49 @@ Examples:
   zenuml --parse -i diagram.zenuml
 `.trimStart();
   process.stdout.write(help);
+}
+
+// ---------------------------------------------------------------------------
+// Glob expansion
+// ---------------------------------------------------------------------------
+
+/** Check if a string contains glob metacharacters. */
+function isGlobPattern(s: string): boolean {
+  return /[*?\[]/.test(s);
+}
+
+/** Expand inputs: literal paths pass through; glob patterns are expanded.
+ *  Returns the expanded list. Throws if a glob pattern matches zero files. */
+function expandInputs(inputs: string[]): string[] {
+  const result: string[] = [];
+  for (const input of inputs) {
+    if (input === "-" || !isGlobPattern(input)) {
+      result.push(input);
+      continue;
+    }
+    // Glob expansion
+    const glob = new Bun.Glob(input);
+    const matches: string[] = [];
+    for (const match of glob.scanSync({ cwd: process.cwd(), onlyFiles: true })) {
+      matches.push(match);
+    }
+    if (matches.length === 0) {
+      throw new Error(`Glob pattern "${input}" matched no files`);
+    }
+    // Sort for deterministic order
+    matches.sort();
+    result.push(...matches);
+  }
+  return result;
+}
+
+/** Check if a path is an existing directory. */
+function isDirectory(p: string): boolean {
+  try {
+    return statSync(p).isDirectory();
+  } catch {
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -348,11 +391,22 @@ async function main(): Promise<void> {
   }
 
   // ---------------------------------------------------------------------------
+  // Glob expansion
+  // ---------------------------------------------------------------------------
+  let expandedInputs: string[];
+  try {
+    expandedInputs = expandInputs(args.inputs);
+  } catch (err: any) {
+    process.stderr.write(`Error: ${err.message}\n`);
+    process.exit(1);
+  }
+
+  // ---------------------------------------------------------------------------
   // --check mode: validate syntax without rendering
   // ---------------------------------------------------------------------------
   if (args.check) {
     const results: FileCheckResult[] = [];
-    for (const input of args.inputs) {
+    for (const input of expandedInputs) {
       results.push(await checkOne(input));
     }
 
@@ -363,11 +417,11 @@ async function main(): Promise<void> {
       // Human-readable output to stderr
       for (const r of results) {
         if (!r.pass) {
-          if (args.inputs.length > 1) {
+          if (expandedInputs.length > 1) {
             process.stderr.write(`${r.file}:\n`);
           }
           for (const e of r.errors) {
-            const prefix = args.inputs.length > 1 ? "  " : "";
+            const prefix = expandedInputs.length > 1 ? "  " : "";
             process.stderr.write(`${prefix}line ${e.line}, col ${e.column}: ${e.msg}\n`);
           }
         }
@@ -379,11 +433,14 @@ async function main(): Promise<void> {
   }
 
   // ---------------------------------------------------------------------------
-  // --parse mode: output AST as JSON
+  // --parse mode: output AST as JSON (single input only)
   // ---------------------------------------------------------------------------
   if (args.parse) {
-    // Only use the first input for parse mode
-    const input = args.inputs[0];
+    if (expandedInputs.length > 1) {
+      process.stderr.write("Error: --parse supports only a single input file.\n");
+      process.exit(1);
+    }
+    const input = expandedInputs[0];
     let code: string;
     try {
       code = await readCode(input);
@@ -411,11 +468,6 @@ async function main(): Promise<void> {
   }
 
   // ---------------------------------------------------------------------------
-  // Render mode (default) — only uses first input
-  // ---------------------------------------------------------------------------
-  const inputArg = args.inputs[0];
-
-  // ---------------------------------------------------------------------------
   // Config file merging: config file < CLI flags
   // ---------------------------------------------------------------------------
   let configScale: number | undefined;
@@ -431,36 +483,93 @@ async function main(): Promise<void> {
     if (typeof cfg.outputFormat === "string") configOutputFormat = cfg.outputFormat;
   }
 
-  // Resolve effective values: CLI flag > config > default
-  const outputPath = resolveOutput(inputArg, args.output);
-  const autoFormatFromExt = outputPath !== "-" && extname(outputPath).toLowerCase() === ".png" ? "png" : undefined;
-  const effectiveFormat = args.outputFormat ?? configOutputFormat ?? autoFormatFromExt ?? "svg";
-
-  // Validate format
-  if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
-    process.stderr.write(`Error: Unsupported output format: "${effectiveFormat}". Use "svg" or "png".\n`);
+  // ---------------------------------------------------------------------------
+  // Validate: -o as single file + multiple inputs → error
+  // ---------------------------------------------------------------------------
+  const multipleInputs = expandedInputs.length > 1;
+  if (multipleInputs && args.output && args.output !== "-" && !isDirectory(resolve(args.output))) {
+    // -o is a file path (not a directory) with multiple inputs
+    process.stderr.write("Error: -o must be a directory when multiple input files are provided.\n");
     process.exit(1);
   }
 
-  const effectiveScale = args.scale ?? configScale ?? 2;
+  // ---------------------------------------------------------------------------
+  // Render mode — iterate all expanded inputs
+  // ---------------------------------------------------------------------------
+  let rendered = 0;
+  let errors = 0;
+
+  for (const inputArg of expandedInputs) {
+    // Progress reporting
+    if (!args.quiet) {
+      const displayName = inputArg === "-" ? "<stdin>" : inputArg;
+      process.stderr.write(`Rendering ${displayName}...\n`);
+    }
+
+    try {
+      await renderOneFile(inputArg, args, {
+        configScale,
+        configBackgroundColor,
+        configTheme,
+        configOutputFormat,
+        multipleInputs,
+      });
+      rendered++;
+    } catch (err: any) {
+      errors++;
+      process.stderr.write(`Error: ${inputArg}: ${err.message}\n`);
+    }
+  }
+
+  // Summary line
+  if (!args.quiet && expandedInputs.length > 1) {
+    process.stderr.write(`Rendered ${rendered} files (${errors} errors)\n`);
+  }
+
+  if (errors > 0) {
+    process.exit(1);
+  }
+}
+
+/** Render a single input file to its output. Throws on failure. */
+async function renderOneFile(
+  inputArg: string,
+  args: CliArgs,
+  config: {
+    configScale?: number;
+    configBackgroundColor?: string;
+    configTheme?: string;
+    configOutputFormat?: string;
+    multipleInputs: boolean;
+  },
+): Promise<void> {
+  // Resolve effective values: CLI flag > config > default
+  const outputPath = resolveOutput(inputArg, args.output, ".svg", config.multipleInputs);
+  const autoFormatFromExt = outputPath !== "-" && extname(outputPath).toLowerCase() === ".png" ? "png" : undefined;
+  const effectiveFormat = args.outputFormat ?? config.configOutputFormat ?? autoFormatFromExt ?? "svg";
+
+  // Validate format
+  if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
+    throw new Error(`Unsupported output format: "${effectiveFormat}". Use "svg" or "png".`);
+  }
+
+  const effectiveScale = args.scale ?? config.configScale ?? 2;
   const effectiveBackgroundColor =
     args.backgroundColor ??
-    configBackgroundColor ??
+    config.configBackgroundColor ??
     (effectiveFormat === "png" ? "white" : "transparent");
-  const effectiveTheme = args.theme ?? configTheme;
+  const effectiveTheme = args.theme ?? config.configTheme;
 
   // Read input
   let code: string;
   if (inputArg === "-") {
-    // Read from stdin
     code = await readStdin();
   } else {
     const inputPath = resolve(inputArg);
     try {
       code = readFileSync(inputPath, "utf-8");
-    } catch (err: any) {
-      process.stderr.write(`Error: Cannot read input file: ${inputPath}\n`);
-      process.exit(1);
+    } catch {
+      throw new Error(`Cannot read input file: ${inputPath}`);
     }
   }
 
@@ -480,16 +589,23 @@ async function main(): Promise<void> {
     svgWidth = result.width;
     svgHeight = result.height;
   } catch (err: any) {
-    process.stderr.write(`Error: Failed to render diagram: ${err.message}\n`);
-    process.exit(1);
+    throw new Error(`Failed to render diagram: ${err.message}`);
   }
 
   // Determine final output path (adjust extension if format is png and no explicit -o)
   let finalOutputPath = outputPath;
-  if (effectiveFormat === "png" && finalOutputPath !== "-" && !args.output) {
-    // Auto-generated path: swap .svg extension for .png
-    const ext = extname(finalOutputPath);
-    finalOutputPath = finalOutputPath.slice(0, -ext.length) + ".png";
+  if (effectiveFormat === "png" && finalOutputPath !== "-") {
+    if (!args.output || isDirectory(resolve(args.output!))) {
+      // Auto-generated or directory-based path: swap extension for .png
+      const ext = extname(finalOutputPath);
+      finalOutputPath = finalOutputPath.slice(0, -ext.length) + ".png";
+    }
+  }
+
+  // Ensure output directory exists
+  if (finalOutputPath !== "-") {
+    const dir = dirname(finalOutputPath);
+    mkdirSync(dir, { recursive: true });
   }
 
   // Write output
@@ -503,9 +619,8 @@ async function main(): Promise<void> {
         if (!args.quiet) {
           process.stderr.write(`Wrote ${finalOutputPath}\n`);
         }
-      } catch (err: any) {
-        process.stderr.write(`Error: Cannot write output file: ${finalOutputPath}\n`);
-        process.exit(1);
+      } catch {
+        throw new Error(`Cannot write output file: ${finalOutputPath}`);
       }
     }
   } else {
@@ -518,17 +633,29 @@ async function main(): Promise<void> {
         if (!args.quiet) {
           process.stderr.write(`Wrote ${finalOutputPath}\n`);
         }
-      } catch (err: any) {
-        process.stderr.write(`Error: Cannot write output file: ${finalOutputPath}\n`);
-        process.exit(1);
+      } catch {
+        throw new Error(`Cannot write output file: ${finalOutputPath}`);
       }
     }
   }
 }
 
-function resolveOutput(input: string, output: string | undefined, defaultExt: string = ".svg"): string {
-  if (output !== undefined) return output === "-" ? "-" : resolve(output);
+function resolveOutput(input: string, output: string | undefined, defaultExt: string = ".svg", multipleInputs: boolean = false): string {
+  if (output !== undefined) {
+    if (output === "-") return "-";
+    const resolvedOutput = resolve(output);
+    if (isDirectory(resolvedOutput)) {
+      // -o is a directory: output inside it with path relative to cwd, swapped extension
+      if (input === "-") return "-"; // stdin + directory doesn't make sense, fall to stdout
+      const relPath = relative(process.cwd(), resolve(input));
+      const ext = extname(relPath);
+      const base = relPath.slice(0, relPath.length - ext.length);
+      return join(resolvedOutput, `${base}${defaultExt}`);
+    }
+    return resolvedOutput;
+  }
   if (input === "-") return "-"; // stdin without -o → stdout
+  // No -o: output adjacent to input with swapped extension
   const ext = extname(input);
   const base = basename(input, ext);
   const dir = dirname(resolve(input));
