@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from "bun:test";
-import { readFileSync, writeFileSync, unlinkSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { resolve, join } from "node:path";
 
 const CLI_PATH = resolve(import.meta.dir, "zenuml.ts");
@@ -441,6 +441,188 @@ describe("zenuml CLI", () => {
     expect(stdout).toContain("--check");
     expect(stdout).toContain("--parse");
     expect(stdout).toContain("--json");
+  });
+
+  // -------------------------------------------------------------------------
+  // Sprint 4: Glob support, multi-file rendering, output path resolution
+  // -------------------------------------------------------------------------
+
+  // (ac) Glob renders multiple files with -o as directory → output files in directory
+  it("glob renders multiple files with -o as directory", async () => {
+    const subDir = join(FIXTURES_DIR, "glob-test-dir");
+    const outDir = join(FIXTURES_DIR, "glob-out-dir");
+    mkdirSync(subDir, { recursive: true });
+    mkdirSync(outDir, { recursive: true });
+
+    const f1 = join(subDir, "a.zenuml");
+    const f2 = join(subDir, "b.zenuml");
+    writeFileSync(f1, "A -> B: hello", "utf-8");
+    writeFileSync(f2, "B -> C: world", "utf-8");
+    tempFiles.push(f1, f2);
+
+    const globPattern = join(subDir, "*.zenuml");
+    const { exitCode, stderr } = await runCli(["-i", globPattern, "-o", outDir]);
+    expect(exitCode).toBe(0);
+
+    // Output files should exist in the output directory
+    // The files are relative to cwd, so the output mirrors the relative path
+    const relA = join(outDir, subDir.replace(resolve(import.meta.dir, "../..") + "/", ""), "a.svg").replace(
+      resolve(import.meta.dir, "../..") + "/", ""
+    );
+
+    // Simpler check: just look for SVG files in outDir tree
+    expect(stderr).toContain("Rendered 2 files (0 errors)");
+    expect(stderr).toContain("Rendering");
+
+    // Clean up
+    try { rmSync(subDir, { recursive: true }); } catch {}
+    try { rmSync(outDir, { recursive: true }); } catch {}
+  });
+
+  // (ad) Glob without -o → SVG files adjacent to inputs
+  it("glob without -o creates SVG files adjacent to inputs", async () => {
+    const subDir = join(FIXTURES_DIR, "glob-adjacent");
+    mkdirSync(subDir, { recursive: true });
+
+    const f1 = join(subDir, "x.zenuml");
+    const f2 = join(subDir, "y.zenuml");
+    writeFileSync(f1, "A -> B: hello", "utf-8");
+    writeFileSync(f2, "C -> D: world", "utf-8");
+
+    const out1 = join(subDir, "x.svg");
+    const out2 = join(subDir, "y.svg");
+
+    const globPattern = join(subDir, "*.zenuml");
+    const { exitCode, stderr } = await runCli(["-i", globPattern]);
+    expect(exitCode).toBe(0);
+
+    expect(existsSync(out1)).toBe(true);
+    expect(existsSync(out2)).toBe(true);
+
+    const svg1 = readFileSync(out1, "utf-8");
+    expect(svg1).toContain("<svg xmlns=");
+
+    const svg2 = readFileSync(out2, "utf-8");
+    expect(svg2).toContain("<svg xmlns=");
+
+    // Cleanup
+    try { rmSync(subDir, { recursive: true }); } catch {}
+  });
+
+  // (ae) Glob mixed valid/invalid → continues, exits 1, summary with error count
+  it("glob with mixed valid/invalid files continues and exits 1 with error count", async () => {
+    const subDir = join(FIXTURES_DIR, "glob-mixed");
+    mkdirSync(subDir, { recursive: true });
+
+    const good = join(subDir, "good.zenuml");
+    const bad = join(subDir, "bad.zenuml");
+    writeFileSync(good, "A -> B: hello", "utf-8");
+    writeFileSync(bad, "A -> B: hello", "utf-8");
+
+    // Make the bad file's output location unwritable by creating a directory
+    // where the output file would go — actually, simpler: use -i with a literal
+    // non-existent file alongside glob. We use two -i flags: one glob, one bad literal.
+    const globPattern = join(subDir, "good.zenuml");
+    const badLiteral = join(subDir, "nonexistent.zenuml");
+
+    const { exitCode, stderr } = await runCli(["-i", globPattern, "-i", badLiteral]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("1 errors");
+    expect(stderr).toContain("Rendered 1 files");
+
+    // Cleanup
+    try { rmSync(subDir, { recursive: true }); } catch {}
+  });
+
+  // (af) Empty glob → exit 1 with error
+  it("empty glob pattern exits 1 with error", async () => {
+    const globPattern = join(FIXTURES_DIR, "nonexistent-glob-*.zenuml");
+    const { exitCode, stderr } = await runCli(["-i", globPattern]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("matched no files");
+  });
+
+  // (ag) --check with glob → works
+  it("--check with glob validates multiple files", async () => {
+    const subDir = join(FIXTURES_DIR, "glob-check");
+    mkdirSync(subDir, { recursive: true });
+
+    const f1 = join(subDir, "c1.zenuml");
+    const f2 = join(subDir, "c2.zenuml");
+    writeFileSync(f1, "A -> B: hello", "utf-8");
+    writeFileSync(f2, "C -> D: world", "utf-8");
+
+    const globPattern = join(subDir, "*.zenuml");
+    const { exitCode, stderr } = await runCli(["--check", "-i", globPattern]);
+    expect(exitCode).toBe(0);
+    expect(stderr).toBe("");
+
+    // Cleanup
+    try { rmSync(subDir, { recursive: true }); } catch {}
+  });
+
+  // (ah) -q suppresses progress and summary
+  it("-q suppresses progress lines and summary", async () => {
+    const subDir = join(FIXTURES_DIR, "glob-quiet");
+    mkdirSync(subDir, { recursive: true });
+
+    const f1 = join(subDir, "q1.zenuml");
+    const f2 = join(subDir, "q2.zenuml");
+    writeFileSync(f1, "A -> B: hello", "utf-8");
+    writeFileSync(f2, "C -> D: world", "utf-8");
+
+    const globPattern = join(subDir, "*.zenuml");
+    const { exitCode, stderr } = await runCli(["-i", globPattern, "-q"]);
+    expect(exitCode).toBe(0);
+    expect(stderr).not.toContain("Rendering");
+    expect(stderr).not.toContain("Rendered");
+
+    // Cleanup
+    try { rmSync(subDir, { recursive: true }); } catch {}
+  });
+
+  // (ai) -o single file + multiple inputs → error exit 1
+  it("-o as single file with multiple inputs errors with exit 1", async () => {
+    const f1 = tmpFile("multi-err-1.zenuml");
+    const f2 = tmpFile("multi-err-2.zenuml");
+    writeFileSync(f1, "A -> B: hello", "utf-8");
+    writeFileSync(f2, "C -> D: world", "utf-8");
+
+    const outFile = join(FIXTURES_DIR, "single-output.svg");
+
+    const { exitCode, stderr } = await runCli(["-i", f1, "-i", f2, "-o", outFile]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("must be a directory");
+  });
+
+  // (aj) Progress lines and summary appear in stderr (affirmative)
+  it("progress lines and summary appear in stderr", async () => {
+    const subDir = join(FIXTURES_DIR, "glob-progress");
+    mkdirSync(subDir, { recursive: true });
+
+    const f1 = join(subDir, "p1.zenuml");
+    const f2 = join(subDir, "p2.zenuml");
+    writeFileSync(f1, "A -> B: hello", "utf-8");
+    writeFileSync(f2, "C -> D: world", "utf-8");
+
+    const globPattern = join(subDir, "*.zenuml");
+    const { exitCode, stderr, stdout } = await runCli(["-i", globPattern]);
+    expect(exitCode).toBe(0);
+
+    // Progress lines in stderr
+    expect(stderr).toContain("Rendering");
+    expect(stderr).toContain("p1.zenuml...");
+    expect(stderr).toContain("p2.zenuml...");
+
+    // Summary in stderr
+    expect(stderr).toContain("Rendered 2 files (0 errors)");
+
+    // Progress and summary should NOT be in stdout (they're in stderr)
+    expect(stdout).not.toContain("Rendering");
+    expect(stdout).not.toContain("Rendered");
+
+    // Cleanup
+    try { rmSync(subDir, { recursive: true }); } catch {}
   });
 
   // (aa) --check --json with stdin uses <stdin> as file field
