@@ -38,8 +38,8 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
         run: bun install
-      - name: Install Playwright browsers
-        run: bun run pw:install
+      - name: Install Playwright Chromium for CLI PNG tests
+        run: npx playwright-core install --with-deps chromium
       - name: Run tests
         run: bun run test --run
 
