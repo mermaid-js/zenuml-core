@@ -17,7 +17,7 @@ import type { RenderOptions } from "@/svg/renderToSvg";
 import { setCanvasContext } from "@/positioning/WidthProviderFunc";
 import Parser from "@/parser/index.js";
 import { readFileSync, writeFileSync, mkdirSync, statSync, watch as fsWatch } from "node:fs";
-import { resolve, basename, extname, dirname, join, relative } from "node:path";
+import { resolve, basename, extname, dirname, join } from "node:path";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -128,7 +128,7 @@ export function extractZenumlBlocks(md: string): ZenumlBlock[] {
 
 /** Check if a string contains glob metacharacters. */
 function isGlobPattern(s: string): boolean {
-  return /[*?\[]/.test(s);
+  return /[*?[]/.test(s);
 }
 
 /** Expand inputs: literal paths pass through; glob patterns are expanded.
@@ -780,7 +780,7 @@ async function main(): Promise<void> {
       let mdContent: string;
       try {
         mdContent = readFileSync(resolve(inputArg), "utf-8");
-      } catch (err: any) {
+      } catch {
         throw new Error(`Cannot read input file: ${resolve(inputArg)}`);
       }
 
@@ -933,7 +933,7 @@ async function renderOneFile(
   },
 ): Promise<void> {
   // Resolve effective values: CLI flag > config > default
-  const outputPath = resolveOutput(inputArg, args.output, ".svg", config.multipleInputs);
+  const outputPath = resolveOutput(inputArg, args.output, ".svg");
   const autoFormatFromExt = outputPath !== "-" && extname(outputPath).toLowerCase() === ".png" ? "png" : undefined;
   const effectiveFormat = args.outputFormat ?? config.configOutputFormat ?? autoFormatFromExt ?? "svg";
 
@@ -1025,7 +1025,7 @@ async function renderOneFile(
   }
 }
 
-function resolveOutput(input: string, output: string | undefined, defaultExt: string = ".svg", multipleInputs: boolean = false): string {
+function resolveOutput(input: string, output: string | undefined, defaultExt: string = ".svg"): string {
   if (output !== undefined) {
     if (output === "-") return "-";
     const resolvedOutput = resolve(output);
