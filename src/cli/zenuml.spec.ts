@@ -56,7 +56,7 @@ mkdirSync(FIXTURES_DIR, { recursive: true });
 
 afterEach(() => {
   for (const f of tempFiles) {
-    try { unlinkSync(f); } catch {}
+    try { unlinkSync(f); } catch { /* ignore */ }
   }
   tempFiles.length = 0;
 });
@@ -304,7 +304,7 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("check-valid.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stderr, stdout } = await runCli(["--check", "-i", inputPath]);
+    const { exitCode, stderr } = await runCli(["--check", "-i", inputPath]);
     expect(exitCode).toBe(0);
     expect(stderr).toBe("");
   });
@@ -388,7 +388,7 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("parse-valid.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stdout, stderr } = await runCli(["--parse", "-i", inputPath]);
+    const { exitCode, stdout } = await runCli(["--parse", "-i", inputPath]);
     expect(exitCode).toBe(0);
     const ast = JSON.parse(stdout);
     expect(ast.type).toBe("rule");
@@ -403,7 +403,7 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("parse-invalid.zenuml");
     writeFileSync(inputPath, INVALID_DSL, "utf-8");
 
-    const { exitCode, stderr, stdout } = await runCli(["--parse", "-i", inputPath]);
+    const { exitCode, stderr } = await runCli(["--parse", "-i", inputPath]);
     expect(exitCode).toBe(1);
     expect(stderr).toContain("line");
     expect(stderr).toContain("col");
@@ -464,8 +464,8 @@ describe("zenuml CLI", () => {
     expect(stderr).toContain("Rendering");
 
     // Clean up
-    try { rmSync(subDir, { recursive: true }); } catch {}
-    try { rmSync(outDir, { recursive: true }); } catch {}
+    try { rmSync(subDir, { recursive: true }); } catch { /* ignore */ }
+    try { rmSync(outDir, { recursive: true }); } catch { /* ignore */ }
   });
 
   // (ad) Glob without -o → SVG files adjacent to inputs
@@ -482,7 +482,7 @@ describe("zenuml CLI", () => {
     const out2 = join(subDir, "y.svg");
 
     const globPattern = join(subDir, "*.zenuml");
-    const { exitCode, stderr } = await runCli(["-i", globPattern]);
+    const { exitCode } = await runCli(["-i", globPattern]);
     expect(exitCode).toBe(0);
 
     expect(existsSync(out1)).toBe(true);
@@ -495,7 +495,7 @@ describe("zenuml CLI", () => {
     expect(svg2).toContain("<svg xmlns=");
 
     // Cleanup
-    try { rmSync(subDir, { recursive: true }); } catch {}
+    try { rmSync(subDir, { recursive: true }); } catch { /* ignore */ }
   });
 
   // (ae) Glob mixed valid/invalid → continues, exits 1, summary with error count
@@ -516,7 +516,7 @@ describe("zenuml CLI", () => {
     expect(stderr).toContain("Rendered 1 files");
 
     // Cleanup
-    try { rmSync(subDir, { recursive: true }); } catch {}
+    try { rmSync(subDir, { recursive: true }); } catch { /* ignore */ }
   });
 
   // (af) Empty glob → exit 1 with error
@@ -543,7 +543,7 @@ describe("zenuml CLI", () => {
     expect(stderr).toBe("");
 
     // Cleanup
-    try { rmSync(subDir, { recursive: true }); } catch {}
+    try { rmSync(subDir, { recursive: true }); } catch { /* ignore */ }
   });
 
   // (ah) -q suppresses progress and summary
@@ -563,7 +563,7 @@ describe("zenuml CLI", () => {
     expect(stderr).not.toContain("Rendered");
 
     // Cleanup
-    try { rmSync(subDir, { recursive: true }); } catch {}
+    try { rmSync(subDir, { recursive: true }); } catch { /* ignore */ }
   });
 
   // (ai) -o single file + multiple inputs → error exit 1
@@ -607,7 +607,7 @@ describe("zenuml CLI", () => {
     expect(stdout).not.toContain("Rendered");
 
     // Cleanup
-    try { rmSync(subDir, { recursive: true }); } catch {}
+    try { rmSync(subDir, { recursive: true }); } catch { /* ignore */ }
   });
 
   // (aa) --check --json with stdin uses <stdin> as file field
@@ -709,7 +709,7 @@ describe("zenuml CLI", () => {
     const md = `# Docs\n\n\`\`\`zenuml\nA -> B: hello\n\`\`\`\n\nSome text.\n\n\`\`\`zenuml\nB -> C: world\n\`\`\`\n`;
     writeFileSync(inputPath, md, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["-i", inputPath]);
+    const { exitCode } = await runCli(["-i", inputPath]);
     expect(exitCode).toBe(0);
     expect(existsSync(imgA)).toBe(true);
     expect(existsSync(imgB)).toBe(true);
@@ -851,8 +851,8 @@ describe("zenuml CLI", () => {
     expect(outputMd).toContain("place-test-zenuml-0.svg");
 
     // Cleanup
-    try { unlinkSync(outMd); } catch {}
-    try { unlinkSync(outImg); } catch {}
+    try { unlinkSync(outMd); } catch { /* ignore */ }
+    try { unlinkSync(outImg); } catch { /* ignore */ }
   });
 
   // -------------------------------------------------------------------------
@@ -901,7 +901,7 @@ describe("zenuml CLI", () => {
     const renderFn = async (p: string) => { calls.push(p); };
 
     // Stub watchFn: never fires the handler
-    const watchFn = (_path: string, _handler: () => void) => ({ close: () => {} });
+    const watchFn = () => ({ close: () => {} });
 
     const handle = await startWatchMode(
       ["a.zenuml", "b.zenuml", "c.zenuml"],
@@ -921,7 +921,7 @@ describe("zenuml CLI", () => {
   // Test 6: stub fires 3× with 0ms delay → renderFn called exactly 1× (debounce, D4)
   it("(w6) unit: stub fires 3x rapidly with 0ms delay → renderFn called exactly 1x after debounce", async () => {
     let handler: (() => void) | undefined;
-    const watchFn = (_path: string, h: () => void) => {
+    const watchFn = (_: string, h: () => void) => {
       handler = h;
       return { close: () => {} };
     };
@@ -961,8 +961,8 @@ describe("zenuml CLI", () => {
     const logs: string[] = [];
     const logFn = (msg: string) => { logs.push(msg); };
 
-    const watchFn = (_path: string, _h: () => void) => ({ close: () => {} });
-    const renderFn = async (_p: string) => { /* success */ };
+    const watchFn = () => ({ close: () => {} });
+    const renderFn = async () => { /* success */ };
 
     const handle = await startWatchMode(
       ["ok.zenuml"],
@@ -984,8 +984,8 @@ describe("zenuml CLI", () => {
     const logs: string[] = [];
     const logFn = (msg: string) => { logs.push(msg); };
 
-    const watchFn = (_path: string, _h: () => void) => ({ close: () => {} });
-    const renderFn = async (_p: string) => { throw new Error("render failed"); };
+    const watchFn = () => ({ close: () => {} });
+    const renderFn = async () => { throw new Error("render failed"); };
 
     const handle = await startWatchMode(
       ["bad.zenuml"],
@@ -1005,18 +1005,13 @@ describe("zenuml CLI", () => {
   // Test 9: md mode, stub fires once → md render 1×, single-file 0× (D6)
   it("(w9) unit: md file uses renderMdFn, not renderFn", async () => {
     let handler: (() => void) | undefined;
-    let closeCalled = false;
-    const watchFn = (_path: string, h: () => void) => {
+    const watchFn = (_: string, h: () => void) => {
       handler = h;
-      return { close: () => { closeCalled = true; } };
+      return { close: () => {} };
     };
 
     const renderCalls: string[] = [];
     const mdRenderCalls: string[] = [];
-
-    // For initial render, we track separately
-    let initialRenderCount = 0;
-    let initialMdCount = 0;
 
     const renderFn = async (p: string) => { renderCalls.push(p); };
     const renderMdFn = async (p: string) => { mdRenderCalls.push(p); };
@@ -1045,7 +1040,7 @@ describe("zenuml CLI", () => {
   it("(w10) unit: shutdown() calls .close() on all watchers", async () => {
     const closeCallCounts: number[] = [];
 
-    const watchFn = (_path: string, _h: () => void) => {
+    const watchFn = () => {
       const idx = closeCallCounts.length;
       closeCallCounts.push(0);
       return {
@@ -1053,7 +1048,7 @@ describe("zenuml CLI", () => {
       };
     };
 
-    const renderFn = async (_p: string) => {};
+    const renderFn = async () => {};
 
     const handle = await startWatchMode(
       ["file1.zenuml", "file2.zenuml", "file3.zenuml"],
@@ -1131,7 +1126,7 @@ describe("zenuml CLI — PNG snapshots", () => {
 
   afterEach(() => {
     for (const f of tempPngs) {
-      try { unlinkSync(f); } catch {}
+      try { unlinkSync(f); } catch { /* ignore */ }
     }
     tempPngs.length = 0;
   });
