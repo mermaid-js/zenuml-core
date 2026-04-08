@@ -9,9 +9,12 @@
  *   zenuml -i diagram.zenuml -e png       # writes diagram.png
  *   zenuml -i - -o -                      # stdin → stdout
  *   cat diagram.zenuml | zenuml -i - -o - # pipe mode
+ *   zenuml --check -i diagram.zenuml      # validate syntax (exit 0 = valid)
+ *   zenuml --parse -i diagram.zenuml      # output AST as JSON
  */
 import { renderToSvg } from "@/svg/renderToSvg";
 import type { RenderOptions } from "@/svg/renderToSvg";
+import Parser from "@/parser/index.js";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve, basename, extname, dirname, join } from "node:path";
 
@@ -39,18 +42,22 @@ Usage: zenuml [options]
 Render ZenUML DSL text to SVG or PNG.
 
 Options:
-  -i, --input <file>           Input file (use "-" for stdin)
+  -i, --input <file>           Input file (use "-" for stdin; repeatable)
   -o, --output <file>          Output file (use "-" for stdout; default: <input>.svg)
   -e, --outputFormat <format>  Output format: "svg" (default) or "png"
   -s, --scale <factor>         Pixel scale factor for PNG (default: 2; ignored for SVG)
   -b, --backgroundColor <col>  Background color (default: "white" for PNG, "transparent" for SVG)
   -t, --theme <name>           Theme name passed to renderer (e.g. "theme-default")
   -c, --configFile <file>      JSON config file with { theme, scale, backgroundColor, outputFormat }
+  --check                      Validate syntax without rendering (exit 0 if valid, 1 if errors)
+  --parse                      Parse input and output AST as JSON (exit 0 if valid, 1 if errors)
+  --json                       Machine-readable JSON output for --check mode
   -q, --quiet                  Suppress non-error output
   -h, --help                   Show this help message
   -V, --version                Show version number
 
 Config file values are overridden by CLI flags.
+Rendering flags (-o, -e, -t, -s, -b) are silently ignored in --check and --parse modes.
 
 Examples:
   zenuml -i diagram.zenuml
@@ -59,6 +66,9 @@ Examples:
   zenuml -i diagram.zenuml -e png -s 3
   zenuml -i diagram.zenuml -c config.json
   cat diagram.zenuml | zenuml -i - -o -
+  zenuml --check -i file1.zenuml -i file2.zenuml
+  zenuml --check --json -i file1.zenuml -i file2.zenuml
+  zenuml --parse -i diagram.zenuml
 `.trimStart();
   process.stdout.write(help);
 }
@@ -68,20 +78,23 @@ Examples:
 // ---------------------------------------------------------------------------
 
 interface CliArgs {
-  input?: string;
+  inputs: string[];
   output?: string;
   outputFormat?: string;
   scale?: number;
   backgroundColor?: string;
   theme?: string;
   configFile?: string;
+  check: boolean;
+  parse: boolean;
+  json: boolean;
   quiet: boolean;
   help: boolean;
   version: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { quiet: false, help: false, version: false };
+  const args: CliArgs = { inputs: [], check: false, parse: false, json: false, quiet: false, help: false, version: false };
   let i = 0;
   while (i < argv.length) {
     const arg = argv[i];
@@ -89,7 +102,7 @@ function parseArgs(argv: string[]): CliArgs {
       case "-i":
       case "--input":
         i++;
-        args.input = argv[i];
+        args.inputs.push(argv[i]);
         break;
       case "-o":
       case "--output":
@@ -120,6 +133,15 @@ function parseArgs(argv: string[]): CliArgs {
       case "--configFile":
         i++;
         args.configFile = argv[i];
+        break;
+      case "--check":
+        args.check = true;
+        break;
+      case "--parse":
+        args.parse = true;
+        break;
+      case "--json":
+        args.json = true;
         break;
       case "-q":
       case "--quiet":
@@ -193,6 +215,115 @@ async function rasterizeToPng(
   return canvas.toBuffer("image/png") as Buffer;
 }
 
+// ---------------------------------------------------------------------------
+// AST Serializer — converts ANTLR parse tree to JSON-safe plain object
+// ---------------------------------------------------------------------------
+
+interface AstNode {
+  type: string;
+  ruleName?: string;
+  text?: string;
+  children?: AstNode[];
+}
+
+/** Get rule names from the parser embedded in a context node. */
+function getRuleNames(ctx: any): string[] | undefined {
+  return ctx?.parser?.ruleNames;
+}
+
+/** Serialize an ANTLR parse tree node to a JSON-safe object. */
+function serializeParseTree(node: any): AstNode {
+  if (!node) return { type: "null" };
+
+  // Terminal node (leaf token)
+  if (node.symbol !== undefined) {
+    return {
+      type: "terminal",
+      text: node.getText(),
+    };
+  }
+
+  // Parser rule context node
+  const ruleNames = getRuleNames(node);
+  const ruleName = ruleNames && node.ruleIndex !== undefined
+    ? ruleNames[node.ruleIndex]
+    : undefined;
+
+  const result: AstNode = {
+    type: "rule",
+  };
+  if (ruleName) {
+    result.ruleName = ruleName;
+  }
+
+  const children = node.children;
+  if (children && children.length > 0) {
+    result.children = children.map((child: any) => serializeParseTree(child));
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Check mode — validate syntax without rendering
+// ---------------------------------------------------------------------------
+
+interface FileCheckResult {
+  file: string;
+  pass: boolean;
+  errors: Array<{ line: number; column: number; msg: string }>;
+}
+
+/** Read code from a file path or stdin ("-"). */
+async function readCode(input: string): Promise<string> {
+  if (input === "-") {
+    return readStdin();
+  }
+  const inputPath = resolve(input);
+  try {
+    return readFileSync(inputPath, "utf-8");
+  } catch {
+    throw new Error(`Cannot read input file: ${inputPath}`);
+  }
+}
+
+/** Parse one file/input and return check result. Clears Parser.ErrorDetails before each parse. */
+async function checkOne(input: string): Promise<FileCheckResult> {
+  const fileName = input === "-" ? "<stdin>" : input;
+  let code: string;
+  try {
+    code = await readCode(input);
+  } catch (err: any) {
+    return {
+      file: fileName,
+      pass: false,
+      errors: [{ line: 0, column: 0, msg: err.message }],
+    };
+  }
+
+  // Clear accumulated errors before parsing
+  Parser.Errors.length = 0;
+  Parser.ErrorDetails.length = 0;
+
+  Parser.RootContext(code);
+
+  const errors = Parser.ErrorDetails.map((e: any) => ({
+    line: e.line,
+    column: e.column,
+    msg: e.msg,
+  }));
+
+  return {
+    file: fileName,
+    pass: errors.length === 0,
+    errors,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
 async function main(): Promise<void> {
   // Skip the first two entries (bun executable + script path).
   const rawArgs = process.argv.slice(2);
@@ -211,10 +342,78 @@ async function main(): Promise<void> {
   }
 
   // Require input
-  if (!args.input) {
+  if (args.inputs.length === 0) {
     process.stderr.write("Error: -i/--input is required. Use -h for help.\n");
     process.exit(1);
   }
+
+  // ---------------------------------------------------------------------------
+  // --check mode: validate syntax without rendering
+  // ---------------------------------------------------------------------------
+  if (args.check) {
+    const results: FileCheckResult[] = [];
+    for (const input of args.inputs) {
+      results.push(await checkOne(input));
+    }
+
+    if (args.json) {
+      // Machine-readable JSON output to stdout
+      process.stdout.write(JSON.stringify(results, null, 2) + "\n");
+    } else {
+      // Human-readable output to stderr
+      for (const r of results) {
+        if (!r.pass) {
+          if (args.inputs.length > 1) {
+            process.stderr.write(`${r.file}:\n`);
+          }
+          for (const e of r.errors) {
+            const prefix = args.inputs.length > 1 ? "  " : "";
+            process.stderr.write(`${prefix}line ${e.line}, col ${e.column}: ${e.msg}\n`);
+          }
+        }
+      }
+    }
+
+    const anyFailed = results.some((r) => !r.pass);
+    process.exit(anyFailed ? 1 : 0);
+  }
+
+  // ---------------------------------------------------------------------------
+  // --parse mode: output AST as JSON
+  // ---------------------------------------------------------------------------
+  if (args.parse) {
+    // Only use the first input for parse mode
+    const input = args.inputs[0];
+    let code: string;
+    try {
+      code = await readCode(input);
+    } catch (err: any) {
+      process.stderr.write(`Error: ${err.message}\n`);
+      process.exit(1);
+    }
+
+    // Clear accumulated errors before parsing
+    Parser.Errors.length = 0;
+    Parser.ErrorDetails.length = 0;
+
+    const tree = Parser.RootContext(code);
+
+    if (Parser.ErrorDetails.length > 0) {
+      for (const e of Parser.ErrorDetails) {
+        process.stderr.write(`line ${e.line}, col ${e.column}: ${e.msg}\n`);
+      }
+      process.exit(1);
+    }
+
+    const ast = serializeParseTree(tree);
+    process.stdout.write(JSON.stringify(ast, null, 2) + "\n");
+    process.exit(0);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Render mode (default) — only uses first input
+  // ---------------------------------------------------------------------------
+  const inputArg = args.inputs[0];
 
   // ---------------------------------------------------------------------------
   // Config file merging: config file < CLI flags
@@ -233,7 +432,7 @@ async function main(): Promise<void> {
   }
 
   // Resolve effective values: CLI flag > config > default
-  const outputPath = resolveOutput(args.input, args.output);
+  const outputPath = resolveOutput(inputArg, args.output);
   const autoFormatFromExt = outputPath !== "-" && extname(outputPath).toLowerCase() === ".png" ? "png" : undefined;
   const effectiveFormat = args.outputFormat ?? configOutputFormat ?? autoFormatFromExt ?? "svg";
 
@@ -252,11 +451,11 @@ async function main(): Promise<void> {
 
   // Read input
   let code: string;
-  if (args.input === "-") {
+  if (inputArg === "-") {
     // Read from stdin
     code = await readStdin();
   } else {
-    const inputPath = resolve(args.input);
+    const inputPath = resolve(inputArg);
     try {
       code = readFileSync(inputPath, "utf-8");
     } catch (err: any) {
