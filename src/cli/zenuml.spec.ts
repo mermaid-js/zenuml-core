@@ -815,7 +815,7 @@ describe("zenuml CLI", () => {
   // (aq) -o - → transformed Markdown to stdout
   it("(aq) -o - in markdown mode writes transformed Markdown to stdout", async () => {
     const inputPath = tmpFile("stdout-md.md");
-    tempFiles.push(); // no output file
+    tempFiles.push(join(FIXTURES_DIR, "stdout-md-zenuml-0.svg")); // cleanup generated sidecar
 
     writeFileSync(inputPath, "```zenuml\nA -> B: hi\n```\n", "utf-8");
 
