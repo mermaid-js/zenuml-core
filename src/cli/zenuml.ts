@@ -645,11 +645,10 @@ function resolveOutput(input: string, output: string | undefined, defaultExt: st
     if (output === "-") return "-";
     const resolvedOutput = resolve(output);
     if (isDirectory(resolvedOutput)) {
-      // -o is a directory: output inside it with path relative to cwd, swapped extension
+      // -o is a directory: output inside it using just the input's basename
       if (input === "-") return "-"; // stdin + directory doesn't make sense, fall to stdout
-      const relPath = relative(process.cwd(), resolve(input));
-      const ext = extname(relPath);
-      const base = relPath.slice(0, relPath.length - ext.length);
+      const ext = extname(input);
+      const base = basename(input, ext);
       return join(resolvedOutput, `${base}${defaultExt}`);
     }
     return resolvedOutput;
