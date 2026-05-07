@@ -12,6 +12,11 @@ const defaultConfig = {
   onThemeChange: ({ theme }) => {
     localStorage.setItem(`${location.hostname}-zenuml-theme`, theme);
   },
+  // Demo site sees all editing surfaces; the published library defaults each off.
+  enableParticipantInsertion: true,
+  enableMessageInsertion: true,
+  enableDividerInsertion: true,
+  enableParticipantStyleEditing: true,
 };
 
 export function initZenUml(element: HTMLElement) {

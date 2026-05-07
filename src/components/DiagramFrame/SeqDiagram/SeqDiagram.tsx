@@ -6,6 +6,8 @@ import {
   modeAtom,
   RenderMode,
   rootContextAtom,
+  selectedAtom,
+  selectedMessageAtom,
   themeAtom,
 } from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -21,6 +23,9 @@ import "./SeqDiagram.css";
 import { cn } from "@/utils";
 import { LifeLineLayer } from "./LifeLineLayer/LifeLineLayer";
 import { MessageLayer } from "./MessageLayer/MessageLayer";
+import { ParticipantInsertControls } from "./LifeLineLayer/ParticipantInsertControls";
+import { ParticipantStylePanel } from "./LifeLineLayer/ParticipantStylePanel";
+import { EmptyDiagramPrompt } from "./EmptyDiagramPrompt";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -31,7 +36,13 @@ export const SeqDiagram = (props: {
   const mode = useAtomValue(modeAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
+  const isEmpty = useMemo(
+    () => coordinates.orderedParticipantNames().length === 0,
+    [coordinates],
+  );
   const setDiagramElement = useSetAtom(diagramElementAtom);
+  const setSelectedParticipants = useSetAtom(selectedAtom);
+  const setSelectedMessage = useSetAtom(selectedMessageAtom);
 
   const diagramRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -66,6 +77,18 @@ export const SeqDiagram = (props: {
       )}
       style={props.style}
       ref={diagramRef}
+      onClick={(event) => {
+        const target = event.target as HTMLElement | null;
+        if (
+          target?.closest(".interaction") ||
+          target?.closest(".participant") ||
+          target?.closest("#style-panel")
+        ) {
+          return;
+        }
+        setSelectedParticipants([]);
+        setSelectedMessage(null);
+      }}
     >
       {/* .zenuml is used to make sure tailwind css takes effect when naked == true;
       .bg-skin-base is repeated because .zenuml reset it to default theme. */}
@@ -75,6 +98,7 @@ export const SeqDiagram = (props: {
       >
         {mode === RenderMode.Dynamic ? (
           <>
+            {isEmpty && <EmptyDiagramPrompt />}
             {/* Why do we have two `life-line-layer`s? This is introduced when we add support of
               floating participant. Essentially, the Participant labels must be on the top
               of message layer and the lines of lifelines must be under the message layer. */}
@@ -92,6 +116,22 @@ export const SeqDiagram = (props: {
               context={rootContext?.head()}
               renderParticipants
             />
+            {/* Insert controls on a separate layer above participants.
+               pointer-events: none lets clicks pass through to the participant
+               layer below; individual "+" buttons opt back in. */}
+            <div
+              className="absolute h-full top-0 pt-2"
+              style={{
+                width: `calc(100% - ${frameBorderLeft}px)`,
+                pointerEvents: "none",
+                zIndex: 40,
+              }}
+            >
+              <div className="relative grow h-full">
+                <ParticipantInsertControls />
+              </div>
+            </div>
+            <ParticipantStylePanel />
           </>
         ) : (
           <>

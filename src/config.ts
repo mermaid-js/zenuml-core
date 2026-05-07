@@ -1,8 +1,6 @@
 export function getTheme(): string {
-  return (
-    localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
-    "theme-idle-afternoon"
-  );
+  // Workbench preview always uses the unstyled black-on-white default.
+  return "theme-default";
 }
 
 export function setTheme(theme: string): void {

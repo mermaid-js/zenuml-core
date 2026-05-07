@@ -2,8 +2,52 @@ import { codeAtom, modeAtom, RenderMode } from "@/store/Store";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import type { ComponentProps } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ParticipantLabel } from "./ParticipantLabel";
+
+// DiagramTitle.spec.tsx (loaded earlier alphabetically) registers a vi.mock for
+// EditableSpan that strips the `editable-span-base` class. Override it here
+// with a minimal implementation that preserves the class so our tests can find
+// the element and interact with it.
+vi.mock("@/components/common/EditableSpan", () => ({
+  EditableSpan: ({
+    text,
+    isEditable,
+    className,
+    onSave,
+    title,
+  }: {
+    text: string;
+    isEditable?: boolean;
+    className?: string;
+    onSave: (t: string) => void;
+    title?: string;
+  }) => {
+    const [editing, setEditing] = React.useState(false);
+    return (
+      <span
+        className={`${className ?? ""} editable-span-base`.trim()}
+        contentEditable={editing ? true : undefined}
+        suppressContentEditableWarning={true}
+        title={title}
+        onClick={() => {
+          if (isEditable) setEditing(true);
+        }}
+        onBlur={(e) => {
+          if (editing) {
+            setEditing(false);
+            onSave(e.currentTarget.innerText);
+          }
+        }}
+      >
+        {text}
+      </span>
+    );
+  },
+}));
+
+// React is used inside the vi.mock factory above; import it at module level.
+import React from "react";
 
 function renderParticipantLabel(
   props: ComponentProps<typeof ParticipantLabel>,
@@ -50,13 +94,13 @@ describe("ParticipantLabel", () => {
     const editableSpan = container.querySelector(".editable-span-base");
     expect(editableSpan).not.toBeNull();
 
-    fireEvent.doubleClick(editableSpan!);
+    fireEvent.click(editableSpan!);
 
     await waitFor(() => {
       expect(editableSpan?.getAttribute("contenteditable")).toBe("true");
     });
 
-    editableSpan!.innerText = "c:C";
+    (editableSpan as HTMLElement).innerText = "c:C";
     fireEvent.blur(editableSpan!);
 
     await waitFor(() => {

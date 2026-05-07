@@ -1,7 +1,11 @@
 import parentLogger from "./logger/logger";
 import {
   codeAtom,
+  enableDividerInsertionAtom,
+  enableMessageInsertionAtom,
   enableMultiThemeAtom,
+  enableParticipantInsertionAtom,
+  enableParticipantStyleEditingAtom,
   enableScopedThemingAtom,
   lifelineReadyAtom,
   modeAtom,
@@ -48,6 +52,13 @@ interface Config {
   onContentChange?: (code: string) => void;
   onEventEmit?: (name: string, data: unknown) => void;
   mode?: RenderMode;
+  // Editing feature flags. Default off; opt in per surface.
+  // Message insertion is currently broken for nested messages, so the flag
+  // exists to ship participant insertion independently.
+  enableParticipantInsertion?: boolean;
+  enableMessageInsertion?: boolean;
+  enableDividerInsertion?: boolean;
+  enableParticipantStyleEditing?: boolean;
 }
 
 export interface ParseResult {
@@ -172,6 +183,24 @@ export default class ZenUml implements IZenUml {
     this.store.set(onEventEmitAtom, config?.onEventEmit || (() => {}));
     if (config?.enableMultiTheme !== undefined) {
       this.store.set(enableMultiThemeAtom, config?.enableMultiTheme);
+    }
+    if (config?.enableParticipantInsertion !== undefined) {
+      this.store.set(
+        enableParticipantInsertionAtom,
+        config.enableParticipantInsertion,
+      );
+    }
+    if (config?.enableMessageInsertion !== undefined) {
+      this.store.set(enableMessageInsertionAtom, config.enableMessageInsertion);
+    }
+    if (config?.enableDividerInsertion !== undefined) {
+      this.store.set(enableDividerInsertionAtom, config.enableDividerInsertion);
+    }
+    if (config?.enableParticipantStyleEditing !== undefined) {
+      this.store.set(
+        enableParticipantStyleEditingAtom,
+        config.enableParticipantStyleEditing,
+      );
     }
     if (this._code === this.store.get(codeAtom)) {
       return true;

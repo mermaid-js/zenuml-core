@@ -12,18 +12,23 @@ import logger from "@/logger/logger";
 
 type VerticalMode = "html" | "legacy";
 const resolveVerticalMode = (): VerticalMode => {
-  const mode = import.meta.env.VITE_VERTICAL_MODE === "legacy"
-    ? "legacy"
-    : "html";
-  logger.info(`[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`);
+  const mode =
+    import.meta.env.VITE_VERTICAL_MODE === "legacy" ? "legacy" : "html";
+  logger.info(
+    `[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`,
+  );
   return mode;
 };
 
 export const resolveWidthProvider = (): WidthFunc => {
-  const urlParam = typeof location !== "undefined"
-    ? new URLSearchParams(location.search).get("WIDTH_PROVIDER")
-    : null;
-  const mode = (urlParam || import.meta.env.VITE_WIDTH_PROVIDER) === "canvas" ? "canvas" : "browser";
+  const urlParam =
+    typeof location !== "undefined"
+      ? new URLSearchParams(location.search).get("WIDTH_PROVIDER")
+      : null;
+  const mode =
+    (urlParam || import.meta.env.VITE_WIDTH_PROVIDER) === "canvas"
+      ? "canvas"
+      : "browser";
   logger.debug(`[ZenUML] WidthProvider: ${mode}`);
   return mode === "canvas" ? WidthProviderOnCanvas : WidthProviderOnBrowser;
 };
@@ -40,7 +45,11 @@ export const enum RenderMode {
 
 export const codeAtom = atom("");
 
-export const rootContextAtom = atom((get) => RootContext(get(codeAtom)));
+export const rootContextAtom = atom((get) => {
+  const code = get(codeAtom);
+  if (!code.trim()) return null;
+  return RootContext(code);
+});
 
 export const titleAtom = atom<string | undefined>((get) => {
   const titleContext = get(rootContextAtom)?.title();
@@ -50,9 +59,11 @@ export const titleAtom = atom<string | undefined>((get) => {
   return (titleContext as any).content();
 });
 
-export const participantsAtom = atom((get) =>
-  Participants(get(rootContextAtom)),
-);
+export const participantsAtom = atom((get) => {
+  const rootContext = get(rootContextAtom);
+  if (!rootContext) return Participants(null);
+  return Participants(rootContext);
+});
 
 export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), resolveWidthProvider()),
@@ -104,6 +115,13 @@ export const showTipsAtom = atom(false);
 
 export const modeAtom = atom(RenderMode.Dynamic);
 
+// Editing feature flags. Default off so embedders (e.g. mermaid) get safe behavior;
+// embedders opt in per surface. The dev site (main.tsx) enables them explicitly.
+export const enableParticipantInsertionAtom = atom(false);
+export const enableMessageInsertionAtom = atom(false);
+export const enableDividerInsertionAtom = atom(false);
+export const enableParticipantStyleEditingAtom = atom(false);
+
 export const enableNumberingAtom = atomWithLocalStorage(
   `${location.hostname}-zenuml-numbering`,
   true,
@@ -123,9 +141,21 @@ export const onMessageClickAtom = atomWithFunctionValue<
   (context: any, element: HTMLElement) => void
 >(() => {});
 
+export const selectedMessageAtom = atom<{
+  start: number;
+  end: number;
+  token: number;
+} | null>(null);
+
 export const onContentChangeAtom = atomWithFunctionValue<
   (code: string) => void
 >(() => {});
+
+export const pendingEditableRangeAtom = atom<{
+  start: number;
+  end: number;
+  token: number;
+} | null>(null);
 
 export const onThemeChangeAtom = atomWithFunctionValue<
   (data: { theme: string; scoped: boolean }) => void
@@ -134,6 +164,31 @@ export const onThemeChangeAtom = atomWithFunctionValue<
 export const onEventEmitAtom = atomWithFunctionValue<
   (name: string, data: any) => void
 >(() => {});
+
+export const createMessageDragAtom = atom<{
+  source: string;
+  sourceX: number;
+  sourceY: number;
+  pointerX: number;
+  pointerY: number;
+  hoverTarget: string | null;
+  insertIndex: number;
+  blockContext: any | null;
+  hostContext?: any;
+} | null>(null);
+
+export const messageReorderDragAtom = atom<string | null>(null);
+
+export const messageReorderPendingAtom = atom<{
+  key: string;
+  startX: number;
+  startY: number;
+} | null>(null);
+
+export const messageReorderDropAtom = atom<{
+  key: string;
+  place: "before" | "after";
+} | null>(null);
 
 export const lifelineReadyAtom = atom<string[]>([]);
 

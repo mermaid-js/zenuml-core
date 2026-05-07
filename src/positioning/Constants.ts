@@ -8,6 +8,8 @@ export const OCCURRENCE_BAR_SIDE_WIDTH = (OCCURRENCE_WIDTH - 1) / 2; // Width of
 // also used in css `.zenuml .participant { min-width: 88px; }`
 export const MIN_PARTICIPANT_WIDTH = 80;
 export const PARTICIPANT_HEIGHT = 70;
+// Width allocated for the icon column on the left of an iconed participant.
+export const PARTICIPANT_ICON_WIDTH = 40;
 
 export const LIFELINE_WIDTH = 1;
 

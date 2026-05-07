@@ -28,7 +28,7 @@ export const FragmentOpt = (props: {
   } = useFragmentData(props.context, props.origin);
   return (
     <div
-      data-origin={origin}
+      data-origin={props.origin}
       data-left-participant={leftParticipant}
       data-frame-padding-left={border.left}
       data-frame-padding-right={border.right}

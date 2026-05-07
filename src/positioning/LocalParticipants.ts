@@ -11,5 +11,6 @@ import { Participants } from "@/parser";
  * @param ctx
  */
 export function getLocalParticipantNames(ctx: any): string[] {
+  if (!ctx) return [];
   return [ctx.Origin() || _STARTER_, ...Participants(ctx).Names()];
 }

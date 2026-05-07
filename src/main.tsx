@@ -6,12 +6,15 @@ const logger = parentLogger.child({ name: "main" });
 const defaultConfig = {
   enableMultiTheme: true,
   stickyOffset: 0,
-  theme:
-    localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
-    "theme-idle-afternoon",
+  theme: "theme-default",
   onThemeChange: ({ theme }: { theme: string }) => {
     localStorage.setItem(`${location.hostname}-zenuml-theme`, theme);
   },
+  // Demo site sees all editing surfaces; the published library defaults each off.
+  enableParticipantInsertion: true,
+  enableMessageInsertion: true,
+  enableDividerInsertion: true,
+  enableParticipantStyleEditing: true,
 };
 
 export function initZenUml(element: HTMLElement) {

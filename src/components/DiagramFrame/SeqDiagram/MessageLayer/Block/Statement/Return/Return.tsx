@@ -35,7 +35,7 @@ export const Return = (props: {
   let start = -1, stop = -1;
   if (messageContext instanceof sequenceParser.AtomExprContext) {
     const ret = messageContext.atom();
-    [start, stop] = [ret?.start.start, ret?.stop.stop];
+    [start, stop] = [ret?.start?.start, ret?.stop?.stop];
   } else if (messageContext instanceof sequenceParser.ContentContext) {
     [start, stop] = [messageContext.start.start, messageContext.stop.stop];
   }
@@ -57,7 +57,7 @@ export const Return = (props: {
       onClick={onClick}
       data-type="return"
       data-signature={signature}
-      data-origin={origin}
+      data-origin={props.origin}
       data-to={target}
       data-source={source}
       data-target={target}
@@ -98,6 +98,7 @@ export const Return = (props: {
           className={cn(props.commentObj?.messageClassNames)}
           textStyle={props.commentObj?.messageStyle}
           context={messageContext}
+          selectionRange={[start, stop]}
           rtl={rightToLeft}
           type="return"
           number={props.number}

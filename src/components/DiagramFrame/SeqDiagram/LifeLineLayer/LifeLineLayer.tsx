@@ -7,6 +7,7 @@ import {
 import { useAtomValue } from "jotai";
 import { LifeLine } from "./LifeLine";
 import { LifeLineGroup } from "./LifeLineGroup";
+import { MessageCreateControls } from "./MessageCreateControls";
 import { Fragment, useMemo } from "react";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { blankParticipant } from "@/parser/Participants";
@@ -43,7 +44,9 @@ export const LifeLineLayer = (props: {
       style={{
         minWidth: mode === RenderMode.Dynamic ? "200px" : "auto",
         width: `calc(100% - ${props.leftGap}px)`,
-        pointerEvents: props.renderParticipants ? "none" : "all",
+        // Always pass through pointer events at the container level.
+        // Participant boxes opt back in via pointerEvents: "auto".
+        pointerEvents: "none",
       }}
     >
       <div className="z-lifeline-container relative grow">
@@ -87,6 +90,7 @@ export const LifeLineLayer = (props: {
             renderLifeLine={props.renderLifeLine}
           />
         ))}
+        {props.renderParticipants && <MessageCreateControls />}
       </div>
     </div>
   );

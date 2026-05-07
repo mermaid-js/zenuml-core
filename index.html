@@ -434,6 +434,11 @@
           <button id="view-svg" class="tool-chip">SVG</button>
           <button id="view-dom" class="tool-chip">DOM</button>
           <button id="view-split" class="tool-chip">Split</button>
+          <span class="toolbar-label">Editing</span>
+          <button class="tool-chip" data-flag="enableParticipantInsertion" title="Toggle ParticipantInsertControls (+ between participants)">+ Participant</button>
+          <button class="tool-chip" data-flag="enableMessageInsertion" title="Toggle Occurrence drag-to-create + GapHandleZone message handles">+ Message</button>
+          <button class="tool-chip" data-flag="enableDividerInsertion" title="Toggle GapHandleZone divider button">+ Divider</button>
+          <button class="tool-chip" data-flag="enableParticipantStyleEditing" title="Toggle ParticipantStylePanel (color/type)">Style Participant</button>
           <button id="width-provider-toggle" class="tool-chip"></button>
           <span id="svg-stats" class="stats-text">SVG: waiting</span>
           <a class="tool-link" href="/e2e/tools/compare.html" target="_blank" rel="noreferrer">
@@ -550,8 +555,37 @@
         localStorage.setItem("zenuml-workbench-view", validMode);
       }
 
+      const FLAG_KEYS = [
+        "enableParticipantInsertion",
+        "enableMessageInsertion",
+        "enableDividerInsertion",
+        "enableParticipantStyleEditing",
+      ];
+      const FLAG_STORAGE_PREFIX = "zenuml-workbench-flag-";
+
+      function readFlag(key) {
+        const stored = localStorage.getItem(FLAG_STORAGE_PREFIX + key);
+        // Default ON in the workbench so dev experience matches main.tsx.
+        return stored === null ? true : stored === "true";
+      }
+
+      function writeFlag(key, value) {
+        localStorage.setItem(FLAG_STORAGE_PREFIX + key, String(value));
+      }
+
+      function readFlags() {
+        return Object.fromEntries(FLAG_KEYS.map((k) => [k, readFlag(k)]));
+      }
+
+      function syncFlagButtons() {
+        document.querySelectorAll("[data-flag]").forEach((btn) => {
+          btn.classList.toggle("is-active", readFlag(btn.dataset.flag));
+        });
+      }
+
       const updateHtmlPreview = debounce((content) => {
         const config = createConfig({
+          ...readFlags(),
           onContentChange: (code) => editor.setValue(code),
         });
 
@@ -561,6 +595,16 @@
             .debug("render resolved", r);
         });
       }, 400);
+
+      document.querySelectorAll("[data-flag]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const key = btn.dataset.flag;
+          writeFlag(key, !readFlag(key));
+          syncFlagButtons();
+          updateHtmlPreview(editor.getValue());
+        });
+      });
+      syncFlagButtons();
 
       const updateSvgPreview = debounce((content) => {
         try {
