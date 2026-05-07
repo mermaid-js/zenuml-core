@@ -67,7 +67,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
-        run: bun run build
+        run: bun run build:release
       - name: Publish to npm with provenance
         run: npm publish --provenance --access public
       - name: Create git tag

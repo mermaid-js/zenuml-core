@@ -20,6 +20,9 @@ const gitBranch = process.env.DOCKER
   ? ""
   : execSync("git branch --show-current").toString().trim();
 
+const isReleaseBuild = process.env.RELEASE === "1";
+const shouldAnalyzeBundle = process.env.ANALYZE === "1";
+
 // Merge all cloud-provider icon SVGs into a single chunk instead of 500+
 function manualChunks(id: string) {
   if (
@@ -45,7 +48,7 @@ export default defineConfig({
       name: "ZenUML",
       fileName: "zenuml",
     },
-    sourcemap: true,
+    sourcemap: isReleaseBuild,
     rollupOptions: {
       output: [
         {
@@ -70,12 +73,16 @@ export default defineConfig({
     svgr(),
     react(),
     cssInjectedByJsPlugin(),
-    visualizer({
-      filename: "dist/stats.html",
-      open: false,
-      gzipSize: true,
-      brotliSize: true,
-    }),
+    ...(shouldAnalyzeBundle
+      ? [
+          visualizer({
+            filename: "dist/stats.html",
+            open: false,
+            gzipSize: true,
+            brotliSize: true,
+          }),
+        ]
+      : []),
   ],
   define: {
     "process.env.NODE_ENV": '"production"',
