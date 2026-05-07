@@ -1,7 +1,6 @@
 import antlr4 from "antlr4";
 import sequenceParserListener from "../generated-parser/sequenceParserListener";
 import { Frame } from "@/positioning/FrameBorder";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
