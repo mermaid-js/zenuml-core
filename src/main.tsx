@@ -6,9 +6,7 @@ const logger = parentLogger.child({ name: "main" });
 const defaultConfig = {
   enableMultiTheme: true,
   stickyOffset: 0,
-  theme:
-    localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
-    "theme-idle-afternoon",
+  theme: "theme-default",
   onThemeChange: ({ theme }: { theme: string }) => {
     localStorage.setItem(`${location.hostname}-zenuml-theme`, theme);
   },
