@@ -13,6 +13,7 @@ import {
 } from "../../test/unit/parser/fixture/Fixture";
 import { clearCache } from "@/utils/RenderingCache";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+
 describe("get absolute position of a participant", () => {
   beforeEach(() => {
     clearCache();

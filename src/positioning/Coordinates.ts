@@ -3,6 +3,7 @@ import {
   MARGIN,
   MIN_PARTICIPANT_WIDTH,
   OCCURRENCE_WIDTH,
+  PARTICIPANT_ICON_WIDTH,
 } from "./Constants";
 import { TextType } from "./Coordinate";
 import type { WidthFunc } from "./Coordinate";
@@ -161,7 +162,7 @@ export class Coordinates {
     // Add icon width if the participant has an icon
     // Icon's total width is 32px (24px for icon + 8px for margin)
     const hasIcon = participant.hasIcon();
-    const iconWidth = hasIcon ? 40 : 0;
+    const iconWidth = hasIcon ? PARTICIPANT_ICON_WIDTH : 0;
     // Emoji character (~16px glyph + em-space) adds width when present
     const emojiWidth = participant.emoji ? 24 : 0;
 

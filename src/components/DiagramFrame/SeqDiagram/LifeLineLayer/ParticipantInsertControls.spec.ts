@@ -1,31 +1,43 @@
 import { describe, expect, it } from "vitest";
 import {
   computeAppendAnchor,
+  computeGapAnchor,
   computePrependAnchor,
 } from "./ParticipantInsertControls";
 import { MARGIN } from "@/positioning/Constants";
 
 const stubCoordinates = (
-  edges: Record<string, { left: number; right: number }>,
+  edges: Record<string, { boxLeft: number; boxRight: number }>,
 ) =>
   ({
-    left: (name: string) => edges[name].left,
-    right: (name: string) => edges[name].right,
+    boxLeft: (name: string) => edges[name].boxLeft,
+    boxRight: (name: string) => edges[name].boxRight,
   }) as unknown as Parameters<typeof computeAppendAnchor>[0];
 
-describe("computeAppendAnchor", () => {
-  it("places the button half of the previous gap to the right of the last participant (>=2 participants)", () => {
-    // A: [50, 100]   B: [180, 230]   gap A->B = 80
+describe("computeGapAnchor", () => {
+  it("returns the midpoint of two participants' DOM box edges", () => {
+    // A right at 100, B left at 180 → midpoint 140
     const coordinates = stubCoordinates({
-      A: { left: 50, right: 100 },
-      B: { left: 180, right: 230 },
+      A: { boxLeft: 50, boxRight: 100 },
+      B: { boxLeft: 180, boxRight: 230 },
     });
-    // expected: right(B) + (left(B) - right(A)) / 2 = 230 + 80/2 = 270
-    expect(computeAppendAnchor(coordinates, ["A", "B"])).toBe(270);
+    expect(computeGapAnchor(coordinates, "A", "B")).toBe(140);
+  });
+});
+
+describe("computeAppendAnchor", () => {
+  it("places the button at a fixed MARGIN/2 offset to the right of the last participant (>=2 participants)", () => {
+    const coordinates = stubCoordinates({
+      A: { boxLeft: 50, boxRight: 100 },
+      B: { boxLeft: 180, boxRight: 230 },
+    });
+    expect(computeAppendAnchor(coordinates, ["A", "B"])).toBe(230 + MARGIN / 2);
   });
 
-  it("falls back to MARGIN/2 to the right when only one participant", () => {
-    const coordinates = stubCoordinates({ A: { left: 50, right: 100 } });
+  it("uses the same fixed offset for a single participant (consistent with the multi-participant case)", () => {
+    const coordinates = stubCoordinates({
+      A: { boxLeft: 50, boxRight: 100 },
+    });
     expect(computeAppendAnchor(coordinates, ["A"])).toBe(100 + MARGIN / 2);
   });
 
@@ -36,18 +48,18 @@ describe("computeAppendAnchor", () => {
 });
 
 describe("computePrependAnchor", () => {
-  it("places the button half of the next gap to the left of the first participant (>=2 participants)", () => {
-    // A: [50, 100]   B: [180, 230]   gap A->B = 80
+  it("places the button at a fixed MARGIN/2 offset to the left of the first participant (>=2 participants)", () => {
     const coordinates = stubCoordinates({
-      A: { left: 50, right: 100 },
-      B: { left: 180, right: 230 },
+      A: { boxLeft: 50, boxRight: 100 },
+      B: { boxLeft: 180, boxRight: 230 },
     });
-    // expected: left(A) - (left(B) - right(A)) / 2 = 50 - 80/2 = 10
-    expect(computePrependAnchor(coordinates, ["A", "B"])).toBe(10);
+    expect(computePrependAnchor(coordinates, ["A", "B"])).toBe(50 - MARGIN / 2);
   });
 
-  it("falls back to MARGIN/2 to the left when only one participant", () => {
-    const coordinates = stubCoordinates({ A: { left: 50, right: 100 } });
+  it("uses the same fixed offset for a single participant (consistent with the multi-participant case)", () => {
+    const coordinates = stubCoordinates({
+      A: { boxLeft: 50, boxRight: 100 },
+    });
     expect(computePrependAnchor(coordinates, ["A"])).toBe(50 - MARGIN / 2);
   });
 
