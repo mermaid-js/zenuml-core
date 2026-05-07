@@ -16,6 +16,11 @@ const packageJson = JSON.parse(
   readFileSync(resolve(__dirname, "package.json"), "utf-8"),
 );
 
+// e2e fixtures and test-compression.html are served via the Vite dev server
+// (Playwright launches `bun run dev` — see playwright.config.ts), so they
+// don't need to be part of the production site build. Set INCLUDE_E2E_HTML=1
+// to bundle them into a built site (rare; only needed if hosting the
+// fixtures statically instead of running them via dev server).
 function getE2eHtmlFiles() {
   const e2eFolder = resolve(__dirname, "e2e");
   const strings = execSync(`find ${e2eFolder} -name '*.html'`)
@@ -26,14 +31,16 @@ function getE2eHtmlFiles() {
   return strings;
 }
 
-const e2eHtmlFiles = getE2eHtmlFiles();
+const includeE2eHtml = process.env.INCLUDE_E2E_HTML === "1";
+const e2eHtmlFiles = includeE2eHtml ? getE2eHtmlFiles() : [];
+const optionalDevHtml = includeE2eHtml ? ["test-compression.html"] : [];
 
 export default defineConfig(({ mode }) => ({
   base: mode === "gh-pages" ? "/zenuml-core/" : "/",
   build: {
     target: "esnext",
     rollupOptions: {
-      input: ["index.html", "embed.html", "renderer.html", "test-compression.html", ...e2eHtmlFiles],
+      input: ["index.html", "embed.html", "renderer.html", ...optionalDevHtml, ...e2eHtmlFiles],
     },
   },
   resolve: {
