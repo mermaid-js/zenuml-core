@@ -60,21 +60,24 @@ test.describe("Message Rename Panel", () => {
       .locator(".interaction.async .editable-span-base")
       .filter({ hasText: "Hello Bob" });
     await expect(editableLabel).toHaveAttribute("contenteditable", "true");
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const el = document.activeElement as HTMLElement | null;
+          if (!el?.classList.contains("editable-span-base")) return false;
+          return (el.textContent ?? "").includes("Hello Bob");
+        }),
+      )
+      .toBe(true);
 
     await page.keyboard.type("Hello Alice");
     await page.keyboard.press("Enter");
 
-    await expect(
-      page
-        .locator(".interaction.async .editable-span-base")
-        .filter({ hasText: "Hello Alice" })
-        .first(),
-    ).toBeVisible({ timeout: 10000 });
-    await expect(
-      page.locator('.interaction.async .message[data-selected="true"]').filter({
-        hasText: "Hello Alice",
-      }),
-    ).toHaveAttribute("data-selected", "true");
+    const renamedMessage = page
+      .locator('.interaction.async[data-source="D"][data-target="C"] .message')
+      .filter({ hasText: "Hello Alice" });
+    await expect(renamedMessage).toBeVisible({ timeout: 10000 });
+    await expect(renamedMessage).toHaveAttribute("data-selected", "true");
     await expect
       .poll(() => page.evaluate(() => (window as any).__lastContentChange ?? null))
       .toContain("D->C:Hello Alice");
