@@ -41,7 +41,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "bun run --bun storybook build",
     "worker:dev": "bun run build:site && bun run --bun wrangler dev",
-    "worker:deploy": "bun run build:site && bun run --bun wrangler deploy",
+    "worker:deploy": "bun run build:site && bun run --bun wrangler deploy -e production",
     "worker:deploy:staging": "bun run build:site && bun run --bun wrangler deploy --env staging"
   },
   "main": "./dist/zenuml.js",
