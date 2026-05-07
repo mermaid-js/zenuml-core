@@ -2,6 +2,7 @@ import {
   KeyboardEvent,
   MouseEvent,
   useEffect,
+  useLayoutEffect,
   useState,
   useRef,
 } from "react";
@@ -31,50 +32,54 @@ export const EditableSpan = ({
   const originalTextRef = useRef("");
   const spanRef = useRef<HTMLSpanElement>(null);
   const cancelRef = useRef(false);
+  const pendingFocusRef = useRef<{ x: number; y: number } | null>(null);
 
-  const focusEditable = (clickPoint?: { x: number; y: number } | null) => {
-    setTimeout(() => {
-      const target = spanRef.current;
-      if (!target) return;
+  const applyFocus = (clickPoint: { x: number; y: number } | null) => {
+    const target = spanRef.current;
+    if (!target) return;
 
-      target.focus();
+    target.focus();
 
-      if (!clickPoint) {
-        const selection = window.getSelection();
-        if (!selection) return;
-        const range = document.createRange();
-        range.selectNodeContents(target);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        return;
-      }
+    const selection = window.getSelection();
+    if (!selection) return;
 
-      const selection = window.getSelection();
-      if (!selection) return;
+    if (!clickPoint) {
+      const range = document.createRange();
+      range.selectNodeContents(target);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return;
+    }
 
-      let range = document.caretRangeFromPoint?.(
+    let range = document.caretRangeFromPoint?.(clickPoint.x, clickPoint.y);
+
+    if (!range && (document as any).caretPositionFromPoint) {
+      const pos = (document as any).caretPositionFromPoint(
         clickPoint.x,
-        clickPoint.y
+        clickPoint.y,
       );
-
-      if (!range && (document as any).caretPositionFromPoint) {
-        const pos = (document as any).caretPositionFromPoint(
-          clickPoint.x,
-          clickPoint.y
-        );
-        if (pos) {
-          range = document.createRange();
-          range.setStart(pos.offsetNode, pos.offset);
-        }
+      if (pos) {
+        range = document.createRange();
+        range.setStart(pos.offsetNode, pos.offset);
       }
+    }
 
-      if (range) {
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
-    }, 0);
+    if (range) {
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
   };
+
+  // Focus the span synchronously after the DOM is updated with
+  // contentEditable=true. Doing this in a layout effect (rather than a
+  // setTimeout) guarantees focus is established before any keystrokes can
+  // race against it — both for fast typists and for Playwright tests that
+  // start typing as soon as they observe contentEditable="true".
+  useLayoutEffect(() => {
+    if (!editing) return;
+    applyFocus(pendingFocusRef.current);
+  }, [editing]);
 
   const startEditing = (e: MouseEvent | KeyboardEvent) => {
     if (!isEditable) return;
@@ -83,7 +88,7 @@ export const EditableSpan = ({
 
     cancelRef.current = false;
     const target = e.target as HTMLElement | null;
-    const clickPoint =
+    pendingFocusRef.current =
       selectAllOnEdit || !("clientX" in e)
         ? null
         : { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
@@ -92,7 +97,6 @@ export const EditableSpan = ({
     }
 
     setEditing(true);
-    focusEditable(clickPoint);
   };
 
   const handleClick = (e: MouseEvent) => {
@@ -197,8 +201,8 @@ export const EditableSpan = ({
     }
     originalTextRef.current = spanRef.current?.innerText ?? text;
     cancelRef.current = false;
+    pendingFocusRef.current = null;
     setEditing(true);
-    focusEditable(null);
   }, [autoEditToken, isEditable, text]);
 
   return (
