@@ -8,5 +8,11 @@ directory = "dist"
 [env.production]
 name = "zenuml-web-renderer"
 
+[env.production.assets]
+directory = "dist"
+
 [env.staging]
 name = "zenuml-web-renderer-staging"
+
+[env.staging.assets]
+directory = "dist"
