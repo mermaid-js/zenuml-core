@@ -17,7 +17,13 @@ console.log("set zenUML to window");
 
 // @ts-expect-error -- dynamic import
 window.zenUml = zenUml;
-zenUml.render(code, { theme: "theme-nab",
+zenUml.render(code, {
+  theme: "theme-nab",
+  // E2E fixtures exercise editing features; the published library defaults each off.
+  enableParticipantInsertion: true,
+  enableMessageInsertion: true,
+  enableDividerInsertion: true,
+  enableParticipantStyleEditing: true,
   onContentChange: code1 => {
     // @ts-expect-error -- e2e inspection hook
     window.__lastContentChange = code1;

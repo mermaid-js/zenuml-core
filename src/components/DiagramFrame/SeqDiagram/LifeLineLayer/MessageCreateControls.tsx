@@ -3,6 +3,7 @@ import {
   codeAtom,
   createMessageDragAtom,
   diagramElementAtom,
+  enableMessageInsertionAtom,
   modeAtom,
   onContentChangeAtom,
   pendingEditableRangeAtom,
@@ -14,8 +15,11 @@ import { insertMessageInDsl } from "@/utils/insertMessageInDsl";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef } from "react";
 
+const DRAG_HANDLE_SIZE = 16;
+
 export const MessageCreateControls = () => {
   const mode = useAtomValue(modeAtom);
+  const enabled = useAtomValue(enableMessageInsertionAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
@@ -109,6 +113,7 @@ export const MessageCreateControls = () => {
           from: current.source,
           to: target,
           blockContext: current.blockContext,
+          hostContext: current.hostContext,
           insertIndex: current.insertIndex,
         });
         setCode(next.code);
@@ -139,9 +144,24 @@ export const MessageCreateControls = () => {
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [code, diagramElement, dragState, onContentChange, participants, setCode, setPendingEditableRange, setDragState, setSelectedParticipants]);
+  }, [
+    code,
+    diagramElement,
+    dragState,
+    onContentChange,
+    participants,
+    setCode,
+    setPendingEditableRange,
+    setDragState,
+    setSelectedParticipants,
+  ]);
 
-  if (mode !== RenderMode.Dynamic || !diagramElement || participants.length === 0) {
+  if (
+    !enabled ||
+    mode !== RenderMode.Dynamic ||
+    !diagramElement ||
+    participants.length === 0
+  ) {
     return null;
   }
 
@@ -151,28 +171,41 @@ export const MessageCreateControls = () => {
   const offsetY = containerRect ? containerRect.top - diagramRect.top : 0;
 
   return (
-    <div ref={containerRef} className="absolute inset-0" style={{ pointerEvents: "none" }}>
+    <div
+      ref={containerRef}
+      className="absolute inset-0"
+      style={{ pointerEvents: "none" }}
+    >
       {dragState && (
-        <svg
-          className="absolute inset-0 z-30"
-          style={{ pointerEvents: "none", overflow: "visible" }}
-        >
-          <line
-            x1={dragState.sourceX}
-            y1={dragState.sourceY - offsetY}
-            x2={dragState.pointerX - offsetX}
-            y2={dragState.sourceY - offsetY}
-            stroke="#d97706"
-            strokeWidth="2"
-            strokeDasharray="5 4"
-          />
-          <circle
-            cx={dragState.pointerX - offsetX}
-            cy={dragState.sourceY - offsetY}
-            r="4"
-            fill="#d97706"
-          />
-        </svg>
+        <>
+          <svg
+            className="absolute inset-0 z-30"
+            style={{ pointerEvents: "none", overflow: "visible" }}
+          >
+            <line
+              x1={dragState.sourceX}
+              y1={dragState.sourceY - offsetY}
+              x2={dragState.pointerX - offsetX}
+              y2={dragState.sourceY - offsetY}
+              stroke="#d97706"
+              strokeWidth="2"
+              strokeDasharray="5 4"
+            />
+          </svg>
+          <div
+            data-testid="message-create-drag-indicator"
+            className="absolute z-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-400 bg-white text-amber-500 text-xs leading-none font-bold flex items-center justify-center shadow-sm pointer-events-none"
+            style={{
+              width: DRAG_HANDLE_SIZE,
+              height: DRAG_HANDLE_SIZE,
+              left: dragState.pointerX - offsetX,
+              top: dragState.sourceY - offsetY,
+            }}
+            aria-hidden="true"
+          >
+            +
+          </div>
+        </>
       )}
       {dragState &&
         participants.map((participant) => {
@@ -189,10 +222,16 @@ export const MessageCreateControls = () => {
           return (
             <div
               key={`highlight-${participant.name}`}
-              data-testid={isTarget ? `message-create-target-${participant.name}` : undefined}
-              className={isTarget
-                ? "absolute z-20 rounded-md border-2 border-amber-400 bg-amber-100/40 pointer-events-none"
-                : "absolute z-20 rounded-md border-2 border-sky-400 bg-sky-100/40 pointer-events-none"}
+              data-testid={
+                isTarget
+                  ? `message-create-target-${participant.name}`
+                  : undefined
+              }
+              className={
+                isTarget
+                  ? "absolute z-20 rounded-md border-2 border-amber-400 bg-amber-100/40 pointer-events-none"
+                  : "absolute z-20 rounded-md border-2 border-sky-400 bg-sky-100/40 pointer-events-none"
+              }
               style={{
                 left: rect.left - (containerRect?.left ?? diagramRect.left) - 4,
                 top: rect.top - (containerRect?.top ?? diagramRect.top) - 4,

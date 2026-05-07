@@ -12,18 +12,23 @@ import logger from "@/logger/logger";
 
 type VerticalMode = "html" | "legacy";
 const resolveVerticalMode = (): VerticalMode => {
-  const mode = import.meta.env.VITE_VERTICAL_MODE === "legacy"
-    ? "legacy"
-    : "html";
-  logger.info(`[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`);
+  const mode =
+    import.meta.env.VITE_VERTICAL_MODE === "legacy" ? "legacy" : "html";
+  logger.info(
+    `[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`,
+  );
   return mode;
 };
 
 export const resolveWidthProvider = (): WidthFunc => {
-  const urlParam = typeof location !== "undefined"
-    ? new URLSearchParams(location.search).get("WIDTH_PROVIDER")
-    : null;
-  const mode = (urlParam || import.meta.env.VITE_WIDTH_PROVIDER) === "canvas" ? "canvas" : "browser";
+  const urlParam =
+    typeof location !== "undefined"
+      ? new URLSearchParams(location.search).get("WIDTH_PROVIDER")
+      : null;
+  const mode =
+    (urlParam || import.meta.env.VITE_WIDTH_PROVIDER) === "canvas"
+      ? "canvas"
+      : "browser";
   logger.debug(`[ZenUML] WidthProvider: ${mode}`);
   return mode === "canvas" ? WidthProviderOnCanvas : WidthProviderOnBrowser;
 };
@@ -110,6 +115,13 @@ export const showTipsAtom = atom(false);
 
 export const modeAtom = atom(RenderMode.Dynamic);
 
+// Editing feature flags. Default off so embedders (e.g. mermaid) get safe behavior;
+// embedders opt in per surface. The dev site (main.tsx) enables them explicitly.
+export const enableParticipantInsertionAtom = atom(false);
+export const enableMessageInsertionAtom = atom(false);
+export const enableDividerInsertionAtom = atom(false);
+export const enableParticipantStyleEditingAtom = atom(false);
+
 export const enableNumberingAtom = atomWithLocalStorage(
   `${location.hostname}-zenuml-numbering`,
   true,
@@ -161,7 +173,8 @@ export const createMessageDragAtom = atom<{
   pointerY: number;
   hoverTarget: string | null;
   insertIndex: number;
-  blockContext: any;
+  blockContext: any | null;
+  hostContext?: any;
 } | null>(null);
 
 export const messageReorderDragAtom = atom<string | null>(null);

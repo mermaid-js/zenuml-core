@@ -9,6 +9,25 @@ const mockBlockContext = (charRanges: [number, number][]) => ({
     })),
 });
 
+const mockHostContext = ({
+  start,
+  stop,
+  blockContext = null,
+}: {
+  start: number;
+  stop: number;
+  blockContext?: any;
+}) => ({
+  start: { start },
+  stop: { stop },
+  braceBlock: () =>
+    blockContext
+      ? {
+          block: () => blockContext,
+        }
+      : null,
+});
+
 describe("insertMessageInDsl", () => {
   it("appends to empty block", () => {
     const result = insertMessageInDsl({
@@ -19,9 +38,9 @@ describe("insertMessageInDsl", () => {
       insertIndex: 0,
     });
     expect(result.code).toBe("A\nB\nA->B.newMessage()");
-    expect(result.code.slice(result.labelPosition[0], result.labelPosition[1] + 1)).toBe(
-      "newMessage()",
-    );
+    expect(
+      result.code.slice(result.labelPosition[0], result.labelPosition[1] + 1),
+    ).toBe("newMessage()");
   });
 
   it("inserts before first statement", () => {
@@ -78,9 +97,7 @@ describe("insertMessageInDsl", () => {
       ]),
       insertIndex: 1,
     });
-    expect(result.code).toBe(
-      "A\nB\nA->B.hello()\nA->B.check()\nB->A.world()",
-    );
+    expect(result.code).toBe("A\nB\nA->B.hello()\nA->B.check()\nB->A.world()");
     expect(
       result.code.slice(result.labelPosition[0], result.labelPosition[1] + 1),
     ).toBe("check()");
@@ -99,5 +116,27 @@ describe("insertMessageInDsl", () => {
     expect(
       result.code.slice(result.labelPosition[0], result.labelPosition[1] + 1),
     ).toBe("validate()");
+  });
+
+  it("wraps a sync message into a block when inserting the first nested message", () => {
+    const code = "A\nB\nC\nA->B.hello()";
+    const helloStart = code.indexOf("A->B.hello()");
+    const helloEnd = helloStart + "A->B.hello()".length - 1;
+
+    const result = insertMessageInDsl({
+      code,
+      from: "B",
+      to: "C",
+      hostContext: mockHostContext({
+        start: helloStart,
+        stop: helloEnd,
+      }),
+      insertIndex: 0,
+    });
+
+    expect(result.code).toBe("A\nB\nC\nA->B.hello() {\n  B->C.newMessage()\n}");
+    expect(
+      result.code.slice(result.labelPosition[0], result.labelPosition[1] + 1),
+    ).toBe("newMessage()");
   });
 });

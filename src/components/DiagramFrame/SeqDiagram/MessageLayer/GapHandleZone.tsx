@@ -4,6 +4,8 @@ import {
   coordinatesAtom,
   createMessageDragAtom,
   diagramElementAtom,
+  enableDividerInsertionAtom,
+  enableMessageInsertionAtom,
   modeAtom,
   onContentChangeAtom,
   pendingEditableRangeAtom,
@@ -28,6 +30,8 @@ export const GapHandleZone = (props: {
   isEmpty?: boolean;
 }) => {
   const mode = useAtomValue(modeAtom);
+  const messageInsertionEnabled = useAtomValue(enableMessageInsertionAtom);
+  const dividerInsertionEnabled = useAtomValue(enableDividerInsertionAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
@@ -94,7 +98,11 @@ export const GapHandleZone = (props: {
     [code, onContentChange, props.blockContext, props.insertIndex, setCode, setPendingEditableRange],
   );
 
-  if (mode !== RenderMode.Dynamic || participants.length < 2) {
+  if (
+    mode !== RenderMode.Dynamic ||
+    participants.length < 2 ||
+    (!messageInsertionEnabled && !dividerInsertionEnabled)
+  ) {
     return null;
   }
 
@@ -132,41 +140,44 @@ export const GapHandleZone = (props: {
     return (
       <>
         <div className="absolute left-0 right-0 top-1/2 -translate-y-px h-px border-t border-dashed border-amber-300/60" />
-        {participants.map((p) => (
+        {messageInsertionEnabled &&
+          participants.map((p) => (
+            <button
+              key={p.name}
+              type="button"
+              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-400 bg-white text-amber-500 text-xs leading-none font-bold flex items-center justify-center cursor-grab hover:bg-amber-50 hover:border-amber-500 hover:shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+              style={{
+                width: HANDLE_SIZE,
+                height: HANDLE_SIZE,
+                left: `${centerOf(coordinates, p.name)}px`,
+                zIndex: 50,
+                pointerEvents: "auto",
+              }}
+              data-testid={`message-create-handle-${props.insertIndex}-${p.name}`}
+              title={`Drag to create a message from ${p.name}`}
+              aria-label={`Drag to create a message from ${p.name}`}
+              onPointerDown={(event) => startDrag(p.name, event)}
+            >
+              +
+            </button>
+          ))}
+        {dividerInsertionEnabled && (
           <button
-            key={p.name}
             type="button"
-            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-400 bg-white text-amber-500 text-xs leading-none font-bold flex items-center justify-center cursor-grab hover:bg-amber-50 hover:border-amber-500 hover:shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+            className="absolute top-1/2 right-0 -translate-y-1/2 rounded border border-amber-400 bg-white text-amber-500 text-[9px] leading-none font-bold px-1 flex items-center justify-center hover:bg-amber-50 hover:border-amber-500 hover:shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
             style={{
-              width: HANDLE_SIZE,
               height: HANDLE_SIZE,
-              left: `${centerOf(coordinates, p.name)}px`,
               zIndex: 50,
               pointerEvents: "auto",
             }}
-            data-testid={`message-create-handle-${props.insertIndex}-${p.name}`}
-            title={`Drag to create a message from ${p.name}`}
-            aria-label={`Drag to create a message from ${p.name}`}
-            onPointerDown={(event) => startDrag(p.name, event)}
+            data-testid={`divider-insert-${props.insertIndex}`}
+            title="Insert divider"
+            aria-label="Insert divider"
+            onClick={insertDivider}
           >
-            +
+            ══
           </button>
-        ))}
-        <button
-          type="button"
-          className="absolute top-1/2 right-0 -translate-y-1/2 rounded border border-amber-400 bg-white text-amber-500 text-[9px] leading-none font-bold px-1 flex items-center justify-center hover:bg-amber-50 hover:border-amber-500 hover:shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
-          style={{
-            height: HANDLE_SIZE,
-            zIndex: 50,
-            pointerEvents: "auto",
-          }}
-          data-testid={`divider-insert-${props.insertIndex}`}
-          title="Insert divider"
-          aria-label="Insert divider"
-          onClick={insertDivider}
-        >
-          ══
-        </button>
+        )}
       </>
     );
   }

@@ -103,6 +103,7 @@ export const Interaction = (props: {
         messageClassNames={messageClassNames}
         isSelf={isSelf}
         interactionWidth={isSelf ? undefined : interactionWidth}
+        enableCreateDrag
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import {
   coordinatesAtom,
+  enableParticipantInsertionAtom,
   modeAtom,
   onContentChangeAtom,
   RenderMode,
@@ -32,6 +33,7 @@ const generateName = (existingNames: Set<string>) => {
 
 export const ParticipantInsertControls = () => {
   const mode = useAtomValue(modeAtom);
+  const enabled = useAtomValue(enableParticipantInsertionAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
@@ -83,7 +85,11 @@ export const ParticipantInsertControls = () => {
     onContentChange(nextCode);
   };
 
-  if (mode !== RenderMode.Dynamic || participantModels.length === 0) {
+  if (
+    !enabled ||
+    mode !== RenderMode.Dynamic ||
+    participantModels.length === 0
+  ) {
     return null;
   }
 

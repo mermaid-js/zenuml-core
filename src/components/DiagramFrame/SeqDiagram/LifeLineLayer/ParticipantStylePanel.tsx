@@ -2,6 +2,7 @@ import {
   codeAtom,
   createMessageDragAtom,
   diagramElementAtom,
+  enableParticipantStyleEditingAtom,
   modeAtom,
   onContentChangeAtom,
   RenderMode,
@@ -39,6 +40,7 @@ const PARTICIPANT_TYPES = [
 
 export const ParticipantStylePanel = () => {
   const mode = useAtomValue(modeAtom);
+  const enabled = useAtomValue(enableParticipantStyleEditingAtom);
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const rootContext = useAtomValue(rootContextAtom);
@@ -112,7 +114,13 @@ export const ParticipantStylePanel = () => {
     };
   }, [isOpen, setSelected]);
 
-  if (mode !== RenderMode.Dynamic || !isOpen || !participantName || !panelPos) {
+  if (
+    !enabled ||
+    mode !== RenderMode.Dynamic ||
+    !isOpen ||
+    !participantName ||
+    !panelPos
+  ) {
     return null;
   }
 
