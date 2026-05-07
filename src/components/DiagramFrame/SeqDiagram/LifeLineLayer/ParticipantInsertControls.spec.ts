@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { computeAppendAnchor } from "./ParticipantInsertControls";
+import {
+  computeAppendAnchor,
+  computePrependAnchor,
+} from "./ParticipantInsertControls";
 import { MARGIN } from "@/positioning/Constants";
 
 const stubCoordinates = (
@@ -29,5 +32,27 @@ describe("computeAppendAnchor", () => {
   it("returns null when there are no participants", () => {
     const coordinates = stubCoordinates({});
     expect(computeAppendAnchor(coordinates, [])).toBeNull();
+  });
+});
+
+describe("computePrependAnchor", () => {
+  it("places the button half of the next gap to the left of the first participant (>=2 participants)", () => {
+    // A: [50, 100]   B: [180, 230]   gap A->B = 80
+    const coordinates = stubCoordinates({
+      A: { left: 50, right: 100 },
+      B: { left: 180, right: 230 },
+    });
+    // expected: left(A) - (left(B) - right(A)) / 2 = 50 - 80/2 = 10
+    expect(computePrependAnchor(coordinates, ["A", "B"])).toBe(10);
+  });
+
+  it("falls back to MARGIN/2 to the left when only one participant", () => {
+    const coordinates = stubCoordinates({ A: { left: 50, right: 100 } });
+    expect(computePrependAnchor(coordinates, ["A"])).toBe(50 - MARGIN / 2);
+  });
+
+  it("returns null when there are no participants", () => {
+    const coordinates = stubCoordinates({});
+    expect(computePrependAnchor(coordinates, [])).toBeNull();
   });
 });

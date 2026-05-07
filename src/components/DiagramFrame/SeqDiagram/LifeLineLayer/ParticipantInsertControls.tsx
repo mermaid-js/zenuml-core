@@ -36,6 +36,21 @@ export const computeAppendAnchor = (
   return coordinates.right(last) + MARGIN / 2;
 };
 
+// Mirror of computeAppendAnchor for the leading prepend button.
+export const computePrependAnchor = (
+  coordinates: AnchorCoordinates,
+  participantNames: string[],
+): number | null => {
+  if (participantNames.length === 0) return null;
+  const first = participantNames[0];
+  if (participantNames.length >= 2) {
+    const next = participantNames[1];
+    const gap = coordinates.left(next) - coordinates.right(first);
+    return coordinates.left(first) - gap / 2;
+  }
+  return coordinates.left(first) - MARGIN / 2;
+};
+
 const BUTTON_CENTER_Y = 40;
 const BUTTON_SIZE = 16;
 const HIT_AREA_SIZE = 36;
@@ -88,9 +103,19 @@ export const ParticipantInsertControls = () => {
     return anchors;
   }, [coordinates, participantModels]);
 
+  const participantNames = useMemo(
+    () => participantModels.map((p) => p.name),
+    [participantModels],
+  );
+
+  const prependAnchor = useMemo(
+    () => computePrependAnchor(coordinates, participantNames),
+    [coordinates, participantNames],
+  );
+
   const appendAnchor = useMemo(
-    () => computeAppendAnchor(coordinates, participantModels.map((p) => p.name)),
-    [coordinates, participantModels],
+    () => computeAppendAnchor(coordinates, participantNames),
+    [coordinates, participantNames],
   );
 
   const handleInsert = (insertIndex: number) => {
@@ -120,6 +145,30 @@ export const ParticipantInsertControls = () => {
 
   return (
     <>
+      {prependAnchor !== null && (
+        <div
+          className="group absolute -translate-x-1/2"
+          style={{
+            left: prependAnchor,
+            top: HIT_AREA_TOP,
+            width: HIT_AREA_SIZE,
+            height: HIT_AREA_SIZE,
+            pointerEvents: "auto",
+          }}
+        >
+          <button
+            type="button"
+            data-testid="participant-prepend-button"
+            title="Add participant"
+            aria-label="Add participant at the start"
+            className={insertButtonClass}
+            style={insertButtonStyle}
+            onClick={() => handleInsert(0)}
+          >
+            +
+          </button>
+        </div>
+      )}
       {gapAnchors.map((left, index) => (
         <div
           key={index}
