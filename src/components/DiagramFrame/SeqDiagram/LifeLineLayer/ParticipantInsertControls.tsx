@@ -8,9 +8,33 @@ import {
   rootContextAtom,
 } from "@/store/Store";
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
+import { MARGIN } from "@/positioning/Constants";
 import { useAtom, useAtomValue } from "jotai";
 import { codeAtom } from "@/store/Store";
 import { useMemo } from "react";
+
+interface AnchorCoordinates {
+  left(name: string): number;
+  right(name: string): number;
+}
+
+// Anchor for the trailing append button. Mirrors the in-between gap-midpoint
+// logic so the trailing "+" sits in clear space to the right of the last
+// participant — symmetric to every other gap button.
+export const computeAppendAnchor = (
+  coordinates: AnchorCoordinates,
+  participantNames: string[],
+): number | null => {
+  if (participantNames.length === 0) return null;
+  const last = participantNames[participantNames.length - 1];
+  if (participantNames.length >= 2) {
+    const prev = participantNames[participantNames.length - 2];
+    const gap = coordinates.left(last) - coordinates.right(prev);
+    return coordinates.right(last) + gap / 2;
+  }
+  // Single-participant fallback: no previous gap to mirror.
+  return coordinates.right(last) + MARGIN / 2;
+};
 
 const BUTTON_CENTER_Y = 40;
 const BUTTON_SIZE = 16;
@@ -64,12 +88,10 @@ export const ParticipantInsertControls = () => {
     return anchors;
   }, [coordinates, participantModels]);
 
-  // Anchor for appending a new participant after the last one
-  const appendAnchor = useMemo(() => {
-    if (participantModels.length === 0) return null;
-    const last = participantModels[participantModels.length - 1];
-    return coordinates.right(last.name) - BUTTON_SIZE / 2;
-  }, [coordinates, participantModels]);
+  const appendAnchor = useMemo(
+    () => computeAppendAnchor(coordinates, participantModels.map((p) => p.name)),
+    [coordinates, participantModels],
+  );
 
   const handleInsert = (insertIndex: number) => {
     if (!rootContext) return;
