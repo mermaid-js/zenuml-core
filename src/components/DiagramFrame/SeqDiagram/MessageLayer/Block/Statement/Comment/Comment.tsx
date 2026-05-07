@@ -53,7 +53,7 @@ marked.setOptions({
     const validLanguage = highlightjs.getLanguage(language)
       ? language
       : "plaintext";
-    return highlightjs.highlight(validLanguage, code).value;
+    return highlightjs.highlight(code, { language: validLanguage }).value;
   },
   breaks: true,
 });
