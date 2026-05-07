@@ -36,6 +36,7 @@ function manualChunks(id: string) {
 
 export default defineConfig({
   build: {
+    target: "esnext",
     // https://vitejs.dev/guide/build.html#library-mode
     lib: {
       entry: resolve(__dirname, "src/core.tsx"),
