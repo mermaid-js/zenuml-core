@@ -381,7 +381,7 @@ export const StylePanel = () => {
               title="Change message type"
               aria-expanded={openSubmenu === "type"}
               aria-haspopup="true"
-              onClick={() => setOpenSubmenu(openSubmenu === "type" ? null : "type")}
+              onClick={() => openSub("type")}
             >
               {messageData.current.currentType} ▾
             </button>
@@ -448,7 +448,7 @@ export const StylePanel = () => {
               title="Wrap in fragment"
               aria-expanded={openSubmenu === "wrap"}
               aria-haspopup="true"
-              onClick={() => setOpenSubmenu(openSubmenu === "wrap" ? null : "wrap")}
+              onClick={() => openSub("wrap")}
             >
               Wrap ▾
             </button>
