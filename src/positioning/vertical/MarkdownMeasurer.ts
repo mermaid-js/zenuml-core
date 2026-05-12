@@ -1,5 +1,4 @@
 import { marked } from "marked";
-import DOMPurify from "dompurify";
 import Comment from "../../components/Comment/Comment";
 
 const defaultTokensOptions = {
@@ -14,11 +13,7 @@ export class MarkdownMeasurer {
     }
 
     const commentObj = new Comment(_text);
-    const text = DOMPurify.sanitize(
-      commentObj?.text && marked.parse(commentObj?.text),
-    );
-
-    const tokens = marked.lexer(text, defaultTokensOptions);
+    const tokens = marked.lexer(commentObj?.text ?? "", defaultTokensOptions);
     if (!tokens.length) {
       return 0;
     }
@@ -28,7 +23,6 @@ export class MarkdownMeasurer {
     //   "MarkdownMeasurer",
     //   `commentObj?.text ${commentObj?.text}`,
     //   `lines.length ${lines.length}`,
-    //   `DOMPurify ${text}`,
     //   `tokens", ${JSON.stringify(tokens)}`,
     // );
 

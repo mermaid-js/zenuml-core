@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync 
 import { resolve, join } from "node:path";
 import { PNG } from "pngjs";
 import pixelmatchModule from "pixelmatch";
+import { CASES } from "../../e2e/data/compare-cases.js";
 import { extractZenumlBlocks, startWatchMode } from "./zenuml";
 
 const pixelmatch = (pixelmatchModule as any).default ?? pixelmatchModule;
@@ -93,6 +94,20 @@ describe("zenuml CLI", () => {
     const svg = readFileSync(outputPath, "utf-8");
     expect(svg).toContain('<svg xmlns=');
     expect(svg).toContain("</svg>");
+  });
+
+  it("renders e2e smoke fixture comments in the Bun CLI runtime", async () => {
+    const inputPath = tmpFile("e2e-smoke.zenuml");
+    const outputPath = tmpFile("e2e-smoke.svg");
+    writeFileSync(inputPath, CASES.smoke, "utf-8");
+
+    const { exitCode, stderr } = await runCli(["-i", inputPath, "-o", outputPath, "-q"]);
+    expect(exitCode).toBe(0);
+    expect(stderr).not.toContain("DOMPurify.sanitize is not a function");
+
+    const svg = readFileSync(outputPath, "utf-8");
+    expect(svg).toContain('<svg xmlns=');
+    expect(svg).toContain("String line");
   });
 
   // (d) stdin (-i -) piping works via subprocess with piped stdin
