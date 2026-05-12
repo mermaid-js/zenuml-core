@@ -8,8 +8,7 @@
   },
   "files": [
     "dist/",
-    "types/",
-    "src/cli/zenuml.ts"
+    "types/"
   ],
   "scripts": {
     "dev": "vite dev --port 4000 --host 0.0.0.0",
@@ -17,9 +16,11 @@
     "preview": "bun run --bun vite preview --port 4000 --host",
     "build:site": "bun run --bun vite build",
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
-    "build": "bun run --bun vite build -c vite.config.lib.ts",
-    "build:release": "RELEASE=1 bun run --bun vite build -c vite.config.lib.ts",
-    "build:analyze": "RELEASE=1 ANALYZE=1 bun run --bun vite build -c vite.config.lib.ts",
+    "build:lib": "bun run --bun vite build -c vite.config.lib.ts",
+    "build:cli": "bun run --bun vite build -c vite.config.cli.ts",
+    "build": "bun run build:lib && bun run build:cli",
+    "build:release": "RELEASE=1 bun run build:lib && RELEASE=1 bun run build:cli",
+    "build:analyze": "RELEASE=1 ANALYZE=1 bun run build:lib && RELEASE=1 bun run build:cli",
     "test": "bun test src test/unit",
     "pw": "playwright test --reporter=list",
     "pw:ci": "playwright test",
@@ -53,7 +54,7 @@
     "worker:deploy:staging": "bun run build:site && bun run --bun wrangler deploy --env staging"
   },
   "bin": {
-    "zenuml": "./src/cli/zenuml.ts"
+    "zenuml": "./dist/cli/zenuml.mjs"
   },
   "main": "./dist/zenuml.js",
   "module": "./dist/zenuml.esm.mjs",
@@ -96,6 +97,7 @@
     "marked": "^4.3.0",
     "pako": "^2.1.0",
     "pino": "^8.21.0",
+    "playwright-core": "^1.59.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tailwind-merge": "^3.4.0",
@@ -104,7 +106,6 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@happy-dom/global-registrator": "^18.0.1",
-    "@napi-rs/canvas": "^0.1.97",
     "@playwright/test": "^1.57.0",
     "@storybook/addon-docs": "^9.1.17",
     "@storybook/addon-onboarding": "^9.1.17",
@@ -130,7 +131,6 @@
     "jsdom": "^26.1.0",
     "less": "^4.5.1",
     "pixelmatch": "^7.1.0",
-    "playwright-core": "^1.59.1",
     "pngjs": "^7.0.0",
     "postcss": "^8.5.6",
     "prettier": "3.5.3",
@@ -144,5 +144,8 @@
     "vite-plugin-svgr": "^4.5.0",
     "vitest": "^3.2.4",
     "wrangler": "^4.88"
+  },
+  "optionalDependencies": {
+    "@napi-rs/canvas": "^0.1.97"
   }
 }
