@@ -132,6 +132,33 @@ describe("zenuml CLI", () => {
     expect(stdout).toContain("</svg>");
   });
 
+  it("keeps stdout clean for SVG pipe output and sends progress to stderr", async () => {
+    const inputPath = tmpFile("stdout-contract.zenuml");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { stdout, stderr, exitCode } = await runCli(["-i", inputPath, "-o", "-"]);
+    expect(exitCode).toBe(0);
+    expect(stdout.trimStart().startsWith("<svg")).toBe(true);
+    expect(stdout.trimEnd().endsWith("</svg>")).toBe(true);
+    expect(stdout).not.toContain("Rendering");
+    expect(stdout).not.toContain("Wrote");
+    expect(stdout).not.toContain("Width of");
+    expect(stdout).not.toContain("Position of");
+    expect(stderr).toContain("Rendering");
+  });
+
+  it("writes progress to stderr and leaves stdout empty for file output", async () => {
+    const inputPath = tmpFile("stderr-progress.zenuml");
+    const outputPath = tmpFile("stderr-progress.svg");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { stdout, stderr, exitCode } = await runCli(["-i", inputPath, "-o", outputPath]);
+    expect(exitCode).toBe(0);
+    expect(stdout).toBe("");
+    expect(stderr).toContain("Rendering");
+    expect(stderr).toContain("Wrote");
+  });
+
   // (f) missing -i flag exits with code 1 and error on stderr
   it("exits with code 1 and error on stderr when -i is missing", async () => {
     const { stderr, exitCode } = await runCli([]);
@@ -598,6 +625,17 @@ describe("zenuml CLI", () => {
     try { rmSync(subDir, { recursive: true }); } catch { /* ignore */ }
   });
 
+  it("--quiet suppresses all non-error logs for successful file output", async () => {
+    const inputPath = tmpFile("quiet-contract.zenuml");
+    const outputPath = tmpFile("quiet-contract.svg");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { stdout, stderr, exitCode } = await runCli(["-i", inputPath, "-o", outputPath, "--quiet"]);
+    expect(exitCode).toBe(0);
+    expect(stdout).toBe("");
+    expect(stderr).toBe("");
+  });
+
   // (ai) -o single file + multiple inputs → error exit 1
   it("-o as single file with multiple inputs errors with exit 1", async () => {
     const f1 = tmpFile("multi-err-1.zenuml");
@@ -851,10 +889,15 @@ describe("zenuml CLI", () => {
 
     writeFileSync(inputPath, "```zenuml\nA -> B: hi\n```\n", "utf-8");
 
-    const { exitCode, stdout } = await runCli(["-i", inputPath, "-o", "-"]);
+    const { exitCode, stdout, stderr } = await runCli(["-i", inputPath, "-o", "-"]);
     expect(exitCode).toBe(0);
     expect(stdout).toContain("![");
     expect(stdout).toContain("stdout-md-zenuml-0.svg");
+    expect(stdout).not.toContain("Rendering");
+    expect(stdout).not.toContain("Wrote");
+    expect(stdout).not.toContain("Width of");
+    expect(stdout).not.toContain("Position of");
+    expect(stderr).toContain("Wrote");
   });
 
   // (ar) --md + non-.md input → exit 1
