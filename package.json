@@ -6,8 +6,14 @@
   "repository": {
     "url": "https://github.com/mermaid-js/zenuml-core"
   },
+  "files": [
+    "dist/",
+    "types/",
+    "src/cli/zenuml.ts"
+  ],
   "scripts": {
     "dev": "vite dev --port 4000 --host 0.0.0.0",
+    "cli": "bun src/cli/zenuml.ts",
     "preview": "bun run --bun vite preview --port 4000 --host",
     "build:site": "bun run --bun vite build",
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
@@ -45,6 +51,9 @@
     "worker:dev": "bun run build:site && bun run --bun wrangler dev",
     "worker:deploy": "bun run build:site && bun run --bun wrangler deploy -e production",
     "worker:deploy:staging": "bun run build:site && bun run --bun wrangler deploy --env staging"
+  },
+  "bin": {
+    "zenuml": "./src/cli/zenuml.ts"
   },
   "main": "./dist/zenuml.js",
   "module": "./dist/zenuml.esm.mjs",
@@ -121,6 +130,7 @@
     "jsdom": "^26.1.0",
     "less": "^4.5.1",
     "pixelmatch": "^7.1.0",
+    "playwright-core": "^1.59.1",
     "pngjs": "^7.0.0",
     "postcss": "^8.5.6",
     "prettier": "3.5.3",
