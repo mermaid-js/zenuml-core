@@ -10,23 +10,46 @@ const logger = pino({
 });
 
 const LEVELS = ["log", "trace", "debug", "info", "warn", "error"] as const;
+const PINO_LEVEL: Record<(typeof LEVELS)[number], "trace" | "debug" | "info" | "warn" | "error"> = {
+  log: "info",
+  trace: "trace",
+  debug: "debug",
+  info: "info",
+  warn: "warn",
+  error: "error",
+};
 
 type LoggerLike = Record<string, (...args: unknown[]) => void> & {
   child: (opts: { name?: string }) => LoggerLike;
 };
 
-function bind(target: LoggerLike, level: string) {
-  const consoleFn = level in console
-    ? (console[level as keyof Console] as (...args: unknown[]) => void)
-    : console.log;
-  target[level] = consoleFn.bind(console);
+function isEnabled(target: LoggerLike, level: (typeof LEVELS)[number]) {
+  const loggerTarget = target as unknown as {
+    isLevelEnabled?: (level: string) => boolean;
+  };
+  return loggerTarget.isLevelEnabled?.(PINO_LEVEL[level]) ?? true;
 }
 
-function bind2(target: LoggerLike, level: string, prefix: [string, string]) {
+function bind(target: LoggerLike, level: (typeof LEVELS)[number]) {
   const consoleFn = level in console
     ? (console[level as keyof Console] as (...args: unknown[]) => void)
     : console.log;
-  target[level] = consoleFn.bind(console, prefix[0], prefix[1]);
+  target[level] = (...args: unknown[]) => {
+    if (isEnabled(target, level)) {
+      consoleFn(...args);
+    }
+  };
+}
+
+function bind2(target: LoggerLike, level: (typeof LEVELS)[number], prefix: [string, string]) {
+  const consoleFn = level in console
+    ? (console[level as keyof Console] as (...args: unknown[]) => void)
+    : console.log;
+  target[level] = (...args: unknown[]) => {
+    if (isEnabled(target, level)) {
+      consoleFn(prefix[0], prefix[1], ...args);
+    }
+  };
 }
 
 function prettify(target: LoggerLike): LoggerLike {
