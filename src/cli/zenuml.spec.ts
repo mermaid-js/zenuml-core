@@ -18,10 +18,11 @@ const SAMPLE_DSL = "A -> B: hello";
 /** Spawn the CLI as a subprocess and collect output. */
 async function runCli(
   args: string[],
-  options?: { stdin?: string },
+  options?: { stdin?: string; env?: Record<string, string> },
 ): Promise<{ stdout: string; stderr: string; exitCode: number; stdoutBytes?: Buffer }> {
   const proc = Bun.spawn(["bun", "run", CLI_PATH, ...args], {
     cwd: resolve(import.meta.dir, "../.."),
+    env: options?.env ? { ...process.env, ...options.env } : process.env,
     stdout: "pipe",
     stderr: "pipe",
     stdin: options?.stdin !== undefined ? "pipe" : undefined,
@@ -196,6 +197,22 @@ describe("zenuml CLI", () => {
     expect(buf[1]).toBe(0x50);
     expect(buf[2]).toBe(0x4E);
     expect(buf[3]).toBe(0x47);
+  });
+
+  it("prints PNG setup guidance when Chromium cannot be launched", async () => {
+    const inputPath = tmpFile("png-missing-chromium.zenuml");
+    const outputPath = tmpFile("png-missing-chromium.png");
+    writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
+
+    const { exitCode, stderr } = await runCli(["-i", inputPath, "-o", outputPath, "-e", "png"], {
+      env: { ZENUML_CHROMIUM_PATH: "/definitely/missing/chromium" },
+    });
+
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("PNG output requires Playwright's Chromium runtime");
+    expect(stderr).toContain("npm install playwright-core");
+    expect(stderr).toContain("npx playwright-core install chromium");
+    expect(stderr).toContain("ZENUML_CHROMIUM_PATH=/path/to/chrome");
   });
 
   // (j) Auto-format detection from .png output extension (no -e flag)

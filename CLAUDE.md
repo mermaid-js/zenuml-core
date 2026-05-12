@@ -76,6 +76,16 @@ Output formats:
 - **E2E tests**: Playwright for full integration testing with visual snapshots
 - **Test files**: Co-located with source files using `.spec.ts` extension
 
+### E2E Screenshot Snapshot Updates
+
+Never update Playwright screenshots just to make a failing snapshot test pass. Before committing any updated E2E screenshot:
+
+1. Compare the before and after screenshots and identify exactly where the visual differences are.
+2. Use the existing diagram diff workflow where applicable: run `node scripts/analyze-compare-case.mjs --case <name> --json` for structured attribution, or `--output-dir <dir>` to save `html.png`, `svg.png`, `diff.png`, and `report.json`.
+3. For compare-case pages, treat the native diff panel / analyzer output as the source of truth. Locate connected diff clusters, their bounding boxes/centroids, and the nearest semantic targets such as labels, arrows, participant boxes, participant icons, stereotypes, groups, fragments, or comments.
+4. Judge the identified differences against the actual code change in the commit. Only update snapshots when the changed pixels are an intentional and correct consequence of the code change.
+5. In the PR or commit notes, state which elements changed, where they changed, and why the screenshot update is correct.
+
 ## Key Dependencies
 
 - **React 19**: UI framework

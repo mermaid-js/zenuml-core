@@ -20,7 +20,6 @@
         "marked": "^4.3.0",
         "pako": "^2.1.0",
         "pino": "^8.21.0",
-        "playwright-core": "^1.59.1",
         "react": "^19.2.3",
         "react-dom": "^19.2.3",
         "tailwind-merge": "^3.4.0",
@@ -54,6 +53,7 @@
         "jsdom": "^26.1.0",
         "less": "^4.5.1",
         "pixelmatch": "^7.1.0",
+        "playwright-core": "^1.59.1",
         "pngjs": "^7.0.0",
         "postcss": "^8.5.6",
         "prettier": "3.5.3",
@@ -71,6 +71,12 @@
       "optionalDependencies": {
         "@napi-rs/canvas": "^0.1.97",
       },
+      "peerDependencies": {
+        "playwright-core": "^1.59.1",
+      },
+      "optionalPeers": [
+        "playwright-core",
+      ],
     },
   },
   "packages": {
