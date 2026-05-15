@@ -28,6 +28,11 @@ channels {
     // Title directive if EOF or not followed by '.', '(', '='
     return next === EOF || (next !== DOT && next !== EQUALS && next !== OPEN_PAREN);
   };
+
+  this.isNameStartAhead = function() {
+    const next = this._input.LA(1);
+    return next !== -1 && /[\p{L}_]/u.test(String.fromCodePoint(next));
+  };
 }
 
 fragment HWS: [ \t]; // Horizontal WhiteSpace
@@ -140,10 +145,6 @@ ID
  : [\p{L}_] [\p{L}\p{Nd}_]*
  ;
 
-fragment UNIT
- : [a-zA-Z]+
- ;
-
 fragment DIGIT
     : [0-9]
     ;
@@ -154,7 +155,7 @@ INT
 
 FLOAT
  : DIGIT+ '.' DIGIT*
- | '.' DIGIT+
+ | '.' DIGIT+ {!this.isNameStartAhead()}?
  ;
 
 MONEY
@@ -162,7 +163,43 @@ MONEY
     ;
 
 NUMBER_UNIT
- : (INT | FLOAT) UNIT
+ : (DIGIT+ '.' DIGIT* | '.' DIGIT+ | DIGIT+) KNOWN_UNIT
+ ;
+
+DIGIT_LEADING_NAME
+ : DIGIT+ [\p{L}] [\p{L}\p{Nd}_]*
+ ;
+
+fragment KNOWN_UNIT
+ : TIME_UNIT
+ | SIZE_UNIT
+ | LENGTH_UNIT
+ | MASS_UNIT
+ ;
+
+fragment TIME_UNIT
+ : 'milliseconds' | 'millisecond' | 'ms'
+ | 'seconds' | 'second' | 'secs' | 'sec' | 's'
+ | 'minutes' | 'minute' | 'mins' | 'min'
+ | 'hours' | 'hour' | 'hrs' | 'hr' | 'h'
+ | 'days' | 'day' | 'd'
+ | 'weeks' | 'week' | 'w'
+ ;
+
+fragment SIZE_UNIT
+ : 'KiB' | 'MiB' | 'GiB' | 'TiB'
+ | 'KB' | 'MB' | 'GB' | 'TB'
+ | 'kb' | 'mb' | 'gb' | 'tb'
+ | 'B'
+ ;
+
+fragment LENGTH_UNIT
+ : 'rem' | 'em' | 'px'
+ | 'mm' | 'cm' | 'km' | 'm'
+ ;
+
+fragment MASS_UNIT
+ : 'mg' | 'kg' | 'g'
  ;
 
 // Strings are split into closed vs. unclosed to improve editor tolerance

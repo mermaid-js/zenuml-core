@@ -58,7 +58,7 @@ participantType
  ;
 
 name
- : ID | CSTRING | USTRING
+ : ID | DIGIT_LEADING_NAME | CSTRING | USTRING
  ;
 
 width
@@ -227,7 +227,7 @@ type
  ;
 
 assignee
- : atom | (ID (COMMA ID)*) | CSTRING | USTRING
+ : atom | ((ID | DIGIT_LEADING_NAME) (COMMA (ID | DIGIT_LEADING_NAME))*) | CSTRING | USTRING
  | NEW // allowing `new = method()`
  ;
 
@@ -246,11 +246,11 @@ parameter
  ;
 
 namedParameter
- : ID ASSIGN expr?
+ : (ID | DIGIT_LEADING_NAME) ASSIGN expr?
  ;
 
 declaration
- : type ID
+ : type (ID | DIGIT_LEADING_NAME)
  ;
 
 // try catch finaly
@@ -323,6 +323,7 @@ atom
  | MONEY          #moneyAtom
  | (TRUE | FALSE) #booleanAtom
  | ID             #idAtom
+ | DIGIT_LEADING_NAME #digitLeadingNameAtom
  | (CSTRING | USTRING) #stringAtom
  | NIL            #nilAtom
  ;
@@ -340,9 +341,9 @@ condition
  ;
 
 inExpr
- : ID IN ID
+ : (ID | DIGIT_LEADING_NAME) IN (ID | DIGIT_LEADING_NAME)
  ;
 
 textExpr
- : ID+
+ : (ID | DIGIT_LEADING_NAME | NUMBER_UNIT)+
  ;
