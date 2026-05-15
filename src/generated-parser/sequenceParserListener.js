@@ -671,6 +671,15 @@ export default class sequenceParserListener extends antlr4.tree.ParseTreeListene
 	}
 
 
+	// Enter a parse tree produced by sequenceParser#digitLeadingNameAtom.
+	enterDigitLeadingNameAtom(ctx) {
+	}
+
+	// Exit a parse tree produced by sequenceParser#digitLeadingNameAtom.
+	exitDigitLeadingNameAtom(ctx) {
+	}
+
+
 	// Enter a parse tree produced by sequenceParser#stringAtom.
 	enterStringAtom(ctx) {
 	}
