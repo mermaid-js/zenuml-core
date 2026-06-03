@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- **Start development server**: `bun dev` (runs on port 8080)
+- **Start development server**: `bun dev` (runs on port 14000)
 - **Build library**: `bun build` (builds library with vite.config.lib.ts)
 - **Build site**: `bun build:site` (builds demo site with vite.config.ts)
 - **Run tests**: `bun run test` (runs Vitest unit tests, excluding E2E). Do NOT use `bun test` — it picks up Playwright E2E files and reports false failures.

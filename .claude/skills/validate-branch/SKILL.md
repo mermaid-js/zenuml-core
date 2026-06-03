@@ -33,10 +33,10 @@ Do NOT use `bun test` — it picks up Playwright files and gives false failures.
 
 ### 3. Playwright E2E
 
-Before running Playwright, make sure port `8080` is either free or owned by a dev server started from **this repo**. `playwright.config.ts` uses `reuseExistingServer`, so an unrelated Vite server on `8080` will cause false results.
+Before running Playwright, make sure port `14000` is either free or owned by a dev server started from **this repo**. `playwright.config.ts` uses `reuseExistingServer`, so an unrelated Vite server on `14000` will cause false results.
 
 ```bash
-PORT="${PORT:-8080}"
+PORT="${PORT:-14000}"
 THIS_REPO="$(pwd -P)"
 LISTENER_PID="$(lsof -tiTCP:${PORT} -sTCP:LISTEN 2>/dev/null | head -n1 || true)"
 
@@ -68,5 +68,5 @@ Report one of:
 
 - `bun run test` not `bun test` — critical difference, the latter runs E2E too
 - Playwright needs browsers installed (`bun pw:install` if missing)
-- Before `bun pw`, verify any existing `8080` listener belongs to this repo; otherwise kill it and let Playwright start the right server
+- Before `bun pw`, verify any existing `14000` listener belongs to this repo; otherwise kill it and let Playwright start the right server
 - HTML Playwright snapshot failures are a hard stop — never update HTML snapshots without understanding why they changed

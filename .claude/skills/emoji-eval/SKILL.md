@@ -9,7 +9,7 @@ Automatically score emoji rendering quality in ZenUML diagrams by rendering test
 
 ## Prerequisites
 
-- Dev server running on `http://localhost:8080` (`bun dev`)
+- Dev server running on `http://localhost:14000` (`bun dev`)
 - Playwright MCP available for browser automation
 
 ## Test Cases
@@ -37,7 +37,7 @@ For each test case:
 
 ### Step 1: Render in DOM mode
 
-1. Navigate to `http://localhost:8080`
+1. Navigate to `http://localhost:14000`
 2. Set the code via CodeMirror:
    ```javascript
    page.evaluate((code) => {

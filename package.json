@@ -11,9 +11,9 @@
     "types/"
   ],
   "scripts": {
-    "dev": "vite dev --port 4000 --host 0.0.0.0",
+    "dev": "vite dev --port 14000 --host 0.0.0.0",
     "cli": "bun src/cli/zenuml.ts",
-    "preview": "bun run --bun vite preview --port 4000 --host",
+    "preview": "bun run --bun vite preview --port 14000 --host",
     "build:site": "bun run --bun vite build",
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
     "build:lib": "bun run --bun vite build -c vite.config.lib.ts",
@@ -130,7 +130,7 @@
     "jsdom": "^26.1.0",
     "less": "^4.5.1",
     "pixelmatch": "^7.1.0",
-    "playwright-core": "^1.59.1",
+    "playwright-core": "1.57.0",
     "pngjs": "^7.0.0",
     "postcss": "^8.5.6",
     "prettier": "3.5.3",
@@ -149,7 +149,7 @@
     "@napi-rs/canvas": "^0.1.97"
   },
   "peerDependencies": {
-    "playwright-core": "^1.59.1"
+    "playwright-core": "1.57.0"
   },
   "peerDependenciesMeta": {
     "playwright-core": {
