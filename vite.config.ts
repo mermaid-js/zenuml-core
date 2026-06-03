@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   server: {
-    allowedHosts: ["8080.diagramly.net"],
+    allowedHosts: ["mmd-zenuml-core-app.zenuml.com"],
   },
   plugins: [svgr(), react()],
   define: {

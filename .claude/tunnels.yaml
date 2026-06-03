@@ -1,0 +1,6 @@
+project: mmd-zenuml-core
+domain: zenuml.com
+tunnels:
+- name: files
+- name: app
+  port: 14000

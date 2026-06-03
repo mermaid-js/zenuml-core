@@ -11,9 +11,9 @@
     "types/"
   ],
   "scripts": {
-    "dev": "vite dev --port 4000 --host 0.0.0.0",
+    "dev": "vite dev --port 14000 --host 0.0.0.0",
     "cli": "bun src/cli/zenuml.ts",
-    "preview": "bun run --bun vite preview --port 4000 --host",
+    "preview": "bun run --bun vite preview --port 14000 --host",
     "build:site": "bun run --bun vite build",
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
     "build:lib": "bun run --bun vite build -c vite.config.lib.ts",

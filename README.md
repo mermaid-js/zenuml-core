@@ -85,10 +85,10 @@ tunnels for this.
 
 ### Cloudflare tunnels [for collaborators only]
 
-1. Start your local dev server at `8080` with `pnpm dev`.
+1. Start your local dev server at `14000` with `bun dev`.
 2. Request a subdomain from the team. For example, `air.zenuml.com`.
 3. You will be given a command that install a service locally. Run it.
-4. Your localhost:8080 will be available at `air.zenuml.com`.
+4. Your localhost:14000 will be available at `air.zenuml.com`.
 
 ### Docker
 
