@@ -43,11 +43,11 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-browsers-v2-${{ hashFiles('bun.lock') }}
-          restore-keys: playwright-browsers-v2-
+          key: playwright-browsers-${{ hashFiles('bun.lock') }}
+          restore-keys: playwright-browsers-
       - name: Install Playwright Chromium for CLI PNG tests
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: bun run pw:install && npx playwright-core install chromium
+        run: bun run pw:install
       - name: Run tests
         run: bun run test --run
 
