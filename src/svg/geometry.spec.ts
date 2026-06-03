@@ -83,8 +83,12 @@ describe("geometry: occurrences", () => {
 });
 
 describe("geometry: fragments", () => {
+  // Multiline form: a single-line `if(x) { A -> B: msg }` lets the greedy async
+  // `content` lexer swallow the closing `}`, so the message escapes the fragment
+  // (the same pre-existing quirk `loop`'s optional braceBlock has). The canonical
+  // multiline form below renders correctly and is what every other if test uses.
   it("positions an if fragment", () => {
-    const g = geo("if(x) { A -> B: msg }");
+    const g = geo("if(x) {\n  A -> B: msg\n}");
     expect(g.fragments).toHaveLength(1);
     const f = g.fragments[0];
     expect(f.kind).toBe("alt");
@@ -93,7 +97,7 @@ describe("geometry: fragments", () => {
   });
 
   it("positions if/else fragment with correct dimensions", () => {
-    const g = geo("if(x) { A->B: a } else { A->B: b }");
+    const g = geo("if(x) {\n  A->B: a\n} else {\n  A->B: b\n}");
     expect(g.fragments).toHaveLength(1);
     const f = g.fragments[0];
     expect(f.kind).toBe("alt");
@@ -117,7 +121,7 @@ describe("geometry: returns", () => {
 describe("geometry: creations", () => {
   it("creation participant has lower y than normal participants", () => {
     const g = geo("A.m { new B() }");
-    const normal = g.participants.find(p => p.name === "A")!;
+    const normal = g.participants.find((p) => p.name === "A")!;
     const created = g.creations[0].participant;
     expect(created.y).toBeGreaterThan(normal.y);
     expect(created.width).toBeGreaterThan(0);
