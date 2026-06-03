@@ -9,6 +9,7 @@ import {
 import { specialCharRegex } from "@/utils/messageNormalizers";
 import { EditableSpan } from "@/components/common/EditableSpan";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
+import { resolveAutoEditToken } from "@/utils/pendingEditableRange";
 import { useSetAtom } from "jotai";
 
 const equalityRegex = /\b(\w+)\s*==\s*(\w+)\b/g;
@@ -25,10 +26,11 @@ export const ConditionLabel = (props: { condition: any }) => {
     props.condition?.start?.start,
     props.condition?.stop?.stop,
   ];
-  const shouldAutoEdit =
-    pendingEditableRange?.start === start && pendingEditableRange?.end === end
-      ? pendingEditableRange.token
-      : undefined;
+  const shouldAutoEdit = resolveAutoEditToken(
+    pendingEditableRange,
+    start,
+    end,
+  );
 
   const handleSave = (newText: string) => {
     // if text is empty or unchanged (compare against stripped display value), bail out
