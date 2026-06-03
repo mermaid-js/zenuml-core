@@ -47,7 +47,7 @@ jobs:
           restore-keys: playwright-browsers-
       - name: Install Playwright Chromium for CLI PNG tests
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: bun run pw:install
+        run: bun run pw:install && npx playwright-core install chromium
       - name: Run tests
         run: bun run test --run
 
