@@ -274,16 +274,19 @@ alt
  : ifBlock elseIfBlock* elseBlock?
  ;
 
+// braceBlock is optional to tolerate a missing block during typing (e.g. `if()`),
+// matching the `loop` rule below. Without this, ANTLR error recovery consumes the
+// following statement and the enclosing block's closing brace into the if/else body.
 ifBlock
- : IF parExpr braceBlock
+ : IF parExpr braceBlock?
  ;
 
 elseIfBlock
- : ELSE IF parExpr braceBlock
+ : ELSE IF parExpr braceBlock?
  ;
 
 elseBlock
- : ELSE braceBlock
+ : ELSE braceBlock?
  ;
 
 // [Perf] After removed 'OBRACE' rule, 'A.m {' is parsed as three messages.
