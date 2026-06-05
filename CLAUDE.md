@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Start development server**: `bun dev` (runs on port 14000)
 - **Build library**: `bun build` (builds library with vite.config.lib.ts)
 - **Build site**: `bun build:site` (builds demo site with vite.config.ts)
-- **Run tests**: `bun run test` (runs Vitest unit tests, excluding E2E). Do NOT use `bun test` — it picks up Playwright E2E files and reports false failures.
+- **Run tests**: `bun run test` (runs unit tests scoped to `src/` and `test/unit/`, excluding E2E). Do NOT run `bun test` without arguments — it picks up Playwright E2E files and reports false failures.
+- **Analyze E2E diff**: `node scripts/analyze-compare-case.mjs --case <name> --json` (structured diff attribution for compare-case pages; `--output-dir <dir>` saves `html.png`, `svg.png`, `diff.png`, `report.json`)
 - **Run E2E tests**: `bun pw` (runs Playwright tests)
 - **Run E2E tests (CI)**: `bun pw:ci` (runs with GitHub reporter for CI)
 - **Open Playwright UI**: `bun pw:ui`
@@ -74,7 +75,7 @@ Output formats:
 - **Unit tests**: Vitest for parser and utility functions
 - **Component tests**: React Testing Library for component logic
 - **E2E tests**: Playwright for full integration testing with visual snapshots
-- **Test files**: Co-located with source files using `.spec.ts` extension
+- **Test files**: Co-located with source files using `.spec.ts` / `.spec.tsx` extensions
 
 ### E2E Screenshot Snapshot Updates
 
@@ -100,12 +101,12 @@ Never update Playwright screenshots just to make a failing snapshot test pass. B
 Uses Bun as the package manager and JavaScript runtime. Bun is a fast all-in-one JavaScript runtime that includes a package manager, test runner, and bundler.
 
 ### Test Configuration
-- **Unit tests with Bun**: `bun test` (alias: `bun run test`) - Runs unit tests in `src/` and `test/unit/` folders (excludes `/tests` E2E folder)
+- **Unit tests**: `bun run test` — runs `bun test src test/unit`, scoping to unit test folders only (excludes `/tests` E2E folder)
 - **Vitest**: Tests also support Vitest for IDE integration compatibility
 - **E2E tests**: `bun pw` - Runs Playwright tests in `/tests` folder
 - **Test setup**: `test/setup.ts` configures test environment (mocks IntersectionObserver, etc.)
 - Tests use `vi` mocking utilities from Vitest
-- Test files use `.spec.ts` extension and are co-located with source files
+- Test files use `.spec.ts` / `.spec.tsx` extensions and are co-located with source files
 
 ## Bug Fix Process
 
