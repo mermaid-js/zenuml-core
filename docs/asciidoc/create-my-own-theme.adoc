@@ -106,7 +106,7 @@ they are NOT meant be overridden.
 For example,
 [html]
 ....
-// Participant.vue
+// Participant.tsx
 <div class="participant relative flex flex-col justify-center z-10 h-10"
 ....
 

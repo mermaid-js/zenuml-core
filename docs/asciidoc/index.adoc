@@ -183,7 +183,7 @@ This time we focus on how to align the arrow line and the arrow head.
 We use a similar approach as pattern #vertically aligning# with pattern
 #shift half the height#. Instead of `items-center` we use `items-end`.
 Then we use `translate-y-1/2` to shift the arrow head down half the
-height of the arrow head. (See Message.vue)
+height of the arrow head. (See Message.tsx)
 ....
   <div class="message flex items-end"
     <div class="name flex-grow" style="padding-left: 10px">{{content}}</div>

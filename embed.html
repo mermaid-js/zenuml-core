@@ -92,10 +92,6 @@
         window.addEventListener('message', handle_message, false);
 
         window.onerror = function (msg, url, lineNo, columnNo, error) {
-          if (msg.includes('module specifier “vue”')) {
-            // firefox only error, ignore
-            return false;
-          }
           try {
             parent.postMessage({ action: 'error', value: error }, '*');
           } catch (e) {
@@ -120,13 +116,6 @@
         ['clear', 'log', 'info', 'dir', 'warn', 'error', 'table'].forEach((level) => {
           const original = console[level];
           console[level] = (...args) => {
-            const msg = String(args[0]);
-            if (
-              msg.includes('You are running a development build of Vue') ||
-              msg.includes('You are running the esm-bundler build of Vue')
-            ) {
-              return;
-            }
             const stringifiedArgs = stringify(args);
             if (previous.level === level && previous.args && previous.args === stringifiedArgs) {
               parent !== window &&
