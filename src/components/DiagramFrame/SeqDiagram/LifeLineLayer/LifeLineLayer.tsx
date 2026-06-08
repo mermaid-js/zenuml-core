@@ -37,6 +37,20 @@ export const LifeLineLayer = (props: {
     }
     return null;
   }, [coordinates]);
+
+  const explicitChildren = useMemo(() => {
+    const seen = new Set<string>();
+    return ((props.context?.children as any[]) || [])
+      .filter((c) => c instanceof GroupContext || c instanceof ParticipantContext)
+      .filter((c) => {
+        if (!(c instanceof ParticipantContext)) return true;
+        const name = Participants(c).First()?.name;
+        if (!name || seen.has(name)) return false;
+        seen.add(name);
+        return true;
+      });
+  }, [props.context]);
+
   return (
     <div
       className="life-line-layer lifeline-layer z-30 absolute h-full flex flex-col top-0 pt-2"
@@ -58,11 +72,7 @@ export const LifeLineLayer = (props: {
             renderLifeLine={props.renderLifeLine}
           />
         )}
-        {((props.context?.children as any[]) || [])
-          .filter(
-            (c) => c instanceof GroupContext || c instanceof ParticipantContext,
-          )
-          .map((child, index) => (
+        {explicitChildren.map((child, index) => (
             <Fragment key={index}>
               {child instanceof GroupContext && (
                 <LifeLineGroup
