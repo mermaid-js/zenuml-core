@@ -25,18 +25,11 @@ Please follow the [integration tutorial](./TUTORIAL.md) for detailed steps.
 
 ## Technical Requirements
 
-These are the tools we use for working with the code and documentation:
-
-- [volta](https://volta.sh/) to manage node versions.
-- [Node.js](https://nodejs.org/en/). `volta install node`
-- [pnpm](https://pnpm.io/) package manager. `volta install pnpm`
-- [npx](https://docs.npmjs.com/cli/v8/commands/npx) the packaged executor in npm. This is needed [to install pnpm.](#install-packages)
-
-Follow the setup steps below to install them and start the development.
+- [Bun](https://bun.sh/) — package manager, runtime, and test runner. Install via `curl -fsSL https://bun.sh/install | bash`
 
 ### Switch to project
 
-Once you have cloned the repository onto your development machine, change into the `zenuml-core` project folder (the top level directory of the @zenuml/core project repository)
+Once you have cloned the repository onto your development machine, change into the `zenuml-core` project folder:
 
 ```bash
 cd zenuml-core
@@ -44,16 +37,14 @@ cd zenuml-core
 
 ### Install packages
 
-Run `npx pnpm install`. You will need `npx` for this because volta doesn't support it yet.
-
 ```bash
-npx pnpm install # npx is required for first install
+bun install
 ```
 
 ### Launch
 
 ```bash
-npx pnpm run dev
+bun dev
 ```
 
 ## CI/CD
