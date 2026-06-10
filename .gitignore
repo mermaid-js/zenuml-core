@@ -41,6 +41,7 @@ src/generated-parser/sequenceLexer.interp
 
 # Log files
 npm-debug.log*
+firebase-debug.log*
 
 # Editor directories and files
 .idea
