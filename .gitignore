@@ -39,6 +39,9 @@ src/generated-parser/sequenceLexer.interp
 # MCP config (contains tokens)
 .mcp.json
 
+# Claude Code local (per-machine) settings
+.claude/settings.local.json
+
 # Log files
 npm-debug.log*
 firebase-debug.log*
