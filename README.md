@@ -49,20 +49,16 @@ bun dev
 
 ## CI/CD
 
-CI/CD is done with GitHub Actions. The workflow is defined in `.github/workflows/*.yml`.
+CI/CD is done with GitHub Actions (`.github/workflows/`):
 
-## gh-pages.yml
+- **`cd.yml`** — runs on every push and pull request: lint + unit tests (`test`),
+  Playwright E2E (`e2e`, via `e2e.yml`), then — only if both pass — publishes
+  `@zenuml/core` to npm (on `main`) and deploys the demo site to Cloudflare
+  Workers (production on `main`, staging otherwise). See [DEPLOYMENT.md](./DEPLOYMENT.md).
+- **`e2e.yml`** — reusable Playwright workflow, called by `cd.yml` or run manually.
+- **`update-snapshots.yml`** — manually triggered; regenerates Linux visual snapshots.
 
-This workflow has two jobs: `build` -> `deploy`.
-
-```text
-test  -> npm publish
-      -> cy tests
-      -> build site -> deploy gh-pages
-```
-
-This workflow is triggered on every push to the `main` branch.
-It will build the project and publish the `dist` folder to the `gh-pages` branch.
+The DSL syntax reference lives at [docs/DSL_SYNTAX.md](./docs/DSL_SYNTAX.md).
 
 ## Put localhost on the internet
 

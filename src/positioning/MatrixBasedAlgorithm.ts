@@ -1,14 +1,21 @@
-import memoize from "lodash/memoize";
-
-function resolver() {
-  return (...args: any[]) => args.join("-");
+// Minimal replacement for lodash/memoize: caches on the joined argument list
+// (nested arrays stringify into the key, so matrix contents are part of it).
+function memoize<T extends (...args: any[]) => any>(fn: T): T {
+  const cache = new Map<string, ReturnType<T>>();
+  return ((...args: Parameters<T>) => {
+    const key = args.join("-");
+    if (!cache.has(key)) {
+      cache.set(key, fn(...args));
+    }
+    return cache.get(key)!;
+  }) as T;
 }
 
 const range = memoize((to: number, from = 0) => {
   return Array(to - from)
     .fill(0)
     .map((_, idx) => idx + from);
-}, resolver);
+});
 
 function neighbourGap(right: number, minDistanceMatrix: Array<Array<number>>) {
   return Math.max(
@@ -42,7 +49,7 @@ const final_distance = (
   }
 };
 
-export const distance = memoize(final_distance, resolver());
+export const distance = memoize(final_distance);
 
 export const final_pos = (
   i: number,
