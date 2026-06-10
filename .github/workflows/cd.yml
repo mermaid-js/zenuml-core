@@ -48,12 +48,19 @@ jobs:
       - name: Install Playwright Chromium for CLI PNG tests
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: bun run pw:install
+      - name: Lint
+        run: bunx eslint src
       - name: Run tests
-        run: bun run test --run
+        run: bun run test
+
+  e2e:
+    uses: ./.github/workflows/e2e.yml
+    permissions:
+      contents: read
 
   npm-publish:
     runs-on: ubuntu-22.04
-    needs: test
+    needs: [test, e2e]
     permissions:
       contents: write    # for git tag push
       id-token: write    # for npm OIDC trusted publishing
@@ -98,7 +105,7 @@ jobs:
   # Deploy to Cloudflare Workers
   deploy-to-cloudflare:
     runs-on: ubuntu-22.04
-    needs: test
+    needs: [test, e2e]
     permissions:
       contents: read
       deployments: write
