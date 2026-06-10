@@ -1,69 +1,52 @@
-import pino from "pino";
-
 /**
- * What do we get from 'pino'?
- * - log level. The level is used in the prettify function to determine which log is printed to the console.
- * - `child` method to create a child logger with a given name. The name is added to the log message with the prettify function.
+ * Console-backed logger with level filtering and named child loggers.
+ * Replaces pino: in the browser all output went to the console anyway,
+ * and the only pino features used were level filtering and `child({ name })`.
  */
-const logger = pino({
-  level: "warn",
-});
-
 const LEVELS = ["log", "trace", "debug", "info", "warn", "error"] as const;
-const PINO_LEVEL: Record<(typeof LEVELS)[number], "trace" | "debug" | "info" | "warn" | "error"> = {
-  log: "info",
-  trace: "trace",
-  debug: "debug",
-  info: "info",
-  warn: "warn",
-  error: "error",
+type Level = (typeof LEVELS)[number];
+
+// Numeric weights; messages below the threshold are dropped.
+const LEVEL_WEIGHT: Record<Level, number> = {
+  trace: 10,
+  debug: 20,
+  log: 30,
+  info: 30,
+  warn: 40,
+  error: 50,
 };
 
-type LoggerLike = Record<string, (...args: unknown[]) => void> & {
-  child: (opts: { name?: string }) => LoggerLike;
+const THRESHOLD = LEVEL_WEIGHT.warn;
+
+export type Logger = Record<Level, (...args: unknown[]) => void> & {
+  child: (opts: { name?: string }) => Logger;
 };
 
-function isEnabled(target: LoggerLike, level: (typeof LEVELS)[number]) {
-  const loggerTarget = target as unknown as {
-    isLevelEnabled?: (level: string) => boolean;
-  };
-  return loggerTarget.isLevelEnabled?.(PINO_LEVEL[level]) ?? true;
+function consoleFn(level: Level): (...args: unknown[]) => void {
+  const fn = console[level as keyof Console];
+  return typeof fn === "function"
+    ? (fn as (...args: unknown[]) => void).bind(console)
+    : console.log.bind(console);
 }
 
-function bind(target: LoggerLike, level: (typeof LEVELS)[number]) {
-  const consoleFn = level in console
-    ? (console[level as keyof Console] as (...args: unknown[]) => void)
-    : console.log;
-  target[level] = (...args: unknown[]) => {
-    if (isEnabled(target, level)) {
-      consoleFn(...args);
-    }
-  };
+function createLogger(prefix?: [string, string]): Logger {
+  const logger = {} as Logger;
+  for (const level of LEVELS) {
+    const fn = consoleFn(level);
+    logger[level] = (...args: unknown[]) => {
+      if (LEVEL_WEIGHT[level] >= THRESHOLD) {
+        if (prefix) {
+          fn(prefix[0], prefix[1], ...args);
+        } else {
+          fn(...args);
+        }
+      }
+    };
+  }
+  logger.child = (opts: { name?: string }) =>
+    createLogger(["%c" + (opts.name || ""), "color: #00f"]);
+  return logger;
 }
 
-function bind2(target: LoggerLike, level: (typeof LEVELS)[number], prefix: [string, string]) {
-  const consoleFn = level in console
-    ? (console[level as keyof Console] as (...args: unknown[]) => void)
-    : console.log;
-  target[level] = (...args: unknown[]) => {
-    if (isEnabled(target, level)) {
-      consoleFn(prefix[0], prefix[1], ...args);
-    }
-  };
-}
-
-function prettify(target: LoggerLike): LoggerLike {
-  LEVELS.forEach((level) => bind(target, level));
-  const childFn = target.child;
-  target.child = function (opts: { name?: string }) {
-    const child = childFn.call(target, opts);
-    LEVELS.forEach((level) =>
-      bind2(child, level, ["%c" + (opts.name || ""), "color: #00f"]),
-    );
-    return child;
-  };
-  return target;
-}
-
-const rootLogger = prettify(logger as unknown as LoggerLike);
+const rootLogger = createLogger();
 export default rootLogger;
