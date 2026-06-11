@@ -1,0 +1,72 @@
+[
+  {
+    "type": "ID",
+    "text": "A",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ARROW",
+    "text": "->",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "B",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "COL",
+    "text": ":",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "EVENT_PAYLOAD_LXR",
+    "text": " hello",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "EVENT_END",
+    "text": "\r",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CR",
+    "text": "\n",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "ID",
+    "text": "B",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ARROW",
+    "text": "->",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "C",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "COL",
+    "text": ":",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "EVENT_PAYLOAD_LXR",
+    "text": " world",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "EVENT_END",
+    "text": "\r",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CR",
+    "text": "\n",
+    "channel": "HIDDEN"
+  }
+]

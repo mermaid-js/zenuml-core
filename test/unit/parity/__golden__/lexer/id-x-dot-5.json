@@ -1,0 +1,12 @@
+[
+  {
+    "type": "ID",
+    "text": "x",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "FLOAT",
+    "text": ".5",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

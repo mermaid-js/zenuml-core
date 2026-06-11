@@ -1,0 +1,182 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 98,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 68,
+      "children": [
+        {
+          "kind": "GroupContext",
+          "start": 0,
+          "stop": 68,
+          "children": [
+            {
+              "token": "GROUP",
+              "text": "group"
+            },
+            {
+              "kind": "NameContext",
+              "start": 6,
+              "stop": 20,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "BusinessService"
+                }
+              ]
+            },
+            {
+              "token": "OBRACE",
+              "text": "{"
+            },
+            {
+              "kind": "ParticipantContext",
+              "start": 26,
+              "stop": 38,
+              "children": [
+                {
+                  "kind": "ParticipantTypeContext",
+                  "start": 26,
+                  "stop": 31,
+                  "children": [
+                    {
+                      "token": "ANNOTATION",
+                      "text": "@Actor"
+                    }
+                  ]
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 33,
+                  "stop": 38,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "Client"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "ParticipantContext",
+              "start": 42,
+              "stop": 66,
+              "children": [
+                {
+                  "kind": "ParticipantTypeContext",
+                  "start": 42,
+                  "stop": 50,
+                  "children": [
+                    {
+                      "token": "ANNOTATION",
+                      "text": "@Boundary"
+                    }
+                  ]
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 52,
+                  "stop": 66,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "OrderController"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "CBRACE",
+              "text": "}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 70,
+      "stop": 98,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 70,
+          "stop": 98,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 70,
+              "stop": 98,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 70,
+                  "stop": 75,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 70,
+                      "stop": 75,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "Client"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 78,
+                  "stop": 92,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 78,
+                      "stop": 92,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "OrderController"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 94,
+                  "stop": 98,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " post"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

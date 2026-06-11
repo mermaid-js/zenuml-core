@@ -1,0 +1,125 @@
+{
+  "id": "parameters-trailing-comma",
+  "code": "A.m(a,)",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "A.m(a,)",
+      "getText": "A.m(a,)<EOF>",
+      "getComment": null
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "A.m(a,)",
+      "getText": "A.m(a,)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat",
+      "kind": "StatContext",
+      "getFormattedText": "A.m(a,)",
+      "getText": "A.m(a,)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message",
+      "kind": "MessageContext",
+      "getFormattedText": "A.m(a,)",
+      "getText": "A.m(a,)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody",
+      "kind": "MessageBodyContext",
+      "getFormattedText": "A.m(a,)",
+      "getText": "A.m(a,)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo",
+      "kind": "FromToContext",
+      "getFormattedText": "A.",
+      "getText": "A.",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo.to",
+      "kind": "ToContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func",
+      "kind": "FuncContext",
+      "getFormattedText": "m(a,)",
+      "getText": "m(a,)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature",
+      "kind": "SignatureContext",
+      "getFormattedText": "m(a,)",
+      "getText": "m(a,)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.methodName",
+      "kind": "MethodNameContext",
+      "getFormattedText": "m",
+      "getText": "m",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.methodName.name",
+      "kind": "NameContext",
+      "getFormattedText": "m",
+      "getText": "m",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation",
+      "kind": "InvocationContext",
+      "getFormattedText": "(a,)",
+      "getText": "(a,)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters",
+      "kind": "ParametersContext",
+      "getFormattedText": "a",
+      "getText": "a,",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter",
+      "kind": "ParameterContext",
+      "getFormattedText": "a",
+      "getText": "a",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter.expr",
+      "kind": "AtomExprContext",
+      "getFormattedText": "a",
+      "getText": "a",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter.expr.atom",
+      "kind": "IdAtomContext",
+      "getFormattedText": "a",
+      "getText": "a",
+      "getComment": null
+    }
+  ]
+}

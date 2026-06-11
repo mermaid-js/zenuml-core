@@ -1,0 +1,87 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 10,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 10,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 10,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 0,
+              "stop": 10,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 0,
+                  "stop": 0,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 0,
+                      "stop": 0,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 5,
+                  "stop": 5,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 5,
+                      "stop": 5,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "B"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 7,
+                  "stop": 10,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " msg"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

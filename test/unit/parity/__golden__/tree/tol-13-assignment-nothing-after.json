@@ -1,0 +1,68 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 4,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 4,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 4,
+          "children": [
+            {
+              "kind": "MessageContext",
+              "start": 0,
+              "stop": 4,
+              "children": [
+                {
+                  "kind": "MessageBodyContext",
+                  "start": 0,
+                  "stop": 4,
+                  "children": [
+                    {
+                      "kind": "AssignmentContext",
+                      "start": 0,
+                      "stop": 4,
+                      "children": [
+                        {
+                          "kind": "AssigneeContext",
+                          "start": 0,
+                          "stop": 2,
+                          "children": [
+                            {
+                              "kind": "IdAtomContext",
+                              "start": 0,
+                              "stop": 2,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "ret"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "ASSIGN",
+                          "text": "="
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

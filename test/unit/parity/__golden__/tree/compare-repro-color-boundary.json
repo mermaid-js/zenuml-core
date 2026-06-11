@@ -1,0 +1,160 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 84,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 54,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 20,
+          "children": [
+            {
+              "kind": "ParticipantTypeContext",
+              "start": 0,
+              "stop": 5,
+              "children": [
+                {
+                  "token": "ANNOTATION",
+                  "text": "@Actor"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 7,
+              "stop": 12,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "Client"
+                }
+              ]
+            },
+            {
+              "token": "COLOR",
+              "text": "#FFEBE6"
+            }
+          ]
+        },
+        {
+          "kind": "ParticipantContext",
+          "start": 22,
+          "stop": 54,
+          "children": [
+            {
+              "kind": "ParticipantTypeContext",
+              "start": 22,
+              "stop": 30,
+              "children": [
+                {
+                  "token": "ANNOTATION",
+                  "text": "@Boundary"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 32,
+              "stop": 46,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "OrderController"
+                }
+              ]
+            },
+            {
+              "token": "COLOR",
+              "text": "#0747A6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 56,
+      "stop": 84,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 56,
+          "stop": 84,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 56,
+              "stop": 84,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 56,
+                  "stop": 61,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 56,
+                      "stop": 61,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "Client"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 64,
+                  "stop": 78,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 64,
+                      "stop": 78,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "OrderController"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 80,
+                  "stop": 84,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " post"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

@@ -1,0 +1,284 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 64,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 46,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 22,
+          "children": [
+            {
+              "kind": "StereotypeContext",
+              "start": 0,
+              "stop": 10,
+              "children": [
+                {
+                  "token": "SOPEN",
+                  "text": "<<"
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 2,
+                  "stop": 8,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "service"
+                    }
+                  ]
+                },
+                {
+                  "token": "SCLOSE",
+                  "text": ">>"
+                }
+              ]
+            },
+            {
+              "kind": "EmojiContext",
+              "start": 12,
+              "stop": 17,
+              "children": [
+                {
+                  "token": "LBRACKET",
+                  "text": "["
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 13,
+                  "stop": 16,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "lock"
+                    }
+                  ]
+                },
+                {
+                  "token": "RBRACKET",
+                  "text": "]"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 19,
+              "stop": 22,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "Auth"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "ParticipantContext",
+          "start": 24,
+          "stop": 46,
+          "children": [
+            {
+              "kind": "StereotypeContext",
+              "start": 24,
+              "stop": 34,
+              "children": [
+                {
+                  "token": "SOPEN",
+                  "text": "<<"
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 26,
+                  "stop": 32,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "gateway"
+                    }
+                  ]
+                },
+                {
+                  "token": "SCLOSE",
+                  "text": ">>"
+                }
+              ]
+            },
+            {
+              "kind": "EmojiContext",
+              "start": 36,
+              "stop": 42,
+              "children": [
+                {
+                  "token": "LBRACKET",
+                  "text": "["
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 37,
+                  "stop": 41,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "globe"
+                    }
+                  ]
+                },
+                {
+                  "token": "RBRACKET",
+                  "text": "]"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 44,
+              "stop": 46,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "API"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 48,
+      "stop": 64,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 48,
+          "stop": 64,
+          "children": [
+            {
+              "kind": "MessageContext",
+              "start": 48,
+              "stop": 64,
+              "children": [
+                {
+                  "kind": "MessageBodyContext",
+                  "start": 48,
+                  "stop": 64,
+                  "children": [
+                    {
+                      "kind": "FromToContext",
+                      "start": 48,
+                      "stop": 57,
+                      "children": [
+                        {
+                          "kind": "FromContext",
+                          "start": 48,
+                          "stop": 50,
+                          "children": [
+                            {
+                              "kind": "NameContext",
+                              "start": 48,
+                              "stop": 50,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "API"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "ARROW",
+                          "text": "->"
+                        },
+                        {
+                          "kind": "ToContext",
+                          "start": 53,
+                          "stop": 56,
+                          "children": [
+                            {
+                              "kind": "NameContext",
+                              "start": 53,
+                              "stop": 56,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "Auth"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "DOT",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "FuncContext",
+                      "start": 58,
+                      "stop": 64,
+                      "children": [
+                        {
+                          "kind": "SignatureContext",
+                          "start": 58,
+                          "stop": 64,
+                          "children": [
+                            {
+                              "kind": "MethodNameContext",
+                              "start": 58,
+                              "stop": 62,
+                              "children": [
+                                {
+                                  "kind": "NameContext",
+                                  "start": 58,
+                                  "stop": 62,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "check"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "InvocationContext",
+                              "start": 63,
+                              "stop": 64,
+                              "children": [
+                                {
+                                  "token": "OPAR",
+                                  "text": "("
+                                },
+                                {
+                                  "token": "CPAR",
+                                  "text": ")"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

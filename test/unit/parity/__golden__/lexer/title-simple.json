@@ -1,0 +1,12 @@
+[
+  {
+    "type": "TITLE",
+    "text": "title",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "TITLE_CONTENT",
+    "text": " Order Flow",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

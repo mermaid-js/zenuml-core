@@ -32,7 +32,7 @@ ProgContext (ANTLR parse tree)
 | `src/g4/sequenceLexer.g4` | ANTLR lexer grammar. Channels: `HIDDEN` (whitespace), `COMMENT_CHANNEL`, `MODIFIER_CHANNEL`. |
 | `src/g4/sequenceParser.g4` | ANTLR parser grammar. Top rule: `prog → title? head? block`. |
 | `src/generated-parser/` | ANTLR output — do not edit by hand. Regenerate with `bun antlr`. |
-| `src/parser/index.js` | Entry point. `RootContext(code)` → `ProgContext`. Adds prototype methods: `getFormattedText()`, `getComment()`, `returnedValue()`. Collects errors via `SeqErrorListener`. |
+| `src/parser/index.js` | Entry point. `RootContext(code)` → `ProgContext`. Adds prototype methods: `getFormattedText()`, `getComment()`. Collects errors via `SeqErrorListener`. |
 | `src/parser/Participants.ts` | `Participant` model + `Participants` collection (Map). Tracks name, type, stereotype, label, color, emoji, width, groupId, positions. |
 | `src/parser/ToCollector.js` | ANTLR listener. Walks parse tree → populates `Participants` from declarations, from/to mentions, `new` constructors, `ref` targets. |
 | `src/parser/MessageCollector.ts` | ANTLR listener → `OwnableMessage[]` (from, to, signature, type enum). Used by horizontal coordinate solver. |

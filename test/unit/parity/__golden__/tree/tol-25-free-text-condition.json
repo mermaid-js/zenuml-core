@@ -1,0 +1,77 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 21,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 21,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 21,
+          "children": [
+            {
+              "kind": "LoopContext",
+              "start": 0,
+              "stop": 21,
+              "children": [
+                {
+                  "token": "WHILE",
+                  "text": "while"
+                },
+                {
+                  "kind": "ParExprContext",
+                  "start": 5,
+                  "stop": 21,
+                  "children": [
+                    {
+                      "token": "OPAR",
+                      "text": "("
+                    },
+                    {
+                      "kind": "ConditionContext",
+                      "start": 6,
+                      "stop": 20,
+                      "children": [
+                        {
+                          "kind": "TextExprContext",
+                          "start": 6,
+                          "stop": 20,
+                          "children": [
+                            {
+                              "token": "ID",
+                              "text": "no"
+                            },
+                            {
+                              "token": "ID",
+                              "text": "more"
+                            },
+                            {
+                              "token": "ID",
+                              "text": "retries"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "CPAR",
+                      "text": ")"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "id": "chinese-text",
+  "code": "用户.登录(密码)\n用户->系统: 你好",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "用户.登录(密码) 用户->系统: 你好",
+      "getText": "用户.登录(密码)用户->系统: 你好<EOF>",
+      "getComment": null
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "用户.登录(密码) 用户->系统: 你好",
+      "getText": "用户.登录(密码)用户->系统: 你好",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0]",
+      "kind": "StatContext",
+      "getFormattedText": "用户.登录(密码)",
+      "getText": "用户.登录(密码)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message",
+      "kind": "MessageContext",
+      "getFormattedText": "用户.登录(密码)",
+      "getText": "用户.登录(密码)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody",
+      "kind": "MessageBodyContext",
+      "getFormattedText": "用户.登录(密码)",
+      "getText": "用户.登录(密码)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.fromTo",
+      "kind": "FromToContext",
+      "getFormattedText": "用户.",
+      "getText": "用户.",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.fromTo.to",
+      "kind": "ToContext",
+      "getFormattedText": "用户",
+      "getText": "用户",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.fromTo.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "用户",
+      "getText": "用户",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func",
+      "kind": "FuncContext",
+      "getFormattedText": "登录(密码)",
+      "getText": "登录(密码)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature",
+      "kind": "SignatureContext",
+      "getFormattedText": "登录(密码)",
+      "getText": "登录(密码)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature.methodName",
+      "kind": "MethodNameContext",
+      "getFormattedText": "登录",
+      "getText": "登录",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature.methodName.name",
+      "kind": "NameContext",
+      "getFormattedText": "登录",
+      "getText": "登录",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature.invocation",
+      "kind": "InvocationContext",
+      "getFormattedText": "(密码)",
+      "getText": "(密码)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature.invocation.parameters",
+      "kind": "ParametersContext",
+      "getFormattedText": "密码",
+      "getText": "密码",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature.invocation.parameters.parameter",
+      "kind": "ParameterContext",
+      "getFormattedText": "密码",
+      "getText": "密码",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature.invocation.parameters.parameter.expr",
+      "kind": "AtomExprContext",
+      "getFormattedText": "密码",
+      "getText": "密码",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature.invocation.parameters.parameter.expr.atom",
+      "kind": "IdAtomContext",
+      "getFormattedText": "密码",
+      "getText": "密码",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1]",
+      "kind": "StatContext",
+      "getFormattedText": "用户->系统: 你好",
+      "getText": "用户->系统: 你好",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1].asyncMessage",
+      "kind": "AsyncMessageContext",
+      "getFormattedText": "用户->系统: 你好",
+      "getText": "用户->系统: 你好",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1].asyncMessage.from",
+      "kind": "FromContext",
+      "getFormattedText": "用户",
+      "getText": "用户",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1].asyncMessage.from.name",
+      "kind": "NameContext",
+      "getFormattedText": "用户",
+      "getText": "用户",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1].asyncMessage.to",
+      "kind": "ToContext",
+      "getFormattedText": "系统",
+      "getText": "系统",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1].asyncMessage.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "系统",
+      "getText": "系统",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1].asyncMessage.content",
+      "kind": "ContentContext",
+      "getFormattedText": " 你好",
+      "getText": " 你好",
+      "getComment": null
+    }
+  ]
+}

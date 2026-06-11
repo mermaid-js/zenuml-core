@@ -1,0 +1,69 @@
+{
+  "id": "emoji",
+  "code": "// 😀 emoji comment\nUser->Bob: hi 🎉",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "User->Bob: hi 🎉",
+      "getText": "User->Bob: hi 🎉<EOF>",
+      "getComment": " 😀 emoji comment"
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "User->Bob: hi 🎉",
+      "getText": "User->Bob: hi 🎉",
+      "getComment": " 😀 emoji comment"
+    },
+    {
+      "path": "prog.block.stat",
+      "kind": "StatContext",
+      "getFormattedText": "User->Bob: hi 🎉",
+      "getText": "User->Bob: hi 🎉",
+      "getComment": " 😀 emoji comment"
+    },
+    {
+      "path": "prog.block.stat.asyncMessage",
+      "kind": "AsyncMessageContext",
+      "getFormattedText": "User->Bob: hi 🎉",
+      "getText": "User->Bob: hi 🎉",
+      "getComment": " 😀 emoji comment"
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.from",
+      "kind": "FromContext",
+      "getFormattedText": "User",
+      "getText": "User",
+      "getComment": " 😀 emoji comment"
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.from.name",
+      "kind": "NameContext",
+      "getFormattedText": "User",
+      "getText": "User",
+      "getComment": " 😀 emoji comment"
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.to",
+      "kind": "ToContext",
+      "getFormattedText": "Bob",
+      "getText": "Bob",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "Bob",
+      "getText": "Bob",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.content",
+      "kind": "ContentContext",
+      "getFormattedText": " hi 🎉",
+      "getText": " hi 🎉",
+      "getComment": null
+    }
+  ]
+}

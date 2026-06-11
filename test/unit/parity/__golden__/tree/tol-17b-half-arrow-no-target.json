@@ -1,0 +1,54 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 3,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 3,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 3,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 0,
+              "stop": 3,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 0,
+                  "stop": 0,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 0,
+                      "stop": 0,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

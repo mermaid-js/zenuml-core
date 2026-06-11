@@ -1,0 +1,27 @@
+[
+  {
+    "type": "ID",
+    "text": "a",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "EQ",
+    "text": "==",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "ID",
+    "text": "b",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

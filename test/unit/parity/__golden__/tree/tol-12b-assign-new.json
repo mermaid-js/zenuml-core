@@ -1,0 +1,72 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 6,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 6,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 6,
+          "children": [
+            {
+              "kind": "CreationContext",
+              "start": 0,
+              "stop": 6,
+              "children": [
+                {
+                  "kind": "CreationBodyContext",
+                  "start": 0,
+                  "stop": 6,
+                  "children": [
+                    {
+                      "kind": "AssignmentContext",
+                      "start": 0,
+                      "stop": 2,
+                      "children": [
+                        {
+                          "kind": "AssigneeContext",
+                          "start": 0,
+                          "stop": 0,
+                          "children": [
+                            {
+                              "kind": "IdAtomContext",
+                              "start": 0,
+                              "stop": 0,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "a"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "ASSIGN",
+                          "text": "="
+                        }
+                      ]
+                    },
+                    {
+                      "token": "NEW",
+                      "text": "new"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

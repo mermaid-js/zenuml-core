@@ -1,0 +1,41 @@
+{
+  "id": "divider-comma-quirk",
+  "code": "==A, B==",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "==A,B==",
+      "getText": "==A, B==<EOF>",
+      "getComment": null
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "==A,B==",
+      "getText": "==A, B==",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat",
+      "kind": "StatContext",
+      "getFormattedText": "==A,B==",
+      "getText": "==A, B==",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.divider",
+      "kind": "DividerContext",
+      "getFormattedText": "==A,B==",
+      "getText": "==A, B==",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.divider.dividerNote",
+      "kind": "DividerNoteContext",
+      "getFormattedText": "==A,B==",
+      "getText": "==A, B==",
+      "getComment": null
+    }
+  ]
+}

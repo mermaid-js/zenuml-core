@@ -1,0 +1,134 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 17,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 17,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 12,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 0,
+              "stop": 11,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 0,
+                  "stop": 1,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 0,
+                      "stop": 1,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "A0"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 4,
+                  "stop": 5,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 4,
+                      "stop": 5,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "A0"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 7,
+                  "stop": 11,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " self"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "EVENT_END",
+              "text": "\n"
+            }
+          ]
+        },
+        {
+          "kind": "StatContext",
+          "start": 13,
+          "stop": 17,
+          "children": [
+            {
+              "kind": "CreationContext",
+              "start": 13,
+              "stop": 17,
+              "children": [
+                {
+                  "kind": "CreationBodyContext",
+                  "start": 13,
+                  "stop": 17,
+                  "children": [
+                    {
+                      "token": "NEW",
+                      "text": "new"
+                    },
+                    {
+                      "kind": "ConstructContext",
+                      "start": 17,
+                      "stop": 17,
+                      "children": [
+                        {
+                          "kind": "NameContext",
+                          "start": 17,
+                          "stop": 17,
+                          "children": [
+                            {
+                              "token": "ID",
+                              "text": "A"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

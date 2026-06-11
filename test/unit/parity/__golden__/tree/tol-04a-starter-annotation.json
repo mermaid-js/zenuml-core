@@ -1,0 +1,29 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 7,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 7,
+      "children": [
+        {
+          "kind": "StarterExpContext",
+          "start": 0,
+          "stop": 7,
+          "children": [
+            {
+              "token": "STARTER_LXR",
+              "text": "@Starter"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

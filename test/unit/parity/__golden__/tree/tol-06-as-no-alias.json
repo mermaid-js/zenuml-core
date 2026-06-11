@@ -1,0 +1,47 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 3,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 3,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 3,
+          "children": [
+            {
+              "kind": "NameContext",
+              "start": 0,
+              "stop": 0,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "A"
+                }
+              ]
+            },
+            {
+              "kind": "LabelContext",
+              "start": 2,
+              "stop": 3,
+              "children": [
+                {
+                  "token": "AS",
+                  "text": "as"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

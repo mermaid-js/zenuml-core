@@ -1,0 +1,130 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 38,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 2,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 0,
+          "children": [
+            {
+              "kind": "NameContext",
+              "start": 0,
+              "stop": 0,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "ParticipantContext",
+          "start": 2,
+          "stop": 2,
+          "children": [
+            {
+              "kind": "NameContext",
+              "start": 2,
+              "stop": 2,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "B"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 26,
+      "stop": 38,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 26,
+          "stop": 38,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 26,
+              "stop": 38,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 26,
+                  "stop": 26,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 26,
+                      "stop": 26,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 29,
+                  "stop": 29,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 29,
+                      "stop": 29,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "B"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 31,
+                  "stop": 38,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " process"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

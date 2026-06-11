@@ -1,0 +1,174 @@
+{
+  "id": "comment-between-statements",
+  "code": "A.m1()\n// between\nB.m2()",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "A.m1() // between B.m2()",
+      "getText": "A.m1()B.m2()<EOF>",
+      "getComment": null
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "A.m1() // between B.m2()",
+      "getText": "A.m1()B.m2()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0]",
+      "kind": "StatContext",
+      "getFormattedText": "A.m1()",
+      "getText": "A.m1()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message",
+      "kind": "MessageContext",
+      "getFormattedText": "A.m1()",
+      "getText": "A.m1()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody",
+      "kind": "MessageBodyContext",
+      "getFormattedText": "A.m1()",
+      "getText": "A.m1()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.fromTo",
+      "kind": "FromToContext",
+      "getFormattedText": "A.",
+      "getText": "A.",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.fromTo.to",
+      "kind": "ToContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.fromTo.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func",
+      "kind": "FuncContext",
+      "getFormattedText": "m1()",
+      "getText": "m1()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature",
+      "kind": "SignatureContext",
+      "getFormattedText": "m1()",
+      "getText": "m1()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature.methodName",
+      "kind": "MethodNameContext",
+      "getFormattedText": "m1",
+      "getText": "m1",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature.methodName.name",
+      "kind": "NameContext",
+      "getFormattedText": "m1",
+      "getText": "m1",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[0].message.messageBody.func.signature.invocation",
+      "kind": "InvocationContext",
+      "getFormattedText": "()",
+      "getText": "()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1]",
+      "kind": "StatContext",
+      "getFormattedText": "B.m2()",
+      "getText": "B.m2()",
+      "getComment": " between"
+    },
+    {
+      "path": "prog.block.stat[1].message",
+      "kind": "MessageContext",
+      "getFormattedText": "B.m2()",
+      "getText": "B.m2()",
+      "getComment": " between"
+    },
+    {
+      "path": "prog.block.stat[1].message.messageBody",
+      "kind": "MessageBodyContext",
+      "getFormattedText": "B.m2()",
+      "getText": "B.m2()",
+      "getComment": " between"
+    },
+    {
+      "path": "prog.block.stat[1].message.messageBody.fromTo",
+      "kind": "FromToContext",
+      "getFormattedText": "B.",
+      "getText": "B.",
+      "getComment": " between"
+    },
+    {
+      "path": "prog.block.stat[1].message.messageBody.fromTo.to",
+      "kind": "ToContext",
+      "getFormattedText": "B",
+      "getText": "B",
+      "getComment": " between"
+    },
+    {
+      "path": "prog.block.stat[1].message.messageBody.fromTo.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "B",
+      "getText": "B",
+      "getComment": " between"
+    },
+    {
+      "path": "prog.block.stat[1].message.messageBody.func",
+      "kind": "FuncContext",
+      "getFormattedText": "m2()",
+      "getText": "m2()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1].message.messageBody.func.signature",
+      "kind": "SignatureContext",
+      "getFormattedText": "m2()",
+      "getText": "m2()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1].message.messageBody.func.signature.methodName",
+      "kind": "MethodNameContext",
+      "getFormattedText": "m2",
+      "getText": "m2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1].message.messageBody.func.signature.methodName.name",
+      "kind": "NameContext",
+      "getFormattedText": "m2",
+      "getText": "m2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat[1].message.messageBody.func.signature.invocation",
+      "kind": "InvocationContext",
+      "getFormattedText": "()",
+      "getText": "()",
+      "getComment": null
+    }
+  ]
+}

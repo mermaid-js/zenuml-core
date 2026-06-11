@@ -1,0 +1,160 @@
+{
+  "id": "parameters-named",
+  "code": "A.m(a=1, b=2)",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "A.m(a=1,b=2)",
+      "getText": "A.m(a=1,b=2)<EOF>",
+      "getComment": null
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "A.m(a=1,b=2)",
+      "getText": "A.m(a=1,b=2)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat",
+      "kind": "StatContext",
+      "getFormattedText": "A.m(a=1,b=2)",
+      "getText": "A.m(a=1,b=2)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message",
+      "kind": "MessageContext",
+      "getFormattedText": "A.m(a=1,b=2)",
+      "getText": "A.m(a=1,b=2)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody",
+      "kind": "MessageBodyContext",
+      "getFormattedText": "A.m(a=1,b=2)",
+      "getText": "A.m(a=1,b=2)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo",
+      "kind": "FromToContext",
+      "getFormattedText": "A.",
+      "getText": "A.",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo.to",
+      "kind": "ToContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func",
+      "kind": "FuncContext",
+      "getFormattedText": "m(a=1,b=2)",
+      "getText": "m(a=1,b=2)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature",
+      "kind": "SignatureContext",
+      "getFormattedText": "m(a=1,b=2)",
+      "getText": "m(a=1,b=2)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.methodName",
+      "kind": "MethodNameContext",
+      "getFormattedText": "m",
+      "getText": "m",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.methodName.name",
+      "kind": "NameContext",
+      "getFormattedText": "m",
+      "getText": "m",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation",
+      "kind": "InvocationContext",
+      "getFormattedText": "(a=1,b=2)",
+      "getText": "(a=1,b=2)",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters",
+      "kind": "ParametersContext",
+      "getFormattedText": "a=1,b=2",
+      "getText": "a=1,b=2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter[0]",
+      "kind": "ParameterContext",
+      "getFormattedText": "a=1",
+      "getText": "a=1",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter[0].namedParameter",
+      "kind": "NamedParameterContext",
+      "getFormattedText": "a=1",
+      "getText": "a=1",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter[0].namedParameter.expr",
+      "kind": "AtomExprContext",
+      "getFormattedText": "1",
+      "getText": "1",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter[0].namedParameter.expr.atom",
+      "kind": "NumberAtomContext",
+      "getFormattedText": "1",
+      "getText": "1",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter[1]",
+      "kind": "ParameterContext",
+      "getFormattedText": "b=2",
+      "getText": "b=2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter[1].namedParameter",
+      "kind": "NamedParameterContext",
+      "getFormattedText": "b=2",
+      "getText": "b=2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter[1].namedParameter.expr",
+      "kind": "AtomExprContext",
+      "getFormattedText": "2",
+      "getText": "2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation.parameters.parameter[1].namedParameter.expr.atom",
+      "kind": "NumberAtomContext",
+      "getFormattedText": "2",
+      "getText": "2",
+      "getComment": null
+    }
+  ]
+}

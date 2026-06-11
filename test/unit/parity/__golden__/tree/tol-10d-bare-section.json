@@ -1,0 +1,36 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 6,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 6,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 6,
+          "children": [
+            {
+              "kind": "SectionContext",
+              "start": 0,
+              "stop": 6,
+              "children": [
+                {
+                  "token": "SECTION",
+                  "text": "section"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

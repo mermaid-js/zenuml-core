@@ -1,0 +1,204 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 67,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 44,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 21,
+          "children": [
+            {
+              "kind": "ParticipantTypeContext",
+              "start": 0,
+              "stop": 8,
+              "children": [
+                {
+                  "token": "ANNOTATION",
+                  "text": "@Database"
+                }
+              ]
+            },
+            {
+              "kind": "EmojiContext",
+              "start": 10,
+              "stop": 15,
+              "children": [
+                {
+                  "token": "LBRACKET",
+                  "text": "["
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 11,
+                  "stop": 14,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "fire"
+                    }
+                  ]
+                },
+                {
+                  "token": "RBRACKET",
+                  "text": "]"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 17,
+              "stop": 21,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "HotDB"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "ParticipantContext",
+          "start": 23,
+          "stop": 44,
+          "children": [
+            {
+              "kind": "ParticipantTypeContext",
+              "start": 23,
+              "stop": 28,
+              "children": [
+                {
+                  "token": "ANNOTATION",
+                  "text": "@Actor"
+                }
+              ]
+            },
+            {
+              "kind": "EmojiContext",
+              "start": 30,
+              "stop": 35,
+              "children": [
+                {
+                  "token": "LBRACKET",
+                  "text": "["
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 31,
+                  "stop": 34,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "eyes"
+                    }
+                  ]
+                },
+                {
+                  "token": "RBRACKET",
+                  "text": "]"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 37,
+              "stop": 44,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "Reviewer"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 46,
+      "stop": 67,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 46,
+          "stop": 67,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 46,
+              "stop": 67,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 46,
+                  "stop": 53,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 46,
+                      "stop": 53,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "Reviewer"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 56,
+                  "stop": 60,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 56,
+                      "stop": 60,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "HotDB"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 62,
+                  "stop": 67,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " query"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

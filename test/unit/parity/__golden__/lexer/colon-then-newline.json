@@ -1,0 +1,12 @@
+[
+  {
+    "type": "COL",
+    "text": ":",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "EVENT_END",
+    "text": "\n",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

@@ -1,0 +1,263 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 122,
+  "children": [
+    {
+      "kind": "TitleContext",
+      "start": 0,
+      "stop": 46,
+      "children": [
+        {
+          "token": "TITLE",
+          "text": "title"
+        },
+        {
+          "token": "TITLE_CONTENT",
+          "text": " Issue 232 - wrong layout for if-fragment"
+        },
+        {
+          "token": "TITLE_END",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 47,
+      "stop": 122,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 47,
+          "stop": 75,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 47,
+              "stop": 74,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 47,
+                  "stop": 52,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 47,
+                      "stop": 52,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "Client"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 57,
+                  "stop": 62,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 57,
+                      "stop": 62,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "Server"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 64,
+                  "stop": 74,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": "SendRequest"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "EVENT_END",
+              "text": "\n"
+            }
+          ]
+        },
+        {
+          "kind": "StatContext",
+          "start": 77,
+          "stop": 122,
+          "children": [
+            {
+              "kind": "AltContext",
+              "start": 77,
+              "stop": 122,
+              "children": [
+                {
+                  "kind": "IfBlockContext",
+                  "start": 77,
+                  "stop": 122,
+                  "children": [
+                    {
+                      "token": "IF",
+                      "text": "if"
+                    },
+                    {
+                      "kind": "ParExprContext",
+                      "start": 79,
+                      "stop": 84,
+                      "children": [
+                        {
+                          "token": "OPAR",
+                          "text": "("
+                        },
+                        {
+                          "kind": "ConditionContext",
+                          "start": 80,
+                          "stop": 83,
+                          "children": [
+                            {
+                              "kind": "BooleanAtomContext",
+                              "start": 80,
+                              "stop": 83,
+                              "children": [
+                                {
+                                  "token": "TRUE",
+                                  "text": "true"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "CPAR",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "BraceBlockContext",
+                      "start": 85,
+                      "stop": 122,
+                      "children": [
+                        {
+                          "token": "OBRACE",
+                          "text": "{"
+                        },
+                        {
+                          "kind": "BlockContext",
+                          "start": 89,
+                          "stop": 121,
+                          "children": [
+                            {
+                              "kind": "StatContext",
+                              "start": 89,
+                              "stop": 121,
+                              "children": [
+                                {
+                                  "kind": "AsyncMessageContext",
+                                  "start": 89,
+                                  "stop": 120,
+                                  "children": [
+                                    {
+                                      "kind": "FromContext",
+                                      "start": 89,
+                                      "stop": 94,
+                                      "children": [
+                                        {
+                                          "kind": "NameContext",
+                                          "start": 89,
+                                          "stop": 94,
+                                          "children": [
+                                            {
+                                              "token": "ID",
+                                              "text": "Server"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "token": "ARROW",
+                                      "text": "->"
+                                    },
+                                    {
+                                      "kind": "ToContext",
+                                      "start": 99,
+                                      "stop": 104,
+                                      "children": [
+                                        {
+                                          "kind": "NameContext",
+                                          "start": 99,
+                                          "stop": 104,
+                                          "children": [
+                                            {
+                                              "token": "ID",
+                                              "text": "Server"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "token": "COL",
+                                      "text": ":"
+                                    },
+                                    {
+                                      "kind": "ContentContext",
+                                      "start": 106,
+                                      "stop": 120,
+                                      "children": [
+                                        {
+                                          "token": "EVENT_PAYLOAD_LXR",
+                                          "text": " processRequest"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "EVENT_END",
+                                  "text": "\n"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "CBRACE",
+                          "text": "}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

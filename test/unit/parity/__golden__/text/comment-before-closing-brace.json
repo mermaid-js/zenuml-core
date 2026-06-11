@@ -1,0 +1,104 @@
+{
+  "id": "comment-before-closing-brace",
+  "code": "A.method() { // comment \n }",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "A.method() { // comment }",
+      "getText": "A.method(){}<EOF>",
+      "getComment": null
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "A.method() { // comment }",
+      "getText": "A.method(){}",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat",
+      "kind": "StatContext",
+      "getFormattedText": "A.method() { // comment }",
+      "getText": "A.method(){}",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message",
+      "kind": "MessageContext",
+      "getFormattedText": "A.method() { // comment }",
+      "getText": "A.method(){}",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody",
+      "kind": "MessageBodyContext",
+      "getFormattedText": "A.method()",
+      "getText": "A.method()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo",
+      "kind": "FromToContext",
+      "getFormattedText": "A.",
+      "getText": "A.",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo.to",
+      "kind": "ToContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func",
+      "kind": "FuncContext",
+      "getFormattedText": "method()",
+      "getText": "method()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature",
+      "kind": "SignatureContext",
+      "getFormattedText": "method()",
+      "getText": "method()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.methodName",
+      "kind": "MethodNameContext",
+      "getFormattedText": "method",
+      "getText": "method",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.methodName.name",
+      "kind": "NameContext",
+      "getFormattedText": "method",
+      "getText": "method",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.invocation",
+      "kind": "InvocationContext",
+      "getFormattedText": "()",
+      "getText": "()",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.braceBlock",
+      "kind": "BraceBlockContext",
+      "getFormattedText": "{ // comment }",
+      "getText": "{}",
+      "getComment": " comment "
+    }
+  ]
+}

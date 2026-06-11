@@ -1,0 +1,97 @@
+[
+  {
+    "type": "IF",
+    "text": "if",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "OPAR",
+    "text": "(",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "x",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CPAR",
+    "text": ")",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "OBRACE",
+    "text": "{",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CR",
+    "text": "\n",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "WS",
+    "text": "  ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "ID",
+    "text": "A",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "DOT",
+    "text": ".",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "m",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "OPAR",
+    "text": "(",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CPAR",
+    "text": ")",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CR",
+    "text": "\n",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "WS",
+    "text": "  ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "COMMENT",
+    "text": "// trailing",
+    "channel": "COMMENT_CHANNEL"
+  },
+  {
+    "type": "CR",
+    "text": "\n",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "CBRACE",
+    "text": "}",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "type": "STARTER_LXR",
+    "text": "@Starter",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "OPAR",
+    "text": "(",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "A",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CPAR",
+    "text": ")",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

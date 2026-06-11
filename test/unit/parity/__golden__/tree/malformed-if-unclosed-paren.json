@@ -1,0 +1,72 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 3,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 3,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 3,
+          "children": [
+            {
+              "kind": "AltContext",
+              "start": 0,
+              "stop": 3,
+              "children": [
+                {
+                  "kind": "IfBlockContext",
+                  "start": 0,
+                  "stop": 3,
+                  "children": [
+                    {
+                      "token": "IF",
+                      "text": "if"
+                    },
+                    {
+                      "kind": "ParExprContext",
+                      "start": 2,
+                      "stop": 3,
+                      "children": [
+                        {
+                          "token": "OPAR",
+                          "text": "("
+                        },
+                        {
+                          "kind": "ConditionContext",
+                          "start": 3,
+                          "stop": 3,
+                          "children": [
+                            {
+                              "kind": "IdAtomContext",
+                              "start": 3,
+                              "stop": 3,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "x"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

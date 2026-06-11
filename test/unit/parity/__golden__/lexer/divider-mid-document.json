@@ -1,0 +1,67 @@
+[
+  {
+    "type": "ID",
+    "text": "A",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "DOT",
+    "text": ".",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "m",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "OPAR",
+    "text": "(",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CPAR",
+    "text": ")",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CR",
+    "text": "\n",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "DIVIDER",
+    "text": "== phase two ==",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CR",
+    "text": "\n",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "ID",
+    "text": "B",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "DOT",
+    "text": ".",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "n",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "OPAR",
+    "text": "(",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CPAR",
+    "text": ")",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

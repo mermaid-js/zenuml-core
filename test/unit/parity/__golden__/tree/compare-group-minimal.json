@@ -1,0 +1,66 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 10,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 10,
+      "children": [
+        {
+          "kind": "GroupContext",
+          "start": 0,
+          "stop": 10,
+          "children": [
+            {
+              "token": "GROUP",
+              "text": "group"
+            },
+            {
+              "kind": "NameContext",
+              "start": 6,
+              "stop": 6,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "x"
+                }
+              ]
+            },
+            {
+              "token": "OBRACE",
+              "text": "{"
+            },
+            {
+              "kind": "ParticipantContext",
+              "start": 9,
+              "stop": 9,
+              "children": [
+                {
+                  "kind": "NameContext",
+                  "start": 9,
+                  "stop": 9,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "a"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "CBRACE",
+              "text": "}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

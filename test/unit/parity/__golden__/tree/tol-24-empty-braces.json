@@ -1,0 +1,47 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 1,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 1,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 1,
+          "children": [
+            {
+              "kind": "SectionContext",
+              "start": 0,
+              "stop": 1,
+              "children": [
+                {
+                  "kind": "BraceBlockContext",
+                  "start": 0,
+                  "stop": 1,
+                  "children": [
+                    {
+                      "token": "OBRACE",
+                      "text": "{"
+                    },
+                    {
+                      "token": "CBRACE",
+                      "text": "}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+[
+  {
+    "type": "DIGIT_LEADING_NAME",
+    "text": "2fa",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

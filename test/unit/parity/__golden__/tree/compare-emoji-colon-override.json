@@ -1,0 +1,82 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 51,
+  "children": [
+    {
+      "token": "LBRACKET",
+      "text": "[",
+      "error": true
+    },
+    {
+      "token": "COL",
+      "text": ":",
+      "error": true
+    },
+    {
+      "token": "EVENT_PAYLOAD_LXR",
+      "text": "red:] Alert",
+      "error": true
+    },
+    {
+      "token": "EVENT_END",
+      "text": "\n",
+      "error": true
+    },
+    {
+      "token": "LBRACKET",
+      "text": "[",
+      "error": true
+    },
+    {
+      "token": "ID",
+      "text": "rocket",
+      "error": true
+    },
+    {
+      "token": "RBRACKET",
+      "text": "]",
+      "error": true
+    },
+    {
+      "token": "ID",
+      "text": "Normal",
+      "error": true
+    },
+    {
+      "token": "ID",
+      "text": "Alert",
+      "error": true
+    },
+    {
+      "token": "ARROW",
+      "text": "->",
+      "error": true
+    },
+    {
+      "token": "ID",
+      "text": "Normal",
+      "error": true
+    },
+    {
+      "token": "DOT",
+      "text": ".",
+      "error": true
+    },
+    {
+      "token": "ID",
+      "text": "notify",
+      "error": true
+    },
+    {
+      "token": "OPAR",
+      "text": "(",
+      "error": true
+    },
+    {
+      "token": "CPAR",
+      "text": ")",
+      "error": true
+    }
+  ]
+}

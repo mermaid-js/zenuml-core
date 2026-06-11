@@ -1,0 +1,36 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 5,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 5,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 5,
+          "children": [
+            {
+              "kind": "ParticipantTypeContext",
+              "start": 0,
+              "stop": 5,
+              "children": [
+                {
+                  "token": "ANNOTATION",
+                  "text": "@Actor"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

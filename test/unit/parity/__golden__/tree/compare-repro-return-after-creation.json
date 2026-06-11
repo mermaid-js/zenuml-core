@@ -1,0 +1,163 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 57,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 57,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 33,
+          "children": [
+            {
+              "kind": "CreationContext",
+              "start": 0,
+              "stop": 33,
+              "children": [
+                {
+                  "kind": "CreationBodyContext",
+                  "start": 0,
+                  "stop": 6,
+                  "children": [
+                    {
+                      "token": "NEW",
+                      "text": "new"
+                    },
+                    {
+                      "kind": "ConstructContext",
+                      "start": 4,
+                      "stop": 4,
+                      "children": [
+                        {
+                          "kind": "NameContext",
+                          "start": 4,
+                          "stop": 4,
+                          "children": [
+                            {
+                              "token": "ID",
+                              "text": "B"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "OPAR",
+                      "text": "("
+                    },
+                    {
+                      "token": "CPAR",
+                      "text": ")"
+                    }
+                  ]
+                },
+                {
+                  "kind": "BraceBlockContext",
+                  "start": 8,
+                  "stop": 33,
+                  "children": [
+                    {
+                      "token": "OBRACE",
+                      "text": "{"
+                    },
+                    {
+                      "kind": "BlockContext",
+                      "start": 12,
+                      "stop": 31,
+                      "children": [
+                        {
+                          "kind": "StatContext",
+                          "start": 12,
+                          "stop": 31,
+                          "children": [
+                            {
+                              "kind": "RetContext",
+                              "start": 12,
+                              "stop": 31,
+                              "children": [
+                                {
+                                  "token": "RETURN",
+                                  "text": "return"
+                                },
+                                {
+                                  "kind": "AtomExprContext",
+                                  "start": 19,
+                                  "stop": 31,
+                                  "children": [
+                                    {
+                                      "kind": "IdAtomContext",
+                                      "start": 19,
+                                      "stop": 31,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "from_creation"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "CBRACE",
+                      "text": "}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "StatContext",
+          "start": 35,
+          "stop": 57,
+          "children": [
+            {
+              "kind": "RetContext",
+              "start": 35,
+              "stop": 57,
+              "children": [
+                {
+                  "token": "RETURN",
+                  "text": "return"
+                },
+                {
+                  "kind": "AtomExprContext",
+                  "start": 42,
+                  "stop": 57,
+                  "children": [
+                    {
+                      "kind": "StringAtomContext",
+                      "start": 42,
+                      "stop": 57,
+                      "children": [
+                        {
+                          "token": "CSTRING",
+                          "text": "\"back to caller\""
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

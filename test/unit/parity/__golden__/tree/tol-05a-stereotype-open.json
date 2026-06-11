@@ -1,0 +1,36 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 1,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 1,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 1,
+          "children": [
+            {
+              "kind": "StereotypeContext",
+              "start": 0,
+              "stop": 1,
+              "children": [
+                {
+                  "token": "SOPEN",
+                  "text": "<<"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

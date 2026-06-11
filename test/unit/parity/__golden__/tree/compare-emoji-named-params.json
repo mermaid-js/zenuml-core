@@ -1,0 +1,498 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 97,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 97,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 46,
+          "children": [
+            {
+              "kind": "MessageContext",
+              "start": 0,
+              "stop": 46,
+              "children": [
+                {
+                  "kind": "MessageBodyContext",
+                  "start": 0,
+                  "stop": 46,
+                  "children": [
+                    {
+                      "kind": "FromToContext",
+                      "start": 0,
+                      "stop": 9,
+                      "children": [
+                        {
+                          "kind": "ToContext",
+                          "start": 0,
+                          "stop": 8,
+                          "children": [
+                            {
+                              "kind": "EmojiContext",
+                              "start": 0,
+                              "stop": 7,
+                              "children": [
+                                {
+                                  "token": "LBRACKET",
+                                  "text": "["
+                                },
+                                {
+                                  "kind": "NameContext",
+                                  "start": 1,
+                                  "stop": 6,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "rocket"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "RBRACKET",
+                                  "text": "]"
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "NameContext",
+                              "start": 8,
+                              "stop": 8,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "A"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "DOT",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "FuncContext",
+                      "start": 10,
+                      "stop": 46,
+                      "children": [
+                        {
+                          "kind": "SignatureContext",
+                          "start": 10,
+                          "stop": 46,
+                          "children": [
+                            {
+                              "kind": "MethodNameContext",
+                              "start": 10,
+                              "stop": 21,
+                              "children": [
+                                {
+                                  "kind": "EmojiContext",
+                                  "start": 10,
+                                  "stop": 15,
+                                  "children": [
+                                    {
+                                      "token": "LBRACKET",
+                                      "text": "["
+                                    },
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 11,
+                                      "stop": 14,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "lock"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "token": "RBRACKET",
+                                      "text": "]"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "kind": "NameContext",
+                                  "start": 16,
+                                  "stop": 21,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "method"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "InvocationContext",
+                              "start": 22,
+                              "stop": 46,
+                              "children": [
+                                {
+                                  "token": "OPAR",
+                                  "text": "("
+                                },
+                                {
+                                  "kind": "ParametersContext",
+                                  "start": 23,
+                                  "stop": 45,
+                                  "children": [
+                                    {
+                                      "kind": "ParameterContext",
+                                      "start": 23,
+                                      "stop": 32,
+                                      "children": [
+                                        {
+                                          "kind": "NamedParameterContext",
+                                          "start": 23,
+                                          "stop": 32,
+                                          "children": [
+                                            {
+                                              "token": "ID",
+                                              "text": "userId"
+                                            },
+                                            {
+                                              "token": "ASSIGN",
+                                              "text": "="
+                                            },
+                                            {
+                                              "kind": "AtomExprContext",
+                                              "start": 30,
+                                              "stop": 32,
+                                              "children": [
+                                                {
+                                                  "kind": "NumberAtomContext",
+                                                  "start": 30,
+                                                  "stop": 32,
+                                                  "children": [
+                                                    {
+                                                      "token": "INT",
+                                                      "text": "123"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "token": "COMMA",
+                                      "text": ","
+                                    },
+                                    {
+                                      "kind": "ParameterContext",
+                                      "start": 35,
+                                      "stop": 45,
+                                      "children": [
+                                        {
+                                          "kind": "NamedParameterContext",
+                                          "start": 35,
+                                          "stop": 45,
+                                          "children": [
+                                            {
+                                              "token": "ID",
+                                              "text": "name"
+                                            },
+                                            {
+                                              "token": "ASSIGN",
+                                              "text": "="
+                                            },
+                                            {
+                                              "kind": "AtomExprContext",
+                                              "start": 40,
+                                              "stop": 45,
+                                              "children": [
+                                                {
+                                                  "kind": "StringAtomContext",
+                                                  "start": 40,
+                                                  "stop": 45,
+                                                  "children": [
+                                                    {
+                                                      "token": "CSTRING",
+                                                      "text": "\"John\""
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "CPAR",
+                                  "text": ")"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "StatContext",
+          "start": 48,
+          "stop": 97,
+          "children": [
+            {
+              "kind": "MessageContext",
+              "start": 48,
+              "stop": 97,
+              "children": [
+                {
+                  "kind": "MessageBodyContext",
+                  "start": 48,
+                  "stop": 97,
+                  "children": [
+                    {
+                      "kind": "FromToContext",
+                      "start": 48,
+                      "stop": 59,
+                      "children": [
+                        {
+                          "kind": "ToContext",
+                          "start": 48,
+                          "stop": 58,
+                          "children": [
+                            {
+                              "kind": "EmojiContext",
+                              "start": 48,
+                              "stop": 57,
+                              "children": [
+                                {
+                                  "token": "LBRACKET",
+                                  "text": "["
+                                },
+                                {
+                                  "kind": "NameContext",
+                                  "start": 49,
+                                  "stop": 56,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "database"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "RBRACKET",
+                                  "text": "]"
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "NameContext",
+                              "start": 58,
+                              "stop": 58,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "B"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "DOT",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "FuncContext",
+                      "start": 60,
+                      "stop": 97,
+                      "children": [
+                        {
+                          "kind": "SignatureContext",
+                          "start": 60,
+                          "stop": 97,
+                          "children": [
+                            {
+                              "kind": "MethodNameContext",
+                              "start": 60,
+                              "stop": 71,
+                              "children": [
+                                {
+                                  "kind": "EmojiContext",
+                                  "start": 60,
+                                  "stop": 65,
+                                  "children": [
+                                    {
+                                      "token": "LBRACKET",
+                                      "text": "["
+                                    },
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 61,
+                                      "stop": 64,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "fire"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "token": "RBRACKET",
+                                      "text": "]"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "kind": "NameContext",
+                                  "start": 66,
+                                  "stop": 71,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "create"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "InvocationContext",
+                              "start": 72,
+                              "stop": 97,
+                              "children": [
+                                {
+                                  "token": "OPAR",
+                                  "text": "("
+                                },
+                                {
+                                  "kind": "ParametersContext",
+                                  "start": 73,
+                                  "stop": 96,
+                                  "children": [
+                                    {
+                                      "kind": "ParameterContext",
+                                      "start": 73,
+                                      "stop": 83,
+                                      "children": [
+                                        {
+                                          "kind": "NamedParameterContext",
+                                          "start": 73,
+                                          "stop": 83,
+                                          "children": [
+                                            {
+                                              "token": "ID",
+                                              "text": "type"
+                                            },
+                                            {
+                                              "token": "ASSIGN",
+                                              "text": "="
+                                            },
+                                            {
+                                              "kind": "AtomExprContext",
+                                              "start": 78,
+                                              "stop": 83,
+                                              "children": [
+                                                {
+                                                  "kind": "StringAtomContext",
+                                                  "start": 78,
+                                                  "stop": 83,
+                                                  "children": [
+                                                    {
+                                                      "token": "CSTRING",
+                                                      "text": "\"User\""
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "token": "COMMA",
+                                      "text": ","
+                                    },
+                                    {
+                                      "kind": "ParameterContext",
+                                      "start": 86,
+                                      "stop": 96,
+                                      "children": [
+                                        {
+                                          "kind": "NamedParameterContext",
+                                          "start": 86,
+                                          "stop": 96,
+                                          "children": [
+                                            {
+                                              "token": "ID",
+                                              "text": "active"
+                                            },
+                                            {
+                                              "token": "ASSIGN",
+                                              "text": "="
+                                            },
+                                            {
+                                              "kind": "AtomExprContext",
+                                              "start": 93,
+                                              "stop": 96,
+                                              "children": [
+                                                {
+                                                  "kind": "BooleanAtomContext",
+                                                  "start": 93,
+                                                  "stop": 96,
+                                                  "children": [
+                                                    {
+                                                      "token": "TRUE",
+                                                      "text": "true"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "CPAR",
+                                  "text": ")"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

@@ -1,0 +1,292 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 79,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 59,
+      "children": [
+        {
+          "kind": "GroupContext",
+          "start": 0,
+          "stop": 30,
+          "children": [
+            {
+              "token": "GROUP",
+              "text": "group"
+            },
+            {
+              "kind": "NameContext",
+              "start": 6,
+              "stop": 13,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "Frontend"
+                }
+              ]
+            },
+            {
+              "token": "OBRACE",
+              "text": "{"
+            },
+            {
+              "kind": "ParticipantContext",
+              "start": 16,
+              "stop": 29,
+              "children": [
+                {
+                  "kind": "EmojiContext",
+                  "start": 16,
+                  "stop": 22,
+                  "children": [
+                    {
+                      "token": "LBRACKET",
+                      "text": "["
+                    },
+                    {
+                      "kind": "NameContext",
+                      "start": 17,
+                      "stop": 21,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "globe"
+                        }
+                      ]
+                    },
+                    {
+                      "token": "RBRACKET",
+                      "text": "]"
+                    }
+                  ]
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 23,
+                  "stop": 29,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "Gateway"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "CBRACE",
+              "text": "}"
+            }
+          ]
+        },
+        {
+          "kind": "GroupContext",
+          "start": 32,
+          "stop": 59,
+          "children": [
+            {
+              "token": "GROUP",
+              "text": "group"
+            },
+            {
+              "kind": "NameContext",
+              "start": 38,
+              "stop": 44,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "Backend"
+                }
+              ]
+            },
+            {
+              "token": "OBRACE",
+              "text": "{"
+            },
+            {
+              "kind": "ParticipantContext",
+              "start": 47,
+              "stop": 58,
+              "children": [
+                {
+                  "kind": "EmojiContext",
+                  "start": 47,
+                  "stop": 56,
+                  "children": [
+                    {
+                      "token": "LBRACKET",
+                      "text": "["
+                    },
+                    {
+                      "kind": "NameContext",
+                      "start": 48,
+                      "stop": 55,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "database"
+                        }
+                      ]
+                    },
+                    {
+                      "token": "RBRACKET",
+                      "text": "]"
+                    }
+                  ]
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 57,
+                  "stop": 58,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "DB"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "CBRACE",
+              "text": "}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 61,
+      "stop": 79,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 61,
+          "stop": 79,
+          "children": [
+            {
+              "kind": "MessageContext",
+              "start": 61,
+              "stop": 79,
+              "children": [
+                {
+                  "kind": "MessageBodyContext",
+                  "start": 61,
+                  "stop": 79,
+                  "children": [
+                    {
+                      "kind": "FromToContext",
+                      "start": 61,
+                      "stop": 72,
+                      "children": [
+                        {
+                          "kind": "FromContext",
+                          "start": 61,
+                          "stop": 67,
+                          "children": [
+                            {
+                              "kind": "NameContext",
+                              "start": 61,
+                              "stop": 67,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "Gateway"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "ARROW",
+                          "text": "->"
+                        },
+                        {
+                          "kind": "ToContext",
+                          "start": 70,
+                          "stop": 71,
+                          "children": [
+                            {
+                              "kind": "NameContext",
+                              "start": 70,
+                              "stop": 71,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "DB"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "DOT",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "FuncContext",
+                      "start": 73,
+                      "stop": 79,
+                      "children": [
+                        {
+                          "kind": "SignatureContext",
+                          "start": 73,
+                          "stop": 79,
+                          "children": [
+                            {
+                              "kind": "MethodNameContext",
+                              "start": 73,
+                              "stop": 77,
+                              "children": [
+                                {
+                                  "kind": "NameContext",
+                                  "start": 73,
+                                  "stop": 77,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "query"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "InvocationContext",
+                              "start": 78,
+                              "stop": 79,
+                              "children": [
+                                {
+                                  "token": "OPAR",
+                                  "text": "("
+                                },
+                                {
+                                  "token": "CPAR",
+                                  "text": ")"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

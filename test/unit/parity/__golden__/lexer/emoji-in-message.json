@@ -1,0 +1,27 @@
+[
+  {
+    "type": "ID",
+    "text": "A",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ARROW",
+    "text": "->",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "B",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "COL",
+    "text": ":",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "EVENT_PAYLOAD_LXR",
+    "text": " deploy 🚀 now",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

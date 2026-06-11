@@ -1,0 +1,29 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 4,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 4,
+      "children": [
+        {
+          "kind": "GroupContext",
+          "start": 0,
+          "stop": 4,
+          "children": [
+            {
+              "token": "GROUP",
+              "text": "group"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

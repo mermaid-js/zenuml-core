@@ -1,0 +1,37 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 9,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 9,
+      "children": [
+        {
+          "kind": "StarterExpContext",
+          "start": 0,
+          "stop": 9,
+          "children": [
+            {
+              "token": "STARTER_LXR",
+              "text": "@Starter"
+            },
+            {
+              "token": "OPAR",
+              "text": "("
+            },
+            {
+              "token": "CPAR",
+              "text": ")"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}
