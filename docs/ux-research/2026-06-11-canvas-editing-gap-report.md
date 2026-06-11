@@ -12,6 +12,8 @@ This report analyzes on-canvas (rendered diagram) editing from the perspective o
 
 Scope: the React renderer in Dynamic mode with all editing flags enabled (`enableParticipantInsertion`, `enableMessageInsertion`, `enableDividerInsertion`, `enableParticipantStyleEditing` — all default `false` in `src/store/Store.ts:120-123`; the demo apps enable them). The DSL text editor is out of scope except as the forced fallback.
 
+> **Update (same day):** live captures for the companion visual audit revealed that both floating panels render with **no styling at all** in the running product (Tailwind is scoped under `.zenuml`; the panels portal to `document.body` outside it). Where this report describes panel appearance, it describes the intended classes. See finding 0 and the annotated screenshots in `2026-06-11-canvas-editing-visual-language.md`.
+
 ---
 
 ## 1. The user's mental model

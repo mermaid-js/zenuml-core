@@ -3,12 +3,30 @@ scenario_id: canvas-editing-visual-language
 scenario_title: Visual presentation audit of on-canvas editing affordances
 run_date: 2026-06-11
 zenuml_core_sha: 2a7beba
-method: static code analysis (component styling, CSS, layering, theming); companion to 2026-06-11-canvas-editing-gap-report.md
+method: static code analysis (component styling, CSS, layering, theming) + live annotated Playwright captures (assets/canvas-visual-audit/); companion to 2026-06-11-canvas-editing-gap-report.md
 ---
 
 # Canvas Editing — Visual Language Audit
 
 The companion gap report covered *what* the user can do on the canvas. This report covers *how those capabilities look*: where each control appears relative to its target, what color and size it is, when it reveals itself, what layer it sits on, and whether the pieces add up to one coherent visual grammar. It audits the existing affordances as a system and ends with a proposed grammar that future affordances (delete, unwrap, context menu) should slot into. No code was changed.
+
+Every issue is demonstrated with an annotated screenshot (magenta = the problem, amber = supporting context, green = the good pattern to copy, purple = commentary), captured live from the e2e fixture page with all editing flags enabled. Capturing them surfaced one discovery that static reading had missed — it is finding 0 below, and it changes the severity ranking of everything panel-related.
+
+---
+
+## 0. Discovery: both floating panels render with NO styling at all
+
+Live rendering revealed that the message style panel and the participant style panel are **completely unstyled in the running product**. The cause is structural: Tailwind is configured with `important: ".zenuml"` (`tailwind.config.js:2`), which scopes every utility class under a `.zenuml` ancestor — but both panels render through `FloatingPortal` into `document.body` (`StylePanel.tsx:318`, `ParticipantStylePanel.tsx:166`), *outside* any `.zenuml` element. Every Tailwind class on them is inert. Computed style on the open message panel confirms it: `display: block` (the `flex` is dead, so the toolbar stacks vertically), `background-color: rgba(0,0,0,0)` (no white card), `box-shadow: none`, and buttons fall back to native browser borders.
+
+![Message panel unstyled](assets/canvas-visual-audit/00a-message-panel-unstyled.png)
+
+The participant panel is worse — with no background, the diagram bleeds straight through the swatches and type buttons:
+
+![Participant panel transparent](assets/canvas-visual-audit/00b-participant-panel-transparent.png)
+
+Consequences for this report: every observation below about the panels' *intended* chrome (white card, shadow, pressed states, hover states, submenu styling) describes classes that exist in the code but are never applied. The earlier statements in §2 and the scorecard treating the panels as "hardcoded light-mode" have been corrected accordingly — the panels are not light-mode, they are unstyled. This is the single highest-severity visual defect on the canvas, it affects every embedding of the library, and it is invisible to the existing test suite because E2E asserts behavior and visual snapshots don't capture open panels.
+
+**Fix direction (one of):** give the portal a root inside the diagram element (`FloatingPortal` accepts a `root` prop), wrap the portaled content in a `.zenuml`-classed container, or stop scoping Tailwind with `important: ".zenuml"` for panel-relevant utilities.
 
 ---
 
@@ -16,9 +34,13 @@ The companion gap report covered *what* the user can do on the canvas. This repo
 
 Participants show selection clearly: a sky ring (`ring-2 ring-sky-400`, `Participant.tsx:102`). Messages show **nothing**. `data-selected="true"` is set on the message element (`Message.tsx:69`, `MessageView.tsx:64`, `SelfInvocation.tsx:46`) but no CSS rule anywhere in `src/` targets it — grep for `data-selected` / `data-[selected` across all `.css` and component files finds only the attribute being *written* and one place *reading* it as a behavior guard (`EditableSpan.tsx:107`). The attribute drives logic, not pixels.
 
-So when a user clicks a message, the only feedback is (a) a floating style panel appearing *somewhere below*, and (b) the native tooltip text changing from "Click to select · drag to reorder" to "Click label to edit · drag to reorder" (`Message.tsx:70-76`) — which they will only see after the next 1-second hover. The interaction model is click-to-select / click-again-to-edit, which is a fine pattern (§3.2 of the gap report), but the model is invisible: the user cannot see *that* the first click did anything to the message, so the second click's different behavior feels random. This is the single highest-leverage visual fix on the canvas, and the spec already half-exists — whatever the participant ring does, the message should do (e.g., tinting the arrow/label via a `[data-selected="true"]` rule using the existing `--color-message-arrow` token family).
+So when a user clicks a message, the only feedback is (a) a floating style panel appearing *somewhere below* (and per finding 0, an unstyled one), and (b) the native tooltip text changing from "Click to select · drag to reorder" to "Click label to edit · drag to reorder" (`Message.tsx:70-76`) — which they will only see after the next 1-second hover. The interaction model is click-to-select / click-again-to-edit, which is a fine pattern (§3.2 of the gap report), but the model is invisible: the user cannot see *that* the first click did anything to the message, so the second click's different behavior feels random. This is the single highest-leverage visual fix on the canvas, and the spec already half-exists — whatever the participant ring does, the message should do (e.g., tinting the arrow/label via a `[data-selected="true"]` rule using the existing `--color-message-arrow` token family).
+
+![Selected message has no visual state](assets/canvas-visual-audit/01-message-selection-invisible.png)
 
 The same applies to the **drag-to-reorder** states: `data-reorder-state` is set to `pending`/`dragging` (`Block.tsx:145-167`) but the only visual consequences are `select-none`, a grabbing cursor, and the drop line on the *target*. The dragged message itself never changes appearance — no dimming, no ghost — so the user's eye has nothing confirming what is being moved.
+
+![Reorder drag: dragged message unchanged](assets/canvas-visual-audit/14-reorder-no-ghost.png)
 
 ---
 
@@ -36,11 +58,23 @@ Inventory of every accent color used by editing chrome (all hardcoded Tailwind u
 The intended semantics are legible — roughly *sky = selection/structure, amber = creation* — but they leak across each other in ways a user will register as noise:
 
 1. **Participant insertion is a creation act drawn in selection colors.** The "+" between participants hovers sky (`ParticipantInsertControls.tsx:182`) while the visually identical "+" in message gaps is amber (`GapHandleZone.tsx:148`). Same glyph, same size, same shape, same verb ("insert something here") — different palette depending on which axis you're inserting along.
+
+   ![Participant insert is sky](assets/canvas-visual-audit/02a-participant-plus-sky.png)
+   ![Message insert is amber](assets/canvas-visual-audit/02b-message-plus-amber.png)
+
 2. **One gesture, two accents.** During a create-drag, the source participant is ringed sky and the target amber (`MessageCreateControls.tsx:230-234`). The user is mid-gesture in the amber "creation" mode while the thing they grabbed glows in the unrelated selection color.
+
+   ![Create drag: sky source, amber target](assets/canvas-visual-audit/03-create-drag-two-accents.png)
+
 3. **Edit mode is a third blue.** The contenteditable state uses blue-300/blue-50 (`EditableSpan.css`) — close enough to sky to look like it's trying to match the selection color, far enough to read as a mismatch when a selected participant (sky-400 ring) has its label in edit state (blue-300 outline) two pixels away.
+
+   ![Edit state is a third blue](assets/canvas-visual-audit/04-edit-state-third-blue.png)
+
 4. **Reorder (a move) is sky.** The drop indicator is `bg-sky-500` (`Block.tsx:201`) — arguably "structure", but it makes amber strictly mean "create a message", not "create/insert" generally, undermining reading 1.
 
-None of these colors are theme tokens. The diagram surface is fully tokenized (`bg-skin-participant`, `text-skin-message-arrow`, etc. — see `src/assets/tailwind.css`) and ships a dark theme (`src/themes/theme-dark.css`), but every piece of editing chrome — white panel backgrounds, `text-black` panel buttons (`StylePanel.tsx:321,332`), white handle fills, the `#eff6ff` edit tint — assumes a light canvas. On `theme-dark`, the diagram goes dark while every editing affordance stays daylight-white; contrast of amber-on-dark and the gray hover outline (`#d1d5db` on a dark surface) was never designed, it just happens.
+None of these colors are theme tokens. The diagram surface is fully tokenized (`bg-skin-participant`, `text-skin-message-arrow`, etc. — see `src/assets/tailwind.css`) and ships a dark theme (`src/themes/theme-dark.css`), but every piece of in-canvas editing chrome — white handle fills, the amber/sky accents, the `#eff6ff` edit tint — assumes a light canvas. The panels' light chrome (`bg-white`, `text-black` — `StylePanel.tsx:321,332`) is *intended* to be light-mode but per finding 0 isn't applied at all, which on `theme-dark` produces the worst of both: a transparent panel with dark text floating over a dark canvas. Contrast of amber-on-dark and the gray hover outline (`#d1d5db` on a dark surface) was never designed, it just happens.
+
+![Dark theme with daylight chrome](assets/canvas-visual-audit/11-dark-theme-chrome.png)
 
 **Recommendation:** define three semantic tokens — `--color-edit-selection` (selection rings, drop indicators), `--color-edit-creation` (insert handles, drag line, both ends of a create-drag), `--color-edit-active` (contenteditable state, ideally the same hue as selection at a different weight) — give them dark-theme values, and route all chrome through them. That single move fixes inconsistencies 1–4 and the dark-theme clash simultaneously.
 
@@ -55,9 +89,20 @@ None of these colors are theme tokens. The diagram surface is fully tokenized (`
 
 ### What's placed poorly
 1. **The divider button is orphaned.** It's pinned to the far-right end of the gap (`right-0`, `GapHandleZone.tsx:167`), an arbitrary corner unrelated to what a divider *is* (a full-width band). On a wide diagram the user hovers a gap in the middle, sees "+" handles appear around the cursor, and the divider button materializes meters away at the edge — outside the attention zone, likely outside the viewport. Its glyph (`══`, 9px text) is also the only affordance whose icon needs decoding.
+
+   ![Divider control appears 457px from the cursor](assets/canvas-visual-audit/05-divider-orphaned.png)
+
 2. **A gap row scales its noise with participant count.** Each gap renders one "+" per participant simultaneously (`GapHandleZone.tsx:143-163`). With 8 participants, a single hover pops 8 identical amber circles plus a dashed line plus the divider button. All buttons look the same; the *only* differentiator is horizontal position, and the tooltip naming the source appears per-button on delayed hover. The row treats "which source?" — the key decision — as undifferentiated repetition rather than highlighting the lifeline nearest the cursor.
+
+   ![One hover reveals eight identical buttons](assets/canvas-visual-audit/06-gap-row-noise.png)
+
 3. **Both floating panels open blind, below their anchor, over live content.** The message style panel floats under the clicked message (floating-ui default placement, no `autoUpdate` — `StylePanel.tsx:82-85`); the participant panel at `rect.bottom + 6` (`ParticipantStylePanel.tsx:67-68`). In a sequence diagram, "directly below" is never empty — it's the next statement, or for participants the first messages. The panel thus covers exactly the elements the user is most likely to interact with next; the participant panel at least clamps to the viewport and flips when it would overflow (`ParticipantStylePanel.tsx:78-93`), the message panel doesn't even do that.
-4. **Panels don't track anything.** Neither panel registers scroll/resize repositioning — no `autoUpdate`/`whileElementsMounted` anywhere in `src/`, and the participant panel computes `position: fixed` coordinates once on open (`ParticipantStylePanel.tsx:62-69`). Scroll the page with a panel open and it detaches from its anchor and floats over unrelated content, the strongest possible signal of "this UI is bolted on."
+
+   ![Panel covers the next statement](assets/canvas-visual-audit/07-panel-covers-next-statement.png)
+
+4. **Panels don't track anything.** Neither panel registers scroll/resize repositioning — no `autoUpdate`/`whileElementsMounted` anywhere in `src/`, and the participant panel computes `position: fixed` coordinates once on open (`ParticipantStylePanel.tsx:62-69`). Scroll the page with a panel open and it detaches from its anchor and floats over unrelated content, the strongest possible signal of "this UI is bolted on." (In the capture below, the anchor participant is simulated-sticky and pinned at the top while the panel stays at its opening coordinates over messages 6–7.)
+
+   ![Panel detached after scrolling 260px](assets/canvas-visual-audit/08-participant-panel-scroll-detach.png)
 
 ---
 
@@ -76,6 +121,10 @@ None of these colors are theme tokens. The diagram surface is fully tokenized (`
 
 Two patterns stand out. First, the codebase already contains the correct technique — the invisible 36 px hit wrapper around a 16 px visual (`ParticipantInsertControls`) — but applies it to only one of the four small-button families. The gap handles, which require the most precise hovering (a 16 px strip offset 5 px above the statement boundary, `GapHandleZone.tsx:24,220`), get no such cushion; the 80 ms hide-delay (`GapHandleZone.tsx:64-71`) papers over exits but doesn't help entry. Second, every small control is exactly 16 px — a size constant chosen once (`HANDLE_SIZE`, `DRAG_HANDLE_SIZE`, `BUTTON_SIZE` are three separate constants that all equal 16) — which is consistent, but consistently below the 24 px floor, and these are *inside the scaled canvas* (next section), so at 80 % zoom they render at 12.8 px.
 
+![The good pattern: 36px hit area](assets/canvas-visual-audit/09a-participant-plus-hit-area.png)
+![The bad pattern: 16px button is the whole target](assets/canvas-visual-audit/09b-gap-handle-hit-area.png)
+![The occurrence bar: 15px wide, cursor-only affordance](assets/canvas-visual-audit/13-occurrence-bar.png)
+
 ---
 
 ## 5. Layering, scale, and two coordinate worlds
@@ -86,6 +135,8 @@ The editing chrome lives in two different coordinate systems with different beha
 - **Portaled** (never scales): both floating panels render through `FloatingPortal` to the document body (`StylePanel.tsx:318`, `ParticipantStylePanel.tsx:166`).
 
 At 100 % zoom this is invisible. At 70 % the in-canvas controls shrink to ~11 px while the panels remain full-size — controls that are already too small get smaller exactly when the user has zoomed out to work on a large diagram, while the panel looms disproportionately large next to the shrunken element it styles. (Zoom is capped at 100 %, `DiagramFrame.tsx:89`, so the mismatch only ever makes small things smaller.)
+
+![70% zoom: diagram shrinks, panel doesn't](assets/canvas-visual-audit/10-zoom-scale-mismatch.png)
 
 The z-index stack is ad-hoc magic numbers spread across files: participants 10, drag highlights 20, drag line 30, insert layer / message panel / drag badge 40, gap-handle buttons / participant panel 50 (`Participant.tsx:99`, `MessageCreateControls.tsx:182,197,232`, `SeqDiagram.tsx:127`, `StylePanel.tsx:319`, `GapHandleZone.tsx:153`, `ParticipantStylePanel.tsx:170`). It currently works, but there is no documented scale, and the two panels — peers in the UI — sit on different layers (40 vs 50), so if they ever overlap, the participant panel wins by accident rather than by decision.
 
@@ -108,8 +159,15 @@ How each affordance announces its existence:
 Three observations:
 
 1. **Everything except the empty state is hover-gated, and the gating is inconsistent** — some things fade (participant "+", title), some pop in with no transition (gap handles), some only change the cursor (messages, occurrence bars). Fade vs pop is exactly the kind of micro-inconsistency that makes a UI feel assembled rather than designed; pick one reveal animation for "insertion handles" as a class.
-2. **The entire interaction contract is delegated to native `title` tooltips** — delayed ~1 s, unstyled, absent on touch, and carrying load-bearing instructions: "Click to select · drag to reorder" (`Message.tsx:74-75`), "Drag to create a message from X" (`GapHandleZone.tsx:157`), "Click to style participant" (`Participant.tsx:122`). Native tooltips are fine as reinforcement; as the *only* teaching layer they mean a user who never hovers-and-waits never learns the model. The contradictions noted in the gap report compound this: the participant box says "Click to style participant" while the label inside it says "Double-click to edit" and actually single-click-edits.
+2. **The entire interaction contract is delegated to native `title` tooltips** — delayed ~1 s, unstyled, absent on touch, and carrying load-bearing instructions: "Click to select · drag to reorder" (`Message.tsx:74-75`), "Drag to create a message from X" (`GapHandleZone.tsx:157`), "Click to style participant" (`Participant.tsx:122`). Native tooltips are fine as reinforcement; as the *only* teaching layer they mean a user who never hovers-and-waits never learns the model. The contradictions noted in the gap report compound this: the participant box says "Click to style participant" while the label inside it says "Double-click to edit" and actually single-click-edits. (During this audit, the capture automation itself fell into the trap twice: clicking a participant's center lands on the label and enters rename mode instead of selecting.)
+
+   ![Two contradictory tooltips on one element](assets/canvas-visual-audit/12-tooltip-contract.png)
 3. **The occurrence bar is the least announced affordance with the most magic.** A 15 px bar whose entire affordance is a cursor change initiates a nested-message drag that may rewrite a leaf call into a block. Compare: the same verb (create message) from a gap gets an amber "+", a dashed guide line, and a tooltip. The visual investment is wildly uneven across two entry points to the same action.
+
+The empty-title affordance is the limit case of hover-gating — at rest there is literally nothing on screen:
+
+![Empty title: invisible at rest](assets/canvas-visual-audit/18a-title-invisible.png)
+![Empty title: revealed only on hover](assets/canvas-visual-audit/18b-title-hover.png)
 
 ---
 
@@ -124,8 +182,8 @@ Three observations:
 | Message selection | n/a | — | ✅ row target | ⚠️ cursor+tooltip only | ❌ **no selected visual at all** | **D** |
 | Reorder drag | ✅ drop line at boundary | ⚠️ sky | ✅ | ⚠️ cursor only | ❌ dragged item unchanged, no ghost, no auto-scroll | **C-** |
 | Inline edit (labels) | ✅ in place | ⚠️ third blue | ✅ | ✅ hover outline | ✅ clear edit state | **A-** |
-| Message style panel | ❌ covers next statement, no autoUpdate | ❌ hardcoded light | ⚠️ 24 px buttons, 11 px menus | ✅ opens on select | ✅ pressed states, disabled tooltips | **C** |
-| Participant style panel | ⚠️ covers first messages; clamps but doesn't track scroll | ❌ hardcoded light | ✅ swatches+type cards | ✅ | ⚠️ closes after each apply | **C** |
+| Message style panel | ❌ covers next statement, no autoUpdate | ❌ **unstyled — finding 0** | ⚠️ 24 px buttons, 11 px menus (as designed; not applied) | ✅ opens on select | ❌ pressed/hover states are dead classes; disabled tooltips work | **F** |
+| Participant style panel | ⚠️ covers first messages; clamps but doesn't track scroll | ❌ **transparent — finding 0** | ❌ swatches collapse to a strip | ✅ | ⚠️ closes after each apply | **F** |
 | Occurrence drag bar | ✅ the bar itself | — (no visual) | ❌ 15 px wide | ❌ cursor only | ⚠️ | **D+** |
 | Empty-diagram prompt | ✅ centered | ✅ neutral→sky | ✅ large | ✅ always visible | ✅ | **A** |
 
@@ -154,6 +212,7 @@ The findings above are individually small; the systemic issue is that there is n
 
 ## 9. Quick wins (visual-only, no new capability)
 
+0. **Fix the dead panel styling (finding 0)** — portal the panels inside a `.zenuml`-classed root so their Tailwind classes actually apply. Until this lands, every other panel polish item is moot.
 1. CSS rule for `[data-selected="true"]` messages — selection becomes visible. Highest leverage, smallest change.
 2. Fix the two lying tooltips (`ParticipantLabel.tsx:125`, `Participant.tsx:122`).
 3. Wrap gap-handle and divider buttons in 36 px hit areas (pattern already in `ParticipantInsertControls`).
@@ -162,3 +221,27 @@ The findings above are individually small; the systemic issue is that there is n
 6. Dim/ghost the dragged statement via the already-present `data-reorder-state="dragging"` attribute.
 7. Route panel/handle chrome through skin tokens; add dark-theme values.
 8. Add `autoUpdate` to both floating panels.
+
+---
+
+## 10. Appendix: screenshots for the companion gap report's interaction findings
+
+The remaining captures illustrate behavioral findings from `2026-06-11-canvas-editing-gap-report.md` (inelegant-interaction table):
+
+**Insert-handoff inconsistency (gap report §2.1).** Participant insertion ships a participant named "A" with no rename mode; message insertion opens the label pre-focused — the pattern the former should copy:
+
+![Participant insert: no rename handoff](assets/canvas-visual-audit/15a-participant-insert-no-rename.png)
+![Message insert: automatic rename](assets/canvas-visual-audit/15b-message-insert-auto-rename.png)
+
+**Abandoned rename leaves residue (gap report §3.1).** Escape during the post-insert rename keeps the placeholder statement in the document; with no delete and no undo, the canvas cannot recover:
+
+![newMessage() persists after cancel](assets/canvas-visual-audit/16-abandoned-rename-residue.png)
+
+**No delete verb (gap report §3.6).** The message panel offers style, rename, re-type, and wrap — removal does not exist anywhere on the canvas:
+
+![The panel has every verb except delete](assets/canvas-visual-audit/17-style-panel-no-delete.png)
+
+**Participant panel closes after one change (gap report §2.3).** Applying a single property dismisses the panel and clears the selection; a color + type change requires two full select-open-apply cycles:
+
+![Step 1: panel open](assets/canvas-visual-audit/19a-participant-panel-open.png)
+![Step 2: panel auto-closed after one apply](assets/canvas-visual-audit/19b-participant-panel-closed-after-one-change.png)
