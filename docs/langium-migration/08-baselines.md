@@ -263,3 +263,62 @@ bun scripts/parity/bench-parse.mjs          # human-readable tables
 bun scripts/parity/bench-parse.mjs --json   # machine-readable
 bun run build                                # then gzip -9 -c dist/<f> | wc -c
 ```
+
+## 7. Stage 1 results — Chevrotain lexer vs ANTLR lex (Gate 1)
+
+Recorded 2026-06-11 on the same machine/runtime as §1 (Apple M4, Bun 1.2.22),
+after the Chevrotain lexer at `src/parser-langium/lexer/` reached 100%
+token-stream parity (`test/unit/parity/lexer-parity-langium.spec.ts`,
+100/100 goldens green).
+
+- Script: `scripts/parity/bench-lex-langium.mjs` (reuses the corpus +
+  median-of-5/2-warmup harness from `bench-parse.mjs`; run with `--json` for
+  machine-readable output).
+- Same 150-case corpus as §2 (148 compare-cases + `synthetic-cjk-heavy` +
+  `synthetic-large-520`). The ANTLR side was **re-run fresh in the same
+  process** for a fair same-load comparison — its numbers below (sum 429 ms)
+  match the §3 baseline (443 ms) within the documented ±15% variance.
+- `chevrotain raw` = `lexer.tokenize(code)` only. `chevrotain merged` = the
+  full `lexWithLangium` parity adapter (tokenize + channel-group merge by
+  startOffset + plain-object mapping).
+- The lexer runs with `safeMode: true` (first-char optimization OFF — required
+  for correctness of the `\p{L}` custom patterns, see `lexer/index.ts`) and
+  `positionTracking: "onlyOffset"`. No further tuning
+  (`start_chars_hint`, `ensureOptimizations`) was needed.
+
+### Headline numbers
+
+| metric | antlr lex (ms) | chevrotain raw (ms) | chevrotain merged (ms) | raw vs antlr |
+| --- | ---: | ---: | ---: | ---: |
+| Sum of per-case medians (150 cases) | 429.2 | 5.38 | 5.35 | 0.013× |
+| Full-corpus single pass (median of 5) | 415.3 | 4.93 | 5.38 | 0.012× |
+| `synthetic-cjk-heavy` (283 lines) | 68.6 | 0.81 | 0.86 | 0.012× |
+| `synthetic-large-520` (694 lines) | 164.1 | 1.72 | 1.87 | 0.010× |
+| `demo1-smoke` (60 lines, largest real case) | 13.1 | 0.13 | 0.13 | 0.010× |
+
+(raw vs merged differences are inside run-to-run jitter — the group-merge
+adapter overhead is negligible.)
+
+### Verdict
+
+**PASS — far within budget.** The Gate-1 budget was Chevrotain ≤ 1.5× ANTLR;
+the measured ratio is **~0.013× (≈80–100× faster)** on every aggregate and
+every individual case, including the CJK worst case that risk R7 flagged for
+Chevrotain's `\p{L}` handling. Even with `safeMode: true` disabling the
+first-char bucket optimization, the custom sticky-`u`-regex patterns are two
+orders of magnitude faster than the ANTLR JS lexer ATN. No Lexer config tuning
+was applied, so token order and patterns are untouched; the parity spec
+(100/100) was re-run green after the benchmark-only export change
+(`export const lexer` in `src/parser-langium/lexer/index.ts`).
+
+Sanity check accompanying the numbers: for all 150 corpus cases, ANTLR
+token count (EOF excluded) == merged adapter count == raw tokens+groups count,
+with zero Chevrotain lex errors.
+
+### How to regenerate
+
+```sh
+bun scripts/parity/bench-lex-langium.mjs          # human-readable table
+bun scripts/parity/bench-lex-langium.mjs --json   # machine-readable
+bun test test/unit/parity/lexer-parity-langium.spec.ts  # parity guard
+```
