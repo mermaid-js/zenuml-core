@@ -17,7 +17,9 @@ channels {
 
     // Look ahead past 'title' and any whitespace to check what follows
     const SPACE = 32, TAB = 9, EOF = -1, DOT = 46, EQUALS = 61, OPEN_PAREN = 40;
-    let pos = 6, next = this._input.LA(pos);
+    // Right-edge predicate: input is already past 'title', so LA(1)
+    // is the first character after the keyword.
+    let pos = 1, next = this._input.LA(pos);
 
     // Skip past any whitespace
     while (next === SPACE || next === TAB) {
@@ -47,7 +49,7 @@ STATIC:     'static' -> channel(MODIFIER_CHANNEL);
 AWAIT:      'await' -> channel(MODIFIER_CHANNEL);
 
 TITLE
- : {this.isTitle()}? 'title' -> pushMode(TITLE_MODE)
+ : 'title' {this.isTitle()}? -> pushMode(TITLE_MODE)
  ;
 
 COL
@@ -233,7 +235,7 @@ OTHER
 // Divider notes can be characters other than changeline.
 // So it must not be tokenized by other Lexer rules.
 // Thus this is not suitable for the parser to parse.
-DIVIDER: {this.column === 0}? HWS* '==' ~[\r\n]*;
+DIVIDER: HWS* '==' ~[\r\n]* {this._tokenStartColumn === 0}?;
 
 mode EVENT;
 EVENT_PAYLOAD_LXR
