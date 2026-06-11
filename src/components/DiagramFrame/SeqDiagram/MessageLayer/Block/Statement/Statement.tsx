@@ -13,6 +13,7 @@ import { Divider } from "./Divider/Divider";
 import { Return } from "./Return/Return";
 import Comment from "../../../../../Comment/Comment";
 import { cn } from "@/utils";
+import { useMemo } from "react";
 
 export const Statement = (props: {
   context: any;
@@ -20,8 +21,12 @@ export const Statement = (props: {
   number?: string;
   collapsed?: boolean;
 }) => {
-  const comment = props.context.getComment() || "";
-  const commentObj = new Comment(comment);
+  // getComment walks the token stream and Comment parses styling per line;
+  // both depend only on the (immutable) context.
+  const { comment, commentObj } = useMemo(() => {
+    const comment = props.context.getComment() || "";
+    return { comment, commentObj: new Comment(comment) };
+  }, [props.context]);
 
   const subProps = {
     className: cn("text-left text-sm text-skin-message", {

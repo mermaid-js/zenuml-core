@@ -16,7 +16,16 @@ class Participant implements IParticipantModel {
   emoji?: string;
   groupId?: string | number;
 
-  constructor(name: string, left: string, label?: string, type?: string, stereotype?: string, color?: string, groupId?: string | number, emoji?: string) {
+  constructor(
+    name: string,
+    left: string,
+    label?: string,
+    type?: string,
+    stereotype?: string,
+    color?: string,
+    groupId?: string | number,
+    emoji?: string,
+  ) {
     this.name = name;
     this.left = left;
     this.label = label;
@@ -37,8 +46,13 @@ class Participant implements IParticipantModel {
   }
 }
 
+// Pure function of the (immutable) parse tree; consumers only read the models.
+const orderedParticipantsCache = new WeakMap<object, IParticipantModel[]>();
+
 export function OrderedParticipants(rootContext: any): IParticipantModel[] {
   if (!rootContext) return [];
+  const cached = orderedParticipantsCache.get(rootContext);
+  if (cached) return cached;
   // @ts-expect-error type
   const participants = ToCollector.getParticipants(rootContext);
   const participantEntries = Array.from(participants.participants.entries());
@@ -55,19 +69,23 @@ export function OrderedParticipants(rootContext: any): IParticipantModel[] {
       { ...blankParticipant, name: _STARTER_, isStarter: true },
     ]);
   }
-  return participantEntries.map((entry: any, index: number, entries: any) => {
-    const participant = entry[1];
-    const previousName = index > 0 ? entries[index - 1][1].name : "";
+  const result = participantEntries.map(
+    (entry: any, index: number, entries: any) => {
+      const participant = entry[1];
+      const previousName = index > 0 ? entries[index - 1][1].name : "";
 
-    return new Participant(
-      participant.name,
-      previousName,
-      participant.label,
-      participant.type,
-      participant.stereotype,
-      participant.color,
-      participant.groupId,
-      participant.emoji,
-    );
-  });
+      return new Participant(
+        participant.name,
+        previousName,
+        participant.label,
+        participant.type,
+        participant.stereotype,
+        participant.color,
+        participant.groupId,
+        participant.emoji,
+      );
+    },
+  );
+  orderedParticipantsCache.set(rootContext, result);
+  return result;
 }
