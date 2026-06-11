@@ -172,9 +172,24 @@ ToCollector.enterRet = function (ctx) {
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
+// Per-context memoization. Collecting participants requires a full parse-tree
+// walk, and the same (immutable) root context is queried many times during a
+// single render across different components. A WeakMap keyed on the context
+// auto-invalidates when the code changes (a new parse produces new context
+// objects, and the old ones become eligible for GC). The returned Participants
+// instance is only mutated via .Add() inside this walk — callers treat it as
+// read-only — so sharing the cached instance is safe.
+const participantsCache = new WeakMap();
+
 ToCollector.getParticipants = function (context) {
+  if (context && participantsCache.has(context)) {
+    return participantsCache.get(context);
+  }
   participants = new Participants();
-  if (context) walker.walk(this, context);
+  if (context) {
+    walker.walk(this, context);
+    participantsCache.set(context, participants);
+  }
   return participants;
 };
 

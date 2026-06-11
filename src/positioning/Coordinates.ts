@@ -21,11 +21,20 @@ export class Coordinates {
   private readonly widthProvider: WidthFunc;
   private readonly participantModels: IParticipantModel[];
   private readonly ownableMessages: OwnableMessage[];
+  // Index lookup by participant name, built once. Avoids O(n) findIndex per call.
+  private readonly participantIndex: Map<string, number> = new Map();
+  // Cached result of the (relatively expensive, ~O(n^3)) optimal-layout solve.
+  // `this.m` never changes after construction, so the solution is identical for
+  // every participant — compute it once instead of once per participant.
+  private optimalPositions?: number[];
 
   constructor(ctx: any, widthProvider: WidthFunc) {
     clearCache();
     this.participantModels = OrderedParticipants(ctx);
     this.ownableMessages = AllMessages(ctx);
+    this.participantModels.forEach((p, i) =>
+      this.participantIndex.set(p.name, i),
+    );
 
     this.widthProvider = widthProvider;
     this.walkThrough();
@@ -35,11 +44,18 @@ export class Coordinates {
     return this.participantModels.map((p) => p.name);
   }
 
+  private getOptimalPositions(): number[] {
+    if (!this.optimalPositions) {
+      this.optimalPositions = find_optimal(this.m);
+    }
+    return this.optimalPositions;
+  }
+
   getPosition(participantName: string | undefined): number {
     if (!participantName) return 0;
 
-    const participant = this.getParticipantModel(participantName);
-    if (!participant) {
+    const pIndex = this.participantIndex.get(participantName);
+    if (pIndex === undefined) {
       console.warn(`Participant ${participantName} not found`);
       return 0;
     }
@@ -50,12 +66,9 @@ export class Coordinates {
       return cachedPosition;
     }
 
-    const pIndex = this.participantModels.findIndex(
-      (p) => p.name === participantName,
-    );
     const leftGap = this.getParticipantGap(this.participantModels[0]);
     // const leftGap = 0;
-    const position = leftGap + find_optimal(this.m)[pIndex];
+    const position = leftGap + this.getOptimalPositions()[pIndex];
     setCache(cacheKey, position);
     logger.debug(`Position of ${participantName} is ${position}`);
     return position;
@@ -148,7 +161,8 @@ export class Coordinates {
   }
 
   private getParticipantModel(name: string): IParticipantModel | undefined {
-    return this.participantModels.find((p) => p.name === name);
+    const i = this.participantIndex.get(name);
+    return i === undefined ? undefined : this.participantModels[i];
   }
 
   private _getParticipantWidth(participant: IParticipantModel) {
@@ -171,7 +185,8 @@ export class Coordinates {
       TextType.ParticipantName,
     );
     const participantWidth =
-      Math.max(labelWidth + iconWidth + emojiWidth, MIN_PARTICIPANT_WIDTH) + MARGIN;
+      Math.max(labelWidth + iconWidth + emojiWidth, MIN_PARTICIPANT_WIDTH) +
+      MARGIN;
 
     setCache(cacheKey, participantWidth);
     logger.debug(
