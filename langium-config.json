@@ -1,0 +1,13 @@
+{
+  "projectName": "ZenUml",
+  "languages": [
+    {
+      "id": "zenuml",
+      "grammar": "src/parser-langium/zenuml.langium",
+      "fileExtensions": [".zenuml"]
+    }
+  ],
+  "mode": "production",
+  "importExtension": ".js",
+  "out": "src/parser-langium/generated"
+}

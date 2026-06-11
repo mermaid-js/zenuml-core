@@ -38,6 +38,7 @@
     "antlr:grun": "pwd && cd ./src/g4-units/hello-world && grun Hello r -tokens",
     "antlr": "bun run antlr:lexer && bun run antlr:parser",
     "antlr:clear": "rm -rf src/generated-parser/*",
+    "langium:generate": "langium generate",
     "antlr:lexer": "java -Duser.dir=$(pwd)/src/g4 -cp $(pwd)/antlr/antlr-4.11.1-complete.jar org.antlr.v4.Tool -o ./src/generated-parser -Dlanguage=JavaScript sequenceLexer.g4",
     "antlr:parser": "java -Duser.dir=$(pwd)/src/g4 -cp $(pwd)/antlr/antlr-4.11.1-complete.jar org.antlr.v4.Tool -o ./src/generated-parser -Dlanguage=JavaScript sequenceParser.g4",
     "eslint": "eslint --fix --ext .js,.ts,.tsx,.jsx src",
