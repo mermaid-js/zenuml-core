@@ -32,11 +32,51 @@ class SeqErrorListener extends antlr4.error.ErrorListener {
   }
 }
 
-function rootContext(code) {
+function createParser(code, { silent = false } = {}) {
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
+  if (silent) {
+    lexer.removeErrorListeners();
+  }
   const tokens = new antlr4.CommonTokenStream(lexer);
   const parser = new sequenceParser(tokens);
+  if (silent) {
+    parser.removeErrorListeners();
+  }
+  return parser;
+}
+
+// Memoize error-free parse results so the same code is parsed once even when
+// multiple render paths (store, SVG export, CLI) need the tree.
+const rootContextCache = new Map();
+const ROOT_CONTEXT_CACHE_MAX = 10;
+
+function rootContext(code) {
+  const cached = rootContextCache.get(code);
+  if (cached) {
+    return cached;
+  }
+
+  // Two-stage parsing: SLL prediction is an order of magnitude faster than
+  // full LL and, when it succeeds, is guaranteed to produce the same parse
+  // tree. BailErrorStrategy aborts on the first syntax error so invalid input
+  // falls through to the full LL parse below, which keeps error recovery and
+  // error reporting behavior unchanged.
+  const sllParser = createParser(code, { silent: true });
+  sllParser._interp.predictionMode = antlr4.atn.PredictionMode.SLL;
+  sllParser._errHandler = new antlr4.error.BailErrorStrategy();
+  try {
+    const tree = sllParser.prog();
+    rootContextCache.set(code, tree);
+    if (rootContextCache.size > ROOT_CONTEXT_CACHE_MAX) {
+      rootContextCache.delete(rootContextCache.keys().next().value);
+    }
+    return tree;
+  } catch {
+    // fall through to full LL parse
+  }
+
+  const parser = createParser(code);
   parser.addErrorListener(new SeqErrorListener());
   return parser._syntaxErrors ? null : parser.prog();
 }

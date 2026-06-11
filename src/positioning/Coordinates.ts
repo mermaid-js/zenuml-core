@@ -14,18 +14,28 @@ import { find_optimal } from "./david/DavidEisenstat";
 import { AllMessages } from "@/parser/MessageCollector";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
 import type { OwnableMessage } from "@/parser/OwnableMessage";
-import { clearCache, getCache, setCache } from "@/utils/RenderingCache";
 
 export class Coordinates {
   private m: Array<Array<number>> = [];
   private readonly widthProvider: WidthFunc;
   private readonly participantModels: IParticipantModel[];
   private readonly ownableMessages: OwnableMessage[];
+  private readonly participantModelsByName = new Map<
+    string,
+    IParticipantModel
+  >();
+  private readonly participantIndexByName = new Map<string, number>();
+  private readonly participantWidthCache = new Map<string, number>();
+  // Solved positions for all participants; the solver runs once per instance.
+  private positionsCache: number[] | null = null;
 
   constructor(ctx: any, widthProvider: WidthFunc) {
-    clearCache();
     this.participantModels = OrderedParticipants(ctx);
     this.ownableMessages = AllMessages(ctx);
+    this.participantModels.forEach((p, i) => {
+      this.participantModelsByName.set(p.name, p);
+      this.participantIndexByName.set(p.name, i);
+    });
 
     this.widthProvider = widthProvider;
     this.walkThrough();
@@ -38,32 +48,24 @@ export class Coordinates {
   getPosition(participantName: string | undefined): number {
     if (!participantName) return 0;
 
-    const participant = this.getParticipantModel(participantName);
-    if (!participant) {
+    const pIndex = this.participantIndexByName.get(participantName);
+    if (pIndex === undefined) {
       console.warn(`Participant ${participantName} not found`);
       return 0;
     }
 
-    const cacheKey = `getPosition_${participantName}`;
-    const cachedPosition = getCache(cacheKey);
-    if (cachedPosition != null) {
-      return cachedPosition;
+    if (!this.positionsCache) {
+      this.positionsCache = find_optimal(this.m);
     }
-
-    const pIndex = this.participantModels.findIndex(
-      (p) => p.name === participantName,
-    );
     const leftGap = this.getParticipantGap(this.participantModels[0]);
-    // const leftGap = 0;
-    const position = leftGap + find_optimal(this.m)[pIndex];
-    setCache(cacheKey, position);
+    const position = leftGap + this.positionsCache[pIndex];
     logger.debug(`Position of ${participantName} is ${position}`);
     return position;
   }
 
   walkThrough() {
     this.withParticipantGaps(this.participantModels);
-    this.withMessageGaps(this.ownableMessages, this.participantModels);
+    this.withMessageGaps(this.ownableMessages);
   }
 
   half(participantName: string): number {
@@ -104,20 +106,15 @@ export class Coordinates {
     return messageWidth;
   }
 
-  private withMessageGaps(
-    ownableMessages: OwnableMessage[],
-    participantModels: IParticipantModel[],
-  ) {
+  private withMessageGaps(ownableMessages: OwnableMessage[]) {
     for (const message of ownableMessages) {
-      if (!message.from) {
-        message.from = _STARTER_;
-      }
-      const indexFrom = participantModels.findIndex(
-        (p) => p.name === message.from,
-      );
-      const indexTo = participantModels.findIndex((p) => p.name === message.to);
+      // The message array is shared (cached per parse tree), so derive the
+      // effective source locally instead of mutating the message.
+      const from = message.from || _STARTER_;
+      const indexFrom = this.participantIndexByName.get(from) ?? -1;
+      const indexTo = this.participantIndexByName.get(message.to) ?? -1;
       if (indexFrom === -1 || indexTo === -1) {
-        console.warn(`Participant ${message.from} or ${message.to} not found`);
+        console.warn(`Participant ${from} or ${message.to} not found`);
         continue;
       }
       const leftIndex = Math.min(indexFrom, indexTo);
@@ -130,7 +127,7 @@ export class Coordinates {
         );
       } catch {
         console.warn(
-          `Could not set message gap between ${message.from} and ${message.to}`,
+          `Could not set message gap between ${from} and ${message.to}`,
         );
       }
     }
@@ -148,12 +145,11 @@ export class Coordinates {
   }
 
   private getParticipantModel(name: string): IParticipantModel | undefined {
-    return this.participantModels.find((p) => p.name === name);
+    return this.participantModelsByName.get(name);
   }
 
   private _getParticipantWidth(participant: IParticipantModel) {
-    const cacheKey = `getParticipantWidth_${participant.name}`;
-    const cachedWidth = getCache(cacheKey);
+    const cachedWidth = this.participantWidthCache.get(participant.name);
     if (cachedWidth != null) {
       return cachedWidth;
     }
@@ -171,9 +167,10 @@ export class Coordinates {
       TextType.ParticipantName,
     );
     const participantWidth =
-      Math.max(labelWidth + iconWidth + emojiWidth, MIN_PARTICIPANT_WIDTH) + MARGIN;
+      Math.max(labelWidth + iconWidth + emojiWidth, MIN_PARTICIPANT_WIDTH) +
+      MARGIN;
 
-    setCache(cacheKey, participantWidth);
+    this.participantWidthCache.set(participant.name, participantWidth);
     logger.debug(
       `Width of ${participant.name} is ${participantWidth}; labelWidth: ${labelWidth}`,
     );

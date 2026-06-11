@@ -3,6 +3,7 @@ import { centerOf, distance2 } from "./utils";
 import Anchor2 from "@/positioning/Anchor2";
 import { coordinatesAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
+import { useMemo } from "react";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 const matchesImplicitStarterSelf = (ctx: any, participant: string) => {
@@ -55,38 +56,51 @@ export const useArrow = ({
 }) => {
   const coordinates = useAtomValue(coordinatesAtom);
 
-  const isSelf = source === target;
+  // Pure derivation from the parse-tree context and coordinates; the ancestor
+  // walks and anchor math don't need to re-run on unrelated re-renders.
+  return useMemo(() => {
+    const isSelf = source === target;
 
-  const originLayers = depthOnParticipant(context, origin);
+    const originLayers = depthOnParticipant(context, origin);
 
-  const sourceLayers = depthOnParticipant(context, source);
+    const sourceLayers = depthOnParticipant(context, source);
 
-  const targetLayers = depthOnParticipant4Stat(context, target);
+    const targetLayers = depthOnParticipant4Stat(context, target);
 
-  const anchor2Origin = new Anchor2(centerOf(coordinates, origin), originLayers);
+    const anchor2Origin = new Anchor2(
+      centerOf(coordinates, origin),
+      originLayers,
+    );
 
-  const anchor2Source = new Anchor2(centerOf(coordinates, source), sourceLayers);
+    const anchor2Source = new Anchor2(
+      centerOf(coordinates, source),
+      sourceLayers,
+    );
 
-  const anchor2Target = new Anchor2(centerOf(coordinates, target), targetLayers);
+    const anchor2Target = new Anchor2(
+      centerOf(coordinates, target),
+      targetLayers,
+    );
 
-  const interactionWidth = Math.abs(anchor2Source.edgeOffset(anchor2Target));
+    const interactionWidth = Math.abs(anchor2Source.edgeOffset(anchor2Target));
 
-  const rightToLeft = distance2(coordinates, source, target) < 0;
+    const rightToLeft = distance2(coordinates, source, target) < 0;
 
-  const translateX = anchor2Origin.centerToEdge(
-    !rightToLeft ? anchor2Source : anchor2Target,
-  );
+    const translateX = anchor2Origin.centerToEdge(
+      !rightToLeft ? anchor2Source : anchor2Target,
+    );
 
-  return {
-    isSelf,
-    originLayers,
-    sourceLayers,
-    targetLayers,
-    anchor2Origin,
-    anchor2Source,
-    anchor2Target,
-    interactionWidth,
-    rightToLeft,
-    translateX,
-  };
+    return {
+      isSelf,
+      originLayers,
+      sourceLayers,
+      targetLayers,
+      anchor2Origin,
+      anchor2Source,
+      anchor2Target,
+      interactionWidth,
+      rightToLeft,
+      translateX,
+    };
+  }, [context, origin, source, target, coordinates]);
 };

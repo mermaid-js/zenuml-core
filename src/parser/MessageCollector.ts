@@ -58,12 +58,21 @@ export class MessageCollector extends sequenceParserListener {
   }
 }
 
+// Tree walks are pure functions of the (immutable) parse tree, so results are
+// cached per context node. Several render paths collect messages from the same
+// context within a single render.
+const allMessagesCache = new WeakMap<object, Array<OwnableMessage>>();
+
 // Returns all messages grouped by owner participant
 export function AllMessages(ctx: any) {
   if (!ctx) return [];
+  const cached = allMessagesCache.get(ctx);
+  if (cached) return cached;
   const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
   const listener = new MessageCollector();
   walker.walk(listener, ctx);
-  return listener.result();
+  const result = listener.result();
+  allMessagesCache.set(ctx, result);
+  return result;
 }

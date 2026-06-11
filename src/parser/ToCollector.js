@@ -172,9 +172,17 @@ ToCollector.enterRet = function (ctx) {
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
+// The walk is a pure function of the (immutable) parse tree and consumers only
+// read the returned Participants, so results are cached per context node.
+const participantsCache = new WeakMap();
+
 ToCollector.getParticipants = function (context) {
+  if (!context) return new Participants();
+  const cached = participantsCache.get(context);
+  if (cached) return cached;
   participants = new Participants();
-  if (context) walker.walk(this, context);
+  walker.walk(this, context);
+  participantsCache.set(context, participants);
   return participants;
 };
 
