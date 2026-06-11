@@ -1,6 +1,8 @@
 import { Participants } from "./Participants";
 import antlr4 from "antlr4";
 import { default as sequenceParserListener } from "../generated-parser/sequenceParserListener";
+import { USE_LANGIUM } from "../parser-langium/engine-flag";
+import { LangiumToCollector } from "../parser-langium/facade/visitors";
 
 let participants = undefined;
 let isBlind = false;
@@ -186,4 +188,6 @@ ToCollector.getParticipants = function (context) {
   return participants;
 };
 
-export default ToCollector;
+// Engine flag (Stage-5 rollback lever): the Langium visitor is re-entrant and
+// keeps the exact `getParticipants(ctx)` surface; ANTLR path is untouched.
+export default USE_LANGIUM ? LangiumToCollector : ToCollector;

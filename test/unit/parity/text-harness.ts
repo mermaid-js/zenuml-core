@@ -23,7 +23,19 @@
  */
 // Side-effectful import: installs getFormattedText/getComment (and the
 // ParametersContext override) on the generated context prototypes.
-import { RootContext } from "../../../src/parser/index";
+// (ANTLR BASELINE: the harness must not follow the ZENUML_PARSER engine
+// flag, so it builds the ANTLR pipeline directly.)
+import "../../../src/parser/index";
+import sequenceLexer from "../../../src/generated-parser/sequenceLexer";
+
+function antlrRootContext(code: string) {
+  const chars = new antlr4.InputStream(code);
+  const lexer = new sequenceLexer(chars);
+  const tokens = new antlr4.CommonTokenStream(lexer);
+  const parser = new sequenceParser(tokens);
+  parser.removeErrorListeners();
+  return parser.prog();
+}
 import antlr4 from "antlr4";
 import { default as sequenceParser } from "../../../src/generated-parser/sequenceParser";
 
@@ -112,7 +124,7 @@ export function collectFacetsFromTree(root: any): TextFacet[] {
 
 /** Reference implementation: parse `code` with the live ANTLR parser and collect facets. */
 export function collectTextFacets(code: string): TextFacet[] | null {
-  const root = RootContext(code);
+  const root = antlrRootContext(code);
   if (!root) return null;
   return collectFacetsFromTree(root);
 }

@@ -26,7 +26,21 @@
 import antlr4 from "antlr4";
 
 import sequenceParser from "../../../src/generated-parser/sequenceParser";
-import { RootContext } from "../../../src/parser/index";
+// Side-effectful import only: installs the prototype augmentations. The
+// harness is the ANTLR BASELINE serializer by definition, so it builds the
+// ANTLR pipeline directly instead of going through the (engine-flag-aware)
+// RootContext export.
+import "../../../src/parser/index";
+import sequenceLexer from "../../../src/generated-parser/sequenceLexer";
+
+function antlrRootContext(code: string) {
+  const chars = new antlr4.InputStream(code);
+  const lexer = new sequenceLexer(chars);
+  const tokens = new antlr4.CommonTokenStream(lexer);
+  const parser = new sequenceParser(tokens);
+  parser.removeErrorListeners();
+  return parser.prog();
+}
 
 export interface SerializedRuleNode {
   kind: string;
@@ -96,7 +110,7 @@ export function serializeTree(node: unknown): SerializedNode {
 
 /** Parse with the live ANTLR parser and serialize. Implements TreeParityParser. */
 export const parseWithAntlr: TreeParityParser = (code: string) => {
-  const ctx = RootContext(code);
+  const ctx = antlrRootContext(code);
   return ctx ? (serializeTree(ctx) as SerializedRuleNode) : null;
 };
 
