@@ -22,6 +22,7 @@
     "build:release": "RELEASE=1 bun run build:lib && RELEASE=1 bun run build:cli",
     "build:analyze": "RELEASE=1 ANALYZE=1 bun run build:lib && RELEASE=1 bun run build:cli",
     "test": "bun test src test/unit",
+    "bench": "bun test benchmarks/render.bench.spec.ts",
     "pw": "playwright test --reporter=list",
     "pw:ci": "playwright test",
     "measure:layout": "COLLECT_LAYOUT_METRICS=1 playwright test tests/layout-metrics.spec.ts --reporter=line --project=chromium",
