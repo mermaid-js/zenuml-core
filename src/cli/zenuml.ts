@@ -16,7 +16,13 @@ import { renderToSvg } from "@/svg/renderToSvg";
 import type { RenderOptions } from "@/svg/renderToSvg";
 import { setCanvasContext } from "@/positioning/WidthProviderFunc";
 import Parser from "@/parser/index.js";
-import { readFileSync, writeFileSync, mkdirSync, statSync, watch as fsWatch } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+  statSync,
+  watch as fsWatch,
+} from "node:fs";
 import { resolve, basename, extname, dirname, join } from "node:path";
 
 // ---------------------------------------------------------------------------
@@ -150,7 +156,10 @@ function expandInputs(inputs: string[]): string[] {
     // Glob expansion
     const glob = new Bun.Glob(input);
     const matches: string[] = [];
-    for (const match of glob.scanSync({ cwd: process.cwd(), onlyFiles: true })) {
+    for (const match of glob.scanSync({
+      cwd: process.cwd(),
+      onlyFiles: true,
+    })) {
       matches.push(match);
     }
     if (matches.length === 0) {
@@ -194,7 +203,17 @@ interface CliArgs {
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { inputs: [], check: false, parse: false, json: false, quiet: false, help: false, version: false, md: false, watch: false };
+  const args: CliArgs = {
+    inputs: [],
+    check: false,
+    parse: false,
+    json: false,
+    quiet: false,
+    help: false,
+    version: false,
+    md: false,
+    watch: false,
+  };
   let i = 0;
   while (i < argv.length) {
     const arg = argv[i];
@@ -258,7 +277,9 @@ function parseArgs(argv: string[]): CliArgs {
         args.watch = true;
         break;
       default:
-        process.stderr.write(`Unknown option: ${arg}\nRun "zenuml --help" for usage.\n`);
+        process.stderr.write(
+          `Unknown option: ${arg}\nRun "zenuml --help" for usage.\n`,
+        );
         process.exit(1);
     }
     i++;
@@ -289,7 +310,9 @@ function loadConfigFile(filePath: string): Record<string, unknown> {
 }
 
 /** Shared Playwright browser instance — launched once, reused across renders. */
-let _browser: Awaited<ReturnType<typeof import("playwright-core")["chromium"]["launch"]>> | null = null;
+let _browser: Awaited<
+  ReturnType<(typeof import("playwright-core"))["chromium"]["launch"]>
+> | null = null;
 
 function pngRuntimeHelp(detail: string): string {
   return [
@@ -320,7 +343,9 @@ async function getPlaywrightBrowser() {
 
   const executablePath = process.env["ZENUML_CHROMIUM_PATH"];
   try {
-    _browser = await playwright.chromium.launch(executablePath ? { executablePath } : undefined);
+    _browser = await playwright.chromium.launch(
+      executablePath ? { executablePath } : undefined,
+    );
     return _browser;
   } catch (error) {
     throw new Error(
@@ -386,7 +411,85 @@ function getRuleNames(ctx: any): string[] | undefined {
   return ctx?.parser?.ruleNames;
 }
 
-/** Serialize an ANTLR parse tree node to a JSON-safe object. */
+/** A Langium-facade Ctx node (no ANTLR `.parser`/`.symbol`, carries `_doc`). */
+function isFacadeNode(node: any): boolean {
+  return (
+    !!node &&
+    node.symbol === undefined &&
+    !node.parser &&
+    !!node._doc &&
+    typeof node.constructor?.name === "string" &&
+    node.constructor.name.endsWith("Context")
+  );
+}
+
+/** Facade class name -> ANTLR rule name, e.g. ProgContext -> prog. */
+function facadeRuleName(className: string): string {
+  const base = className.endsWith("Context")
+    ? className.slice(0, -"Context".length)
+    : className;
+  return base.charAt(0).toLowerCase() + base.slice(1);
+}
+
+/**
+ * Serialize a Langium-facade node to the same shape as the ANTLR path:
+ * `{type:"rule", ruleName, children}` with terminal leaves the node owns
+ * directly (those not inside any child rule span) interleaved in source order.
+ */
+function serializeFacadeNode(node: any): AstNode {
+  const result: AstNode = {
+    type: "rule",
+    ruleName: facadeRuleName(node.constructor.name),
+  };
+
+  const ruleChildren: any[] = node.children ?? [];
+  const childSpans = ruleChildren.map((c) => ({
+    c,
+    start: c.start?.start ?? null,
+    end: c.stop?.stop ?? null, // inclusive
+  }));
+
+  const items: Array<{ off: number; node: AstNode }> = [];
+  for (const cs of childSpans) {
+    if (cs.start !== null) {
+      items.push({ off: cs.start, node: serializeParseTree(cs.c) });
+    }
+  }
+
+  const nodeStart: number | undefined = node.start?.start;
+  const nodeStop: number | null | undefined = node.stop?.stop; // inclusive
+  if (nodeStart !== undefined && nodeStop !== null && nodeStop !== undefined) {
+    for (const leaf of node._doc.leaves as Array<{
+      offset: number;
+      hidden: boolean;
+      text: string;
+    }>) {
+      if (leaf.offset < nodeStart) continue;
+      if (leaf.offset > nodeStop) break;
+      if (leaf.hidden) continue;
+      const covered = childSpans.some(
+        (cs) =>
+          cs.start !== null &&
+          cs.end !== null &&
+          leaf.offset >= cs.start &&
+          leaf.offset <= cs.end,
+      );
+      if (covered) continue;
+      items.push({
+        off: leaf.offset,
+        node: { type: "terminal", text: leaf.text },
+      });
+    }
+  }
+
+  items.sort((a, b) => a.off - b.off);
+  if (items.length > 0) {
+    result.children = items.map((it) => it.node);
+  }
+  return result;
+}
+
+/** Serialize an ANTLR (or Langium-facade) parse tree node to a JSON-safe object. */
 function serializeParseTree(node: any): AstNode {
   if (!node) return { type: "null" };
 
@@ -398,11 +501,17 @@ function serializeParseTree(node: any): AstNode {
     };
   }
 
-  // Parser rule context node
+  // Langium-facade rule node
+  if (isFacadeNode(node)) {
+    return serializeFacadeNode(node);
+  }
+
+  // ANTLR parser rule context node
   const ruleNames = getRuleNames(node);
-  const ruleName = ruleNames && node.ruleIndex !== undefined
-    ? ruleNames[node.ruleIndex]
-    : undefined;
+  const ruleName =
+    ruleNames && node.ruleIndex !== undefined
+      ? ruleNames[node.ruleIndex]
+      : undefined;
 
   const result: AstNode = {
     type: "rule",
@@ -538,7 +647,9 @@ async function main(): Promise<void> {
       process.exit(1);
     }
     if (expandedInputs.includes("-")) {
-      process.stderr.write("Error: --watch is incompatible with stdin input.\n");
+      process.stderr.write(
+        "Error: --watch is incompatible with stdin input.\n",
+      );
       process.exit(1);
     }
   }
@@ -564,7 +675,9 @@ async function main(): Promise<void> {
           }
           for (const e of r.errors) {
             const prefix = expandedInputs.length > 1 ? "  " : "";
-            process.stderr.write(`${prefix}line ${e.line}, col ${e.column}: ${e.msg}\n`);
+            process.stderr.write(
+              `${prefix}line ${e.line}, col ${e.column}: ${e.msg}\n`,
+            );
           }
         }
       }
@@ -579,7 +692,9 @@ async function main(): Promise<void> {
   // ---------------------------------------------------------------------------
   if (args.parse) {
     if (expandedInputs.length > 1) {
-      process.stderr.write("Error: --parse supports only a single input file.\n");
+      process.stderr.write(
+        "Error: --parse supports only a single input file.\n",
+      );
       process.exit(1);
     }
     const input = expandedInputs[0];
@@ -613,14 +728,16 @@ async function main(): Promise<void> {
   // --md mode: render Markdown with zenuml code blocks
   // ---------------------------------------------------------------------------
   // Determine if we're in Markdown mode: explicit --md flag or auto-detect from extension
-  const isMdMode = args.md || expandedInputs.some(
-    (f) => f !== "-" && /\.(?:md|markdown)$/i.test(f),
-  );
+  const isMdMode =
+    args.md ||
+    expandedInputs.some((f) => f !== "-" && /\.(?:md|markdown)$/i.test(f));
 
   if (isMdMode) {
     // Validate: --md with multiple inputs is an error
     if (expandedInputs.length > 1) {
-      process.stderr.write("Error: --md mode supports only a single input file.\n");
+      process.stderr.write(
+        "Error: --md mode supports only a single input file.\n",
+      );
       process.exit(1);
     }
     const inputArg = expandedInputs[0];
@@ -629,7 +746,9 @@ async function main(): Promise<void> {
     if (args.md && inputArg !== "-") {
       const ext = extname(inputArg).toLowerCase();
       if (ext !== ".md" && ext !== ".markdown") {
-        process.stderr.write(`Error: --md flag requires a .md or .markdown input file, got: ${inputArg}\n`);
+        process.stderr.write(
+          `Error: --md flag requires a .md or .markdown input file, got: ${inputArg}\n`,
+        );
         process.exit(1);
       }
     }
@@ -646,7 +765,9 @@ async function main(): Promise<void> {
     // Effective format for diagram images
     const effectiveFormat = args.outputFormat ?? "svg";
     if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
-      process.stderr.write(`Error: Unsupported output format: "${effectiveFormat}". Use "svg" or "png".\n`);
+      process.stderr.write(
+        `Error: Unsupported output format: "${effectiveFormat}". Use "svg" or "png".\n`,
+      );
       process.exit(1);
     }
 
@@ -723,7 +844,9 @@ async function main(): Promise<void> {
         svgWidth = result.width;
         svgHeight = result.height;
       } catch (err: any) {
-        process.stderr.write(`Error: Failed to render zenuml block ${block.index}: ${err.message}\n`);
+        process.stderr.write(
+          `Error: Failed to render zenuml block ${block.index}: ${err.message}\n`,
+        );
         process.exit(1);
       }
 
@@ -731,7 +854,12 @@ async function main(): Promise<void> {
       mkdirSync(imageDir, { recursive: true });
 
       if (effectiveFormat === "png") {
-        const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale);
+        const pngBuffer = await rasterizeToPng(
+          svg,
+          svgWidth,
+          svgHeight,
+          effectiveScale,
+        );
         writeFileSync(imageFilePath, pngBuffer);
       } else {
         writeFileSync(imageFilePath, svg, "utf-8");
@@ -787,16 +915,24 @@ async function main(): Promise<void> {
     const cfg = loadConfigFile(args.configFile);
     if (typeof cfg.scale === "number") configScale = cfg.scale;
     if (typeof cfg.theme === "string") configTheme = cfg.theme;
-    if (typeof cfg.outputFormat === "string") configOutputFormat = cfg.outputFormat;
+    if (typeof cfg.outputFormat === "string")
+      configOutputFormat = cfg.outputFormat;
   }
 
   // ---------------------------------------------------------------------------
   // Validate: -o as single file + multiple inputs → error
   // ---------------------------------------------------------------------------
   const multipleInputs = expandedInputs.length > 1;
-  if (multipleInputs && args.output && args.output !== "-" && !isDirectory(resolve(args.output))) {
+  if (
+    multipleInputs &&
+    args.output &&
+    args.output !== "-" &&
+    !isDirectory(resolve(args.output))
+  ) {
     // -o is a file path (not a directory) with multiple inputs
-    process.stderr.write("Error: -o must be a directory when multiple input files are provided.\n");
+    process.stderr.write(
+      "Error: -o must be a directory when multiple input files are provided.\n",
+    );
     process.exit(1);
   }
 
@@ -826,7 +962,9 @@ async function main(): Promise<void> {
 
       const effectiveFormat = args.outputFormat ?? "svg";
       if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
-        throw new Error(`Unsupported output format: "${effectiveFormat}". Use "svg" or "png".`);
+        throw new Error(
+          `Unsupported output format: "${effectiveFormat}". Use "svg" or "png".`,
+        );
       }
 
       let mdOutputPath: string;
@@ -871,7 +1009,12 @@ async function main(): Promise<void> {
         mkdirSync(imageDir, { recursive: true });
 
         if (effectiveFormat === "png") {
-          const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale);
+          const pngBuffer = await rasterizeToPng(
+            svg,
+            svgWidth,
+            svgHeight,
+            effectiveScale,
+          );
           writeFileSync(imageFilePath, pngBuffer);
         } else {
           writeFileSync(imageFilePath, svg, "utf-8");
@@ -902,7 +1045,9 @@ async function main(): Promise<void> {
     };
 
     // Detect md inputs
-    const hasMdInputs = expandedInputs.some((f) => /\.(?:md|markdown)$/i.test(f));
+    const hasMdInputs = expandedInputs.some((f) =>
+      /\.(?:md|markdown)$/i.test(f),
+    );
     const renderMdFnForWatch = hasMdInputs ? renderMdForWatch : undefined;
 
     const watchHandle = await startWatchMode(
@@ -974,12 +1119,21 @@ async function renderOneFile(
 ): Promise<void> {
   // Resolve effective values: CLI flag > config > default
   const outputPath = resolveOutput(inputArg, args.output, ".svg");
-  const autoFormatFromExt = outputPath !== "-" && extname(outputPath).toLowerCase() === ".png" ? "png" : undefined;
-  const effectiveFormat = args.outputFormat ?? config.configOutputFormat ?? autoFormatFromExt ?? "svg";
+  const autoFormatFromExt =
+    outputPath !== "-" && extname(outputPath).toLowerCase() === ".png"
+      ? "png"
+      : undefined;
+  const effectiveFormat =
+    args.outputFormat ??
+    config.configOutputFormat ??
+    autoFormatFromExt ??
+    "svg";
 
   // Validate format
   if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
-    throw new Error(`Unsupported output format: "${effectiveFormat}". Use "svg" or "png".`);
+    throw new Error(
+      `Unsupported output format: "${effectiveFormat}". Use "svg" or "png".`,
+    );
   }
 
   const effectiveScale = args.scale ?? config.configScale ?? 2;
@@ -1035,7 +1189,12 @@ async function renderOneFile(
 
   // Write output
   if (effectiveFormat === "png") {
-    const pngBuffer = await rasterizeToPng(svg, svgWidth, svgHeight, effectiveScale);
+    const pngBuffer = await rasterizeToPng(
+      svg,
+      svgWidth,
+      svgHeight,
+      effectiveScale,
+    );
     if (finalOutputPath === "-") {
       process.stdout.write(pngBuffer);
     } else {
@@ -1065,7 +1224,11 @@ async function renderOneFile(
   }
 }
 
-function resolveOutput(input: string, output: string | undefined, defaultExt: string = ".svg"): string {
+function resolveOutput(
+  input: string,
+  output: string | undefined,
+  defaultExt: string = ".svg",
+): string {
   if (output !== undefined) {
     if (output === "-") return "-";
     const resolvedOutput = resolve(output);
@@ -1134,10 +1297,12 @@ export async function startWatchMode(
   const delay = delayMs ?? 100;
 
   // Default watcher using node:fs.watch
-  const watchFactory = watchFn ?? ((path: string, handler: () => void) => {
-    const watcher = fsWatch(path, () => handler());
-    return { close: () => watcher.close() };
-  });
+  const watchFactory =
+    watchFn ??
+    ((path: string, handler: () => void) => {
+      const watcher = fsWatch(path, () => handler());
+      return { close: () => watcher.close() };
+    });
 
   // Pick which render function to use for a given file
   function pickRender(p: string): (path: string) => Promise<void> {

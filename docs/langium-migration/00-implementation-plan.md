@@ -41,7 +41,7 @@ Decisions on open questions (07 §6):
 ## Stage 5: Cutover
 **Goal**: RootContext default = Langium; core.tsx errors verified; lib build green.
 **Success Criteria**: `bun pw` green with zero snapshot updates; perf/bundle deltas reported vs Stage 0.
-**Status**: Not Started
+**Status**: Complete — default flipped to Langium (`engine-flag.ts`), full unit suite 1597/0 under both engines, `bun pw` 120/120 with zero snapshot updates, lib build green. Parse ~107× faster than ANTLR; bundle +144 KB gz ESM (both engines shipped; ~+89 KB after Stage 6). Details in 13-stage5-cutover.md. ANTLR rollback = `ZENUML_PARSER=antlr`.
 
 ## Stage 6: Decommission (separate PR)
 **Goal**: remove antlr4, src/generated-parser/, src/g4/, `bun antlr`; update docs.

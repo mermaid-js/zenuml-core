@@ -20,9 +20,11 @@
  *     content, property nodes) are synthesized so parentCtx chains and
  *     getAncestors() depth match ANTLR exactly (AncestorPath pin: 7).
  *
- * Deliberate do-NOT-ports (07 Part 2): no generic `Origin()` on the base
- * (latent infinite loop — Origin exists only on StatContext/ProgContext);
- * no `constructor.name` string checks (BraceBlock anchor is an override).
+ * Generic `Origin()` lives on the base (Stat/Prog override it) — the
+ * positioning + SVG layers call it on arbitrary node kinds, mirroring ANTLR's
+ * `ParserRuleContext.prototype.Origin`. ANTLR's latent infinite-loop bug
+ * (`ctx = this.parentCtx` in its walk) is NOT ported; we walk `ctx.parentCtx`.
+ * No `constructor.name` string checks (BraceBlock anchor is an override).
  */
 import { GrammarUtils, isCompositeCstNode, isLeafCstNode } from "langium";
 import type { AstNode, CstNode } from "langium";
@@ -351,6 +353,24 @@ export abstract class Ctx {
     while (current && !(current instanceof StatContext))
       current = current.parentCtx;
     return current instanceof StatContext ? current : undefined;
+  }
+
+  /**
+   * Generic Origin — the "from"/current-lifeline of a node, used by the
+   * positioning + SVG layers (LocalParticipants, AsyncMessage VMs,
+   * walkStatements) on arbitrary node kinds. Mirrors ANTLR's
+   * `ParserRuleContext.prototype.Origin`: walk up to the nearest Stat/Prog and
+   * delegate to its Origin. ANTLR's version only terminates when the direct
+   * parent is already Stat/Prog (`ctx = this.parentCtx` in its loop is a latent
+   * infinite-loop bug); we port the intent with the correct `ctx.parentCtx`
+   * walk. StatContext / ProgContext override this with their own Origin.
+   */
+  Origin(): string | undefined {
+    let ctx: Ctx | null = this.parentCtx;
+    while (ctx && !(ctx instanceof StatContext || ctx instanceof ProgContext)) {
+      ctx = ctx.parentCtx;
+    }
+    return ctx ? (ctx as ProgContext | StatContext).Origin() : undefined;
   }
 
   /**
