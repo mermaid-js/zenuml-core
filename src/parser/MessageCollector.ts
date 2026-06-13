@@ -2,8 +2,6 @@ import { OwnableMessage, OwnableMessageType } from "./OwnableMessage";
 import antlr4 from "antlr4";
 
 import sequenceParserListener from "../generated-parser/sequenceParserListener";
-import { USE_LANGIUM } from "../parser-langium/engine-flag";
-import { langiumAllMessages } from "../parser-langium/facade/visitors";
 
 export class MessageCollector extends sequenceParserListener {
   private isBlind = false;
@@ -68,9 +66,6 @@ const allMessagesCache = new WeakMap<object, Array<OwnableMessage>>();
 // Returns all messages grouped by owner participant
 export function AllMessages(ctx: any) {
   if (!ctx) return [];
-  // Engine flag (Stage-5 rollback lever): Langium path uses the re-entrant
-  // facade visitor; ANTLR path below (incl. the per-context cache) is untouched.
-  if (USE_LANGIUM) return langiumAllMessages(ctx);
   const cached = allMessagesCache.get(ctx);
   if (cached) return cached;
   const walker = antlr4.tree.ParseTreeWalker.DEFAULT;

@@ -43,6 +43,24 @@ Decisions on open questions (07 §6):
 **Success Criteria**: `bun pw` green with zero snapshot updates; perf/bundle deltas reported vs Stage 0.
 **Status**: Complete (rebased onto `main` b5100138) — default flipped to Langium (`engine-flag.ts`), full unit suite 1601/0 under both engines, `bun pw` 120/120 zero snapshot updates, goldens regenerated unchanged, lib build green. **Perf rationale neutralized by main's ANTLR perf commits**: new ANTLR (SLL two-stage) is ~12× faster cold on large input than Langium; both memoize on repeat. Bundle +145 KB gz ESM (both engines; ~+89 KB after Stage 6). Migration now justified on tooling/maintenance only — go/no-go before Stage 6. Details in 13-stage5-cutover.md. ANTLR rollback = `ZENUML_PARSER=antlr`.
 
-## Stage 6: Decommission (separate PR)
-**Goal**: remove antlr4, src/generated-parser/, src/g4/, `bun antlr`; update docs.
-**Status**: Not Started
+## Stage 5b: Revert cutover → dual-parser architecture (supersedes Stage 6)
+**Decision**: after rebasing onto `main`, main's own ANTLR perf work made the
+existing parser faster than Langium, so the full cutover was reverted. End state:
+ANTLR ships in production; Langium is a build-time side-car for the LSP server +
+the CI consistency gate.
+**Done**: `src/parser/*` reverted to ANTLR-only (engine flag + instanceof shim
+deleted); library ESM bundle back to baseline (460,986 B gz, zero Chevrotain);
+`src/parser-langium/` kept as isolated side-car; CI gate `bun run parity:dualrun`
+wired into `cd.yml` (190 identical / 8 G7 / 0 unexplained). Full doc:
+14-dual-parser-architecture.md.
+**Status**: Complete.
+
+## Stage 6: Decommission — CANCELLED
+Not doing it. Removing ANTLR was the whole point of the original cutover; under
+the dual-parser model ANTLR is the production parser and stays. Langium lives on
+as the LSP side-car.
+**Status**: Cancelled (replaced by Stage 5b).
+
+## Next: Langium LSP server
+Build the LSP on `src/parser-langium/` (completion/hover/diagnostics/go-to-def).
+Separate effort; the side-car grammar + services are ready.

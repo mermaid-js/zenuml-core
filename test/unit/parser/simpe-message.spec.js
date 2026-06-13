@@ -1,6 +1,5 @@
 import { Fixture } from "./fixture/Fixture";
 import { Assignment } from "../../../src/parser/Messages/Assignment";
-import { USE_LANGIUM } from "../../../src/parser-langium/engine-flag";
 
 describe("message - complete", () => {
   test("A.m", () => {
@@ -24,47 +23,34 @@ describe("message - complete", () => {
     ["readonly ret = A.m", "m", "ret"],
     ["static ret = A.m", "m", "ret"],
     ["const ret = await A.m", "m", "ret"],
-  ])(
-    " %s, signature: %s and assignment: %s",
-    (text, signature, expectedAssignee) => {
-      let message = Fixture.firstStatement(text).message();
-      expect(message.SignatureText()).toBe(signature);
-      let actual = message.Assignment();
-      if (expectedAssignee === undefined) {
-        expect(actual).toBeUndefined();
-      } else {
-        expect(actual).toBeDefined();
-        expect(actual.assignee).toBe(expectedAssignee);
-        expect(actual.type).toBe("");
-      }
-    },
-  );
+  ])(" %s, signature: %s and assignment: %s", (text, signature, expectedAssignee) => {
+    let message = Fixture.firstStatement(text).message();
+    expect(message.SignatureText()).toBe(signature);
+    let actual = message.Assignment();
+    if (expectedAssignee === undefined) {
+      expect(actual).toBeUndefined();
+    } else {
+      expect(actual).toBeDefined();
+      expect(actual.assignee).toBe(expectedAssignee);
+      expect(actual.type).toBe("");
+    }
+  });
+
 });
 
 describe("message - incomplete", () => {
   test("A.", () => {
     let message = Fixture.firstStatement("A.").message();
-    expect(message.messageBody().fromTo().to().getText()).toBe("A");
+  expect(message.messageBody().fromTo().to().getText()).toBe("A");
   });
 
-  // Incomplete `A.m(` is an error-recovery shape that differs by engine
-  // (07-risk-map §G7, docs/langium-migration/12-stage34-exceptions.md):
-  //  - ANTLR DefaultErrorStrategy splits it into `A.` + `m(`, so the first
-  //    statement's func() is null.
-  //  - Chevrotain (Langium) single-token-insertion recovers the missing `)`
-  //    into one message whose func() is `m(` — Chevrotain has no recovery
-  //    hooks (langium #1742) and faking the split is forbidden.
-  // The editor closes the `(` in most cases, so this transient state is rare
-  // and renders correctly under both engines (E2E visual gate covers it).
+  // This will be parsed as to statements: `A.` and `m(`, so the first statement has a null func.
+  // The editor should close the () in most cases. We do not add alternative rules to allow this
+  // to be parsed as one statement, because it causes other issues.
   test("A.m(", () => {
     let message = Fixture.firstStatement("A.m(").message();
     let signatureElement = message.messageBody().func();
-    if (USE_LANGIUM) {
-      expect(signatureElement).not.toBeNull();
-      expect(signatureElement.getFormattedText()).toBe("m(");
-    } else {
-      expect(signatureElement).toBeNull();
-    }
+    expect(signatureElement).toBeNull();
   });
 });
 

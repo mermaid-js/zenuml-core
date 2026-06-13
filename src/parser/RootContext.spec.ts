@@ -2,7 +2,6 @@ import antlr4 from "antlr4";
 import { RootContext } from "@/parser";
 import sequenceLexer from "@/generated-parser/sequenceLexer";
 import sequenceParser from "@/generated-parser/sequenceParser";
-import { USE_LANGIUM } from "@/parser-langium/engine-flag";
 
 // Reference parse: plain full-LL parse, the strategy RootContext used before
 // two-stage (SLL-first) parsing was introduced.
@@ -25,25 +24,11 @@ describe("RootContext (two-stage parsing)", () => {
       "new A\nret = A.method()\nA->B: done",
     ];
     for (const code of samples) {
-      // RootContext is union-typed across engines (ANTLR ProgContext has
-      // `.parser` + 2-arg toStringTree; the Langium facade has neither); the
-      // branch below picks the engine-correct shape, so `any` here is honest.
-      const tree: any = RootContext(code);
+      const tree = RootContext(code);
       expect(tree).toBeTruthy();
-      if (USE_LANGIUM) {
-        // The Langium engine has no SLL/LL split to compare; tree-shape parity
-        // is proven exhaustively by the dual-run A/B harness
-        // (scripts/parity/dualrun-diff.mjs). Assert the facade tree is valid
-        // and deterministic for the same input.
-        expect(tree.toStringTree()).toBe(
-          (RootContext(code) as any).toStringTree(),
-        );
-      } else {
-        const ll: any = parseWithFullLL(code);
-        expect(tree.toStringTree(null, tree.parser)).toBe(
-          ll.toStringTree(null, ll.parser),
-        );
-      }
+      expect(tree.toStringTree(null, tree.parser)).toBe(
+        parseWithFullLL(code).toStringTree(null, parseWithFullLL(code).parser),
+      );
     }
   });
 

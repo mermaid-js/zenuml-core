@@ -17,13 +17,6 @@ import "./From";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
 import { formatText } from "@/utils/StringUtil";
-import { USE_LANGIUM } from "../parser-langium/engine-flag";
-import langiumCompat from "../parser-langium/compat";
-import { installInstanceofShim } from "../parser-langium/instanceof-shim";
-
-// Under the Langium engine, make `x instanceof sequenceParser.<Kind>Context`
-// recognise facade nodes (renderer + AncestorPath rely on it). No-op for ANTLR.
-if (USE_LANGIUM) installInstanceofShim();
 
 const errors = [];
 const errorDetails = [];
@@ -112,52 +105,35 @@ antlr4.ParserRuleContext.prototype.getComment = function () {
   );
 };
 
-// Engine selection (Stage-5 rollback lever): every export keeps an identical
-// shape under both engines; ZENUML_PARSER=langium flips to the facade-backed
-// implementations in src/parser-langium/compat.ts, default stays ANTLR.
-export const ProgContext = USE_LANGIUM
-  ? langiumCompat.ProgContext
-  : sequenceParser.ProgContext;
-export const RootContext = USE_LANGIUM
-  ? langiumCompat.RootContext
-  : rootContext;
-export const GroupContext = USE_LANGIUM
-  ? langiumCompat.GroupContext
-  : sequenceParser.GroupContext;
-export const ParticipantContext = USE_LANGIUM
-  ? langiumCompat.ParticipantContext
-  : sequenceParser.ParticipantContext;
-export const Depth = USE_LANGIUM
-  ? langiumCompat.Depth
-  : function (ctx) {
-      const childFragmentDetector = ChildFragmentDetector;
-      return childFragmentDetector.depth(childFragmentDetector)(ctx);
-    };
-export const Participants = USE_LANGIUM
-  ? langiumCompat.Participants
-  : function (ctx) {
-      const toCollector = ToCollector;
-      return toCollector.getParticipants(ctx);
-    };
+export const ProgContext = sequenceParser.ProgContext;
+export const RootContext = rootContext;
+export const GroupContext = sequenceParser.GroupContext;
+export const ParticipantContext = sequenceParser.ParticipantContext;
+export const Depth = function (ctx) {
+  const childFragmentDetector = ChildFragmentDetector;
+  return childFragmentDetector.depth(childFragmentDetector)(ctx);
+};
+export const Participants = function (ctx) {
+  const toCollector = ToCollector;
+  return toCollector.getParticipants(ctx);
+};
 
-export default USE_LANGIUM
-  ? langiumCompat
-  : {
-      RootContext: rootContext,
-      ProgContext: sequenceParser.ProgContext,
-      GroupContext: sequenceParser.GroupContext,
-      ParticipantContext: sequenceParser.ParticipantContext,
-      Participants: function (ctx) {
-        const toCollector = ToCollector;
-        return toCollector.getParticipants(ctx);
-      },
-      Errors: errors,
-      ErrorDetails: errorDetails,
-      /**
-       * @return {number} how many levels of embedded fragments
-       */
-      Depth: function (ctx) {
-        const childFragmentDetector = ChildFragmentDetector;
-        return childFragmentDetector.depth(childFragmentDetector)(ctx);
-      },
-    };
+export default {
+  RootContext: rootContext,
+  ProgContext: sequenceParser.ProgContext,
+  GroupContext: sequenceParser.GroupContext,
+  ParticipantContext: sequenceParser.ParticipantContext,
+  Participants: function (ctx) {
+    const toCollector = ToCollector;
+    return toCollector.getParticipants(ctx);
+  },
+  Errors: errors,
+  ErrorDetails: errorDetails,
+  /**
+   * @return {number} how many levels of embedded fragments
+   */
+  Depth: function (ctx) {
+    const childFragmentDetector = ChildFragmentDetector;
+    return childFragmentDetector.depth(childFragmentDetector)(ctx);
+  },
+};

@@ -1,4 +1,10 @@
-# Stage 5 — Cutover: Langium is the default engine
+> **⚠️ SUPERSEDED — this cutover was reverted.** After the perf finding below,
+> the project adopted a **dual-parser architecture** instead: ANTLR stays the
+> production/shipped parser, Langium becomes a side-car for the LSP server + the
+> CI consistency gate. See **14-dual-parser-architecture.md**. This doc is kept
+> as the record of why the full cutover was attempted and then rolled back.
+
+# Stage 5 — Cutover: Langium is the default engine (REVERTED)
 
 The parser engine default flipped from ANTLR to Langium
 (`src/parser-langium/engine-flag.ts`: `DEFAULT_ENGINE = "langium"`). ANTLR

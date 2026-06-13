@@ -2,8 +2,6 @@ import antlr4 from "antlr4";
 import sequenceParserListener from "../generated-parser/sequenceParserListener";
 import { Frame } from "@/positioning/FrameBorder";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { USE_LANGIUM } from "../parser-langium/engine-flag";
-import { LangiumFrameBuilder } from "../parser-langium/facade/visitors";
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
@@ -127,6 +125,4 @@ class FrameBuilder extends sequenceParserListener {
   }
 }
 
-// Engine flag (Stage-5 rollback lever): same constructor/getFrame surface
-// under both engines; ANTLR path is untouched.
-export default (USE_LANGIUM ? LangiumFrameBuilder : FrameBuilder) as typeof FrameBuilder;
+export default FrameBuilder;
