@@ -1,0 +1,213 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 61,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 32,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 32,
+          "children": [
+            {
+              "kind": "ParticipantTypeContext",
+              "start": 0,
+              "stop": 3,
+              "children": [
+                {
+                  "token": "ANNOTATION",
+                  "text": "@EC2"
+                }
+              ]
+            },
+            {
+              "kind": "StereotypeContext",
+              "start": 5,
+              "stop": 11,
+              "children": [
+                {
+                  "token": "SOPEN",
+                  "text": "<<"
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 7,
+                  "stop": 9,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "BFF"
+                    }
+                  ]
+                },
+                {
+                  "token": "SCLOSE",
+                  "text": ">>"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 13,
+              "stop": 24,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "OrderService"
+                }
+              ]
+            },
+            {
+              "token": "COLOR",
+              "text": "#E3FCEF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 34,
+      "stop": 61,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 34,
+          "stop": 61,
+          "children": [
+            {
+              "kind": "MessageContext",
+              "start": 34,
+              "stop": 61,
+              "children": [
+                {
+                  "kind": "MessageBodyContext",
+                  "start": 34,
+                  "stop": 61,
+                  "children": [
+                    {
+                      "kind": "FromToContext",
+                      "start": 34,
+                      "stop": 46,
+                      "children": [
+                        {
+                          "kind": "ToContext",
+                          "start": 34,
+                          "stop": 45,
+                          "children": [
+                            {
+                              "kind": "NameContext",
+                              "start": 34,
+                              "stop": 45,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "OrderService"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "DOT",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "FuncContext",
+                      "start": 47,
+                      "stop": 61,
+                      "children": [
+                        {
+                          "kind": "SignatureContext",
+                          "start": 47,
+                          "stop": 61,
+                          "children": [
+                            {
+                              "kind": "MethodNameContext",
+                              "start": 47,
+                              "stop": 52,
+                              "children": [
+                                {
+                                  "kind": "NameContext",
+                                  "start": 47,
+                                  "stop": 52,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "create"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "InvocationContext",
+                              "start": 53,
+                              "stop": 61,
+                              "children": [
+                                {
+                                  "token": "OPAR",
+                                  "text": "("
+                                },
+                                {
+                                  "kind": "ParametersContext",
+                                  "start": 54,
+                                  "stop": 60,
+                                  "children": [
+                                    {
+                                      "kind": "ParameterContext",
+                                      "start": 54,
+                                      "stop": 60,
+                                      "children": [
+                                        {
+                                          "kind": "AtomExprContext",
+                                          "start": 54,
+                                          "stop": 60,
+                                          "children": [
+                                            {
+                                              "kind": "IdAtomContext",
+                                              "start": 54,
+                                              "stop": 60,
+                                              "children": [
+                                                {
+                                                  "token": "ID",
+                                                  "text": "payload"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "CPAR",
+                                  "text": ")"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

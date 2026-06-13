@@ -1,0 +1,528 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 97,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 97,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 97,
+          "children": [
+            {
+              "kind": "MessageContext",
+              "start": 0,
+              "stop": 97,
+              "children": [
+                {
+                  "kind": "MessageBodyContext",
+                  "start": 0,
+                  "stop": 7,
+                  "children": [
+                    {
+                      "kind": "FromToContext",
+                      "start": 0,
+                      "stop": 1,
+                      "children": [
+                        {
+                          "kind": "ToContext",
+                          "start": 0,
+                          "stop": 0,
+                          "children": [
+                            {
+                              "kind": "NameContext",
+                              "start": 0,
+                              "stop": 0,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "A"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "DOT",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "FuncContext",
+                      "start": 2,
+                      "stop": 7,
+                      "children": [
+                        {
+                          "kind": "SignatureContext",
+                          "start": 2,
+                          "stop": 7,
+                          "children": [
+                            {
+                              "kind": "MethodNameContext",
+                              "start": 2,
+                              "stop": 7,
+                              "children": [
+                                {
+                                  "kind": "NameContext",
+                                  "start": 2,
+                                  "stop": 7,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "method"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "BraceBlockContext",
+                  "start": 9,
+                  "stop": 97,
+                  "children": [
+                    {
+                      "token": "OBRACE",
+                      "text": "{"
+                    },
+                    {
+                      "kind": "BlockContext",
+                      "start": 13,
+                      "stop": 95,
+                      "children": [
+                        {
+                          "kind": "StatContext",
+                          "start": 13,
+                          "stop": 95,
+                          "children": [
+                            {
+                              "kind": "TcfContext",
+                              "start": 13,
+                              "stop": 95,
+                              "children": [
+                                {
+                                  "kind": "TryBlockContext",
+                                  "start": 13,
+                                  "stop": 35,
+                                  "children": [
+                                    {
+                                      "token": "TRY",
+                                      "text": "try"
+                                    },
+                                    {
+                                      "kind": "BraceBlockContext",
+                                      "start": 17,
+                                      "stop": 35,
+                                      "children": [
+                                        {
+                                          "token": "OBRACE",
+                                          "text": "{"
+                                        },
+                                        {
+                                          "kind": "BlockContext",
+                                          "start": 23,
+                                          "stop": 31,
+                                          "children": [
+                                            {
+                                              "kind": "StatContext",
+                                              "start": 23,
+                                              "stop": 31,
+                                              "children": [
+                                                {
+                                                  "kind": "MessageContext",
+                                                  "start": 23,
+                                                  "stop": 31,
+                                                  "children": [
+                                                    {
+                                                      "kind": "MessageBodyContext",
+                                                      "start": 23,
+                                                      "stop": 31,
+                                                      "children": [
+                                                        {
+                                                          "kind": "FromToContext",
+                                                          "start": 23,
+                                                          "stop": 24,
+                                                          "children": [
+                                                            {
+                                                              "kind": "ToContext",
+                                                              "start": 23,
+                                                              "stop": 23,
+                                                              "children": [
+                                                                {
+                                                                  "kind": "NameContext",
+                                                                  "start": 23,
+                                                                  "stop": 23,
+                                                                  "children": [
+                                                                    {
+                                                                      "token": "ID",
+                                                                      "text": "B"
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "token": "DOT",
+                                                              "text": "."
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "kind": "FuncContext",
+                                                          "start": 25,
+                                                          "stop": 31,
+                                                          "children": [
+                                                            {
+                                                              "kind": "SignatureContext",
+                                                              "start": 25,
+                                                              "stop": 31,
+                                                              "children": [
+                                                                {
+                                                                  "kind": "MethodNameContext",
+                                                                  "start": 25,
+                                                                  "stop": 31,
+                                                                  "children": [
+                                                                    {
+                                                                      "kind": "NameContext",
+                                                                      "start": 25,
+                                                                      "stop": 31,
+                                                                      "children": [
+                                                                        {
+                                                                          "token": "ID",
+                                                                          "text": "process"
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "token": "CBRACE",
+                                          "text": "}"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "kind": "CatchBlockContext",
+                                  "start": 37,
+                                  "stop": 67,
+                                  "children": [
+                                    {
+                                      "token": "CATCH",
+                                      "text": "catch"
+                                    },
+                                    {
+                                      "kind": "InvocationContext",
+                                      "start": 42,
+                                      "stop": 48,
+                                      "children": [
+                                        {
+                                          "token": "OPAR",
+                                          "text": "("
+                                        },
+                                        {
+                                          "kind": "ParametersContext",
+                                          "start": 43,
+                                          "stop": 47,
+                                          "children": [
+                                            {
+                                              "kind": "ParameterContext",
+                                              "start": 43,
+                                              "stop": 47,
+                                              "children": [
+                                                {
+                                                  "kind": "AtomExprContext",
+                                                  "start": 43,
+                                                  "stop": 47,
+                                                  "children": [
+                                                    {
+                                                      "kind": "IdAtomContext",
+                                                      "start": 43,
+                                                      "stop": 47,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "error"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "token": "CPAR",
+                                          "text": ")"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "kind": "BraceBlockContext",
+                                      "start": 50,
+                                      "stop": 67,
+                                      "children": [
+                                        {
+                                          "token": "OBRACE",
+                                          "text": "{"
+                                        },
+                                        {
+                                          "kind": "BlockContext",
+                                          "start": 56,
+                                          "stop": 63,
+                                          "children": [
+                                            {
+                                              "kind": "StatContext",
+                                              "start": 56,
+                                              "stop": 63,
+                                              "children": [
+                                                {
+                                                  "kind": "MessageContext",
+                                                  "start": 56,
+                                                  "stop": 63,
+                                                  "children": [
+                                                    {
+                                                      "kind": "MessageBodyContext",
+                                                      "start": 56,
+                                                      "stop": 63,
+                                                      "children": [
+                                                        {
+                                                          "kind": "FromToContext",
+                                                          "start": 56,
+                                                          "stop": 57,
+                                                          "children": [
+                                                            {
+                                                              "kind": "ToContext",
+                                                              "start": 56,
+                                                              "stop": 56,
+                                                              "children": [
+                                                                {
+                                                                  "kind": "NameContext",
+                                                                  "start": 56,
+                                                                  "stop": 56,
+                                                                  "children": [
+                                                                    {
+                                                                      "token": "ID",
+                                                                      "text": "C"
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "token": "DOT",
+                                                              "text": "."
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "kind": "FuncContext",
+                                                          "start": 58,
+                                                          "stop": 63,
+                                                          "children": [
+                                                            {
+                                                              "kind": "SignatureContext",
+                                                              "start": 58,
+                                                              "stop": 63,
+                                                              "children": [
+                                                                {
+                                                                  "kind": "MethodNameContext",
+                                                                  "start": 58,
+                                                                  "stop": 63,
+                                                                  "children": [
+                                                                    {
+                                                                      "kind": "NameContext",
+                                                                      "start": 58,
+                                                                      "stop": 63,
+                                                                      "children": [
+                                                                        {
+                                                                          "token": "ID",
+                                                                          "text": "handle"
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "token": "CBRACE",
+                                          "text": "}"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "kind": "FinallyBlockContext",
+                                  "start": 69,
+                                  "stop": 95,
+                                  "children": [
+                                    {
+                                      "token": "FINALLY",
+                                      "text": "finally"
+                                    },
+                                    {
+                                      "kind": "BraceBlockContext",
+                                      "start": 77,
+                                      "stop": 95,
+                                      "children": [
+                                        {
+                                          "token": "OBRACE",
+                                          "text": "{"
+                                        },
+                                        {
+                                          "kind": "BlockContext",
+                                          "start": 83,
+                                          "stop": 91,
+                                          "children": [
+                                            {
+                                              "kind": "StatContext",
+                                              "start": 83,
+                                              "stop": 91,
+                                              "children": [
+                                                {
+                                                  "kind": "MessageContext",
+                                                  "start": 83,
+                                                  "stop": 91,
+                                                  "children": [
+                                                    {
+                                                      "kind": "MessageBodyContext",
+                                                      "start": 83,
+                                                      "stop": 91,
+                                                      "children": [
+                                                        {
+                                                          "kind": "FromToContext",
+                                                          "start": 83,
+                                                          "stop": 84,
+                                                          "children": [
+                                                            {
+                                                              "kind": "ToContext",
+                                                              "start": 83,
+                                                              "stop": 83,
+                                                              "children": [
+                                                                {
+                                                                  "kind": "NameContext",
+                                                                  "start": 83,
+                                                                  "stop": 83,
+                                                                  "children": [
+                                                                    {
+                                                                      "token": "ID",
+                                                                      "text": "D"
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "token": "DOT",
+                                                              "text": "."
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "kind": "FuncContext",
+                                                          "start": 85,
+                                                          "stop": 91,
+                                                          "children": [
+                                                            {
+                                                              "kind": "SignatureContext",
+                                                              "start": 85,
+                                                              "stop": 91,
+                                                              "children": [
+                                                                {
+                                                                  "kind": "MethodNameContext",
+                                                                  "start": 85,
+                                                                  "stop": 91,
+                                                                  "children": [
+                                                                    {
+                                                                      "kind": "NameContext",
+                                                                      "start": 85,
+                                                                      "stop": 91,
+                                                                      "children": [
+                                                                        {
+                                                                          "token": "ID",
+                                                                          "text": "cleanup"
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "token": "CBRACE",
+                                          "text": "}"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "CBRACE",
+                      "text": "}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

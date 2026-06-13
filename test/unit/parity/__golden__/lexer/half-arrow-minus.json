@@ -1,0 +1,17 @@
+[
+  {
+    "type": "ID",
+    "text": "A",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "MINUS",
+    "text": "-",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

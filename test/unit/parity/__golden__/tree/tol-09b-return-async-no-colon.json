@@ -1,0 +1,27 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 5,
+  "children": [
+    {
+      "token": "ID",
+      "text": "A",
+      "error": true
+    },
+    {
+      "token": "OTHER",
+      "text": "~",
+      "error": true
+    },
+    {
+      "token": "GT",
+      "text": ">",
+      "error": true
+    },
+    {
+      "token": "ID",
+      "text": "B",
+      "error": true
+    }
+  ]
+}

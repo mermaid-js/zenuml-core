@@ -1,0 +1,36 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 4,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 4,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 4,
+          "children": [
+            {
+              "kind": "LoopContext",
+              "start": 0,
+              "stop": 4,
+              "children": [
+                {
+                  "token": "WHILE",
+                  "text": "while"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

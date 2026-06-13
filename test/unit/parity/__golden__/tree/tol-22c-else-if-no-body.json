@@ -1,0 +1,139 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 17,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 17,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 17,
+          "children": [
+            {
+              "kind": "AltContext",
+              "start": 0,
+              "stop": 17,
+              "children": [
+                {
+                  "kind": "IfBlockContext",
+                  "start": 0,
+                  "stop": 6,
+                  "children": [
+                    {
+                      "token": "IF",
+                      "text": "if"
+                    },
+                    {
+                      "kind": "ParExprContext",
+                      "start": 2,
+                      "stop": 4,
+                      "children": [
+                        {
+                          "token": "OPAR",
+                          "text": "("
+                        },
+                        {
+                          "kind": "ConditionContext",
+                          "start": 3,
+                          "stop": 3,
+                          "children": [
+                            {
+                              "kind": "IdAtomContext",
+                              "start": 3,
+                              "stop": 3,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "x"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "CPAR",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "BraceBlockContext",
+                      "start": 5,
+                      "stop": 6,
+                      "children": [
+                        {
+                          "token": "OBRACE",
+                          "text": "{"
+                        },
+                        {
+                          "token": "CBRACE",
+                          "text": "}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "ElseIfBlockContext",
+                  "start": 8,
+                  "stop": 17,
+                  "children": [
+                    {
+                      "token": "ELSE",
+                      "text": "else"
+                    },
+                    {
+                      "token": "IF",
+                      "text": "if"
+                    },
+                    {
+                      "kind": "ParExprContext",
+                      "start": 15,
+                      "stop": 17,
+                      "children": [
+                        {
+                          "token": "OPAR",
+                          "text": "("
+                        },
+                        {
+                          "kind": "ConditionContext",
+                          "start": 16,
+                          "stop": 16,
+                          "children": [
+                            {
+                              "kind": "IdAtomContext",
+                              "start": 16,
+                              "stop": 16,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "y"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "CPAR",
+                          "text": ")"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

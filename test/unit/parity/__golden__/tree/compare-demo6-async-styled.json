@@ -1,0 +1,233 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 40,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 40,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 12,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 0,
+              "stop": 11,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 0,
+                  "stop": 0,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 0,
+                      "stop": 0,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 3,
+                  "stop": 3,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 3,
+                      "stop": 3,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 5,
+                  "stop": 11,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": ": Hello"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "EVENT_END",
+              "text": "\n"
+            }
+          ]
+        },
+        {
+          "kind": "StatContext",
+          "start": 13,
+          "stop": 27,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 13,
+              "stop": 26,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 13,
+                  "stop": 13,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 13,
+                      "stop": 13,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 16,
+                  "stop": 16,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 16,
+                      "stop": 16,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "B"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 18,
+                  "stop": 26,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": ": Hello B"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "EVENT_END",
+              "text": "\n"
+            }
+          ]
+        },
+        {
+          "kind": "StatContext",
+          "start": 28,
+          "stop": 40,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 28,
+              "stop": 40,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 28,
+                  "stop": 28,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 28,
+                      "stop": 28,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "B"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 31,
+                  "stop": 31,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 31,
+                      "stop": 31,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 33,
+                  "stop": 40,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " So what"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

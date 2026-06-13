@@ -1,0 +1,12 @@
+[
+  {
+    "type": "DOT",
+    "text": ".",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "DIGIT_LEADING_NAME",
+    "text": "5x",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

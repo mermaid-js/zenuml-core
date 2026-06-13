@@ -1,0 +1,90 @@
+{
+  "id": "comment-indented-leading-spaces",
+  "code": "//   three leading spaces\n  // indented comment line\nA.m",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "A.m",
+      "getText": "A.m<EOF>",
+      "getComment": "   three leading spaces\n indented comment line"
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "A.m",
+      "getText": "A.m",
+      "getComment": "   three leading spaces\n indented comment line"
+    },
+    {
+      "path": "prog.block.stat",
+      "kind": "StatContext",
+      "getFormattedText": "A.m",
+      "getText": "A.m",
+      "getComment": "   three leading spaces\n indented comment line"
+    },
+    {
+      "path": "prog.block.stat.message",
+      "kind": "MessageContext",
+      "getFormattedText": "A.m",
+      "getText": "A.m",
+      "getComment": "   three leading spaces\n indented comment line"
+    },
+    {
+      "path": "prog.block.stat.message.messageBody",
+      "kind": "MessageBodyContext",
+      "getFormattedText": "A.m",
+      "getText": "A.m",
+      "getComment": "   three leading spaces\n indented comment line"
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo",
+      "kind": "FromToContext",
+      "getFormattedText": "A.",
+      "getText": "A.",
+      "getComment": "   three leading spaces\n indented comment line"
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo.to",
+      "kind": "ToContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": "   three leading spaces\n indented comment line"
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": "   three leading spaces\n indented comment line"
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func",
+      "kind": "FuncContext",
+      "getFormattedText": "m",
+      "getText": "m",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature",
+      "kind": "SignatureContext",
+      "getFormattedText": "m",
+      "getText": "m",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.methodName",
+      "kind": "MethodNameContext",
+      "getFormattedText": "m",
+      "getText": "m",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature.methodName.name",
+      "kind": "NameContext",
+      "getFormattedText": "m",
+      "getText": "m",
+      "getComment": null
+    }
+  ]
+}

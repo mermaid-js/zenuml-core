@@ -1,0 +1,90 @@
+{
+  "id": "quoted-participant-names",
+  "code": "\"Alice Smith\"\n\"Alice Smith\"->Bob: hello",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "\"Alice Smith\" \"Alice Smith\"->Bob: hello",
+      "getText": "\"Alice Smith\"\"Alice Smith\"->Bob: hello<EOF>",
+      "getComment": null
+    },
+    {
+      "path": "prog.head",
+      "kind": "HeadContext",
+      "getFormattedText": "Alice Smith",
+      "getText": "\"Alice Smith\"",
+      "getComment": null
+    },
+    {
+      "path": "prog.head.participant",
+      "kind": "ParticipantContext",
+      "getFormattedText": "Alice Smith",
+      "getText": "\"Alice Smith\"",
+      "getComment": null
+    },
+    {
+      "path": "prog.head.participant.name",
+      "kind": "NameContext",
+      "getFormattedText": "Alice Smith",
+      "getText": "\"Alice Smith\"",
+      "getComment": null
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "\"Alice Smith\"->Bob: hello",
+      "getText": "\"Alice Smith\"->Bob: hello",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat",
+      "kind": "StatContext",
+      "getFormattedText": "\"Alice Smith\"->Bob: hello",
+      "getText": "\"Alice Smith\"->Bob: hello",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage",
+      "kind": "AsyncMessageContext",
+      "getFormattedText": "\"Alice Smith\"->Bob: hello",
+      "getText": "\"Alice Smith\"->Bob: hello",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.from",
+      "kind": "FromContext",
+      "getFormattedText": "Alice Smith",
+      "getText": "\"Alice Smith\"",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.from.name",
+      "kind": "NameContext",
+      "getFormattedText": "Alice Smith",
+      "getText": "\"Alice Smith\"",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.to",
+      "kind": "ToContext",
+      "getFormattedText": "Bob",
+      "getText": "Bob",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "Bob",
+      "getText": "Bob",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.content",
+      "kind": "ContentContext",
+      "getFormattedText": " hello",
+      "getText": " hello",
+      "getComment": null
+    }
+  ]
+}

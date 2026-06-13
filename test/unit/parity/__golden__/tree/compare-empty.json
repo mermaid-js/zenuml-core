@@ -1,0 +1,11 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": null,
+  "children": [
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

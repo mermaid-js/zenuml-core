@@ -1,0 +1,334 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 167,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 167,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 40,
+          "children": [
+            {
+              "kind": "CreationContext",
+              "start": 0,
+              "stop": 40,
+              "children": [
+                {
+                  "kind": "CreationBodyContext",
+                  "start": 0,
+                  "stop": 13,
+                  "children": [
+                    {
+                      "token": "NEW",
+                      "text": "new"
+                    },
+                    {
+                      "kind": "ConstructContext",
+                      "start": 4,
+                      "stop": 11,
+                      "children": [
+                        {
+                          "kind": "NameContext",
+                          "start": 4,
+                          "stop": 11,
+                          "children": [
+                            {
+                              "token": "ID",
+                              "text": "Creation"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "OPAR",
+                      "text": "("
+                    },
+                    {
+                      "token": "CPAR",
+                      "text": ")"
+                    }
+                  ]
+                },
+                {
+                  "kind": "BraceBlockContext",
+                  "start": 15,
+                  "stop": 40,
+                  "children": [
+                    {
+                      "token": "OBRACE",
+                      "text": "{"
+                    },
+                    {
+                      "kind": "BlockContext",
+                      "start": 19,
+                      "stop": 38,
+                      "children": [
+                        {
+                          "kind": "StatContext",
+                          "start": 19,
+                          "stop": 38,
+                          "children": [
+                            {
+                              "kind": "RetContext",
+                              "start": 19,
+                              "stop": 38,
+                              "children": [
+                                {
+                                  "token": "RETURN",
+                                  "text": "return"
+                                },
+                                {
+                                  "kind": "AtomExprContext",
+                                  "start": 26,
+                                  "stop": 38,
+                                  "children": [
+                                    {
+                                      "kind": "IdAtomContext",
+                                      "start": 26,
+                                      "stop": 38,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "from_creation"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "CBRACE",
+                      "text": "}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "StatContext",
+          "start": 42,
+          "stop": 76,
+          "children": [
+            {
+              "kind": "RetContext",
+              "start": 42,
+              "stop": 76,
+              "children": [
+                {
+                  "token": "RETURN",
+                  "text": "return"
+                },
+                {
+                  "kind": "AtomExprContext",
+                  "start": 49,
+                  "stop": 76,
+                  "children": [
+                    {
+                      "kind": "StringAtomContext",
+                      "start": 49,
+                      "stop": 76,
+                      "children": [
+                        {
+                          "token": "CSTRING",
+                          "text": "\"from if to original source\""
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "StatContext",
+          "start": 78,
+          "stop": 167,
+          "children": [
+            {
+              "kind": "TcfContext",
+              "start": 78,
+              "stop": 167,
+              "children": [
+                {
+                  "kind": "TryBlockContext",
+                  "start": 78,
+                  "stop": 167,
+                  "children": [
+                    {
+                      "token": "TRY",
+                      "text": "try"
+                    },
+                    {
+                      "kind": "BraceBlockContext",
+                      "start": 82,
+                      "stop": 167,
+                      "children": [
+                        {
+                          "token": "OBRACE",
+                          "text": "{"
+                        },
+                        {
+                          "kind": "BlockContext",
+                          "start": 86,
+                          "stop": 165,
+                          "children": [
+                            {
+                              "kind": "StatContext",
+                              "start": 86,
+                              "stop": 165,
+                              "children": [
+                                {
+                                  "kind": "CreationContext",
+                                  "start": 86,
+                                  "stop": 165,
+                                  "children": [
+                                    {
+                                      "kind": "CreationBodyContext",
+                                      "start": 86,
+                                      "stop": 132,
+                                      "children": [
+                                        {
+                                          "token": "NEW",
+                                          "text": "new"
+                                        },
+                                        {
+                                          "kind": "ConstructContext",
+                                          "start": 90,
+                                          "stop": 130,
+                                          "children": [
+                                            {
+                                              "kind": "NameContext",
+                                              "start": 90,
+                                              "stop": 130,
+                                              "children": [
+                                                {
+                                                  "token": "ID",
+                                                  "text": "AHasAVeryLongNameLongNameLongNameLongName"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "token": "OPAR",
+                                          "text": "("
+                                        },
+                                        {
+                                          "token": "CPAR",
+                                          "text": ")"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "kind": "BraceBlockContext",
+                                      "start": 134,
+                                      "stop": 165,
+                                      "children": [
+                                        {
+                                          "token": "OBRACE",
+                                          "text": "{"
+                                        },
+                                        {
+                                          "kind": "BlockContext",
+                                          "start": 140,
+                                          "stop": 161,
+                                          "children": [
+                                            {
+                                              "kind": "StatContext",
+                                              "start": 140,
+                                              "stop": 161,
+                                              "children": [
+                                                {
+                                                  "kind": "CreationContext",
+                                                  "start": 140,
+                                                  "stop": 161,
+                                                  "children": [
+                                                    {
+                                                      "kind": "CreationBodyContext",
+                                                      "start": 140,
+                                                      "stop": 161,
+                                                      "children": [
+                                                        {
+                                                          "token": "NEW",
+                                                          "text": "new"
+                                                        },
+                                                        {
+                                                          "kind": "ConstructContext",
+                                                          "start": 144,
+                                                          "stop": 159,
+                                                          "children": [
+                                                            {
+                                                              "kind": "NameContext",
+                                                              "start": 144,
+                                                              "stop": 159,
+                                                              "children": [
+                                                                {
+                                                                  "token": "ID",
+                                                                  "text": "CreatWithinCreat"
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "token": "OPAR",
+                                                          "text": "("
+                                                        },
+                                                        {
+                                                          "token": "CPAR",
+                                                          "text": ")"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "token": "CBRACE",
+                                          "text": "}"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "CBRACE",
+                          "text": "}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

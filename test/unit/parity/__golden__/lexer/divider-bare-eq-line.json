@@ -1,0 +1,7 @@
+[
+  {
+    "type": "EQ",
+    "text": "==",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

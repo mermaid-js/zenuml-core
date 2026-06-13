@@ -1,0 +1,49 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 2,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 2,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 2,
+          "children": [
+            {
+              "kind": "TcfContext",
+              "start": 0,
+              "stop": 2,
+              "children": [
+                {
+                  "kind": "TryBlockContext",
+                  "start": 0,
+                  "stop": 2,
+                  "children": [
+                    {
+                      "token": "TRY",
+                      "text": "try"
+                    },
+                    {
+                      "kind": "BraceBlockContext",
+                      "start": 3,
+                      "stop": 2,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

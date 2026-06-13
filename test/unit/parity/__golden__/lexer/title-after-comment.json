@@ -1,0 +1,22 @@
+[
+  {
+    "type": "COMMENT",
+    "text": "// c",
+    "channel": "COMMENT_CHANNEL"
+  },
+  {
+    "type": "CR",
+    "text": "\n",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "TITLE",
+    "text": "title",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "TITLE_CONTENT",
+    "text": " X",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

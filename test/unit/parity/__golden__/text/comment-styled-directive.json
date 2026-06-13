@@ -1,0 +1,69 @@
+{
+  "id": "comment-styled-directive",
+  "code": "// [bold,#red] styled\nA->B: hi",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "A->B: hi",
+      "getText": "A->B: hi<EOF>",
+      "getComment": " [bold,#red] styled"
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "A->B: hi",
+      "getText": "A->B: hi",
+      "getComment": " [bold,#red] styled"
+    },
+    {
+      "path": "prog.block.stat",
+      "kind": "StatContext",
+      "getFormattedText": "A->B: hi",
+      "getText": "A->B: hi",
+      "getComment": " [bold,#red] styled"
+    },
+    {
+      "path": "prog.block.stat.asyncMessage",
+      "kind": "AsyncMessageContext",
+      "getFormattedText": "A->B: hi",
+      "getText": "A->B: hi",
+      "getComment": " [bold,#red] styled"
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.from",
+      "kind": "FromContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": " [bold,#red] styled"
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.from.name",
+      "kind": "NameContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": " [bold,#red] styled"
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.to",
+      "kind": "ToContext",
+      "getFormattedText": "B",
+      "getText": "B",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "B",
+      "getText": "B",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.content",
+      "kind": "ContentContext",
+      "getFormattedText": " hi",
+      "getText": " hi",
+      "getComment": null
+    }
+  ]
+}

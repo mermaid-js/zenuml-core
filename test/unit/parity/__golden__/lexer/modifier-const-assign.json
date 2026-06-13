@@ -1,0 +1,37 @@
+[
+  {
+    "type": "CONSTANT",
+    "text": "const",
+    "channel": "MODIFIER_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "ID",
+    "text": "x",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "ASSIGN",
+    "text": "=",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "INT",
+    "text": "1",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

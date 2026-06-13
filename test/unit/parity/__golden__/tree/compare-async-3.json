@@ -1,0 +1,1236 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 234,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 4,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 0,
+          "children": [
+            {
+              "kind": "NameContext",
+              "start": 0,
+              "stop": 0,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "ParticipantContext",
+          "start": 2,
+          "stop": 2,
+          "children": [
+            {
+              "kind": "NameContext",
+              "start": 2,
+              "stop": 2,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "B"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "ParticipantContext",
+          "start": 4,
+          "stop": 4,
+          "children": [
+            {
+              "kind": "NameContext",
+              "start": 4,
+              "stop": 4,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "C"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 6,
+      "stop": 234,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 6,
+          "stop": 234,
+          "children": [
+            {
+              "kind": "MessageContext",
+              "start": 6,
+              "stop": 234,
+              "children": [
+                {
+                  "kind": "MessageBodyContext",
+                  "start": 6,
+                  "stop": 13,
+                  "children": [
+                    {
+                      "kind": "FromToContext",
+                      "start": 6,
+                      "stop": 7,
+                      "children": [
+                        {
+                          "kind": "ToContext",
+                          "start": 6,
+                          "stop": 6,
+                          "children": [
+                            {
+                              "kind": "NameContext",
+                              "start": 6,
+                              "stop": 6,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "C"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "DOT",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "FuncContext",
+                      "start": 8,
+                      "stop": 13,
+                      "children": [
+                        {
+                          "kind": "SignatureContext",
+                          "start": 8,
+                          "stop": 13,
+                          "children": [
+                            {
+                              "kind": "MethodNameContext",
+                              "start": 8,
+                              "stop": 13,
+                              "children": [
+                                {
+                                  "kind": "NameContext",
+                                  "start": 8,
+                                  "stop": 13,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "method"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "BraceBlockContext",
+                  "start": 15,
+                  "stop": 234,
+                  "children": [
+                    {
+                      "token": "OBRACE",
+                      "text": "{"
+                    },
+                    {
+                      "kind": "BlockContext",
+                      "start": 19,
+                      "stop": 232,
+                      "children": [
+                        {
+                          "kind": "StatContext",
+                          "start": 19,
+                          "stop": 30,
+                          "children": [
+                            {
+                              "kind": "AsyncMessageContext",
+                              "start": 19,
+                              "stop": 29,
+                              "children": [
+                                {
+                                  "kind": "FromContext",
+                                  "start": 19,
+                                  "stop": 19,
+                                  "children": [
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 19,
+                                      "stop": 19,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "A"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "ARROW",
+                                  "text": "->"
+                                },
+                                {
+                                  "kind": "ToContext",
+                                  "start": 22,
+                                  "stop": 22,
+                                  "children": [
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 22,
+                                      "stop": 22,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "C"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "COL",
+                                  "text": ":"
+                                },
+                                {
+                                  "kind": "ContentContext",
+                                  "start": 24,
+                                  "stop": 29,
+                                  "children": [
+                                    {
+                                      "token": "EVENT_PAYLOAD_LXR",
+                                      "text": " async"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "token": "EVENT_END",
+                              "text": "\n"
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "StatContext",
+                          "start": 33,
+                          "stop": 44,
+                          "children": [
+                            {
+                              "kind": "AsyncMessageContext",
+                              "start": 33,
+                              "stop": 43,
+                              "children": [
+                                {
+                                  "kind": "FromContext",
+                                  "start": 33,
+                                  "stop": 33,
+                                  "children": [
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 33,
+                                      "stop": 33,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "C"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "ARROW",
+                                  "text": "->"
+                                },
+                                {
+                                  "kind": "ToContext",
+                                  "start": 36,
+                                  "stop": 36,
+                                  "children": [
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 36,
+                                      "stop": 36,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "A"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "COL",
+                                  "text": ":"
+                                },
+                                {
+                                  "kind": "ContentContext",
+                                  "start": 38,
+                                  "stop": 43,
+                                  "children": [
+                                    {
+                                      "token": "EVENT_PAYLOAD_LXR",
+                                      "text": " async"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "token": "EVENT_END",
+                              "text": "\n"
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "StatContext",
+                          "start": 47,
+                          "stop": 58,
+                          "children": [
+                            {
+                              "kind": "AsyncMessageContext",
+                              "start": 47,
+                              "stop": 57,
+                              "children": [
+                                {
+                                  "kind": "FromContext",
+                                  "start": 47,
+                                  "stop": 47,
+                                  "children": [
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 47,
+                                      "stop": 47,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "C"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "ARROW",
+                                  "text": "->"
+                                },
+                                {
+                                  "kind": "ToContext",
+                                  "start": 50,
+                                  "stop": 50,
+                                  "children": [
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 50,
+                                      "stop": 50,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "B"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "COL",
+                                  "text": ":"
+                                },
+                                {
+                                  "kind": "ContentContext",
+                                  "start": 52,
+                                  "stop": 57,
+                                  "children": [
+                                    {
+                                      "token": "EVENT_PAYLOAD_LXR",
+                                      "text": " async"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "token": "EVENT_END",
+                              "text": "\n"
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "StatContext",
+                          "start": 61,
+                          "stop": 72,
+                          "children": [
+                            {
+                              "kind": "AsyncMessageContext",
+                              "start": 61,
+                              "stop": 71,
+                              "children": [
+                                {
+                                  "kind": "FromContext",
+                                  "start": 61,
+                                  "stop": 61,
+                                  "children": [
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 61,
+                                      "stop": 61,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "B"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "ARROW",
+                                  "text": "->"
+                                },
+                                {
+                                  "kind": "ToContext",
+                                  "start": 64,
+                                  "stop": 64,
+                                  "children": [
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 64,
+                                      "stop": 64,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "C"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "COL",
+                                  "text": ":"
+                                },
+                                {
+                                  "kind": "ContentContext",
+                                  "start": 66,
+                                  "stop": 71,
+                                  "children": [
+                                    {
+                                      "token": "EVENT_PAYLOAD_LXR",
+                                      "text": " async"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "token": "EVENT_END",
+                              "text": "\n"
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "StatContext",
+                          "start": 75,
+                          "stop": 232,
+                          "children": [
+                            {
+                              "kind": "MessageContext",
+                              "start": 75,
+                              "stop": 232,
+                              "children": [
+                                {
+                                  "kind": "MessageBodyContext",
+                                  "start": 75,
+                                  "stop": 82,
+                                  "children": [
+                                    {
+                                      "kind": "FromToContext",
+                                      "start": 75,
+                                      "stop": 76,
+                                      "children": [
+                                        {
+                                          "kind": "ToContext",
+                                          "start": 75,
+                                          "stop": 75,
+                                          "children": [
+                                            {
+                                              "kind": "NameContext",
+                                              "start": 75,
+                                              "stop": 75,
+                                              "children": [
+                                                {
+                                                  "token": "ID",
+                                                  "text": "B"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "token": "DOT",
+                                          "text": "."
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "kind": "FuncContext",
+                                      "start": 77,
+                                      "stop": 82,
+                                      "children": [
+                                        {
+                                          "kind": "SignatureContext",
+                                          "start": 77,
+                                          "stop": 82,
+                                          "children": [
+                                            {
+                                              "kind": "MethodNameContext",
+                                              "start": 77,
+                                              "stop": 82,
+                                              "children": [
+                                                {
+                                                  "kind": "NameContext",
+                                                  "start": 77,
+                                                  "stop": 82,
+                                                  "children": [
+                                                    {
+                                                      "token": "ID",
+                                                      "text": "method"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "kind": "BraceBlockContext",
+                                  "start": 84,
+                                  "stop": 232,
+                                  "children": [
+                                    {
+                                      "token": "OBRACE",
+                                      "text": "{"
+                                    },
+                                    {
+                                      "kind": "BlockContext",
+                                      "start": 90,
+                                      "stop": 229,
+                                      "children": [
+                                        {
+                                          "kind": "StatContext",
+                                          "start": 90,
+                                          "stop": 101,
+                                          "children": [
+                                            {
+                                              "kind": "AsyncMessageContext",
+                                              "start": 90,
+                                              "stop": 100,
+                                              "children": [
+                                                {
+                                                  "kind": "FromContext",
+                                                  "start": 90,
+                                                  "stop": 90,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 90,
+                                                      "stop": 90,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "A"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "ARROW",
+                                                  "text": "->"
+                                                },
+                                                {
+                                                  "kind": "ToContext",
+                                                  "start": 93,
+                                                  "stop": 93,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 93,
+                                                      "stop": 93,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "A"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "COL",
+                                                  "text": ":"
+                                                },
+                                                {
+                                                  "kind": "ContentContext",
+                                                  "start": 95,
+                                                  "stop": 100,
+                                                  "children": [
+                                                    {
+                                                      "token": "EVENT_PAYLOAD_LXR",
+                                                      "text": " async"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "token": "EVENT_END",
+                                              "text": "\n"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "kind": "StatContext",
+                                          "start": 106,
+                                          "stop": 117,
+                                          "children": [
+                                            {
+                                              "kind": "AsyncMessageContext",
+                                              "start": 106,
+                                              "stop": 116,
+                                              "children": [
+                                                {
+                                                  "kind": "FromContext",
+                                                  "start": 106,
+                                                  "stop": 106,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 106,
+                                                      "stop": 106,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "A"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "ARROW",
+                                                  "text": "->"
+                                                },
+                                                {
+                                                  "kind": "ToContext",
+                                                  "start": 109,
+                                                  "stop": 109,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 109,
+                                                      "stop": 109,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "B"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "COL",
+                                                  "text": ":"
+                                                },
+                                                {
+                                                  "kind": "ContentContext",
+                                                  "start": 111,
+                                                  "stop": 116,
+                                                  "children": [
+                                                    {
+                                                      "token": "EVENT_PAYLOAD_LXR",
+                                                      "text": " async"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "token": "EVENT_END",
+                                              "text": "\n"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "kind": "StatContext",
+                                          "start": 122,
+                                          "stop": 133,
+                                          "children": [
+                                            {
+                                              "kind": "AsyncMessageContext",
+                                              "start": 122,
+                                              "stop": 132,
+                                              "children": [
+                                                {
+                                                  "kind": "FromContext",
+                                                  "start": 122,
+                                                  "stop": 122,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 122,
+                                                      "stop": 122,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "A"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "ARROW",
+                                                  "text": "->"
+                                                },
+                                                {
+                                                  "kind": "ToContext",
+                                                  "start": 125,
+                                                  "stop": 125,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 125,
+                                                      "stop": 125,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "C"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "COL",
+                                                  "text": ":"
+                                                },
+                                                {
+                                                  "kind": "ContentContext",
+                                                  "start": 127,
+                                                  "stop": 132,
+                                                  "children": [
+                                                    {
+                                                      "token": "EVENT_PAYLOAD_LXR",
+                                                      "text": " async"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "token": "EVENT_END",
+                                              "text": "\n"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "kind": "StatContext",
+                                          "start": 138,
+                                          "stop": 149,
+                                          "children": [
+                                            {
+                                              "kind": "AsyncMessageContext",
+                                              "start": 138,
+                                              "stop": 148,
+                                              "children": [
+                                                {
+                                                  "kind": "FromContext",
+                                                  "start": 138,
+                                                  "stop": 138,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 138,
+                                                      "stop": 138,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "B"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "ARROW",
+                                                  "text": "->"
+                                                },
+                                                {
+                                                  "kind": "ToContext",
+                                                  "start": 141,
+                                                  "stop": 141,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 141,
+                                                      "stop": 141,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "B"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "COL",
+                                                  "text": ":"
+                                                },
+                                                {
+                                                  "kind": "ContentContext",
+                                                  "start": 143,
+                                                  "stop": 148,
+                                                  "children": [
+                                                    {
+                                                      "token": "EVENT_PAYLOAD_LXR",
+                                                      "text": " async"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "token": "EVENT_END",
+                                              "text": "\n"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "kind": "StatContext",
+                                          "start": 154,
+                                          "stop": 165,
+                                          "children": [
+                                            {
+                                              "kind": "AsyncMessageContext",
+                                              "start": 154,
+                                              "stop": 164,
+                                              "children": [
+                                                {
+                                                  "kind": "FromContext",
+                                                  "start": 154,
+                                                  "stop": 154,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 154,
+                                                      "stop": 154,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "B"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "ARROW",
+                                                  "text": "->"
+                                                },
+                                                {
+                                                  "kind": "ToContext",
+                                                  "start": 157,
+                                                  "stop": 157,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 157,
+                                                      "stop": 157,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "C"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "COL",
+                                                  "text": ":"
+                                                },
+                                                {
+                                                  "kind": "ContentContext",
+                                                  "start": 159,
+                                                  "stop": 164,
+                                                  "children": [
+                                                    {
+                                                      "token": "EVENT_PAYLOAD_LXR",
+                                                      "text": " async"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "token": "EVENT_END",
+                                              "text": "\n"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "kind": "StatContext",
+                                          "start": 170,
+                                          "stop": 181,
+                                          "children": [
+                                            {
+                                              "kind": "AsyncMessageContext",
+                                              "start": 170,
+                                              "stop": 180,
+                                              "children": [
+                                                {
+                                                  "kind": "FromContext",
+                                                  "start": 170,
+                                                  "stop": 170,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 170,
+                                                      "stop": 170,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "B"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "ARROW",
+                                                  "text": "->"
+                                                },
+                                                {
+                                                  "kind": "ToContext",
+                                                  "start": 173,
+                                                  "stop": 173,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 173,
+                                                      "stop": 173,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "A"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "COL",
+                                                  "text": ":"
+                                                },
+                                                {
+                                                  "kind": "ContentContext",
+                                                  "start": 175,
+                                                  "stop": 180,
+                                                  "children": [
+                                                    {
+                                                      "token": "EVENT_PAYLOAD_LXR",
+                                                      "text": " async"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "token": "EVENT_END",
+                                              "text": "\n"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "kind": "StatContext",
+                                          "start": 186,
+                                          "stop": 197,
+                                          "children": [
+                                            {
+                                              "kind": "AsyncMessageContext",
+                                              "start": 186,
+                                              "stop": 196,
+                                              "children": [
+                                                {
+                                                  "kind": "FromContext",
+                                                  "start": 186,
+                                                  "stop": 186,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 186,
+                                                      "stop": 186,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "C"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "ARROW",
+                                                  "text": "->"
+                                                },
+                                                {
+                                                  "kind": "ToContext",
+                                                  "start": 189,
+                                                  "stop": 189,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 189,
+                                                      "stop": 189,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "C"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "COL",
+                                                  "text": ":"
+                                                },
+                                                {
+                                                  "kind": "ContentContext",
+                                                  "start": 191,
+                                                  "stop": 196,
+                                                  "children": [
+                                                    {
+                                                      "token": "EVENT_PAYLOAD_LXR",
+                                                      "text": " async"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "token": "EVENT_END",
+                                              "text": "\n"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "kind": "StatContext",
+                                          "start": 202,
+                                          "stop": 213,
+                                          "children": [
+                                            {
+                                              "kind": "AsyncMessageContext",
+                                              "start": 202,
+                                              "stop": 212,
+                                              "children": [
+                                                {
+                                                  "kind": "FromContext",
+                                                  "start": 202,
+                                                  "stop": 202,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 202,
+                                                      "stop": 202,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "C"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "ARROW",
+                                                  "text": "->"
+                                                },
+                                                {
+                                                  "kind": "ToContext",
+                                                  "start": 205,
+                                                  "stop": 205,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 205,
+                                                      "stop": 205,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "B"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "COL",
+                                                  "text": ":"
+                                                },
+                                                {
+                                                  "kind": "ContentContext",
+                                                  "start": 207,
+                                                  "stop": 212,
+                                                  "children": [
+                                                    {
+                                                      "token": "EVENT_PAYLOAD_LXR",
+                                                      "text": " async"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "token": "EVENT_END",
+                                              "text": "\n"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "kind": "StatContext",
+                                          "start": 218,
+                                          "stop": 229,
+                                          "children": [
+                                            {
+                                              "kind": "AsyncMessageContext",
+                                              "start": 218,
+                                              "stop": 228,
+                                              "children": [
+                                                {
+                                                  "kind": "FromContext",
+                                                  "start": 218,
+                                                  "stop": 218,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 218,
+                                                      "stop": 218,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "C"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "ARROW",
+                                                  "text": "->"
+                                                },
+                                                {
+                                                  "kind": "ToContext",
+                                                  "start": 221,
+                                                  "stop": 221,
+                                                  "children": [
+                                                    {
+                                                      "kind": "NameContext",
+                                                      "start": 221,
+                                                      "stop": 221,
+                                                      "children": [
+                                                        {
+                                                          "token": "ID",
+                                                          "text": "A"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "token": "COL",
+                                                  "text": ":"
+                                                },
+                                                {
+                                                  "kind": "ContentContext",
+                                                  "start": 223,
+                                                  "stop": 228,
+                                                  "children": [
+                                                    {
+                                                      "token": "EVENT_PAYLOAD_LXR",
+                                                      "text": " async"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "token": "EVENT_END",
+                                              "text": "\n"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "token": "CBRACE",
+                                      "text": "}"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "CBRACE",
+                      "text": "}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

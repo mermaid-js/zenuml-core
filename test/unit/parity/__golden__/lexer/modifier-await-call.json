@@ -1,0 +1,37 @@
+[
+  {
+    "type": "AWAIT",
+    "text": "await",
+    "channel": "MODIFIER_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "ID",
+    "text": "A",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "DOT",
+    "text": ".",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "m",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "OPAR",
+    "text": "(",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CPAR",
+    "text": ")",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

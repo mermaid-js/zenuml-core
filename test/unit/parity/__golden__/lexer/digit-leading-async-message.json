@@ -1,0 +1,27 @@
+[
+  {
+    "type": "ID",
+    "text": "API",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ARROW",
+    "text": "->",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "DIGIT_LEADING_NAME",
+    "text": "5xx_error",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "COL",
+    "text": ":",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "EVENT_PAYLOAD_LXR",
+    "text": " retry",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "type": "OTHER",
+    "text": "\ud83e",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "OTHER",
+    "text": "\udd16",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "Bot",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "DOT",
+    "text": ".",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "run",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "OPAR",
+    "text": "(",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "CPAR",
+    "text": ")",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

@@ -1,0 +1,152 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 106,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 52,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 22,
+          "children": [
+            {
+              "kind": "ParticipantTypeContext",
+              "start": 0,
+              "stop": 6,
+              "children": [
+                {
+                  "token": "ANNOTATION",
+                  "text": "@Lambda"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 8,
+              "stop": 22,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "PurchaseService"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "ParticipantContext",
+          "start": 24,
+          "stop": 52,
+          "children": [
+            {
+              "kind": "ParticipantTypeContext",
+              "start": 24,
+              "stop": 37,
+              "children": [
+                {
+                  "token": "ANNOTATION",
+                  "text": "@AzureFunction"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 39,
+              "stop": 52,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "InvoiceService"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 54,
+      "stop": 106,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 54,
+          "stop": 106,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 54,
+              "stop": 106,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 54,
+                  "stop": 68,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 54,
+                      "stop": 68,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "PurchaseService"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 71,
+                  "stop": 84,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 71,
+                      "stop": 84,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "InvoiceService"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 86,
+                  "stop": 106,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " createInvoice(order)"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

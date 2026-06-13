@@ -1,0 +1,36 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 7,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 7,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 7,
+          "children": [
+            {
+              "kind": "CriticalContext",
+              "start": 0,
+              "stop": 7,
+              "children": [
+                {
+                  "token": "CRITICAL",
+                  "text": "critical"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

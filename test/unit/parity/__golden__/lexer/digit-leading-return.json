@@ -1,0 +1,17 @@
+[
+  {
+    "type": "RETURN",
+    "text": "return",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "DIGIT_LEADING_NAME",
+    "text": "5xx_error",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

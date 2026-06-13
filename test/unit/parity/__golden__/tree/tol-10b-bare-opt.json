@@ -1,0 +1,36 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 2,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 2,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 2,
+          "children": [
+            {
+              "kind": "OptContext",
+              "start": 0,
+              "stop": 2,
+              "children": [
+                {
+                  "token": "OPT",
+                  "text": "opt"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

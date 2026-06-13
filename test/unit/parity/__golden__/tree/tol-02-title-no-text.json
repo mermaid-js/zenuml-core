@@ -1,0 +1,22 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 4,
+  "children": [
+    {
+      "kind": "TitleContext",
+      "start": 0,
+      "stop": 4,
+      "children": [
+        {
+          "token": "TITLE",
+          "text": "title"
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

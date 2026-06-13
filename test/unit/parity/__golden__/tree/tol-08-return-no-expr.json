@@ -1,0 +1,36 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 5,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 5,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 5,
+          "children": [
+            {
+              "kind": "RetContext",
+              "start": 0,
+              "stop": 5,
+              "children": [
+                {
+                  "token": "RETURN",
+                  "text": "return"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

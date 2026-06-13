@@ -1,0 +1,17 @@
+[
+  {
+    "type": "ID",
+    "text": "a",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "DOT",
+    "text": ".",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "b",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

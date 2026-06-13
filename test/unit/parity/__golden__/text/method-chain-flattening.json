@@ -1,0 +1,111 @@
+{
+  "id": "method-chain-flattening",
+  "code": "A.m1.m2",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "A.m1.m2",
+      "getText": "A.m1.m2<EOF>",
+      "getComment": null
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "A.m1.m2",
+      "getText": "A.m1.m2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat",
+      "kind": "StatContext",
+      "getFormattedText": "A.m1.m2",
+      "getText": "A.m1.m2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message",
+      "kind": "MessageContext",
+      "getFormattedText": "A.m1.m2",
+      "getText": "A.m1.m2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody",
+      "kind": "MessageBodyContext",
+      "getFormattedText": "A.m1.m2",
+      "getText": "A.m1.m2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo",
+      "kind": "FromToContext",
+      "getFormattedText": "A.",
+      "getText": "A.",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo.to",
+      "kind": "ToContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.fromTo.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func",
+      "kind": "FuncContext",
+      "getFormattedText": "m1.m2",
+      "getText": "m1.m2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature[0]",
+      "kind": "SignatureContext",
+      "getFormattedText": "m1",
+      "getText": "m1",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature[0].methodName",
+      "kind": "MethodNameContext",
+      "getFormattedText": "m1",
+      "getText": "m1",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature[0].methodName.name",
+      "kind": "NameContext",
+      "getFormattedText": "m1",
+      "getText": "m1",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature[1]",
+      "kind": "SignatureContext",
+      "getFormattedText": "m2",
+      "getText": "m2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature[1].methodName",
+      "kind": "MethodNameContext",
+      "getFormattedText": "m2",
+      "getText": "m2",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.message.messageBody.func.signature[1].methodName.name",
+      "kind": "NameContext",
+      "getFormattedText": "m2",
+      "getText": "m2",
+      "getComment": null
+    }
+  ]
+}

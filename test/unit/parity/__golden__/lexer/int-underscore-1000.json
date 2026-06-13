@@ -1,0 +1,12 @@
+[
+  {
+    "type": "INT",
+    "text": "1",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "_000",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

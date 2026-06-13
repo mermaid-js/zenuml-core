@@ -14,7 +14,6 @@ import "./Divider/DividerContext";
 import "./SignatureText";
 import "./Messages/MessageContext";
 import "./From";
-import "./key/Key";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
 import { formatText } from "@/utils/StringUtil";
@@ -104,10 +103,6 @@ antlr4.ParserRuleContext.prototype.getComment = function () {
       .map((t) => t.text.substring(2)) // skip '//'
       .join("\n")
   );
-};
-
-antlr4.ParserRuleContext.prototype.returnedValue = function () {
-  return this.braceBlock().block().ret().value();
 };
 
 export const ProgContext = sequenceParser.ProgContext;

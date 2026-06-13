@@ -1,0 +1,27 @@
+[
+  {
+    "type": "ID",
+    "text": "用户",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ARROW",
+    "text": "->",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "订单服务",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "COL",
+    "text": ":",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "EVENT_PAYLOAD_LXR",
+    "text": " 下单",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

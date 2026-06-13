@@ -1,0 +1,12 @@
+[
+  {
+    "type": "OTHER",
+    "text": "#",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "ID",
+    "text": "xyz",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

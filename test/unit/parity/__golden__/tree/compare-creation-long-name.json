@@ -1,0 +1,69 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 46,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 46,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 46,
+          "children": [
+            {
+              "kind": "CreationContext",
+              "start": 0,
+              "stop": 46,
+              "children": [
+                {
+                  "kind": "CreationBodyContext",
+                  "start": 0,
+                  "stop": 46,
+                  "children": [
+                    {
+                      "token": "NEW",
+                      "text": "new"
+                    },
+                    {
+                      "kind": "ConstructContext",
+                      "start": 4,
+                      "stop": 44,
+                      "children": [
+                        {
+                          "kind": "NameContext",
+                          "start": 4,
+                          "stop": 44,
+                          "children": [
+                            {
+                              "token": "ID",
+                              "text": "AHasAVeryLongNameLongNameLongNameLongName"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "OPAR",
+                      "text": "("
+                    },
+                    {
+                      "token": "CPAR",
+                      "text": ")"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

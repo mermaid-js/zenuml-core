@@ -1,0 +1,311 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 37,
+  "children": [
+    {
+      "kind": "TitleContext",
+      "start": 0,
+      "stop": 13,
+      "children": [
+        {
+          "token": "TITLE",
+          "text": "title"
+        },
+        {
+          "token": "TITLE_CONTENT",
+          "text": " Title 1"
+        },
+        {
+          "token": "TITLE_END",
+          "text": "\n"
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 14,
+      "stop": 37,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 14,
+          "stop": 37,
+          "children": [
+            {
+              "kind": "MessageContext",
+              "start": 14,
+              "stop": 37,
+              "children": [
+                {
+                  "kind": "MessageBodyContext",
+                  "start": 14,
+                  "stop": 16,
+                  "children": [
+                    {
+                      "kind": "FromToContext",
+                      "start": 14,
+                      "stop": 15,
+                      "children": [
+                        {
+                          "kind": "ToContext",
+                          "start": 14,
+                          "stop": 14,
+                          "children": [
+                            {
+                              "kind": "NameContext",
+                              "start": 14,
+                              "stop": 14,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "A"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "DOT",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "FuncContext",
+                      "start": 16,
+                      "stop": 16,
+                      "children": [
+                        {
+                          "kind": "SignatureContext",
+                          "start": 16,
+                          "stop": 16,
+                          "children": [
+                            {
+                              "kind": "MethodNameContext",
+                              "start": 16,
+                              "stop": 16,
+                              "children": [
+                                {
+                                  "kind": "NameContext",
+                                  "start": 16,
+                                  "stop": 16,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "m"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "BraceBlockContext",
+                  "start": 18,
+                  "stop": 37,
+                  "children": [
+                    {
+                      "token": "OBRACE",
+                      "text": "{"
+                    },
+                    {
+                      "kind": "BlockContext",
+                      "start": 22,
+                      "stop": 35,
+                      "children": [
+                        {
+                          "kind": "StatContext",
+                          "start": 22,
+                          "stop": 35,
+                          "children": [
+                            {
+                              "kind": "CreationContext",
+                              "start": 22,
+                              "stop": 35,
+                              "children": [
+                                {
+                                  "kind": "CreationBodyContext",
+                                  "start": 22,
+                                  "stop": 35,
+                                  "children": [
+                                    {
+                                      "token": "NEW",
+                                      "text": "new"
+                                    },
+                                    {
+                                      "kind": "ConstructContext",
+                                      "start": 26,
+                                      "stop": 26,
+                                      "children": [
+                                        {
+                                          "kind": "NameContext",
+                                          "start": 26,
+                                          "stop": 26,
+                                          "children": [
+                                            {
+                                              "token": "ID",
+                                              "text": "B"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "token": "OPAR",
+                                      "text": "("
+                                    },
+                                    {
+                                      "kind": "ParametersContext",
+                                      "start": 28,
+                                      "stop": 34,
+                                      "children": [
+                                        {
+                                          "kind": "ParameterContext",
+                                          "start": 28,
+                                          "stop": 28,
+                                          "children": [
+                                            {
+                                              "kind": "AtomExprContext",
+                                              "start": 28,
+                                              "stop": 28,
+                                              "children": [
+                                                {
+                                                  "kind": "NumberAtomContext",
+                                                  "start": 28,
+                                                  "stop": 28,
+                                                  "children": [
+                                                    {
+                                                      "token": "INT",
+                                                      "text": "1"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "token": "COMMA",
+                                          "text": ","
+                                        },
+                                        {
+                                          "kind": "ParameterContext",
+                                          "start": 30,
+                                          "stop": 30,
+                                          "children": [
+                                            {
+                                              "kind": "AtomExprContext",
+                                              "start": 30,
+                                              "stop": 30,
+                                              "children": [
+                                                {
+                                                  "kind": "NumberAtomContext",
+                                                  "start": 30,
+                                                  "stop": 30,
+                                                  "children": [
+                                                    {
+                                                      "token": "INT",
+                                                      "text": "2"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "token": "COMMA",
+                                          "text": ","
+                                        },
+                                        {
+                                          "kind": "ParameterContext",
+                                          "start": 32,
+                                          "stop": 32,
+                                          "children": [
+                                            {
+                                              "kind": "AtomExprContext",
+                                              "start": 32,
+                                              "stop": 32,
+                                              "children": [
+                                                {
+                                                  "kind": "NumberAtomContext",
+                                                  "start": 32,
+                                                  "stop": 32,
+                                                  "children": [
+                                                    {
+                                                      "token": "INT",
+                                                      "text": "3"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "token": "COMMA",
+                                          "text": ","
+                                        },
+                                        {
+                                          "kind": "ParameterContext",
+                                          "start": 34,
+                                          "stop": 34,
+                                          "children": [
+                                            {
+                                              "kind": "AtomExprContext",
+                                              "start": 34,
+                                              "stop": 34,
+                                              "children": [
+                                                {
+                                                  "kind": "NumberAtomContext",
+                                                  "start": 34,
+                                                  "stop": 34,
+                                                  "children": [
+                                                    {
+                                                      "token": "INT",
+                                                      "text": "4"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "token": "CPAR",
+                                      "text": ")"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "CBRACE",
+                      "text": "}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

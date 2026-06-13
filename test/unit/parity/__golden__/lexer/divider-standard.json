@@ -1,0 +1,7 @@
+[
+  {
+    "type": "DIVIDER",
+    "text": "== divider ==",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

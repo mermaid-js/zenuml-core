@@ -1,0 +1,47 @@
+[
+  {
+    "type": "NUMBER_UNIT",
+    "text": "1kg",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "NUMBER_UNIT",
+    "text": "100day",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "NUMBER_UNIT",
+    "text": "0.5h",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "NUMBER_UNIT",
+    "text": ".5m",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  },
+  {
+    "type": "WS",
+    "text": " ",
+    "channel": "HIDDEN"
+  },
+  {
+    "type": "NUMBER_UNIT",
+    "text": "10ms",
+    "channel": "DEFAULT_TOKEN_CHANNEL"
+  }
+]

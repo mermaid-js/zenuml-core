@@ -1,0 +1,237 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 52,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 52,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 15,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 0,
+              "stop": 14,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 0,
+                  "stop": 0,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 0,
+                      "stop": 0,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 5,
+                  "stop": 5,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 5,
+                      "stop": 5,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "B"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 7,
+                  "stop": 14,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " request"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "EVENT_END",
+              "text": "\n"
+            }
+          ]
+        },
+        {
+          "kind": "StatContext",
+          "start": 16,
+          "stop": 52,
+          "children": [
+            {
+              "kind": "LoopContext",
+              "start": 16,
+              "stop": 52,
+              "children": [
+                {
+                  "token": "WHILE",
+                  "text": "loop"
+                },
+                {
+                  "kind": "ParExprContext",
+                  "start": 20,
+                  "stop": 30,
+                  "children": [
+                    {
+                      "token": "OPAR",
+                      "text": "("
+                    },
+                    {
+                      "kind": "ConditionContext",
+                      "start": 21,
+                      "stop": 29,
+                      "children": [
+                        {
+                          "kind": "IdAtomContext",
+                          "start": 21,
+                          "stop": 29,
+                          "children": [
+                            {
+                              "token": "ID",
+                              "text": "condition"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "CPAR",
+                      "text": ")"
+                    }
+                  ]
+                },
+                {
+                  "kind": "BraceBlockContext",
+                  "start": 32,
+                  "stop": 52,
+                  "children": [
+                    {
+                      "token": "OBRACE",
+                      "text": "{"
+                    },
+                    {
+                      "kind": "BlockContext",
+                      "start": 36,
+                      "stop": 51,
+                      "children": [
+                        {
+                          "kind": "StatContext",
+                          "start": 36,
+                          "stop": 51,
+                          "children": [
+                            {
+                              "kind": "AsyncMessageContext",
+                              "start": 36,
+                              "stop": 50,
+                              "children": [
+                                {
+                                  "kind": "FromContext",
+                                  "start": 36,
+                                  "stop": 36,
+                                  "children": [
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 36,
+                                      "stop": 36,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "B"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "ARROW",
+                                  "text": "->"
+                                },
+                                {
+                                  "kind": "ToContext",
+                                  "start": 41,
+                                  "stop": 41,
+                                  "children": [
+                                    {
+                                      "kind": "NameContext",
+                                      "start": 41,
+                                      "stop": 41,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "C"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "COL",
+                                  "text": ":"
+                                },
+                                {
+                                  "kind": "ContentContext",
+                                  "start": 43,
+                                  "stop": 50,
+                                  "children": [
+                                    {
+                                      "token": "EVENT_PAYLOAD_LXR",
+                                      "text": " process"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "token": "EVENT_END",
+                              "text": "\n"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "token": "CBRACE",
+                      "text": "}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

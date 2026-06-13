@@ -1,0 +1,69 @@
+{
+  "id": "async-message-leading-space-signature",
+  "code": "A->B: message",
+  "facets": [
+    {
+      "path": "prog",
+      "kind": "ProgContext",
+      "getFormattedText": "A->B: message",
+      "getText": "A->B: message<EOF>",
+      "getComment": null
+    },
+    {
+      "path": "prog.block",
+      "kind": "BlockContext",
+      "getFormattedText": "A->B: message",
+      "getText": "A->B: message",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat",
+      "kind": "StatContext",
+      "getFormattedText": "A->B: message",
+      "getText": "A->B: message",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage",
+      "kind": "AsyncMessageContext",
+      "getFormattedText": "A->B: message",
+      "getText": "A->B: message",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.from",
+      "kind": "FromContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.from.name",
+      "kind": "NameContext",
+      "getFormattedText": "A",
+      "getText": "A",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.to",
+      "kind": "ToContext",
+      "getFormattedText": "B",
+      "getText": "B",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.to.name",
+      "kind": "NameContext",
+      "getFormattedText": "B",
+      "getText": "B",
+      "getComment": null
+    },
+    {
+      "path": "prog.block.stat.asyncMessage.content",
+      "kind": "ContentContext",
+      "getFormattedText": " message",
+      "getText": " message",
+      "getComment": null
+    }
+  ]
+}

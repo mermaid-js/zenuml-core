@@ -13,7 +13,6 @@ function createParser(code: any) {
   return parser;
 }
 
- 
 function createParseFunction(parseMethod: (parser: sequenceParser) => any) {
   return (code: string) => {
     const parser = createParser(code);
@@ -21,26 +20,11 @@ function createParseFunction(parseMethod: (parser: sequenceParser) => any) {
   };
 }
 
-export const ProgContextFixture = createParseFunction((parser) =>
-  parser.prog(),
-);
-export const TitleContextFixture = createParseFunction((parser) =>
-  parser.title(),
-);
-export const StatContextFixture = createParseFunction((parser) =>
-  parser.stat(),
-);
-export const AsyncMessageContextFixture = createParseFunction((parser) =>
-  parser.asyncMessage(),
-);
-export const SyncMessageContextFixture = createParseFunction((parser) =>
-  parser.message(),
-);
-export const DividerContextFixture = createParseFunction((parser) =>
-  parser.divider(),
-);
-export const CreationContextFixture = createParseFunction((parser) =>
-  parser.creation(),
-);
-
+export const ProgContextFixture = createParseFunction((parser) => parser.prog());
+export const TitleContextFixture = createParseFunction((parser) => parser.title());
+export const StatContextFixture = createParseFunction((parser) => parser.stat());
+export const AsyncMessageContextFixture = createParseFunction((parser) => parser.asyncMessage());
+export const SyncMessageContextFixture = createParseFunction((parser) => parser.message());
+export const DividerContextFixture = createParseFunction((parser) => parser.divider());
+export const CreationContextFixture = createParseFunction((parser) => parser.creation());
 export const RetContextFixture = createParseFunction((parser) => parser.ret());

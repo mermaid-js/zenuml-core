@@ -1,0 +1,299 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 90,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 43,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 18,
+          "children": [
+            {
+              "kind": "EmojiContext",
+              "start": 0,
+              "stop": 7,
+              "children": [
+                {
+                  "token": "LBRACKET",
+                  "text": "["
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 1,
+                  "stop": 6,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "rocket"
+                    }
+                  ]
+                },
+                {
+                  "token": "RBRACKET",
+                  "text": "]"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 9,
+              "stop": 18,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "Production"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "ParticipantContext",
+          "start": 20,
+          "stop": 30,
+          "children": [
+            {
+              "kind": "EmojiContext",
+              "start": 20,
+              "stop": 25,
+              "children": [
+                {
+                  "token": "LBRACKET",
+                  "text": "["
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 21,
+                  "stop": 24,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "lock"
+                    }
+                  ]
+                },
+                {
+                  "token": "RBRACKET",
+                  "text": "]"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 27,
+              "stop": 30,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "Auth"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "ParticipantContext",
+          "start": 32,
+          "stop": 43,
+          "children": [
+            {
+              "kind": "EmojiContext",
+              "start": 32,
+              "stop": 37,
+              "children": [
+                {
+                  "token": "LBRACKET",
+                  "text": "["
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 33,
+                  "stop": 36,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "fire"
+                    }
+                  ]
+                },
+                {
+                  "token": "RBRACKET",
+                  "text": "]"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 39,
+              "stop": 43,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "Cache"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 45,
+      "stop": 90,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 45,
+          "stop": 71,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 45,
+              "stop": 70,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 45,
+                  "stop": 54,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 45,
+                      "stop": 54,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "Production"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 57,
+                  "stop": 60,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 57,
+                      "stop": 60,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "Auth"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 62,
+                  "stop": 70,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " validate"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "EVENT_END",
+              "text": "\n"
+            }
+          ]
+        },
+        {
+          "kind": "StatContext",
+          "start": 72,
+          "stop": 90,
+          "children": [
+            {
+              "kind": "AsyncMessageContext",
+              "start": 72,
+              "stop": 90,
+              "children": [
+                {
+                  "kind": "FromContext",
+                  "start": 72,
+                  "stop": 75,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 72,
+                      "stop": 75,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "Auth"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "ARROW",
+                  "text": "->"
+                },
+                {
+                  "kind": "ToContext",
+                  "start": 78,
+                  "stop": 82,
+                  "children": [
+                    {
+                      "kind": "NameContext",
+                      "start": 78,
+                      "stop": 82,
+                      "children": [
+                        {
+                          "token": "ID",
+                          "text": "Cache"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "token": "COL",
+                  "text": ":"
+                },
+                {
+                  "kind": "ContentContext",
+                  "start": 84,
+                  "stop": 90,
+                  "children": [
+                    {
+                      "token": "EVENT_PAYLOAD_LXR",
+                      "text": " lookup"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

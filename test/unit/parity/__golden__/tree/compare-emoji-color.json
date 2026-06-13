@@ -1,0 +1,240 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 62,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 40,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 20,
+          "children": [
+            {
+              "kind": "EmojiContext",
+              "start": 0,
+              "stop": 7,
+              "children": [
+                {
+                  "token": "LBRACKET",
+                  "text": "["
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 1,
+                  "stop": 6,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "rocket"
+                    }
+                  ]
+                },
+                {
+                  "token": "RBRACKET",
+                  "text": "]"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 9,
+              "stop": 12,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "Prod"
+                }
+              ]
+            },
+            {
+              "token": "COLOR",
+              "text": "#FF6600"
+            }
+          ]
+        },
+        {
+          "kind": "ParticipantContext",
+          "start": 22,
+          "stop": 40,
+          "children": [
+            {
+              "kind": "EmojiContext",
+              "start": 22,
+              "stop": 27,
+              "children": [
+                {
+                  "token": "LBRACKET",
+                  "text": "["
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 23,
+                  "stop": 26,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "lock"
+                    }
+                  ]
+                },
+                {
+                  "token": "RBRACKET",
+                  "text": "]"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 29,
+              "stop": 32,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "Auth"
+                }
+              ]
+            },
+            {
+              "token": "COLOR",
+              "text": "#0747A6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "BlockContext",
+      "start": 42,
+      "stop": 62,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 42,
+          "stop": 62,
+          "children": [
+            {
+              "kind": "MessageContext",
+              "start": 42,
+              "stop": 62,
+              "children": [
+                {
+                  "kind": "MessageBodyContext",
+                  "start": 42,
+                  "stop": 62,
+                  "children": [
+                    {
+                      "kind": "FromToContext",
+                      "start": 42,
+                      "stop": 52,
+                      "children": [
+                        {
+                          "kind": "FromContext",
+                          "start": 42,
+                          "stop": 45,
+                          "children": [
+                            {
+                              "kind": "NameContext",
+                              "start": 42,
+                              "stop": 45,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "Prod"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "ARROW",
+                          "text": "->"
+                        },
+                        {
+                          "kind": "ToContext",
+                          "start": 48,
+                          "stop": 51,
+                          "children": [
+                            {
+                              "kind": "NameContext",
+                              "start": 48,
+                              "stop": 51,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "Auth"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "DOT",
+                          "text": "."
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "FuncContext",
+                      "start": 53,
+                      "stop": 62,
+                      "children": [
+                        {
+                          "kind": "SignatureContext",
+                          "start": 53,
+                          "stop": 62,
+                          "children": [
+                            {
+                              "kind": "MethodNameContext",
+                              "start": 53,
+                              "stop": 60,
+                              "children": [
+                                {
+                                  "kind": "NameContext",
+                                  "start": 53,
+                                  "stop": 60,
+                                  "children": [
+                                    {
+                                      "token": "ID",
+                                      "text": "validate"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "InvocationContext",
+                              "start": 61,
+                              "stop": 62,
+                              "children": [
+                                {
+                                  "token": "OPAR",
+                                  "text": "("
+                                },
+                                {
+                                  "token": "CPAR",
+                                  "text": ")"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}
