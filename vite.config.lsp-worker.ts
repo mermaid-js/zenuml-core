@@ -13,7 +13,7 @@ export default defineConfig({
     outDir: "dist/lsp",
     emptyOutDir: false,
     copyPublicDir: false,
-    sourcemap: process.env.RELEASE === "1",
+    sourcemap: false,
     lib: {
       entry: resolve(__dirname, "src/parser-langium/lsp/worker.ts"),
       formats: ["es"],

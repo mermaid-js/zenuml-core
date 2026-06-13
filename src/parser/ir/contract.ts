@@ -349,13 +349,13 @@ export interface StarterExpContext extends IrNode {
 }
 
 /** Starter participant reference; read via offsets + `getFormattedText()`. */
-export interface StarterContext extends IrNode {}
+export type StarterContext = IrNode;
 
 /**
  * A generic name node (`name` rule): participant names, ref labels, endpoint
  * names. Read via `getFormattedText()` (quote-stripped) and offsets.
  */
-export interface NameContext extends IrNode {}
+export type NameContext = IrNode;
 
 /** `as "label"` node under a participant. */
 export interface LabelContext extends IrNode {
@@ -381,7 +381,7 @@ export interface EmojiContext extends IrNode {
 }
 
 /** `@Actor` / `@Database` … node; read via `getFormattedText()` then `.replace("@","")`. */
-export interface ParticipantTypeContext extends IrNode {}
+export type ParticipantTypeContext = IrNode;
 
 /**
  * One explicit participant declaration under {@link HeadContext}.
@@ -554,14 +554,14 @@ export interface EndpointContext extends IrNode {
 }
 
 /** Free-text payload node (`content` rule). Exported as a class for `instanceof` (Return.tsx:36). */
-export interface ContentContext extends IrNode {}
+export type ContentContext = IrNode;
 
 /**
  * One signature segment of a method chain (`signature` rule). Read via
  * offsets (`signature()[0].start/.stop` selection range, Interaction.tsx:30)
  * and `getFormattedText()`.
  */
-export interface SignatureContext extends IrNode {}
+export type SignatureContext = IrNode;
 
 /** `func` rule — a method chain `a.b().c()`. */
 export interface FuncContext extends IrNode {
@@ -819,7 +819,7 @@ export interface CreationContext extends IrNode {
 }
 
 /** Expression node (`expr` rule) — generic base for all expression alternatives. */
-export interface ExprContext extends IrNode {}
+export type ExprContext = IrNode;
 
 /**
  * Labeled alternative `#atomExpr` of `expr`. Exported as a class for
@@ -830,7 +830,7 @@ export interface AtomExprContext extends ExprContext {
 }
 
 /** Atom node (literals, names). Read via offsets and `getFormattedText()`. */
-export interface AtomContext extends IrNode {}
+export type AtomContext = IrNode;
 
 /**
  * `return …` statement.
@@ -905,7 +905,7 @@ export interface ParExprContext extends IrNode {
  * `start.start` / `stop.stop` (inline editing:
  * `code.slice(0, start) + text + code.slice(end + 1)` — ConditionLabel.tsx:23-27).
  */
-export interface ConditionContext extends IrNode {}
+export type ConditionContext = IrNode;
 
 /** `if` branch of an `alt` fragment. */
 export interface IfBlockContext extends IrNode {
@@ -1072,7 +1072,7 @@ export interface DividerContext extends IrNode {
 /* ------------------------------------------------------------------------ */
 
 /** A single parameter (named parameter, declaration, or expression). */
-export interface ParameterContext extends IrNode {}
+export type ParameterContext = IrNode;
 
 /**
  * Parameter list node. NOTE: this kind OVERRIDES the base
