@@ -18,7 +18,8 @@ carried through Stage 5 cutover + a rebase onto current `main`.)
 | ⚠️ Perf finding (post-rebase) | main's ANTLR perf commits (`d163803b` SLL two-stage, `db1038ad` lexer DFA) make the **new ANTLR ~12× faster cold than Langium** on large input; both memoize on repeat. Migration's parse-speed rationale is gone. |
 | **Stage 5b: dual-parser architecture** | ✅ **COMPLETE — final state.** ANTLR ships in production (`src/parser/*` reverted to ANTLR-only; engine flag + instanceof shim deleted; ESM bundle back to baseline 460,986 B gz, **zero Chevrotain**). Langium kept as isolated build-time side-car (`src/parser-langium/`) for the LSP server. CI consistency gate `bun run parity:dualrun` wired into `cd.yml` (190 identical / 8 G7 / 0 unexplained). Full doc: **14-dual-parser-architecture.md**. |
 | Stage 6 decommission | ❌ **CANCELLED** — under the dual-parser model ANTLR is the production parser and stays. |
-| Next: Langium LSP server | not started — build on the `src/parser-langium/` side-car (separate effort). |
+| Langium LSP server | ✅ **BUILT.** `src/parser-langium/lsp/` — validation (duplicate-participant warning + auto syntax diagnostics), participant-name completion, hover (participant/endpoint/creation/title). Node stdio server `dist/lsp/main.js` via `bun run build:lsp`; `bun run lsp` to run. 8 LSP tests (`langium/test`) + stdio boot smoke, both in `bun run test`; CI also runs `build:lsp`. Library bundle stays ANTLR-only (LSP never imported by it). Details in 14-dual-parser-architecture.md. |
+| Next (optional) | VS Code extension packaging; richer LSP (go-to-def, semantic tokens, outline). |
 
 ## How to resume Stage 3+4
 

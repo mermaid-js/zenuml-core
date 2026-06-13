@@ -61,6 +61,10 @@ the dual-parser model ANTLR is the production parser and stays. Langium lives on
 as the LSP side-car.
 **Status**: Cancelled (replaced by Stage 5b).
 
-## Next: Langium LSP server
-Build the LSP on `src/parser-langium/` (completion/hover/diagnostics/go-to-def).
-Separate effort; the side-car grammar + services are ready.
+## Langium LSP server — DONE
+Built on `src/parser-langium/lsp/`: validation (duplicate-participant warning +
+automatic syntax diagnostics), participant-name completion, hover. Node stdio
+server `dist/lsp/main.js` (`bun run build:lsp`). 8 `langium/test` feature tests +
+stdio boot smoke (in `bun run test`); CI runs `build:lsp`. Library bundle stays
+ANTLR-only. Full doc: 14-dual-parser-architecture.md.
+Optional next: VS Code extension packaging; go-to-def / semantic tokens / outline.

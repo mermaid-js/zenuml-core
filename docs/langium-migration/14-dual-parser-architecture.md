@@ -80,12 +80,43 @@ When the ZenUML DSL changes, **both grammars must change**: `src/g4/*.g4`
 diverge, so a missed update on either side is caught before merge — the
 discipline is "edit both, let CI prove they agree."
 
+## LSP server (built)
+
+The Langium side-car now drives a working LSP server — `src/parser-langium/lsp/`:
+
+| File | Role |
+|---|---|
+| `zenuml-lsp-module.ts` | LSP services wiring — reuses the core parser overrides from `services.ts`, layers `langium/lsp` defaults + the providers below. `createZenUmlLspServices(context)`. |
+| `zenuml-validator.ts` | Semantic validation (parser/lexer errors are automatic; adds a duplicate-participant warning). |
+| `zenuml-completion.ts` | Completion — appends the document's participant names (collected live) to Langium's defaults. |
+| `zenuml-hover.ts` | Hover for participants, message endpoints, creations, title. |
+| `participants.ts` | Shared helper: collect participant names from a parsed document. |
+| `main.ts` | Node server entry (`startLanguageServer` over stdio). |
+
+Build/run: `bun run build:lsp` → `dist/lsp/main.js` (Node SSR bundle, ~104 KB,
+langium+chevrotain bundled — a Node process, not the browser library);
+`bun run lsp` runs it from source over stdio. Wire `dist/lsp/main.js --stdio` as
+the server command in any editor language client for `.zenuml`.
+
+Tested end-to-end without an editor in `src/parser-langium/lsp/lsp.spec.ts`
+(8 tests via Langium's `langium/test` harness: validation diagnostics,
+participant-name completion, hover), plus a stdio boot smoke check confirming the
+server advertises `completionProvider` + `hoverProvider`. These run in
+`bun run test`; CI also builds the server (`build:lsp`) so it can't rot.
+
+Note: for this grammar Langium's default completion contributes no keyword items
+(ZenUML's fragment keywords are terminal tokens, not inline literals), so the
+participant-name completion is the primary editor assist.
+
 ## Status / next steps
 
 - ✅ Production reverted to ANTLR-only; bundle at baseline; side-car isolated.
-- ✅ CI consistency gate wired (`parity:dualrun` in `cd.yml`).
-- ⏭️ Build the Langium LSP server on `src/parser-langium/` (completion, hover,
-  diagnostics, go-to-definition for participants/messages) — separate effort.
+- ✅ CI consistency gate wired (`parity:dualrun` + `build:lsp` in `cd.yml`).
+- ✅ Langium LSP server built + tested (validation, completion, hover).
+- ⏭️ Editor packaging: a VS Code extension (language client + `.zenuml`
+  grammar/config) that launches `dist/lsp/main.js`.
+- ⏭️ Richer LSP: go-to-definition / find-references across message endpoints,
+  semantic tokens, document symbols (outline of participants + messages).
 - ⏭️ Optional: behavioural dual-run (Participants/AllMessages) if the LSP grows
   to need renderer-equivalent semantics.
 - The Stage-5 cutover doc (13) is retained as the historical record of why the

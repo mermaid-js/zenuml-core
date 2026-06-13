@@ -58,6 +58,8 @@ jobs:
         # This diffs both engines over the whole corpus and fails on any
         # undocumented divergence, so the two parsers can never drift apart.
         run: bun run parity:dualrun
+      - name: Build LSP server (side-car, ensure it compiles)
+        run: bun run build:lsp
 
   e2e:
     uses: ./.github/workflows/e2e.yml

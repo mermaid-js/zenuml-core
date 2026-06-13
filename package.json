@@ -18,6 +18,8 @@
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
     "build:lib": "bun run --bun vite build -c vite.config.lib.ts",
     "build:cli": "bun run --bun vite build -c vite.config.cli.ts",
+    "build:lsp": "bun run --bun vite build -c vite.config.lsp.ts",
+    "lsp": "bun src/parser-langium/lsp/main.ts --stdio",
     "build": "bun run build:lib && bun run build:cli",
     "build:release": "RELEASE=1 bun run build:lib && RELEASE=1 bun run build:cli",
     "build:analyze": "RELEASE=1 ANALYZE=1 bun run build:lib && RELEASE=1 bun run build:cli",
