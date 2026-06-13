@@ -31,12 +31,12 @@ Decisions on open questions (07 §6):
 ## Stage 3: Compatibility facade
 **Goal**: memoized per-kind facade classes, RootContext/Errors/Participants compat exports, comment attachment (G4), ContextsFixture on parse(text,{rule}).
 **Success Criteria**: all src/parser/** specs pass unchanged against Langium; dual-run A/B diff empty/explained.
-**Status**: Not Started
+**Status**: Complete — dual-run 190 identical / 8 explained (G7) / 0 unexplained; `instanceof` shim added (src/parser-langium/instanceof-shim.ts) so facade nodes satisfy `instanceof sequenceParser.<Kind>Context`. One accepted exception (`A.m(` recovery), see 12-stage34-exceptions.md.
 
 ## Stage 4: Parser-layer services + downstream suites
 **Goal**: visitor rewrites of ToCollector/MessageCollector/FrameBuilder/ChildFragmentDetector (re-entrant).
 **Success Criteria**: entire `bun run test` green with Langium engine in tests.
-**Status**: Not Started
+**Status**: Complete — `ZENUML_PARSER=langium bun test src/parser test/unit` = 1210 pass / 1 fail (documented `A.m(` G7 exception) / 2 skip; default ANTLR full suite unchanged at 1597/0 (1600).
 
 ## Stage 5: Cutover
 **Goal**: RootContext default = Langium; core.tsx errors verified; lib build green.

@@ -56,10 +56,13 @@ interface CollectState {
 
 function onParticipant(ctx: any, state: CollectState): void {
   const type = ctx?.participantType()?.getFormattedText().replace("@", "");
-  const participant = ctx?.name()?.getFormattedText() || "Missing `Participant`";
+  const participant =
+    ctx?.name()?.getFormattedText() || "Missing `Participant`";
   const stereotype = ctx.stereotype()?.name()?.getFormattedText();
   const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
-  const width = (ctx.width && ctx.width() && Number.parseInt(ctx.width().getText())) || undefined;
+  const width =
+    (ctx.width && ctx.width() && Number.parseInt(ctx.width().getText())) ||
+    undefined;
   const labelCtx = ctx.label && ctx.label();
   const label = labelCtx?.name()?.getFormattedText();
   const explicit = true;
@@ -95,7 +98,8 @@ function onParticipant(ctx: any, state: CollectState): void {
 }
 
 function onTo(ctx: any, state: CollectState): void {
-  const participant = ctx.name?.()?.getFormattedText() || ctx.getFormattedText();
+  const participant =
+    ctx.name?.()?.getFormattedText() || ctx.getFormattedText();
   const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
   const participantInstance = state.participants.Get(participant);
 
@@ -129,7 +133,7 @@ function onStarterExp(ctx: StarterExpContext, state: CollectState): void {
   if (!starter) return;
   state.participants.Add(starter.getFormattedText(), {
     isStarter: true,
-    position: [starter.start.start, starter.stop.stop + 1],
+    position: [starter.start.start, starter.stop!.stop + 1],
   });
 }
 
@@ -173,7 +177,8 @@ function onRet(ctx: any, state: CollectState): void {
 
 function collect(node: Ctx, state: CollectState): void {
   // Blind-mode by non-descent (07 §R11).
-  if (node instanceof ParametersContext || node instanceof ConditionContext) return;
+  if (node instanceof ParametersContext || node instanceof ConditionContext)
+    return;
 
   if (node instanceof ParticipantContext) {
     onParticipant(node, state);
@@ -206,7 +211,10 @@ function collect(node: Ctx, state: CollectState): void {
  */
 export const LangiumToCollector = {
   getParticipants(context: any): Participants {
-    const state: CollectState = { participants: new Participants(), groupId: undefined };
+    const state: CollectState = {
+      participants: new Participants(),
+      groupId: undefined,
+    };
     if (context) collect(context, state);
     return state.participants;
   },
@@ -216,7 +224,11 @@ export const LangiumToCollector = {
 /* MessageCollector — AllMessages (src/parser/MessageCollector.ts)      */
 /* ------------------------------------------------------------------ */
 
-function addOwnedMessage(out: OwnableMessage[], type: OwnableMessageType, ctx: any): void {
+function addOwnedMessage(
+  out: OwnableMessage[],
+  type: OwnableMessageType,
+  ctx: any,
+): void {
   const from = ctx.From();
   const owner = ctx?.Owner();
   let signature = ctx?.SignatureText();
@@ -285,7 +297,10 @@ function fragmentType(node: Ctx): string | undefined {
  */
 function localParticipantNames(ctx: Ctx): string[] {
   const origin = ctx.ClosestAncestorStat()?.Origin();
-  return [origin || _STARTER_, ...LangiumToCollector.getParticipants(ctx).Names()];
+  return [
+    origin || _STARTER_,
+    ...LangiumToCollector.getParticipants(ctx).Names(),
+  ];
 }
 
 export class LangiumFrameBuilder {
@@ -299,7 +314,9 @@ export class LangiumFrameBuilder {
 
   private getLeft(ctx: Ctx): string {
     const localParticipants = localParticipantNames(ctx);
-    return this._orderedParticipants.find((p) => localParticipants.includes(p)) || "";
+    return (
+      this._orderedParticipants.find((p) => localParticipants.includes(p)) || ""
+    );
   }
 
   private getRight(ctx: Ctx): string {

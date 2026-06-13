@@ -19,6 +19,11 @@ import "./AncestorPath";
 import { formatText } from "@/utils/StringUtil";
 import { USE_LANGIUM } from "../parser-langium/engine-flag";
 import langiumCompat from "../parser-langium/compat";
+import { installInstanceofShim } from "../parser-langium/instanceof-shim";
+
+// Under the Langium engine, make `x instanceof sequenceParser.<Kind>Context`
+// recognise facade nodes (renderer + AncestorPath rely on it). No-op for ANTLR.
+if (USE_LANGIUM) installInstanceofShim();
 
 const errors = [];
 const errorDetails = [];
@@ -113,7 +118,9 @@ antlr4.ParserRuleContext.prototype.getComment = function () {
 export const ProgContext = USE_LANGIUM
   ? langiumCompat.ProgContext
   : sequenceParser.ProgContext;
-export const RootContext = USE_LANGIUM ? langiumCompat.RootContext : rootContext;
+export const RootContext = USE_LANGIUM
+  ? langiumCompat.RootContext
+  : rootContext;
 export const GroupContext = USE_LANGIUM
   ? langiumCompat.GroupContext
   : sequenceParser.GroupContext;

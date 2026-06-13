@@ -103,7 +103,13 @@ class TokenView {
   readonly line: number;
   readonly column: number;
   readonly text: string;
-  constructor(start: number, stop: number, line: number, column: number, text: string) {
+  constructor(
+    start: number,
+    stop: number,
+    line: number,
+    column: number,
+    text: string,
+  ) {
     this.start = start;
     this.stop = stop;
     this.line = line;
@@ -113,7 +119,11 @@ class TokenView {
 }
 
 /** Synthetic view for nodes whose span contains no real tokens (recovery). */
-function syntheticView(doc: FacadeDocument, offset: number, stop: number): TokenView {
+function syntheticView(
+  doc: FacadeDocument,
+  offset: number,
+  stop: number,
+): TokenView {
   let line = 0;
   let lineStart = 0;
   for (let i = 0; i < offset && i < doc.text.length; i++) {
@@ -163,12 +173,17 @@ export abstract class Ctx {
   private readonly _explicitSpan: Span | null;
   private _spanCache: Span | undefined;
   private _startView: TokenView | undefined;
-  private _stopView: TokenView | undefined;
-  private _startIdx: number | undefined;
-  private _stopIdx: number | undefined;
+  private _stopView: TokenView | null | undefined;
+  protected _startIdx: number | undefined;
+  protected _stopIdx: number | undefined;
   private _childList: Ctx[] | null | undefined;
 
-  constructor(doc: FacadeDocument, ast: AstNode | null, parent: Ctx | null, span?: Span) {
+  constructor(
+    doc: FacadeDocument,
+    ast: AstNode | null,
+    parent: Ctx | null,
+    span?: Span,
+  ) {
     this._doc = doc;
     this._ast = ast;
     this.parentCtx = parent;
@@ -181,10 +196,23 @@ export abstract class Ctx {
     if (this._spanCache) return this._spanCache;
     let span: Span;
     if (this._explicitSpan) span = this._explicitSpan;
-    else if (this._ast?.$cstNode) span = { offset: this._ast.$cstNode.offset, end: this._ast.$cstNode.end };
+    else if (this._ast?.$cstNode)
+      span = { offset: this._ast.$cstNode.offset, end: this._ast.$cstNode.end };
     else span = { offset: 0, end: 0 };
     this._spanCache = span;
     return span;
+  }
+
+  /**
+   * Trailing END tokens the ANTLR counterpart rule keeps as its stop token
+   * (`stat: asyncMessage EVENT_END?`, `ret: … EVENT_END?`, `title: …
+   * TITLE_END?`, and transitively block/prog whose last consumed token they
+   * become). The Langium grammar marks EVENT_END/TITLE_END `hidden`, so they
+   * sit directly after the AST node's CST span; `_computeViews` adopts the
+   * adjacent END leaf as the stop without disturbing getText/comment scans.
+   */
+  protected _trailingEndTypes(): string[] | null {
+    return null;
   }
 
   private _computeViews(): void {
@@ -200,17 +228,46 @@ export abstract class Ctx {
       if (firstIdx === -1) firstIdx = i;
       lastIdx = i;
     }
+    // ANTLR keeps a trailing EVENT_END/TITLE_END as the rule's stop token.
+    // The Langium grammar hides it directly after the AST CST span; adopt that
+    // adjacent END leaf as the stop (getText / comment scans are unaffected
+    // since the END leaf stays hidden in the leaf stream).
+    let stopIdx = lastIdx;
+    const endTypes = this._trailingEndTypes();
+    if (endTypes) {
+      const cand = doc.leaves[doc.lowerBound(end)];
+      if (cand && cand.offset === end && endTypes.includes(cand.type)) {
+        stopIdx = doc.lowerBound(end);
+      }
+    }
     this._startIdx = firstIdx;
-    this._stopIdx = lastIdx;
+    this._stopIdx = stopIdx;
     if (firstIdx === -1) {
       this._startView = syntheticView(doc, offset, Math.max(offset, end - 1));
-      this._stopView = this._startView;
-      return;
+    } else {
+      const f = doc.leaves[firstIdx];
+      this._startView = new TokenView(
+        f.offset,
+        f.end - 1,
+        f.line + 1,
+        f.column,
+        f.text,
+      );
     }
-    const f = doc.leaves[firstIdx];
-    const l = doc.leaves[lastIdx];
-    this._startView = new TokenView(f.offset, f.end - 1, f.line + 1, f.column, f.text);
-    this._stopView = new TokenView(l.offset, l.end - 1, l.line + 1, l.column, l.text);
+    if (stopIdx === -1) {
+      // ANTLR: a rule that consumed zero parser-visible tokens has stop=null
+      // (e.g. ProgContext on an empty document).
+      this._stopView = null;
+    } else {
+      const l = doc.leaves[stopIdx];
+      this._stopView = new TokenView(
+        l.offset,
+        l.end - 1,
+        l.line + 1,
+        l.column,
+        l.text,
+      );
+    }
   }
 
   get start(): TokenView {
@@ -218,9 +275,9 @@ export abstract class Ctx {
     return this._startView!;
   }
 
-  get stop(): TokenView {
+  get stop(): TokenView | null {
     this._computeViews();
-    return this._stopView!;
+    return this._stopView ?? null;
   }
 
   /* ---- text reconstruction ---- */
@@ -291,17 +348,19 @@ export abstract class Ctx {
   ClosestAncestorStat(): StatContext | undefined {
     if (this instanceof StatContext) return this;
     let current = this.parentCtx;
-    while (current && !(current instanceof StatContext)) current = current.parentCtx;
+    while (current && !(current instanceof StatContext))
+      current = current.parentCtx;
     return current instanceof StatContext ? current : undefined;
   }
 
   /**
    * ANTLR API-compat tree dump (consumed by IfWithoutBody.spec via
-   * `root.toStringTree(null, root.parser)`); arguments are ignored.
-   * Chevrotain recovery never renders "missing"/"extraneous" markers, which
-   * is exactly the no-recovery-artifact property the spec asserts.
+   * `root.toStringTree(null, root.parser)`); ANTLR's two arguments are ignored
+   * — JS drops the extra call args. Chevrotain recovery never renders
+   * "missing"/"extraneous" markers, which is exactly the no-recovery-artifact
+   * property the spec asserts.
    */
-  toStringTree(_ruleNames?: unknown, _recog?: unknown): string {
+  toStringTree(): string {
     const kids = this.children ?? [];
     if (!kids.length) return this.getText();
     return `(${this.constructor.name} ${kids.map((k) => k.toStringTree()).join(" ")})`;
@@ -329,18 +388,30 @@ export abstract class Ctx {
   }
 
   /** Synthesize a child node over the CST segment of an AST property. */
-  protected _propNode(cls: new (doc: FacadeDocument, ast: null, parent: Ctx, span: Span) => Ctx, prop: string): any {
+  protected _propNode(
+    cls: new (doc: FacadeDocument, ast: null, parent: Ctx, span: Span) => Ctx,
+    prop: string,
+  ): any {
     const ast = this._ast;
     if (!ast || ast[prop] === undefined || !ast.$cstNode) return null;
     const cst = GrammarUtils.findNodeForProperty(ast.$cstNode, prop);
     if (!cst) return null;
-    return this._synth(ast, `prop:${prop}`, () => new cls(this._doc, null, this, { offset: cst.offset, end: cst.end }));
+    return this._synth(
+      ast,
+      `prop:${prop}`,
+      () =>
+        new cls(this._doc, null, this, { offset: cst.offset, end: cst.end }),
+    );
   }
 
   protected _propTerminal(prop: string): TerminalView | null {
     const ast = this._ast;
     if (!ast || ast[prop] === undefined) return null;
-    return this._synth(ast, `terminal:${prop}`, () => new TerminalView(String(ast[prop])));
+    return this._synth(
+      ast,
+      `terminal:${prop}`,
+      () => new TerminalView(String(ast[prop])),
+    );
   }
 }
 
@@ -355,11 +426,30 @@ function dual<T>(arr: T[], i?: number): any {
 export class NameContext extends Ctx {}
 export class ParticipantTypeContext extends Ctx {}
 export class WidthContext extends Ctx {}
-export class StarterContext extends Ctx {}
 export class ContentContext extends Ctx {}
-export class TypeContext extends Ctx {}
-export class ConstructContext extends Ctx {}
 export class DividerNoteContext extends Ctx {}
+
+/**
+ * ANTLR `starter: name`, `type: name`, `construct: name` — a single
+ * NameContext child sharing the node's span.
+ */
+abstract class NameWrappingContext extends Ctx {
+  name(): NameContext {
+    return this._synth(
+      this,
+      "name",
+      () => new NameContext(this._doc, null, this, this._span()),
+    ) as NameContext;
+  }
+
+  protected override _buildChildren(): Ctx[] {
+    return [this.name()];
+  }
+}
+
+export class StarterContext extends NameWrappingContext {}
+export class TypeContext extends NameWrappingContext {}
+export class ConstructContext extends NameWrappingContext {}
 
 /* ------------------------------------------------------------------ */
 /* Root / head                                                          */
@@ -375,7 +465,11 @@ export class ProgContext extends Ctx {
     if (!ast) return null;
     const hasHead = (ast.headElements?.length ?? 0) > 0 || ast.starterExp;
     if (!hasHead) return null;
-    return this._synth(ast, "head", () => new HeadContext(this._doc, ast, this));
+    return this._synth(
+      ast,
+      "head",
+      () => new HeadContext(this._doc, ast, this),
+    );
   }
 
   block(): BlockContext | null {
@@ -400,12 +494,22 @@ export class ProgContext extends Ctx {
     if (block) out.push(block);
     return out;
   }
+
+  /** prog's last consumed token can be a stat's EVENT_END or a lone title's TITLE_END. */
+  protected override _trailingEndTypes(): string[] {
+    return ["EVENT_END", "TITLE_END"];
+  }
 }
 
 export class TitleContext extends Ctx {
   content(): string {
     const raw = this._ast?.content;
     return raw == null ? "" : String(raw).trim();
+  }
+
+  /** ANTLR `title: TITLE TITLE_CONTENT? TITLE_END?`. */
+  protected override _trailingEndTypes(): string[] {
+    return ["TITLE_END"];
   }
 }
 
@@ -443,7 +547,9 @@ export class HeadContext extends Ctx {
   }
 
   protected override _buildChildren(): Ctx[] {
-    const out: Ctx[] = (this._ast.headElements ?? []).map((e: any) => this._wrap(e));
+    const out: Ctx[] = (this._ast.headElements ?? []).map((e: any) =>
+      this._wrap(e),
+    );
     const starterExp = this.starterExp();
     if (starterExp) out.push(starterExp);
     return out;
@@ -471,8 +577,13 @@ export class GroupContext extends Ctx {
     return dual(arr, i);
   }
 
+  /** ANTLR `group: GROUP name? (OBRACE participant* CBRACE?)?`. */
   protected override _buildChildren(): Ctx[] {
-    return (this._ast.participants ?? []).map((p: any) => this._wrap(p));
+    const name = this.name();
+    const participants = (this._ast.participants ?? []).map((p: any) =>
+      this._wrap(p),
+    );
+    return name ? [name, ...participants] : participants;
   }
 }
 
@@ -504,11 +615,28 @@ export class ParticipantContext extends Ctx {
   COLOR(): TerminalView | null {
     return this._propTerminal("color");
   }
+
+  /** ANTLR `participant: participantType? stereotype? emoji? name width? label? COLOR?`. */
+  protected override _buildChildren(): Ctx[] {
+    return [
+      this.participantType(),
+      this.stereotype(),
+      this.emoji(),
+      this.name(),
+      this.width(),
+      this.label(),
+    ].filter(Boolean) as Ctx[];
+  }
 }
 
 export class StereotypeContext extends Ctx {
   name(): NameContext | null {
     return this._propNode(NameContext, "name");
+  }
+
+  protected override _buildChildren(): Ctx[] {
+    const name = this.name();
+    return name ? [name] : [];
   }
 }
 
@@ -516,11 +644,21 @@ export class LabelContext extends Ctx {
   name(): NameContext | null {
     return this._propNode(NameContext, "name");
   }
+
+  protected override _buildChildren(): Ctx[] {
+    const name = this.name();
+    return name ? [name] : [];
+  }
 }
 
 export class EmojiContext extends Ctx {
   name(): NameContext | null {
     return this._propNode(NameContext, "name");
+  }
+
+  protected override _buildChildren(): Ctx[] {
+    const name = this.name();
+    return name ? [name] : [];
   }
 }
 
@@ -534,8 +672,17 @@ export class BlockContext extends Ctx {
     return dual(arr, i);
   }
 
+  /** ANTLR block.stop = last stat's stop, which can be an EVENT_END. */
+  protected override _trailingEndTypes(): string[] {
+    return ["EVENT_END"];
+  }
+
   private _statWrapper(concrete: AstNode): StatContext {
-    return this._synth(concrete, "stat", () => new StatContext(this._doc, concrete, this));
+    return this._synth(
+      concrete,
+      "stat",
+      () => new StatContext(this._doc, concrete, this),
+    );
   }
 
   protected override _buildChildren(): Ctx[] {
@@ -552,7 +699,7 @@ export class BraceBlockContext extends Ctx {
   protected override _commentAnchorIdx(): number {
     // Force view computation, then use the stop-leaf index.
     void this.stop;
-    return (this as any)._stopIdx ?? -1;
+    return this._stopIdx ?? -1;
   }
 
   protected override _buildChildren(): Ctx[] {
@@ -569,7 +716,9 @@ export class StatContext extends Ctx {
       doc,
       concrete,
       parent,
-      concrete.$cstNode ? { offset: concrete.$cstNode.offset, end: concrete.$cstNode.end } : { offset: 0, end: 0 },
+      concrete.$cstNode
+        ? { offset: concrete.$cstNode.offset, end: concrete.$cstNode.end }
+        : { offset: 0, end: 0 },
     );
   }
 
@@ -639,6 +788,11 @@ export class StatContext extends Ctx {
     const concrete = this._wrap(this._ast);
     return concrete ? [concrete] : [];
   }
+
+  /** ANTLR `stat: … | asyncMessage EVENT_END? | ret …` (ret consumes its own). */
+  protected override _trailingEndTypes(): string[] {
+    return ["EVENT_END"];
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -647,7 +801,8 @@ export class StatContext extends Ctx {
 
 function getOwnerFromAncestor(ctx: Ctx | null): string | undefined {
   while (ctx) {
-    if (ctx instanceof CreationContext || ctx instanceof MessageContext) return ctx.Owner();
+    if (ctx instanceof CreationContext || ctx instanceof MessageContext)
+      return ctx.Owner();
     ctx = ctx.parentCtx;
   }
   return undefined;
@@ -657,24 +812,29 @@ function isCurrentImpl(self: any, cursor: number): boolean {
   try {
     if (cursor === null || cursor === undefined) return false;
     const start = self.start.start;
-    const stop = self.Body().stop.stop + 1;
+    const stop = self.Body().stop!.stop + 1;
     return cursor >= start && cursor <= stop;
   } catch {
     return false;
   }
 }
 
-function extractAssignment(assignmentCtx: AssignmentContext | null): Assignment | undefined {
+function extractAssignment(
+  assignmentCtx: AssignmentContext | null,
+): Assignment | undefined {
   if (!assignmentCtx) return undefined;
   const assigneeCtx = assignmentCtx.assignee();
   const assignee = assigneeCtx?.getFormattedText();
   const typeCtx = assignmentCtx.type();
   const type = typeCtx?.getFormattedText();
   const assigneePosition: [number, number] = assigneeCtx
-    ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
+    ? [assigneeCtx.start.start, assigneeCtx.stop!.stop]
     : [-1, -1];
-  const typePosition: [number, number] = typeCtx ? [typeCtx.start.start, typeCtx.stop.stop] : [-1, -1];
-  if (assignee) return new Assignment(assignee, type, assigneePosition, typePosition);
+  const typePosition: [number, number] = typeCtx
+    ? [typeCtx.start.start, typeCtx.stop!.stop]
+    : [-1, -1];
+  if (assignee)
+    return new Assignment(assignee, type, assigneePosition, typePosition);
   return undefined;
 }
 
@@ -759,7 +919,9 @@ export class MessageBodyContext extends Ctx {
   }
 
   protected override _buildChildren(): Ctx[] {
-    return [this.assignment(), this.fromTo(), this.func()].filter(Boolean) as Ctx[];
+    return [this.assignment(), this.fromTo(), this.func()].filter(
+      Boolean,
+    ) as Ctx[];
   }
 }
 
@@ -784,6 +946,11 @@ export class FromContext extends Ctx {
   emoji(): EmojiContext | null {
     return this._wrap(this._ast?.emoji);
   }
+
+  /** ANTLR `from: emoji? name`. */
+  protected override _buildChildren(): Ctx[] {
+    return [this.emoji(), this.name()].filter(Boolean) as Ctx[];
+  }
 }
 
 export class ToContext extends Ctx {
@@ -792,6 +959,11 @@ export class ToContext extends Ctx {
   }
   emoji(): EmojiContext | null {
     return this._wrap(this._ast?.emoji);
+  }
+
+  /** ANTLR `to: emoji? name`. */
+  protected override _buildChildren(): Ctx[] {
+    return [this.emoji(), this.name()].filter(Boolean) as Ctx[];
   }
 }
 
@@ -826,6 +998,11 @@ export class MethodNameContext extends Ctx {
   }
   emoji(): EmojiContext | null {
     return this._wrap(this._ast?.emoji);
+  }
+
+  /** ANTLR `methodName: emoji? name`. */
+  protected override _buildChildren(): Ctx[] {
+    return [this.emoji(), this.name()].filter(Boolean) as Ctx[];
   }
 }
 
@@ -869,7 +1046,11 @@ function formatParameters(params: ParameterContext[]): string {
 export class ParametersContext extends Ctx {
   parameter(i?: number): any {
     const arr = (this._ast.parameters ?? []).map((p: AstNode) =>
-      this._synth(p, "parameter", () => new ParameterContext(this._doc, p, this)),
+      this._synth(
+        p,
+        "parameter",
+        () => new ParameterContext(this._doc, p, this),
+      ),
     );
     return dual(arr, i);
   }
@@ -894,7 +1075,9 @@ export class ParameterContext extends Ctx {
       doc,
       concrete,
       parent,
-      concrete.$cstNode ? { offset: concrete.$cstNode.offset, end: concrete.$cstNode.end } : { offset: 0, end: 0 },
+      concrete.$cstNode
+        ? { offset: concrete.$cstNode.offset, end: concrete.$cstNode.end }
+        : { offset: 0, end: 0 },
     );
   }
 
@@ -918,9 +1101,16 @@ export class ParameterContext extends Ctx {
 
 export class NamedParameterContext extends Ctx {
   ID(): TerminalView | null {
-    const cst = this._ast?.$cstNode && GrammarUtils.findNodeForProperty(this._ast.$cstNode, "name");
-    if (!cst || !isLeafCstNode(cst) || cst.tokenType?.name !== "ID") return null;
-    return this._synth(this._ast, "terminal:name", () => new TerminalView(cst.text));
+    const cst =
+      this._ast?.$cstNode &&
+      GrammarUtils.findNodeForProperty(this._ast.$cstNode, "name");
+    if (!cst || !isLeafCstNode(cst) || cst.tokenType?.name !== "ID")
+      return null;
+    return this._synth(
+      this._ast,
+      "terminal:name",
+      () => new TerminalView(cst.text),
+    );
   }
 
   expr(): any {
@@ -948,9 +1138,9 @@ export class AssignmentContext extends Ctx {
     return this._propNode(TypeContext, "type");
   }
 
+  /** ANTLR `assignment: type? assignee ASSIGN`. */
   protected override _buildChildren(): Ctx[] {
-    const assignee = this.assignee();
-    return assignee ? [assignee] : [];
+    return [this.type(), this.assignee()].filter(Boolean) as Ctx[];
   }
 }
 
@@ -985,7 +1175,7 @@ export class CreationContext extends Ctx {
   AssigneePosition(): [number, number] | undefined {
     const assignee = this.creationBody()?.assignment()?.assignee();
     if (!assignee) return undefined;
-    return [assignee.start.start, assignee.stop.stop + 1];
+    return [assignee.start.start, assignee.stop!.stop + 1];
   }
 
   Constructor(): string | undefined {
@@ -1012,7 +1202,9 @@ export class CreationContext extends Ctx {
 
   ParametersText(): string {
     const params = this.creationBody()!.parameters();
-    return (params?.parameter()?.length ?? 0) > 0 ? formatParameters(params!.parameter()) : "";
+    return (params?.parameter()?.length ?? 0) > 0
+      ? formatParameters(params!.parameter())
+      : "";
   }
 
   SignatureText(): string {
@@ -1058,8 +1250,11 @@ export class CreationBodyContext extends Ctx {
     return this._wrap(this._ast?.parameters);
   }
 
+  /** ANTLR `creationBody: assignment? NEW construct (OPAR parameters? CPAR)?`. */
   protected override _buildChildren(): Ctx[] {
-    return [this.assignment(), this.parameters()].filter(Boolean) as Ctx[];
+    return [this.assignment(), this.construct(), this.parameters()].filter(
+      Boolean,
+    ) as Ctx[];
   }
 }
 
@@ -1144,8 +1339,11 @@ export class RetContext extends Ctx {
 
   /** Port of src/parser/RetContext.js ReturnTo() — the hairiest upward walk. */
   ReturnTo(): string | undefined {
-    const asyncToCtx = this.asyncMessage()?.to() || this.returnAsyncMessage()?.to();
-    const asyncTo = asyncToCtx?.name?.()?.getFormattedText() || asyncToCtx?.getFormattedText();
+    const asyncToCtx =
+      this.asyncMessage()?.to() || this.returnAsyncMessage()?.to();
+    const asyncTo =
+      asyncToCtx?.name?.()?.getFormattedText() ||
+      asyncToCtx?.getFormattedText();
     if (asyncTo) return asyncTo;
 
     const stat = this.parentCtx as Ctx;
@@ -1155,7 +1353,11 @@ export class RetContext extends Ctx {
       return blockParent.Starter();
     }
     let ctx: Ctx | null = blockParent;
-    while (ctx && !(ctx instanceof MessageContext) && !(ctx instanceof CreationContext)) {
+    while (
+      ctx &&
+      !(ctx instanceof MessageContext) &&
+      !(ctx instanceof CreationContext)
+    ) {
       if (ctx instanceof ProgContext) return ctx.Starter();
       ctx = ctx.parentCtx;
     }
@@ -1186,7 +1388,14 @@ export class RetContext extends Ctx {
   }
 
   protected override _buildChildren(): Ctx[] {
-    return [this.expr(), this.asyncMessage(), this.returnAsyncMessage()].filter(Boolean) as Ctx[];
+    return [this.expr(), this.asyncMessage(), this.returnAsyncMessage()].filter(
+      Boolean,
+    ) as Ctx[];
+  }
+
+  /** ANTLR `ret: … asyncMessage EVENT_END? | returnAsyncMessage EVENT_END?`. */
+  protected override _trailingEndTypes(): string[] {
+    return ["EVENT_END"];
   }
 }
 
@@ -1200,7 +1409,15 @@ export class DividerContext extends Ctx {
     if (!ast || ast.note === undefined || !ast.$cstNode) return null;
     const cst = GrammarUtils.findNodeForProperty(ast.$cstNode, "note");
     if (!cst) return null;
-    return this._synth(ast, "dividerNote", () => new DividerNoteContext(this._doc, null, this, { offset: cst.offset, end: cst.end }));
+    return this._synth(
+      ast,
+      "dividerNote",
+      () =>
+        new DividerNoteContext(this._doc, null, this, {
+          offset: cst.offset,
+          end: cst.end,
+        }),
+    );
   }
 
   /**
@@ -1229,7 +1446,11 @@ export class ParExprContext extends Ctx {
   condition(): ConditionContext | null {
     const cond = this._ast?.condition;
     if (!cond) return null;
-    return this._synth(cond, "condition", () => new ConditionContext(this._doc, cond, this));
+    return this._synth(
+      cond,
+      "condition",
+      () => new ConditionContext(this._doc, cond, this),
+    );
   }
 
   protected override _buildChildren(): Ctx[] {
@@ -1248,7 +1469,9 @@ export class ConditionContext extends Ctx {
       doc,
       concrete,
       parent,
-      concrete.$cstNode ? { offset: concrete.$cstNode.offset, end: concrete.$cstNode.end } : { offset: 0, end: 0 },
+      concrete.$cstNode
+        ? { offset: concrete.$cstNode.offset, end: concrete.$cstNode.end }
+        : { offset: 0, end: 0 },
     );
   }
 
@@ -1272,7 +1495,12 @@ export class ConditionContext extends Ctx {
   }
 
   protected override _buildChildren(): Ctx[] {
-    const child = this.atom() ?? this.expr() ?? this.inExpr() ?? this.textExpr() ?? this._wrap(this._ast);
+    const child =
+      this.atom() ??
+      this.expr() ??
+      this.inExpr() ??
+      this.textExpr() ??
+      this._wrap(this._ast);
     return child ? [child] : [];
   }
 }
@@ -1333,7 +1561,9 @@ export class AltContext extends Ctx {
   }
 
   protected override _buildChildren(): Ctx[] {
-    return [this.ifBlock(), ...this.elseIfBlock(), this.elseBlock()].filter(Boolean) as Ctx[];
+    return [this.ifBlock(), ...this.elseIfBlock(), this.elseBlock()].filter(
+      Boolean,
+    ) as Ctx[];
   }
 }
 
@@ -1395,7 +1625,9 @@ export class TcfContext extends Ctx {
   }
 
   protected override _buildChildren(): Ctx[] {
-    return [this.tryBlock(), ...this.catchBlock(), this.finallyBlock()].filter(Boolean) as Ctx[];
+    return [this.tryBlock(), ...this.catchBlock(), this.finallyBlock()].filter(
+      Boolean,
+    ) as Ctx[];
   }
 }
 
@@ -1447,7 +1679,11 @@ export class RefContext extends Ctx {
     return this._synth(ast, "names", () => {
       const csts = GrammarUtils.findNodesForProperty(ast.$cstNode, "names");
       return csts.map(
-        (cst: CstNode) => new NameContext(this._doc, null, this, { offset: cst.offset, end: cst.end }),
+        (cst: CstNode) =>
+          new NameContext(this._doc, null, this, {
+            offset: cst.offset,
+            end: cst.end,
+          }),
       );
     });
   }
@@ -1489,7 +1725,9 @@ export class ParenthesizedExprContext extends UnaryExprContext {}
 
 abstract class BinaryExprContext extends Ctx {
   protected override _buildChildren(): Ctx[] {
-    return [this._wrap(this._ast?.left), this._wrap(this._ast?.right)].filter(Boolean) as Ctx[];
+    return [this._wrap(this._ast?.left), this._wrap(this._ast?.right)].filter(
+      Boolean,
+    ) as Ctx[];
   }
 }
 
@@ -1502,7 +1740,9 @@ export class OrExprContext extends BinaryExprContext {}
 
 export class FuncExprContext extends Ctx {
   protected override _buildChildren(): Ctx[] {
-    return [this._wrap(this._ast?.to), this._wrap(this._ast?.func)].filter(Boolean) as Ctx[];
+    return [this._wrap(this._ast?.to), this._wrap(this._ast?.func)].filter(
+      Boolean,
+    ) as Ctx[];
   }
 }
 
@@ -1515,7 +1755,10 @@ export class CreationExprContext extends Ctx {
 
 export class AssignmentExprContext extends Ctx {
   protected override _buildChildren(): Ctx[] {
-    return [this._wrap(this._ast?.assignment), this._wrap(this._ast?.expr)].filter(Boolean) as Ctx[];
+    return [
+      this._wrap(this._ast?.assignment),
+      this._wrap(this._ast?.expr),
+    ].filter(Boolean) as Ctx[];
   }
 }
 
@@ -1546,7 +1789,12 @@ export class DigitLeadingNameAtomContext extends Ctx {
 /* $type -> facade class dispatch                                       */
 /* ------------------------------------------------------------------ */
 
-type CtxClass = new (doc: FacadeDocument, ast: any, parent: Ctx | null, span?: Span) => Ctx;
+type CtxClass = new (
+  doc: FacadeDocument,
+  ast: any,
+  parent: Ctx | null,
+  span?: Span,
+) => Ctx;
 
 const CLASS_BY_TYPE: Record<string, CtxClass> = {
   Prog: ProgContext,
@@ -1619,9 +1867,38 @@ const CLASS_BY_TYPE: Record<string, CtxClass> = {
   NilAtom: NilAtomContext,
 };
 
+/**
+ * ANTLR context class NAME -> facade class, for the Stage-3 generated-parser
+ * `instanceof` shim (src/parser-langium/instanceof-shim.ts). Keys are derived
+ * from string literals (the Langium `$type` + "Context", plus the synthesized
+ * kinds that have no `$type`) so they survive identifier minification — the
+ * generated parser is referenced by stable property name on both sides.
+ */
+export const FACADE_CLASS_BY_NAME: Record<string, CtxClass> = {};
+for (const [type, cls] of Object.entries(CLASS_BY_TYPE)) {
+  FACADE_CLASS_BY_NAME[`${type}Context`] = cls;
+}
+for (const [name, cls] of Object.entries({
+  StatContext,
+  NameContext,
+  ParticipantTypeContext,
+  WidthContext,
+  StarterContext,
+  ContentContext,
+  TypeContext,
+  ConstructContext,
+  DividerNoteContext,
+})) {
+  FACADE_CLASS_BY_NAME[name] = cls as CtxClass;
+}
+
 class GenericContext extends Ctx {}
 
-export function wrapAst(doc: FacadeDocument, ast: AstNode, parent: Ctx | null): Ctx {
+export function wrapAst(
+  doc: FacadeDocument,
+  ast: AstNode,
+  parent: Ctx | null,
+): Ctx {
   const cached = doc.nodeCache.get(ast);
   if (cached) return cached;
   const cls = CLASS_BY_TYPE[(ast as any).$type] ?? GenericContext;
@@ -1634,16 +1911,28 @@ export function wrapAst(doc: FacadeDocument, ast: AstNode, parent: Ctx | null): 
 /* Root builders                                                        */
 /* ------------------------------------------------------------------ */
 
-export function buildRootFacade(value: AstNode | undefined, code: string): ProgContext {
+export function buildRootFacade(
+  value: AstNode | undefined,
+  code: string,
+): ProgContext {
   const doc = new FacadeDocument(value, code);
   if (value) return wrapAst(doc, value, null) as ProgContext;
   // Defensive: parseZen always yields a value object; an empty Prog facade
   // mirrors ANTLR's empty-input ProgContext.
-  return new ProgContext(doc, { $type: "Prog", headElements: [] }, null, { offset: 0, end: 0 });
+  return new ProgContext(
+    doc,
+    { $type: "Prog", headElements: [] } as unknown as AstNode,
+    null,
+    { offset: 0, end: 0 },
+  );
 }
 
 /** Wrap a sub-rule parse result (ContextsFixture entry points). */
-export function buildSubRuleFacade(value: AstNode | undefined, code: string, opts?: { statWrapper?: boolean }): any {
+export function buildSubRuleFacade(
+  value: AstNode | undefined,
+  code: string,
+  opts?: { statWrapper?: boolean },
+): any {
   const doc = new FacadeDocument(value, code);
   if (!value) return new GenericContext(doc, null, null, { offset: 0, end: 0 });
   if (opts?.statWrapper) return new StatContext(doc, value, null);

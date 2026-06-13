@@ -10,7 +10,7 @@
 | Stage 1: Chevrotain lexer parity | ✅ committed `a7043c26` (100/100 goldens, ~80× faster, token order pinned) |
 | v1 IR contract (hybrid decision) | ✅ committed `e69ac2a2` (`src/parser/ir/contract.ts` + doc 09) |
 | Stage 2: Langium grammar | ✅ committed `5f730131` (421 parity tests, 25 tolerance points, 2 G7 exclusions; full suite 1597/0) |
-| **Stage 3+4: facade + visitors** | ⏸ **IN FLIGHT — WIP committed on pause.** Round 1 (fable) was mid-implementation. Facade skeleton exists (`src/parser-langium/facade/`, `compat.ts`, `engine-flag.ts`); `src/parser/{index.js,ToCollector.js,FrameBuilder.ts,MessageCollector.ts,ContextsFixture.ts}` modified for the engine flag + visitor rewiring. Default (ANTLR) suite verified green at pause: 1600 tests, 0 fail. Langium-flag spec status: unknown/incomplete. |
+| Stage 3+4: facade + visitors | ✅ **COMPLETE.** Dual-run A/B 190 identical / 8 explained (G7) / 0 unexplained (`scripts/parity/dualrun-diff.mjs`, report 11). `instanceof` shim added (`src/parser-langium/instanceof-shim.ts`) so facade nodes satisfy `instanceof sequenceParser.<Kind>Context` (renderer + AncestorPath). Langium oracle `ZENUML_PARSER=langium bun test src/parser test/unit` = 1210 pass / 1 fail / 2 skip — the single fail is the documented `A.m(` G7 recovery exception (12-stage34-exceptions.md). Default ANTLR full suite unchanged: 1597/0 (1600). |
 | Stage 5 cutover, Stage 6 decommission | not started |
 
 ## How to resume Stage 3+4
