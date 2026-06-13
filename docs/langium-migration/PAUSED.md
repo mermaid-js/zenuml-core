@@ -1,4 +1,7 @@
-# MIGRATION PAUSED — weekly usage threshold (10%) reached 2026-06-12
+# MIGRATION STATUS — Stages 0–5 complete, rebased onto `main` 2026-06-13
+
+(Originally paused at the 10% weekly-usage threshold on 2026-06-12; resumed and
+carried through Stage 5 cutover + a rebase onto current `main`.)
 
 ## Where we are
 
@@ -11,8 +14,9 @@
 | v1 IR contract (hybrid decision) | ✅ committed `e69ac2a2` (`src/parser/ir/contract.ts` + doc 09) |
 | Stage 2: Langium grammar | ✅ committed `5f730131` (421 parity tests, 25 tolerance points, 2 G7 exclusions; full suite 1597/0) |
 | Stage 3+4: facade + visitors | ✅ **COMPLETE.** Dual-run A/B 190 identical / 8 explained (G7) / 0 unexplained (`scripts/parity/dualrun-diff.mjs`, report 11). `instanceof` shim added (`src/parser-langium/instanceof-shim.ts`) so facade nodes satisfy `instanceof sequenceParser.<Kind>Context` (renderer + AncestorPath). Langium oracle `ZENUML_PARSER=langium bun test src/parser test/unit` = 1210 pass / 1 fail / 2 skip — the single fail is the documented `A.m(` G7 recovery exception (12-stage34-exceptions.md). Default ANTLR full suite unchanged: 1597/0 (1600). |
-| Stage 5: cutover | ✅ **COMPLETE.** Default engine flipped to Langium (`engine-flag.ts`, rollback `ZENUML_PARSER=antlr`). Full unit suite 1597/0 under both engines; `bun pw` 120/120 zero snapshot updates; lib build green. Parse ~107× faster; bundle +144 KB gz ESM (both engines; ~+89 KB after Stage 6). Fixes: generic base `Origin()` (36 renderer/geometry tests), facade-aware CLI `--parse` serializer (2 tests). Details in 13-stage5-cutover.md. |
-| Stage 6 decommission | not started — remove antlr4 / `src/generated-parser/` / `src/g4/` / `bun antlr` / engine flag / instanceof shim (separate PR). |
+| Stage 5: cutover | ✅ **COMPLETE (rebased onto `main` b5100138).** Default engine = Langium (`engine-flag.ts`, rollback `ZENUML_PARSER=antlr`). Full unit suite 1601/0 under both engines; `bun pw` 120/120 zero snapshot updates; goldens regenerated unchanged; lib build green. Fixes: generic base `Origin()` (36 renderer/geometry tests), facade-aware CLI `--parse` serializer (2 tests), engine-aware `RootContext.spec` + Langium result memoization (2 tests from main). Details in 13-stage5-cutover.md. |
+| ⚠️ Perf finding (post-rebase) | main's ANTLR perf commits (`d163803b` SLL two-stage, `db1038ad` lexer DFA) make the **new ANTLR ~12× faster cold than Langium** on large input; both memoize on repeat. **The migration's parse-speed rationale is gone** — remaining case is tooling/maintenance vs +145 KB gz bundle. Go/no-go needed before Stage 6. |
+| Stage 6 decommission | not started — remove antlr4 / `src/generated-parser/` / `src/g4/` / `bun antlr` / engine flag / instanceof shim (separate PR). Gated on the go/no-go above. |
 
 ## How to resume Stage 3+4
 

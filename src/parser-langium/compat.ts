@@ -21,7 +21,12 @@ import {
   ParticipantContext,
   ProgContext,
 } from "./facade/nodes";
-import { LangiumFrameBuilder, LangiumToCollector, langiumAllMessages, langiumDepth } from "./facade/visitors";
+import {
+  LangiumFrameBuilder,
+  LangiumToCollector,
+  langiumAllMessages,
+  langiumDepth,
+} from "./facade/visitors";
 
 export interface ErrorDetail {
   line: number;
@@ -42,17 +47,41 @@ function recordErrors(result: ParseResult<any>): void {
   for (const e of result.parserErrors ?? []) {
     const token: any = e.token;
     const line = Number.isFinite(token?.startLine) ? token.startLine : 1;
-    const column = Number.isFinite(token?.startColumn) ? token.startColumn - 1 : 0;
-    Errors.push(`${token?.image ?? "<EOF>"} line ${line}, col ${column}: ${e.message}`);
+    const column = Number.isFinite(token?.startColumn)
+      ? token.startColumn - 1
+      : 0;
+    Errors.push(
+      `${token?.image ?? "<EOF>"} line ${line}, col ${column}: ${e.message}`,
+    );
     ErrorDetails.push({ line, column, msg: e.message });
   }
 }
 
+// Memoize error-free facades so the same code parses once even when multiple
+// render paths (store, SVG export, CLI) need the tree — mirrors the ANTLR
+// rootContext cache (src/parser/index.js). Only error-free results are cached,
+// which keeps the Errors live-array correct: a cache hit records no new errors,
+// which is right precisely because there were none.
+const rootFacadeCache = new Map<string, ProgContext>();
+const ROOT_FACADE_CACHE_MAX = 10;
+
 export function RootContext(code: unknown): ProgContext {
   const text = typeof code === "string" ? code : String(code ?? "");
+  const cached = rootFacadeCache.get(text);
+  if (cached) return cached;
   const result = parseZen(text);
   recordErrors(result);
-  return buildRootFacade(result.value, text);
+  const facade = buildRootFacade(result.value, text);
+  if (
+    (result.lexerErrors?.length ?? 0) === 0 &&
+    (result.parserErrors?.length ?? 0) === 0
+  ) {
+    rootFacadeCache.set(text, facade);
+    if (rootFacadeCache.size > ROOT_FACADE_CACHE_MAX) {
+      rootFacadeCache.delete(rootFacadeCache.keys().next().value as string);
+    }
+  }
+  return facade;
 }
 
 export function Participants(ctx: unknown) {
@@ -63,7 +92,14 @@ export function Depth(ctx: unknown): number {
   return langiumDepth(ctx);
 }
 
-export { ProgContext, GroupContext, ParticipantContext, LangiumFrameBuilder, LangiumToCollector, langiumAllMessages };
+export {
+  ProgContext,
+  GroupContext,
+  ParticipantContext,
+  LangiumFrameBuilder,
+  LangiumToCollector,
+  langiumAllMessages,
+};
 
 /* ------------------------------------------------------------------ */
 /* Sub-rule fixtures (ContextsFixture port — 07 §P10/G9)                */
