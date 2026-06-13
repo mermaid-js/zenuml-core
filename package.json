@@ -18,10 +18,12 @@
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
     "build:lib": "bun run --bun vite build -c vite.config.lib.ts",
     "build:cli": "bun run --bun vite build -c vite.config.cli.ts",
-    "build:lsp": "bun run --bun vite build -c vite.config.lsp.ts",
+    "build:lsp:node": "bun run --bun vite build -c vite.config.lsp.ts",
+    "build:lsp:worker": "bun run --bun vite build -c vite.config.lsp-worker.ts",
+    "build:lsp": "bun run build:lsp:node && bun run build:lsp:worker",
     "lsp": "bun src/parser-langium/lsp/main.ts --stdio",
     "build": "bun run build:lib && bun run build:cli",
-    "build:release": "RELEASE=1 bun run build:lib && RELEASE=1 bun run build:cli",
+    "build:release": "RELEASE=1 bun run build:lib && RELEASE=1 bun run build:cli && RELEASE=1 bun run build:lsp",
     "build:analyze": "RELEASE=1 ANALYZE=1 bun run build:lib && RELEASE=1 bun run build:cli",
     "test": "bun test src test/unit",
     "parity:dualrun": "bun scripts/parity/dualrun-diff.mjs",
@@ -73,7 +75,9 @@
         "types": "./types/index.d.ts",
         "default": "./dist/zenuml.js"
       }
-    }
+    },
+    "./lsp-worker": "./dist/lsp/zenuml-server.worker.js",
+    "./lsp-server": "./dist/lsp/main.js"
   },
   "engines": {
     "node": ">=20"

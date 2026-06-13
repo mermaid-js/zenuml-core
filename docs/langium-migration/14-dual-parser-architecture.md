@@ -93,10 +93,46 @@ The Langium side-car now drives a working LSP server — `src/parser-langium/lsp
 | `participants.ts` | Shared helper: collect participant names from a parsed document. |
 | `main.ts` | Node server entry (`startLanguageServer` over stdio). |
 
-Build/run: `bun run build:lsp` → `dist/lsp/main.js` (Node SSR bundle, ~104 KB,
-langium+chevrotain bundled — a Node process, not the browser library);
-`bun run lsp` runs it from source over stdio. Wire `dist/lsp/main.js --stdio` as
-the server command in any editor language client for `.zenuml`.
+Build/run: `bun run build:lsp` builds **both** transports:
+- `dist/lsp/main.js` — Node stdio server (~104 KB; `bun run lsp` runs it from
+  source). Wire `dist/lsp/main.js --stdio` as the server command in a desktop
+  editor / Node-backed language client.
+- `dist/lsp/zenuml-server.worker.js` — **browser Web Worker** bundle (~163 KB gz,
+  self-contained, zero Node APIs) for a serverless, in-browser language server.
+
+### Using it with CodeMirror (or Monaco) — browser, no backend
+
+Yes. The server logic is editor-agnostic; only the transport differs. The
+Langium parser is pure JS (Chevrotain), so the whole server runs in a Web Worker
+— **no backend process needed**:
+
+```ts
+// in the web app that hosts the editor
+import { ZenUmlCompletion, /* … */ } from "...";
+const worker = new Worker(
+  new URL("@zenuml/core/lsp-worker", import.meta.url),
+  { type: "module" },
+);
+// bridge the worker to the editor with an LSP client:
+//  - CodeMirror 6: @codemirror/lsp-client (official) or codemirror-languageserver
+//                  (community), pointed at a Transport that wraps the worker's
+//                  postMessage channel.
+//  - Monaco: monaco-languageclient over the same worker.
+```
+
+The worker speaks standard LSP/JSON-RPC over `postMessage`; the CodeMirror LSP
+client provides completion, hover, and diagnostics in the editor from it. Both
+transports are smoke-verified to boot and advertise `completionProvider` +
+`hoverProvider` (Node over stdio; worker over `postMessage`).
+
+Alternative (if you prefer a Node backend): run `dist/lsp/main.js` and expose it
+over a WebSocket with `vscode-ws-jsonrpc`, then point `codemirror-languageserver`
+at that URL. The Web-Worker path is simpler for a static/serverless web app
+(e.g. app.zenuml.com / the Cloudflare-hosted add-ons), which have no LSP backend.
+
+The CodeMirror **client glue lives in the consuming web app**, not in this
+parser repo (CodeMirror is intentionally not a dependency here) — this package
+ships the server worker; the app wires it to its editor.
 
 Tested end-to-end without an editor in `src/parser-langium/lsp/lsp.spec.ts`
 (8 tests via Langium's `langium/test` harness: validation diagnostics,
