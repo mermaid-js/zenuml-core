@@ -138,7 +138,7 @@ export const onElementClickAtom = atomWithFunctionValue(
 );
 
 export const onMessageClickAtom = atomWithFunctionValue<
-  (context: any, element: HTMLElement) => void
+  (context: any, element: HTMLElement, editIntent?: boolean) => void
 >(() => {});
 
 export const selectedMessageAtom = atom<{

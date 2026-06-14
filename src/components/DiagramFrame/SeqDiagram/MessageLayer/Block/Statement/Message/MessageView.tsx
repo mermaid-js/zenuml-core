@@ -10,6 +10,7 @@ export type MessageViewProps = {
   number?: string;
   rtl?: string | boolean;
   onClick?: () => void;
+  onDoubleClick?: () => void;
   messageRef?: RefObject<HTMLDivElement>;
   "data-selected"?: string;
   title?: string;
@@ -33,6 +34,7 @@ export const MessageView = ({
   number,
   rtl,
   onClick,
+  onDoubleClick,
   messageRef,
   "data-selected": dataSelected,
   title,
@@ -52,8 +54,12 @@ export const MessageView = ({
       )}
       style={style}
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
       onKeyDown={onClick ? (e) => {
-        if (e.key === "Enter" || e.key === " ") {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          (onDoubleClick ?? onClick)();
+        } else if (e.key === " ") {
           e.preventDefault();
           onClick();
         }

@@ -203,7 +203,7 @@ export const StylePanel = () => {
   });
 
   useEffect(() => {
-    setOnMessageClick((context: any, element: HTMLElement) => {
+    setOnMessageClick((context: any, element: HTMLElement, editIntent?: boolean) => {
       // make sure this is triggered after the outsideclicking
       setTimeout(() => {
         const message = messageData.current;
@@ -271,12 +271,22 @@ export const StylePanel = () => {
           end: message.labelEnd >= 0 ? message.labelEnd : (context?.stop?.stop ?? message.start),
           token: Date.now(),
         });
-        refs.setReference(element);
-        setHasMessageContext(Boolean(context));
-        setIsOpen(true);
+
+        if (editIntent && message.labelStart >= 0 && message.labelEnd >= 0) {
+          // Double-click / Enter on focused message: go straight to label edit, skip panel
+          setPendingEditableRange({
+            start: message.labelStart,
+            end: message.labelEnd,
+            token: Date.now(),
+          });
+        } else {
+          refs.setReference(element);
+          setHasMessageContext(Boolean(context));
+          setIsOpen(true);
+        }
       }, 0);
     });
-  }, [code, refs, setOnMessageClick, setSelectedMessage, setSelectedParticipants]);
+  }, [code, refs, setOnMessageClick, setPendingEditableRange, setSelectedMessage, setSelectedParticipants]);
 
   useEffect(() => {
     if (!selectedMessage) {
@@ -284,18 +294,25 @@ export const StylePanel = () => {
     }
   }, [selectedMessage]);
 
+  const handleRenameRef = useRef(handleRenameClick);
+  handleRenameRef.current = handleRenameClick;
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+        setSelectedMessage(null);
         return;
       }
-      setIsOpen(false);
-      setSelectedMessage(null);
+      if (event.key === "Enter" && isOpen) {
+        event.preventDefault();
+        handleRenameRef.current();
+      }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [setSelectedMessage]);
+  }, [isOpen, setSelectedMessage]);
 
   const [openSubmenu, setOpenSubmenu] = useState<"type" | "wrap" | null>(null);
   const submenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

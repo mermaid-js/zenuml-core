@@ -4,7 +4,7 @@ import {
   RenderMode,
   selectedMessageAtom,
 } from "@/store/Store";
-import { CSSProperties, ReactNode, useRef } from "react";
+import { CSSProperties, ReactNode, useEffect, useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { MessageView } from "./MessageView";
 import { cn } from "@/utils.ts";
@@ -38,6 +38,7 @@ export const Message = (props: {
   const selectedMessage = useAtomValue(selectedMessageAtom);
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const messageRef = useRef<HTMLDivElement>(null);
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stylable = mode !== RenderMode.Static;
   const [rangeStart, rangeEnd] = selectionRange ?? [
     context?.start?.start,
@@ -46,14 +47,37 @@ export const Message = (props: {
   const isSelected =
     selectedMessage?.start === rangeStart && selectedMessage?.end === rangeEnd;
 
-  const onClick = () => {
-    if (!stylable || !messageRef.current) return;
+  useEffect(() => () => {
+    if (clickTimer.current) clearTimeout(clickTimer.current);
+  }, []);
+
+  const selectMessage = () => {
     setSelectedMessage(
       rangeStart != null && rangeEnd != null
         ? { start: rangeStart, end: rangeEnd, token: Date.now() }
         : null,
     );
-    onMessageClick(context, messageRef.current);
+  };
+
+  const onClick = () => {
+    if (!stylable || !messageRef.current) return;
+    selectMessage();
+    if (clickTimer.current) clearTimeout(clickTimer.current);
+    const el = messageRef.current;
+    clickTimer.current = setTimeout(() => {
+      clickTimer.current = null;
+      onMessageClick(context, el);
+    }, 200);
+  };
+
+  const onDoubleClick = () => {
+    if (!stylable || !messageRef.current) return;
+    if (clickTimer.current) {
+      clearTimeout(clickTimer.current);
+      clickTimer.current = null;
+    }
+    selectMessage();
+    onMessageClick(context, messageRef.current, true);
   };
 
   return (
@@ -65,14 +89,15 @@ export const Message = (props: {
       number={number}
       rtl={rtl}
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
       messageRef={messageRef}
       data-selected={isSelected ? "true" : "false"}
       title={
         !stylable
           ? undefined
           : isSelected
-          ? "Click label to edit · drag to reorder"
-          : "Click to select · drag to reorder"
+          ? "Double-click to edit · click to select · drag to reorder"
+          : "Click to select · double-click to edit · drag to reorder"
       }
       children={children}
     />
