@@ -3,7 +3,7 @@ import { cn } from "@/utils";
 import { getStyle } from "@/utils/messageStyling";
 import { resolveBracketContent, getEmojiUnicode } from "@/emoji/resolveEmoji";
 import { useAtomValue } from "jotai";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { centerOf } from "../utils";
 
 export const Divider = (props: {
@@ -45,21 +45,15 @@ export const Divider = (props: {
 
   const cleanNote = messageStyle.note.replace(/^=+\s*|\s*=+$/g, "").trim();
 
-  // Align with the lifeline-layer (same x=0 as SVG coordinate system).
-  // The block has padding-left that positions the statement-container;
-  // we need to offset back by that full padding to reach the content origin.
-  const refCallback = useCallback((el: HTMLDivElement | null) => {
-    if (!el) return;
-    const stmtContainer = el.parentElement;
-    const block = stmtContainer?.parentElement;
-    if (!block) return;
-    const blockPadding = parseFloat(getComputedStyle(block).paddingLeft) || 0;
-    el.style.transform = `translateX(-${blockPadding}px)`;
-  }, []);
-
+  // Pull the full-width divider back to the diagram content origin (x=0 in the
+  // lifeline coordinate system). The divider's natural left edge sits at the
+  // cumulative indentation of all ancestor occurrences — which equals the
+  // origin participant's center — so translateX(-centerOfOrigin) lands the left
+  // edge at the diagram origin regardless of nesting depth. (Reading a single
+  // block's padding-left here is wrong: nested blocks have padding-left=0, which
+  // left deep dividers un-shifted and overflowing off the right edge — #392.)
   return (
     <div
-      ref={refCallback}
       className={cn("divider", props.className)}
       data-origin={props.origin}
       style={{
