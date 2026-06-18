@@ -66,16 +66,31 @@ jobs:
     permissions:
       contents: read
 
-  npm-publish:
+  # Release via Changesets.
+  #
+  # On every push to main this job runs the changesets action:
+  #   * If unreleased changeset files exist in .changeset/, it opens (or
+  #     updates) a "Version Packages" PR that bumps package.json and writes
+  #     CHANGELOG.md.
+  #   * When that PR is merged (no changesets left), it runs `bun run release`
+  #     which builds and publishes to npm, then tags the commit and creates a
+  #     GitHub Release.
+  #
+  # Bump levels are declared per-PR by contributors via `bun run changeset`,
+  # so versioning no longer depends on parsing commit messages.
+  release:
     runs-on: ubuntu-22.04
     needs: [test, e2e]
     permissions:
-      contents: write    # for git tag push
-      id-token: write    # for npm OIDC trusted publishing
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/publish'
+      contents: write # commit version bump, push tags, create releases
+      pull-requests: write # open/update the "Version Packages" PR
+      id-token: write # npm OIDC trusted publishing + provenance
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # changesets needs full history and tags
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -86,29 +101,16 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
       - run: bun install
-      - name: Bump Version
-        id: bump
-        run: ./scripts/bump-version.js
+      - name: Create Release PR or Publish to npm
+        uses: changesets/action@v1
+        with:
+          version: bun run changeset:version
+          publish: bun run release
+          commit: "chore: version packages"
+          title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build
-        run: bun run build:release
-      - name: Publish to npm with provenance
-        run: npm publish --provenance --access public
-      - name: Create git tag
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git tag "v${{ steps.bump.outputs.version }}"
-          git push origin "v${{ steps.bump.outputs.version }}"
-      - name: Add version to job summary
-        run: |
-          echo "# Published Version" >> $GITHUB_STEP_SUMMARY
-          echo "| Package | Version | Tag |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| @zenuml/core | v${{ steps.bump.outputs.version }} | [v${{ steps.bump.outputs.version }}](https://github.com/mermaid-js/zenuml-core/releases/tag/v${{ steps.bump.outputs.version }}) |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "[View on npm](https://www.npmjs.com/package/@zenuml/core/v/${{ steps.bump.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+          NPM_CONFIG_PROVENANCE: "true" # publish with provenance via OIDC
 
   # Deploy to Cloudflare Workers
   deploy-to-cloudflare:
