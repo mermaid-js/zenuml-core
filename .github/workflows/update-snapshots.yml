@@ -41,6 +41,10 @@ jobs:
           UPDATE_SNAPSHOTS: "1"
 
       - name: Commit updated snapshots
+        # Run even if an earlier generate step failed, so regenerated snapshots
+        # are never silently discarded (see #395). The git-diff guard below
+        # no-ops when there is nothing staged.
+        if: always()
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
