@@ -49,6 +49,9 @@ const HIDDEN_FOR_PARSER = new Set([
   "AWAIT",
   "EVENT_END",
   "TITLE_END",
+  // Wrapper/theme directives are no-ops, ignored by the parser (issue #400).
+  "WRAPPER_DIRECTIVE",
+  "THEME_DIRECTIVE",
 ]);
 
 function cloneForParser(token: TokenType): TokenType {
