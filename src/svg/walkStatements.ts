@@ -142,8 +142,13 @@ function walkBlock(
       continue;
     }
 
-    // Fragments — record with enriched metadata and recurse into their blocks
+    // Fragments — record with enriched metadata and recurse into their blocks.
+    // extractFragmentInfo returns null for statements that match no known
+    // fragment type (e.g. error-recovery artifacts from stray icon tokens like
+    // `[rocket]`). The HTML renderer drops these (Statement.tsx renders nothing),
+    // so the SVG walk skips them too instead of inventing a spurious Loop (#367).
     const fragmentInfo = extractFragmentInfo(stat);
+    if (!fragmentInfo) continue;
     results.push({
       key,
       kind: "fragment",
@@ -173,7 +178,7 @@ interface FragmentExtract {
   sections: FragmentSectionInfo[];
 }
 
-function extractFragmentInfo(stat: StatNode): FragmentExtract {
+function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
   // Single-block fragments: loop, opt, par, critical, section
   for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
     const frag = stat[kind]?.();
@@ -243,7 +248,10 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract {
     return { fragmentKind: "ref", label, sections: [] };
   }
 
-  return { fragmentKind: "loop", label: "", sections: [] };
+  // No recognized fragment type. Rather than defaulting to a Loop fragment
+  // (which produced spurious stacked loops for stray icon tokens, issue #367),
+  // return null so the caller skips this statement — matching the HTML renderer.
+  return null;
 }
 
 function blockLength(block: BlockNode): number {
