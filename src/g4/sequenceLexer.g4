@@ -132,9 +132,20 @@ CATCH:      'catch';
 FINALLY:    'finally';
 IN:         'in';
 
+// PlantUML/ZenUML wrapper directives are no-ops: sent to a hidden channel so
+// the parser ignores them while source offsets are preserved (issue #400).
+// Must precede ANNOTATION so these specific literals win over the generic
+// '@'[a-zA-Z_0-9]* rule.
+WRAPPER_DIRECTIVE:  ('@startuml' | '@enduml' | '@startzenuml' | '@endzenuml') -> channel(HIDDEN);
+
 STARTER_LXR:        '@Starter' | '@starter';
 ANNOTATION_RET:     '@Return' | '@return' | '@Reply' | '@reply';
 ANNOTATION:         '@'[a-zA-Z_0-9]*;
+
+// PlantUML preprocessor theme directive (e.g. `!theme plain`). The trailing
+// column-0 predicate keeps this from ever shadowing the `!` (NOT) operator,
+// which only appears mid-line inside expressions (issue #400).
+THEME_DIRECTIVE:    '!theme' ~[\r\n]* {this._tokenStartColumn === 0}? -> channel(HIDDEN);
 
 DOT
  : '.'

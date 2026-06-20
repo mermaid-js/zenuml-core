@@ -261,6 +261,34 @@ export const ANNOTATION = createToken({
   pattern: /@[a-zA-Z0-9_]*/,
 });
 
+// PlantUML/ZenUML wrapper directives are no-ops (issue #400): hidden from the
+// parser. The boundary lookahead keeps `@startumlX` lexing as ANNOTATION.
+// Must precede ANNOTATION in the token order.
+export const WRAPPER_DIRECTIVE = createToken({
+  name: "WRAPPER_DIRECTIVE",
+  pattern: /@(?:startuml|enduml|startzenuml|endzenuml)(?![a-zA-Z0-9_])/,
+  group: HIDDEN_GROUP,
+});
+
+// PlantUML `!theme …` directive at column 0 (issue #400). The column-0 guard
+// (mirroring sequenceLexer.g4's `{_tokenStartColumn === 0}?`) keeps it from
+// ever shadowing the `!` (NOT) operator, which only appears mid-line.
+const THEME_DIRECTIVE_RE = /!theme[^\r\n]*/y;
+const themeDirectiveExec: CustomExec = (text, offset) => {
+  if (offset !== 0) {
+    const prev = text.charCodeAt(offset - 1);
+    if (prev !== 10 && prev !== 13) return null; // not at column 0
+  }
+  THEME_DIRECTIVE_RE.lastIndex = offset;
+  return THEME_DIRECTIVE_RE.exec(text);
+};
+export const THEME_DIRECTIVE = createToken({
+  name: "THEME_DIRECTIVE",
+  pattern: themeDirectiveExec,
+  group: HIDDEN_GROUP,
+  line_breaks: false,
+});
+
 // ---------------------------------------------------------------------------
 // Keywords (default channel). All carry the unicode boundary lookahead.
 // Within alternations, longer alternatives come first (JS regex alternation
@@ -466,6 +494,8 @@ export const tokens: TokenType[] = [
   AWAIT,
   // Predicated soft keyword.
   TITLE,
+  // Wrapper directives (hidden) before the generic ANNOTATION.
+  WRAPPER_DIRECTIVE,
   // Annotations: fixed forms before the generic one.
   STARTER_LXR,
   ANNOTATION_RET,
@@ -520,6 +550,8 @@ export const tokens: TokenType[] = [
   DIV,
   MOD,
   POW,
+  // `!theme …` at column 0 (hidden) before the `!` NOT operator.
+  THEME_DIRECTIVE,
   NOT,
   SCOL,
   COMMA,
