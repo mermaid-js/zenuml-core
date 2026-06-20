@@ -2,7 +2,7 @@
 // jshint ignore: start
 import antlr4 from 'antlr4';
 import sequenceParserListener from './sequenceParserListener.js';
-const serializedATN = [4,1,78,658,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
+const serializedATN = [4,1,81,658,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,
 2,13,7,13,2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,
 20,7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,26,2,27,
@@ -76,8 +76,8 @@ const serializedATN = [4,1,78,658,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 0,0,133,134,1,0,0,0,134,136,1,0,0,0,135,137,3,4,2,0,136,135,1,0,0,0,136,
 137,1,0,0,0,137,138,1,0,0,0,138,139,3,26,13,0,139,140,5,0,0,1,140,142,1,
 0,0,0,141,123,1,0,0,0,141,127,1,0,0,0,141,133,1,0,0,0,142,1,1,0,0,0,143,
-145,5,6,0,0,144,146,5,76,0,0,145,144,1,0,0,0,145,146,1,0,0,0,146,148,1,0,
-0,0,147,149,5,77,0,0,148,147,1,0,0,0,148,149,1,0,0,0,149,3,1,0,0,0,150,153,
+145,5,6,0,0,144,146,5,79,0,0,145,144,1,0,0,0,145,146,1,0,0,0,146,148,1,0,
+0,0,147,149,5,80,0,0,148,147,1,0,0,0,148,149,1,0,0,0,149,3,1,0,0,0,150,153,
 3,6,3,0,151,153,3,12,6,0,152,150,1,0,0,0,152,151,1,0,0,0,153,154,1,0,0,0,
 154,152,1,0,0,0,154,155,1,0,0,0,155,165,1,0,0,0,156,159,3,6,3,0,157,159,
 3,12,6,0,158,156,1,0,0,0,158,157,1,0,0,0,159,162,1,0,0,0,160,158,1,0,0,0,
@@ -105,22 +105,22 @@ const serializedATN = [4,1,78,658,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 3,20,10,0,235,237,5,51,0,0,236,233,1,0,0,0,236,235,1,0,0,0,237,17,1,0,0,
 0,238,239,5,59,0,0,239,19,1,0,0,0,240,241,7,2,0,0,241,21,1,0,0,0,242,243,
 5,63,0,0,243,23,1,0,0,0,244,245,5,13,0,0,245,246,3,20,10,0,246,247,5,14,
-0,0,247,250,1,0,0,0,248,250,5,78,0,0,249,244,1,0,0,0,249,248,1,0,0,0,250,
+0,0,247,250,1,0,0,0,248,250,5,81,0,0,249,244,1,0,0,0,249,248,1,0,0,0,250,
 25,1,0,0,0,251,253,3,36,18,0,252,251,1,0,0,0,253,254,1,0,0,0,254,252,1,0,
 0,0,254,255,1,0,0,0,255,27,1,0,0,0,256,258,5,43,0,0,257,259,3,110,55,0,258,
 257,1,0,0,0,258,259,1,0,0,0,259,261,1,0,0,0,260,262,5,30,0,0,261,260,1,0,
 0,0,261,262,1,0,0,0,262,273,1,0,0,0,263,264,5,58,0,0,264,266,3,70,35,0,265,
-267,5,75,0,0,266,265,1,0,0,0,266,267,1,0,0,0,267,273,1,0,0,0,268,270,3,30,
-15,0,269,271,5,75,0,0,270,269,1,0,0,0,270,271,1,0,0,0,271,273,1,0,0,0,272,
+267,5,78,0,0,266,265,1,0,0,0,266,267,1,0,0,0,267,273,1,0,0,0,268,270,3,30,
+15,0,269,271,5,78,0,0,270,269,1,0,0,0,270,271,1,0,0,0,271,273,1,0,0,0,272,
 256,1,0,0,0,272,263,1,0,0,0,272,268,1,0,0,0,273,29,1,0,0,0,274,275,3,60,
 30,0,275,276,5,10,0,0,276,277,3,62,31,0,277,279,5,7,0,0,278,280,3,72,36,
 0,279,278,1,0,0,0,279,280,1,0,0,0,280,287,1,0,0,0,281,282,3,60,30,0,282,
 284,5,10,0,0,283,285,3,62,31,0,284,283,1,0,0,0,284,285,1,0,0,0,285,287,1,
 0,0,0,286,274,1,0,0,0,286,281,1,0,0,0,287,31,1,0,0,0,288,289,3,34,17,0,289,
-33,1,0,0,0,290,291,5,73,0,0,291,35,1,0,0,0,292,309,3,98,49,0,293,309,3,38,
+33,1,0,0,0,290,291,5,76,0,0,291,35,1,0,0,0,292,309,3,98,49,0,293,309,3,38,
 19,0,294,309,3,40,20,0,295,309,3,42,21,0,296,309,3,44,22,0,297,309,3,48,
 24,0,298,309,3,108,54,0,299,309,3,46,23,0,300,309,3,52,26,0,301,303,3,70,
-35,0,302,304,5,75,0,0,303,302,1,0,0,0,303,304,1,0,0,0,304,309,1,0,0,0,305,
+35,0,302,304,5,78,0,0,303,302,1,0,0,0,303,304,1,0,0,0,304,309,1,0,0,0,305,
 309,3,28,14,0,306,309,3,32,16,0,307,309,3,90,45,0,308,292,1,0,0,0,308,293,
 1,0,0,0,308,294,1,0,0,0,308,295,1,0,0,0,308,296,1,0,0,0,308,297,1,0,0,0,
 308,298,1,0,0,0,308,299,1,0,0,0,308,300,1,0,0,0,308,301,1,0,0,0,308,305,
@@ -169,7 +169,7 @@ const serializedATN = [4,1,78,658,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 456,457,3,62,31,0,457,459,5,7,0,0,458,460,3,72,36,0,459,458,1,0,0,0,459,
 460,1,0,0,0,460,467,1,0,0,0,461,462,3,60,30,0,462,464,7,3,0,0,463,465,3,
 62,31,0,464,463,1,0,0,0,464,465,1,0,0,0,465,467,1,0,0,0,466,454,1,0,0,0,
-466,461,1,0,0,0,467,71,1,0,0,0,468,469,5,74,0,0,469,73,1,0,0,0,470,471,3,
+466,461,1,0,0,0,467,71,1,0,0,0,468,469,5,77,0,0,469,73,1,0,0,0,470,471,3,
 20,10,0,471,75,1,0,0,0,472,473,3,20,10,0,473,77,1,0,0,0,474,487,3,112,56,
 0,475,480,7,4,0,0,476,477,5,31,0,0,477,479,7,4,0,0,478,476,1,0,0,0,479,482,
 1,0,0,0,480,478,1,0,0,0,480,481,1,0,0,0,481,487,1,0,0,0,482,480,1,0,0,0,
@@ -265,9 +265,10 @@ export default class sequenceParser extends antlr4.Parser {
                              "IN", "WRAPPER_DIRECTIVE", "STARTER_LXR", "ANNOTATION_RET", 
                              "ANNOTATION", "THEME_DIRECTIVE", "DOT", "ID", 
                              "INT", "FLOAT", "MONEY", "NUMBER_UNIT", "DIGIT_LEADING_NAME", 
-                             "CSTRING", "USTRING", "CR", "COMMENT", "OTHER", 
-                             "DIVIDER", "EVENT_PAYLOAD_LXR", "EVENT_END", 
-                             "TITLE_CONTENT", "TITLE_END", "EMOJI_SHORTCODE" ];
+                             "CSTRING", "USTRING", "CR", "COMMENT", "BLOCK_COMMENT", 
+                             "HASH_COMMENT", "QUOTE_COMMENT", "OTHER", "DIVIDER", 
+                             "EVENT_PAYLOAD_LXR", "EVENT_END", "TITLE_CONTENT", 
+                             "TITLE_END", "EMOJI_SHORTCODE" ];
     static ruleNames = [ "prog", "title", "head", "group", "starterExp", 
                          "starter", "participant", "stereotype", "label", 
                          "participantType", "name", "width", "emoji", "block", 
@@ -419,7 +420,7 @@ export default class sequenceParser extends antlr4.Parser {
 	        this.state = 145;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
-	        if(_la===76) {
+	        if(_la===79) {
 	            this.state = 144;
 	            this.match(sequenceParser.TITLE_CONTENT);
 	        }
@@ -427,7 +428,7 @@ export default class sequenceParser extends antlr4.Parser {
 	        this.state = 148;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
-	        if(_la===77) {
+	        if(_la===80) {
 	            this.state = 147;
 	            this.match(sequenceParser.TITLE_END);
 	        }
@@ -479,7 +480,7 @@ export default class sequenceParser extends antlr4.Parser {
 	            		case 67:
 	            		case 68:
 	            		case 69:
-	            		case 78:
+	            		case 81:
 	            		    this.state = 151;
 	            		    this.participant();
 	            		    break;
@@ -518,7 +519,7 @@ export default class sequenceParser extends antlr4.Parser {
 	                    case 67:
 	                    case 68:
 	                    case 69:
-	                    case 78:
+	                    case 81:
 	                        this.state = 157;
 	                        this.participant();
 	                        break;
@@ -721,7 +722,7 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.state = 202;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
-	            if(_la===13 || _la===78) {
+	            if(_la===13 || _la===81) {
 	                this.state = 201;
 	                this.emoji();
 	            }
@@ -995,7 +996,7 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.state = 246;
 	            this.match(sequenceParser.RBRACKET);
 	            break;
-	        case 78:
+	        case 81:
 	            this.enterOuterAlt(localctx, 2);
 	            this.state = 248;
 	            this.match(sequenceParser.EMOJI_SHORTCODE);
@@ -1034,7 +1035,7 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.state = 254; 
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
-	        } while(_la===13 || ((((_la - 35)) & ~0x1f) == 0 && ((1 << (_la - 35)) & 4169332669) !== 0) || ((((_la - 67)) & ~0x1f) == 0 && ((1 << (_la - 67)) & 2119) !== 0));
+	        } while(_la===13 || ((((_la - 35)) & ~0x1f) == 0 && ((1 << (_la - 35)) & 4169332669) !== 0) || ((((_la - 67)) & ~0x1f) == 0 && ((1 << (_la - 67)) & 16903) !== 0));
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
 		        localctx.exception = re;
@@ -1089,7 +1090,7 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.state = 266;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
-	            if(_la===75) {
+	            if(_la===78) {
 	                this.state = 265;
 	                this.match(sequenceParser.EVENT_END);
 	            }
@@ -1100,14 +1101,14 @@ export default class sequenceParser extends antlr4.Parser {
 	        case 67:
 	        case 68:
 	        case 69:
-	        case 78:
+	        case 81:
 	            this.enterOuterAlt(localctx, 3);
 	            this.state = 268;
 	            this.returnAsyncMessage();
 	            this.state = 270;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
-	            if(_la===75) {
+	            if(_la===78) {
 	                this.state = 269;
 	                this.match(sequenceParser.EVENT_END);
 	            }
@@ -1154,7 +1155,7 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.state = 279;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
-	            if(_la===74) {
+	            if(_la===77) {
 	                this.state = 278;
 	                this.content();
 	            }
@@ -1310,7 +1311,7 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.state = 303;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
-	            if(_la===75) {
+	            if(_la===78) {
 	                this.state = 302;
 	                this.match(sequenceParser.EVENT_END);
 	            }
@@ -1686,7 +1687,7 @@ export default class sequenceParser extends antlr4.Parser {
 	                this.state = 378;
 	                this._errHandler.sync(this);
 	                _la = this._input.LA(1);
-	                if(((((_la - 13)) & ~0x1f) == 0 && ((1 << (_la - 13)) & 2266040321) !== 0) || ((((_la - 62)) & ~0x1f) == 0 && ((1 << (_la - 62)) & 65791) !== 0)) {
+	                if(((((_la - 13)) & ~0x1f) == 0 && ((1 << (_la - 13)) & 2266040321) !== 0) || ((((_la - 62)) & ~0x1f) == 0 && ((1 << (_la - 62)) & 524543) !== 0)) {
 	                    this.state = 377;
 	                    this.parameters();
 	                }
@@ -1916,7 +1917,7 @@ export default class sequenceParser extends antlr4.Parser {
 	        this.state = 426;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
-	        if(_la===13 || _la===78) {
+	        if(_la===13 || _la===81) {
 	            this.state = 425;
 	            this.emoji();
 	        }
@@ -1948,7 +1949,7 @@ export default class sequenceParser extends antlr4.Parser {
 	        this.state = 431;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
-	        if(_la===13 || _la===78) {
+	        if(_la===13 || _la===81) {
 	            this.state = 430;
 	            this.emoji();
 	        }
@@ -2013,7 +2014,7 @@ export default class sequenceParser extends antlr4.Parser {
 	        this.state = 441;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
-	        if(((((_la - 13)) & ~0x1f) == 0 && ((1 << (_la - 13)) & 2266040321) !== 0) || ((((_la - 62)) & ~0x1f) == 0 && ((1 << (_la - 62)) & 65791) !== 0)) {
+	        if(((((_la - 13)) & ~0x1f) == 0 && ((1 << (_la - 13)) & 2266040321) !== 0) || ((((_la - 62)) & ~0x1f) == 0 && ((1 << (_la - 62)) & 524543) !== 0)) {
 	            this.state = 440;
 	            this.parameters();
 	        }
@@ -2097,7 +2098,7 @@ export default class sequenceParser extends antlr4.Parser {
 	            this.state = 459;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
-	            if(_la===74) {
+	            if(_la===77) {
 	                this.state = 458;
 	                this.content();
 	            }
@@ -2304,7 +2305,7 @@ export default class sequenceParser extends antlr4.Parser {
 	        this.state = 489;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
-	        if(_la===13 || _la===78) {
+	        if(_la===13 || _la===81) {
 	            this.state = 488;
 	            this.emoji();
 	        }
@@ -2437,7 +2438,7 @@ export default class sequenceParser extends antlr4.Parser {
 	        this.state = 512;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
-	        if(((((_la - 13)) & ~0x1f) == 0 && ((1 << (_la - 13)) & 2266040321) !== 0) || ((((_la - 62)) & ~0x1f) == 0 && ((1 << (_la - 62)) & 65791) !== 0)) {
+	        if(((((_la - 13)) & ~0x1f) == 0 && ((1 << (_la - 13)) & 2266040321) !== 0) || ((((_la - 62)) & ~0x1f) == 0 && ((1 << (_la - 62)) & 524543) !== 0)) {
 	            this.state = 511;
 	            this.expr(0);
 	        }
@@ -2772,7 +2773,7 @@ export default class sequenceParser extends antlr4.Parser {
 	        this.state = 566;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
-	        if(_la===13 || ((((_la - 35)) & ~0x1f) == 0 && ((1 << (_la - 35)) & 4169332669) !== 0) || ((((_la - 67)) & ~0x1f) == 0 && ((1 << (_la - 67)) & 2119) !== 0)) {
+	        if(_la===13 || ((((_la - 35)) & ~0x1f) == 0 && ((1 << (_la - 35)) & 4169332669) !== 0) || ((((_la - 67)) & ~0x1f) == 0 && ((1 << (_la - 67)) & 16903) !== 0)) {
 	            this.state = 565;
 	            this.block();
 	        }
@@ -3437,13 +3438,16 @@ sequenceParser.CSTRING = 68;
 sequenceParser.USTRING = 69;
 sequenceParser.CR = 70;
 sequenceParser.COMMENT = 71;
-sequenceParser.OTHER = 72;
-sequenceParser.DIVIDER = 73;
-sequenceParser.EVENT_PAYLOAD_LXR = 74;
-sequenceParser.EVENT_END = 75;
-sequenceParser.TITLE_CONTENT = 76;
-sequenceParser.TITLE_END = 77;
-sequenceParser.EMOJI_SHORTCODE = 78;
+sequenceParser.BLOCK_COMMENT = 72;
+sequenceParser.HASH_COMMENT = 73;
+sequenceParser.QUOTE_COMMENT = 74;
+sequenceParser.OTHER = 75;
+sequenceParser.DIVIDER = 76;
+sequenceParser.EVENT_PAYLOAD_LXR = 77;
+sequenceParser.EVENT_END = 78;
+sequenceParser.TITLE_CONTENT = 79;
+sequenceParser.TITLE_END = 80;
+sequenceParser.EMOJI_SHORTCODE = 81;
 
 sequenceParser.RULE_prog = 0;
 sequenceParser.RULE_title = 1;
