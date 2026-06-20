@@ -182,6 +182,37 @@ export const COMMENT = createToken({
   group: COMMENT_GROUP,
 });
 
+// Additional comment styles pasted from PlantUML / source code (issue #402),
+// hidden from the parser. Mirror sequenceLexer.g4: block `/* … */` (multiline),
+// `# ` (space-guarded so `#RRGGBB` stays COLOR), and column-0 `'` (PlantUML).
+// BLOCK_COMMENT must precede DIV, HASH_COMMENT must precede COLOR.
+export const BLOCK_COMMENT = createToken({
+  name: "BLOCK_COMMENT",
+  pattern: /\/\*[\s\S]*?\*\//,
+  group: HIDDEN_GROUP,
+  line_breaks: true,
+});
+export const HASH_COMMENT = createToken({
+  name: "HASH_COMMENT",
+  pattern: /#[ \t][^\r\n]*/,
+  group: HIDDEN_GROUP,
+});
+const QUOTE_COMMENT_RE = /'[^\r\n]*/y;
+const quoteCommentExec: CustomExec = (text, offset) => {
+  if (offset !== 0) {
+    const prev = text.charCodeAt(offset - 1);
+    if (prev !== 10 && prev !== 13) return null; // not at column 0
+  }
+  QUOTE_COMMENT_RE.lastIndex = offset;
+  return QUOTE_COMMENT_RE.exec(text);
+};
+export const QUOTE_COMMENT = createToken({
+  name: "QUOTE_COMMENT",
+  pattern: quoteCommentExec,
+  group: HIDDEN_GROUP,
+  line_breaks: false,
+});
+
 // Modifier keywords (MODIFIER_CHANNEL). Boundary lookahead keeps `constant`,
 // `awaits`, `statics`, `readonlyX` lexing as ID (ANTLR maximal munch).
 export const CONSTANT = createToken({
@@ -485,8 +516,10 @@ export const tokens: TokenType[] = [
   DIVIDER,
   WS,
   CR,
-  // COMMENT before DIV.
+  // COMMENT before DIV; BLOCK_COMMENT (`/* */`) before DIV too.
   COMMENT,
+  BLOCK_COMMENT,
+  QUOTE_COMMENT,
   // Modifier channel.
   CONSTANT,
   READONLY,
@@ -526,6 +559,8 @@ export const tokens: TokenType[] = [
   MONEY,
   DIGIT_LEADING_NAME,
   INT,
+  // HASH_COMMENT (`# …`, space-guarded) before COLOR (`#RRGGBB`).
+  HASH_COMMENT,
   COLOR,
   // Strings: CSTRING wins ties; USTRING right after.
   CSTRING,

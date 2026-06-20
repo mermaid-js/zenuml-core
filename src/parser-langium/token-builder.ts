@@ -52,6 +52,10 @@ const HIDDEN_FOR_PARSER = new Set([
   // Wrapper/theme directives are no-ops, ignored by the parser (issue #400).
   "WRAPPER_DIRECTIVE",
   "THEME_DIRECTIVE",
+  // Extra comment styles, ignored by the parser (issue #402).
+  "BLOCK_COMMENT",
+  "HASH_COMMENT",
+  "QUOTE_COMMENT",
 ]);
 
 function cloneForParser(token: TokenType): TokenType {

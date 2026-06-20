@@ -238,6 +238,22 @@ CR
 COMMENT
  : '//' ~[\r\n]* -> channel(COMMENT_CHANNEL)
  ;
+
+// Additional comment styles pasted from PlantUML / source code (issue #402).
+// Skipped (hidden) so the surrounding diagram renders unaffected.
+// - Block `/* … */` may span lines.
+// - `# ` requires a following space so it never shadows the `#RRGGBB` COLOR token.
+// - `'` (PlantUML line comment) is column-0 guarded so it never eats inline text.
+BLOCK_COMMENT
+ : '/*' .*? '*/' -> channel(HIDDEN)
+ ;
+HASH_COMMENT
+ : '#' [ \t] ~[\r\n]* -> channel(HIDDEN)
+ ;
+QUOTE_COMMENT
+ : '\'' ~[\r\n]* {this._tokenStartColumn === 0}? -> channel(HIDDEN)
+ ;
+
 OTHER
  : .
  ;
