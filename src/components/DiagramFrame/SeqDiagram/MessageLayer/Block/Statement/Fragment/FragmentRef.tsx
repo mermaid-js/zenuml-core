@@ -4,6 +4,7 @@ import { Numbering } from "../../../Numbering";
 import { Comment } from "../Comment/Comment";
 import { MessageLabel } from "../../../MessageLabel";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
+import { labelRangeOfRef } from "@/parser/RefContext";
 
 export const FragmentRef = (props: {
   context: any;
@@ -15,12 +16,10 @@ export const FragmentRef = (props: {
 }) => {
   const { paddingLeft, fragmentStyle, border, leftParticipant } =
     useFragmentData(props.context, props.origin);
-  const content = props.context.ref().Content();
+  const refContext = props.context.ref();
+  const content = refContext.Content();
   const contentLabel = content?.getFormattedText();
-  const contentPosition: [number, number] = [
-    content?.start.start,
-    content?.stop.stop,
-  ];
+  const contentPosition: [number, number] = labelRangeOfRef(refContext);
 
   return (
     <div className={props.className}>
