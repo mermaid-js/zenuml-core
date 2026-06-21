@@ -45,8 +45,15 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ hashFiles('bun.lock') }}
           restore-keys: playwright-browsers-
-      - name: Install Playwright Chromium for CLI PNG tests
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      # Must run on every job, even on a Playwright browser cache hit. The cache
+      # restores only the browser binary (~/.cache/ms-playwright), NOT the apt
+      # system packages that `playwright install-deps` provides. The CLI PNG tests
+      # measure text via @napi-rs/canvas, which reads system fonts through
+      # fontconfig; without those fonts it falls back to wider metrics, changing
+      # the rendered diagram width and failing the committed snapshots (which were
+      # generated with fonts present). `playwright install chromium` is a fast
+      # no-op when the binary is already cached, so this stays cheap.
+      - name: Install Playwright Chromium + system fonts for CLI PNG tests
         run: bun run pw:install
       - name: Lint
         run: bunx eslint src
