@@ -1,17 +1,21 @@
 ---
 name: ship-branch
-description: Ship the current branch from local validation through to npm release. Orchestrates validate-branch, submit-branch, babysit-pr, and land-pr in sequence. Use when the user says "ship", "ship it", "ship this branch", "ship to production", "release this", "get this to npm", or wants to go from local branch to published npm package in one command. Stops at the first failure with a clear report.
+description: Ship the current branch from local validation through to MERGED on main. Orchestrates validate-branch, submit-branch, babysit-pr, and land-pr in sequence. Use when the user says "ship", "ship it", "ship this branch", "merge this", or wants to go from local branch to merged in one command. Merging does NOT publish to npm — releases are driven by Changesets; publish via /release-app. Stops at the first failure with a clear report.
 ---
 
 # Ship Branch
 
-Orchestrate the full path from local branch to npm release. This skill composes four sub-skills in sequence, stopping at the first failure.
+Orchestrate the full path from local branch to **merged on main**. This skill composes sub-skills in sequence, stopping at the first failure.
+
+**Merging does NOT publish to npm.** This repo uses [Changesets](https://github.com/changesets/changesets). A feature PR that affects the published package carries a `.changeset/*.md`; merging it just feeds the **"chore: version packages"** PR that the Changesets Action keeps updated. Publishing happens only when that version PR is merged — use **`/release-app`**.
 
 ## Flow
 
 ```
 rebase on origin/main → CONFLICT → stop, report
      | CLEAN
+ensure changeset (if change affects published package) → MISSING → add via `bun run changeset`
+     | PRESENT or N/A
 validate-branch → FAIL → stop, report
      | PASS
 submit-branch → FAIL → stop, report
@@ -19,86 +23,80 @@ submit-branch → FAIL → stop, report
 babysit-pr → EXHAUSTED → stop, "CI blocked"
      | GREEN
 land-pr → BLOCKED → stop, report
-     | MERGED
-land-pr → PUBLISH FAIL → alert, stop
-     | PUBLISHED
-     done
+     | MERGED (version PR updated)
+     done → suggest /release-app to publish to npm
 ```
 
 ## Steps
 
 ### Step 0: Rebase on remote main
 
-Fetch and rebase onto `origin/main` to ensure the branch is up to date before validating.
-
 ```bash
 git fetch origin main
 git rebase origin/main
 ```
 
-If the rebase has conflicts, stop immediately and report. The developer must resolve conflicts manually before shipping.
+If the rebase has conflicts, stop immediately and report. Resolve manually before shipping.
 
-### Step 1: Validate locally
+### Step 1: Ensure a changeset (when the change affects the published package)
 
-Invoke `/validate-branch`. If it reports FAIL, stop and show the failure. The developer needs to fix locally before shipping.
+A fix/feature/breaking change to `@zenuml/core` needs a changeset so it gets a version bump and changelog entry:
 
-### Step 2: Submit as PR
+```bash
+bun run changeset status   # shows pending changesets + the next version
+```
 
-Invoke `/submit-branch`. If it reports FAILED, stop and show what went wrong (dirty worktree, push conflict, etc.).
+If the change is user-facing and there's no changeset, add one (`bun run changeset`, pick patch/minor/major) and commit it on the branch. Changes that don't affect the published package (CI, docs, tests, repo tooling) don't need one — note that and continue.
 
-On success, note the PR number and URL.
+### Step 2: Validate locally
 
-### Step 3: Get CI green
+Invoke `/validate-branch`. If FAIL, stop and show the failure.
 
-Invoke `/babysit-pr` with the PR number from Step 2. If it exhausts all 3 retry attempts, stop and report "CI blocked" with the babysit report.
+### Step 3: Submit as PR
 
-On success, the PR is green and ready to merge.
+Invoke `/submit-branch`. If FAILED, stop and show what went wrong. On success, note the PR number and URL.
 
-### Step 4: Land and verify release
+### Step 4: Get CI green
 
-Merging to main triggers an npm publish — this is irreversible. To prevent the orchestrator from skipping the land-pr skill's merge strategy logic (which has happened before), **spawn an Agent** for this step:
+Invoke `/babysit-pr` with the PR number. If it exhausts all 3 retry attempts, stop and report "CI blocked".
+
+### Step 5: Land (merge only)
+
+Merging no longer publishes, so this is safe to automate. To preserve the land-pr skill's merge-strategy logic (which the orchestrator has skipped before), **spawn an Agent**:
 
 ```
 Spawn an Agent with this prompt:
 "Use the Skill tool to invoke the land-pr skill, then follow it to land PR #<PR_NUMBER>
 on mermaid-js/zenuml-core. Follow every step including the merge strategy evaluation.
-Report back the merge SHA and npm version, or the reason it was blocked."
+Report back the merge SHA and whether a changeset shipped, or the reason it was blocked."
 ```
 
-Replace `<PR_NUMBER>` with the actual PR number from Step 2.
-
-Do NOT run `gh pr merge` directly from the main conversation — the land-pr skill contains merge strategy decision logic that must be evaluated by the Agent.
-
-If merge succeeds but npm publish fails, alert immediately with the failure details. Do NOT auto-rollback.
-
-On full success, report the new npm version.
+Do NOT run `gh pr merge` directly from the main conversation.
 
 ## Rules
 
-- **Each step is a hard boundary.** No step reaches back to retry a previous step.
-- **No auto-rollback.** Stop and report on any failure. The developer decides next steps.
-- **Only this skill calls babysit-pr.** Sub-skills never cross-call each other.
-- **Confirm before merge.** Since merge = npm release, pause and confirm with the user before Step 4 unless they explicitly said "ship it" (indicating full automation is intended).
+- **Each step is a hard boundary.** No step retries a previous step.
+- **No auto-rollback.** Stop and report on any failure.
+- **Only this skill calls babysit-pr.**
+- **Ship stops at merge.** This skill does NOT publish to npm. Publishing is `/release-app` (merge the "chore: version packages" PR). Do not merge the version PR here.
 
 ## Output
 
-Final report:
-
 ```
 ## Ship Report: <branch-name>
+- Changeset: <added: patch|minor|major | n/a — no package impact>
 - Validation: PASS
 - PR: #<number> (<url>)
 - CI: GREEN (attempt <N>)
 - Merge: <SQUASHED|MERGED> into main (<sha>)
-- npm: @zenuml/core@<version> published
+- Release: queued in the "chore: version packages" PR (not yet published)
+- Next: /release-app to publish to npm
 ```
 
 Or on failure:
 
 ```
 ## Ship Report: <branch-name>
-- Validation: PASS
-- PR: #<number>
 - CI: BLOCKED after 3 attempts
 - Stopped at: babysit-pr
 - Details: <failure summary>

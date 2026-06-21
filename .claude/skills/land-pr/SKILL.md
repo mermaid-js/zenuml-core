@@ -1,120 +1,79 @@
 ---
 name: land-pr
-description: Merge a green PR and verify the npm release succeeds. Use when the user says "merge", "land", "land PR", "merge this", "ship to npm", "merge and release", or when a PR has passed CI and is ready to merge. This is a high-stakes action — merging to main triggers an automatic npm publish, so this skill verifies everything before and after merge.
+description: Merge a green feature PR to main. Merging does NOT publish to npm — this repo uses Changesets, so merging just updates the "chore: version packages" PR. Publishing happens later via /release-app. Use when the user says "merge", "land", "land PR", "merge this", or when a PR has passed CI and is ready to merge. Verifies preconditions, picks a merge strategy, merges, and reports what was queued for release.
 ---
 
 # Land PR
 
-Merge a green PR to `main` and verify the npm release. In this repo, **merge = release** — every merge to main triggers automatic npm publish via GitHub Actions. Treat this as a production deployment, not a casual merge.
+Merge a green feature PR to `main`. In this repo **merge ≠ release** ([Changesets](https://github.com/changesets/changesets)): merging a PR that carries a `.changeset/*.md` just adds it to the **"chore: version packages"** PR that the Changesets Action maintains. Nothing publishes until that version PR is merged (`/release-app`). Merging is therefore safe to automate.
 
 ## Preconditions
 
-Before merging, verify ALL of these:
+Verify ALL before merging:
 
 1. **All CI checks green** — no pending or failed checks
 2. **No pending reviews** — no requested changes outstanding
 3. **Branch is up to date** — no merge conflicts with main
-4. **PR is the right one** — confirm PR number with the user if ambiguous
+4. **PR is the right one** — confirm the number with the user if ambiguous
 
 ```bash
 gh pr view <PR_NUMBER> --json state,mergeable,statusCheckRollup,reviewDecision
 ```
 
-If any precondition fails, report which one and stop. Do not attempt to fix — that's `babysit-pr`'s job.
+If any precondition fails, report which one and stop. Do not fix — that's `babysit-pr`'s job.
 
 ## Steps
 
 ### 1. Verify readiness
 
-Run the precondition checks above. If anything is not green, stop and report.
+Run the precondition checks. If anything is not green, stop and report.
 
 ### 2. Decide merge strategy
-
-Inspect the branch's commit history to decide between squash and merge:
 
 ```bash
 git log main..HEAD --oneline
 ```
 
-**Auto-squash if ANY of these are true:**
-- Only 1 commit on the branch
-- Commit messages contain noise patterns: "wip", "fixup", "temp", "oops", "try again", "fix lint", "fix test", duplicate messages
-- More than half the commits have the same or very similar messages
+**Auto-squash if ANY:** only 1 commit; messages contain noise ("wip", "fixup", "fix lint", duplicates); >half the commits are the same message.
 
-**Merge (preserve commits) if ALL of these are true:**
-- 2+ commits with distinct, meaningful messages
-- Each commit describes a self-contained step (not just iterations on the same change)
-- Commits follow a logical progression (e.g., "add X" → "refactor Y" → "delete Z")
+**Merge (preserve commits) if ALL:** 2+ commits with distinct, meaningful messages; each a self-contained step; logical progression.
 
-Announce the decision and why: "Squashing — 3 of 5 commits are fixups" or "Merging — 8 clean commits with distinct steps".
+Announce the decision and why. (When squashing, keep the `.changeset/*.md` file in the result — it must reach main to drive the release.)
 
 ### 3. Execute merge
 
 ```bash
-# If squash:
-gh pr merge <PR_NUMBER> --squash --auto
-
-# If merge:
-gh pr merge <PR_NUMBER> --merge --auto
+gh pr merge <PR_NUMBER> --squash --auto   # or --merge --auto
 ```
 
-Using `--auto` arms auto-merge so GitHub merges when all checks pass. If checks are already green, it merges immediately.
+`--auto` arms auto-merge; merges immediately if checks are already green.
 
 ### 4. Wait for merge
 
-If auto-merge was armed, wait for it:
-
 ```bash
-gh pr view <PR_NUMBER> --json state
+gh pr view <PR_NUMBER> --json state   # poll until MERGED; 5-min timeout
 ```
 
-Poll until state is `MERGED`. Timeout after 5 minutes — if not merged by then, report and stop.
+### 5. Report what was queued for release
 
-### 5. Monitor npm publish
-
-After merge, the `Build, Test, npm Publish, and Deploy` workflow runs on `main`. Watch it:
+After merge, the `release` job runs `changesets/action` on `main`. If the PR carried a changeset, the Action opens or updates the **"chore: version packages"** PR (it bumps versions + writes the changelog). It does NOT publish.
 
 ```bash
-gh run list --repo mermaid-js/zenuml-core --branch main --limit 1 --json databaseId,status,conclusion
+gh run list --repo mermaid-js/zenuml-core --branch main --limit 1 --json status,conclusion
+gh pr list --repo mermaid-js/zenuml-core --search "chore: version packages in:title" --json number,title,state
 ```
 
-Wait for the run to complete:
-
-```bash
-gh run watch <RUN_ID> --repo mermaid-js/zenuml-core
-```
-
-### 6. Verify npm publish
-
-Check that the new version appeared on npm:
-
-```bash
-npm view @zenuml/core version
-```
-
-Compare with the version before merge. If it didn't bump, check the `npm-publish` job logs for errors.
+If the PR had a changeset, confirm the version PR appeared/updated. If it had none (docs/CI/chore), confirm no version PR change is expected.
 
 ## Output
 
-Report one of:
-
-- **LANDED** — merged, published to npm as `@zenuml/core@<version>`
-- **MERGE BLOCKED** — which precondition failed
-- **PUBLISH FAILED** — merged but npm publish failed, with error details
-
-## On publish failure
-
-**Do NOT auto-rollback.** A failed npm publish after merge is a serious situation that needs human judgment. Report:
-
-1. The merge commit SHA
-2. The failing workflow run URL
-3. The npm-publish job error output
-4. Whether the version was partially published
-
-The user decides whether to hotfix, revert, or investigate.
+- **LANDED** — merged into main as `<squash|merge>`; release queued in the "chore: version packages" PR (#<n>). Next: `/release-app`.
+- **LANDED (no release)** — merged; no changeset, so nothing queued for publish.
+- **MERGE BLOCKED** — which precondition failed.
 
 ## Does NOT
 
+- Publish to npm (use `/release-app` — merge the version PR)
 - Fix CI (use `/babysit-pr`)
 - Create PRs (use `/submit-branch`)
 - Run local tests (use `/validate-branch`)
