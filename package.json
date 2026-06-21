@@ -25,6 +25,9 @@
     "build": "bun run build:lib && bun run build:cli",
     "build:release": "RELEASE=1 bun run build:lib && RELEASE=1 bun run build:cli && RELEASE=1 bun run build:lsp",
     "build:analyze": "RELEASE=1 ANALYZE=1 bun run build:lib && RELEASE=1 bun run build:cli",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "release": "bun run build:release && changeset publish",
     "test": "bun test src test/unit",
     "parity:dualrun": "bun scripts/parity/dualrun-diff.mjs",
     "pw": "playwright test --reporter=list",
@@ -106,6 +109,8 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
     "@eslint/js": "^9.39.2",
     "@happy-dom/global-registrator": "^18.0.1",
     "@playwright/test": "^1.57.0",
