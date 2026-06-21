@@ -73,16 +73,22 @@ jobs:
     permissions:
       contents: read
 
-  npm-publish:
+  # Merge to main PREPARES a release; it does not publish. This job computes the
+  # next version and upserts a single rolling DRAFT GitHub Release. Publishing is
+  # decoupled: promoting that draft to a published release triggers release.yml,
+  # which runs `npm publish`. Drive it with the /ship-branch (merge) and
+  # /release-app (publish) skills. See DEPLOYMENT.md.
+  draft-release:
     runs-on: ubuntu-22.04
     needs: [test, e2e]
     permissions:
-      contents: write    # for git tag push
-      id-token: write    # for npm OIDC trusted publishing
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/publish'
+      contents: write # create/delete draft releases
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # bump-version reads tags + commit history since last release
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -93,29 +99,33 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
       - run: bun install
-      - name: Bump Version
+      - name: Compute next version (no package.json / npm changes)
         id: bump
-        run: ./scripts/bump-version.js
+        run: ./scripts/bump-version.js --dry-run
+      - name: Upsert rolling draft release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build
-        run: bun run build:release
-      - name: Publish to npm with provenance
-        run: npm publish --provenance --access public
-      - name: Create git tag
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.bump.outputs.version }}
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git tag "v${{ steps.bump.outputs.version }}"
-          git push origin "v${{ steps.bump.outputs.version }}"
-      - name: Add version to job summary
+          # Keep exactly one rolling draft for the next npm release. A draft does
+          # not create its git tag until published, so deleting stale drafts is
+          # clean. Then create a fresh draft at this commit with auto-notes.
+          gh release list --limit 100 --json tagName,isDraft \
+            | jq -r '.[] | select(.isDraft) | .tagName' \
+            | while read -r t; do
+                [ -n "$t" ] && gh release delete "$t" --yes || true
+              done
+          gh release create "v${VERSION}" \
+            --draft \
+            --title "v${VERSION}" \
+            --target "${GITHUB_SHA}" \
+            --generate-notes
+      - name: Add draft info to job summary
         run: |
-          echo "# Published Version" >> $GITHUB_STEP_SUMMARY
-          echo "| Package | Version | Tag |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| @zenuml/core | v${{ steps.bump.outputs.version }} | [v${{ steps.bump.outputs.version }}](https://github.com/mermaid-js/zenuml-core/releases/tag/v${{ steps.bump.outputs.version }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "# Draft release prepared" >> $GITHUB_STEP_SUMMARY
+          echo "Next version: **v${{ steps.bump.outputs.version }}** — draft, NOT yet published to npm." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "[View on npm](https://www.npmjs.com/package/@zenuml/core/v/${{ steps.bump.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+          echo "Publish via \`/release-app\` (or publish the GitHub Release) to run \`npm publish\`." >> $GITHUB_STEP_SUMMARY
 
   # Deploy to Cloudflare Workers
   deploy-to-cloudflare:

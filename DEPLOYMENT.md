@@ -1,7 +1,37 @@
 # ZenUML Web Renderer Deployment
 
 This document describes how the ZenUML demo site / web renderer is deployed to
-**Cloudflare Workers** (using Workers Static Assets, not Cloudflare Pages).
+**Cloudflare Workers** (using Workers Static Assets, not Cloudflare Pages), and
+how the `@zenuml/core` npm package is released.
+
+## npm Release Model (ship ≠ publish)
+
+Merging to `main` no longer publishes to npm. Shipping (merge) and releasing
+(publish) are decoupled, mirroring the conf-app model:
+
+```
+merge to main   -> cd.yml `draft-release`  -> draft GitHub Release "v{next}"  (NO npm publish)
+publish release -> release.yml             -> npm publish "{next}" with provenance
+```
+
+- **`draft-release`** (in `.github/workflows/cd.yml`, runs on every `main` push
+  after `test` + `e2e`): computes the next semver via `scripts/bump-version.js
+  --dry-run` and upserts a single rolling **draft** GitHub Release. Nothing is
+  published.
+- **`release.yml`** (triggered by `release: published`): checks out the release
+  tag, sets `package.json` to the tag version, builds, and runs
+  `npm publish --provenance`.
+
+Operate it with the skills: **`/ship-branch`** takes a branch to merged-on-main
+(a draft appears); **`/release-app`** promotes the draft to a published release
+(which triggers `npm publish`).
+
+> **One-time setup when adopting this model:** npm OIDC trusted publishing is
+> configured per workflow filename. Update the `@zenuml/core` trusted publisher
+> on npmjs.com to point at `.github/workflows/release.yml` (it previously pointed
+> at `cd.yml`), or `npm publish --provenance` will fail OIDC verification.
+
+## Web Renderer (Cloudflare) Deployment
 
 ## Deployment Strategy
 

@@ -1,0 +1,64 @@
+# Publish @zenuml/core to npm when a GitHub Release is published.
+#
+# This is the second half of the decoupled release model (the first half is the
+# `draft-release` job in cd.yml, which prepares a draft on every merge to main):
+#
+#   merge to main  -> cd.yml draft-release  -> draft GitHub Release "v{next}"
+#   publish release -> release.yml (this)    -> npm publish "{next}"
+#
+# Promote the draft with the /release-app skill (or the GitHub "Publish release"
+# button). The release tag is the source of truth for the published version.
+#
+# NOTE: npm OIDC trusted publishing is configured per workflow filename on
+# npmjs.com. When adopting this model, update the @zenuml/core trusted publisher
+# config to point at `.github/workflows/release.yml` (previously `cd.yml`),
+# otherwise `npm publish --provenance` fails OIDC verification.
+name: Publish to npm
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write # npm OIDC trusted publishing (provenance)
+
+jobs:
+  npm-publish:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout at the release tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+      - name: Install dependencies
+        run: bun install
+      - name: Set package.json version from release tag
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION="${TAG#v}"
+          echo "Publishing @zenuml/core@${VERSION}"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+      - name: Build
+        run: bun run build:release
+      - name: Publish to npm with provenance
+        run: npm publish --provenance --access public
+      - name: Add version to job summary
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION="${TAG#v}"
+          echo "# Published @zenuml/core@${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- [Release ${TAG}](${{ github.event.release.html_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [View on npm](https://www.npmjs.com/package/@zenuml/core/v/${VERSION})" >> $GITHUB_STEP_SUMMARY

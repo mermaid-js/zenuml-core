@@ -93,6 +93,14 @@ const run = async () => {
   const newVersion = getNewVersion(currentVersion, versionBump);
   console.log(`New version will be: ${newVersion}`);
 
+  // Always expose the computed version to GitHub Actions, even on a dry run.
+  // The draft-release job (cd.yml) runs this with --dry-run to compute the next
+  // version for the draft tag WITHOUT mutating package.json; the version is
+  // applied at publish time (release.yml) from the release tag.
+  if (process.env.GITHUB_ACTIONS && process.env.GITHUB_OUTPUT) {
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${newVersion}\n`);
+  }
+
   if (!dryRun) {
     // Update package.json
     const pkg = require("../package.json");
@@ -101,13 +109,8 @@ const run = async () => {
       path.join(__dirname, "../package.json"),
       JSON.stringify(pkg, null, 2) + "\n",
     );
-
-    // Set output for GitHub Actions
-    if (process.env.GITHUB_ACTIONS) {
-      fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${newVersion}\n`);
-    }
   } else {
-    console.log("\nDRY RUN: No changes were made");
+    console.log("\nDRY RUN: package.json not modified");
   }
 };
 
