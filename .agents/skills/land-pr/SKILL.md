@@ -1,11 +1,11 @@
 ---
 name: land-pr
-description: Merge a green PR and verify the npm release succeeds. Use when the user says "merge", "land", "land PR", "merge this", "ship to npm", "merge and release", or when a PR has passed CI and is ready to merge. This is a high-stakes action — merging to main triggers an automatic npm publish, so this skill verifies everything before and after merge.
+description: Merge a green PR to main. Merging prepares a DRAFT release (it does NOT publish to npm) — publishing is a separate step via /release-app. Use when the user says "merge", "land", "land PR", "merge this", or when a PR has passed CI and is ready to merge. Verifies preconditions, picks a merge strategy, merges, and confirms the draft release was prepared.
 ---
 
 # Land PR
 
-Merge a green PR to `main` and verify the npm release. In this repo, **merge = release** — every merge to main triggers automatic npm publish via GitHub Actions. Treat this as a production deployment, not a casual merge.
+Merge a green PR to `main`. In this repo, **merge ≠ release**: merging triggers cd.yml's `draft-release` job, which prepares a draft GitHub Release. No npm publish happens here — that's `/release-app`. Merging is therefore safe to automate.
 
 ## Preconditions
 
@@ -70,51 +70,29 @@ gh pr view <PR_NUMBER> --json state
 
 Poll until state is `MERGED`. Timeout after 5 minutes — if not merged by then, report and stop.
 
-### 5. Monitor npm publish
+### 5. Confirm the draft release was prepared
 
-After merge, the `Build, Test, npm Publish, and Deploy` workflow runs on `main`. Watch it:
+After merge, the `draft-release` job runs on `main`. Watch it and confirm a fresh draft appeared:
 
 ```bash
 gh run list --repo mermaid-js/zenuml-core --branch main --limit 1 --json databaseId,status,conclusion
+# after it completes:
+gh release list --repo mermaid-js/zenuml-core --limit 10 --json tagName,isDraft,createdAt
 ```
 
-Wait for the run to complete:
-
-```bash
-gh run watch <RUN_ID> --repo mermaid-js/zenuml-core
-```
-
-### 6. Verify npm publish
-
-Check that the new version appeared on npm:
-
-```bash
-npm view @zenuml/core version
-```
-
-Compare with the version before merge. If it didn't bump, check the `npm-publish` job logs for errors.
+There should be exactly one draft release `v<version>`. That version is the next npm release — published later via `/release-app`. If no draft appears, check the `draft-release` job logs.
 
 ## Output
 
 Report one of:
 
-- **LANDED** — merged, published to npm as `@zenuml/core@<version>`
-- **MERGE BLOCKED** — which precondition failed
-- **PUBLISH FAILED** — merged but npm publish failed, with error details
-
-## On publish failure
-
-**Do NOT auto-rollback.** A failed npm publish after merge is a serious situation that needs human judgment. Report:
-
-1. The merge commit SHA
-2. The failing workflow run URL
-3. The npm-publish job error output
-4. Whether the version was partially published
-
-The user decides whether to hotfix, revert, or investigate.
+- **LANDED** — merged into main as `<squash|merge>`; draft release `v<version>` prepared (not published). Next: `/release-app`.
+- **MERGE BLOCKED** — which precondition failed.
+- **DRAFT MISSING** — merged, but the draft-release job did not produce a draft (with the job error).
 
 ## Does NOT
 
+- Publish to npm (use `/release-app`)
 - Fix CI (use `/babysit-pr`)
 - Create PRs (use `/submit-branch`)
 - Run local tests (use `/validate-branch`)

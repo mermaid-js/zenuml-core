@@ -52,9 +52,12 @@ bun dev
 CI/CD is done with GitHub Actions (`.github/workflows/`):
 
 - **`cd.yml`** — runs on every push and pull request: lint + unit tests (`test`),
-  Playwright E2E (`e2e`, via `e2e.yml`), then — only if both pass — publishes
-  `@zenuml/core` to npm (on `main`) and deploys the demo site to Cloudflare
-  Workers (production on `main`, staging otherwise). See [DEPLOYMENT.md](./DEPLOYMENT.md).
+  Playwright E2E (`e2e`, via `e2e.yml`), then — only if both pass — prepares a
+  **draft** release (on `main`) and deploys the demo site to Cloudflare Workers
+  (production on `main`, staging otherwise). Merging does **not** publish to npm.
+- **`release.yml`** — publishes `@zenuml/core` to npm when a GitHub Release is
+  published (i.e. when the draft is promoted). Ship with `/ship-branch` (merge),
+  release with `/release-app` (publish). See [DEPLOYMENT.md](./DEPLOYMENT.md).
 - **`e2e.yml`** — reusable Playwright workflow, called by `cd.yml` or run manually.
 - **`update-snapshots.yml`** — manually triggered; regenerates Linux visual snapshots.
 
