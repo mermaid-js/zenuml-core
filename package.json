@@ -22,9 +22,10 @@
     "build:lsp:worker": "bun run --bun vite build -c vite.config.lsp-worker.ts",
     "build:lsp": "bun run build:lsp:node && bun run build:lsp:worker",
     "lsp": "bun src/parser-langium/lsp/main.ts --stdio",
-    "build": "bun run build:lib && bun run build:cli",
-    "build:release": "RELEASE=1 bun run build:lib && RELEASE=1 bun run build:cli && RELEASE=1 bun run build:lsp",
-    "build:analyze": "RELEASE=1 ANALYZE=1 bun run build:lib && RELEASE=1 bun run build:cli",
+    "build:parser": "bun run --bun vite build -c vite.config.parser.ts",
+    "build": "bun run build:lib && bun run build:cli && bun run build:parser",
+    "build:release": "RELEASE=1 bun run build:lib && RELEASE=1 bun run build:cli && RELEASE=1 bun run build:lsp && RELEASE=1 bun run build:parser",
+    "build:analyze": "RELEASE=1 ANALYZE=1 bun run build:lib && RELEASE=1 bun run build:cli && RELEASE=1 bun run build:parser",
     "changeset": "changeset",
     "changeset:version": "changeset version",
     "release": "bun run build:release && changeset publish",
@@ -80,7 +81,17 @@
       }
     },
     "./lsp-worker": "./dist/lsp/zenuml-server.worker.js",
-    "./lsp-server": "./dist/lsp/main.js"
+    "./lsp-server": "./dist/lsp/main.js",
+    "./parser": {
+      "import": {
+        "types": "./types/parser/index.d.ts",
+        "default": "./dist/parser/index.mjs"
+      },
+      "require": {
+        "types": "./types/parser/index.d.ts",
+        "default": "./dist/parser/index.cjs"
+      }
+    }
   },
   "engines": {
     "node": ">=20"
