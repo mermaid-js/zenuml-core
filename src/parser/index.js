@@ -31,6 +31,21 @@ class SeqErrorListener extends antlr4.error.ErrorListener {
   }
 }
 
+// Reentrant error listener: collects syntax errors into its OWN instance array
+// instead of the shared module-level `errors`/`errorDetails`. This is what lets
+// validate()/parse() below run repeatedly or concurrently (e.g. server-side)
+// without the clear-before/clear-after dance the legacy globals require.
+class CollectingErrorListener extends antlr4.error.ErrorListener {
+  constructor() {
+    super();
+    /** @type {{ line: number, column: number, msg: string }[]} */
+    this.errorDetails = [];
+  }
+  syntaxError(recognizer, offendingSymbol, line, column, msg) {
+    this.errorDetails.push({ line, column, msg });
+  }
+}
+
 function createParser(code, { silent = false } = {}) {
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
@@ -105,6 +120,43 @@ antlr4.ParserRuleContext.prototype.getComment = function () {
   );
 };
 
+/**
+ * Parse ZenUML DSL with a per-call (reentrant) error listener and return both
+ * the error-recovered parse tree and a structured error list. Safe to call
+ * repeatedly/concurrently — it does not touch the module-level Errors/ErrorDetails.
+ *
+ * @param {string} code ZenUML DSL source
+ * @returns {{ rootContext: object, pass: boolean, errorDetails: { line: number, column: number, msg: string }[] }}
+ */
+export function parse(code) {
+  const listener = new CollectingErrorListener();
+  const chars = new antlr4.InputStream(code);
+  const lexer = new sequenceLexer(chars);
+  lexer.removeErrorListeners();
+  lexer.addErrorListener(listener);
+  const tokens = new antlr4.CommonTokenStream(lexer);
+  const parser = new sequenceParser(tokens);
+  parser.removeErrorListeners();
+  parser.addErrorListener(listener);
+  const tree = parser.prog();
+  return {
+    rootContext: tree,
+    pass: listener.errorDetails.length === 0,
+    errorDetails: listener.errorDetails,
+  };
+}
+
+/**
+ * Validate ZenUML DSL syntax without exposing the parse tree. Reentrant.
+ *
+ * @param {string} code ZenUML DSL source
+ * @returns {{ pass: boolean, errorDetails: { line: number, column: number, msg: string }[] }}
+ */
+export function validate(code) {
+  const { pass, errorDetails } = parse(code);
+  return { pass, errorDetails };
+}
+
 export const ProgContext = sequenceParser.ProgContext;
 export const RootContext = rootContext;
 export const GroupContext = sequenceParser.GroupContext;
@@ -127,6 +179,8 @@ export default {
     const toCollector = ToCollector;
     return toCollector.getParticipants(ctx);
   },
+  parse,
+  validate,
   Errors: errors,
   ErrorDetails: errorDetails,
   /**
