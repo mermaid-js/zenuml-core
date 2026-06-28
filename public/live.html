@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>ZenUML Live — test latest core</title>
+    <meta
+      name="description"
+      content="Live editor that renders ZenUML diagrams using the latest published @zenuml/core from a CDN. Test anywhere, anytime."
+    />
+
+    <!-- CodeMirror (editor) from CDN so this page stays fully self-contained -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/material-darker.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.js"></script>
+
+    <style>
+      :root {
+        --bg: #0f1117;
+        --panel: #161922;
+        --border: #262b38;
+        --text: #e6e8ee;
+        --muted: #9aa3b2;
+        --accent: #4f8cff;
+        --accent-weak: #1e2a45;
+        --danger: #ff6b6b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 14px;
+        border-bottom: 1px solid var(--border);
+        background: var(--panel);
+        flex-wrap: wrap;
+      }
+      header .brand {
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+      header .brand small {
+        font-weight: 400;
+        color: var(--muted);
+        margin-left: 6px;
+      }
+      .badge {
+        font-size: 12px;
+        color: var(--muted);
+        background: var(--accent-weak);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 3px 10px;
+        white-space: nowrap;
+      }
+      .badge b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .spacer {
+        flex: 1;
+      }
+      header label {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      select,
+      button {
+        font-size: 13px;
+        color: var(--text);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      button:hover,
+      select:hover {
+        border-color: var(--accent);
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      main {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+      }
+      .pane {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+      }
+      .pane.editor {
+        width: 38%;
+        max-width: 620px;
+        border-right: 1px solid var(--border);
+      }
+      .pane.viewer {
+        flex: 1;
+        background: #fff;
+      }
+      .pane-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--muted);
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--border);
+        background: var(--panel);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .CodeMirror {
+        height: 100% !important;
+        font-size: 13.5px;
+        line-height: 1.5;
+      }
+      #editorWrap {
+        flex: 1;
+        min-height: 0;
+      }
+      #diagram {
+        flex: 1;
+        overflow: auto;
+        padding: 16px;
+      }
+      #status {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      #status.error {
+        color: var(--danger);
+      }
+      #loader {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 17, 23, 0.85);
+        color: var(--text);
+        font-size: 14px;
+        z-index: 50;
+      }
+      .toast {
+        position: fixed;
+        bottom: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #222838;
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+        z-index: 60;
+      }
+      .toast.show {
+        opacity: 1;
+      }
+      @media (max-width: 720px) {
+        main {
+          flex-direction: column;
+        }
+        .pane.editor {
+          width: 100%;
+          max-width: none;
+          height: 45%;
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="brand">ZenUML Live <small>latest published core</small></span>
+      <span class="badge" id="versionBadge">loading core…</span>
+      <span class="spacer"></span>
+      <label for="themeSelect">Theme</label>
+      <select id="themeSelect">
+        <option value="theme-default">Legacy</option>
+        <option value="theme-clean-light">Clear Light</option>
+        <option value="theme-clean-dark">Clear Dark</option>
+        <option value="theme-neon">Neon Dark</option>
+      </select>
+      <button id="shareBtn" title="Copy a shareable link with the current diagram">
+        Copy link
+      </button>
+      <button id="resetBtn" title="Reset to the sample diagram">Reset</button>
+    </header>
+
+    <main>
+      <section class="pane editor">
+        <div class="pane-title">
+          Source <span id="status">ready</span>
+        </div>
+        <div id="editorWrap">
+          <textarea id="code"></textarea>
+        </div>
+      </section>
+      <section class="pane viewer">
+        <div class="pane-title">Diagram</div>
+        <div id="diagram" style="position: relative">
+          <div id="loader">Loading latest @zenuml/core…</div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      // ---------------------------------------------------------------------
+      // ZenUML Live — renders against the LATEST published @zenuml/core from a
+      // CDN, so it works on any device/host without a local build.
+      //
+      // Optional override (handy for the occasional pinned check, not in the UI):
+      //   ?core=4.1.0   -> load a specific published version
+      //   ?core=next    -> load a published dist-tag
+      // Default is the npm "latest" tag.
+      // ---------------------------------------------------------------------
+      const params = new URLSearchParams(location.search);
+      const CORE_VERSION = params.get("core") || "latest";
+      const CDN_URL = `https://cdn.jsdelivr.net/npm/@zenuml/core@${CORE_VERSION}/dist/zenuml.js`;
+
+      const DEFAULT_CODE = `// Try editing me — rendered by the latest published @zenuml/core.
+title Order checkout
+
+@Actor Customer
+Customer->Web: Place order
+Web->Payment: Charge card
+Payment->Bank: Authorize
+Bank-->Payment: Approved
+Payment-->Web: Receipt
+Web-->Customer: Order confirmed`;
+
+      const STORAGE_KEY = "zenuml-live:code";
+      const THEME_KEY = "zenuml-live:theme";
+
+      const $ = (id) => document.getElementById(id);
+      const statusEl = $("status");
+      const toastEl = $("toast");
+      let toastTimer;
+
+      function toast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1600);
+      }
+      function setStatus(msg, isError) {
+        statusEl.textContent = msg;
+        statusEl.classList.toggle("error", !!isError);
+      }
+
+      // --- share / persistence helpers -----------------------------------
+      function encode(text) {
+        return encodeURIComponent(btoa(unescape(encodeURIComponent(text))));
+      }
+      function decode(s) {
+        try {
+          return decodeURIComponent(escape(atob(decodeURIComponent(s))));
+        } catch (e) {
+          return null;
+        }
+      }
+      function readInitialCode() {
+        const hash = new URLSearchParams(location.hash.slice(1));
+        if (hash.get("code")) {
+          const c = decode(hash.get("code"));
+          if (c != null) return c;
+        }
+        return localStorage.getItem(STORAGE_KEY) || DEFAULT_CODE;
+      }
+
+      // --- editor ---------------------------------------------------------
+      const editor = CodeMirror.fromTextArea($("code"), {
+        lineNumbers: true,
+        theme: "material-darker",
+        lineWrapping: true,
+        viewportMargin: Infinity,
+      });
+      editor.setValue(readInitialCode());
+
+      const themeSelect = $("themeSelect");
+      themeSelect.value = localStorage.getItem(THEME_KEY) || "theme-default";
+
+      // --- rendering ------------------------------------------------------
+      let zenuml; // single ZenUML instance, reused across renders
+      let renderTimer;
+
+      function currentTheme() {
+        return themeSelect.value;
+      }
+
+      async function doRender() {
+        if (!zenuml) return;
+        const code = editor.getValue();
+        localStorage.setItem(STORAGE_KEY, code);
+        try {
+          setStatus("rendering…");
+          await zenuml.render(code, { theme: currentTheme() });
+          setStatus("ready");
+        } catch (err) {
+          console.error(err);
+          setStatus((err && err.message) || "render error", true);
+        }
+      }
+
+      function scheduleRender() {
+        clearTimeout(renderTimer);
+        renderTimer = setTimeout(doRender, 250);
+      }
+
+      editor.on("change", scheduleRender);
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, currentTheme());
+        doRender();
+      });
+
+      $("shareBtn").addEventListener("click", async () => {
+        const url =
+          location.origin +
+          location.pathname +
+          location.search +
+          "#code=" +
+          encode(editor.getValue());
+        try {
+          await navigator.clipboard.writeText(url);
+          toast("Shareable link copied");
+        } catch (e) {
+          location.hash = "code=" + encode(editor.getValue());
+          toast("Link added to address bar");
+        }
+      });
+
+      $("resetBtn").addEventListener("click", () => {
+        editor.setValue(DEFAULT_CODE);
+        history.replaceState(null, "", location.pathname);
+        doRender();
+      });
+
+      // --- load core from CDN --------------------------------------------
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement("script");
+          s.src = src;
+          s.onload = resolve;
+          s.onerror = () => reject(new Error("Failed to load " + src));
+          document.head.appendChild(s);
+        });
+      }
+
+      (async function init() {
+        try {
+          await loadScript(CDN_URL);
+          // The UMD bundle exposes the lowercase global `zenuml` (a module
+          // namespace). The ZenUML class self-references via `.default` for UMD
+          // compatibility (see core.tsx). Support both shapes defensively.
+          const ns = window.zenuml || window.ZenUML;
+          const ZenUML = (ns && ns.default) || ns;
+          if (!ZenUML) throw new Error("ZenUML global not found after load");
+
+          const version = ZenUML.version || CORE_VERSION;
+          $("versionBadge").innerHTML =
+            "@zenuml/core <b>" +
+            version +
+            "</b>" +
+            (CORE_VERSION !== "latest" ? " (pinned)" : " (latest)");
+
+          $("loader").remove();
+          zenuml = new ZenUML($("diagram"));
+          await doRender();
+        } catch (err) {
+          console.error(err);
+          const loader = $("loader");
+          if (loader) {
+            loader.style.color = "var(--danger)";
+            loader.textContent =
+              "Could not load @zenuml/core from CDN: " + err.message;
+          }
+          setStatus("core failed to load", true);
+        }
+      })();
+    </script>
+  </body>
+</html>
