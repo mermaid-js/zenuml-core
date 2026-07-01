@@ -15,8 +15,8 @@
   </g>
 
   <!-- headline -->
-  <text x="78" y="255" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="90" fill="#171412">Turn text into</text>
-  <text x="78" y="355" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="90" fill="#FF5B4C" stroke="#171412" stroke-width="2">sequence diagrams</text>
+  <text x="78" y="255" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="70" fill="#171412">Turn text into</text>
+  <text x="78" y="355" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="70" fill="#FF5B4C" stroke="#171412" stroke-width="2">sequence diagrams</text>
 
   <text x="80" y="425" font-family="'DM Sans',Arial,sans-serif" font-weight="500" font-size="30" fill="#171412">Write Markdown-style text, get a diagram. Client-side, open</text>
   <text x="80" y="465" font-family="'DM Sans',Arial,sans-serif" font-weight="500" font-size="30" fill="#171412">source, npm-installable — @zenuml/core.</text>
