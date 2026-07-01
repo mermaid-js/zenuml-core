@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About ZenUML — Text-to-Diagram Open Source Project</title>
+  <meta name="description" content="ZenUML is an open-source project that turns Markdown-style text into sequence diagrams client-side. Learn who builds it, how it started, and where it runs." />
+  <link rel="canonical" href="https://zenuml.com/about/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="About ZenUML" />
+  <meta property="og:description" content="The open-source project behind text-to-sequence-diagram rendering." />
+  <meta property="og:url" content="https://zenuml.com/about/" />
+  <meta property="og:image" content="https://zenuml.com/assets/og.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="/" aria-label="ZenUML home">
+        <svg class="brand__mark" viewBox="0 0 32 32" role="img" aria-hidden="true"><rect x="3" y="4" width="26" height="24" rx="3" fill="#FFC93C" stroke="#171412" stroke-width="2.5"/><path d="M9 11h14M9 16h9" stroke="#171412" stroke-width="2.5" stroke-linecap="round"/><path d="M9 21h8l-3-3M17 21l3 3" stroke="#2F6BFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>ZenUML</span>
+      </a>
+      <button class="nav__toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">☰</button>
+      <ul class="nav__links" id="nav-links">
+        <li><a href="/#features">Features</a></li>
+        <li><a href="/#how">How it works</a></li>
+        <li><a href="/#examples">Examples</a></li>
+        <li><a href="https://github.com/mermaid-js/zenuml-core">Docs / GitHub</a></li>
+        <li class="nav__cta"><a class="btn btn--primary" href="https://app.zenuml.com">Open Live Editor ▸</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">About</span>
+        <h1>Diagrams should live with your code</h1>
+        <p class="hero__sub">ZenUML started from a simple frustration: sequence diagrams drawn in GUI tools drift out of date the moment the code changes. Text fixes that.</p>
+      </div>
+    </section>
+
+    <section class="section section--panel">
+      <div class="wrap" style="max-width:760px;">
+        <h2>What we build</h2>
+        <p>ZenUML is an open-source JavaScript library, published on npm as <code>@zenuml/core</code>, that turns a small Markdown-style language into sequence diagrams. You write messages like <code>A-&gt;B: request</code> and calls like <code>A.method()</code>; the parser reads that text into an ordered model of participants and messages, and a React 19 renderer paints a clean SVG diagram — entirely in the browser, with no server round-trip. Your diagram source never has to leave the page it lives on.</p>
+        <p>Because the source is text, a diagram behaves like any other file in your repository. It diffs in a pull request, reverts cleanly, and stays close to the code it documents. That is the whole idea: diagrams as code, reviewed and versioned like everything else you ship. The language stays deliberately small, covering messages and returns, self-messages, activations, <code>@Actor</code> participant declarations, inline <code>// comments</code>, <code>== dividers ==</code>, and combined fragments such as alt (<code>if</code>/<code>else</code>), <code>opt</code>, loops (<code>while</code>), and <code>par</code> for parallel work.</p>
+
+        <h2>The diagrams-as-code philosophy</h2>
+        <p>Traditional diagram tools make you place every box and drag every line by hand. That work is slow, hard to review, and it rots the moment the underlying system changes. ZenUML takes the opposite view: the diagram is a description, not a drawing. You state what happens — who calls whom, in what order, under which condition — and the layout is computed for you. Change the text and the picture follows. It is the same idea that made infrastructure-as-code and docs-as-code stick: text is portable, searchable, and reviewable, and it keeps a diagram honest by making it cheap to update.</p>
+
+        <h2>Where it runs</h2>
+        <p>The same engine powers the ZenUML Live Editor at app.zenuml.com, the Confluence app on the Atlassian Marketplace, plugins for JetBrains IDEs and VS Code, a Chrome extension, and Mermaid, which supports <code>zenuml</code> as a diagram type. Install the library from npm to embed the renderer in your own product, documentation site, or internal dashboard. One small language, many homes.</p>
+
+        <h2>Open source, developed in the open</h2>
+        <p>ZenUML is free and open source under an MIT-style license, developed in public at <a href="https://github.com/mermaid-js/zenuml-core">github.com/mermaid-js/zenuml-core</a>. Because the project lives inside the mermaid-js organization, ZenUML also ships as a first-class diagram type inside Mermaid, so it renders anywhere Mermaid already does. Anyone can read the source, file an issue, propose a change, or fork it.</p>
+
+        <h2>Contact &amp; contributing</h2>
+        <p>ZenUML is maintained by the ZenUML team together with its open-source contributors. The best place to report a bug, request a feature, or ask a question is the <a href="https://github.com/mermaid-js/zenuml-core/issues">GitHub issue tracker</a>, where discussion happens in the open and history is preserved. For anything that does not belong in a public issue — partnerships, security disclosures, or press — email us directly at <a href="mailto:hello@zenuml.com">hello@zenuml.com</a>.</p>
+        <div class="hero__ctas" style="margin-top:1.5rem;">
+          <a class="btn btn--primary" href="https://app.zenuml.com">Open Live Editor ▸</a>
+          <a class="btn btn--yellow" href="https://github.com/mermaid-js/zenuml-core">GitHub ★</a>
+          <a class="btn btn--ghost" href="/">Back to home</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <a class="brand footer-brand" href="/" aria-label="ZenUML home">
+            <svg class="brand__mark" viewBox="0 0 32 32" role="img" aria-hidden="true"><rect x="3" y="4" width="26" height="24" rx="3" fill="#FFC93C" stroke="#171412" stroke-width="2.5"/><path d="M9 11h14M9 16h9" stroke="#171412" stroke-width="2.5" stroke-linecap="round"/><path d="M9 21h8l-3-3M17 21l3 3" stroke="#2F6BFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>ZenUML</span>
+          </a>
+          <p class="footer-blurb">Turn Markdown-style text into sequence diagrams — open source, client-side, and ready to embed anywhere.</p>
+        </div>
+        <div><h4>Product</h4><ul><li><a href="/#features">Features</a></li><li><a href="/#how">How it works</a></li><li><a href="/#examples">Examples</a></li><li><a href="https://app.zenuml.com">Live Editor</a></li></ul></div>
+        <div><h4>Developers</h4><ul><li><a href="https://www.npmjs.com/package/@zenuml/core">npm package</a></li><li><a href="https://github.com/mermaid-js/zenuml-core">GitHub repo</a></li><li><a href="https://mermaid.js.org/syntax/zenuml.html">Mermaid docs</a></li><li><a href="https://marketplace.atlassian.com/search?query=zenuml">Confluence app</a></li></ul></div>
+        <div><h4>Company</h4><ul><li><a href="/about/">About</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li><li><a href="mailto:hello@zenuml.com">hello@zenuml.com</a></li></ul></div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 ZenUML · MIT-style open source</span>
+        <div class="footer-social"><a href="https://github.com/mermaid-js/zenuml-core">GitHub</a><a href="https://twitter.com/zenuml">Twitter/X</a><a href="mailto:hello@zenuml.com">Contact</a></div>
+      </div>
+    </div>
+  </footer>
+  <script src="/main.js"></script>
+</body>
+</html>
