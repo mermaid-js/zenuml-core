@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>@zenuml/core — Sequence diagrams from text, rendered in the browser</title>
+<title>@zenuml/core — Sequence diagrams from text, in the browser</title>
 <meta name="description" content="Sequence diagrams from text: @zenuml/core is a JavaScript library that turns a Markdown-inspired DSL into interactive diagrams in the browser. MIT, no server.">
 <link rel="canonical" href="https://core.zenuml.com/">
 <meta property="og:title" content="@zenuml/core — Sequence diagrams from text">
@@ -270,6 +270,10 @@ html.js .reveal.in{transform:none}
   "alternateName": "ZenUML Core",
   "url": "https://core.zenuml.com",
   "description": "@zenuml/core is a JavaScript sequence-diagram library that turns Markdown-inspired text definitions into interactive diagrams entirely in the browser — no server required.",
+  "potentialAction": {
+    "@type": "ReadAction",
+    "target": "https://core.zenuml.com/"
+  },
   "publisher": {
     "@type": "Organization",
     "name": "ZenUML",
@@ -283,6 +287,12 @@ html.js .reveal.in{transform:none}
   "@type": "Organization",
   "name": "ZenUML",
   "url": "https://zenuml.com",
+  "logo": "https://core.zenuml.com/assets/logo.png",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "hello@zenuml.com",
+    "contactType": "customer support"
+  },
   "sameAs": [
     "https://github.com/mermaid-js/zenuml-core",
     "https://www.npmjs.com/package/@zenuml/core",
@@ -433,7 +443,8 @@ html.js .reveal.in{transform:none}
       <div>
         <p class="idx mb-5">[ 01 — INPUT&nbsp;→&nbsp;OUTPUT ]</p>
         <div class="mb-5"><span class="chip"><i aria-hidden="true"></i>OPEN SOURCE · MIT · v4.1.0</span></div>
-        <h1 id="hero-h1" class="h1"><span class="hl">Sequence diagrams</span><br>from text.</h1>
+        <h1 id="hero-h1" class="h1"><span class="hl">Sequence diagrams</span><br>
+from text.</h1>
         <p class="mt-4 font-mono text-teal text-[0.9375rem] font-medium">Help documentation catch up with development.</p>
         <p class="mt-4 max-w-[52ch] text-[1.0625rem] leading-relaxed text-stone-700">
           @zenuml/core is a JavaScript sequence-diagram library that turns Markdown-inspired text
@@ -568,6 +579,7 @@ zenUml.render(code, config);</pre>
     </div>
 
     <!-- pipeline fit: CLI + headless parser, one line each -->
+    <h2 class="vh" id="tools-h2">Sequence-diagram CLI and headless parser</h2>
     <div class="mt-8 reveal">
       <div class="tool-row">
         <b>zenuml</b><span class="text-stone-500">CLI</span>
@@ -738,6 +750,8 @@ WebApp --&gt; Customer: orderConfirmed(orderId)</pre>
         <p>Yes. @zenuml/core is open source under the MIT license and free to install from npm. The current version is 4.1.0.</p>
       </details>
     </div>
+
+    <p class="mt-8 reveal"><a class="plink" href="/about/">More about the project — the diagrams-as-code philosophy →</a> <a class="plink" href="/llms.txt">Machine-readable reference — /llms.txt</a></p>
   </div>
 </section>
 
@@ -783,6 +797,7 @@ WebApp --&gt; Customer: orderConfirmed(orderId)</pre>
           <li><a class="plink" href="/about/">About</a></li>
           <li><a class="plink" href="/privacy/">Privacy</a></li>
           <li><a class="plink" href="/terms/">Terms</a></li>
+          <li><a class="plink" href="mailto:hello@zenuml.com">Contact — hello@zenuml.com</a></li>
         </ul>
       </nav>
     </div>
