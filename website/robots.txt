@@ -1,0 +1,30 @@
+# robots.txt for https://core.zenuml.com
+# Default policy: all crawlers are welcome on every page.
+
+User-agent: *
+Allow: /
+
+# AI crawlers — explicitly allowed. The allow-all default above already
+# covers them; they are listed here to document intent.
+
+# OpenAI (ChatGPT / GPT training and search)
+User-agent: GPTBot
+Allow: /
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+# Google AI (Gemini / AI Overviews grounding)
+User-agent: Google-Extended
+Allow: /
+
+# Common Crawl (used by many AI training pipelines)
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://core.zenuml.com/sitemap.xml

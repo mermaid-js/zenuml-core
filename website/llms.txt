@@ -1,0 +1,23 @@
+# @zenuml/core
+
+> A JavaScript sequence-diagram library that turns Markdown-inspired text definitions into interactive diagrams entirely in the browser — no server required. MIT-licensed, published on npm, and the engine behind ZenUML syntax support in the Mermaid ecosystem.
+
+ZenUML uses a code-like DSL — method calls (`A.method()`), nested blocks, return-value assignment, and if/else, loop, opt, par, critical, try/catch/finally and ref fragments — instead of an arrow-per-line syntax. One DSL feeds two renderers: an interactive React 19 HTML renderer and a headless native-SVG renderer (`renderToSvg()`). The package also ships a server-safe parser subpath (`@zenuml/core/parser`), a `zenuml` CLI for rendering `.zenuml` files to SVG/PNG, and a Langium-based language server. Current version: 4.1.0. Node.js >= 20 is required for the tooling.
+
+## Docs
+
+- [Homepage](https://core.zenuml.com/): overview, install commands, quickstart code, DSL examples, and FAQ
+- [Full reference for LLMs](https://core.zenuml.com/llms-full.txt): the complete plain-text reference — API, CLI, DSL syntax summary, facts table, FAQ
+- [About](https://core.zenuml.com/about/): what @zenuml/core is and how it relates to Mermaid
+
+## Ecosystem
+
+- [GitHub repository](https://github.com/mermaid-js/zenuml-core): source code, hosted in the mermaid-js organization (MIT license)
+- [npm package](https://www.npmjs.com/package/@zenuml/core): install with `npm install @zenuml/core` or `bun add @zenuml/core`
+- [ZenUML Live Editor](https://app.zenuml.com): create sequence diagrams online — no programming required
+- [Mermaid docs for ZenUML](https://mermaid.js.org/syntax/zenuml.html): using ZenUML syntax inside Mermaid
+
+## Optional
+
+- [Privacy policy](https://core.zenuml.com/privacy/): how the site handles data
+- [Terms of use](https://core.zenuml.com/terms/): terms for using the site

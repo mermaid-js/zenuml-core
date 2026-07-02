@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About @zenuml/core — the open-source sequence-diagram engine</title>
+<meta name="description" content="About @zenuml/core: the MIT-licensed, open-source sequence-diagram engine — its diagrams-as-code philosophy, where it runs, its place in the Mermaid ecosystem, and how to reach the maintainers.">
+<link rel="canonical" href="https://core.zenuml.com/about/">
+<meta property="og:title" content="About @zenuml/core">
+<meta property="og:description" content="The open-source, MIT-licensed engine behind ZenUML sequence diagrams — diagrams-as-code philosophy, ecosystem, and maintainers.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://core.zenuml.com/about/">
+<meta property="og:image" content="https://core.zenuml.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#FAFAF9">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/site.css">
+</head>
+
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <nav class="wrap nav-inner" aria-label="Primary">
+    <a href="/" class="brand">
+      <span class="logo-mark" role="img" aria-label="ZenUML logo"></span>
+      <span class="brand-name">@zenuml/core</span>
+    </a>
+    <div class="nav-links">
+      <a class="navlink" href="https://github.com/mermaid-js/zenuml-core/blob/main/docs/DSL_SYNTAX.md" rel="noopener">Syntax</a>
+      <a class="navlink" href="https://app.zenuml.com" rel="noopener">Playground</a>
+      <a class="navlink" href="https://github.com/mermaid-js/zenuml-core" rel="noopener">GitHub</a>
+      <a class="navlink" href="https://www.npmjs.com/package/@zenuml/core" rel="noopener">npm</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+<div class="rails">
+<section class="sec">
+  <div class="wrap">
+    <p class="idx">[ ABOUT — THE PROJECT ]</p>
+    <h1 class="page-h1">Diagrams should <span class="hl">live with your code</span>.</h1>
+    <p class="lede">ZenUML started from a simple frustration: sequence diagrams drawn in GUI tools drift out of date the moment the code changes. Text fixes that.</p>
+
+    <div class="prose">
+      <h2>What we build</h2>
+      <p>@zenuml/core is an open-source JavaScript library, published on npm, that turns a small Markdown-inspired language into sequence diagrams. You write messages like <code>A -&gt; B: request</code> and calls like <code>A.method()</code>; an ANTLR4-based parser reads that text into an ordered model of participants and messages, and a React 19 renderer paints the diagram — entirely in the browser, with no server round-trip. Your diagram source never has to leave the page it lives on.</p>
+      <p>Because the source is text, a diagram behaves like any other file in your repository. It diffs in a pull request, reverts cleanly, and stays close to the code it documents. That is the whole idea: diagrams as code, reviewed and versioned like everything else you ship. The language stays deliberately code-like, covering method calls with nested blocks, return-value assignment, async messages (<code>A -&gt; B: text</code>), typed participants such as <code>@Actor</code> and <code>@Database</code>, inline <code>// comments</code>, <code>== dividers ==</code>, and the full UML fragment set: if/else (alt), while/for/loop, opt, par, critical, section/frame, try/catch/finally, and ref.</p>
+      <p>One DSL feeds two renderers — the interactive React 19 HTML renderer and a headless native-SVG renderer (<code>renderToSvg()</code>) — plus a server-safe parser subpath (<code>@zenuml/core/parser</code>), a <code>zenuml</code> CLI that renders <code>.zenuml</code> files to SVG or PNG, and a Langium-based language server.</p>
+
+      <h2>The diagrams-as-code philosophy</h2>
+      <p>Traditional diagram tools make you place every box and drag every line by hand. That work is slow, hard to review, and it rots the moment the underlying system changes. ZenUML takes the opposite view: the diagram is a description, not a drawing. You state what happens — who calls whom, in what order, under which condition — and the layout is computed for you. Change the text and the picture follows. It is the same idea that made infrastructure-as-code and docs-as-code stick: text is portable, searchable, and reviewable, and it keeps a diagram honest by making it cheap to update.</p>
+
+      <h2>Where it runs</h2>
+      <p>The same engine powers the ZenUML Live Editor at <a href="https://app.zenuml.com" rel="noopener">app.zenuml.com</a>, the ZenUML Confluence app on the Atlassian Marketplace, a JetBrains IDE plugin, a Chrome extension, and <a href="https://mermaid.js.org/syntax/zenuml.html" rel="noopener">Mermaid</a>, which supports <code>zenuml</code> as a diagram type. Install the library from npm to embed the renderer in your own product, documentation site, or internal dashboard. One small language, many homes.</p>
+
+      <h2>Open source, developed in the open</h2>
+      <p>@zenuml/core is free and open source under the MIT license (© 2022 Peng Xiao), developed in public at <a href="https://github.com/mermaid-js/zenuml-core" rel="noopener">github.com/mermaid-js/zenuml-core</a>. The repository lives inside the mermaid-js GitHub organization: ZenUML is not a Mermaid competitor but an alternative sequence-diagram syntax available inside the Mermaid ecosystem — Mermaid's <code>mermaid-zenuml</code> package calls this library's renderer — and it is also usable standalone. Anyone can read the source, file an issue, propose a change, or fork it.</p>
+
+      <h2>Contact &amp; contributing</h2>
+      <p>@zenuml/core is maintained by the ZenUML team together with its open-source contributors. The best place to report a bug, request a feature, or ask a question is the <a href="https://github.com/mermaid-js/zenuml-core/issues" rel="noopener">GitHub issue tracker</a>, where discussion happens in the open and history is preserved. For anything that does not belong in a public issue — partnerships, security disclosures, or press — email us directly at <a href="mailto:hello@zenuml.com">hello@zenuml.com</a>.</p>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn-ink" href="https://app.zenuml.com" rel="noopener">Open the playground →</a>
+      <a class="plink" href="https://github.com/mermaid-js/zenuml-core" rel="noopener">GitHub — mermaid-js/zenuml-core ↗</a>
+      <a class="plink" href="/">← Back to home</a>
+    </div>
+  </div>
+</section>
+</div>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap foot-inner">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brandline">
+          <span class="logo-mark" role="img" aria-label="ZenUML logo"></span>
+          <span class="name">@zenuml/core</span>
+        </div>
+        <p class="foot-blurb">Markdown-inspired text in, interactive sequence diagrams out. Parsed, laid out, and rendered in the browser.</p>
+      </div>
+      <nav class="foot-col" aria-label="Project">
+        <p class="cap">Project</p>
+        <ul>
+          <li><a class="plink" href="https://github.com/mermaid-js/zenuml-core" rel="noopener">GitHub</a></li>
+          <li><a class="plink" href="https://www.npmjs.com/package/@zenuml/core" rel="noopener">npm</a></li>
+          <li><a class="plink" href="https://app.zenuml.com" rel="noopener">Playground — app.zenuml.com</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-label="Documentation">
+        <p class="cap">Docs</p>
+        <ul>
+          <li><a class="plink" href="https://github.com/mermaid-js/zenuml-core/blob/main/docs/DSL_SYNTAX.md" rel="noopener">Syntax reference</a></li>
+          <li><a class="plink" href="https://mermaid.js.org/syntax/zenuml.html" rel="noopener">ZenUML in Mermaid</a></li>
+          <li><a class="plink" href="/llms.txt">/llms.txt</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-label="Site">
+        <p class="cap">Site</p>
+        <ul>
+          <li><a class="plink" href="/about/">About</a></li>
+          <li><a class="plink" href="/privacy/">Privacy</a></li>
+          <li><a class="plink" href="/terms/">Terms</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="foot-bottom">
+      <p>MIT License · © 2022 Peng Xiao</p>
+      <p>Sequence diagrams from text — rendered in the browser</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
