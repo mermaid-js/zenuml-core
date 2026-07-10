@@ -13,6 +13,7 @@
  *  - sub-rule fixture entries are rebuilt on parseZen(code, { rule }).
  */
 import type { ParseResult } from "langium";
+import type { ParserModule } from "@/parser/ir/contract";
 import { parseZen } from "./services";
 import {
   buildRootFacade,
@@ -124,6 +125,12 @@ export const DividerContextFixture = fixture("Divider");
 export const CreationContextFixture = fixture("Creation");
 export const RetContextFixture = fixture("Ret");
 
+// `satisfies ParserModule` binds this facade's module surface to the v1 IR
+// contract (src/parser/ir/contract.ts). tsc (the CI typecheck gate) now fails
+// if the facade drifts from the contract — including the ProgContext /
+// GroupContext / ParticipantContext facade classes, which ParserModule types
+// as `ContextClass<...>` and so are checked transitively against their
+// contract node interfaces.
 const compatDefault = {
   RootContext,
   ProgContext,
@@ -133,6 +140,6 @@ const compatDefault = {
   Errors,
   ErrorDetails,
   Depth,
-};
+} satisfies ParserModule;
 
 export default compatDefault;

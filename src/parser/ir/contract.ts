@@ -6,8 +6,12 @@
  * `src/utils`) consumes today. It contains TypeScript types ONLY — no runtime
  * code, and no imports from `antlr4`, `langium`, or `src/generated-parser`.
  *
- * The Stage-3 Langium compatibility facade classes `implements` these
- * interfaces; the renderer stays untouched through the migration
+ * Enforcement: `src/parser-langium/compat.ts` binds its module surface to
+ * {@link ParserModule} with `satisfies`, so `tsc` (the CI typecheck gate) fails
+ * if the Langium facade drifts from this contract — including the ProgContext /
+ * GroupContext / ParticipantContext facade classes and the ParticipantsCollection
+ * shape, which ParserModule types as members and so are checked transitively.
+ * The renderer stays untouched through the migration
  * (docs/langium-migration/07-risk-map.md Part 3). The contract is derived from:
  *
  * - docs/langium-migration/03-context-api-contract.md (per-method consumer table)
@@ -128,8 +132,13 @@ export interface IrNode {
    * Last token of the node. `stop.stop` is INCLUSIVE — every label-edit /
    * DSL-transform site computes `stop.stop + 1` for the exclusive slice end.
    * Consumers: same set as {@link IrNode.start}.
+   *
+   * `null` when the node consumed zero parser-visible tokens (ANTLR gives such
+   * a rule `stop === null`; the Langium facade mirrors this — facade/nodes.ts
+   * `get stop()`). The DSL-transform consumers above only read `stop` on
+   * non-empty nodes, so they never observe the `null`.
    */
-  readonly stop: TokenView;
+  readonly stop: TokenView | null;
 
   /**
    * Parent node; `null`/`undefined` at the root. Upward walks traverse the
@@ -1134,10 +1143,14 @@ export interface ParticipantsCollection {
   Get(name: string): ParticipantView | undefined;
   /** Number of participants. */
   Size(): number;
-  /** Declaration/mention offset ranges `[start, stop + 1]`. Consumer: Participant.tsx:45-48. */
-  GetPositions(name: string): IrPosition[];
-  /** Assignee offset ranges. Consumer: Participant.tsx:45-48. */
-  GetAssigneePositions(name: string): IrPosition[];
+  /**
+   * Declaration/mention offset ranges `[start, stop + 1]`, or `undefined` when
+   * the name is unknown. Consumer normalizes with `Array.from(… ?? [])`
+   * (Participant.tsx:45-48).
+   */
+  GetPositions(name: string): ReadonlySet<IrPosition> | undefined;
+  /** Assignee offset ranges (see {@link ParticipantsCollection.GetPositions}). */
+  GetAssigneePositions(name: string): ReadonlySet<IrPosition> | undefined;
 }
 
 /* ------------------------------------------------------------------------ */

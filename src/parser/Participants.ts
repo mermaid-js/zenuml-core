@@ -35,17 +35,21 @@ export const blankParticipant = {
 
 export class Participant {
   name: string;
-  private stereotype: string | undefined;
+  // Fields the renderer-facing ParticipantView (ir/contract.ts) exposes are
+  // public; they were already fully exposed via ToValue(), so the previous
+  // `private` was inconsistent encapsulation. `width` stays private — it is not
+  // part of ParticipantView.
+  stereotype: string | undefined;
   private width: number | undefined;
-  private groupId: number | string | undefined;
+  groupId: number | string | undefined;
   explicit: boolean | undefined;
   isStarter: boolean | undefined;
   label: string | undefined;
-  private type: string | undefined;
-  private color: string | undefined;
-  private comment: string | undefined;
-  private assignee: string | undefined;
-  private emoji: string | undefined;
+  type: string | undefined;
+  color: string | undefined;
+  comment: string | undefined;
+  assignee: string | undefined;
+  emoji: string | undefined;
   positions: Set<Position> = new Set();
   assigneePositions: Set<Position> = new Set();
 
