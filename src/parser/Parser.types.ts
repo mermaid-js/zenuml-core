@@ -63,6 +63,11 @@ export interface AsyncMessageContext extends BaseContext {
   SignatureText(): string;
 }
 
+export interface ReturnAsyncMessageContext extends BaseContext {
+  content(): Content;
+  SignatureText(): string;
+}
+
 export interface CreationContext extends BaseContext {
   creationBody(): CreationBody;
   SignatureText(): string;
@@ -72,6 +77,7 @@ export interface CreationContext extends BaseContext {
 
 export interface RetContext extends BaseContext {
   asyncMessage(): AsyncMessage;
+  returnAsyncMessage(): AsyncMessage;
   expr(): Expression;
   SignatureText(): string;
 }

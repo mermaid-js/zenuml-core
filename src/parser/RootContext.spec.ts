@@ -26,8 +26,12 @@ describe("RootContext (two-stage parsing)", () => {
     for (const code of samples) {
       const tree = RootContext(code);
       expect(tree).toBeTruthy();
-      expect(tree.toStringTree(null, tree.parser)).toBe(
-        parseWithFullLL(code).toStringTree(null, parseWithFullLL(code).parser),
+      // toStringTree's ruleNames param is only a fallback for when recog is
+      // omitted (see antlr4 Trees.js) — passing recog always overrides it,
+      // so [] here is equivalent to the ANTLR-idiomatic `null` at runtime,
+      // but @types/antlr4 declares the param as non-nullable string[].
+      expect(tree.toStringTree([], tree.parser)).toBe(
+        parseWithFullLL(code).toStringTree([], parseWithFullLL(code).parser),
       );
     }
   });

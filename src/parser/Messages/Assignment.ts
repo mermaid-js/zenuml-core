@@ -45,16 +45,12 @@ function extractAssignmentFromContext(assignmentContext: any): Assignment | unde
   if (!assignmentContext) {
     return undefined;
   }
-  // @ts-expect-error -- ANTLR generated code
   const assignee = assignmentContext?.assignee()?.getFormattedText();
-  // @ts-expect-error -- ANTLR generated code
   const type = assignmentContext?.type()?.getFormattedText();
-  // @ts-expect-error -- ANTLR generated code
   const assigneeCtx = assignmentContext?.assignee();
   const assigneePosition: [number, number] = assigneeCtx
     ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
     : [-1, -1];
-  // @ts-expect-error -- ANTLR generated code
   const typeCtx = assignmentContext?.type();
   const typePosition: [number, number] = typeCtx
     ? [typeCtx.start.start, typeCtx.stop.stop]

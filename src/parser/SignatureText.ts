@@ -1,5 +1,5 @@
 import sequenceParser from "../generated-parser/sequenceParser";
-import type { AsyncMessageContext, CreationContext, MessageContext, Parameter, RetContext } from "./Parser.types";
+import type { AsyncMessageContext, CreationContext, MessageContext, Parameter, RetContext, ReturnAsyncMessageContext } from "./Parser.types";
 
 // Helper function to format a single parameter
 function formatParameter(param: Parameter): string {
@@ -19,8 +19,9 @@ function formatParameter(param: Parameter): string {
     }
   }
   
-  if (param.expr?.()) {
-    return param.expr().getFormattedText();
+  const expr = param.expr?.();
+  if (expr) {
+    return expr.getFormattedText();
   }
   
   return param.getFormattedText();
@@ -51,6 +52,10 @@ const CreationContext = sequenceParser.CreationContext as any as {
 const RetContext = sequenceParser.RetContext as any as {
   new (): RetContext;
   prototype: RetContext;
+};
+const ReturnAsyncMessageContext = sequenceParser.ReturnAsyncMessageContext as any as {
+  new (): ReturnAsyncMessageContext;
+  prototype: ReturnAsyncMessageContext;
 };
 
 // Now we can safely extend the prototypes with proper typing
@@ -103,7 +108,9 @@ RetContext.prototype.SignatureText = function (this: RetContext): string {
   );
 };
 
-sequenceParser.ReturnAsyncMessageContext.prototype.SignatureText = function (): string {
+ReturnAsyncMessageContext.prototype.SignatureText = function (
+  this: ReturnAsyncMessageContext,
+): string {
   return this.content()?.getFormattedText() ?? "";
 };
 

@@ -18,6 +18,43 @@ export interface AntlrNode {
   getComment?(): string;
 }
 
+/**
+ * The real shape of any ANTLR ParserRuleContext-derived node in this
+ * codebase once the runtime prototype augmentations installed by
+ * src/parser/index.js, src/parser/Origin.js and
+ * src/parser/utils/cloest-ancestor/ClosestAncestor.ts have run — every
+ * generated context class extends antlr4.ParserRuleContext, and those
+ * modules patch its prototype directly at runtime.
+ *
+ * TypeScript's inference for the ANTLR-generated classes (src/generated-parser)
+ * does not see prototype patches applied from other files: neither
+ * `declare module "antlr4"` (merges only with the named-import view of
+ * ParserRuleContext, not the `antlr4.ParserRuleContext` namespace-member
+ * view every generated class's `extends` clause uses) nor
+ * `declare module "@/generated-parser/sequenceParser"` (breaks the module's
+ * inferred default export entirely — sequenceParser.js has no named class
+ * exports to merge against) actually bridges this gap. Both were tried and
+ * reverted; see git history on this file.
+ *
+ * So: cast ANTLR context values to this type (or an intersection adding a
+ * specific context's own generated methods) explicitly at the point of use,
+ * instead of relying on the compiler to infer the augmentation.
+ */
+export interface AugmentedContext {
+  getText(): string;
+  /** Installed in src/parser/index.js. */
+  getFormattedText(): string;
+  /** Installed in src/parser/index.js. */
+  getComment(): string | undefined;
+  parentCtx: AugmentedContext | null;
+  /** Installed in src/parser/utils/cloest-ancestor/ClosestAncestor.ts. */
+  ClosestAncestorStat(): AugmentedContext | undefined;
+  /** Installed in src/parser/utils/cloest-ancestor/ClosestAncestor.ts. */
+  ClosestAncestorBlock(): AugmentedContext | undefined;
+  /** Installed in src/parser/Origin.js. */
+  Origin(): string | undefined;
+}
+
 /** A block containing statements: `{ stat1; stat2; }` */
 export interface BlockNode extends AntlrNode {
   stat?(): StatNode[];

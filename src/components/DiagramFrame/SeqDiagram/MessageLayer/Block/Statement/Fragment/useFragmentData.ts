@@ -10,8 +10,18 @@ import sequenceParser from "@/generated-parser/sequenceParser";
 import Anchor2 from "@/positioning/Anchor2";
 import { centerOf } from "../utils";
 import { createStore, useStore } from "jotai";
+import type { AugmentedContext } from "@/parser/AntlrTypes";
 
 type Store = ReturnType<typeof createStore>;
+
+// Owner is installed on MessageContext/CreationContext's prototypes at
+// runtime (see src/parser/Owner.js) — TS's inference for the ANTLR-generated
+// classes doesn't see prototype patches applied from another file (see
+// AntlrTypes.AugmentedContext's doc comment), so the narrowed context value
+// is cast to this shape below.
+interface OwnedContext extends AugmentedContext {
+  Owner(): string | undefined;
+}
 
 // Helper function to calculate the depth/layers on a participant due to nested calls
 const depthOnParticipant = (context: any, participant: any): number => {
@@ -22,7 +32,7 @@ const depthOnParticipant = (context: any, participant: any): number => {
       return isMessageContext || isCreationContext;
     };
     if (isSync(ctx)) {
-      return ctx.Owner() === participant;
+      return (ctx as unknown as OwnedContext).Owner() === participant;
     }
     return false;
   }).length;

@@ -5,13 +5,24 @@ import { coordinatesAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import type { AugmentedContext } from "@/parser/AntlrTypes";
+
+// Owner/From are installed on MessageContext/CreationContext's prototypes at
+// runtime (see src/parser/Owner.js, src/parser/From.ts) — TS's inference for
+// the ANTLR-generated classes doesn't see prototype patches applied from
+// another file (see AntlrTypes.AugmentedContext's doc comment), so narrowed
+// context values are cast to this shape at each call site below instead.
+interface OwnedContext extends AugmentedContext {
+  Owner(): string | undefined;
+  From(): string | undefined;
+}
 
 const matchesImplicitStarterSelf = (ctx: any, participant: string) => {
   return (
     participant === _STARTER_ &&
     ctx instanceof sequenceParser.MessageContext &&
-    ctx.Owner?.() === undefined &&
-    ctx.From?.() === undefined
+    (ctx as unknown as OwnedContext).Owner?.() === undefined &&
+    (ctx as unknown as OwnedContext).From?.() === undefined
   );
 };
 
@@ -24,7 +35,8 @@ export const depthOnParticipant = (context: any, participant: any): number => {
     };
     if (isSync(ctx)) {
       return (
-        ctx.Owner?.() === participant || matchesImplicitStarterSelf(ctx, participant)
+        (ctx as unknown as OwnedContext).Owner?.() === participant ||
+        matchesImplicitStarterSelf(ctx, participant)
       );
     }
     return false;
@@ -36,7 +48,10 @@ const depthOnParticipant4Stat = (context: any, participant: any): number => {
     return 0;
   }
 
-  const child = context?.children?.[0];
+  // `children` is a real antlr4 runtime field that @types/antlr4 omits from
+  // its declarations (see AntlrTypes.ts / antlr4/context/ParserRuleContext.js).
+  const stat = context as { children?: unknown[] | null };
+  const child = stat.children?.[0];
   if (!child) {
     return 0;
   }
