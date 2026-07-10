@@ -10,7 +10,7 @@ export type MessageViewProps = {
   number?: string;
   rtl?: string | boolean;
   onClick?: () => void;
-  messageRef?: RefObject<HTMLDivElement>;
+  messageRef?: RefObject<HTMLDivElement | null>;
   "data-selected"?: string;
   title?: string;
   children: ReactNode;

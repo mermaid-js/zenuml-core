@@ -37,7 +37,11 @@ export function buildFragmentGeometry(
   coordinates: Coordinates,
   verticalCoordinates: VerticalCoordinates,
   allParticipants: string[],
-  measureText?: (text: string, type: TextType) => number,
+  // Accepted for call-site symmetry with buildStatementGeometry's other
+  // builders, but fragment label width is always measured via
+  // measureSvgFragmentLabelWidth below — this is not wired to a custom
+  // measurer today. See src/svg/buildFragmentGeometry.ts TS6133 fix.
+  _measureText?: (text: string, type: TextType) => number,
   commentHeight: number = 0,
   commentText?: string,
   commentStyle?: Record<string, string>,

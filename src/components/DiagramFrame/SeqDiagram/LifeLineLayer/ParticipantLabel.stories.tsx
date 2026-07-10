@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { ParticipantLabel } from './ParticipantLabel'
 import { createStore, Provider } from 'jotai'
@@ -5,11 +6,23 @@ import { modeAtom, RenderMode } from '../../../../store/Store'
 
 const store = createStore();
 
-const meta: Meta<typeof ParticipantLabel> = {
+// Storybook-only control: toggles modeAtom (Dynamic vs Static) via the
+// `render` functions below. It is not a real ParticipantLabel prop, so the
+// component's own prop type is widened here just for the story args/argTypes.
+type ParticipantLabelStoryProps = ComponentProps<typeof ParticipantLabel> & {
+  editable?: boolean
+}
+
+const meta: Meta<ParticipantLabelStoryProps> = {
   title: 'Components/Sequence Diagram/ParticipantLabel',
   component: ParticipantLabel,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: 'Enhanced ParticipantLabel with single-click editing, hover hints, and improved focus styling.',
+      },
+    },
   },
   decorators: [
     (Story) => (
@@ -20,14 +33,6 @@ const meta: Meta<typeof ParticipantLabel> = {
       </Provider>
     ),
   ],
-  parameters: {
-    layout: 'centered',
-    docs: {
-      description: {
-        component: 'Enhanced ParticipantLabel with single-click editing, hover hints, and improved focus styling.',
-      },
-    },
-  },
   argTypes: {
     labelText: {
       control: 'text',

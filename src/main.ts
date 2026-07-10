@@ -9,7 +9,7 @@ const defaultConfig = {
   theme:
     localStorage.getItem(`${location.hostname}-zenuml-theme`) ||
     "theme-default",
-  onThemeChange: ({ theme }) => {
+  onThemeChange: ({ theme }: { theme: string }) => {
     localStorage.setItem(`${location.hostname}-zenuml-theme`, theme);
   },
   // Demo site sees all editing surfaces; the published library defaults each off.
@@ -44,7 +44,7 @@ export function initZenUml(element: HTMLElement) {
 }
 
 // find the first element with tag `pre` and class `zenuml`
-const elm = document.querySelector("pre.zenuml");
+const elm = document.querySelector("pre.zenuml") as HTMLElement;
 if (elm) {
   initZenUml(elm);
 }

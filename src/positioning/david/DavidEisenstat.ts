@@ -81,7 +81,7 @@ function longestPathTable(graph: any, gaps: Array<any>): any {
 
 // Essentially the usual algorithm for decoding the longest path from the
 // dynamic program table.
-function freezeCriticalGaps(table: any, graph: any, gaps: Array<any>) {
+function freezeCriticalGaps(table: any, gaps: Array<any>) {
   let j = table.length - 1;
   while (j > 0) {
     const argument = table[j].argument;
@@ -125,7 +125,7 @@ function find_optimal(matrix: Array<Array<number>>) {
       return positionsFromTable(table);
     }
     if (table[n - 1].maximum.velocity > 0) {
-      freezeCriticalGaps(table, graph, gaps);
+      freezeCriticalGaps(table, gaps);
     } else {
       advanceGaps(gaps, delta);
     }

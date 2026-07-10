@@ -18,19 +18,19 @@ interface ParticipantOptions {
 
 export const blankParticipant = {
   name: "",
-  color: undefined,
-  comment: undefined,
-  explicit: undefined,
-  groupId: undefined,
-  isStarter: undefined,
-  label: undefined,
-  stereotype: undefined,
-  type: undefined,
-  width: undefined,
-  assignee: undefined,
-  emoji: undefined,
-  positions: new Set(),
-  assigneePositions: new Set(),
+  color: undefined as string | undefined,
+  comment: undefined as string | undefined,
+  explicit: undefined as boolean | undefined,
+  groupId: undefined as number | string | undefined,
+  isStarter: undefined as boolean | undefined,
+  label: undefined as string | undefined,
+  stereotype: undefined as string | undefined,
+  type: undefined as string | undefined,
+  width: undefined as number | undefined,
+  assignee: undefined as string | undefined,
+  emoji: undefined as string | undefined,
+  positions: new Set<Position>(),
+  assigneePositions: new Set<Position>(),
 };
 
 export class Participant {
@@ -137,7 +137,7 @@ export class Participants {
 
   // Items in entries are in the order of entry insertion:
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
-  private Array() {
+  Array() {
     return Array.from(this.participants.entries()).map((entry) => entry[1]);
   }
 

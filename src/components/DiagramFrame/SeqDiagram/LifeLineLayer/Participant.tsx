@@ -42,13 +42,10 @@ export const Participant = (props: {
   const isDefaultStarter = props.entity.name === _STARTER_;
 
   const labelPositions = Array.from(
-    (participants.GetPositions(props.entity.name) as [number, number][]) ?? [],
+    participants.GetPositions(props.entity.name) ?? [],
   ).sort((a, b) => b[0] - a[0]);
   const assigneePositions = Array.from(
-    (participants.GetAssigneePositions(props.entity.name) as [
-      number,
-      number,
-    ][]) ?? [],
+    participants.GetAssigneePositions(props.entity.name) ?? [],
   ).sort((a, b) => b[0] - a[0]);
 
   const calcOffset = () => {

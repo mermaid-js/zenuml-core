@@ -22,7 +22,7 @@ describe("Assignment", function () {
   test.each([
     [[10, 20], [10, 20]],
     [[-1, -1], [-1, -1]],
-  ])(
+  ] as [[number, number], [number, number]][])(
     "labelPosition: input: %s, expected: %s",
     function (labelPosition, expected) {
       const assignment = new Assignment("A", "B", labelPosition, [-1, -1]);
@@ -34,7 +34,7 @@ describe("Assignment", function () {
     [[10, 20], [30, 40], [10, 20], [30, 40]],
     [[-1, -1], [-1, -1], [-1, -1], [-1, -1]],
     [[5, 10], [15, 25], [5, 10], [15, 25]],
-  ])(
+  ] as [[number, number], [number, number], [number, number], [number, number]][])(
     "assigneePosition and typePosition: assigneePos: %s, typePos: %s",
     function (assigneePos, typePos, expectedAssigneePos, expectedTypePos) {
       const assignment = new Assignment("A", "B", assigneePos, typePos);

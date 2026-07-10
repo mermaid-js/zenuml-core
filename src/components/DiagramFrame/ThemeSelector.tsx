@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAtom } from "jotai";
+import { useAtom, useStore } from "jotai";
 import {
   Transition,
   TransitionChild,
@@ -47,6 +47,7 @@ const themes = [
 ];
 
 export const ThemeSelector = () => {
+  const store = useStore();
   const [isOpen, setIsOpen] = useState(false);
   const [theme = themes[0].id, setTheme] = useAtom(themeAtom);
   const [enableScopedTheming, setEnableScopedTheming] = useAtom(
@@ -56,6 +57,7 @@ export const ThemeSelector = () => {
 
   const themeTrackEvent = (action: string) => {
     TrackEvent(
+      store,
       {
         theme,
         enableScopedTheming,

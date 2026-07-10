@@ -53,9 +53,10 @@ export function OrderedParticipants(rootContext: any): IParticipantModel[] {
   if (!rootContext) return [];
   const cached = orderedParticipantsCache.get(rootContext);
   if (cached) return cached;
-  // @ts-expect-error type
   const participants = ToCollector.getParticipants(rootContext);
-  const participantEntries = Array.from(participants.participants.entries());
+  // ToValue() yields plain data (same shape as blankParticipant below),
+  // keeping the real Participants/Participant classes encapsulated.
+  const participantEntries = participants.Array().map((p) => p.ToValue());
 
   const allMessages = AllMessages(rootContext);
 
@@ -64,28 +65,26 @@ export function OrderedParticipants(rootContext: any): IParticipantModel[] {
   const someMessagesMissFrom = allMessages.some((m) => !m.from);
   const needDefaultStarter = emptyContext || someMessagesMissFrom;
   if (needDefaultStarter) {
-    participantEntries.unshift([
-      _STARTER_,
-      { ...blankParticipant, name: _STARTER_, isStarter: true },
-    ]);
+    participantEntries.unshift({
+      ...blankParticipant,
+      name: _STARTER_,
+      isStarter: true,
+    });
   }
-  const result = participantEntries.map(
-    (entry: any, index: number, entries: any) => {
-      const participant = entry[1];
-      const previousName = index > 0 ? entries[index - 1][1].name : "";
+  const result = participantEntries.map((participant, index, entries) => {
+    const previousName = index > 0 ? entries[index - 1].name : "";
 
-      return new Participant(
-        participant.name,
-        previousName,
-        participant.label,
-        participant.type,
-        participant.stereotype,
-        participant.color,
-        participant.groupId,
-        participant.emoji,
-      );
-    },
-  );
+    return new Participant(
+      participant.name,
+      previousName,
+      participant.label,
+      participant.type,
+      participant.stereotype,
+      participant.color,
+      participant.groupId,
+      participant.emoji,
+    );
+  });
   orderedParticipantsCache.set(rootContext, result);
   return result;
 }

@@ -75,7 +75,11 @@ const buildParticipantLines = (
 
   current.splice(insertIndex, 0, {
     name,
+    label: undefined,
     type: type === "default" ? undefined : type,
+    stereotype: undefined,
+    color: undefined,
+    emoji: undefined,
   });
 
   return current.map(formatParticipantDeclaration).join("\n");
