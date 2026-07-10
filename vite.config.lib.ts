@@ -40,6 +40,10 @@ function manualChunks(id: string) {
 export default defineConfig({
   build: {
     target: "esnext",
+    // Don't rake the demo site's public/ (fonts, vendor/, demo html, CNAME) into
+    // the published package — matches cli/parser/lsp configs. build:site uses
+    // vite.config.ts, which is unaffected and still ships public assets.
+    copyPublicDir: false,
     // https://vitejs.dev/guide/build.html#library-mode
     lib: {
       entry: resolve(__dirname, "src/core.tsx"),
