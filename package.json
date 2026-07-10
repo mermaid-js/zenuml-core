@@ -30,6 +30,7 @@
     "changeset:version": "changeset version",
     "release": "bun run build:release && changeset publish",
     "test": "bun test src test/unit",
+    "typecheck": "tsc -b",
     "parity:dualrun": "bun scripts/parity/dualrun-diff.mjs",
     "pw": "playwright test --reporter=list",
     "pw:ci": "playwright test",

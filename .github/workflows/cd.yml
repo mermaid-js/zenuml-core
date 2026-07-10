@@ -38,6 +38,12 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
         run: bun install
+      - name: Typecheck
+        # tsc -b (project references), not bare `tsc --noEmit` — the root
+        # tsconfig.json has "files": [] so a bare `tsc --noEmit` checks zero
+        # files and always exits 0. `-b` builds tsconfig.app.json (src) and
+        # tsconfig.node.json (vite.config.ts), which is the real check.
+        run: bun run typecheck
       - name: Cache Playwright browsers
         uses: actions/cache@v5
         id: playwright-cache
