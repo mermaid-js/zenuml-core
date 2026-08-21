@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    /* Required alongside noEmit for `tsc -b`. Without it, build mode
+       looks for emitted .js outputs that noEmit never produces, so the
+       project is reported out of date on every run and the whole program
+       is re-checked from scratch each time. */
+    "incremental": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2022",
     "lib": ["ES2023"],
