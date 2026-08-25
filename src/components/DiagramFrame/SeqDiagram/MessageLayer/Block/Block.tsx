@@ -23,7 +23,7 @@ export const Block = (props: {
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const statements: any[] = props.context?.stat() || [];
-  const enableReorder = !props.number;
+  const enableReorder = true;
   const [dragKey, setDragKey] = useState<string | null>(null);
   const dragKeyRef = useRef<string | null>(null);
   const [pendingDrag, setPendingDrag] = useState<{
@@ -119,7 +119,7 @@ export const Block = (props: {
     }
     return String(index + 1);
   };
-  const enableGapHandles = enableReorder;
+  const enableGapHandles = true;
 
   return (
     <div

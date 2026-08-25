@@ -34,4 +34,20 @@ describe("messageReorderTransform", () => {
       }),
     ).toBe("A\nB\nC\nA->C: second\nA->B: first\n");
   });
+
+  it("reorders indented messages inside a fragment", () => {
+    const code = "if(cond) {\n  A->B: first\n  B->C: second\n}";
+    const firstStart = code.indexOf("A->B: first");
+    const firstEnd = firstStart + "A->B: first".length - 1;
+    const secondStart = code.indexOf("B->C: second");
+    const secondEnd = secondStart + "B->C: second".length - 1;
+    expect(
+      reorderMessageInDsl({
+        code,
+        sourceRange: [secondStart, secondEnd],
+        targetRange: [firstStart, firstEnd],
+        place: "before",
+      }),
+    ).toBe("if(cond) {\n  B->C: second\n  A->B: first\n}");
+  });
 });

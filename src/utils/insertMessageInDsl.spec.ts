@@ -100,4 +100,66 @@ describe("insertMessageInDsl", () => {
       result.code.slice(result.labelPosition[0], result.labelPosition[1] + 1),
     ).toBe("validate()");
   });
+
+  it("preserves indentation when inserting inside a fragment", () => {
+    const code = "if(cond) {\n  A->B.ping()\n}";
+    const pingStart = code.indexOf("A->B.ping()");
+    const pingEnd = pingStart + "A->B.ping()".length - 1;
+
+    const result = insertMessageInDsl({
+      code,
+      from: "B",
+      to: "A",
+      blockContext: mockBlockContext([[pingStart, pingEnd]]),
+      insertIndex: 1,
+    });
+    expect(result.code).toBe("if(cond) {\n  A->B.ping()\n  B->A.newMessage()\n}");
+    expect(
+      result.code.slice(result.labelPosition[0], result.labelPosition[1] + 1),
+    ).toBe("newMessage()");
+  });
+
+  it("preserves indentation when inserting before in a fragment", () => {
+    const code = "if(cond) {\n  A->B.ping()\n}";
+    const pingStart = code.indexOf("A->B.ping()");
+    const pingEnd = pingStart + "A->B.ping()".length - 1;
+
+    const result = insertMessageInDsl({
+      code,
+      from: "B",
+      to: "A",
+      blockContext: mockBlockContext([[pingStart, pingEnd]]),
+      insertIndex: 0,
+    });
+    expect(result.code).toBe("if(cond) {\n  B->A.newMessage()\n  A->B.ping()\n}");
+    expect(
+      result.code.slice(result.labelPosition[0], result.labelPosition[1] + 1),
+    ).toBe("newMessage()");
+  });
+
+  it("preserves indentation between two statements in a fragment", () => {
+    const code = "if(cond) {\n  A->B.first()\n  B->A.second()\n}";
+    const firstStart = code.indexOf("A->B.first()");
+    const firstEnd = firstStart + "A->B.first()".length - 1;
+    const secondStart = code.indexOf("B->A.second()");
+    const secondEnd = secondStart + "B->A.second()".length - 1;
+
+    const result = insertMessageInDsl({
+      code,
+      from: "A",
+      to: "B",
+      signature: "middle()",
+      blockContext: mockBlockContext([
+        [firstStart, firstEnd],
+        [secondStart, secondEnd],
+      ]),
+      insertIndex: 1,
+    });
+    expect(result.code).toBe(
+      "if(cond) {\n  A->B.first()\n  A->B.middle()\n  B->A.second()\n}",
+    );
+    expect(
+      result.code.slice(result.labelPosition[0], result.labelPosition[1] + 1),
+    ).toBe("middle()");
+  });
 });

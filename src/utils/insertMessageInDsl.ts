@@ -14,6 +14,13 @@ const lineTail = (code: string, index: number) => {
   return next === -1 ? code.length : next + 1;
 };
 
+const detectIndent = (code: string, statements: any[]): string => {
+  if (statements.length === 0) return "";
+  const lineStart = getLineHead(code, statements[0].start.start);
+  const match = code.slice(lineStart).match(/^([ \t]*)/);
+  return match ? match[1] : "";
+};
+
 export const insertMessageInDsl = ({
   code,
   from,
@@ -23,7 +30,8 @@ export const insertMessageInDsl = ({
   insertIndex,
 }: InsertMessageInput) => {
   const statements: any[] = blockContext?.stat() || [];
-  const line = `${from}->${to}.${signature}`;
+  const indent = detectIndent(code, statements);
+  const line = `${indent}${from}->${to}.${signature}`;
 
   if (statements.length === 0) {
     const prefix =
@@ -31,7 +39,7 @@ export const insertMessageInDsl = ({
     const start = prefix.length + `${from}->${to}.`.length;
     const end = start + signature.length - 1;
     return {
-      code: `${prefix}${line}`,
+      code: `${prefix}${from}->${to}.${signature}`,
       labelPosition: [start, end] as [number, number],
     };
   }
@@ -56,7 +64,7 @@ export const insertMessageInDsl = ({
     code.slice(0, insertionOffset) + insertedText + code.slice(insertionOffset);
 
   const actualLineStart = insertionOffset + (needsLeadingNewline ? 1 : 0);
-  const labelStart = actualLineStart + `${from}->${to}.`.length;
+  const labelStart = actualLineStart + indent.length + `${from}->${to}.`.length;
   const labelEnd = labelStart + signature.length - 1;
 
   return {
