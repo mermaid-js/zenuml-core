@@ -1,48 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import lazyIcons from './LazyIcons';
+import React, { useEffect, useState } from "react";
+import { loadIcon } from "./LazyIcons";
 
 interface AsyncIconProps {
-    iconKey: string;
-    className?: string;
-    alt?: string;
+  iconKey: string;
+  className?: string;
+  alt?: string;
 }
 
-export const AsyncIcon: React.FC<AsyncIconProps> = ({ iconKey, className, alt }) => {
-    const [iconContent, setIconContent] = useState<string | null>(null);
+export const AsyncIcon: React.FC<AsyncIconProps> = ({
+  iconKey,
+  className,
+  alt,
+}) => {
+  const [iconContent, setIconContent] = useState<string | null>(null);
 
-    useEffect(() => {
-        const loadIcon = async () => {
-            if (!iconKey || !lazyIcons[iconKey]) {
-                // Try lowercase if exact match fails (legacy behavior support)
-                if (iconKey && lazyIcons[iconKey.toLowerCase()]) {
-                    const module = await lazyIcons[iconKey.toLowerCase()]();
-                    setIconContent(module.default);
-                    return;
-                }
-                return;
-            }
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setIconContent(await loadIcon(iconKey));
+      } catch (err) {
+        console.error(`Failed to load icon: ${iconKey}`, err);
+      }
+    };
 
-            try {
-                const module = await lazyIcons[iconKey]();
-                setIconContent(module.default);
-            } catch (err) {
-                console.error(`Failed to load icon: ${iconKey}`, err);
-            }
-        };
+    load();
+  }, [iconKey]);
 
-        loadIcon();
-    }, [iconKey]);
+  if (!iconContent) {
+    // Render empty placeholder with same dimensions to prevent layout shift
+    return <div className={className} />;
+  }
 
-    if (!iconContent) {
-        // Render empty placeholder with same dimensions to prevent layout shift
-        return <div className={className} />;
-    }
-
-    return (
-        <div
-            className={className}
-            aria-description={alt}
-            dangerouslySetInnerHTML={{ __html: iconContent }}
-        />
-    );
+  return (
+    <div
+      className={className}
+      aria-description={alt}
+      dangerouslySetInnerHTML={{ __html: iconContent }}
+    />
+  );
 };
