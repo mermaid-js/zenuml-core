@@ -191,7 +191,7 @@ export interface IrNode {
    *
    * The single most-called method in the codebase (03 §3).
    * Consumers: Interaction-async.tsx:96,100, SelfInvocationAsync.tsx:53,
-   * FragmentSection.tsx:30, FragmentRef.tsx:19, ConditionLabel.tsx:23,
+   * FragmentSingleBlock.tsx, FragmentRef.tsx, ConditionLabel.tsx,
    * FragmentTryCatchFinally.tsx:31, LifeLineGroup.tsx:137,
    * ParticipantStylePanel.tsx:137, utils/participantStyleTransform.ts:28-52,
    * positioning/vertical/vm/AsyncMessageStatementVM.ts:28,
@@ -902,8 +902,8 @@ export interface RetContext extends IrNode {
 /** `(condition)` wrapper (`parExpr` rule). */
 export interface ParExprContext extends IrNode {
   /**
-   * Consumers: FragmentAlt.tsx:23-43, FragmentLoop.tsx:30, FragmentOpt.tsx:19,
-   * FragmentPar.tsx:30, FragmentCritical.tsx:29, vm/FragmentSingleBlockVM.ts:23,
+   * Consumers: FragmentAlt.tsx and FragmentSingleBlock.tsx,
+   * vm/FragmentSingleBlockVM.ts,
    * vm/FragmentAltVM.ts:25-48.
    */
   condition(): ConditionContext | null;
@@ -956,28 +956,28 @@ export interface AltContext extends IrNode {
 
 /** `opt` fragment. */
 export interface OptContext extends IrNode {
-  /** Consumers: FragmentOpt.tsx:19-20,70, vm/FragmentSingleBlockVM.ts:23-28. */
+  /** Consumers: FragmentSingleBlock.tsx and vm/FragmentSingleBlockVM.ts. */
   parExpr(): ParExprContext | null;
   braceBlock(): BraceBlockContext | null;
 }
 
 /** `par` fragment. */
 export interface ParContext extends IrNode {
-  /** Consumers: FragmentPar.tsx:30-31,73-77, vm/FragmentSingleBlockVM.ts:23-28. */
+  /** Consumers: FragmentSingleBlock.tsx and vm/FragmentSingleBlockVM.ts. */
   parExpr(): ParExprContext | null;
   braceBlock(): BraceBlockContext | null;
 }
 
 /** `critical` fragment. */
 export interface CriticalContext extends IrNode {
-  /** Consumers: FragmentCritical.tsx:29-32, vm/FragmentSingleBlockVM.ts:23-28. */
+  /** Consumers: FragmentSingleBlock.tsx and vm/FragmentSingleBlockVM.ts. */
   parExpr(): ParExprContext | null;
   braceBlock(): BraceBlockContext | null;
 }
 
 /** `loop` / `while` / `for` / `forEach` fragment. */
 export interface LoopContext extends IrNode {
-  /** Consumers: FragmentLoop.tsx:30-32, vm/FragmentSingleBlockVM.ts:23-28. */
+  /** Consumers: FragmentSingleBlock.tsx and vm/FragmentSingleBlockVM.ts. */
   parExpr(): ParExprContext | null;
   braceBlock(): BraceBlockContext | null;
   /** See {@link IfBlockContext.Statements}. */
@@ -986,7 +986,7 @@ export interface LoopContext extends IrNode {
 
 /** `section` / `frame` fragment. */
 export interface SectionContext extends IrNode {
-  /** Section label: `atom()?.getFormattedText()`. Consumers: FragmentSection.tsx:28-31. */
+  /** Section label: `atom()?.getFormattedText()`. Consumer: FragmentSingleBlock.tsx. */
   atom(): AtomContext | null;
   braceBlock(): BraceBlockContext | null;
 }

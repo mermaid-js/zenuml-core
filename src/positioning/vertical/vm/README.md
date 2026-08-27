@@ -65,23 +65,8 @@ classDiagram
 
     StatementVM <|-- FragmentVM
 
-    class FragmentLoopVM {
-      +kind: "loop"
-    }
     class FragmentSingleBlockVM {
-      <<abstract>>
-    }
-    class FragmentOptVM {
-      +kind: "opt"
-    }
-    class FragmentParVM {
-      +kind: "par"
-    }
-    class FragmentSectionVM {
-      +kind: "section"
-    }
-    class FragmentCriticalVM {
-      +kind: "critical"
+      +kind: "loop" | "opt" | "par" | "section" | "critical"
     }
     class FragmentTryCatchVM {
       +kind: "tcf"
@@ -93,12 +78,7 @@ classDiagram
       +kind: "ref"
     }
 
-    FragmentVM <|-- FragmentLoopVM
     FragmentVM <|-- FragmentSingleBlockVM
-    FragmentSingleBlockVM <|-- FragmentOptVM
-    FragmentSingleBlockVM <|-- FragmentParVM
-    FragmentSingleBlockVM <|-- FragmentSectionVM
-    FragmentSingleBlockVM <|-- FragmentCriticalVM
     FragmentVM <|-- FragmentTryCatchVM
     FragmentVM <|-- FragmentAltVM
     FragmentVM <|-- FragmentRefVM
