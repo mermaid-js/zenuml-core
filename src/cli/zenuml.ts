@@ -584,6 +584,111 @@ async function checkOne(input: string): Promise<FileCheckResult> {
   };
 }
 
+interface RenderConfig {
+  configScale?: number;
+  configTheme?: string;
+  configOutputFormat?: string;
+  multipleInputs: boolean;
+}
+
+/** Render every ZenUML fence in one Markdown input and write the transformed document. */
+async function renderMarkdownFile(
+  inputArg: string,
+  args: CliArgs,
+  config: RenderConfig,
+): Promise<void> {
+  const mdContent = await readCode(inputArg);
+  const effectiveFormat =
+    args.outputFormat ?? config.configOutputFormat ?? "svg";
+  if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
+    throw new Error(
+      `Unsupported output format: "${effectiveFormat}". Use "svg" or "png".`,
+    );
+  }
+
+  const inputPath = inputArg === "-" ? undefined : resolve(inputArg);
+  const outputPath =
+    args.output === "-"
+      ? "-"
+      : args.output
+        ? resolve(args.output)
+        : inputPath
+          ? join(
+              dirname(inputPath),
+              `${basename(inputArg, extname(inputArg))}-rendered.md`,
+            )
+          : "-";
+  const imageDir =
+    outputPath !== "-"
+      ? dirname(outputPath)
+      : inputPath
+        ? dirname(inputPath)
+        : process.cwd();
+  const imageStem = inputPath
+    ? basename(inputArg, extname(inputArg))
+    : outputPath !== "-"
+      ? basename(outputPath, extname(outputPath))
+      : "diagram";
+
+  const renderOptions: RenderOptions = {};
+  const effectiveTheme = args.theme ?? config.configTheme;
+  if (effectiveTheme) {
+    renderOptions.theme = effectiveTheme as RenderOptions["theme"];
+  }
+
+  const blocks = extractZenumlBlocks(mdContent);
+  const imageFiles = new Map<number, string>();
+  for (const block of blocks) {
+    if (block.empty) continue;
+
+    const imageFilename = `${imageStem}-zenuml-${block.index}.${effectiveFormat}`;
+    const imageFilePath = join(imageDir, imageFilename);
+    let result: ReturnType<typeof renderToSvg>;
+    try {
+      result = renderToSvg(block.code, renderOptions);
+    } catch (err: any) {
+      throw new Error(
+        `Failed to render zenuml block ${block.index}: ${err.message}`,
+      );
+    }
+
+    mkdirSync(imageDir, { recursive: true });
+    const image =
+      effectiveFormat === "png"
+        ? await rasterizeToPng(
+            result.svg,
+            result.width,
+            result.height,
+            args.scale ?? config.configScale ?? 2,
+          )
+        : result.svg;
+    writeFileSync(imageFilePath, image);
+    imageFiles.set(block.index, imageFilename);
+
+    if (!args.quiet && !args.watch) {
+      process.stderr.write(`Wrote ${imageFilePath}\n`);
+    }
+  }
+
+  const outputMd = [...blocks].reverse().reduce((markdown, block) => {
+    const replacement = block.empty
+      ? ""
+      : `![${block.title || `diagram ${block.index + 1}`}](${imageFiles.get(block.index)})`;
+    return markdown.replace(block.raw, replacement);
+  }, mdContent);
+
+  if (outputPath === "-") {
+    process.stdout.write(outputMd);
+    return;
+  }
+
+  mkdirSync(dirname(outputPath), { recursive: true });
+  writeFileSync(outputPath, outputMd, "utf-8");
+  if (!args.quiet && !args.watch) {
+    process.stderr.write(`Wrote ${outputPath}\n`);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -725,186 +830,6 @@ async function main(): Promise<void> {
   }
 
   // ---------------------------------------------------------------------------
-  // --md mode: render Markdown with zenuml code blocks
-  // ---------------------------------------------------------------------------
-  // Determine if we're in Markdown mode: explicit --md flag or auto-detect from extension
-  const isMdMode =
-    args.md ||
-    expandedInputs.some((f) => f !== "-" && /\.(?:md|markdown)$/i.test(f));
-
-  if (isMdMode) {
-    // Validate: --md with multiple inputs is an error
-    if (expandedInputs.length > 1) {
-      process.stderr.write(
-        "Error: --md mode supports only a single input file.\n",
-      );
-      process.exit(1);
-    }
-    const inputArg = expandedInputs[0];
-
-    // Validate: --md with non-.md input is an error (only when --md was explicitly passed)
-    if (args.md && inputArg !== "-") {
-      const ext = extname(inputArg).toLowerCase();
-      if (ext !== ".md" && ext !== ".markdown") {
-        process.stderr.write(
-          `Error: --md flag requires a .md or .markdown input file, got: ${inputArg}\n`,
-        );
-        process.exit(1);
-      }
-    }
-
-    // Read markdown content
-    let mdContent: string;
-    try {
-      mdContent = await readCode(inputArg);
-    } catch (err: any) {
-      process.stderr.write(`Error: ${err.message}\n`);
-      process.exit(1);
-    }
-
-    // Effective format for diagram images
-    const effectiveFormat = args.outputFormat ?? "svg";
-    if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
-      process.stderr.write(
-        `Error: Unsupported output format: "${effectiveFormat}". Use "svg" or "png".\n`,
-      );
-      process.exit(1);
-    }
-
-    // Determine output dir for images:
-    // If -o is given (and not stdout), use that file's directory
-    // Otherwise if input is a file, use input's directory
-    // For -o - (stdout), images go adjacent to the input file (or cwd for stdin)
-    let imageDir: string;
-    let mdOutputPath: string;
-
-    if (args.output && args.output !== "-") {
-      const resolvedOutput = resolve(args.output);
-      imageDir = dirname(resolvedOutput);
-      mdOutputPath = resolvedOutput;
-    } else if (args.output === "-") {
-      // stdout: images go adjacent to input or cwd
-      if (inputArg !== "-") {
-        imageDir = dirname(resolve(inputArg));
-      } else {
-        imageDir = process.cwd();
-      }
-      mdOutputPath = "-";
-    } else {
-      // No -o: default output is {stem}-rendered.md adjacent to input
-      if (inputArg !== "-") {
-        const resolvedInput = resolve(inputArg);
-        const inputDir = dirname(resolvedInput);
-        const ext = extname(inputArg);
-        const stem = basename(inputArg, ext);
-        imageDir = inputDir;
-        mdOutputPath = join(inputDir, `${stem}-rendered.md`);
-      } else {
-        imageDir = process.cwd();
-        mdOutputPath = "-";
-      }
-    }
-
-    // Determine stem for image file names (from input or output path)
-    let imageStem: string;
-    if (inputArg !== "-") {
-      const ext = extname(inputArg);
-      imageStem = basename(inputArg, ext);
-    } else if (mdOutputPath !== "-") {
-      const ext = extname(mdOutputPath);
-      imageStem = basename(mdOutputPath, ext);
-    } else {
-      imageStem = "diagram";
-    }
-
-    // Extract zenuml blocks
-    const blocks = extractZenumlBlocks(mdContent);
-
-    // Effective render options
-    const effectiveScale = args.scale ?? 2;
-    const effectiveTheme = args.theme;
-    const renderOptions: RenderOptions = {};
-    if (effectiveTheme) {
-      renderOptions.theme = effectiveTheme as RenderOptions["theme"];
-    }
-
-    // Render each non-empty block and collect image paths
-    const imageFiles: Map<number, string> = new Map();
-    for (const block of blocks) {
-      if (block.empty) continue;
-      const imageFilename = `${imageStem}-zenuml-${block.index}.${effectiveFormat}`;
-      const imageFilePath = join(imageDir, imageFilename);
-
-      let svg: string;
-      let svgWidth: number;
-      let svgHeight: number;
-      try {
-        const result = renderToSvg(block.code, renderOptions);
-        svg = result.svg;
-        svgWidth = result.width;
-        svgHeight = result.height;
-      } catch (err: any) {
-        process.stderr.write(
-          `Error: Failed to render zenuml block ${block.index}: ${err.message}\n`,
-        );
-        process.exit(1);
-      }
-
-      // Ensure image directory exists
-      mkdirSync(imageDir, { recursive: true });
-
-      if (effectiveFormat === "png") {
-        const pngBuffer = await rasterizeToPng(
-          svg,
-          svgWidth,
-          svgHeight,
-          effectiveScale,
-        );
-        writeFileSync(imageFilePath, pngBuffer);
-      } else {
-        writeFileSync(imageFilePath, svg, "utf-8");
-      }
-
-      if (!args.quiet) {
-        process.stderr.write(`Wrote ${imageFilePath}\n`);
-      }
-
-      imageFiles.set(block.index, imageFilename);
-    }
-
-    // Replace blocks in the Markdown
-    let outputMd = mdContent;
-    // Process blocks in reverse order so that string offsets remain valid
-    // We need to find and replace each raw block
-    // Re-scan in reverse order to replace correctly
-    const sortedBlocks = [...blocks].reverse();
-    for (const block of sortedBlocks) {
-      const altText = block.title || `diagram ${block.index + 1}`;
-      if (block.empty) {
-        // Remove empty blocks entirely
-        outputMd = outputMd.replace(block.raw, "");
-      } else {
-        const imageFilename = imageFiles.get(block.index)!;
-        const replacement = `![${altText}](${imageFilename})`;
-        outputMd = outputMd.replace(block.raw, replacement);
-      }
-    }
-
-    // Write output Markdown
-    if (mdOutputPath === "-") {
-      process.stdout.write(outputMd);
-    } else {
-      mkdirSync(dirname(mdOutputPath), { recursive: true });
-      writeFileSync(mdOutputPath, outputMd, "utf-8");
-      if (!args.quiet) {
-        process.stderr.write(`Wrote ${mdOutputPath}\n`);
-      }
-    }
-
-    process.exit(0);
-  }
-
-  // ---------------------------------------------------------------------------
   // Config file merging: config file < CLI flags
   // ---------------------------------------------------------------------------
   let configScale: number | undefined;
@@ -936,128 +861,41 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  const config: RenderConfig = {
+    configScale,
+    configTheme,
+    configOutputFormat,
+    multipleInputs,
+  };
+
+  // Markdown mode is explicit with --md or inferred from the input extension.
+  const isMdMode =
+    args.md ||
+    expandedInputs.some((f) => f !== "-" && /\.(?:md|markdown)$/i.test(f));
+  if (isMdMode && multipleInputs) {
+    process.stderr.write(
+      "Error: --md mode supports only a single input file.\n",
+    );
+    process.exit(1);
+  }
+
+  const inputArg = expandedInputs[0];
+  if (args.md && inputArg !== "-" && !/\.(?:md|markdown)$/i.test(inputArg)) {
+    process.stderr.write(
+      `Error: --md flag requires a .md or .markdown input file, got: ${inputArg}\n`,
+    );
+    process.exit(1);
+  }
+
   // ---------------------------------------------------------------------------
   // --watch mode
   // ---------------------------------------------------------------------------
   if (args.watch) {
-    const renderForWatch = async (inputArg: string): Promise<void> => {
-      await renderOneFile(inputArg, args, {
-        configScale,
-        configTheme,
-        configOutputFormat,
-        multipleInputs,
-      });
-    };
-
-    const renderMdForWatch = async (inputArg: string): Promise<void> => {
-      // Re-invoke main md render for this file by delegating back through renderOneFile
-      // but we need md-specific rendering — so call the same md render path.
-      // For simplicity, we re-read and re-run the md render inline.
-      let mdContent: string;
-      try {
-        mdContent = readFileSync(resolve(inputArg), "utf-8");
-      } catch {
-        throw new Error(`Cannot read input file: ${resolve(inputArg)}`);
-      }
-
-      const effectiveFormat = args.outputFormat ?? "svg";
-      if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
-        throw new Error(
-          `Unsupported output format: "${effectiveFormat}". Use "svg" or "png".`,
-        );
-      }
-
-      let mdOutputPath: string;
-      let imageDir: string;
-
-      if (args.output && args.output !== "-") {
-        const resolvedOutput = resolve(args.output);
-        imageDir = dirname(resolvedOutput);
-        mdOutputPath = resolvedOutput;
-      } else if (args.output === "-") {
-        imageDir = dirname(resolve(inputArg));
-        mdOutputPath = "-";
-      } else {
-        const resolvedInput = resolve(inputArg);
-        const inputDir = dirname(resolvedInput);
-        const ext = extname(inputArg);
-        const stem = basename(inputArg, ext);
-        imageDir = inputDir;
-        mdOutputPath = join(inputDir, `${stem}-rendered.md`);
-      }
-
-      const ext = extname(inputArg);
-      const imageStem = basename(inputArg, ext);
-      const blocks = extractZenumlBlocks(mdContent);
-
-      const effectiveScale = args.scale ?? configScale ?? 2;
-      const effectiveTheme = args.theme ?? configTheme;
-      const renderOptions: RenderOptions = {};
-      if (effectiveTheme) {
-        renderOptions.theme = effectiveTheme as RenderOptions["theme"];
-      }
-
-      const imageFiles: Map<number, string> = new Map();
-      for (const block of blocks) {
-        if (block.empty) continue;
-        const imageFilename = `${imageStem}-zenuml-${block.index}.${effectiveFormat}`;
-        const imageFilePath = join(imageDir, imageFilename);
-
-        const result = renderToSvg(block.code, renderOptions);
-        const { svg, width: svgWidth, height: svgHeight } = result;
-
-        mkdirSync(imageDir, { recursive: true });
-
-        if (effectiveFormat === "png") {
-          const pngBuffer = await rasterizeToPng(
-            svg,
-            svgWidth,
-            svgHeight,
-            effectiveScale,
-          );
-          writeFileSync(imageFilePath, pngBuffer);
-        } else {
-          writeFileSync(imageFilePath, svg, "utf-8");
-        }
-
-        imageFiles.set(block.index, imageFilename);
-      }
-
-      let outputMd = mdContent;
-      const sortedBlocks = [...blocks].reverse();
-      for (const block of sortedBlocks) {
-        const altText = block.title || `diagram ${block.index + 1}`;
-        if (block.empty) {
-          outputMd = outputMd.replace(block.raw, "");
-        } else {
-          const imageFilename = imageFiles.get(block.index)!;
-          const replacement = `![${altText}](${imageFilename})`;
-          outputMd = outputMd.replace(block.raw, replacement);
-        }
-      }
-
-      if (mdOutputPath === "-") {
-        process.stdout.write(outputMd);
-      } else {
-        mkdirSync(dirname(mdOutputPath), { recursive: true });
-        writeFileSync(mdOutputPath, outputMd, "utf-8");
-      }
-    };
-
-    // Detect md inputs
-    const hasMdInputs = expandedInputs.some((f) =>
-      /\.(?:md|markdown)$/i.test(f),
-    );
-    const renderMdFnForWatch = hasMdInputs ? renderMdForWatch : undefined;
-
-    const watchHandle = await startWatchMode(
-      expandedInputs,
-      renderForWatch,
-      undefined,
-      undefined,
-      undefined,
-      renderMdFnForWatch,
-    );
+    const renderForWatch = (input: string) =>
+      isMdMode
+        ? renderMarkdownFile(input, args, config)
+        : renderOneFile(input, args, config);
+    const watchHandle = await startWatchMode(expandedInputs, renderForWatch);
 
     process.on("SIGINT", () => {
       watchHandle.shutdown();
@@ -1067,6 +905,16 @@ async function main(): Promise<void> {
     // Keep the process alive (watch mode runs indefinitely)
     await new Promise<void>(() => {});
     return;
+  }
+
+  if (isMdMode) {
+    try {
+      await renderMarkdownFile(inputArg, args, config);
+      process.exit(0);
+    } catch (err: any) {
+      process.stderr.write(`Error: ${err.message}\n`);
+      process.exit(1);
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1110,12 +958,7 @@ async function main(): Promise<void> {
 async function renderOneFile(
   inputArg: string,
   args: CliArgs,
-  config: {
-    configScale?: number;
-    configTheme?: string;
-    configOutputFormat?: string;
-    multipleInputs: boolean;
-  },
+  config: RenderConfig,
 ): Promise<void> {
   // Resolve effective values: CLI flag > config > default
   const outputPath = resolveOutput(inputArg, args.output, ".svg");
