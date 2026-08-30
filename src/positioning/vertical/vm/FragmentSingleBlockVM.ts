@@ -3,13 +3,15 @@ import type { StatementKind } from "@/positioning/vertical/StatementTypes";
 import { FragmentVM } from "./FragmentVM";
 import type { LayoutRuntime } from "./types";
 
-export abstract class FragmentSingleBlockVM extends FragmentVM {
-  abstract readonly kind: StatementKind;
-
+export class FragmentSingleBlockVM extends FragmentVM {
   constructor(
     statement: any,
     protected readonly fragment: any,
     runtime: LayoutRuntime,
+    public readonly kind: Extract<
+      StatementKind,
+      "critical" | "loop" | "opt" | "par" | "section"
+    >,
   ) {
     super(statement, runtime);
   }

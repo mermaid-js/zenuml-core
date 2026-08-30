@@ -3,12 +3,8 @@ import { CreationStatementVM } from "./CreationStatementVM";
 import { DividerStatementVM } from "./DividerStatementVM";
 import { EmptyStatementVM } from "./EmptyStatementVM";
 import { FragmentAltVM } from "./FragmentAltVM";
-import { FragmentCriticalVM } from "./FragmentCriticalVM";
-import { FragmentLoopVM } from "./FragmentLoopVM";
-import { FragmentOptVM } from "./FragmentOptVM";
-import { FragmentParVM } from "./FragmentParVM";
 import { FragmentRefVM } from "./FragmentRefVM";
-import { FragmentSectionVM } from "./FragmentSectionVM";
+import { FragmentSingleBlockVM } from "./FragmentSingleBlockVM";
 import { FragmentTryCatchVM } from "./FragmentTryCatchVM";
 import { ReturnStatementVM } from "./ReturnStatementVM";
 import type { StatementVM } from "./StatementVM";
@@ -42,29 +38,11 @@ export const createStatementVM = (
     return new DividerStatementVM(statement, runtime);
   }
 
-  const loop = statement.loop?.();
-  if (loop) {
-    return new FragmentLoopVM(statement, loop, runtime);
-  }
-
-  const opt = statement.opt?.();
-  if (opt) {
-    return new FragmentOptVM(statement, opt, runtime);
-  }
-
-  const par = statement.par?.();
-  if (par) {
-    return new FragmentParVM(statement, par, runtime);
-  }
-
-  const section = statement.section?.();
-  if (section) {
-    return new FragmentSectionVM(statement, section, runtime);
-  }
-
-  const critical = statement.critical?.();
-  if (critical) {
-    return new FragmentCriticalVM(statement, critical, runtime);
+  for (const kind of ["loop", "opt", "par", "section", "critical"] as const) {
+    const fragment = statement[kind]?.();
+    if (fragment) {
+      return new FragmentSingleBlockVM(statement, fragment, runtime, kind);
+    }
   }
 
   const tcf = statement.tcf?.();

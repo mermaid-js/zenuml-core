@@ -29,6 +29,7 @@ node_modules_bak
 gen
 .antlr
 src/g4/sequenceLexer.tokens
+src/generated-parser/*.tokens
 src/generated-parser/sequenceParser.interp
 src/generated-parser/sequenceLexer.interp
 

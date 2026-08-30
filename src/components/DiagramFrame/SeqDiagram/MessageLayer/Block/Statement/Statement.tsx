@@ -1,9 +1,5 @@
-import { FragmentLoop } from "./Fragment/FragmentLoop";
 import { FragmentAlt } from "./Fragment/FragmentAlt";
-import { FragmentPar } from "./Fragment/FragmentPar";
-import { FragmentOpt } from "./Fragment/FragmentOpt";
-import { FragmentSection } from "./Fragment/FragmentSection";
-import { FragmentCritical } from "./Fragment/FragmentCritical";
+import { FragmentSingleBlock } from "./Fragment/FragmentSingleBlock";
 import { FragmentTryCatchFinally } from "./Fragment/FragmentTryCatchFinally";
 import { FragmentRef } from "./Fragment/FragmentRef";
 import { Creation } from "./Creation/Creation";
@@ -39,19 +35,16 @@ export const Statement = (props: {
     number: props.number,
   };
 
+  const singleBlockKind = (
+    ["loop", "par", "opt", "section", "critical"] as const
+  ).find((kind) => props.context[kind]());
+  if (singleBlockKind) {
+    return <FragmentSingleBlock {...subProps} kind={singleBlockKind} />;
+  }
+
   switch (true) {
-    case Boolean(props.context.loop()):
-      return <FragmentLoop {...subProps} />;
     case Boolean(props.context.alt()):
       return <FragmentAlt {...subProps} />;
-    case Boolean(props.context.par()):
-      return <FragmentPar {...subProps} />;
-    case Boolean(props.context.opt()):
-      return <FragmentOpt {...subProps} />;
-    case Boolean(props.context.section()):
-      return <FragmentSection {...subProps} />;
-    case Boolean(props.context.critical()):
-      return <FragmentCritical {...subProps} />;
     case Boolean(props.context.tcf()):
       return <FragmentTryCatchFinally {...subProps} />;
     case Boolean(props.context.ref()):
