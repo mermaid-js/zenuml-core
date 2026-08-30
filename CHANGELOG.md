@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.2.1
+
+### Patch Changes
+
+- [#421](https://github.com/mermaid-js/zenuml-core/pull/421) [`6436b95`](https://github.com/mermaid-js/zenuml-core/commit/6436b95d0fc1c32f8ca355ef1a15d16d5bb3adec) Thanks [@MrCoder](https://github.com/MrCoder)! - Reduce the core maintenance surface by consolidating Markdown rendering, cloud icon loading, and single-block fragment rendering while preserving parser and diagram behavior. Markdown watch mode now reuses the same rendering path as one-shot mode.
+
 ## 4.2.0
 
 ### Minor Changes
