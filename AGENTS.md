@@ -5,7 +5,7 @@
 
 ## Build, Test, and Development Commands
 - `bun install` – install dependencies (Bun 1.x, Node ≥20).
-- `bun run dev` – Vite dev server on `http://localhost:4000`.
+- `bun run dev` – Vite dev server on `http://localhost:14000`.
 - `bun run build` – library bundle via `vite.config.lib.ts`.
 - `bun run build:site` / `bun run build:gh-pages` – demo/docs build (standard vs GitHub Pages).
 - `bun run test` – Bun unit tests covering `src` and `test/unit`.
