@@ -43,7 +43,6 @@ export class SyncMessageStatementVM extends StatementVM {
     }
 
     const height = cursor - top;
-    // console.info("syncMessageVM::end", height, commentHeight, messageHeight);
 
     return { top, height, kind: this.kind };
   }

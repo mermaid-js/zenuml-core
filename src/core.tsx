@@ -1,4 +1,3 @@
-import parentLogger from "./logger/logger";
 import {
   codeAtom,
   enableDividerInsertionAtom,
@@ -41,7 +40,6 @@ import { createStore, Provider } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
 export { renderToSvg } from "./svg/renderToSvg";
 export type { RenderResult, RenderOptions } from "./svg/renderToSvg";
-const logger = parentLogger.child({ name: "core" });
 
 interface Config {
   theme?: string;
@@ -145,10 +143,8 @@ export default class ZenUml implements IZenUml {
     config: Config | undefined,
   ): Promise<IZenUml> {
     if (this._currentTimeout) {
-      logger.debug("rendering clearTimeout");
       clearTimeout(this._currentTimeout);
     }
-    logger.debug("rendering", code, config);
     this._code = code === undefined ? this._code : code;
     this._theme = config?.theme || this._theme;
     this.store.set(stickyOffsetAtom, config?.stickyOffset ?? 0);
@@ -175,7 +171,6 @@ export default class ZenUml implements IZenUml {
   }
 
   async doRender(config: Config | undefined) {
-    logger.debug("rendering start");
     const start = getStartTime();
     clearCache();
     this.store.set(onContentChangeAtom, config?.onContentChange || (() => {}));
@@ -216,17 +211,13 @@ export default class ZenUml implements IZenUml {
       });
     }
     setTimeout(() => {
-      this._lastRenderingCostMilliseconds = calculateCostTime(
-        "rendering end",
-        start,
-      );
+      this._lastRenderingCostMilliseconds = calculateCostTime(start);
     }, 0);
   }
 
   calculateDebounceMilliseconds(): number {
     let debounce = this._lastRenderingCostMilliseconds;
     if (debounce > 2000) debounce = 2000;
-    logger.debug("rendering debounce: " + debounce + "ms");
     return debounce;
   }
 
@@ -244,7 +235,6 @@ export default class ZenUml implements IZenUml {
         // Clear any previous errors
         Parser.ErrorDetails.length = 0;
         const result = Parser.RootContext(codeOrText);
-        logger.debug("errors", Parser.ErrorDetails);
         const errors = [...Parser.ErrorDetails];
         // Clear errors after reading
         Parser.ErrorDetails.length = 0;

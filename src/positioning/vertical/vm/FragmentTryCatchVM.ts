@@ -43,7 +43,6 @@ export class FragmentTryCatchVM extends StatementVM {
     }
 
     cursor += this.metrics.fragmentPaddingBottom + 1; // .fragment =>padding-bottom: 10px
-    // console.info("FragmentTryCatchVM::end", cursor, cursor - top);
 
     return {
       top,

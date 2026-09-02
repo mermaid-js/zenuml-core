@@ -1,4 +1,3 @@
-import logger from "@/logger/logger";
 import {
   coordinatesAtom,
   lifelineReadyAtom,
@@ -14,8 +13,6 @@ import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { EventBus } from "@/EventBus";
-
-// const logger = parentLogger.child({ name: "LifeLine" });
 
 export const LifeLine = (props: {
   entity: any;
@@ -64,37 +61,10 @@ export const LifeLine = (props: {
         creationTop != null
           ? Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, creationTop)
           : PARTICIPANT_TOP_SPACE_FOR_GROUP;
-      // logger.debug(
-      //   `LifeLine top resolved for ${props.entity.name}: ${resolvedTop}px`,
-      // );
-      // if (
-      //   typeof window !== "undefined" &&
-      //   (window as any).__ZEN_CAPTURE_VERTICAL
-      // ) {
-      //   (window as any).__zenumlVerticalEntries = verticalCoordinates.entries();
-      //   const registry =
-      //     (window as any).__zenumlLifelineDebug ||
-      //     ((window as any).__zenumlLifelineDebug = {});
-      //   registry[props.entity.name] = {
-      //     creationTop,
-      //     resolvedTop,
-      //     8,
-      //     components: verticalCoordinates.getCreationTopComponents(
-      //       props.entity.name,
-      //     ),
-      //   };
-      //   // Also export the full creation top records for all participants
-      //   (window as any).__zenumlCreationTopRecords =
-      //     verticalCoordinates.getCreationTopRecords();
-      // }
-      if (creationTop != null) {
-        logger.info(`[LifeLine] creation participant="${props.entity.name}" creationTop=${creationTop} resolvedTop=${resolvedTop}`);
-      }
       setTop(resolvedTop);
       return true;
     };
 
-    // console.info("LifeLine:verticalMode", verticalMode);
     if (verticalMode === "html") {
       resolveFromVM();
     } else {

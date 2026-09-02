@@ -1,6 +1,4 @@
-import parentLogger from "./logger/logger";
 import ZenUml from "./core";
-const logger = parentLogger.child({ name: "main" });
 
 // find the fist element with tag `pre` and class `zenuml`
 const elm = document.querySelector("pre.zenuml");
@@ -29,8 +27,4 @@ zenUml.render(code, {
     window.__lastContentChange = code1;
     console.log('onContentChange', code1);
   }
-}).then((r) => {
-  logger.debug("render resolved", r);
 });
-// @ts-expect-error -- dynamic import
-window.parentLogger = parentLogger;

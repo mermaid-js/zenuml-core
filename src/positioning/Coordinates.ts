@@ -9,7 +9,6 @@ import { TextType } from "./Coordinate";
 import type { WidthFunc } from "./Coordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
-import logger from "@/logger/logger";
 import { find_optimal } from "./david/DavidEisenstat";
 import { AllMessages } from "@/parser/MessageCollector";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
@@ -59,7 +58,6 @@ export class Coordinates {
     }
     const leftGap = this.getParticipantGap(this.participantModels[0]);
     const position = leftGap + this.positionsCache[pIndex];
-    logger.debug(`Position of ${participantName} is ${position}`);
     return position;
   }
 
@@ -165,9 +163,6 @@ export class Coordinates {
       MARGIN;
 
     this.participantWidthCache.set(participant.name, participantWidth);
-    logger.debug(
-      `Width of ${participant.name} is ${participantWidth}; labelWidth: ${labelWidth}`,
-    );
     return participantWidth;
   }
 }

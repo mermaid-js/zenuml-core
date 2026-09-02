@@ -1,7 +1,6 @@
 import type { StatementCoordinate } from "../StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
-import logger from "@/logger/logger";
 
 const CREATION_MESSAGE_HEIGHT = 40; // [data-type="creation"], .h-10
 
@@ -25,9 +24,6 @@ export class CreationStatementVM extends StatementVM {
     }
 
     let cursor = top + commentHeight + CREATION_MESSAGE_HEIGHT;
-    // console.info(
-    //   `creation::${participant}::start cursor:${cursor} commentHeight:${commentHeight}`,
-    // );
 
     const block = this.creation?.braceBlock?.()?.block?.();
     if (block) {
@@ -41,14 +37,10 @@ export class CreationStatementVM extends StatementVM {
 
     const assignment = this.creation?.Assignment?.();
     if (assignment) {
-      logger.info(`creation::assignment::${participant}`);
       cursor += 12;
     }
 
     const height = cursor - top;
-    // console.info(
-    //   `creation::${participant}::end cursor:${cursor} height:${height}`,
-    // );
 
     return {
       top,

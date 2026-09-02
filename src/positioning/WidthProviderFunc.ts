@@ -1,6 +1,5 @@
 import { TextType } from "@/positioning/Coordinate";
 import { getCache, setCache } from "./../utils/RenderingCache";
-import logger from "@/logger/logger";
 
 const FONT_FAMILY = "Helvetica, Verdana, serif";
 const FONT_SIZE_PARTICIPANT = "16px"; // 1rem — used for ALL measurements (see getFontSpec comment)
@@ -28,15 +27,11 @@ function getCanvasContext(): CanvasRenderingContext2D | OffscreenCanvasRendering
   try {
     if (typeof OffscreenCanvas !== "undefined") {
       canvasCtx = new OffscreenCanvas(1, 1).getContext("2d");
-      logger.debug("[ZenUML] WidthProviderOnCanvas: using OffscreenCanvas");
     } else if (typeof document !== "undefined") {
       canvasCtx = document.createElement("canvas").getContext("2d");
-      logger.debug("[ZenUML] WidthProviderOnCanvas: using <canvas> element");
-    } else {
-      logger.debug("[ZenUML] WidthProviderOnCanvas: no canvas available, using character estimate fallback");
     }
   } catch {
-    logger.debug("[ZenUML] WidthProviderOnCanvas: canvas creation failed, using character estimate fallback");
+    // canvas creation failed; caller falls back to a character-count estimate
   }
   return canvasCtx;
 }
