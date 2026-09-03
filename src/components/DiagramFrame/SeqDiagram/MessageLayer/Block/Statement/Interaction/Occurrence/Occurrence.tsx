@@ -43,14 +43,7 @@ export const Occurrence = (props: {
 
   const debug = localStorage.getItem("zenumlDebug");
 
-  const computedCenter = () => {
-    try {
-      return centerOf(coordinates, props.participant);
-    } catch (e) {
-      console.error(e);
-      return 0;
-    }
-  };
+  const computedCenter = () => centerOf(coordinates, props.participant);
   const hasAnyStatementsExceptReturn = () => {
     const braceBlock = props.context.braceBlock();
     if (!braceBlock) return false;

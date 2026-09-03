@@ -22,7 +22,7 @@ Computes the 2D pixel coordinates of every element in the diagram — participan
 | `FrameBorder.ts` | Computes fragment bounding box (left, right, top, bottom) by walking the `Frame` tree from `FrameBuilder`. |
 | `LocalParticipants.ts` | Returns participant names scoped to a given context (for fragment-local layouts). |
 | `Anchor2.ts` | Models a participant's visual anchor point. `centerToEdge()` and `edgeOffset()` compute `translateX`/`width` for arrows. |
-| `Constants.ts` | Dimension constants: `ARROW_HEAD_WIDTH`, `OCCURRENCE_WIDTH`, `MIN_PARTICIPANT_WIDTH`, `LIFELINE_WIDTH`, `MESSAGE_HEIGHT`, `CREATION_MESSAGE_HEIGHT`, `FRAGMENT_HEADER_HEIGHT`, etc. |
+| `Constants.ts` | Dimension constants: `ARROW_HEAD_WIDTH`, `OCCURRENCE_WIDTH`, `MIN_PARTICIPANT_WIDTH`, `LIFELINE_WIDTH`, etc. |
 | `vertical/vm/` | VM layer — one VM class per statement type. See sub-section below. |
 
 ## Vertical Layout Entry Point
@@ -31,17 +31,13 @@ Computes the 2D pixel coordinates of every element in the diagram — participan
 const vc = new VerticalCoordinates(rootContext)
 
 // Look up a statement's position
-vc.getStatementCoordinateFor(statementContext)  // { top, height, kind }
-vc.getStatementCoordinate(key)
+vc.getStatementCoordinate(key)  // { top, height, kind }
 
 // Lifeline start position for a created participant
 vc.getCreationTop(participantName)
 
 // Total diagram height
 vc.getTotalHeight()
-
-// All coordinates
-vc.entries()
 ```
 
 The layout starts at y=56px (`pt-14` on `.message-layer`) and measures each statement via its VM class.
@@ -70,7 +66,6 @@ Each statement type has a corresponding VM class that implements `measure()`:
 All VMs inherit from `NodeVM` which provides:
 - `measureComment()` — tokenizes comment via `marked`, sums line heights (20px/line)
 - `layoutBlock(block, origin, startY)` — recursively lays out a statement block
-- `resolveFragmentOrigin(context)` — finds the origin participant for a fragment
 
 ## Horizontal Layout
 

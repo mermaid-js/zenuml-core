@@ -119,17 +119,11 @@ export class Coordinates {
       }
       const leftIndex = Math.min(indexFrom, indexTo);
       const rightIndex = Math.max(indexFrom, indexTo);
-      try {
-        const messageWidth = this.getMessageWidth(message);
-        this.m[leftIndex][rightIndex] = Math.max(
-          messageWidth + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH,
-          this.m[leftIndex][rightIndex],
-        );
-      } catch {
-        console.warn(
-          `Could not set message gap between ${from} and ${message.to}`,
-        );
-      }
+      const messageWidth = this.getMessageWidth(message);
+      this.m[leftIndex][rightIndex] = Math.max(
+        messageWidth + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH,
+        this.m[leftIndex][rightIndex],
+      );
     }
   }
   private withParticipantGaps(participantModels: IParticipantModel[]) {

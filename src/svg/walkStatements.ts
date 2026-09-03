@@ -18,7 +18,7 @@ export interface FragmentSectionInfo {
 
 export interface StatementInfo {
   key: string;
-  kind: "sync" | "async" | "creation" | "return" | "divider" | "fragment" | "empty";
+  kind: "sync" | "async" | "creation" | "return" | "divider" | "fragment";
   from: string;
   to: string;
   label: string;
@@ -81,7 +81,9 @@ function walkBlock(
 
     index++;
     const ordinal = indexOffset + index;
-    const number = parentNumber ? `${parentNumber}.${ordinal}` : String(ordinal);
+    const number = parentNumber
+      ? `${parentNumber}.${ordinal}`
+      : String(ordinal);
     const comment = stat.getComment?.() || "";
 
     const message = stat.message?.();
@@ -90,22 +92,68 @@ function walkBlock(
       const to = message.Owner?.() || _STARTER_;
       const label = normalizeLabel(message.SignatureText?.() || "");
       const nestedBlock = message.braceBlock?.()?.block?.();
-      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), targetOccurrenceDepth: activeOccurrences.get(to) || 0, number, depth, parentBlockKind });
+      results.push({
+        key,
+        kind: "sync",
+        from,
+        to,
+        label,
+        isSelf: from === to,
+        hasBlock: !!nestedBlock,
+        comment,
+        statNode: stat,
+        senderOccurrenceDepth: activeOccurrences.get(from) || 0,
+        targetHasOccurrence: activeOccurrences.has(to),
+        targetOccurrenceDepth: activeOccurrences.get(to) || 0,
+        number,
+        depth,
+        parentBlockKind,
+      });
 
       if (nestedBlock) {
         const innerOccs = new Map(activeOccurrences);
         innerOccs.set(to, (innerOccs.get(to) || 0) + 1);
-        results.push(...walkBlock(nestedBlock, to, innerOccs, number, depth + 1, "sync", 0));
+        results.push(
+          ...walkBlock(
+            nestedBlock,
+            to,
+            innerOccs,
+            number,
+            depth + 1,
+            "sync",
+            0,
+          ),
+        );
       }
       continue;
     }
 
     const asyncMsg = stat.asyncMessage?.();
     if (asyncMsg) {
-      const from = asyncMsg.From?.() || asyncMsg.ProvidedFrom?.() || asyncMsg.Origin?.() || currentOrigin;
-      const to = asyncMsg.Owner?.() || asyncMsg.to?.()?.getFormattedText?.() || from;
-      const label = normalizeLabel(asyncMsg.content?.()?.getText?.() || asyncMsg.SignatureText?.() || "");
-      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false, comment, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), number, depth });
+      const from =
+        asyncMsg.From?.() ||
+        asyncMsg.ProvidedFrom?.() ||
+        asyncMsg.Origin?.() ||
+        currentOrigin;
+      const to =
+        asyncMsg.Owner?.() || asyncMsg.to?.()?.getFormattedText?.() || from;
+      const label = normalizeLabel(
+        asyncMsg.content?.()?.getText?.() || asyncMsg.SignatureText?.() || "",
+      );
+      results.push({
+        key,
+        kind: "async",
+        from,
+        to,
+        label,
+        isSelf: from === to,
+        hasBlock: false,
+        comment,
+        senderOccurrenceDepth: activeOccurrences.get(from) || 0,
+        targetHasOccurrence: activeOccurrences.has(to),
+        number,
+        depth,
+      });
       continue;
     }
 
@@ -115,12 +163,37 @@ function walkBlock(
       const to = creation.Owner?.() || "";
       const label = normalizeLabel(creation.SignatureText?.() || "«create»");
       const creationBlock = creation.braceBlock?.()?.block?.();
-      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), number, depth, parentBlockKind });
+      results.push({
+        key,
+        kind: "creation",
+        from,
+        to,
+        label,
+        isSelf: false,
+        hasBlock: !!creationBlock,
+        comment,
+        statNode: stat,
+        senderOccurrenceDepth: activeOccurrences.get(from) || 0,
+        targetHasOccurrence: activeOccurrences.has(to),
+        number,
+        depth,
+        parentBlockKind,
+      });
 
       if (creationBlock) {
         const innerOccs = new Map(activeOccurrences);
         innerOccs.set(to, (innerOccs.get(to) || 0) + 1);
-        results.push(...walkBlock(creationBlock, to || currentOrigin, innerOccs, number, depth + 1, "creation", 0));
+        results.push(
+          ...walkBlock(
+            creationBlock,
+            to || currentOrigin,
+            innerOccs,
+            number,
+            depth + 1,
+            "creation",
+            0,
+          ),
+        );
       }
       continue;
     }
@@ -130,15 +203,45 @@ function walkBlock(
       const label = normalizeLabel(ret.SignatureText?.() || "");
       const asyncMessage = ret?.asyncMessage?.();
       const from = asyncMessage?.From?.() || ret?.From?.() || currentOrigin;
-      const to = asyncMessage?.to?.()?.getFormattedText?.() || ret?.ReturnTo?.() || _STARTER_;
-      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetOccurrenceDepth: activeOccurrences.get(to) || 0, number, depth, parentBlockKind });
+      const to =
+        asyncMessage?.to?.()?.getFormattedText?.() ||
+        ret?.ReturnTo?.() ||
+        _STARTER_;
+      results.push({
+        key,
+        kind: "return",
+        from,
+        to,
+        label,
+        isSelf: from === to,
+        hasBlock: false,
+        comment,
+        senderOccurrenceDepth: activeOccurrences.get(from) || 0,
+        targetOccurrenceDepth: activeOccurrences.get(to) || 0,
+        number,
+        depth,
+        parentBlockKind,
+      });
       continue;
     }
 
     const divider = stat.divider?.();
     if (divider) {
-      const label = normalizeLabel(divider.getFormattedText?.() || divider.getText?.() || "");
-      results.push({ key, kind: "divider", from: "", to: "", label, isSelf: false, hasBlock: false, senderOccurrenceDepth: 0, number, depth });
+      const label = normalizeLabel(
+        divider.getFormattedText?.() || divider.getText?.() || "",
+      );
+      results.push({
+        key,
+        kind: "divider",
+        from: "",
+        to: "",
+        label,
+        isSelf: false,
+        hasBlock: false,
+        senderOccurrenceDepth: 0,
+        number,
+        depth,
+      });
       continue;
     }
 
@@ -166,7 +269,14 @@ function walkBlock(
       number,
       depth,
     });
-    walkFragmentBlocks(stat, currentOrigin, results, activeOccurrences, number, depth);
+    walkFragmentBlocks(
+      stat,
+      currentOrigin,
+      results,
+      activeOccurrences,
+      number,
+      depth,
+    );
   }
 
   return results;
@@ -201,17 +311,26 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
     const ifBlock = alt.ifBlock?.();
     if (ifBlock) {
       // First section label = kind name (matches HTML header visible text)
-      sections.push({ label: "Alt", blockNode: ifBlock.braceBlock?.()?.block?.() });
+      sections.push({
+        label: "Alt",
+        blockNode: ifBlock.braceBlock?.()?.block?.(),
+      });
     }
     for (const elseIf of alt.elseIfBlock?.() || []) {
       const condition = elseIf.parExpr?.()?.condition?.();
       const label = condition?.getFormattedText?.() || "";
       // HTML renders as "[ cond ]" (condition in brackets with spaces, "else if" is hidden)
-      sections.push({ label: `[ ${label} ]`, blockNode: elseIf.braceBlock?.()?.block?.() });
+      sections.push({
+        label: `[ ${label} ]`,
+        blockNode: elseIf.braceBlock?.()?.block?.(),
+      });
     }
     const elseBlock = alt.elseBlock?.();
     if (elseBlock) {
-      sections.push({ label: "[else]", blockNode: elseBlock.braceBlock?.()?.block?.() });
+      sections.push({
+        label: "[else]",
+        blockNode: elseBlock.braceBlock?.()?.block?.(),
+      });
     }
 
     const ifCondition = alt.ifBlock?.()?.parExpr?.()?.condition?.();
@@ -227,15 +346,25 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
     const tryBlock = tcf.tryBlock?.();
     if (tryBlock) {
       // First section label = capitalized kind name (matches HTML header)
-      sections.push({ label: "Try", blockNode: tryBlock.braceBlock?.()?.block?.() });
+      sections.push({
+        label: "Try",
+        blockNode: tryBlock.braceBlock?.()?.block?.(),
+      });
     }
     for (const catchBlock of tcf.catchBlock?.() || []) {
-      const exception = catchBlock.invocation?.()?.parameters?.()?.getFormattedText?.() || "";
-      sections.push({ label: `catch ${exception}`, blockNode: catchBlock.braceBlock?.()?.block?.() });
+      const exception =
+        catchBlock.invocation?.()?.parameters?.()?.getFormattedText?.() || "";
+      sections.push({
+        label: `catch ${exception}`,
+        blockNode: catchBlock.braceBlock?.()?.block?.(),
+      });
     }
     const finallyBlock = tcf.finallyBlock?.();
     if (finallyBlock) {
-      sections.push({ label: "finally", blockNode: finallyBlock.braceBlock?.()?.block?.() });
+      sections.push({
+        label: "finally",
+        blockNode: finallyBlock.braceBlock?.()?.block?.(),
+      });
     }
 
     return { fragmentKind: "tcf", label: "", sections };
@@ -255,17 +384,37 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
 }
 
 function blockLength(block: BlockNode): number {
-  return (block?.stat?.() || []).filter((stat: StatNode) => !!createStatementKey(stat)).length;
+  return (block?.stat?.() || []).filter(
+    (stat: StatNode) => !!createStatementKey(stat),
+  ).length;
 }
 
 /** Recurse into fragment inner blocks (loop, opt, alt, try/catch, etc.) */
-function walkFragmentBlocks(stat: StatNode, origin: string, results: StatementInfo[], activeOccurrences: Map<string, number>, parentNumber: string, depth: number): void {
+function walkFragmentBlocks(
+  stat: StatNode,
+  origin: string,
+  results: StatementInfo[],
+  activeOccurrences: Map<string, number>,
+  parentNumber: string,
+  depth: number,
+): void {
   // Single-block fragments: loop, opt, par, critical, section
   for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
     const frag = stat[kind]?.();
     if (frag) {
       const block = frag.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, 0));
+      if (block)
+        results.push(
+          ...walkBlock(
+            block,
+            origin,
+            activeOccurrences,
+            parentNumber,
+            depth + 1,
+            null,
+            0,
+          ),
+        );
       return;
     }
   }
@@ -278,14 +427,32 @@ function walkFragmentBlocks(stat: StatNode, origin: string, results: StatementIn
     if (ifBlock) {
       const block = ifBlock.braceBlock?.()?.block?.();
       if (block) {
-        results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset));
+        results.push(
+          ...walkBlock(
+            block,
+            origin,
+            activeOccurrences,
+            parentNumber,
+            depth + 1,
+            null,
+            sectionOffset,
+          ),
+        );
         sectionOffset += blockLength(block);
       }
     }
     for (const elseIf of alt.elseIfBlock?.() || []) {
       const block = elseIf.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
+        const sectionStmts = walkBlock(
+          block,
+          origin,
+          activeOccurrences,
+          parentNumber,
+          depth + 1,
+          null,
+          sectionOffset,
+        );
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
         sectionOffset += blockLength(block);
@@ -295,7 +462,15 @@ function walkFragmentBlocks(stat: StatNode, origin: string, results: StatementIn
     if (elseBlock) {
       const block = elseBlock.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
+        const sectionStmts = walkBlock(
+          block,
+          origin,
+          activeOccurrences,
+          parentNumber,
+          depth + 1,
+          null,
+          sectionOffset,
+        );
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
       }
@@ -311,14 +486,32 @@ function walkFragmentBlocks(stat: StatNode, origin: string, results: StatementIn
     if (tryBlock) {
       const block = tryBlock.braceBlock?.()?.block?.();
       if (block) {
-        results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset));
+        results.push(
+          ...walkBlock(
+            block,
+            origin,
+            activeOccurrences,
+            parentNumber,
+            depth + 1,
+            null,
+            sectionOffset,
+          ),
+        );
         sectionOffset += blockLength(block);
       }
     }
     for (const catchBlock of tcf.catchBlock?.() || []) {
       const block = catchBlock.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
+        const sectionStmts = walkBlock(
+          block,
+          origin,
+          activeOccurrences,
+          parentNumber,
+          depth + 1,
+          null,
+          sectionOffset,
+        );
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
         sectionOffset += blockLength(block);
@@ -328,7 +521,15 @@ function walkFragmentBlocks(stat: StatNode, origin: string, results: StatementIn
     if (finallyBlock) {
       const block = finallyBlock.braceBlock?.()?.block?.();
       if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
+        const sectionStmts = walkBlock(
+          block,
+          origin,
+          activeOccurrences,
+          parentNumber,
+          depth + 1,
+          null,
+          sectionOffset,
+        );
         if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
         results.push(...sectionStmts);
       }

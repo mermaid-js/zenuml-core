@@ -25,16 +25,16 @@ export class VerticalCoordinates {
 
     const runtime: LayoutRuntime = {
       metrics,
-      rootBlock,
       participants,
-      originParticipant,
       recordCoordinate: (statement: any, coordinate: StatementCoordinate) => {
         const key = createStatementKey(statement);
         this.statementMap.set(key, coordinate);
       },
       updateCreationTop: (participant: string, top: number) => {
         const paddingTop = top - 8; // .life-line-layer, .pt-2
-        logger.info(`[VerticalCoordinates] updateCreationTop participant="${participant}" raw=${top} paddingTop=${paddingTop}`);
+        logger.info(
+          `[VerticalCoordinates] updateCreationTop participant="${participant}" raw=${top} paddingTop=${paddingTop}`,
+        );
         this.creationTops.set(participant, paddingTop);
       },
     };
@@ -49,14 +49,6 @@ export class VerticalCoordinates {
 
   getStatementCoordinate(key: string): StatementCoordinate | undefined {
     return this.statementMap.get(key);
-  }
-
-  getStatementCoordinateFor(statement: any): StatementCoordinate | undefined {
-    return this.statementMap.get(createStatementKey(statement));
-  }
-
-  entries(): Array<[string, StatementCoordinate]> {
-    return Array.from(this.statementMap.entries());
   }
 
   getTotalHeight(): number {
