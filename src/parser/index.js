@@ -2,7 +2,6 @@ import antlr4 from "antlr4";
 import { default as sequenceLexer } from "../generated-parser/sequenceLexer";
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
 import ToCollector from "./ToCollector";
-import ChildFragmentDetector from "./ChildFragmentDetecotr";
 import "./TitleContext";
 import "./IsCurrent";
 import "./Owner";
@@ -18,11 +17,9 @@ import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
 import { formatText } from "@/utils/StringUtil";
 
-const errors = [];
 const errorDetails = [];
 class SeqErrorListener extends antlr4.error.ErrorListener {
   syntaxError(recognizer, offendingSymbol, line, column, msg) {
-    errors.push(`${offendingSymbol} line ${line}, col ${column}: ${msg}`);
     errorDetails.push({
       line,
       column,
@@ -32,7 +29,7 @@ class SeqErrorListener extends antlr4.error.ErrorListener {
 }
 
 // Reentrant error listener: collects syntax errors into its OWN instance array
-// instead of the shared module-level `errors`/`errorDetails`. This is what lets
+// instead of the shared module-level `errorDetails`. This is what lets
 // validate()/parse() below run repeatedly or concurrently (e.g. server-side)
 // without the clear-before/clear-after dance the legacy globals require.
 class CollectingErrorListener extends antlr4.error.ErrorListener {
@@ -92,7 +89,7 @@ function rootContext(code) {
 
   const parser = createParser(code);
   parser.addErrorListener(new SeqErrorListener());
-  return parser._syntaxErrors ? null : parser.prog();
+  return parser.prog();
 }
 
 antlr4.ParserRuleContext.prototype.getFormattedText = function () {
@@ -123,7 +120,7 @@ antlr4.ParserRuleContext.prototype.getComment = function () {
 /**
  * Parse ZenUML DSL with a per-call (reentrant) error listener and return both
  * the error-recovered parse tree and a structured error list. Safe to call
- * repeatedly/concurrently — it does not touch the module-level Errors/ErrorDetails.
+ * repeatedly/concurrently — it does not touch the module-level ErrorDetails.
  *
  * @param {string} code ZenUML DSL source
  * @returns {{ rootContext: object, pass: boolean, errorDetails: { line: number, column: number, msg: string }[] }}
@@ -161,10 +158,6 @@ export const ProgContext = sequenceParser.ProgContext;
 export const RootContext = rootContext;
 export const GroupContext = sequenceParser.GroupContext;
 export const ParticipantContext = sequenceParser.ParticipantContext;
-export const Depth = function (ctx) {
-  const childFragmentDetector = ChildFragmentDetector;
-  return childFragmentDetector.depth(childFragmentDetector)(ctx);
-};
 export const Participants = function (ctx) {
   const toCollector = ToCollector;
   return toCollector.getParticipants(ctx);
@@ -181,13 +174,5 @@ export default {
   },
   parse,
   validate,
-  Errors: errors,
   ErrorDetails: errorDetails,
-  /**
-   * @return {number} how many levels of embedded fragments
-   */
-  Depth: function (ctx) {
-    const childFragmentDetector = ChildFragmentDetector;
-    return childFragmentDetector.depth(childFragmentDetector)(ctx);
-  },
 };

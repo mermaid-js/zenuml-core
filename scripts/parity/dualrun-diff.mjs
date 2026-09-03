@@ -73,8 +73,9 @@ const { RootContext: LangiumRootContext } = await import(
   path.join(ROOT, "src/parser-langium/compat.ts")
 );
 // Clear any accumulated errors between parses
-const { Errors: LangiumErrors, ErrorDetails: LangiumErrorDetails } =
-  await import(path.join(ROOT, "src/parser-langium/compat.ts"));
+const { ErrorDetails: LangiumErrorDetails } = await import(
+  path.join(ROOT, "src/parser-langium/compat.ts")
+);
 
 // ---------------------------------------------------------------------------
 // Facade-level serializer (engine-neutral)
@@ -247,7 +248,6 @@ const results = [];
 
 for (const entry of TREE_CORPUS) {
   // Reset Langium error accumulators between parses
-  LangiumErrors.length = 0;
   LangiumErrorDetails.length = 0;
 
   let antlrTree = null;

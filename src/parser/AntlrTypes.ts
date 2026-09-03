@@ -49,8 +49,6 @@ export interface AugmentedContext {
   parentCtx: AugmentedContext | null;
   /** Installed in src/parser/utils/cloest-ancestor/ClosestAncestor.ts. */
   ClosestAncestorStat(): AugmentedContext | undefined;
-  /** Installed in src/parser/utils/cloest-ancestor/ClosestAncestor.ts. */
-  ClosestAncestorBlock(): AugmentedContext | undefined;
   /** Installed in src/parser/Origin.js. */
   Origin(): string | undefined;
 }
