@@ -7,11 +7,7 @@ const MessageContext = sequenceParser.MessageContext;
 const CreationContext = sequenceParser.CreationContext;
 
 ParserRuleContext.prototype.Origin = function () {
-  let ctx = this.parentCtx;
-  while (ctx && !(ctx instanceof StatContext || ctx instanceof ProgContext)) {
-    ctx = this.parentCtx;
-  }
-  return ctx.Origin();
+  return this.ClosestAncestorStat()?.Origin();
 };
 // Origin is essentially the 'from' of a message.
 // For example, in `S -> A.m1 {B.m2 {C.m3}}`,
