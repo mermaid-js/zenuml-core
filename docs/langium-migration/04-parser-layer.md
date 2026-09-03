@@ -336,7 +336,7 @@ sender only.
 
 **Pure helpers inside (PORT-AS-IS logic):** `formatParameter(param)` — named parameter
 → `id=expr`; declaration → `type id`; expression → formatted text; fallback raw;
-`formatParameters(params)` — comma-join. Typed against `Parser.types.ts` interfaces.
+`formatParameters(params)` — comma-join. Typed against the required-member interfaces in `AntlrTypes.ts`.
 
 ### 3.5 `src/parser/RetContext.js` (51 lines)
 
@@ -526,7 +526,10 @@ column of the stop token, hence the `+ text.length`). 1-based lines, 0-based col
 The class is pure; only `from()` duck-types ANTLR tokens — Langium adapter reads
 `$cstNode.range` (note Langium ranges are 0-based lines — conversion needed).
 
-### 4.7 `src/parser/Parser.types.ts` (77 lines) — PORT-AS-IS (will be superseded)
+### 4.7 The required-member context interfaces (merged into `src/parser/AntlrTypes.ts`) — PORT-AS-IS (will be superseded)
+
+> These lived in `src/parser/Parser.types.ts` (77 lines) until it was merged into
+> `AntlrTypes.ts`; the declarations are unchanged.
 
 Hand-written structural interfaces for context shapes used by `SignatureText.ts`:
 `BaseContext` (`getFormattedText()`), `Parameter`, `NamedParameter`, `Declaration`,
@@ -535,7 +538,7 @@ Hand-written structural interfaces for context shapes used by `SignatureText.ts`
 `CreationContext`, `RetContext`. Pure type declarations; Langium's generated AST types
 replace them, but they document the exact accessor surface the formatting code expects.
 
-### 4.8 `src/parser/AntlrTypes.ts` (116 lines) — PORT-AS-IS (will be superseded)
+### 4.8 `src/parser/AntlrTypes.ts` (254 lines) — PORT-AS-IS (will be superseded)
 
 Broader duck-typed interfaces for tree nodes as the *renderer* sees them: `AntlrNode`
 (`getText/getFormattedText/getComment`), `BlockNode`, `RootContextNode`, `StatNode`
@@ -620,7 +623,7 @@ the regression suite the Langium grammar must pass.
 
    ContextsFixture.ts ──► antlr4 + generated parser + index.js side effects (test only)
    CodeRange.ts ──► duck-typed ANTLR token shape (line/column/text)
-   AntlrTypes.ts / Parser.types.ts ──► pure type declarations (document the contract)
+   AntlrTypes.ts ──► pure type declarations (document the contract)
    ParticipantListener.ts ──► nothing (dead)
 ```
 
@@ -634,7 +637,7 @@ the regression suite the Langium grammar must pass.
 of section 1, 2, 3 plus the fixture.)
 
 **Pure modules (no ANTLR import):** `Participants.ts`, `OwnableMessage.ts`,
-`IParticipantModel.ts`, `ParticipantListener.ts` (dead), `Parser.types.ts`,
+`IParticipantModel.ts`, `ParticipantListener.ts` (dead),
 `AntlrTypes.ts`, `CodeRange.ts` (duck-typed token shape only),
 `OrderedParticipants.ts` (no direct ANTLR import; coupled via the two collectors).
 
@@ -670,8 +673,7 @@ of section 1, 2, 3 plus the fixture.)
 | `IParticipantModel.ts` | 23 | **PORT-AS-IS** | Pure interface |
 | `ParticipantListener.ts` | 17 | **DELETE** | Dead duplicate interface, zero importers |
 | `CodeRange.ts` | 30 | **PORT-AS-IS** (+ Langium range adapter) | Mind 1-based vs 0-based line conventions |
-| `Parser.types.ts` | 77 | **SUPERSEDED** | Replaced by generated Langium AST types; keep as spec reference |
-| `AntlrTypes.ts` | 116 | **SUPERSEDED** | Ditto — best description of the renderer's AST contract |
+| `AntlrTypes.ts` | 254 | **SUPERSEDED** | Both projections (walker `*Node` shapes + the required-member context shapes merged in from `Parser.types.ts`); replaced by generated Langium AST types, keep as spec reference |
 | `ContextsFixture.ts` | 46 | **REWRITE** (test infra) | Needs Langium alternate-entry-rule parsing to keep fragment-level specs |
 | `CONTEXT.md` | 117 | **UPDATE** | Docs |
 

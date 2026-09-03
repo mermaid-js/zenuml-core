@@ -6,7 +6,7 @@ import type {
   Parameter,
   RetContext,
   ReturnAsyncMessageContext,
-} from "./Parser.types";
+} from "./AntlrTypes";
 
 // Helper function to format a single parameter
 function formatParameter(param: Parameter): string {

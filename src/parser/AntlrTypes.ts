@@ -6,9 +6,20 @@
  * codebase, providing documentation and IntelliSense without pretending the
  * shapes are fully known at compile time.
  *
- * Methods use optional chaining patterns (e.g. `node.block?.()`) because
- * not all context types have all methods — each grammar rule produces a
- * different context class.
+ * The file holds two projections of that same parse tree, and they are NOT
+ * interchangeable:
+ *
+ * - The `*Node` interfaces (tree-walk projection) declare every member
+ *   OPTIONAL, because the walkers in `src/svg` and the renderer probe methods
+ *   that only some context kinds have (`node.block?.()`).
+ * - The `*Context` / domain interfaces (prototype-augmentation projection,
+ *   formerly `src/parser/Parser.types.ts`) declare members REQUIRED, because
+ *   `src/parser/SignatureText.ts` installs prototype methods against them and
+ *   calls `this.messageBody()` / `this.content()` unguarded.
+ *
+ * A `*Node` value is therefore not assignable to its `*Context` twin — see the
+ * "kept apart" note below each pair. Merging them would silently drop the
+ * required-ness the prototype installers rely on.
  */
 
 /** Base interface for any ANTLR parse tree node */
@@ -148,4 +159,96 @@ export interface CatchBlockNode extends AntlrNode {
 export interface SingleBlockFragmentNode extends AntlrNode {
   parExpr?(): { condition?(): AntlrNode } | null;
   braceBlock?(): { block?(): BlockNode } | null;
+}
+
+/* ------------------------------------------------------------------------ */
+/* Prototype-augmentation projection (merged from src/parser/Parser.types.ts) */
+/*                                                                          */
+/* Required-member shapes used by src/parser/SignatureText.ts to type the    */
+/* generated context classes it patches. Kept separate from the `*Node`      */
+/* interfaces above: `MessageNode`/`CreationNode`/`ReturnNode`/              */
+/* `AsyncMessageNode` declare the same concepts with every member optional,  */
+/* and collapsing each pair into one declaration would drop the required-ness*/
+/* these installers depend on.                                              */
+/* ------------------------------------------------------------------------ */
+
+/** Any context whose formatted source text the parser layer reads. */
+export interface BaseContext {
+  getFormattedText(): string;
+}
+
+/**
+ * `signature`, `content` and `expr` contexts are read through
+ * `getFormattedText()` only, so they are the same shape as {@link BaseContext}
+ * — aliased rather than re-declared three times.
+ */
+export type Signature = BaseContext;
+export type Content = BaseContext;
+export type Expression = BaseContext;
+
+export interface Parameter extends BaseContext {
+  length: number;
+  namedParameter?(): NamedParameter | null;
+  expr?(): Expression | null;
+  declaration?(): Declaration | null;
+}
+
+export interface NamedParameter extends BaseContext {
+  ID(): { getText(): string };
+  expr(): Expression;
+}
+
+export interface Declaration extends BaseContext {
+  type(): { getText(): string };
+  ID(): { getText(): string };
+}
+
+export interface Parameters extends BaseContext {
+  parameter(): Parameter[];
+}
+
+export interface Func {
+  signature(): Signature[];
+}
+
+export interface MessageBody {
+  func(): Func;
+}
+
+export interface CreationBody {
+  parameters(): Parameters;
+}
+
+export interface AsyncMessage {
+  content(): Content;
+}
+
+/** Kept apart from {@link MessageNode}: `messageBody()` is required here. */
+export interface MessageContext extends BaseContext {
+  messageBody(): MessageBody;
+  SignatureText(): string;
+}
+
+/** Kept apart from {@link AsyncMessageNode}: `content()` is required here. */
+export interface AsyncMessageContext extends BaseContext {
+  content(): Content;
+  SignatureText(): string;
+}
+
+/** Same shape as {@link AsyncMessageContext}; distinct grammar rule, one declaration. */
+export type ReturnAsyncMessageContext = AsyncMessageContext;
+
+/** Kept apart from {@link CreationNode}: `creationBody()` is required here. */
+export interface CreationContext extends BaseContext {
+  creationBody(): CreationBody;
+  SignatureText(): string;
+  ParametersText(): string;
+}
+
+/** Kept apart from {@link ReturnNode}: `asyncMessage()`/`expr()` are required here. */
+export interface RetContext extends BaseContext {
+  asyncMessage(): AsyncMessage;
+  returnAsyncMessage(): AsyncMessage;
+  expr(): Expression;
+  SignatureText(): string;
 }

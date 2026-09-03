@@ -72,7 +72,7 @@ Components do not call the layout engines directly. They read atoms:
 ```typescript
 // In a component:
 const vc = useAtomValue(verticalCoordinatesAtom)
-const coord = vc?.getStatementCoordinateFor(context)
+const coord = vc?.getStatementCoordinate(createStatementKey(context))
 // → { top: number, height: number, kind: string }
 ```
 
