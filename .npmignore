@@ -6,9 +6,7 @@ test
 tests
 public
 reports
-.gauge
 logs
-env
 specs
 .github
 
@@ -17,8 +15,6 @@ dist/vue-sequence.common.*
 dist/vue-sequence.umd.js
 dist/*.map
 
-cypress
-gen
 coverage
 
 manifest.json

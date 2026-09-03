@@ -12,8 +12,5 @@ dist
 .eslintrc.js
 .git-blame-ignore-revs
 .vscode
-cypress
-cypress.config.ts
 docs
 test
-vite.config.lib.js

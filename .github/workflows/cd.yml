@@ -5,12 +5,12 @@ on:
   push:
     paths-ignore:
       - "docs/**"
-      - "integration/**"
+      - "Integration/**"
       - "*.md"
   pull_request:
     paths-ignore:
       - "docs/**"
-      - "integration/**"
+      - "Integration/**"
       - "*.md"
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages

@@ -1,11 +1,11 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-`src/` holds the TypeScript/React core plus ANTLR grammars in `src/g4/` whose generated output belongs in `src/generated-parser/`. Static assets stay in `public/`, while demos and docs live in `playground/` and `docs/`. Bun specs reside in `test/unit/` (fixtures in `test/`); Playwright suites and snapshots live in `tests/`. Tooling sits in `scripts/`, `antlr/`, `types/`, and the repo-level configs (including `wrangler.toml`).
+`src/` holds the TypeScript/React core plus ANTLR grammars in `src/g4/` whose generated output belongs in `src/generated-parser/`. Static assets stay in `public/`; docs live in `docs/`. Bun specs reside in `test/unit/` (fixtures in `test/`); Playwright suites and snapshots live in `tests/`. Tooling sits in `scripts/`, `antlr/`, `types/`, and the repo-level configs (including `wrangler.toml`).
 
 ## Build, Test, and Development Commands
 - `bun install` – install dependencies (Bun 1.x, Node ≥20).
-- `bun run dev` – Vite dev server on `http://localhost:4000`.
+- `bun run dev` – Vite dev server on `http://localhost:14000`.
 - `bun run build` – library bundle via `vite.config.lib.ts`.
 - `bun run build:site` / `bun run build:gh-pages` – demo/docs build (standard vs GitHub Pages).
 - `bun run test` – Bun unit tests covering `src` and `test/unit`.
