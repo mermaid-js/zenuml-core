@@ -37,9 +37,10 @@ const MessageContext = seqParser.MessageContext as any as {
 const AsyncMessageContext = seqParser.AsyncMessageContext as any as {
   prototype: AsyncMessageContextInstalled;
 };
-const ReturnAsyncMessageContext = seqParser.ReturnAsyncMessageContext as any as {
-  prototype: AsyncMessageContextInstalled;
-};
+const ReturnAsyncMessageContext =
+  seqParser.ReturnAsyncMessageContext as any as {
+    prototype: AsyncMessageContextInstalled;
+  };
 const RetContext = seqParser.RetContext as any as {
   prototype: RetContextInstalled;
 };
@@ -51,41 +52,45 @@ CreationContext.prototype.From = function (this: CreationContextInstalled) {
   return undefined;
 };
 
+/** Shared by MessageContext, AsyncMessageContext and ReturnAsyncMessageContext. */
+interface HasProvidedFrom extends AugmentedContext {
+  ProvidedFrom(): string | undefined;
+}
+
+// MessageContext, AsyncMessageContext and ReturnAsyncMessageContext all
+// resolve From identically: prefer their own ProvidedFrom(), else fall back
+// to the enclosing statement's Origin(). Assigning the same function to each
+// prototype keeps the body single-sourced while each context class still
+// gets its own From property.
+function fromProvidedOrOrigin(this: HasProvidedFrom) {
+  return this.ProvidedFrom() || this.ClosestAncestorStat()?.Origin();
+}
+
 MessageContext.prototype.ProvidedFrom = function (
   this: MessageContextInstalled,
 ) {
   const fromCtx = this.messageBody()?.fromTo?.()?.from?.();
-  return fromCtx?.name?.()?.getFormattedText?.() || fromCtx?.getFormattedText?.();
+  return (
+    fromCtx?.name?.()?.getFormattedText?.() || fromCtx?.getFormattedText?.()
+  );
 };
-MessageContext.prototype.From = function (this: MessageContextInstalled) {
-  return this.ProvidedFrom() || this.ClosestAncestorStat()?.Origin();
-};
+MessageContext.prototype.From = fromProvidedOrOrigin;
 
-AsyncMessageContext.prototype.ProvidedFrom = function (
-  this: AsyncMessageContextInstalled,
-) {
+// AsyncMessageContext and ReturnAsyncMessageContext resolve ProvidedFrom
+// identically (unlike MessageContext, which reaches its `from` node through
+// messageBody()?.fromTo()).
+function providedFromDirectFrom(this: AsyncMessageContextInstalled) {
   const fromCtx = this.from();
-  return fromCtx?.name?.()?.getFormattedText?.() || fromCtx?.getFormattedText?.();
-};
+  return (
+    fromCtx?.name?.()?.getFormattedText?.() || fromCtx?.getFormattedText?.()
+  );
+}
 
-AsyncMessageContext.prototype.From = function (
-  this: AsyncMessageContextInstalled,
-) {
-  return this.ProvidedFrom() || this.ClosestAncestorStat()?.Origin();
-};
+AsyncMessageContext.prototype.ProvidedFrom = providedFromDirectFrom;
+AsyncMessageContext.prototype.From = fromProvidedOrOrigin;
 
-ReturnAsyncMessageContext.prototype.ProvidedFrom = function (
-  this: AsyncMessageContextInstalled,
-) {
-  const fromCtx = this.from();
-  return fromCtx?.name?.()?.getFormattedText?.() || fromCtx?.getFormattedText?.();
-};
-
-ReturnAsyncMessageContext.prototype.From = function (
-  this: AsyncMessageContextInstalled,
-) {
-  return this.ProvidedFrom() || this.ClosestAncestorStat()?.Origin();
-};
+ReturnAsyncMessageContext.prototype.ProvidedFrom = providedFromDirectFrom;
+ReturnAsyncMessageContext.prototype.From = fromProvidedOrOrigin;
 
 RetContext.prototype.From = function (this: RetContextInstalled) {
   return (

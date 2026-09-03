@@ -44,10 +44,6 @@ MessageContext.prototype.To = function () {
   return toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
 };
 
-MessageContext.prototype.Owner = function () {
-  return this.To() || getOwnerFromAncestor(this.parentCtx);
-};
-
 function getOwnerFromAncestor(ctx) {
   while (ctx) {
     if (ctx instanceof CreationContext || ctx instanceof MessageContext) {
@@ -58,28 +54,35 @@ function getOwnerFromAncestor(ctx) {
   return undefined;
 }
 
-AsyncMessageContext.prototype.To = function () {
+// MessageContext, AsyncMessageContext, ReturnAsyncMessageContext and
+// RetContext all resolve Owner the same way: prefer their own To(), else
+// look up the nearest CreationContext/MessageContext ancestor. Assigning
+// the same function to each prototype keeps the body single-sourced while
+// each context class still gets its own Owner property.
+function ownerFromToOrAncestor() {
+  return this.To() || getOwnerFromAncestor(this.parentCtx);
+}
+
+[
+  MessageContext,
+  AsyncMessageContext,
+  ReturnAsyncMessageContext,
+  RetMessageContext,
+].forEach((ContextClass) => {
+  ContextClass.prototype.Owner = ownerFromToOrAncestor;
+});
+
+// AsyncMessageContext and ReturnAsyncMessageContext resolve To() identically
+// (unlike MessageContext, which reaches its `to` node through
+// messageBody()?.fromTo(), and RetContext, which delegates to ReturnTo()).
+function toFromDirectTo() {
   const toCtx = this.to();
   return toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
-};
+}
 
-AsyncMessageContext.prototype.Owner = function () {
-  return this.To() || getOwnerFromAncestor(this.parentCtx);
-};
-
-ReturnAsyncMessageContext.prototype.To = function () {
-  const toCtx = this.to();
-  return toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
-};
-
-ReturnAsyncMessageContext.prototype.Owner = function () {
-  return this.To() || getOwnerFromAncestor(this.parentCtx);
-};
+AsyncMessageContext.prototype.To = toFromDirectTo;
+ReturnAsyncMessageContext.prototype.To = toFromDirectTo;
 
 RetMessageContext.prototype.To = function () {
   return this.ReturnTo();
-};
-
-RetMessageContext.prototype.Owner = function () {
-  return this.To() || getOwnerFromAncestor(this.parentCtx);
 };
