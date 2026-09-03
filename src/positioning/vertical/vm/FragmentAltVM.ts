@@ -1,8 +1,8 @@
 import type { StatementCoordinate } from "../StatementCoordinate";
-import { FragmentVM } from "./FragmentVM";
+import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
-export class FragmentAltVM extends FragmentVM {
+export class FragmentAltVM extends StatementVM {
   readonly kind = "alt" as const;
 
   constructor(

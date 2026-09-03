@@ -36,7 +36,6 @@ export default function FrameBorder(frame: Frame | null) {
     return { left: 0, right: 0 };
   }
   return {
-    type: frame.type,
     left: FRAGMENT_PADDING_X * longestPath(frame, PathType.LEFT),
     right: FRAGMENT_PADDING_X * longestPath(frame, PathType.RIGHT),
   };

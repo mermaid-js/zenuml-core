@@ -4,26 +4,23 @@
  */
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
-import {
-  measureSvgParticipantLabelWidth,
-} from "@/positioning/WidthProviderFunc";
+import { measureSvgParticipantLabelWidth } from "@/positioning/WidthProviderFunc";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
-import {
-  MARGIN,
-  MIN_PARTICIPANT_WIDTH,
-} from "@/positioning/Constants";
+import { MARGIN, MIN_PARTICIPANT_WIDTH } from "@/positioning/Constants";
 import { TextType } from "@/positioning/Coordinate";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import type { ParticipantGeometry, LifelineGeometry, GroupGeometry } from "./geometry";
+import type {
+  ParticipantGeometry,
+  LifelineGeometry,
+  GroupGeometry,
+} from "./geometry";
 import {
   PARTICIPANT_TOP_SPACE,
   PARTICIPANT_BOX_PADDING,
-  PARTICIPANT_BOX_PADDING_ASSIGNEE,
   PARTICIPANT_ICON_ROW_WIDTH,
   PARTICIPANT_EMOJI_WIDTH,
   PARTICIPANT_VISUAL_HEIGHT,
   PARTICIPANT_MAX_WIDTH,
-  snapX,
 } from "./svgConstants";
 
 export function buildParticipants(
@@ -32,69 +29,75 @@ export function buildParticipants(
   verticalCoordinates: VerticalCoordinates,
   measureText?: (text: string, type: TextType) => number,
 ): ParticipantGeometry[] {
-  return models
-    .map((m) => {
-      const centerX = snapX(coordinates.getPosition(m.name));
-      const halfWidth = coordinates.half(m.name);
-      // Compute visual box width from raw text measurement + CSS decorations.
-      // The positioning engine clamps labelWidth to MIN_PARTICIPANT_WIDTH, losing
-      // the actual text width.  Re-measure here to get the correct box size.
-      // HTML box = max(textWidth + BOX_PADDING, MIN_PARTICIPANT_WIDTH).
-      // Assignee participants (name contains ":") render two EditableSpan components
-      // in HTML, each with 8px horizontal padding (EditableSpan.css .editable-span-base).
-      const isAssignee = m.name.includes(":") && m.getDisplayName() === m.name;
-      let width: number;
-      let measuredTextWidth: number | undefined;
-      let measuredStereotypeWidth: number | undefined;
-      if (measureText && m.name !== _STARTER_) {
-        const textWidth = measureSvgParticipantLabelWidth(m.getDisplayName());
-        measuredTextWidth = textWidth;
-        const padding = isAssignee ? PARTICIPANT_BOX_PADDING_ASSIGNEE : PARTICIPANT_BOX_PADDING;
-        const iconWidth = m.hasIcon() ? PARTICIPANT_ICON_ROW_WIDTH : 0;
-        const emojiWidth = m.emoji ? PARTICIPANT_EMOJI_WIDTH : 0;
-        // When a stereotype is present, the participant box must be wide enough to fit the
-        // stereotype text. HTML's box = max(contentRowWidth + padding, stereotypeGlyphWidth + 8, minWidth).
-        // The +8 = 4px box padding (2px * 2) + 4px border (2px * 2), both included in border-box sizing.
-        const STEREOTYPE_BOX_OVERHEAD = 8;
-        if (m.stereotype) {
-          measuredStereotypeWidth = measureSvgParticipantLabelWidth(`«${m.stereotype}»`);
-        }
-        const stereotypeBoxWidth = measuredStereotypeWidth != null
+  return models.map((m) => {
+    const centerX = coordinates.getPosition(m.name);
+    const halfWidth = coordinates.half(m.name);
+    // Compute visual box width from raw text measurement + CSS decorations.
+    // The positioning engine clamps labelWidth to MIN_PARTICIPANT_WIDTH, losing
+    // the actual text width.  Re-measure here to get the correct box size.
+    // HTML box = max(textWidth + BOX_PADDING, MIN_PARTICIPANT_WIDTH).
+    let width: number;
+    let measuredTextWidth: number | undefined;
+    let measuredStereotypeWidth: number | undefined;
+    if (measureText && m.name !== _STARTER_) {
+      const textWidth = measureSvgParticipantLabelWidth(m.getDisplayName());
+      measuredTextWidth = textWidth;
+      const padding = PARTICIPANT_BOX_PADDING;
+      const iconWidth = m.hasIcon() ? PARTICIPANT_ICON_ROW_WIDTH : 0;
+      const emojiWidth = m.emoji ? PARTICIPANT_EMOJI_WIDTH : 0;
+      // When a stereotype is present, the participant box must be wide enough to fit the
+      // stereotype text. HTML's box = max(contentRowWidth + padding, stereotypeGlyphWidth + 8, minWidth).
+      // The +8 = 4px box padding (2px * 2) + 4px border (2px * 2), both included in border-box sizing.
+      const STEREOTYPE_BOX_OVERHEAD = 8;
+      if (m.stereotype) {
+        measuredStereotypeWidth = measureSvgParticipantLabelWidth(
+          `«${m.stereotype}»`,
+        );
+      }
+      const stereotypeBoxWidth =
+        measuredStereotypeWidth != null
           ? measuredStereotypeWidth + STEREOTYPE_BOX_OVERHEAD
           : 0;
-        width = Math.min(Math.max(textWidth + padding + iconWidth + emojiWidth, stereotypeBoxWidth, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
-      } else {
-        width = Math.min(halfWidth * 2 - MARGIN, PARTICIPANT_MAX_WIDTH);
-      }
-      if (m.name === _STARTER_) width = Math.min(width, 80); // match HTML min-width: 80px
-      const creationTop = verticalCoordinates.getCreationTop(m.name);
-      const isStarter = m.name === _STARTER_;
-      // updateCreationTop subtracts 8px for HTML CSS padding (.life-line-layer .pt-2);
-      // SVG has no such padding, so add 8 back to recover the raw VM top, plus the
-      // SVG stroke-model offset is already accounted for by PARTICIPANT_TOP_SPACE.
-      const y =
-        creationTop != null
-          ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 8)
-          : PARTICIPANT_TOP_SPACE;
+      width = Math.min(
+        Math.max(
+          textWidth + padding + iconWidth + emojiWidth,
+          stereotypeBoxWidth,
+          MIN_PARTICIPANT_WIDTH,
+        ),
+        PARTICIPANT_MAX_WIDTH,
+      );
+    } else {
+      width = Math.min(halfWidth * 2 - MARGIN, PARTICIPANT_MAX_WIDTH);
+    }
+    if (m.name === _STARTER_) width = Math.min(width, 80); // match HTML min-width: 80px
+    const creationTop = verticalCoordinates.getCreationTop(m.name);
+    const isStarter = m.name === _STARTER_;
+    // updateCreationTop subtracts 8px for HTML CSS padding (.life-line-layer .pt-2);
+    // SVG has no such padding, so add 8 back to recover the raw VM top, plus the
+    // SVG stroke-model offset is already accounted for by PARTICIPANT_TOP_SPACE.
+    const y =
+      creationTop != null
+        ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 8)
+        : PARTICIPANT_TOP_SPACE;
 
-      return {
-        name: m.name,
-        label: m.getDisplayName(),
-        x: centerX,
-        y,
-        width,
-        height: PARTICIPANT_VISUAL_HEIGHT,
-        isStarter,
-        showBottom: creationTop == null && !isStarter,
-        labelWidth: measuredTextWidth,
-        type: m.type,
-        stereotype: m.stereotype,
-        stereotypeWidth: measuredStereotypeWidth,
-        color: m.color,
-        emoji: m.emoji,
-        groupId: m.groupId,
-      };
-    });
+    return {
+      name: m.name,
+      label: m.getDisplayName(),
+      x: centerX,
+      y,
+      width,
+      height: PARTICIPANT_VISUAL_HEIGHT,
+      isStarter,
+      showBottom: creationTop == null && !isStarter,
+      labelWidth: measuredTextWidth,
+      type: m.type,
+      stereotype: m.stereotype,
+      stereotypeWidth: measuredStereotypeWidth,
+      color: m.color,
+      emoji: m.emoji,
+      groupId: m.groupId,
+    };
+  });
 }
 
 export function buildLifelines(

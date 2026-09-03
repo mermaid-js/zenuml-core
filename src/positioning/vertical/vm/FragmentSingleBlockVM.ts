@@ -1,9 +1,9 @@
 import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import type { StatementKind } from "@/positioning/vertical/StatementTypes";
-import { FragmentVM } from "./FragmentVM";
+import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
-export class FragmentSingleBlockVM extends FragmentVM {
+export class FragmentSingleBlockVM extends StatementVM {
   constructor(
     statement: any,
     protected readonly fragment: any,

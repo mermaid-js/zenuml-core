@@ -28,7 +28,7 @@ import type {
   DividerGeometry,
   CommentGeometry,
 } from "./geometry";
-import { PARTICIPANT_VISUAL_HEIGHT, snapX, cssToSvgStyle } from "./svgConstants";
+import { PARTICIPANT_VISUAL_HEIGHT, cssToSvgStyle } from "./svgConstants";
 import type { RootContextNode } from "@/parser/AntlrTypes";
 
 export interface BuildMessagesResult {
@@ -40,7 +40,6 @@ export interface BuildMessagesResult {
   returns: ReturnGeometry[];
   dividers: DividerGeometry[];
   comments: CommentGeometry[];
-  totalReturnDebt: number;
   maxReturnBottom: number;
 }
 
@@ -83,7 +82,11 @@ export function buildMessages(
   // the return element takes ~16px of visual space. This causes all subsequent
   // elements to be positioned too high. We compute a per-statement adjustment.
   const RETURN_VISUAL_HEIGHT = 16;
-  const adjustMap = computeReturnDebt(statements, verticalCoordinates, RETURN_VISUAL_HEIGHT);
+  const adjustMap = computeReturnDebt(
+    statements,
+    verticalCoordinates,
+    RETURN_VISUAL_HEIGHT,
+  );
 
   for (const info of statements) {
     const coord = verticalCoordinates.getStatementCoordinate(info.key);
@@ -108,19 +111,20 @@ export function buildMessages(
         if (fX > tX) commentParticipant = info.to;
       }
       const commentX = commentParticipant
-        ? snapX(coordinates.getPosition(commentParticipant))
+        ? coordinates.getPosition(commentParticipant)
         : 10;
       // SVG text y = baseline; HTML positions by visual top. Add font ascent (~12px for 14px text).
       const COMMENT_FONT_ASCENT = 15;
       // Inside an occurrence, HTML positions the comment at the occurrence
       // bar's inner edge (OCCURRENCE_BAR_SIDE_WIDTH + 1). At the top level
       // (no active occurrence), the comment sits near the lifeline center.
-      const commentXOffset = info.senderOccurrenceDepth >= 1
-        ? OCCURRENCE_BAR_SIDE_WIDTH + 1
-        : 1;
+      const commentXOffset =
+        info.senderOccurrenceDepth >= 1 ? OCCURRENCE_BAR_SIDE_WIDTH + 1 : 1;
       // HTML wraps backtick text in <code> with padding:2px (Cosmetic.scss).
       // Add the same left-padding offset so SVG text aligns with HTML.
-      const codeSpanPadding = commentObj.text.trimStart().startsWith("`") ? 2 : 0;
+      const codeSpanPadding = commentObj.text.trimStart().startsWith("`")
+        ? 2
+        : 0;
       comments.push({
         x: commentX + commentXOffset + codeSpanPadding,
         y: coord.top + adjust + COMMENT_FONT_ASCENT,
@@ -130,19 +134,22 @@ export function buildMessages(
     }
 
     // Message style from styling comment (applied to message/self-call/creation labels)
-    const messageStyle = commentObj ? cssToSvgStyle(commentObj.messageStyle) : undefined;
+    const messageStyle = commentObj
+      ? cssToSvgStyle(commentObj.messageStyle)
+      : undefined;
 
     // --- Sync / Async messages ---
     if (info.kind === "sync" || info.kind === "async") {
-      let fromX = snapX(coordinates.getPosition(info.from));
-      const toX = snapX(coordinates.getPosition(info.to));
+      let fromX = coordinates.getPosition(info.from);
+      const toX = coordinates.getPosition(info.to);
       const messageHeight = info.isSelf ? 30 : 16;
       // Comment height: HTML renders comment <p> above the message in CSS flow.
       // coord.top doesn't include comment height, so offset manually (same as fragments).
       const msgCommentHeight = commentObj?.text
         ? (info.comment?.trim().split("\n").length || 0) * 20
         : 0;
-      const messageY = coord.top + adjust + msgCommentHeight + messageHeight - 0.5;
+      const messageY =
+        coord.top + adjust + msgCommentHeight + messageHeight - 0.5;
 
       // D4: When sender has an active occurrence, arrow starts from its near edge.
       // LTR: near edge is the RIGHT side → center + depth*side (each level shifts bar right).
@@ -156,12 +163,15 @@ export function buildMessages(
         const isLTR = fromX < toX;
         fromX = isLTR
           ? fromX + occOffset
-          : fromX - OCCURRENCE_BAR_SIDE_WIDTH + (depth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
+          : fromX -
+            OCCURRENCE_BAR_SIDE_WIDTH +
+            (depth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
       }
 
       // When target already has active occurrences, the new occurrence is nested
       // (stacked inward by OCCURRENCE_BAR_SIDE_WIDTH per level). Arrow endpoints shift accordingly.
-      const targetDepth = info.targetOccurrenceDepth || (info.targetHasOccurrence ? 1 : 0);
+      const targetDepth =
+        info.targetOccurrenceDepth || (info.targetHasOccurrence ? 1 : 0);
       const nestingOffset = targetDepth * OCCURRENCE_BAR_SIDE_WIDTH;
 
       if (info.isSelf) {
@@ -176,9 +186,12 @@ export function buildMessages(
         // For self-calls inside an occurrence, the HTML component renders
         // inside the occurrence div — starting at the occurrence's right edge.
         // For nested occurrences, offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level.
-        const selfX = (info.senderOccurrenceDepth >= 1)
-          ? fromX + OCCURRENCE_BAR_SIDE_WIDTH + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH
-          : fromX;
+        const selfX =
+          info.senderOccurrenceDepth >= 1
+            ? fromX +
+              OCCURRENCE_BAR_SIDE_WIDTH +
+              (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH
+            : fromX;
         selfCalls.push({
           x: selfX,
           y: coord.top + selfYOffset + msgCommentHeight,
@@ -197,12 +210,12 @@ export function buildMessages(
         //   (points at outer edge of existing occ)
         const isLTR = fromX < toX;
         const syncOffset = info.kind === "sync" && !info.isSelf;
-        const asyncTargetOcc = info.kind === "async" && !info.isSelf && targetDepth > 0;
-        const arrowToX =
-          syncOffset
-            ? isLTR
-              ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
-              : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
+        const asyncTargetOcc =
+          info.kind === "async" && !info.isSelf && targetDepth > 0;
+        const arrowToX = syncOffset
+          ? isLTR
+            ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
+            : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset
           : asyncTargetOcc
             ? isLTR
               ? toX - nestingOffset
@@ -306,8 +319,12 @@ export function buildMessages(
               ? `${info.number}.${(blockChildCount.get(info.number) || 0) + 1}`
               : undefined;
             returns.push({
-              fromX: retFromX, toX: senderX, y: returnArrowY,
-              label: assignment.assignee, isReverse: fromX < toX, isSelf: false,
+              fromX: retFromX,
+              toX: senderX,
+              y: returnArrowY,
+              label: assignment.assignee,
+              isReverse: fromX < toX,
+              isSelf: false,
               number: assignReturnNumber,
             });
             maxReturnBottom = Math.max(maxReturnBottom, returnArrowY + 46);
@@ -320,19 +337,21 @@ export function buildMessages(
     // --- Creation arrows ---
     if (info.kind === "creation") {
       const CREATION_MSG_HEIGHT = 40; // from CreationStatementVM.ts
-      let fromX = snapX(coordinates.getPosition(info.from));
-      const toX = snapX(coordinates.getPosition(info.to));
+      let fromX = coordinates.getPosition(info.from);
+      const toX = coordinates.getPosition(info.to);
 
       // When sender has an active occurrence, arrow starts from its near edge
       // For nested occurrences, offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level
       if (info.senderOccurrenceDepth >= 1) {
-        const occOffset = OCCURRENCE_BAR_SIDE_WIDTH + (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
+        const occOffset =
+          OCCURRENCE_BAR_SIDE_WIDTH +
+          (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
         const isLTR = fromX < toX;
         fromX = isLTR ? fromX + occOffset : fromX - occOffset;
       }
 
       // Find the already-built participant (buildParticipants handles creationTop)
-      const targetParticipant = participants.find(p => p.name === info.to);
+      const targetParticipant = participants.find((p) => p.name === info.to);
       // Center the arrow on the participant box visual center (y + height/2).
       const messageY = targetParticipant
         ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT / 2
@@ -363,7 +382,7 @@ export function buildMessages(
       // Compute occurrence from its top to the bottom of the statement coordinate.
       // Align the bottom edge with HTML's CSS-computed occurrence bottom.
       const occHeight = Math.max(
-        (coord.top + coord.height) - occY,
+        coord.top + coord.height - occY,
         OCCURRENCE_EMPTY_HEIGHT,
       );
       if (occHeight > 0) {
@@ -389,27 +408,32 @@ export function buildMessages(
           // Compute both endpoints from raw lifeline centers.
           // HTML return line starts 1px beyond sender occurrence edge (CSS gap),
           // and ends at the created occurrence edge.
-          const rawFromX = snapX(coordinates.getPosition(info.from));
+          const rawFromX = coordinates.getPosition(info.from);
           const isLTR = rawFromX < toX;
           const occHalf = OCCURRENCE_BAR_SIDE_WIDTH;
           // Sender (A) side: occurrence near edge facing the created participant.
           // LTR: sender's right edge = rawFromX + occHalf + 1 (center pixel).
           // RTL: sender's left edge = rawFromX - occHalf.
-          const senderNest = Math.max(info.senderOccurrenceDepth - 1, 0) * OCCURRENCE_BAR_SIDE_WIDTH;
-          const senderRetX = info.senderOccurrenceDepth >= 1
-            ? rawFromX + senderNest + (isLTR ? occHalf + 2 : -occHalf)
-            : rawFromX;
+          const senderNest =
+            Math.max(info.senderOccurrenceDepth - 1, 0) *
+            OCCURRENCE_BAR_SIDE_WIDTH;
+          const senderRetX =
+            info.senderOccurrenceDepth >= 1
+              ? rawFromX + senderNest + (isLTR ? occHalf + 2 : -occHalf)
+              : rawFromX;
           // Created (B) side: occurrence near edge facing the sender.
           // LTR: created's left edge + 1 (HTML starts 1px past border).
           // RTL: created's right edge = toX + occHalf + 1 (center pixel).
-          const createdRetX = isLTR
-            ? toX - occHalf + 1
-            : toX + occHalf + 1;
+          const createdRetX = isLTR ? toX - occHalf + 1 : toX + occHalf + 1;
           // fromX = line start (created side), toX = arrow tip (sender side)
           // renderReturn places arrow head at toX
           returns.push({
-            fromX: createdRetX, toX: senderRetX, y: occBottom,
-            label: creationAssign.assignee, isReverse: createdRetX > senderRetX, isSelf: false,
+            fromX: createdRetX,
+            toX: senderRetX,
+            y: occBottom,
+            label: creationAssign.assignee,
+            isReverse: createdRetX > senderRetX,
+            isSelf: false,
             number: info.number
               ? `${info.number}.${(blockChildCount.get(info.number) || 0) + 1}`
               : undefined,
@@ -437,7 +461,9 @@ export function buildMessages(
         measureText,
         fragmentCommentHeight,
         commentObj?.text,
-        commentObj?.commentStyle ? cssToSvgStyle(commentObj.commentStyle) : undefined,
+        commentObj?.commentStyle
+          ? cssToSvgStyle(commentObj.commentStyle)
+          : undefined,
         coord.top + adjust,
       );
       if (fragmentResult) {
@@ -451,8 +477,8 @@ export function buildMessages(
 
     // --- Returns ---
     if (info.kind === "return") {
-      const rawFromX = snapX(coordinates.getPosition(info.from));
-      const rawToX = snapX(coordinates.getPosition(info.to));
+      const rawFromX = coordinates.getPosition(info.from);
+      const rawToX = coordinates.getPosition(info.to);
       const isReverse = rawToX < rawFromX;
       // HTML Anchor2 positions return lines edge-to-edge between occurrence walls.
       // rightEdgeOfRightWall = position + BAR_SIDE_WIDTH * layers
@@ -463,9 +489,13 @@ export function buildMessages(
       let fromX: number;
       if (isReverse) {
         // RTL: line starts from from's left edge of right wall
-        fromX = fromLayers === 0
-          ? rawFromX
-          : (fromLayers <= 1 ? rawFromX : rawFromX + OCCURRENCE_BAR_SIDE_WIDTH * (fromLayers - 1)) - OCCURRENCE_BAR_SIDE_WIDTH;
+        fromX =
+          fromLayers === 0
+            ? rawFromX
+            : (fromLayers <= 1
+                ? rawFromX
+                : rawFromX + OCCURRENCE_BAR_SIDE_WIDTH * (fromLayers - 1)) -
+              OCCURRENCE_BAR_SIDE_WIDTH;
       } else {
         // LTR: line starts from from's right edge of right wall.
         // +1: occurrence stroke extends 1px beyond fill area (stroke-width=2, centered).
@@ -479,9 +509,13 @@ export function buildMessages(
         toX = rawToX + OCCURRENCE_BAR_SIDE_WIDTH * toLayers;
       } else {
         // LTR: target is on the right, use its left edge
-        toX = toLayers === 0
-          ? rawToX
-          : (toLayers <= 1 ? rawToX : rawToX + OCCURRENCE_BAR_SIDE_WIDTH * (toLayers - 1)) - OCCURRENCE_BAR_SIDE_WIDTH;
+        toX =
+          toLayers === 0
+            ? rawToX
+            : (toLayers <= 1
+                ? rawToX
+                : rawToX + OCCURRENCE_BAR_SIDE_WIDTH * (toLayers - 1)) -
+              OCCURRENCE_BAR_SIDE_WIDTH;
       }
       // HTML Anchor2.edgeOffset subtracts LIFELINE_WIDTH from the container width.
       // For RTL returns, add LIFELINE_WIDTH to reach the inner edge of the target.
@@ -523,7 +557,9 @@ export function buildMessages(
         y: coord.top + adjust + coord.height / 2,
         width: diagramWidth,
         label: info.label,
-        labelWidth: measureSvgFragmentLabelWidth(resolveEmojiInText(cleanLabel)),
+        labelWidth: measureSvgFragmentLabelWidth(
+          resolveEmojiInText(cleanLabel),
+        ),
       });
       continue;
     }
@@ -549,17 +585,31 @@ export function buildMessages(
     for (let j = 0; j < occurrences.length; j++) {
       if (i === j) continue;
       const outer = occurrences[j];
-      if (outer.participantName === inner.participantName &&
-          outer.y <= inner.y &&
-          outer.y + outer.height >= inner.y + inner.height) {
+      if (
+        outer.participantName === inner.participantName &&
+        outer.y <= inner.y &&
+        outer.y + outer.height >= inner.y + inner.height
+      ) {
         depth++;
       }
     }
     if (depth > 0) {
-      occurrences[i] = { ...inner, x: inner.x + depth * OCCURRENCE_BAR_SIDE_WIDTH };
+      occurrences[i] = {
+        ...inner,
+        x: inner.x + depth * OCCURRENCE_BAR_SIDE_WIDTH,
+      };
     }
   }
 
-  const totalReturnDebt = adjustMap.get("__totalDebt__") || 0;
-  return { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments, totalReturnDebt, maxReturnBottom };
+  return {
+    messages,
+    selfCalls,
+    occurrences,
+    creations,
+    fragments,
+    returns,
+    dividers,
+    comments,
+    maxReturnBottom,
+  };
 }

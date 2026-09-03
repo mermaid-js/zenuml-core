@@ -18,6 +18,7 @@ import { renderReturn } from "./components/return";
 import { renderDivider } from "./components/divider";
 import { renderComment } from "./components/comment";
 import { renderGroup } from "./components/group";
+import { esc } from "./components/svgUtils";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import type { DiagramGeometry } from "./geometry";
 
@@ -77,11 +78,21 @@ const DEFAULT_THEME_STYLES = `
   .group-title-text { font-family: Helvetica, Verdana, serif; font-size: 13px; font-weight: 400; fill: #222; }
 `;
 
-export function renderToSvg(code: string, options?: RenderOptions): RenderResult {
+export function renderToSvg(
+  code: string,
+  options?: RenderOptions,
+): RenderResult {
   // 1. Parse
   const rootContext = RootContext(code);
   if (!rootContext) {
-    return { svg: "<svg></svg>", innerSvg: "", width: 0, height: 0, viewBox: "0 0 0 0", geometry: undefined };
+    return {
+      svg: "<svg></svg>",
+      innerSvg: "",
+      width: 0,
+      height: 0,
+      viewBox: "0 0 0 0",
+      geometry: undefined,
+    };
   }
 
   // 2. Layout (uses canvas provider — no DOM)
@@ -116,7 +127,8 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
   // Content left offset = 1 (frame border) + 10 (seq-diagram px-2.5 padding) + frameBorderLeft
   // This matches the HTML layout: .frame(1px border) > .sequence-diagram(px-2.5) > div(paddingLeft:frameBorderLeft) > content
   const contentLeftMargin = 1 + padding + g.frameBorderLeft;
-  const viewWidth = g.width + contentLeftMargin + padding + g.frameBorderRight + 1;
+  const viewWidth =
+    g.width + contentLeftMargin + padding + g.frameBorderRight + 1;
   const viewHeight = g.height + padding * 2 + headerH - 1; // -1 to match HTML CSS border-box visual height
 
   const parts: string[] = [];
@@ -133,7 +145,7 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
 
   // Participants — split into non-creation (painted before occurrences) and
   // creation (painted after occurrences so the participant box covers the bar)
-  const creationNames = new Set(g.creations.map(c => c.participant.name));
+  const creationNames = new Set(g.creations.map((c) => c.participant.name));
   for (const p of g.participants) {
     if (!creationNames.has(p.name)) {
       parts.push(renderParticipant(p));
@@ -198,7 +210,7 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
   const headerLineDrawY = headerLineY - 0.5; // 33.5 — half-pixel for crisp 1px line at pixel row 33, matching HTML header border-bottom
   const headerLineSvg = `<line class="frame-header-line" x1="1" y1="${headerLineDrawY}" x2="${viewWidth - 1}" y2="${headerLineDrawY}"/>`;
   const titleSvg = g.title
-    ? `<text x="5" y="${headerLineDrawY / 2}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
+    ? `<text x="5" y="${headerLineDrawY / 2}" dominant-baseline="central" class="frame-title">${esc(g.title)}</text>`
     : "";
 
   const viewBox = `0 0 ${viewWidth} ${viewHeight}`;
@@ -211,12 +223,4 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="${viewBox}">\n${innerSvg}\n</svg>`;
 
   return { svg, innerSvg, width: viewWidth, height: viewHeight, viewBox };
-}
-
-function escXml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }

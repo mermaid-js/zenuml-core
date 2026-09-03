@@ -69,12 +69,6 @@ export function computeReturnDebt(
       if (ownerKey && occInnerDebt > 0) {
         result.set(`inner:${ownerKey}`, occInnerDebt);
       }
-      // Record whether block had mixed content (returns + non-return children).
-      // Return-only blocks don't get the CSS border +1px correction.
-      const hasMixed = hasNonReturnChild[maxDepth] || false;
-      if (ownerKey && hasMixed) {
-        result.set(`mixed:${ownerKey}`, 1);
-      }
       const hasAssign = blockHasAssignment[maxDepth] || false;
       debtByDepth.pop();
       directDebtByDepth.pop();
@@ -143,7 +137,11 @@ export function computeReturnDebt(
         // transition that normally adds +1px to the gap between consecutive
         // returns. Compensate with +1 via nbAssignShift (non-propagating) to
         // avoid inflating inner debt / occurrence height calculations.
-        if (isFirstAtDepth && totalDebt !== 0 && info.parentBlockKind === "sync") {
+        if (
+          isFirstAtDepth &&
+          totalDebt !== 0 &&
+          info.parentBlockKind === "sync"
+        ) {
           nbAssignShift[depth] = (nbAssignShift[depth] || 0) + 1;
         }
       }
@@ -163,7 +161,7 @@ export function computeReturnDebt(
     if ((info.kind === "sync" || info.kind === "creation") && info.hasBlock) {
       // Check if this sync has an assignment return (e.g. `ret = B.method { ... }`)
       const msgCtx = info.statNode?.message?.();
-      const hasAssign = !!(msgCtx?.Assignment?.()?.assignee) && !info.isSelf;
+      const hasAssign = !!msgCtx?.Assignment?.()?.assignee && !info.isSelf;
       // The next depth level's block belongs to this statement
       if (depth + 1 > maxDepth) {
         maxDepth = depth + 1;
@@ -196,10 +194,6 @@ export function computeReturnDebt(
     if (ownerKey && occInnerDebtEnd > 0) {
       result.set(`inner:${ownerKey}`, occInnerDebtEnd);
     }
-    const hasMixedEnd = hasNonReturnChild[maxDepth] || false;
-    if (ownerKey && hasMixedEnd) {
-      result.set(`mixed:${ownerKey}`, 1);
-    }
     const hasAssignEnd = blockHasAssignment[maxDepth] || false;
     debtByDepth.pop();
     directDebtByDepth.pop();
@@ -216,9 +210,6 @@ export function computeReturnDebt(
       }
     }
   }
-
-  // Store total root debt for diagram height adjustment
-  result.set("__totalDebt__", debtByDepth[0] || 0);
 
   return result;
 }
