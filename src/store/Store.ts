@@ -44,14 +44,6 @@ export const rootContextAtom = atom((get) => {
   return RootContext(code);
 });
 
-export const titleAtom = atom<string | undefined>((get) => {
-  const titleContext = get(rootContextAtom)?.title();
-  if (!titleContext || typeof (titleContext as any).content !== "function") {
-    return undefined;
-  }
-  return (titleContext as any).content();
-});
-
 export const participantsAtom = atom((get) => {
   const rootContext = get(rootContextAtom);
   if (!rootContext) return Participants(null);

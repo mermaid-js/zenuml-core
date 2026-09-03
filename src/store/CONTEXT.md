@@ -14,7 +14,6 @@ codeAtom (string)
   ▼
 rootContextAtom (ProgContext | null)    ← RootContext(code)
   │
-  ├─▶ titleAtom (string | null)         ← rootContext.title()
   ├─▶ participantsAtom (Participants)   ← Participants(rootContext)
   ├─▶ coordinatesAtom (Coordinates)     ← new Coordinates(rootContext, widthProvider)
   └─▶ verticalCoordinatesAtom           ← new VerticalCoordinates(rootContext) | null
@@ -28,7 +27,6 @@ rootContextAtom (ProgContext | null)    ← RootContext(code)
 |---|---|---|
 | `codeAtom` | `string` | User's DSL source code |
 | `rootContextAtom` | `ProgContext \| null` | Parsed ANTLR tree |
-| `titleAtom` | `string \| null` | Diagram title extracted from tree |
 | `participantsAtom` | `Participants` | Participants map from ToCollector |
 | `coordinatesAtom` | `Coordinates` | Horizontal layout |
 | `verticalCoordinatesAtom` | `VerticalCoordinates \| null` | Vertical layout (null in legacy mode) |
