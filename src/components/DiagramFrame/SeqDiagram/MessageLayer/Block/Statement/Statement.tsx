@@ -9,6 +9,7 @@ import { Divider } from "./Divider/Divider";
 import { Return } from "./Return/Return";
 import Comment from "../../../../../Comment/Comment";
 import { cn } from "@/utils";
+import { SINGLE_BLOCK_FRAGMENT_KINDS } from "@/positioning/vertical/StatementTypes";
 import { useMemo } from "react";
 
 export const Statement = (props: {
@@ -35,9 +36,9 @@ export const Statement = (props: {
     number: props.number,
   };
 
-  const singleBlockKind = (
-    ["loop", "par", "opt", "section", "critical"] as const
-  ).find((kind) => props.context[kind]());
+  const singleBlockKind = SINGLE_BLOCK_FRAGMENT_KINDS.find((kind) =>
+    props.context[kind](),
+  );
   if (singleBlockKind) {
     return <FragmentSingleBlock {...subProps} kind={singleBlockKind} />;
   }

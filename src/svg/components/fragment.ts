@@ -1,8 +1,11 @@
 import type { FragmentGeometry } from "../geometry";
 import { esc } from "./svgUtils";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
+import { DEFAULT_LAYOUT_METRICS } from "@/positioning/vertical/LayoutMetrics";
 
-const HEADER_HEIGHT = 25;
+// Same header band the vertical layout engine reserves via
+// LayoutMetrics.fragmentHeaderHeight (.fragment .leading-4).
+const HEADER_HEIGHT = DEFAULT_LAYOUT_METRICS.fragmentHeaderHeight;
 const BRACKET_WIDTH = 3.89;
 const TEXT_PAD_X = 4;
 

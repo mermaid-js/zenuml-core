@@ -7,6 +7,7 @@ import { FragmentRefVM } from "./FragmentRefVM";
 import { FragmentSingleBlockVM } from "./FragmentSingleBlockVM";
 import { FragmentTryCatchVM } from "./FragmentTryCatchVM";
 import { ReturnStatementVM } from "./ReturnStatementVM";
+import { SINGLE_BLOCK_FRAGMENT_KINDS } from "../StatementTypes";
 import type { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 import { SyncMessageStatementVM } from "./SyncMessageStatementVM";
@@ -38,7 +39,7 @@ export const createStatementVM = (
     return new DividerStatementVM(statement, runtime);
   }
 
-  for (const kind of ["loop", "opt", "par", "section", "critical"] as const) {
+  for (const kind of SINGLE_BLOCK_FRAGMENT_KINDS) {
     const fragment = statement[kind]?.();
     if (fragment) {
       return new FragmentSingleBlockVM(statement, fragment, runtime, kind);

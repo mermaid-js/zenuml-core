@@ -8,12 +8,13 @@ import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
+import { FRAGMENT_BORDER_WIDTH } from "@/positioning/vertical/LayoutMetrics";
 import type { TextType } from "@/positioning/Coordinate";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
+import { SINGLE_BLOCK_FRAGMENT_KINDS } from "@/positioning/vertical/StatementTypes";
 import { Participants } from "@/parser/index.js";
-import { AllMessages } from "@/parser/MessageCollector";
+import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import type {
@@ -57,9 +58,7 @@ export function buildFragmentGeometry(
   // Find the fragment context node (loop, alt, opt, etc.)
   const fragmentCtx = findFragmentContext(statNode);
 
-  // Compute fragment width from local participants, including nested fragments.
-  // getLocalParticipantNames only does shallow extraction; we also walk inner
-  // section blocks to capture participants inside nested par/alt/loop/etc.
+  // Left/right participants of the fragment, used below to place its left edge.
   const localNames = getDeepParticipantNames(
     fragmentCtx,
     info.fragmentSections,
@@ -82,26 +81,20 @@ export function buildFragmentGeometry(
   let fragX: number;
 
   if (leftParticipant && rightParticipant) {
-    const participantWidth =
-      coordinates.distance(leftParticipant, rightParticipant) +
-      coordinates.half(leftParticipant) +
-      coordinates.half(rightParticipant);
-    // Self-call extra width — matches HTML's TotalWidth (WidthOfContext.ts)
-    const selfMessages = AllMessages(statNode).filter(
-      (m: any) => m.from === m.to,
-    );
-    const extraWidths = selfMessages.map(
-      (m: any) =>
-        coordinates.getMessageWidth(m) -
-        coordinates.distance(m.from || _STARTER_, rightParticipant) -
-        coordinates.half(rightParticipant),
-    );
-    const extraWidth = Math.max(0, ...extraWidths);
-    fragWidth =
-      Math.max(participantWidth, FRAGMENT_MIN_WIDTH) +
-      fragBorder.left +
-      fragBorder.right +
-      extraWidth;
+    // Width is HTML's canonical TotalWidth (WidthOfContext.ts) on the same stat
+    // context fragBorder is built from: participant span floored at
+    // FRAGMENT_MIN_WIDTH, plus the frame border on both sides, plus the
+    // self-message extra width.
+    //
+    // TotalWidth derives its own left/right participants from
+    // getLocalParticipantNames(statNode); that set is identical to localNames
+    // above — ToCollector walks the whole subtree (ParseTreeWalker.DEFAULT with
+    // no enterStat listener), so Participants(statNode) === Participants(
+    // fragmentCtx) and already subsumes every section block, and a fragment
+    // context's parent is always its StatContext so the two Origin() values
+    // agree. localNames is still needed here because fragX hangs off
+    // leftParticipant, which TotalWidth does not expose.
+    fragWidth = TotalWidth(statNode, coordinates);
     fragX =
       coordinates.getPosition(leftParticipant) -
       coordinates.half(leftParticipant);
@@ -272,7 +265,9 @@ export function buildFragmentGeometry(
       y: coord.top,
       width: fragWidth,
       height: coord.height,
-      headerY: coord.top + 1 + commentHeight,
+      // The header sits just inside the fragment's 1px top border, below any
+      // inline comment — the same offset FragmentSingleBlockVM.measure() applies.
+      headerY: coord.top + FRAGMENT_BORDER_WIDTH + commentHeight,
       sections,
       number: info.number,
       depth: info.depth,
@@ -282,7 +277,7 @@ export function buildFragmentGeometry(
 }
 
 function findFragmentContext(stat: any): any {
-  for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
+  for (const kind of SINGLE_BLOCK_FRAGMENT_KINDS) {
     const frag = stat[kind]?.();
     if (frag) return frag;
   }

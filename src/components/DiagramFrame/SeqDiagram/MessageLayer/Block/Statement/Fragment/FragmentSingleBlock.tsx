@@ -12,12 +12,9 @@ import "./FragmentLoop.css";
 import "./FragmentPar.css";
 import "./FragmentSection.css";
 
-export type SingleBlockFragmentKind =
-  | "critical"
-  | "loop"
-  | "opt"
-  | "par"
-  | "section";
+import type { SingleBlockFragmentKind } from "@/positioning/vertical/StatementTypes";
+
+export type { SingleBlockFragmentKind };
 
 interface FragmentSingleBlockProps {
   kind: SingleBlockFragmentKind;

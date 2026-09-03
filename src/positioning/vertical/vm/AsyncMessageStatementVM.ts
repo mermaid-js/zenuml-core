@@ -1,4 +1,8 @@
 import type { StatementCoordinate } from "../StatementCoordinate";
+import {
+  ASYNC_SELF_MESSAGE_HEIGHT,
+  MESSAGE_HEIGHT,
+} from "@/positioning/vertical/LayoutMetrics";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
@@ -29,7 +33,7 @@ export class AsyncMessageStatementVM extends StatementVM {
       source;
 
     const isSelf = source === target;
-    const messageHeight = isSelf ? 44 : 16;
+    const messageHeight = isSelf ? ASYNC_SELF_MESSAGE_HEIGHT : MESSAGE_HEIGHT;
 
     return {
       top,
