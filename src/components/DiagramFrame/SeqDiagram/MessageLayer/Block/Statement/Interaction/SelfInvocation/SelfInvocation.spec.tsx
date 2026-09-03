@@ -29,6 +29,7 @@ describe("SelfInvocation", () => {
   const selfInvocationWrapper = render(
     <SelfInvocation
       context={Fixture.firstStatement("ret = A->A.method2()").message()}
+      type="sync"
     />,
   );
 
@@ -37,8 +38,9 @@ describe("SelfInvocation", () => {
       selfInvocationWrapper.container.querySelector(".assignee")?.textContent,
     ).toBe("ret");
     expect(
-      selfInvocationWrapper.container.querySelector(".label .editable-span-base")
-        ?.textContent,
+      selfInvocationWrapper.container.querySelector(
+        ".label .editable-span-base",
+      )?.textContent,
     ).toBe("method2()");
     expect(
       selfInvocationWrapper.container.querySelector(".self-invocation>label")
