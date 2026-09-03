@@ -68,7 +68,7 @@
 
 import { cn } from "@/utils";
 import { Comment } from "../Comment/Comment";
-import { SelfInvocationAsync } from "./SelfInvocationAsync/SelfInvocationAsync";
+import { SelfInvocation } from "../Interaction/SelfInvocation/SelfInvocation";
 import { Message } from "../Message/Message";
 import { MessageLabel } from "../../../MessageLabel";
 import CommentClass from "@/components/Comment/Comment";
@@ -97,7 +97,8 @@ export const InteractionAsync = (props: {
   const providedSource = asyncMessage?.ProvidedFrom();
   const source = providedSource || props.origin;
   const toCtx = asyncMessage?.to();
-  const target = toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
+  const target =
+    toCtx?.name?.()?.getFormattedText() || toCtx?.getFormattedText();
   const isSelf = source === target;
 
   const content = asyncMessage?.content();
@@ -148,11 +149,12 @@ export const InteractionAsync = (props: {
     >
       {props.comment && <Comment commentObj={props.commentObj} />}
       {isSelf ? (
-        <SelfInvocationAsync
+        <SelfInvocation
           classNames={cn(messageClassNames)}
           textStyle={messageTextStyle}
           context={asyncMessage}
           number={props.number}
+          type="async"
         />
       ) : (
         <Message
