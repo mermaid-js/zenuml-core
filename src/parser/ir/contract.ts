@@ -814,9 +814,6 @@ export interface CreationContext extends IrNode {
    */
   Body(): CreationBodyContext | null;
 
-  /** Explicit receiver — alias of `Constructor()`; consumed by `Owner()`/Participants collection. */
-  To(): string | undefined;
-
   /** Formatted assignee text or `undefined`. Indirect consumers via Owner()/Participants (03 §4). */
   Assignee(): string | undefined;
 
@@ -1170,12 +1167,17 @@ export interface ErrorDetail {
 }
 
 /**
- * `RootContext(code)`: parses `code` and returns the root node, or `null`.
+ * `RootContext(code)`: parses `code` and returns the root node.
  * v1 semantics (04 §1.1): a (partial) tree is effectively ALWAYS returned for
  * non-empty input — error recovery produces a renderable partial tree while
- * diagnostics accumulate in {@link ParserModule.Errors} /
- * {@link ParserModule.ErrorDetails}. Live typing of half-finished DSL must
- * still render. `null` is reserved for the blank-code convention.
+ * diagnostics accumulate in {@link ParserModule.ErrorDetails}. Live typing of
+ * half-finished DSL must still render. The ANTLR implementation
+ * (src/parser/index.js `rootContext`) never itself produces `null` — the
+ * blank-code `null` a caller may see comes from the caller's own guard
+ * (e.g. `src/store/Store.ts`'s `rootContextAtom`, which short-circuits on
+ * empty/whitespace-only code before calling `RootContext` at all). The `|
+ * null` stays in this type only because downstream consumers
+ * (`src/store/Store.ts`, `src/core.tsx`) already branch on it defensively.
  * Consumer: src/store/Store.ts:48-52 (`rootContextAtom`) — the only
  * renderer-side parse trigger.
  */
@@ -1200,19 +1202,16 @@ export interface ParserModule {
   RootContext: RootContextFn;
 
   /**
-   * LIVE mutable arrays (module singletons): accumulate one entry per syntax
+   * LIVE mutable array (module singleton): accumulates one entry per syntax
    * error across ALL parses; never auto-cleared by the parser.
    * `src/core.tsx:245-250` clears with `.length = 0`, copies, reports —
    * the live-reference import shape must be preserved (07 §R12/G5).
-   * `Errors` entries are preformatted strings
-   * (`"<symbol> line <l>, col <c>: <msg>"`); `ErrorDetails` are structured.
+   * Entries are structured `{ line, column, msg }` records.
    *
    * @v2 Per-parse diagnostics returned alongside the AST
    * (`{ root, errors }`); the singleton is a latent re-entrancy bug — do not
    * carry it past the cutover cleanup (Stage 6).
    */
-  Errors: string[];
-  /** See {@link ParserModule.Errors}. */
   ErrorDetails: ErrorDetail[];
 
   /**
@@ -1222,13 +1221,6 @@ export interface ParserModule {
    * positioning/LocalParticipants.ts:15, LifeLineLayer.tsx.
    */
   Participants(ctx: IrNode | null | undefined): ParticipantsCollection;
-
-  /**
-   * Max nesting depth of fragments inside `ctx`. No renderer consumers found
-   * (03 §1) — kept on the contract for package-API parity only.
-   * @v2 Drop from the public surface with a CHANGELOG note (07 open question 4).
-   */
-  Depth(ctx: IrNode): number;
 
   /** Class export for `instanceof` (LifeLineLayer.tsx:14,44-51 via GroupContext/ParticipantContext; ProgContext for API parity). */
   ProgContext: ContextClass<ProgContext>;

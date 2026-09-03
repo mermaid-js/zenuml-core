@@ -1202,10 +1202,6 @@ export class CreationContext extends Ctx {
     return this.creationBody()?.construct()?.getFormattedText();
   }
 
-  To(): string | undefined {
-    return this.Constructor();
-  }
-
   Owner(): string | undefined {
     if (!this.Constructor()) return "Missing Constructor";
     const assignee = this.Assignee();
@@ -1230,10 +1226,6 @@ export class CreationContext extends Ctx {
   SignatureText(): string {
     const text = this.ParametersText() || "create";
     return `«${text}»`;
-  }
-
-  isParamValid(): boolean {
-    return (this.creationBody()!.parameters()?.parameter()?.length ?? 0) > 0;
   }
 
   Assignment(): Assignment | undefined {

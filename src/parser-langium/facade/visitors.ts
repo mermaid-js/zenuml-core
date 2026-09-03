@@ -358,29 +358,3 @@ export class LangiumFrameBuilder {
     return this.frameRoot;
   }
 }
-
-/* ------------------------------------------------------------------ */
-/* ChildFragmentDetector — Depth (src/parser/ChildFragmentDetecotr.js)  */
-/* ------------------------------------------------------------------ */
-
-const DEPTH_FRAGMENTS = new Set<any>([
-  TcfContext,
-  OptContext,
-  ParContext,
-  AltContext,
-  LoopContext,
-  SectionContext,
-  CriticalContext,
-  // NOTE: ref is deliberately NOT counted (matches the ANTLR detector).
-]);
-
-export function langiumDepth(context: any): number {
-  let max = 0;
-  function walk(node: Ctx, depth: number): void {
-    const d = DEPTH_FRAGMENTS.has(node.constructor) ? depth + 1 : depth;
-    if (d > max) max = d;
-    for (const child of node.children ?? []) walk(child, d);
-  }
-  for (const child of context?.children ?? []) walk(child, 0);
-  return max;
-}

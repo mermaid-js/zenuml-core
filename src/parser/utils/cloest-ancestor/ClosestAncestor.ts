@@ -28,16 +28,4 @@ ParserRuleContext.prototype.ClosestAncestorStat = function (
   return undefined;
 };
 
-ParserRuleContext.prototype.ClosestAncestorBlock = function (
-  this: AugmentedContext,
-): AugmentedContext | undefined {
-  const parentCtx = this.ClosestAncestorStat()?.parentCtx;
-  // if parent is a block, return it
-  if (parentCtx instanceof seqParser.BlockContext) {
-    return parentCtx;
-  }
-  console.warn("Cannot find closest ancestor block for context:", this);
-  return undefined;
-};
-
 export {};

@@ -30,10 +30,6 @@ CreationContext.prototype.Constructor = function () {
   return this.creationBody()?.construct()?.getFormattedText();
 };
 
-CreationContext.prototype.To = function () {
-  return this.Constructor();
-};
-
 CreationContext.prototype.Owner = function () {
   if (!this.Constructor()) {
     return "Missing Constructor";

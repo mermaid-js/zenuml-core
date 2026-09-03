@@ -1,5 +1,12 @@
 import sequenceParser from "../generated-parser/sequenceParser";
-import type { AsyncMessageContext, CreationContext, MessageContext, Parameter, RetContext, ReturnAsyncMessageContext } from "./Parser.types";
+import type {
+  AsyncMessageContext,
+  CreationContext,
+  MessageContext,
+  Parameter,
+  RetContext,
+  ReturnAsyncMessageContext,
+} from "./Parser.types";
 
 // Helper function to format a single parameter
 function formatParameter(param: Parameter): string {
@@ -11,19 +18,19 @@ function formatParameter(param: Parameter): string {
       return `${namedParam.ID().getText()}=${value}`;
     }
   }
-  
+
   if (param.declaration?.()) {
     const decl = param.declaration();
     if (decl) {
       return `${decl.type().getText()} ${decl.ID().getText()}`;
     }
   }
-  
+
   const expr = param.expr?.();
   if (expr) {
     return expr.getFormattedText();
   }
-  
+
   return param.getFormattedText();
 }
 
@@ -53,10 +60,11 @@ const RetContext = sequenceParser.RetContext as any as {
   new (): RetContext;
   prototype: RetContext;
 };
-const ReturnAsyncMessageContext = sequenceParser.ReturnAsyncMessageContext as any as {
-  new (): ReturnAsyncMessageContext;
-  prototype: ReturnAsyncMessageContext;
-};
+const ReturnAsyncMessageContext =
+  sequenceParser.ReturnAsyncMessageContext as any as {
+    new (): ReturnAsyncMessageContext;
+    prototype: ReturnAsyncMessageContext;
+  };
 
 // Now we can safely extend the prototypes with proper typing
 MessageContext.prototype.SignatureText = function (
@@ -91,12 +99,6 @@ CreationContext.prototype.SignatureText = function (
 ): string {
   const text = this.ParametersText() || "create";
   return `«${text}»`;
-};
-
-CreationContext.prototype.isParamValid = function (
-  this: CreationContext,
-): boolean {
-  return (this.creationBody().parameters()?.parameter()?.length ?? 0) > 0;
 };
 
 RetContext.prototype.SignatureText = function (this: RetContext): string {

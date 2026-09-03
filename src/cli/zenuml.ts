@@ -566,7 +566,6 @@ async function checkOne(input: string): Promise<FileCheckResult> {
   }
 
   // Clear accumulated errors before parsing
-  Parser.Errors.length = 0;
   Parser.ErrorDetails.length = 0;
 
   Parser.RootContext(code);
@@ -812,7 +811,6 @@ async function main(): Promise<void> {
     }
 
     // Clear accumulated errors before parsing
-    Parser.Errors.length = 0;
     Parser.ErrorDetails.length = 0;
 
     const tree = Parser.RootContext(code);
