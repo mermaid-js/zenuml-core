@@ -1,5 +1,6 @@
 import { marked } from "marked";
 import Comment from "../../components/Comment/Comment";
+import { COMMENT_LINE_HEIGHT } from "./LayoutMetrics";
 
 const defaultTokensOptions = {
   gfm: true,
@@ -20,6 +21,6 @@ export class MarkdownMeasurer {
 
     const lines = _text.trim().split("\n");
 
-    return lines.length * 20;
+    return lines.length * COMMENT_LINE_HEIGHT;
   }
 }

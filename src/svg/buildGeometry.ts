@@ -7,14 +7,10 @@
  */
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
-import {
-  FRAGMENT_MIN_WIDTH,
-  FRAGMENT_PADDING_X,
-} from "@/positioning/Constants";
+import { FRAGMENT_PADDING_X } from "@/positioning/Constants";
 import { TextType } from "@/positioning/Coordinate";
-import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
-import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { AllMessages } from "@/parser/MessageCollector";
+import { OrderedParticipants } from "@/parser/OrderedParticipants";
+import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import type { DiagramGeometry, FragmentGeometry } from "./geometry";
@@ -86,30 +82,15 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     lifelineBottom,
   );
 
-  // Compute diagramWidth matching HTML's TotalWidth formula (WidthOfContext.ts).
-  // HTML uses participantWidth = distance(left, right) + half(left) + half(right),
-  // NOT coordinates.getWidth() (which can include extra left(firstParticipant) offset).
-  // In SVG, border.left/.right are added separately in composeSvg, so we include only
-  // participantWidth + extraWidthDueToSelfMessage here.
-  const localParticipants = getLocalParticipantNames(rootContext);
-  const orderedNames = coordinates.orderedParticipantNames();
-  const leftParticipant = orderedNames.find(p => localParticipants.includes(p)) || "";
-  const rightParticipant = orderedNames.slice().reverse().find(p => localParticipants.includes(p)) || "";
-
-  const participantWidth =
-    coordinates.distance(leftParticipant, rightParticipant) +
-    coordinates.half(leftParticipant) +
-    coordinates.half(rightParticipant);
-
-  const selfMessages = AllMessages(rootContext).filter(m => m.from === m.to);
-  const extraWidths = selfMessages.map(m =>
-    coordinates.getMessageWidth(m) -
-    coordinates.distance(m.from || _STARTER_, rightParticipant) -
-    coordinates.half(rightParticipant)
-  );
-  const extraWidthDueToSelfMessage = Math.max(0, ...extraWidths);
-
-  let diagramWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH) + extraWidthDueToSelfMessage;
+  // Diagram width is HTML's canonical TotalWidth (WidthOfContext.ts), which is
+  // max(participantWidth, FRAGMENT_MIN_WIDTH) + border.left + border.right +
+  // extraWidthDueToSelfMessage. The SVG path adds border.left/.right separately
+  // during composition (see the fragment shifts below and composeSvg), so the
+  // two border terms are subtracted back out here rather than threaded through
+  // TotalWidth as a flag — `frameBorder` above is built from exactly the same
+  // (rootContext, orderedParticipantNames) pair TotalWidth uses internally.
+  let diagramWidth =
+    TotalWidth(rootContext, coordinates) - frameBorder.left - frameBorder.right;
 
   // Expand width to fit labels that extend beyond
   if (measureText) {

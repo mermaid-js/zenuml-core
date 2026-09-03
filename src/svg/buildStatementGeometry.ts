@@ -10,7 +10,15 @@ import {
   LIFELINE_WIDTH,
   OCCURRENCE_EMPTY_HEIGHT,
 } from "@/positioning/Constants";
+import {
+  ASYNC_SELF_MESSAGE_HEIGHT,
+  COMMENT_LINE_HEIGHT,
+  CREATION_MESSAGE_HEIGHT,
+  MESSAGE_HEIGHT,
+  SELF_MESSAGE_HEIGHT,
+} from "@/positioning/vertical/LayoutMetrics";
 import { TextType } from "@/positioning/Coordinate";
+import Anchor2 from "@/positioning/Anchor2";
 import { buildFragmentGeometry } from "./buildFragmentGeometry";
 import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
@@ -142,30 +150,33 @@ export function buildMessages(
     if (info.kind === "sync" || info.kind === "async") {
       let fromX = coordinates.getPosition(info.from);
       const toX = coordinates.getPosition(info.to);
-      const messageHeight = info.isSelf ? 30 : 16;
+      const isAsync = info.kind === "async";
+      // Same three heights the VMs measure (SyncMessageStatementVM /
+      // AsyncMessageStatementVM): a self sync call is the 30px looped arrow, a
+      // self async call is label + 24px arrow SVG, everything else is 16px.
+      const messageHeight = !info.isSelf
+        ? MESSAGE_HEIGHT
+        : isAsync
+          ? ASYNC_SELF_MESSAGE_HEIGHT
+          : SELF_MESSAGE_HEIGHT;
       // Comment height: HTML renders comment <p> above the message in CSS flow.
       // coord.top doesn't include comment height, so offset manually (same as fragments).
       const msgCommentHeight = commentObj?.text
-        ? (info.comment?.trim().split("\n").length || 0) * 20
+        ? (info.comment?.trim().split("\n").length || 0) * COMMENT_LINE_HEIGHT
         : 0;
       const messageY =
         coord.top + adjust + msgCommentHeight + messageHeight - 0.5;
 
       // D4: When sender has an active occurrence, arrow starts from its near edge.
-      // LTR: near edge is the RIGHT side → center + depth*side (each level shifts bar right).
-      // RTL: near edge is the LEFT side → center - side + (depth-1)*side = center + (depth-2)*side.
-      //   depth=1: center - side (outer bar left edge)
-      //   depth=2: center            (second bar left edge)
-      //   depth=3: center + side     (third bar left edge)
+      // Same wall arithmetic the HTML path runs through Anchor2:
+      // LTR → rightEdgeOfRightWall (position + side*depth);
+      // RTL → leftEdgeOfRightWall  (position + side*(depth-1) - side).
       if (info.senderOccurrenceDepth >= 1 && !info.isSelf) {
-        const depth = info.senderOccurrenceDepth;
-        const occOffset = depth * OCCURRENCE_BAR_SIDE_WIDTH;
+        const senderAnchor = new Anchor2(fromX, info.senderOccurrenceDepth);
         const isLTR = fromX < toX;
         fromX = isLTR
-          ? fromX + occOffset
-          : fromX -
-            OCCURRENCE_BAR_SIDE_WIDTH +
-            (depth - 1) * OCCURRENCE_BAR_SIDE_WIDTH;
+          ? senderAnchor.rightEdgeOfRightWall()
+          : senderAnchor.leftEdgeOfRightWall();
       }
 
       // When target already has active occurrences, the new occurrence is nested
@@ -178,25 +189,21 @@ export function buildMessages(
         // Async self-calls: HTML renders label (flex-col) then a 30×24 SVG arrow.
         // The label and arrow are laid out by renderSelfCall from s.y, so no Y offset
         // is needed here — otherwise the label height gets double-counted.
-        const isAsync = info.kind === "async";
         const selfYOffset = 0;
         const selfWidth = isAsync ? 28 : OCCURRENCE_WIDTH;
-        // Async: full visual extent = label(~20px) + arrow SVG(24px) = 44px
-        const selfHeight = isAsync ? 44 : messageHeight;
         // For self-calls inside an occurrence, the HTML component renders
-        // inside the occurrence div — starting at the occurrence's right edge.
-        // For nested occurrences, offset further by OCCURRENCE_BAR_SIDE_WIDTH per extra level.
-        const selfX =
-          info.senderOccurrenceDepth >= 1
-            ? fromX +
-              OCCURRENCE_BAR_SIDE_WIDTH +
-              (info.senderOccurrenceDepth - 1) * OCCURRENCE_BAR_SIDE_WIDTH
-            : fromX;
+        // inside the occurrence div — starting at the occurrence's right edge,
+        // i.e. Anchor2's rightEdgeOfRightWall (position + side*depth), which
+        // degenerates to the bare lifeline position at depth 0.
+        const selfX = new Anchor2(
+          fromX,
+          info.senderOccurrenceDepth,
+        ).rightEdgeOfRightWall();
         selfCalls.push({
           x: selfX,
           y: coord.top + selfYOffset + msgCommentHeight,
           width: selfWidth,
-          height: selfHeight,
+          height: messageHeight,
           label: info.label,
           arrowStyle: isAsync ? "open" : "solid",
           number: info.number,
@@ -336,7 +343,6 @@ export function buildMessages(
 
     // --- Creation arrows ---
     if (info.kind === "creation") {
-      const CREATION_MSG_HEIGHT = 40; // from CreationStatementVM.ts
       let fromX = coordinates.getPosition(info.from);
       const toX = coordinates.getPosition(info.to);
 
@@ -355,7 +361,7 @@ export function buildMessages(
       // Center the arrow on the participant box visual center (y + height/2).
       const messageY = targetParticipant
         ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT / 2
-        : coord.top + CREATION_MSG_HEIGHT / 2;
+        : coord.top + CREATION_MESSAGE_HEIGHT / 2;
       if (targetParticipant) {
         creations.push({
           participant: targetParticipant,
@@ -378,7 +384,7 @@ export function buildMessages(
       // -2px matches HTML's Occurrence mt-[-2px]
       const occY = targetParticipant
         ? targetParticipant.y + PARTICIPANT_VISUAL_HEIGHT - 2
-        : coord.top + CREATION_MSG_HEIGHT - 2;
+        : coord.top + CREATION_MESSAGE_HEIGHT - 2;
       // Compute occurrence from its top to the bottom of the statement coordinate.
       // Align the bottom edge with HTML's CSS-computed occurrence bottom.
       const occHeight = Math.max(
@@ -448,9 +454,10 @@ export function buildMessages(
     if (info.kind === "fragment" && info.fragmentKind) {
       const adjustedCoord = { top: coord.top + adjust, height: coord.height };
       // Compute comment height: the HTML renderer places the header BELOW any
-      // inline comment. MarkdownMeasurer uses lines * 20 for height.
+      // inline comment, one COMMENT_LINE_HEIGHT line box per line (the same
+      // arithmetic MarkdownMeasurer runs for the vertical engine).
       const fragmentCommentHeight = commentObj?.text
-        ? (info.comment?.trim().split("\n").length || 0) * 20
+        ? (info.comment?.trim().split("\n").length || 0) * COMMENT_LINE_HEIGHT
         : 0;
       const fragmentResult = buildFragmentGeometry(
         info,
@@ -480,51 +487,26 @@ export function buildMessages(
       const rawFromX = coordinates.getPosition(info.from);
       const rawToX = coordinates.getPosition(info.to);
       const isReverse = rawToX < rawFromX;
-      // HTML Anchor2 positions return lines edge-to-edge between occurrence walls.
-      // rightEdgeOfRightWall = position + BAR_SIDE_WIDTH * layers
-      // leftEdgeOfRightWall  = layers === 0 ? position : centerOfRightWall - BAR_SIDE_WIDTH
-      //   where centerOfRightWall = layers <= 1 ? position : position + BAR_SIDE_WIDTH * (layers - 1)
-      // LTR: from.rightEdge → to;  RTL: to ← from.leftEdge
-      const fromLayers = info.senderOccurrenceDepth;
-      let fromX: number;
-      if (isReverse) {
-        // RTL: line starts from from's left edge of right wall
-        fromX =
-          fromLayers === 0
-            ? rawFromX
-            : (fromLayers <= 1
-                ? rawFromX
-                : rawFromX + OCCURRENCE_BAR_SIDE_WIDTH * (fromLayers - 1)) -
-              OCCURRENCE_BAR_SIDE_WIDTH;
-      } else {
-        // LTR: line starts from from's right edge of right wall.
-        // +1: occurrence stroke extends 1px beyond fill area (stroke-width=2, centered).
-        fromX = rawFromX + OCCURRENCE_BAR_SIDE_WIDTH * fromLayers + 1;
-      }
-      // Target also needs occurrence edge offset (Anchor2 uses the near edge facing the source)
-      const toLayers = info.targetOccurrenceDepth || 0;
-      let toX: number;
-      if (isReverse) {
-        // RTL: target is on the left, use its right edge
-        toX = rawToX + OCCURRENCE_BAR_SIDE_WIDTH * toLayers;
-      } else {
-        // LTR: target is on the right, use its left edge
-        toX =
-          toLayers === 0
-            ? rawToX
-            : (toLayers <= 1
-                ? rawToX
-                : rawToX + OCCURRENCE_BAR_SIDE_WIDTH * (toLayers - 1)) -
-              OCCURRENCE_BAR_SIDE_WIDTH;
-      }
+      // Return lines run edge-to-edge between occurrence walls; reuse the very
+      // same wall arithmetic the HTML path uses (src/positioning/Anchor2.ts).
+      // LTR: from.rightEdge → to.leftEdge;  RTL: to.rightEdge ← from.leftEdge
+      const fromAnchor = new Anchor2(rawFromX, info.senderOccurrenceDepth);
+      const toAnchor = new Anchor2(rawToX, info.targetOccurrenceDepth || 0);
+      // +1: occurrence stroke extends 1px beyond fill area (stroke-width=2,
+      // centered). Not part of Anchor2 — kept as a separate addition.
+      const RETURN_STROKE_OFFSET = 1;
+      const fromX = isReverse
+        ? fromAnchor.leftEdgeOfRightWall()
+        : fromAnchor.rightEdgeOfRightWall() + RETURN_STROKE_OFFSET;
       // HTML Anchor2.edgeOffset subtracts LIFELINE_WIDTH from the container width.
       // For RTL returns, add LIFELINE_WIDTH to reach the inner edge of the target.
-      // For LTR returns, the +1 stroke correction on fromX (line 680) already
-      // accounts for the Anchor2 LIFELINE_WIDTH subtraction — applying it again
-      // on toX would double-count and shrink the arrow by 2px instead of 1px.
-      if (isReverse) {
-        toX += LIFELINE_WIDTH;
-      }
+      // For LTR returns, the +1 stroke correction on fromX already accounts for
+      // the Anchor2 LIFELINE_WIDTH subtraction — applying it again on toX would
+      // double-count and shrink the arrow by 2px instead of 1px. Neither term is
+      // part of Anchor2, so both stay outside the accessor call.
+      const toX = isReverse
+        ? toAnchor.rightEdgeOfRightWall() + LIFELINE_WIDTH
+        : toAnchor.leftEdgeOfRightWall();
       // Return Y positioning: subpixel browser measurement (scoring coord = attrY + 21)
       // shows the two sub-cases that the positioning engine distinguishes with 0 vs 16px:
       //   - return with coord.height=0: HTML collapses margin (CSS margin-bottom:-16px on

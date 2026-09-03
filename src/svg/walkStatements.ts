@@ -8,6 +8,7 @@
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import type { FragmentKind } from "./geometry";
+import { SINGLE_BLOCK_FRAGMENT_KINDS } from "@/positioning/vertical/StatementTypes";
 import type { RootContextNode, BlockNode, StatNode } from "@/parser/AntlrTypes";
 
 export interface FragmentSectionInfo {
@@ -289,8 +290,7 @@ interface FragmentExtract {
 }
 
 function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
-  // Single-block fragments: loop, opt, par, critical, section
-  for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
+  for (const kind of SINGLE_BLOCK_FRAGMENT_KINDS) {
     const frag = stat[kind]?.();
     if (frag) {
       const condition = frag.parExpr?.()?.condition?.();
@@ -398,8 +398,7 @@ function walkFragmentBlocks(
   parentNumber: string,
   depth: number,
 ): void {
-  // Single-block fragments: loop, opt, par, critical, section
-  for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
+  for (const kind of SINGLE_BLOCK_FRAGMENT_KINDS) {
     const frag = stat[kind]?.();
     if (frag) {
       const block = frag.braceBlock?.()?.block?.();

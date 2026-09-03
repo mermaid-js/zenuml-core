@@ -1,8 +1,7 @@
 import type { StatementCoordinate } from "../StatementCoordinate";
+import { CREATION_MESSAGE_HEIGHT } from "@/positioning/vertical/LayoutMetrics";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
-
-const CREATION_MESSAGE_HEIGHT = 40; // [data-type="creation"], .h-10
 
 export class CreationStatementVM extends StatementVM {
   readonly kind = "creation" as const;
