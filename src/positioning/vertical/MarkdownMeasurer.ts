@@ -19,12 +19,6 @@ export class MarkdownMeasurer {
     }
 
     const lines = _text.trim().split("\n");
-    // console.info(
-    //   "MarkdownMeasurer",
-    //   `commentObj?.text ${commentObj?.text}`,
-    //   `lines.length ${lines.length}`,
-    //   `tokens", ${JSON.stringify(tokens)}`,
-    // );
 
     return lines.length * 20;
   }

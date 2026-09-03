@@ -8,16 +8,10 @@ import type { WidthFunc } from "../positioning/Coordinate";
 import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { CodeRange } from "../parser/CodeRange";
-import logger from "@/logger/logger";
 
 type VerticalMode = "html" | "legacy";
 const resolveVerticalMode = (): VerticalMode => {
-  const mode =
-    import.meta.env.VITE_VERTICAL_MODE === "legacy" ? "legacy" : "html";
-  logger.info(
-    `[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`,
-  );
-  return mode;
+  return import.meta.env.VITE_VERTICAL_MODE === "legacy" ? "legacy" : "html";
 };
 
 export const resolveWidthProvider = (): WidthFunc => {
@@ -29,7 +23,6 @@ export const resolveWidthProvider = (): WidthFunc => {
     (urlParam || import.meta.env.VITE_WIDTH_PROVIDER) === "canvas"
       ? "canvas"
       : "browser";
-  logger.debug(`[ZenUML] WidthProvider: ${mode}`);
   return mode === "canvas" ? WidthProviderOnCanvas : WidthProviderOnBrowser;
 };
 
@@ -131,11 +124,9 @@ export const stickyOffsetAtom = atom<number | false>(0);
 
 export const diagramElementAtom = atom<HTMLElement | null>(null);
 
-export const onElementClickAtom = atomWithFunctionValue(
-  (codeRange: CodeRange) => {
-    logger.debug("Element clicked", codeRange);
-  },
-);
+export const onElementClickAtom = atomWithFunctionValue<
+  (codeRange: CodeRange) => void
+>(() => {});
 
 export const onMessageClickAtom = atomWithFunctionValue<
   (context: any, element: HTMLElement) => void

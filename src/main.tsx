@@ -1,7 +1,4 @@
-import parentLogger from "./logger/logger";
 import ZenUml from "./core";
-
-const logger = parentLogger.child({ name: "main" });
 
 const defaultConfig = {
   enableMultiTheme: true,
@@ -31,7 +28,6 @@ export function initZenUml(element: HTMLElement) {
   zenUml.render = (content: string, config = {}) => {
     return originalRender(content, { ...defaultConfig, ...config }).then(
       (r) => {
-        logger.debug("render resolved", r);
         console.log("ZenUML Core Version:", ZenUml.version);
         return r;
       },

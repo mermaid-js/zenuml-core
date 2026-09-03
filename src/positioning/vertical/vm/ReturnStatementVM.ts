@@ -61,7 +61,6 @@ export class ReturnStatementVM extends StatementVM {
     }
 
     const height = cursor - top;
-    // console.info("returnVM::", top, commentHeight, source, target, height);
 
     return { top, height, kind: this.kind };
   }
