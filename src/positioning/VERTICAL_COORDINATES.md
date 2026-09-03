@@ -13,9 +13,7 @@ This module replaces browser-driven measurements with a deterministic, server-si
 | Method | Returns | Description |
 |--------|---------|-------------|
 | `getCreationTop(participant)` | `number \| undefined` | Earliest creation anchor for a participant (used for lifeline start positioning) |
-| `getStatementCoordinate(key)` | `StatementCoordinate \| undefined` | Lookup by statement key string |
-| `getStatementCoordinateFor(statement)` | `StatementCoordinate \| undefined` | Lookup by parser statement context (avoids key-format coupling) |
-| `entries()` | `Array<[string, StatementCoordinate]>` | Snapshot of all statement coordinates |
+| `getStatementCoordinate(key)` | `StatementCoordinate \| undefined` | Lookup by statement key string (build the key with `createStatementKey(statement)`) |
 | `getTotalHeight()` | `number` | Total layout height (from `BlockVM.layout()` return value) |
 
 ### StatementCoordinate
@@ -47,7 +45,7 @@ Keys are `(start.stop)` token ranges via `vertical/StatementIdentifier.ts`, ensu
 
 ## Consuming the Coordinates
 
-- **Rendering**: Use `getStatementCoordinateFor(statement)` to position elements.
+- **Rendering**: Use `getStatementCoordinate(createStatementKey(statement))` to position elements.
 - **Lifelines**: Call `getCreationTop(participant)` for lifeline start points.
 - **Total sizing**: Use `getTotalHeight()` for diagram height.
 - **Testing**: `src/positioning/VerticalCoordinates.spec.ts` covers crash regression and API contract.

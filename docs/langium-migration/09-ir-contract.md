@@ -33,7 +33,7 @@ Why freeze the awkward shape instead of designing a clean one (07 §3.2–3.3):
    `RootContext` can A/B between ANTLR and Langium during stabilization, and
    rollback is one line.
 
-So: **v1 declares the status quo; v2 (the `@v2` tags) declares the exit.**
+So: **v1 declares the status quo; v2 (the §6 table) declares the exit.**
 The contract file is the binding artifact — if the facade and this document
 disagree, doc 03 (the survey) is the evidence base and the contract file must
 be corrected against it.
@@ -47,15 +47,40 @@ against `contract.ts` alone.
 
 In scope (everything in `contract.ts`):
 
-- `TokenView` and the base node surface (`IrNode`).
+- `TokenView`, `IrTerminal` (the token-child view returned by terminal
+  accessors such as `ParticipantContext.COLOR()`), and the base node surface
+  (`IrNode`).
 - One interface per context kind with ≥1 external consumer (03 §5/§10) —
   50 node-kind interfaces, listed in §4.
 - Tree-derived service shapes the renderer holds: `ParticipantsCollection`,
-  `ParticipantView`, `AssignmentView`, `IrPosition`.
-- Entry points: `RootContextFn`, `ParserModule` (incl. live `Errors` /
-  `ErrorDetails` arrays and `Participants`/`Depth`), `GeneratedParserShim`
-  (the five classes renderer files import for `instanceof`), and
-  `ContextsFixtureModule` (sub-rule parse entry points used by specs).
+  `ParticipantView`, `AssignmentView`, `IrPosition` — invariants in §4.1.
+- Entry points: `RootContextFn`, `ParserModule` (the live `ErrorDetails`
+  array, `Participants`, and the three `instanceof` class exports),
+  `ContextClass`.
+
+Declared once but never imported, and therefore **removed** from the contract:
+`GeneratedParserShim` and `ContextsFixtureModule`. Both surfaces are still real
+— they live in `src/generated-parser` and `src/parser/ContextsFixture.ts` — but
+nothing was type-checking the declarations, so they could only rot. A Langium
+shim must still provide both; re-declare them here when something actually
+binds to them. What they specified, kept here because it is still binding on a
+Stage-3 shim:
+
+- **`@/generated-parser` classes imported for `instanceof`** (03 §1). A shim
+  module replacing `src/generated-parser` must export facade classes under
+  exactly these names: `useArrow.ts` uses `MessageContext`, `CreationContext`,
+  `StatContext`; `useFragmentData.ts` uses `MessageContext`, `CreationContext`;
+  `Return.tsx` uses `AtomExprContext`, `ContentContext`.
+- **Sub-rule parse entry points** (`src/parser/ContextsFixture.ts`, used by the
+  spec suite): `ProgContextFixture`, `TitleContextFixture`, `StatContextFixture`,
+  `AsyncMessageContextFixture`, `SyncMessageContextFixture` (parses at the sync
+  `message` rule), `DividerContextFixture`, `CreationContextFixture`,
+  `RetContextFixture`. Each parses `code` starting at the named grammar rule;
+  the Langium port rebuilds them on `LangiumParser.parse(text, { rule })`
+  (07 §P10/G9) keeping the exact names and return kinds so the 34-spec suite
+  runs unchanged. NOTE: a fixture returns its node even when the input has
+  errors — there is no `null`-on-error convention here, because the no-op error
+  listener swallows diagnostics.
 
 Deliberately **excluded** (no external consumer; risk-map "delete, don't
 migrate" list): `Key()`, `returnedValue()`, `ClosestAncestorBlock()`,
@@ -80,16 +105,27 @@ facade class implements these for internal reasons, they are not contract.
 - Langium mapping (for the implementer): `start.start = $cstNode.offset`,
   `stop.stop = $cstNode.end - 1`, `line = range.start.line + 1`,
   `column = range.start.character`.
+- `IrNode.stop` is `null` when the node consumed zero parser-visible tokens.
+  ANTLR gives such a rule `stop === null` and the Langium facade mirrors it
+  (`src/parser-langium/facade/nodes.ts`, `get stop()`). The DSL-transform
+  consumers only ever read `stop` on non-empty nodes, so none of them observes
+  the `null` — which is why the `| null` has never needed a guard at a call
+  site.
+- `TokenView.text` (the token image) is consumed by `src/parser/CodeRange.ts`
+  only. Everything else reads the four numeric fields.
 
 ### 3.2 Identity (07 §R8)
 
 Same child accessor on the same node returns the **same object** (`===`) every
 call. Arrays may be fresh per call but elements are identical objects.
-Consumers that break otherwise: `VerticalCoordinates.ts:16` +
-`StatementVM.ts:70-71` (`block === this.runtime.rootBlock`),
-`StatementVM.isFirstStatement` (`statements[0] === statCtx`), BlockVM reorder
-keys, React hook deps (`useFragmentData.ts:79-81`, `Occurrence.tsx:71-73`,
-`FragmentAlt.tsx:27-35`). Implementation rule: one per-parse `WeakMap` from
+Consumers that break otherwise: React hook deps that key on the context object
+itself (`useFragmentData.ts:87`, `Occurrence.tsx:66,84`) and the
+`rootContext?.block?.() ?? rootContext` fallback in `VerticalCoordinates.ts:15`
+that must stay stable for the whole layout pass. (The `StatementVM`
+`block === this.runtime.rootBlock` and `statements[0] === statCtx` checks that
+used to head this list were deleted with `isRootLevelStatement` /
+`isFirstStatement`; the rule below is unchanged, it just has fewer witnesses.)
+Implementation rule: one per-parse `WeakMap` from
 AST node (plus `(astNode, wrapperKind)` for synthesized wrappers) to facade
 instance. Fresh-wrapper-per-call is forbidden.
 
@@ -114,7 +150,12 @@ Two orthogonal rules that must not be conflated:
   `contract.ts` **is** the contract.
 - Exception encoded in the types: `EndpointContext.name?()` and
   `EmojiContext.name?()` are optional methods (grammar-alternative dependent);
-  the renderer probes them with `?.()`.
+  the renderer probes them with `?.()`. "Absent" here must mean an absent
+  property, not a method that exists and throws (03 §8.1) — `?.()` only guards
+  the receiver.
+- `StatContext`'s thirteen discriminators are mutually exclusive: exactly ONE
+  returns non-`null` on any given statement and the other twelve return `null`.
+  `utils/Context.ts` relies on that to pick a kind by first non-`null` hit.
 
 Dual arity: repeated-rule accessors (`stat`, `signature`, `elseIfBlock`,
 `catchBlock`, `participant`, `parameter`, `name` on ref) return the array with
@@ -180,7 +221,11 @@ Two distinct reconstructions, both contract:
 ### 3.6 Tree shape and upward walks (07 §G8)
 
 `parentCtx` walks traverse the exact ANTLR wrapper chain
-(stat → block → braceBlock → message/creation). `getAncestors()` returns
+(stat → block → braceBlock → message/creation). `getAncestors(predicate)`
+returns `[this (when it matches), ...matching ancestors]` — SELF-INCLUSIVE and
+root-last. Self-inclusion is load-bearing for occurrence-bar layer counts
+(`useArrow.ts:18-31`, `useFragmentData.ts:18-29`): drop it and every nested
+message shifts by one layer. `getAncestors()` returns
 exactly 7 nodes for the `AncestorPath.spec.ts` pinned input — this freezes the
 wrapper-chain depth. The facade synthesizes wrapper levels (`stat`, `fromTo`,
 `dividerNote`, …) regardless of how idiomatic the `.langium` grammar is;
@@ -189,17 +234,28 @@ grammar design is thereby decoupled from renderer compatibility.
 ### 3.7 Errors and partial trees (07 §R12/G5/P13)
 
 `RootContext(code)` effectively always returns a (partial) tree for non-empty
-input; error recovery must keep half-typed DSL renderable. `Errors` /
-`ErrorDetails` are **live module-level arrays** (`{line, column, msg}` for
-details) that accumulate across parses and are cleared by `core.tsx` via
-`.length = 0` — the live-reference import shape is contract until Stage 6.
+input; error recovery must keep half-typed DSL renderable. `ErrorDetails` is a
+**live module-level array** of `{line, column, msg}` records that accumulates
+across parses and is cleared by `core.tsx` via `.length = 0` — the
+live-reference import shape is contract until Stage 6. (The parallel `Errors`
+array was write-only and was deleted in #425; do not reintroduce it.)
+
+`RootContextFn` is typed `(code: string) => ProgContext | null`, but the ANTLR
+implementation (`src/parser/index.js` `rootContext`) never itself produces
+`null`. The blank-code `null` a caller may see comes from the caller's own
+guard: `src/store/Store.ts`'s `rootContextAtom` short-circuits on
+empty/whitespace-only code before calling `RootContext` at all. The `| null`
+stays in the type only because `src/store/Store.ts` and `src/core.tsx` already
+branch on it defensively — a facade is not permitted to start returning `null`
+on the strength of it.
 
 ## 4. Per-kind method placement table
 
 Kind-specific members only; every kind also carries the base surface
 (`start`, `stop`, `parentCtx`, `children`, `getText`, `getFormattedText`,
 `getComment`, `getAncestors`, `ClosestAncestorStat`). Consumers abbreviated —
-full file:line lists are in the contract JSDoc and 03 §10.
+**the full file:line index is 03 §10**, which is the single place it lives.
+`contract.ts` carries declarations and per-member one-liners only.
 
 | Kind | Members | Primary consumers |
 |---|---|---|
@@ -220,11 +276,11 @@ full file:line lists are in the contract JSDoc and 03 §10.
 | `MessageBodyContext` | `func()` | Interaction.tsx, SelfInvocation.tsx, StylePanel.tsx |
 | `FuncContext` | `signature()` (dual) | Interaction.tsx, SelfInvocation.tsx |
 | `SignatureContext` | (base only) | selection ranges + label text |
-| `AsyncMessageContext` | `content()`, `to()`, `from()`, `Owner()`, `From()`, `ProvidedFrom()`, `To()`, `SignatureText()` | Interaction-async.tsx, SelfInvocationAsync.tsx, AsyncMessageStatementVM, StylePanel.tsx |
+| `AsyncMessageContext` | `content()`, `to()`, `from()`, `Owner()`, `From()`, `ProvidedFrom()`, `To()`, `SignatureText()` | Interaction-async.tsx, SelfInvocation.tsx, AsyncMessageStatementVM, StylePanel.tsx |
 | `ReturnAsyncMessageContext` | same surface as AsyncMessageContext | Return.tsx, ReturnStatementVM, MessageCollector |
 | `EndpointContext` | `name?()` (optional method) | Interaction-async.tsx, AsyncMessageStatementVM |
 | `ContentContext` | (base only); exported class for `instanceof` | Return.tsx |
-| `CreationContext` | `creationBody()` (kind test), `braceBlock()`, `Owner()`, `From()`, `SignatureText()`, `ParametersText()`, `Assignment()` (kind test), `Statements()`, `isCurrent()`, `Body()`, `To()`, `Assignee()`, `AssigneePosition()`, `Constructor()` | Creation.tsx, useArrow/useFragmentData, CreationStatementVM, StylePanel.tsx; `instanceof` in 2 files |
+| `CreationContext` | `creationBody()` (kind test), `braceBlock()`, `Owner()`, `From()`, `SignatureText()`, `ParametersText()`, `Assignment()` (kind test), `Statements()`, `isCurrent()`, `Body()`, `Assignee()`, `AssigneePosition()`, `Constructor()` | Creation.tsx, useArrow/useFragmentData, CreationStatementVM, StylePanel.tsx; `instanceof` in 2 files |
 | `CreationBodyContext` | `parameters()` | Creation.tsx, StylePanel.tsx |
 | `RetContext` | `asyncMessage()`, `returnAsyncMessage()`, `expr()`, `Signature()`, `SignatureText()`, `ReturnTo()`, `From()`, `To()`, `Owner()` | Return.tsx, ReturnStatementVM, MessageCollector |
 | `ExprContext` | (base only) | Return.tsx |
@@ -246,15 +302,43 @@ full file:line lists are in the contract JSDoc and 03 §10.
 | `ParExprContext` | `condition()` | all conditional fragments |
 | `ConditionContext` | (base only) | ConditionLabel.tsx (label + edit offsets) |
 | `RefContext` | `name()` (dual), `Content()`, `Participants()` | FragmentRef.tsx, ToCollector |
-| `DividerContext` | `Note()` (**throws** on non-`==` text — kept for parity, see `@v2`) | Divider.tsx |
+| `DividerContext` | `Note()` (**throws** on non-`==` text — kept for parity, see §6) | Divider.tsx |
 
-Entry points: `ParserModule` (`RootContext`, `Errors`, `ErrorDetails`,
-`Participants`, `Depth`, class exports `ProgContext`/`GroupContext`/
-`ParticipantContext`), `GeneratedParserShim` (`MessageContext`,
-`CreationContext`, `StatContext`, `AtomExprContext`, `ContentContext` for the
-3 renderer files importing `@/generated-parser`), `ContextsFixtureModule`
-(8 sub-rule fixtures: Prog, Title, Stat, AsyncMessage, SyncMessage, Divider,
-Creation, Ret).
+Entry points: `ParserModule` (`RootContext`, `ErrorDetails`, `Participants`,
+class exports `ProgContext`/`GroupContext`/`ParticipantContext`). Two notes on
+that shape:
+
+- `Participants(ctx)` accepts `null`/`undefined` and returns an EMPTY
+  collection rather than throwing — `LocalParticipants.ts` and
+  `LifeLineLayer.tsx` call it on possibly-absent subtrees without a guard.
+- `ContextClass<T>`'s construction signature (`abstract new (...args: never[])
+  => T`) is deliberately uncallable. Consumers only ever put these values on
+  the right-hand side of `instanceof`, and an uncallable signature stops a
+  facade author from treating them as public constructors.
+
+`Errors` and `Depth` were part of this surface historically; both are gone
+(#425) and neither is contract.
+
+### 4.1 Tree-derived service shapes
+
+These are not parse-tree nodes; they are the plain values tree-walking services
+hand the renderer. Their invariants are contract too.
+
+- `IrPosition` is `[start, end)` — an EXCLUSIVE end, i.e. `stop.stop + 1`. Every
+  producer of a position tuple owes the `+ 1`; the type cannot enforce it.
+- `AssignmentView` is the return type of `Assignment()`, a plain data class
+  ported as-is from `src/parser/Messages/Assignment.ts`. `labelPosition` is a
+  backward-compat alias of `assigneePosition` — two names, one value; a facade
+  must keep both. `typePosition` is the sentinel `[-1, -1]` when the assignment
+  has no type part, NOT `undefined` and not an empty range.
+- `ParticipantView` is the plain-object snapshot produced by
+  `src/parser/Participants.ts` `ToValue()`; the class is ported as-is. Its
+  `positions` / `assigneePositions` are sets of absolute char-offset tuples.
+- `ParticipantsCollection` insertion order IS source order — `Names()` and
+  `First()` both depend on it. `GetPositions` / `GetAssigneePositions` return
+  `undefined` for an unknown name; `Participant.tsx:45-48` normalizes that with
+  `Array.from(… ?? [])`, so returning an empty set instead would be silently
+  compatible but is not the declared shape.
 
 ## 5. Semantic method semantics (normative cross-references)
 
@@ -274,18 +358,40 @@ the parser spec suite. Contract-level highlights:
   `«create»`/`«params»` guillemets; quote-stripping in `getFormattedText`;
   `Signature()` returns `undefined` when empty while `SignatureText()` returns
   `""`.
+- `SignatureText()` is width-critical: the horizontal solver sizes columns from
+  `MessageCollector` output while the components render their own label, so the
+  two strings must be EXACTLY equal. A facade that normalizes whitespace on one
+  path and not the other produces silently mis-sized diagrams rather than a
+  test failure.
 - `Divider.Note()` throws on notes not starting with `==` and `Divider.tsx`
   does not catch — kept through the migration for parity, softened post-cutover
-  (`@v2`).
+  (§6).
+- `ProgContext.Starter()` returns ONLY an explicitly written `@Starter(X)`.
+  The parser never invents a default: synthesizing `_STARTER_` is a
+  renderer/`OrderedParticipants` concern, and that split is deliberate design
+  doctrine (`src/parser/ProgContext.js`). A facade that helpfully defaults here
+  changes participant ordering for every diagram without a starter.
+- `isCurrent(cursor)` (on `MessageContext` and `CreationContext`) is `true` iff
+  `cursor` — an absolute char offset supplied by the editor — lies within
+  `[start.start, Body().stop.stop + 1]`. Any internal failure yields `false`
+  rather than propagating.
+- Members with NO direct renderer call site, kept in the contract because
+  facade-internal walks or `MessageCollector` consume them:
+  `MessageContext.To()`, `AsyncMessageContext.To()`, `RetContext.To()`,
+  `CreationContext.Assignee()` / `AssigneePosition()` / `Constructor()`, and
+  `IrNode.ClosestAncestorStat()` (the building block of every
+  `From()` / `Origin()` chain the renderer triggers per message). Grep for
+  renderer call sites will find none — that is expected, not dead code.
 
 ## 6. v2 evolution path
 
-The `@v2` JSDoc tags in `contract.ts` are the complete map of ANTLR-inherited
-awkwardness. They are **not** deprecations today — v1 facade classes implement
-them fully. Post-cutover (Stage 6+), call sites migrate **file-by-file,
-test-gated**, each PR shrinking the v1 surface:
+The table below is the complete map of ANTLR-inherited awkwardness. (It used to
+be duplicated as `@v2` JSDoc tags in `contract.ts`; the tags are gone and this
+table is now the only copy.) These are **not** deprecations today — v1 facade
+classes implement them fully. Post-cutover (Stage 6+), call sites migrate
+**file-by-file, test-gated**, each PR shrinking the v1 surface:
 
-| v1 member (`@v2`-tagged) | v2 replacement | Migration shape |
+| v1 member | v2 replacement | Migration shape |
 |---|---|---|
 | `stat()` / `stat(i)` dual arity (also `signature`, `elseIfBlock`, `catchBlock`, `participant`, `parameter`, `name`) | `statements: readonly StatContext[]` etc. (plain readonly array properties) | Mechanical per call site; the indexed form is `array[i]` |
 | Inclusive `stop.stop` + `TokenView` pair | Exclusive `{ offset, end }` range on the node | One conversion point per file; kills the `+ 1` ritual at ~18 sites |
@@ -296,13 +402,13 @@ test-gated**, each PR shrinking the v1 surface:
 | `isCurrent(cursor)` | Renderer-side pure range check over node offsets | Move into the two callers |
 | `Signature()` vs `SignatureText()` empty-value split | Single member, single convention | Return.tsx + MessageCollector |
 | `Divider.Note()` throw | Safe value for malformed-but-parsed notes | One component |
-| Live `Errors`/`ErrorDetails` arrays | Per-parse `{ root, errors }` result | `core.tsx` refactor (already flagged in 03 §1) |
-| `Depth` public export | Drop with CHANGELOG note | No renderer consumers found |
+| Live `ErrorDetails` array | Per-parse `{ root, errors }` result | `core.tsx` refactor (already flagged in 03 §1) |
+| `parentCtx: IrNode \| null \| undefined` | `parent: IrNode \| null` with a guaranteed-`null` root | Drop the `undefined` looseness once the `typeof`-free call sites migrate |
 | `TitleContext.content()` method | `title: string` property | Store.ts duck-check + DiagramTitle |
 | `RefContext.name()[0]`-is-label positional encoding | `label` + `participants` members | FragmentRef.tsx |
 
-Sequencing rule: a `@v2` member may be removed only when grep proves zero
-call sites remain and `bun run test` + the Playwright suite are green. The
+Sequencing rule: a member in this table may be removed only when grep proves
+zero call sites remain and `bun run test` + the Playwright suite are green. The
 facade shrinks until deletable; the `.langium`-generated `ast.ts` types then
 become the only tree API.
 
@@ -335,6 +441,15 @@ become the only tree API.
   imports; it cannot change any build output.
 - Type-checked standalone (`tsc --strict --noUnusedLocals`) and as part of
   `tsconfig.app.json` (no new diagnostics over the pre-existing baseline).
+- **The contract is enforced, not merely documented.**
+  `src/parser-langium/compat.ts` binds its module surface with
+  `satisfies ParserModule`, so the CI `tsc -b` gate fails when the Langium
+  facade drifts — including the `ProgContext` / `GroupContext` /
+  `ParticipantContext` facade classes and the `ParticipantsCollection` shape,
+  which `ParserModule` types as members and which are therefore checked
+  transitively. Anything NOT reachable from `ParserModule` is documentation
+  only: nothing type-checks it, which is how `GeneratedParserShim` and
+  `ContextsFixtureModule` could sit here unbound (see §2).
 - Coverage cross-check against 03 §10: every row of the call-site index maps
   to a contract member (see the row-by-row checklist in the PR/working notes
   for this change).

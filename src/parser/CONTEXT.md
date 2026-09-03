@@ -39,8 +39,7 @@ ProgContext (ANTLR parse tree)
 | `src/parser/FrameBuilder.ts` | ANTLR listener → nested `Frame` tree for fragments. Each frame: `{ type, left, right, children }`. Used to draw fragment borders. |
 | `src/parser/OrderedParticipants.ts` | `OrderedParticipants(rootContext)` → `IParticipantModel[]` in insertion order. Injects `_STARTER_` when needed. |
 | `src/parser/Messages/MessageContext.ts` | Extends ANTLR `MessageContext` with `Statements()` helper for nested statement access. |
-| `src/parser/AntlrTypes.ts` | TypeScript types wrapping ANTLR context nodes. |
-| `src/parser/Parser.types.ts` | Domain types: `Parameter`, `NamedParameter`, `Declaration`, `Signature`, `MessageContext`, `AsyncMessageContext`, `CreationContext`. |
+| `src/parser/AntlrTypes.ts` | TypeScript types wrapping ANTLR context nodes. Two projections in one file: the all-optional `*Node` shapes the tree walkers probe, and the required-member `BaseContext` / `Parameter` / `MessageContext` / `AsyncMessageContext` / `CreationContext` / `RetContext` shapes `SignatureText.ts` patches prototypes against (merged in from the former `Parser.types.ts`). |
 
 ## Public API
 
