@@ -1,9 +1,9 @@
 import EventEmitter from "events";
-import { EventBus, CustomEmit, TrackEvent } from "./EventBus";
+import { EventBus, TrackEvent } from "./EventBus";
 import { onEventEmitAtom } from "./store/Store";
 import { createStore } from "jotai";
 
-const store = createStore()
+const store = createStore();
 
 describe("EventEmitter", () => {
   let eventEmitter: EventEmitter;
@@ -54,19 +54,10 @@ describe("EventEmitter", () => {
   });
 });
 
-describe("CustomEmit and TrackEvent", () => {
+describe("TrackEvent", () => {
   beforeEach(() => {
     store.set(onEventEmitAtom, vi.fn());
     vi.spyOn(EventBus, "emit");
-  });
-
-  it("should handle CustomEmit with undefined data", () => {
-    CustomEmit(store, "testEvent", undefined);
-    expect(store.get(onEventEmitAtom)).toHaveBeenCalledWith("eventEmit", {
-      event: "testEvent",
-      data: undefined,
-    });
-    expect(EventBus.emit).toHaveBeenCalledWith("testEvent", undefined);
   });
 
   it("should handle TrackEvent with complex label object", () => {
