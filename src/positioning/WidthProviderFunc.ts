@@ -1,5 +1,9 @@
 import { TextType } from "@/positioning/Coordinate";
-import { getCache, setCache } from "./../utils/RenderingCache";
+import {
+  clearPersistentCache,
+  getCache,
+  setCache,
+} from "./../utils/RenderingCache";
 
 const FONT_FAMILY = "Helvetica, Verdana, serif";
 const FONT_SIZE_PARTICIPANT = "16px"; // 1rem — used for ALL measurements (see getFontSpec comment)
@@ -15,14 +19,27 @@ function getFontSpec(): string {
   return `${FONT_SIZE_PARTICIPANT} ${FONT_FAMILY}`;
 }
 
-let canvasCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
+let canvasCtx:
+  | CanvasRenderingContext2D
+  | OffscreenCanvasRenderingContext2D
+  | null = null;
 
 /** Inject a custom canvas context (e.g., from @napi-rs/canvas for accurate text measurement in Node/Bun). */
-export function setCanvasContext(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null): void {
+export function setCanvasContext(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null,
+): void {
+  if (ctx === canvasCtx) return;
   canvasCtx = ctx;
+  // Widths measured with the previous backend (or with the character-count
+  // estimate used when there was none) are not comparable to widths from this
+  // one, and the backend is not part of any cache key.
+  clearPersistentCache();
 }
 
-function getCanvasContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null {
+function getCanvasContext():
+  | CanvasRenderingContext2D
+  | OffscreenCanvasRenderingContext2D
+  | null {
   if (canvasCtx) return canvasCtx;
   try {
     if (typeof OffscreenCanvas !== "undefined") {
@@ -36,16 +53,13 @@ function getCanvasContext(): CanvasRenderingContext2D | OffscreenCanvasRendering
   return canvasCtx;
 }
 
-export function WidthProviderOnCanvas(
-  text: string,
-  type: TextType,
-): number {
+export function WidthProviderOnCanvas(text: string, type: TextType): number {
   // Trim whitespace to match browser behavior: DOM scrollWidth (used by
   // WidthProviderOnBrowser) ignores leading/trailing spaces because the hidden
   // div has display:inline + width:0px.  Canvas measureText includes them,
   // so we trim to keep both providers consistent.
   const measured = text.trim();
-  const cacheKey = `WidthProviderOnCanvas_${measured}_${type}`;
+  const cacheKey = `WidthProviderOnCanvas_${getFontSpec()}_${measured}_${type}`;
   const cacheValue = getCache(cacheKey);
   if (cacheValue != null) {
     return cacheValue;
@@ -53,9 +67,12 @@ export function WidthProviderOnCanvas(
 
   const ctx = getCanvasContext();
   if (!ctx) {
-    // Fallback: estimate based on character count (always 16px to match browser)
+    // Fallback: estimate based on character count (always 16px to match
+    // browser). Cached for this render only — a canvas may be installed later
+    // (src/cli/zenuml.ts does exactly that), and a persisted estimate could
+    // never be corrected.
     const width = Math.ceil(measured.length * 16 * 0.6);
-    setCache(cacheKey, width, true);
+    setCache(cacheKey, width);
     return width;
   }
 
@@ -66,7 +83,8 @@ export function WidthProviderOnCanvas(
 }
 
 // eslint-disable-next-line no-misleading-character-class
-const EMOJI_PATTERN = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
+const EMOJI_PATTERN =
+  /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
 
 /**
  * Measure text width using SVG <text> element (accurate for emoji).
@@ -94,9 +112,10 @@ export function measureTextWithFont(text: string, fontSize: string): number {
   // Use SVG measurement for text containing emoji — canvas measureText
   // returns wider values for emoji glyphs than SVG <text> actually renders.
   const hasEmoji = EMOJI_PATTERN.test(measured);
+  const font = `${fontSize} ${FONT_FAMILY}`;
   const cacheKey = hasEmoji
-    ? `measureTextWithFont_svg_${fontSize}_${measured}`
-    : `measureTextWithFont_${fontSize}_${measured}`;
+    ? `measureTextWithFont_svg_${font}_${measured}`
+    : `measureTextWithFont_${font}_${measured}`;
   const cacheValue = getCache(cacheKey);
   if (cacheValue != null) {
     return cacheValue;
@@ -112,13 +131,14 @@ export function measureTextWithFont(text: string, fontSize: string): number {
 
   const ctx = getCanvasContext();
   if (!ctx) {
+    // Estimate only — not persisted, for the reason above.
     const px = Number.parseFloat(fontSize) || 14;
     const width = Math.ceil(measured.length * px * 0.6);
-    setCache(cacheKey, width, true);
+    setCache(cacheKey, width);
     return width;
   }
 
-  ctx.font = `${fontSize} ${FONT_FAMILY}`;
+  ctx.font = font;
   const width = ctx.measureText(measured).width;
   setCache(cacheKey, width, true);
   return width;
