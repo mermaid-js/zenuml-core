@@ -79,6 +79,22 @@ jobs:
     permissions:
       contents: read
 
+  # Smoke-test the Dockerfile: it has no other coverage, so a package-manager
+  # or script drift (e.g. package.json's build:site renamed) goes unnoticed
+  # until someone tries to build the image.
+  docker-build:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+
   # Release via Changesets.
   #
   # On every push to main this job runs the changesets action:

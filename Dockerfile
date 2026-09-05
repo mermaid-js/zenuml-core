@@ -1,31 +1,25 @@
-FROM node:20-slim AS base
+FROM oven/bun:1-slim AS base
 
-# Set environment variables for pnpm
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
 ENV DOCKER=true
-
-# Enable corepack to use pnpm
-RUN corepack enable
-
-# Set the working directory
 WORKDIR /app
 
-# Copy the project files to the working directory
-COPY . .
-
-RUN pnpm add -g serve
-
-FROM base As prod-deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --prod --ignore-scripts
+# Only the manifest and lockfile first, so source-only changes don't bust the
+# install layer cache.
 FROM base AS deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+
+FROM base AS prod-deps
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --production
 
 FROM base AS build
 COPY --from=deps /app/node_modules /app/node_modules
-RUN pnpm build:site
+COPY . .
+RUN bun run build:site
 
 FROM base
+RUN bun add -g serve
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
 
