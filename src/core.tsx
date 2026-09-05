@@ -2,6 +2,7 @@ import {
   codeAtom,
   enableDividerInsertionAtom,
   enableMessageInsertionAtom,
+  enableMessageReorderAtom,
   enableMultiThemeAtom,
   enableParticipantInsertionAtom,
   enableParticipantStyleEditingAtom,
@@ -56,6 +57,10 @@ interface Config {
   enableMessageInsertion?: boolean;
   enableDividerInsertion?: boolean;
   enableParticipantStyleEditing?: boolean;
+  // Drag-to-reorder used to run with no flag at all — the only editing
+  // surface in the rendering core with no opt-out. Default off, like every
+  // other editing flag above.
+  enableMessageReorder?: boolean;
 }
 
 export interface ParseResult {
@@ -190,6 +195,9 @@ export default class ZenUml implements IZenUml {
         enableParticipantStyleEditingAtom,
         config.enableParticipantStyleEditing,
       );
+    }
+    if (config?.enableMessageReorder !== undefined) {
+      this.store.set(enableMessageReorderAtom, config.enableMessageReorder);
     }
     if (this._code === this.store.get(codeAtom)) {
       return true;

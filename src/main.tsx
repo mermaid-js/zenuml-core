@@ -12,6 +12,7 @@ const defaultConfig = {
   enableMessageInsertion: true,
   enableDividerInsertion: true,
   enableParticipantStyleEditing: true,
+  enableMessageReorder: true,
 };
 
 export function initZenUml(element: HTMLElement) {
