@@ -1,21 +1,52 @@
 import { atom } from "jotai";
 
-export const atomWithLocalStorage = <T>(key: string, initialValue: T) => {
-  const getInitialValue = (): T => {
-    const item = localStorage.getItem(key);
-    if (item !== null) {
-      return JSON.parse(item);
+/** Not yet read from storage — distinct from a stored `undefined`. */
+const UNREAD = Symbol("unread");
+
+/**
+ * An atom backed by localStorage.
+ *
+ * The key is a function and storage is read on first use, not at module load.
+ * Reading eagerly made importing this module — and therefore the package entry
+ * and its `renderToSvg` export — throw `ReferenceError: location is not
+ * defined` in Node, and throw in a browser configured to block site data.
+ *
+ * The first read is memoized per atom, matching the previous behaviour where
+ * the initial value was computed once and shared by every store.
+ */
+export const atomWithLocalStorage = <T>(key: () => string, initialValue: T) => {
+  let cached: { value: T } | undefined;
+
+  const readInitialValue = (): T => {
+    if (cached) return cached.value;
+    let value = initialValue;
+    try {
+      const item = localStorage.getItem(key());
+      if (item !== null) value = JSON.parse(item);
+    } catch {
+      // No storage available (Node, private browsing, blocked site data) or
+      // an unparsable entry: fall back to the supplied default.
     }
-    return initialValue;
+    cached = { value };
+    return value;
   };
-  const baseAtom = atom(getInitialValue());
+
+  const baseAtom = atom<T | typeof UNREAD>(UNREAD);
+  const resolve = (stored: T | typeof UNREAD): T =>
+    stored === UNREAD ? readInitialValue() : stored;
+
   const derivedAtom = atom(
-    (get) => get(baseAtom),
+    (get) => resolve(get(baseAtom)),
     (get, set, update: T) => {
       const nextValue =
-        typeof update === "function" ? update(get(baseAtom)) : update;
+        typeof update === "function" ? update(resolve(get(baseAtom))) : update;
       set(baseAtom, nextValue);
-      localStorage.setItem(key, JSON.stringify(nextValue));
+      try {
+        localStorage.setItem(key(), JSON.stringify(nextValue));
+      } catch {
+        // Storage unavailable — keep the in-memory value.
+      }
+      cached = { value: nextValue };
     },
   );
   return derivedAtom;

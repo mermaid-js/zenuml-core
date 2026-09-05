@@ -22,7 +22,20 @@ import { AsyncIcon } from "../../Tutorial/AsyncIcon";
 // import iconPath from "../../Tutorial/Icons"; // Removed eager import
 
 const INTERSECTION_ERROR_MARGIN = 10;
-const PARTICIPANT_DEBUG = Boolean(localStorage.getItem("zenumlDebug"));
+// Read on first use, not at module load: this module is reachable from the
+// package entry, which must import in Node (and in a browser that blocks site
+// data) without throwing.
+let participantDebug: boolean | undefined;
+const isParticipantDebug = (): boolean => {
+  if (participantDebug === undefined) {
+    try {
+      participantDebug = Boolean(localStorage.getItem("zenumlDebug"));
+    } catch {
+      participantDebug = false;
+    }
+  }
+  return participantDebug;
+};
 
 export const Participant = (props: {
   entity: Record<string, string>;
@@ -65,7 +78,8 @@ export const Participant = (props: {
   };
 
   // We use this method to simulate sticky behavior. CSS sticky is not working out of an iframe.
-  const stickyVerticalOffset = mode === RenderMode.Static || stickyOffset === false ? 0 : calcOffset();
+  const stickyVerticalOffset =
+    mode === RenderMode.Static || stickyOffset === false ? 0 : calcOffset();
 
   const backgroundColor = props.entity.color
     ? removeAlpha(props.entity.color)
@@ -86,9 +100,7 @@ export const Participant = (props: {
   }, [props.entity.color]);
 
   // Determine icon key
-  const iconKey = isDefaultStarter
-    ? "actor"
-    : props.entity.type?.toLowerCase();
+  const iconKey = isDefaultStarter ? "actor" : props.entity.type?.toLowerCase();
 
   return (
     <div
@@ -114,12 +126,20 @@ export const Participant = (props: {
           onSelect(props.entity.name);
         }
       }}
-      tabIndex={mode === RenderMode.Dynamic && !isDefaultStarter ? 0 : undefined}
-      role={mode === RenderMode.Dynamic && !isDefaultStarter ? "button" : undefined}
-      title={mode === RenderMode.Dynamic && !isDefaultStarter ? "Click to style participant" : undefined}
+      tabIndex={
+        mode === RenderMode.Dynamic && !isDefaultStarter ? 0 : undefined
+      }
+      role={
+        mode === RenderMode.Dynamic && !isDefaultStarter ? "button" : undefined
+      }
+      title={
+        mode === RenderMode.Dynamic && !isDefaultStarter
+          ? "Click to style participant"
+          : undefined
+      }
       data-participant-id={props.entity.name}
     >
-      {PARTICIPANT_DEBUG && (
+      {isParticipantDebug() && (
         <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-8 h-[2px] bg-amber-700">
           <div className="w-full h-full bg-black" />
         </div>
@@ -142,7 +162,10 @@ export const Participant = (props: {
             )}
             <div className="flex items-center">
               {props.entity.emoji && (
-                <span className="mr-1 flex-shrink-0" data-testid="participant-emoji">
+                <span
+                  className="mr-1 flex-shrink-0"
+                  data-testid="participant-emoji"
+                >
                   {getEmojiUnicode(props.entity.emoji)}
                 </span>
               )}

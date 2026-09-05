@@ -40,7 +40,14 @@ export const Occurrence = (props: {
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const [collapsed, setCollapsed] = useState(false);
 
-  const debug = localStorage.getItem("zenumlDebug");
+  // Guarded: an embedder may block site data, and this component is reachable
+  // from the package entry.
+  let debug: string | null = null;
+  try {
+    debug = localStorage.getItem("zenumlDebug");
+  } catch {
+    debug = null;
+  }
 
   const computedCenter = () => centerOf(coordinates, props.participant);
   const hasAnyStatementsExceptReturn = () => {

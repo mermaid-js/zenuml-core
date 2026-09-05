@@ -62,7 +62,7 @@ export const themeAtom = atom("theme-default");
 export const enableScopedThemingAtom = atom<boolean>(false);
 
 export const themeIconDotAtom = atomWithLocalStorage(
-  `${location.hostname}-zenuml-theme-icon-dot`,
+  () => `${location.hostname}-zenuml-theme-icon-dot`,
   "1",
 );
 
@@ -98,7 +98,7 @@ export const enableDividerInsertionAtom = atom(false);
 export const enableParticipantStyleEditingAtom = atom(false);
 
 export const enableNumberingAtom = atomWithLocalStorage(
-  `${location.hostname}-zenuml-numbering`,
+  () => `${location.hostname}-zenuml-numbering`,
   true,
 );
 
