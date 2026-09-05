@@ -53,7 +53,8 @@ Rendering:
   -o, --output <file>          Output file (use "-" for stdout; default: <input>.svg)
   -e, --outputFormat <format>  Output format: "svg" (default) or "png"
   -s, --scale <factor>         Pixel scale factor for PNG (default: 2; ignored for SVG)
-  -t, --theme <name>           Theme name passed to renderer (e.g. "theme-default")
+  -t, --theme <name>           Theme: default, mermaid, clean-light, clean-dark,
+                               neon (prefix "theme-"; unknown names use default)
   -c, --configFile <file>      JSON config file with { theme, scale, outputFormat }
   --md                         Markdown mode: render zenuml code blocks and produce output Markdown
 
