@@ -49,7 +49,6 @@ Keys are `(start.stop)` token ranges via `vertical/StatementIdentifier.ts`, ensu
 - **Lifelines**: Call `getCreationTop(participant)` for lifeline start points.
 - **Total sizing**: Use `getTotalHeight()` for diagram height.
 - **Testing**: `src/positioning/VerticalCoordinates.spec.ts` covers crash regression and API contract.
-- **Vertical mode**: Set `VITE_VERTICAL_MODE` to `"legacy"` to bypass pre-computed coordinates and use DOM measurement (for Playwright snapshot regeneration). Default is `"html"`.
 
 ## Keeping It Accurate
 

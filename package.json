@@ -35,7 +35,6 @@
     "parity:dualrun": "bun scripts/parity/dualrun-diff.mjs",
     "pw": "playwright test --reporter=list",
     "pw:ci": "playwright test",
-    "snapshots:dual": "node scripts/snapshot-dual.js",
     "pw:update": "playwright test --update-snapshots --reporter=list",
     "pw:update-ci": "playwright test --update-snapshots --reporter=github",
     "pw:ui": "playwright test --ui",
