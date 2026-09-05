@@ -30,8 +30,12 @@ peer = true
 dev = true
 optional = true
 
-# Auto install dependencies
-auto = "auto"
+# Never fetch a package that is not in package.json. With bun's default
+# ("auto") a directory without node_modules — a fresh clone before `bun
+# install`, or a script run outside the installed tree — resolves an unknown
+# import by downloading that name from npm and executing it, with no prompt and
+# no lockfile entry. A typo then runs whatever is published under the typo.
+auto = "disable"
 
 # Disable cache if needed
 # disable = false
@@ -47,6 +51,3 @@ print = "bun"
 # Bun runtime settings for scripts
 # Silent mode for cleaner output
 # silent = false
-
-# Automatically install missing packages when running scripts
-autoInstall = true
