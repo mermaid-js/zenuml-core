@@ -29,7 +29,7 @@ rootContextAtom (ProgContext | null)    ← RootContext(code)
 | `rootContextAtom` | `ProgContext \| null` | Parsed ANTLR tree |
 | `participantsAtom` | `Participants` | Participants map from ToCollector |
 | `coordinatesAtom` | `Coordinates` | Horizontal layout |
-| `verticalCoordinatesAtom` | `VerticalCoordinates \| null` | Vertical layout (null in legacy mode) |
+| `verticalCoordinatesAtom` | `VerticalCoordinates \| null` | Vertical layout (null when the code is empty) |
 
 ### Rendering
 
@@ -38,7 +38,6 @@ rootContextAtom (ProgContext | null)    ← RootContext(code)
 | `themeAtom` | `string` | `"theme-default"` | CSS theme class |
 | `scaleAtom` | `number` | `1` | Zoom level |
 | `modeAtom` | `RenderMode` | `Dynamic` | `Dynamic` (html) or `Static` (svg) |
-| `verticalModeAtom` | `"html" \| "legacy"` | resolved | Vertical layout engine |
 | `diagramElementAtom` | `HTMLElement \| null` | `null` | Ref to diagram DOM node |
 
 ### Selection / Interaction

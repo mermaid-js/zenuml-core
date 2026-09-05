@@ -1,5 +1,13 @@
+export type SvgTheme =
+  | 'theme-default'
+  | 'theme-mermaid'
+  | 'theme-clean-light'
+  | 'theme-clean-dark'
+  | 'theme-neon';
+
 export interface RenderOptions {
-  theme?: 'theme-default' | 'theme-mermaid';
+  /** Theme name. Unknown names fall back to 'theme-default'. */
+  theme?: SvgTheme;
 }
 
 export interface RenderResult {

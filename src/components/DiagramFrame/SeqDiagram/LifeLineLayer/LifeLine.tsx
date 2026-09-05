@@ -2,17 +2,13 @@ import {
   coordinatesAtom,
   lifelineReadyAtom,
   verticalCoordinatesAtom,
-  verticalModeAtom,
-  diagramElementAtom,
-  scaleAtom,
 } from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { EventBus } from "@/EventBus";
 
 export const LifeLine = (props: {
   entity: any;
@@ -24,54 +20,20 @@ export const LifeLine = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const coordinates = useAtomValue(coordinatesAtom);
   const verticalCoordinates = useAtomValue(verticalCoordinatesAtom);
-  const verticalMode = useAtomValue(verticalModeAtom);
-  const diagramElement = useAtomValue(diagramElementAtom);
-  const scale = useAtomValue(scaleAtom);
   const setLifelineReady = useSetAtom(lifelineReadyAtom);
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
   const left =
     centerOf(coordinates, props.entity.name) - (props.groupLeft || 0);
 
-  const measureFromDOM = useCallback(() => {
-    // escape entity name to avoid invalid selector errors
-    const escapedName = props.entity.name.replace(/[^A-Za-z0-9_-]/g, "\\$&");
-    const firstMessage = diagramElement?.querySelector(
-      `[data-to="${escapedName}"]`,
-    ) as HTMLElement | null;
-    const isVisible = firstMessage?.offsetParent != null;
-    if (
-      firstMessage &&
-      firstMessage.getAttribute("data-type") === "creation" &&
-      isVisible
-    ) {
-      const rootY = elRef.current?.getBoundingClientRect().y || 0;
-      const messageY = firstMessage.getBoundingClientRect().y;
-      setTop((messageY - rootY) / (scale || 1));
-    } else {
-      setTop(PARTICIPANT_TOP_SPACE_FOR_GROUP);
-    }
-  }, [diagramElement, props.entity.name, scale]);
-
   useEffect(() => {
-    const resolveFromVM = () => {
-      if (!verticalCoordinates) return false;
+    if (verticalCoordinates) {
       const creationTop = verticalCoordinates.getCreationTop(props.entity.name);
-      const resolvedTop =
+      setTop(
         creationTop != null
           ? Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, creationTop)
-          : PARTICIPANT_TOP_SPACE_FOR_GROUP;
-      setTop(resolvedTop);
-      return true;
-    };
-
-    if (verticalMode === "html") {
-      resolveFromVM();
-    } else {
-      const rerun = () => setTimeout(measureFromDOM, 0);
-      setTimeout(measureFromDOM, 0);
-      EventBus.on("participant_set_top", rerun);
-      return () => EventBus.off("participant_set_top", rerun);
+          : PARTICIPANT_TOP_SPACE_FOR_GROUP,
+      );
     }
 
     if (props.entity.name !== _STARTER_) {
@@ -83,13 +45,7 @@ export const LifeLine = (props: {
         );
       }, 0);
     }
-  }, [
-    props.entity.name,
-    verticalCoordinates,
-    verticalMode,
-    setLifelineReady,
-    measureFromDOM,
-  ]);
+  }, [props.entity.name, verticalCoordinates, setLifelineReady]);
 
   return (
     <div

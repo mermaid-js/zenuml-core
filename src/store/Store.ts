@@ -9,11 +9,6 @@ import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { CodeRange } from "../parser/CodeRange";
 
-type VerticalMode = "html" | "legacy";
-const resolveVerticalMode = (): VerticalMode => {
-  return import.meta.env.VITE_VERTICAL_MODE === "legacy" ? "legacy" : "html";
-};
-
 export const resolveWidthProvider = (): WidthFunc => {
   const urlParam =
     typeof location !== "undefined"
@@ -54,12 +49,7 @@ export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), resolveWidthProvider()),
 );
 
-export const verticalModeAtom = atom<VerticalMode>(resolveVerticalMode());
-
 export const verticalCoordinatesAtom = atom((get) => {
-  if (get(verticalModeAtom) === "legacy") {
-    return null;
-  }
   const rootContext = get(rootContextAtom);
   if (!rootContext) {
     return null;

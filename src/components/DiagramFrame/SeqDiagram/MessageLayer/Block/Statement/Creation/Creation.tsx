@@ -12,7 +12,6 @@ import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
-import { EventBus } from "@/EventBus";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 import { CreationMessageLabel } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/CreationMessageLabel";
 
@@ -61,8 +60,6 @@ export const Creation = (props: {
 
     // Get the actual width from the DOM element
     setParticipantWidth(participantElement.getBoundingClientRect().width);
-
-    EventBus.emit("participant_set_top");
   }, [target, participantWidth]);
 
   return (

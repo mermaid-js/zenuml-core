@@ -589,11 +589,7 @@
           onContentChange: (code) => editor.setValue(code),
         });
 
-        window.zenUml.render(content, config).then((r) => {
-          window.parentLogger
-            .child({ name: "index.html" })
-            .debug("render resolved", r);
-        });
+        window.zenUml.render(content, config);
       }, 400);
 
       document.querySelectorAll("[data-flag]").forEach((btn) => {
