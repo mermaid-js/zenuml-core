@@ -11,7 +11,6 @@ import {
   onContentChangeAtom,
   onEventEmitAtom,
   onThemeChangeAtom,
-  renderingReadyAtom,
   RenderMode,
   stickyOffsetAtom,
   themeAtom,
@@ -33,6 +32,7 @@ import "./themes/theme-dark.css";
 
 import { getStartTime, calculateCostTime } from "./utils/CostTime";
 import { clearCache } from "./utils/RenderingCache";
+import { waitForRenderingReady } from "./store/waitForRenderingReady";
 import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { createStore, Provider } from "jotai";
@@ -62,12 +62,11 @@ export interface ParseResult {
   pass: boolean;
   errorDetails: ErrorDetail[];
 }
-export interface  ErrorDetail {
+export interface ErrorDetail {
   line: number;
   column: number;
   msg: string;
 }
-
 
 interface IZenUml {
   get code(): string | undefined;
@@ -195,13 +194,8 @@ export default class ZenUml implements IZenUml {
     if (this._code === this.store.get(codeAtom)) {
       return true;
     } else {
-      await new Promise((resolve) => {
-        this.store.set(lifelineReadyAtom, []);
-        this.store.sub(renderingReadyAtom, () => {
-          if (this.store.get(renderingReadyAtom)) {
-            resolve(true);
-          }
-        });
+      this.store.set(lifelineReadyAtom, []);
+      await waitForRenderingReady(this.store, () => {
         this.store.set(codeAtom, this._code || "");
       });
     }
