@@ -82,8 +82,11 @@ export function WidthProviderOnCanvas(text: string, type: TextType): number {
   return width;
 }
 
-// eslint-disable-next-line no-misleading-character-class
+// The class deliberately lists the variation selectors and the zero-width
+// joiner as single code points: this is a "does the text contain any emoji
+// machinery" probe, not a matcher for whole grapheme clusters.
 const EMOJI_PATTERN =
+  // eslint-disable-next-line no-misleading-character-class
   /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
 
 /**
