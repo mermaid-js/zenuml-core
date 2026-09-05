@@ -1,5 +1,5 @@
 import { cn } from "@/utils";
-import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/StringUtil";
+import { getLineHead, getPrevLine } from "@/utils/StringUtil";
 import {
   canTransformMessageType,
   type MessageArrowType,
@@ -9,6 +9,10 @@ import {
   type WrapFragmentType,
   wrapMessageInFragment,
 } from "@/utils/messageWrapTransform";
+import {
+  parseStyleComment,
+  toggleMessageStyle,
+} from "@/utils/messageStyleToggle";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   codeAtom,
@@ -66,10 +70,6 @@ export const StylePanel = () => {
   const messageData = useRef({
     start: 0,
     lineHead: 0,
-    prevLine: "",
-    leadingSpaces: "",
-    prevLineIsComment: false,
-    hasStyleBrackets: false,
     line: "",
     currentType: "sync" as MessageArrowType,
     source: "",
@@ -87,41 +87,13 @@ export const StylePanel = () => {
   const handleClick = (style: string) => {
     setIsOpen(false);
     if (!hasMessageContext) return;
-    const message = messageData.current;
-    if (message.prevLineIsComment) {
-      let newComment = "";
-      if (message.hasStyleBrackets) {
-        let updatedStyles;
-
-        if (existingStyles.includes(style)) {
-          updatedStyles = existingStyles.filter((s) => s !== style);
-        } else {
-          updatedStyles = [...existingStyles, style];
-        }
-
-        newComment = `${message.leadingSpaces}// [${updatedStyles
-          .filter(Boolean)
-          .join(", ")}] ${message.prevLine
-          .slice(message.prevLine.indexOf("]") + 1)
-          .trimStart()}`;
-      } else {
-        newComment = `${message.leadingSpaces}// [${style}] ${message.prevLine
-          .slice((message.prevLine.match(/\/\/*/)?.index || -2) + 2)
-          .trimStart()}`;
-      }
-      if (!newComment.endsWith("\n")) newComment += "\n";
-      updateCode(
-        code.slice(0, getPrevLineHead(code, message.start)) +
-          newComment +
-          code.slice(message.lineHead),
-      );
-    } else {
-      updateCode(
-        code.slice(0, message.lineHead) +
-          `${message.leadingSpaces}// [${style}]\n` +
-          code.slice(message.lineHead),
-      );
-    }
+    updateCode(
+      toggleMessageStyle({
+        code,
+        messageStart: messageData.current.start,
+        style,
+      }),
+    );
   };
 
   const handleTypeClick = (targetType: MessageArrowType) => {
@@ -213,29 +185,9 @@ export const StylePanel = () => {
         message.line = lineTail === -1
           ? code.slice(message.lineHead)
           : code.slice(message.lineHead, lineTail);
-        message.prevLine = getPrevLine(code, message.start);
-        message.leadingSpaces =
-          code.slice(message.lineHead).match(/^\s*/)?.[0] || "";
-        message.prevLineIsComment = message.prevLine.trim().startsWith("//");
-        if (message.prevLineIsComment) {
-          const trimedPrevLine = message.prevLine
-            .trimStart()
-            .slice(2)
-            .trimStart();
-          const styleStart = trimedPrevLine.indexOf("[");
-          const styleEnd = trimedPrevLine.indexOf("]");
-          message.hasStyleBrackets = Boolean(styleStart === 0 && styleEnd);
-          if (message.hasStyleBrackets) {
-            setExistingStyles(
-              trimedPrevLine
-                .slice(styleStart + 1, styleEnd)
-                .split(",")
-                .map((s) => s.trim()),
-            );
-          } else {
-            setExistingStyles([]);
-          }
-        }
+        setExistingStyles(
+          parseStyleComment(getPrevLine(code, message.start)).styles,
+        );
         const interactionElement = element.closest(".interaction");
         const classList = interactionElement?.classList;
         const signatureCtx = context?.messageBody?.()?.func?.()?.signature?.()?.[0];
