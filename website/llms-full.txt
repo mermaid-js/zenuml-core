@@ -1,0 +1,272 @@
+# @zenuml/core — Full Reference
+
+> @zenuml/core is a JavaScript sequence-diagram library that turns Markdown-inspired
+> text definitions into interactive diagrams entirely in the browser — no server
+> required. MIT-licensed, published on npm, and the engine behind ZenUML syntax
+> support in the Mermaid ecosystem.
+
+Canonical site: https://core.zenuml.com
+GitHub: https://github.com/mermaid-js/zenuml-core
+npm: https://www.npmjs.com/package/@zenuml/core
+Live editor: https://app.zenuml.com
+
+## What is ZenUML?
+
+ZenUML is a JavaScript-based diagramming tool that requires no server. It uses
+Markdown-inspired text definitions and a renderer to create and modify sequence
+diagrams. The main purpose of ZenUML is to help documentation catch up with
+development: diagram definitions are plain text, so they live in version control
+like code.
+
+It serves frontend/full-stack developers embedding diagrams in their own apps
+(as a library or an embedded iframe), docs-as-code teams, platform and tool
+builders (the same engine feeds Confluence, app.zenuml.com, a JetBrains plugin,
+a Chrome extension, and Mermaid), backend/Node developers who need server-side
+DSL validation via the `@zenuml/core/parser` subpath, and non-programmers via
+the ZenUML Live Editor at https://app.zenuml.com.
+
+## Install
+
+```bash
+npm install @zenuml/core
+# or
+bun add @zenuml/core
+```
+
+Requires Node.js >= 20. Ships an ESM bundle (`dist/zenuml.esm.mjs`) for modern
+bundlers and a UMD bundle (`dist/zenuml.js`) for browser scripts.
+
+## Quickstart (browser rendering)
+
+```javascript
+import ZenUml from '@zenuml/core';
+
+// 1. Get the container element
+const el = document.getElementById('zenuml-container');
+
+// 2. Create a new instance of ZenUml
+const zenUml = new ZenUml(el);
+
+// 3. Render a diagram
+const code = 'A->B: message';
+const config = {
+  theme: 'default',
+};
+zenUml.render(code, config);
+```
+
+Export: `await zenUml.getPng()` and `await zenUml.getSvg()` return data URLs.
+
+## Headless parser (server-side / Node)
+
+The `@zenuml/core/parser` subpath exists because the default entry throws
+`location is not defined` in Node. The parser subpath imports cleanly
+server-side and is reentrant — safe to call repeatedly and concurrently.
+
+```javascript
+import { validate } from '@zenuml/core/parser';
+
+const { pass, errorDetails } = validate('A->B: hello');
+// pass === true; errorDetails is [] on success,
+// [{ line, column, msg }] on syntax errors
+```
+
+API:
+- `validate(code)` → `{ pass, errorDetails }`
+- `parse(code)` → same, plus an error-recovered `rootContext` parse tree
+
+Distributed as `dist/parser/index.mjs` (ESM) and `dist/parser/index.cjs` (CJS),
+with types at `types/parser/index.d.ts`.
+
+## CLI
+
+The package installs a `zenuml` binary (`./dist/cli/zenuml.mjs`) that:
+
+- renders `.zenuml` files to SVG or PNG
+- supports stdin/stdout pipes
+- validates syntax with `--check`
+- outputs the AST as JSON with `--parse`
+
+## DSL examples (all verified against the real parser — `pass: true`)
+
+### 1. Hello world — async messages between two participants
+
+```
+Alice -> Bob: Hello Bob!
+Bob -> Alice: Hello Alice!
+```
+
+### 2. Code-like calls with fragments — alt (if/else) and loop (while)
+
+```
+BookService.borrowBook(bookId) {
+  if (book.isAvailable()) {
+    BookRepository.save(book)
+    return receipt
+  } else {
+    return error("Book is on loan")
+  }
+}
+
+while (queue.hasNext()) {
+  Notifier.notifyWaitlist()
+}
+```
+
+### 3. Full order flow — typed participants, starter, nesting, object creation, async notify, divider
+
+```
+title Order Processing
+
+@Actor Customer
+@Boundary WebApp
+@Control OrderService
+@Entity OrderDB
+@Queue NotificationQueue
+
+@Starter(Customer)
+
+// Place order
+Customer -> WebApp: submitOrder(cartId)
+
+WebApp.processOrder(cartId) {
+  if (cart.isEmpty()) {
+    return error("Empty cart")
+  }
+
+  String orderId = new OrderService(cart) {
+    OrderService -> OrderDB: persist(order)
+    return orderId
+  }
+
+  // Notify async
+  WebApp -> NotificationQueue: orderCreated(orderId)
+}
+
+== Confirmation ==
+
+WebApp --> Customer: orderConfirmed(orderId)
+```
+
+## DSL syntax summary
+
+Messages:
+- Sync method call: `A.method()`; nested occurrence blocks: `A.process() { B.validate() }`
+- Return-value assignment: `result = A.compute()`, typed: `String orderId = ...`
+- Typed parameters in method signatures
+- Async message: `A -> B: text`; async return: `A --> B: text`; `return` keyword
+- `new` object creation as first-class syntax
+- `title`, `// comments`, and dividers: `== text ==`
+
+Fragments (full UML set):
+- if/else (alt), while/for/loop, opt, par, critical, section/frame,
+  try/catch/finally, and ref
+- Conditions accept real expressions: comparison, boolean, arithmetic,
+  function calls, and `in`
+
+Participants:
+- Type annotations with icons: `@Actor`, `@Boundary`, `@Control`, `@Entity`,
+  `@Database`, `@Collections`, `@Queue`
+- `<<stereotype>>` labels, hex colors, aliases (`as "Label"`), participant
+  groups, min-width
+- Full declaration form: `@Type <<Stereotype>> [emoji] ParticipantName Width as "Label" #COLOR`
+- Unicode everywhere: Chinese/Japanese/Korean/Arabic identifiers, `[shortcode]`
+  emoji, and raw Unicode emoji in participant and method names
+
+## Features
+
+- Markdown-inspired text DSL, zero server — rendered fully client-side
+- Code-like syntax with nesting and activation boxes derived structurally,
+  not via explicit activate/deactivate lines
+- Full UML fragment set (see above)
+- Rich participant modeling: types, icons, stereotypes, colors, groups
+- Two renderers from one DSL: interactive React 19 HTML renderer, plus a
+  headless native-SVG renderer exported as `renderToSvg()`
+  (parse → layout → geometry IR → SVG primitives → compose)
+- Headless, server-safe parser subpath: `@zenuml/core/parser`
+- PNG and SVG export built in: `getPng()` / `getSvg()`
+- Theming system: `theme` config option, scoped theming for multiple
+  differently-themed diagrams per page, theme-change callbacks
+- CLI renderer: the `zenuml` binary
+- Language-server tooling: Langium-based LSP at subpaths `./lsp-server` (Node)
+  and `./lsp-worker` (browser worker)
+- Unicode & emoji support throughout
+
+## ZenUML and Mermaid
+
+ZenUML is not a Mermaid competitor — it is an alternative sequence-diagram
+syntax available inside the Mermaid ecosystem, powered by this engine, and also
+usable standalone. The repository lives in the mermaid-js GitHub organization
+(https://github.com/mermaid-js/zenuml-core). The Mermaid side of the
+integration is a separate package in the mermaid repo, `packages/mermaid-zenuml`,
+whose `zenumlRenderer.ts` calls this library's renderer. The engine even ships
+a `theme-mermaid` theme and carries a fix specifically for the Mermaid Live
+Editor.
+
+What ZenUML's syntax provides (repo-verified; no claims here about what
+Mermaid's built-in sequenceDiagram does or lacks):
+
+- Method-call syntax with nested blocks for call hierarchy and activation boxes
+- Return-value assignment (`String result = A.compute()`)
+- Real expressions in conditions
+- try/catch/finally fragments and `new` object creation as first-class syntax
+- Typed participants with icons, stereotypes, colors, emoji, and groups in one
+  declaration line
+- Headless parser + CLI + LSP shipped from the same package
+
+## Themes
+
+13 named themes: theme-default, theme-mermaid, theme-darcula, theme-sky,
+theme-idle-afternoon, theme-coles, theme-woolworths, theme-anz, theme-nab,
+theme-google, theme-diagramly, theme-creately, theme-purple. Theming is
+CSS-variable driven; multiple differently-themed diagrams can coexist on one
+page via scoped theming.
+
+## Facts
+
+| Fact | Value |
+|---|---|
+| npm package name | `@zenuml/core` |
+| Version | 4.1.0 |
+| License | MIT (Copyright (c) 2022 Peng Xiao) |
+| GitHub repo | https://github.com/mermaid-js/zenuml-core |
+| UMD bundle | `./dist/zenuml.js` |
+| ESM bundle | `./dist/zenuml.esm.mjs` |
+| Types | `./types/index.d.ts` (main), `./types/parser/index.d.ts` (parser) |
+| Subpath exports | `.`, `./parser` (ESM `dist/parser/index.mjs` / CJS `dist/parser/index.cjs`), `./lsp-server` (`dist/lsp/main.js`), `./lsp-worker` (`dist/lsp/zenuml-server.worker.js`) |
+| CLI binary | `zenuml` → `./dist/cli/zenuml.mjs` |
+| UI framework | React 19 (`react` ^19.2.3, `react-dom` ^19.2.3) |
+| Parser tech | ANTLR4 (`antlr4` ~4.11.0 runtime; grammar in `src/g4/`) |
+| LSP tech | Langium 4.2.4 |
+| State management | Jotai ^2.16.1 |
+| Styling | Tailwind CSS, scoped under `.zenuml` |
+| Node requirement | >= 20 |
+| Package manager / runtime | Bun |
+| Live editor | https://app.zenuml.com |
+| Distribution surfaces | Confluence (Atlassian Marketplace), Web App, JetBrains Plugin, Chrome Extension |
+
+## FAQ
+
+Q: What is @zenuml/core?
+A: @zenuml/core is a JavaScript sequence-diagram library that turns Markdown-inspired text definitions into interactive diagrams entirely in the browser, with no server required. It is published on npm under the MIT license, and it is the engine that powers ZenUML syntax support in the Mermaid ecosystem.
+
+Q: How do I install @zenuml/core?
+A: Install @zenuml/core from npm with `npm install @zenuml/core` or `bun add @zenuml/core`. The package requires Node.js 20 or later and ships both an ESM bundle (dist/zenuml.esm.mjs) for modern bundlers and a UMD bundle (dist/zenuml.js) for browser scripts.
+
+Q: Is ZenUML part of Mermaid?
+A: ZenUML is not a Mermaid competitor — it is an alternative sequence-diagram syntax available inside the Mermaid ecosystem, and it is also usable standalone. The @zenuml/core repository lives in the mermaid-js GitHub organization, and Mermaid's mermaid-zenuml package calls this library's renderer.
+
+Q: Does ZenUML require a server to render diagrams?
+A: No. ZenUML diagrams are defined as plain text and rendered fully client-side in the browser. One DSL feeds two renderers: an interactive React 19 HTML renderer and a headless native-SVG renderer exported as renderToSvg().
+
+Q: Can I validate ZenUML syntax on the server in Node.js?
+A: Yes. The @zenuml/core/parser subpath exports a reentrant validate(code) function that returns { pass, errorDetails } and a parse(code) function that adds an error-recovered rootContext parse tree. It imports cleanly server-side and is safe to call repeatedly or concurrently in Node.
+
+Q: What UML fragments does ZenUML support?
+A: ZenUML supports the full UML fragment set: if/else (alt), while/for/loop, opt, par, critical, section/frame, try/catch/finally, and ref. Conditions accept real expressions, including comparison, boolean, arithmetic, function calls, and the in operator.
+
+Q: Can I export ZenUML diagrams as PNG or SVG?
+A: Yes. The ZenUml instance provides getPng() and getSvg() methods that return data URLs. The package also ships a zenuml CLI binary that renders .zenuml files to SVG or PNG, supports stdin/stdout pipes, and offers --check syntax validation and --parse AST-as-JSON output.
+
+Q: Is @zenuml/core free to use?
+A: Yes. @zenuml/core is open source under the MIT license and free to install from npm. The current version is 4.1.0.
