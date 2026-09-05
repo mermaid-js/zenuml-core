@@ -45,6 +45,4 @@ if (elm) {
 }
 
 // @ts-expect-error global variable
-window.parentLogger = parentLogger;
-// @ts-expect-error global variable
 window.initZenUml = initZenUml;
