@@ -22,6 +22,7 @@ zenUml.render(code, {
   enableMessageInsertion: true,
   enableDividerInsertion: true,
   enableParticipantStyleEditing: true,
+  enableMessageReorder: true,
   onContentChange: code1 => {
     // @ts-expect-error -- e2e inspection hook
     window.__lastContentChange = code1;

@@ -5,10 +5,13 @@ import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { useAtom, useAtomValue } from "jotai";
 import {
   codeAtom,
+  enableMessageReorderAtom,
   messageReorderDragAtom,
   messageReorderDropAtom,
   messageReorderPendingAtom,
+  modeAtom,
   onContentChangeAtom,
+  RenderMode,
 } from "@/store/Store";
 import { reorderMessageInDsl } from "@/utils/messageReorderTransform";
 import { Fragment, useEffect, useRef } from "react";
@@ -35,6 +38,13 @@ export const Block = (props: {
   const dragKeyRef = useRef<string | null>(null);
   const [pendingDrag, setPendingDrag] = useAtom(messageReorderPendingAtom);
   const [dropState, setDropState] = useAtom(messageReorderDropAtom);
+  const enableMessageReorder = useAtomValue(enableMessageReorderAtom);
+  const mode = useAtomValue(modeAtom);
+  // Unlike every other editing surface, this drag used to run with no
+  // `enable*` flag and no respect for `RenderMode.Static` — a render-only
+  // host (SVG export, a static embed) could have its diagram silently
+  // rewritten by an accidental drag.
+  const reorderEnabled = enableMessageReorder && mode === RenderMode.Dynamic;
 
   useEffect(() => {
     dragKeyRef.current = dragKey;
@@ -54,7 +64,7 @@ export const Block = (props: {
   }, [dragKey, pendingDrag]);
 
   useEffect(() => {
-    if (!props.isRoot) {
+    if (!props.isRoot || !reorderEnabled) {
       return;
     }
     if (!pendingDrag || dragKey) {
@@ -81,7 +91,7 @@ export const Block = (props: {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
     };
-  }, [dragKey, pendingDrag, props.isRoot, setDragKey, setPendingDrag]);
+  }, [dragKey, pendingDrag, props.isRoot, reorderEnabled, setDragKey, setPendingDrag]);
 
   useEffect(() => {
     if (!props.isRoot) {
@@ -166,6 +176,9 @@ export const Block = (props: {
               data-statement-key={statementKey}
               data-reorder-state={reorderState}
               onPointerDown={(event) => {
+                if (!reorderEnabled) {
+                  return;
+                }
                 const target = event.target as HTMLElement | null;
                 if (
                   !target?.closest(".message") ||

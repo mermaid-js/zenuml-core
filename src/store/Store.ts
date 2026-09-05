@@ -96,6 +96,7 @@ export const enableParticipantInsertionAtom = atom(false);
 export const enableMessageInsertionAtom = atom(false);
 export const enableDividerInsertionAtom = atom(false);
 export const enableParticipantStyleEditingAtom = atom(false);
+export const enableMessageReorderAtom = atom(false);
 
 export const enableNumberingAtom = atomWithLocalStorage(
   () => `${location.hostname}-zenuml-numbering`,
