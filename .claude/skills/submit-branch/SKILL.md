@@ -62,15 +62,25 @@ EOF
 
 The PR targets `main` on `mermaid-js/zenuml-core`.
 
+### 4. Hand off to babysit-pr — always
+
+A push starts a CI run. Invoke `/babysit-pr` with the PR number **immediately**, in
+the same turn, without asking first. Reporting the PR URL and stopping is not
+finishing this skill: it leaves a run nobody is watching, and the user then has to
+type "babysit pr" to get what the push already implied.
+
+This applies to every push, including one that only adds a commit to an existing PR.
+The one exception is `/ship-branch`, which invokes babysit-pr itself as its next
+step — do not run it twice.
+
 ## Output
 
 Report:
 
-- **SUBMITTED** — PR number, URL, and branch name
+- **SUBMITTED** — PR number, URL, and branch name, then the babysit-pr result
 - **FAILED** — what went wrong (dirty worktree, push conflict, gh error)
 
 ## Does NOT
 
 - Run tests or lint (use `/validate-branch` for that)
-- Fix CI failures (use `/babysit-pr` for that)
 - Merge the PR (use `/land-pr` for that)

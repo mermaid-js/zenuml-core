@@ -77,7 +77,7 @@ Do NOT run `gh pr merge` directly from the main conversation.
 
 - **Each step is a hard boundary.** No step retries a previous step.
 - **No auto-rollback.** Stop and report on any failure.
-- **Only this skill calls babysit-pr.**
+- **Call babysit-pr exactly once per push.** This skill runs it at step 3; `/submit-branch` runs it when invoked on its own. Never both for the same push.
 - **Ship stops at merge.** This skill does NOT publish to npm. Publishing is `/release-app` (merge the "chore: version packages" PR). Do not merge the version PR here.
 
 ## Output
