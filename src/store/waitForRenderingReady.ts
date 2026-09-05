@@ -38,5 +38,9 @@ export function waitForRenderingReady(
     };
     subscription.off = store.sub(renderingReadyAtom, stopWhenReady);
     beginRender();
+    // A notification only arrives when the atom's value CHANGES. Rendering a
+    // document with no participants leaves it true throughout (0 lifelines ===
+    // 0 participants), so without this check the wait would never end.
+    stopWhenReady();
   });
 }

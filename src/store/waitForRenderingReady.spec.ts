@@ -65,6 +65,28 @@ describe("waitForRenderingReady", () => {
     expect(resolved).toBe(true);
   });
 
+  it("resolves when readiness already holds before the wait begins", async () => {
+    // A document with no participants is ready the moment lifelineReadyAtom is
+    // emptied: 0 lifelines === 0 participants. Rendering a second such
+    // document leaves renderingReadyAtom true across the whole wait, so no
+    // notification is ever emitted and only an explicit check can end it.
+    const store = createStore();
+    store.set(lifelineReadyAtom, []);
+    store.set(codeAtom, "// a comment, no participants");
+    expect(store.get(renderingReadyAtom)).toBe(true);
+
+    store.set(lifelineReadyAtom, []);
+    let resolved = false;
+    const done = waitForRenderingReady(store, () =>
+      store.set(codeAtom, "// another comment, still no participants"),
+    ).then(() => {
+      resolved = true;
+    });
+
+    await Promise.race([done, new Promise((r) => setTimeout(r, 200))]);
+    expect(resolved).toBe(true);
+  });
+
   it("leaves no subscription behind across repeated renders", async () => {
     // The defect this guards: store.sub returns an unsubscribe function, and
     // discarding it left one listener per render alive for the lifetime of
