@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="ZenUML — Sequence Diagrams From Text">
+  <rect width="1200" height="630" fill="#FFFDF7"/>
+
+  <!-- memphis ambient glyphs -->
+  <text x="70" y="120" font-family="'Space Mono',monospace" font-size="46" fill="#171412" opacity="0.16">-&gt;</text>
+  <text x="1080" y="560" font-family="'Space Mono',monospace" font-size="60" fill="#171412" opacity="0.14">┊</text>
+  <text x="1110" y="150" font-family="'Space Mono',monospace" font-size="52" fill="#171412" opacity="0.16">⌐</text>
+  <circle cx="120" cy="520" r="26" fill="none" stroke="#2FD3A5" stroke-width="6"/>
+  <rect x="1040" y="70" width="42" height="42" fill="#C9B8FF" stroke="#171412" stroke-width="4"/>
+
+  <!-- eyebrow -->
+  <g transform="translate(80,96)">
+    <rect x="0" y="0" width="260" height="46" fill="#FFC93C" stroke="#171412" stroke-width="4"/>
+    <text x="20" y="31" font-family="'Space Mono',monospace" font-weight="700" font-size="22" letter-spacing="3" fill="#171412">DIAGRAMS AS CODE</text>
+  </g>
+
+  <!-- headline -->
+  <text x="78" y="255" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="70" fill="#171412">Turn text into</text>
+  <text x="78" y="355" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="70" fill="#FF5B4C" stroke="#171412" stroke-width="2">sequence diagrams</text>
+
+  <text x="80" y="425" font-family="'DM Sans',Arial,sans-serif" font-weight="500" font-size="30" fill="#171412">Write Markdown-style text, get a diagram. Client-side, open</text>
+  <text x="80" y="465" font-family="'DM Sans',Arial,sans-serif" font-weight="500" font-size="30" fill="#171412">source, npm-installable — @zenuml/core.</text>
+
+  <!-- mini diagram motif -->
+  <g transform="translate(80,520)">
+    <rect x="6" y="6" width="120" height="46" fill="#171412"/>
+    <rect x="0" y="0" width="120" height="46" fill="#FFC93C" stroke="#171412" stroke-width="4"/>
+    <text x="60" y="31" text-anchor="middle" font-family="'Syne',sans-serif" font-weight="700" font-size="24" fill="#171412">User</text>
+    <line x1="126" y1="23" x2="320" y2="23" stroke="#171412" stroke-width="5"/>
+    <path d="M312 15 L326 23 L312 31 Z" fill="#171412"/>
+    <text x="220" y="16" text-anchor="middle" font-family="'Space Mono',monospace" font-size="18" fill="#171412">checkout()</text>
+    <rect x="336" y="6" width="120" height="46" fill="#171412"/>
+    <rect x="330" y="0" width="120" height="46" fill="#2FD3A5" stroke="#171412" stroke-width="4"/>
+    <text x="390" y="31" text-anchor="middle" font-family="'Syne',sans-serif" font-weight="700" font-size="24" fill="#171412">Order</text>
+  </g>
+
+  <!-- editor card motif on the right -->
+  <g transform="translate(760,150)">
+    <rect x="10" y="10" width="360" height="330" fill="#171412"/>
+    <rect x="0" y="0" width="360" height="330" fill="#171412" stroke="#171412" stroke-width="4"/>
+    <rect x="0" y="0" width="360" height="40" fill="#26211d"/>
+    <circle cx="24" cy="20" r="7" fill="#FF5B4C"/>
+    <circle cx="46" cy="20" r="7" fill="#FFC93C"/>
+    <circle cx="68" cy="20" r="7" fill="#2FD3A5"/>
+    <text x="28" y="86" font-family="'Space Mono',monospace" font-size="22" fill="#FFFDF7">User.checkout() {</text>
+    <text x="48" y="122" font-family="'Space Mono',monospace" font-size="22" fill="#cdd8ff">Order.validate()</text>
+    <text x="48" y="158" font-family="'Space Mono',monospace" font-size="22" fill="#FFC93C">if(paid) {</text>
+    <text x="68" y="194" font-family="'Space Mono',monospace" font-size="22" fill="#cdd8ff">Order.confirm()</text>
+    <text x="48" y="230" font-family="'Space Mono',monospace" font-size="22" fill="#FFC93C">}</text>
+    <text x="28" y="266" font-family="'Space Mono',monospace" font-size="22" fill="#FFFDF7">}</text>
+  </g>
+
+  <!-- => token -->
+  <g transform="translate(690,290)">
+    <rect x="6" y="6" width="70" height="70" fill="#171412"/>
+    <rect x="0" y="0" width="70" height="70" fill="#FFC93C" stroke="#171412" stroke-width="4"/>
+    <text x="35" y="50" text-anchor="middle" font-family="'Syne',sans-serif" font-weight="800" font-size="40" fill="#171412">=&gt;</text>
+  </g>
+</svg>
