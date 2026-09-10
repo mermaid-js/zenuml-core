@@ -1,13 +1,4 @@
-import {
-  RenderMode,
-  modeAtom,
-  rootContextAtom,
-  showTipsAtom,
-  scaleAtom,
-  themeAtom,
-  enableNumberingAtom,
-  enableMultiThemeAtom,
-} from "@/store/Store";
+import { rootContextAtom, scaleAtom, themeAtom } from "@/store/Store";
 import { useAtom, useAtomValue } from "jotai";
 import * as htmlToImage from "html-to-image";
 import {
@@ -20,9 +11,6 @@ import { cn } from "@/utils";
 import { Debug } from "./Debug";
 import { Privacy } from "./Privacy";
 import { DiagramTitle } from "./DiagramTitle";
-import { TipsDialog } from "./Tutorial/TipsDialog";
-import Icon from "../Icon/Icons";
-import { ThemeSelector } from "./ThemeSelector";
 import { SeqDiagram } from "./SeqDiagram/SeqDiagram";
 
 const exportConfig = {
@@ -46,28 +34,10 @@ export const DiagramFrame = ({
   }>;
 }>) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const rootContext = useAtomValue(rootContextAtom);
-  const [showTips, setShowTips] = useAtom(showTipsAtom);
   const [scale, setScale] = useAtom(scaleAtom);
   const [theme, setTheme] = useAtom(themeAtom);
-  const [enableNumbering, setEnableNumbering] = useAtom(enableNumberingAtom);
-  const enableMultiTheme = useAtomValue(enableMultiThemeAtom);
-  const mode = useAtomValue(modeAtom);
   const title = rootContext?.title();
-
-  const showTipsDialog = () => {
-    setShowTips(true);
-
-    // try {
-    //   this.$gtag?.event("view", {
-    //     event_category: "help",
-    //     event_label: "tips dialog",
-    //   });
-    // } catch (e) {
-    //   console.error(e);
-    // }
-  };
 
   const toPng = async () => {
     if (!containerRef.current) return;
@@ -149,7 +119,7 @@ export const DiagramFrame = ({
     >
       <Debug />
       <div className="frame text-skin-base bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded">
-        <div ref={contentRef}>
+        <div>
           <div className="header text-skin-title bg-skin-title border-skin-frame border-b p-1 flex justify-between rounded-t">
             <div className="left hide-export">{children}</div>
             <div className="right flex-grow flex justify-between">
@@ -158,69 +128,10 @@ export const DiagramFrame = ({
               <Privacy className="hide-export flex items-center" />
             </div>
           </div>
-          {showTips && (
-            <div
-              className="fixed z-40 inset-0 overflow-y-auto"
-              aria-labelledby="modal-title"
-              role="dialog"
-              aria-modal="true"
-            >
-              <TipsDialog />
-            </div>
-          )}
           <SeqDiagram
             className="origin-top-left"
             style={{ transform: `scale(${scale})` }}
           />
-        </div>
-        <div className="footer rounded text-skin-control bg-skin-title px-4 py-1 flex justify-between items-center gap-3">
-          {mode === RenderMode.Dynamic && (
-            <>
-              <div className="flex items-center gap-3 color-base">
-                <button
-                  className="bottom-1 flex items-center left-1 hide-export"
-                  onClick={showTipsDialog}
-                >
-                  <Icon name="tip" className="filter grayscale w-4 h-4" />
-                </button>
-                {enableMultiTheme && <ThemeSelector />}
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="order-display"
-                    className="mr-1"
-                    checked={Boolean(enableNumbering)}
-                    onChange={() => setEnableNumbering(!enableNumbering)}
-                  />
-                  <label
-                    htmlFor="order-display"
-                    title="Numbering the diagram"
-                    className="select-none"
-                  >
-                    <Icon name="numbering" className="w-6 h-6" />
-                  </label>
-                </div>
-              </div>
-              <div className="zoom-controls flex hide-export gap-1">
-                <button className="zoom-in" onClick={zoomIn}>
-                  <Icon name="zoom-in" className="w-4 h-4" />
-                </button>
-                <label className="w-12 block text-center">
-                  {Number(scale * 100).toFixed(0)}%
-                </label>
-                <button className="zoom-out" onClick={zoomOut}>
-                  <Icon name="zoom-out" className="w-4 h-4" />
-                </button>
-              </div>
-              <a
-                target="_blank"
-                href="https://zenuml.com"
-                className="brand text-xs hover:underline"
-              >
-                ZenUML.com
-              </a>
-            </>
-          )}
         </div>
       </div>
     </div>

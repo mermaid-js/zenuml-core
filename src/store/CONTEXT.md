@@ -58,9 +58,8 @@ rootContextAtom (ProgContext | null)    ← RootContext(code)
 | `enableDividerInsertionAtom` | `false` | Show divider insert controls |
 | `enableParticipantStyleEditingAtom` | `false` | Click-to-edit participant styles |
 | `enableNumberingAtom` | `true` (localStorage) | Auto-number messages |
-| `enableMultiThemeAtom` | `true` | Theme picker visible |
+| `enableMultiThemeAtom` | `true` | Legacy host configuration compatibility |
 | `enableScopedThemingAtom` | `false` | Scoped CSS theming |
-| `showTipsAtom` | `false` | Tutorial tips dialog |
 
 ### Drag & Drop
 

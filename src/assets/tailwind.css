@@ -137,10 +137,6 @@
     --color-bg-occurrence: #dedede;
   }
 
-  .theme-mermaid .footer {
-    visibility: hidden;
-  }
-
   .theme-darcula {
     /* Frame */
     --color-bg-canvas: #ffffff;
@@ -275,10 +271,6 @@
     /* Other */
     --color-text-link: #344337;
     --color-text-control: #97a49b;
-  }
-
-  .theme-coles .footer {
-    background-color: #ffffff;
   }
 
   .theme-woolworths {

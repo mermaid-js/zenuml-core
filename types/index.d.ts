@@ -1,9 +1,9 @@
 export type SvgTheme =
-  | 'theme-default'
-  | 'theme-mermaid'
-  | 'theme-clean-light'
-  | 'theme-clean-dark'
-  | 'theme-neon';
+  | "theme-default"
+  | "theme-mermaid"
+  | "theme-clean-light"
+  | "theme-clean-dark"
+  | "theme-neon";
 
 export interface RenderOptions {
   /** Theme name. Unknown names fall back to 'theme-default'. */
@@ -19,7 +19,10 @@ export interface RenderResult {
   viewBox: string;
 }
 
-export declare function renderToSvg(code: string, options?: RenderOptions): RenderResult;
+export declare function renderToSvg(
+  code: string,
+  options?: RenderOptions,
+): RenderResult;
 
 export interface ParseResult {
   pass: boolean;
@@ -32,11 +35,13 @@ export interface ErrorDetail {
   msg: string;
 }
 
-interface Config {
+export interface Config {
   theme?: string;
   enableScopedTheming?: boolean;
   onThemeChange?: (data: { theme: string; scoped?: boolean }) => void;
   enableMultiTheme?: boolean;
+  /** Show hierarchical message numbering. Omission preserves stored state (initially true). */
+  enableNumbering?: boolean;
   stickyOffset?: number | false;
   onContentChange?: (code: string) => void;
   mode?: string;
@@ -46,7 +51,10 @@ interface IZenUml {
   get code(): string | undefined;
   get theme(): string | undefined;
   parse(text: string): Promise<ParseResult>;
-  render(code: string | undefined, config: Config | undefined): Promise<IZenUml>;
+  render(
+    code: string | undefined,
+    config: Config | undefined,
+  ): Promise<IZenUml>;
 }
 
 declare class ZenUml implements IZenUml {
@@ -56,7 +64,10 @@ declare class ZenUml implements IZenUml {
   get code(): string | undefined;
   get theme(): string | undefined;
   parse(text: string): Promise<ParseResult>;
-  render(code: string | undefined, config: Config | undefined): Promise<IZenUml>;
+  render(
+    code: string | undefined,
+    config: Config | undefined,
+  ): Promise<IZenUml>;
   getPng(): Promise<string>;
   getSvg(): Promise<string>;
 }
