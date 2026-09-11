@@ -53,7 +53,7 @@ DiagramFrame                          ← outer container, theme, title, control
 
 ### `DiagramFrame`
 
-Top-level component. Sets up `JotaiProvider` with initial atom values from props. Renders title, theme selector, tips dialog, and `SeqDiagram`.
+Top-level component. Renders the diagram title, privacy indicator, and `SeqDiagram`. Host applications own surrounding controls such as theme selection and viewport zoom.
 
 ### `SeqDiagram`
 

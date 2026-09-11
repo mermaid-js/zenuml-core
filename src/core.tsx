@@ -1,6 +1,7 @@
 import {
   codeAtom,
   enableDividerInsertionAtom,
+  enableNumberingAtom,
   enableMessageInsertionAtom,
   enableMessageReorderAtom,
   enableMultiThemeAtom,
@@ -41,11 +42,13 @@ import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx"
 export { renderToSvg } from "./svg/renderToSvg";
 export type { RenderResult, RenderOptions } from "./svg/renderToSvg";
 
-interface Config {
+export interface Config {
   theme?: string;
   enableScopedTheming?: boolean;
   onThemeChange?: (data: { theme: string; scoped?: boolean }) => void;
   enableMultiTheme?: boolean;
+  /** Show hierarchical message numbering. Omission preserves stored state (initially true). */
+  enableNumbering?: boolean;
   stickyOffset?: number | false;
   onContentChange?: (code: string) => void;
   onEventEmit?: (name: string, data: unknown) => void;
@@ -177,6 +180,9 @@ export default class ZenUml implements IZenUml {
     this.store.set(onEventEmitAtom, config?.onEventEmit || (() => {}));
     if (config?.enableMultiTheme !== undefined) {
       this.store.set(enableMultiThemeAtom, config?.enableMultiTheme);
+    }
+    if (config?.enableNumbering !== undefined) {
+      this.store.set(enableNumberingAtom, config.enableNumbering);
     }
     if (config?.enableParticipantInsertion !== undefined) {
       this.store.set(

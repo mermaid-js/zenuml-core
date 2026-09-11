@@ -23,7 +23,7 @@ export const resolveWidthProvider = (): WidthFunc => {
 
 /*
  * RenderMode
- * Static: Compatible with Mermaid which renders once and never update. It also disables sticky participants and hides the footer
+ * Static: Compatible with Mermaid which renders once and never updates. It also disables sticky participants.
  * Dynamic: Render once and update when code changes
  */
 export const enum RenderMode {
@@ -61,11 +61,6 @@ export const themeAtom = atom("theme-default");
 
 export const enableScopedThemingAtom = atom<boolean>(false);
 
-export const themeIconDotAtom = atomWithLocalStorage(
-  () => `${location.hostname}-zenuml-theme-icon-dot`,
-  "1",
-);
-
 export const enableMultiThemeAtom = atom(true);
 
 export const scaleAtom = atom(1);
@@ -85,8 +80,6 @@ export const onSelectAtom = atom(null, (get, set, payload: string) => {
 });
 
 export const cursorAtom = atom<number | null | undefined>(null);
-
-export const showTipsAtom = atom(false);
 
 export const modeAtom = atom(RenderMode.Dynamic);
 

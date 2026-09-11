@@ -1,5 +1,7 @@
-import { JSDOM } from "jsdom";
+import { waitFor } from "@testing-library/react";
 import ZenUml from "./core";
+import { createStore } from "jotai";
+import { enableNumberingAtom } from "./store/Store";
 
 // IntersectionObserver is already mocked globally by the test setup files
 // (test-setup.ts for `bun test`, test/setup.ts for vitest). Do NOT re-stub it
@@ -8,25 +10,56 @@ import ZenUml from "./core";
 // and breaks `bun run test` on newer Bun (see issue #395).
 describe("@ZenUML/core", function () {
   beforeEach(() => {
-    // Create a new JSDOM instance
-    const dom = new JSDOM(
-      '<!DOCTYPE html><div class="textarea-hidden-div"></div>',
-      {
-        url: "http://localhost",
-      },
-    );
-
-    // Set up global objects that would normally be available in the browser
-    global.document = dom.window.document;
-    global.window = dom.window as unknown as Window & typeof globalThis;
+    createStore().set(enableNumberingAtom, true);
+    document.body.innerHTML = '<div class="textarea-hidden-div"></div>';
   });
 
   afterEach(() => {
+    createStore().set(enableNumberingAtom, true);
     // Clean up after each test
     document.body.innerHTML = "";
     // Clear the cache to prevent test interference
     vi.clearAllMocks();
     // You might need to clear your rendering cache here too
+  });
+
+  const renderDiagram = async (config: Record<string, unknown> = {}) => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const zenUml = new ZenUml(el, true);
+
+    await zenUml.render("Alice->Bob: Hello", config);
+    await waitFor(() => {
+      expect(el.textContent).toContain("Hello");
+    });
+
+    return el;
+  };
+
+  it("shows message numbering by default", async () => {
+    const el = await renderDiagram();
+
+    expect(el.querySelector(".message-layer")?.textContent).toContain("1");
+  });
+
+  it("lets the host hide message numbering", async () => {
+    const el = await renderDiagram({ enableNumbering: false });
+
+    expect(el.querySelector(".message-layer")?.textContent).not.toContain("1");
+  });
+
+  it("preserves stored numbering when the option is omitted", async () => {
+    createStore().set(enableNumberingAtom, false);
+    const el = await renderDiagram();
+
+    expect(el.querySelector(".message-layer")?.textContent).not.toContain("1");
+  });
+
+  it("lets an explicit true override stored numbering", async () => {
+    createStore().set(enableNumberingAtom, false);
+    const el = await renderDiagram({ enableNumbering: true });
+
+    expect(el.querySelector(".message-layer")?.textContent).toContain("1");
   });
 
   // TODO: fix this test. It randomly fails.
