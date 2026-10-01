@@ -23,6 +23,18 @@ const parse = (geometry: FragmentGeometry) => {
 };
 
 describe("SVG fragment header numbering", () => {
+  it("preserves the square opt header while rounding other fragment headers", () => {
+    expect(
+      parse({ ...fragment, kind: "opt", number: undefined })
+        .querySelector(".fragment-header")
+        ?.getAttribute("style"),
+    ).toBeNull();
+    expect(
+      parse({ ...fragment, kind: "alt", number: undefined })
+        .querySelector(".fragment-header")
+        ?.getAttribute("style"),
+    ).toContain("4px 4px 0 0");
+  });
   it("keeps the number inside the header, before the icon and type", () => {
     const view = parse(fragment);
     const number = view.querySelector(".seq-number")!;

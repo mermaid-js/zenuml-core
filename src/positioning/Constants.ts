@@ -15,3 +15,7 @@ export const LIFELINE_WIDTH = 1;
 
 export const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
 export const OCCURRENCE_EMPTY_HEIGHT = 24;
+
+// Frame header: 24px title row + 4px padding on each side + 1px bottom border.
+// The outer frame adds its own 1px top border before the sequence content.
+export const DIAGRAM_HEADER_HEIGHT = 24 + 4 * 2 + 1;

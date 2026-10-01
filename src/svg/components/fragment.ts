@@ -33,7 +33,7 @@ export function renderFragment(f: FragmentGeometry): string {
   // Fragment border rect — inset by half stroke width so outer stroke
   // edge matches CSS border-box model (border inside the bounding box)
   parts.push(
-    `<rect x="${f.x + HALF_STROKE}" y="${f.y + HALF_STROKE}" width="${width - STROKE_WIDTH}" height="${f.height - STROKE_WIDTH}" rx="4" class="fragment-border"/>`,
+    `<rect x="${f.x + HALF_STROKE}" y="${f.y + HALF_STROKE}" width="${width - STROKE_WIDTH}" height="${f.height - STROKE_WIDTH}" rx="${4 - HALF_STROKE}" class="fragment-border"/>`,
   );
 
   // Full-width header bar (matches HTML's bg-skin-fragment-header)
@@ -42,19 +42,22 @@ export function renderFragment(f: FragmentGeometry): string {
   const headerY = f.headerY;
   const headerW = width - 2;
   parts.push(
-    `<rect x="${headerX}" y="${headerY}" width="${headerW}" height="${HEADER_HEIGHT}" class="fragment-header"/>`,
+    `<rect x="${headerX}" y="${headerY}" width="${headerW}" height="${HEADER_HEIGHT}" class="fragment-header"${f.kind === "opt" ? "" : ' style="clip-path: inset(0 round 4px 4px 0 0)"'}/>`,
   );
 
   // Kind-specific icon inside the header bar
   // Each fragment type uses its own icon matching the HTML/React renderer
-  const numberWidth = f.number ? measureTextWithFont(f.number, "12px") : 0;
-  const numberInset = f.number ? numberWidth + 15 : 0;
+  // Browser layout rounds inline widths up to its 1/64px layout unit.
+  const numberWidth = f.number
+    ? Math.ceil(measureTextWithFont(f.number, "12px") * 64) / 64
+    : 0;
+  const numberInset = f.number ? numberWidth + 14 : 0;
   const titleY = headerY + HEADER_HEIGHT / 2 - 0.5;
   if (f.number) {
     const numberBoxX = headerX + 4;
     const numberX = numberBoxX + NUMBER_PAD_X;
     parts.push(
-      `<rect x="${numberBoxX}" y="${headerY + (HEADER_HEIGHT - 16) / 2}" width="${numberWidth + NUMBER_PAD_X * 2}" height="16" rx="2" class="fragment-number-bg"/>`,
+      `<rect x="${numberBoxX}" y="${headerY + (HEADER_HEIGHT - 1 - 16) / 2}" width="${numberWidth + NUMBER_PAD_X * 2}" height="16" rx="2" class="fragment-number-bg"/>`,
       `<text x="${numberX}" y="${titleY}" dominant-baseline="central" class="seq-number">${esc(f.number)}</text>`,
     );
   }

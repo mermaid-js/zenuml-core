@@ -185,9 +185,9 @@ export function buildThemeStyles(p: SvgPalette): string {
   .arrow-head { fill: ${p.messageArrow}; stroke: ${p.messageArrow}; stroke-width: 1; }
   .arrow-open { fill: none; }
   .occurrence { fill: ${p.occurrenceBg}; stroke: ${p.occurrenceBorder}; stroke-width: 1; shape-rendering: crispEdges; }
-  .fragment-border { fill: none; stroke: ${p.fragmentBorder}; stroke-width: 1; shape-rendering: crispEdges; }
+  .fragment-border { fill: none; stroke: ${p.fragmentBorder}; stroke-width: 1; }
   .fragment-header { fill: ${p.fragmentHeaderBg}; fill-opacity: ${p.fragmentHeaderOpacity}; stroke: none; shape-rendering: crispEdges; }
-  .fragment-number-bg { fill: ${p.fragmentText}; fill-opacity: 0.08; stroke: none; }
+  .fragment-number-bg { fill: #6b7280; fill-opacity: 0.1; stroke: none; }
   .message-number-bg { fill: #6b7280; fill-opacity: 0.1; stroke: none; }
   .fragment-label { font-family: ${p.fontFamily}; font-size: 14px; font-weight: 400; font-variant-caps: all-small-caps; fill: ${p.fragmentText}; }
   .fragment-condition { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.fragmentText}; }

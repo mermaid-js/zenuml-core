@@ -269,7 +269,7 @@ A -> B.loadCustomerAccountAndValidateSubscription() {
   expect(actual.svg.fragmentNumberBackground).toEqual(
     actual.svg.fragmentNumberBackground.map(() => ({
       rx: "2",
-      opacity: "0.08",
+      opacity: "0.1",
     })),
   );
 });
