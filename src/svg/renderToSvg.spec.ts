@@ -66,6 +66,40 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain("hello");
   });
 
+  it("uses 1px strokes for message lines, arrowheads, and occurrence borders", () => {
+    const result = renderToSvg("A.method() {\n  B.reply()\n}");
+    expect(result.svg).toContain(".message-line { stroke: #000; stroke-width: 1;");
+    expect(result.svg).toContain(".arrow-head { fill: #000; stroke: #000; stroke-width: 1;");
+    expect(result.svg).toContain(".occurrence { fill: #dedede; stroke: #666; stroke-width: 1;");
+    expect(result.svg).toMatch(/class="occurrence"/);
+    expect(result.svg).toMatch(/<path d="M1 1\.25 L6\.15 4\.5 L1 7\.75 Z"[^>]*stroke-width="1"/);
+  });
+
+  it("aligns 1px message and return strokes to the same pixel-centered baseline", () => {
+    const message = renderToSvg("A->B: ping").svg;
+    const messageY = Number(message.match(/<line[^>]*y1="([\d.]+)"[^>]*class="message-line"/)?.[1]);
+    const headY = Number(message.match(/<svg[^>]*y="([\d.]+)"[^>]*class="arrow-head/)?.[1]);
+    expect(messageY % 1).toBe(0.5);
+    expect(messageY).toBe(headY + 5.5);
+
+    const returned = renderToSvg("A.method() {\n  return x\n}").svg;
+    const returnY = Number(returned.match(/<line[^>]*y1="([\d.]+)"[^>]*class="return-line"/)?.[1]);
+    const returnTipY = Number(returned.match(/<polyline[^>]*points="[\d.]+,[\d.]+ [\d.]+,([\d.]+) [^"]+"[^>]*class="return-arrow"/)?.[1]);
+    expect(returnY % 1).toBe(0.5);
+    expect(returnY).toBe(returnTipY);
+  });
+
+  it("extends exported arrow tips 1px past their shaft endpoints", () => {
+    for (const [code, rtl] of [["A\nB\nA->B: ping", false], ["A\nB\nB->A: pong", true]] as const) {
+      const svg = renderToSvg(code).svg;
+      const endpoint = Number(svg.match(/<line[^>]*x2="([\d.]+)"[^>]*class="message-line"/)?.[1]);
+      const arrowX = Number(svg.match(/<svg x="([\d.]+)"[^>]*class="arrow-head/)?.[1]);
+      const offset = Number(svg.match(/<path[^>]*transform="translate\(([\d.]+) 0\.5\)"[^>]*stroke-width="1"/)?.[1]);
+      const tip = arrowX + (rtl ? 0.85 - offset : 6.15 + offset);
+      expect(tip - endpoint).toBeCloseTo(rtl ? -0.15 : 0.15, 2);
+    }
+  });
+
   it("renders async messages with open arrow", () => {
     // ZenUML async syntax: A -> B: msg (no block body)
     const result = renderToSvg("A -> B: async call");

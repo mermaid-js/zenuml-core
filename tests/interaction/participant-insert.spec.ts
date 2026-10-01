@@ -1,6 +1,60 @@
 import { test, expect } from "../fixtures";
 
 test.describe("Participant Insert", () => {
+  test("participant borders are 1px without changing box or label geometry", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await expect(page.locator("#A .participant")).toBeVisible();
+    await expect(page.locator("#A .participant")).toHaveScreenshot(
+      "participant-border-1px.png",
+    );
+
+    const before = await page.evaluate(() => {
+      const selectors = [
+        "#A .participant",
+        "#A .participant .name",
+        "#A .line",
+        "#C .participant",
+        ".message-layer .message",
+      ];
+      const box = (selector: string) => {
+        const rect = document.querySelector(selector)?.getBoundingClientRect();
+        return rect && [rect.x, rect.y, rect.width, rect.height];
+      };
+      return {
+        boxes: selectors.map(box),
+        border: getComputedStyle(document.querySelector("#A .participant")!)
+          .borderTopWidth,
+      };
+    });
+
+    await page.locator(".participant").evaluateAll((participants) => {
+      for (const participant of participants as HTMLElement[]) {
+        participant.style.borderWidth = "2px";
+        participant.style.padding = "0 2px";
+      }
+    });
+
+    const oldBoxes = await page.evaluate(() => {
+      const selectors = [
+        "#A .participant",
+        "#A .participant .name",
+        "#A .line",
+        "#C .participant",
+        ".message-layer .message",
+      ];
+      return selectors.map((selector) => {
+        const rect = document.querySelector(selector)?.getBoundingClientRect();
+        return rect && [rect.x, rect.y, rect.width, rect.height];
+      });
+    });
+
+    expect(before.border).toBe("1px");
+    expect(before.boxes.every(Boolean)).toBe(true);
+    expect(before.boxes).toEqual(oldBoxes);
+  });
+
   test("shows insert button on hover between participants", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     await expect(page.locator(".privacy>span>svg")).toBeVisible({

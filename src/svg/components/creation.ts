@@ -66,6 +66,5 @@ function renderOpenArrow(tipX: number, tipY: number, pointsLeft: boolean): strin
   const x1 = tipX + dir * w;
   const y1 = tipY - halfH;
   const y2 = tipY + halfH;
-  return `<polyline points="${x1},${y1} ${tipX},${tipY} ${x1},${y2}" fill="none" stroke-linecap="round" class="arrow-head arrow-open"/>`;
+  return `<polyline points="${x1},${y1} ${tipX},${tipY} ${x1},${y2}" transform="translate(${pointsLeft ? -1 : 1} 0)" fill="none" stroke-linecap="round" class="arrow-head arrow-open"/>`;
 }
-

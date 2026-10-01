@@ -4,10 +4,9 @@ import { buildThemeStyles, resolvePalette, THEME_PALETTES } from "./themes";
 import type { SvgTheme } from "./themes";
 
 /**
- * The exact <style> body renderToSvg emitted before themes.ts existed
- * (src/svg/renderToSvg.ts DEFAULT_THEME_STYLES, as of 49b6d6bb). Pinning it
- * byte for byte keeps every committed SVG snapshot valid: adding or editing a
- * theme must never move theme-default's output.
+ * Pin the default <style> body so theme changes cannot silently alter its
+ * rendering. The participant stroke is 1px as required by the current
+ * rendering contract.
  */
 const LEGACY_DEFAULT_STYLES = `
   .frame-border-outer { fill: #666; }
@@ -15,24 +14,24 @@ const LEGACY_DEFAULT_STYLES = `
   .frame-header-bg { fill: #ffffff; }
   .frame-header-line { stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
   .frame-title { font-family: Helvetica, Verdana, serif; font-size: 16px; font-weight: 600; fill: #222; }
-  .participant-box { fill: #ffffff; stroke: #666; stroke-width: 2; }
+  .participant-box { fill: #ffffff; stroke: #666; stroke-width: 1; }
   .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #222; }
   .participant-icon { color: #222; }
   .participant-icon [fill="currentColor"]:not([stroke]) { stroke: #666; stroke-width: 1; }
   .lifeline { stroke: #666; stroke-width: 1; }
-  .message-line { stroke: #000; stroke-width: 2; shape-rendering: crispEdges; }
+  .message-line { stroke: #000; stroke-width: 1; shape-rendering: crispEdges; }
   .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
-  .arrow-head { fill: #000; stroke: #000; stroke-width: 2; }
+  .arrow-head { fill: #000; stroke: #000; stroke-width: 1; }
   .arrow-open { fill: none; }
-  .occurrence { fill: #dedede; stroke: #666; stroke-width: 2; shape-rendering: crispEdges; }
+  .occurrence { fill: #dedede; stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-border { fill: none; stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-header { fill: #dedede; fill-opacity: 0.498; stroke: none; shape-rendering: crispEdges; }
   .fragment-label { font-family: Helvetica, Verdana, serif; font-size: 14px; font-weight: 600; fill: #000; }
   .fragment-condition { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
   .fragment-separator { stroke: #e5e7eb; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-section-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
-  .return-line { stroke: #000; stroke-width: 2; stroke-dasharray: 6,4; shape-rendering: crispEdges; }
-  .return-arrow { stroke: #000; stroke-width: 2; fill: none; }
+  .return-line { stroke: #000; stroke-width: 1; stroke-dasharray: 6,4; shape-rendering: crispEdges; }
+  .return-arrow { stroke: #000; stroke-width: 1; fill: none; }
   .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .return-icon { fill: #222; }
   .divider-line { stroke: #aaaa33; stroke-width: 1; }
@@ -46,7 +45,7 @@ const LEGACY_DEFAULT_STYLES = `
 `;
 
 describe("SVG theme palettes", () => {
-  it("reproduces the legacy hard-coded style block for theme-default", () => {
+  it("emits the expected style block for theme-default", () => {
     expect(buildThemeStyles(THEME_PALETTES["theme-default"])).toBe(
       LEGACY_DEFAULT_STYLES,
     );

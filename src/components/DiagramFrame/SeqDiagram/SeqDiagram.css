@@ -10,8 +10,9 @@
 /* .participant is shared by MessageLayer and LifeLineLayer */
 .zenuml .participant {
   /* don't override */
-  border-width: 2px;
-  padding: 0 2px;
+  /* Preserve the old border + padding total: 4px horizontally, 2px vertically. */
+  border-width: 1px;
+  padding: 1px 3px;
   min-width: 80px;
   max-width: 250px;
   text-align: center;

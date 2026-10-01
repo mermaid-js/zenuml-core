@@ -144,7 +144,7 @@ export const Occurrence = (props: {
   return (
     <div
       className={cn(
-        "occurrence min-h-6 shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full w-[15px] mt-[-2px] pl-[6px]",
+        "occurrence min-h-6 shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border relative left-full w-[15px] mt-[-2px] pl-[7px] pr-px pt-px pb-px",
         { "right-to-left left-[-14px]": props.rtl },
         {
           "cursor-grab": dragEnabled,

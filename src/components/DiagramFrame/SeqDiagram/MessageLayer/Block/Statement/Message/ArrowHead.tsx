@@ -7,7 +7,7 @@ export const ArrowHead = (props: {
   // Single unified arrow shape for both filled and open
   return (
     <svg
-      className="stroke-2"
+      className="stroke-1"
       height="10"
       width="7"
       viewBox="0 0 7 9"

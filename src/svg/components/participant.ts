@@ -11,8 +11,8 @@ import { esc } from "./svgUtils";
  * Inset the rect by half the stroke width on each side so the outer
  * stroke edge aligns with the CSS border outer edge.
  */
-const STROKE_WIDTH = 2;
-const HALF_STROKE = STROKE_WIDTH / 2; // 1px inset
+const STROKE_WIDTH = 1;
+const HALF_STROKE = STROKE_WIDTH / 2; // 0.5px inset
 const ICON_SIZE = 24;
 const ICON_MARGIN_RIGHT = 4;
 const ICON_PAINT_OFFSET_X = 4;
@@ -26,8 +26,8 @@ const PARTICIPANT_TEXT_FILL = "#222";
 export function renderParticipant(p: ParticipantGeometry): string {
   if (p.isStarter) return renderStarterParticipant(p);
 
-  // rx=3 so that with stroke-width:2 centered, outer visible radius is 3+1=4, matching CSS border-radius:4
-  const rx = 3;
+  // Keep the visible outer radius at 4px, matching the CSS border-radius.
+  const rx = 4 - HALF_STROKE;
   const x = p.x - p.width / 2 + HALF_STROKE;
   const rectY = p.y + HALF_STROKE;
   const rectW = p.width - STROKE_WIDTH;
@@ -138,7 +138,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
 export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number): string {
   if (!p.showBottom || p.isStarter) return "";
-  const rx = 3;
+  const rx = 4 - HALF_STROKE;
   const x = p.x - p.width / 2 + HALF_STROKE;
   const rectY = bottomY + HALF_STROKE;
   const rectW = p.width - STROKE_WIDTH;
@@ -201,7 +201,7 @@ function renderStarterParticipant(p: ParticipantGeometry): string {
     return "";
   }
 
-  const rx = 3;
+  const rx = 4 - HALF_STROKE;
   const boxX = p.x - p.width / 2 + HALF_STROKE;
   const rectY = p.y + HALF_STROKE;
   const rectW = p.width - STROKE_WIDTH;

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZenUML · Line weight examples</title>
+    <style>
+      :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #f5f7fa; color: #18212f; }
+      .page { max-width: 1480px; margin: auto; padding: 44px 36px 80px; }
+      header { margin-bottom: 34px; }
+      .eyebrow { color: #627b9c; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+      h1 { font-size: clamp(28px, 3vw, 40px); letter-spacing: -.04em; margin: 8px 0 8px; }
+      .intro { color: #637286; font-size: 15px; margin: 0; max-width: 680px; line-height: 1.6; }
+      .examples { display: grid; gap: 26px; }
+      article { background: white; border: 1px solid #dce3eb; border-radius: 16px; box-shadow: 0 10px 35px #1e314008; overflow: hidden; }
+      .card-head { padding: 22px 26px 18px; border-bottom: 1px solid #edf0f4; display: flex; gap: 20px; align-items: start; justify-content: space-between; }
+      .card-head h2 { font-size: 19px; letter-spacing: -.025em; margin: 0 0 4px; }
+      .card-head p { color: #708095; font-size: 13px; margin: 0; line-height: 1.5; }
+      .number { color: #95a7bc; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+      .diagram-scroll { overflow-x: auto; overflow-y: hidden; padding: 28px 30px 38px; background: white; }
+      .diagram { width: max-content; margin-inline: auto; }
+      .diagram pre.zenuml { margin: 0; }
+      .diagram .footer { display: none !important; }
+      details { border-top: 1px solid #edf0f4; }
+      summary { cursor: pointer; padding: 14px 26px; color: #557296; font-size: 13px; font-weight: 600; }
+      summary:hover { color: #274f81; }
+      .source { margin: 0; border-top: 1px solid #edf0f4; padding: 22px 26px; overflow: auto; background: #f9fbfd; color: #344255; line-height: 1.55; font-size: 12px; }
+      .error { color: #b42318; padding: 16px 30px; }
+      @media (max-width: 680px) { .page { padding: 26px 14px 50px; } .diagram-scroll { padding: 18px 12px 28px; } .card-head { padding: 18px; } }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <div class="eyebrow">Diagram review · 3 examples</div>
+        <h1>Lines in context</h1>
+        <p class="intro">Three everyday sequence diagrams to review the lighter borders, message lines, and arrowheads. Each diagram is shown at its natural size; scroll sideways if needed.</p>
+      </header>
+      <div class="examples">
+        <article id="checkout">
+          <div class="card-head"><div><h2>Checkout & payment</h2><p>A payment decision with nested authorization and an async receipt.</p></div><span class="number">01</span></div>
+          <div class="diagram-scroll"><div class="diagram"><pre class="zenuml"></pre></div></div>
+          <details><summary>View ZenUML source</summary><pre class="source"></pre></details>
+        </article>
+        <article id="login">
+          <div class="card-head"><div><h2>Login & MFA</h2><p>A cache lookup, secondary verification, and a session response.</p></div><span class="number">02</span></div>
+          <div class="diagram-scroll"><div class="diagram"><pre class="zenuml"></pre></div></div>
+          <details><summary>View ZenUML source</summary><pre class="source"></pre></details>
+        </article>
+        <article id="job">
+          <div class="card-head"><div><h2>Background job & retry</h2><p>A queued export with a retry loop and a completion callback.</p></div><span class="number">03</span></div>
+          <div class="diagram-scroll"><div class="diagram"><pre class="zenuml"></pre></div></div>
+          <details><summary>View ZenUML source</summary><pre class="source"></pre></details>
+        </article>
+      </div>
+    </main>
+    <script type="module">
+      import ZenUml from "/src/core.tsx";
+
+      const examples = {
+        checkout: `title Checkout & payment
+Shopper -> Store.placeOrder() {
+  Store -> Cart.total() {
+    return amount
+  }
+  Store -> Payment.authorize() {
+    Payment.verifyCard()
+    if (approved) {
+      return receipt
+    } else {
+      return declined
+    }
+  }
+  Store -> Mailer: send receipt
+  Mailer -> Shopper: email sent
+  return orderStatus
+}`,
+        login: `title Login & MFA
+Visitor -> Gateway.signIn() {
+  Gateway -> Cache.findSession() {
+    return cacheMiss
+  }
+  Gateway -> Identity.checkPassword() {
+    Identity.auditAttempt()
+    return accepted
+  }
+  if (MFA required) {
+    Gateway -> Phone: send code
+    Phone -> Visitor: show prompt
+    Visitor -> Gateway.verifyCode() {
+      return valid
+    }
+  }
+  Gateway -> Cache: save session
+  return session
+}`,
+        job: `title Background job & retry
+Client -> API.startExport() {
+  API -> Queue: enqueue export
+  return jobId
+}
+Queue -> Worker.runJob() {
+  loop (attempts remain) {
+    Worker -> Storage.fetchData() {
+      return records
+    }
+    Worker.prepareFile()
+    if (upload failed) {
+      Worker -> Queue: retry later
+    } else {
+      Worker -> Storage.saveFile() {
+        return fileUrl
+      }
+    }
+  }
+  Worker -> API: export ready
+  API -> Client: callback
+}`,
+      };
+
+      window.__strokeExamples = { ready: false, errors: [], codes: examples };
+      for (const [id, code] of Object.entries(examples)) {
+        const card = document.getElementById(id);
+        const pre = card.querySelector("pre.zenuml");
+        pre.textContent = code;
+        card.querySelector("pre.source").textContent = code;
+        try {
+          const renderer = new ZenUml(pre);
+          const parsed = await renderer.parse(code);
+          if (!parsed.pass) throw new Error(JSON.stringify(parsed.errorDetails));
+          await renderer.render(code, { theme: "theme-default" });
+        } catch (error) {
+          window.__strokeExamples.errors.push({ id, message: String(error) });
+          card.querySelector(".diagram-scroll").insertAdjacentHTML("beforeend", `<p class="error">Diagram could not render.</p>`);
+          console.error(`Failed to render ${id}`, error);
+        }
+      }
+      window.__strokeExamples.ready = true;
+    </script>
+  </body>
+</html>

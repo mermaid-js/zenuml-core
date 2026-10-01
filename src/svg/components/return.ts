@@ -16,12 +16,13 @@ export function renderReturn(r: ReturnGeometry): string {
     + (r.isReverse ? ARROW_PADDING_HALF : -ARROW_PADDING_HALF);
   // HTML CSS snaps the return line to integer CSS pixels. SVG may produce fractional
   // coordinates (e.g. 153.5). Floor to match HTML's integer-snapped line position.
-  const lineY = Math.floor(r.y);
+  const snappedY = Math.floor(r.y);
+  const lineY = snappedY + 0.5;
   // Label sits 3px above the line. Use lineY (floored integer) so that both integer
   // r.y (assignment returns) and half-pixel r.y (keyword returns) produce the same
   // integer labelY that matches HTML. Previously "-3.5 from r.y" caused a -0.5px
   // offset when r.y is an integer (assignment return case).
-  const labelY = lineY - 3;
+  const labelY = snappedY - 3;
 
   // Match HTML renderer's ArrowHead.tsx path: M1,1.25 L6.15,4.5 L1,7.75
   const arrowTipX = r.toX;
@@ -40,7 +41,7 @@ export function renderReturn(r: ReturnGeometry): string {
 
   return `<g class="return">
   <line x1="${r.fromX}" y1="${lineY}" x2="${r.toX}" y2="${lineY}" class="return-line"/>
-  <polyline points="${ax1},${ay1} ${arrowTipX},${lineY} ${ax1},${ay2}" fill="none" stroke-linecap="round" class="return-arrow"/>
+  <polyline points="${ax1},${ay1} ${arrowTipX},${lineY} ${ax1},${ay2}" transform="translate(${dir} 0)" fill="none" stroke-linecap="round" class="return-arrow"/>
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="return-label">${esc(resolveEmojiInText(r.label))}</text>
   ${numberSvg}
 </g>`;
@@ -70,4 +71,3 @@ function renderSelfReturn(r: ReturnGeometry): string {
   <text x="${labelX}" y="${labelY}" text-anchor="start" class="return-label">${esc(resolveEmojiInText(r.label))}</text>
 </g>`;
 }
-
