@@ -47,7 +47,7 @@ export const MessageView = ({
   return (
     <div
       className={cn(
-        "message leading-none border-b !border-transparent pb-px flex items-end relative",
+        "message text-[15px] leading-none border-b !border-transparent pb-px flex items-end relative",
         className,
       )}
       style={style}

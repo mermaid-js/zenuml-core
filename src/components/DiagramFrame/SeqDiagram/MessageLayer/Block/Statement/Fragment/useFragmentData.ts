@@ -2,13 +2,29 @@ import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext"
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { coordinatesAtom } from "@/store/Store";
-import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
-import { useEffect, useState } from "react";
+import {
+  coordinatesAtom,
+  enableNumberingAtom,
+  rootContextAtom,
+} from "@/store/Store";
+import {
+  fragmentHeaderLabel,
+  fragmentHeaderWidth,
+} from "@/positioning/FragmentHeaderWidth";
+import {
+  FRAGMENT_MIN_WIDTH,
+  FRAGMENT_PADDING_X,
+} from "@/positioning/Constants";
+import { useEffect, useMemo, useState } from "react";
+import { walkStatements } from "@/svg/walkStatements";
+import {
+  fragmentGuardKeyword,
+  fragmentGuardWidth,
+} from "@/positioning/FragmentGuardWidth";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import Anchor2 from "@/positioning/Anchor2";
 import { centerOf } from "../utils";
-import { createStore, useStore } from "jotai";
+import { createStore, useAtomValue, useStore } from "jotai";
 import type { AugmentedContext } from "@/parser/AntlrTypes";
 
 type Store = ReturnType<typeof createStore>;
@@ -64,8 +80,14 @@ const getOffsetX = (store: Store, context: any, origin: string) => {
   const originLayers = depthOnParticipant(context, origin);
 
   // Create anchors for both participants to calculate accurate distance
-  const anchor2Origin = new Anchor2(centerOf(coordinates, origin), originLayers);
-  const anchor2LeftParticipant = new Anchor2(centerOf(coordinates, leftParticipant), 0);
+  const anchor2Origin = new Anchor2(
+    centerOf(coordinates, origin),
+    originLayers,
+  );
+  const anchor2LeftParticipant = new Anchor2(
+    centerOf(coordinates, leftParticipant),
+    0,
+  );
 
   // Calculate the offset from the left participant to the origin, accounting for occurrence bar layers
   const distanceWithLayers =
@@ -75,8 +97,78 @@ const getOffsetX = (store: Store, context: any, origin: string) => {
     distanceWithLayers + getBorder(store, context).left + halfLeftParticipant
   );
 };
-export const useFragmentData = (context: any, origin: string) => {
+export const useFragmentData = (
+  context: any,
+  origin: string,
+  header?: { label: string; number?: string },
+) => {
   const store = useStore();
+  const enableNumbering = useAtomValue(enableNumberingAtom);
+  const headerLabel = header?.label;
+  const headerNumber = header?.number;
+  const headerMinWidth = useMemo(() => {
+    if (headerLabel == null) return FRAGMENT_MIN_WIDTH;
+    const infos = walkStatements(store.get(rootContextAtom)!);
+    const own = infos.find((info) => info.statNode === context);
+    let width = fragmentHeaderWidth(
+      headerLabel,
+      enableNumbering ? headerNumber : undefined,
+    );
+    if (own) {
+      if (own.fragmentLabel)
+        width = Math.max(
+          width,
+          fragmentGuardWidth(
+            own.fragmentLabel,
+            fragmentGuardKeyword(own.fragmentKind!, own.guardKeyword),
+          ),
+        );
+      for (const section of own.fragmentSections ?? []) {
+        if (section.guardKeyword)
+          width = Math.max(
+            width,
+            fragmentGuardWidth(section.condition ?? "", section.guardKeyword),
+          );
+      }
+      for (const info of infos) {
+        if (
+          info.kind !== "fragment" ||
+          !info.number?.startsWith(`${own.number}.`)
+        )
+          continue;
+        const number = headerNumber
+          ? headerNumber + info.number.slice(own.number!.length)
+          : undefined;
+        const inset = (info.depth - own.depth) * FRAGMENT_PADDING_X * 2;
+        width = Math.max(
+          width,
+          fragmentHeaderWidth(
+            fragmentHeaderLabel(info.fragmentKind!),
+            enableNumbering ? number : undefined,
+          ) + inset,
+        );
+        if (info.fragmentLabel)
+          width = Math.max(
+            width,
+            fragmentGuardWidth(
+              info.fragmentLabel,
+              fragmentGuardKeyword(info.fragmentKind!, info.guardKeyword),
+            ) + inset,
+          );
+        for (const section of info.fragmentSections ?? []) {
+          if (section.guardKeyword)
+            width = Math.max(
+              width,
+              fragmentGuardWidth(
+                section.condition ?? "",
+                section.guardKeyword,
+              ) + inset,
+            );
+        }
+      }
+    }
+    return Math.max(FRAGMENT_MIN_WIDTH, width);
+  }, [context, store, headerLabel, headerNumber, enableNumbering]);
   const [collapsed, setCollapsed] = useState(false);
   const toggleCollapse = () => {
     setCollapsed((prev) => !prev);
@@ -106,7 +198,7 @@ export const useFragmentData = (context: any, origin: string) => {
     // +1px for the border of the fragment
     transform: "translateX(" + (offsetX + 1) * -1 + "px)",
     width: TotalWidth(context, coordinates) + "px",
-    minWidth: FRAGMENT_MIN_WIDTH + "px",
+    minWidth: headerMinWidth + "px",
   };
 
   return {

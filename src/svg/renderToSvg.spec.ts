@@ -2,6 +2,47 @@ import { describe, it, expect } from "bun:test";
 import { renderToSvg } from "./renderToSvg";
 
 describe("renderToSvg", () => {
+  it.each(["for", "while", "loop", "foreach", "forEach"])("keeps the original %s loop keyword in the SVG guard", (keyword) => {
+    const result = renderToSvg(`${keyword}(pending) {\n A->B:work\n}`, { enableNumbering: false });
+    expect(result.svg).toContain(`class="guard-keyword">${keyword}</text>`);
+  });
+  it("renders if, else-if and else guard keywords without bracket decorations", () => {
+    const { svg } = renderToSvg("if(approved) {\n A->B:first\n} else if(retry) {\n A->B:second\n} else {\n B->A:third\n}");
+    expect(svg).toMatch(/class="guard-keyword">if<\/text>/);
+    expect(svg).toMatch(/class="guard-keyword">else if<\/text>/);
+    expect(svg).toMatch(/class="guard-keyword">else<\/text>/);
+    expect(svg).not.toContain("[else]");
+    expect(svg).not.toMatch(/>\[<\/text>|>\]<\/text>/);
+  });
+  it("gives message, return and self-call numbers compact backgrounds inside the exported frame", () => {
+    const result = renderToSvg("A->B.call() {\n B.prepare()\n B->C: dispatch\n return result\n}");
+    const numbers = [...result.svg.matchAll(/<text[^>]*class="seq-number"/g)];
+    const backgrounds = [...result.svg.matchAll(/<rect[^>]*class="message-number-bg"/g)];
+    expect(backgrounds.length).toBe(numbers.length);
+    expect(backgrounds.length).toBeGreaterThan(2);
+    for (const [background] of backgrounds) {
+      expect(background).toContain('height="16"');
+      expect(background).toContain('rx="2"');
+    }
+    const nested = renderToSvg("A->B.call() {\n".repeat(25) + "A->B: dispatch\n" + "}\n".repeat(25)).svg;
+    const contentX = Number(nested.match(/<g transform="translate\(([-\d.]+), 34\)"/)?.[1]);
+    const leftEdges = [...nested.matchAll(/<rect x="([-\d.]+)"[^>]*class="message-number-bg"/g)].map((match) => Number(match[1]) + contentX);
+    expect(leftEdges.length).toBeGreaterThan(20);
+    expect(Math.min(...leftEdges)).toBeGreaterThanOrEqual(10);
+    const disabled = renderToSvg("A->B.call() {\n".repeat(25) + "A->B: dispatch\n" + "}\n".repeat(25), { enableNumbering: false });
+    expect(disabled.svg).not.toMatch(/<text[^>]*class="seq-number"/);
+    expect(disabled.svg).not.toMatch(/<rect[^>]*class="(?:message|fragment)-number-bg"/);
+    expect(disabled.width).toBeLessThan(Number(nested.match(/<svg[^>]*width="([\d.]+)"/)?.[1]));
+    const mixedCode = "A.method() {\n loop (pending) {\n A.prepare()\n A->B: dispatch\n new C()\n return completed\n }\n}";
+    const enabledMixed = renderToSvg(mixedCode);
+    const disabledMixed = renderToSvg(mixedCode, { enableNumbering: false });
+    expect(enabledMixed.geometry?.fragments).toHaveLength(1);
+    expect(enabledMixed.geometry?.creations).toHaveLength(1);
+    expect(disabledMixed.svg).not.toMatch(/<(?:text|rect)[^>]*class="(?:seq-number|message-number-bg|fragment-number-bg)"/);
+    expect(disabledMixed.geometry?.fragments[0].number).toBeUndefined();
+    expect(disabledMixed.geometry?.creations[0].message.number).toBeUndefined();
+    expect(renderToSvg(mixedCode, { enableNumbering: true }).svg).toBe(enabledMixed.svg);
+  });
   it("returns empty SVG for empty input", () => {
     const result = renderToSvg("");
     expect(result.svg).toContain("<svg");
@@ -257,8 +298,8 @@ describe("renderToSvg", () => {
   it("renders alt fragment with condition label", () => {
     const result = renderToSvg("if(condition) {\n  A -> B: msg\n}");
     expect(result.svg).toContain('class="fragment fragment-alt"');
-    // Condition should appear as three positioned text nodes matching the HTML bracket + padded span model.
-    expect(result.svg).toContain('class="fragment-condition">[</text>');
+    // The keyword and condition share a baseline without bracket decoration.
+    expect(result.svg).toContain('class="guard-keyword">if</text>');
     expect(result.svg).toContain('class="fragment-condition" opacity="0.65">condition</text>');
   });
 

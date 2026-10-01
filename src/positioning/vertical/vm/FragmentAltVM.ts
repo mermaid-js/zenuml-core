@@ -1,6 +1,7 @@
 import type { StatementCoordinate } from "../StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
+import { FRAGMENT_GUARD_HEIGHT } from "../LayoutMetrics";
 
 export class FragmentAltVM extends StatementVM {
   readonly kind = "alt" as const;
@@ -22,7 +23,7 @@ export class FragmentAltVM extends StatementVM {
 
     const ifBlock = this.alt?.ifBlock?.();
     if (ifBlock) {
-      cursor += 20; // .text-skin-fragment > label
+      cursor += FRAGMENT_GUARD_HEIGHT;
       cursor = this.layoutBlock(
         ifBlock.braceBlock()?.block(),
         leftParticipant,
@@ -30,7 +31,7 @@ export class FragmentAltVM extends StatementVM {
       );
     }
     this.alt?.elseIfBlock?.()?.forEach((block: any) => {
-      cursor += 20; // .text-skin-fragment > label
+      cursor += FRAGMENT_GUARD_HEIGHT;
       cursor += 8; // .mt-2
       cursor += 1; // .segment.border-t.border-solid
       cursor = this.layoutBlock(
@@ -41,7 +42,7 @@ export class FragmentAltVM extends StatementVM {
     });
     const elseBlock = this.alt?.elseBlock?.()?.braceBlock?.()?.block?.();
     if (elseBlock) {
-      cursor += 20; // .text-skin-fragment > label
+      cursor += FRAGMENT_GUARD_HEIGHT;
       cursor += 8; // .mt-2
       cursor += 1; // .segment.border-t.border-solid
       cursor = this.layoutBlock(elseBlock, leftParticipant, cursor);

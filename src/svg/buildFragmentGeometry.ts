@@ -8,7 +8,10 @@ import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
-import { FRAGMENT_BORDER_WIDTH } from "@/positioning/vertical/LayoutMetrics";
+import {
+  FRAGMENT_BORDER_WIDTH,
+  FRAGMENT_GUARD_HEIGHT,
+} from "@/positioning/vertical/LayoutMetrics";
 import type { TextType } from "@/positioning/Coordinate";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
@@ -127,8 +130,10 @@ export function buildFragmentGeometry(
                 verticalCoordinates.getStatementCoordinate(firstStatKey);
               if (innerCoord) {
                 // Section separator is positioned above the first inner statement
-                // with label space (20px) and padding (8+8+1px border)
-                sectionY = innerCoord.top - 20 - 8 - 8 - 1;
+                // Alt guard rows use 28px; catch/finally keep their 20px labels.
+                const labelHeight =
+                  info.fragmentKind === "alt" ? FRAGMENT_GUARD_HEIGHT : 20;
+                sectionY = innerCoord.top - labelHeight - 8 - 8 - 1;
               }
             }
           }
@@ -142,19 +147,27 @@ export function buildFragmentGeometry(
 
       sections.push({
         label: section.label,
+        guardKeyword: section.guardKeyword,
         y: sectionY,
         height: sectionHeight,
         labelWidth: section.label
           ? measureSvgFragmentLabelWidth(resolveEmojiInText(section.label))
           : undefined,
-        innerLabel: /^\[\s*.*\s*\]$/.test(section.label)
-          ? section.label.slice(1, -1).trim()
-          : undefined,
-        innerLabelWidth: /^\[\s*.*\s*\]$/.test(section.label)
-          ? measureSvgFragmentLabelWidth(
-              resolveEmojiInText(section.label.slice(1, -1).trim()),
-            )
-          : undefined,
+        innerLabel:
+          section.condition ??
+          (/^\[\s*.*\s*\]$/.test(section.label)
+            ? section.label.slice(1, -1).trim()
+            : undefined),
+        innerLabelWidth:
+          section.condition !== undefined
+            ? measureSvgFragmentLabelWidth(
+                resolveEmojiInText(section.condition),
+              )
+            : /^\[\s*.*\s*\]$/.test(section.label)
+              ? measureSvgFragmentLabelWidth(
+                  resolveEmojiInText(section.label.slice(1, -1).trim()),
+                )
+              : undefined,
         keyword: (() => {
           const spaceIdx = section.label.indexOf(" ");
           if (
@@ -258,6 +271,7 @@ export function buildFragmentGeometry(
     fragment: {
       kind: info.fragmentKind!,
       label: info.fragmentLabel || "",
+      guardKeyword: info.guardKeyword,
       labelWidth: info.fragmentLabel
         ? measureSvgFragmentLabelWidth(resolveEmojiInText(info.fragmentLabel))
         : undefined,

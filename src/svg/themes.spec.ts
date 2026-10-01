@@ -13,32 +13,36 @@ const LEGACY_DEFAULT_STYLES = `
   .frame-border-inner { fill: #ffffff; }
   .frame-header-bg { fill: #ffffff; }
   .frame-header-line { stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
-  .frame-title { font-family: Helvetica, Verdana, serif; font-size: 16px; font-weight: 600; fill: #222; }
+  .frame-title { font-family: Helvetica, Verdana, serif; font-size: 14px; font-weight: 400; fill: #222; }
   .participant-box { fill: #ffffff; stroke: #666; stroke-width: 1; }
-  .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #222; }
+  .participant-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .participant-icon { color: #222; }
   .participant-icon [fill="currentColor"]:not([stroke]) { stroke: #666; stroke-width: 1; }
   .lifeline { stroke: #666; stroke-width: 1; }
   .message-line { stroke: #000; stroke-width: 1; shape-rendering: crispEdges; }
-  .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
+  .message-label { font-family: Helvetica, Verdana, serif; font-size: 15px; fill: #222; }
   .arrow-head { fill: #000; stroke: #000; stroke-width: 1; }
   .arrow-open { fill: none; }
   .occurrence { fill: #dedede; stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-border { fill: none; stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-header { fill: #dedede; fill-opacity: 0.498; stroke: none; shape-rendering: crispEdges; }
-  .fragment-label { font-family: Helvetica, Verdana, serif; font-size: 14px; font-weight: 600; fill: #000; }
+  .fragment-number-bg { fill: #000; fill-opacity: 0.08; stroke: none; }
+  .message-number-bg { fill: #6b7280; fill-opacity: 0.1; stroke: none; }
+  .fragment-label { font-family: Helvetica, Verdana, serif; font-size: 14px; font-weight: 400; font-variant-caps: all-small-caps; fill: #000; }
   .fragment-condition { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
   .fragment-separator { stroke: #e5e7eb; stroke-width: 1; shape-rendering: crispEdges; }
+  .fragment-section-keyword { font-variant-caps: all-small-caps; }
   .fragment-section-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
   .return-line { stroke: #000; stroke-width: 1; stroke-dasharray: 6,4; shape-rendering: crispEdges; }
   .return-arrow { stroke: #000; stroke-width: 1; fill: none; }
-  .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
+  .return-label { font-family: Helvetica, Verdana, serif; font-size: 15px; fill: #222; }
   .return-icon { fill: #222; }
   .divider-line { stroke: #aaaa33; stroke-width: 1; }
   .divider-bg { fill: #fff5ad; stroke: #aaaa33; stroke-width: 1; }
   .divider-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; }
   .comment-text { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; opacity: 0.5; }
-  .seq-number { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 100; fill: #6b7280; }
+  .guard-keyword { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 400; font-variant-caps: all-small-caps; fill: #6b7280; }
+  .seq-number { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 400; fill: #6b7280; }
   .group-outline { fill: none; stroke: #666; }
   .group-title-bg { fill: #ffffff; stroke: none; }
   .group-title-text { font-family: Helvetica, Verdana, serif; font-size: 13px; font-weight: 400; fill: #222; }

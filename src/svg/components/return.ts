@@ -1,6 +1,7 @@
 import type { ReturnGeometry } from "../geometry";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import { esc } from "./svgUtils";
+import { renderMessageNumber } from "./numbering";
 
 export function renderReturn(r: ReturnGeometry): string {
   if (r.isSelf) {
@@ -35,9 +36,7 @@ export function renderReturn(r: ReturnGeometry): string {
 
   // Sequence number: always to the left of the return
   const numberX = Math.min(r.fromX, r.toX) - 4;
-  const numberSvg = r.number
-    ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(r.number)}</text>`
-    : "";
+  const numberSvg = renderMessageNumber(r.number, numberX, labelY);
 
   return `<g class="return">
   <line x1="${r.fromX}" y1="${lineY}" x2="${r.toX}" y2="${lineY}" class="return-line"/>

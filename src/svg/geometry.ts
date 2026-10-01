@@ -103,6 +103,7 @@ export type FragmentKind =
 
 export interface FragmentSectionGeometry {
   label: string;
+  guardKeyword?: string;
   y: number; // top of this section (separator line y)
   height: number;
   /** Measured glyph width of the whole label at 14px message-content font */
@@ -126,6 +127,7 @@ export interface FragmentSectionGeometry {
 export interface FragmentGeometry {
   kind: FragmentKind;
   label: string;
+  guardKeyword?: string;
   /** Measured glyph width of the primary fragment condition label */
   labelWidth?: number;
   x: number;

@@ -58,8 +58,8 @@ export const SelfInvocation = (props: {
       ref={messageRef}
       className={
         isAsync
-          ? "message self flex items-start flex-col !border-none"
-          : "self-invocation message leading-none self flex items-start flex-col border-none"
+          ? "message text-[15px] self flex items-start flex-col !border-none"
+          : "self-invocation message text-[15px] leading-none self flex items-start flex-col border-none"
       }
       onClick={onClick}
       data-selected={isSelected ? "true" : "false"}

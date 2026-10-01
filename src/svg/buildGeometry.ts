@@ -8,6 +8,8 @@
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { FRAGMENT_PADDING_X } from "@/positioning/Constants";
+import { fragmentHeaderLabel, fragmentHeaderWidth } from "@/positioning/FragmentHeaderWidth";
+import { fragmentGuardKeyword, fragmentGuardWidth } from "@/positioning/FragmentGuardWidth";
 import { TextType } from "@/positioning/Coordinate";
 import { OrderedParticipants } from "@/parser/OrderedParticipants";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
@@ -25,6 +27,7 @@ export interface BuildGeometryInput {
   verticalCoordinates: VerticalCoordinates;
   title?: string;
   measureText?: (text: string, type: TextType) => number;
+  enableNumbering?: boolean;
 }
 
 export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
@@ -53,6 +56,19 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     measureText,
   );
   const { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments } = buildResult;
+  // Remove references before measuring header widths and export badge padding.
+  if (input.enableNumbering === false) {
+    const numberedItems = [
+      ...messages,
+      ...selfCalls,
+      ...fragments,
+      ...returns,
+      ...creations.map((creation) => creation.message),
+    ];
+    for (const numbered of numberedItems) {
+      numbered.number = undefined;
+    }
+  }
 
   // Compute diagram height from the positioning engine's totalHeight (primary) or
   // max rendered content Y (fallback). Returns need more bottom overhead than other elements
@@ -165,6 +181,22 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     if (currentRight >= targetRight - 20 && currentRight < targetRight) {
       f.width = targetRight - f.x;
     }
+  }
+
+  // Size titles after spatial nesting is established, then keep their enclosing
+  // fragments and the exported viewBox large enough for the complete header.
+  for (const inner of [...fragments].sort((a, b) => a.height - b.height)) {
+    inner.width = Math.max(inner.width, fragmentHeaderWidth(fragmentHeaderLabel(inner.kind), inner.number));
+    if (inner.label) inner.width = Math.max(inner.width, fragmentGuardWidth(inner.label, fragmentGuardKeyword(inner.kind, inner.guardKeyword)));
+    for (const section of inner.sections) {
+      if (section.guardKeyword) inner.width = Math.max(inner.width, fragmentGuardWidth(section.innerLabel ?? "", section.guardKeyword));
+    }
+    for (const outer of fragments) {
+      if (outer.y < inner.y && outer.y + outer.height >= inner.y + inner.height && outer.x <= inner.x) {
+        outer.width = Math.max(outer.width, inner.x + inner.width + FRAGMENT_PADDING_X - outer.x);
+      }
+    }
+    diagramWidth = Math.max(diagramWidth, inner.x + inner.width - frameBorder.right);
   }
 
   // Build group geometry from participants that share a groupId
