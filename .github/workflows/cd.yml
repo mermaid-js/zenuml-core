@@ -185,10 +185,9 @@ jobs:
           command: deploy --env staging
 
       - name: Comment on PR with Staging URL
-        if: github.event_name == 'pull_request' && github.ref != 'refs/heads/main'
+        if: github.event_name == 'pull_request' && github.ref != 'refs/heads/main' && steps.deploy_staging.outputs.deployment-url != ''
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            🚀 Staging deployment available at: https://zenuml-web-renderer-staging.${{ vars.CLOUDFLARE_ACCOUNT_ID }}.workers.dev
-            (Note: The subdomain part might vary based on Cloudflare configuration.)
+            🚀 Staging deployment available at: ${{ steps.deploy_staging.outputs.deployment-url }}
