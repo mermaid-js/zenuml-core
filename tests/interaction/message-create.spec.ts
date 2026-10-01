@@ -3,7 +3,7 @@ import { test, expect } from "../fixtures";
 test.describe("Message Create (Gap Handles)", () => {
   test("shows drag handles on gap hover", async ({ page }) => {
     await page.goto("/e2e/fixtures/create-message.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram")).toBeVisible({
       timeout: 5000,
     });
 
@@ -23,7 +23,7 @@ test.describe("Message Create (Gap Handles)", () => {
     page,
   }) => {
     await page.goto("/e2e/fixtures/create-message.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram")).toBeVisible({
       timeout: 5000,
     });
 
@@ -67,7 +67,7 @@ test.describe("Message Create (Gap Handles)", () => {
     page,
   }) => {
     await page.goto("/e2e/fixtures/create-message.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram")).toBeVisible({
       timeout: 5000,
     });
 
@@ -112,7 +112,7 @@ test.describe("Message Create (Gap Handles)", () => {
 
   test("Escape key cancels drag without creating message", async ({ page }) => {
     await page.goto("/e2e/fixtures/create-message.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram")).toBeVisible({
       timeout: 5000,
     });
 
@@ -157,7 +157,7 @@ test.describe("Message Create (Gap Handles)", () => {
     page,
   }) => {
     await page.goto("/e2e/fixtures/create-message.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram")).toBeVisible({
       timeout: 5000,
     });
 

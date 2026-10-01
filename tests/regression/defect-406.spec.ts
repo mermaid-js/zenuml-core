@@ -13,7 +13,7 @@ test.describe("Defect 406", () => {
       timeout: 5000,
     });
     // This line is to make sure the privacy icon is loaded
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram")).toBeVisible({
       timeout: 5000,
     });
     await expect(page).toHaveScreenshot({

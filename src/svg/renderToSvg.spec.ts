@@ -2,12 +2,19 @@ import { describe, it, expect } from "bun:test";
 import { renderToSvg } from "./renderToSvg";
 
 describe("renderToSvg", () => {
-  it.each(["for", "while", "loop", "foreach", "forEach"])("keeps the original %s loop keyword in the SVG guard", (keyword) => {
-    const result = renderToSvg(`${keyword}(pending) {\n A->B:work\n}`, { enableNumbering: false });
-    expect(result.svg).toContain(`class="guard-keyword">${keyword}</text>`);
-  });
+  it.each(["for", "while", "loop", "foreach", "forEach"])(
+    "keeps the original %s loop keyword in the SVG guard",
+    (keyword) => {
+      const result = renderToSvg(`${keyword}(pending) {\n A->B:work\n}`, {
+        enableNumbering: false,
+      });
+      expect(result.svg).toContain(`class="guard-keyword">${keyword}</text>`);
+    },
+  );
   it("renders if, else-if and else guard keywords without bracket decorations", () => {
-    const { svg } = renderToSvg("if(approved) {\n A->B:first\n} else if(retry) {\n A->B:second\n} else {\n B->A:third\n}");
+    const { svg } = renderToSvg(
+      "if(approved) {\n A->B:first\n} else if(retry) {\n A->B:second\n} else {\n B->A:third\n}",
+    );
     expect(svg).toMatch(/class="guard-keyword">if<\/text>/);
     expect(svg).toMatch(/class="guard-keyword">else if<\/text>/);
     expect(svg).toMatch(/class="guard-keyword">else<\/text>/);
@@ -15,33 +22,55 @@ describe("renderToSvg", () => {
     expect(svg).not.toMatch(/>\[<\/text>|>\]<\/text>/);
   });
   it("gives message, return and self-call numbers compact backgrounds inside the exported frame", () => {
-    const result = renderToSvg("A->B.call() {\n B.prepare()\n B->C: dispatch\n return result\n}");
+    const result = renderToSvg(
+      "A->B.call() {\n B.prepare()\n B->C: dispatch\n return result\n}",
+    );
     const numbers = [...result.svg.matchAll(/<text[^>]*class="seq-number"/g)];
-    const backgrounds = [...result.svg.matchAll(/<rect[^>]*class="message-number-bg"/g)];
+    const backgrounds = [
+      ...result.svg.matchAll(/<rect[^>]*class="message-number-bg"/g),
+    ];
     expect(backgrounds.length).toBe(numbers.length);
     expect(backgrounds.length).toBeGreaterThan(2);
     for (const [background] of backgrounds) {
       expect(background).toContain('height="16"');
       expect(background).toContain('rx="2"');
     }
-    const nested = renderToSvg("A->B.call() {\n".repeat(25) + "A->B: dispatch\n" + "}\n".repeat(25)).svg;
-    const contentX = Number(nested.match(/<g transform="translate\(([-\d.]+), 34\)"/)?.[1]);
-    const leftEdges = [...nested.matchAll(/<rect x="([-\d.]+)"[^>]*class="message-number-bg"/g)].map((match) => Number(match[1]) + contentX);
+    const nested = renderToSvg(
+      "A->B.call() {\n".repeat(25) + "A->B: dispatch\n" + "}\n".repeat(25),
+    ).svg;
+    const contentX = Number(
+      nested.match(/<g transform="translate\(([-\d.]+), 34\)"/)?.[1],
+    );
+    const leftEdges = [
+      ...nested.matchAll(/<rect x="([-\d.]+)"[^>]*class="message-number-bg"/g),
+    ].map((match) => Number(match[1]) + contentX);
     expect(leftEdges.length).toBeGreaterThan(20);
     expect(Math.min(...leftEdges)).toBeGreaterThanOrEqual(10);
-    const disabled = renderToSvg("A->B.call() {\n".repeat(25) + "A->B: dispatch\n" + "}\n".repeat(25), { enableNumbering: false });
+    const disabled = renderToSvg(
+      "A->B.call() {\n".repeat(25) + "A->B: dispatch\n" + "}\n".repeat(25),
+      { enableNumbering: false },
+    );
     expect(disabled.svg).not.toMatch(/<text[^>]*class="seq-number"/);
-    expect(disabled.svg).not.toMatch(/<rect[^>]*class="(?:message|fragment)-number-bg"/);
-    expect(disabled.width).toBeLessThan(Number(nested.match(/<svg[^>]*width="([\d.]+)"/)?.[1]));
-    const mixedCode = "A.method() {\n loop (pending) {\n A.prepare()\n A->B: dispatch\n new C()\n return completed\n }\n}";
+    expect(disabled.svg).not.toMatch(
+      /<rect[^>]*class="(?:message|fragment)-number-bg"/,
+    );
+    expect(disabled.width).toBeLessThan(
+      Number(nested.match(/<svg[^>]*width="([\d.]+)"/)?.[1]),
+    );
+    const mixedCode =
+      "A.method() {\n loop (pending) {\n A.prepare()\n A->B: dispatch\n new C()\n return completed\n }\n}";
     const enabledMixed = renderToSvg(mixedCode);
     const disabledMixed = renderToSvg(mixedCode, { enableNumbering: false });
     expect(enabledMixed.geometry?.fragments).toHaveLength(1);
     expect(enabledMixed.geometry?.creations).toHaveLength(1);
-    expect(disabledMixed.svg).not.toMatch(/<(?:text|rect)[^>]*class="(?:seq-number|message-number-bg|fragment-number-bg)"/);
+    expect(disabledMixed.svg).not.toMatch(
+      /<(?:text|rect)[^>]*class="(?:seq-number|message-number-bg|fragment-number-bg)"/,
+    );
     expect(disabledMixed.geometry?.fragments[0].number).toBeUndefined();
     expect(disabledMixed.geometry?.creations[0].message.number).toBeUndefined();
-    expect(renderToSvg(mixedCode, { enableNumbering: true }).svg).toBe(enabledMixed.svg);
+    expect(renderToSvg(mixedCode, { enableNumbering: true }).svg).toBe(
+      enabledMixed.svg,
+    );
   });
   it("returns empty SVG for empty input", () => {
     const result = renderToSvg("");
@@ -82,7 +111,8 @@ describe("renderToSvg", () => {
   });
 
   it("viewBox width accommodates long message labels near right edge", () => {
-    const longLabel = "thisIsAVeryLongMethodNameThatExtendsWayBeyondTheParticipant";
+    const longLabel =
+      "thisIsAVeryLongMethodNameThatExtendsWayBeyondTheParticipant";
     const result = renderToSvg(`A -> B: ${longLabel}`);
     const widthMatch = result.svg.match(/width="([\d.]+)"/);
     expect(widthMatch).not.toBeNull();
@@ -109,33 +139,62 @@ describe("renderToSvg", () => {
 
   it("uses 1px strokes for message lines, arrowheads, and occurrence borders", () => {
     const result = renderToSvg("A.method() {\n  B.reply()\n}");
-    expect(result.svg).toContain(".message-line { stroke: #000; stroke-width: 1;");
-    expect(result.svg).toContain(".arrow-head { fill: #000; stroke: #000; stroke-width: 1;");
-    expect(result.svg).toContain(".occurrence { fill: #dedede; stroke: #666; stroke-width: 1;");
+    expect(result.svg).toContain(
+      ".message-line { stroke: #000; stroke-width: 1;",
+    );
+    expect(result.svg).toContain(
+      ".arrow-head { fill: #000; stroke: #000; stroke-width: 1;",
+    );
+    expect(result.svg).toContain(
+      ".occurrence { fill: #dedede; stroke: #666; stroke-width: 1;",
+    );
     expect(result.svg).toMatch(/class="occurrence"/);
-    expect(result.svg).toMatch(/<path d="M1 1\.25 L6\.15 4\.5 L1 7\.75 Z"[^>]*stroke-width="1"/);
+    expect(result.svg).toMatch(
+      /<path d="M1 1\.25 L6\.15 4\.5 L1 7\.75 Z"[^>]*stroke-width="1"/,
+    );
   });
 
   it("aligns 1px message and return strokes to the same pixel-centered baseline", () => {
     const message = renderToSvg("A->B: ping").svg;
-    const messageY = Number(message.match(/<line[^>]*y1="([\d.]+)"[^>]*class="message-line"/)?.[1]);
-    const headY = Number(message.match(/<svg[^>]*y="([\d.]+)"[^>]*class="arrow-head/)?.[1]);
+    const messageY = Number(
+      message.match(/<line[^>]*y1="([\d.]+)"[^>]*class="message-line"/)?.[1],
+    );
+    const headY = Number(
+      message.match(/<svg[^>]*y="([\d.]+)"[^>]*class="arrow-head/)?.[1],
+    );
     expect(messageY % 1).toBe(0.5);
     expect(messageY).toBe(headY + 5.5);
 
     const returned = renderToSvg("A.method() {\n  return x\n}").svg;
-    const returnY = Number(returned.match(/<line[^>]*y1="([\d.]+)"[^>]*class="return-line"/)?.[1]);
-    const returnTipY = Number(returned.match(/<polyline[^>]*points="[\d.]+,[\d.]+ [\d.]+,([\d.]+) [^"]+"[^>]*class="return-arrow"/)?.[1]);
+    const returnY = Number(
+      returned.match(/<line[^>]*y1="([\d.]+)"[^>]*class="return-line"/)?.[1],
+    );
+    const returnTipY = Number(
+      returned.match(
+        /<polyline[^>]*points="[\d.]+,[\d.]+ [\d.]+,([\d.]+) [^"]+"[^>]*class="return-arrow"/,
+      )?.[1],
+    );
     expect(returnY % 1).toBe(0.5);
     expect(returnY).toBe(returnTipY);
   });
 
   it("extends exported arrow tips 1px past their shaft endpoints", () => {
-    for (const [code, rtl] of [["A\nB\nA->B: ping", false], ["A\nB\nB->A: pong", true]] as const) {
+    for (const [code, rtl] of [
+      ["A\nB\nA->B: ping", false],
+      ["A\nB\nB->A: pong", true],
+    ] as const) {
       const svg = renderToSvg(code).svg;
-      const endpoint = Number(svg.match(/<line[^>]*x2="([\d.]+)"[^>]*class="message-line"/)?.[1]);
-      const arrowX = Number(svg.match(/<svg x="([\d.]+)"[^>]*class="arrow-head/)?.[1]);
-      const offset = Number(svg.match(/<path[^>]*transform="translate\(([\d.]+) 0\.5\)"[^>]*stroke-width="1"/)?.[1]);
+      const endpoint = Number(
+        svg.match(/<line[^>]*x2="([\d.]+)"[^>]*class="message-line"/)?.[1],
+      );
+      const arrowX = Number(
+        svg.match(/<svg x="([\d.]+)"[^>]*class="arrow-head/)?.[1],
+      );
+      const offset = Number(
+        svg.match(
+          /<path[^>]*transform="translate\(([\d.]+) 0\.5\)"[^>]*stroke-width="1"/,
+        )?.[1],
+      );
       const tip = arrowX + (rtl ? 0.85 - offset : 6.15 + offset);
       expect(tip - endpoint).toBeCloseTo(rtl ? -0.15 : 0.15, 2);
     }
@@ -202,7 +261,7 @@ describe("renderToSvg", () => {
 
   it("renders messages in all try/catch/finally branches", () => {
     const result = renderToSvg(
-      "try {\n  A.tryOp()\n} catch(e) {\n  B.catchOp()\n} finally {\n  C.finallyOp()\n}"
+      "try {\n  A.tryOp()\n} catch(e) {\n  B.catchOp()\n} finally {\n  C.finallyOp()\n}",
     );
     expect(result.svg).toContain("tryOp");
     expect(result.svg).toContain("catchOp");
@@ -221,8 +280,12 @@ describe("renderToSvg", () => {
   it("does not render starter at bottom of diagram", () => {
     const result = renderToSvg("A.method()");
     // Starter should not appear in bottom participants
-    const bottomGroups = [...result.svg.matchAll(/class="participant participant-bottom"[^>]*data-participant="([^"]+)"/g)];
-    const starterAtBottom = bottomGroups.some(m => m[1] === "_STARTER_");
+    const bottomGroups = [
+      ...result.svg.matchAll(
+        /class="participant participant-bottom"[^>]*data-participant="([^"]+)"/g,
+      ),
+    ];
+    const starterAtBottom = bottomGroups.some((m) => m[1] === "_STARTER_");
     expect(starterAtBottom).toBe(false);
   });
 
@@ -247,16 +310,23 @@ describe("renderToSvg", () => {
       ].join("\n"),
     );
 
-    expect(result.svg).toContain("GET https://${account.namespace}/authorize/?");
+    expect(result.svg).toContain(
+      "GET https://${account.namespace}/authorize/?",
+    );
     expect(result.svg).toContain("response_type=token");
     expect(result.svg).not.toContain("```");
-    expect((result.svg.match(/<tspan x="[^"]+"(?: y="[^"]+"| dy="20")>/g) || []).length).toBeGreaterThan(1);
+    expect(
+      (result.svg.match(/<tspan x="[^"]+"(?: y="[^"]+"| dy="20")>/g) || [])
+        .length,
+    ).toBeGreaterThan(1);
   });
 
   // --- Fragment tests ---
 
   it("renders if/else fragment with border and header", () => {
-    const result = renderToSvg("if(x > 0) {\n  A -> B: positive\n} else {\n  A -> B: negative\n}");
+    const result = renderToSvg(
+      "if(x > 0) {\n  A -> B: positive\n} else {\n  A -> B: negative\n}",
+    );
     expect(result.svg).toContain('class="fragment fragment-alt"');
     expect(result.svg).toContain('class="fragment-border"');
     expect(result.svg).toContain('class="fragment-header"');
@@ -281,7 +351,7 @@ describe("renderToSvg", () => {
 
   it("renders try/catch/finally fragment with sections", () => {
     const result = renderToSvg(
-      "try {\n  A.tryOp()\n} catch(e) {\n  B.catchOp()\n} finally {\n  C.finallyOp()\n}"
+      "try {\n  A.tryOp()\n} catch(e) {\n  B.catchOp()\n} finally {\n  C.finallyOp()\n}",
     );
     expect(result.svg).toContain('class="fragment fragment-tcf"');
     expect(result.svg).toContain(">Try</text>");
@@ -300,13 +370,17 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain('class="fragment fragment-alt"');
     // The keyword and condition share a baseline without bracket decoration.
     expect(result.svg).toContain('class="guard-keyword">if</text>');
-    expect(result.svg).toContain('class="fragment-condition" opacity="0.65">condition</text>');
+    expect(result.svg).toContain(
+      'class="fragment-condition" opacity="0.65">condition</text>',
+    );
   });
 
   it("fragment has valid rect geometry", () => {
     const result = renderToSvg("if(x) {\n  A -> B: msg\n}");
     // Fragment border rect should have positive dimensions
-    const rectMatch = result.svg.match(/<rect[^>]*class="fragment-border"[^>]*/);
+    const rectMatch = result.svg.match(
+      /<rect[^>]*class="fragment-border"[^>]*/,
+    );
     expect(rectMatch).not.toBeNull();
     // Width and height are before class in the element
     const fullRect = rectMatch![0];
@@ -373,11 +447,15 @@ describe("renderToSvg", () => {
   });
 
   it("does not render assignment return for self-call", () => {
-    const result = renderToSvg("A.m1() {\n  ret0 = A.m2() {\n    B.inner()\n  }\n}");
+    const result = renderToSvg(
+      "A.m1() {\n  ret0 = A.m2() {\n    B.inner()\n  }\n}",
+    );
     // Self-call assignment should NOT generate a return arrow
     // (only the inner B.inner() occurrence matters)
-    const returnLabels = [...result.svg.matchAll(/class="return-label"[^>]*>([^<]*)</g)];
-    const hasRet0Return = returnLabels.some(m => m[1] === "ret0");
+    const returnLabels = [
+      ...result.svg.matchAll(/class="return-label"[^>]*>([^<]*)</g),
+    ];
+    const hasRet0Return = returnLabels.some((m) => m[1] === "ret0");
     expect(hasRet0Return).toBe(false);
   });
 
@@ -397,7 +475,7 @@ describe("renderToSvg", () => {
     // Guillemets are rendered as separate tspan elements with dx spacing
     expect(result.svg).toContain("<tspan>«</tspan>");
     expect(result.svg).toContain("1,2,3,4");
-    expect(result.svg).toContain("<tspan dx=\"4\">»</tspan>");
+    expect(result.svg).toContain('<tspan dx="4">»</tspan>');
     // B should exist as a participant but positioned inline (not at top)
     expect(result.svg).toContain('data-participant="B"');
   });
@@ -419,7 +497,9 @@ describe("renderToSvg", () => {
   });
 
   it("renders creation inside fragment without crash", () => {
-    const result = renderToSvg("title Title 1\nA.m1 {\n  new B(1,2,3,4) {\n    if(x) {\n      C.m2\n    }\n  }\n}");
+    const result = renderToSvg(
+      "title Title 1\nA.m1 {\n  new B(1,2,3,4) {\n    if(x) {\n      C.m2\n    }\n  }\n}",
+    );
     expect(result.svg).toContain('class="creation"');
     expect(result.svg).toContain('class="fragment');
     expect(result.svg).toContain("m2");
@@ -448,10 +528,14 @@ describe("renderToSvg", () => {
   });
 
   it("renders stereotype label on participant", () => {
-    const result = renderToSvg('@EC2 <<BFF>> OrderService\nOrderService.method()');
+    const result = renderToSvg(
+      "@EC2 <<BFF>> OrderService\nOrderService.method()",
+    );
     expect(result.innerSvg).toContain("«BFF»");
     expect(result.innerSvg).toContain('data-participant="OrderService"');
-    expect(result.innerSvg).toMatch(/class="participant-icon" transform="translate\([^)]+\) scale/);
+    expect(result.innerSvg).toMatch(
+      /class="participant-icon" transform="translate\([^)]+\) scale/,
+    );
   });
 
   it("renders participant without icon when type is unknown", () => {
@@ -463,18 +547,23 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain('data-participant="B"');
     // UnknownType participants should not have icons, only _STARTER_ (actor) has one
     // Count icon transforms - should only be 1 (for _STARTER_)
-    const iconTransforms = result.svg.match(/transform="translate\([^)]+\) scale/g);
+    const iconTransforms = result.svg.match(
+      /transform="translate\([^)]+\) scale/g,
+    );
     expect(iconTransforms?.length).toBe(1); // Only _STARTER_ actor icon
   });
 
   it("renders participant with background color", () => {
-    const result = renderToSvg("@Boundary OrderController #0747A6\nOrderController.method()");
+    const result = renderToSvg(
+      "@Boundary OrderController #0747A6\nOrderController.method()",
+    );
     expect(result.innerSvg).toContain('style="fill:#0747A6;"');
     expect(result.innerSvg).toContain('class="participant-label"');
   });
 
   it("renders participant group container", () => {
-    const code = 'group BusinessService {\n  @Actor Client\n  @Boundary OrderController\n}\nClient->OrderController: post';
+    const code =
+      "group BusinessService {\n  @Actor Client\n  @Boundary OrderController\n}\nClient->OrderController: post";
     const result = renderToSvg(code);
     expect(result.innerSvg).toContain("BusinessService");
     // Group should have a dashed outline
@@ -490,7 +579,9 @@ describe("renderToSvg", () => {
 
     expect(result.svg).toContain('data-participant="PurchaseService"');
     expect(result.svg).toContain('data-participant="InvoiceService"');
-    const iconTransforms = result.svg.match(/class="participant-icon" transform="translate\([^)]+\) scale/g);
+    const iconTransforms = result.svg.match(
+      /class="participant-icon" transform="translate\([^)]+\) scale/g,
+    );
     expect(iconTransforms?.length).toBe(2);
   });
 });

@@ -101,15 +101,34 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
   // Deep sequence references can be wider than their source participant's
   // left margin. Keep their full badge inside the exported frame.
   let numberLeft = 0;
-  for (const message of [...g.messages, ...g.creations.map((creation) => creation.message)]) {
+  for (const message of [
+    ...g.messages,
+    ...g.creations.map((creation) => creation.message),
+  ]) {
     if (!message.number) continue;
-    numberLeft = Math.min(numberLeft, Math.min(message.fromX, message.toX) + 1 - 4 - messageNumberWidth(message.number));
+    numberLeft = Math.min(
+      numberLeft,
+      Math.min(message.fromX, message.toX) +
+        1 -
+        4 -
+        messageNumberWidth(message.number),
+    );
   }
   for (const call of g.selfCalls) {
-    if (call.number) numberLeft = Math.min(numberLeft, call.x - 3 - messageNumberWidth(call.number));
+    if (call.number)
+      numberLeft = Math.min(
+        numberLeft,
+        call.x - 3 - messageNumberWidth(call.number),
+      );
   }
   for (const returned of g.returns) {
-    if (returned.number && !returned.isSelf) numberLeft = Math.min(numberLeft, Math.min(returned.fromX, returned.toX) - 4 - messageNumberWidth(returned.number));
+    if (returned.number && !returned.isSelf)
+      numberLeft = Math.min(
+        numberLeft,
+        Math.min(returned.fromX, returned.toX) -
+          4 -
+          messageNumberWidth(returned.number),
+      );
   }
   contentLeftMargin += Math.max(0, padding - contentLeftMargin - numberLeft);
   const viewWidth =

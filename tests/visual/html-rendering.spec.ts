@@ -7,7 +7,7 @@ test.describe("HTML Rendering", () => {
       await page.goto(`/e2e/fixtures/fixture.html?case=${name}`);
 
       // Wait for diagram to render
-      await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      await expect(page.locator(".sequence-diagram")).toBeVisible({
         timeout: 5000,
       });
 

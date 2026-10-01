@@ -95,7 +95,14 @@ export function renderFragment(f: FragmentGeometry): string {
       // Both catch and finally have a semi-transparent white background (bg-skin-frame opacity-65)
       if (section.label) {
         if (f.kind === "alt") {
-          parts.push(renderGuardRow(f.x + 1, lineY + 1, section.innerLabel ?? "", section.guardKeyword));
+          parts.push(
+            renderGuardRow(
+              f.x + 1,
+              lineY + 1,
+              section.innerLabel ?? "",
+              section.guardKeyword,
+            ),
+          );
           continue;
         }
         const labelY = lineY + 16;
@@ -103,13 +110,7 @@ export function renderFragment(f: FragmentGeometry): string {
         const isBracketed = !!section.innerLabel && section.label !== "[else]";
         if (isBracketed) {
           const labelX = f.x + 1;
-          parts.push(
-              renderGuardRow(
-              labelX,
-              lineY + 1,
-              section.innerLabel!,
-            ),
-          );
+          parts.push(renderGuardRow(labelX, lineY + 1, section.innerLabel!));
           continue;
         }
         // Split "catch error" → ["catch", "error"], "else [cond]" → ["else", "[cond]"], "finally" → ["finally"]
@@ -119,7 +120,11 @@ export function renderFragment(f: FragmentGeometry): string {
             section.keyword || section.label.substring(0, spaceIdx);
           const condition =
             section.detail || section.label.substring(spaceIdx + 1);
-          const keywordWidth = measureTextWithFont(keyword, "14px", "all-small-caps");
+          const keywordWidth = measureTextWithFont(
+            keyword,
+            "14px",
+            "all-small-caps",
+          );
           const keywordX = f.x + 5;
           const conditionX = keywordX + keywordWidth + TEXT_PAD_X * 2;
           // Group with opacity 0.65 matches HTML parent opacity (affects both bg and text together)
@@ -144,7 +149,10 @@ export function renderFragment(f: FragmentGeometry): string {
             continue;
           }
           const bgWidth =
-            (isFinally ? measureTextWithFont(section.label, "14px", "all-small-caps") : section.labelWidth ?? section.label.length * 7) + TEXT_PAD_X * 2;
+            (isFinally
+              ? measureTextWithFont(section.label, "14px", "all-small-caps")
+              : (section.labelWidth ?? section.label.length * 7)) +
+            TEXT_PAD_X * 2;
           const bgY = lineY + 1;
           const bgHeight = 20;
           parts.push(
@@ -169,11 +177,17 @@ function renderGuardRow(
 ): string {
   const baseline = rowY + 19;
   const textX = x + 4;
-  const conditionX = textX + (keyword ? measureTextWithFont(keyword, "12px", "all-small-caps") + 4 : 0);
+  const conditionX =
+    textX +
+    (keyword ? measureTextWithFont(keyword, "12px", "all-small-caps") + 4 : 0);
   return (
     `<g class="guard-row">` +
-    (keyword ? `<text x="${textX}" y="${baseline}" class="guard-keyword">${esc(keyword)}</text>` : "") +
-    (innerText ? `<text x="${conditionX}" y="${baseline}" class="fragment-condition" opacity="0.65">${esc(resolveEmojiInText(innerText))}</text>` : "") +
+    (keyword
+      ? `<text x="${textX}" y="${baseline}" class="guard-keyword">${esc(keyword)}</text>`
+      : "") +
+    (innerText
+      ? `<text x="${conditionX}" y="${baseline}" class="fragment-condition" opacity="0.65">${esc(resolveEmojiInText(innerText))}</text>`
+      : "") +
     `</g>`
   );
 }

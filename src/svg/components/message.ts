@@ -69,8 +69,8 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   const arrowTx = isAsync ? 0 : 7;
   const arrowFill = isAsync ? "none" : "#000";
   const arrowPath = isAsync
-    ? 'M1 1.25 L6.15 4.5 L1 7.75'
-    : 'M1 1.25 L6.15 4.5 L1 7.75 Z';
+    ? "M1 1.25 L6.15 4.5 L1 7.75"
+    : "M1 1.25 L6.15 4.5 L1 7.75 Z";
 
   return `<g class="message self-call">
   <svg x="${svgX}" y="${svgY}" width="30" height="24">
@@ -114,7 +114,9 @@ function renderArrowHead(
   // 0.85px too far outward on both LTR and RTL arrows.
   const svgX = pointsLeft ? tipX : tipX - 7;
   const svgY = tipY - 5;
-  const rtlTransform = pointsLeft ? ' transform="scale(-1, 1) translate(-7, 0)"' : "";
+  const rtlTransform = pointsLeft
+    ? ' transform="scale(-1, 1) translate(-7, 0)"'
+    : "";
 
   return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9" overflow="visible" class="arrow-head${isFilled ? "" : " arrow-open"}">
     <g${rtlTransform}>

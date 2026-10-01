@@ -13,8 +13,10 @@ export function renderReturn(r: ReturnGeometry): string {
   // arrow-tip side (for the arrowhead SVG). This shifts text center 3.5px away
   // from the tip. SVG has no such padding, so offset the label accordingly.
   const ARROW_PADDING_HALF = 3.5;
-  const labelX = minX + Math.abs(r.toX - r.fromX) / 2
-    + (r.isReverse ? ARROW_PADDING_HALF : -ARROW_PADDING_HALF);
+  const labelX =
+    minX +
+    Math.abs(r.toX - r.fromX) / 2 +
+    (r.isReverse ? ARROW_PADDING_HALF : -ARROW_PADDING_HALF);
   // HTML CSS snaps the return line to integer CSS pixels. SVG may produce fractional
   // coordinates (e.g. 153.5). Floor to match HTML's integer-snapped line position.
   const snappedY = Math.floor(r.y);

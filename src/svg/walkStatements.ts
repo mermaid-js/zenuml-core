@@ -320,7 +320,8 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
       sections.push({
         label: "Alt",
         guardKeyword: "if",
-        condition: ifBlock.parExpr?.()?.condition?.()?.getFormattedText?.() || "",
+        condition:
+          ifBlock.parExpr?.()?.condition?.()?.getFormattedText?.() || "",
         blockNode: ifBlock.braceBlock?.()?.block?.(),
       });
     }

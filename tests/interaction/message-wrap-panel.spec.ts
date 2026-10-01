@@ -3,7 +3,7 @@ import { test, expect } from "../fixtures";
 test.describe("Message Wrap Panel", () => {
   test("wraps an async message with alt and focuses the condition", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram")).toBeVisible({
       timeout: 5000,
     });
 
@@ -31,7 +31,7 @@ test.describe("Message Wrap Panel", () => {
 
   test("wraps an async message with loop and focuses the condition", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram")).toBeVisible({
       timeout: 5000,
     });
 
@@ -58,7 +58,7 @@ test.describe("Message Wrap Panel", () => {
 
   test("wraps an async message with opt and focuses the condition", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram")).toBeVisible({
       timeout: 5000,
     });
 
@@ -85,7 +85,7 @@ test.describe("Message Wrap Panel", () => {
 
   test("wraps an async message with par and focuses the condition", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram")).toBeVisible({
       timeout: 5000,
     });
 
