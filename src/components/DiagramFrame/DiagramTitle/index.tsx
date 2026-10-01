@@ -1,6 +1,11 @@
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import { EditableSpan } from "@/components/common/EditableSpan";
-import { codeAtom, modeAtom, onContentChangeAtom, RenderMode } from "@/store/Store";
+import {
+  codeAtom,
+  modeAtom,
+  onContentChangeAtom,
+  RenderMode,
+} from "@/store/Store";
 import { useAtom, useAtomValue } from "jotai";
 
 export const DiagramTitle = (props: { context: any }) => {
@@ -16,7 +21,8 @@ export const DiagramTitle = (props: { context: any }) => {
   const hasTitle = Boolean(displayTitle);
 
   const handleSave = (newText: string) => {
-    const sanitized = newText === PLACEHOLDER ? "" : newText.replace(/[\r\n]+/g, " ");
+    const sanitized =
+      newText === PLACEHOLDER ? "" : newText.replace(/[\r\n]+/g, " ");
     const trimmed = sanitized.trim();
     if (trimmed === displayTitle || !trimmed) return;
 
@@ -35,14 +41,20 @@ export const DiagramTitle = (props: { context: any }) => {
   };
 
   return (
-    <div className={`title text-skin-title text-base font-semibold${!hasTitle && isEditable ? " group min-w-[8rem]" : ""}`}>
+    <div
+      className={`title text-skin-title text-sm font-normal${!hasTitle && isEditable ? " group min-w-[8rem]" : ""}`}
+    >
       {isEditable ? (
         <EditableSpan
           text={hasTitle ? displayTitle : PLACEHOLDER}
           isEditable={true}
           onSave={handleSave}
           title={hasTitle ? "Click to edit title" : "Click to add title"}
-          className={hasTitle ? "!p-0" : "!p-0 text-gray-400 italic font-normal text-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"}
+          className={
+            hasTitle
+              ? "!p-0"
+              : "!p-0 text-gray-400 italic font-normal text-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+          }
           selectAllOnEdit={!hasTitle}
         />
       ) : (

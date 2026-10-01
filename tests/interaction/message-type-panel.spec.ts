@@ -8,7 +8,7 @@ test.describe("Message Type Panel", () => {
     });
 
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -42,7 +42,7 @@ test.describe("Message Type Panel", () => {
     });
 
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -71,7 +71,7 @@ test.describe("Message Type Panel", () => {
 
   test("switches a sync message to async and back to sync (roundtrip)", async ({ page }) => {
     await page.goto("/e2e/fixtures/type-switch.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -109,7 +109,7 @@ test.describe("Message Type Panel", () => {
 
   test("switches an async message with method-like content to sync", async ({ page }) => {
     await page.goto("/e2e/fixtures/type-switch.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -134,7 +134,7 @@ test.describe("Message Type Panel", () => {
 
   test("switches a sync message to return and updates DSL", async ({ page }) => {
     await page.goto("/e2e/fixtures/type-switch.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -159,7 +159,7 @@ test.describe("Message Type Panel", () => {
 
   test("switches a return message to sync and updates DSL", async ({ page }) => {
     await page.goto("/e2e/fixtures/type-switch.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -184,7 +184,7 @@ test.describe("Message Type Panel", () => {
 
   test("disables sync button for async messages with spaces in content", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -202,7 +202,7 @@ test.describe("Message Type Panel", () => {
 
   test("highlights creation button when a creation message is selected", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -222,7 +222,7 @@ test.describe("Message Type Panel", () => {
 
   test("converts a sync message to creation and updates DSL", async ({ page }) => {
     await page.goto("/e2e/fixtures/type-switch.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 

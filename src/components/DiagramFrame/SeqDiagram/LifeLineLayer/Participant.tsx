@@ -105,7 +105,7 @@ export const Participant = (props: {
   return (
     <div
       className={cn(
-        "participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8",
+        "participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-sm font-normal leading-4 flex flex-col justify-center z-10 h-10 top-8",
         {
           selected: selected.includes(props.entity.name),
           "ring-2 ring-sky-400": selected.includes(props.entity.name),

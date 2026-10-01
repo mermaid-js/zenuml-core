@@ -41,23 +41,31 @@ export const MessageView = ({
   const isDashed = type === "creation" || type === "return";
   const isFilled = type === "sync";
   const arrowPath = rtl
-    ? (isFilled ? RTL_FILLED : RTL_OPEN)
-    : (isFilled ? LTR_FILLED : LTR_OPEN);
+    ? isFilled
+      ? RTL_FILLED
+      : RTL_OPEN
+    : isFilled
+      ? LTR_FILLED
+      : LTR_OPEN;
 
   return (
     <div
       className={cn(
-        "message leading-none border-b !border-transparent pb-px flex items-end relative",
+        "message text-[15px] leading-none border-b !border-transparent pb-px flex items-end relative",
         className,
       )}
       style={style}
       onClick={onClick}
-      onKeyDown={onClick ? (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick();
-        }
-      } : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
       tabIndex={onClick ? 0 : undefined}
       role={onClick ? "button" : undefined}
       ref={messageRef}
@@ -108,9 +116,7 @@ export const MessageView = ({
         style={{ [rtl ? "paddingLeft" : "paddingRight"]: "7px" }}
       >
         <div className="inline-block static min-h-[1em]">
-          <div style={textStyle}>
-            {children}
-          </div>
+          <div style={textStyle}>{children}</div>
         </div>
       </div>
       <Numbering number={number} />

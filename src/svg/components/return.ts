@@ -1,6 +1,7 @@
 import type { ReturnGeometry } from "../geometry";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import { esc } from "./svgUtils";
+import { renderMessageNumber } from "./numbering";
 
 export function renderReturn(r: ReturnGeometry): string {
   if (r.isSelf) {
@@ -12,8 +13,10 @@ export function renderReturn(r: ReturnGeometry): string {
   // arrow-tip side (for the arrowhead SVG). This shifts text center 3.5px away
   // from the tip. SVG has no such padding, so offset the label accordingly.
   const ARROW_PADDING_HALF = 3.5;
-  const labelX = minX + Math.abs(r.toX - r.fromX) / 2
-    + (r.isReverse ? ARROW_PADDING_HALF : -ARROW_PADDING_HALF);
+  const labelX =
+    minX +
+    Math.abs(r.toX - r.fromX) / 2 +
+    (r.isReverse ? ARROW_PADDING_HALF : -ARROW_PADDING_HALF);
   // HTML CSS snaps the return line to integer CSS pixels. SVG may produce fractional
   // coordinates (e.g. 153.5). Floor to match HTML's integer-snapped line position.
   const snappedY = Math.floor(r.y);
@@ -35,9 +38,7 @@ export function renderReturn(r: ReturnGeometry): string {
 
   // Sequence number: always to the left of the return
   const numberX = Math.min(r.fromX, r.toX) - 4;
-  const numberSvg = r.number
-    ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(r.number)}</text>`
-    : "";
+  const numberSvg = renderMessageNumber(r.number, numberX, labelY);
 
   return `<g class="return">
   <line x1="${r.fromX}" y1="${lineY}" x2="${r.toX}" y2="${lineY}" class="return-line"/>

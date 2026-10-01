@@ -13,7 +13,7 @@ test.describe("Emoji in Messages and Conditions", () => {
       await page.goto(`/e2e/fixtures/fixture.html?case=${name}`);
 
       // Wait for diagram to render
-      await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
         timeout: 5000,
       });
 

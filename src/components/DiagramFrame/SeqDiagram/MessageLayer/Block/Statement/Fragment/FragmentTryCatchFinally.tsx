@@ -1,7 +1,7 @@
 import CommentClass from "@/components/Comment/Comment";
 import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
-import { Numbering } from "../../../Numbering";
+import { FragmentNumbering } from "./FragmentNumbering";
 import { CollapseButton } from "./CollapseButton";
 import { cn } from "@/utils";
 import { Block } from "../../Block";
@@ -25,7 +25,10 @@ export const FragmentTryCatchFinally = (props: {
     fragmentStyle,
     border,
     leftParticipant,
-  } = useFragmentData(props.context, props.origin);
+  } = useFragmentData(props.context, props.origin, {
+    label: "Try",
+    number: props.number,
+  });
 
   const exception = (ctx: any) => {
     return ctx?.invocation()?.parameters()?.getFormattedText();
@@ -61,9 +64,9 @@ export const FragmentTryCatchFinally = (props: {
           <Comment comment={props.comment} commentObj={props.commentObj} />
         )}
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
-          <Numbering number={props.number} />
-          <div className="name font-semibold p-1 border-b">
-            <label className="p-0 flex items-center gap-0.5">
+          <div className="name font-normal p-1 border-b">
+            <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
+              <FragmentNumbering number={props.number} />
               <Icon name="try-catch-fragment" />
               <CollapseButton
                 label="Try"
@@ -88,12 +91,17 @@ export const FragmentTryCatchFinally = (props: {
             )}
           </div>
           {tcf.catchBlock().map((catchBlock: any, index: number) => (
-            <div className="segment border-t border-solid mt-2" key={index + 500}>
+            <div
+              className="segment border-t border-solid mt-2"
+              key={index + 500}
+            >
               <div
                 className="header inline-block bg-skin-frame opacity-65"
                 key={index + 1000}
               >
-                <label className="keyword catch p-1">catch</label>
+                <label className="keyword catch p-1 [font-variant-caps:all-small-caps]">
+                  catch
+                </label>
                 <label className="exception p-1">{exception(catchBlock)}</label>
               </div>
               <Block
@@ -109,7 +117,7 @@ export const FragmentTryCatchFinally = (props: {
           {finallyBlock && (
             <div className="segment border-t border-solid mt-2">
               <div className="header flex text-skin-fragment finally">
-                <label className="keyword finally bg-skin-frame opacity-65 px-1 inline-block">
+                <label className="keyword finally bg-skin-frame opacity-65 px-1 inline-block [font-variant-caps:all-small-caps]">
                   finally
                 </label>
               </div>

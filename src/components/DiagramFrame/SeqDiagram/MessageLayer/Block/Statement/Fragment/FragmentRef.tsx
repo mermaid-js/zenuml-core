@@ -1,6 +1,6 @@
 import CommentClass from "@/components/Comment/Comment";
 import { useFragmentData } from "./useFragmentData";
-import { Numbering } from "../../../Numbering";
+import { FragmentNumbering } from "./FragmentNumbering";
 import { Comment } from "../Comment/Comment";
 import { MessageLabel } from "../../../MessageLabel";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
@@ -15,7 +15,10 @@ export const FragmentRef = (props: {
   className?: string;
 }) => {
   const { paddingLeft, fragmentStyle, border, leftParticipant } =
-    useFragmentData(props.context, props.origin);
+    useFragmentData(props.context, props.origin, {
+      label: "Ref",
+      number: props.number,
+    });
   const refContext = props.context.ref();
   const content = refContext.Content();
   const contentLabel = content?.getFormattedText();
@@ -32,7 +35,6 @@ export const FragmentRef = (props: {
         style={{ ...fragmentStyle, paddingLeft: `${paddingLeft}px` }}
       >
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t absolute top-0 left-0">
-          <Numbering number={props.number} />
           {props.commentObj?.text && (
             <Comment
               className="absolute -top-4 left-0"
@@ -40,14 +42,17 @@ export const FragmentRef = (props: {
               commentObj={props.commentObj}
             />
           )}
-          <div className="text-skin-fragment relative w-9 h-8 -top-[1px] -left-[1px]">
+          <div className="text-skin-fragment relative min-w-9 w-max h-8 -top-[1px] -left-[1px]">
             <div className="polygon-border absolute inset-0"></div>
-            <div className="polygon-content bg-skin-frame text-skin-fragment-header absolute inset-[1px] flex flex-col items-center justify-center">
+            <div className="polygon-content bg-skin-frame text-skin-fragment-header relative m-px flex items-center justify-center">
               <span
-                className={`flex items-center justify-center font-semibold ${props.commentObj?.messageClassNames || ""}`}
+                className={`flex items-center justify-center gap-0.5 whitespace-nowrap px-1 h-8 font-normal ${props.commentObj?.messageClassNames || ""}`}
                 style={props.commentObj?.messageStyle}
               >
-                Ref
+                <FragmentNumbering number={props.number} />
+                <span className="fragment-type [font-variant-caps:all-small-caps]">
+                  Ref
+                </span>
               </span>
             </div>
           </div>

@@ -35,3 +35,6 @@ export const COMMENT_LINE_HEIGHT = tw(5);
 
 /** `.fragment` border-width, one pixel per side. */
 export const FRAGMENT_BORDER_WIDTH = 1;
+
+/** Guard row: .p-1 + .leading-5, including keyword-only else rows. */
+export const FRAGMENT_GUARD_HEIGHT = 28;

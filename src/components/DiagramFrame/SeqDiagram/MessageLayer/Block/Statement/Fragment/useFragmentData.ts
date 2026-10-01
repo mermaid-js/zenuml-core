@@ -2,13 +2,23 @@ import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext"
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { coordinatesAtom } from "@/store/Store";
+import {
+  coordinatesAtom,
+  enableNumberingAtom,
+  rootContextAtom,
+} from "@/store/Store";
+import {
+  fragmentMinimumWidth,
+  fragmentHeaderWidth,
+} from "@/positioning/FragmentHeaderWidth";
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { walkStatements } from "@/svg/walkStatements";
+
 import sequenceParser from "@/generated-parser/sequenceParser";
 import Anchor2 from "@/positioning/Anchor2";
 import { centerOf } from "../utils";
-import { createStore, useStore } from "jotai";
+import { createStore, useAtomValue, useStore } from "jotai";
 import type { AugmentedContext } from "@/parser/AntlrTypes";
 
 type Store = ReturnType<typeof createStore>;
@@ -64,8 +74,14 @@ const getOffsetX = (store: Store, context: any, origin: string) => {
   const originLayers = depthOnParticipant(context, origin);
 
   // Create anchors for both participants to calculate accurate distance
-  const anchor2Origin = new Anchor2(centerOf(coordinates, origin), originLayers);
-  const anchor2LeftParticipant = new Anchor2(centerOf(coordinates, leftParticipant), 0);
+  const anchor2Origin = new Anchor2(
+    centerOf(coordinates, origin),
+    originLayers,
+  );
+  const anchor2LeftParticipant = new Anchor2(
+    centerOf(coordinates, leftParticipant),
+    0,
+  );
 
   // Calculate the offset from the left participant to the origin, accounting for occurrence bar layers
   const distanceWithLayers =
@@ -75,8 +91,37 @@ const getOffsetX = (store: Store, context: any, origin: string) => {
     distanceWithLayers + getBorder(store, context).left + halfLeftParticipant
   );
 };
-export const useFragmentData = (context: any, origin: string) => {
+export const useFragmentData = (
+  context: any,
+  origin: string,
+  header?: { label: string; number?: string },
+) => {
   const store = useStore();
+  const enableNumbering = useAtomValue(enableNumberingAtom);
+  const coordinates = useAtomValue(coordinatesAtom);
+  const headerLabel = header?.label;
+  const headerNumber = header?.number;
+  const headerMinWidth = useMemo(() => {
+    if (headerLabel == null) return FRAGMENT_MIN_WIDTH;
+    const infos = walkStatements(store.get(rootContextAtom)!);
+    const own = infos.find((info) => info.statNode === context);
+    return own
+      ? fragmentMinimumWidth(
+          own,
+          infos,
+          coordinates,
+          enableNumbering,
+          headerLabel,
+          headerNumber,
+        )
+      : Math.max(
+          FRAGMENT_MIN_WIDTH,
+          fragmentHeaderWidth(
+            headerLabel,
+            enableNumbering ? headerNumber : undefined,
+          ),
+        );
+  }, [context, store, headerLabel, headerNumber, enableNumbering, coordinates]);
   const [collapsed, setCollapsed] = useState(false);
   const toggleCollapse = () => {
     setCollapsed((prev) => !prev);
@@ -85,8 +130,6 @@ export const useFragmentData = (context: any, origin: string) => {
   useEffect(() => {
     setCollapsed(false);
   }, [context]);
-
-  const coordinates = store.get(coordinatesAtom);
 
   const allParticipants = coordinates.orderedParticipantNames();
   const localParticipants = getLocalParticipantNames(context);
@@ -106,7 +149,7 @@ export const useFragmentData = (context: any, origin: string) => {
     // +1px for the border of the fragment
     transform: "translateX(" + (offsetX + 1) * -1 + "px)",
     width: TotalWidth(context, coordinates) + "px",
-    minWidth: FRAGMENT_MIN_WIDTH + "px",
+    minWidth: headerMinWidth + "px",
   };
 
   return {

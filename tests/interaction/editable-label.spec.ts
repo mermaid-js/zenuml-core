@@ -66,8 +66,8 @@ async function clickToEdit(page: import("@playwright/test").Page, messageLabel: 
 test.describe("Editable Label", () => {
   test("Special characters & extra spaces", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    // This line is to make sure the privacy icon is loaded
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    // Wait until the participant has rendered
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
     await expect(page.getByText("method()", { exact: false })).toBeVisible();
@@ -101,8 +101,8 @@ test.describe("Editable Label", () => {
 
   test("Self message", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    // This line is to make sure the privacy icon is loaded
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    // Wait until the participant has rendered
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -140,8 +140,8 @@ test.describe("Editable Label", () => {
 
   test("Async message", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    // This line is to make sure the privacy icon is loaded
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    // Wait until the participant has rendered
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -178,8 +178,8 @@ test.describe("Editable Label", () => {
 
   test("Creation message", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    // This line is to make sure the privacy icon is loaded
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    // Wait until the participant has rendered
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -204,8 +204,8 @@ test.describe("Editable Label", () => {
 
   test("ESC cancels edit and reverts to original text", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    // This line is to make sure the privacy icon is loaded
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    // Wait until the participant has rendered
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
