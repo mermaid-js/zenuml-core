@@ -13,7 +13,7 @@ Checks run fastest-first so you get feedback quickly. Lint catches syntax issues
 
 ## Steps
 
-Run from the `zenuml-core` directory. Stop on first failure.
+Run from the `zenuml-core` directory, in order. On a failure, diagnose it and make the smallest safe repair in the current branch, then rerun the failed check. Continue through the remaining checks only after it passes. After any code or fixture change, rerun the full sequence from lint so the final state passes every check. Repairing failures is part of validation; do not stop to ask for routine permission.
 
 ### 1. Lint
 
@@ -21,7 +21,7 @@ Run from the `zenuml-core` directory. Stop on first failure.
 bun eslint
 ```
 
-If lint fails, report the errors and stop. These are usually quick fixes.
+If lint fails, inspect the reported files and apply the minimal lint or code fix that preserves intended behavior. Rerun lint and proceed only when it passes.
 
 ### 2. Unit tests
 
@@ -29,7 +29,7 @@ If lint fails, report the errors and stop. These are usually quick fixes.
 bun run test
 ```
 
-Do NOT use `bun test` — it picks up Playwright files and gives false failures. If tests fail, report the failing test names and stop.
+Do NOT use `bun test` — it picks up Playwright files and gives false failures. For unit failures, inspect the failing tests and implementation, identify the cause, and make a minimal behavior-preserving fix. Keep or add meaningful regression coverage; never delete, skip, weaken, or rewrite assertions merely to get a pass. Rerun unit tests and proceed only when they pass.
 
 ### 3. Playwright E2E
 
@@ -55,18 +55,20 @@ If you killed a different repo's server, do **not** start Vite manually. `bun pw
 bun pw
 ```
 
-If snapshot tests fail, check whether the changes are intentional (rendering code changed) or unexpected. Report which snapshots failed.
+For E2E or snapshot failures, inspect the failure and compare it with the intended change. Repair regressions in code. Update a snapshot only when the rendered change is an expected consequence of the branch; never blindly refresh snapshots or use snapshot updates to hide a regression. Rerun Playwright and proceed only when it passes.
+
+If a failure is caused by a genuine external blocker (for example, unavailable dependencies, missing browser installation, or an unrelated service), diagnose it and make the available environment repair when safe (for example, install the required Playwright browsers with `bun pw:install`). Do not disguise an unresolved failure as a pass. If it remains blocked, report the check, relevant error, repairs attempted, and what is needed to continue.
 
 ## Output
 
 Report one of:
 
-- **PASS** — all 3 checks passed, branch is ready
-- **FAIL** — which check failed, the error output, and a one-line suggestion
+- **PASS** — all 3 checks passed on the final code; branch is ready
+- **BLOCKED** — a check could not complete after diagnosis and safe repair attempts; name the check, summarize the error and attempts, and state what is needed to continue
 
 ## Gotchas
 
 - `bun run test` not `bun test` — critical difference, the latter runs E2E too
 - Playwright needs browsers installed (`bun pw:install` if missing)
 - Before `bun pw`, verify any existing `14000` listener belongs to this repo; otherwise kill it and let Playwright start the right server
-- HTML Playwright snapshot failures are a hard stop — never update HTML snapshots without understanding why they changed
+- HTML Playwright snapshot failures require understanding the rendered change before repair or snapshot update
