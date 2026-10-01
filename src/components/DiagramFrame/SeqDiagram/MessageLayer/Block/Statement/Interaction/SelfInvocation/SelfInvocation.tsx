@@ -95,7 +95,7 @@ export const SelfInvocation = (props: {
       </label>
       <svg className="arrow text-skin-message-arrow" width="30" height="24">
         <path
-          className="stroke-current stroke-2 fill-none"
+          className="stroke-current stroke-1 fill-none"
           d={
             isAsync
               ? "M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 L1,15"

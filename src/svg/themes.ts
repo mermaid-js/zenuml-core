@@ -175,24 +175,24 @@ export function buildThemeStyles(p: SvgPalette): string {
   .frame-header-bg { fill: ${p.frameBg}; }
   .frame-header-line { stroke: ${p.frameBorder}; stroke-width: 1; shape-rendering: crispEdges; }
   .frame-title { font-family: ${p.fontFamily}; font-size: 16px; font-weight: 600; fill: ${p.titleText}; }
-  .participant-box { fill: ${p.participantBg}; stroke: ${p.participantBorder}; stroke-width: 2; }
+  .participant-box { fill: ${p.participantBg}; stroke: ${p.participantBorder}; stroke-width: 1; }
   .participant-label { font-family: ${p.fontFamily}; font-size: 16px; fill: ${p.participantText}; }
   .participant-icon { color: ${p.participantText}; }
   .participant-icon [fill="currentColor"]:not([stroke]) { stroke: ${p.participantBorder}; stroke-width: 1; }
   .lifeline { stroke: ${p.participantBorder}; stroke-width: 1; }
-  .message-line { stroke: ${p.messageArrow}; stroke-width: 2; shape-rendering: crispEdges; }
+  .message-line { stroke: ${p.messageArrow}; stroke-width: 1; shape-rendering: crispEdges; }
   .message-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.messageText}; }
-  .arrow-head { fill: ${p.messageArrow}; stroke: ${p.messageArrow}; stroke-width: 2; }
+  .arrow-head { fill: ${p.messageArrow}; stroke: ${p.messageArrow}; stroke-width: 1; }
   .arrow-open { fill: none; }
-  .occurrence { fill: ${p.occurrenceBg}; stroke: ${p.occurrenceBorder}; stroke-width: 2; shape-rendering: crispEdges; }
+  .occurrence { fill: ${p.occurrenceBg}; stroke: ${p.occurrenceBorder}; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-border { fill: none; stroke: ${p.fragmentBorder}; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-header { fill: ${p.fragmentHeaderBg}; fill-opacity: ${p.fragmentHeaderOpacity}; stroke: none; shape-rendering: crispEdges; }
   .fragment-label { font-family: ${p.fontFamily}; font-size: 14px; font-weight: 600; fill: ${p.fragmentText}; }
   .fragment-condition { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.fragmentText}; }
   .fragment-separator { stroke: ${p.fragmentSeparator}; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-section-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.fragmentText}; }
-  .return-line { stroke: ${p.messageArrow}; stroke-width: 2; stroke-dasharray: 6,4; shape-rendering: crispEdges; }
-  .return-arrow { stroke: ${p.messageArrow}; stroke-width: 2; fill: none; }
+  .return-line { stroke: ${p.messageArrow}; stroke-width: 1; stroke-dasharray: 6,4; shape-rendering: crispEdges; }
+  .return-arrow { stroke: ${p.messageArrow}; stroke-width: 1; fill: none; }
   .return-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.messageText}; }
   .return-icon { fill: ${p.messageText}; }
   .divider-line { stroke: #aaaa33; stroke-width: 1; }

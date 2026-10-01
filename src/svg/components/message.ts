@@ -25,10 +25,13 @@ export function renderMessage(m: MessageGeometry): string {
     ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
     : "";
 
-  const lineY = m.y - 0.5;
+  // The 1px crisp shaft and antialiased head need a shared center at a
+  // half-pixel coordinate. Keep the head's outer SVG box at its old position.
+  const headCenterY = m.y - 0.5;
+  const lineY = headCenterY + 0.5;
   return `<g class="message">
   <line x1="${fromX}" y1="${lineY}" x2="${toX}" y2="${lineY}" class="message-line"${dashAttr}/>
-  ${renderArrowHead(toX, lineY, m.isReverse, m.arrowStyle)}
+  ${renderArrowHead(toX, headCenterY, m.isReverse, m.arrowStyle)}
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(resolveEmojiInText(m.label))}</text>
   ${numberSvg}
 </g>`;
@@ -74,11 +77,11 @@ export function renderSelfCall(s: SelfCallGeometry): string {
 
   return `<g class="message self-call">
   <svg x="${svgX}" y="${svgY}" width="30" height="24">
-    <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 ${pathEnd}" fill="none" stroke="#000" stroke-width="2"/>
+    <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 ${pathEnd}" fill="none" stroke="#000" stroke-width="1"/>
     <g transform="translate(${arrowTx}, 10)">
       <svg height="10" width="7" viewBox="0 0 7 9">
         <g transform="scale(-1, 1) translate(-7, 0)">
-          <path d="${arrowPath}" stroke="#000" stroke-linecap="round" fill="${arrowFill}" stroke-width="2"/>
+          <path d="${arrowPath}" stroke="#000" stroke-linecap="round" fill="${arrowFill}" stroke-width="1"/>
         </g>
       </svg>
     </g>
@@ -118,8 +121,7 @@ function renderArrowHead(
 
   return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9" overflow="visible" class="arrow-head${isFilled ? "" : " arrow-open"}">
     <g${rtlTransform}>
-      <path d="${pathD}" stroke="#000" stroke-linecap="round" stroke-width="2" fill="${fillAttr}"/>
+      <path d="${pathD}" transform="translate(1 0.5)" stroke="#000" stroke-linecap="round" stroke-width="1" fill="${fillAttr}"/>
     </g>
   </svg>`;
 }
-
