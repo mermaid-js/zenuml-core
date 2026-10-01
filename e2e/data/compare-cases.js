@@ -3,6 +3,12 @@
 
 export const CASES = {
   // --- Basics ---
+  "workbench-title-fragment": `title ttt
+Alice -> Bob: Hello Bob!
+Bob -> Alice: Hello Alice!
+if(x) {
+ A.method()
+}`,
   "empty": ``,
   "single-participant": `A`,
   "sync-call": `A.m`,

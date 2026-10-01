@@ -4,6 +4,7 @@
  * Pipeline: parse → layout → geometry IR → SVG primitives → compose
  */
 import { RootContext } from "@/parser";
+import { DIAGRAM_HEADER_HEIGHT } from "@/positioning/Constants";
 import { Coordinates } from "@/positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { WidthProviderOnCanvas } from "@/positioning/WidthProviderFunc";
@@ -45,7 +46,10 @@ export interface RenderResult {
   geometry?: DiagramGeometry;
 }
 
-const FRAME_HEADER_HEIGHT = 28;
+// Legacy viewport sizing allowance: content starts at DIAGRAM_HEADER_HEIGHT + 1,
+// while the geometry already includes its own bottom space. Keep this allowance
+// separate from the shared, painted header height.
+const FRAME_VIEWPORT_HEADER_ALLOWANCE = 28;
 const FRAME_BORDER_RADIUS = 4;
 
 export function renderToSvg(
@@ -94,7 +98,7 @@ export function renderToSvg(
 function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
   void options;
   const padding = 10;
-  const headerH = FRAME_HEADER_HEIGHT;
+  const headerH = FRAME_VIEWPORT_HEADER_ALLOWANCE;
   // Content left offset = 1 (frame border) + 10 (seq-diagram px-2.5 padding) + frameBorderLeft
   // This matches the HTML layout: .frame(1px border) > .sequence-diagram(px-2.5) > div(paddingLeft:frameBorderLeft) > content
   let contentLeftMargin = 1 + padding + g.frameBorderLeft;
@@ -209,8 +213,7 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
     `<rect class="frame-border-outer" x="0" y="0" width="${viewWidth}" height="${viewHeight}" rx="${r}" fill="#666"/>`,
     `<rect class="frame-border-inner" x="1" y="1" width="${viewWidth - 2}" height="${viewHeight - 2}" rx="${Math.max(0, r - 1)}" fill="#fff"/>`,
   ].join("\n");
-  const contentPaddingTop = 6; // tuned to match HTML content Y offset (~34px below frame top)
-  const headerLineY = headerH + contentPaddingTop; // 34 — content group Y offset
+  const headerLineY = 1 + DIAGRAM_HEADER_HEIGHT; // Outer frame border + shared header layout.
   const headerLineDrawY = headerLineY - 0.5; // 33.5 — half-pixel for crisp 1px line at pixel row 33, matching HTML header border-bottom
   const headerLineSvg = `<line class="frame-header-line" x1="1" y1="${headerLineDrawY}" x2="${viewWidth - 1}" y2="${headerLineDrawY}"/>`;
   const titleSvg = g.title

@@ -15,14 +15,16 @@ export function renderMessage(m: MessageGeometry): string {
   // shifting the label center toward the source. +0.5 for lifeline width averaging.
   const direction = Math.sign(m.toX - m.fromX);
   const labelX = (m.fromX + m.toX) / 2 - direction * 3.5 + 0.5;
-  const labelY = m.y - 3.5;
+  // A 15px HTML line box places its alphabetic baseline 2.5px above the shaft.
+  // Number badges retain their independent 12px baseline.
+  const labelY = m.y - 2.5;
 
   const dashAttr = m.arrowStyle === "dashed" ? ' stroke-dasharray="6,4"' : "";
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
 
   // Sequence badge sits to the left of the message with a 4px gutter.
   const numberX = Math.min(fromX, toX) - 4;
-  const numberSvg = renderMessageNumber(m.number, numberX, labelY);
+  const numberSvg = renderMessageNumber(m.number, numberX, m.y - 3.5);
 
   // The 1px crisp shaft and antialiased head need a shared center at a
   // half-pixel coordinate. Keep the head's outer SVG box at its old position.

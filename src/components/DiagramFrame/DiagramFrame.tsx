@@ -8,6 +8,7 @@ import {
   useRef,
 } from "react";
 import { cn } from "@/utils";
+import { DIAGRAM_HEADER_HEIGHT } from "@/positioning/Constants";
 import { Debug } from "./Debug";
 import { DiagramTitle } from "./DiagramTitle";
 import { SeqDiagram } from "./SeqDiagram/SeqDiagram";
@@ -119,7 +120,10 @@ export const DiagramFrame = ({
       <Debug />
       <div className="frame text-skin-base bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded">
         <div>
-          <div className="header text-skin-title bg-skin-title border-skin-frame border-b p-1 flex justify-between rounded-t">
+          <div
+            className="header text-skin-title bg-skin-title border-skin-frame border-b p-1 flex items-center justify-between rounded-t"
+            style={{ minHeight: DIAGRAM_HEADER_HEIGHT }}
+          >
             <div className="left hide-export">{children}</div>
             <div className="right flex-grow flex justify-between">
               <DiagramTitle context={title} />

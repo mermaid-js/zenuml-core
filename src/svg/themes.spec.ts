@@ -24,9 +24,9 @@ const LEGACY_DEFAULT_STYLES = `
   .arrow-head { fill: #000; stroke: #000; stroke-width: 1; }
   .arrow-open { fill: none; }
   .occurrence { fill: #dedede; stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
-  .fragment-border { fill: none; stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
+  .fragment-border { fill: none; stroke: #666; stroke-width: 1; }
   .fragment-header { fill: #dedede; fill-opacity: 0.498; stroke: none; shape-rendering: crispEdges; }
-  .fragment-number-bg { fill: #000; fill-opacity: 0.08; stroke: none; }
+  .fragment-number-bg { fill: #6b7280; fill-opacity: 0.1; stroke: none; }
   .message-number-bg { fill: #6b7280; fill-opacity: 0.1; stroke: none; }
   .fragment-label { font-family: Helvetica, Verdana, serif; font-size: 14px; font-weight: 400; font-variant-caps: all-small-caps; fill: #000; }
   .fragment-condition { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
