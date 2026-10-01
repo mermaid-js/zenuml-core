@@ -27,484 +27,70 @@
       href="/vendor/codemirror/material-darker.min.css"
     />
     <title>ZenUML Dev Workbench</title>
-    <style>
-      :root {
-        --bg: #0f172a;
-        --bg-alt: #111827;
-        --panel: #ffffff;
-        --panel-alt: #f8fafc;
-        --panel-muted: #eef2f7;
-        --ink: #0f172a;
-        --muted: #526072;
-        --line: #d7deea;
-        --line-strong: #c4cedd;
-        --accent: #0f766e;
-        --accent-strong: #115e59;
-        --danger: #991b1b;
-        --shadow: 0 18px 48px rgba(15, 23, 42, 0.14);
-        --radius-lg: 14px;
-        --radius-md: 10px;
-        --editor-width: 420px;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        margin: 0;
-        min-height: 100%;
-      }
-
-      body {
-        font-family:
-          "SF Pro Text",
-          "Segoe UI",
-          system-ui,
-          sans-serif;
-        color: var(--ink);
-        background: linear-gradient(180deg, var(--bg) 0%, var(--bg-alt) 100%);
-      }
-
-      a {
-        color: inherit;
-      }
-
-      code,
-      .CodeMirror,
-      .tool-chip,
-      .tool-button,
-      .tool-link,
-      .stats-text,
-      .toolbar-label {
-        font-family:
-          "IBM Plex Mono",
-          "SFMono-Regular",
-          "Menlo",
-          "Monaco",
-          "Consolas",
-          monospace;
-      }
-
-      .app-shell {
-        min-height: 100vh;
-        display: grid;
-        grid-template-rows: auto 1fr;
-        gap: 12px;
-        padding: 14px;
-      }
-
-      .toolbar {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 16px;
-        padding: 12px 14px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: var(--radius-lg);
-        background: rgba(15, 23, 42, 0.9);
-        color: #e5edf8;
-        box-shadow: var(--shadow);
-      }
-
-      .toolbar-title {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        gap: 12px;
-      }
-
-      .toolbar-title strong {
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: 0.01em;
-      }
-
-      .toolbar-title span {
-        color: #9fb1c7;
-        font-size: 12px;
-      }
-
-      .toolbar-actions {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .toolbar-label {
-        color: #9fb1c7;
-        font-size: 11px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .workspace {
-        min-height: 0;
-        display: grid;
-        grid-template-columns: minmax(280px, var(--editor-width)) 10px minmax(320px, 1fr) minmax(320px, 1fr);
-        gap: 12px;
-        align-items: stretch;
-      }
-
-      .panel {
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-        min-width: 0;
-        overflow: hidden;
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--line);
-        background: var(--panel);
-        box-shadow: var(--shadow);
-      }
-
-      .workspace-resizer {
-        position: relative;
-        min-height: 0;
-        border-radius: 999px;
-        background: rgba(148, 163, 184, 0.28);
-        cursor: col-resize;
-        touch-action: none;
-      }
-
-      .workspace-resizer::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        margin: auto;
-        width: 4px;
-        height: 56px;
-        border-radius: 999px;
-        background: rgba(15, 118, 110, 0.22);
-      }
-
-      .workspace-resizer:hover,
-      .workspace.is-resizing .workspace-resizer {
-        background: rgba(15, 118, 110, 0.2);
-      }
-
-      .workspace.is-resizing {
-        user-select: none;
-      }
-
-      .panel-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        padding: 12px 14px;
-        border-bottom: 1px solid var(--line);
-        background: var(--panel-alt);
-      }
-
-      .panel-title {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .panel-title h2,
-      .panel-title h3 {
-        margin: 0;
-        font-size: 14px;
-        letter-spacing: 0.01em;
-      }
-
-      .panel-title p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 12px;
-        line-height: 1.3;
-      }
-
-      .panel-actions {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        gap: 8px;
-      }
-
-      .tool-button,
-      .tool-chip,
-      .tool-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        appearance: none;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        padding: 8px 10px;
-        background: #fff;
-        color: var(--ink);
-        cursor: pointer;
-        text-decoration: none;
-        transition:
-          border-color 160ms ease,
-          background 160ms ease;
-        font-size: 11px;
-        letter-spacing: 0.03em;
-        white-space: nowrap;
-      }
-
-      .tool-button:hover,
-      .tool-chip:hover,
-      .tool-link:hover {
-        border-color: var(--line-strong);
-        background: var(--panel-muted);
-      }
-
-      .toolbar .tool-chip,
-      .toolbar .tool-link {
-        background: rgba(15, 23, 42, 0.55);
-        border-color: rgba(159, 177, 199, 0.25);
-        color: #e5edf8;
-      }
-
-      .toolbar .tool-chip:hover,
-      .toolbar .tool-link:hover {
-        background: rgba(30, 41, 59, 0.95);
-        border-color: rgba(191, 209, 230, 0.4);
-      }
-
-      .tool-chip.is-active {
-        background: var(--accent);
-        border-color: var(--accent-strong);
-        color: #f8fffe;
-      }
-
-      .tool-button.primary {
-        background: var(--accent);
-        border-color: var(--accent-strong);
-        color: #f8fffe;
-      }
-
-      .panel-body {
-        flex: 1;
-        min-height: 0;
-      }
-
-      .editor-body {
-        background: #1d1d1b;
-      }
-
-      .CodeMirror {
-        font-size: 14px;
-        height: 100%;
-        overflow: hidden;
-      }
-
-      .CodeMirror-scroll {
-        padding: 1rem;
-      }
-
-      .zenuml .CodeMirror .CodeMirror-cursor {
-        border-color: #fff;
-        border-left-width: 2px;
-      }
-
-      .preview-surface {
-        height: 100%;
-        overflow: auto;
-        padding: 12px;
-        background: var(--panel-muted);
-      }
-
-      .html-surface {
-        position: relative;
-      }
-
-      .preview-stage {
-        min-height: 100%;
-        padding: 10px;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--line);
-        background: #fff;
-      }
-
-      .preview-stage pre {
-        margin: 0;
-      }
-
-      .preview-stage svg {
-        display: block;
-      }
-
-      .svg-stage {
-        display: block;
-      }
-
-      #svg-container {
-        width: max-content;
-        margin: 0 auto;
-        min-width: 100%;
-        min-height: 100%;
-        display: grid;
-        place-items: center;
-      }
-
-      #svg-container svg {
-        display: block;
-        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-      }
-
-      .stats-text {
-        color: #9fb1c7;
-        font-size: 11px;
-      }
-
-      .svg-error {
-        display: grid;
-        place-items: center;
-        min-height: 240px;
-        padding: 20px;
-        border-radius: var(--radius-md);
-        border: 1px dashed #d4b4b4;
-        color: var(--danger);
-        background: #fff7f7;
-        text-align: center;
-        line-height: 1.6;
-      }
-
-      .workspace.mode-svg,
-      .workspace.mode-dom {
-        grid-template-columns: minmax(280px, var(--editor-width)) 10px minmax(720px, 1fr);
-      }
-
-      .workspace.mode-svg .html-panel,
-      .workspace.mode-dom .svg-panel {
-        display: none;
-      }
-
-      @media (max-width: 1440px) {
-        .workspace,
-        .workspace.mode-svg,
-        .workspace.mode-dom {
-          grid-template-columns: minmax(280px, var(--editor-width)) 10px minmax(320px, 1fr);
-        }
-
-        .workspace.mode-split .svg-panel {
-          grid-column: 3;
-        }
-      }
-
-      @media (max-width: 1024px) {
-        .app-shell {
-          padding: 10px;
-        }
-
-        .toolbar {
-          grid-template-columns: 1fr;
-          align-items: start;
-        }
-
-        .workspace,
-        .workspace.mode-svg,
-        .workspace.mode-dom {
-          grid-template-columns: 1fr;
-        }
-
-        .workspace-resizer {
-          display: none;
-        }
-
-        .workspace.mode-split .svg-panel {
-          grid-column: auto;
-        }
-
-        .panel {
-          min-height: 360px;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="/workbench.css" />
     <script src="/vendor/tailwindcss/tailwindcss.js"></script>
   </head>
   <body>
     <div class="app-shell">
       <header class="toolbar">
         <div class="toolbar-title">
-          <strong>ZenUML Dev Workbench</strong>
-          <span>default to native SVG, switch to DOM or split only when needed</span>
+          <strong>ZenUML Workbench</strong>
+          <span>Design, render, and inspect a sequence</span>
         </div>
-        <div class="toolbar-actions">
-          <span class="toolbar-label">View</span>
-          <button id="view-svg" class="tool-chip">SVG</button>
-          <button id="view-dom" class="tool-chip">DOM</button>
-          <button id="view-split" class="tool-chip">Split</button>
-          <span class="toolbar-label">Editing</span>
-          <button class="tool-chip" data-flag="enableParticipantInsertion" title="Toggle ParticipantInsertControls (+ between participants)">+ Participant</button>
-          <button class="tool-chip" data-flag="enableMessageInsertion" title="Toggle Occurrence drag-to-create + GapHandleZone message handles">+ Message</button>
-          <button class="tool-chip" data-flag="enableDividerInsertion" title="Toggle GapHandleZone divider button">+ Divider</button>
-          <button class="tool-chip" data-flag="enableParticipantStyleEditing" title="Toggle ParticipantStylePanel (color/type)">Style Participant</button>
-          <button id="width-provider-toggle" class="tool-chip"></button>
-          <span id="svg-stats" class="stats-text">SVG: waiting</span>
-          <a class="tool-link" href="/e2e/tools/compare.html" target="_blank" rel="noreferrer">
-            Compare Cases
-          </a>
-          <a class="tool-link" href="/e2e/tools/svg-preview.html" target="_blank" rel="noreferrer">
-            SVG Only
-          </a>
-        </div>
+        <nav class="toolbar-actions" aria-label="Workbench tools">
+          <a class="tool-link" href="/e2e/tools/compare.html" target="_blank" rel="noreferrer">Compare Cases ↗</a>
+          <a class="tool-link" href="/e2e/tools/svg-preview.html" target="_blank" rel="noreferrer">SVG Only ↗</a>
+          <button onclick="exportDiagram()" class="tool-button primary">Export PNG</button>
+        </nav>
       </header>
 
       <main class="workspace mode-svg" id="workspace">
-          <article class="panel editor-panel">
-            <div class="panel-header">
-              <div class="panel-title">
-                <h2>Editor</h2>
-                <p>Persisted in <code>localStorage</code>.</p>
-              </div>
-              <div class="panel-actions">
-                <button onclick="loadExample('basic')" class="tool-button">Basic</button>
-                <button onclick="loadExample('advanced')" class="tool-button">Advanced</button>
-                <button onclick="clearEditor()" class="tool-button">Clear</button>
-                <button onclick="exportDiagram()" class="tool-button primary">Export PNG</button>
-              </div>
+        <article class="panel editor-panel">
+          <div class="panel-header">
+            <div class="panel-title"><h2>Editor</h2></div>
+            <div class="panel-actions">
+              <button onclick="loadExample('basic')" class="tool-button">Basic</button>
+              <button onclick="loadExample('advanced')" class="tool-button">Advanced</button>
+              <button onclick="clearEditor()" class="tool-button">Clear</button>
             </div>
-            <div class="panel-body editor-body">
-              <textarea id="text" style="display: none"></textarea>
-            </div>
-          </article>
+          </div>
+          <div class="saved-state" role="status">Saving…</div>
+          <div class="panel-body editor-body"><textarea id="text" style="display: none"></textarea></div>
+        </article>
 
-          <div
-            id="editor-resizer"
-            class="workspace-resizer"
-            role="separator"
-            aria-orientation="vertical"
-            aria-label="Resize editor"
-          ></div>
+        <div id="editor-resizer" class="workspace-resizer" role="separator" aria-orientation="vertical" aria-label="Resize editor"></div>
 
-          <article class="panel html-panel">
-            <div class="panel-header">
-              <div class="panel-title">
-                <h3>DOM preview</h3>
-                <p><code>window.zenUml.render()</code> output.</p>
+        <article class="panel preview-panel">
+          <div class="panel-header preview-header">
+            <div class="panel-title"><h2>Preview</h2></div>
+            <div class="view-tabs" role="group" aria-label="Preview mode">
+              <button id="view-svg" class="tool-chip">SVG</button>
+              <button id="view-dom" class="tool-chip">DOM</button>
+              <button id="view-split" class="tool-chip">Split</button>
+            </div>
+          </div>
+          <div class="preview-canvas">
+            <div class="preview-views">
+              <div class="html-panel preview-view">
+                <div class="preview-stage html-stage"><div class="stage-caption">Sequence preview</div><pre class="zenuml"></pre></div>
+              </div>
+              <div class="svg-panel preview-view">
+                <div class="preview-stage svg-stage"><div class="stage-caption">Sequence preview</div><div id="svg-container"></div></div>
               </div>
             </div>
-            <div class="panel-body preview-surface html-surface">
-              <div class="preview-stage">
-                <pre class="zenuml"></pre>
-              </div>
+          </div>
+          <section class="capabilities" aria-label="DOM editing capabilities">
+            <div class="capabilities-title">DOM EDITING <span>· enabled controls appear on the diagram</span></div>
+            <div class="capability-list">
+              <button class="capability-switch" type="button" role="switch" data-flag="enableParticipantInsertion" aria-label="Insert participant"><span>Insert participant</span><span class="switch-track" aria-hidden="true"></span></button>
+              <button class="capability-switch" type="button" role="switch" data-flag="enableMessageInsertion" aria-label="Insert message"><span>Insert message</span><span class="switch-track" aria-hidden="true"></span></button>
+              <button class="capability-switch" type="button" role="switch" data-flag="enableDividerInsertion" aria-label="Insert divider"><span>Insert divider</span><span class="switch-track" aria-hidden="true"></span></button>
+              <button class="capability-switch" type="button" role="switch" data-flag="enableParticipantStyleEditing" aria-label="Style participant"><span>Style participant</span><span class="switch-track" aria-hidden="true"></span></button>
             </div>
-          </article>
-
-          <article class="panel svg-panel">
-            <div class="panel-header">
-              <div class="panel-title">
-                <h3>Native SVG preview</h3>
-                <p><code>renderToSvg()</code> output.</p>
-              </div>
-            </div>
-            <div class="panel-body preview-surface svg-surface">
-              <div class="preview-stage svg-stage">
-                <div id="svg-container"></div>
-              </div>
-            </div>
-          </article>
+          </section>
+        </article>
       </main>
+      <footer class="diagnostics-footer"><span class="render-indicator" role="status">Waiting</span><span id="svg-stats" class="stats-text">SVG: waiting</span><button id="width-provider-toggle" class="width-toggle" type="button"></button></footer>
     </div>
 
     <script type="module">
@@ -533,7 +119,7 @@
       const minEditorWidth = 280;
 
       function clampEditorWidth(nextWidth) {
-        const maxEditorWidth = Math.max(minEditorWidth, Math.floor(window.innerWidth * 0.72));
+        const maxEditorWidth = Math.max(minEditorWidth, window.innerWidth - 412);
         return Math.min(Math.max(nextWidth, minEditorWidth), maxEditorWidth);
       }
 
@@ -550,6 +136,7 @@
 
         Object.entries(viewButtons).forEach(([key, button]) => {
           button.classList.toggle("is-active", key === validMode);
+          button.setAttribute("aria-pressed", String(key === validMode));
         });
 
         localStorage.setItem("zenuml-workbench-view", validMode);
@@ -579,7 +166,9 @@
 
       function syncFlagButtons() {
         document.querySelectorAll("[data-flag]").forEach((btn) => {
-          btn.classList.toggle("is-active", readFlag(btn.dataset.flag));
+          const enabled = readFlag(btn.dataset.flag);
+          btn.classList.toggle("is-active", enabled);
+          btn.setAttribute("aria-checked", String(enabled));
         });
       }
 
@@ -615,11 +204,13 @@
               </div>
             `;
             svgStats.textContent = "SVG: empty";
+            document.querySelector(".render-indicator").textContent = "Empty";
             return;
           }
 
           svgContainer.innerHTML = result.svg;
-          svgStats.textContent = `SVG ${result.width}x${result.height} | ${dt}ms`;
+          svgStats.textContent = `SVG ${result.width} × ${result.height}   ${dt} ms`;
+          document.querySelector(".render-indicator").innerHTML = '<span class="saved-dot" aria-hidden="true"></span> Rendered';
         } catch (error) {
           console.error("Failed to render native SVG preview:", error);
           svgContainer.innerHTML = `
@@ -628,6 +219,7 @@
             </div>
           `;
           svgStats.textContent = "SVG: error";
+          document.querySelector(".render-indicator").textContent = "Render failed";
         }
       }, 180);
 
@@ -676,7 +268,12 @@
           () => {
             updateHtmlPreview(content);
             // Save to localStorage
-            localStorage.setItem("zenuml-cm-code", content);
+            try {
+              localStorage.setItem("zenuml-cm-code", content);
+              document.querySelector(".saved-state").innerHTML = '<span class="saved-dot" aria-hidden="true"></span> Saved locally in this browser';
+            } catch {
+              document.querySelector(".saved-state").textContent = "Could not save in this browser";
+            }
           },
         );
       });
@@ -719,7 +316,9 @@ WebApp --> Customer: Order confirmation`,
       };
 
       window.exportDiagram = async function () {
-        const element = document.querySelector(".zenuml");
+        const element = workspace.classList.contains("mode-svg")
+          ? svgContainer.querySelector("svg")
+          : document.querySelector(".zenuml");
         if (element) {
           try {
             const dataUrl = await toPng(element);
@@ -753,7 +352,7 @@ WebApp --> Customer: Order confirmation`,
       const wp = params.get("WIDTH_PROVIDER") || import.meta.env.VITE_WIDTH_PROVIDER || "browser";
       const toggle = document.getElementById("width-provider-toggle");
       const isCanvas = wp === "canvas";
-      toggle.textContent = "WIDTH: " + wp;
+      toggle.textContent = "Text width: " + (isCanvas ? "Canvas" : "Browser") + " ▾";
       toggle.classList.toggle("is-active", isCanvas);
       toggle.title = "Click to switch to " + (isCanvas ? "browser" : "canvas");
       toggle.addEventListener("click", () => {
