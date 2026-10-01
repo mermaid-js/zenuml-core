@@ -31,9 +31,17 @@ If no PR is found, tell the user and stop.
 gh pr checks <PR_NUMBER> --repo mermaid-js/zenuml-core
 ```
 
-**If all checks pass**: Report success and stop. Nothing to babysit.
+Before claiming the PR is green or merge-ready, inspect its target branch and mergeability:
+
+```bash
+gh pr view <PR_NUMBER> --repo mermaid-js/zenuml-core --json mergeable,baseRefName,headRefName
+```
+
+**If all checks pass**: Verify merge readiness before reporting success, including whether the published PR branch can merge cleanly into the target branch. If a merge conflict exists, proceed to the Merge Conflict flow in Step 4 even though CI is green. Report success only after the branch is conflict-free and the required checks have completed.
 
 **If checks are still running**: Report status and wait. Use `gh run watch <RUN_ID> --repo mermaid-js/zenuml-core` to wait for completion (with a 10-minute timeout). Then re-evaluate.
+
+**If checks are absent or inconclusive**: Inspect the PR merge state and target/head relationship. If a merge conflict exists, proceed to the Merge Conflict flow in Step 4; otherwise report that no completed CI result is available and do not claim the PR is green.
 
 **If checks failed**: Proceed to Step 3.
 
@@ -153,7 +161,17 @@ This is the most common CI-only failure because snapshots are platform-specific.
 
 #### Merge Conflict
 
-1. **Report to user** — do NOT auto-resolve merge conflicts. Show what's conflicting and ask for guidance.
+1. **Wait for any previous CI run to finish** before pushing. A green or absent check result does not remove this requirement.
+2. **Preserve unrelated local work**: inspect the working tree and keep changes outside the authorized PR/shipping scope intact. Do not reset, discard, or overwrite unrelated edits.
+3. **Fetch and merge the target branch into the published PR branch**:
+   ```bash
+   git fetch origin <TARGET_BRANCH>
+   git merge --no-edit origin/<TARGET_BRANCH>
+   ```
+4. **Inspect base, ours, and theirs** for every conflict and reconcile the intended source and test behavior from both branches. Preserve all intended requirements and assertions; do not weaken or delete assertions to make the merge pass, and do not resolve conflicts by blanket-choosing one side.
+5. **Inspect both versions of every snapshot conflict**. Preserve intended expectations in text snapshots. Regenerate and review intentional Darwin visual baselines locally with the repository's snapshot-update commands. For Linux binary conflicts, choose a provisional baseline only to complete the local merge, record the affected paths as provisional, and do not treat it as final.
+6. **Verify and integrate in order**: resolve every conflict and marker, run the full unit, browser, and lint validation (`bun run test --run`, `bun pw`, and `bun eslint`), then complete the merge and push the published PR branch with regular ancestry (`git push origin <PR_BRANCH>`); never force-push.
+7. **Verify the remote result**: wait for the new CI runs to finish. If Linux baselines need updating, run the existing Linux snapshot update workflow against the merged remote PR head, wait for generation and verification, then pull and inspect its results. Claim CI green only after the required checks pass. Ask the user only when a genuine behavioral ambiguity or required human decision remains, and report the concrete issue.
 
 #### Infra/Flaky
 
@@ -216,7 +234,7 @@ After babysitting completes (success or exhausted retries), produce a brief repo
 ## Safety Rules
 
 - **Never force-push** — always regular `git push`
-- **Never resolve merge conflicts automatically** — report and ask
+- **Resolve merge conflicts autonomously within the authorized PR/shipping scope**; ask only when a genuine behavioral ambiguity or required human decision remains, and report the concrete issue
 - **Never push while CI is still running** from a previous attempt — wait for it to finish first
 - **Never modify the snapshot update workflow itself** — only trigger it
 - **Always verify fixes locally** before pushing (except Linux snapshot updates which can only be verified in CI)
