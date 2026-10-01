@@ -366,10 +366,81 @@ test("long nested fragment numbers fit their header and enclosing frame", async 
           number.getBoundingClientRect().left > frame.left &&
           label.getBoundingClientRect().right < frame.right,
         enclosed: !parentFrame || frame.right <= parentFrame.right,
+        frameFits:
+          frame.right <=
+          host.querySelector(".frame")!.getBoundingClientRect().right,
       };
     });
   });
   expect(fit).toHaveLength(14);
   for (const fragment of fit)
-    expect(fragment).toEqual({ inside: true, enclosed: true });
+    expect(fragment).toEqual({ inside: true, enclosed: true, frameFits: true });
+});
+
+test("nested custom section titles fit their fragment and enclosing frames", async ({
+  page,
+}) => {
+  await page.goto("/e2e/tools/stroke-examples.html");
+  await page.waitForFunction(() => (window as any).__strokeExamples?.ready);
+  const fit = await page.evaluate(async () => {
+    const { default: ZenUml } = await import("/src/core.tsx");
+    const host = document.createElement("pre");
+    host.className = "zenuml";
+    document.body.append(host);
+    await new ZenUml(host).render(`loop (pending) {
+      section (VeryLongCustomSectionTitleThatMustFitInsideTheParentFragmentAndDiagram) {
+        A->A:m
+      }
+    }`);
+    const frames = [...host.querySelectorAll(".fragment")].map((element) =>
+      element.getBoundingClientRect(),
+    );
+    const sectionTitle = host
+      .querySelector(".fragment-section .collapsible-header > label")!
+      .getBoundingClientRect();
+    return {
+      count: frames.length,
+      titleFits: sectionTitle.right < frames[1].right,
+      parentFits: frames[1].right <= frames[0].right,
+      frameFits:
+        frames[0].right <=
+        host.querySelector(".frame")!.getBoundingClientRect().right,
+    };
+  });
+  expect(fit).toEqual({
+    count: 2,
+    titleFits: true,
+    parentFits: true,
+    frameFits: true,
+  });
+});
+
+test("wide inner guards starting at later participants fit their enclosing fragment", async ({
+  page,
+}) => {
+  await page.goto("/e2e/tools/stroke-examples.html");
+  await page.waitForFunction(() => (window as any).__strokeExamples?.ready);
+  const fit = await page.evaluate(async () => {
+    const { default: ZenUml } = await import("/src/core.tsx");
+    const host = document.createElement("pre");
+    host.className = "zenuml";
+    document.body.append(host);
+    await new ZenUml(host).render(`loop(pending) {
+A->B:m
+loop(customerAccountIsActiveAndSubscriptionIsCurrentAndPaymentAuthorizationHasCompletedSuccessfully) {
+B->B:m
+}
+}`);
+    const frames = [...host.querySelectorAll(".fragment")].map((element) =>
+      element.getBoundingClientRect(),
+    );
+    return {
+      shifted: frames[1].left > frames[0].left + 20,
+      parentFits: frames[1].right <= frames[0].right,
+      frameFits:
+        frames[0].right <=
+        host.querySelector(".frame")!.getBoundingClientRect().right,
+    };
+  });
+  expect(fit).toEqual({ shifted: true, parentFits: true, frameFits: true });
 });

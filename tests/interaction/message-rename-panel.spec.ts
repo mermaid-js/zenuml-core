@@ -3,7 +3,7 @@ import { test, expect } from "../fixtures";
 test.describe("Message Rename Panel", () => {
   test("selects a message and clears selection on empty canvas click", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".sequence-diagram")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -23,7 +23,7 @@ test.describe("Message Rename Panel", () => {
 
   test("clears message selection with escape", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".sequence-diagram")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -43,7 +43,7 @@ test.describe("Message Rename Panel", () => {
 
   test("renames an async message from the toolbar", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".sequence-diagram")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 

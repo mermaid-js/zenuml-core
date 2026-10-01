@@ -3,7 +3,7 @@ import { test, expect } from "../fixtures";
 test.describe("Message Reorder", () => {
   test("reorders top-level messages by dragging one above another", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-message.html");
-    await expect(page.locator(".sequence-diagram")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -38,7 +38,7 @@ test.describe("Message Reorder", () => {
 
   test("reorders top-level messages by dragging one below another", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-message.html");
-    await expect(page.locator(".sequence-diagram")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -73,7 +73,7 @@ test.describe("Message Reorder", () => {
 
   test("shows a resize cursor when hovering a message", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-message.html");
-    await expect(page.locator(".sequence-diagram")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -88,7 +88,7 @@ test.describe("Message Reorder", () => {
 
   test("shows immediate pending feedback on pointer down before drag threshold", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-message.html");
-    await expect(page.locator(".sequence-diagram")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -115,7 +115,7 @@ test.describe("Message Reorder", () => {
 
   test("keeps the grabbing cursor while actively dragging", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-message.html");
-    await expect(page.locator(".sequence-diagram")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 

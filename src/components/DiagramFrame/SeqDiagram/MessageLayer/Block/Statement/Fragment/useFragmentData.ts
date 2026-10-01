@@ -8,19 +8,13 @@ import {
   rootContextAtom,
 } from "@/store/Store";
 import {
-  fragmentHeaderLabel,
+  fragmentMinimumWidth,
   fragmentHeaderWidth,
 } from "@/positioning/FragmentHeaderWidth";
-import {
-  FRAGMENT_MIN_WIDTH,
-  FRAGMENT_PADDING_X,
-} from "@/positioning/Constants";
+import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { useEffect, useMemo, useState } from "react";
 import { walkStatements } from "@/svg/walkStatements";
-import {
-  fragmentGuardKeyword,
-  fragmentGuardWidth,
-} from "@/positioning/FragmentGuardWidth";
+
 import sequenceParser from "@/generated-parser/sequenceParser";
 import Anchor2 from "@/positioning/Anchor2";
 import { centerOf } from "../utils";
@@ -104,71 +98,30 @@ export const useFragmentData = (
 ) => {
   const store = useStore();
   const enableNumbering = useAtomValue(enableNumberingAtom);
+  const coordinates = useAtomValue(coordinatesAtom);
   const headerLabel = header?.label;
   const headerNumber = header?.number;
   const headerMinWidth = useMemo(() => {
     if (headerLabel == null) return FRAGMENT_MIN_WIDTH;
     const infos = walkStatements(store.get(rootContextAtom)!);
     const own = infos.find((info) => info.statNode === context);
-    let width = fragmentHeaderWidth(
-      headerLabel,
-      enableNumbering ? headerNumber : undefined,
-    );
-    if (own) {
-      if (own.fragmentLabel)
-        width = Math.max(
-          width,
-          fragmentGuardWidth(
-            own.fragmentLabel,
-            fragmentGuardKeyword(own.fragmentKind!, own.guardKeyword),
+    return own
+      ? fragmentMinimumWidth(
+          own,
+          infos,
+          coordinates,
+          enableNumbering,
+          headerLabel,
+          headerNumber,
+        )
+      : Math.max(
+          FRAGMENT_MIN_WIDTH,
+          fragmentHeaderWidth(
+            headerLabel,
+            enableNumbering ? headerNumber : undefined,
           ),
         );
-      for (const section of own.fragmentSections ?? []) {
-        if (section.guardKeyword)
-          width = Math.max(
-            width,
-            fragmentGuardWidth(section.condition ?? "", section.guardKeyword),
-          );
-      }
-      for (const info of infos) {
-        if (
-          info.kind !== "fragment" ||
-          !info.number?.startsWith(`${own.number}.`)
-        )
-          continue;
-        const number = headerNumber
-          ? headerNumber + info.number.slice(own.number!.length)
-          : undefined;
-        const inset = (info.depth - own.depth) * FRAGMENT_PADDING_X * 2;
-        width = Math.max(
-          width,
-          fragmentHeaderWidth(
-            fragmentHeaderLabel(info.fragmentKind!),
-            enableNumbering ? number : undefined,
-          ) + inset,
-        );
-        if (info.fragmentLabel)
-          width = Math.max(
-            width,
-            fragmentGuardWidth(
-              info.fragmentLabel,
-              fragmentGuardKeyword(info.fragmentKind!, info.guardKeyword),
-            ) + inset,
-          );
-        for (const section of info.fragmentSections ?? []) {
-          if (section.guardKeyword)
-            width = Math.max(
-              width,
-              fragmentGuardWidth(
-                section.condition ?? "",
-                section.guardKeyword,
-              ) + inset,
-            );
-        }
-      }
-    }
-    return Math.max(FRAGMENT_MIN_WIDTH, width);
-  }, [context, store, headerLabel, headerNumber, enableNumbering]);
+  }, [context, store, headerLabel, headerNumber, enableNumbering, coordinates]);
   const [collapsed, setCollapsed] = useState(false);
   const toggleCollapse = () => {
     setCollapsed((prev) => !prev);
@@ -177,8 +130,6 @@ export const useFragmentData = (
   useEffect(() => {
     setCollapsed(false);
   }, [context]);
-
-  const coordinates = store.get(coordinatesAtom);
 
   const allParticipants = coordinates.orderedParticipantNames();
   const localParticipants = getLocalParticipantNames(context);

@@ -62,6 +62,9 @@ critical(locked) {
         condition: condition?.textContent ?? "",
         height: box.height,
         inset: first.getBoundingClientRect().left - box.left,
+        frameFits:
+          frame.right <=
+          host.querySelector(".frame")!.getBoundingClientRect().right,
         fits:
           !condition ||
           condition.getBoundingClientRect().right <= frame.right - 4,
@@ -122,6 +125,7 @@ critical(locked) {
     expect(row.height).toBe(28);
     expect(row.inset).toBe(4);
     expect(row.fits).toBe(true);
+    expect(row.frameFits).toBe(true);
     expect(row.baseline).toBe(0);
     if (row.keywordStyle)
       expect(row.keywordStyle).toBe("12px/400/rgb(107, 114, 128)");

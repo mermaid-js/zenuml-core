@@ -270,6 +270,7 @@ export function buildFragmentGeometry(
   return {
     fragment: {
       kind: info.fragmentKind!,
+      headerLabel: info.fragmentHeaderLabel,
       label: info.fragmentLabel || "",
       guardKeyword: info.guardKeyword,
       labelWidth: info.fragmentLabel

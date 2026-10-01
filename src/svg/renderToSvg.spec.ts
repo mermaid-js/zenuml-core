@@ -335,6 +335,30 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain("negative");
   });
 
+  it("preserves long custom section titles inside their parent and diagram", () => {
+    const title =
+      "VeryLongCustomSectionTitleThatMustFitInsideTheParentFragmentAndDiagram";
+    const result = renderToSvg(
+      `loop(pending) {
+section(${title}) {
+A->A:m
+}
+}`,
+    );
+    const outer = result.geometry!.fragments.find(
+      (fragment) => fragment.kind === "loop",
+    )!;
+    const inner = result.geometry!.fragments.find(
+      (fragment) => fragment.kind === "section",
+    )!;
+    expect(inner.headerLabel).toBe(title);
+    expect(result.svg).toContain(`>${title}</text>`);
+    expect(inner.x + inner.width).toBeLessThanOrEqual(outer.x + outer.width);
+    expect(outer.x + outer.width).toBeLessThanOrEqual(
+      result.geometry!.width + result.geometry!.frameBorderRight,
+    );
+  });
+
   it("renders loop fragment", () => {
     const result = renderToSvg("loop(3) {\n  A -> B: repeat\n}");
     expect(result.svg).toContain('class="fragment fragment-loop"');

@@ -27,7 +27,7 @@ const HALF_STROKE = STROKE_WIDTH / 2; // 0.5px inset
 
 export function renderFragment(f: FragmentGeometry): string {
   const parts: string[] = [];
-  const kindLabel = fragmentHeaderLabel(f.kind);
+  const kindLabel = f.headerLabel ?? fragmentHeaderLabel(f.kind);
   const width = Math.max(f.width, fragmentHeaderWidth(kindLabel, f.number));
 
   // Fragment border rect — inset by half stroke width so outer stroke

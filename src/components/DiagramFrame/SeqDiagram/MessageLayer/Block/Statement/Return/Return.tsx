@@ -32,7 +32,8 @@ export const Return = (props: {
   const target = ret?.ReturnTo() || _STARTER_;
 
   const messageContext = asyncMessage?.content() || ret?.expr();
-  let start = -1, stop = -1;
+  let start = -1,
+    stop = -1;
   if (messageContext instanceof sequenceParser.AtomExprContext) {
     const ret = messageContext.atom();
     [start, stop] = [ret?.start?.start, ret?.stop?.stop];

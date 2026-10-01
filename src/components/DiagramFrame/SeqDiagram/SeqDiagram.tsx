@@ -2,6 +2,7 @@ import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import {
   coordinatesAtom,
+  enableNumberingAtom,
   diagramElementAtom,
   modeAtom,
   RenderMode,
@@ -18,6 +19,9 @@ import {
   useMemo,
   useRef,
 } from "react";
+import { walkStatements } from "@/svg/walkStatements";
+import { fragmentMinimumWidth } from "@/positioning/FragmentHeaderWidth";
+import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { TotalWidth } from "./WidthOfContext";
 import "./SeqDiagram.css";
 import { cn } from "@/utils";
@@ -36,6 +40,7 @@ export const SeqDiagram = (props: {
   const mode = useAtomValue(modeAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
+  const enableNumbering = useAtomValue(enableNumberingAtom);
   const isEmpty = useMemo(
     () => coordinates.orderedParticipantNames().length === 0,
     [coordinates],
@@ -65,8 +70,26 @@ export const SeqDiagram = (props: {
     //   [MessageLayer width] <- contextWidth
     //  [Frame width        ]
     // || <- frameBorderLeft extra width provided by container
-    return contextWidth - frameBorderLeft;
-  }, [rootContext, coordinates, frameBorderLeft]);
+    const infos = walkStatements(rootContext!);
+    const participants = coordinates.orderedParticipantNames();
+    const builder = new FrameBuilder(participants);
+    let contentWidth = contextWidth - frameBorderLeft;
+    for (const info of infos) {
+      if (info.kind !== "fragment") continue;
+      const locals = getLocalParticipantNames(info.statNode);
+      const left = participants.find((name) => locals.includes(name));
+      if (!left) continue;
+      const border = FrameBorder(builder.getFrame(info.statNode));
+      const fragmentLeft =
+        coordinates.getPosition(left) - coordinates.half(left) - border.left;
+      contentWidth = Math.max(
+        contentWidth,
+        fragmentLeft +
+          fragmentMinimumWidth(info, infos, coordinates, enableNumbering),
+      );
+    }
+    return contentWidth;
+  }, [rootContext, coordinates, frameBorderLeft, enableNumbering]);
 
   return (
     <div

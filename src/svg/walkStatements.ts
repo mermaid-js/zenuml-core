@@ -32,6 +32,7 @@ export interface StatementInfo {
   fragmentKind?: FragmentKind;
   /** For fragments: condition/label text */
   fragmentLabel?: string;
+  fragmentHeaderLabel?: string;
   guardKeyword?: string;
   /** For fragments: section info (for alt/tcf with multiple sections) */
   fragmentSections?: FragmentSectionInfo[];
@@ -266,6 +267,7 @@ function walkBlock(
       hasBlock: false,
       fragmentKind: fragmentInfo.fragmentKind,
       fragmentLabel: fragmentInfo.label,
+      fragmentHeaderLabel: fragmentInfo.headerLabel,
       guardKeyword: fragmentInfo.guardKeyword,
       fragmentSections: fragmentInfo.sections,
       comment,
@@ -288,6 +290,7 @@ function walkBlock(
 }
 
 interface FragmentExtract {
+  headerLabel?: string;
   fragmentKind: FragmentKind;
   label: string;
   guardKeyword?: string;
@@ -302,6 +305,7 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
       const label = condition?.getFormattedText?.() || "";
       return {
         fragmentKind: kind,
+        headerLabel: frag.atom?.()?.getFormattedText?.(),
         label,
         guardKeyword: kind === "loop" ? frag.WHILE?.()?.getText?.() : undefined,
         sections: [{ label, blockNode: frag.braceBlock?.()?.block?.() }],

@@ -157,6 +157,7 @@ export interface CatchBlockNode extends AntlrNode {
 
 /** Single-block fragments: loop, opt, par, critical, section */
 export interface SingleBlockFragmentNode extends AntlrNode {
+  atom?(): AntlrNode | null;
   /** Loop aliases share WHILE token kind; getText preserves the source keyword. */
   WHILE?(): AntlrNode | null;
   parExpr?(): { condition?(): AntlrNode } | null;

@@ -24,14 +24,29 @@ const renderFragment = (
 };
 
 describe("fragment header numbering", () => {
-  test.each(["for", "while", "loop", "foreach", "forEach"])("keeps the original %s loop keyword in its guard", (keyword) => {
-    const view = renderFragment(`${keyword}(pending) {\n A->B:work\n}`);
-    expect(view.container.querySelector(".guard-keyword")?.textContent).toBe(keyword);
-  });
+  test.each(["for", "while", "loop", "foreach", "forEach"])(
+    "keeps the original %s loop keyword in its guard",
+    (keyword) => {
+      const view = renderFragment(`${keyword}(pending) {\n A->B:work\n}`);
+      expect(view.container.querySelector(".guard-keyword")?.textContent).toBe(
+        keyword,
+      );
+    },
+  );
   test("labels all alternative guard branches with keywords instead of brackets", () => {
-    const view = renderFragment("if(approved) {\n A->B:first\n} else if(retry) {\n A->B:second\n} else {\n B->A:third\n}");
-    expect([...view.container.querySelectorAll(".guard-keyword")].map((element) => element.textContent)).toEqual(["if", "else if", "else"]);
-    expect([...view.container.querySelectorAll(".guard-row")].map((element) => element.textContent)).toEqual(["ifapproved", "else ifretry", "else"]);
+    const view = renderFragment(
+      "if(approved) {\n A->B:first\n} else if(retry) {\n A->B:second\n} else {\n B->A:third\n}",
+    );
+    expect(
+      [...view.container.querySelectorAll(".guard-keyword")].map(
+        (element) => element.textContent,
+      ),
+    ).toEqual(["if", "else if", "else"]);
+    expect(
+      [...view.container.querySelectorAll(".guard-row")].map(
+        (element) => element.textContent,
+      ),
+    ).toEqual(["ifapproved", "else ifretry", "else"]);
   });
   test("does not invent a while guard when a loop has no condition", () => {
     const view = renderFragment("loop {\n A->B:work\n}");

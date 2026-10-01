@@ -210,7 +210,10 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
   for (const inner of [...fragments].sort((a, b) => a.height - b.height)) {
     inner.width = Math.max(
       inner.width,
-      fragmentHeaderWidth(fragmentHeaderLabel(inner.kind), inner.number),
+      fragmentHeaderWidth(
+        inner.headerLabel ?? fragmentHeaderLabel(inner.kind),
+        inner.number,
+      ),
     );
     if (inner.label)
       inner.width = Math.max(

@@ -125,6 +125,7 @@ export interface FragmentSectionGeometry {
 }
 
 export interface FragmentGeometry {
+  headerLabel?: string;
   kind: FragmentKind;
   label: string;
   guardKeyword?: string;
