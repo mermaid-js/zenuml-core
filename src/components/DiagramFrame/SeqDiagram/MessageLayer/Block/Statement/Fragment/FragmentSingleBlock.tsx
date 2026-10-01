@@ -2,7 +2,7 @@ import CommentClass from "@/components/Comment/Comment";
 import Icon from "@/components/Icon/Icons";
 import { cn } from "@/utils";
 import { Block } from "../../Block";
-import { Numbering } from "../../../Numbering";
+import { FragmentNumbering } from "./FragmentNumbering";
 import { Comment } from "../Comment/Comment";
 import { CollapseButton } from "./CollapseButton";
 import { ConditionLabel } from "./ConditionLabel";
@@ -36,6 +36,8 @@ const labels: Record<SingleBlockFragmentKind, string> = {
 
 export const FragmentSingleBlock = (props: FragmentSingleBlockProps) => {
   const { kind } = props;
+  const fragment = props.context[kind]();
+  const label = fragment?.atom?.()?.getFormattedText() ?? labels[kind];
   const {
     collapsed,
     toggleCollapse,
@@ -43,11 +45,12 @@ export const FragmentSingleBlock = (props: FragmentSingleBlockProps) => {
     fragmentStyle,
     border,
     leftParticipant,
-  } = useFragmentData(props.context, props.origin);
-  const fragment = props.context[kind]();
+  } = useFragmentData(props.context, props.origin, {
+    label,
+    number: props.number,
+  });
   const block = fragment?.braceBlock()?.block();
   const condition = fragment?.parExpr?.()?.condition?.();
-  const label = fragment?.atom?.()?.getFormattedText() ?? labels[kind];
   const isOpt = kind === "opt";
   const isLoop = kind === "loop";
   const isSection = kind === "section";
@@ -75,9 +78,9 @@ export const FragmentSingleBlock = (props: FragmentSingleBlockProps) => {
           !isOpt && "rounded-t",
         )}
       >
-        <Numbering number={props.number} />
-        <div className="name font-semibold p-1 border-b">
-          <label className="p-0 flex items-center gap-0.5">
+        <div className="name font-normal p-1 border-b">
+          <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
+            <FragmentNumbering number={props.number} />
             <Icon name={`${kind}-fragment`} />
             <CollapseButton
               label={label}
@@ -102,9 +105,18 @@ export const FragmentSingleBlock = (props: FragmentSingleBlockProps) => {
           {isSection ? (
             <div className="text-skin-fragment flex" />
           ) : (
-            (isLoop || condition) && (
+            condition && (
               <div className="text-skin-fragment">
-                <ConditionLabel condition={condition} />
+                <ConditionLabel
+                  keyword={
+                    isLoop
+                      ? fragment.WHILE?.()?.getText?.()
+                      : isOpt
+                        ? "if"
+                        : undefined
+                  }
+                  condition={condition}
+                />
               </div>
             )
           )}

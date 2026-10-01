@@ -1,6 +1,7 @@
 import type { MessageGeometry, SelfCallGeometry } from "../geometry";
 import { esc, styleToAttr } from "./svgUtils";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
+import { renderMessageNumber } from "./numbering";
 
 export function renderMessage(m: MessageGeometry): string {
   // HTML arrow SVG container spans from left_lifeline_center+1 to right_lifeline_center.
@@ -19,11 +20,9 @@ export function renderMessage(m: MessageGeometry): string {
   const dashAttr = m.arrowStyle === "dashed" ? ' stroke-dasharray="6,4"' : "";
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
 
-  // Sequence number: positioned to the LEFT of the message with 4px gap (matching HTML pr-1).
+  // Sequence badge sits to the left of the message with a 4px gutter.
   const numberX = Math.min(fromX, toX) - 4;
-  const numberSvg = m.number
-    ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
-    : "";
+  const numberSvg = renderMessageNumber(m.number, numberX, labelY);
 
   // The 1px crisp shaft and antialiased head need a shared center at a
   // half-pixel coordinate. Keep the head's outer SVG box at its old position.
@@ -51,9 +50,7 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   // For async, labelY = s.y + 15, but number should be at s.y + 11 (4px higher).
   // For sync, labelY = s.y + 11, number at same Y (both flush with container).
   const numberY = s.y + 12;
-  const numberSvg = s.number
-    ? `<text x="${x1 - 3}" y="${numberY}" text-anchor="end" class="seq-number">${esc(s.number)}</text>`
-    : "";
+  const numberSvg = renderMessageNumber(s.number, x1 - 3, numberY);
 
   // Reuse the exact same SVG structure as the HTML SelfInvocation component:
   //   <svg width="30" height="24">
@@ -72,8 +69,8 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   const arrowTx = isAsync ? 0 : 7;
   const arrowFill = isAsync ? "none" : "#000";
   const arrowPath = isAsync
-    ? 'M1 1.25 L6.15 4.5 L1 7.75'
-    : 'M1 1.25 L6.15 4.5 L1 7.75 Z';
+    ? "M1 1.25 L6.15 4.5 L1 7.75"
+    : "M1 1.25 L6.15 4.5 L1 7.75 Z";
 
   return `<g class="message self-call">
   <svg x="${svgX}" y="${svgY}" width="30" height="24">
@@ -117,7 +114,9 @@ function renderArrowHead(
   // 0.85px too far outward on both LTR and RTL arrows.
   const svgX = pointsLeft ? tipX : tipX - 7;
   const svgY = tipY - 5;
-  const rtlTransform = pointsLeft ? ' transform="scale(-1, 1) translate(-7, 0)"' : "";
+  const rtlTransform = pointsLeft
+    ? ' transform="scale(-1, 1) translate(-7, 0)"'
+    : "";
 
   return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9" overflow="visible" class="arrow-head${isFilled ? "" : " arrow-open"}">
     <g${rtlTransform}>

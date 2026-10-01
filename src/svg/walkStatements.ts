@@ -13,6 +13,8 @@ import type { RootContextNode, BlockNode, StatNode } from "@/parser/AntlrTypes";
 
 export interface FragmentSectionInfo {
   label: string;
+  guardKeyword?: string;
+  condition?: string;
   /** The parse tree block node for this section (used for inner statement key lookups) */
   blockNode: BlockNode | undefined;
 }
@@ -30,6 +32,8 @@ export interface StatementInfo {
   fragmentKind?: FragmentKind;
   /** For fragments: condition/label text */
   fragmentLabel?: string;
+  fragmentHeaderLabel?: string;
+  guardKeyword?: string;
   /** For fragments: section info (for alt/tcf with multiple sections) */
   fragmentSections?: FragmentSectionInfo[];
   /** Inline comment text (e.g. // String line) */
@@ -263,6 +267,8 @@ function walkBlock(
       hasBlock: false,
       fragmentKind: fragmentInfo.fragmentKind,
       fragmentLabel: fragmentInfo.label,
+      fragmentHeaderLabel: fragmentInfo.headerLabel,
+      guardKeyword: fragmentInfo.guardKeyword,
       fragmentSections: fragmentInfo.sections,
       comment,
       statNode: stat,
@@ -284,8 +290,10 @@ function walkBlock(
 }
 
 interface FragmentExtract {
+  headerLabel?: string;
   fragmentKind: FragmentKind;
   label: string;
+  guardKeyword?: string;
   sections: FragmentSectionInfo[];
 }
 
@@ -297,14 +305,16 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
       const label = condition?.getFormattedText?.() || "";
       return {
         fragmentKind: kind,
+        headerLabel: frag.atom?.()?.getFormattedText?.(),
         label,
+        guardKeyword: kind === "loop" ? frag.WHILE?.()?.getText?.() : undefined,
         sections: [{ label, blockNode: frag.braceBlock?.()?.block?.() }],
       };
     }
   }
 
   // Alt (if/else if/else) — multiple sections
-  // Section labels match HTML visible text: "Alt", "[cond2]", "[else]"
+  // Guard keywords are separate from editable condition text.
   const alt = stat.alt?.();
   if (alt) {
     const sections: FragmentSectionInfo[] = [];
@@ -313,22 +323,27 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
       // First section label = kind name (matches HTML header visible text)
       sections.push({
         label: "Alt",
+        guardKeyword: "if",
+        condition:
+          ifBlock.parExpr?.()?.condition?.()?.getFormattedText?.() || "",
         blockNode: ifBlock.braceBlock?.()?.block?.(),
       });
     }
     for (const elseIf of alt.elseIfBlock?.() || []) {
       const condition = elseIf.parExpr?.()?.condition?.();
       const label = condition?.getFormattedText?.() || "";
-      // HTML renders as "[ cond ]" (condition in brackets with spaces, "else if" is hidden)
       sections.push({
-        label: `[ ${label} ]`,
+        label: `else if ${label}`,
+        guardKeyword: "else if",
+        condition: label,
         blockNode: elseIf.braceBlock?.()?.block?.(),
       });
     }
     const elseBlock = alt.elseBlock?.();
     if (elseBlock) {
       sections.push({
-        label: "[else]",
+        label: "else",
+        guardKeyword: "else",
         blockNode: elseBlock.braceBlock?.()?.block?.(),
       });
     }

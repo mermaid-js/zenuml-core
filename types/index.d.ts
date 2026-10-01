@@ -8,6 +8,8 @@ export type SvgTheme =
 export interface RenderOptions {
   /** Theme name. Unknown names fall back to 'theme-default'. */
   theme?: SvgTheme;
+  /** Show sequence references and their badges; defaults to true. */
+  enableNumbering?: boolean;
 }
 
 export interface RenderResult {

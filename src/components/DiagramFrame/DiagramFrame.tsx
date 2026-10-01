@@ -9,7 +9,6 @@ import {
 } from "react";
 import { cn } from "@/utils";
 import { Debug } from "./Debug";
-import { Privacy } from "./Privacy";
 import { DiagramTitle } from "./DiagramTitle";
 import { SeqDiagram } from "./SeqDiagram/SeqDiagram";
 
@@ -124,8 +123,6 @@ export const DiagramFrame = ({
             <div className="left hide-export">{children}</div>
             <div className="right flex-grow flex justify-between">
               <DiagramTitle context={title} />
-              {/* Knowledge: how to vertically align a svg icon. */}
-              <Privacy className="hide-export flex items-center" />
             </div>
           </div>
           <SeqDiagram

@@ -4,7 +4,7 @@ import { CollapseButton } from "./CollapseButton";
 import { Block } from "../../Block";
 import { useFragmentData } from "./useFragmentData";
 import { Comment } from "../Comment/Comment";
-import { Numbering } from "../../../Numbering";
+import { FragmentNumbering } from "./FragmentNumbering";
 import { cn } from "@/utils";
 import { ConditionLabel } from "./ConditionLabel";
 import "./FragmentAlt.css";
@@ -48,7 +48,10 @@ export const FragmentAlt = (props: {
     paddingLeft,
     fragmentStyle,
     leftParticipant,
-  } = useFragmentData(props.context, props.origin);
+  } = useFragmentData(props.context, props.origin, {
+    label: "Alt",
+    number: props.number,
+  });
 
   return (
     <div
@@ -66,9 +69,9 @@ export const FragmentAlt = (props: {
         <Comment comment={props.comment} commentObj={props.commentObj} />
       )}
       <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
-        <Numbering number={props.number} />
-        <div className="name font-semibold p-1 border-b">
-          <label className="p-0 flex items-center gap-0.5">
+        <div className="name font-normal p-1 border-b">
+          <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
+            <FragmentNumbering number={props.number} />
             <Icon name="alt-fragment" />
             <CollapseButton
               label="Alt"
@@ -84,7 +87,10 @@ export const FragmentAlt = (props: {
       <div className={collapsed ? "hidden" : "block"}>
         <div className="segment">
           <div className="text-skin-fragment">
-            <ConditionLabel condition={conditionFromIfElseBlock(ifBlock)} />
+            <ConditionLabel
+              keyword="if"
+              condition={conditionFromIfElseBlock(ifBlock)}
+            />
           </div>
           {blockInIfBlock && (
             <Block
@@ -98,10 +104,13 @@ export const FragmentAlt = (props: {
         </div>
         {elseIfBlocks.map((elseIfBlock: any, index: number) => (
           <Fragment key={index}>
-            <div className="segment border-t border-solid mt-2" key={index + 500}>
+            <div
+              className="segment border-t border-solid mt-2"
+              key={index + 500}
+            >
               <div className="text-skin-fragment" key={index + 1000}>
-                <label className="else-if hidden">else if</label>
                 <ConditionLabel
+                  keyword="else if"
                   condition={conditionFromIfElseBlock(elseIfBlock)}
                 />
               </div>
@@ -120,7 +129,7 @@ export const FragmentAlt = (props: {
           <>
             <div className="segment border-t border-solid mt-2">
               <div className="text-skin-fragment">
-                <label className="p-1">[else]</label>
+                <ConditionLabel keyword="else" />
               </div>
               <Block
                 origin={leftParticipant}

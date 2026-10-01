@@ -4,6 +4,7 @@ import {
   WidthProviderOnCanvas,
   measureSvgFragmentLabelWidth,
   measureSvgParticipantLabelWidth,
+  measureTextWithFont,
   setCanvasContext,
 } from "./WidthProviderFunc";
 import { TextType } from "./Coordinate";
@@ -52,8 +53,9 @@ describe("width-measurement caching", () => {
     setCanvasContext(realContext());
     const text = "Fragment label";
     const at14 = measureSvgFragmentLabelWidth(text);
-    const at16 = measureSvgParticipantLabelWidth(text);
+    const at16 = measureTextWithFont(text, "16px");
     expect(at16).toBeGreaterThan(at14);
+    expect(measureSvgParticipantLabelWidth(text)).toBe(at14);
   });
 
   it("caches a canvas measurement across clearCache", () => {

@@ -19,7 +19,7 @@ const ICON_PAINT_OFFSET_X = 4;
 const LABEL_PAD_LEFT = 8;
 const LABEL_HORIZONTAL_PADDING = 16;
 const STEREOTYPE_VERTICAL_OFFSET = 8;
-const STEREOTYPE_FONT_SIZE = 16;
+const STEREOTYPE_FONT_SIZE = 14;
 const BOUNDARY_ICON_VERTICAL_TWEAK = 2.75;
 const PARTICIPANT_TEXT_FILL = "#222";
 
@@ -54,11 +54,19 @@ export function renderParticipant(p: ParticipantGeometry): string {
     // inside the <text> element but textWidth only covers the plain label.
     // Add PARTICIPANT_EMOJI_WIDTH to account for the emoji glyph + space.
     const emojiExtra = p.emoji ? PARTICIPANT_EMOJI_WIDTH : 0;
-    const groupWidth = ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_HORIZONTAL_PADDING + textWidth + emojiExtra;
+    const groupWidth =
+      ICON_SIZE +
+      ICON_MARGIN_RIGHT +
+      LABEL_HORIZONTAL_PADDING +
+      textWidth +
+      emojiExtra;
     const groupX = p.x - groupWidth / 2;
     const iconX = groupX + ICON_PAINT_OFFSET_X;
     const iconType = p.type?.toLowerCase();
-    const iconY = p.y + (p.height - ICON_SIZE) / 2 + (iconType === "boundary" ? BOUNDARY_ICON_VERTICAL_TWEAK : 0);
+    const iconY =
+      p.y +
+      (p.height - ICON_SIZE) / 2 +
+      (iconType === "boundary" ? BOUNDARY_ICON_VERTICAL_TWEAK : 0);
     if (p.emoji) {
       // When both type icon and emoji are present, render the emoji as a separate
       // <text> element (like emoji-only participants) positioned immediately after
@@ -97,16 +105,15 @@ export function renderParticipant(p: ParticipantGeometry): string {
     emojiIconSvg = `<text x="${emojiTextX}" y="${labelY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
   }
 
-  // Match the current HTML renderer: stereotypes inherit the same 16px text styling
+  // Match the current HTML renderer: stereotypes inherit the same 14px text styling
   // and theme-default participant text color rather than SVG-side contrast heuristics.
   let stereotypeSvg = "";
   if (p.stereotype) {
     // Stereotype is always centered over the full participant box (text-anchor="middle").
     // When a type icon is present, center over the label portion only.
     // When no icon (plain or emoji-only), center at p.x (participant center).
-    const stereoX = icon && p.labelWidth != null
-      ? textX + p.labelWidth / 2
-      : p.x;
+    const stereoX =
+      icon && p.labelWidth != null ? textX + p.labelWidth / 2 : p.x;
     const stereoAnchor = "middle";
     const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET;
     stereotypeSvg = `<text x="${stereoX}" y="${stereoY}" text-anchor="${stereoAnchor}" dominant-baseline="central" class="stereotype-label" font-size="${STEREOTYPE_FONT_SIZE}"${participantTextStyle()}>${esc("«" + p.stereotype + "»")}</text>`;
@@ -136,7 +143,10 @@ export function renderParticipant(p: ParticipantGeometry): string {
 </g>`;
 }
 
-export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number): string {
+export function renderParticipantBottom(
+  p: ParticipantGeometry,
+  bottomY: number,
+): string {
   if (!p.showBottom || p.isStarter) return "";
   const rx = 4 - HALF_STROKE;
   const x = p.x - p.width / 2 + HALF_STROKE;
@@ -176,7 +186,12 @@ export function renderParticipantBottom(p: ParticipantGeometry, bottomY: number)
   if (p.emoji && icon) {
     const textWidth = p.labelWidth ?? 0;
     const emojiExtra = PARTICIPANT_EMOJI_WIDTH;
-    const groupWidth = ICON_SIZE + ICON_MARGIN_RIGHT + LABEL_HORIZONTAL_PADDING + textWidth + emojiExtra;
+    const groupWidth =
+      ICON_SIZE +
+      ICON_MARGIN_RIGHT +
+      LABEL_HORIZONTAL_PADDING +
+      textWidth +
+      emojiExtra;
     const groupX = p.x - groupWidth / 2;
     const iconX = groupX + ICON_PAINT_OFFSET_X;
     const emojiTextX = iconX + ICON_SIZE + ICON_MARGIN_RIGHT;
@@ -234,7 +249,10 @@ function normalizeHexColor(color: string): string {
 /**
  * Build fill and text-color style attributes for a participant with a background color.
  */
-function colorAttrs(color: string | undefined): { fillStyle: string; textStyle: string } {
+function colorAttrs(color: string | undefined): {
+  fillStyle: string;
+  textStyle: string;
+} {
   if (!color) {
     return { fillStyle: "", textStyle: "" };
   }
@@ -248,4 +266,3 @@ function colorAttrs(color: string | undefined): { fillStyle: string; textStyle: 
 function participantTextStyle(): string {
   return ` style="fill:${PARTICIPANT_TEXT_FILL};"`;
 }
-

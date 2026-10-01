@@ -17,7 +17,9 @@ export const CollapseButton = (props: {
       )}
       style={props.style}
     >
-      <label className="mb-0">{props.label}</label>
+      <label className="mb-0 [font-variant-caps:all-small-caps]">
+        {props.label}
+      </label>
       {props.collapsed ? (
         <Icon
           name="collapse-unexpanded"

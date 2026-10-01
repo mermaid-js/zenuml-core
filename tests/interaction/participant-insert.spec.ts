@@ -57,7 +57,7 @@ test.describe("Participant Insert", () => {
 
   test("shows insert button on hover between participants", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -77,7 +77,7 @@ test.describe("Participant Insert", () => {
 
   test("one-click inserts a participant between two lifelines and rewrites DSL", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -120,7 +120,7 @@ test.describe("Participant Insert", () => {
 
   test("insert button is vertically centered with participant headers", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -159,7 +159,7 @@ test.describe("Participant Insert", () => {
 test.describe("Empty Diagram Prompt", () => {
   test("clicking the empty diagram prompt adds the first participant", async ({ page }) => {
     await page.goto("/e2e/fixtures/empty-diagram.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId("empty-diagram-prompt")).toBeVisible({ timeout: 5000 });
 
     const prompt = page.getByTestId("empty-diagram-prompt");
     await expect(prompt).toBeVisible();

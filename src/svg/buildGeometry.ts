@@ -8,6 +8,14 @@
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { FRAGMENT_PADDING_X } from "@/positioning/Constants";
+import {
+  fragmentHeaderLabel,
+  fragmentHeaderWidth,
+} from "@/positioning/FragmentHeaderWidth";
+import {
+  fragmentGuardKeyword,
+  fragmentGuardWidth,
+} from "@/positioning/FragmentGuardWidth";
 import { TextType } from "@/positioning/Coordinate";
 import { OrderedParticipants } from "@/parser/OrderedParticipants";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
@@ -16,7 +24,11 @@ import FrameBorder from "@/positioning/FrameBorder";
 import type { DiagramGeometry, FragmentGeometry } from "./geometry";
 import type { RootContextNode } from "@/parser/AntlrTypes";
 import { PARTICIPANT_VISUAL_HEIGHT } from "./svgConstants";
-import { buildParticipants, buildLifelines, buildGroups } from "./buildParticipantGeometry";
+import {
+  buildParticipants,
+  buildLifelines,
+  buildGroups,
+} from "./buildParticipantGeometry";
 import { buildMessages } from "./buildStatementGeometry";
 
 export interface BuildGeometryInput {
@@ -25,10 +37,12 @@ export interface BuildGeometryInput {
   verticalCoordinates: VerticalCoordinates;
   title?: string;
   measureText?: (text: string, type: TextType) => number;
+  enableNumbering?: boolean;
 }
 
 export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
-  const { rootContext, coordinates, verticalCoordinates, title, measureText } = input;
+  const { rootContext, coordinates, verticalCoordinates, title, measureText } =
+    input;
   const participantModels = OrderedParticipants(rootContext);
   const totalHeight = verticalCoordinates.getTotalHeight();
 
@@ -52,7 +66,29 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     participants,
     measureText,
   );
-  const { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments } = buildResult;
+  const {
+    messages,
+    selfCalls,
+    occurrences,
+    creations,
+    fragments,
+    returns,
+    dividers,
+    comments,
+  } = buildResult;
+  // Remove references before measuring header widths and export badge padding.
+  if (input.enableNumbering === false) {
+    const numberedItems = [
+      ...messages,
+      ...selfCalls,
+      ...fragments,
+      ...returns,
+      ...creations.map((creation) => creation.message),
+    ];
+    for (const numbered of numberedItems) {
+      numbered.number = undefined;
+    }
+  }
 
   // Compute diagram height from the positioning engine's totalHeight (primary) or
   // max rendered content Y (fallback). Returns need more bottom overhead than other elements
@@ -62,10 +98,12 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
   // bottom space = viewHeight_overhead(47) - headerLineY(34)).
   let maxOccBottom = 0;
   let maxOtherY = 0;
-  for (const o of occurrences) maxOccBottom = Math.max(maxOccBottom, o.y + o.height);
+  for (const o of occurrences)
+    maxOccBottom = Math.max(maxOccBottom, o.y + o.height);
   for (const m of messages) maxOtherY = Math.max(maxOtherY, m.y);
   for (const s of selfCalls) maxOtherY = Math.max(maxOtherY, s.y + s.height);
-  for (const c of creations) maxOtherY = Math.max(maxOtherY, c.message.y + PARTICIPANT_VISUAL_HEIGHT);
+  for (const c of creations)
+    maxOtherY = Math.max(maxOtherY, c.message.y + PARTICIPANT_VISUAL_HEIGHT);
   for (const f of fragments) maxOtherY = Math.max(maxOtherY, f.y + f.height);
   for (const d of dividers) maxOtherY = Math.max(maxOtherY, d.y);
   const diagramHeight = Math.max(
@@ -77,10 +115,7 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
   const lifelineBottom = diagramHeight + PARTICIPANT_VISUAL_HEIGHT - 28;
 
   // Build lifelines AFTER height adjustment so they extend to the correct bottom
-  const lifelines = buildLifelines(
-    participants,
-    lifelineBottom,
-  );
+  const lifelines = buildLifelines(participants, lifelineBottom);
 
   // Diagram width is HTML's canonical TotalWidth (WidthOfContext.ts), which is
   // max(participantWidth, FRAGMENT_MIN_WIDTH) + border.left + border.right +
@@ -141,9 +176,12 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     let nestDepth = 0;
     for (const outer of fragments) {
       if (outer === inner) continue;
-      if (outer.x <= inner.x && outer.y <= inner.y &&
-          outer.x + outer.width >= inner.x + inner.width &&
-          outer.y + outer.height >= inner.y + inner.height) {
+      if (
+        outer.x <= inner.x &&
+        outer.y <= inner.y &&
+        outer.x + outer.width >= inner.x + inner.width &&
+        outer.y + outer.height >= inner.y + inner.height
+      ) {
         nestDepth++;
       }
     }
@@ -165,6 +203,49 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     if (currentRight >= targetRight - 20 && currentRight < targetRight) {
       f.width = targetRight - f.x;
     }
+  }
+
+  // Size titles after spatial nesting is established, then keep their enclosing
+  // fragments and the exported viewBox large enough for the complete header.
+  for (const inner of [...fragments].sort((a, b) => a.height - b.height)) {
+    inner.width = Math.max(
+      inner.width,
+      fragmentHeaderWidth(
+        inner.headerLabel ?? fragmentHeaderLabel(inner.kind),
+        inner.number,
+      ),
+    );
+    if (inner.label)
+      inner.width = Math.max(
+        inner.width,
+        fragmentGuardWidth(
+          inner.label,
+          fragmentGuardKeyword(inner.kind, inner.guardKeyword),
+        ),
+      );
+    for (const section of inner.sections) {
+      if (section.guardKeyword)
+        inner.width = Math.max(
+          inner.width,
+          fragmentGuardWidth(section.innerLabel ?? "", section.guardKeyword),
+        );
+    }
+    for (const outer of fragments) {
+      if (
+        outer.y < inner.y &&
+        outer.y + outer.height >= inner.y + inner.height &&
+        outer.x <= inner.x
+      ) {
+        outer.width = Math.max(
+          outer.width,
+          inner.x + inner.width + FRAGMENT_PADDING_X - outer.x,
+        );
+      }
+    }
+    diagramWidth = Math.max(
+      diagramWidth,
+      inner.x + inner.width - frameBorder.right,
+    );
   }
 
   // Build group geometry from participants that share a groupId

@@ -164,9 +164,9 @@ export function resolvePalette(theme?: string): SvgPalette {
 /**
  * The `<style>` body embedded in every rendered SVG.
  *
- * Divider colours and the sequence-number grey are deliberately not themed:
- * the divider draws its own light background, and both read on light and dark
- * grounds.
+ * Sequence-number styling is deliberately kept neutral so it reads across
+ * light and dark themes; the fragment number background reuses the theme's
+ * fragment text colour at low opacity.
  */
 export function buildThemeStyles(p: SvgPalette): string {
   return `
@@ -174,32 +174,36 @@ export function buildThemeStyles(p: SvgPalette): string {
   .frame-border-inner { fill: ${p.frameBg}; }
   .frame-header-bg { fill: ${p.frameBg}; }
   .frame-header-line { stroke: ${p.frameBorder}; stroke-width: 1; shape-rendering: crispEdges; }
-  .frame-title { font-family: ${p.fontFamily}; font-size: 16px; font-weight: 600; fill: ${p.titleText}; }
+  .frame-title { font-family: ${p.fontFamily}; font-size: 14px; font-weight: 400; fill: ${p.titleText}; }
   .participant-box { fill: ${p.participantBg}; stroke: ${p.participantBorder}; stroke-width: 1; }
-  .participant-label { font-family: ${p.fontFamily}; font-size: 16px; fill: ${p.participantText}; }
+  .participant-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.participantText}; }
   .participant-icon { color: ${p.participantText}; }
   .participant-icon [fill="currentColor"]:not([stroke]) { stroke: ${p.participantBorder}; stroke-width: 1; }
   .lifeline { stroke: ${p.participantBorder}; stroke-width: 1; }
   .message-line { stroke: ${p.messageArrow}; stroke-width: 1; shape-rendering: crispEdges; }
-  .message-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.messageText}; }
+  .message-label { font-family: ${p.fontFamily}; font-size: 15px; fill: ${p.messageText}; }
   .arrow-head { fill: ${p.messageArrow}; stroke: ${p.messageArrow}; stroke-width: 1; }
   .arrow-open { fill: none; }
   .occurrence { fill: ${p.occurrenceBg}; stroke: ${p.occurrenceBorder}; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-border { fill: none; stroke: ${p.fragmentBorder}; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-header { fill: ${p.fragmentHeaderBg}; fill-opacity: ${p.fragmentHeaderOpacity}; stroke: none; shape-rendering: crispEdges; }
-  .fragment-label { font-family: ${p.fontFamily}; font-size: 14px; font-weight: 600; fill: ${p.fragmentText}; }
+  .fragment-number-bg { fill: ${p.fragmentText}; fill-opacity: 0.08; stroke: none; }
+  .message-number-bg { fill: #6b7280; fill-opacity: 0.1; stroke: none; }
+  .fragment-label { font-family: ${p.fontFamily}; font-size: 14px; font-weight: 400; font-variant-caps: all-small-caps; fill: ${p.fragmentText}; }
   .fragment-condition { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.fragmentText}; }
   .fragment-separator { stroke: ${p.fragmentSeparator}; stroke-width: 1; shape-rendering: crispEdges; }
+  .fragment-section-keyword { font-variant-caps: all-small-caps; }
   .fragment-section-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.fragmentText}; }
   .return-line { stroke: ${p.messageArrow}; stroke-width: 1; stroke-dasharray: 6,4; shape-rendering: crispEdges; }
   .return-arrow { stroke: ${p.messageArrow}; stroke-width: 1; fill: none; }
-  .return-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.messageText}; }
+  .return-label { font-family: ${p.fontFamily}; font-size: 15px; fill: ${p.messageText}; }
   .return-icon { fill: ${p.messageText}; }
   .divider-line { stroke: #aaaa33; stroke-width: 1; }
   .divider-bg { fill: #fff5ad; stroke: #aaaa33; stroke-width: 1; }
   .divider-label { font-family: ${p.fontFamily}; font-size: 14px; fill: #333; }
   .comment-text { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.commentText}; opacity: 0.5; }
-  .seq-number { font-family: ${p.fontFamily}; font-size: 12px; font-weight: 100; fill: #6b7280; }
+  .guard-keyword { font-family: ${p.fontFamily}; font-size: 12px; font-weight: 400; font-variant-caps: all-small-caps; fill: #6b7280; }
+  .seq-number { font-family: ${p.fontFamily}; font-size: 12px; font-weight: 400; fill: #6b7280; }
   .group-outline { fill: none; stroke: ${p.participantBorder}; }
   .group-title-bg { fill: ${p.frameBg}; stroke: none; }
   .group-title-text { font-family: ${p.fontFamily}; font-size: 13px; font-weight: 400; fill: ${p.participantText}; }

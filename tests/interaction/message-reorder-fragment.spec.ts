@@ -3,7 +3,7 @@ import { test, expect } from "../fixtures";
 test.describe("Message Reorder in Fragment", () => {
   test("reorders messages inside an alt fragment by dragging", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-fragment.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -39,7 +39,7 @@ test.describe("Message Reorder in Fragment", () => {
 
   test("shows ns-resize cursor on messages inside a fragment", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-fragment.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -52,7 +52,7 @@ test.describe("Message Reorder in Fragment", () => {
 
   test("moves a top-level message into a fragment by dragging onto a fragment message", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-cross-fragment.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
@@ -88,7 +88,7 @@ test.describe("Message Reorder in Fragment", () => {
 
   test("moves a fragment message out to the top level by dragging onto a top-level message", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-cross-fragment.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 

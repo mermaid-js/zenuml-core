@@ -1,6 +1,9 @@
 import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordinate";
 import type { SingleBlockFragmentKind } from "@/positioning/vertical/StatementTypes";
-import { FRAGMENT_BORDER_WIDTH } from "@/positioning/vertical/LayoutMetrics";
+import {
+  FRAGMENT_BORDER_WIDTH,
+  FRAGMENT_GUARD_HEIGHT,
+} from "@/positioning/vertical/LayoutMetrics";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
@@ -23,7 +26,7 @@ export class FragmentSingleBlockVM extends StatementVM {
       commentHeight;
 
     const hasCondition = Boolean(this.fragment?.parExpr?.()?.condition?.());
-    if (hasCondition) cursor += 20;
+    if (hasCondition) cursor += FRAGMENT_GUARD_HEIGHT;
 
     const block = this.fragment?.braceBlock?.()?.block?.();
     if (block) {

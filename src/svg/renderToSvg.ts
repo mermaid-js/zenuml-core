@@ -19,6 +19,7 @@ import { renderDivider } from "./components/divider";
 import { renderComment } from "./components/comment";
 import { renderGroup } from "./components/group";
 import { esc } from "./components/svgUtils";
+import { messageNumberWidth } from "./components/numbering";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import type { DiagramGeometry } from "./geometry";
 import { buildThemeStyles, resolvePalette } from "./themes";
@@ -27,6 +28,8 @@ import type { SvgTheme } from "./themes";
 export interface RenderOptions {
   /** Theme name; see src/svg/themes.ts. Unknown names fall back to theme-default. */
   theme?: SvgTheme;
+  /** Show sequence references and their badges; defaults to true. */
+  enableNumbering?: boolean;
   /** Optional emoji shortcode-to-Unicode cache (for future use by Task 8) */
   emojiCache?: Map<string, string>;
 }
@@ -81,6 +84,7 @@ export function renderToSvg(
     verticalCoordinates,
     title,
     measureText: WidthProviderOnCanvas,
+    enableNumbering: options?.enableNumbering,
   });
 
   // 5. Render to SVG
@@ -93,7 +97,40 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
   const headerH = FRAME_HEADER_HEIGHT;
   // Content left offset = 1 (frame border) + 10 (seq-diagram px-2.5 padding) + frameBorderLeft
   // This matches the HTML layout: .frame(1px border) > .sequence-diagram(px-2.5) > div(paddingLeft:frameBorderLeft) > content
-  const contentLeftMargin = 1 + padding + g.frameBorderLeft;
+  let contentLeftMargin = 1 + padding + g.frameBorderLeft;
+  // Deep sequence references can be wider than their source participant's
+  // left margin. Keep their full badge inside the exported frame.
+  let numberLeft = 0;
+  for (const message of [
+    ...g.messages,
+    ...g.creations.map((creation) => creation.message),
+  ]) {
+    if (!message.number) continue;
+    numberLeft = Math.min(
+      numberLeft,
+      Math.min(message.fromX, message.toX) +
+        1 -
+        4 -
+        messageNumberWidth(message.number),
+    );
+  }
+  for (const call of g.selfCalls) {
+    if (call.number)
+      numberLeft = Math.min(
+        numberLeft,
+        call.x - 3 - messageNumberWidth(call.number),
+      );
+  }
+  for (const returned of g.returns) {
+    if (returned.number && !returned.isSelf)
+      numberLeft = Math.min(
+        numberLeft,
+        Math.min(returned.fromX, returned.toX) -
+          4 -
+          messageNumberWidth(returned.number),
+      );
+  }
+  contentLeftMargin += Math.max(0, padding - contentLeftMargin - numberLeft);
   const viewWidth =
     g.width + contentLeftMargin + padding + g.frameBorderRight + 1;
   const viewHeight = g.height + padding * 2 + headerH - 1; // -1 to match HTML CSS border-box visual height
