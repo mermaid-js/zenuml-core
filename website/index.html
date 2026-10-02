@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ZenUML — Sequence Diagrams From Text, No Server Needed</title>
+  <meta name="description" content="Create sequence diagrams from text with ZenUML — a client-side, open-source library. No server, npm-installable, and it works in Confluence and Mermaid." />
+  <link rel="canonical" href="https://zenuml.com/" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ZenUML" />
+  <meta property="og:title" content="ZenUML — Sequence Diagrams From Text" />
+  <meta property="og:description" content="Write Markdown-style text, get a sequence diagram. Client-side, open source, npm-installable, and embeddable anywhere." />
+  <meta property="og:url" content="https://zenuml.com/" />
+  <meta property="og:image" content="https://zenuml.com/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:alt" content="ZenUML — turn text into sequence diagrams" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ZenUML — Sequence Diagrams From Text" />
+  <meta name="twitter:description" content="Write Markdown-style text, get a sequence diagram. Client-side, open source, npm-installable." />
+  <meta name="twitter:image" content="https://zenuml.com/assets/og.png" />
+
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ZenUML",
+    "url": "https://zenuml.com/",
+    "description": "Turn Markdown-style text into sequence diagrams, rendered client-side with no server.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://zenuml.com/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ZenUML",
+    "url": "https://zenuml.com/",
+    "logo": "https://zenuml.com/assets/favicon.svg",
+    "email": "hello@zenuml.com",
+    "contactPoint": { "@type": "ContactPoint", "email": "hello@zenuml.com", "contactType": "customer support" },
+    "sameAs": [
+      "https://github.com/mermaid-js/zenuml-core",
+      "https://app.zenuml.com",
+      "https://www.npmjs.com/package/@zenuml/core"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is ZenUML?",
+        "acceptedAnswer": { "@type": "Answer", "text": "ZenUML is an open-source JavaScript library, published as @zenuml/core, that turns Markdown-style text into sequence diagrams. It renders entirely in the browser, so you never need a diagram server." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I create sequence diagrams from text?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Write a few lines of DSL, such as A.method or A->B: message, wrap conditionals in if(cond){...} and loops in while(cond){...}. ZenUML parses the text and renders an SVG sequence diagram instantly." }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need a server or an account to render diagrams?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. ZenUML runs client-side using a React 19 renderer. You install @zenuml/core from npm and render diagrams locally, or use the hosted Live Editor at app.zenuml.com." }
+      },
+      {
+        "@type": "Question",
+        "name": "Where can I use ZenUML?",
+        "acceptedAnswer": { "@type": "Answer", "text": "ZenUML works in Confluence through the Atlassian Marketplace app, in the ZenUML Live Editor, in JetBrains IDEs, in VS Code, in a Chrome extension, and inside Mermaid, which supports zenuml as a diagram type." }
+      },
+      {
+        "@type": "Question",
+        "name": "Which diagram features does the DSL support?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The DSL supports messages, self-messages, activations, participant declarations with @Actor, comments, dividers, and combined fragments including alt via if/else, opt, loop via while, and par for parallel work." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is ZenUML free and open source?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. ZenUML is open source under an MIT-style license and developed in the open at github.com/mermaid-js/zenuml-core. You can read the code, file issues, and contribute." }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ===== HEADER / NAV ===== -->
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="/" aria-label="ZenUML home">
+        <svg class="brand__mark" viewBox="0 0 32 32" role="img" aria-hidden="true">
+          <rect x="3" y="4" width="26" height="24" rx="3" fill="#FFC93C" stroke="#171412" stroke-width="2.5"/>
+          <path d="M9 11h14M9 16h9" stroke="#171412" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M9 21h8l-3-3M17 21l3 3" stroke="#2F6BFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>ZenUML</span>
+      </a>
+      <button class="nav__toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">☰</button>
+      <ul class="nav__links" id="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#examples">Examples</a></li>
+        <li><a href="https://github.com/mermaid-js/zenuml-core">Docs / GitHub</a></li>
+        <li class="nav__cta"><a class="btn btn--primary" href="https://app.zenuml.com">Open Live Editor ▸</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div class="memphis-deco" aria-hidden="true" style="top:8%;left:4%;font-size:2rem;">▸</div>
+      <div class="memphis-deco" aria-hidden="true" style="top:70%;left:2%;font-size:2.4rem;">┊</div>
+      <div class="memphis-deco" aria-hidden="true" style="top:20%;right:3%;font-size:2rem;">⌐</div>
+      <div class="memphis-deco" aria-hidden="true" style="bottom:8%;right:6%;font-size:2.2rem;">-&gt;</div>
+      <div class="wrap">
+        <div class="hero__inner">
+          <div class="hero__copy">
+            <span class="eyebrow">Diagrams as code</span>
+            <h1><span class="hl">Sequence diagrams</span> from text, in seconds</h1>
+            <p class="hero__sub">Write a few Markdown-style lines and ZenUML instantly draws the participants, arrows and lifelines for you — rendered right in the browser. No server, no dragging boxes, no accounts.</p>
+            <div class="hero__ctas">
+              <a class="btn btn--primary" href="https://app.zenuml.com">Open Live Editor ▸</a>
+              <a class="btn btn--yellow" href="https://www.npmjs.com/package/@zenuml/core">View on npm</a>
+              <a class="btn btn--ghost" href="https://github.com/mermaid-js/zenuml-core">GitHub ★</a>
+            </div>
+          </div>
+
+          <div class="hero__signature">
+            <div class="transform">
+              <div class="editor-card">
+                <div class="editor-card__bar" aria-hidden="true">
+                  <span class="editor-card__dot editor-card__dot--r"></span>
+                  <span class="editor-card__dot editor-card__dot--y"></span>
+                  <span class="editor-card__dot editor-card__dot--g"></span>
+                  <span class="editor-card__name">order.zen</span>
+                </div>
+<pre class="code" tabindex="0" aria-label="ZenUML DSL source (scrollable)"><span class="p">User</span>.<span class="m">checkout</span>() {
+  <span class="p">Order</span>.<span class="m">validate</span>()
+  <span class="c">// charge the card</span>
+  <span class="p">Order</span>-&gt;<span class="p">Payment</span>: <span class="m">charge</span>
+  <span class="k">if</span>(paid) {
+    <span class="p">Order</span>.<span class="m">confirm</span>()
+  }
+}</pre>
+              </div>
+
+              <div class="arrow-token" aria-hidden="true">=&gt;</div>
+
+              <div class="diagram-card">
+                <svg class="zsvg" viewBox="0 0 300 320" role="img" aria-labelledby="heroTitle heroDesc">
+                  <title id="heroTitle">Sequence diagram generated from the ZenUML text on the left</title>
+                  <desc id="heroDesc">Three participants — User, Order and Payment — exchange a checkout, validate, charge and confirm sequence with an activation bar and a self-message loop.</desc>
+
+                  <!-- participant boxes with hard offset shadows -->
+                  <rect class="box-shadow" x="18" y="20" width="66" height="34"/>
+                  <rect class="box box--yellow" x="14" y="16" width="66" height="34" rx="3"/>
+                  <text class="label" x="47" y="38" text-anchor="middle">User</text>
+
+                  <rect class="box-shadow" x="122" y="20" width="66" height="34"/>
+                  <rect class="box box--mint" x="118" y="16" width="66" height="34" rx="3"/>
+                  <text class="label" x="151" y="38" text-anchor="middle">Order</text>
+
+                  <rect class="box-shadow" x="226" y="20" width="66" height="34"/>
+                  <rect class="box box--lilac" x="222" y="16" width="66" height="34" rx="3"/>
+                  <text class="label" x="255" y="38" text-anchor="middle">Payment</text>
+
+                  <!-- lifelines -->
+                  <line class="lifeline" x1="47" y1="50" x2="47" y2="300"/>
+                  <line class="lifeline" x1="151" y1="50" x2="151" y2="300"/>
+                  <line class="lifeline" x1="255" y1="50" x2="255" y2="300"/>
+
+                  <!-- activation bar on Order -->
+                  <rect class="activation" x="145" y="86" width="12" height="150"/>
+
+                  <!-- checkout: User -> Order -->
+                  <path class="arrow draw" style="--len:104" d="M47 86 H151" marker-end="url(#ah)"/>
+                  <text class="msg" x="98" y="80" text-anchor="middle">checkout()</text>
+
+                  <!-- self message: Order validate (memphis squiggle loop) -->
+                  <path class="arrow draw" style="--len:120" d="M157 116 q34 -2 32 16 q-2 16 -32 12" marker-end="url(#ah)"/>
+                  <text class="msg" x="196" y="112" text-anchor="start">validate()</text>
+
+                  <!-- charge: Order -> Payment -->
+                  <path class="arrow draw" style="--len:98" d="M157 172 H255" marker-end="url(#ah)"/>
+                  <text class="msg" x="206" y="166" text-anchor="middle">charge</text>
+
+                  <!-- confirm return: Order self (loop squiggle) -->
+                  <path class="arrow draw arrow--return" style="--len:120" d="M157 210 q34 -2 32 14 q-2 14 -32 10" marker-end="url(#ah)"/>
+                  <text class="msg" x="196" y="206" text-anchor="start">confirm()</text>
+
+                  <defs>
+                    <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                      <path d="M0 0 L9 4.5 L0 9 Z" fill="#171412"/>
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TRUST STRIP ===== -->
+    <section class="section section--panel" aria-label="Where ZenUML works">
+      <div class="wrap">
+        <p class="eyebrow" style="display:block;text-align:center;background:transparent;border:0;box-shadow:none;margin-bottom:1rem;">Works everywhere you already write</p>
+        <div class="trust">
+          <span class="chip">Confluence</span>
+          <span class="chip">Mermaid</span>
+          <span class="chip">JetBrains</span>
+          <span class="chip">VS Code</span>
+          <span class="chip">Chrome</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FEATURES ===== -->
+    <section class="section" id="features">
+      <div class="wrap">
+        <span class="eyebrow">Why ZenUML</span>
+        <h2>Diagrams that live in your codebase</h2>
+        <p class="section-lead">Because the diagram is text, it belongs in the same place as everything else you version, review and ship. Here is what that buys you.</p>
+
+        <div class="grid grid--3" style="margin-top:2.5rem;">
+          <article class="card feature reveal">
+            <svg class="feature__icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="8" width="16" height="12" rx="2" fill="none" stroke="#171412" stroke-width="2.5"/><rect x="26" y="8" width="16" height="12" rx="2" fill="none" stroke="#171412" stroke-width="2.5"/><path d="M22 14h20" stroke="#2F6BFF" stroke-width="2.5"/><path d="M8 26h32M8 32h22M8 38h28" stroke="#171412" stroke-width="2.5" stroke-linecap="round"/></svg>
+            <h3>Diagrams as code</h3>
+            <p>Describe a flow in plain text and ZenUML draws it. Edit a line, the diagram updates — no dragging boxes into place.</p>
+          </article>
+
+          <article class="card feature reveal">
+            <svg class="feature__icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 6v36" stroke="#171412" stroke-width="2.5"/><circle cx="24" cy="12" r="5" fill="#FFC93C" stroke="#171412" stroke-width="2.5"/><circle cx="14" cy="30" r="5" fill="#2FD3A5" stroke="#171412" stroke-width="2.5"/><circle cx="34" cy="30" r="5" fill="#FF5B4C" stroke="#171412" stroke-width="2.5"/><path d="M24 17l-10 8M24 17l10 8" stroke="#171412" stroke-width="2.5"/></svg>
+            <h3>Version-controllable</h3>
+            <p>Diagrams diff cleanly in Git. Review them in a pull request, revert a bad change, and keep them in sync with the code they document.</p>
+          </article>
+
+          <article class="card feature reveal">
+            <svg class="feature__icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="16" fill="none" stroke="#171412" stroke-width="2.5"/><path d="M24 24l9-5" stroke="#FF5B4C" stroke-width="2.5" stroke-linecap="round"/><path d="M24 24V12" stroke="#171412" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="24" r="3" fill="#171412"/></svg>
+            <h3>No server needed</h3>
+            <p>Rendering happens client-side with a React 19 engine. Your diagram source and data never leave the browser.</p>
+          </article>
+
+          <article class="card feature reveal">
+            <svg class="feature__icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="8" width="32" height="32" rx="2" fill="none" stroke="#171412" stroke-width="2.5" stroke-dasharray="6 4"/><path d="M8 14h6M34 14h6M8 8v6M40 8v6" stroke="#171412" stroke-width="3" stroke-linecap="round"/><path d="M16 24h16M16 30h10" stroke="#2F6BFF" stroke-width="2.5" stroke-linecap="round"/></svg>
+            <h3>Fragments built in</h3>
+            <p>Wrap logic in <code>if</code>/<code>else</code>, <code>opt</code>, <code>while</code> loops and <code>par</code> blocks. Alt, option, loop and parallel frames draw automatically.</p>
+          </article>
+
+          <article class="card feature reveal">
+            <svg class="feature__icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 10l-6 14 6 14M34 10l6 14-6 14" fill="none" stroke="#171412" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="18" r="3" fill="#FFC93C" stroke="#171412" stroke-width="2"/><circle cx="24" cy="30" r="3" fill="#2FD3A5" stroke="#171412" stroke-width="2"/></svg>
+            <h3>Themeable output</h3>
+            <p>The renderer produces clean, styleable SVG, so you can match your brand, your docs, or a dark theme without post-processing.</p>
+          </article>
+
+          <article class="card feature reveal">
+            <svg class="feature__icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="12" width="34" height="24" rx="3" fill="none" stroke="#171412" stroke-width="2.5"/><path d="M7 20h34" stroke="#171412" stroke-width="2.5"/><circle cx="12" cy="16" r="1.6" fill="#FF5B4C"/><circle cx="17" cy="16" r="1.6" fill="#FFC93C"/><path d="M16 28h16" stroke="#2F6BFF" stroke-width="2.5" stroke-linecap="round"/></svg>
+            <h3>Embeddable widget</h3>
+            <p>Install <code>@zenuml/core</code> from npm and mount the renderer anywhere — docs sites, dashboards, internal tools, or a Confluence page.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section class="section section--panel" id="how">
+      <div class="wrap">
+        <span class="eyebrow">How it works</span>
+        <h2>Three steps, one arrow each</h2>
+        <p class="section-lead">The pipeline is short on purpose: text in, diagram out. Here is the exact path a line of DSL takes.</p>
+
+        <div class="steps" style="margin-top:2.5rem;">
+          <article class="step reveal">
+            <span class="step__wire" aria-hidden="true">▸</span>
+            <span class="step__num">01</span>
+            <h3>Write the DSL</h3>
+            <p>Type a message like <code>A-&gt;B: request</code> or a call like <code>A.method()</code>. Add fragments, comments and participants as you go.</p>
+          </article>
+          <article class="step reveal">
+            <span class="step__wire" aria-hidden="true">▸</span>
+            <span class="step__num">02</span>
+            <h3>Parse the text</h3>
+            <p>ZenUML parses your text into an ordered model of participants and messages, resolving who talks to whom and in what sequence.</p>
+          </article>
+          <article class="step reveal">
+            <span class="step__num">03</span>
+            <h3>Render the SVG</h3>
+            <p>The React renderer lays out boxes, lifelines and arrows and paints a crisp SVG sequence diagram — instantly, in the browser.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== LIVE EXAMPLES ===== -->
+    <section class="section" id="examples">
+      <div class="wrap">
+        <span class="eyebrow">Live examples</span>
+        <h2>See the grammar in action</h2>
+        <p class="section-lead">Same tiny language, four different shapes. Switch a tab to swap the source and its diagram.</p>
+
+        <div class="examples" style="margin-top:2rem;">
+          <div class="examples__tabs" role="tablist" aria-label="Example diagrams">
+            <button class="tab" role="tab" id="tab-simple" aria-selected="true" aria-controls="panel-simple">Simple call</button>
+            <button class="tab" role="tab" id="tab-alt" aria-selected="false" aria-controls="panel-alt" tabindex="-1">Conditional (alt)</button>
+            <button class="tab" role="tab" id="tab-loop" aria-selected="false" aria-controls="panel-loop" tabindex="-1">Loop</button>
+            <button class="tab" role="tab" id="tab-async" aria-selected="false" aria-controls="panel-async" tabindex="-1">Async</button>
+          </div>
+
+          <!-- Panel: Simple call -->
+          <div class="example-panel" id="panel-simple" role="tabpanel" aria-labelledby="tab-simple" tabindex="0">
+            <div class="editor-card">
+              <div class="editor-card__bar" aria-hidden="true"><span class="editor-card__dot editor-card__dot--r"></span><span class="editor-card__dot editor-card__dot--y"></span><span class="editor-card__dot editor-card__dot--g"></span><span class="editor-card__name">simple.zen</span></div>
+<pre class="code" tabindex="0" aria-label="ZenUML DSL source (scrollable)"><span class="p">Client</span>-&gt;<span class="p">Server</span>: <span class="m">GET /orders</span>
+<span class="p">Server</span>.<span class="m">query</span>()
+<span class="p">Server</span>--&gt;<span class="p">Client</span>: <span class="m">200 OK</span></pre>
+            </div>
+            <div class="diagram-card">
+              <svg class="zsvg" viewBox="0 0 300 230" role="img" aria-labelledby="exSimpleT exSimpleD">
+                <title id="exSimpleT">Simple request-response sequence diagram</title>
+                <desc id="exSimpleD">Client sends GET /orders to Server, Server queries itself, then returns 200 OK to Client.</desc>
+                <rect class="box-shadow" x="42" y="20" width="70" height="34"/><rect class="box box--yellow" x="38" y="16" width="70" height="34" rx="3"/><text class="label" x="73" y="38" text-anchor="middle">Client</text>
+                <rect class="box-shadow" x="192" y="20" width="70" height="34"/><rect class="box box--mint" x="188" y="16" width="70" height="34" rx="3"/><text class="label" x="223" y="38" text-anchor="middle">Server</text>
+                <line class="lifeline" x1="73" y1="50" x2="73" y2="210"/><line class="lifeline" x1="223" y1="50" x2="223" y2="210"/>
+                <rect class="activation" x="217" y="84" width="12" height="70"/>
+                <path class="arrow" d="M73 84 H223" marker-end="url(#ah2)"/><text class="msg" x="148" y="78" text-anchor="middle">GET /orders</text>
+                <path class="arrow" d="M229 112 q30 -2 28 14 q-2 14 -28 10" marker-end="url(#ah2)"/><text class="msg" x="262" y="110" text-anchor="start">query()</text>
+                <path class="arrow arrow--return" d="M223 172 H73" marker-end="url(#ah2)"/><text class="msg" x="148" y="166" text-anchor="middle">200 OK</text>
+                <defs><marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="#171412"/></marker></defs>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Panel: Conditional -->
+          <div class="example-panel" id="panel-alt" role="tabpanel" aria-labelledby="tab-alt" tabindex="0" hidden>
+            <div class="editor-card">
+              <div class="editor-card__bar" aria-hidden="true"><span class="editor-card__dot editor-card__dot--r"></span><span class="editor-card__dot editor-card__dot--y"></span><span class="editor-card__dot editor-card__dot--g"></span><span class="editor-card__name">login.zen</span></div>
+<pre class="code" tabindex="0" aria-label="ZenUML DSL source (scrollable)"><span class="p">User</span>-&gt;<span class="p">Auth</span>: <span class="m">login()</span>
+<span class="k">if</span>(valid) {
+  <span class="p">Auth</span>--&gt;<span class="p">User</span>: <span class="m">token</span>
+} <span class="k">else</span> {
+  <span class="p">Auth</span>--&gt;<span class="p">User</span>: <span class="m">401</span>
+}</pre>
+            </div>
+            <div class="diagram-card">
+              <svg class="zsvg" viewBox="0 0 300 250" role="img" aria-labelledby="exAltT exAltD">
+                <title id="exAltT">Conditional login sequence diagram with an alt fragment</title>
+                <desc id="exAltD">User calls login on Auth. An alt fragment shows a token returned when valid, or a 401 returned otherwise.</desc>
+                <rect class="box-shadow" x="34" y="20" width="66" height="34"/><rect class="box box--yellow" x="30" y="16" width="66" height="34" rx="3"/><text class="label" x="63" y="38" text-anchor="middle">User</text>
+                <rect class="box-shadow" x="200" y="20" width="66" height="34"/><rect class="box box--lilac" x="196" y="16" width="66" height="34" rx="3"/><text class="label" x="229" y="38" text-anchor="middle">Auth</text>
+                <line class="lifeline" x1="63" y1="50" x2="63" y2="234"/><line class="lifeline" x1="229" y1="50" x2="229" y2="234"/>
+                <path class="arrow" d="M63 78 H229" marker-end="url(#ah3)"/><text class="msg" x="146" y="72" text-anchor="middle">login()</text>
+                <rect class="frag" x="24" y="92" width="250" height="128"/>
+                <path class="frag-tab" d="M24 92 h44 v16 l-8 8 H24 Z"/><text class="msg" x="30" y="106" text-anchor="start" style="font-weight:700">alt</text>
+                <line x1="24" y1="160" x2="274" y2="160" stroke="#171412" stroke-width="2" stroke-dasharray="6 5"/>
+                <path class="arrow arrow--return" d="M229 132 H63" marker-end="url(#ah3)"/><text class="msg" x="146" y="126" text-anchor="middle">token</text>
+                <text class="msg" x="30" y="176" text-anchor="start">[else]</text>
+                <path class="arrow arrow--return" d="M229 198 H63" marker-end="url(#ah3)"/><text class="msg" x="146" y="192" text-anchor="middle">401</text>
+                <defs><marker id="ah3" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="#171412"/></marker></defs>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Panel: Loop -->
+          <div class="example-panel" id="panel-loop" role="tabpanel" aria-labelledby="tab-loop" tabindex="0" hidden>
+            <div class="editor-card">
+              <div class="editor-card__bar" aria-hidden="true"><span class="editor-card__dot editor-card__dot--r"></span><span class="editor-card__dot editor-card__dot--y"></span><span class="editor-card__dot editor-card__dot--g"></span><span class="editor-card__name">poll.zen</span></div>
+<pre class="code" tabindex="0" aria-label="ZenUML DSL source (scrollable)"><span class="p">Worker</span>-&gt;<span class="p">Queue</span>: <span class="m">connect</span>
+<span class="k">while</span>(job) {
+  <span class="p">Worker</span>-&gt;<span class="p">Queue</span>: <span class="m">poll()</span>
+  <span class="p">Queue</span>--&gt;<span class="p">Worker</span>: <span class="m">job</span>
+}</pre>
+            </div>
+            <div class="diagram-card">
+              <svg class="zsvg" viewBox="0 0 300 250" role="img" aria-labelledby="exLoopT exLoopD">
+                <title id="exLoopT">Polling loop sequence diagram</title>
+                <desc id="exLoopD">Worker connects to Queue, then a loop fragment repeats polling and receiving a job.</desc>
+                <rect class="box-shadow" x="30" y="20" width="70" height="34"/><rect class="box box--mint" x="26" y="16" width="70" height="34" rx="3"/><text class="label" x="61" y="38" text-anchor="middle">Worker</text>
+                <rect class="box-shadow" x="200" y="20" width="66" height="34"/><rect class="box box--coral" x="196" y="16" width="66" height="34" rx="3"/><text class="label" x="229" y="38" text-anchor="middle">Queue</text>
+                <line class="lifeline" x1="61" y1="50" x2="61" y2="234"/><line class="lifeline" x1="229" y1="50" x2="229" y2="234"/>
+                <path class="arrow" d="M61 78 H229" marker-end="url(#ah4)"/><text class="msg" x="145" y="72" text-anchor="middle">connect</text>
+                <rect class="frag" x="22" y="94" width="252" height="120"/>
+                <path class="frag-tab" d="M22 94 h52 v16 l-8 8 H22 Z"/><text class="msg" x="28" y="108" text-anchor="start" style="font-weight:700">loop</text>
+                <text class="msg" x="78" y="108" text-anchor="start">[job]</text>
+                <path class="arrow" d="M61 138 H229" marker-end="url(#ah4)"/><text class="msg" x="145" y="132" text-anchor="middle">poll()</text>
+                <path class="arrow arrow--return" d="M229 178 H61" marker-end="url(#ah4)"/><text class="msg" x="145" y="172" text-anchor="middle">job</text>
+                <defs><marker id="ah4" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="#171412"/></marker></defs>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Panel: Async -->
+          <div class="example-panel" id="panel-async" role="tabpanel" aria-labelledby="tab-async" tabindex="0" hidden>
+            <div class="editor-card">
+              <div class="editor-card__bar" aria-hidden="true"><span class="editor-card__dot editor-card__dot--r"></span><span class="editor-card__dot editor-card__dot--y"></span><span class="editor-card__dot editor-card__dot--g"></span><span class="editor-card__name">notify.zen</span></div>
+<pre class="code" tabindex="0" aria-label="ZenUML DSL source (scrollable)"><span class="c">// fire and forget</span>
+<span class="p">Api</span>-&gt;<span class="p">Bus</span>: <span class="m">publish(event)</span>
+<span class="p">Bus</span>-&gt;<span class="p">Email</span>: <span class="m">send</span>
+<span class="p">Bus</span>-&gt;<span class="p">Push</span>: <span class="m">send</span></pre>
+            </div>
+            <div class="diagram-card">
+              <svg class="zsvg" viewBox="0 0 300 250" role="img" aria-labelledby="exAsyncT exAsyncD">
+                <title id="exAsyncT">Asynchronous fan-out sequence diagram</title>
+                <desc id="exAsyncD">Api publishes an event to Bus, which asynchronously sends to both an Email and a Push participant.</desc>
+                <rect class="box-shadow" x="14" y="20" width="54" height="34"/><rect class="box box--yellow" x="10" y="16" width="54" height="34" rx="3"/><text class="label" x="37" y="38" text-anchor="middle">Api</text>
+                <rect class="box-shadow" x="112" y="20" width="54" height="34"/><rect class="box box--mint" x="108" y="16" width="54" height="34" rx="3"/><text class="label" x="135" y="38" text-anchor="middle">Bus</text>
+                <rect class="box-shadow" x="196" y="20" width="60" height="34"/><rect class="box box--lilac" x="192" y="16" width="60" height="34" rx="3"/><text class="label" x="222" y="38" text-anchor="middle">Email</text>
+                <rect class="box-shadow" x="264" y="20" width="30" height="34"/><rect class="box box--coral" x="260" y="16" width="30" height="34" rx="3"/><text class="label" x="275" y="37" text-anchor="middle" style="font-size:11px">Push</text>
+                <line class="lifeline" x1="37" y1="50" x2="37" y2="234"/><line class="lifeline" x1="135" y1="50" x2="135" y2="234"/><line class="lifeline" x1="222" y1="50" x2="222" y2="234"/><line class="lifeline" x1="275" y1="50" x2="275" y2="234"/>
+                <path class="arrow" d="M37 96 H135" marker-end="url(#ah5)"/><text class="msg" x="86" y="90" text-anchor="middle">publish(event)</text>
+                <path class="arrow" d="M135 148 H222" marker-end="url(#ah5)"/><text class="msg" x="178" y="142" text-anchor="middle">send</text>
+                <path class="arrow" d="M135 196 H275" marker-end="url(#ah5)"/><text class="msg" x="205" y="190" text-anchor="middle">send</text>
+                <defs><marker id="ah5" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="#171412"/></marker></defs>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SYNTAX CHEAT SHEET ===== -->
+    <section class="section section--lilac">
+      <div class="wrap">
+        <span class="eyebrow">Syntax</span>
+        <h2>The whole language on one card</h2>
+        <p class="section-lead">You already know most of it. The rest fits in a few rows.</p>
+        <div class="cheat reveal" style="margin-top:2rem;max-width:760px;">
+          <table>
+            <tbody>
+              <tr><td>A.method()</td><td>A calls a method on itself (a self-message).</td></tr>
+              <tr><td>A-&gt;B: text</td><td>A sends a message labelled “text” to B.</td></tr>
+              <tr><td>A--&gt;B: text</td><td>A returns a value to B with a dashed arrow.</td></tr>
+              <tr><td>if(cond){ }</td><td>Conditional branch — draws an alt fragment.</td></tr>
+              <tr><td>while(cond){ }</td><td>Repeat a block — draws a loop fragment.</td></tr>
+              <tr><td>par { }</td><td>Run messages in parallel inside one frame.</td></tr>
+              <tr><td>@Actor User</td><td>Declare a participant and give it an actor icon.</td></tr>
+              <tr><td>// comment</td><td>Add an inline note; == text == draws a divider.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== INTEGRATIONS ===== -->
+    <section class="section" id="integrations">
+      <div class="wrap">
+        <span class="eyebrow">Integrations</span>
+        <h2>Use it where you already work</h2>
+        <p class="section-lead">One engine, many homes. Pick the surface that fits your workflow.</p>
+        <div class="grid grid--3" style="margin-top:2.5rem;">
+          <a class="card integration reveal" href="https://marketplace.atlassian.com/search?query=zenuml">
+            <span class="integration__tag">Atlassian</span>
+            <h3>Confluence</h3>
+            <p>Add sequence diagrams to any page with the ZenUML app from the Atlassian Marketplace.</p>
+          </a>
+          <a class="card integration reveal" href="https://app.zenuml.com">
+            <span class="integration__tag">Hosted</span>
+            <h3>Live Editor</h3>
+            <p>Sketch, tweak and export diagrams at app.zenuml.com — nothing to install.</p>
+          </a>
+          <a class="card integration reveal" href="https://plugins.jetbrains.com/search?search=zenuml">
+            <span class="integration__tag">IDE</span>
+            <h3>JetBrains &amp; VS Code</h3>
+            <p>Preview diagrams next to your code in IntelliJ-based IDEs and Visual Studio Code.</p>
+          </a>
+          <a class="card integration reveal" href="https://mermaid.js.org/syntax/zenuml.html">
+            <span class="integration__tag">Markdown</span>
+            <h3>Mermaid</h3>
+            <p>Mermaid supports zenuml as a diagram type, so it renders in every Mermaid-aware tool.</p>
+          </a>
+          <a class="card integration reveal" href="https://chrome.google.com/webstore/search/zenuml">
+            <span class="integration__tag">Browser</span>
+            <h3>Chrome extension</h3>
+            <p>Turn text into diagrams on the pages you browse, straight from the toolbar.</p>
+          </a>
+          <a class="card integration reveal" href="https://www.npmjs.com/package/@zenuml/core">
+            <span class="integration__tag">npm</span>
+            <h3>@zenuml/core</h3>
+            <p>Install the library and embed the renderer in your own app, docs or dashboard.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section section--panel" id="faq">
+      <div class="wrap">
+        <span class="eyebrow">FAQ</span>
+        <h2>Questions, answered</h2>
+        <div class="faq" style="margin-top:2rem;">
+          <details open>
+            <summary>What is ZenUML?</summary>
+            <p>ZenUML is an open-source JavaScript library, published as <code>@zenuml/core</code>, that turns Markdown-style text into sequence diagrams. It renders entirely in the browser, so you never need a diagram server.</p>
+          </details>
+          <details>
+            <summary>How do I create sequence diagrams from text?</summary>
+            <p>Write a few lines of DSL, such as <code>A.method</code> or <code>A-&gt;B: message</code>, wrap conditionals in <code>if(cond){…}</code> and loops in <code>while(cond){…}</code>. ZenUML parses the text and renders an SVG sequence diagram instantly.</p>
+          </details>
+          <details>
+            <summary>Do I need a server or an account to render diagrams?</summary>
+            <p>No. ZenUML runs client-side using a React 19 renderer. You install <code>@zenuml/core</code> from npm and render diagrams locally, or use the hosted Live Editor at app.zenuml.com.</p>
+          </details>
+          <details>
+            <summary>Where can I use ZenUML?</summary>
+            <p>It works in Confluence through the Atlassian Marketplace app, in the ZenUML Live Editor, in JetBrains IDEs, in VS Code, in a Chrome extension, and inside Mermaid, which supports zenuml as a diagram type.</p>
+          </details>
+          <details>
+            <summary>Which diagram features does the DSL support?</summary>
+            <p>Messages, self-messages, activations, participant declarations with <code>@Actor</code>, comments, dividers, and combined fragments including alt via <code>if</code>/<code>else</code>, <code>opt</code>, loop via <code>while</code>, and <code>par</code> for parallel work.</p>
+          </details>
+          <details>
+            <summary>Is ZenUML free and open source?</summary>
+            <p>Yes. ZenUML is open source under an MIT-style license and developed in the open at <a href="https://github.com/mermaid-js/zenuml-core">github.com/mermaid-js/zenuml-core</a>. Read the code, file issues, and contribute.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CTA BAND ===== -->
+    <section class="section section--ink cta-band">
+      <div class="wrap">
+        <span class="eyebrow">Start drawing</span>
+        <h2>Your next diagram is one line away</h2>
+        <p>Install the library, or jump straight into the editor. Both take about ten seconds.</p>
+        <div class="install">
+          <code id="install-cmd">npm i @zenuml/core</code>
+          <button id="copy-btn" type="button" aria-label="Copy install command">Copy</button>
+        </div>
+        <div class="cta-band__row">
+          <a class="btn btn--primary" href="https://app.zenuml.com">Open Live Editor ▸</a>
+          <a class="btn btn--yellow" href="https://github.com/mermaid-js/zenuml-core">Star on GitHub ★</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <a class="brand footer-brand" href="/" aria-label="ZenUML home">
+            <svg class="brand__mark" viewBox="0 0 32 32" role="img" aria-hidden="true">
+              <rect x="3" y="4" width="26" height="24" rx="3" fill="#FFC93C" stroke="#171412" stroke-width="2.5"/>
+              <path d="M9 11h14M9 16h9" stroke="#171412" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M9 21h8l-3-3M17 21l3 3" stroke="#2F6BFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>ZenUML</span>
+          </a>
+          <p class="footer-blurb">Turn Markdown-style text into sequence diagrams — open source, client-side, and ready to embed anywhere.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how">How it works</a></li>
+            <li><a href="#examples">Examples</a></li>
+            <li><a href="https://app.zenuml.com">Live Editor</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Developers</h4>
+          <ul>
+            <li><a href="https://www.npmjs.com/package/@zenuml/core">npm package</a></li>
+            <li><a href="https://github.com/mermaid-js/zenuml-core">GitHub repo</a></li>
+            <li><a href="https://mermaid.js.org/syntax/zenuml.html">Mermaid docs</a></li>
+            <li><a href="https://marketplace.atlassian.com/search?query=zenuml">Confluence app</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="/about/">About</a></li>
+            <li><a href="/privacy/">Privacy</a></li>
+            <li><a href="/terms/">Terms</a></li>
+            <li><a href="mailto:hello@zenuml.com">hello@zenuml.com</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 ZenUML · MIT-style open source</span>
+        <div class="footer-social">
+          <a href="https://github.com/mermaid-js/zenuml-core">GitHub</a>
+          <a href="https://twitter.com/zenuml">Twitter/X</a>
+          <a href="mailto:hello@zenuml.com">Contact</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/main.js"></script>
+</body>
+</html>
