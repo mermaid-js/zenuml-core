@@ -4,8 +4,9 @@ import {
   getCache,
   setCache,
 } from "./../utils/RenderingCache";
+import { DIAGRAM_FONT_STACK } from "@/svg/fonts/ibmPlexSans";
 
-const FONT_FAMILY = "Helvetica, Verdana, serif";
+const FONT_FAMILY = DIAGRAM_FONT_STACK;
 const FONT_SIZE_PARTICIPANT = "14px";
 const FONT_SIZE_MESSAGE = "15px";
 const FONT_SIZE_FRAGMENT = "14px";
@@ -198,7 +199,7 @@ export default function WidthProviderOnBrowser(
   if (!hiddenDiv) {
     const newDiv = document.createElement("div");
     newDiv.className = "textarea-hidden-div ";
-    newDiv.style.fontFamily = "Helvetica, Verdana, serif";
+    newDiv.style.fontFamily = FONT_FAMILY;
     newDiv.style.display = "inline";
     // newDiv.style.zIndex = '-9999';
     newDiv.style.whiteSpace = "nowrap";
