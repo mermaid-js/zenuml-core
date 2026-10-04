@@ -133,3 +133,17 @@ Never skip the reproduction step. If you can't reproduce it, you don't understan
 - E2E tests use visual snapshots for regression testing
 - The library is published as `@zenuml/core` to npm
 - GitHub Pages deployment is automated via GitHub Actions
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues on `mermaid-js/zenuml-core` (via the `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one root `GLOSSARY.md` plus `docs/adr/`, both created lazily. The `src/*/CONTEXT.md` files are module architecture docs, not glossaries. See `docs/agents/domain.md`.
