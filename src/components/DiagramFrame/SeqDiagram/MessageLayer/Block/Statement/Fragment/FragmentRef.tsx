@@ -50,7 +50,7 @@ export const FragmentRef = (props: {
                 style={props.commentObj?.messageStyle}
               >
                 <FragmentNumbering number={props.number} />
-                <span className="fragment-type [font-variant-caps:all-small-caps]">
+                <span className="fragment-type -translate-y-[1.5px] [font-variant-caps:all-small-caps]">
                   Ref
                 </span>
               </span>

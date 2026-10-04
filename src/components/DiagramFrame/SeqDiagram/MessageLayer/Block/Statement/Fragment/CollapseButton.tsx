@@ -17,7 +17,9 @@ export const CollapseButton = (props: {
       )}
       style={props.style}
     >
-      <label className="mb-0 [font-variant-caps:all-small-caps]">
+      {/* Small caps only fill the lower part of the 16px line box, so their ink
+          sits ~1.5px below the icon and number centres; nudge them back up. */}
+      <label className="mb-0 -translate-y-[1.5px] [font-variant-caps:all-small-caps]">
         {props.label}
       </label>
       {props.collapsed ? (
