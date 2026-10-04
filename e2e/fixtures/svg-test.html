@@ -12,7 +12,9 @@
     <div id="svg-output"></div>
     <script type="module">
       import { renderToSvg } from "/src/svg/renderToSvg.ts";
-      window.__renderSvg = (code) => {
+      import { ensureSvgFontsLoaded } from "/src/svg/fonts/ensureSvgFontsLoaded.ts";
+      window.__renderSvg = async (code) => {
+        await ensureSvgFontsLoaded();
         const result = renderToSvg(code);
         document.getElementById("svg-output").innerHTML = result.svg;
       };

@@ -52,7 +52,17 @@ export interface SvgPalette {
   fontFamily: string;
 }
 
-const HELVETICA = "Helvetica, Verdana, serif";
+import {
+  IBM_PLEX_SANS_400_DATA_URI,
+  IBM_PLEX_SANS_FAMILY,
+} from "./fonts/ibmPlexSans";
+
+/**
+ * Font stack of the SVG renderer. Layout is measured with the same stack (see
+ * renderToSvg), and the first family is embedded in every SVG by
+ * buildThemeStyles, so a reader without the font installed still gets it.
+ */
+export const SVG_FONT_FAMILY = `"${IBM_PLEX_SANS_FAMILY}", Helvetica, Verdana, serif`;
 
 /** src/assets/tailwind.css `.theme-default`. */
 const DEFAULT_PALETTE: SvgPalette = {
@@ -72,7 +82,7 @@ const DEFAULT_PALETTE: SvgPalette = {
   fragmentText: "#000",
   fragmentSeparator: "#e5e7eb",
   commentText: "#333",
-  fontFamily: HELVETICA,
+  fontFamily: SVG_FONT_FAMILY,
 };
 
 export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
@@ -101,7 +111,7 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentText: "#368eff",
     fragmentSeparator: "#e5e9f0",
     commentText: "#353748",
-    fontFamily: HELVETICA,
+    fontFamily: SVG_FONT_FAMILY,
   },
 
   // src/assets/tailwind.css `.theme-clean-dark`.
@@ -122,7 +132,7 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentText: "#cecfd2",
     fragmentSeparator: "#cecfd2",
     commentText: "#cecfd2",
-    fontFamily: HELVETICA,
+    fontFamily: SVG_FONT_FAMILY,
   },
 
   // src/assets/tailwind.css `.theme-neon`. The DOM theme also swaps in the
@@ -146,7 +156,7 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentText: "#8ffc5b",
     fragmentSeparator: "#60ff33",
     commentText: "#8ffc5b",
-    fontFamily: `"MS Sans Serif", ${HELVETICA}`,
+    fontFamily: `"MS Sans Serif", ${SVG_FONT_FAMILY}`,
   },
 };
 
@@ -170,6 +180,7 @@ export function resolvePalette(theme?: string): SvgPalette {
  */
 export function buildThemeStyles(p: SvgPalette): string {
   return `
+  @font-face { font-family: "${IBM_PLEX_SANS_FAMILY}"; font-weight: 400; font-style: normal; src: url(${IBM_PLEX_SANS_400_DATA_URI}) format("woff2"); }
   .frame-border-outer { fill: ${p.frameBorder}; }
   .frame-border-inner { fill: ${p.frameBg}; }
   .frame-header-bg { fill: ${p.frameBg}; }
