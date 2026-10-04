@@ -12,6 +12,12 @@ import { fragmentGuardKeyword } from "@/positioning/FragmentGuardWidth";
 // Same header band the vertical layout engine reserves via
 // LayoutMetrics.fragmentHeaderHeight (.fragment .leading-4).
 const HEADER_HEIGHT = DEFAULT_LAYOUT_METRICS.fragmentHeaderHeight;
+// Vertical lift that centres a 14px all-small-caps title on the header's
+// icon and number (mirrors `-translate-y-[1.5px]` on the HTML title).
+const SMALL_CAPS_OPTICAL_LIFT = 1.5;
+// The HTML badge centres a 12px line box in the header; with IBM Plex Sans a
+// "central" SVG baseline lands 0.5px lower than that, so lift the digits.
+const NUMBER_OPTICAL_LIFT = 0.5;
 const TEXT_PAD_X = 4;
 const NUMBER_PAD_X = 4;
 
@@ -58,7 +64,7 @@ export function renderFragment(f: FragmentGeometry): string {
     const numberX = numberBoxX + NUMBER_PAD_X;
     parts.push(
       `<rect x="${numberBoxX}" y="${headerY + (HEADER_HEIGHT - 1 - 16) / 2}" width="${numberWidth + NUMBER_PAD_X * 2}" height="16" rx="2" class="fragment-number-bg"/>`,
-      `<text x="${numberX}" y="${titleY}" dominant-baseline="central" class="seq-number">${esc(f.number)}</text>`,
+      `<text x="${numberX}" y="${titleY - NUMBER_OPTICAL_LIFT}" dominant-baseline="central" class="seq-number">${esc(f.number)}</text>`,
     );
   }
   const iconX = headerX + 4 + numberInset;
@@ -66,8 +72,12 @@ export function renderFragment(f: FragmentGeometry): string {
   parts.push(getFragmentIcon(f.kind, iconX, iconY));
 
   const labelX = headerX + 26 + numberInset; // after the diamond icon
+  // Small caps only fill the lower part of the em box, so a "central" baseline
+  // leaves their ink ~1.5px below the icon and number centres (same nudge as
+  // the HTML CollapseButton title).
+  const labelY = titleY - SMALL_CAPS_OPTICAL_LIFT;
   parts.push(
-    `<text x="${labelX}" y="${headerY + HEADER_HEIGHT / 2 - 0.5}" dominant-baseline="central" class="fragment-label">${esc(kindLabel)}</text>`,
+    `<text x="${labelX}" y="${labelY}" dominant-baseline="central" class="fragment-label">${esc(kindLabel)}</text>`,
   );
 
   // Padded guard row shares a baseline across its keyword and editable condition.
@@ -220,7 +230,7 @@ function getFragmentIcon(kind: string, x: number, y: number): string {
       <path d="M12 15V15.5" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>`;
     case "tcf":
-      return `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 76 76" fill="#000" stroke="none">
+      return `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 3 76 76" fill="#000" stroke="none">
       <path d="M 26,22.0001L 27,21.9998L 27,27L 26.0001,27.0003C 23.2386,27.0003 21.0001,29.2389 21.0001,32.0003L 21,46.0002C 21,48.7616 23.2386,51.0002 25.9999,51.0002L 27,51.0002L 27,47L 33.75,53.5L 27,60L 27,56L 26,56C 20.4771,56 16,51.5229 16,46L 16,32.0001C 16,26.4773 20.4771,22.0001 26,22.0001 Z M 33,27L 59,27L 59,32L 33,32L 33,27 Z M 36,35L 59,35L 59,40L 36,40L 36,35 Z M 33,43L 59,43L 59,48L 33,48L 33,43 Z"/>
     </svg>`;
     case "ref":

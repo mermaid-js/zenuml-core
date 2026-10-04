@@ -50,7 +50,11 @@ describe("SVG fragment header numbering", () => {
     expect(numberBackground.getAttribute("rx")).toBe("2");
     expect(view.querySelector(".fragment-number-divider")).toBeNull();
     expect(Number(label.getAttribute("x"))).toBeGreaterThan(numberX);
-    expect(number.getAttribute("y")).toBe(label.getAttribute("y"));
+    // The number is lifted 0.5px and the small-caps title 1.5px so both ink
+    // centres sit on the header's centre line.
+    expect(Number(label.getAttribute("y"))).toBe(
+      Number(number.getAttribute("y")) - 1,
+    );
   });
 
   it("does not reserve a divider or number gap when the number is absent", () => {
