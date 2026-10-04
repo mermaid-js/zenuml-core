@@ -7,10 +7,7 @@ import { RootContext } from "@/parser";
 import { DIAGRAM_HEADER_HEIGHT } from "@/positioning/Constants";
 import { Coordinates } from "@/positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
-import {
-  runWithFontFamily,
-  WidthProviderOnCanvas,
-} from "@/positioning/WidthProviderFunc";
+import { WidthProviderOnCanvas } from "@/positioning/WidthProviderFunc";
 import { buildGeometry } from "./buildGeometry";
 import { renderParticipant } from "./components/participant";
 import { renderLifeline } from "./components/lifeline";
@@ -26,7 +23,7 @@ import { esc } from "./components/svgUtils";
 import { messageNumberWidth } from "./components/numbering";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import type { DiagramGeometry } from "./geometry";
-import { buildThemeStyles, resolvePalette, SVG_FONT_FAMILY } from "./themes";
+import { buildThemeStyles, resolvePalette } from "./themes";
 import type { SvgTheme } from "./themes";
 
 export interface RenderOptions {
@@ -56,16 +53,6 @@ const FRAME_VIEWPORT_HEADER_ALLOWANCE = 28;
 const FRAME_BORDER_RADIUS = 4;
 
 export function renderToSvg(
-  code: string,
-  options?: RenderOptions,
-): RenderResult {
-  // Measure with the typeface the SVG embeds, so layout and glyphs agree.
-  return runWithFontFamily(SVG_FONT_FAMILY, () =>
-    renderToSvgWithCurrentFont(code, options),
-  );
-}
-
-function renderToSvgWithCurrentFont(
   code: string,
   options?: RenderOptions,
 ): RenderResult {

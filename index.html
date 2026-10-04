@@ -98,8 +98,8 @@
       import { createConfig } from "./src/config.ts";
       import { toPng } from "html-to-image";
       import { renderToSvg } from "./src/svg/renderToSvg.ts";
-      import { ensureSvgFontsLoaded } from "./src/svg/fonts/ensureSvgFontsLoaded.ts";
-      await ensureSvgFontsLoaded();
+      import { ensureDiagramFontsLoaded } from "./src/svg/fonts/ensureDiagramFontsLoaded.ts";
+      await ensureDiagramFontsLoaded();
 
       const editor = CodeMirror.fromTextArea(document.getElementById("text"), {
         lineNumbers: true,

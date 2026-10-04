@@ -7,14 +7,14 @@ import {
 let loading: Promise<void> | null = null;
 
 /**
- * Make the SVG renderer's typeface available to canvas text measurement in a
- * browser. Call and await this before the first renderToSvg(): canvas
+ * Make the diagram typeface available to text measurement and rendering in a
+ * browser. Await this before the first render or renderToSvg(): canvas
  * measureText silently measures a fallback font while a web font is not loaded,
  * which would lay the diagram out for the wrong glyph widths.
  *
  * No-op outside a browser; the CLI registers the font with its own canvas.
  */
-export function ensureSvgFontsLoaded(): Promise<void> {
+export function ensureDiagramFontsLoaded(): Promise<void> {
   if (typeof document === "undefined" || typeof FontFace === "undefined") {
     return Promise.resolve();
   }

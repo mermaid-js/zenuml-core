@@ -53,16 +53,10 @@ export interface SvgPalette {
 }
 
 import {
+  DIAGRAM_FONT_STACK,
   IBM_PLEX_SANS_400_DATA_URI,
   IBM_PLEX_SANS_FAMILY,
 } from "./fonts/ibmPlexSans";
-
-/**
- * Font stack of the SVG renderer. Layout is measured with the same stack (see
- * renderToSvg), and the first family is embedded in every SVG by
- * buildThemeStyles, so a reader without the font installed still gets it.
- */
-export const SVG_FONT_FAMILY = `"${IBM_PLEX_SANS_FAMILY}", Helvetica, Verdana, serif`;
 
 /** src/assets/tailwind.css `.theme-default`. */
 const DEFAULT_PALETTE: SvgPalette = {
@@ -82,7 +76,7 @@ const DEFAULT_PALETTE: SvgPalette = {
   fragmentText: "#000",
   fragmentSeparator: "#e5e7eb",
   commentText: "#333",
-  fontFamily: SVG_FONT_FAMILY,
+  fontFamily: DIAGRAM_FONT_STACK,
 };
 
 export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
@@ -111,7 +105,7 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentText: "#368eff",
     fragmentSeparator: "#e5e9f0",
     commentText: "#353748",
-    fontFamily: SVG_FONT_FAMILY,
+    fontFamily: DIAGRAM_FONT_STACK,
   },
 
   // src/assets/tailwind.css `.theme-clean-dark`.
@@ -132,7 +126,7 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentText: "#cecfd2",
     fragmentSeparator: "#cecfd2",
     commentText: "#cecfd2",
-    fontFamily: SVG_FONT_FAMILY,
+    fontFamily: DIAGRAM_FONT_STACK,
   },
 
   // src/assets/tailwind.css `.theme-neon`. The DOM theme also swaps in the
@@ -156,7 +150,7 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentText: "#8ffc5b",
     fragmentSeparator: "#60ff33",
     commentText: "#8ffc5b",
-    fontFamily: `"MS Sans Serif", ${SVG_FONT_FAMILY}`,
+    fontFamily: `"MS Sans Serif", ${DIAGRAM_FONT_STACK}`,
   },
 };
 

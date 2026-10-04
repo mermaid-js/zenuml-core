@@ -4,25 +4,9 @@ import {
   getCache,
   setCache,
 } from "./../utils/RenderingCache";
+import { DIAGRAM_FONT_STACK } from "@/svg/fonts/ibmPlexSans";
 
-const DEFAULT_FONT_FAMILY = "Helvetica, Verdana, serif";
-let fontFamily = DEFAULT_FONT_FAMILY;
-
-/**
- * Run `fn` with text measurement using `family` instead of the default stack.
- * The SVG renderer uses this so its layout matches the typeface it emits; the
- * DOM renderer keeps the default. Cache keys include the font string, so widths
- * measured under different families never mix.
- */
-export function runWithFontFamily<T>(family: string, fn: () => T): T {
-  const previous = fontFamily;
-  fontFamily = family;
-  try {
-    return fn();
-  } finally {
-    fontFamily = previous;
-  }
-}
+const FONT_FAMILY = DIAGRAM_FONT_STACK;
 const FONT_SIZE_PARTICIPANT = "14px";
 const FONT_SIZE_MESSAGE = "15px";
 const FONT_SIZE_FRAGMENT = "14px";
@@ -34,7 +18,7 @@ function getFontSize(type: TextType): string {
 }
 
 function getFontSpec(type: TextType): string {
-  return `${getFontSize(type)} ${fontFamily}`;
+  return `${getFontSize(type)} ${FONT_FAMILY}`;
 }
 
 let canvasCtx:
@@ -123,7 +107,7 @@ function measureWithSvg(
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("style", "position:absolute;left:-9999px;top:-9999px");
   const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  textEl.setAttribute("font-family", fontFamily);
+  textEl.setAttribute("font-family", FONT_FAMILY);
   textEl.setAttribute("font-size", fontSize);
   textEl.style.fontVariantCaps = caps;
   if (typeof textEl.getBBox !== "function") return null;
@@ -146,7 +130,7 @@ export function measureTextWithFont(
   // Native SVG matches rendered emoji and synthetic small caps more accurately
   // than canvas measurement, whose caps shaping differs between backends.
   const hasEmoji = EMOJI_PATTERN.test(measured);
-  const font = `${fontSize} ${fontFamily}`;
+  const font = `${fontSize} ${FONT_FAMILY}`;
   const cacheKey =
     (hasEmoji
       ? `measureTextWithFont_svg_${font}_${measured}`
@@ -215,7 +199,7 @@ export default function WidthProviderOnBrowser(
   if (!hiddenDiv) {
     const newDiv = document.createElement("div");
     newDiv.className = "textarea-hidden-div ";
-    newDiv.style.fontFamily = "Helvetica, Verdana, serif";
+    newDiv.style.fontFamily = FONT_FAMILY;
     newDiv.style.display = "inline";
     // newDiv.style.zIndex = '-9999';
     newDiv.style.whiteSpace = "nowrap";

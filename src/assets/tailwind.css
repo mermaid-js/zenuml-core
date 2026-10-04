@@ -8,8 +8,10 @@
   src: url("/fonts/MS Sans Serif.ttf") format("truetype");
 }
 
+/* Keep in sync with DIAGRAM_FONT_STACK in src/svg/fonts/ibmPlexSans.ts; the face
+   itself is registered at runtime by ensureDiagramFontsLoaded(). */
 .zenuml {
-  font-family: Helvetica, Verdana, serif;
+  font-family: "IBM Plex Sans", Helvetica, Verdana, serif;
   font-size: 16px;
 }
 
