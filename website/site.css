@@ -1,0 +1,111 @@
+/* core.zenuml.com — shared styles for the subpages (about/, privacy/, terms/, 404).
+   Extracted from the landing page (index.html) design system: JetBrains Mono
+   headings, teal accent (#0F766E), hairline borders (#D6D3D1), paper background
+   (#FAFAF9), zero border-radius everywhere. index.html stays self-contained. */
+
+/* metric-overridden local fallbacks — JetBrains Mono mapped onto Menlo / Consolas
+   so the webfont swap barely shifts (same as index.html) */
+@font-face{font-family:'JBM Fallback';src:local('Menlo');size-adjust:99.66%;ascent-override:102.35%;descent-override:30.1%;line-gap-override:0%}
+@font-face{font-family:'JBM Fallback2';src:local('Consolas');size-adjust:109.13%;ascent-override:93.47%;descent-override:27.49%;line-gap-override:0%}
+
+/* ============ DESIGN TOKENS ============ */
+:root{
+  --ink:#0F172A; --teal:#0F766E; --paper:#FAFAF9; --char:#0C0A09; --hair:#D6D3D1;
+  --stone-500:#78716C; --stone-600:#57534E; --stone-700:#44403C;
+  --mono:'JetBrains Mono','JBM Fallback','JBM Fallback2',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --body:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;
+  --fs--1:.75rem; --fs-0:.8125rem; --fs-1:1rem; --fs-2:1.0625rem; --fs-3:1.3125rem;
+  --sec-y:clamp(3.5rem, 8vw, 6rem);
+}
+
+*,::before,::after{box-sizing:border-box}
+html{background:var(--paper);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--char);font-family:var(--body);
+  font-size:var(--fs-1);line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+::selection{background:var(--teal);color:#fff}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:0}
+a,button{border-radius:0} /* discipline: zero radius */
+pre,code,kbd{font-family:var(--mono);font-variant-ligatures:none}
+img{display:block;max-width:100%;height:auto}
+
+/* ============ STRUCTURE ============ */
+.wrap{max-width:1200px;margin:0 auto;padding-left:20px;padding-right:20px}
+@media(min-width:768px){.wrap{padding-left:32px;padding-right:32px}}
+@media(min-width:1280px){.rails{border-left:1px solid var(--hair);border-right:1px solid var(--hair)}}
+.sec{padding-top:var(--sec-y);padding-bottom:var(--sec-y)}
+.idx{font-family:var(--mono);font-size:var(--fs--1);letter-spacing:.08em;color:var(--teal);
+  font-weight:500;text-transform:uppercase;margin:0 0 1.25rem}
+.hl{background:var(--teal);color:#fff;padding:0 .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.cap{font-family:var(--mono);font-size:var(--fs--1);letter-spacing:.12em;text-transform:uppercase}
+
+.skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:#fff;
+  font-family:var(--mono);padding:.75rem 1rem;z-index:100;text-decoration:none}
+.skip:focus{left:0}
+
+/* ============ NAV (same grammar as index.html) ============ */
+.site-head{border-bottom:1px solid var(--hair);position:sticky;top:0;z-index:50;background:var(--paper)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:3.5rem}
+.brand{display:flex;align-items:center;gap:.625rem;text-decoration:none}
+.brand-name{display:none;font-family:var(--mono);font-weight:700;font-size:.9375rem;
+  letter-spacing:-.025em;color:var(--ink)}
+@media(min-width:640px){.brand-name{display:inline}}
+.logo-mark{display:block;width:22px;height:22px;background:url(/assets/logo.png) center/contain no-repeat;flex:none}
+.nav-links{display:flex;align-items:center;gap:1rem}
+@media(min-width:640px){.nav-links{gap:1.75rem}}
+.navlink{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--char);text-decoration:none;padding:.25rem 0;border-bottom:2px solid transparent;
+  transition:color .15s,border-color .15s}
+.navlink:hover{color:var(--teal);border-bottom-color:var(--teal)}
+
+/* ============ PAGE HEADINGS + PROSE ============ */
+.page-h1{font-family:var(--mono);font-weight:700;text-transform:uppercase;letter-spacing:-.02em;
+  line-height:1.08;font-size:clamp(1.75rem,3.8vw,2.75rem);color:var(--ink);margin:0}
+.lede{margin:1rem 0 0;max-width:52ch;font-size:var(--fs-2);line-height:1.625;color:var(--stone-700)}
+.prose{max-width:72ch;margin-top:2.5rem}
+.prose h2{font-family:var(--mono);font-weight:700;text-transform:uppercase;letter-spacing:-.01em;
+  line-height:1.15;font-size:clamp(1.1875rem,2vw,1.5rem);color:var(--ink);margin:2.5rem 0 .875rem}
+.prose p{margin:0 0 1rem;max-width:62ch;color:#292524}
+.prose a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--hair);
+  text-underline-offset:4px;transition:text-decoration-color .15s ease,color .15s ease}
+.prose a:hover{color:var(--teal);text-decoration-color:var(--teal)}
+.prose code{font-family:var(--mono);font-size:.875em;color:var(--ink)}
+
+/* ============ LINKS / BUTTONS (verbatim from index.html) ============ */
+.plink{font-family:var(--mono);font-size:.875rem;color:var(--ink);text-decoration:underline;
+  text-decoration-color:var(--hair);text-underline-offset:5px;transition:text-decoration-color .15s ease,color .15s ease}
+.plink:hover{text-decoration-color:var(--teal);color:var(--teal)}
+.btn-ink{display:inline-flex;align-items:center;gap:.625rem;background:var(--ink);color:#fff;
+  font-family:var(--mono);font-weight:600;font-size:.9375rem;padding:.875rem 1.5rem;border:1px solid var(--ink);
+  text-decoration:none;transition:background-color .15s ease,border-color .15s ease}
+.btn-ink:hover{background:var(--teal);border-color:var(--teal)}
+.cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:1rem 1.5rem;margin-top:2.5rem}
+
+/* ============ PANEL (shared editor/diagram grammar, for the 404 page) ============ */
+.panel{border:1px solid var(--hair);background:#fff}
+.panel-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  border-bottom:1px solid var(--hair);background:var(--paper);padding:0 1rem;height:2.25rem}
+.panel-bar .t{font-family:var(--mono);font-size:.6875rem;letter-spacing:.12em;text-transform:uppercase;color:var(--stone-500)}
+.panel-bar .ok{font-family:var(--mono);font-size:.6875rem;letter-spacing:.06em;color:var(--teal)}
+.panel-bar .ok.err{color:var(--char);font-weight:700}
+.panel pre{margin:0;padding:1rem;font-size:var(--fs-0);line-height:1.75;overflow-x:auto;color:var(--char)}
+
+/* ============ FOOTER (same grammar as index.html) ============ */
+.site-foot{border-top:1px solid var(--hair)}
+.foot-inner{padding-top:3rem;padding-bottom:3rem}
+.foot-grid{display:grid;gap:2.5rem}
+@media(min-width:768px){.foot-grid{grid-template-columns:1fr auto auto auto;gap:3.5rem}}
+.foot-brandline{display:flex;align-items:center;gap:.625rem}
+.foot-brandline .name{font-family:var(--mono);font-weight:700;font-size:.9375rem;color:var(--ink)}
+.foot-blurb{margin:.75rem 0 0;max-width:38ch;font-size:.875rem;color:var(--stone-600)}
+.foot-col .cap{color:var(--stone-500);margin:0 0 .75rem}
+.foot-col ul{list-style:none;margin:0;padding:0}
+.foot-col li+li{margin-top:.5rem}
+.foot-bottom{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--hair);
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem}
+.foot-bottom p{font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--stone-500);margin:0}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce){
+  .navlink,.plink,.btn-ink,.prose a{transition:none}
+}
