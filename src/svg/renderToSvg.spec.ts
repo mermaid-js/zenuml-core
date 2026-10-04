@@ -535,8 +535,12 @@ A->A:m
 
     // Should contain participant with database icon
     expect(result.svg).toContain('data-participant="DB"');
-    // Icon content should be present (database icon has "fill-rule" in its path)
-    expect(result.svg).toContain('fill-rule="evenodd"');
+    const db = result.svg.slice(
+      result.svg.indexOf('data-participant="DB"'),
+      result.svg.indexOf("</g>", result.svg.indexOf('data-participant="DB"')),
+    );
+    expect(db).toContain('stroke="currentColor"');
+    expect(db).toContain("<ellipse");
   });
 
   it("renders multiple participants with different icons", () => {

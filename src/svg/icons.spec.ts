@@ -33,6 +33,21 @@ describe("Icon definitions", () => {
     expect(ICONS.actor.attributes).toContain('fill="none"');
   });
 
+  it("draws every UML participant icon stroke at 1px when rendered at 24px", () => {
+    for (const key of ["actor", "boundary", "control", "entity", "database"]) {
+      const icon = ICONS[key];
+      const [, , w, h] = (icon.viewBox || "0 0 24 24").split(" ").map(Number);
+      const scale = 24 / Math.max(w, h);
+      const shapes = icon.content.match(/<(path|ellipse|circle|line)\b[^>]*>/g) ?? [];
+      expect(shapes.length).toBeGreaterThan(0);
+      for (const shape of shapes) {
+        expect(shape).toContain('stroke="currentColor"');
+        const sw = Number(shape.match(/stroke-width="([^"]+)"/)?.[1] ?? 1);
+        expect(sw * scale).toBeCloseTo(1, 3);
+      }
+    }
+  });
+
   it("getIcon returns icon for valid type", () => {
     expect(getIcon("actor")).toBe(ICONS.actor);
     expect(getIcon("database")).toBe(ICONS.database);
