@@ -2,7 +2,6 @@ import { RootContext } from "@/parser";
 import { codeAtom, modeAtom, RenderMode } from "@/store/Store";
 import { fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
-import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { DiagramTitle } from "./index";
 
