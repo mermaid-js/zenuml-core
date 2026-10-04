@@ -27,10 +27,22 @@ export const DiagramTitle = (props: { context: any }) => {
     if (trimmed === displayTitle || !trimmed) return;
 
     if (props.context) {
-      const contentStart = props.context.start.start + "title ".length;
-      const contentEnd = props.context.stop.stop;
+      // The `title` rule spans `TITLE TITLE_CONTENT? TITLE_END?`, so its stop
+      // token may be the line break. Replace only the content token so the
+      // newline after the title survives the edit. TITLE_CONTENT also carries
+      // the whitespace around the text: keep the separator after `title`,
+      // drop any trailing spaces.
+      const contentToken = props.context.TITLE_CONTENT()?.symbol;
+      const titleEnd = props.context.TITLE().symbol.stop + 1;
+      const tokenText: string = contentToken?.text ?? "";
+      const leading = tokenText.length - tokenText.trimStart().length;
+      const contentStart = contentToken
+        ? contentToken.start + leading
+        : titleEnd;
+      const contentEnd = contentToken ? contentToken.stop + 1 : titleEnd;
+      const replacement = (leading > 0 ? "" : " ") + trimmed;
       const newCode =
-        code.slice(0, contentStart) + trimmed + code.slice(contentEnd + 1);
+        code.slice(0, contentStart) + replacement + code.slice(contentEnd);
       setCode(newCode);
       onContentChange(newCode);
     } else {
