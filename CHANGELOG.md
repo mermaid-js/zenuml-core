@@ -1,5 +1,15 @@
 # @zenuml/core
 
+## 4.3.1
+
+### Patch Changes
+
+- [#442](https://github.com/mermaid-js/zenuml-core/pull/442) [`dc6d5f3`](https://github.com/mermaid-js/zenuml-core/commit/dc6d5f3fc5583048edd8b16e564b99b5407e14c5) Thanks [@MrCoder](https://github.com/MrCoder)! - Use 1px borders and arrow strokes in HTML and SVG sequence diagrams while preserving layout
+
+- [#446](https://github.com/mermaid-js/zenuml-core/pull/446) [`34c0dd6`](https://github.com/mermaid-js/zenuml-core/commit/34c0dd6bb503abdea705fdd1d8a8c9e077cc30d9) Thanks [@MrCoder](https://github.com/MrCoder)! - Keep sequence badges inside fragment headers, align editable guard rows, and fit typography consistently in HTML and SVG.
+
+- [#448](https://github.com/mermaid-js/zenuml-core/pull/448) [`a4721c1`](https://github.com/mermaid-js/zenuml-core/commit/a4721c1f9db003394ed7e0d7155cb69124f00fe8) Thanks [@MrCoder](https://github.com/MrCoder)! - Match HTML diagram header and message flow heights to SVG geometry, align straight-message label baselines, and match fragment headers, number badges, and rounded borders.
+
 ## 4.3.0
 
 ### Minor Changes
