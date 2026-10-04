@@ -198,7 +198,14 @@ for (const [name, code] of Object.entries(cases)) {
       const expected = svg.fragmentHeaders[index];
       expect(header.radius).toBe(expected.radius);
       expect(header.label.x).toBeCloseTo(expected.label.x, 1);
-      expect(header.label.y).toBeCloseTo(expected.label.y, 1);
+      // Compare vertical centres, not tops: the DOM label box is the 16px line
+      // box, the SVG text box is the font's ascent + descent. Both are centred
+      // on the header, so their tops only coincide for a font whose ascent +
+      // descent happens to equal the line height.
+      expect(header.label.y + header.label.height / 2).toBeCloseTo(
+        expected.label.y + expected.label.height / 2,
+        1,
+      );
       expect(header.icon.x).toBeCloseTo(expected.icon.x, 1);
       expect(header.icon.y).toBeCloseTo(expected.icon.y, 1);
       expect(header.badge.y).toBeCloseTo(expected.badge.y, 1);

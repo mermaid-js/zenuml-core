@@ -88,7 +88,9 @@ test.describe("Editable Label", () => {
     // Wait for the edit to complete
     await page.waitForTimeout(500);
 
-    await expect(page.locator("span").getByText("meth1od()")).toBeVisible({
+    // The click lands on the label centre, so where the caret falls depends
+    // on glyph widths: between "t" and "h" with IBM Plex Sans.
+    await expect(page.locator("span").getByText("met1hod()")).toBeVisible({
       timeout: 10000,
     });
     await page.locator(".header").click();

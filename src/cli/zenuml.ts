@@ -15,6 +15,10 @@
 import { renderToSvg } from "@/svg/renderToSvg";
 import type { RenderOptions } from "@/svg/renderToSvg";
 import { setCanvasContext } from "@/positioning/WidthProviderFunc";
+import {
+  IBM_PLEX_SANS_400_WOFF2_BASE64,
+  IBM_PLEX_SANS_FAMILY,
+} from "@/svg/fonts/ibmPlexSans";
 import Parser from "@/parser/index.js";
 import {
   readFileSync,
@@ -699,7 +703,13 @@ async function main(): Promise<void> {
   // produces incorrect layout (wrong participant spacing and message positioning).
   if (!globalThis.OffscreenCanvas && typeof document === "undefined") {
     try {
-      const { createCanvas } = await import("@napi-rs/canvas");
+      const { createCanvas, GlobalFonts } = await import("@napi-rs/canvas");
+      // Register before creating the context: a context resolves its fonts
+      // when it is created, so a later registration is not picked up.
+      GlobalFonts.register(
+        Buffer.from(IBM_PLEX_SANS_400_WOFF2_BASE64, "base64"),
+        IBM_PLEX_SANS_FAMILY,
+      );
       setCanvasContext(createCanvas(1, 1).getContext("2d") as any);
     } catch {
       // If @napi-rs/canvas is unavailable, fall back to character estimates

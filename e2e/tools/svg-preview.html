@@ -35,6 +35,8 @@ B -> A: done</textarea>
   </div>
   <script type="module">
     import { renderToSvg } from "/src/svg/renderToSvg.ts";
+    import { ensureDiagramFontsLoaded } from "/src/svg/fonts/ensureDiagramFontsLoaded.ts";
+    await ensureDiagramFontsLoaded();
 
     const codeEl = document.getElementById("code");
     const containerEl = document.getElementById("svg-container");

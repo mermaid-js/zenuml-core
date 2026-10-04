@@ -40,6 +40,8 @@ import { StrictMode } from "react";
 import { createStore, Provider } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
 export { renderToSvg } from "./svg/renderToSvg";
+import { ensureDiagramFontsLoaded } from "./svg/fonts/ensureDiagramFontsLoaded";
+export { ensureDiagramFontsLoaded };
 export type { RenderResult, RenderOptions } from "./svg/renderToSvg";
 
 export interface Config {
@@ -173,6 +175,8 @@ export default class ZenUml implements IZenUml {
   }
 
   async doRender(config: Config | undefined) {
+    // Text is measured during render; the face must be available first.
+    await ensureDiagramFontsLoaded();
     const start = getStartTime();
     clearCache();
     this.store.set(onContentChangeAtom, config?.onContentChange || (() => {}));

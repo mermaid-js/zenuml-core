@@ -62,6 +62,8 @@
     <script type="module">
       import ZenUml from "/src/core.tsx";
       import { renderToSvg } from "/src/svg/renderToSvg.ts";
+      import { ensureDiagramFontsLoaded } from "/src/svg/fonts/ensureDiagramFontsLoaded.ts";
+      await ensureDiagramFontsLoaded();
 
       import { CASES } from "../data/compare-cases.js";
       import { diffImages, DEFAULTS } from "../data/diff-algorithm.js";
