@@ -114,3 +114,36 @@ if(x) {
     expect(steps).toEqual([10, 10, 10]);
   });
 });
+
+describe("buildGeometry top-level fragments of different depth", () => {
+  it("places each fragment by its own nesting border, as the DOM renderer does", () => {
+    // alt (1 level) then try > par > alt (3 levels), all over A..B. The DOM
+    // puts a fragment `border.left` px left of its first participant, so the
+    // shallow alt starts 20px right of the deep try.
+    const code = `A B
+if(x) {
+  A->B.m()
+}
+try {
+  A->B.m()
+} catch {
+  par {
+    if(y) {
+      A->B.m()
+    }
+  }
+}`;
+    const [shallowAlt, tcf, par, innerAlt] = [
+      ...getGeometry(code).fragments,
+    ].sort((a, b) => a.y - b.y);
+    expect([shallowAlt.kind, tcf.kind, par.kind, innerAlt.kind]).toEqual([
+      "alt",
+      "tcf",
+      "par",
+      "alt",
+    ]);
+    expect([shallowAlt.x - tcf.x, par.x - tcf.x, innerAlt.x - tcf.x]).toEqual([
+      20, 10, 20,
+    ]);
+  });
+});

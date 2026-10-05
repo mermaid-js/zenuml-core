@@ -31,9 +31,37 @@ function longestPath(frame: Frame, pathType: PathType): number {
   return maxDepth + 1;
 }
 
-export default function FrameBorder(frame: Frame | null) {
+/**
+ * Type of the frame FrameBuilder.getFrame returns when a context holds several
+ * top-level fragments. It is not a fragment itself, so it adds no border; its
+ * border is the widest border of the fragments it holds.
+ */
+export const TOP_LEVEL_FRAGMENTS = "top-level-fragments";
+
+/**
+ * One top-level fragment is returned as is. Several are wrapped so that
+ * FrameBorder sees all of them; returning only the first one made the diagram
+ * frame too narrow for a later, more deeply nested fragment.
+ */
+export function topLevelFrame(frames: Frame[]): Frame | null {
+  if (frames.length === 0) return null;
+  if (frames.length === 1) return frames[0];
+  return { type: TOP_LEVEL_FRAGMENTS, left: "", right: "", children: frames };
+}
+
+export default function FrameBorder(frame: Frame | null): {
+  left: number;
+  right: number;
+} {
   if (!frame) {
     return { left: 0, right: 0 };
+  }
+  if (frame.type === TOP_LEVEL_FRAGMENTS) {
+    const borders = (frame.children ?? []).map(FrameBorder);
+    return {
+      left: Math.max(0, ...borders.map((b) => b.left)),
+      right: Math.max(0, ...borders.map((b) => b.right)),
+    };
   }
   return {
     left: FRAGMENT_PADDING_X * longestPath(frame, PathType.LEFT),

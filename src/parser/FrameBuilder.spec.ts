@@ -1,6 +1,8 @@
 import FrameBuilder from "./FrameBuilder";
 import { Fixture } from "../../test/unit/parser/fixture/Fixture";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { RootContext } from "@/parser";
+import FrameBorder from "@/positioning/FrameBorder";
 
 describe("FrameBuilder", () => {
   test("getFrame should return a frame", () => {
@@ -87,4 +89,28 @@ describe("FrameBuilder", () => {
   });
 
   // ... more tests here ...
+});
+
+describe("FrameBuilder with several top-level fragments", () => {
+  test("the diagram frame border covers the deepest top-level fragment, not only the first", () => {
+    // The first top-level fragment is one level deep, the second three levels
+    // (try > par > alt). The diagram must reserve room for all three levels on
+    // both sides, otherwise the try fragment overflows the frame.
+    const code = `A B
+if(x) {
+  A->B.m()
+}
+try {
+  A->B.m()
+} catch {
+  par {
+    if(y) {
+      A->B.m()
+    }
+  }
+}`;
+    const rootContext = RootContext(code);
+    const frame = new FrameBuilder([_STARTER_, "A", "B"]).getFrame(rootContext);
+    expect(FrameBorder(frame)).toEqual({ left: 30, right: 30 });
+  });
 });

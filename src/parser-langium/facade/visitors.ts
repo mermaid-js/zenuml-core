@@ -15,7 +15,7 @@
 import { Participants } from "@/parser/Participants";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
 import type { OwnableMessage } from "@/parser/OwnableMessage";
-import type { Frame } from "@/positioning/FrameBorder";
+import { topLevelFrame, type Frame } from "@/positioning/FrameBorder";
 import {
   AltContext,
   AsyncMessageContext,
@@ -305,7 +305,7 @@ function localParticipantNames(ctx: Ctx): string[] {
 
 export class LangiumFrameBuilder {
   private readonly _orderedParticipants: string[];
-  private frameRoot: Frame | null = null;
+  private topLevelFrames: Frame[] = [];
   private parents: Frame[] = [];
 
   constructor(orderedParticipants: string[]) {
@@ -336,9 +336,10 @@ export class LangiumFrameBuilder {
       right: this.getRight(ctx),
       children: [],
     };
-    if (!this.frameRoot) this.frameRoot = frame;
     if (this.parents.length > 0) {
       this.parents[this.parents.length - 1].children?.push(frame);
+    } else {
+      this.topLevelFrames.push(frame);
     }
     this.parents.push(frame);
   }
@@ -352,9 +353,9 @@ export class LangiumFrameBuilder {
 
   getFrame(context: any): Frame | null {
     if (!context) return null;
-    this.frameRoot = null;
+    this.topLevelFrames = [];
     this.parents = [];
     for (const child of context.children ?? []) this.walk(child);
-    return this.frameRoot;
+    return topLevelFrame(this.topLevelFrames);
   }
 }

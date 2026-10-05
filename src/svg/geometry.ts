@@ -172,7 +172,7 @@ export interface CommentGeometry {
   text: string;
   /** Inline style from styling comments (e.g. // <red>) */
   style?: Record<string, string>;
-  /** True for comments above fragments — needs frameBorder.left shift */
+  /** True for a comment drawn above a fragment, aligned with its left edge. */
   fragmentComment?: boolean;
 }
 

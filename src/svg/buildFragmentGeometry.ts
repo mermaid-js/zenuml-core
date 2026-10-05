@@ -98,18 +98,19 @@ export function buildFragmentGeometry(
     // agree. localNames is still needed here because fragX hangs off
     // leftParticipant, which TotalWidth does not expose.
     fragWidth = TotalWidth(statNode, coordinates);
+    // Like useFragmentData's offsetX: the fragment starts its own nesting
+    // border to the left of its first participant.
     fragX =
       coordinates.getPosition(leftParticipant) -
-      coordinates.half(leftParticipant);
+      coordinates.half(leftParticipant) -
+      fragBorder.left;
   } else {
     fragWidth = Math.max(FRAGMENT_MIN_WIDTH, coordinates.getWidth());
-    fragX = 0;
+    fragX = -fragBorder.left;
   }
 
-  // fragX is the left participant's edge for every fragment, nested or not;
-  // fragWidth already includes the nesting borders on both sides. The left
-  // indent per nesting level is applied in buildGeometry, once every fragment
-  // is known.
+  // fragX already includes this fragment's own nesting border, so nested and
+  // sibling fragments of any depth line up as in the DOM.
 
   // Build section geometry for multi-section fragments (alt, tcf)
   const sections: FragmentSectionGeometry[] = [];

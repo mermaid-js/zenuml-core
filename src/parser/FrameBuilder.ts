@@ -1,13 +1,13 @@
 import antlr4 from "antlr4";
 import sequenceParserListener from "../generated-parser/sequenceParserListener";
-import { Frame } from "@/positioning/FrameBorder";
+import { Frame, topLevelFrame } from "@/positioning/FrameBorder";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
 class FrameBuilder extends sequenceParserListener {
   private _orderedParticipants: string[];
-  private frameRoot: Frame | null = null;
+  private topLevelFrames: Frame[] = [];
   private parents: Frame[] = [];
 
   constructor(orderedParticipants: string[]) {
@@ -40,14 +40,12 @@ class FrameBuilder extends sequenceParserListener {
       children: [],
     };
 
-    // If there's no root, set the current frame as root
-    if (!this.frameRoot) {
-      this.frameRoot = frame;
-    }
-
-    // If there are parents, add the frame to the last parent
+    // A frame with no open parent is a top-level fragment of the context;
+    // otherwise it belongs to the innermost open fragment.
     if (this.parents.length > 0) {
       this.parents[this.parents.length - 1].children?.push(frame);
+    } else {
+      this.topLevelFrames.push(frame);
     }
 
     // Add the current frame to the parent stack
@@ -121,7 +119,7 @@ class FrameBuilder extends sequenceParserListener {
     context.children.map((child: any) => {
       walker.walk(this, child);
     });
-    return this.frameRoot;
+    return topLevelFrame(this.topLevelFrames);
   }
 }
 
