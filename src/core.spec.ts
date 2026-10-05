@@ -36,6 +36,31 @@ describe("@ZenUML/core", function () {
     return el;
   };
 
+  it("renders when the page blocks the embedded font", async () => {
+    // A Content-Security-Policy without data: in font-src makes FontFace.load()
+    // reject. The diagram must still render, with the fallback fonts.
+    const g = globalThis as any;
+    const originalFontFace = g.FontFace;
+    const originalFonts = Object.getOwnPropertyDescriptor(document, "fonts");
+    g.FontFace = class {
+      load() {
+        return Promise.reject(new Error("A network error occurred."));
+      }
+    };
+    Object.defineProperty(document, "fonts", {
+      configurable: true,
+      value: { add() {} },
+    });
+    try {
+      await renderDiagram();
+    } finally {
+      g.FontFace = originalFontFace;
+      if (originalFonts)
+        Object.defineProperty(document, "fonts", originalFonts);
+      else delete (document as any).fonts;
+    }
+  });
+
   it("shows message numbering by default", async () => {
     const el = await renderDiagram();
 
