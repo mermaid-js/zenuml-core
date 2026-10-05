@@ -54,8 +54,7 @@ export interface SvgPalette {
 
 import {
   DIAGRAM_FONT_STACK,
-  IBM_PLEX_SANS_400_DATA_URI,
-  IBM_PLEX_SANS_FAMILY,
+  IBM_PLEX_SANS_FONT_FACE_CSS,
 } from "./fonts/ibmPlexSans";
 
 /** src/assets/tailwind.css `.theme-default`. */
@@ -174,7 +173,7 @@ export function resolvePalette(theme?: string): SvgPalette {
  */
 export function buildThemeStyles(p: SvgPalette): string {
   return `
-  @font-face { font-family: "${IBM_PLEX_SANS_FAMILY}"; font-weight: 400; font-style: normal; src: url(${IBM_PLEX_SANS_400_DATA_URI}) format("woff2"); }
+  ${IBM_PLEX_SANS_FONT_FACE_CSS}
   .frame-border-outer { fill: ${p.frameBorder}; }
   .frame-border-inner { fill: ${p.frameBg}; }
   .frame-header-bg { fill: ${p.frameBg}; }

@@ -40,8 +40,13 @@ import { StrictMode } from "react";
 import { createStore, Provider } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
 export { renderToSvg } from "./svg/renderToSvg";
-import { ensureDiagramFontsLoaded } from "./svg/fonts/ensureDiagramFontsLoaded";
-export { ensureDiagramFontsLoaded };
+import {
+  ensureDiagramFontsLoaded,
+  getDiagramFontFaceCss,
+  setDiagramFontUrl,
+} from "./svg/fonts/ensureDiagramFontsLoaded";
+export { ensureDiagramFontsLoaded, getDiagramFontFaceCss, setDiagramFontUrl };
+export type { DiagramFontFamily } from "./svg/fonts/ensureDiagramFontsLoaded";
 export type { RenderResult, RenderOptions } from "./svg/renderToSvg";
 
 export interface Config {
@@ -94,6 +99,8 @@ export default class ZenUml implements IZenUml {
   // UMD Compatibility Layer - Support both window.zenuml and window.zenuml.default
   // The problem was introduced at commit 4c46879f when we remove the named export VueSequence
   static readonly default = ZenUml; // Self-reference for UMD compatibility
+  /** See {@link setDiagramFontUrl}; also reachable from the UMD global. */
+  static readonly setDiagramFontUrl = setDiagramFontUrl;
 
   private readonly el: HTMLElement;
   private _code: string | undefined;

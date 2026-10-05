@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: MS Sans Serif;
-  /*noinspection CssUnknownTarget*/
-  src: url("/fonts/MS Sans Serif.ttf") format("truetype");
-}
-
 /* Keep in sync with DIAGRAM_FONT_STACK in src/svg/fonts/ibmPlexSans.ts; the face
    itself is registered at runtime by ensureDiagramFontsLoaded(). */
 .zenuml {
@@ -15,6 +9,8 @@
   font-size: 16px;
 }
 
+/* The MS Sans Serif face is registered at runtime once a URL is set with
+   setDiagramFontUrl(url, "MS Sans Serif"); until then theme-neon falls back. */
 .zenuml .theme-neon {
   font-family:
     MS Sans Serif,

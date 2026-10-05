@@ -117,3 +117,19 @@ describe("@ZenUML/core", function () {
     }
   });
 });
+
+describe("font API exports", () => {
+  it("exposes the font URL setter as a named export and a ZenUml static", async () => {
+    const core = await import("./core");
+    expect(typeof core.setDiagramFontUrl).toBe("function");
+    expect(ZenUml.setDiagramFontUrl).toBe(core.setDiagramFontUrl);
+  });
+
+  it("exports getDiagramFontFaceCss and ensureDiagramFontsLoaded", async () => {
+    const core = await import("./core");
+    expect(await core.getDiagramFontFaceCss()).toContain(
+      'font-family: "IBM Plex Sans"',
+    );
+    expect(typeof core.ensureDiagramFontsLoaded).toBe("function");
+  });
+});

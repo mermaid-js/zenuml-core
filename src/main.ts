@@ -1,4 +1,11 @@
-import ZenUml from "./core";
+import ZenUml, { setDiagramFontUrl } from "./core";
+
+// The demo site serves the theme-neon face from public/fonts/; library
+// consumers point this at @zenuml/core/fonts/MS-Sans-Serif.ttf instead.
+setDiagramFontUrl(
+  `${import.meta.env.BASE_URL}fonts/MS Sans Serif.ttf`,
+  "MS Sans Serif",
+);
 
 const defaultConfig = {
   enableMultiTheme: true,
