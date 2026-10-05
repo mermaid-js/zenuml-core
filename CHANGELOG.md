@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.4.1
+
+### Patch Changes
+
+- [#457](https://github.com/mermaid-js/zenuml-core/pull/457) [`cc1bcb7`](https://github.com/mermaid-js/zenuml-core/commit/cc1bcb7cfca84f8ed8f4541c281554e1e7515d58) Thanks [@MrCoder](https://github.com/MrCoder)! - Render diagrams when the page blocks the embedded font. On a page whose Content-Security-Policy does not allow `data:` fonts, 4.4.0 rejected `render()` and drew nothing. The font loader now carries on with the fallback fonts (Helvetica, Verdana), and `ensureDiagramFontsLoaded()` never rejects.
+
 ## 4.4.0
 
 ### Minor Changes
