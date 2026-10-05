@@ -25,9 +25,12 @@ describe("ensureDiagramFontsLoaded", () => {
   it("resolves when the page blocks the embedded font", async () => {
     (globalThis as any).FontFace = BlockedFontFace;
     // Fresh module instance: the loader memoises its promise per module.
-    const { ensureDiagramFontsLoaded } = await import(
-      "./ensureDiagramFontsLoaded.ts?blocked-font"
-    );
+    // The query string makes Bun load a separate instance; the specifier is
+    // built at runtime so the type checker does not try to resolve it.
+    const specifier = "./ensureDiagramFontsLoaded.ts" + "?blocked-font";
+    const { ensureDiagramFontsLoaded } = (await import(specifier)) as {
+      ensureDiagramFontsLoaded: () => Promise<void>;
+    };
     await expect(ensureDiagramFontsLoaded()).resolves.toBeUndefined();
   });
 });
