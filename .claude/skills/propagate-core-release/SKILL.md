@@ -1,6 +1,6 @@
 ---
 name: propagate-core-release
-description: Propagate a published `@zenuml/core` release by opening or reusing per-repo downstream issues with explicit rollout instructions. Use when the user says "push core to downstreams", "update downstream projects", "propagate release", "open downstream issues", "file rollout issues", or wants the newly published zenuml/core version handed off across mermaid, mermaid live editor, web-sequence, the IntelliJ plugin, confluence-plugin-cloud, and diagramly.ai.
+description: Propagate a published `@zenuml/core` release by opening or reusing per-repo downstream issues with explicit rollout instructions. Use when the user says "push core to downstreams", "update downstream projects", "propagate release", "open downstream issues", "file rollout issues", or wants the newly published zenuml/core version handed off across mermaid, mermaid live editor, web-sequence, the IntelliJ plugin, conf-app, and diagramly.ai.
 ---
 
 # Propagate Core Release
@@ -156,7 +156,7 @@ Each downstream has specific update and verification commands documented in [ref
 
 For each repo:
 
-1. Include the **Update Command** from the table verbatim
+1. Include the **Update Command** from the table verbatim, except when the repo's current `@zenuml/core` range is below the target's major version: then append `@^<version>` as described under "Crossing a major version" in the reference file
 2. Include the lockfile refresh step:
    - `pnpm install` for pnpm repos
    - `yarn install` for yarn repos
@@ -168,7 +168,7 @@ Special handling for renderer API changes:
 
 - `mermaid-js/mermaid` is the direct `@zenuml/core` SVG-renderer integration. When core export APIs change, it may require code updates in `packages/mermaid-zenuml`, not just a dependency bump.
 - `mermaid-js/mermaid-live-editor` is an indirect SVG-renderer consumer through `@mermaid-js/mermaid-zenuml`. Do not add `@zenuml/core` directly there just to follow a core release.
-- `web-sequence`, `confluence-plugin-cloud`, `diagramly.ai`, and similar downstreams stay on the HTML-renderer path unless the user explicitly asks for a renderer migration.
+- `web-sequence`, `conf-app`, `diagramly.ai`, and similar downstreams stay on the HTML-renderer path unless the user explicitly asks for a renderer migration.
 
 Prefer the smallest downstream task description that updates the repo safely:
 
