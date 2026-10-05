@@ -1,5 +1,23 @@
 # @zenuml/core
 
+## 4.4.0
+
+### Minor Changes
+
+- [#450](https://github.com/mermaid-js/zenuml-core/pull/450) [`80f32ea`](https://github.com/mermaid-js/zenuml-core/commit/80f32ea52f66889c978c6747004c8f98289eefec) Thanks [@MrCoder](https://github.com/MrCoder)! - Render diagrams in IBM Plex Sans. The typeface is bundled with the library and embedded in exported SVGs, so `I`, `l` and `1` are distinct in code-like labels and the layout no longer depends on the fonts installed on the reader's machine. Callers of `renderToSvg` in a browser should `await ensureDiagramFontsLoaded()` first; `ZenUml.render` does this itself.
+
+### Patch Changes
+
+- [#453](https://github.com/mermaid-js/zenuml-core/pull/453) [`8e8114a`](https://github.com/mermaid-js/zenuml-core/commit/8e8114af63904ae2dc549e277a84a427b963b0c1) Thanks [@MrCoder](https://github.com/MrCoder)! - Centre fragment header titles (Alt, Loop, Opt, Par, Try, ...) on their kind icon and numbering badge in both the DOM and SVG renderers, and recentre the try/catch icon artwork.
+
+- [#456](https://github.com/mermaid-js/zenuml-core/pull/456) [`b90aa00`](https://github.com/mermaid-js/zenuml-core/commit/b90aa00743ca76d8653ba34c20cc0cad1414da9e) Thanks [@MrCoder](https://github.com/MrCoder)! - Keep every fragment inside the diagram frame when a diagram has several top-level fragments. The frame padding was sized for the first top-level fragment only, so a later fragment with more nesting overflowed the frame in the DOM renderer, and the SVG renderer placed shallower fragments too far left. Both renderers now size the frame for the deepest top-level fragment and place every fragment by its own nesting border, so DOM and SVG fragment edges and frame widths agree.
+
+- [#449](https://github.com/mermaid-js/zenuml-core/pull/449) [`57c989e`](https://github.com/mermaid-js/zenuml-core/commit/57c989e2e9267b938b003b2ae3aca19a20b35d3e) Thanks [@MrCoder](https://github.com/MrCoder)! - Draw the Actor, Boundary, Control, Entity and Database participant icons with 1px strokes at 24px. The Database icon is now a three-tier stroked cylinder sized like the other icons.
+
+- [#455](https://github.com/mermaid-js/zenuml-core/pull/455) [`bbad9ac`](https://github.com/mermaid-js/zenuml-core/commit/bbad9acf70372dfa751b36d6b955c3aea811f4a8) Thanks [@MrCoder](https://github.com/MrCoder)! - Indent every level of nested fragments in SVG output. Fragments nested three or more levels deep, all starting at the same participant, now sit 10px inside their container on the left, as in the DOM renderer; before, only the first nesting level was indented.
+
+- [#452](https://github.com/mermaid-js/zenuml-core/pull/452) [`40c923c`](https://github.com/mermaid-js/zenuml-core/commit/40c923ce0919db78c5218aa94b0a257ea0270b43) Thanks [@MrCoder](https://github.com/MrCoder)! - Keep the line break after the title when editing the title in the diagram. Previously confirming an edit merged the title with the next line of the DSL.
+
 ## 4.3.1
 
 ### Patch Changes
