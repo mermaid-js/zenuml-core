@@ -106,8 +106,10 @@ export function buildFragmentGeometry(
     fragX = 0;
   }
 
-  // No explicit nesting indent needed — fragBorder.left/right from FrameBorder
-  // already accounts for inner nesting depth, matching HTML's TotalWidth formula.
+  // fragX is the left participant's edge for every fragment, nested or not;
+  // fragWidth already includes the nesting borders on both sides. The left
+  // indent per nesting level is applied in buildGeometry, once every fragment
+  // is known.
 
   // Build section geometry for multi-section fragments (alt, tcf)
   const sections: FragmentSectionGeometry[] = [];
