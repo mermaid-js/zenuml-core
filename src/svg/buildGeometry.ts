@@ -156,24 +156,9 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     }
   }
 
-  // Shift fragment left edges into the diagram padding area (matching HTML CSS
-  // where fragments use left: -frameBorderLeft). Position-only shift.
-  // Also shift fragment-level comments by the same amount so they stay aligned.
-  for (const f of fragments) {
-    f.x -= frameBorder.left;
-  }
-  for (const c of comments) {
-    if (c.fragmentComment) {
-      c.x -= frameBorder.left;
-    }
-  }
-
-  // Compute spatial nesting depth for each fragment (how many other fragments
-  // fully contain it). This is more accurate than info.depth which includes
-  // message block nesting, not just fragment nesting.
-  // Count every depth before shifting any fragment: shifting a container first
-  // moves its left edge past the fragments it holds, so they would stop
-  // counting it and only the first nesting level would be indented.
+  // Spatial nesting depth of each fragment (how many other fragments fully
+  // contain it). Fragment x already includes its own nesting border (see
+  // buildFragmentGeometry); the depth is used only to extend right edges below.
   const nestDepths = new Map<FragmentGeometry, number>();
   for (const inner of fragments) {
     let nestDepth = 0;
@@ -189,9 +174,6 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
       }
     }
     nestDepths.set(inner, nestDepth);
-  }
-  for (const [fragment, nestDepth] of nestDepths) {
-    fragment.x += nestDepth * FRAGMENT_PADDING_X;
   }
 
   // Extend fragment right edges into the frameBorder area ONLY when the
