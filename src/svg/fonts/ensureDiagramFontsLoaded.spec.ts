@@ -230,6 +230,19 @@ describe("late IBM Plex Sans face", () => {
     expect(fonts.listeners.size).toBe(0);
   });
 
+  it("clears the width cache on the next load when the host added an already-loaded face", async () => {
+    refuse = () => true;
+    const { ensureDiagramFontsLoaded } = await freshLoader();
+    await ensureDiagramFontsLoaded();
+    // new FontFace(...).load().then(f => document.fonts.add(f)) adds a loaded
+    // face: the set never enters "loading", so no loadingdone fires.
+    fonts.add({ family: "IBM Plex Sans", status: "loaded" });
+    persistAWidth();
+    await ensureDiagramFontsLoaded();
+    expect(persistedWidthSurvived()).toBe(false);
+    expect(fonts.listeners.size).toBe(0);
+  });
+
   it("does not listen when core's own load succeeded", async () => {
     const { ensureDiagramFontsLoaded } = await freshLoader();
     await ensureDiagramFontsLoaded();

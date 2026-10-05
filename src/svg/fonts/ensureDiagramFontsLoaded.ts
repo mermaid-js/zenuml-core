@@ -62,7 +62,8 @@ export function setDiagramFontUrl(
   }
 }
 
-let lateFaceRecoveryArmed = false;
+/** Set while core's IBM Plex Sans load is refused and a host face is awaited. */
+let lateFaceRecovery: { fonts: FontFaceSet; stop: () => void } | null = null;
 
 function stripQuotes(family: string): string {
   return family.replace(/^["']|["']$/g, "");
@@ -85,38 +86,53 @@ function plexFaceAlreadyLoaded(fonts: FontFaceSet): boolean {
   return found;
 }
 
+function disarmLateFaceRecovery(): void {
+  lateFaceRecovery?.stop();
+  lateFaceRecovery = null;
+}
+
 /**
  * Core's own IBM Plex Sans load was refused, so widths have been measured
  * with a fallback font. If the host page registers the face itself (now or
  * later), those widths are wrong: drop them once so the next render
- * re-measures with the real face.
+ * re-measures with the real face. A face the host loads before adding it never
+ * puts the set into "loading", so no loadingdone fires for it;
+ * {@link checkLateFace} catches that case on the next render.
  */
 function armLateFaceRecovery(): void {
-  if (lateFaceRecoveryArmed) return;
+  if (lateFaceRecovery) return;
   const fonts = document.fonts as FontFaceSet | undefined;
   if (!fonts) return;
   if (plexFaceAlreadyLoaded(fonts)) {
     clearPersistentCache();
     return;
   }
-  if (
-    typeof fonts.addEventListener !== "function" ||
-    typeof fonts.removeEventListener !== "function"
-  ) {
-    return;
-  }
-  lateFaceRecoveryArmed = true;
+  const canListen =
+    typeof fonts.addEventListener === "function" &&
+    typeof fonts.removeEventListener === "function";
   const onLoadingDone = (event: Event) => {
     const loaded = (event as FontFaceSetLoadEvent).fontfaces;
     const plexArrived = loaded
       ? loaded.some(isLoadedPlexFace)
       : plexFaceAlreadyLoaded(fonts);
     if (!plexArrived) return;
-    fonts.removeEventListener("loadingdone", onLoadingDone);
-    lateFaceRecoveryArmed = false;
+    disarmLateFaceRecovery();
     clearPersistentCache();
   };
-  fonts.addEventListener("loadingdone", onLoadingDone);
+  if (canListen) fonts.addEventListener("loadingdone", onLoadingDone);
+  lateFaceRecovery = {
+    fonts,
+    stop: () => {
+      if (canListen) fonts.removeEventListener("loadingdone", onLoadingDone);
+    },
+  };
+}
+
+function checkLateFace(): void {
+  if (lateFaceRecovery && plexFaceAlreadyLoaded(lateFaceRecovery.fonts)) {
+    disarmLateFaceRecovery();
+    clearPersistentCache();
+  }
 }
 
 function load(family: DiagramFontFamily, source: string): Promise<void> {
@@ -127,6 +143,7 @@ function load(family: DiagramFontFamily, source: string): Promise<void> {
   return face.load().then(
     (loaded) => {
       document.fonts.add(loaded);
+      if (family === IBM_PLEX_SANS_FAMILY) disarmLateFaceRecovery();
       // Widths persisted before the font was available were measured with a
       // fallback and are keyed by the same font string.
       clearPersistentCache();
@@ -157,6 +174,7 @@ export function ensureDiagramFontsLoaded(): Promise<void> {
   if (typeof document === "undefined" || typeof FontFace === "undefined") {
     return Promise.resolve();
   }
+  checkLateFace();
   const pending: Promise<void>[] = [];
   for (const family of [IBM_PLEX_SANS_FAMILY, MS_SANS_SERIF_FAMILY] as const) {
     const source = sourceUrl(family);
