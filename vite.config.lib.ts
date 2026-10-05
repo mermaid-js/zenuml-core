@@ -6,7 +6,9 @@ import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 import svgr from "vite-plugin-svgr";
 import { visualizer } from "rollup-plugin-visualizer";
 import { execSync } from "child_process";
-import { readFileSync } from "fs";
+import { mkdirSync, readFileSync, writeFileSync } from "fs";
+import type { Plugin } from "vite";
+import { packageFontFiles } from "./src/svg/fonts/packageFontFiles";
 
 // Read version from package.json
 const packageJson = JSON.parse(
@@ -35,6 +37,24 @@ function manualChunks(id: string) {
   ) {
     return "cloud-icons";
   }
+}
+
+// Ship the font files as package assets (`@zenuml/core/fonts/*`) so consumers
+// whose Content-Security-Policy refuses data: fonts can serve them from their
+// own origin. Written straight to dist/fonts/: the build has two outputs (esm,
+// umd), and the files are the same for both.
+function packageFonts(): Plugin {
+  return {
+    name: "zenuml-package-fonts",
+    apply: "build",
+    closeBundle() {
+      const dir = resolve(__dirname, "dist/fonts");
+      mkdirSync(dir, { recursive: true });
+      for (const { fileName, source } of packageFontFiles()) {
+        writeFileSync(resolve(dir, fileName), source);
+      }
+    },
+  };
 }
 
 export default defineConfig({
@@ -77,6 +97,7 @@ export default defineConfig({
     svgr(),
     react(),
     cssInjectedByJsPlugin(),
+    packageFonts(),
     ...(shouldAnalyzeBundle
       ? [
           visualizer({

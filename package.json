@@ -82,7 +82,8 @@
         "types": "./types/parser/index.d.ts",
         "default": "./dist/parser/index.cjs"
       }
-    }
+    },
+    "./fonts/*": "./dist/fonts/*"
   },
   "engines": {
     "node": ">=20"
