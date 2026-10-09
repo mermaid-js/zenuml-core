@@ -6,6 +6,7 @@ import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { measureSvgParticipantLabelWidth } from "@/positioning/WidthProviderFunc";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
+import type { HeadNode } from "@/parser/AntlrTypes";
 import { MARGIN, MIN_PARTICIPANT_WIDTH } from "@/positioning/Constants";
 import { TextType } from "@/positioning/Coordinate";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
@@ -125,10 +126,13 @@ export interface GroupSpec {
  * same way the HTML renderer's LifeLineLayer does. Unnamed groups are kept:
  * the parser gives them no groupId, so grouping by groupId would drop them.
  */
-export function collectGroupSpecs(head: any): GroupSpec[] {
-  return ((head?.children as any[]) || [])
+export function collectGroupSpecs(
+  head: HeadNode | null | undefined,
+): GroupSpec[] {
+  return (head?.children ?? [])
     .filter((c) => c instanceof GroupContext)
-    .map((g) => ({
+    .map((g: any) => ({
+      // getFormattedText is installed on every context in src/parser/index.js
       name: g.name()?.getFormattedText() ?? "",
       participantNames: Participants(g)
         .Array()
