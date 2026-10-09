@@ -33,6 +33,14 @@ export declare function renderToSvg(
  */
 export declare function ensureDiagramFontsLoaded(): Promise<void>;
 
+/**
+ * Load the participant icons `code` uses that `renderToSvg()` does not build
+ * in (e.g. `@VPC`, `@RDS` and the other cloud icons), so the next
+ * `renderToSvg(code)` draws them. Await it before `renderToSvg()`. Never
+ * rejects: an unknown or failing icon falls back to the text label.
+ */
+export declare function ensureDiagramIconsLoaded(code: string): Promise<void>;
+
 /** Font families whose file URL can be set with {@link setDiagramFontUrl}. */
 export type DiagramFontFamily = "IBM Plex Sans" | "MS Sans Serif";
 
