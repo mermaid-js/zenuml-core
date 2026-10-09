@@ -63,6 +63,7 @@
       import ZenUml from "/src/core.tsx";
       import { renderToSvg } from "/src/svg/renderToSvg.ts";
       import { ensureDiagramFontsLoaded } from "/src/svg/fonts/ensureDiagramFontsLoaded.ts";
+      import { ensureDiagramIconsLoaded } from "/src/svg/icons.ts";
       await ensureDiagramFontsLoaded();
 
       import { CASES } from "../data/compare-cases.js";
@@ -111,6 +112,7 @@
         document.getElementById("svg-output").appendChild(errP);
       } else {
         // SVG side
+        await ensureDiagramIconsLoaded(code);
         const result = renderToSvg(code);
         document.getElementById("svg-output").innerHTML = result.svg;
 
