@@ -98,9 +98,12 @@ function formatParticipantColorSummary(color) {
 
 function formatGroupSummary(group) {
   if (group.status !== "ok") {
-    return `participant-group:${group.name} -> ambiguous`;
+    return `participant-group:${group.name} -> ${group.reason ?? "ambiguous"}`;
   }
-  const namePart = group.name_dx === null || group.name_dy === null
+  const untitled = !group.html_name_box && !group.svg_name_box;
+  const namePart = untitled
+    ? "name=none"
+    : group.name_dx === null || group.name_dy === null
     ? "name=ambiguous"
     : `name_dx=${group.name_dx.toFixed(2)}px name_dy=${group.name_dy.toFixed(2)}px`;
   return `participant-group:${group.name} -> dx=${group.dx.toFixed(2)}px dy=${group.dy.toFixed(2)}px dw=${group.dw.toFixed(2)}px dh=${group.dh.toFixed(2)}px ${namePart}`;

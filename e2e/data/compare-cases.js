@@ -1098,4 +1098,9 @@ D-->A: [check] all done`,
   @Actor Customer
   Web
 }`,
+  // --- Repro: unnamed group outline missing in SVG ---
+  "repro-unnamed-group": `group { A B }
+group Named { C }
+A->B.call()
+B->C.next()`,
 };

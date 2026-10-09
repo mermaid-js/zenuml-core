@@ -569,14 +569,19 @@ function buildParticipantColorSection(htmlParticipants, svgParticipants) {
   return names.map((name) => scoreParticipantColor(htmlMap.get(name) || null, svgMap.get(name) || null));
 }
 
-function groupNames(htmlGroups, svgGroups) {
-  return Array.from(
-    new Set(
-      [...htmlGroups, ...svgGroups]
-        .map((group) => group.name)
-        .filter(Boolean),
-    ),
-  ).sort((a, b) => a.localeCompare(b));
+/**
+ * Key each group by its name and its occurrence of that name, in render order:
+ * "G", "G#2", ... An unnamed group is "(unnamed)". Matching by name alone
+ * dropped unnamed groups and merged groups that share a name.
+ */
+function keyGroups(groups) {
+  const seen = new Map();
+  return groups.map((group) => {
+    const base = group.name || "(unnamed)";
+    const n = (seen.get(base) ?? 0) + 1;
+    seen.set(base, n);
+    return [n === 1 ? base : `${base}#${n}`, group];
+  });
 }
 
 function scoreGroup(htmlGroup, svgGroup) {
@@ -641,10 +646,15 @@ function scoreGroup(htmlGroup, svgGroup) {
 }
 
 function buildGroupSection(htmlGroups, svgGroups) {
-  const names = groupNames(htmlGroups, svgGroups);
-  const htmlMap = new Map(htmlGroups.map((group) => [group.name, group]));
-  const svgMap = new Map(svgGroups.map((group) => [group.name, group]));
-  return names.map((name) => scoreGroup(htmlMap.get(name) || null, svgMap.get(name) || null));
+  const htmlKeyed = keyGroups(htmlGroups);
+  const svgKeyed = keyGroups(svgGroups);
+  const htmlMap = new Map(htmlKeyed);
+  const svgMap = new Map(svgKeyed);
+  const keys = Array.from(new Set([...htmlKeyed, ...svgKeyed].map(([key]) => key)));
+  return keys.map((key) => ({
+    ...scoreGroup(htmlMap.get(key) || null, svgMap.get(key) || null),
+    name: key,
+  }));
 }
 
 function scoreOccurrence(htmlOcc, svgOcc) {

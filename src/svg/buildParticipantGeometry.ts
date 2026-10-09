@@ -9,6 +9,7 @@ import type { IParticipantModel } from "@/parser/IParticipantModel";
 import { MARGIN, MIN_PARTICIPANT_WIDTH } from "@/positioning/Constants";
 import { TextType } from "@/positioning/Coordinate";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import { GroupContext, Participants } from "@/parser";
 import type {
   ParticipantGeometry,
   LifelineGeometry,
@@ -113,33 +114,47 @@ export function buildLifelines(
   }));
 }
 
+/** One `group` block from the DSL: its name ("" when unnamed) and members. */
+export interface GroupSpec {
+  name: string;
+  participantNames: string[];
+}
+
 /**
- * Build group geometry by grouping participants that share the same groupId.
+ * The `group` blocks of a diagram, in DSL order, read from the parse tree the
+ * same way the HTML renderer's LifeLineLayer does. Unnamed groups are kept:
+ * the parser gives them no groupId, so grouping by groupId would drop them.
+ */
+export function collectGroupSpecs(head: any): GroupSpec[] {
+  return ((head?.children as any[]) || [])
+    .filter((c) => c instanceof GroupContext)
+    .map((g) => ({
+      name: g.name()?.getFormattedText() ?? "",
+      participantNames: Participants(g)
+        .Array()
+        .map((e: { name: string }) => e.name),
+    }));
+}
+
+/**
+ * Build group geometry, one group per `group` block.
  * Each group gets a bounding box from leftmost to rightmost participant,
  * with a small margin matching the HTML renderer's LIFELINE_GROUP_OUTLINE_MARGIN.
  */
 export function buildGroups(
   participants: ParticipantGeometry[],
   diagramHeight: number,
+  groupSpecs: GroupSpec[],
 ): GroupGeometry[] {
   // Group outline extends 2px outside the participant bounding box on each side.
   const GROUP_OUTLINE_MARGIN = -2;
 
-  // Collect participants by groupId
-  const groupMap = new Map<string | number, ParticipantGeometry[]>();
-  for (const p of participants) {
-    if (p.groupId != null) {
-      const existing = groupMap.get(p.groupId);
-      if (existing) {
-        existing.push(p);
-      } else {
-        groupMap.set(p.groupId, [p]);
-      }
-    }
-  }
-
+  const byName = new Map(participants.map((p) => [p.name, p]));
   const groups: GroupGeometry[] = [];
-  for (const [groupId, members] of groupMap) {
+  for (const spec of groupSpecs) {
+    const members = spec.participantNames
+      .map((n) => byName.get(n))
+      .filter((p): p is ParticipantGeometry => p !== undefined);
     if (members.length === 0) continue;
 
     // Find bounding box from leftmost to rightmost participant
@@ -173,9 +188,8 @@ export function buildGroups(
     // K=13 is a compromise: g.height=211.5, rendered bottom=255 (viewBox edge), <g> h≈213 (dh≈+1)
     const height = Math.max(0, diagramHeight - y + 13);
 
-    // Use groupId as the display name (the parser sets groupId = group name from DSL)
     groups.push({
-      name: String(groupId),
+      name: spec.name,
       x,
       y,
       width,

@@ -196,6 +196,50 @@ describe("analyze-compare-case/report", () => {
     expect(report.residual_scopes).toEqual([]);
   });
 
+  it("pairs groups by name and order, including unnamed and repeated names", () => {
+    const g = (name: string, x: number) => ({
+      name,
+      box: { x, y: 0, w: 50, h: 100 },
+      nameBox: null,
+      nameFont: null,
+      nameLetters: [],
+    });
+    const extracted = {
+      htmlLabels: [],
+      svgLabels: [],
+      htmlNumbers: [],
+      svgNumbers: [],
+      htmlArrows: [],
+      svgArrows: [],
+      htmlParticipants: [],
+      svgParticipants: [],
+      htmlComments: [],
+      svgComments: [],
+      // HTML draws an unnamed group and two groups named "G"; SVG drops the
+      // unnamed one.
+      htmlGroups: [g("", 0), g("G", 100), g("G", 200)],
+      svgGroups: [g("G", 100), g("G", 201)],
+      htmlRootBox: { x: 0, y: 0, w: 300, h: 100 },
+      svgRootBox: { x: 0, y: 0, w: 300, h: 100 },
+      svgFrameBorderBox: null,
+    };
+    const diffImage = {
+      width: 1,
+      height: 1,
+      diffData: new Uint8ClampedArray(4),
+      classData: new Uint8Array(1),
+      stats: { matched: 0, total: 0, htmlOnly: 0, svgOnly: 0, colorDiff: 0, pixelPct: 100 },
+    };
+
+    const groups = buildReport("demo", extracted, diffImage).participant_groups;
+
+    expect(groups.map((x: any) => [x.name, x.status, x.dx ?? null])).toEqual([
+      ["(unnamed)", "ambiguous", null],
+      ["G", "ok", 0],
+      ["G#2", "ok", 1],
+    ]);
+  });
+
   it("exports collectLabelData as a callable function", () => {
     expect(typeof collectLabelData).toBe("function");
   });

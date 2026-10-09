@@ -621,16 +621,18 @@ export async function collectLabelData(page) {
       // Group containers appear twice: once in participant layer (has name label, no overlay)
       // and once in lifeline layer (has overlay rect, no name label).
       // Collect name data from participant-layer containers and outline boxes from
-      // lifeline-layer containers, then merge by index order.
+      // lifeline-layer containers, then merge by index order. Every group has a
+      // participant-layer container; an unnamed group's has no name label, so
+      // its name is "" (pairing name labels alone shifted every later group).
       const nameEntries = [];
       const boxEntries = [];
       for (const groupEl of root.querySelectorAll(".lifeline-group-container")) {
         const nameEl = groupEl.querySelector(".text-skin-lifeline-group-name");
         const outlineRect = groupEl.querySelector("[data-group-overlay] rect");
-        if (nameEl) {
+        if (groupEl.querySelector(".participant")) {
           nameEntries.push({
-            name: textContentNormalized(nameEl),
-            measuredName: measureTextEntry(nameEl, rootRect),
+            name: nameEl ? textContentNormalized(nameEl) : "",
+            measuredName: nameEl ? measureTextEntry(nameEl, rootRect) : null,
           });
         }
         if (outlineRect) {
