@@ -32,6 +32,13 @@ const GroupOutline = (props: {
       left: props.left,
       pointerEvents: "none",
       overflow: "visible",
+      // The bottom edge runs into the frame's bottom border, as in the SVG
+      // renderer. The lower half of the centred bottom stroke would paint
+      // half a pixel below the frame and thicken its border under each dash,
+      // so clip at the outline's own bottom edge. The rect keeps its size so
+      // the dash pattern on the other edges is unchanged.
+      // (tests/regression/group-outline-bottom.spec.ts)
+      clipPath: `inset(-${GROUP_STROKE_WIDTH * 2}px -${GROUP_STROKE_WIDTH * 2}px 0 -${GROUP_STROKE_WIDTH * 2}px)`,
     }}
   >
     <rect
