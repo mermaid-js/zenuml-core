@@ -38,6 +38,17 @@ export const EditableSpan = ({
   const cancelRef = useRef(false);
   const pendingFocusRef = useRef<{ x: number; y: number } | null>(null);
   const ignoreEnterKeyupRef = useRef(false);
+  const consumedAutoEditTokenRef = useRef<number | undefined>(undefined);
+  const editingRef = useRef(false);
+  const onEditingChangeRef = useRef(onEditingChange);
+  onEditingChangeRef.current = onEditingChange;
+
+  const changeEditing = (next: boolean) => {
+    if (editingRef.current === next) return;
+    editingRef.current = next;
+    setEditing(next);
+    onEditingChangeRef.current?.(next);
+  };
 
   const applyFocus = (clickPoint: { x: number; y: number } | null) => {
     const target = spanRef.current;
@@ -104,18 +115,15 @@ export const EditableSpan = ({
       originalTextRef.current = target.innerText ?? "";
     }
 
-    setEditing(true);
-    onEditingChange?.(true);
+    changeEditing(true);
   };
 
   const handleClick = (e: MouseEvent) => {
-    if (editing || !isEditable) return;
-    // If inside a message, only start editing when that message is already
-    // selected. Otherwise let the click propagate to select it first.
-    const message = (e.currentTarget as HTMLElement).closest(".message");
-    if (message && message.getAttribute("data-selected") !== "true") {
+    if (editing) {
+      e.stopPropagation();
       return;
     }
+    if (!isEditable) return;
     startEditing(e);
   };
 
@@ -138,9 +146,8 @@ export const EditableSpan = ({
     if (!editing) return;
     if (cancelRef.current) return;
 
-    setEditing(false);
+    changeEditing(false);
     setIsHovered(false);
-    onEditingChange?.(false);
     saveText();
   };
 
@@ -167,9 +174,8 @@ export const EditableSpan = ({
       if (target) {
         target.innerText = originalTextRef.current;
       }
-      setEditing(false);
+      changeEditing(false);
       setIsHovered(false);
-      onEditingChange?.(false);
       return;
     }
 
@@ -190,9 +196,8 @@ export const EditableSpan = ({
     if (e.key === "Enter" || e.key === "Tab") {
       // Prevent handleBlur from calling saveText again (stale closure double-save)
       cancelRef.current = true;
-      setEditing(false);
+      changeEditing(false);
       setIsHovered(false);
-      onEditingChange?.(false);
       saveText();
     }
   };
@@ -212,14 +217,32 @@ export const EditableSpan = ({
   };
 
   useEffect(() => {
-    if (!autoEditToken || !isEditable) {
+    if (
+      !autoEditToken ||
+      !isEditable ||
+      consumedAutoEditTokenRef.current === autoEditToken
+    ) {
       return;
     }
+    consumedAutoEditTokenRef.current = autoEditToken;
     originalTextRef.current = spanRef.current?.innerText ?? text;
     cancelRef.current = false;
     pendingFocusRef.current = null;
-    setEditing(true);
+    changeEditing(true);
   }, [autoEditToken, isEditable, text]);
+
+  useEffect(() => {
+    if (!isEditable && editingRef.current) {
+      changeEditing(false);
+    }
+  }, [isEditable]);
+
+  useEffect(() => {
+    if (editingRef.current) onEditingChangeRef.current?.(true);
+    return () => {
+      if (editingRef.current) onEditingChangeRef.current?.(false);
+    };
+  }, []);
 
   return (
     <span

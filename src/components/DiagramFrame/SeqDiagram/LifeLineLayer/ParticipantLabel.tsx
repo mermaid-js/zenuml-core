@@ -9,6 +9,7 @@ import { Position } from "@/parser/Participants";
 import { specialCharRegex } from "@/utils/messageNormalizers";
 import { cn } from "@/utils";
 import { EditableSpan } from "@/components/common/EditableSpan";
+import { useTextEditingGuard } from "@/components/common/EditableSpan/useTextEditingGuard";
 
 const UneditableText = ["Missing Constructor", "ZenUML"];
 
@@ -20,6 +21,7 @@ export const ParticipantLabel = (props: {
   onNameEditingChange?: (editing: boolean) => void;
 }) => {
   const mode = useAtomValue(modeAtom);
+  const updateTextEditing = useTextEditingGuard();
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const participantIsEditable =
@@ -121,7 +123,10 @@ export const ParticipantLabel = (props: {
         text={displayText}
         isEditable={props.assignee ? assigneeIsEditable : participantIsEditable}
         className={cn("name leading-4 right px-1 participant-name")}
-        onEditingChange={props.onNameEditingChange}
+        onEditingChange={(editing) => {
+          updateTextEditing(editing);
+          props.onNameEditingChange?.(editing);
+        }}
         ignoreEnterKeyupAfterStart
         onSave={
           props.assignee

@@ -1,9 +1,17 @@
-import { onMessageClickAtom, selectedMessageAtom } from "@/store/Store";
+import {
+  enableMessageReorderAtom,
+  modeAtom,
+  onMessageClickAtom,
+  RenderMode,
+  selectedMessageAtom,
+  textEditingAtom,
+} from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
 import { CSSProperties, useMemo, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
 import { MessageLabel } from "../../../../MessageLabel";
 import { ArrowHead } from "../../Message/ArrowHead";
+import { MessageReorderHandle } from "../../Message/MessageReorderHandle";
 import {
   asyncMessageNormalizer,
   syncMessageNormalizer,
@@ -25,6 +33,11 @@ export const SelfInvocation = (props: {
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const selectedMessage = useAtomValue(selectedMessageAtom);
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
+  const messageReorderEnabled = useAtomValue(enableMessageReorderAtom);
+  const textEditing = useAtomValue(textEditingAtom);
+  const mode = useAtomValue(modeAtom);
+  const reorderEnabled =
+    messageReorderEnabled && !textEditing && mode === RenderMode.Dynamic;
 
   const content = isAsync ? props.context?.content() : undefined;
   const assignee = isAsync ? "" : props.context?.Assignment()?.getText() || "";
@@ -45,6 +58,7 @@ export const SelfInvocation = (props: {
     selectedMessage.end === labelPosition[1];
 
   const onClick = () => {
+    if (mode === RenderMode.Static) return;
     setSelectedMessage(
       labelPosition[0] !== -1
         ? { start: labelPosition[0], end: labelPosition[1], token: Date.now() }
@@ -64,6 +78,7 @@ export const SelfInvocation = (props: {
       onClick={onClick}
       data-selected={isSelected ? "true" : "false"}
     >
+      {reorderEnabled && <MessageReorderHandle />}
       <label
         className={
           isAsync

@@ -18,6 +18,26 @@ async function expectParticipantScreenshot(
 }
 
 test.describe("Participant name rename", () => {
+  test("frame whitespace selects and name click edits without reopening the toolbar", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const participant = page.locator('[data-participant-id="A"]');
+    const name = participant.locator(".participant-name");
+    const box = await participant.boundingBox();
+    expect(box).toBeTruthy();
+
+    await participant.click({ position: { x: 3, y: box!.height - 3 } });
+    await expect(page.getByTestId("participant-style-panel")).toBeVisible();
+    await name.click();
+    await expect(name).toHaveAttribute("contenteditable", "true");
+    await expect(page.getByTestId("participant-style-panel")).toHaveCount(0);
+    await name.click();
+    await expect(page.getByTestId("participant-style-panel")).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(name).not.toHaveAttribute("contenteditable", "true");
+  });
+
   test("uses the approved hover and editing states without changing geometry", async ({
     page,
   }) => {

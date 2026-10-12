@@ -48,14 +48,17 @@ const dragFirstMessageOntoSecond = (view: ReturnType<typeof render>) => {
   const containers = view.container.querySelectorAll(".statement-container");
   expect(containers.length).toBeGreaterThanOrEqual(2);
   const [, second] = Array.from(containers);
-  const message = containers[0].querySelector(".message") as Element;
-  expect(message).toBeTruthy();
+  const handle = containers[0].querySelector(
+    ".message-reorder-handle",
+  ) as Element | null;
+  const source = handle ?? containers[0].querySelector(".message");
+  expect(source).toBeTruthy();
 
-  // Dispatch directly on `.message` (not on the container with a `target`
+  // Dispatch directly on the handle (not on the container with a `target`
   // override) — happy-dom cannot reassign a PointerEvent's read-only
   // `target`, and forcing it here hangs the whole suite.
   act(() => {
-    fireEvent.pointerDown(message, { clientX: 0, clientY: 0 });
+    fireEvent.pointerDown(source!, { clientX: 0, clientY: 0 });
   });
   act(() => {
     fireEvent.pointerMove(window, { clientX: 0, clientY: 100 });
@@ -85,6 +88,7 @@ describe("Block drag-to-reorder gating", () => {
     });
     dragFirstMessageOntoSecond(view);
     expect(store.get(codeAtom)).toBe(CODE);
+    expect(view.container.querySelector(".message-reorder-handle")).toBeNull();
   });
 
   it("reorders when explicitly enabled in RenderMode.Dynamic", () => {

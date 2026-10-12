@@ -13,6 +13,7 @@ export type MessageViewProps = {
   messageRef?: RefObject<HTMLDivElement | null>;
   "data-selected"?: string;
   title?: string;
+  reorderHandle?: ReactNode;
   children: ReactNode;
 };
 
@@ -36,6 +37,7 @@ export const MessageView = ({
   messageRef,
   "data-selected": dataSelected,
   title,
+  reorderHandle,
   children,
 }: MessageViewProps) => {
   const isDashed = type === "creation" || type === "return";
@@ -72,6 +74,7 @@ export const MessageView = ({
       data-selected={dataSelected}
       title={title}
     >
+      {reorderHandle}
       {/* At 1px, center the crisp line and antialiased head on the same half-pixel. */}
       <svg
         className="absolute left-0 w-full text-skin-message-arrow pointer-events-none"

@@ -10,6 +10,7 @@ import {
   RenderMode,
   rootContextAtom,
   selectedAtom,
+  textEditingAtom,
 } from "@/store/Store";
 import { insertMessageInDsl } from "@/utils/insertMessageInDsl";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -20,6 +21,7 @@ const DRAG_THRESHOLD = 6;
 export const MessageCreateControls = () => {
   const mode = useAtomValue(modeAtom);
   const enabled = useAtomValue(enableMessageInsertionAtom);
+  const textEditing = useAtomValue(textEditingAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
@@ -47,8 +49,17 @@ export const MessageCreateControls = () => {
   }, [dragState]);
 
   useEffect(() => {
+    if (textEditing && dragState) setDragState(null);
+  }, [dragState, setDragState, textEditing]);
+
+  useEffect(() => {
     if (!diagramElement) return;
-    if (isCreatingMessage && enabled && mode === RenderMode.Dynamic) {
+    if (
+      isCreatingMessage &&
+      enabled &&
+      !textEditing &&
+      mode === RenderMode.Dynamic
+    ) {
       diagramElement.dataset.messageCreateDragging = "true";
     } else {
       delete diagramElement.dataset.messageCreateDragging;
@@ -56,10 +67,10 @@ export const MessageCreateControls = () => {
     return () => {
       delete diagramElement.dataset.messageCreateDragging;
     };
-  }, [diagramElement, enabled, isCreatingMessage, mode]);
+  }, [diagramElement, enabled, isCreatingMessage, mode, textEditing]);
 
   useEffect(() => {
-    if (!dragState || !diagramElement) {
+    if (!dragState || !diagramElement || textEditing) {
       dragHandledRef.current = false;
       participantScreenXRef.current = new Map();
       return;
@@ -151,7 +162,8 @@ export const MessageCreateControls = () => {
 
     const onPointerUp = (event: PointerEvent) => {
       const current = dragStateRef.current;
-      if (!current || dragHandledRef.current) {
+      if (!current || dragHandledRef.current || textEditing) {
+        setDragState(null);
         return;
       }
       dragHandledRef.current = true;
@@ -213,10 +225,12 @@ export const MessageCreateControls = () => {
     setPendingEditableRange,
     setDragState,
     setSelectedParticipants,
+    textEditing,
   ]);
 
   if (
     !enabled ||
+    textEditing ||
     mode !== RenderMode.Dynamic ||
     !diagramElement ||
     participants.length === 0

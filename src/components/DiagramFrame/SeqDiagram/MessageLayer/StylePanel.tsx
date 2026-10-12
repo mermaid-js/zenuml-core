@@ -13,14 +13,16 @@ import {
   parseStyleComment,
   toggleMessageStyle,
 } from "@/utils/messageStyleToggle";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import {
   codeAtom,
+  diagramElementAtom,
   onContentChangeAtom,
   onMessageClickAtom,
   pendingEditableRangeAtom,
   selectedAtom,
   selectedMessageAtom,
+  textEditingAtom,
 } from "@/store/Store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FloatingPortal, useFloating } from "@floating-ui/react";
@@ -52,12 +54,18 @@ const btns = [
 const wrapTypes: WrapFragmentType[] = ["alt", "loop", "opt", "par"];
 
 export const StylePanel = () => {
+  const store = useStore();
   const [code, setCode] = useAtom(codeAtom);
+  const diagramElement = useAtomValue(diagramElementAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const setOnMessageClick = useSetAtom(onMessageClickAtom);
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
   const setSelectedParticipants = useSetAtom(selectedAtom);
   const [selectedMessage, setSelectedMessage] = useAtom(selectedMessageAtom);
+  const textEditing = useAtomValue(textEditingAtom);
+  const themeClasses = Array.from(diagramElement?.classList ?? [])
+    .filter((name) => name.startsWith("theme-"))
+    .join(" ");
   const [isOpen, setIsOpen] = useState(false);
   const [existingStyles, setExistingStyles] = useState<string[]>([]);
   const [hasMessageContext, setHasMessageContext] = useState(false);
@@ -99,14 +107,17 @@ export const StylePanel = () => {
   const handleTypeClick = (targetType: MessageArrowType) => {
     const message = messageData.current;
     if (message.currentType === targetType) return;
-    if (!canTransformMessageType({
-      line: message.line,
-      currentType: message.currentType,
-      targetType,
-      source: message.source,
-      target: message.target,
-      signature: message.signature,
-    })) return;
+    if (
+      !canTransformMessageType({
+        line: message.line,
+        currentType: message.currentType,
+        targetType,
+        source: message.source,
+        target: message.target,
+        signature: message.signature,
+      })
+    )
+      return;
     const nextLine = transformMessageType({
       line: message.line,
       currentType: message.currentType,
@@ -123,9 +134,7 @@ export const StylePanel = () => {
     const labelText = message.signature;
     const labelOffset = labelText ? nextLine.lastIndexOf(labelText) : -1;
     updateCode(
-      code.slice(0, message.lineHead) +
-        nextLine +
-        code.slice(lineTail),
+      code.slice(0, message.lineHead) + nextLine + code.slice(lineTail),
     );
     message.currentType = targetType;
     message.line = nextLine;
@@ -169,8 +178,14 @@ export const StylePanel = () => {
     });
   };
 
-  useOutsideClick(refs.floating.current, () => {
+  useOutsideClick(refs.floating.current, (event) => {
     setIsOpen(false);
+    // Keep this diagram's selected message through capture while its label
+    // receives a click. The label itself takes that click into editing.
+    const clickedMessage = (event.target as Element | null)?.closest?.(
+      ".message[data-selected='true']",
+    );
+    if (clickedMessage && diagramElement?.contains(clickedMessage)) return;
     setSelectedMessage(null);
   });
 
@@ -178,28 +193,34 @@ export const StylePanel = () => {
     setOnMessageClick((context: any, element: HTMLElement) => {
       // make sure this is triggered after the outsideclicking
       setTimeout(() => {
+        // A quick double click can begin editing before this callback runs.
+        if (store.get(textEditingAtom)) return;
         const message = messageData.current;
         message.start = context.start.start;
         message.lineHead = getLineHead(code, message.start);
         const lineTail = code.indexOf("\n", message.lineHead);
-        message.line = lineTail === -1
-          ? code.slice(message.lineHead)
-          : code.slice(message.lineHead, lineTail);
+        message.line =
+          lineTail === -1
+            ? code.slice(message.lineHead)
+            : code.slice(message.lineHead, lineTail);
         setExistingStyles(
           parseStyleComment(getPrevLine(code, message.start)).styles,
         );
         const interactionElement = element.closest(".interaction");
         const classList = interactionElement?.classList;
-        const signatureCtx = context?.messageBody?.()?.func?.()?.signature?.()?.[0];
+        const signatureCtx = context
+          ?.messageBody?.()
+          ?.func?.()
+          ?.signature?.()?.[0];
         const asyncContent = context?.content?.();
         const creationParams = context?.creationBody?.()?.parameters?.();
         message.currentType = classList?.contains("creation")
           ? "creation"
           : classList?.contains("return")
-          ? "return"
-          : classList?.contains("async")
-          ? "async"
-          : "sync";
+            ? "return"
+            : classList?.contains("async")
+              ? "async"
+              : "sync";
         message.source = interactionElement?.getAttribute("data-source") || "";
         message.target = interactionElement?.getAttribute("data-target") || "";
         message.signature =
@@ -220,7 +241,10 @@ export const StylePanel = () => {
         setSelectedParticipants([]);
         setSelectedMessage({
           start: message.labelStart >= 0 ? message.labelStart : message.start,
-          end: message.labelEnd >= 0 ? message.labelEnd : (context?.stop?.stop ?? message.start),
+          end:
+            message.labelEnd >= 0
+              ? message.labelEnd
+              : (context?.stop?.stop ?? message.start),
           token: Date.now(),
         });
         refs.setReference(element);
@@ -228,13 +252,24 @@ export const StylePanel = () => {
         setIsOpen(true);
       }, 0);
     });
-  }, [code, refs, setOnMessageClick, setSelectedMessage, setSelectedParticipants]);
+  }, [
+    code,
+    refs,
+    setOnMessageClick,
+    setSelectedMessage,
+    setSelectedParticipants,
+    store,
+  ]);
 
   useEffect(() => {
     if (!selectedMessage) {
       setIsOpen(false);
     }
   }, [selectedMessage]);
+
+  useEffect(() => {
+    if (textEditing) setIsOpen(false);
+  }, [textEditing]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -253,7 +288,10 @@ export const StylePanel = () => {
   const submenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const openSub = useCallback((menu: "type" | "wrap") => {
-    if (submenuTimer.current) { clearTimeout(submenuTimer.current); submenuTimer.current = null; }
+    if (submenuTimer.current) {
+      clearTimeout(submenuTimer.current);
+      submenuTimer.current = null;
+    }
     setOpenSubmenu(menu);
   }, []);
 
@@ -268,163 +306,188 @@ export const StylePanel = () => {
 
   return (
     <FloatingPortal>
-    <div id="style-panel" ref={refs.setFloating} style={{ ...floatingStyles, zIndex: 40 }}>
-      {isOpen && (
-        <div className="flex items-center bg-white shadow-md z-40 rounded-md p-1 gap-1">
-          <div className="flex">
-            {btns.map((btn) => (
+      <div
+        id="style-panel"
+        className="zenuml"
+        ref={refs.setFloating}
+        style={{ ...floatingStyles, zIndex: 40 }}
+      >
+        {isOpen && !textEditing && (
+          <div
+            className={cn(
+              "flex items-center bg-white shadow-md z-40 rounded-md p-1 gap-1",
+              themeClasses,
+            )}
+          >
+            <div className="flex">
+              {btns.map((btn) => (
+                <button
+                  type="button"
+                  key={btn.name}
+                  aria-label={btn.name}
+                  aria-pressed={existingStyles.includes(btn.class)}
+                  title={
+                    existingStyles.includes(btn.class)
+                      ? `Remove ${btn.name}`
+                      : `Apply ${btn.name}`
+                  }
+                  onClick={() => handleClick(btn.class)}
+                  className={cn(
+                    "w-6 mx-1 py-1 rounded-md text-black text-center cursor-pointer hover:bg-gray-200",
+                    [
+                      btn.class,
+                      { "bg-gray-100": existingStyles.includes(btn.class) },
+                    ],
+                  )}
+                >
+                  {btn.content}
+                </button>
+              ))}
+            </div>
+            <div className="w-px self-stretch bg-gray-200" />
+            <div className="flex items-center gap-1">
               <button
                 type="button"
-                key={btn.name}
-                aria-label={btn.name}
-                aria-pressed={existingStyles.includes(btn.class)}
-                title={existingStyles.includes(btn.class) ? `Remove ${btn.name}` : `Apply ${btn.name}`}
-                onClick={() => handleClick(btn.class)}
+                data-testid="message-rename"
                 className={cn(
-                  "w-6 mx-1 py-1 rounded-md text-black text-center cursor-pointer hover:bg-gray-200",
-                  [
-                    btn.class,
-                    { "bg-gray-100": existingStyles.includes(btn.class) },
-                  ],
+                  "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  {
+                    "opacity-40 pointer-events-none":
+                      messageData.current.labelStart < 0 ||
+                      messageData.current.labelEnd < 0,
+                  },
                 )}
+                title={
+                  messageData.current.labelStart < 0 ||
+                  messageData.current.labelEnd < 0
+                    ? "Cannot rename: message has no label"
+                    : "Rename message label"
+                }
+                onClick={handleRenameClick}
               >
-                {btn.content}
+                Rename
               </button>
-            ))}
-          </div>
-          <div className="w-px self-stretch bg-gray-200" />
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              data-testid="message-rename"
-              className={cn(
-                "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
-                {
-                  "opacity-40 pointer-events-none":
-                    messageData.current.labelStart < 0 ||
-                    messageData.current.labelEnd < 0,
-                },
-              )}
-              title={
-                messageData.current.labelStart < 0 ||
-                messageData.current.labelEnd < 0
-                  ? "Cannot rename: message has no label"
-                  : "Rename message label"
-              }
-              onClick={handleRenameClick}
+            </div>
+            <div className="w-px self-stretch bg-gray-200" />
+            {/* Type submenu trigger */}
+            <div
+              className="relative"
+              onPointerEnter={() => openSub("type")}
+              onPointerLeave={closeSub}
             >
-              Rename
-            </button>
-          </div>
-          <div className="w-px self-stretch bg-gray-200" />
-          {/* Type submenu trigger */}
-          <div
-            className="relative"
-            onPointerEnter={() => openSub("type")}
-            onPointerLeave={closeSub}
-          >
-            <button
-              type="button"
-              data-testid="message-type-menu"
-              className={cn(
-                "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
-                { "bg-gray-100": openSubmenu === "type" },
+              <button
+                type="button"
+                data-testid="message-type-menu"
+                className={cn(
+                  "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  { "bg-gray-100": openSubmenu === "type" },
+                )}
+                title="Change message type"
+                aria-expanded={openSubmenu === "type"}
+                aria-haspopup="true"
+                onClick={() => openSub("type")}
+              >
+                {messageData.current.currentType} ▾
+              </button>
+              {openSubmenu === "type" && (
+                <div className="absolute left-0 top-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[90px]">
+                  {(
+                    [
+                      "sync",
+                      "async",
+                      "return",
+                      "creation",
+                    ] as MessageArrowType[]
+                  ).map((type) => {
+                    const canTransform = canTransformMessageType({
+                      line: messageData.current.line,
+                      currentType: messageData.current.currentType,
+                      targetType: type,
+                      source: messageData.current.source,
+                      target: messageData.current.target,
+                      signature: messageData.current.signature,
+                    });
+                    const isCurrent = messageData.current.currentType === type;
+                    const disabledTitle = isCurrent
+                      ? `Already ${type}`
+                      : !canTransform && type === "sync"
+                        ? "Label must be a valid method name (no spaces) to switch to sync"
+                        : !canTransform &&
+                            messageData.current.currentType === "creation"
+                          ? "Cannot convert creation messages"
+                          : !canTransform
+                            ? `Cannot convert to ${type}`
+                            : undefined;
+                    return (
+                      <button
+                        type="button"
+                        key={type}
+                        data-testid={`message-type-${type}`}
+                        aria-label={`Change to ${type} message type`}
+                        aria-pressed={isCurrent}
+                        title={disabledTitle}
+                        onClick={() => {
+                          handleTypeClick(type);
+                          setOpenSubmenu(null);
+                        }}
+                        className={cn(
+                          "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100",
+                          {
+                            "bg-gray-100 font-semibold": isCurrent,
+                            "opacity-40 cursor-not-allowed": !canTransform,
+                            "cursor-pointer": canTransform && !isCurrent,
+                          },
+                        )}
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
-              title="Change message type"
-              aria-expanded={openSubmenu === "type"}
-              aria-haspopup="true"
-              onClick={() => openSub("type")}
+            </div>
+            <div className="w-px self-stretch bg-gray-200" />
+            {/* Wrap submenu trigger */}
+            <div
+              className="relative"
+              onPointerEnter={() => openSub("wrap")}
+              onPointerLeave={closeSub}
             >
-              {messageData.current.currentType} ▾
-            </button>
-            {openSubmenu === "type" && (
-              <div className="absolute left-0 top-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[90px]">
-                {(["sync", "async", "return", "creation"] as MessageArrowType[]).map((type) => {
-                  const canTransform = canTransformMessageType({
-                    line: messageData.current.line,
-                    currentType: messageData.current.currentType,
-                    targetType: type,
-                    source: messageData.current.source,
-                    target: messageData.current.target,
-                    signature: messageData.current.signature,
-                  });
-                  const isCurrent = messageData.current.currentType === type;
-                  const disabledTitle = isCurrent
-                    ? `Already ${type}`
-                    : !canTransform && type === "sync"
-                    ? "Label must be a valid method name (no spaces) to switch to sync"
-                    : !canTransform && messageData.current.currentType === "creation"
-                    ? "Cannot convert creation messages"
-                    : !canTransform
-                    ? `Cannot convert to ${type}`
-                    : undefined;
-                  return (
+              <button
+                type="button"
+                data-testid="message-wrap-menu"
+                className={cn(
+                  "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  { "bg-gray-100": openSubmenu === "wrap" },
+                )}
+                title="Wrap in fragment"
+                aria-expanded={openSubmenu === "wrap"}
+                aria-haspopup="true"
+                onClick={() => openSub("wrap")}
+              >
+                Wrap ▾
+              </button>
+              {openSubmenu === "wrap" && (
+                <div className="absolute left-0 top-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[70px]">
+                  {wrapTypes.map((type) => (
                     <button
                       type="button"
                       key={type}
-                      data-testid={`message-type-${type}`}
-                      aria-label={`Change to ${type} message type`}
-                      aria-pressed={isCurrent}
-                      title={disabledTitle}
-                      onClick={() => { handleTypeClick(type); setOpenSubmenu(null); }}
-                      className={cn(
-                        "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100",
-                        {
-                          "bg-gray-100 font-semibold": isCurrent,
-                          "opacity-40 cursor-not-allowed": !canTransform,
-                          "cursor-pointer": canTransform && !isCurrent,
-                        },
-                      )}
+                      data-testid={`message-wrap-${type}`}
+                      className="px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100"
+                      title={`Wrap in ${type} fragment`}
+                      aria-label={`Wrap in ${type} fragment`}
+                      onClick={() => handleWrapClick(type)}
                     >
                       {type}
                     </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-          <div className="w-px self-stretch bg-gray-200" />
-          {/* Wrap submenu trigger */}
-          <div
-            className="relative"
-            onPointerEnter={() => openSub("wrap")}
-            onPointerLeave={closeSub}
-          >
-            <button
-              type="button"
-              data-testid="message-wrap-menu"
-              className={cn(
-                "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
-                { "bg-gray-100": openSubmenu === "wrap" },
+                  ))}
+                </div>
               )}
-              title="Wrap in fragment"
-              aria-expanded={openSubmenu === "wrap"}
-              aria-haspopup="true"
-              onClick={() => openSub("wrap")}
-            >
-              Wrap ▾
-            </button>
-            {openSubmenu === "wrap" && (
-              <div className="absolute left-0 top-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[70px]">
-                {wrapTypes.map((type) => (
-                  <button
-                    type="button"
-                    key={type}
-                    data-testid={`message-wrap-${type}`}
-                    className="px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100"
-                    title={`Wrap in ${type} fragment`}
-                    aria-label={`Wrap in ${type} fragment`}
-                    onClick={() => handleWrapClick(type)}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            )}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
     </FloatingPortal>
   );
 };

@@ -16,6 +16,9 @@ type InsertParticipantInput = {
   insertIndex: number;
   name: string;
   type: ParticipantInsertType;
+  /** Style an already inferred participant while materializing the header. */
+  materializeExisting?: boolean;
+  color?: string | null;
 };
 
 const normalizeName = (text: string) => {
@@ -61,6 +64,8 @@ const buildParticipantLines = (
   insertIndex: number,
   name: string,
   type: ParticipantInsertType,
+  materializeExisting: boolean,
+  color?: string | null,
 ) => {
   const current = OrderedParticipants(rootContext)
     .filter((participant) => participant.name !== _STARTER_)
@@ -73,14 +78,26 @@ const buildParticipantLines = (
       emoji: participant.emoji,
     }));
 
-  current.splice(insertIndex, 0, {
+  const declaration = {
     name,
     label: undefined,
     type: type === "default" ? undefined : type,
     stereotype: undefined,
-    color: undefined,
+    color: color ?? undefined,
     emoji: undefined,
-  });
+  };
+  if (materializeExisting) {
+    const index = current.findIndex((participant) => participant.name === name);
+    if (index >= 0) {
+      current[index] = {
+        ...current[index],
+        type: declaration.type,
+        color: declaration.color,
+      };
+    }
+  } else {
+    current.splice(insertIndex, 0, declaration);
+  }
 
   return current.map(formatParticipantDeclaration).join("\n");
 };
@@ -91,12 +108,16 @@ export const insertParticipantIntoDsl = ({
   insertIndex,
   name,
   type,
+  materializeExisting = false,
+  color,
 }: InsertParticipantInput) => {
   const participantLines = buildParticipantLines(
     rootContext,
     insertIndex,
     name,
     type,
+    materializeExisting,
+    color,
   );
   const head = rootContext?.head?.();
   const block = rootContext?.block?.();
@@ -118,11 +139,10 @@ export const insertParticipantIntoDsl = ({
   const insertionPoint = block
     ? block.start.start
     : title
-    ? title.stop.stop + 1
-    : 0;
+      ? title.stop.stop + 1
+      : 0;
   const prefix = code.slice(0, insertionPoint);
   const suffix = code.slice(insertionPoint);
-  const separator =
-    prefix.length > 0 && !prefix.endsWith("\n") ? "\n" : "";
+  const separator = prefix.length > 0 && !prefix.endsWith("\n") ? "\n" : "";
   return `${prefix}${separator}${participantLines}\n${suffix}`;
 };

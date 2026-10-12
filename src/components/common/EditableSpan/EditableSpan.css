@@ -3,39 +3,22 @@
   border-radius: 4px;
 }
 
-.editable-span-editing {
-  outline: 2px dashed #93c5fd;
-  background-color: #eff6ff;
-}
-
-.editable-span-hover {
-  outline: 2px dashed #d1d5db;
-  background-color: #f3f4f6;
-  cursor: text;
-}
-
-.zenuml .participant .participant-name.editable-span-base {
-  outline: none;
-}
-
-.zenuml .participant .participant-name.editable-span-hover {
+.editable-span-base.editable-span-hover[role] {
   outline: none;
   background-color: #f3f4f6;
   cursor: text;
 }
 
-.zenuml
-  .participant
-  .participant-name:focus-visible:not(.editable-span-editing) {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-.zenuml .participant .participant-name.editable-span-editing {
+.editable-span-base.editable-span-editing {
   outline: 1px solid #3b82f6;
   outline-offset: 0;
-  border-radius: 4px;
   background-color: #eff6ff;
+  border-radius: 4px;
   box-shadow: none;
   cursor: text;
+}
+
+.editable-span-base:focus-visible:not(.editable-span-editing) {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }

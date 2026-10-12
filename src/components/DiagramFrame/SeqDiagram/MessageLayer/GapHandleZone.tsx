@@ -13,6 +13,7 @@ import {
   rootContextAtom,
   selectedAtom,
   selectedMessageAtom,
+  textEditingAtom,
 } from "@/store/Store";
 import { centerOf } from "./Block/Statement/utils";
 import { insertDividerInDsl } from "@/utils/insertDividerInDsl";
@@ -36,6 +37,7 @@ export const GapHandleZone = (props: {
   const mode = useAtomValue(modeAtom);
   const messageInsertionEnabled = useAtomValue(enableMessageInsertionAtom);
   const dividerInsertionEnabled = useAtomValue(enableDividerInsertionAtom);
+  const textEditing = useAtomValue(textEditingAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
@@ -71,6 +73,17 @@ export const GapHandleZone = (props: {
   }, []);
 
   useEffect(() => {
+    if (!textEditing) return;
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current);
+    setHovered(false);
+    setActiveParticipant(null);
+    activeParticipantRef.current = null;
+    setTooltipParticipant(null);
+    setMenuOpen(false);
+  }, [textEditing]);
+
+  useEffect(() => {
     if (!menuOpen) return;
     menuItemRef.current?.focus();
     const closeOutside = (event: PointerEvent) => {
@@ -84,7 +97,10 @@ export const GapHandleZone = (props: {
     () => OrderedParticipants(rootContext).filter((p) => p.name !== _STARTER_),
     [rootContext],
   );
-  const canCreateMessage = messageInsertionEnabled && participants.length >= 2;
+  const configuredMessageCreation =
+    messageInsertionEnabled && participants.length >= 2;
+  const canCreateMessage = !textEditing && configuredMessageCreation;
+  const canInsertDivider = !textEditing && dividerInsertionEnabled;
 
   const updateNearest = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!canCreateMessage || dragState || menuOpen) return;
@@ -117,7 +133,7 @@ export const GapHandleZone = (props: {
       clearTimeout(hideTimerRef.current);
       hideTimerRef.current = null;
     }
-    if (!dragState && !menuOpen) {
+    if (!textEditing && !dragState && !menuOpen) {
       setHovered(true);
       updateNearest(event);
     }
@@ -146,6 +162,7 @@ export const GapHandleZone = (props: {
     (event: React.MouseEvent) => {
       event.preventDefault();
       event.stopPropagation();
+      if (!canInsertDivider || mode !== RenderMode.Dynamic) return;
       const result = insertDividerInDsl({
         code,
         blockContext: props.blockContext,
@@ -161,6 +178,8 @@ export const GapHandleZone = (props: {
     },
     [
       code,
+      canInsertDivider,
+      mode,
       onContentChange,
       props.blockContext,
       props.insertIndex,
@@ -171,13 +190,13 @@ export const GapHandleZone = (props: {
 
   if (
     mode !== RenderMode.Dynamic ||
-    (!canCreateMessage && !dividerInsertionEnabled)
+    (!configuredMessageCreation && !dividerInsertionEnabled)
   ) {
     return null;
   }
 
   const startDrag = (participantName: string, event: React.PointerEvent) => {
-    if (event.button !== 0) return;
+    if (event.button !== 0 || !canCreateMessage) return;
     event.preventDefault();
     event.stopPropagation();
     if (!diagramElement) return;
@@ -220,6 +239,7 @@ export const GapHandleZone = (props: {
     : 0;
 
   const openMenu = (clientX: number, currentTarget: HTMLDivElement) => {
+    if (!canInsertDivider) return;
     const rect = currentTarget.getBoundingClientRect();
     const scale = rect.width / (currentTarget.offsetWidth || rect.width) || 1;
     setMenuX(
@@ -235,7 +255,7 @@ export const GapHandleZone = (props: {
   };
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!dividerInsertionEnabled) return;
+    if (!canInsertDivider) return;
     event.preventDefault();
     event.stopPropagation();
     openMenu(event.clientX, event.currentTarget);
@@ -248,7 +268,7 @@ export const GapHandleZone = (props: {
       setMenuOpen(false);
       zoneRef.current?.focus();
     } else if (
-      dividerInsertionEnabled &&
+      canInsertDivider &&
       (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10"))
     ) {
       event.preventDefault();
@@ -316,7 +336,7 @@ export const GapHandleZone = (props: {
             Drag from {activeParticipant} to a participant
           </div>
         )}
-        {menuOpen && dividerInsertionEnabled && (
+        {menuOpen && canInsertDivider && (
           <div
             role="menu"
             data-testid={`gap-insert-menu-${props.insertIndex}`}
@@ -350,6 +370,7 @@ export const GapHandleZone = (props: {
           height: GAP_HEIGHT_EMPTY,
           marginLeft: `-${paddingLeft}px`,
           width: `calc(100% + ${paddingLeft}px)`,
+          pointerEvents: textEditing ? "none" : undefined,
         }}
         data-testid={`message-gap-${props.insertIndex}`}
         ref={zoneRef}
@@ -358,8 +379,8 @@ export const GapHandleZone = (props: {
         onPointerLeave={handlePointerLeave}
         onContextMenu={handleContextMenu}
         onKeyDown={handleKeyDown}
-        tabIndex={dividerInsertionEnabled ? 0 : undefined}
-        aria-label={dividerInsertionEnabled ? "Insertion options" : undefined}
+        tabIndex={canInsertDivider ? 0 : undefined}
+        aria-label={canInsertDivider ? "Insertion options" : undefined}
       >
         {renderHandles()}
       </div>
@@ -391,15 +412,15 @@ export const GapHandleZone = (props: {
             ? FIRST_GAP_CLEARANCE
             : -(HOVER_ZONE_HEIGHT / 2) - GAP_OFFSET_UP,
           height: HOVER_ZONE_HEIGHT,
-          pointerEvents: "auto",
+          pointerEvents: textEditing ? "none" : "auto",
         }}
         onPointerEnter={handlePointerEnter}
         onPointerMove={updateNearest}
         onPointerLeave={handlePointerLeave}
         onContextMenu={handleContextMenu}
         onKeyDown={handleKeyDown}
-        tabIndex={dividerInsertionEnabled ? 0 : undefined}
-        aria-label={dividerInsertionEnabled ? "Insertion options" : undefined}
+        tabIndex={canInsertDivider ? 0 : undefined}
+        aria-label={canInsertDivider ? "Insertion options" : undefined}
       >
         {renderHandles()}
       </div>

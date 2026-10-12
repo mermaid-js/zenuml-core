@@ -8,9 +8,13 @@ import {
   RenderMode,
   rootContextAtom,
   selectedAtom,
+  textEditingAtom,
 } from "@/store/Store";
 import { setParticipantStyleInDsl } from "@/utils/participantStyleTransform";
-import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
+import {
+  insertParticipantIntoDsl,
+  type ParticipantInsertType,
+} from "@/utils/participantInsertTransform";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
@@ -47,8 +51,15 @@ export const ParticipantStylePanel = () => {
   const [selected, setSelected] = useAtom(selectedAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const dragState = useAtomValue(createMessageDragAtom);
+  const textEditing = useAtomValue(textEditingAtom);
+  const themeClasses = Array.from(diagramElement?.classList ?? [])
+    .filter((name) => name.startsWith("theme-"))
+    .join(" ");
   const [isOpen, setIsOpen] = useState(false);
-  const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
+  const [panelPos, setPanelPos] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const participantName = selected[0] ?? null;
 
@@ -59,7 +70,7 @@ export const ParticipantStylePanel = () => {
   const currentType = currentParticipant?.type ?? null;
 
   useEffect(() => {
-    if (selected.length === 1 && diagramElement && !dragState) {
+    if (selected.length === 1 && diagramElement && !dragState && !textEditing) {
       const el = diagramElement.querySelector(
         `[data-participant-id="${selected[0]}"]`,
       ) as HTMLElement | null;
@@ -72,7 +83,7 @@ export const ParticipantStylePanel = () => {
       setIsOpen(false);
       setPanelPos(null);
     }
-  }, [selected, diagramElement, dragState]);
+  }, [selected, diagramElement, dragState, textEditing]);
 
   // Clamp panel position to stay within viewport after it renders
   useEffect(() => {
@@ -118,43 +129,52 @@ export const ParticipantStylePanel = () => {
     !enabled ||
     mode !== RenderMode.Dynamic ||
     !isOpen ||
+    textEditing ||
     !participantName ||
     !panelPos
   ) {
     return null;
   }
 
-  const applyStyle = (updates: { color?: string | null; type?: string | null }) => {
+  const applyStyle = (updates: {
+    color?: string | null;
+    type?: string | null;
+  }) => {
     let workingCode = code;
-    const workingContext = rootContext;
 
     // If participant has no explicit declaration, insert one first
     const participants = OrderedParticipants(rootContext).filter(
       (p) => p.name !== _STARTER_,
     );
-    const hasExplicitDecl =
-      (rootContext?.head?.()?.participant?.() ?? []).some(
-        (ctx: any) => ctx?.name()?.getFormattedText() === participantName,
-      );
+    const hasExplicitDecl = (rootContext?.head?.()?.participant?.() ?? []).some(
+      (ctx: any) => ctx?.name()?.getFormattedText() === participantName,
+    );
     if (!hasExplicitDecl) {
-      const insertIndex = participants.findIndex((p) => p.name === participantName);
+      const insertIndex = participants.findIndex(
+        (p) => p.name === participantName,
+      );
       workingCode = insertParticipantIntoDsl({
         code: workingCode,
-        rootContext: workingContext,
+        rootContext,
         insertIndex,
         name: participantName,
-        type: "default",
+        type: (updates.type ?? "default") as ParticipantInsertType,
+        color: updates.color,
+        materializeExisting: true,
       });
-      const newCode = setParticipantStyleInDsl(workingCode, workingContext, participantName, updates);
-      const finalCode = newCode !== workingCode ? newCode : workingCode;
-      setCode(finalCode);
-      onContentChange(finalCode);
+      setCode(workingCode);
+      onContentChange(workingCode);
       setIsOpen(false);
       setSelected([]);
       return;
     }
 
-    const newCode = setParticipantStyleInDsl(workingCode, workingContext, participantName, updates);
+    const newCode = setParticipantStyleInDsl(
+      workingCode,
+      rootContext,
+      participantName,
+      updates,
+    );
     if (newCode === workingCode) return;
     setCode(newCode);
     onContentChange(newCode);
@@ -164,79 +184,95 @@ export const ParticipantStylePanel = () => {
 
   return (
     <FloatingPortal>
-    <div
-      ref={panelRef}
-      className="bg-white rounded-lg shadow-lg border border-gray-200 p-2 flex flex-col gap-2"
-      style={{ position: "fixed", zIndex: 50, minWidth: 180, top: panelPos.top, left: panelPos.left }}
-      data-testid="participant-style-panel"
-    >
-      <div className="text-[10px] uppercase tracking-wide text-gray-400 font-semibold px-1">Color</div>
-      <div className="flex flex-wrap gap-1 px-1">
-        {PRESET_COLORS.map(({ hex, name }) => {
-          const isActive = currentColor === hex.toLowerCase();
-          return (
-            <button
-              key={hex}
-              type="button"
-              className={`w-5 h-5 rounded-full border hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 ${
-                isActive ? "border-sky-500 ring-2 ring-sky-400 ring-offset-1" : "border-gray-300"
-              }`}
-              style={{ backgroundColor: hex }}
-              title={isActive ? `${name} (current)` : name}
-              aria-label={`Set color to ${name}`}
-              aria-pressed={isActive}
-              onClick={() => applyStyle({ color: hex })}
-            />
-          );
-        })}
-        <button
-          type="button"
-          className="w-5 h-5 rounded-full border border-dashed border-gray-400 text-gray-400 text-[9px] hover:scale-110 transition-transform flex items-center justify-center"
-          title="Remove color"
-          aria-label="Remove color"
-          onClick={() => applyStyle({ color: null })}
+      <div className="zenuml">
+        <div
+          ref={panelRef}
+          className={`bg-white rounded-lg shadow-lg border border-gray-200 p-2 flex flex-col gap-2 ${themeClasses}`}
+          style={{
+            position: "fixed",
+            zIndex: 50,
+            minWidth: 180,
+            top: panelPos.top,
+            left: panelPos.left,
+          }}
+          data-testid="participant-style-panel"
         >
-          ✕
-        </button>
-      </div>
-
-      <div className="w-full h-px bg-gray-100" />
-
-      <div className="text-[10px] uppercase tracking-wide text-gray-400 font-semibold px-1">Type</div>
-      <div className="flex flex-wrap gap-1 px-1">
-        {PARTICIPANT_TYPES.map(({ key, label, icon }) => {
-          const isActive = currentType?.toLowerCase() === key.toLowerCase();
-          return (
+          <div className="text-[10px] uppercase tracking-wide text-gray-400 font-semibold px-1">
+            Color
+          </div>
+          <div className="flex flex-wrap gap-1 px-1">
+            {PRESET_COLORS.map(({ hex, name }) => {
+              const isActive = currentColor === hex.toLowerCase();
+              return (
+                <button
+                  key={hex}
+                  type="button"
+                  className={`w-5 h-5 rounded-full border hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 ${
+                    isActive
+                      ? "border-sky-500 ring-2 ring-sky-400 ring-offset-1"
+                      : "border-gray-300"
+                  }`}
+                  style={{ backgroundColor: hex }}
+                  title={isActive ? `${name} (current)` : name}
+                  aria-label={`Set color to ${name}`}
+                  aria-pressed={isActive}
+                  onClick={() => applyStyle({ color: hex })}
+                />
+              );
+            })}
             <button
-              key={key}
               type="button"
-              className={`flex flex-col items-center gap-0.5 px-1.5 py-1 rounded border text-[10px] min-w-[36px] hover:bg-gray-100 ${
-                isActive
-                  ? "border-sky-400 bg-sky-50 text-sky-700"
-                  : "border-gray-200 text-gray-700"
-              }`}
-              title={isActive ? `${label} (current)` : `Set type to ${label}`}
-              aria-label={`Set type to ${label}`}
-              aria-pressed={isActive}
-              onClick={() => applyStyle({ type: key })}
+              className="w-5 h-5 rounded-full border border-dashed border-gray-400 text-gray-400 text-[9px] hover:scale-110 transition-transform flex items-center justify-center"
+              title="Remove color"
+              aria-label="Remove color"
+              onClick={() => applyStyle({ color: null })}
             >
-              <span className="text-sm leading-none">{icon}</span>
-              <span>{label}</span>
+              ✕
             </button>
-          );
-        })}
-        <button
-          type="button"
-          className="flex flex-col items-center gap-0.5 px-1.5 py-1 rounded border border-dashed border-gray-300 text-gray-400 hover:bg-gray-100 text-[10px] min-w-[36px]"
-          title="Remove type"
-          aria-label="Remove type"
-          onClick={() => applyStyle({ type: null })}
-        >
-          <span className="text-sm leading-none">□</span>
-          <span>None</span>
-        </button>
+          </div>
+
+          <div className="w-full h-px bg-gray-100" />
+
+          <div className="text-[10px] uppercase tracking-wide text-gray-400 font-semibold px-1">
+            Type
+          </div>
+          <div className="flex flex-wrap gap-1 px-1">
+            {PARTICIPANT_TYPES.map(({ key, label, icon }) => {
+              const isActive = currentType?.toLowerCase() === key.toLowerCase();
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={`flex flex-col items-center gap-0.5 px-1.5 py-1 rounded border text-[10px] min-w-[36px] hover:bg-gray-100 ${
+                    isActive
+                      ? "border-sky-400 bg-sky-50 text-sky-700"
+                      : "border-gray-200 text-gray-700"
+                  }`}
+                  title={
+                    isActive ? `${label} (current)` : `Set type to ${label}`
+                  }
+                  aria-label={`Set type to ${label}`}
+                  aria-pressed={isActive}
+                  onClick={() => applyStyle({ type: key })}
+                >
+                  <span className="text-sm leading-none">{icon}</span>
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              className="flex flex-col items-center gap-0.5 px-1.5 py-1 rounded border border-dashed border-gray-300 text-gray-400 hover:bg-gray-100 text-[10px] min-w-[36px]"
+              title="Remove type"
+              aria-label="Remove type"
+              onClick={() => applyStyle({ type: null })}
+            >
+              <span className="text-sm leading-none">□</span>
+              <span>None</span>
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
     </FloatingPortal>
   );
 };

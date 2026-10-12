@@ -1,8 +1,8 @@
-import type { ComponentProps } from 'react'
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import { ParticipantLabel } from './ParticipantLabel'
-import { createStore, Provider } from 'jotai'
-import { modeAtom, RenderMode } from '../../../../store/Store'
+import type { ComponentProps } from "react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { ParticipantLabel } from "./ParticipantLabel";
+import { createStore, Provider } from "jotai";
+import { modeAtom, RenderMode } from "../../../../store/Store";
 
 const store = createStore();
 
@@ -10,24 +10,25 @@ const store = createStore();
 // `render` functions below. It is not a real ParticipantLabel prop, so the
 // component's own prop type is widened here just for the story args/argTypes.
 type ParticipantLabelStoryProps = ComponentProps<typeof ParticipantLabel> & {
-  editable?: boolean
-}
+  editable?: boolean;
+};
 
 const meta: Meta<ParticipantLabelStoryProps> = {
-  title: 'Components/Sequence Diagram/ParticipantLabel',
+  title: "Components/Sequence Diagram/ParticipantLabel",
   component: ParticipantLabel,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
     docs: {
       description: {
-        component: 'Enhanced ParticipantLabel with single-click editing, hover hints, and improved focus styling.',
+        component:
+          "Enhanced ParticipantLabel with single-click editing, hover hints, and improved focus styling.",
       },
     },
   },
   decorators: [
     (Story) => (
       <Provider store={store}>
-        <div style={{ padding: '20px', backgroundColor: '#f5f5f5' }}>
+        <div style={{ padding: "20px", backgroundColor: "#f5f5f5" }}>
           <Story />
         </div>
       </Provider>
@@ -35,122 +36,132 @@ const meta: Meta<ParticipantLabelStoryProps> = {
   ],
   argTypes: {
     labelText: {
-      control: 'text',
-      description: 'The participant label text'
+      control: "text",
+      description: "The participant label text",
     },
     assignee: {
-      control: 'text',
-      description: 'Optional assignee (variable name)'
+      control: "text",
+      description: "Optional assignee (variable name)",
     },
     editable: {
-      control: 'boolean',
-      description: 'Enable editing mode (Dynamic vs Static)',
+      control: "boolean",
+      description: "Enable editing mode (Dynamic vs Static)",
       defaultValue: true,
     },
   },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => {
-    const { editable, ...participantProps } = args as any
-    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static)
-    return <ParticipantLabel {...participantProps} />
+    const { editable, ...participantProps } = args as any;
+    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static);
+    return <ParticipantLabel {...participantProps} />;
   },
   args: {
-    labelText: 'Alice',
+    labelText: "Alice",
     labelPositions: [[0, 5]],
     editable: true,
   },
-}
+};
 
 export const WithAssignee: Story = {
   render: (args) => {
-    const { editable, ...participantProps } = args as any
-    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static)
-    return <ParticipantLabel {...participantProps} />
+    const { editable, ...participantProps } = args as any;
+    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static);
+    return <ParticipantLabel {...participantProps} />;
   },
   args: {
-    labelText: 'WebServer',
-    assignee: 'server',
+    labelText: "WebServer",
+    assignee: "server",
     labelPositions: [[0, 9]],
     assigneePositions: [[0, 6]],
     editable: true,
   },
-}
+};
 
 export const LongText: Story = {
   render: (args) => {
-    const { editable, ...participantProps } = args as any
-    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static)
-    return <ParticipantLabel {...participantProps} />
+    const { editable, ...participantProps } = args as any;
+    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static);
+    return <ParticipantLabel {...participantProps} />;
   },
   args: {
-    labelText: 'DatabaseConnectionPool',
+    labelText: "DatabaseConnectionPool",
     labelPositions: [[0, 22]],
     editable: true,
   },
-}
+};
 
 export const SpecialCharacters: Story = {
   render: (args) => {
-    const { editable, ...participantProps } = args as any
-    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static)
-    return <ParticipantLabel {...participantProps} />
+    const { editable, ...participantProps } = args as any;
+    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static);
+    return <ParticipantLabel {...participantProps} />;
   },
   args: {
     labelText: '"User Account"',
     labelPositions: [[0, 14]],
     editable: true,
   },
-}
+};
 
 export const ImprovedEditingDemo: Story = {
   render: (args) => {
-    const { editable, ...participantProps } = args as any
-    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static)
+    const { editable, ...participantProps } = args as any;
+    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static);
     return (
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ marginBottom: '20px', fontSize: '14px', color: '#666' }}>
-          <p><strong>✨ Enhanced Editing Experience:</strong></p>
-          <p>• <strong>Single-click</strong> to edit (no more double-click!)</p>
-          <p>• <strong>Hover</strong> to see visual hints</p>
-          <p>• <strong>Clean focus</strong> styling without cursor-hiding ring</p>
-          <p>• <strong>Press Enter/Escape</strong> to finish editing</p>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ marginBottom: "20px", fontSize: "14px", color: "#666" }}>
+          <p>
+            <strong>✨ Enhanced Editing Experience:</strong>
+          </p>
+          <p>
+            • <strong>Single-click</strong> the name to edit
+          </p>
+          <p>
+            • <strong>Hover</strong> to see visual hints
+          </p>
+          <p>
+            • <strong>Clean focus</strong> styling without cursor-hiding ring
+          </p>
+          <p>
+            • <strong>Press Enter/Escape</strong> to finish editing
+          </p>
         </div>
         <ParticipantLabel {...participantProps} />
       </div>
-    )
+    );
   },
   args: {
-    labelText: 'UserService',
-    assignee: 'service',
+    labelText: "UserService",
+    assignee: "service",
     labelPositions: [[0, 11]],
     assigneePositions: [[0, 7]],
     editable: true,
   },
-}
+};
 
 export const EditableExample: Story = {
   render: (args) => {
-    const { editable, ...participantProps } = args as any
-    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static)
+    const { editable, ...participantProps } = args as any;
+    store.set(modeAtom, editable ? RenderMode.Dynamic : RenderMode.Static);
     return (
       <div>
-        <p style={{ marginBottom: '10px', fontSize: '14px', color: '#666' }}>
-          Double-click labels to edit when editable mode is enabled
+        <p style={{ marginBottom: "10px", fontSize: "14px", color: "#666" }}>
+          Single-click labels to edit when Dynamic mode is enabled
         </p>
         <ParticipantLabel {...participantProps} />
       </div>
-    )
+    );
   },
   args: {
-    labelText: 'EditableParticipant',
-    assignee: 'variable',
+    labelText: "EditableParticipant",
+    assignee: "variable",
     labelPositions: [[0, 18]],
     assigneePositions: [[0, 8]],
     editable: true,
   },
-}
+};

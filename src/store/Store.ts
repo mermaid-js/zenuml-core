@@ -91,6 +91,14 @@ export const enableDividerInsertionAtom = atom(false);
 export const enableParticipantStyleEditingAtom = atom(false);
 export const enableMessageReorderAtom = atom(false);
 
+// Each ZenUml instance has its own Jotai store, so text editing blocks only
+// structural controls in that diagram. Tokens let multiple editors clean up
+// independently if a component unmounts while editing.
+export const activeTextEditorsAtom = atom<Set<symbol>>(new Set<symbol>());
+export const textEditingAtom = atom(
+  (get) => get(activeTextEditorsAtom).size > 0,
+);
+
 export const enableNumberingAtom = atomWithLocalStorage(
   () => `${location.hostname}-zenuml-numbering`,
   true,

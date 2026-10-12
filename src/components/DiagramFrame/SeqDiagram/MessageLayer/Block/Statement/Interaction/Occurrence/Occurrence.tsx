@@ -13,6 +13,7 @@ import {
   RenderMode,
   selectedAtom,
   selectedMessageAtom,
+  textEditingAtom,
 } from "@/store/Store";
 import { Message } from "../../Message/Message";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
@@ -33,6 +34,7 @@ export const Occurrence = (props: {
 }) => {
   const mode = useAtomValue(modeAtom);
   const messageInsertionEnabled = useAtomValue(enableMessageInsertionAtom);
+  const textEditing = useAtomValue(textEditingAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const setCreateDrag = useSetAtom(createMessageDragAtom);
@@ -97,6 +99,7 @@ export const Occurrence = (props: {
   const dragEnabled =
     !!props.enableCreateDrag &&
     messageInsertionEnabled &&
+    !textEditing &&
     mode === RenderMode.Dynamic;
 
   const startCreateDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -196,6 +199,7 @@ export const Occurrence = (props: {
             )}
           >
             <Message
+              allowReorder={false}
               className={cn(
                 "return transform -translate-y-full pointer-events-auto",
                 props.messageClassNames,

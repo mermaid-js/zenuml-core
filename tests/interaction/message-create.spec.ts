@@ -110,7 +110,10 @@ test.describe("Message Create (Gap Handles)", () => {
     ).toBe("pointer");
     expect(
       await message.evaluate((element) => getComputedStyle(element).cursor),
-    ).toBe("ns-resize");
+    ).toBe("pointer");
+    await expect(
+      message.getByRole("button", { name: "Drag to reorder message" }),
+    ).toHaveCSS("cursor", "grab");
     await page.mouse.up();
   });
 
@@ -151,12 +154,22 @@ test.describe("Message Create (Gap Handles)", () => {
         (element) => getComputedStyle(element).cursor,
       ),
     ).toBe("pointer");
+    await expect(
+      page.locator(".statement-container .editable-span-editing"),
+    ).toHaveCount(1);
     expect(
       await page
         .locator(".statement-container .message")
         .first()
         .evaluate((element) => getComputedStyle(element).cursor),
-    ).toBe("ns-resize");
+    ).toBe("pointer");
+    await page.keyboard.press("Escape");
+    expect(
+      await page
+        .locator(".statement-container .message")
+        .first()
+        .evaluate((element) => getComputedStyle(element).cursor),
+    ).toBe("pointer");
   });
 
   test("drag preview highlights a valid target and invalid release cancels", async ({

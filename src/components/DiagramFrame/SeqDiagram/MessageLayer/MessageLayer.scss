@@ -15,13 +15,23 @@
   }
 
   .statement-container .message {
-    cursor: ns-resize;
-    user-select: none;
-    -webkit-user-select: none;
+    cursor: pointer;
     transition:
       box-shadow 120ms ease,
       transform 120ms ease,
       background-color 120ms ease;
+  }
+
+  .statement-container .message.message-reorder-disabled {
+    cursor: pointer;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  .statement-container .message .editable-span-editing {
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
   }
 
   .statement-container[data-reorder-state="pending"] .message,
@@ -29,6 +39,78 @@
     box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.28);
     background-color: rgba(224, 242, 254, 0.45);
     transform: translateY(-1px);
+  }
+
+  .message-reorder-handle {
+    position: absolute;
+    left: -48px;
+    top: -4px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    cursor: grab;
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .message-reorder-handle-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: white;
+  }
+
+  .message-reorder-handle svg {
+    display: block;
+    flex: none;
+    fill: currentColor;
+  }
+
+  .statement-container:hover
+    > .interaction
+    > .message
+    > .message-reorder-handle,
+  .statement-container:hover
+    > .interaction
+    > .message-container
+    > .message
+    > .message-reorder-handle,
+  .statement-container:hover
+    > .interaction
+    > .self-invocation
+    > .message-reorder-handle,
+  .message-reorder-handle:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .message-reorder-handle:hover .message-reorder-handle-visual,
+  .message-reorder-handle:focus-visible .message-reorder-handle-visual,
+  .statement-container[data-reorder-state="pending"]
+    .message-reorder-handle-visual,
+  .statement-container[data-reorder-state="dragging"]
+    .message-reorder-handle-visual {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #2563eb;
+  }
+
+  .message-reorder-handle:active,
+  .statement-container[data-reorder-state="pending"] .message-reorder-handle,
+  .statement-container[data-reorder-state="dragging"] .message-reorder-handle {
     cursor: grabbing;
   }
 
@@ -57,7 +139,7 @@
     /* Return statements in the last statement-container of a block */
     .block {
       > .statement-container:last-child {
-        >.interaction.return {
+        > .interaction.return {
           margin-bottom: -16px;
           bottom: -1px;
         }
@@ -65,7 +147,7 @@
     }
     /* Assignment-created return statement (always last child of occurrence) */
     > .statement-container:last-child {
-      >.interaction.return {
+      > .interaction.return {
         margin-bottom: -16px;
         bottom: -1px;
       }

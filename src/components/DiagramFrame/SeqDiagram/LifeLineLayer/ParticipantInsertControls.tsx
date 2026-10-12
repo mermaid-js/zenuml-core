@@ -6,6 +6,7 @@ import {
   onContentChangeAtom,
   RenderMode,
   rootContextAtom,
+  textEditingAtom,
 } from "@/store/Store";
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
 import { MARGIN } from "@/positioning/Constants";
@@ -75,6 +76,7 @@ const generateName = (existingNames: Set<string>) => {
 export const ParticipantInsertControls = () => {
   const mode = useAtomValue(modeAtom);
   const enabled = useAtomValue(enableParticipantInsertionAtom);
+  const textEditing = useAtomValue(textEditingAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
@@ -82,8 +84,9 @@ export const ParticipantInsertControls = () => {
 
   const participantModels = useMemo(
     () =>
-      OrderedParticipants(rootContext)
-        .filter((participant) => participant.name !== _STARTER_),
+      OrderedParticipants(rootContext).filter(
+        (participant) => participant.name !== _STARTER_,
+      ),
     [rootContext],
   );
 
@@ -158,7 +161,8 @@ export const ParticipantInsertControls = () => {
   );
 
   const handleInsert = (insertIndex: number) => {
-    if (!rootContext) return;
+    if (!rootContext || textEditing || !enabled || mode !== RenderMode.Dynamic)
+      return;
     const name = generateName(existingNames);
     const nextCode = insertParticipantIntoDsl({
       code,
@@ -173,14 +177,21 @@ export const ParticipantInsertControls = () => {
 
   if (
     !enabled ||
+    textEditing ||
     mode !== RenderMode.Dynamic ||
     participantModels.length === 0
   ) {
     return null;
   }
 
-  const insertButtonClass = "absolute flex items-center justify-center rounded-full border border-slate-300 bg-white text-slate-400 text-xs leading-none opacity-0 transition-all group-hover:opacity-80 hover:!opacity-100 hover:border-sky-400 hover:text-sky-500 hover:shadow-sm focus-visible:opacity-100 focus-visible:border-sky-400 focus-visible:text-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300";
-  const insertButtonStyle = { top: BUTTON_INSET, left: BUTTON_INSET, width: BUTTON_SIZE, height: BUTTON_SIZE };
+  const insertButtonClass =
+    "absolute flex items-center justify-center rounded-full border border-slate-300 bg-white text-slate-400 text-xs leading-none opacity-0 transition-all group-hover:opacity-80 hover:!opacity-100 hover:border-sky-400 hover:text-sky-500 hover:shadow-sm focus-visible:opacity-100 focus-visible:border-sky-400 focus-visible:text-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300";
+  const insertButtonStyle = {
+    top: BUTTON_INSET,
+    left: BUTTON_INSET,
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
+  };
 
   return (
     <>

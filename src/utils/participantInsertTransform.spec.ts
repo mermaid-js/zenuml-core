@@ -30,4 +30,20 @@ describe("participantInsertTransform", () => {
       }),
     ).toBe("title Demo\nA\n@Actor B\nC\nA->C: Ping");
   });
+
+  it("styles an inferred participant once when materializing its declaration", () => {
+    const code = "A->C: Ping";
+
+    expect(
+      insertParticipantIntoDsl({
+        code,
+        rootContext: RootContext(code),
+        insertIndex: 0,
+        name: "A",
+        type: "Actor",
+        color: "#ef4444",
+        materializeExisting: true,
+      }),
+    ).toBe("@Actor A #ef4444\nC\nA->C: Ping");
+  });
 });

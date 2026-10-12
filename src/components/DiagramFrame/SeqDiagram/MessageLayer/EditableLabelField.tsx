@@ -5,6 +5,7 @@ import {
   pendingEditableRangeAtom,
   selectedMessageAtom,
 } from "@/store/Store";
+import { useTextEditingGuard } from "@/components/common/EditableSpan/useTextEditingGuard";
 import { cn } from "@/utils";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { formatText } from "@/utils/StringUtil";
@@ -28,6 +29,7 @@ export const EditableLabelField = ({
   title = "Click to edit",
 }: EditableLabelFieldProps) => {
   const mode = useAtomValue(modeAtom);
+  const updateTextEditing = useTextEditingGuard();
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const pendingEditableRange = useAtomValue(pendingEditableRangeAtom);
@@ -78,6 +80,10 @@ export const EditableLabelField = ({
       onSave={handleSave}
       title={title}
       autoEditToken={shouldAutoEdit}
+      onEditingChange={(editing) => {
+        updateTextEditing(editing);
+        if (!editing && shouldAutoEdit) setPendingEditableRange(null);
+      }}
     />
   );
 };

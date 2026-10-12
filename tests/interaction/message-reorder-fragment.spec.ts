@@ -1,13 +1,19 @@
 import { test, expect } from "../fixtures";
 
 test.describe("Message Reorder in Fragment", () => {
-  test("reorders messages inside an alt fragment by dragging", async ({ page }) => {
+  test("reorders messages inside an alt fragment by dragging", async ({
+    page,
+  }) => {
     await page.goto("/e2e/fixtures/reorder-fragment.html");
-    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
+    await expect(
+      page.locator(".sequence-diagram .participant").first(),
+    ).toBeVisible({
       timeout: 5000,
     });
 
-    const messages = page.locator(".fragment-alt .statement-container .message");
+    const messages = page.locator(
+      ".fragment-alt .statement-container .message",
+    );
     await expect(messages).toHaveCount(2);
 
     const first = messages.nth(0);
@@ -16,106 +22,123 @@ test.describe("Message Reorder in Fragment", () => {
     await expect(first).toContainText("alpha");
     await expect(second).toContainText("beta");
 
-    const sourceBox = await second.boundingBox();
     const targetBox = await first.boundingBox();
-    if (!sourceBox || !targetBox) throw new Error("missing bounding boxes");
+    if (!targetBox) throw new Error("missing target bounding box");
 
-    await page.mouse.move(
-      sourceBox.x + sourceBox.width / 2,
-      sourceBox.y + sourceBox.height / 2,
-    );
+    await second.hover();
+    await second
+      .getByRole("button", { name: "Drag to reorder message" })
+      .hover();
     await page.mouse.down();
-    await page.mouse.move(
-      targetBox.x + targetBox.width / 2,
-      targetBox.y + 2,
-      { steps: 12 },
-    );
+    await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + 2, {
+      steps: 12,
+    });
     await page.mouse.up();
 
-    await expect.poll(async () =>
-      page.evaluate(() => (window as any).__lastContentChange ?? null),
-    ).toContain("A->C: beta\n  A->B: alpha");
+    await expect
+      .poll(async () =>
+        page.evaluate(() => (window as any).__lastContentChange ?? null),
+      )
+      .toContain("A->C: beta\n  A->B: alpha");
+    await expect
+      .poll(() => page.evaluate(() => document.body.style.cursor))
+      .toBe("");
   });
 
-  test("shows ns-resize cursor on messages inside a fragment", async ({ page }) => {
+  test("shows the handle on messages inside a fragment", async ({ page }) => {
     await page.goto("/e2e/fixtures/reorder-fragment.html");
-    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
+    await expect(
+      page.locator(".sequence-diagram .participant").first(),
+    ).toBeVisible({
       timeout: 5000,
     });
 
-    const message = page.locator(".fragment-alt .statement-container .message").first();
+    const message = page
+      .locator(".fragment-alt .statement-container .message")
+      .first();
     await message.hover();
 
-    await expect(message).toHaveAttribute("title", "Click to select · drag to reorder");
-    await expect(message).toHaveCSS("cursor", "ns-resize");
+    await expect(message).toHaveAttribute(
+      "title",
+      "Click label to edit · click arrow to select · drag handle to reorder",
+    );
+    await expect(
+      message.getByRole("button", { name: "Drag to reorder message" }),
+    ).toHaveCSS("opacity", "1");
   });
 
-  test("moves a top-level message into a fragment by dragging onto a fragment message", async ({ page }) => {
+  test("moves a top-level message into a fragment by dragging onto a fragment message", async ({
+    page,
+  }) => {
     await page.goto("/e2e/fixtures/reorder-cross-fragment.html");
-    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
+    await expect(
+      page.locator(".sequence-diagram .participant").first(),
+    ).toBeVisible({
       timeout: 5000,
     });
 
     const outside = page.locator(".statement-container .message").filter({
       hasText: "outside()",
     });
-    const alpha = page.locator(".fragment-alt .statement-container .message").filter({ hasText: "alpha()" });
+    const alpha = page
+      .locator(".fragment-alt .statement-container .message")
+      .filter({ hasText: "alpha()" });
 
-    const sourceBox = await outside.boundingBox();
     const targetBox = await alpha.boundingBox();
-    if (!sourceBox || !targetBox) throw new Error("missing bounding boxes");
+    if (!targetBox) throw new Error("missing target bounding box");
 
-    await page.mouse.move(
-      sourceBox.x + sourceBox.width / 2,
-      sourceBox.y + sourceBox.height / 2,
-    );
+    await outside.hover();
+    await outside
+      .getByRole("button", { name: "Drag to reorder message" })
+      .hover();
     await page.mouse.down();
-    await page.mouse.move(
-      targetBox.x + targetBox.width / 2,
-      targetBox.y + 2,
-      { steps: 12 },
-    );
+    await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + 2, {
+      steps: 12,
+    });
     await page.mouse.up();
 
-    await expect
-      .poll(() => page.evaluate(() => (window as any).__lastContentChange ?? null))
-      .toContain(`if(ready) {
+    await expect.poll(() =>
+      page.evaluate(() => (window as any).__lastContentChange ?? null),
+    ).toContain(`if(ready) {
   B->A.outside()
   A->B.alpha()
   A->C.beta()
 }`);
   });
 
-  test("moves a fragment message out to the top level by dragging onto a top-level message", async ({ page }) => {
+  test("moves a fragment message out to the top level by dragging onto a top-level message", async ({
+    page,
+  }) => {
     await page.goto("/e2e/fixtures/reorder-cross-fragment.html");
-    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
+    await expect(
+      page.locator(".sequence-diagram .participant").first(),
+    ).toBeVisible({
       timeout: 5000,
     });
 
-    const alpha = page.locator(".fragment-alt .statement-container .message").filter({ hasText: "alpha()" });
+    const alpha = page
+      .locator(".fragment-alt .statement-container .message")
+      .filter({ hasText: "alpha()" });
     const outside = page.locator(".statement-container .message").filter({
       hasText: "outside()",
     });
 
-    const sourceBox = await alpha.boundingBox();
     const targetBox = await outside.boundingBox();
-    if (!sourceBox || !targetBox) throw new Error("missing bounding boxes");
+    if (!targetBox) throw new Error("missing target bounding box");
 
-    await page.mouse.move(
-      sourceBox.x + sourceBox.width / 2,
-      sourceBox.y + sourceBox.height / 2,
-    );
+    await alpha.hover();
+    await alpha
+      .getByRole("button", { name: "Drag to reorder message" })
+      .hover();
     await page.mouse.down();
-    await page.mouse.move(
-      targetBox.x + targetBox.width / 2,
-      targetBox.y + 2,
-      { steps: 12 },
-    );
+    await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + 2, {
+      steps: 12,
+    });
     await page.mouse.up();
 
-    await expect
-      .poll(() => page.evaluate(() => (window as any).__lastContentChange ?? null))
-      .toContain(`A
+    await expect.poll(() =>
+      page.evaluate(() => (window as any).__lastContentChange ?? null),
+    ).toContain(`A
 B
 C
 A->B.alpha()
