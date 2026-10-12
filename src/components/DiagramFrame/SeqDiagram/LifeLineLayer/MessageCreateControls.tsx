@@ -27,6 +27,7 @@ export const MessageCreateControls = () => {
   const [, setSelectedParticipants] = useAtom(selectedAtom);
   const [code, setCode] = useAtom(codeAtom);
   const [dragState, setDragState] = useAtom(createMessageDragAtom);
+  const isCreatingMessage = Boolean(dragState);
   const dragStateRef = useRef<typeof dragState>(null);
   const dragHandledRef = useRef(false);
   const participantScreenXRef = useRef<Map<string, number>>(new Map());
@@ -44,6 +45,18 @@ export const MessageCreateControls = () => {
   useEffect(() => {
     dragStateRef.current = dragState;
   }, [dragState]);
+
+  useEffect(() => {
+    if (!diagramElement) return;
+    if (isCreatingMessage && enabled && mode === RenderMode.Dynamic) {
+      diagramElement.dataset.messageCreateDragging = "true";
+    } else {
+      delete diagramElement.dataset.messageCreateDragging;
+    }
+    return () => {
+      delete diagramElement.dataset.messageCreateDragging;
+    };
+  }, [diagramElement, enabled, isCreatingMessage, mode]);
 
   useEffect(() => {
     if (!dragState || !diagramElement) {

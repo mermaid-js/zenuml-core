@@ -66,6 +66,99 @@ test.describe("Message Create (Gap Handles)", () => {
       .toBeNull();
   });
 
+  test("uses crosshair cursors for message creation and restores them on Escape", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/create-message.html");
+    await hoverGapNear(page, 0, "A");
+
+    const handle = page.getByTestId("message-create-handle-0-A");
+    const participantC = page.locator('[data-participant-id="C"]');
+    const message = page.locator(".statement-container .message").first();
+    const handleBox = await handle.boundingBox();
+    const cBox = await participantC.boundingBox();
+    expect(handleBox).toBeTruthy();
+    expect(cBox).toBeTruthy();
+    expect(
+      await handle.evaluate((element) => getComputedStyle(element).cursor),
+    ).toBe("crosshair");
+
+    await page.mouse.move(
+      handleBox!.x + handleBox!.width / 2,
+      handleBox!.y + handleBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(cBox!.x + cBox!.width / 2, handleBox!.y + 8, {
+      steps: 8,
+    });
+    await expect(page.getByTestId("message-create-target-C")).toBeVisible();
+    expect(
+      await participantC.evaluate(
+        (element) => getComputedStyle(element).cursor,
+      ),
+    ).toBe("crosshair");
+    expect(
+      await message.evaluate((element) => getComputedStyle(element).cursor),
+    ).toBe("crosshair");
+
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("message-create-target-C")).not.toBeVisible();
+    expect(
+      await participantC.evaluate(
+        (element) => getComputedStyle(element).cursor,
+      ),
+    ).toBe("pointer");
+    expect(
+      await message.evaluate((element) => getComputedStyle(element).cursor),
+    ).toBe("ns-resize");
+    await page.mouse.up();
+  });
+
+  test("restores normal cursors after a message creation drop", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/create-message.html");
+    await hoverGapNear(page, 0, "A");
+
+    const handle = page.getByTestId("message-create-handle-0-A");
+    const participantC = page.locator('[data-participant-id="C"]');
+    const handleBox = await handle.boundingBox();
+    const cBox = await participantC.boundingBox();
+    expect(handleBox).toBeTruthy();
+    expect(cBox).toBeTruthy();
+
+    await page.mouse.move(
+      handleBox!.x + handleBox!.width / 2,
+      handleBox!.y + handleBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(cBox!.x + cBox!.width / 2, handleBox!.y + 8, {
+      steps: 8,
+    });
+    await expect(page.getByTestId("message-create-target-C")).toBeVisible();
+    await page.mouse.up();
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => (window as any).__lastContentChange ?? null),
+      )
+      .toContain("A->C.newMessage()");
+    await expect(page.locator(".sequence-diagram")).not.toHaveAttribute(
+      "data-message-create-dragging",
+    );
+    expect(
+      await participantC.evaluate(
+        (element) => getComputedStyle(element).cursor,
+      ),
+    ).toBe("pointer");
+    expect(
+      await page
+        .locator(".statement-container .message")
+        .first()
+        .evaluate((element) => getComputedStyle(element).cursor),
+    ).toBe("ns-resize");
+  });
+
   test("drag preview highlights a valid target and invalid release cancels", async ({
     page,
   }) => {
@@ -482,6 +575,9 @@ test.describe("Message Create (Gap Handles)", () => {
     );
     const occurrenceBox = await occurrence.boundingBox();
     expect(occurrenceBox).toBeTruthy();
+    expect(
+      await occurrence.evaluate((element) => getComputedStyle(element).cursor),
+    ).toBe("crosshair");
 
     const participantC = page.locator('[data-participant-id="C"]');
     const cBox = await participantC.boundingBox();

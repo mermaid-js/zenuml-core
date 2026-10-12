@@ -7,6 +7,11 @@
   line-height: normal;
 }
 
+.zenuml.sequence-diagram[data-message-create-dragging],
+.zenuml.sequence-diagram[data-message-create-dragging] * {
+  cursor: crosshair !important;
+}
+
 /* .participant is shared by MessageLayer and LifeLineLayer */
 .zenuml .participant {
   /* don't override */

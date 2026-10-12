@@ -266,7 +266,7 @@ export const GapHandleZone = (props: {
         {showHandle && (
           <button
             type="button"
-            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-500 bg-white text-slate-700 flex items-center justify-center cursor-grab hover:border-slate-700 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-500 bg-white text-slate-700 flex items-center justify-center cursor-crosshair hover:border-slate-700 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             style={{
               width: HANDLE_SIZE,
               height: HANDLE_SIZE,
