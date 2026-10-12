@@ -41,6 +41,42 @@ for (const [name, code] of Object.entries(cases)) {
       name === "nested calls and reverse arrows" ? "reply" : "Hello Bob!",
     );
 
+    const frame = page.locator(".frame");
+    const insertMessage = page.getByRole("switch", { name: "Insert message" });
+    const insertDivider = page.getByRole("switch", { name: "Insert divider" });
+    await expect(insertMessage).toHaveAttribute("aria-checked", "true");
+    await expect(insertDivider).toHaveAttribute("aria-checked", "true");
+    const editingHeight = await frame.evaluate(
+      (element) => element.getBoundingClientRect().height,
+    );
+    await insertMessage.click();
+    await insertDivider.click();
+    await expect(insertMessage).toHaveAttribute("aria-checked", "false");
+    await expect(insertDivider).toHaveAttribute("aria-checked", "false");
+    await expect(page.getByTestId("message-gap-0")).toHaveCount(0);
+    const renderHeight = editingHeight - 12;
+    await expect
+      .poll(() =>
+        frame.evaluate((element) => element.getBoundingClientRect().height),
+      )
+      .toBe(renderHeight);
+
+    // The first gap reserves 12px for the insertion handle only while editing.
+    await insertMessage.click();
+    await expect(page.getByTestId("message-gap-0")).toHaveCount(1);
+    await expect
+      .poll(() =>
+        frame.evaluate((element) => element.getBoundingClientRect().height),
+      )
+      .toBe(editingHeight);
+    await insertMessage.click();
+    await expect(page.getByTestId("message-gap-0")).toHaveCount(0);
+    await expect
+      .poll(() =>
+        frame.evaluate((element) => element.getBoundingClientRect().height),
+      )
+      .toBe(renderHeight);
+
     const html = await page.evaluate(() => {
       const root = document.querySelector(".frame")!.getBoundingClientRect();
       const box = (element: Element) => {
