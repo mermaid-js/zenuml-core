@@ -88,6 +88,43 @@ test("a visible handle reorders messages with native touch without opening the m
   await expect(page.getByTestId("message-rename")).toHaveCount(0);
 });
 
+test("a single threshold-crossing touch move can drop immediately", async ({
+  page,
+}) => {
+  await page.goto("/e2e/fixtures/reorder-message.html");
+  const messages = page.locator(".statement-container .message");
+  const first = messages.first();
+  const second = messages.nth(1);
+  await expect(second).toBeVisible();
+  const handleBox = await second
+    .getByRole("button", { name: "Drag to reorder message" })
+    .boundingBox();
+  const targetBox = await first.boundingBox();
+  expect(handleBox).toBeTruthy();
+  expect(targetBox).toBeTruthy();
+  const from = center(handleBox!);
+  const to = { x: targetBox!.x + targetBox!.width / 2, y: targetBox!.y + 2 };
+  const cdp = await page.context().newCDPSession(page);
+
+  await startTouch(cdp, from);
+  for (const offset of [1, 2]) {
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [{ x: from.x, y: from.y - offset, id: 1 }],
+    });
+  }
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchMove",
+    touchPoints: [{ ...to, id: 1 }],
+  });
+  await finishTouch(cdp, "touchEnd");
+  await cdp.detach();
+
+  await expect
+    .poll(() => contentChange(page))
+    .toContain("A->C: second\nA->B: first");
+});
+
 test("a handle tap leaves the menu closed, and editing removes the handle", async ({
   page,
 }) => {

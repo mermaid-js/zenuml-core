@@ -93,6 +93,23 @@ export const Block = (props: {
       if (Math.max(deltaX, deltaY) < DRAG_THRESHOLD) {
         return;
       }
+      if (event.pointerType === "touch") {
+        const hit = document.elementFromPoint(event.clientX, event.clientY);
+        const row = diagramElement?.contains(hit)
+          ? (hit?.closest(
+              ".statement-container[data-statement-key]",
+            ) as HTMLElement | null)
+          : null;
+        const key = row?.getAttribute("data-statement-key");
+        if (key && key !== pendingDrag.key) {
+          const rect = row!.getBoundingClientRect();
+          setDropState({
+            key,
+            place:
+              event.clientY < rect.top + rect.height / 2 ? "before" : "after",
+          });
+        }
+      }
       setDragKey(pendingDrag.key);
       setPendingDrag(null);
     };
@@ -108,11 +125,13 @@ export const Block = (props: {
       window.removeEventListener("pointerup", onPointerUp);
     };
   }, [
+    diagramElement,
     dragKey,
     pendingDrag,
     props.isRoot,
     reorderEnabled,
     setDragKey,
+    setDropState,
     setPendingDrag,
   ]);
 
