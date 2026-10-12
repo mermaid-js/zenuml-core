@@ -60,6 +60,7 @@
     pointer-events: none;
     user-select: none;
     -webkit-user-select: none;
+    touch-action: none;
   }
 
   .message-reorder-handle-visual {
@@ -95,6 +96,13 @@
   .message-reorder-handle:focus-visible {
     opacity: 1;
     pointer-events: auto;
+  }
+
+  @media (any-pointer: coarse) {
+    .message-reorder-handle {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
   .message-reorder-handle:hover .message-reorder-handle-visual,

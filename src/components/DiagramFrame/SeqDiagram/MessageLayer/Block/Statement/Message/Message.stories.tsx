@@ -14,7 +14,7 @@ const meta: Meta<StoryArgs> = {
     docs: {
       description: {
         component:
-          "Try message editing, the message menu, and reordering in a real sequence diagram. In Dynamic mode, click a message label to edit it; click its arrow to open the message menu. The handle stays hidden until you hover a message row or focus it with Tab. Its six-dot glyph is 32 × 14 px inside a 32 × 24 px hit area on the left. Drag only from that handle to reorder; releasing a drag does not open the menu. Editing any label temporarily disables insert and reorder controls. Static mode is read-only.",
+          "Try message editing, the message menu, and reordering in a real sequence diagram. In Dynamic mode, click a message label to edit it; click its arrow to open the message menu. On touch screens, the dedicated drag handle stays visible with a 32 × 24 px hit area. With a mouse or keyboard, it appears when you hover a message row or focus the handle with Tab; its six-dot glyph is 32 × 14 px. Drag only from that handle to reorder; releasing a drag does not open the menu. Editing any label temporarily disables insert and reorder controls. Static mode is read-only.",
       },
     },
   },

@@ -5,6 +5,7 @@ import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   codeAtom,
+  diagramElementAtom,
   enableMessageReorderAtom,
   messageReorderDragAtom,
   messageReorderDropAtom,
@@ -34,6 +35,7 @@ export const Block = (props: {
   isRoot?: boolean;
 }) => {
   const [code, setCode] = useAtom(codeAtom);
+  const diagramElement = useAtomValue(diagramElementAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const statements: any[] = props.context?.stat() || [];
   const enableGapHandles = props.enableGapHandles ?? false;
@@ -122,11 +124,30 @@ export const Block = (props: {
       return;
     }
     const onPointerMove = (event: PointerEvent) => {
-      const target = event.target as Element | null;
-      const hoveredKey = target
-        ?.closest?.(".statement-container[data-statement-key]")
-        ?.getAttribute("data-statement-key");
-      if (!hoveredKey || hoveredKey === dragKey) setDropState(null);
+      // Touch implicitly captures pointer events on the handle, so event.target
+      // stays on that handle even while the finger crosses another message.
+      const hit =
+        event.pointerType === "touch"
+          ? document.elementFromPoint(event.clientX, event.clientY)
+          : (event.target as Element | null);
+      const target =
+        event.pointerType === "touch" && !diagramElement?.contains(hit)
+          ? null
+          : hit;
+      const hoveredRow = target?.closest?.(
+        ".statement-container[data-statement-key]",
+      ) as HTMLElement | null;
+      const hoveredKey = hoveredRow?.getAttribute("data-statement-key");
+      if (!hoveredKey || hoveredKey === dragKey) {
+        setDropState(null);
+      } else if (event.pointerType === "touch" && hoveredRow) {
+        const rect = hoveredRow.getBoundingClientRect();
+        setDropState({
+          key: hoveredKey,
+          place:
+            event.clientY < rect.top + rect.height / 2 ? "before" : "after",
+        });
+      }
     };
     const onPointerUp = () => {
       const sourceKey = dragKeyRef.current;
@@ -162,6 +183,7 @@ export const Block = (props: {
     };
   }, [
     code,
+    diagramElement,
     dragKey,
     dropState,
     onContentChange,
