@@ -72,6 +72,13 @@ export interface BlockNode extends AntlrNode {
 /** The root context returned by Parser.RootContext() */
 export interface RootContextNode extends AntlrNode {
   block?(): BlockNode;
+  /** Participant declarations and `group` blocks before the first statement. */
+  head?(): HeadNode | null;
+}
+
+/** The diagram head: its children are participant and group contexts. */
+export interface HeadNode extends AntlrNode {
+  children?: unknown[] | null;
 }
 
 /** A statement node — dispatches to one of: message, asyncMessage, creation, ret, divider, alt, tcf, loop, etc. */

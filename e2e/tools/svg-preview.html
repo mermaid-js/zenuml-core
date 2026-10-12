@@ -36,14 +36,19 @@ B -> A: done</textarea>
   <script type="module">
     import { renderToSvg } from "/src/svg/renderToSvg.ts";
     import { ensureDiagramFontsLoaded } from "/src/svg/fonts/ensureDiagramFontsLoaded.ts";
+    import { ensureDiagramIconsLoaded } from "/src/svg/icons.ts";
     await ensureDiagramFontsLoaded();
 
     const codeEl = document.getElementById("code");
     const containerEl = document.getElementById("svg-container");
     const statsEl = document.getElementById("stats");
 
-    function update() {
+    let updateSeq = 0;
+    async function update() {
       const code = codeEl.value;
+      const seq = ++updateSeq;
+      await ensureDiagramIconsLoaded(code);
+      if (seq !== updateSeq) return; // a newer edit is rendering
       const t0 = performance.now();
       const result = renderToSvg(code);
       const dt = (performance.now() - t0).toFixed(1);

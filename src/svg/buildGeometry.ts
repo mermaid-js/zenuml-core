@@ -28,6 +28,7 @@ import {
   buildParticipants,
   buildLifelines,
   buildGroups,
+  collectGroupSpecs,
 } from "./buildParticipantGeometry";
 import { buildMessages } from "./buildStatementGeometry";
 
@@ -235,8 +236,12 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     );
   }
 
-  // Build group geometry from participants that share a groupId
-  const groups = buildGroups(participants, diagramHeight);
+  // One group per `group` block, named or not (as the HTML renderer draws them)
+  const groups = buildGroups(
+    participants,
+    diagramHeight,
+    collectGroupSpecs(rootContext?.head?.()),
+  );
 
   return {
     width: diagramWidth,

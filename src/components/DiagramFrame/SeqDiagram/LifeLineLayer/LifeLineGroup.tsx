@@ -10,6 +10,7 @@ const GROUP_STROKE_WIDTH = 1;
 const GROUP_SW2 = GROUP_STROKE_WIDTH / 2; // 0.5
 const GROUP_STROKE_COLOR = "#666";
 const GROUP_DASH_ARRAY = "4 3";
+const GROUP_TITLE_LINE_HEIGHT = 19;
 
 // Must match SVG renderer's GROUP_OUTLINE_MARGIN (buildParticipantGeometry.ts)
 const SVG_GROUP_OUTLINE_MARGIN = 2;
@@ -31,6 +32,13 @@ const GroupOutline = (props: {
       left: props.left,
       pointerEvents: "none",
       overflow: "visible",
+      // The bottom edge runs into the frame's bottom border, as in the SVG
+      // renderer. The lower half of the centred bottom stroke would paint
+      // half a pixel below the frame and thicken its border under each dash,
+      // so clip at the outline's own bottom edge. The rect keeps its size so
+      // the dash pattern on the other edges is unchanged.
+      // (tests/regression/group-outline-bottom.spec.ts)
+      clipPath: `inset(-${GROUP_STROKE_WIDTH * 2}px -${GROUP_STROKE_WIDTH * 2}px 0 -${GROUP_STROKE_WIDTH * 2}px)`,
     }}
   >
     <rect
@@ -78,6 +86,9 @@ export const LifeLineGroup = (props: {
       ) as HTMLElement | null;
       if (!participantBox) continue;
       const r = participantBox.getBoundingClientRect();
+      // Hidden diagram (e.g. workbench SVG tab): boxes measure 0 wide.
+      // Keep the last good measurement; ResizeObserver re-measures on show.
+      if (r.width === 0) return;
       if (r.left < minLeft) minLeft = r.left;
       if (r.right > maxRight) maxRight = r.right;
     }
@@ -124,7 +135,17 @@ export const LifeLineGroup = (props: {
   useLayoutEffect(() => {
     // Defer to allow participant boxes to render in the other layer
     const id = requestAnimationFrame(measureOverlay);
-    return () => cancelAnimationFrame(id);
+    // Re-measure when the diagram is resized or goes from hidden to shown.
+    const el = containerRef.current;
+    const observer =
+      el && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => measureOverlay())
+        : null;
+    if (el && observer) observer.observe(el);
+    return () => {
+      cancelAnimationFrame(id);
+      observer?.disconnect();
+    };
   }, [measureOverlay]);
 
   if (entities.length <= 0) return null;
@@ -153,7 +174,29 @@ export const LifeLineGroup = (props: {
         />
       )}
       {props.renderParticipants && name && (
-        <div className="z-10 absolute left-1/2 -translate-x-1/2 bg-skin-frame px-1">
+        // Centre on the measured outline (rendered participant boxes), not the
+        // container: the container uses layout-model widths, which can differ
+        // from the rendered boxes (e.g. @Actor), and the SVG renderer centres
+        // on the rendered boxes.
+        // Fixed font-size and line-height on the chip itself: with the inherited
+        // 16px font and line-height "normal", the line box depends on font
+        // metrics and baseline alignment, and the opaque chip can grow taller
+        // than the 20px above the participant boxes, hiding their top border.
+        // 19px matches the SVG title bar (group.ts).
+        // The opaque chip starts below the outline's top stroke (which spans
+        // -GROUP_SW2..+GROUP_SW2 around the container top) so it does not hide
+        // the stroke's lower half, like the SVG title bar (tbY = rectY + sw2).
+        <div
+          className="z-10 absolute left-1/2 -translate-x-1/2 bg-skin-frame px-1"
+          style={{
+            top: `${GROUP_SW2}px`,
+            fontSize: "13px",
+            lineHeight: `${GROUP_TITLE_LINE_HEIGHT}px`,
+            ...(overlayRect
+              ? { left: `${overlayRect.left + overlayRect.width / 2}px` }
+              : {}),
+          }}
+        >
           <span className="text-skin-lifeline-group-name" style={{ fontSize: '13px', fontWeight: 400 }}>
             {name}
           </span>

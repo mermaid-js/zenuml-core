@@ -99,6 +99,7 @@
       import { toPng } from "html-to-image";
       import { renderToSvg } from "./src/svg/renderToSvg.ts";
       import { ensureDiagramFontsLoaded } from "./src/svg/fonts/ensureDiagramFontsLoaded.ts";
+      import { ensureDiagramIconsLoaded } from "./src/svg/icons.ts";
       await ensureDiagramFontsLoaded();
 
       const editor = CodeMirror.fromTextArea(document.getElementById("text"), {
@@ -193,7 +194,11 @@
       });
       syncFlagButtons();
 
-      const updateSvgPreview = debounce((content) => {
+      let svgPreviewSeq = 0;
+      const updateSvgPreview = debounce(async (content) => {
+        const seq = ++svgPreviewSeq;
+        await ensureDiagramIconsLoaded(content);
+        if (seq !== svgPreviewSeq) return; // a newer edit is rendering
         try {
           const t0 = performance.now();
           const result = renderToSvg(content);

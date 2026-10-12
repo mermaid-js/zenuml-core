@@ -1093,4 +1093,14 @@ D-->A: [check] all done`,
     return [x] failure
   }
 }`,
+  // --- Repro: group title centred on model span instead of rendered boxes ---
+  "repro-group-title-actor": `group A {
+  @Actor Customer
+  Web
+}`,
+  // --- Repro: unnamed group outline missing in SVG ---
+  "repro-unnamed-group": `group { A B }
+group Named { C }
+A->B.call()
+B->C.next()`,
 };

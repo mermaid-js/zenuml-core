@@ -13,6 +13,7 @@
  *   zenuml --parse -i diagram.zenuml      # output AST as JSON
  */
 import { renderToSvg } from "@/svg/renderToSvg";
+import { ensureDiagramIconsLoaded } from "@/svg/icons";
 import type { RenderOptions } from "@/svg/renderToSvg";
 import { setCanvasContext } from "@/positioning/WidthProviderFunc";
 import {
@@ -649,6 +650,7 @@ async function renderMarkdownFile(
     const imageFilePath = join(imageDir, imageFilename);
     let result: ReturnType<typeof renderToSvg>;
     try {
+      await ensureDiagramIconsLoaded(block.code);
       result = renderToSvg(block.code, renderOptions);
     } catch (err: any) {
       throw new Error(
@@ -1015,6 +1017,7 @@ async function renderOneFile(
   let svgWidth: number;
   let svgHeight: number;
   try {
+    await ensureDiagramIconsLoaded(code);
     const result = renderToSvg(code, renderOptions);
     svg = result.svg;
     svgWidth = result.width;

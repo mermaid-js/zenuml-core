@@ -601,6 +601,35 @@ A->A:m
     expect(result.geometry?.groups[0].name).toBe("BusinessService");
   });
 
+  // The HTML renderer draws one outline per `group` block, named or not.
+  it("renders an outline without a title for an unnamed group", () => {
+    const result = renderToSvg(
+      "group { A B }\ngroup Named { C }\nA->B.call()\nB->C.next()",
+    );
+    const groups = result.geometry?.groups ?? [];
+    expect(groups.map((g) => g.name)).toEqual(["", "Named"]);
+    const participants = result.geometry?.participants ?? [];
+    const box = (name: string) => participants.find((p) => p.name === name)!;
+    // The unnamed outline spans A..B; the named one spans C.
+    expect(groups[0].x).toBeLessThan(box("A").x - box("A").width / 2);
+    expect(groups[0].x + groups[0].width).toBeGreaterThan(
+      box("B").x + box("B").width / 2,
+    );
+    expect(groups[0].x + groups[0].width).toBeLessThan(
+      box("C").x - box("C").width / 2,
+    );
+    expect(result.innerSvg.match(/class="participant-group"/g)?.length).toBe(2);
+    // Only the named group gets a title strip.
+    expect(result.innerSvg.match(/class="group-title-text"/g)?.length).toBe(1);
+  });
+
+  it("renders two groups with the same name as two outlines", () => {
+    const result = renderToSvg(
+      "group G { A }\nX\ngroup G { B }\nA->X.m()\nX->B.n()",
+    );
+    expect(result.geometry?.groups.map((g) => g.name)).toEqual(["G", "G"]);
+  });
+
   it("renders cloud service participant icons used by order-service", () => {
     const code = `@Lambda PurchaseService\n@AzureFunction InvoiceService\nPurchaseService->InvoiceService: createInvoice(order)`;
     const result = renderToSvg(code);

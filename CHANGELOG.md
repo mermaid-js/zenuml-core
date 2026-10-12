@@ -1,5 +1,17 @@
 # @zenuml/core
 
+## 4.6.0
+
+### Minor Changes
+
+- [#464](https://github.com/mermaid-js/zenuml-core/pull/464) [`152e427`](https://github.com/mermaid-js/zenuml-core/commit/152e427082969e6d469b95813d0d78e17b579fce) Thanks [@MrCoder](https://github.com/MrCoder)! - Draw cloud participant icons (e.g. `@VPC`, `@RDS`, and the other icons the HTML renderer shows) in `renderToSvg()`. It used to draw only 11 built-in icons and left other participants without an icon. Add `ensureDiagramIconsLoaded(code)`: await it before `renderToSvg(code)` to load the icons the diagram uses (the CLI does this itself).
+
+### Patch Changes
+
+- [#463](https://github.com/mermaid-js/zenuml-core/pull/463) [`0c6c4e6`](https://github.com/mermaid-js/zenuml-core/commit/0c6c4e6693d39c554bb4604544da2d9a58827f12) Thanks [@MrCoder](https://github.com/MrCoder)! - Fix the participant group title in the HTML renderer: centre it over the rendered participant boxes (it drifted left when a group started with an `@Actor`), stop it hiding the top border of the participant boxes and of the dashed group outline, and re-measure the outline when a hidden diagram becomes visible.
+
+- [#466](https://github.com/mermaid-js/zenuml-core/pull/466) [`61d7638`](https://github.com/mermaid-js/zenuml-core/commit/61d76386a6113810b37cf9dd46c94c4f16c55758) Thanks [@MrCoder](https://github.com/MrCoder)! - `renderToSvg()` now draws the dashed outline of an unnamed participant group (`group { A B }`), as the HTML renderer does, and draws two groups that share a name as two outlines instead of one.
+
 ## 4.5.0
 
 ### Minor Changes

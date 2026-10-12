@@ -1,0 +1,95 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 34,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 34,
+      "children": [
+        {
+          "kind": "GroupContext",
+          "start": 0,
+          "stop": 34,
+          "children": [
+            {
+              "token": "GROUP",
+              "text": "group"
+            },
+            {
+              "kind": "NameContext",
+              "start": 6,
+              "stop": 6,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "A"
+                }
+              ]
+            },
+            {
+              "token": "OBRACE",
+              "text": "{"
+            },
+            {
+              "kind": "ParticipantContext",
+              "start": 12,
+              "stop": 26,
+              "children": [
+                {
+                  "kind": "ParticipantTypeContext",
+                  "start": 12,
+                  "stop": 17,
+                  "children": [
+                    {
+                      "token": "ANNOTATION",
+                      "text": "@Actor"
+                    }
+                  ]
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 19,
+                  "stop": 26,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "Customer"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "ParticipantContext",
+              "start": 30,
+              "stop": 32,
+              "children": [
+                {
+                  "kind": "NameContext",
+                  "start": 30,
+                  "stop": 32,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "Web"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "CBRACE",
+              "text": "}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

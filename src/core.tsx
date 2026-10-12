@@ -40,6 +40,7 @@ import { StrictMode } from "react";
 import { createStore, Provider } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
 export { renderToSvg } from "./svg/renderToSvg";
+export { ensureDiagramIconsLoaded } from "./svg/icons";
 import {
   ensureDiagramFontsLoaded,
   getDiagramFontFaceCss,
