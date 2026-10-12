@@ -16,7 +16,7 @@ import { cn } from "@/utils";
 import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ParticipantLabel } from "./ParticipantLabel";
 import { AsyncIcon } from "../../Tutorial/AsyncIcon";
 // import iconPath from "../../Tutorial/Icons"; // Removed eager import
@@ -49,6 +49,7 @@ export const Participant = (props: {
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
   const onSelect = useSetAtom(onSelectAtom);
+  const [isEditingName, setIsEditingName] = useState(false);
   const intersectionTop = useIntersectionTop();
   const [scrollTop] = useDocumentScroll();
 
@@ -108,7 +109,8 @@ export const Participant = (props: {
         "participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-sm font-normal leading-4 flex flex-col justify-center z-10 h-10 top-8",
         {
           selected: selected.includes(props.entity.name),
-          "ring-2 ring-sky-400": selected.includes(props.entity.name),
+          "ring-2 ring-sky-400":
+            selected.includes(props.entity.name) && !isEditingName,
           "cursor-pointer": mode === RenderMode.Dynamic && !isDefaultStarter,
         },
       )}
@@ -178,6 +180,7 @@ export const Participant = (props: {
                 labelPositions={labelPositions}
                 assignee={props.entity.assignee}
                 assigneePositions={assigneePositions}
+                onNameEditingChange={setIsEditingName}
               />
             </div>
           </div>

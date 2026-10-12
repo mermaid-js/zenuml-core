@@ -29,7 +29,7 @@ vi.mock("@/components/common/EditableSpan", () => ({
         className={`${className ?? ""} editable-span-base`.trim()}
         contentEditable={editing ? true : undefined}
         suppressContentEditableWarning={true}
-        title={title}
+        title={isEditable ? title : undefined}
         onClick={() => {
           if (isEditable) setEditing(true);
         }}
@@ -52,9 +52,10 @@ import React from "react";
 function renderParticipantLabel(
   props: ComponentProps<typeof ParticipantLabel>,
   code = "",
+  mode = RenderMode.Dynamic,
 ) {
   const store = createStore();
-  store.set(modeAtom, RenderMode.Dynamic);
+  store.set(modeAtom, mode);
   store.set(codeAtom, code);
 
   const view = render(
@@ -78,6 +79,23 @@ describe("ParticipantLabel", () => {
     const editableSpans = container.querySelectorAll(".editable-span-base");
     expect(editableSpans).toHaveLength(1);
     expect(editableSpans[0]?.textContent).toBe("b:B");
+    expect(editableSpans[0]).toHaveClass("participant-name");
+    expect(editableSpans[0]).toHaveAttribute("title", "Click to rename");
+  });
+
+  it("keeps static participant labels read-only", () => {
+    const { container } = renderParticipantLabel(
+      {
+        labelText: "A",
+        labelPositions: [[0, 1]],
+      },
+      "A",
+      RenderMode.Static,
+    );
+
+    const name = container.querySelector(".participant-name");
+    expect(name).not.toBeNull();
+    expect(name?.getAttribute("title")).toBeNull();
   });
 
   it("updates assignee and type from the combined single-span edit", async () => {

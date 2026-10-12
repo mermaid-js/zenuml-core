@@ -16,6 +16,8 @@ export interface EditableSpanProps {
   title?: string;
   autoEditToken?: number;
   selectAllOnEdit?: boolean;
+  onEditingChange?: (editing: boolean) => void;
+  ignoreEnterKeyupAfterStart?: boolean;
 }
 
 export const EditableSpan = ({
@@ -26,6 +28,8 @@ export const EditableSpan = ({
   title = "Click to edit",
   autoEditToken,
   selectAllOnEdit = false,
+  onEditingChange,
+  ignoreEnterKeyupAfterStart = false,
 }: EditableSpanProps) => {
   const [editing, setEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -33,6 +37,7 @@ export const EditableSpan = ({
   const spanRef = useRef<HTMLSpanElement>(null);
   const cancelRef = useRef(false);
   const pendingFocusRef = useRef<{ x: number; y: number } | null>(null);
+  const ignoreEnterKeyupRef = useRef(false);
 
   const applyFocus = (clickPoint: { x: number; y: number } | null) => {
     const target = spanRef.current;
@@ -87,6 +92,9 @@ export const EditableSpan = ({
     e.stopPropagation();
 
     cancelRef.current = false;
+    if (ignoreEnterKeyupAfterStart && "key" in e && e.key === "Enter") {
+      ignoreEnterKeyupRef.current = true;
+    }
     const target = e.target as HTMLElement | null;
     pendingFocusRef.current =
       selectAllOnEdit || !("clientX" in e)
@@ -97,6 +105,7 @@ export const EditableSpan = ({
     }
 
     setEditing(true);
+    onEditingChange?.(true);
   };
 
   const handleClick = (e: MouseEvent) => {
@@ -128,9 +137,10 @@ export const EditableSpan = ({
   const handleBlur = () => {
     if (!editing) return;
     if (cancelRef.current) return;
-    
+
     setEditing(false);
     setIsHovered(false);
+    onEditingChange?.(false);
     saveText();
   };
 
@@ -152,13 +162,14 @@ export const EditableSpan = ({
       e.preventDefault();
       e.stopPropagation();
       cancelRef.current = true;
-      
+
       const target = e.target as HTMLElement | null;
       if (target) {
         target.innerText = originalTextRef.current;
       }
       setEditing(false);
       setIsHovered(false);
+      onEditingChange?.(false);
       return;
     }
 
@@ -170,6 +181,10 @@ export const EditableSpan = ({
 
   const handleKeyup = (e: KeyboardEvent) => {
     if (!isEditable) return;
+    if (e.key === "Enter" && ignoreEnterKeyupRef.current) {
+      ignoreEnterKeyupRef.current = false;
+      return;
+    }
     if (!editing) return;
 
     if (e.key === "Enter" || e.key === "Tab") {
@@ -177,6 +192,7 @@ export const EditableSpan = ({
       cancelRef.current = true;
       setEditing(false);
       setIsHovered(false);
+      onEditingChange?.(false);
       saveText();
     }
   };

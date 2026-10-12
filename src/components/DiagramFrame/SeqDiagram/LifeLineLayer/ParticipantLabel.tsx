@@ -17,6 +17,7 @@ export const ParticipantLabel = (props: {
   labelPositions?: Array<[number, number]>;
   assignee?: string;
   assigneePositions?: Array<[number, number]>;
+  onNameEditingChange?: (editing: boolean) => void;
 }) => {
   const mode = useAtomValue(modeAtom);
   const [code, setCode] = useAtom(codeAtom);
@@ -69,7 +70,10 @@ export const ParticipantLabel = (props: {
     onContentChange(newCode);
   };
 
-  const createSaveHandler = (positions: Array<Position>, originalText: string) => {
+  const createSaveHandler = (
+    positions: Array<Position>,
+    originalText: string,
+  ) => {
     return (newText: string) => {
       // If text is empty or same as the original label text, bail out
       if (newText === "" || newText === originalText) {
@@ -116,13 +120,15 @@ export const ParticipantLabel = (props: {
       <EditableSpan
         text={displayText}
         isEditable={props.assignee ? assigneeIsEditable : participantIsEditable}
-        className={cn("name leading-4 right px-1")}
+        className={cn("name leading-4 right px-1 participant-name")}
+        onEditingChange={props.onNameEditingChange}
+        ignoreEnterKeyupAfterStart
         onSave={
           props.assignee
             ? createCombinedSaveHandler(displayText)
             : createSaveHandler(props.labelPositions ?? [], props.labelText)
         }
-        title="Double-click to edit"
+        title="Click to rename"
       />
     </div>
   );

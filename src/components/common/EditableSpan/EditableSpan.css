@@ -13,3 +13,29 @@
   background-color: #f3f4f6;
   cursor: text;
 }
+
+.zenuml .participant .participant-name.editable-span-base {
+  outline: none;
+}
+
+.zenuml .participant .participant-name.editable-span-hover {
+  outline: none;
+  background-color: #f3f4f6;
+  cursor: text;
+}
+
+.zenuml
+  .participant
+  .participant-name:focus-visible:not(.editable-span-editing) {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.zenuml .participant .participant-name.editable-span-editing {
+  outline: 1px solid #3b82f6;
+  outline-offset: 0;
+  border-radius: 4px;
+  background-color: #eff6ff;
+  box-shadow: none;
+  cursor: text;
+}
