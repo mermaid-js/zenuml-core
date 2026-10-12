@@ -123,8 +123,12 @@ export const Occurrence = (props: {
 
     const diagramRect = diagramElement.getBoundingClientRect();
     const barRect = currentTarget.getBoundingClientRect();
-    const sourceX = barRect.left - diagramRect.left + barRect.width / 2;
-    const sourceY = event.clientY - diagramRect.top;
+    const scale =
+      diagramRect.width / (diagramElement.offsetWidth || diagramRect.width) ||
+      1;
+    const sourceX =
+      (barRect.left - diagramRect.left + barRect.width / 2) / scale;
+    const sourceY = (event.clientY - diagramRect.top) / scale;
 
     setSelectedMessage(null);
     setSelectedParticipants([props.participant]);

@@ -165,6 +165,7 @@ export const Block = (props: {
                 insertIndex={index}
                 blockContext={props.context}
                 origin={props.origin || ""}
+                isFirstRootGap={props.isRoot && index === 0}
               />
             )}
             <div

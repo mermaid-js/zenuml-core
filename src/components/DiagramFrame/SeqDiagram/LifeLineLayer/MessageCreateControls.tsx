@@ -13,9 +13,9 @@ import {
 } from "@/store/Store";
 import { insertMessageInDsl } from "@/utils/insertMessageInDsl";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useId, useMemo, useRef } from "react";
 
-const DRAG_HANDLE_SIZE = 16;
+const DRAG_THRESHOLD = 6;
 
 export const MessageCreateControls = () => {
   const mode = useAtomValue(modeAtom);
@@ -31,6 +31,7 @@ export const MessageCreateControls = () => {
   const dragHandledRef = useRef(false);
   const participantScreenXRef = useRef<Map<string, number>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
+  const arrowId = useId();
 
   const participants = useMemo(
     () =>
@@ -65,34 +66,70 @@ export const MessageCreateControls = () => {
       participantScreenXRef.current = map;
     }
 
-    const findNearest = (clientX: number, source: string): string | null => {
+    const rect = diagramElement.getBoundingClientRect();
+    const scale = rect.width / (diagramElement.offsetWidth || rect.width) || 1;
+    const movedEnough = (
+      clientX: number,
+      clientY: number,
+      sourceX: number,
+      sourceY: number,
+    ) =>
+      Math.hypot(
+        clientX - (rect.left + sourceX * scale),
+        clientY - (rect.top + sourceY * scale),
+      ) >= DRAG_THRESHOLD;
+
+    const findTarget = (
+      clientX: number,
+      clientY: number,
+      source: string,
+    ): string | null => {
+      if (
+        clientX < rect.left ||
+        clientX > rect.right ||
+        clientY < rect.top ||
+        clientY > rect.bottom
+      )
+        return null;
       let nearest: string | null = null;
       let minDist = Infinity;
       for (const [name, cx] of participantScreenXRef.current) {
-        if (name === source) continue;
         const dist = Math.abs(clientX - cx);
         if (dist < minDist) {
           minDist = dist;
           nearest = name;
         }
       }
+      if (!nearest || nearest === source) return null;
+      const nearestX = participantScreenXRef.current.get(nearest)!;
+      const neighborDistance = Math.min(
+        ...Array.from(participantScreenXRef.current.values())
+          .filter((x) => x !== nearestX)
+          .map((x) => Math.abs(x - nearestX)),
+      );
+      if (minDist > Math.max(24 * scale, neighborDistance / 2)) return null;
       return nearest;
     };
-
-    const rect = diagramElement.getBoundingClientRect();
 
     const onPointerMove = (event: PointerEvent) => {
       const current = dragStateRef.current;
       if (!current) return;
 
-      const target = findNearest(event.clientX, current.source);
+      const target = movedEnough(
+        event.clientX,
+        event.clientY,
+        current.sourceX,
+        current.sourceY,
+      )
+        ? findTarget(event.clientX, event.clientY, current.source)
+        : null;
 
       setDragState((prev) =>
         prev
           ? {
               ...prev,
-              pointerX: event.clientX - rect.left,
-              pointerY: event.clientY - rect.top,
+              pointerX: (event.clientX - rect.left) / scale,
+              pointerY: (event.clientY - rect.top) / scale,
               hoverTarget: target,
             }
           : prev,
@@ -106,7 +143,14 @@ export const MessageCreateControls = () => {
       }
       dragHandledRef.current = true;
 
-      const target = findNearest(event.clientX, current.source);
+      const target = movedEnough(
+        event.clientX,
+        event.clientY,
+        current.sourceX,
+        current.sourceY,
+      )
+        ? findTarget(event.clientX, event.clientY, current.source)
+        : null;
       if (target) {
         const next = insertMessageInDsl({
           code,
@@ -132,6 +176,8 @@ export const MessageCreateControls = () => {
       if (event.key !== "Escape") {
         return;
       }
+      dragStateRef.current = null;
+      dragHandledRef.current = true;
       setDragState(null);
       setSelectedParticipants([]);
     };
@@ -166,9 +212,36 @@ export const MessageCreateControls = () => {
   }
 
   const diagramRect = diagramElement.getBoundingClientRect();
+  const scale =
+    diagramRect.width / (diagramElement.offsetWidth || diagramRect.width) || 1;
   const containerRect = containerRef.current?.getBoundingClientRect();
-  const offsetX = containerRect ? containerRect.left - diagramRect.left : 0;
-  const offsetY = containerRect ? containerRect.top - diagramRect.top : 0;
+  const offsetX = containerRect
+    ? (containerRect.left - diagramRect.left) / scale
+    : 0;
+  const offsetY = containerRect
+    ? (containerRect.top - diagramRect.top) / scale
+    : 0;
+  const targetElement = dragState?.hoverTarget
+    ? (diagramElement.querySelector(
+        `[data-participant-id="${CSS.escape(dragState.hoverTarget)}"]`,
+      ) as HTMLElement | null)
+    : null;
+  const targetRect = targetElement?.getBoundingClientRect();
+  const targetX = targetRect
+    ? (targetRect.left + targetRect.width / 2 - diagramRect.left) / scale -
+      offsetX
+    : null;
+  const tooltipX =
+    targetX === null
+      ? 0
+      : Math.max(
+          90,
+          Math.min(
+            targetX,
+            (containerRef.current?.offsetWidth ?? diagramElement.offsetWidth) -
+              90,
+          ),
+        );
 
   return (
     <div
@@ -182,36 +255,55 @@ export const MessageCreateControls = () => {
             className="absolute inset-0 z-30"
             style={{ pointerEvents: "none", overflow: "visible" }}
           >
+            <defs>
+              <marker
+                id={arrowId}
+                markerWidth="7"
+                markerHeight="10"
+                viewBox="0 0 7 9"
+                markerUnits="userSpaceOnUse"
+                refX="6.15"
+                refY="4.5"
+                orient="auto"
+              >
+                <path
+                  d="M1 1.25 L6.15 4.5 L1 7.75"
+                  fill="none"
+                  stroke="#2563eb"
+                  strokeLinecap="round"
+                  strokeWidth="1"
+                />
+              </marker>
+            </defs>
             <line
-              x1={dragState.sourceX}
+              data-testid="message-create-preview-line"
+              x1={dragState.sourceX - offsetX}
               y1={dragState.sourceY - offsetY}
-              x2={dragState.pointerX - offsetX}
+              x2={targetX ?? dragState.pointerX - offsetX}
               y2={dragState.sourceY - offsetY}
-              stroke="#d97706"
-              strokeWidth="2"
-              strokeDasharray="5 4"
+              stroke="#2563eb"
+              strokeWidth="1"
+              shapeRendering="crispEdges"
+              markerEnd={`url(#${arrowId})`}
             />
           </svg>
           <div
-            data-testid="message-create-drag-indicator"
-            className="absolute z-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-400 bg-white text-amber-500 text-xs leading-none font-bold flex items-center justify-center shadow-sm pointer-events-none"
+            data-testid="message-create-source-dot"
+            className="absolute z-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600 pointer-events-none"
             style={{
-              width: DRAG_HANDLE_SIZE,
-              height: DRAG_HANDLE_SIZE,
-              left: dragState.pointerX - offsetX,
+              width: 6,
+              height: 6,
+              left: dragState.sourceX - offsetX,
               top: dragState.sourceY - offsetY,
             }}
             aria-hidden="true"
-          >
-            +
-          </div>
+          />
         </>
       )}
       {dragState &&
         participants.map((participant) => {
-          const isSource = participant.name === dragState.source;
           const isTarget = participant.name === dragState.hoverTarget;
-          if (!isSource && !isTarget) return null;
+          if (!isTarget) return null;
           const element = diagramElement.querySelector(
             `[data-participant-id="${participant.name}"]`,
           ) as HTMLElement | null;
@@ -222,25 +314,41 @@ export const MessageCreateControls = () => {
           return (
             <div
               key={`highlight-${participant.name}`}
-              data-testid={
-                isTarget
-                  ? `message-create-target-${participant.name}`
-                  : undefined
-              }
-              className={
-                isTarget
-                  ? "absolute z-20 rounded-md border-2 border-amber-400 bg-amber-100/40 pointer-events-none"
-                  : "absolute z-20 rounded-md border-2 border-sky-400 bg-sky-100/40 pointer-events-none"
-              }
+              data-testid={`message-create-target-${participant.name}`}
+              className="absolute z-20 rounded-md border-2 border-blue-600 pointer-events-none"
               style={{
-                left: rect.left - (containerRect?.left ?? diagramRect.left) - 4,
-                top: rect.top - (containerRect?.top ?? diagramRect.top) - 4,
-                width: rect.width + 8,
-                height: rect.height + 8,
+                left:
+                  (rect.left - (containerRect?.left ?? diagramRect.left)) /
+                    scale -
+                  4,
+                top:
+                  (rect.top - (containerRect?.top ?? diagramRect.top)) / scale -
+                  4,
+                width: rect.width / scale + 8,
+                height: rect.height / scale + 8,
               }}
             />
           );
         })}
+      {dragState && targetRect && (
+        <div
+          data-testid="message-create-release-tooltip"
+          className="absolute z-40 -translate-x-1/2 -translate-y-full rounded bg-gray-900 px-2 py-1 text-[11px] leading-4 text-white shadow-sm pointer-events-none"
+          style={{
+            left: tooltipX,
+            top:
+              (targetRect.top - (containerRect?.top ?? diagramRect.top)) /
+                scale -
+              8,
+            width: "max-content",
+            maxWidth: "min(180px, calc(100% - 16px))",
+            whiteSpace: "normal",
+            overflowWrap: "anywhere",
+          }}
+        >
+          Release to insert {dragState.source} → {dragState.hoverTarget}
+        </div>
+      )}
     </div>
   );
 };

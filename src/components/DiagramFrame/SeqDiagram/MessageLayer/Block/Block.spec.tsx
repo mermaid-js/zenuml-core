@@ -1,6 +1,7 @@
 import { RootContext } from "@/parser";
 import {
   codeAtom,
+  enableMessageInsertionAtom,
   enableMessageReorderAtom,
   modeAtom,
   RenderMode,
@@ -93,5 +94,89 @@ describe("Block drag-to-reorder gating", () => {
     });
     dragFirstMessageOntoSecond(view);
     expect(store.get(codeAtom)).not.toBe(CODE);
+  });
+});
+
+describe("Block insertion gaps", () => {
+  const renderWithGaps = ({
+    mode = RenderMode.Dynamic,
+    enableGapHandles = true,
+    enableMessageInsertion = true,
+    isRoot = true,
+    code = CODE,
+  }: {
+    mode?: RenderMode;
+    enableGapHandles?: boolean;
+    enableMessageInsertion?: boolean;
+    isRoot?: boolean;
+    code?: string;
+  } = {}) => {
+    const store = createStore();
+    store.set(codeAtom, code);
+    store.set(modeAtom, mode);
+    store.set(enableMessageInsertionAtom, enableMessageInsertion);
+    const root = RootContext(code);
+    return render(
+      <Provider store={store}>
+        <Block
+          context={root?.block()}
+          enableGapHandles={enableGapHandles}
+          isRoot={isRoot}
+        />
+      </Provider>,
+    );
+  };
+
+  it("uses only header clearance before the first root statement", () => {
+    const view = renderWithGaps();
+    const gaps = view.container.querySelectorAll<HTMLElement>(
+      '.block > [data-testid^="message-gap-"]',
+    );
+    expect(gaps).toHaveLength(3);
+    expect(gaps[0].style.height).toBe("12px");
+    expect(gaps[0].style.marginTop).toBe("");
+    const firstHover = gaps[0].querySelector<HTMLElement>(
+      '[data-testid="message-gap-hover-0"]',
+    );
+    expect(firstHover?.style.top).toBe("12px");
+    expect(gaps[1].style.height).toBe("0px");
+    expect(gaps[2].style.height).toBe("0px");
+  });
+
+  it("keeps the empty block gap at 48px", () => {
+    const view = renderWithGaps({ code: "A\nB" });
+    const gap = view.container.querySelector<HTMLElement>(
+      '.block > [data-testid="message-gap-0"]',
+    );
+    expect(gap?.style.height).toBe("48px");
+    expect(gap?.style.marginTop).toBe("");
+  });
+
+  it("leaves non-root gaps compact", () => {
+    const view = renderWithGaps({ isRoot: false });
+    const gaps = view.container.querySelectorAll<HTMLElement>(
+      '.block > [data-testid^="message-gap-"]',
+    );
+    expect(gaps).toHaveLength(3);
+    gaps.forEach((gap) => expect(gap.style.height).toBe("0px"));
+  });
+
+  it("does not render controls when gap handles are disabled or mode is static", () => {
+    const disabled = renderWithGaps({ enableGapHandles: false });
+    expect(
+      disabled.container.querySelector('[data-testid^="message-gap-"]'),
+    ).toBeNull();
+    disabled.unmount();
+
+    const staticView = renderWithGaps({ mode: RenderMode.Static });
+    expect(
+      staticView.container.querySelector('[data-testid^="message-gap-"]'),
+    ).toBeNull();
+    staticView.unmount();
+
+    const featureOff = renderWithGaps({ enableMessageInsertion: false });
+    expect(
+      featureOff.container.querySelector('[data-testid^="message-gap-"]'),
+    ).toBeNull();
   });
 });
