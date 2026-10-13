@@ -105,7 +105,10 @@ export const SeqDiagram = (props: {
         if (
           target?.closest(".interaction") ||
           target?.closest(".participant") ||
-          target?.closest("#style-panel")
+          target?.closest("#style-panel") ||
+          // Portal clicks bubble through the React tree; keep the participant
+          // editor's selection alive while interacting with it.
+          target?.closest(".participant-style-panel")
         ) {
           return;
         }

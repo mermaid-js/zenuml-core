@@ -1,0 +1,124 @@
+import { expect, test } from "@playwright/test";
+
+const lastCode = (page: import("@playwright/test").Page) =>
+  page.evaluate(() => (window as any).__lastContentChange ?? "");
+
+test.describe("participant editor", () => {
+  test("edits every declaration attribute in one visit and stays open", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const participant = page.locator('.participant[data-participant-id="A"]');
+    const box = await participant.boundingBox();
+    expect(box).toBeTruthy();
+    await participant.click({ position: { x: 3, y: box!.height - 3 } });
+
+    const panel = page.getByTestId("participant-style-panel");
+    const preview = panel.getByTestId("participant-dsl-preview");
+    await expect(panel).toBeVisible();
+    await expect(preview).toHaveText("A");
+
+    await panel.getByRole("button", { name: "Set type to Database" }).click();
+    await expect(panel).toBeVisible();
+    await expect(preview).toHaveText("@Database A");
+
+    await panel.getByRole("button", { name: "Set color to Blue" }).click();
+    await expect(preview).toHaveText("@Database A #3b82f6");
+
+    const stereotype = panel.getByLabel("Stereotype");
+    await stereotype.fill("Service");
+    await stereotype.press("Enter");
+    await expect(preview).toHaveText("@Database <<Service>> A #3b82f6");
+
+    const label = panel.getByLabel("Display as");
+    await label.fill("Alice Smith");
+    await label.press("Enter");
+    await expect(preview).toHaveText(
+      '@Database <<Service>> A as "Alice Smith" #3b82f6',
+    );
+
+    const hex = panel.getByLabel("Custom hex color");
+    await hex.fill("ff00aa");
+    await hex.press("Enter");
+    await expect(preview).toHaveText(
+      '@Database <<Service>> A as "Alice Smith" #ff00aa',
+    );
+
+    await expect
+      .poll(() => lastCode(page))
+      .toBe('@Database <<Service>> A as "Alice Smith" #ff00aa\nC\nA->C: Ping');
+  });
+
+  test("finds cloud icons by search and applies the key as the type", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const participant = page.locator('.participant[data-participant-id="A"]');
+    const box = await participant.boundingBox();
+    await participant.click({ position: { x: 3, y: box!.height - 3 } });
+
+    const panel = page.getByTestId("participant-style-panel");
+    const search = panel.getByRole("combobox", { name: "Search icons" });
+    await search.fill("s3");
+    const options = panel.getByRole("option");
+    await expect(options.first()).toContainText("@s3");
+    await search.press("ArrowDown");
+    await search.press("Enter");
+
+    await expect(panel.getByTestId("participant-dsl-preview")).toHaveText(
+      "@s3glacier A",
+    );
+    await expect(options).toHaveCount(0);
+    await expect(participant.locator("svg").first()).toBeVisible();
+  });
+
+  test("renames the identifier everywhere, even with a display label", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const participant = page.locator('.participant[data-participant-id="A"]');
+    const box = await participant.boundingBox();
+    await participant.click({ position: { x: 3, y: box!.height - 3 } });
+
+    const panel = page.getByTestId("participant-style-panel");
+    const label = panel.getByLabel("Display as");
+    await label.fill("Alice Smith");
+    await label.press("Enter");
+
+    const name = panel.getByLabel("Name");
+    await name.fill("Alice");
+    await name.press("Enter");
+
+    await expect(
+      page.locator('.participant[data-participant-id="Alice"]'),
+    ).toBeVisible();
+    await expect
+      .poll(() => lastCode(page))
+      .toBe('Alice as "Alice Smith"\nC\nAlice->C: Ping');
+    await expect(panel.getByLabel("Name")).toHaveValue("Alice");
+  });
+
+  test("closes with Escape, the close button and outside clicks", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const participant = page.locator('.participant[data-participant-id="A"]');
+    const box = await participant.boundingBox();
+    const open = () =>
+      participant.click({ position: { x: 3, y: box!.height - 3 } });
+    const panel = page.getByTestId("participant-style-panel");
+
+    await open();
+    await expect(panel).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(panel).toHaveCount(0);
+
+    await open();
+    await panel.getByRole("button", { name: "Close" }).click();
+    await expect(panel).toHaveCount(0);
+
+    await open();
+    await page.mouse.click(5, 5);
+    await expect(panel).toHaveCount(0);
+  });
+});

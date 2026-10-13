@@ -29,6 +29,13 @@ const coreIcons: Record<string, IconLoader> = {
     ),
 };
 
+// Every `@Type` key an icon can be resolved for. Cloud keys live in a large
+// lazily-loaded chunk, so this is async and only pulled in by icon search.
+export const listIconKeys = async (): Promise<string[]> => {
+  const { cloudIcons } = await import("./CloudIcons");
+  return [...Object.keys(coreIcons), ...Object.keys(cloudIcons)];
+};
+
 const loadCloudIcon = async (key: string): Promise<string | null> => {
   const { cloudIcons } = await import("./CloudIcons");
   return cloudIcons[key] ?? null;
