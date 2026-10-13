@@ -132,3 +132,46 @@ describe("participantStyleTransform", () => {
     });
   });
 });
+
+describe("participantStyleTransform keeps untouched attributes verbatim", () => {
+  it('keeps `as "if"` when only the stereotype changes', () => {
+    const code = 'A as "if"\nA->B: hi';
+    const out = apply(code, "A", { stereotype: "Service" });
+    const read = readParticipantDeclaration(RootContext(out), "A");
+    expect(read?.stereotype).toBe("Service");
+    expect(read?.label).toBe("if");
+    expect(out).toContain('as "if"');
+  });
+
+  it("keeps a quoted keyword label across consecutive edits", () => {
+    let code = 'A as "if"\nA->B: hi';
+    code = apply(code, "A", { stereotype: "Service" });
+    code = apply(code, "A", { color: "#ef4444" });
+    code = apply(code, "A", { type: "Actor" });
+    const read = readParticipantDeclaration(RootContext(code), "A");
+    expect(read).toMatchObject({
+      label: "if",
+      stereotype: "Service",
+      color: "#ef4444",
+      type: "Actor",
+    });
+  });
+
+  it("keeps label `const` when other attributes change, and can set it", () => {
+    const out = apply('A as "const"\nA->B: hi', "A", { color: "#ef4444" });
+    expect(readParticipantDeclaration(RootContext(out), "A")?.label).toBe(
+      "const",
+    );
+    const set = setParticipantStyleChecked(
+      "A\nA->B: hi",
+      RootContext("A\nA->B: hi"),
+      "A",
+      { label: "const" },
+    );
+    expect("code" in set).toBe(true);
+    if ("code" in set)
+      expect(
+        readParticipantDeclaration(RootContext(set.code), "A")?.label,
+      ).toBe("const");
+  });
+});

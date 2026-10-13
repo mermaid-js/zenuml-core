@@ -76,6 +76,13 @@ export const readParticipantDeclaration = (
   };
 };
 
+const rawOf = (code: string, ctx: any): string | undefined =>
+  ctx?.start && ctx?.stop
+    ? code.slice(ctx.start.start, ctx.stop.stop + 1)
+    : undefined;
+
+// Untouched attributes keep their original source spelling (quotes included);
+// only attributes named in `updates` are re-formatted.
 const buildStyle = (
   code: string,
   rootContext: any,
@@ -87,25 +94,41 @@ const buildStyle = (
   const existing = readParticipantDeclaration(rootContext, participantName);
   if (!ctx || !existing) return code;
 
-  const pick = <K extends keyof ParticipantUpdates>(key: K) =>
-    key in updates ? (updates[key] ?? undefined) : existing[key];
+  const parts: string[] = [];
+  const touched = (key: keyof ParticipantUpdates) => key in updates;
+  const type = touched("type") ? (updates.type ?? undefined) : existing.type;
+  if (type) parts.push(`@${type}`);
 
-  const newDeclaration = formatParticipantDeclaration(
-    {
-      name: existing.name,
-      emoji: existing.emoji,
-      width: existing.width,
-      type: pick("type"),
-      stereotype: pick("stereotype"),
-      label: pick("label"),
-      color: pick("color"),
-    },
-    forceQuotes,
-  );
+  if (touched("stereotype")) {
+    if (updates.stereotype)
+      parts.push(`<<${quoteIfNeeded(updates.stereotype, forceQuotes)}>>`);
+  } else if (existing.stereotype) {
+    const raw = rawOf(code, ctx.stereotype?.()?.name?.());
+    parts.push(`<<${raw ?? quoteIfNeeded(existing.stereotype)}>>`);
+  }
+
+  if (existing.emoji)
+    parts.push(`[${rawOf(code, ctx.emoji?.()?.name?.()) ?? existing.emoji}]`);
+  parts.push(rawOf(code, ctx.name()) ?? quoteIfNeeded(existing.name));
+  if (existing.width) parts.push(rawOf(code, ctx.width?.()) ?? existing.width);
+
+  if (touched("label")) {
+    if (updates.label && updates.label !== existing.name)
+      parts.push(`as ${quoteIfNeeded(updates.label, forceQuotes)}`);
+  } else if (existing.label) {
+    const raw = rawOf(code, ctx.label?.()?.name?.());
+    parts.push(`as ${raw ?? quoteIfNeeded(existing.label)}`);
+  }
+
+  if (touched("color")) {
+    if (updates.color) parts.push(updates.color);
+  } else if (existing.color) {
+    parts.push(existing.color);
+  }
 
   const start = ctx.start.start;
   const end = ctx.stop.stop + 1;
-  return code.slice(0, start) + newDeclaration + code.slice(end);
+  return code.slice(0, start) + parts.join(" ") + code.slice(end);
 };
 
 export type StyleResult = { code: string } | { error: string };
@@ -114,9 +137,10 @@ const squash = (text: string | undefined | null) =>
   (text ?? "").replace(/\s+/g, "");
 
 /**
- * `setParticipantStyleInDsl` plus a round-trip check: the result is parsed and
- * the requested label and stereotype must read back unchanged. Values the
- * grammar cannot carry are reported instead of written as broken DSL.
+ * `setParticipantStyleInDsl` plus a round-trip check: the result must parse
+ * (or not add parse errors to an already broken input) and read back as the
+ * full expected declaration, so untouched attributes cannot be corrupted.
+ * Values the grammar cannot carry are reported instead of written as broken DSL.
  */
 export const setParticipantStyleChecked = (
   code: string,
@@ -124,29 +148,50 @@ export const setParticipantStyleChecked = (
   participantName: string,
   updates: ParticipantUpdates,
 ): StyleResult => {
+  const before = readParticipantDeclaration(rootContext, participantName);
+  const base = parse(code);
+  const baseErrors = base.errorDetails?.length ?? 0;
+
+  const expected = (): ParticipantDeclaration | null => {
+    if (!before) return null;
+    const next: ParticipantDeclaration = { ...before };
+    for (const key of ["type", "stereotype", "label", "color"] as const) {
+      if (key in updates) next[key] = updates[key] ? updates[key]! : undefined;
+    }
+    if (next.label === next.name) next.label = undefined;
+    return next;
+  };
+
   const verify = (next: string): StyleResult | null => {
+    const failure = (): StyleResult => ({
+      error:
+        "stereotype" in updates && updates.stereotype
+          ? "Not a valid stereotype"
+          : "label" in updates && updates.label
+            ? "Not a valid display name"
+            : "Could not apply the change",
+    });
+    const parsed = parse(next);
+    if (
+      base.pass ? !parsed.pass : (parsed.errorDetails?.length ?? 0) > baseErrors
+    )
+      return failure();
     const read = readParticipantDeclaration(
-      parse(next).rootContext,
+      parsed.rootContext,
       participantName,
     );
-    if (!read) {
-      return {
-        error:
-          "stereotype" in updates && updates.stereotype
-            ? "Not a valid stereotype"
-            : "label" in updates && updates.label
-              ? "Not a valid display name"
-              : "Could not apply the change",
-      };
-    }
-    if ("label" in updates && squash(read.label) !== squash(updates.label)) {
-      return { error: "Not a valid display name" };
-    }
-    if (
-      "stereotype" in updates &&
-      squash(read.stereotype) !== squash(updates.stereotype)
-    ) {
-      return { error: "Not a valid stereotype" };
+    const want = expected();
+    if (!read || !want) return failure();
+    for (const key of [
+      "name",
+      "type",
+      "stereotype",
+      "emoji",
+      "width",
+      "label",
+      "color",
+    ] as const) {
+      if (squash(read[key]) !== squash(want[key])) return failure();
     }
     return null;
   };

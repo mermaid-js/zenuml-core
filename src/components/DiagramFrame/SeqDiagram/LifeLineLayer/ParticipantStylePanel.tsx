@@ -119,7 +119,7 @@ export const ParticipantStylePanel = () => {
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const rootContext = useAtomValue(rootContextAtom);
-  const [selected, setSelected] = useAtom(selectedAtom);
+  const [selected, setSelectedRaw] = useAtom(selectedAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const dragState = useAtomValue(createMessageDragAtom);
   const textEditing = useAtomValue(textEditingAtom);
@@ -156,6 +156,27 @@ export const ParticipantStylePanel = () => {
   const [styleError, setStyleError] = useState<string | null>(null);
   // Escape discards the drafts; the blur that follows must not commit them.
   const skipCommitRef = useRef(false);
+  // Result of the latest field commit, read by the outside-click handler.
+  const lastCommitOkRef = useRef(true);
+  // Outside click on a participant: the panel may re-render the diagram and
+  // detach the clicked node before its click event fires, so the reselection
+  // is deferred to pointerup and cancelled by any later interaction.
+  const interactionTokenRef = useRef(0);
+  const cancelPendingRef = useRef<(() => void) | null>(null);
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
+  const diagramElementRef = useRef(diagramElement);
+  diagramElementRef.current = diagramElement;
+  const cancelPending = () => {
+    interactionTokenRef.current++;
+    cancelPendingRef.current?.();
+    cancelPendingRef.current = null;
+  };
+  const setSelected = (next: string[]) => {
+    cancelPending();
+    setSelectedRaw(next);
+  };
+  useEffect(() => () => cancelPendingRef.current?.(), []);
   // `participantName` is a dependency of every draft so that switching to
   // another participant whose value is identical (e.g. both unlabeled) still
   // resets the field.
@@ -233,7 +254,41 @@ export const ParticipantStylePanel = () => {
         // Commit a focused draft for the participant it belongs to before the
         // selection changes; the blur handler runs synchronously here.
         const active = document.activeElement as HTMLElement | null;
-        if (active && panelRef.current.contains(active)) active.blur();
+        if (active && panelRef.current.contains(active)) {
+          lastCommitOkRef.current = true;
+          active.blur();
+          if (!lastCommitOkRef.current) {
+            // A rejected draft stays open with its error. Keep focus in the
+            // field and swallow the click so it cannot change the selection.
+            active.focus();
+            const keepFocus = (ev: Event) => ev.preventDefault();
+            const swallowClick = (ev: Event) => {
+              ev.preventDefault();
+              ev.stopPropagation();
+            };
+            document.addEventListener("mousedown", keepFocus, {
+              capture: true,
+              once: true,
+            });
+            document.addEventListener("click", swallowClick, {
+              capture: true,
+              once: true,
+            });
+            setTimeout(() => {
+              document.removeEventListener("mousedown", keepFocus, true);
+              document.removeEventListener("click", swallowClick, true);
+            }, 0);
+            document.addEventListener(
+              "pointerup",
+              () =>
+                setTimeout(() => {
+                  document.removeEventListener("click", swallowClick, true);
+                }, 0),
+              { once: true, capture: true },
+            );
+            return;
+          }
+        }
         setIsOpen(false);
         setSelected([]);
         // A committed draft can re-render the diagram and replace the node
@@ -243,14 +298,55 @@ export const ParticipantStylePanel = () => {
           ?.closest?.("[data-participant-id]")
           ?.getAttribute("data-participant-id");
         if (hit) {
-          setTimeout(() => {
+          const token = ++interactionTokenRef.current;
+          const onUp = () => {
+            cancelPendingRef.current?.();
+            cancelPendingRef.current = null;
+            // A connected target still gets its own click, which toggles the
+            // selection; setting it here would toggle it back off.
             if (
+              interactionTokenRef.current === token &&
+              selectedRef.current.length === 0 &&
               !target?.isConnected &&
-              diagramElement?.querySelector(`[data-participant-id="${hit}"]`)
+              diagramElementRef.current?.querySelector(
+                `[data-participant-id="${hit}"]`,
+              )
             ) {
-              setSelected([hit]);
+              setSelectedRaw([hit]);
             }
-          }, 50);
+          };
+          const onKey = (ev: KeyboardEvent) => {
+            if (ev.key !== "Escape") return;
+            cancelPending();
+            // Escape during the press abandons the click as well.
+            const swallowClick = (clickEv: Event) => {
+              clickEv.preventDefault();
+              clickEv.stopPropagation();
+            };
+            document.addEventListener("click", swallowClick, {
+              capture: true,
+              once: true,
+            });
+            document.addEventListener(
+              "pointerup",
+              () =>
+                setTimeout(
+                  () =>
+                    document.removeEventListener("click", swallowClick, true),
+                  0,
+                ),
+              { once: true, capture: true },
+            );
+          };
+          document.addEventListener("pointerup", onUp, {
+            once: true,
+            capture: true,
+          });
+          document.addEventListener("keydown", onKey, true);
+          cancelPendingRef.current = () => {
+            document.removeEventListener("pointerup", onUp, true);
+            document.removeEventListener("keydown", onKey, true);
+          };
         }
       }
     };
@@ -266,7 +362,8 @@ export const ParticipantStylePanel = () => {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [isOpen, setSelected, diagramElement]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   if (
     !enabled ||
@@ -293,7 +390,7 @@ export const ParticipantStylePanel = () => {
   // Changes apply immediately and the panel stays open, so several edits can
   // be made in one visit. An inferred participant gets its declaration line
   // written first, then the update is applied to that line.
-  const applyStyle = (updates: ParticipantUpdates) => {
+  const applyStyle = (updates: ParticipantUpdates): boolean => {
     let workingCode = code;
     let workingRoot = rootContext;
     if (!declaration) {
@@ -318,18 +415,19 @@ export const ParticipantStylePanel = () => {
     );
     if ("error" in result) {
       setStyleError(result.error);
-      return;
+      return false;
     }
     setStyleError(null);
     updateCode(result.code);
+    return true;
   };
 
-  const commitName = () => {
-    if (skipCommitRef.current) return;
+  const commitName = (): boolean => {
+    if (skipCommitRef.current) return true;
     if (nameDraft.trim() === participantName) {
       setNameDraft(participantName);
       setNameError(null);
-      return;
+      return true;
     }
     const result = renameParticipantInDsl(
       code,
@@ -339,37 +437,39 @@ export const ParticipantStylePanel = () => {
     );
     if ("error" in result) {
       setNameError(result.error);
-      return;
+      return false;
     }
     setNameError(null);
     setNameDraft(result.name);
     updateCode(result.code);
     // The selection must use the parser's canonical identity.
     setSelected([result.name]);
+    return true;
   };
 
-  const commitStereotype = () => {
-    if (skipCommitRef.current) return;
+  const commitStereotype = (): boolean => {
+    if (skipCommitRef.current) return true;
     const next = stereotypeDraft.trim();
-    if (next === currentStereotype) return;
-    applyStyle({ stereotype: next || null });
+    if (next === currentStereotype) return true;
+    return applyStyle({ stereotype: next || null });
   };
 
-  const commitLabel = () => {
-    if (skipCommitRef.current) return;
+  const commitLabel = (): boolean => {
+    if (skipCommitRef.current) return true;
     const next = labelDraft.trim();
-    if (next === currentLabel) return;
-    applyStyle({ label: next || null });
+    if (next === currentLabel) return true;
+    return applyStyle({ label: next || null });
   };
 
-  const commitHex = () => {
-    if (skipCommitRef.current) return;
+  const commitHex = (): boolean => {
+    if (skipCommitRef.current) return true;
     const next = normalizeHex(hexDraft);
     if (!next) {
       setHexDraft(currentColor?.slice(1) ?? "");
-      return;
+      return true;
     }
-    if (next !== currentColor) applyStyle({ color: next });
+    if (next !== currentColor) return applyStyle({ color: next });
+    return true;
   };
 
   const pickIcon = (key: string) => {
@@ -378,8 +478,10 @@ export const ParticipantStylePanel = () => {
     applyStyle({ type: key });
   };
 
-  const onEnterBlur = (commit: () => void, reset: () => void) => ({
-    onBlur: commit,
+  const onEnterBlur = (commit: () => boolean, reset: () => void) => ({
+    onBlur: () => {
+      lastCommitOkRef.current = commit();
+    },
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Escape") {
         // Discard the draft and close; the blur on unmount must not commit.

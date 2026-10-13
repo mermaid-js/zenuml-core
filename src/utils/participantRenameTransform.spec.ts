@@ -109,3 +109,22 @@ describe("renameParticipantInDsl", () => {
     });
   });
 });
+
+describe("renameParticipantInDsl keyword safety", () => {
+  it("never turns a declaration into a title when renamed to `title`", () => {
+    const code = 'A as "Alice" #ff0000\nA->B: hi';
+    const result = renamed(code, "A", "title");
+    expect(result.code).toBe('"title" as "Alice" #ff0000\n"title"->B: hi');
+  });
+
+  it("quotes a keyword so `new A()` does not become `new if()`", () => {
+    const result = renamed("new A()\nA->B: hi", "A", "if");
+    expect(result.code).not.toContain("new if(");
+    expect(result.name).toBe("if");
+  });
+
+  it("still accepts a multi-word name whose canonical form drops whitespace", () => {
+    const result = rename("A->B: hi", "A", "First, Last");
+    expect(result).toMatchObject({ name: "First,Last" });
+  });
+});

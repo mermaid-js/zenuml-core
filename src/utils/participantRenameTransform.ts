@@ -1,6 +1,10 @@
 import antlr4 from "antlr4";
 import sequenceParserListener from "@/generated-parser/sequenceParserListener";
 import { Participants, parse } from "@/parser";
+import {
+  readParticipantDeclaration,
+  type ParticipantDeclaration,
+} from "./participantStyleTransform";
 
 type Range = [number, number];
 
@@ -69,13 +73,29 @@ export type RenameResult = { code: string; name: string } | { error: string };
 // Names Participants() would produce for `code`, or null when the parse throws.
 // `parse` is the silent, reentrant entry point, so rejected candidates do not
 // print ANTLR errors to the console.
-const namesOf = (code: string): string[] | null => {
+const analyse = (code: string) => {
   try {
-    return Participants(parse(code).rootContext).Names();
+    const parsed = parse(code);
+    return {
+      pass: !!parsed.pass,
+      errors: parsed.errorDetails?.length ?? 0,
+      rootContext: parsed.rootContext,
+      names: Participants(parsed.rootContext).Names() as string[],
+    };
   } catch {
     return null;
   }
 };
+
+const squash = (text: string | undefined) => (text ?? "").replace(/\s+/g, "");
+
+const sameDeclaration = (
+  a: ParticipantDeclaration,
+  b: ParticipantDeclaration,
+) =>
+  (["type", "stereotype", "emoji", "width", "label", "color"] as const).every(
+    (key) => squash(a[key]) === squash(b[key]),
+  );
 
 const apply = (code: string, positions: Range[], text: string) => {
   let result = code;
@@ -122,19 +142,42 @@ export const renameParticipantInDsl = (
     ? [text, `"${text}"`]
     : [`"${text}"`];
   let collided = false;
+  const base = (() => {
+    try {
+      return parse(code);
+    } catch {
+      return null;
+    }
+  })();
+  const oldDeclaration = readParticipantDeclaration(rootContext, oldName);
   for (const candidate of candidates) {
     const nextCode = apply(code, positions, candidate);
-    const names = namesOf(nextCode);
-    if (!names) continue;
-    const added = names.filter((n) => !oldSet.has(n));
+    const next = analyse(nextCode);
+    if (!next) continue;
+    const added = next.names.filter((n) => !oldSet.has(n));
     if (
-      names.length === oldNames.length &&
-      !names.includes(oldName) &&
+      next.names.length === oldNames.length &&
+      !next.names.includes(oldName) &&
       added.length === 1
     ) {
-      return { code: nextCode, name: added[0] };
+      const parseOk = base?.pass
+        ? next.pass
+        : next.errors <= (base?.errorDetails?.length ?? 0);
+      const nameOk = squash(added[0]) === squash(text);
+      let declOk = true;
+      if (oldDeclaration) {
+        const newDeclaration = readParticipantDeclaration(
+          next.rootContext,
+          added[0],
+        );
+        declOk =
+          !!newDeclaration && sameDeclaration(oldDeclaration, newDeclaration);
+      }
+      if (parseOk && nameOk && declOk) {
+        return { code: nextCode, name: added[0] };
+      }
     }
-    if (names.length < oldNames.length) collided = true;
+    if (next.names.length < oldNames.length) collided = true;
   }
 
   const stripped = text.replace(/\s+/g, "");
