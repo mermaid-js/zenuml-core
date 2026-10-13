@@ -114,10 +114,14 @@ test.describe("participant editor", () => {
     await expect(panel).toHaveCount(0);
 
     await open();
+    await expect(panel).toBeVisible();
     await panel.getByRole("button", { name: "Close" }).click();
     await expect(panel).toHaveCount(0);
 
     await open();
+    // The outside-click listener attaches once the panel is open; clicking
+    // before that lets the panel open after the click and stay open.
+    await expect(panel).toBeVisible();
     await page.mouse.click(5, 5);
     await expect(panel).toHaveCount(0);
   });
