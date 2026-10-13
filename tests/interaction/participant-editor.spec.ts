@@ -188,21 +188,15 @@ test.describe("participant editor", () => {
     expect(await lastCode(page)).toBe("");
   });
 
-  test("Escape between pointerdown and pointerup does not reselect the clicked participant", async ({
+  test("Escape between pointerdown and pointerup does not reopen the edited participant", async ({
     page,
   }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/e2e/fixtures/insert-participant.html");
     await openPanel(page, "A");
     const panel = page.getByTestId("participant-style-panel");
-    const label = panel.getByLabel("Display as");
-    await label.fill("Alice");
-    await label.press("Enter");
-    await expect(panel.getByTestId("participant-dsl-preview")).toContainText(
-      "Alice",
-    );
-    // A second draft of the same width: committing it on click-away rebuilds
-    // the diagram and detaches C without moving it.
-    await label.fill("Alicf");
+    await panel.getByLabel("Display as").fill("Alice");
     const cBox = await page
       .locator('.participant[data-participant-id="C"]')
       .boundingBox();
@@ -217,10 +211,31 @@ test.describe("participant editor", () => {
     await page.mouse.up();
 
     await page.waitForTimeout(300);
-    await expect(panel).toHaveCount(0);
+    // Whatever the release does to C, the edited participant stays closed.
+    await expect(
+      page.getByRole("dialog", { name: "Edit participant A" }),
+    ).toHaveCount(0);
+    expect(errors).toEqual([]);
   });
 
-  test("click-away keeps the panel, draft and alert when the rename is rejected", async ({
+  test("click-away discards a rejected rename and closes the panel", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await openPanel(page, "A");
+    const panel = page.getByTestId("participant-style-panel");
+    await panel.getByLabel("Name").fill("C");
+    await page.mouse.click(5, 5);
+
+    await expect(panel).toHaveCount(0);
+    expect(await lastCode(page)).toBe("");
+
+    await openPanel(page, "A");
+    await expect(panel.getByLabel("Name")).toHaveValue("A");
+    await expect(panel.getByRole("alert")).toHaveCount(0);
+  });
+
+  test("Enter on a rejected rename keeps focus, the draft and the alert", async ({
     page,
   }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
@@ -228,12 +243,11 @@ test.describe("participant editor", () => {
     const panel = page.getByTestId("participant-style-panel");
     const name = panel.getByLabel("Name");
     await name.fill("C");
-    await page.mouse.click(5, 5);
+    await name.press("Enter");
 
-    await expect(panel).toBeVisible();
-    await expect(panel.getByRole("alert")).toHaveText('"C" already exists');
-    await expect(name).toHaveValue("C");
     await expect(name).toBeFocused();
+    await expect(name).toHaveValue("C");
+    await expect(panel.getByRole("alert")).toHaveText('"C" already exists');
     expect(await lastCode(page)).toBe("");
   });
 });

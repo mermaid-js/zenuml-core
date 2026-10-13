@@ -156,8 +156,6 @@ export const ParticipantStylePanel = () => {
   const [styleError, setStyleError] = useState<string | null>(null);
   // Escape discards the drafts; the blur that follows must not commit them.
   const skipCommitRef = useRef(false);
-  // Result of the latest field commit, read by the outside-click handler.
-  const lastCommitOkRef = useRef(true);
   // Outside click on a participant: the panel may re-render the diagram and
   // detach the clicked node before its click event fires, so the reselection
   // is deferred to pointerup and cancelled by any later interaction.
@@ -252,43 +250,11 @@ export const ParticipantStylePanel = () => {
     const onPointerDown = (e: PointerEvent) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
         // Commit a focused draft for the participant it belongs to before the
-        // selection changes; the blur handler runs synchronously here.
+        // selection changes; the blur handler runs synchronously here. A draft
+        // that fails validation is discarded: closing the panel resets every
+        // draft and error from the committed declaration.
         const active = document.activeElement as HTMLElement | null;
-        if (active && panelRef.current.contains(active)) {
-          lastCommitOkRef.current = true;
-          active.blur();
-          if (!lastCommitOkRef.current) {
-            // A rejected draft stays open with its error. Keep focus in the
-            // field and swallow the click so it cannot change the selection.
-            active.focus();
-            const keepFocus = (ev: Event) => ev.preventDefault();
-            const swallowClick = (ev: Event) => {
-              ev.preventDefault();
-              ev.stopPropagation();
-            };
-            document.addEventListener("mousedown", keepFocus, {
-              capture: true,
-              once: true,
-            });
-            document.addEventListener("click", swallowClick, {
-              capture: true,
-              once: true,
-            });
-            setTimeout(() => {
-              document.removeEventListener("mousedown", keepFocus, true);
-              document.removeEventListener("click", swallowClick, true);
-            }, 0);
-            document.addEventListener(
-              "pointerup",
-              () =>
-                setTimeout(() => {
-                  document.removeEventListener("click", swallowClick, true);
-                }, 0),
-              { once: true, capture: true },
-            );
-            return;
-          }
-        }
+        if (active && panelRef.current.contains(active)) active.blur();
         setIsOpen(false);
         setSelected([]);
         // A committed draft can re-render the diagram and replace the node
@@ -300,12 +266,12 @@ export const ParticipantStylePanel = () => {
         if (hit) {
           const token = ++interactionTokenRef.current;
           const onUp = () => {
-            cancelPendingRef.current?.();
-            cancelPendingRef.current = null;
+            const current = interactionTokenRef.current === token;
+            cancelPending();
             // A connected target still gets its own click, which toggles the
             // selection; setting it here would toggle it back off.
             if (
-              interactionTokenRef.current === token &&
+              current &&
               selectedRef.current.length === 0 &&
               !target?.isConnected &&
               diagramElementRef.current?.querySelector(
@@ -316,35 +282,14 @@ export const ParticipantStylePanel = () => {
             }
           };
           const onKey = (ev: KeyboardEvent) => {
-            if (ev.key !== "Escape") return;
-            cancelPending();
-            // Escape during the press abandons the click as well.
-            const swallowClick = (clickEv: Event) => {
-              clickEv.preventDefault();
-              clickEv.stopPropagation();
-            };
-            document.addEventListener("click", swallowClick, {
-              capture: true,
-              once: true,
-            });
-            document.addEventListener(
-              "pointerup",
-              () =>
-                setTimeout(
-                  () =>
-                    document.removeEventListener("click", swallowClick, true),
-                  0,
-                ),
-              { once: true, capture: true },
-            );
+            if (ev.key === "Escape") cancelPending();
           };
-          document.addEventListener("pointerup", onUp, {
-            once: true,
-            capture: true,
-          });
+          document.addEventListener("pointerup", onUp, true);
+          document.addEventListener("pointercancel", cancelPending, true);
           document.addEventListener("keydown", onKey, true);
           cancelPendingRef.current = () => {
             document.removeEventListener("pointerup", onUp, true);
+            document.removeEventListener("pointercancel", cancelPending, true);
             document.removeEventListener("keydown", onKey, true);
           };
         }
@@ -480,7 +425,7 @@ export const ParticipantStylePanel = () => {
 
   const onEnterBlur = (commit: () => boolean, reset: () => void) => ({
     onBlur: () => {
-      lastCommitOkRef.current = commit();
+      commit();
     },
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Escape") {
@@ -491,8 +436,9 @@ export const ParticipantStylePanel = () => {
         return;
       }
       if (e.key === "Enter") {
+        // A rejected draft keeps focus, its text and the error alert.
         e.preventDefault();
-        (e.target as HTMLInputElement).blur();
+        commit();
       }
       // Keep other keys from reaching the canvas shortcuts.
       e.stopPropagation();
