@@ -118,6 +118,27 @@ test.describe("Participant Insert", () => {
       .toContain("A\nB\nC\nA->C: Ping");
   });
 
+  test("hides the insert buttons while one participant is selected", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const participant = page.locator('.participant[data-participant-id="A"]');
+    await expect(participant).toBeVisible({ timeout: 5000 });
+    const buttons = page.locator(
+      '[data-testid^="participant-insert-button-"], [data-testid="participant-prepend-button"], [data-testid="participant-append-button"]',
+    );
+    await expect(buttons.first()).toBeAttached();
+
+    const box = await participant.boundingBox();
+    await participant.click({ position: { x: 3, y: box!.height - 3 } });
+    await expect(page.getByTestId("participant-style-panel")).toBeVisible();
+    await expect(buttons).toHaveCount(0);
+
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("participant-style-panel")).toHaveCount(0);
+    await expect(buttons.first()).toBeAttached();
+  });
+
   test("insert button is vertically centered with participant headers", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({

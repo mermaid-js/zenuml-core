@@ -7,13 +7,14 @@ import {
   diagramElementAtom,
   modeAtom,
   onSelectAtom,
+  participantPreviewAtom,
   participantsAtom,
   RenderMode,
   selectedAtom,
   stickyOffsetAtom,
 } from "@/store/Store";
 import { cn } from "@/utils";
-import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
+import { participantTextColor, removeAlpha } from "@/utils/Color";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useRef, useState } from "react";
@@ -49,6 +50,7 @@ export const Participant = (props: {
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
   const onSelect = useSetAtom(onSelectAtom);
+  const preview = useAtomValue(participantPreviewAtom);
   const [isEditingName, setIsEditingName] = useState(false);
   const intersectionTop = useIntersectionTop();
   const [scrollTop] = useDocumentScroll();
@@ -82,26 +84,22 @@ export const Participant = (props: {
   const stickyVerticalOffset =
     mode === RenderMode.Static || stickyOffset === false ? 0 : calcOffset();
 
-  const backgroundColor = props.entity.color
-    ? removeAlpha(props.entity.color)
+  const activePreview = preview?.name === props.entity.name ? preview : null;
+  const effectiveColor = activePreview?.color ?? props.entity.color;
+  const effectiveType = activePreview?.type ?? props.entity.type;
+
+  const backgroundColor = effectiveColor
+    ? removeAlpha(effectiveColor)
     : undefined;
-  const color = useMemo(() => {
-    if (!props.entity.color) {
-      return undefined;
-    }
-    const bgColor =
-      elRef.current &&
-      window
-        .getComputedStyle(elRef.current)
-        .getPropertyValue("background-color");
-    if (!bgColor) {
-      return undefined;
-    }
-    return brightnessIgnoreAlpha(bgColor) > 128 ? "#000" : "#fff";
-  }, [props.entity.color]);
+  // Derive from the effective colour, not the DOM: during a preview the DOM
+  // still shows the previous background when this memo runs.
+  const color = useMemo(
+    () => (backgroundColor ? participantTextColor(backgroundColor) : undefined),
+    [backgroundColor],
+  );
 
   // Determine icon key
-  const iconKey = isDefaultStarter ? "actor" : props.entity.type?.toLowerCase();
+  const iconKey = isDefaultStarter ? "actor" : effectiveType?.toLowerCase();
 
   return (
     <div

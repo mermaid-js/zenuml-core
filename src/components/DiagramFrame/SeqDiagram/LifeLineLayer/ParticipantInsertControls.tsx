@@ -6,6 +6,7 @@ import {
   onContentChangeAtom,
   RenderMode,
   rootContextAtom,
+  selectedAtom,
   textEditingAtom,
 } from "@/store/Store";
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
@@ -77,6 +78,7 @@ export const ParticipantInsertControls = () => {
   const mode = useAtomValue(modeAtom);
   const enabled = useAtomValue(enableParticipantInsertionAtom);
   const textEditing = useAtomValue(textEditingAtom);
+  const selected = useAtomValue(selectedAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
@@ -178,6 +180,7 @@ export const ParticipantInsertControls = () => {
   if (
     !enabled ||
     textEditing ||
+    selected.length === 1 ||
     mode !== RenderMode.Dynamic ||
     participantModels.length === 0
   ) {
