@@ -158,7 +158,7 @@ export const setParticipantStyleChecked = (
     for (const key of ["type", "stereotype", "label", "color"] as const) {
       if (key in updates) next[key] = updates[key] ? updates[key]! : undefined;
     }
-    if (next.label === next.name) next.label = undefined;
+    if ("label" in updates && next.label === next.name) next.label = undefined;
     return next;
   };
 

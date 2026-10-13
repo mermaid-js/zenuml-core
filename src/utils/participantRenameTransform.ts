@@ -1,4 +1,5 @@
 import antlr4 from "antlr4";
+import sequenceParser from "@/generated-parser/sequenceParser";
 import sequenceParserListener from "@/generated-parser/sequenceParserListener";
 import { Participants, parse } from "@/parser";
 import {
@@ -64,6 +65,30 @@ const collectNamePositions = (rootContext: any, name: string): Range[] => {
 
   antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, rootContext);
   return positions;
+};
+
+// Identifier and string tokens are interchangeable: quoting a name must not
+// count as a structural change.
+const NAME_TOKENS = new Set<number>([
+  (sequenceParser as any).ID,
+  (sequenceParser as any).CSTRING,
+  (sequenceParser as any).USTRING,
+]);
+
+/**
+ * Serialises the parse tree by rule and token type, ignoring token text. A
+ * rename that turns a name into a keyword (`title`, `if`...) changes the shape.
+ */
+export const treeShape = (ctx: any): string => {
+  if (!ctx) return "";
+  if (ctx.symbol) {
+    const type = ctx.symbol.type;
+    return NAME_TOKENS.has(type) ? "N" : `t${type}`;
+  }
+  const children: any[] = ctx.children ?? [];
+  return `(${ctx.ruleIndex ?? ctx.constructor?.name}${children
+    .map(treeShape)
+    .join(",")})`;
 };
 
 const PLAIN_NAME = /^[\p{L}_][\p{L}\p{Nd}_]*$/u;
@@ -149,6 +174,7 @@ export const renameParticipantInDsl = (
       return null;
     }
   })();
+  const oldShape = treeShape(rootContext);
   const oldDeclaration = readParticipantDeclaration(rootContext, oldName);
   for (const candidate of candidates) {
     const nextCode = apply(code, positions, candidate);
@@ -173,7 +199,8 @@ export const renameParticipantInDsl = (
         declOk =
           !!newDeclaration && sameDeclaration(oldDeclaration, newDeclaration);
       }
-      if (parseOk && nameOk && declOk) {
+      const shapeOk = treeShape(next.rootContext) === oldShape;
+      if (parseOk && nameOk && declOk && shapeOk) {
         return { code: nextCode, name: added[0] };
       }
     }

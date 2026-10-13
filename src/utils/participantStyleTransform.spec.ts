@@ -175,3 +175,15 @@ describe("participantStyleTransform keeps untouched attributes verbatim", () => 
       ).toBe("const");
   });
 });
+
+describe("participantStyleTransform after rename-to-label", () => {
+  it("keeps an untouched redundant label when another attribute changes", () => {
+    const code = "Alice as Alice\nAlice->B: hi";
+    const result = setParticipantStyleChecked(code, RootContext(code), "Alice", {
+      color: "#ef4444",
+    });
+    expect(result).toEqual({
+      code: "Alice as Alice #ef4444\nAlice->B: hi",
+    });
+  });
+});

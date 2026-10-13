@@ -128,3 +128,10 @@ describe("renameParticipantInDsl keyword safety", () => {
     expect(result).toMatchObject({ name: "First,Last" });
   });
 });
+
+describe("renameParticipantInDsl tree shape", () => {
+  it("quotes `title` so no message is swallowed into a diagram title", () => {
+    const result = renamed("A->B: first\nB->A: second", "A", "title");
+    expect(result.code).toBe('"title"->B: first\nB->"title": second');
+  });
+});
