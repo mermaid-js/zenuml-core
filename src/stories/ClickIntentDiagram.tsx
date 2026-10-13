@@ -64,7 +64,11 @@ export const ClickIntentDiagram = ({
     <Provider store={store}>
       <div
         className="zenuml theme-default"
-        style={{ minHeight: 280, padding: "24px 24px 24px 56px" }}
+        style={{
+          // Leave room below the diagram for the participant editor popover.
+          minHeight: selectedParticipant ? 640 : 280,
+          padding: "24px 24px 24px 56px",
+        }}
       >
         <DiagramFrame />
       </div>

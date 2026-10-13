@@ -541,7 +541,7 @@ export const ParticipantStylePanel = () => {
                     id="zenuml-participant-stereotype"
                     type="text"
                     value={stereotypeDraft}
-                    placeholder="Service"
+                    placeholder="none"
                     onChange={(e) => setStereotypeDraft(e.target.value)}
                     {...onEnterBlur(commitStereotype)}
                     className={cn(fieldClass, "px-5")}
@@ -638,7 +638,7 @@ export const ParticipantStylePanel = () => {
                   type="text"
                   aria-label="Custom hex color"
                   value={hexDraft}
-                  placeholder="3b82f6"
+                  placeholder="none"
                   maxLength={7}
                   spellCheck={false}
                   onChange={(e) => setHexDraft(e.target.value)}

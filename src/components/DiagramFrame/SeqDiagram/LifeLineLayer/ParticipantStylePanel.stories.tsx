@@ -9,6 +9,9 @@ const meta: Meta<StoryArgs> = {
   parameters: {
     layout: "fullscreen",
     docs: {
+      // The editor is a fixed-position popover; an iframe keeps it inside
+      // each story's frame instead of floating over the docs page.
+      story: { inline: false, iframeHeight: 640 },
       description: {
         component: `
 The participant editor is the inspector that opens when a participant box is clicked
