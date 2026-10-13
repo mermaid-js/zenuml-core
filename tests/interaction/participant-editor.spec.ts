@@ -121,4 +121,66 @@ test.describe("participant editor", () => {
     await page.mouse.click(5, 5);
     await expect(panel).toHaveCount(0);
   });
+
+  const openPanel = async (
+    page: import("@playwright/test").Page,
+    id: string,
+  ) => {
+    const participant = page.locator(
+      `.participant[data-participant-id="${id}"]`,
+    );
+    const box = await participant.boundingBox();
+    expect(box).toBeTruthy();
+    await participant.click({ position: { x: 3, y: box!.height - 3 } });
+  };
+
+  test("does not carry an uncommitted draft over to another participant", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await openPanel(page, "A");
+    const panel = page.getByTestId("participant-style-panel");
+    await panel.getByLabel("Display as").fill("Alice");
+
+    await openPanel(page, "C");
+    await expect(panel).toHaveAttribute("aria-label", "Edit participant C");
+    const label = panel.getByLabel("Display as");
+    await expect(label).toHaveValue("");
+    await label.focus();
+    await label.press("Enter");
+
+    await expect.poll(() => lastCode(page)).toContain("as Alice");
+    expect(await lastCode(page)).not.toContain("C as Alice");
+  });
+
+  test("Escape in a text field discards the draft and closes the panel", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await openPanel(page, "A");
+    const panel = page.getByTestId("participant-style-panel");
+    const label = panel.getByLabel("Display as");
+    await label.fill("Alice");
+    await label.press("Escape");
+
+    await expect(panel).toHaveCount(0);
+    await page.waitForTimeout(200);
+    expect(await lastCode(page)).toBe("");
+  });
+
+  test("shows an alert when a rename would merge two participants", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await openPanel(page, "A");
+    const panel = page.getByTestId("participant-style-panel");
+    const name = panel.getByLabel("Name");
+    await name.fill("C");
+    await name.press("Enter");
+
+    await expect(panel.getByRole("alert")).toHaveText('"C" already exists');
+    await expect(name).toHaveValue("C");
+    await expect(panel).toBeVisible();
+    expect(await lastCode(page)).toBe("");
+  });
 });

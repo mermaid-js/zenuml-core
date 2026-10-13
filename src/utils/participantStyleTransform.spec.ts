@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { RootContext } from "@/parser";
 import {
   readParticipantDeclaration,
+  setParticipantStyleChecked,
   setParticipantStyleInDsl,
 } from "./participantStyleTransform";
 
@@ -83,5 +84,51 @@ describe("participantStyleTransform", () => {
       color: "#3b82f6",
     });
     expect(readParticipantDeclaration(RootContext("A->B: hi"), "A")).toBe(null);
+  });
+
+  describe("values that are not plain identifiers", () => {
+    const readBack = (code: string) =>
+      readParticipantDeclaration(RootContext(code), "A");
+
+    it.each(["if", "123", "Ünïcode—x"])("round-trips label %s", (label) => {
+      const result = apply("A\nA->B: hi", "A", { label });
+      expect(readBack(result)?.label).toBe(label);
+    });
+
+    it.each(["if", "123", "Ünïcode—x"])(
+      "round-trips stereotype %s",
+      (stereotype) => {
+        const result = apply("A\nA->B: hi", "A", { stereotype });
+        expect(readBack(result)?.stereotype).toBe(stereotype);
+      },
+    );
+
+    it("keeps plain unicode identifiers unquoted", () => {
+      expect(apply("A\nA->B: hi", "A", { label: "Ünï" })).toBe(
+        "A as Ünï\nA->B: hi",
+      );
+    });
+  });
+
+  describe("setParticipantStyleChecked", () => {
+    const checked = (code: string, name: string, updates: any) =>
+      setParticipantStyleChecked(code, RootContext(code), name, updates);
+
+    it("returns the new code when the declaration round-trips", () => {
+      expect(checked("A\nA->B: hi", "A", { label: "if" })).toEqual({
+        code: 'A as "if"\nA->B: hi',
+      });
+    });
+
+    it("returns an error and no code when the value cannot round-trip", () => {
+      const result = checked("A\nA->B: hi", "A", { label: "a\nb" });
+      expect(result).toEqual({ error: "Not a valid display name" });
+    });
+
+    it("reports a stereotype failure with its own message", () => {
+      expect(checked("A\nA->B: hi", "A", { stereotype: "a\nb" })).toEqual({
+        error: "Not a valid stereotype",
+      });
+    });
   });
 });

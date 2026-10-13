@@ -13,14 +13,11 @@ import {
 import {
   formatParticipantDeclaration,
   readParticipantDeclaration,
-  setParticipantStyleInDsl,
+  setParticipantStyleChecked,
   type ParticipantUpdates,
 } from "@/utils/participantStyleTransform";
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
-import {
-  normalizeParticipantName,
-  renameParticipantInDsl,
-} from "@/utils/participantRenameTransform";
+import { renameParticipantInDsl } from "@/utils/participantRenameTransform";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import { RootContext } from "@/parser";
 import { cn } from "@/utils";
@@ -155,10 +152,28 @@ export const ParticipantStylePanel = () => {
   const [stereotypeDraft, setStereotypeDraft] = useState("");
   const [labelDraft, setLabelDraft] = useState("");
   const [hexDraft, setHexDraft] = useState("");
-  useEffect(() => setNameDraft(participantName ?? ""), [participantName]);
-  useEffect(() => setStereotypeDraft(currentStereotype), [currentStereotype]);
-  useEffect(() => setLabelDraft(currentLabel), [currentLabel]);
-  useEffect(() => setHexDraft(currentColor?.slice(1) ?? ""), [currentColor]);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [styleError, setStyleError] = useState<string | null>(null);
+  // Escape discards the drafts; the blur that follows must not commit them.
+  const skipCommitRef = useRef(false);
+  // `participantName` is a dependency of every draft so that switching to
+  // another participant whose value is identical (e.g. both unlabeled) still
+  // resets the field.
+  useEffect(() => {
+    setNameDraft(participantName ?? "");
+    setNameError(null);
+    setStyleError(null);
+    skipCommitRef.current = false;
+  }, [participantName]);
+  useEffect(
+    () => setStereotypeDraft(currentStereotype),
+    [participantName, currentStereotype],
+  );
+  useEffect(() => setLabelDraft(currentLabel), [participantName, currentLabel]);
+  useEffect(
+    () => setHexDraft(currentColor?.slice(1) ?? ""),
+    [participantName, currentColor],
+  );
 
   const [query, setQuery] = useState("");
   const [iconKeys, setIconKeys] = useState<string[] | null>(null);
@@ -215,8 +230,28 @@ export const ParticipantStylePanel = () => {
     if (!isOpen) return;
     const onPointerDown = (e: PointerEvent) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        // Commit a focused draft for the participant it belongs to before the
+        // selection changes; the blur handler runs synchronously here.
+        const active = document.activeElement as HTMLElement | null;
+        if (active && panelRef.current.contains(active)) active.blur();
         setIsOpen(false);
         setSelected([]);
+        // A committed draft can re-render the diagram and replace the node
+        // under the pointer, which drops the click that would select it.
+        const target = e.target as Element | null;
+        const hit = target
+          ?.closest?.("[data-participant-id]")
+          ?.getAttribute("data-participant-id");
+        if (hit) {
+          setTimeout(() => {
+            if (
+              !target?.isConnected &&
+              diagramElement?.querySelector(`[data-participant-id="${hit}"]`)
+            ) {
+              setSelected([hit]);
+            }
+          }, 50);
+        }
       }
     };
     const onKeyDown = (e: KeyboardEvent) => {
@@ -231,7 +266,7 @@ export const ParticipantStylePanel = () => {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [isOpen, setSelected]);
+  }, [isOpen, setSelected, diagramElement]);
 
   if (
     !enabled ||
@@ -275,47 +310,60 @@ export const ParticipantStylePanel = () => {
       });
       workingRoot = RootContext(workingCode);
     }
-    updateCode(
-      setParticipantStyleInDsl(
-        workingCode,
-        workingRoot,
-        participantName,
-        updates,
-      ),
+    const result = setParticipantStyleChecked(
+      workingCode,
+      workingRoot,
+      participantName,
+      updates,
     );
+    if ("error" in result) {
+      setStyleError(result.error);
+      return;
+    }
+    setStyleError(null);
+    updateCode(result.code);
   };
 
   const commitName = () => {
-    const next = normalizeParticipantName(nameDraft);
-    if (!next || next === participantName) {
+    if (skipCommitRef.current) return;
+    if (nameDraft.trim() === participantName) {
       setNameDraft(participantName);
+      setNameError(null);
       return;
     }
-    const nextCode = renameParticipantInDsl(
+    const result = renameParticipantInDsl(
       code,
       rootContext,
       participantName,
-      next,
+      nameDraft,
     );
-    if (nextCode === code) return;
-    updateCode(nextCode);
-    // The identifier is stored unquoted in the participant model.
-    setSelected([next.replace(/^"|"$/g, "")]);
+    if ("error" in result) {
+      setNameError(result.error);
+      return;
+    }
+    setNameError(null);
+    setNameDraft(result.name);
+    updateCode(result.code);
+    // The selection must use the parser's canonical identity.
+    setSelected([result.name]);
   };
 
   const commitStereotype = () => {
+    if (skipCommitRef.current) return;
     const next = stereotypeDraft.trim();
     if (next === currentStereotype) return;
     applyStyle({ stereotype: next || null });
   };
 
   const commitLabel = () => {
+    if (skipCommitRef.current) return;
     const next = labelDraft.trim();
     if (next === currentLabel) return;
     applyStyle({ label: next || null });
   };
 
   const commitHex = () => {
+    if (skipCommitRef.current) return;
     const next = normalizeHex(hexDraft);
     if (!next) {
       setHexDraft(currentColor?.slice(1) ?? "");
@@ -330,14 +378,21 @@ export const ParticipantStylePanel = () => {
     applyStyle({ type: key });
   };
 
-  const onEnterBlur = (commit: () => void) => ({
+  const onEnterBlur = (commit: () => void, reset: () => void) => ({
     onBlur: commit,
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Escape") {
+        // Discard the draft and close; the blur on unmount must not commit.
+        skipCommitRef.current = true;
+        reset();
+        close();
+        return;
+      }
       if (e.key === "Enter") {
         e.preventDefault();
         (e.target as HTMLInputElement).blur();
       }
-      // Keep Escape inside the field from also closing the panel.
+      // Keep other keys from reaching the canvas shortcuts.
       e.stopPropagation();
     },
   });
@@ -387,8 +442,12 @@ export const ParticipantStylePanel = () => {
               id="zenuml-participant-name"
               type="text"
               value={nameDraft}
-              onChange={(e) => setNameDraft(e.target.value)}
-              {...onEnterBlur(commitName)}
+              onChange={(e) => {
+                setNameDraft(e.target.value);
+                setNameError(null);
+              }}
+              aria-invalid={nameError ? true : undefined}
+              {...onEnterBlur(commitName, () => setNameDraft(participantName))}
               className="flex-1 min-w-0 h-[30px] box-border rounded-md border border-transparent px-2 text-[15px] font-semibold text-gray-900 bg-white hover:border-gray-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
             />
             <button
@@ -401,6 +460,15 @@ export const ParticipantStylePanel = () => {
               <Stroke d="M6 6l12 12M18 6L6 18" />
             </button>
           </div>
+
+          {nameError && (
+            <div
+              role="alert"
+              className="px-3.5 py-1.5 text-[12px] text-red-700 bg-red-50 border-b border-red-100"
+            >
+              {nameError}
+            </div>
+          )}
 
           <div className="flex flex-col gap-3.5 px-3.5 pt-3 pb-3.5">
             <section className="flex flex-col gap-2">
@@ -457,6 +525,16 @@ export const ParticipantStylePanel = () => {
                     setActiveResult(0);
                   }}
                   onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      if (query) {
+                        e.stopPropagation();
+                        setQuery("");
+                      } else {
+                        skipCommitRef.current = true;
+                        close();
+                      }
+                      return;
+                    }
                     e.stopPropagation();
                     if (e.key === "ArrowDown") {
                       e.preventDefault();
@@ -469,8 +547,6 @@ export const ParticipantStylePanel = () => {
                     } else if (e.key === "Enter" && results[activeResult]) {
                       e.preventDefault();
                       pickIcon(results[activeResult]);
-                    } else if (e.key === "Escape") {
-                      setQuery("");
                     }
                   }}
                   className={cn(fieldClass, "pl-[30px] text-[12px]")}
@@ -542,8 +618,13 @@ export const ParticipantStylePanel = () => {
                     type="text"
                     value={stereotypeDraft}
                     placeholder="none"
-                    onChange={(e) => setStereotypeDraft(e.target.value)}
-                    {...onEnterBlur(commitStereotype)}
+                    onChange={(e) => {
+                      setStereotypeDraft(e.target.value);
+                      setStyleError(null);
+                    }}
+                    {...onEnterBlur(commitStereotype, () =>
+                      setStereotypeDraft(currentStereotype),
+                    )}
                     className={cn(fieldClass, "px-5")}
                   />
                   <span
@@ -566,12 +647,23 @@ export const ParticipantStylePanel = () => {
                   type="text"
                   value={labelDraft}
                   placeholder="Same as name"
-                  onChange={(e) => setLabelDraft(e.target.value)}
-                  {...onEnterBlur(commitLabel)}
+                  onChange={(e) => {
+                    setLabelDraft(e.target.value);
+                    setStyleError(null);
+                  }}
+                  {...onEnterBlur(commitLabel, () =>
+                    setLabelDraft(currentLabel),
+                  )}
                   className={fieldClass}
                 />
               </div>
             </div>
+
+            {styleError && (
+              <div role="alert" className="text-[12px] text-red-700">
+                {styleError}
+              </div>
+            )}
 
             <section className="flex flex-col gap-2">
               <div className="flex items-baseline justify-between">
@@ -642,7 +734,9 @@ export const ParticipantStylePanel = () => {
                   maxLength={7}
                   spellCheck={false}
                   onChange={(e) => setHexDraft(e.target.value)}
-                  {...onEnterBlur(commitHex)}
+                  {...onEnterBlur(commitHex, () =>
+                    setHexDraft(currentColor?.slice(1) ?? ""),
+                  )}
                   className={cn(
                     fieldClass,
                     "h-[30px] pl-[22px] text-[12px] font-mono",

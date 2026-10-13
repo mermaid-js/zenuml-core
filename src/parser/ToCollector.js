@@ -3,7 +3,9 @@ import antlr4 from "antlr4";
 import { default as sequenceParserListener } from "../generated-parser/sequenceParserListener";
 
 let participants = undefined;
-let isBlind = false;
+// Depth counter: parameters and conditions nest, and an inner exit must not
+// re-enable collection while the outer one is still open.
+let isBlind = 0;
 let groupId = undefined;
 const ToCollector = new sequenceParserListener();
 
@@ -134,19 +136,19 @@ ToCollector.enterRef = function (ctx) {
 };
 
 ToCollector.enterParameters = function () {
-  isBlind = true;
+  isBlind++;
 };
 
 ToCollector.exitParameters = function () {
-  isBlind = false;
+  isBlind--;
 };
 
 ToCollector.enterCondition = function () {
-  isBlind = true;
+  isBlind++;
 };
 
 ToCollector.exitCondition = function () {
-  isBlind = false;
+  isBlind--;
 };
 
 ToCollector.enterGroup = function (ctx) {
@@ -181,6 +183,7 @@ ToCollector.getParticipants = function (context) {
   const cached = participantsCache.get(context);
   if (cached) return cached;
   participants = new Participants();
+  isBlind = 0;
   walker.walk(this, context);
   participantsCache.set(context, participants);
   return participants;
