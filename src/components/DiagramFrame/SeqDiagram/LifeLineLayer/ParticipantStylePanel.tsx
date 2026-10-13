@@ -19,6 +19,7 @@ import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { FloatingPortal } from "@floating-ui/react";
+import { AsyncIcon } from "../../Tutorial/AsyncIcon";
 
 const PRESET_COLORS: { hex: string; name: string }[] = [
   { hex: "#ef4444", name: "Red" },
@@ -33,14 +34,77 @@ const PRESET_COLORS: { hex: string; name: string }[] = [
   { hex: "#ffffff", name: "White" },
 ];
 
-const PARTICIPANT_TYPES = [
-  { key: "Actor", label: "Actor", icon: "👤" },
-  { key: "Boundary", label: "Boundary", icon: "⬡" },
-  { key: "Control", label: "Control", icon: "⟳" },
-  { key: "Entity", label: "Entity", icon: "□" },
-  { key: "Database", label: "Database", icon: "🗄" },
-  { key: "Queue", label: "Queue", icon: "≡" },
+// `null` key is the plain participant box (no `@Type` annotation).
+const PARTICIPANT_TYPES: { key: string | null; label: string }[] = [
+  { key: null, label: "Default" },
+  { key: "Actor", label: "Actor" },
+  { key: "Boundary", label: "Boundary" },
+  { key: "Control", label: "Control" },
+  { key: "Entity", label: "Entity" },
+  { key: "Database", label: "Database" },
+  { key: "Queue", label: "Queue" },
 ];
+
+const isLightColor = (hex: string) => {
+  const value = parseInt(hex.slice(1), 16);
+  const r = (value >> 16) & 0xff;
+  const g = (value >> 8) & 0xff;
+  const b = value & 0xff;
+  return r * 0.299 + g * 0.587 + b * 0.114 > 186;
+};
+
+const TypeGlyph = ({ typeKey }: { typeKey: string | null }) => {
+  if (!typeKey) {
+    return (
+      <span className="block w-5 h-3.5 rounded-[3px] border-[1.5px] border-current" />
+    );
+  }
+  if (typeKey === "Queue") {
+    return (
+      <svg viewBox="0 0 24 16" className="w-6 h-4" aria-hidden="true">
+        <rect
+          x="1.5"
+          y="3"
+          width="21"
+          height="10"
+          rx="5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M17.5 3a5 5 0 0 0 0 10"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+      </svg>
+    );
+  }
+  return (
+    <AsyncIcon
+      iconKey={typeKey.toLowerCase()}
+      className="w-6 h-6 flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-full"
+    />
+  );
+};
+
+const CheckMark = ({ light }: { light: boolean }) => (
+  <svg
+    viewBox="0 0 16 16"
+    className={`w-3 h-3 ${light ? "text-gray-800" : "text-white"}`}
+    aria-hidden="true"
+  >
+    <path
+      d="M3.5 8.5l3 3 6-7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 export const ParticipantStylePanel = () => {
   const mode = useAtomValue(modeAtom);
@@ -182,94 +246,146 @@ export const ParticipantStylePanel = () => {
     setSelected([]);
   };
 
+  const close = () => {
+    setIsOpen(false);
+    setSelected([]);
+  };
+
+  const activeColorName =
+    PRESET_COLORS.find(({ hex }) => hex.toLowerCase() === currentColor)?.name ??
+    currentColor;
+  const activeTypeLabel =
+    PARTICIPANT_TYPES.find(
+      ({ key }) => key?.toLowerCase() === currentType?.toLowerCase(),
+    )?.label ?? "Default";
+
+  const sectionLabel =
+    "text-[10px] uppercase tracking-wider text-gray-500 font-semibold";
+
   return (
     <FloatingPortal>
       <div className="zenuml">
         <div
           ref={panelRef}
-          className={`bg-white rounded-lg shadow-lg border border-gray-200 p-2 flex flex-col gap-2 ${themeClasses}`}
+          role="dialog"
+          aria-label={`Edit participant ${participantName}`}
+          className={`bg-white rounded-xl shadow-xl ring-1 ring-black/5 w-[236px] text-gray-700 font-sans overflow-hidden ${themeClasses}`}
           style={{
             position: "fixed",
             zIndex: 50,
-            minWidth: 180,
             top: panelPos.top,
             left: panelPos.left,
           }}
           data-testid="participant-style-panel"
         >
-          <div className="text-[10px] uppercase tracking-wide text-gray-400 font-semibold px-1">
-            Color
-          </div>
-          <div className="flex flex-wrap gap-1 px-1">
-            {PRESET_COLORS.map(({ hex, name }) => {
-              const isActive = currentColor === hex.toLowerCase();
-              return (
-                <button
-                  key={hex}
-                  type="button"
-                  className={`w-5 h-5 rounded-full border hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 ${
-                    isActive
-                      ? "border-sky-500 ring-2 ring-sky-400 ring-offset-1"
-                      : "border-gray-300"
-                  }`}
-                  style={{ backgroundColor: hex }}
-                  title={isActive ? `${name} (current)` : name}
-                  aria-label={`Set color to ${name}`}
-                  aria-pressed={isActive}
-                  onClick={() => applyStyle({ color: hex })}
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100">
+            <span
+              className="w-3 h-3 shrink-0 rounded-full border border-gray-300"
+              style={{ backgroundColor: currentColor ?? "transparent" }}
+              aria-hidden="true"
+            />
+            <span
+              className="flex-1 min-w-0 truncate text-sm font-semibold text-gray-900"
+              title={participantName}
+            >
+              {participantName}
+            </span>
+            <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+              {activeTypeLabel}
+            </span>
+            <button
+              type="button"
+              className="shrink-0 -mr-1 w-6 h-6 rounded-md flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+              title="Close"
+              aria-label="Close"
+              onClick={close}
+            >
+              <svg viewBox="0 0 16 16" className="w-3 h-3" aria-hidden="true">
+                <path
+                  d="M4 4l8 8M12 4l-8 8"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
                 />
-              );
-            })}
-            <button
-              type="button"
-              className="w-5 h-5 rounded-full border border-dashed border-gray-400 text-gray-400 text-[9px] hover:scale-110 transition-transform flex items-center justify-center"
-              title="Remove color"
-              aria-label="Remove color"
-              onClick={() => applyStyle({ color: null })}
-            >
-              ✕
+              </svg>
             </button>
           </div>
 
-          <div className="w-full h-px bg-gray-100" />
+          <div className="px-3 pt-2.5 pb-3 flex flex-col gap-3">
+            <section className="flex flex-col gap-1.5">
+              <div className={sectionLabel}>Type</div>
+              <div className="grid grid-cols-4 gap-1">
+                {PARTICIPANT_TYPES.map(({ key, label }) => {
+                  const isActive =
+                    (currentType?.toLowerCase() ?? null) ===
+                    (key?.toLowerCase() ?? null);
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      className={`flex flex-col items-center justify-center gap-1 h-[52px] rounded-lg border text-[10px] leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 ${
+                        isActive
+                          ? "border-sky-400 bg-sky-50 text-sky-700"
+                          : "border-transparent text-gray-600 hover:bg-gray-100"
+                      }`}
+                      title={isActive ? `${label} (current)` : label}
+                      aria-label={`Set type to ${label}`}
+                      aria-pressed={isActive}
+                      onClick={() => applyStyle({ type: key })}
+                    >
+                      <span className="h-6 flex items-center justify-center">
+                        <TypeGlyph typeKey={key} />
+                      </span>
+                      <span>{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
 
-          <div className="text-[10px] uppercase tracking-wide text-gray-400 font-semibold px-1">
-            Type
-          </div>
-          <div className="flex flex-wrap gap-1 px-1">
-            {PARTICIPANT_TYPES.map(({ key, label, icon }) => {
-              const isActive = currentType?.toLowerCase() === key.toLowerCase();
-              return (
+            <section className="flex flex-col gap-1.5">
+              <div className="flex items-baseline justify-between">
+                <span className={sectionLabel}>Color</span>
+                <span className="text-[10px] text-gray-400 font-mono">
+                  {activeColorName ?? "None"}
+                </span>
+              </div>
+              <div className="grid grid-cols-6 gap-1.5">
                 <button
-                  key={key}
                   type="button"
-                  className={`flex flex-col items-center gap-0.5 px-1.5 py-1 rounded border text-[10px] min-w-[36px] hover:bg-gray-100 ${
-                    isActive
-                      ? "border-sky-400 bg-sky-50 text-sky-700"
-                      : "border-gray-200 text-gray-700"
+                  className={`relative w-6 h-6 rounded-full border border-gray-300 bg-white overflow-hidden hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 ${
+                    currentColor ? "" : "ring-2 ring-sky-400 ring-offset-1"
                   }`}
-                  title={
-                    isActive ? `${label} (current)` : `Set type to ${label}`
-                  }
-                  aria-label={`Set type to ${label}`}
-                  aria-pressed={isActive}
-                  onClick={() => applyStyle({ type: key })}
+                  title={currentColor ? "No color" : "No color (current)"}
+                  aria-label="Remove color"
+                  aria-pressed={!currentColor}
+                  onClick={() => applyStyle({ color: null })}
                 >
-                  <span className="text-sm leading-none">{icon}</span>
-                  <span>{label}</span>
+                  <span className="absolute left-1/2 top-[-2px] h-[28px] w-[1.5px] -translate-x-1/2 rotate-45 bg-red-400" />
                 </button>
-              );
-            })}
-            <button
-              type="button"
-              className="flex flex-col items-center gap-0.5 px-1.5 py-1 rounded border border-dashed border-gray-300 text-gray-400 hover:bg-gray-100 text-[10px] min-w-[36px]"
-              title="Remove type"
-              aria-label="Remove type"
-              onClick={() => applyStyle({ type: null })}
-            >
-              <span className="text-sm leading-none">□</span>
-              <span>None</span>
-            </button>
+                {PRESET_COLORS.map(({ hex, name }) => {
+                  const isActive = currentColor === hex.toLowerCase();
+                  return (
+                    <button
+                      key={hex}
+                      type="button"
+                      className={`w-6 h-6 rounded-full border flex items-center justify-center hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 ${
+                        isActive
+                          ? "border-transparent ring-2 ring-sky-400 ring-offset-1"
+                          : "border-black/10"
+                      }`}
+                      style={{ backgroundColor: hex }}
+                      title={isActive ? `${name} (current)` : name}
+                      aria-label={`Set color to ${name}`}
+                      aria-pressed={isActive}
+                      onClick={() => applyStyle({ color: hex })}
+                    >
+                      {isActive && <CheckMark light={isLightColor(hex)} />}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
           </div>
         </div>
       </div>
