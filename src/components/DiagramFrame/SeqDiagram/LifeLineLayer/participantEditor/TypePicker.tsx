@@ -26,7 +26,7 @@ const Stroke = ({ d, className }: { d: string; className?: string }) => (
   </svg>
 );
 
-const ArchetypeGlyph = ({ typeKey }: { typeKey: string }) => {
+export const ArchetypeGlyph = ({ typeKey }: { typeKey: string }) => {
   if (typeKey === "Queue") {
     return (
       <Stroke

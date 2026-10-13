@@ -1,43 +1,120 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-const lastCode = (page: import("@playwright/test").Page) =>
+const lastCode = (page: Page) =>
   page.evaluate(() => (window as any).__lastContentChange ?? "");
 
+const openPanel = async (page: Page, id: string) => {
+  const participant = page.locator(`.participant[data-participant-id="${id}"]`);
+  const box = await participant.boundingBox();
+  expect(box).toBeTruthy();
+  await participant.click({ position: { x: 3, y: box!.height - 3 } });
+};
+
+// Playwright name matching is a case-insensitive substring by default, so
+// "Blue" would also match "Deep blue" and "Set color (Blue)".
+const typePicker = (page: Page) =>
+  page.getByRole("dialog", { name: "Participant type", exact: true });
+const colorPicker = (page: Page) =>
+  page.getByRole("dialog", { name: "Participant colour", exact: true });
+const iconSlot = (page: Page) =>
+  page
+    .getByTestId("participant-style-panel")
+    .getByRole("button", { name: /^Set icon/ });
+const colorSlot = (page: Page) =>
+  page
+    .getByTestId("participant-style-panel")
+    .getByRole("button", { name: /^Set color/ });
+
+const pickType = async (page: Page, label: string) => {
+  await iconSlot(page).click();
+  await typePicker(page)
+    .getByRole("button", { name: label, exact: true })
+    .click();
+};
+const pickColor = async (page: Page, name: string) => {
+  await colorSlot(page).click();
+  await colorPicker(page).getByRole("button", { name, exact: true }).click();
+};
+
 test.describe("participant editor", () => {
+  test("shows the pill, both slots and the name row, with no none options", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await openPanel(page, "A");
+    const panel = page.getByTestId("participant-style-panel");
+
+    await expect(
+      panel.getByRole("button", { name: "Add stereotype", exact: true }),
+    ).toBeVisible();
+    await expect(
+      panel.getByRole("button", { name: "Set icon", exact: true }),
+    ).toBeVisible();
+    await expect(
+      panel.getByRole("button", { name: "Set color (none)", exact: true }),
+    ).toBeVisible();
+    await expect(panel.getByLabel("Name", { exact: true })).toHaveValue("A");
+    await expect(panel.getByLabel("Display as", { exact: true })).toHaveValue(
+      "",
+    );
+    // Empty slots have no clear half.
+    await expect(panel.getByRole("button", { name: /^Remove/ })).toHaveCount(0);
+
+    // The DSL line shows only while the editor is hovered or focused.
+    const dsl = panel.getByTestId("participant-dsl-preview");
+    await page.mouse.move(600, 600);
+    await expect(dsl).toBeHidden();
+    await panel.getByTestId("participant-name-row").hover();
+    await expect(dsl).toBeVisible();
+    await expect(dsl).toHaveText("A");
+
+    await iconSlot(page).click();
+    await expect(typePicker(page)).toBeVisible();
+    await colorSlot(page).click();
+    await expect(colorPicker(page)).toBeVisible();
+    await expect(typePicker(page)).toHaveCount(0);
+    await expect(page.getByText("Default", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("No color")).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /no colou?r|remove colou?r/i }),
+    ).toHaveCount(0);
+  });
+
   test("edits every declaration attribute in one visit and stays open", async ({
     page,
   }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
-    const participant = page.locator('.participant[data-participant-id="A"]');
-    const box = await participant.boundingBox();
-    expect(box).toBeTruthy();
-    await participant.click({ position: { x: 3, y: box!.height - 3 } });
+    await openPanel(page, "A");
 
     const panel = page.getByTestId("participant-style-panel");
     const preview = panel.getByTestId("participant-dsl-preview");
     await expect(panel).toBeVisible();
     await expect(preview).toHaveText("A");
 
-    await panel.getByRole("button", { name: "Set type to Database" }).click();
+    await pickType(page, "Database");
     await expect(panel).toBeVisible();
     await expect(preview).toHaveText("@Database A");
 
-    await panel.getByRole("button", { name: "Set color to Blue" }).click();
-    await expect(preview).toHaveText("@Database A #3b82f6");
+    await pickColor(page, "Blue");
+    await expect(preview).toHaveText("@Database A #93c5fd");
 
-    const stereotype = panel.getByLabel("Stereotype");
+    await panel
+      .getByRole("button", { name: "Add stereotype", exact: true })
+      .click();
+    const stereotype = panel.getByLabel("Stereotype", { exact: true });
     await stereotype.fill("Service");
     await stereotype.press("Enter");
-    await expect(preview).toHaveText("@Database <<Service>> A #3b82f6");
+    await expect(preview).toHaveText("@Database <<Service>> A #93c5fd");
 
-    const label = panel.getByLabel("Display as");
+    const label = panel.getByLabel("Display as", { exact: true });
     await label.fill("Alice Smith");
     await label.press("Enter");
     await expect(preview).toHaveText(
-      '@Database <<Service>> A as "Alice Smith" #3b82f6',
+      '@Database <<Service>> A as "Alice Smith" #93c5fd',
     );
 
-    const hex = panel.getByLabel("Custom hex color");
+    await colorSlot(page).click();
+    const hex = colorPicker(page).getByLabel("Custom hex color");
     await hex.fill("ff00aa");
     await hex.press("Enter");
     await expect(preview).toHaveText(
@@ -54,13 +131,15 @@ test.describe("participant editor", () => {
   }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     const participant = page.locator('.participant[data-participant-id="A"]');
-    const box = await participant.boundingBox();
-    await participant.click({ position: { x: 3, y: box!.height - 3 } });
+    await openPanel(page, "A");
 
     const panel = page.getByTestId("participant-style-panel");
-    const search = panel.getByRole("combobox", { name: "Search icons" });
+    await iconSlot(page).click();
+    const search = typePicker(page).getByRole("combobox", {
+      name: "Search icons",
+    });
     await search.fill("s3");
-    const options = panel.getByRole("option");
+    const options = typePicker(page).getByRole("option");
     await expect(options.first()).toContainText("@s3");
     await search.press("ArrowDown");
     await search.press("Enter");
@@ -76,16 +155,14 @@ test.describe("participant editor", () => {
     page,
   }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
-    const participant = page.locator('.participant[data-participant-id="A"]');
-    const box = await participant.boundingBox();
-    await participant.click({ position: { x: 3, y: box!.height - 3 } });
+    await openPanel(page, "A");
 
     const panel = page.getByTestId("participant-style-panel");
-    const label = panel.getByLabel("Display as");
+    const label = panel.getByLabel("Display as", { exact: true });
     await label.fill("Alice Smith");
     await label.press("Enter");
 
-    const name = panel.getByLabel("Name");
+    const name = panel.getByLabel("Name", { exact: true });
     await name.fill("Alice");
     await name.press("Enter");
 
@@ -95,30 +172,21 @@ test.describe("participant editor", () => {
     await expect
       .poll(() => lastCode(page))
       .toBe('Alice as "Alice Smith"\nC\nAlice->C: Ping');
-    await expect(panel.getByLabel("Name")).toHaveValue("Alice");
+    await expect(panel.getByLabel("Name", { exact: true })).toHaveValue(
+      "Alice",
+    );
   });
 
-  test("closes with Escape, the close button and outside clicks", async ({
-    page,
-  }) => {
+  test("closes with Escape and outside clicks", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
-    const participant = page.locator('.participant[data-participant-id="A"]');
-    const box = await participant.boundingBox();
-    const open = () =>
-      participant.click({ position: { x: 3, y: box!.height - 3 } });
     const panel = page.getByTestId("participant-style-panel");
 
-    await open();
+    await openPanel(page, "A");
     await expect(panel).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(panel).toHaveCount(0);
 
-    await open();
-    await expect(panel).toBeVisible();
-    await panel.getByRole("button", { name: "Close" }).click();
-    await expect(panel).toHaveCount(0);
-
-    await open();
+    await openPanel(page, "A");
     // The outside-click listener attaches once the panel is open; clicking
     // before that lets the panel open after the click and stay open.
     await expect(panel).toBeVisible();
@@ -126,17 +194,207 @@ test.describe("participant editor", () => {
     await expect(panel).toHaveCount(0);
   });
 
-  const openPanel = async (
-    page: import("@playwright/test").Page,
-    id: string,
-  ) => {
-    const participant = page.locator(
-      `.participant[data-participant-id="${id}"]`,
+  test("Escape in an open picker closes only the picker", async ({ page }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const panel = page.getByTestId("participant-style-panel");
+    await openPanel(page, "A");
+
+    // Focus on the slot that opened the picker.
+    await colorSlot(page).click();
+    await expect(colorPicker(page)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(colorPicker(page)).toHaveCount(0);
+    await expect(panel).toBeVisible();
+
+    // Focus inside the picker: a chip, then the search field.
+    await iconSlot(page).click();
+    await typePicker(page)
+      .getByRole("button", { name: "Actor", exact: true })
+      .focus();
+    await page.keyboard.press("Escape");
+    await expect(typePicker(page)).toHaveCount(0);
+    await expect(panel).toBeVisible();
+
+    await iconSlot(page).click();
+    await typePicker(page).getByRole("combobox").focus();
+    await page.keyboard.press("Escape");
+    await expect(typePicker(page)).toHaveCount(0);
+    await expect(panel).toBeVisible();
+
+    // A hex draft discarded with Escape is not committed.
+    await colorSlot(page).click();
+    await colorPicker(page).getByLabel("Custom hex color").fill("ff00aa");
+    await page.keyboard.press("Escape");
+    await expect(colorPicker(page)).toHaveCount(0);
+    await expect(panel).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(panel).toHaveCount(0);
+    await page.waitForTimeout(200);
+    expect(await lastCode(page)).toBe("");
+  });
+
+  test("keyboard: picking or Escape returns focus to the colour slot", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const panel = page.getByTestId("participant-style-panel");
+    await openPanel(page, "A");
+
+    await colorSlot(page).focus();
+    await page.keyboard.press("Enter");
+    await expect(colorPicker(page)).toBeVisible();
+    await expect(colorPicker(page).locator(":focus")).toHaveCount(1);
+
+    await page.keyboard.press("Enter");
+    await expect(colorPicker(page)).toHaveCount(0);
+    await expect(colorSlot(page)).toBeFocused();
+    await expect(panel).toBeVisible();
+
+    // Escape closes the picker, focus returns, the next Escape closes the editor.
+    await page.keyboard.press("Enter");
+    await expect(colorPicker(page)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(colorPicker(page)).toHaveCount(0);
+    await expect(colorSlot(page)).toBeFocused();
+    await expect(panel).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(panel).toHaveCount(0);
+  });
+
+  test("keyboard: picking or Escape returns focus to the type slot", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const panel = page.getByTestId("participant-style-panel");
+    await openPanel(page, "A");
+
+    await iconSlot(page).focus();
+    await page.keyboard.press("Enter");
+    await expect(typePicker(page)).toBeVisible();
+    await expect(typePicker(page).locator(":focus")).toHaveCount(1);
+
+    await page.keyboard.press("Enter");
+    await expect(typePicker(page)).toHaveCount(0);
+    await expect(iconSlot(page)).toBeFocused();
+    await expect(panel).toBeVisible();
+
+    await page.keyboard.press("Enter");
+    await expect(typePicker(page)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(typePicker(page)).toHaveCount(0);
+    await expect(iconSlot(page)).toBeFocused();
+    await expect(panel).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(panel).toHaveCount(0);
+  });
+
+  test("hovering a swatch previews the box without editing the code", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const participant = page.locator('.participant[data-participant-id="A"]');
+    await openPanel(page, "A");
+    const before = await participant.evaluate(
+      (el) => getComputedStyle(el).backgroundColor,
     );
-    const box = await participant.boundingBox();
-    expect(box).toBeTruthy();
-    await participant.click({ position: { x: 3, y: box!.height - 3 } });
-  };
+
+    await colorSlot(page).click();
+    const deepBlue = colorPicker(page).getByRole("button", {
+      name: "Deep blue",
+      exact: true,
+    });
+    await deepBlue.hover();
+    await expect(participant).toHaveCSS("background-color", "rgb(29, 78, 216)");
+    await expect(participant).toHaveCSS("color", "rgb(255, 255, 255)");
+    expect(await lastCode(page)).toBe("");
+
+    // Leaving the swatches drops the preview.
+    await page.mouse.move(600, 600);
+    await expect(participant).toHaveCSS("background-color", before);
+    expect(await lastCode(page)).toBe("");
+
+    await deepBlue.click();
+    await expect.poll(() => lastCode(page)).toBe("A #1d4ed8\nC\nA->C: Ping");
+    await expect(participant).toHaveCSS("background-color", "rgb(29, 78, 216)");
+  });
+
+  test("the split-slot clear half removes the type and the colour", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await openPanel(page, "A");
+    const panel = page.getByTestId("participant-style-panel");
+    const preview = panel.getByTestId("participant-dsl-preview");
+
+    await pickType(page, "Database");
+    await pickColor(page, "Deep blue");
+    await expect(preview).toHaveText("@Database A #1d4ed8");
+
+    await iconSlot(page).hover();
+    await panel
+      .getByRole("button", { name: "Remove type", exact: true })
+      .click();
+    await expect(preview).toHaveText("A #1d4ed8");
+
+    await colorSlot(page).hover();
+    await panel
+      .getByRole("button", { name: "Remove colour", exact: true })
+      .click();
+    await expect(preview).toHaveText("A");
+    await expect(panel).toBeVisible();
+    await expect(panel.getByRole("button", { name: /^Remove/ })).toHaveCount(0);
+  });
+
+  test("Delete or Backspace on a focused filled slot clears it", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await openPanel(page, "A");
+    const panel = page.getByTestId("participant-style-panel");
+    const preview = panel.getByTestId("participant-dsl-preview");
+
+    await pickType(page, "Database");
+    await pickColor(page, "Rose");
+    await expect(preview).toHaveText("@Database A #fda4af");
+
+    await iconSlot(page).focus();
+    await page.keyboard.press("Delete");
+    await expect(preview).toHaveText("A #fda4af");
+
+    await colorSlot(page).focus();
+    await page.keyboard.press("Backspace");
+    await expect(preview).toHaveText("A");
+    await expect(panel).toBeVisible();
+  });
+
+  test("stereotype pill round trip", async ({ page }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await openPanel(page, "A");
+    const panel = page.getByTestId("participant-style-panel");
+    const preview = panel.getByTestId("participant-dsl-preview");
+    const placeholder = panel.getByRole("button", {
+      name: "Add stereotype",
+      exact: true,
+    });
+
+    await expect(placeholder).toHaveText("«stereotype»");
+    await placeholder.click();
+    const input = panel.getByLabel("Stereotype", { exact: true });
+    await expect(input).toBeFocused();
+    await input.fill("Service");
+    await input.press("Enter");
+    await expect(preview).toHaveText("<<Service>> A");
+    await expect(placeholder).toHaveCount(0);
+
+    await input.fill("");
+    await input.press("Enter");
+    await expect(preview).toHaveText("A");
+    await expect(placeholder).toBeVisible();
+    await expect.poll(() => lastCode(page)).toBe("A\nC\nA->C: Ping");
+  });
 
   test("does not carry an uncommitted draft over to another participant", async ({
     page,
@@ -144,11 +402,11 @@ test.describe("participant editor", () => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     await openPanel(page, "A");
     const panel = page.getByTestId("participant-style-panel");
-    await panel.getByLabel("Display as").fill("Alice");
+    await panel.getByLabel("Display as", { exact: true }).fill("Alice");
 
     await openPanel(page, "C");
     await expect(panel).toHaveAttribute("aria-label", "Edit participant C");
-    const label = panel.getByLabel("Display as");
+    const label = panel.getByLabel("Display as", { exact: true });
     await expect(label).toHaveValue("");
     await label.focus();
     await label.press("Enter");
@@ -163,7 +421,7 @@ test.describe("participant editor", () => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     await openPanel(page, "A");
     const panel = page.getByTestId("participant-style-panel");
-    const label = panel.getByLabel("Display as");
+    const label = panel.getByLabel("Display as", { exact: true });
     await label.fill("Alice");
     await label.press("Escape");
 
@@ -178,7 +436,7 @@ test.describe("participant editor", () => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     await openPanel(page, "A");
     const panel = page.getByTestId("participant-style-panel");
-    const name = panel.getByLabel("Name");
+    const name = panel.getByLabel("Name", { exact: true });
     await name.fill("C");
     await name.press("Enter");
 
@@ -196,7 +454,7 @@ test.describe("participant editor", () => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     await openPanel(page, "A");
     const panel = page.getByTestId("participant-style-panel");
-    await panel.getByLabel("Display as").fill("Alice");
+    await panel.getByLabel("Display as", { exact: true }).fill("Alice");
     const cBox = await page
       .locator('.participant[data-participant-id="C"]')
       .boundingBox();
@@ -224,14 +482,14 @@ test.describe("participant editor", () => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     await openPanel(page, "A");
     const panel = page.getByTestId("participant-style-panel");
-    await panel.getByLabel("Name").fill("C");
+    await panel.getByLabel("Name", { exact: true }).fill("C");
     await page.mouse.click(5, 5);
 
     await expect(panel).toHaveCount(0);
     expect(await lastCode(page)).toBe("");
 
     await openPanel(page, "A");
-    await expect(panel.getByLabel("Name")).toHaveValue("A");
+    await expect(panel.getByLabel("Name", { exact: true })).toHaveValue("A");
     await expect(panel.getByRole("alert")).toHaveCount(0);
   });
 
@@ -241,7 +499,7 @@ test.describe("participant editor", () => {
     await page.goto("/e2e/fixtures/insert-participant.html");
     await openPanel(page, "A");
     const panel = page.getByTestId("participant-style-panel");
-    const name = panel.getByLabel("Name");
+    const name = panel.getByLabel("Name", { exact: true });
     await name.fill("C");
     await name.press("Enter");
 

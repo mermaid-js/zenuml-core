@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSetAtom } from "jotai";
 import { participantPreviewAtom } from "@/store/Store";
+import { cn } from "@/utils";
 import { participantTextColor } from "@/utils/Color";
 import { PRESET_COLORS } from "./palette";
 
-const MONO = "ui-monospace, SFMono-Regular, Menlo, monospace";
 const HEX_RE = /^#?([0-9a-f]{6})$/i;
 
 type Props = {
@@ -14,15 +14,24 @@ type Props = {
   onClose: () => void;
 };
 
-export function ColorPicker({ participantName, currentColor, onPick, onClose }: Props) {
+export function ColorPicker({
+  participantName,
+  currentColor,
+  onPick,
+  onClose,
+}: Props) {
   const setPreview = useSetAtom(participantPreviewAtom);
   const current = currentColor?.replace(/^#/, "") ?? "";
   const [draft, setDraft] = useState(current);
+  // Escape discards the draft; the blur caused by returning focus to the
+  // slot must not commit it.
+  const discardRef = useRef(false);
 
   useEffect(() => setDraft(current), [current]);
   useEffect(() => () => setPreview(null), [setPreview]);
 
   const commit = (input: HTMLInputElement) => {
+    if (discardRef.current) return;
     const reset = () => {
       input.value = current;
       setDraft(current);
@@ -40,29 +49,20 @@ export function ColorPicker({ participantName, currentColor, onPick, onClose }: 
       aria-label="Participant colour"
       onKeyDown={(e) => {
         e.stopPropagation();
-        if (e.key === "Escape") onClose();
+        if (e.key === "Escape") {
+          discardRef.current = true;
+          onClose();
+        }
       }}
-      style={{
-        width: 180,
-        boxSizing: "border-box",
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-        padding: 10,
-        background: "#ffffff",
-        borderRadius: 10,
-        boxShadow: "0 10px 30px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(15, 23, 42, 0.08)",
-      }}
+      // Width and grid columns stay inline: they are the Task 5 picker
+      // contract and ColorPicker.spec reads them from `.style`.
+      style={{ width: 180 }}
+      className="box-border flex flex-col gap-2 p-2.5 bg-white rounded-[10px] shadow-[0_10px_30px_rgba(15,23,42,0.16),0_0_0_1px_rgba(15,23,42,0.08)]"
     >
       <div
         onPointerLeave={() => setPreview(null)}
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 30px)",
-          gap: 3,
-          justifyItems: "center",
-          alignItems: "center",
-        }}
+        style={{ gridTemplateColumns: "repeat(5, 30px)" }}
+        className="grid gap-[3px] justify-items-center items-center"
       >
         {PRESET_COLORS.map(({ hex, name }) => {
           const selected = hex === currentColor?.toLowerCase();
@@ -72,37 +72,31 @@ export function ColorPicker({ participantName, currentColor, onPick, onClose }: 
               type="button"
               aria-label={name}
               aria-pressed={selected}
-              onPointerEnter={() => setPreview({ name: participantName, color: hex })}
+              onPointerEnter={() =>
+                setPreview({ name: participantName, color: hex })
+              }
               onClick={() => {
                 setPreview(null);
                 onPick(hex);
               }}
-              style={{
-                width: 24,
-                height: 24,
-                boxSizing: "border-box",
-                padding: 0,
-                border: selected ? "2px solid #ffffff" : "1px solid rgba(0,0,0,0.12)",
-                boxShadow: selected ? "0 0 0 2px #0ea5e9" : undefined,
-                borderRadius: 5,
-                background: hex,
-                color: participantTextColor(hex),
-                fontSize: 14,
-                fontWeight: 400,
-                lineHeight: 1,
-                fontFamily: "inherit",
-                cursor: "pointer",
-              }}
+              // Fill and letter colour are computed per swatch at render.
+              style={{ background: hex, color: participantTextColor(hex) }}
+              className={cn(
+                "w-6 h-6 box-border p-0 rounded-[5px] text-[14px] font-normal leading-none [font-family:inherit] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
+                selected
+                  ? "border-2 border-solid border-white shadow-[0_0_0_2px_#0ea5e9]"
+                  : "border border-solid border-black/[0.12]",
+              )}
             >
               A
             </button>
           );
         })}
       </div>
-      <label style={{ position: "relative", display: "flex", alignItems: "center" }}>
+      <label className="relative flex items-center">
         <span
           aria-hidden="true"
-          style={{ position: "absolute", left: 9, fontSize: 12, color: "#6b7280", fontFamily: MONO }}
+          className="absolute left-[9px] text-[12px] text-gray-500 font-mono"
         >
           #
         </span>
@@ -118,18 +112,7 @@ export function ColorPicker({ participantName, currentColor, onPick, onClose }: 
               commit(e.currentTarget);
             }
           }}
-          style={{
-            width: "100%",
-            height: 28,
-            boxSizing: "border-box",
-            border: "1px solid #e5e7eb",
-            borderRadius: 6,
-            padding: "0 8px 0 22px",
-            fontSize: 12,
-            color: "#111827",
-            background: "#ffffff",
-            fontFamily: MONO,
-          }}
+          className="w-full h-7 box-border border border-solid border-gray-200 rounded-md pl-[22px] pr-2 text-[12px] text-gray-900 bg-white font-mono focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
         />
       </label>
     </div>

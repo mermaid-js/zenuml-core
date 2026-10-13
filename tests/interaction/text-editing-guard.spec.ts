@@ -50,7 +50,7 @@ test("message editing hides insertion and restores it after save", async ({
   await expect(page.getByTestId("participant-insert-button-0")).toHaveCount(1);
 });
 
-test("selection alone leaves insertion enabled and outside click ends the guard", async ({
+test("participant selection hides insertion; message selection keeps it; outside click ends the guard", async ({
   page,
 }) => {
   await page.goto("/e2e/fixtures/insert-participant.html");
@@ -60,7 +60,9 @@ test("selection alone leaves insertion enabled and outside click ends the guard"
 
   await participant.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByTestId("participant-insert-button-0")).toHaveCount(1);
+  // D13: insertion is hidden while exactly one participant is selected.
+  await expect(page.getByTestId("participant-insert-button-0")).toHaveCount(0);
+  await page.keyboard.press("Escape");
   await message.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByTestId("participant-insert-button-0")).toHaveCount(1);

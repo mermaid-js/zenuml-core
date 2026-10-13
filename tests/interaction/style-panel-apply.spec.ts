@@ -60,23 +60,38 @@ test.describe("style panel application", () => {
     const panel = page.getByTestId("participant-style-panel");
     await expect(panel).toBeVisible();
     await expect(panel).toHaveClass(/theme-nab/);
-    await expect(panel).toHaveCSS("background-color", "rgb(255, 255, 255)");
-    await panel.getByRole("button", { name: "Set color to Red" }).click();
+    // The panel root is a transparent overlay; the name row is the card.
+    await expect(panel.getByTestId("participant-name-row")).toHaveCSS(
+      "background-color",
+      "rgb(255, 255, 255)",
+    );
+    await panel.getByRole("button", { name: /^Set color/ }).click();
+    await page
+      .getByRole("dialog", { name: "Participant colour", exact: true })
+      .getByRole("button", { name: "Rose", exact: true })
+      .click();
 
     await expect
       .poll(() =>
         page.evaluate(() => (window as any).__lastContentChange ?? ""),
       )
-      .toMatch(/^A #ef4444\nC\nA->C: Ping/);
-    await expect(participant).toHaveCSS("background-color", "rgb(239, 68, 68)");
+      .toMatch(/^A #fda4af\nC\nA->C: Ping/);
+    await expect(participant).toHaveCSS(
+      "background-color",
+      "rgb(253, 164, 175)",
+    );
 
     await participant.click({ position: { x: 3, y: box!.height - 3 } });
-    await panel.getByRole("button", { name: "Set type to Actor" }).click();
+    await panel.getByRole("button", { name: /^Set icon/ }).click();
+    await page
+      .getByRole("dialog", { name: "Participant type", exact: true })
+      .getByRole("button", { name: "Actor", exact: true })
+      .click();
     await expect
       .poll(() =>
         page.evaluate(() => (window as any).__lastContentChange ?? ""),
       )
-      .toMatch(/^@Actor A #ef4444\nC\nA->C: Ping/);
+      .toMatch(/^@Actor A #fda4af\nC\nA->C: Ping/);
   });
 
   test("applies a type directly to an implicit participant", async ({
@@ -89,7 +104,11 @@ test.describe("style panel application", () => {
     await participant.click({ position: { x: 3, y: box!.height - 3 } });
     await page
       .getByTestId("participant-style-panel")
-      .getByRole("button", { name: "Set type to Actor" })
+      .getByRole("button", { name: /^Set icon/ })
+      .click();
+    await page
+      .getByRole("dialog", { name: "Participant type", exact: true })
+      .getByRole("button", { name: "Actor", exact: true })
       .click();
 
     await expect
