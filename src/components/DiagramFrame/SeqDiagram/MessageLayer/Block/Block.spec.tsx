@@ -9,10 +9,12 @@ import {
   modeAtom,
   RenderMode,
   selectedAtom,
+  selectedMessageAtom,
 } from "@/store/Store";
+import { enterMenuAtom } from "@/store/interaction/interactionAtom";
 import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { Block } from "./Block";
 
 /**
@@ -145,6 +147,58 @@ describe("Block drag-to-reorder interaction policy", () => {
       });
     }
     expect(store.get(messageReorderPendingAtom)).toBeNull();
+  });
+});
+
+describe("Block reorder while the message menu is open (P2)", () => {
+  // An earlier spec's handle press arms MessageReorderHandle's one-shot
+  // click suppressor (no click follows a synthetic press). Spend it.
+  beforeEach(() => {
+    document.body.click();
+  });
+  const selectFirstMessage = (
+    store: ReturnType<typeof createStore>,
+    view: ReturnType<typeof render>,
+    openMenu: boolean,
+  ) => {
+    const first = view.container.querySelectorAll(".statement-container")[0];
+    act(() => {
+      fireEvent.click(first.querySelector(".message")!);
+    });
+    const selected = store.get(selectedMessageAtom);
+    expect(selected).toBeTruthy();
+    if (openMenu) {
+      act(() => {
+        store.set(enterMenuAtom, {
+          kind: "messageMenu",
+          start: selected!.start,
+          end: selected!.end,
+        });
+      });
+    }
+  };
+
+  const handles = (view: ReturnType<typeof render>) =>
+    Array.from(view.container.querySelectorAll(".statement-container")).map(
+      (row) => !!row.querySelector(".message-reorder-handle"),
+    );
+
+  it("offers the reorder handle only on the selected message", () => {
+    const { store, view } = renderBlock({
+      mode: RenderMode.Dynamic,
+      enableMessageReorder: true,
+    });
+    selectFirstMessage(store, view, true);
+    expect(handles(view)).toEqual([true, false]);
+  });
+
+  it("keeps every reorder handle while the menu is closed", () => {
+    const { store, view } = renderBlock({
+      mode: RenderMode.Dynamic,
+      enableMessageReorder: true,
+    });
+    selectFirstMessage(store, view, false);
+    expect(handles(view)).toEqual([true, true]);
   });
 });
 

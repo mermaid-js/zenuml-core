@@ -17,6 +17,7 @@ import {
 } from "@/store/Store";
 import { reorderMessageInDsl } from "@/utils/messageReorderTransform";
 import { useCan } from "@/store/interaction/useCan";
+import { exitMenuAtom } from "@/store/interaction/interactionAtom";
 import { Fragment, useEffect, useRef } from "react";
 import { GapHandleZone } from "../GapHandleZone";
 
@@ -47,6 +48,7 @@ export const Block = (props: {
   const canReorder = useCan("reorder");
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const setSelectedParticipants = useSetAtom(selectedAtom);
+  const exitMenu = useSetAtom(exitMenuAtom);
   // Unlike every other editing surface, this drag used to run with no
   // `enable*` flag and no respect for `RenderMode.Static` — a render-only
   // host (SVG export, a static embed) could have its diagram silently
@@ -299,6 +301,8 @@ export const Block = (props: {
                 }
                 event.preventDefault();
                 event.stopPropagation();
+                // R1: the reorder drag replaces the open message menu.
+                exitMenu({ kind: "messageMenu" });
                 setSelectedMessage(null);
                 setSelectedParticipants([]);
                 setPendingDrag({

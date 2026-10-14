@@ -10,6 +10,7 @@ import {
   selectedAtom,
   selectedMessageAtom,
 } from "@/store/Store";
+import { enterMenuAtom } from "@/store/interaction/interactionAtom";
 import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { describe, expect, it } from "vitest";
@@ -149,6 +150,31 @@ describe("Occurrence", () => {
       });
       expect(store.get(createMessageDragAtom)).toBeNull();
       expect(store.get(selectedAtom)).toEqual(["A"]);
+    });
+
+    it("does not start a create drag while the message menu is open", () => {
+      const { store, occurrence } = renderOccurrence(NESTED);
+      act(() => {
+        store.set(selectedMessageAtom, { start: 1, end: 2, token: 1 });
+        store.set(enterMenuAtom, { kind: "messageMenu", start: 1, end: 2 });
+      });
+      act(() => {
+        fireEvent.pointerDown(occurrence, { clientX: 118, clientY: 70 });
+      });
+      expect(store.get(createMessageDragAtom)).toBeNull();
+    });
+
+    it("does not collapse while the message menu is open", () => {
+      const { store, container } = renderOccurrence(NESTED);
+      act(() => {
+        store.set(enterMenuAtom, { kind: "messageMenu", start: 1, end: 2 });
+      });
+      const button = container.querySelector(".collapse-button")!;
+      act(() => {
+        fireEvent.pointerDown(button);
+        fireEvent.click(button);
+      });
+      expect(button.classList.contains("hidden")).toBe(false);
     });
 
     it("collapses on click when idle", () => {

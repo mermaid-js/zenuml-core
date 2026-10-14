@@ -26,9 +26,15 @@ export type InteractionState =
   | { kind: "idle" }
   | { kind: "participantEditor"; participant: string }
   | { kind: "messageMenu"; start: number; end: number }
-  | { kind: "gapMenu" }
+  | { kind: "gapMenu"; id: string }
   | { kind: "createDrag"; source: string }
   | { kind: "reorderDrag"; key: string };
+
+/** The primary states that are stored, not derived (P2): open menus. */
+export type MenuState = Extract<
+  InteractionState,
+  { kind: "messageMenu" } | { kind: "gapMenu" }
+>;
 
 export const CAPABILITIES = [
   "select",
@@ -55,12 +61,14 @@ export const POLICY: Record<InteractionKind, Row> = {
   // Click another participant to switch, click away to close. The editor's
   // own slots and pickers are its active surface and are not gated here.
   participantEditor: row("select"),
-  // P1 derives this state from `selectedMessageAtom`, which stays set after
-  // the message menu closes. Until P2 lifts the menu's real open state, a
-  // selected message must not block anything, so this row equals idle.
-  messageMenu: ALL,
-  // Only the menu's own action (insert divider) stays live.
-  gapMenu: row("createMessage"),
+  // The message style menu is open. Reorder is allowed for the selected
+  // message only (`useCanReorderMessage`); rename and the other menu items
+  // are the menu's own surface and are not gated here. A selected message
+  // whose menu is closed is `idle`.
+  messageMenu: row("select", "reorder", "textEdit"),
+  // The gap's insert menu is open. Its own item (insert divider) is the
+  // menu's surface and is not gated here; everything else waits.
+  gapMenu: row(),
   // Each drag keeps its own capability so the drag can complete.
   createDrag: row("createMessage"),
   reorderDrag: row("reorder"),

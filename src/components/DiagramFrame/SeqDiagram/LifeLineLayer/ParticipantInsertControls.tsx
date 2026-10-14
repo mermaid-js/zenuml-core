@@ -12,6 +12,7 @@ import {
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
 import { MARGIN } from "@/positioning/Constants";
 import { useAtom, useAtomValue } from "jotai";
+import { useCan } from "@/store/interaction/useCan";
 import { codeAtom } from "@/store/Store";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
@@ -79,6 +80,9 @@ export const ParticipantInsertControls = () => {
   const enabled = useAtomValue(enableParticipantInsertionAtom);
   const textEditing = useAtomValue(textEditingAtom);
   const selected = useAtomValue(selectedAtom);
+  // ADR 0002: hidden while another interaction (an open menu, a drag) owns
+  // the diagram. The remaining checks are folded into `useCan` in P4.
+  const canInsert = useCan("insertParticipant");
   const coordinates = useAtomValue(coordinatesAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
@@ -179,6 +183,7 @@ export const ParticipantInsertControls = () => {
 
   if (
     !enabled ||
+    !canInsert ||
     textEditing ||
     selected.length === 1 ||
     mode !== RenderMode.Dynamic ||

@@ -6,17 +6,49 @@ import {
   messageReorderPendingAtom,
   modeAtom,
   selectedAtom,
-  selectedMessageAtom,
   textEditingAtom,
 } from "@/store/Store";
-import { can, type Capability, type InteractionState } from "./policy";
+import {
+  can,
+  type Capability,
+  type InteractionState,
+  type MenuState,
+} from "./policy";
+
+/**
+ * The open menu, stored (ADR 0002, P2). At most one menu is open per
+ * diagram: entering a menu replaces whichever menu was open (R1). Write it
+ * only through `enterMenuAtom` / `exitMenuAtom`.
+ */
+export const openMenuAtom = atom<MenuState | null>(null);
+
+/** Open `menu`; the menu that was open, if any, closes (R1). */
+export const enterMenuAtom = atom(null, (_get, set, menu: MenuState) => {
+  set(openMenuAtom, menu);
+});
+
+export type MenuRef = { kind: "messageMenu" } | { kind: "gapMenu"; id: string };
+
+/**
+ * Close `menu` if it is the open one. An owner closing a menu that another
+ * owner has since replaced must not close the newer menu.
+ */
+export const exitMenuAtom = atom(null, (get, set, menu: MenuRef) => {
+  const open = get(openMenuAtom);
+  if (!open || open.kind !== menu.kind) return;
+  if (open.kind === "gapMenu" && menu.kind === "gapMenu" && open.id !== menu.id)
+    return;
+  set(openMenuAtom, null);
+});
 
 /**
  * The diagram's primary interaction state.
  *
- * P1 (ADR 0002) derives it from the atoms that already hold each piece of
- * state. P2 moves that storage into this atom. Order matters: an occurrence
- * create-drag also selects its participant, so drags win over selection.
+ * Drags and the participant editor are derived from the atoms that already
+ * hold them (P1). Open menus are stored in `openMenuAtom` (P2). A selected
+ * message whose menu is closed is idle. Order matters: an occurrence
+ * create-drag also selects its participant, so drags win over selection, and
+ * a stored menu yields to any derived state.
  */
 export const interactionAtom = atom<InteractionState>((get) => {
   const createDrag = get(createMessageDragAtom);
@@ -31,12 +63,7 @@ export const interactionAtom = atom<InteractionState>((get) => {
     return { kind: "participantEditor", participant: selected[0] };
   }
 
-  const message = get(selectedMessageAtom);
-  if (message) {
-    return { kind: "messageMenu", start: message.start, end: message.end };
-  }
-
-  return { kind: "idle" };
+  return get(openMenuAtom) ?? { kind: "idle" };
 });
 
 const canAtoms = new Map<Capability, Atom<boolean>>();

@@ -50,7 +50,7 @@ test("message editing hides insertion and restores it after save", async ({
   await expect(page.getByTestId("participant-insert-button-0")).toHaveCount(1);
 });
 
-test("participant selection hides insertion; message selection keeps it; outside click ends the guard", async ({
+test("participant selection hides insertion; the message menu hides it until closed; outside click ends the guard", async ({
   page,
 }) => {
   await page.goto("/e2e/fixtures/insert-participant.html");
@@ -65,6 +65,12 @@ test("participant selection hides insertion; message selection keeps it; outside
   await page.keyboard.press("Escape");
   await message.focus();
   await page.keyboard.press("Enter");
+  // ADR 0002 P2: selecting a message opens its style menu, and the open
+  // menu blocks participant insertion. Closing the menu restores it.
+  await expect(page.getByTestId("message-rename")).toBeVisible();
+  await expect(page.getByTestId("participant-insert-button-0")).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("message-rename")).toHaveCount(0);
   await expect(page.getByTestId("participant-insert-button-0")).toHaveCount(1);
 
   await name.focus();
