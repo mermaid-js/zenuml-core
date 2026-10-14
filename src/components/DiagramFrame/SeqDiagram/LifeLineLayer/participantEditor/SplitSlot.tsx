@@ -59,7 +59,7 @@ export function SplitSlot({
       onClick={onOpen}
       onKeyDown={onKeyDown}
       className={cn(
-        "flex items-center justify-center shrink-0 box-border cursor-pointer bg-white text-gray-700 focus-visible:outline-none",
+        "flex items-center justify-center shrink-0 box-border cursor-pointer bg-white text-gray-700 focus:outline-none",
         !split && "focus-visible:ring-2 focus-visible:ring-sky-300",
         expanded && (split ? "ring-1 ring-inset ring-sky-500" : "ring-1 ring-sky-500"),
         split
@@ -88,7 +88,7 @@ export function SplitSlot({
       title={`${clearLabel} ⌫`}
       onClick={onClear}
       className={cn(
-        "flex items-center justify-center shrink-0 box-border w-6 rounded-none cursor-pointer text-[14px] leading-none text-red-600 bg-red-100 hover:bg-red-200 border-gray-200 focus-visible:outline-none",
+        "flex items-center justify-center shrink-0 box-border w-6 rounded-none cursor-pointer text-[14px] leading-none text-red-600 bg-red-100 hover:bg-red-200 border-gray-200 focus:outline-none",
         isIcon ? "h-[26px] border-l" : "h-[22px] border-r",
       )}
     >

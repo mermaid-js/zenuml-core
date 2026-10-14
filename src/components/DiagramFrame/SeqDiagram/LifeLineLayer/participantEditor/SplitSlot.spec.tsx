@@ -185,4 +185,13 @@ describe("SplitSlot", () => {
       expect(b.className).not.toContain("focus-visible:ring-2");
     }
   });
+  it("any focus (incl. mouse-path :focus) drops the native outline on both halves", () => {
+    // Host pages style `button:focus { outline: ... }`; the wrapper's
+    // overflow-hidden would clip that outline into a partial ring.
+    const { main, view } = setup();
+    expect(main.className).toContain("focus:outline-none");
+    fireEvent.mouseEnter(main.parentElement!);
+    const clear = view.getByRole("button", { name: "Remove type" });
+    expect(clear.className).toContain("focus:outline-none");
+  });
 });
