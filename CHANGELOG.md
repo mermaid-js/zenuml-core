@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.7.0
+
+### Minor Changes
+
+- [#469](https://github.com/mermaid-js/zenuml-core/pull/469) [`e67a151`](https://github.com/mermaid-js/zenuml-core/commit/e67a151d1b28e84ebef6d78fcdc2dc173541c805) Thanks [@MrCoder](https://github.com/MrCoder)! - Redesign the participant editor as an inspector popover. Clicking a participant frame now opens a form that edits every attribute of its declaration — type (UML archetype chips plus a search across all core and cloud icon keys), stereotype, display label, colour (presets or any hex) and name — applies changes live while staying open, and shows the resulting DSL line.
+
 ## 4.6.1
 
 ### Patch Changes
