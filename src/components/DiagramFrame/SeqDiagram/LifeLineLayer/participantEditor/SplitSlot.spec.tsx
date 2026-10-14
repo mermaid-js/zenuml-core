@@ -42,10 +42,19 @@ describe("SplitSlot", () => {
     expect(view.queryByRole("button", { name: "Remove type" })).toBeNull();
   });
 
-  it("filled: clear button shown on focus-within", () => {
-    const { main, view } = setup({ kind: "color", clearLabel: "Remove colour" });
-    fireEvent.focus(main);
-    expect(view.getByRole("button", { name: "Remove colour" })).toBeTruthy();
+  it("filled: clear button shown on keyboard focus-within", () => {
+    // jsdom does not implement :focus-visible; pretend focus came from the keyboard.
+    const orig = Element.prototype.matches;
+    Element.prototype.matches = function (this: Element, sel: string) {
+      return sel === ":focus-visible" ? true : orig.call(this, sel);
+    };
+    try {
+      const { main, view } = setup({ kind: "color", clearLabel: "Remove colour" });
+      fireEvent.focus(main);
+      expect(view.getByRole("button", { name: "Remove colour" })).toBeTruthy();
+    } finally {
+      Element.prototype.matches = orig;
+    }
   });
 
   it.each(["Delete", "Backspace"])("%s on focused main calls onClear", (key) => {
@@ -142,5 +151,38 @@ describe("SplitSlot", () => {
     fireEvent.mouseEnter(main.parentElement!);
     expect(main.className).toContain("[&>span]:rounded-none");
     expect(main.className).toContain("[&>span]:border-0");
+  });
+
+  it("mouse (non focus-visible) focus does not split; keyboard focus does", () => {
+    const orig = Element.prototype.matches;
+    let visible = false;
+    Element.prototype.matches = function (this: Element, sel: string) {
+      return sel === ":focus-visible" ? visible : orig.call(this, sel);
+    };
+    try {
+      const { main, view } = setup({ kind: "color", clearLabel: "Remove colour" });
+      fireEvent.focus(main);
+      expect(view.queryByRole("button", { name: "Remove colour" })).toBeNull();
+      fireEvent.blur(main);
+      visible = true;
+      fireEvent.focus(main);
+      expect(view.getByRole("button", { name: "Remove colour" })).toBeTruthy();
+    } finally {
+      Element.prototype.matches = orig;
+    }
+  });
+
+  it("split: ring is on the wrapper, inner buttons drop their own focus ring", () => {
+    const { main, view } = setup();
+    expect(main.className).toContain("focus-visible:ring-2");
+    expect(main.parentElement!.className).not.toContain("has-[:focus-visible]:ring-2");
+    fireEvent.mouseEnter(main.parentElement!);
+    const wrapper = main.parentElement!.className.split(/\s+/);
+    expect(wrapper).toContain("has-[:focus-visible]:ring-2");
+    expect(wrapper).toContain("has-[:focus-visible]:ring-sky-300");
+    const clear = view.getByRole("button", { name: "Remove type" });
+    for (const b of [main, clear]) {
+      expect(b.className).not.toContain("focus-visible:ring-2");
+    }
   });
 });

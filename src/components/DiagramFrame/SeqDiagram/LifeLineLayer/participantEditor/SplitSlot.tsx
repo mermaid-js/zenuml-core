@@ -19,7 +19,7 @@ export interface SplitSlotProps {
 
 /**
  * A participant editor slot. Empty: one dashed button. Filled: on hover or
- * focus-within it widens into a split box. The icon slot is [icon | x]
+ * keyboard focus it widens into a split box. The icon slot is [icon | x]
  * (widens right); the colour slot is [x | colour] (widens left).
  */
 export function SplitSlot({
@@ -59,7 +59,8 @@ export function SplitSlot({
       onClick={onOpen}
       onKeyDown={onKeyDown}
       className={cn(
-        "flex items-center justify-center shrink-0 box-border cursor-pointer bg-white text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
+        "flex items-center justify-center shrink-0 box-border cursor-pointer bg-white text-gray-700 focus-visible:outline-none",
+        !split && "focus-visible:ring-2 focus-visible:ring-sky-300",
         expanded && (split ? "ring-1 ring-inset ring-sky-500" : "ring-1 ring-sky-500"),
         split
           ? cn(
@@ -87,7 +88,7 @@ export function SplitSlot({
       title={`${clearLabel} ⌫`}
       onClick={onClear}
       className={cn(
-        "flex items-center justify-center shrink-0 box-border w-6 rounded-none cursor-pointer text-[14px] leading-none text-red-600 bg-red-100 hover:bg-red-200 border-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
+        "flex items-center justify-center shrink-0 box-border w-6 rounded-none cursor-pointer text-[14px] leading-none text-red-600 bg-red-100 hover:bg-red-200 border-gray-200 focus-visible:outline-none",
         isIcon ? "h-[26px] border-l" : "h-[22px] border-r",
       )}
     >
@@ -99,13 +100,23 @@ export function SplitSlot({
     <div
       className={cn(
         "inline-flex items-stretch",
-        split && "box-border rounded-md overflow-hidden border border-gray-300",
+        split && "box-border rounded-md overflow-hidden border border-gray-300 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sky-300",
         className,
       )}
       style={style}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onFocus={() => setFocused(true)}
+      onFocus={(e) => {
+        // Only keyboard focus splits the slot; a programmatic focus after a
+        // mouse pick must leave it plain.
+        let keyboard = true;
+        try {
+          keyboard = (e.target as Element).matches(":focus-visible");
+        } catch {
+          // No :focus-visible support: treat every focus as keyboard focus.
+        }
+        if (keyboard) setFocused(true);
+      }}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
       }}

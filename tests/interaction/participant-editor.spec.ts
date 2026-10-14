@@ -639,4 +639,41 @@ test.describe("participant editor", () => {
     await expect(panel.getByRole("alert")).toHaveText('"C" already exists');
     expect(await lastCode(page)).toBe("");
   });
+
+  test("a mouse pick leaves a plain colour slot, not the split pill", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await openPanel(page, "A");
+    const panel = page.getByTestId("participant-style-panel");
+
+    await pickColor(page, "Blue");
+    await page.mouse.move(600, 600);
+    await expect(panel.getByRole("button", { name: "Remove colour" })).toHaveCount(0);
+    // Keyboard flow is kept: focus returns to the slot.
+    await expect(colorSlot(page)).toBeFocused();
+  });
+
+  test("keyboard focus on a filled colour slot splits it and rings the wrapper", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await openPanel(page, "A");
+    const panel = page.getByTestId("participant-style-panel");
+
+    await pickColor(page, "Blue");
+    await page.mouse.move(600, 600);
+    await colorSlot(page).evaluate((el) => (el as HTMLElement).blur());
+    // A key press switches Chromium to keyboard modality, so focus() is :focus-visible.
+    await page.keyboard.press("Shift");
+    await colorSlot(page).focus();
+
+    await expect(panel.getByRole("button", { name: "Remove colour" })).toBeVisible();
+    const shadows = await colorSlot(page).evaluate((el) => ({
+      main: getComputedStyle(el).boxShadow,
+      wrapper: getComputedStyle(el.parentElement!).boxShadow,
+    }));
+    expect(shadows.main).toBe("none");
+    expect(shadows.wrapper).not.toBe("none");
+  });
 });

@@ -107,8 +107,8 @@ module.exports = {
         },
       },
       boxShadow: {
-        participant: "var(--color-shadow-participant, transparent)",
-        occurrence: "var(--color-shadow-occurrence, transparent)",
+        participant: "var(--color-shadow-participant, 0 0 #0000)",
+        occurrence: "var(--color-shadow-occurrence, 0 0 #0000)",
       },
     },
   },
