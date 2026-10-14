@@ -4,7 +4,11 @@
 
 ### Minor Changes
 
-- [#469](https://github.com/mermaid-js/zenuml-core/pull/469) [`e67a151`](https://github.com/mermaid-js/zenuml-core/commit/e67a151d1b28e84ebef6d78fcdc2dc173541c805) Thanks [@MrCoder](https://github.com/MrCoder)! - Redesign the participant editor as an inspector popover. Clicking a participant frame now opens a form that edits every attribute of its declaration — type (UML archetype chips plus a search across all core and cloud icon keys), stereotype, display label, colour (presets or any hex) and name — applies changes live while staying open, and shows the resulting DSL line.
+- [#469](https://github.com/mermaid-js/zenuml-core/pull/469) [`e67a151`](https://github.com/mermaid-js/zenuml-core/commit/e67a151d1b28e84ebef6d78fcdc2dc173541c805) Thanks [@MrCoder](https://github.com/MrCoder)! - Replace the participant editor dialog with a split on-canvas editor. Selecting a participant dims the rest of the diagram and puts the controls on the participant box: an icon slot on the left edge, a colour slot on the right edge, the name edited in place, and a stereotype pill above the box.
+  - Type picker: six UML archetype chips (Actor, Boundary, Control, Entity, Database, Queue) plus a search across the cloud icons, with a live preview on hover.
+  - Colour picker: 10 preset swatches plus a hex input, with a live preview on hover. Escape discards the preview.
+  - A filled slot shows a `×` to clear it on hover or keyboard focus; Delete/Backspace also clears it.
+  - Fixes: `@Queue` participants now draw their icon in both renderers; participant names are centred under a stereotype; the selection ring now shows in themes that do not define `--color-shadow-participant`.
 
 ## 4.6.1
 
