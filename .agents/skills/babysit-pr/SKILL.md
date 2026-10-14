@@ -97,7 +97,7 @@ If you killed a different repo's server, do **not** start Vite manually. Let `bu
 This is the most common CI-only failure because snapshots are platform-specific.
 
 1. **Verify it's a snapshot diff** (not a logic error) by reading the failure log
-2. **Check if the change is intentional** — look at recent commits on the branch. If they modified rendering code, SVG output, or CSS, snapshot updates are expected
+2. **Check if the change is intentional** — look at recent commits on the branch. If they modified rendering code, SVG output, or CSS, snapshot updates are expected. Run the `snapshot-visual-check` skill (`.claude/skills/snapshot-visual-check/`) on the failing screenshots first; trigger the update only when every diff cluster is `intended`. A `regression` or unexplained cluster means fix the code instead
 3. **Trigger the Linux snapshot update workflow**:
    ```bash
    gh workflow run update-snapshots.yml --repo mermaid-js/zenuml-core --ref <PR_BRANCH>
@@ -113,7 +113,8 @@ This is the most common CI-only failure because snapshots are platform-specific.
    ```bash
    git pull origin <PR_BRANCH>
    ```
-6. The update-snapshots workflow commits and verifies automatically. If it passes, CI should go green on next run.
+6. **Inspect the auto-committed Linux PNGs** with the `snapshot-visual-check` skill (step 6, Linux baselines) before treating them as final. Clusters must match the ones approved in step 2.
+7. The update-snapshots workflow commits and verifies automatically. If it passes, CI should go green on next run.
 
 #### Playwright Test Logic Failure
 
@@ -169,7 +170,7 @@ This is the most common CI-only failure because snapshots are platform-specific.
    git merge --no-edit origin/<TARGET_BRANCH>
    ```
 4. **Inspect base, ours, and theirs** for every conflict and reconcile the intended source and test behavior from both branches. Preserve all intended requirements and assertions; do not weaken or delete assertions to make the merge pass, and do not resolve conflicts by blanket-choosing one side.
-5. **Inspect both versions of every snapshot conflict**. Preserve intended expectations in text snapshots. Regenerate and review intentional Darwin visual baselines locally with the repository's snapshot-update commands. For Linux binary conflicts, choose a provisional baseline only to complete the local merge, record the affected paths as provisional, and do not treat it as final.
+5. **Inspect both versions of every snapshot conflict**. Use the `snapshot-visual-check` skill for every PNG conflict. Preserve intended expectations in text snapshots. Regenerate and review intentional Darwin visual baselines locally with the repository's snapshot-update commands. For Linux binary conflicts, choose a provisional baseline only to complete the local merge, record the affected paths as provisional, and do not treat it as final.
 6. **Verify and integrate in order**: resolve every conflict and marker, run the full unit, browser, and lint validation (`bun run test --run`, `bun pw`, and `bun eslint`), then complete the merge and push the published PR branch with regular ancestry (`git push origin <PR_BRANCH>`); never force-push.
 7. **Verify the remote result**: wait for the new CI runs to finish. If Linux baselines need updating, run the existing Linux snapshot update workflow against the merged remote PR head, wait for generation and verification, then pull and inspect its results. Claim CI green only after the required checks pass. Ask the user only when a genuine behavioral ambiguity or required human decision remains, and report the concrete issue.
 
