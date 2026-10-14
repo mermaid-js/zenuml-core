@@ -155,11 +155,11 @@ export const StylePanel = () => {
     message.currentType = targetType;
     message.line = nextLine;
     if (labelOffset >= 0 && labelText) {
-      setSelectedMessage({
-        start: message.lineHead + labelOffset,
-        end: message.lineHead + labelOffset + labelText.length - 1,
-        token: Date.now(),
-      });
+      const start = message.lineHead + labelOffset;
+      const end = start + labelText.length - 1;
+      setSelectedMessage({ start, end, token: Date.now() });
+      // The menu stays open on the re-typed message.
+      enterMenu({ kind: "messageMenu", start, end });
     }
   };
 

@@ -2,6 +2,7 @@ import { RootContext } from "@/parser";
 import {
   codeAtom,
   diagramElementAtom,
+  enableMessageReorderAtom,
   modeAtom,
   onMessageClickAtom,
   RenderMode,
@@ -14,6 +15,7 @@ import {
 import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { describe, expect, it } from "vitest";
+import { Block } from "./Block/Block";
 import { StylePanel } from "./StylePanel";
 
 const CODE = "A\nB\nA->B.hello()";
@@ -77,5 +79,42 @@ describe("StylePanel open state lives in the interaction state (P2)", () => {
       store.set(enterMenuAtom, { kind: "gapMenu", id: "g1" });
     });
     expect(menuShown()).toBe(false);
+  });
+});
+
+describe("the open menu keeps its own message's reorder handle (P2)", () => {
+  const cases: Array<[string, string]> = [
+    ["sync", "A\nB\nA->B.hello()\nA->B.other()"],
+    ["async", "A\nB\nA->B: hello\nA->B: other"],
+    ["self", "A\nB\nA->B.hello()\nA->A.self()"],
+    ["creation", "A\nA->B.hello()\nA->b:B.new()"],
+    ["return", "A\nB\nA->B.hello()\nB-->A: back"],
+  ];
+
+  it.each(cases)("%s message", async (_name, code) => {
+    const store = createStore();
+    store.set(codeAtom, code);
+    store.set(modeAtom, RenderMode.Dynamic);
+    store.set(enableMessageReorderAtom, true);
+    store.set(diagramElementAtom, document.body);
+    const root = RootContext(code);
+    const view = render(
+      <Provider store={store}>
+        <Block context={root?.block()} isRoot />
+        <StylePanel />
+      </Provider>,
+    );
+    // An earlier spec may have armed the reorder handle's click suppressor.
+    document.body.click();
+    const rows = view.container.querySelectorAll(".statement-container");
+    const row = rows[rows.length - 1];
+    expect(!!row.querySelector(".message-reorder-handle")).toBe(true);
+    await act(async () => {
+      fireEvent.click(row.querySelector(".message")!);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(store.get(interactionAtom).kind).toBe("messageMenu");
+    expect(!!row.querySelector(".message-reorder-handle")).toBe(true);
+    expect(!!rows[0].querySelector(".message-reorder-handle")).toBe(false);
   });
 });
