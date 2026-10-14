@@ -79,7 +79,7 @@ Output formats:
 
 ### E2E Screenshot Snapshot Updates
 
-Never update Playwright screenshots just to make a failing snapshot test pass. Before committing any updated E2E screenshot:
+Never update Playwright screenshots just to make a failing snapshot test pass. Follow the `snapshot-visual-check` skill (`.claude/skills/snapshot-visual-check/`) for the step-by-step procedure and the `diff-crops.mjs` helper. Before committing any updated E2E screenshot:
 
 1. Compare the before and after screenshots and identify exactly where the visual differences are.
 2. Use the existing diagram diff workflow where applicable: run `node scripts/analyze-compare-case.mjs --case <name> --json` for structured attribution, or `--output-dir <dir>` to save `html.png`, `svg.png`, `diff.png`, and `report.json`.
