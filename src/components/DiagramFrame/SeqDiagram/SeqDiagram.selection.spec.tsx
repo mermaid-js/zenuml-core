@@ -33,9 +33,7 @@ const setup = (prepare?: (store: Store) => void) => {
       <SeqDiagram />
     </Provider>,
   );
-  const canvas = view.container.querySelector(
-    ".message-layer",
-  ) as HTMLElement;
+  const canvas = view.container.querySelector(".message-layer") as HTMLElement;
   return { store, view, canvas };
 };
 

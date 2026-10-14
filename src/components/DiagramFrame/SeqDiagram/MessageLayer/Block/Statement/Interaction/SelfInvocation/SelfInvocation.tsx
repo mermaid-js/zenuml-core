@@ -1,11 +1,9 @@
 import {
   enableMessageReorderAtom,
-  modeAtom,
   onMessageClickAtom,
-  RenderMode,
   selectedMessageAtom,
 } from "@/store/Store";
-import { useCanReorderMessage } from "@/store/interaction/useCan";
+import { useCan, useCanReorderMessage } from "@/store/interaction/useCan";
 import { useAtomValue, useSetAtom } from "jotai";
 import { CSSProperties, useMemo, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
@@ -34,7 +32,7 @@ export const SelfInvocation = (props: {
   const selectedMessage = useAtomValue(selectedMessageAtom);
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const messageReorderEnabled = useAtomValue(enableMessageReorderAtom);
-  const mode = useAtomValue(modeAtom);
+  const canSelect = useCan("select");
 
   const content = isAsync ? props.context?.content() : undefined;
   const assignee = isAsync ? "" : props.context?.Assignment()?.getText() || "";
@@ -57,7 +55,8 @@ export const SelfInvocation = (props: {
   const reorderEnabled = messageReorderEnabled && canReorder;
 
   const onClick = () => {
-    if (mode === RenderMode.Static) return;
+    // ADR 0002: selection is the `select` capability (off in Static).
+    if (!canSelect) return;
     setSelectedMessage(
       labelPosition[0] !== -1
         ? { start: labelPosition[0], end: labelPosition[1], token: Date.now() }
