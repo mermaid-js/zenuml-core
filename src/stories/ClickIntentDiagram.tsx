@@ -9,6 +9,7 @@ import {
   enableParticipantStyleEditingAtom,
   modeAtom,
   RenderMode,
+  selectedAtom,
 } from "@/store/Store";
 import { DiagramFrame } from "@/components/DiagramFrame/DiagramFrame";
 import { ensureDiagramFontsLoaded } from "@/svg/fonts/ensureDiagramFontsLoaded";
@@ -26,9 +27,12 @@ export type ClickIntentMode = "Dynamic" | "Static";
 export const ClickIntentDiagram = ({
   mode,
   code,
+  selectedParticipant,
 }: {
   mode: ClickIntentMode;
   code: string;
+  /** Opens the participant editor on this participant once rendered. */
+  selectedParticipant?: string;
 }) => {
   const store = useMemo(() => {
     const nextStore = createStore();
@@ -47,18 +51,24 @@ export const ClickIntentDiagram = ({
   useEffect(() => {
     let active = true;
     void ensureDiagramFontsLoaded().then(() => {
-      if (active) store.set(codeAtom, code);
+      if (!active) return;
+      store.set(codeAtom, code);
+      if (selectedParticipant) store.set(selectedAtom, [selectedParticipant]);
     });
     return () => {
       active = false;
     };
-  }, [code, store]);
+  }, [code, selectedParticipant, store]);
 
   return (
     <Provider store={store}>
       <div
         className="zenuml theme-default"
-        style={{ minHeight: 280, padding: "24px 24px 24px 56px" }}
+        style={{
+          // Leave room below the diagram for the participant editor popover.
+          minHeight: selectedParticipant ? 640 : 280,
+          padding: "24px 24px 24px 56px",
+        }}
       >
         <DiagramFrame />
       </div>

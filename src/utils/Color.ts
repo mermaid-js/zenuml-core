@@ -12,3 +12,7 @@ export function removeAlpha(color: string): string {
   const [r, g, b] = c;
   return `rgb(${r}, ${g}, ${b})`;
 }
+
+export function participantTextColor(color: string): "#000" | "#fff" {
+  return brightnessIgnoreAlpha(color) > 128 ? "#000" : "#fff";
+}

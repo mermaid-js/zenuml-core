@@ -75,7 +75,7 @@ test.describe("Participant name rename", () => {
     await expect(name).toHaveCSS("background-color", "rgb(239, 246, 255)");
     await expect(name).toHaveCSS("box-shadow", "none");
     await expect(name).toHaveCSS("cursor", "text");
-    await expect(participant).not.toHaveClass(/ring-2/);
+    await expect(participant).not.toHaveClass(/ring-1/);
     await expectParticipantScreenshot(
       page,
       participant,
@@ -119,7 +119,7 @@ test.describe("Participant name rename", () => {
     }
     await expect(participant).toBeFocused();
     await page.keyboard.press("Enter");
-    await expect(participant).toHaveClass(/ring-2/);
+    await expect(participant).toHaveClass(/ring-1/);
     await page.keyboard.press("Tab");
     await expect(name).toBeFocused();
     await expect(name).toHaveCSS("outline-style", "solid");
@@ -134,7 +134,7 @@ test.describe("Participant name rename", () => {
 
     await page.keyboard.press("Enter");
     await expect(name).toHaveAttribute("contenteditable", "true");
-    await expect(participant).not.toHaveClass(/ring-2/);
+    await expect(participant).not.toHaveClass(/ring-1/);
     await expectParticipantScreenshot(
       page,
       participant,
@@ -145,6 +145,6 @@ test.describe("Participant name rename", () => {
     await page.keyboard.press("Escape");
     await expect(name).toHaveText("A");
     await expect(name).not.toHaveAttribute("contenteditable", "true");
-    await expect(participant).toHaveClass(/ring-2/);
+    await expect(participant).toHaveClass(/ring-1/);
   });
 });

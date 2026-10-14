@@ -8,6 +8,7 @@ import ActorSvg from "@/assets/actor.svg?raw";
 import BoundarySvg from "@/assets/Robustness_Diagram_Boundary.svg?raw";
 import ControlSvg from "@/assets/Robustness_Diagram_Control.svg?raw";
 import DatabaseSvg from "@/assets/database.svg?raw";
+import QueueSvg from "@/assets/queue.svg?raw";
 import EntitySvg from "@/assets/Robustness_Diagram_Entity.svg?raw";
 import Ec2Svg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_Amazon-EC2_Instance_48.svg?raw";
 import IamSvg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Security-Identity-Compliance/Res_AWS-Identity-Access-Management_IAM-Access-Analyzer_48.svg?raw";
@@ -78,6 +79,7 @@ export const ICONS: Record<string, IconDefinition> = {
   boundary: parseRawSvg(BoundarySvg),
   control: parseRawSvg(ControlSvg),
   entity: parseRawSvg(EntitySvg),
+  queue: parseRawSvg(QueueSvg),
 };
 
 /**

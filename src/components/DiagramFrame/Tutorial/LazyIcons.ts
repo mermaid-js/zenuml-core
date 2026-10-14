@@ -7,6 +7,7 @@ const coreIcons: Record<string, IconLoader> = {
   control: () => import("../../../assets/Robustness_Diagram_Control.svg?raw"),
   database: () => import("../../../assets/database.svg?raw"),
   entity: () => import("../../../assets/Robustness_Diagram_Entity.svg?raw"),
+  queue: () => import("../../../assets/queue.svg?raw"),
   cognito: () =>
     import(
       "../../../assets/Architecture-Service-Icons_09172021/Arch_Security-Identity-Compliance/16/Arch_Amazon-Cognito_16.svg?raw"
@@ -27,6 +28,13 @@ const coreIcons: Record<string, IconLoader> = {
     import(
       "../../../assets/Architecture-Service-Icons_09172021/Arch_Machine-Learning/16/Arch_Amazon-SageMaker_16.svg?raw"
     ),
+};
+
+// Every `@Type` key an icon can be resolved for. Cloud keys live in a large
+// lazily-loaded chunk, so this is async and only pulled in by icon search.
+export const listIconKeys = async (): Promise<string[]> => {
+  const { cloudIcons } = await import("./CloudIcons");
+  return [...Object.keys(coreIcons), ...Object.keys(cloudIcons)];
 };
 
 const loadCloudIcon = async (key: string): Promise<string | null> => {

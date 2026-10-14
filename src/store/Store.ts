@@ -172,3 +172,5 @@ export const renderingReadyAtom = atom((get) => {
   const participants = get(participantsAtom);
   return lifeLineReady.length === participants.Size();
 });
+
+export { participantPreviewAtom } from "./participantPreviewAtom";

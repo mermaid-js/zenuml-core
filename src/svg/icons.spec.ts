@@ -2,9 +2,9 @@ import { describe, it, expect } from "bun:test";
 import { getIcon, ICONS } from "./icons";
 
 describe("Icon definitions", () => {
-  it("exports 11 common icons", () => {
+  it("exports 12 common icons", () => {
     const iconKeys = Object.keys(ICONS);
-    expect(iconKeys.length).toBe(11);
+    expect(iconKeys.length).toBe(12);
     expect(iconKeys).toContain("actor");
     expect(iconKeys).toContain("database");
     expect(iconKeys).toContain("ec2");
@@ -46,6 +46,11 @@ describe("Icon definitions", () => {
         expect(sw * scale).toBeCloseTo(1, 3);
       }
     }
+  });
+
+  it("getIcon resolves the Queue archetype for the SVG renderer", () => {
+    expect(getIcon("Queue")).toBe(ICONS.queue);
+    expect(ICONS.queue).toBeDefined();
   });
 
   it("getIcon returns icon for valid type", () => {
