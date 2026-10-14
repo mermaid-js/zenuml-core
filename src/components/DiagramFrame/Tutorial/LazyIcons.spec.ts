@@ -6,6 +6,12 @@ describe("loadIcon", () => {
     expect(await loadIcon("actor")).toContain("<svg");
   });
 
+  it("loads every type-picker archetype, including Queue", async () => {
+    for (const key of ["actor", "boundary", "control", "entity", "database", "queue"]) {
+      expect(await loadIcon(key)).toContain("<svg");
+    }
+  });
+
   it("loads cloud icons case-insensitively", async () => {
     expect(await loadIcon("CloudFront")).toContain("<svg");
   });

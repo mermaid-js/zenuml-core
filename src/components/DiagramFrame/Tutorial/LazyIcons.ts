@@ -7,6 +7,7 @@ const coreIcons: Record<string, IconLoader> = {
   control: () => import("../../../assets/Robustness_Diagram_Control.svg?raw"),
   database: () => import("../../../assets/database.svg?raw"),
   entity: () => import("../../../assets/Robustness_Diagram_Entity.svg?raw"),
+  queue: () => import("../../../assets/queue.svg?raw"),
   cognito: () =>
     import(
       "../../../assets/Architecture-Service-Icons_09172021/Arch_Security-Identity-Compliance/16/Arch_Amazon-Cognito_16.svg?raw"

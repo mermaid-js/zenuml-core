@@ -27,14 +27,6 @@ const Stroke = ({ d, className }: { d: string; className?: string }) => (
 );
 
 export const ArchetypeGlyph = ({ typeKey }: { typeKey: string }) => {
-  if (typeKey === "Queue") {
-    return (
-      <Stroke
-        className="w-5 h-5"
-        d="M6 7h12M6 17h12M6 7a2.5 5 0 0 0 0 10M18 7a2.5 5 0 1 0 0 10a2.5 5 0 1 0 0-10"
-      />
-    );
-  }
   return (
     <AsyncIcon
       iconKey={typeKey.toLowerCase()}
