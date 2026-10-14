@@ -55,7 +55,7 @@ If you killed a different repo's server, do **not** start Vite manually. `bun pw
 bun pw
 ```
 
-For E2E or snapshot failures, inspect the failure and compare it with the intended change. Repair regressions in code. Update a snapshot only when the rendered change is an expected consequence of the branch; never blindly refresh snapshots or use snapshot updates to hide a regression. Rerun Playwright and proceed only when it passes.
+For E2E or snapshot failures, inspect the failure and compare it with the intended change. Repair regressions in code. Update a snapshot only when the rendered change is an expected consequence of the branch; never blindly refresh snapshots or use snapshot updates to hide a regression. Before updating any snapshot, follow the `snapshot-visual-check` skill (`.claude/skills/snapshot-visual-check/`): reproduce headless, inspect every diff cluster, and update only the inspected tests. Rerun Playwright and proceed only when it passes.
 
 If a failure is caused by a genuine external blocker (for example, unavailable dependencies, missing browser installation, or an unrelated service), diagnose it and make the available environment repair when safe (for example, install the required Playwright browsers with `bun pw:install`). Do not disguise an unresolved failure as a pass. If it remains blocked, report the check, relevant error, repairs attempted, and what is needed to continue.
 
