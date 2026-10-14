@@ -1,7 +1,7 @@
 # 0002 — One interaction state and a capability policy for on-canvas controls
 
 Date: 2026-10-14
-Status: Accepted (P1, P2 and P3 implemented; P4 is a follow-up)
+Status: Accepted (P1–P4 implemented; known gaps are listed under P4)
 
 ## Context
 
@@ -102,7 +102,15 @@ can(cap) = POLICY[state][cap]
 Components still AND their own embedder flag (`enable*Atom`). The flag is
 not in the table because one capability spans several flags
 (`createMessage` = `enableMessageInsertionAtom` for drags and
-`enableDividerInsertionAtom` for dividers).
+`enableDividerInsertionAtom` for dividers). P4 kept this split (see P4).
+
+`hoverAffordance` covers hints that appear only on hover and only invite an
+action: the gap handle and its tooltip, the reorder handle's hover reveal
+and the occurrence create-drag hint (P4). A row that is part of the current
+state keeps its hint: the moving message of a reorder and the selected
+message of an open menu still reveal their own handle. The collapse
+buttons' hover reveal follows `collapse`, not `hoverAffordance`, because
+collapse is view-only and must stay live in `RenderMode.Static`.
 
 Notes on the table:
 
@@ -199,8 +207,7 @@ Notes on the table:
     root gate makes this structural.
   - **The P1 note on the participant editor without an anchor still
     applies.** The editor state is still derived from `selectedAtom`.
-  - **`hoverAffordance` has no consumer yet.** The column is set; P4 wires
-    it.
+  - **`hoverAffordance` had no consumer.** P4 wired it.
 
 - **P3 (done).** `InteractionController`, mounted once in `SeqDiagram`
   (Dynamic mode), owns all input that exits a state:
@@ -208,6 +215,8 @@ Notes on the table:
   ```
   document pointerdown (capture):
     clear the selected message unless the press is on it or in its menu
+    clear a participant highlight (P4) unless a derived state owns it, or
+      the press is outside the diagram or on a participant or a message
     if textEditing or state is idle / a drag: stop
     if target is inside [data-interaction-surface=<state.kind>]: stop
     cap = closest [data-cap] inside the diagram
@@ -310,10 +319,102 @@ Notes on the table:
     and take their `select` capability. P4 can tag them if a state needs to
     tell them apart.
 
-- **P4 (follow-up).** Replace the remaining ad-hoc predicates (for example
-  `ParticipantInsertControls`, `ParticipantStylePanel`,
-  `MessageCreateControls`) with `useCan`. Wire `hoverAffordance`. P3 did not
-  touch either.
+- **P4 (done).** The ADR listed two items: replace the remaining ad-hoc
+  predicates with `useCan`, and wire `hoverAffordance`. P4 also removed the
+  second selection click-away owner. Nothing else was in P4's scope.
+
+  Two read helpers were added next to `useCan` (`useCan.ts`):
+
+  - `useActiveSurface()` (`activeSurfaceAtom`): the state whose own UI
+    shows, or `null` while idle, in `RenderMode.Static` or under a text
+    edit. The participant editor and the message menu render from it.
+  - `useTextEditing()`: the text-edit overlay. Components read it only to
+    step out of an active editor's way or to end a state when an edit
+    starts; `can()` already folds it into every capability.
+
+  Predicate sites replaced (`src/components/DiagramFrame/SeqDiagram/`):
+
+  | Site                                                       | Was                                                                      | Now                                                             |
+  | ---------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------- |
+  | `ParticipantInsertControls` render and `handleInsert`      | `textEditing`, `mode === Dynamic`, `selected.length === 1`               | `enabled && useCan("insertParticipant")`                        |
+  | `ParticipantStylePanel` open effect and render guard       | `enabled`, `mode`, `selected.length === 1`, `!dragState`, `!textEditing` | `useActiveSurface()?.kind === "participantEditor"`              |
+  | `MessageCreateControls` render, dataset flag, drag effects | `enabled && !textEditing && mode === Dynamic`                            | `enabled && useCan("createMessage")`; a drag that loses it ends |
+  | `Block` reorder cancel on text edit                        | `textEditing`                                                            | a reorder that loses `reorder` ends                             |
+  | `StylePanel` button row                                    | `isOpen && !textEditing`                                                 | `useActiveSurface()?.kind === "messageMenu"`                    |
+  | `GapHandleZone` handle, hover enter, nearest participant   | `!dragState && !menuOpen`                                                | `useCan("hoverAffordance")`                                     |
+  | `Participant` click and Enter                              | none (selected in any mode)                                              | `useCan("select")`                                              |
+  | `Message`, `SelfInvocation` click                          | `mode !== Static`                                                        | `useCan("select")`                                              |
+  | `SeqDiagram` root `onClick`                                | its own click-away                                                       | removed; `InteractionController` owns click-away                |
+
+  Reads kept, because they are not gates: the selection ring and
+  `data-selected` (`selectedAtom`, `selectedMessageAtom`), the drag ghost
+  and drop indicator (`createMessageDragAtom`, the reorder atoms), the
+  drags' own pointer lifecycle, the setters that start a drag, and
+  `StylePanel`'s `store.get(textEditingAtom)` in the deferred message-click
+  callback (a double click can start an edit before it runs). Mode reads
+  kept as structural (R3): `SeqDiagram`'s Dynamic branch, `MessageLayer`'s
+  `enableGapHandles`, `GapHandleZone`'s Static guard, `EmptyDiagramPrompt`,
+  `LifeLineLayer`'s width, and the participant's sticky offset, cursor,
+  role, tab stop and title.
+
+  `hoverAffordance` consumers:
+
+  - reorder handle hover reveal: `Block` sets `data-hover-reveal="off"` on
+    rows that must not reveal it; `MessageLayer.scss` honours it. During a
+    reorder only the moving row reveals its handle. Touch (`any-pointer:
+coarse`) shows handles without hover and is unchanged.
+  - occurrence create-drag hint (crosshair cursor and title): hidden while
+    a create drag runs, which keeps `createMessage`.
+  - gap handle and tooltip (no visible change; it replaced
+    `!dragState && !menuOpen`).
+
+  Considered and not wired: the participant insert `+` reveal (the whole
+  control already needs `insertParticipant`, which only idle allows),
+  label hover (`EditableSpan`; `messageMenu` allows `textEdit` but not
+  `hoverAffordance`, so it is the wrong capability), and the collapse
+  buttons (see the capability notes above). The occurrence collapse
+  button's CSS reveal had no gate; it now carries `hover-reveal` only while
+  `collapse` is allowed, like the fragment's `group-hover` class.
+
+  P4 decisions:
+
+  - **Embedder flags stay out of `can()`.** One capability still spans
+    several flags (`createMessage`), and a flag is configuration, not
+    interaction state. Components keep ANDing their flag.
+  - **One selection click-away owner.** `SeqDiagram`'s root `onClick`
+    cleared participant and message selection on `click`. The controller
+    already cleared the message selection and closed the participant
+    editor on `pointerdown`. The root `onClick` also cleared a participant
+    highlight that is not the editor (editor flag off, or several
+    participants toggled on); the controller now does that too, on a press
+    inside the diagram that is not on a participant or a message. A derived
+    state (the editor, a drag) owns its selection and is left alone. Host
+    page presses do not clear a highlight, as before. The root `onClick` is
+    removed. `SeqDiagram.selection.spec.tsx` pins the behaviour through the
+    real diagram.
+  - **Static renders do not select.** The controller mounts only in
+    Dynamic, so without the root `onClick` nothing would clear a selection
+    in `RenderMode.Static`. `select` is not view-only, so participant,
+    message and self-invocation clicks now select through `useCan("select")`
+    and a static render no longer highlights a clicked participant.
+
+  Known gaps:
+
+  - **No `textEdit` targets.** Labels still decide editability by mode
+    (`ParticipantLabel`, `ConditionLabel`, `EditableLabelField`,
+    `CreationMessageLabel`, `DiagramTitle`), and `EditableSpan`'s hover
+    style is not gated. A state that must tell a label from its message or
+    participant needs a `textEdit` tag first.
+  - **Overlay-start transitions are per owner.** A text edit that starts
+    ends a create drag (`MessageCreateControls`), a reorder (`Block`) and
+    the message menu (`StylePanel`) from three effects, not from the
+    controller. `exitInteractionAtom` is not a drop-in: its `createDrag`
+    branch also clears the participant selection.
+  - **A participant highlight is outside the union.** With the editor off,
+    `selectedAtom` can hold several participants and is not a state; the
+    controller clears it as a side rule.
+  - **Touch reorder handles** are always visible on coarse pointers and do
+    not follow `hoverAffordance`.
 
 ## Consequences
 
@@ -347,3 +448,14 @@ Notes on the table:
   a menu, a create drag or a reorder — from one place. A control that must
   keep its own Escape (a picker, a text field, the gap zone) stops the
   event; the central handler is on `document` in the bubble phase.
+- From P4, hover hints show only while idle: during a reorder only the
+  moving message reveals its handle, and during a create drag occurrences
+  show no create hint. The occurrence collapse button no longer appears on
+  hover while another interaction owns the diagram.
+- From P4, participant insert buttons stay available while a participant
+  is only highlighted (editor flag off); before, any single highlighted
+  participant hid them.
+- From P4, a static render does not highlight a clicked participant.
+- From P4, selection click-away runs on `pointerdown` from one owner. A
+  press on empty canvas clears a participant highlight before its click,
+  not after it.
