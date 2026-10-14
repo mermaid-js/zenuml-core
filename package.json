@@ -152,7 +152,7 @@
     "prettier": "3.5.3",
     "rollup-plugin-visualizer": "^6.0.5",
     "sass": "^1.97.2",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "storybook": "^9.1.17",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.7.3",
