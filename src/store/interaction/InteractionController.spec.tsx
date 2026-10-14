@@ -14,7 +14,11 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { InteractionController } from "./InteractionController";
-import { enterMenuAtom, interactionAtom, openMenuAtom } from "./interactionAtom";
+import {
+  enterMenuAtom,
+  interactionAtom,
+  openMenuAtom,
+} from "./interactionAtom";
 
 // ADR 0002, P3: one capture-phase `pointerdown` gate (B), one click-away and
 // one Escape handler, all owned by the interaction state.

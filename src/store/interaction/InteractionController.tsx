@@ -82,7 +82,8 @@ export const InteractionController = () => {
 
   useEffect(() => {
     const exit = (state: InteractionState, cause: ExitCause) => {
-      for (const listener of [...exitListenersOf(store)]) listener(state, cause);
+      for (const listener of [...exitListenersOf(store)])
+        listener(state, cause);
       store.set(exitInteractionAtom, state);
     };
 
@@ -127,7 +128,10 @@ export const InteractionController = () => {
       // Commit a focused draft in the closing surface while its owner still
       // sees the state; a consumed press would not move the focus.
       const active = document.activeElement;
-      if (active instanceof HTMLElement && active.closest(surfaceSelector(state)))
+      if (
+        active instanceof HTMLElement &&
+        active.closest(surfaceSelector(state))
+      )
         active.blur();
 
       exit(state, { type: "press", target });

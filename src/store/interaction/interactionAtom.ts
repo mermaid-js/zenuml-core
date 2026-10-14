@@ -74,8 +74,7 @@ export const derivedInteractionAtom = atom<InteractionState | null>((get) => {
  * not come back when the derived state ends.
  */
 export const interactionAtom = atom<InteractionState>(
-  (get) =>
-    get(derivedInteractionAtom) ?? get(openMenuAtom) ?? { kind: "idle" },
+  (get) => get(derivedInteractionAtom) ?? get(openMenuAtom) ?? { kind: "idle" },
 );
 
 /**
