@@ -176,4 +176,7 @@ Notes on the table:
 - A new on-canvas control must read `useCan` instead of combining atoms. A
   review that sees `!textEditing && mode === RenderMode.Dynamic` in new code
   should ask for a capability instead.
+- While a label is in edit mode, a press on a collapse button only ends the
+  edit (the text-edit overlay); a second press collapses. Before P1 the same
+  press ended the edit and collapsed.
 - Collapse keeps working in `RenderMode.Static`.
