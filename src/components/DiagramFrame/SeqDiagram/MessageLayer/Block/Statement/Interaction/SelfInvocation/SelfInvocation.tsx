@@ -75,6 +75,7 @@ export const SelfInvocation = (props: {
           : "self-invocation message text-[15px] leading-none self flex items-start flex-col border-none"
       }
       onClick={onClick}
+      data-cap="select"
       data-selected={isSelected ? "true" : "false"}
     >
       {reorderEnabled && <MessageReorderHandle />}

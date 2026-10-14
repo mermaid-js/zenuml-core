@@ -22,10 +22,14 @@ export const useCanReorderMessage = (isSelected: boolean): boolean => {
 /**
  * Gate a click-activated control on the state at the moment of the press.
  *
- * A press outside the participant editor closes it on `pointerdown`, before
- * `click` fires; checking `can` at click time would let that same press also
- * run the control. Spread `pressProps` on an element that contains the click
- * target.
+ * Spread `pressProps` on an element that contains the click target. It
+ * declares the capability (`data-cap`) for the input gate (gate B), which
+ * consumes a press — and its click — that the primary state does not allow.
+ *
+ * The press-time record covers the text-edit overlay, which gate B leaves
+ * alone: a press outside an active label editor ends the edit on blur,
+ * before `click` fires, so checking `can` at click time would let that same
+ * press also run the control.
  */
 export const useCapClick = (cap: Capability, onClick?: () => void) => {
   const allowed = useCan(cap);
@@ -33,6 +37,7 @@ export const useCapClick = (cap: Capability, onClick?: () => void) => {
   return {
     allowed,
     pressProps: {
+      "data-cap": cap,
       onPointerDown: () => {
         pressAllowed.current = allowed;
       },

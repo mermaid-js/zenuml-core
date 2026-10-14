@@ -30,6 +30,7 @@ import { MessageLayer } from "./MessageLayer/MessageLayer";
 import { ParticipantInsertControls } from "./LifeLineLayer/ParticipantInsertControls";
 import { ParticipantStylePanel } from "./LifeLineLayer/ParticipantStylePanel";
 import { EmptyDiagramPrompt } from "./EmptyDiagramPrompt";
+import { InteractionController } from "@/store/interaction/InteractionController";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -158,6 +159,7 @@ export const SeqDiagram = (props: {
               </div>
             </div>
             <ParticipantStylePanel />
+            <InteractionController />
           </>
         ) : (
           <>

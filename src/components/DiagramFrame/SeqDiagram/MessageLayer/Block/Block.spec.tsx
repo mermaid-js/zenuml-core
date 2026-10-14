@@ -16,6 +16,7 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Block } from "./Block";
+import { InteractionController } from "@/store/interaction/InteractionController";
 
 /**
  * Drag-to-reorder was the one editing surface in the rendering core gated by
@@ -283,5 +284,61 @@ describe("Block insertion gaps", () => {
     expect(
       featureOff.container.querySelector('[data-testid^="message-gap-"]'),
     ).toBeNull();
+  });
+});
+
+describe("Block reorder and the central Escape (ADR 0002, P3)", () => {
+  const renderWithController = () => {
+    const store = createStore();
+    store.set(codeAtom, CODE);
+    store.set(modeAtom, RenderMode.Dynamic);
+    store.set(enableMessageReorderAtom, true);
+    const root = RootContext(CODE);
+    const view = render(
+      <Provider store={store}>
+        <InteractionController />
+        <Block context={root?.block()} number="1" isRoot />
+      </Provider>,
+    );
+    return { store, view };
+  };
+
+  it("cancels a pending reorder on Escape", () => {
+    const { store, view } = renderWithController();
+    const handle = view.container.querySelector(".message-reorder-handle")!;
+    act(() => {
+      fireEvent.pointerDown(handle, { clientX: 0, clientY: 0 });
+    });
+    expect(store.get(messageReorderPendingAtom)).not.toBeNull();
+    act(() => {
+      fireEvent.keyDown(document, { key: "Escape" });
+    });
+    expect(store.get(messageReorderPendingAtom)).toBeNull();
+    act(() => {
+      fireEvent.pointerUp(window);
+    });
+  });
+
+  it("does not drop after Escape, even when the release comes before a re-render", () => {
+    const { store, view } = renderWithController();
+    const containers = view.container.querySelectorAll(".statement-container");
+    const handle = containers[0].querySelector(".message-reorder-handle")!;
+    act(() => {
+      fireEvent.pointerDown(handle, { clientX: 0, clientY: 0 });
+    });
+    act(() => {
+      fireEvent.pointerMove(window, { clientX: 0, clientY: 100 });
+    });
+    act(() => {
+      fireEvent.pointerMove(containers[1], { clientX: 0, clientY: 100 });
+    });
+    expect(
+      view.container.querySelector('[data-reorder-state="dragging"]'),
+    ).not.toBeNull();
+    act(() => {
+      fireEvent.keyDown(document, { key: "Escape" });
+      fireEvent.pointerUp(window);
+    });
+    expect(store.get(codeAtom)).toBe(CODE);
   });
 });

@@ -31,7 +31,6 @@ import {
   interactionAtom,
 } from "@/store/interaction/interactionAtom";
 import { FloatingPortal, useFloating } from "@floating-ui/react";
-import { useOutsideClick } from "@/functions/useOutsideClick";
 
 const btns = [
   {
@@ -194,16 +193,9 @@ export const StylePanel = () => {
     });
   };
 
-  useOutsideClick(refs.floating.current, (event) => {
-    closeMenu();
-    // Keep this diagram's selected message through capture while its label
-    // receives a click. The label itself takes that click into editing.
-    const clickedMessage = (event.target as Element | null)?.closest?.(
-      ".message[data-selected='true']",
-    );
-    if (clickedMessage && diagramElement?.contains(clickedMessage)) return;
-    setSelectedMessage(null);
-  });
+  // Click-away and Escape belong to the interaction state (ADR 0002, P3):
+  // `InteractionController` closes this menu and clears the message
+  // selection, keeping it when the press lands on the selected message.
 
   useEffect(() => {
     setOnMessageClick((context: any, element: HTMLElement) => {
@@ -295,19 +287,6 @@ export const StylePanel = () => {
     if (textEditing) closeMenu();
   }, [closeMenu, textEditing]);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") {
-        return;
-      }
-      closeMenu();
-      setSelectedMessage(null);
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [closeMenu, setSelectedMessage]);
-
   const [openSubmenu, setOpenSubmenu] = useState<"type" | "wrap" | null>(null);
   const submenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -333,6 +312,7 @@ export const StylePanel = () => {
       <div
         id="style-panel"
         className="zenuml"
+        data-interaction-surface="messageMenu"
         ref={refs.setFloating}
         style={{ ...floatingStyles, zIndex: 40 }}
       >

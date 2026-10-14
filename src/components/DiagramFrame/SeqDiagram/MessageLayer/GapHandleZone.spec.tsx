@@ -20,6 +20,7 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { describe, expect, it } from "vitest";
 import { Block } from "./Block/Block";
+import { InteractionController } from "@/store/interaction/InteractionController";
 
 const CODE = "A\nB\nC\nA->B: first\nA->C: second";
 
@@ -37,6 +38,7 @@ const renderGaps = (
   const root = RootContext(CODE);
   const view = render(
     <Provider store={store}>
+      <InteractionController />
       <Block context={root?.block()} enableGapHandles isRoot />
     </Provider>,
   );
@@ -151,17 +153,74 @@ describe("GapHandleZone open menus (P2)", () => {
     ).toBe(false);
   });
 
-  it("a right-click on another gap closes the open menu and opens that gap's", () => {
+  it("a right-click on another gap only closes the open menu (P3, R2)", () => {
     const { store, view } = renderGaps();
     openGapMenu(view, 1);
-    // Browser order: pointerdown (closes the open menu), then contextmenu.
+    const other = view.getByTestId("message-gap-hover-0");
+    // Browser order: pointerdown, then contextmenu, then pointerup.
     act(() => {
-      fireEvent.pointerDown(view.getByTestId("message-gap-hover-0"));
+      fireEvent.pointerDown(other, { button: 2 });
     });
     openGapMenu(view, 0);
+    act(() => {
+      fireEvent.pointerUp(other, { button: 2 });
+    });
     expect(!!view.queryByTestId("gap-insert-menu-1")).toBe(false);
+    expect(!!view.queryByTestId("gap-insert-menu-0")).toBe(false);
+    expect(store.get(interactionAtom).kind).toBe("idle");
+  });
+
+  it("a second right-click opens that gap's menu", async () => {
+    const { store, view } = renderGaps();
+    openGapMenu(view, 1);
+    const other = view.getByTestId("message-gap-hover-0");
+    act(() => {
+      fireEvent.pointerDown(other, { button: 2 });
+    });
+    openGapMenu(view, 0);
+    act(() => {
+      fireEvent.pointerUp(other, { button: 2 });
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    act(() => {
+      fireEvent.pointerDown(other, { button: 2 });
+    });
+    openGapMenu(view, 0);
     expect(!!view.queryByTestId("gap-insert-menu-0")).toBe(true);
     expect(store.get(interactionAtom).kind).toBe("gapMenu");
+  });
+
+  it("closes on a press outside the gap (P3)", () => {
+    const { store, view } = renderGaps();
+    openGapMenu(view, 1);
+    const outside = document.createElement("button");
+    document.body.appendChild(outside);
+    act(() => {
+      fireEvent.pointerDown(outside);
+    });
+    outside.remove();
+    expect(!!view.queryByTestId("gap-insert-menu-1")).toBe(false);
+    expect(store.get(interactionAtom).kind).toBe("idle");
+  });
+
+  it("stays open on a press inside its own gap (P3)", () => {
+    const { store, view } = renderGaps();
+    const zone = openGapMenu(view, 1);
+    act(() => {
+      fireEvent.pointerDown(zone);
+    });
+    expect(store.get(interactionAtom).kind).toBe("gapMenu");
+  });
+
+  it("closes on Escape when the focus is outside the gap (P3)", () => {
+    const { store, view } = renderGaps();
+    openGapMenu(view, 1);
+    act(() => {
+      (document.activeElement as HTMLElement | null)?.blur();
+      fireEvent.keyDown(document, { key: "Escape" });
+    });
+    expect(!!view.queryByTestId("gap-insert-menu-1")).toBe(false);
+    expect(store.get(interactionAtom).kind).toBe("idle");
   });
 
   it("does not open a second gap menu without the closing press", () => {

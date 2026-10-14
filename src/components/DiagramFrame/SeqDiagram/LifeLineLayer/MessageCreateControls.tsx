@@ -13,12 +13,13 @@ import {
   textEditingAtom,
 } from "@/store/Store";
 import { insertMessageInDsl } from "@/utils/insertMessageInDsl";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import { useEffect, useId, useMemo, useRef } from "react";
 
 const DRAG_THRESHOLD = 6;
 
 export const MessageCreateControls = () => {
+  const store = useStore();
   const mode = useAtomValue(modeAtom);
   const enabled = useAtomValue(enableMessageInsertionAtom);
   const textEditing = useAtomValue(textEditingAtom);
@@ -161,7 +162,11 @@ export const MessageCreateControls = () => {
     };
 
     const onPointerUp = (event: PointerEvent) => {
-      const current = dragStateRef.current;
+      // Read the store, not this render: Escape can cancel the drag after
+      // this listener was installed and before React re-renders.
+      const current = store.get(createMessageDragAtom)
+        ? dragStateRef.current
+        : null;
       if (!current || dragHandledRef.current || textEditing) {
         setDragState(null);
         return;
@@ -197,23 +202,13 @@ export const MessageCreateControls = () => {
       setSelectedParticipants([]);
     };
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") {
-        return;
-      }
-      dragStateRef.current = null;
-      dragHandledRef.current = true;
-      setDragState(null);
-      setSelectedParticipants([]);
-    };
-
+    // Escape cancels through the interaction state (ADR 0002, P3): clearing
+    // the drag removes these listeners before the pointer is released.
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp, { once: true });
-    window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("keydown", onKeyDown);
     };
   }, [
     code,
@@ -225,6 +220,7 @@ export const MessageCreateControls = () => {
     setPendingEditableRange,
     setDragState,
     setSelectedParticipants,
+    store,
     textEditing,
   ]);
 

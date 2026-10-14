@@ -25,6 +25,7 @@ import { cn } from "@/utils";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FloatingPortal } from "@floating-ui/react";
+import { useInteractionExit } from "@/store/interaction/useInteractionExit";
 import { ARCHETYPES, PRESET_COLORS } from "./participantEditor/palette";
 import { SplitSlot } from "./participantEditor/SplitSlot";
 import { ColorPicker } from "./participantEditor/ColorPicker";
@@ -242,70 +243,52 @@ export const ParticipantStylePanel = () => {
     if (width !== nameRowWidth) setNameRowWidth(width);
   });
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        // Commit a focused draft for the participant it belongs to before the
-        // selection changes; the blur handler runs synchronously here. A draft
-        // that fails validation is discarded: closing the panel resets every
-        // draft and error from the committed declaration.
-        const active = document.activeElement as HTMLElement | null;
-        if (active && panelRef.current.contains(active)) active.blur();
-        setIsOpen(false);
-        setSelected([]);
-        // A committed draft can re-render the diagram and replace the node
-        // under the pointer, which drops the click that would select it.
-        const target = e.target as Element | null;
-        const hit = target
-          ?.closest?.("[data-participant-id]")
-          ?.getAttribute("data-participant-id");
-        if (hit) {
-          const token = ++interactionTokenRef.current;
-          const onUp = () => {
-            const current = interactionTokenRef.current === token;
-            cancelPending();
-            // A connected target still gets its own click, which toggles the
-            // selection; setting it here would toggle it back off.
-            if (
-              current &&
-              selectedRef.current.length === 0 &&
-              !target?.isConnected &&
-              diagramElementRef.current?.querySelector(
-                `[data-participant-id="${hit}"]`,
-              )
-            ) {
-              setSelectedRaw([hit]);
-            }
-          };
-          const onKey = (ev: KeyboardEvent) => {
-            if (ev.key === "Escape") cancelPending();
-          };
-          document.addEventListener("pointerup", onUp, true);
-          document.addEventListener("pointercancel", cancelPending, true);
-          document.addEventListener("keydown", onKey, true);
-          cancelPendingRef.current = () => {
-            document.removeEventListener("pointerup", onUp, true);
-            document.removeEventListener("pointercancel", cancelPending, true);
-            document.removeEventListener("keydown", onKey, true);
-          };
-        }
+  // Click-away and Escape are the interaction state's (ADR 0002, P3): it
+  // blurs a focused draft here first, so the draft commits for the
+  // participant it belongs to, then clears the selection. A draft that fails
+  // validation is discarded: closing the panel resets every draft and error
+  // from the committed declaration.
+  useInteractionExit((state, cause) => {
+    if (state.kind !== "participantEditor" || cause.type !== "press") return;
+    cancelPending();
+    // A committed draft can re-render the diagram and replace the node under
+    // the pointer, which drops the click that would select it.
+    const target = cause.target;
+    const hit = target
+      ?.closest?.("[data-participant-id]")
+      ?.getAttribute("data-participant-id");
+    if (!hit) return;
+    const token = ++interactionTokenRef.current;
+    const onUp = () => {
+      const current = interactionTokenRef.current === token;
+      cancelPending();
+      // A connected target still gets its own click, which toggles the
+      // selection; setting it here would toggle it back off.
+      if (
+        current &&
+        selectedRef.current.length === 0 &&
+        !target?.isConnected &&
+        diagramElementRef.current?.querySelector(
+          `[data-participant-id="${hit}"]`,
+        )
+      ) {
+        setSelectedRaw([hit]);
       }
     };
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsOpen(false);
-        setSelected([]);
-      }
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") cancelPending();
     };
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
+    // These follow one press to its end; they are not click-away or Escape
+    // handlers for the editor.
+    document.addEventListener("pointerup", onUp, true);
+    document.addEventListener("pointercancel", cancelPending, true);
+    document.addEventListener("keydown", onKey, true);
+    cancelPendingRef.current = () => {
+      document.removeEventListener("pointerup", onUp, true);
+      document.removeEventListener("pointercancel", cancelPending, true);
+      document.removeEventListener("keydown", onKey, true);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  });
 
   if (
     !enabled ||
@@ -488,6 +471,7 @@ export const ParticipantStylePanel = () => {
         <div
           ref={panelRef}
           role="dialog"
+          data-interaction-surface="participantEditor"
           aria-label={`Edit participant ${participantName}`}
           className={cn(
             "participant-style-panel group fixed inset-0 pointer-events-none text-gray-700",

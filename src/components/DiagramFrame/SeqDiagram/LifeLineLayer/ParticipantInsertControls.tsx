@@ -228,6 +228,7 @@ export const ParticipantInsertControls = () => {
         >
           <button
             type="button"
+            data-cap="insertParticipant"
             data-testid="participant-prepend-button"
             title="Add participant"
             aria-label="Add participant at the start"
@@ -253,6 +254,7 @@ export const ParticipantInsertControls = () => {
         >
           <button
             type="button"
+            data-cap="insertParticipant"
             data-testid={`participant-insert-button-${index}`}
             title={`Insert participant between ${participantModels[index].name} and ${participantModels[index + 1].name}`}
             aria-label={`Insert participant between ${participantModels[index].name} and ${participantModels[index + 1].name}`}
@@ -277,6 +279,7 @@ export const ParticipantInsertControls = () => {
         >
           <button
             type="button"
+            data-cap="insertParticipant"
             data-testid="participant-append-button"
             title="Add participant"
             aria-label="Add participant"

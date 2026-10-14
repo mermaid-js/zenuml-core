@@ -17,6 +17,7 @@ import { createStore, Provider } from "jotai";
 import { describe, expect, it } from "vitest";
 import { Block } from "./Block/Block";
 import { StylePanel } from "./StylePanel";
+import { InteractionController } from "@/store/interaction/InteractionController";
 
 const CODE = "A\nB\nA->B.hello()";
 
@@ -30,6 +31,7 @@ const renderPanel = () => {
       <div className="interaction sync" data-source="A" data-target="B">
         <div className="message" data-testid="message" />
       </div>
+      <InteractionController />
       <StylePanel />
     </Provider>,
   );
@@ -67,9 +69,41 @@ describe("StylePanel open state lives in the interaction state (P2)", () => {
     const { store, openMenu } = renderPanel();
     await openMenu();
     act(() => {
-      fireEvent.keyDown(window, { key: "Escape" });
+      fireEvent.keyDown(document, { key: "Escape" });
     });
     expect(store.get(interactionAtom).kind).toBe("idle");
+  });
+
+  it("closes and clears the selection on a press elsewhere (P3)", async () => {
+    const { store, openMenu, menuShown } = renderPanel();
+    await openMenu();
+    act(() => {
+      fireEvent.pointerDown(document.body);
+    });
+    expect(menuShown()).toBe(false);
+    expect(store.get(selectedMessageAtom)).toBeNull();
+    expect(store.get(interactionAtom).kind).toBe("idle");
+  });
+
+  it("closes but keeps the selection on a press on the selected message (P3)", async () => {
+    const { store, view, openMenu } = renderPanel();
+    await openMenu();
+    const message = view.getByTestId("message");
+    message.setAttribute("data-selected", "true");
+    act(() => {
+      fireEvent.pointerDown(message);
+    });
+    expect(store.get(interactionAtom).kind).toBe("idle");
+    expect(store.get(selectedMessageAtom)).not.toBeNull();
+  });
+
+  it("stays open on a press inside the menu (P3)", async () => {
+    const { store, view, openMenu } = renderPanel();
+    await openMenu();
+    act(() => {
+      fireEvent.pointerDown(view.getByLabelText("bold"));
+    });
+    expect(store.get(interactionAtom).kind).toBe("messageMenu");
   });
 
   it("closes when another primary state is entered (R1)", async () => {

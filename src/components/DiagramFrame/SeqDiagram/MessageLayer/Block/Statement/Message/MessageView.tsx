@@ -71,6 +71,7 @@ export const MessageView = ({
       tabIndex={onClick ? 0 : undefined}
       role={onClick ? "button" : undefined}
       ref={messageRef}
+      data-cap={onClick ? "select" : undefined}
       data-selected={dataSelected}
       title={title}
     >
