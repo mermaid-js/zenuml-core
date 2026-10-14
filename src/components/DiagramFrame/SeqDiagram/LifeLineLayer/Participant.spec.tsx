@@ -1,5 +1,10 @@
-import { participantPreviewAtom, selectedAtom } from "@/store/Store";
-import { act, render } from "@testing-library/react";
+import {
+  modeAtom,
+  participantPreviewAtom,
+  RenderMode,
+  selectedAtom,
+} from "@/store/Store";
+import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { describe, expect, it } from "vitest";
 import { Participant } from "./Participant";
@@ -62,5 +67,33 @@ describe("Participant selection ring", () => {
     expect(box.classList.contains("ring-1")).toBe(true);
     expect(box.classList.contains("ring-sky-400")).toBe(true);
     expect(box.classList.contains("ring-2")).toBe(false);
+  });
+});
+
+// ADR 0002, P4: a participant click selects through `useCan("select")`.
+// `select` is not view-only, so a static render does not select: nothing in
+// `RenderMode.Static` clears a selection any more (the root `onClick` is gone).
+describe("Participant select capability", () => {
+  const clickBox = (mode: RenderMode) => {
+    const store = createStore();
+    store.set(modeAtom, mode);
+    const view = render(
+      <Provider store={store}>
+        <Participant entity={{ name: "A" }} />
+      </Provider>,
+    );
+    const box = view.container.querySelector<HTMLElement>(".participant")!;
+    act(() => {
+      fireEvent.click(box);
+    });
+    return store.get(selectedAtom);
+  };
+
+  it("selects on click in a dynamic render", () => {
+    expect(clickBox(RenderMode.Dynamic)).toEqual(["A"]);
+  });
+
+  it("does not select on click in a static render", () => {
+    expect(clickBox(RenderMode.Static)).toEqual([]);
   });
 });
