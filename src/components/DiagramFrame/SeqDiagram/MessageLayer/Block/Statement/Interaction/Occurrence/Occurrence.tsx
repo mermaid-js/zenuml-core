@@ -32,6 +32,7 @@ export const Occurrence = (props: {
 }) => {
   const messageInsertionEnabled = useAtomValue(enableMessageInsertionAtom);
   const canCreateMessage = useCan("createMessage");
+  const canHover = useCan("hoverAffordance");
   const coordinates = useAtomValue(coordinatesAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const setCreateDrag = useSetAtom(createMessageDragAtom);
@@ -95,6 +96,9 @@ export const Occurrence = (props: {
 
   const dragEnabled =
     !!props.enableCreateDrag && messageInsertionEnabled && canCreateMessage;
+  // The crosshair and the title are hover hints. A running create drag keeps
+  // `createMessage` (it must finish) but not `hoverAffordance`.
+  const showDragHint = dragEnabled && canHover;
 
   const startCreateDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!dragEnabled || !diagramElement) {
@@ -148,7 +152,7 @@ export const Occurrence = (props: {
         "occurrence min-h-6 shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border relative left-full w-[15px] mt-[-2px] pl-[7px] pr-px pt-px pb-px",
         { "right-to-left left-[-14px]": props.rtl },
         {
-          "cursor-crosshair": dragEnabled,
+          "cursor-crosshair": showDragHint,
         },
         props.className,
       )}
@@ -163,7 +167,7 @@ export const Occurrence = (props: {
       }
       onPointerDown={startCreateDrag}
       title={
-        dragEnabled
+        showDragHint
           ? `Drag to create a message from ${props.participant}`
           : undefined
       }

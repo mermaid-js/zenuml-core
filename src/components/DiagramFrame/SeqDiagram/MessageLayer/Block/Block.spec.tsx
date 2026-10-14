@@ -1,5 +1,6 @@
 import { RootContext } from "@/parser";
 import {
+  activeTextEditorsAtom,
   codeAtom,
   createMessageDragAtom,
   enableMessageInsertionAtom,
@@ -284,6 +285,82 @@ describe("Block insertion gaps", () => {
     expect(
       featureOff.container.querySelector('[data-testid^="message-gap-"]'),
     ).toBeNull();
+  });
+});
+
+describe("Block reorder handle hover reveal (P4, hoverAffordance)", () => {
+  beforeEach(() => {
+    document.body.click();
+  });
+
+  // `data-hover-reveal="off"` switches off the CSS that shows a row's handle
+  // while the row is hovered.
+  const reveal = (view: ReturnType<typeof render>) =>
+    Array.from(view.container.querySelectorAll(".statement-container")).map(
+      (row) => row.getAttribute("data-hover-reveal") !== "off",
+    );
+
+  it("reveals every handle on hover when idle", () => {
+    const { view } = renderBlock({
+      mode: RenderMode.Dynamic,
+      enableMessageReorder: true,
+    });
+    expect(reveal(view)).toEqual([true, true]);
+  });
+
+  it("reveals only the moving message's handle while a reorder runs", () => {
+    const { store, view } = renderBlock({
+      mode: RenderMode.Dynamic,
+      enableMessageReorder: true,
+    });
+    const handle = view.container.querySelector(".message-reorder-handle")!;
+    act(() => {
+      fireEvent.pointerDown(handle, { clientX: 0, clientY: 0 });
+    });
+    expect(store.get(messageReorderPendingAtom)).not.toBeNull();
+    expect(reveal(view)).toEqual([true, false]);
+    act(() => {
+      fireEvent.pointerUp(window);
+    });
+  });
+
+  it("keeps the selected message's handle revealable while its menu is open", () => {
+    const { store, view } = renderBlock({
+      mode: RenderMode.Dynamic,
+      enableMessageReorder: true,
+    });
+    const first = view.container.querySelectorAll(".statement-container")[0];
+    act(() => {
+      fireEvent.click(first.querySelector(".message")!);
+    });
+    const selected = store.get(selectedMessageAtom)!;
+    act(() => {
+      store.set(enterMenuAtom, {
+        kind: "messageMenu",
+        start: selected.start,
+        end: selected.end,
+      });
+    });
+    expect(reveal(view)[0]).toBe(true);
+  });
+
+  it("ends a pending reorder when a text edit starts", () => {
+    const { store, view } = renderBlock({
+      mode: RenderMode.Dynamic,
+      enableMessageReorder: true,
+    });
+    const handle = view.container.querySelector(".message-reorder-handle")!;
+    act(() => {
+      fireEvent.pointerDown(handle, { clientX: 0, clientY: 0 });
+    });
+    expect(store.get(messageReorderPendingAtom)).not.toBeNull();
+    act(() => {
+      store.set(activeTextEditorsAtom, new Set([Symbol("label")]));
+    });
+    expect(store.get(messageReorderPendingAtom)).toBeNull();
+    act(() => {
+      fireEvent.pointerUp(window);
+    });
   });
 });
 

@@ -13,11 +13,13 @@ import {
   onContentChangeAtom,
   selectedAtom,
   selectedMessageAtom,
-  textEditingAtom,
 } from "@/store/Store";
 import { reorderMessageInDsl } from "@/utils/messageReorderTransform";
 import { useCan } from "@/store/interaction/useCan";
-import { exitMenuAtom } from "@/store/interaction/interactionAtom";
+import {
+  exitMenuAtom,
+  interactionAtom,
+} from "@/store/interaction/interactionAtom";
 import { Fragment, useEffect, useRef } from "react";
 import { GapHandleZone } from "../GapHandleZone";
 
@@ -45,8 +47,13 @@ export const Block = (props: {
   const [pendingDrag, setPendingDrag] = useAtom(messageReorderPendingAtom);
   const [dropState, setDropState] = useAtom(messageReorderDropAtom);
   const enableMessageReorder = useAtomValue(enableMessageReorderAtom);
-  const textEditing = useAtomValue(textEditingAtom);
   const canReorder = useCan("reorder");
+  // A row reveals its reorder handle on hover only when hover affordances are
+  // allowed (idle), or when the row is part of the current state: the moving
+  // message of a reorder, or the selected message of an open menu (the other
+  // rows render no handle then).
+  const canHover = useCan("hoverAffordance");
+  const interactionKind = useAtomValue(interactionAtom).kind;
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const setSelectedParticipants = useSetAtom(selectedAtom);
   const exitMenu = useSetAtom(exitMenuAtom);
@@ -57,12 +64,14 @@ export const Block = (props: {
   // editing and any other interaction that owns the diagram (ADR 0002).
   const reorderEnabled = enableMessageReorder && canReorder;
 
+  // A reorder that loses its capability (a text edit started) ends. While a
+  // reorder runs, `reorder` is allowed unless a text edit overlays it.
   useEffect(() => {
-    if (!textEditing) return;
+    if (canReorder) return;
     setPendingDrag(null);
     setDragKey(null);
     setDropState(null);
-  }, [setDragKey, setDropState, setPendingDrag, textEditing]);
+  }, [canReorder, setDragKey, setDropState, setPendingDrag]);
 
   useEffect(() => {
     dragKeyRef.current = dragKey;
@@ -273,6 +282,10 @@ export const Block = (props: {
             : pendingDrag?.key === statementKey
               ? "pending"
               : "idle";
+        const hoverReveal =
+          canHover ||
+          interactionKind === "messageMenu" ||
+          reorderState !== "idle";
         return (
           <Fragment key={index}>
             {enableGapHandles && (
@@ -294,6 +307,7 @@ export const Block = (props: {
               data-origin={props.origin}
               data-statement-key={statementKey}
               data-reorder-state={reorderState}
+              data-hover-reveal={hoverReveal ? undefined : "off"}
               onPointerDown={(event) => {
                 if (!reorderEnabled || event.button !== 0) {
                   return;
