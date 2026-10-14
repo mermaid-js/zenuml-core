@@ -109,6 +109,45 @@ test("the open message menu and the participant editor keep their own controls",
   ).toHaveCount(1);
 });
 
+test("a press outside the participant editor commits its focused draft, then closes it", async ({
+  page,
+}) => {
+  await setup(page);
+  const { participant, position } = await participantCorner(page, "A");
+  await participant.click({ position });
+  const panel = page.getByTestId("participant-style-panel");
+  await panel.getByLabel("Name", { exact: true }).fill("Alice");
+  await page.mouse.click(5, 5);
+  await expect(panel).toHaveCount(0);
+  await expect(
+    page.locator('.participant[data-participant-id="Alice"]'),
+  ).toHaveCount(1);
+});
+
+test("a press on a collapse button while the editor is open commits the draft and does not collapse", async ({
+  page,
+}) => {
+  await setup(page);
+  const alt = page.locator(".fragment-alt");
+  const header = alt.locator(":scope > .header");
+  await header.hover();
+  const iconBox = (await header.locator(".collapse-button").boundingBox())!;
+
+  const { participant, position } = await participantCorner(page, "A");
+  await participant.click({ position });
+  const panel = page.getByTestId("participant-style-panel");
+  await panel.getByLabel("Name", { exact: true }).fill("Alice");
+  await page.mouse.click(
+    iconBox.x + iconBox.width / 2,
+    iconBox.y + iconBox.height / 2,
+  );
+  await expect(panel).toHaveCount(0);
+  await expect(
+    page.locator('.participant[data-participant-id="Alice"]'),
+  ).toHaveCount(1);
+  await expect(alt.locator(":scope > .hidden")).toHaveCount(0);
+});
+
 test("Escape closes a gap menu whose item lost the focus", async ({ page }) => {
   await setup(page);
   await openGapMenu(page, 1);
