@@ -5,7 +5,6 @@ import {
   createMessageDragAtom,
   diagramElementAtom,
   enableDividerInsertionAtom,
-  enableMessageInsertionAtom,
   modeAtom,
   onContentChangeAtom,
   pendingEditableRangeAtom,
@@ -18,10 +17,14 @@ import {
 import { centerOf } from "./Block/Statement/utils";
 import { insertDividerInDsl } from "@/utils/insertDividerInDsl";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import {
+  configuredMessageCreationAtom,
+  FIRST_GAP_CLEARANCE,
+  gapHandlesShownAtom,
+} from "./gapHandleAtoms";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const GAP_HEIGHT_EMPTY = 48;
-const FIRST_GAP_CLEARANCE = 12;
 const HANDLE_SIZE = 12;
 const HOVER_ZONE_HEIGHT = 16;
 const GAP_OFFSET_UP = 5;
@@ -35,7 +38,6 @@ export const GapHandleZone = (props: {
   isFirstRootGap?: boolean;
 }) => {
   const mode = useAtomValue(modeAtom);
-  const messageInsertionEnabled = useAtomValue(enableMessageInsertionAtom);
   const dividerInsertionEnabled = useAtomValue(enableDividerInsertionAtom);
   const textEditing = useAtomValue(textEditingAtom);
   const rootContext = useAtomValue(rootContextAtom);
@@ -97,8 +99,8 @@ export const GapHandleZone = (props: {
     () => OrderedParticipants(rootContext).filter((p) => p.name !== _STARTER_),
     [rootContext],
   );
-  const configuredMessageCreation =
-    messageInsertionEnabled && participants.length >= 2;
+  const configuredMessageCreation = useAtomValue(configuredMessageCreationAtom);
+  const gapHandlesShown = useAtomValue(gapHandlesShownAtom);
   const canCreateMessage = !textEditing && configuredMessageCreation;
   const canInsertDivider = !textEditing && dividerInsertionEnabled;
 
@@ -188,10 +190,7 @@ export const GapHandleZone = (props: {
     ],
   );
 
-  if (
-    mode !== RenderMode.Dynamic ||
-    (!configuredMessageCreation && !dividerInsertionEnabled)
-  ) {
+  if (!gapHandlesShown) {
     return null;
   }
 
