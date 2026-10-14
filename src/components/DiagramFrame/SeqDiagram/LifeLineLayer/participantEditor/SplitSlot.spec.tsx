@@ -137,12 +137,22 @@ describe("SplitSlot", () => {
     expect(clear.className.split(/\s+/)).toContain("rounded-none");
   });
 
-  it("expanded ring is inset only when split", () => {
+  it("expanded + split: the whole pill is outlined, not one half", () => {
     const a = setup({ expanded: true });
-    expect(a.main.className.split(/\s+/)).not.toContain("ring-inset");
-    fireEvent.mouseEnter(a.main.parentElement!);
-    expect(a.main.className.split(/\s+/)).toContain("ring-inset");
-    expect(a.main.className.split(/\s+/)).toContain("ring-1");
+    const wrap = a.main.parentElement!;
+    fireEvent.mouseEnter(wrap);
+    const mainCls = a.main.className.split(/\s+/);
+    expect(mainCls).not.toContain("ring-1");
+    expect(mainCls).not.toContain("ring-inset");
+    const wrapCls = wrap.className.split(/\s+/);
+    expect(wrapCls).toContain("border-sky-500");
+    expect(wrapCls).not.toContain("border-gray-300");
+  });
+
+  it("split but not expanded: pill keeps the grey border", () => {
+    const { main } = setup();
+    fireEvent.mouseEnter(main.parentElement!);
+    expect(main.parentElement!.className.split(/\s+/)).toContain("border-gray-300");
   });
 
   it("split: child span fills the half edge to edge", () => {
