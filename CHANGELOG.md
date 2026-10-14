@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.6.1
+
+### Patch Changes
+
+- [#467](https://github.com/mermaid-js/zenuml-core/pull/467) [`8251e5e`](https://github.com/mermaid-js/zenuml-core/commit/8251e5e143bfcff2aaf52dc11f0e1305c94e6d0f) Thanks [@MrCoder](https://github.com/MrCoder)! - HTML renderer: the dashed group outline no longer paints half a pixel below the diagram frame. Its bottom edge now runs into the frame's bottom border as one clean line, as in `renderToSvg()`.
+
 ## 4.6.0
 
 ### Minor Changes
