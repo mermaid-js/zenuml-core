@@ -4,6 +4,7 @@ import {
   createMessageDragAtom,
   diagramElementAtom,
   enableMessageInsertionAtom,
+  enableParticipantStyleEditingAtom,
   modeAtom,
   RenderMode,
   selectedAtom,
@@ -128,5 +129,61 @@ describe("Occurrence", () => {
     expect(dragState?.insertIndex).toBe(1);
     expect(dragState?.blockContext).toBe(message?.braceBlock?.()?.block?.());
     expect(dragState?.hostContext).toBe(message);
+  });
+
+  describe("interaction policy", () => {
+    const NESTED = "A\nB\nC\nA->B.hello() {\n  B->C.work()\n}";
+    const openParticipantEditor = (
+      store: ReturnType<typeof renderOccurrence>["store"],
+    ) =>
+      act(() => {
+        store.set(enableParticipantStyleEditingAtom, true);
+        store.set(selectedAtom, ["A"]);
+      });
+
+    it("does not start a create drag while the participant editor is open", () => {
+      const { store, occurrence } = renderOccurrence(NESTED);
+      openParticipantEditor(store);
+      act(() => {
+        fireEvent.pointerDown(occurrence, { clientX: 118, clientY: 70 });
+      });
+      expect(store.get(createMessageDragAtom)).toBeNull();
+      expect(store.get(selectedAtom)).toEqual(["A"]);
+    });
+
+    it("collapses on click when idle", () => {
+      const { container } = renderOccurrence(NESTED);
+      const button = container.querySelector(".collapse-button")!;
+      act(() => {
+        fireEvent.click(button);
+      });
+      expect(button.classList.contains("hidden")).toBe(true);
+    });
+
+    it("does not collapse while the participant editor is open", () => {
+      const { store, container } = renderOccurrence(NESTED);
+      openParticipantEditor(store);
+      const button = container.querySelector(".collapse-button")!;
+      act(() => {
+        fireEvent.click(button);
+      });
+      expect(button.classList.contains("hidden")).toBe(false);
+    });
+
+    it("ignores a click whose press started while the editor was open", () => {
+      const { store, container } = renderOccurrence(NESTED);
+      openParticipantEditor(store);
+      const button = container.querySelector(".collapse-button")!;
+      act(() => {
+        fireEvent.pointerDown(button);
+      });
+      act(() => {
+        store.set(selectedAtom, []);
+      });
+      act(() => {
+        fireEvent.click(button);
+      });
+      expect(button.classList.contains("hidden")).toBe(false);
+    });
   });
 });

@@ -1,20 +1,29 @@
 import { cn } from "@/utils";
+import { useCapClick } from "@/store/interaction/useCan";
 import "./CollapseButton.css";
 
 export const CollapseButton = (props: {
   collapsed?: boolean;
   onClick?: () => void;
 }) => {
+  // While another interaction owns the diagram, the icon still shows the
+  // collapsed state but does nothing (ADR 0002).
+  const {
+    allowed: canCollapse,
+    pressProps,
+    onClick,
+  } = useCapClick("collapse", props.onClick);
   return (
-    <div className="occurrence-collapsible-header w-auto">
+    <div className="occurrence-collapsible-header w-auto" {...pressProps}>
       <svg
         width="20px"
         height="20px"
-        className={cn("collapse-button cursor-pointer", {
+        className={cn("collapse-button", {
+          "cursor-pointer": canCollapse,
           hidden: props.collapsed,
           expanded: !props.collapsed,
         })}
-        onClick={props.onClick}
+        onClick={onClick}
         viewBox="0 0 25 25"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -39,8 +48,11 @@ export const CollapseButton = (props: {
       <svg
         width="20px"
         height="20px"
-        className={cn("cursor-pointer", { hidden: !props.collapsed })}
-        onClick={props.onClick}
+        className={cn({
+          "cursor-pointer": canCollapse,
+          hidden: !props.collapsed,
+        })}
+        onClick={onClick}
         viewBox="0 0 25 25"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

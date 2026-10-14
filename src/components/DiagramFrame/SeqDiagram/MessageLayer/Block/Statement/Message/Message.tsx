@@ -4,8 +4,8 @@ import {
   RenderMode,
   selectedMessageAtom,
   enableMessageReorderAtom,
-  textEditingAtom,
 } from "@/store/Store";
+import { useCan } from "@/store/interaction/useCan";
 import { CSSProperties, ReactNode, useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { MessageView } from "./MessageView";
@@ -40,12 +40,8 @@ export const Message = (props: {
   } = props;
   const mode = useAtomValue(modeAtom);
   const messageReorderEnabled = useAtomValue(enableMessageReorderAtom);
-  const textEditing = useAtomValue(textEditingAtom);
-  const reorderEnabled =
-    allowReorder &&
-    messageReorderEnabled &&
-    !textEditing &&
-    mode === RenderMode.Dynamic;
+  const canReorder = useCan("reorder");
+  const reorderEnabled = allowReorder && messageReorderEnabled && canReorder;
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const selectedMessage = useAtomValue(selectedMessageAtom);
   const setSelectedMessage = useSetAtom(selectedMessageAtom);

@@ -10,14 +10,13 @@ import {
   messageReorderDragAtom,
   messageReorderDropAtom,
   messageReorderPendingAtom,
-  modeAtom,
   onContentChangeAtom,
-  RenderMode,
   selectedAtom,
   selectedMessageAtom,
   textEditingAtom,
 } from "@/store/Store";
 import { reorderMessageInDsl } from "@/utils/messageReorderTransform";
+import { useCan } from "@/store/interaction/useCan";
 import { Fragment, useEffect, useRef } from "react";
 import { GapHandleZone } from "../GapHandleZone";
 
@@ -44,16 +43,16 @@ export const Block = (props: {
   const [pendingDrag, setPendingDrag] = useAtom(messageReorderPendingAtom);
   const [dropState, setDropState] = useAtom(messageReorderDropAtom);
   const enableMessageReorder = useAtomValue(enableMessageReorderAtom);
-  const mode = useAtomValue(modeAtom);
   const textEditing = useAtomValue(textEditingAtom);
+  const canReorder = useCan("reorder");
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const setSelectedParticipants = useSetAtom(selectedAtom);
   // Unlike every other editing surface, this drag used to run with no
   // `enable*` flag and no respect for `RenderMode.Static` — a render-only
   // host (SVG export, a static embed) could have its diagram silently
-  // rewritten by an accidental drag.
-  const reorderEnabled =
-    enableMessageReorder && !textEditing && mode === RenderMode.Dynamic;
+  // rewritten by an accidental drag. `reorder` also covers the mode, text
+  // editing and any other interaction that owns the diagram (ADR 0002).
+  const reorderEnabled = enableMessageReorder && canReorder;
 
   useEffect(() => {
     if (!textEditing) return;

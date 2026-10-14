@@ -15,6 +15,7 @@ import {
   textEditingAtom,
 } from "@/store/Store";
 import { centerOf } from "./Block/Statement/utils";
+import { useCan } from "@/store/interaction/useCan";
 import { insertDividerInDsl } from "@/utils/insertDividerInDsl";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
@@ -40,6 +41,9 @@ export const GapHandleZone = (props: {
   const mode = useAtomValue(modeAtom);
   const dividerInsertionEnabled = useAtomValue(enableDividerInsertionAtom);
   const textEditing = useAtomValue(textEditingAtom);
+  // Mode and text editing are part of the policy; the embedder flags above
+  // stay here because createMessage spans two of them.
+  const canCreate = useCan("createMessage");
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
@@ -75,7 +79,7 @@ export const GapHandleZone = (props: {
   }, []);
 
   useEffect(() => {
-    if (!textEditing) return;
+    if (canCreate) return;
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current);
     setHovered(false);
@@ -83,7 +87,7 @@ export const GapHandleZone = (props: {
     activeParticipantRef.current = null;
     setTooltipParticipant(null);
     setMenuOpen(false);
-  }, [textEditing]);
+  }, [canCreate]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -101,8 +105,8 @@ export const GapHandleZone = (props: {
   );
   const configuredMessageCreation = useAtomValue(configuredMessageCreationAtom);
   const gapHandlesShown = useAtomValue(gapHandlesShownAtom);
-  const canCreateMessage = !textEditing && configuredMessageCreation;
-  const canInsertDivider = !textEditing && dividerInsertionEnabled;
+  const canCreateMessage = canCreate && configuredMessageCreation;
+  const canInsertDivider = canCreate && dividerInsertionEnabled;
 
   const updateNearest = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!canCreateMessage || dragState || menuOpen) return;
@@ -135,7 +139,7 @@ export const GapHandleZone = (props: {
       clearTimeout(hideTimerRef.current);
       hideTimerRef.current = null;
     }
-    if (!textEditing && !dragState && !menuOpen) {
+    if (canCreate && !dragState && !menuOpen) {
       setHovered(true);
       updateNearest(event);
     }
@@ -164,7 +168,7 @@ export const GapHandleZone = (props: {
     (event: React.MouseEvent) => {
       event.preventDefault();
       event.stopPropagation();
-      if (!canInsertDivider || mode !== RenderMode.Dynamic) return;
+      if (!canInsertDivider) return;
       const result = insertDividerInDsl({
         code,
         blockContext: props.blockContext,
@@ -181,7 +185,6 @@ export const GapHandleZone = (props: {
     [
       code,
       canInsertDivider,
-      mode,
       onContentChange,
       props.blockContext,
       props.insertIndex,
