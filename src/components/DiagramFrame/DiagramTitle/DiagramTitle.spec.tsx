@@ -2,28 +2,8 @@ import { RootContext } from "@/parser";
 import { codeAtom, modeAtom, RenderMode } from "@/store/Store";
 import { fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { DiagramTitle } from "./index";
-
-vi.mock("@/components/common/EditableSpan", () => ({
-  EditableSpan: ({
-    text,
-    onSave,
-    title,
-  }: {
-    text: string;
-    onSave: (t: string) => void;
-    title?: string;
-  }) => (
-    <span
-      data-testid="title-span"
-      title={title}
-      onBlur={(e) => onSave(e.currentTarget.textContent ?? "")}
-    >
-      {text}
-    </span>
-  ),
-}));
 
 function renderTitle(code: string) {
   const store = createStore();
@@ -40,8 +20,9 @@ function renderTitle(code: string) {
 }
 
 function saveTitle(view: ReturnType<typeof renderTitle>, newTitle: string) {
-  const span = view.getByTestId("title-span");
-  span.textContent = newTitle;
+  const span = view.container.querySelector<HTMLElement>(".editable-span-base")!;
+  fireEvent.click(span);
+  span.innerText = newTitle;
   fireEvent.blur(span);
   return view.store.get(codeAtom);
 }
