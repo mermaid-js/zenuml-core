@@ -48,6 +48,8 @@ export function SplitSlot({
     }
   };
 
+  const split = filled && showClear;
+
   const main = (
     <button
       key="main"
@@ -58,15 +60,19 @@ export function SplitSlot({
       onKeyDown={onKeyDown}
       className={cn(
         "flex items-center justify-center shrink-0 box-border cursor-pointer bg-white text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
-        isIcon ? "w-7 h-7" : "w-6 h-6",
-        filled
-          ? "border border-gray-300 hover:border-sky-500"
-          : "border border-dashed border-gray-400 text-gray-400 hover:border-sky-500 hover:text-sky-600",
-        filled && showClear
-          ? isIcon
-            ? "rounded-l-md rounded-r-none"
-            : "rounded-r-md rounded-l-none"
-          : "rounded-md",
+        expanded && (split ? "ring-1 ring-inset ring-sky-500" : "ring-1 ring-sky-500"),
+        split
+          ? cn(
+              "rounded-none [&>span]:rounded-none [&>span]:border-0",
+              isIcon ? "w-[27px] h-[26px]" : "w-[23px] h-[22px]",
+            )
+          : cn(
+              "rounded-md",
+              isIcon ? "w-7 h-7" : "w-6 h-6",
+              filled
+                ? "border border-gray-300 hover:border-sky-500"
+                : "border border-dashed border-gray-400 text-gray-400 hover:border-sky-500 hover:text-sky-600",
+            ),
       )}
     >
       {children}
@@ -81,8 +87,8 @@ export function SplitSlot({
       title={`${clearLabel} ⌫`}
       onClick={onClear}
       className={cn(
-        "flex items-center justify-center shrink-0 box-border w-6 cursor-pointer text-[14px] leading-none text-red-600 bg-red-100 hover:bg-red-200 border border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
-        isIcon ? "h-7 rounded-r-md border-l-0" : "h-6 rounded-l-md border-r-0",
+        "flex items-center justify-center shrink-0 box-border w-6 rounded-none cursor-pointer text-[14px] leading-none text-red-600 bg-red-100 hover:bg-red-200 border-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
+        isIcon ? "h-[26px] border-l" : "h-[22px] border-r",
       )}
     >
       ×
@@ -91,7 +97,11 @@ export function SplitSlot({
 
   return (
     <div
-      className={cn("inline-flex items-stretch", className)}
+      className={cn(
+        "inline-flex items-stretch",
+        split && "box-border rounded-md overflow-hidden border border-gray-300",
+        className,
+      )}
       style={style}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

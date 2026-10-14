@@ -84,7 +84,7 @@ export function ColorPicker({
               className={cn(
                 "w-6 h-6 box-border p-0 rounded-[5px] text-[14px] font-normal leading-none [font-family:inherit] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
                 selected
-                  ? "border-2 border-solid border-white shadow-[0_0_0_2px_#0ea5e9]"
+                  ? "border-2 border-solid border-white shadow-[0_0_0_1px_#0ea5e9]"
                   : "border border-solid border-black/[0.12]",
               )}
             >

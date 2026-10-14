@@ -80,4 +80,67 @@ describe("SplitSlot", () => {
     const { main } = setup({ expanded: true });
     expect(main.getAttribute("aria-expanded")).toBe("true");
   });
+
+  it("filled + hovered: one wrapper forms the pill, halves have no own border/rounding", () => {
+    for (const kind of ["icon", "color"] as const) {
+      const { main, view } = setup({ kind, clearLabel: "Remove type" });
+      const wrapper = main.parentElement!;
+      fireEvent.mouseEnter(wrapper);
+      const cls = wrapper.className.split(/\s+/);
+      expect(cls).toContain("rounded-md");
+      expect(cls).toContain("overflow-hidden");
+      expect(cls).toContain("border");
+      expect(cls).toContain("border-gray-300");
+      const clear = view.getByRole("button", { name: "Remove type" });
+      for (const b of [main, clear]) {
+        const own = b.className.split(/\s+/);
+        expect(own.filter((c) => /^rounded/.test(c) && c !== "rounded-none")).toEqual([]);
+        expect(own).not.toContain("border");
+        expect(own).not.toContain("border-gray-300");
+      }
+      expect(clear.className).toContain("bg-red-100");
+      expect(clear.className).toContain("hover:bg-red-200");
+      cleanup();
+    }
+  });
+
+  it("not hovered: wrapper does not carry the pill border", () => {
+    const { main } = setup();
+    expect(main.parentElement!.className.split(/\s+/)).not.toContain("border");
+    expect(main.className).toContain("rounded-md");
+  });
+
+  it("expanded adds ring-1 ring-sky-500 to main; collapsed does not", () => {
+    const a = setup({ expanded: true });
+    expect(a.main.className).toContain("ring-1");
+    expect(a.main.className).toContain("ring-sky-500");
+    cleanup();
+    const b = setup({ expanded: false });
+    expect(b.main.className.split(/\s+/)).not.toContain("ring-1");
+    expect(b.main.className.split(/\s+/)).not.toContain("ring-sky-500");
+  });
+
+  it("split: both inner buttons are rounded-none (beats global button radius)", () => {
+    const { main, view } = setup();
+    fireEvent.mouseEnter(main.parentElement!);
+    const clear = view.getByRole("button", { name: "Remove type" });
+    expect(main.className.split(/\s+/)).toContain("rounded-none");
+    expect(clear.className.split(/\s+/)).toContain("rounded-none");
+  });
+
+  it("expanded ring is inset only when split", () => {
+    const a = setup({ expanded: true });
+    expect(a.main.className.split(/\s+/)).not.toContain("ring-inset");
+    fireEvent.mouseEnter(a.main.parentElement!);
+    expect(a.main.className.split(/\s+/)).toContain("ring-inset");
+    expect(a.main.className.split(/\s+/)).toContain("ring-1");
+  });
+
+  it("split: child span fills the half edge to edge", () => {
+    const { main } = setup({ kind: "color" });
+    expect(main.className).not.toContain("[&>span]:rounded-none");
+    fireEvent.mouseEnter(main.parentElement!);
+    expect(main.className).toContain("[&>span]:rounded-none");
+    expect(main.className).toContain("[&>span]:border-0");
+  });
 });

@@ -233,11 +233,14 @@ export const ParticipantStylePanel = () => {
   }, [pickerPos, anchor]);
 
   // The name row is centred under the box; measure it to clamp it on screen.
-  // Its width changes with the label field (empty vs filled).
+  // Its width changes with the label field (empty vs filled). It runs after
+  // every render because the row mounts late (FloatingPortal renders its
+  // children one render after the anchor is set) and re-mounts when a picker
+  // closes; the equality guard stops the loop.
   useLayoutEffect(() => {
     const width = nameRowRef.current?.offsetWidth ?? 0;
     if (width !== nameRowWidth) setNameRowWidth(width);
-  }, [anchor, labelDraft, nameRowWidth]);
+  });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -500,6 +503,14 @@ export const ParticipantStylePanel = () => {
             }
           }}
         >
+          {/* Dims the whole diagram, selected box included. First child, so
+              every editor piece stacks above it. Never catches pointer
+              events: click-away and reselect still reach the diagram. */}
+          <div
+            aria-hidden="true"
+            data-testid="participant-editor-mask"
+            className="absolute inset-0 pointer-events-none bg-slate-900/[0.32]"
+          />
           {showStereotypeInput ? (
             <div
               className="absolute pointer-events-auto h-6 min-w-[104px] box-border flex items-center justify-center gap-0.5 px-2 rounded-full border border-solid border-gray-300 bg-white text-[12px] text-gray-900 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100"
@@ -661,77 +672,85 @@ export const ParticipantStylePanel = () => {
             )}
           </div>
 
-          <div
-            className="absolute flex flex-col items-start gap-2.5"
-            style={{
-              left: nameRowLeft,
-              top: anchor.bottom + NAME_ROW_GAP,
-            }}
-          >
+          {/* Hidden while a picker is open: the picker covers this spot. */}
+          {!openPicker && (
             <div
-              ref={nameRowRef}
-              data-testid="participant-name-row"
-              className="pointer-events-auto h-8 box-border flex items-center gap-1.5 px-1 bg-white rounded-lg shadow-[0_4px_14px_rgba(15,23,42,0.12),0_0_0_1px_rgba(15,23,42,0.08)]"
+              className="absolute flex flex-col items-center gap-2.5"
+              style={{
+                // Centred on the (clamped) name row, so the tooltip and the
+                // error block share its centre.
+                left: nameRowLeft + nameRowWidth / 2,
+                top: anchor.bottom + NAME_ROW_GAP,
+                transform: "translateX(-50%)",
+              }}
             >
-              <label htmlFor="zenuml-participant-name" className="sr-only">
-                Name
-              </label>
-              <input
-                id="zenuml-participant-name"
-                type="text"
-                value={nameDraft}
-                onChange={(e) => {
-                  setNameDraft(e.target.value);
-                  setNameError(null);
-                }}
-                aria-invalid={nameError ? true : undefined}
-                {...onEnterBlur(commitName, () =>
-                  setNameDraft(participantName),
-                )}
-                className={cn(
-                  rowInputClass,
-                  "w-[76px] font-semibold",
-                  nameError
-                    ? "border-red-600"
-                    : "border-transparent hover:border-gray-200",
-                )}
-              />
-              <span className="text-[12px] text-gray-600">as</span>
-              <label htmlFor="zenuml-participant-label" className="sr-only">
-                Display as
-              </label>
-              <input
-                id="zenuml-participant-label"
-                type="text"
-                value={labelDraft}
-                placeholder="Display name"
-                onChange={(e) => {
-                  setLabelDraft(e.target.value);
-                  setStyleError(null);
-                }}
-                {...onEnterBlur(commitLabel, () => setLabelDraft(currentLabel))}
-                className={cn(
-                  rowInputClass,
-                  labelDraft
-                    ? "w-[124px] border-gray-200"
-                    : "w-[104px] border-dashed border-slate-300",
-                )}
-              />
-            </div>
-
-            {error && (
               <div
-                role="alert"
-                className="pointer-events-auto max-w-[320px] px-2.5 py-1.5 box-border bg-white rounded-md text-[12px] text-red-700 shadow-[0_4px_14px_rgba(15,23,42,0.12),0_0_0_1px_rgba(220,38,38,0.35)]"
+                ref={nameRowRef}
+                data-testid="participant-name-row"
+                className="pointer-events-auto h-8 box-border flex items-center gap-1.5 px-1 bg-white rounded-lg shadow-[0_4px_14px_rgba(15,23,42,0.12),0_0_0_1px_rgba(15,23,42,0.08)]"
               >
-                {error}
+                <label htmlFor="zenuml-participant-name" className="sr-only">
+                  Name
+                </label>
+                <input
+                  id="zenuml-participant-name"
+                  type="text"
+                  value={nameDraft}
+                  onChange={(e) => {
+                    setNameDraft(e.target.value);
+                    setNameError(null);
+                  }}
+                  aria-invalid={nameError ? true : undefined}
+                  {...onEnterBlur(commitName, () =>
+                    setNameDraft(participantName),
+                  )}
+                  className={cn(
+                    rowInputClass,
+                    "w-[76px] font-semibold",
+                    nameError
+                      ? "border-red-600"
+                      : "border-transparent hover:border-gray-200",
+                  )}
+                />
+                <span className="text-[12px] text-gray-600">as</span>
+                <label htmlFor="zenuml-participant-label" className="sr-only">
+                  Display as
+                </label>
+                <input
+                  id="zenuml-participant-label"
+                  type="text"
+                  value={labelDraft}
+                  placeholder="Display name"
+                  onChange={(e) => {
+                    setLabelDraft(e.target.value);
+                    setStyleError(null);
+                  }}
+                  {...onEnterBlur(commitLabel, () =>
+                    setLabelDraft(currentLabel),
+                  )}
+                  className={cn(
+                    rowInputClass,
+                    labelDraft
+                      ? "w-[124px] border-gray-200"
+                      : "w-[104px] border-dashed border-slate-300",
+                  )}
+                />
               </div>
-            )}
 
-            <div className="invisible group-hover:visible group-focus-within:visible pointer-events-none px-2 py-[5px] bg-gray-800 rounded-md text-gray-50 text-[11px] font-mono whitespace-pre">
-              <code data-testid="participant-dsl-preview">{dslLine}</code>
+              {error && (
+                <div
+                  role="alert"
+                  className="pointer-events-auto max-w-[320px] px-2.5 py-1.5 box-border bg-white rounded-md text-[12px] text-red-700 shadow-[0_4px_14px_rgba(15,23,42,0.12),0_0_0_1px_rgba(220,38,38,0.35)]"
+                >
+                  {error}
+                </div>
+              )}
+
+              <div className="invisible group-hover:visible group-focus-within:visible pointer-events-none px-2 py-[5px] bg-gray-800 rounded-md text-gray-50 text-[11px] font-mono whitespace-pre">
+                <code data-testid="participant-dsl-preview">{dslLine}</code>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </FloatingPortal>

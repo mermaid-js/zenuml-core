@@ -107,7 +107,7 @@ export const Participant = (props: {
         "participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-sm font-normal leading-4 flex flex-col justify-center z-10 h-10 top-8",
         {
           selected: selected.includes(props.entity.name),
-          "ring-2 ring-sky-400":
+          "ring-1 ring-sky-400":
             selected.includes(props.entity.name) && !isEditingName,
           "cursor-pointer": mode === RenderMode.Dynamic && !isDefaultStarter,
         },
@@ -154,7 +154,7 @@ export const Participant = (props: {
         )}
 
         {!isDefaultStarter && (
-          <div className="h-5 group flex flex-col justify-center">
+          <div className="h-5 group flex flex-col items-center justify-center">
             {props.entity.stereotype && (
               <label className="interface leading-4">
                 «{props.entity.stereotype}»

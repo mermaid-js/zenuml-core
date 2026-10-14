@@ -129,4 +129,13 @@ describe("ColorPicker", () => {
     expect(onClose).toHaveBeenCalledTimes(2);
     expect(doc).not.toHaveBeenCalled();
   });
+
+  it("selected swatch has a 1px outer sky ring over a 2px white border", () => {
+    const { view } = setup("#1d4ed8");
+    const sel = view.getAllByRole("button", { pressed: true })[0];
+    expect(sel.className).toContain("shadow-[0_0_0_1px_#0ea5e9]");
+    expect(sel.className).not.toContain("shadow-[0_0_0_2px_#0ea5e9]");
+    expect(sel.className).toContain("border-2");
+    expect(sel.className).toContain("border-white");
+  });
 });

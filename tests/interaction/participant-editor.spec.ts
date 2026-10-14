@@ -396,6 +396,137 @@ test.describe("participant editor", () => {
     await expect.poll(() => lastCode(page)).toBe("A\nC\nA->C: Ping");
   });
 
+  test("dims the diagram with a click-through mask above it", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const mask = page.getByTestId("participant-editor-mask");
+    await expect(mask).toHaveCount(0);
+
+    await openPanel(page, "A");
+    await expect(mask).toBeVisible();
+    await expect(mask).toHaveCSS("background-color", "rgba(15, 23, 42, 0.32)");
+    await expect(mask).toHaveCSS("pointer-events", "none");
+
+    // Clicks pass through the mask and reselect another participant.
+    const panel = page.getByTestId("participant-style-panel");
+    await openPanel(page, "C");
+    await expect(panel).toHaveAttribute("aria-label", "Edit participant C");
+    await expect(mask).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(panel).toHaveCount(0);
+    await expect(mask).toHaveCount(0);
+  });
+
+  test("centres the name row, DSL tooltip and error on the participant box", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1200, height: 700 });
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const panel = page.getByTestId("participant-style-panel");
+    const centreX = async (loc: ReturnType<Page["locator"]>) => {
+      const b = await loc.boundingBox();
+      expect(b).toBeTruthy();
+      return b!.x + b!.width / 2;
+    };
+
+    // Widen A with a long display name so box and row widths differ.
+    await openPanel(page, "A");
+    const label = panel.getByLabel("Display as", { exact: true });
+    await label.fill("A very long display name for Alice");
+    await label.press("Enter");
+    await expect.poll(() => lastCode(page)).toContain("as");
+    await page.keyboard.press("Escape");
+    await expect(panel).toHaveCount(0);
+
+    for (const id of ["C", "A"]) {
+      await openPanel(page, id);
+      await expect(panel).toBeVisible();
+      const box = page.locator(`.participant[data-participant-id="${id}"]`);
+      const row = panel.getByTestId("participant-name-row");
+      // Show the hover-only DSL tooltip, then trigger the error block.
+      await row.hover();
+      const dsl = panel.getByTestId("participant-dsl-preview");
+      await expect(dsl).toBeVisible();
+      const name = panel.getByLabel("Name", { exact: true });
+      await name.fill(id === "A" ? "C" : "A");
+      await name.press("Enter");
+      const alert = panel.getByRole("alert");
+      await expect(alert).toBeVisible();
+
+      const boxX = await centreX(box);
+      const rowBox = (await row.boundingBox())!;
+      // Skip clamped cases: a row that cannot fit centred is pushed inward.
+      const clamped = boxX - rowBox.width / 2 < 8;
+      expect(clamped, `${id} row is clamped`).toBe(false);
+      expect(Math.abs((await centreX(row)) - boxX), `${id} row`).toBeLessThan(
+        1,
+      );
+      expect(Math.abs((await centreX(dsl)) - boxX), `${id} dsl`).toBeLessThan(
+        1,
+      );
+      expect(
+        Math.abs((await centreX(alert)) - boxX),
+        `${id} alert`,
+      ).toBeLessThan(1);
+      await name.press("Escape");
+      await expect(panel).toHaveCount(0);
+    }
+  });
+
+  test("hides the name row, tooltip and error while a picker is open", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const panel = page.getByTestId("participant-style-panel");
+    await openPanel(page, "A");
+    const row = panel.getByTestId("participant-name-row");
+    const dsl = panel.getByTestId("participant-dsl-preview");
+
+    // Produce an error so all three pieces exist before a picker opens.
+    const name = panel.getByLabel("Name", { exact: true });
+    await name.fill("C");
+    await name.press("Enter");
+    await row.hover();
+    await expect(panel.getByRole("alert")).toBeVisible();
+    await expect(dsl).toBeVisible();
+
+    for (const [slot, picker] of [
+      [iconSlot, typePicker],
+      [colorSlot, colorPicker],
+    ] as const) {
+      await slot(page).click();
+      await expect(picker(page)).toBeVisible();
+      await expect(row).toHaveCount(0);
+      await expect(dsl).toHaveCount(0);
+      await expect(panel.getByRole("alert")).toHaveCount(0);
+
+      // Escape closes the picker and the name row returns.
+      await page.keyboard.press("Escape");
+      await expect(picker(page)).toHaveCount(0);
+      await expect(row).toBeVisible();
+      await expect(panel).toBeVisible();
+    }
+
+    // Picking also brings the row back.
+    await iconSlot(page).click();
+    await expect(row).toHaveCount(0);
+    await typePicker(page)
+      .getByRole("button", { name: "Database", exact: true })
+      .click();
+    await expect(typePicker(page)).toHaveCount(0);
+    await expect(row).toBeVisible();
+
+    await colorSlot(page).click();
+    await expect(row).toHaveCount(0);
+    await colorPicker(page)
+      .getByRole("button", { name: "Blue", exact: true })
+      .click();
+    await expect(colorPicker(page)).toHaveCount(0);
+    await expect(row).toBeVisible();
+  });
+
   test("does not carry an uncommitted draft over to another participant", async ({
     page,
   }) => {

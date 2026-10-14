@@ -1,4 +1,4 @@
-import { participantPreviewAtom } from "@/store/Store";
+import { participantPreviewAtom, selectedAtom } from "@/store/Store";
 import { act, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { describe, expect, it } from "vitest";
@@ -46,5 +46,21 @@ describe("Participant preview", () => {
     });
     expect(box().style.backgroundColor).toBe("rgb(253, 164, 175)");
     expect(box().style.color).toBe("#000");
+  });
+});
+
+describe("Participant selection ring", () => {
+  it("draws a 1px sky ring when selected", () => {
+    const store = createStore();
+    store.set(selectedAtom, ["A"]);
+    const view = render(
+      <Provider store={store}>
+        <Participant entity={{ name: "A" }} />
+      </Provider>,
+    );
+    const box = view.container.querySelector<HTMLElement>(".participant")!;
+    expect(box.classList.contains("ring-1")).toBe(true);
+    expect(box.classList.contains("ring-sky-400")).toBe(true);
+    expect(box.classList.contains("ring-2")).toBe(false);
   });
 });
