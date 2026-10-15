@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
+import { firstRootGapClearanceAtom } from "../MessageLayer/gapHandleAtoms";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 
 export const LifeLine = (props: {
@@ -20,6 +21,7 @@ export const LifeLine = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const coordinates = useAtomValue(coordinatesAtom);
   const verticalCoordinates = useAtomValue(verticalCoordinatesAtom);
+  const firstRootGapClearance = useAtomValue(firstRootGapClearanceAtom);
   const setLifelineReady = useSetAtom(lifelineReadyAtom);
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
@@ -31,7 +33,10 @@ export const LifeLine = (props: {
       const creationTop = verticalCoordinates.getCreationTop(props.entity.name);
       setTop(
         creationTop != null
-          ? Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, creationTop)
+          ? Math.max(
+              PARTICIPANT_TOP_SPACE_FOR_GROUP,
+              creationTop + firstRootGapClearance,
+            )
           : PARTICIPANT_TOP_SPACE_FOR_GROUP,
       );
     }
@@ -45,7 +50,12 @@ export const LifeLine = (props: {
         );
       }, 0);
     }
-  }, [props.entity.name, verticalCoordinates, setLifelineReady]);
+  }, [
+    props.entity.name,
+    verticalCoordinates,
+    firstRootGapClearance,
+    setLifelineReady,
+  ]);
 
   return (
     <div
