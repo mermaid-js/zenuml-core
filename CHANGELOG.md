@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.7.1
+
+### Patch Changes
+
+- [#478](https://github.com/mermaid-js/zenuml-core/pull/478) [`ffaa5a1`](https://github.com/mermaid-js/zenuml-core/commit/ffaa5a1a899cd4786c09b60cf657846416827854) Thanks [@MrCoder](https://github.com/MrCoder)! - Fix created participants in the HTML renderer when message or divider insertion is enabled: the «create» arrow now meets the created participant's box at its vertical centre, and the activation bar starts at the box bottom instead of floating 12px below it. Regression since 4.6.1.
+
 ## 4.7.0
 
 ### Minor Changes
