@@ -1,5 +1,17 @@
 # @zenuml/core
 
+## 4.7.2
+
+### Patch Changes
+
+- [#474](https://github.com/mermaid-js/zenuml-core/pull/474) [`072d764`](https://github.com/mermaid-js/zenuml-core/commit/072d76450ae8ece50045d750b2e823b28370a226) Thanks [@MrCoder](https://github.com/MrCoder)! - While a menu or the participant editor is open, the first press elsewhere only closes it; the next press acts. For example, with a gap's insert menu open, a click on a participant or a message, or a right-click on another gap, now only closes the menu. Escape closes whichever menu, editor or drag is open from one place, and releasing the mouse right after Escape no longer completes a cancelled message reorder.
+
+- [#473](https://github.com/mermaid-js/zenuml-core/pull/473) [`a903035`](https://github.com/mermaid-js/zenuml-core/commit/a9030352179f1fc4c911cf8fc7bd2f1f0f42b271) Thanks [@MrCoder](https://github.com/MrCoder)! - While a message's style menu is open, gap handles, the divider menu, occurrence create-drag, collapse buttons and participant insertion no longer react, and only the selected message shows a reorder handle; a press on them only closes the menu. A selected message whose menu is closed blocks nothing. While a gap's insert menu is open, other gap handles and on-canvas controls no longer react, and only one gap menu can be open at a time. Participant insert buttons also hide while a message is being created or reordered by drag.
+
+- [#475](https://github.com/mermaid-js/zenuml-core/pull/475) [`75cbb48`](https://github.com/mermaid-js/zenuml-core/commit/75cbb485cb25ca20caadedc3c52809c6d130cc5e) Thanks [@MrCoder](https://github.com/MrCoder)! - While a message is being reordered by drag, the other messages no longer reveal their reorder handles on hover, and while a message is being created by drag, occurrences no longer show the "Drag to create a message" hint. The occurrence collapse button no longer appears on hover while another interaction (the participant editor, a menu or a drag) owns the diagram. Participant insert buttons now stay available while a participant is only highlighted (participant style editing off). In static rendering, clicking a participant no longer highlights it.
+
+- [#472](https://github.com/mermaid-js/zenuml-core/pull/472) [`6a5fc54`](https://github.com/mermaid-js/zenuml-core/commit/6a5fc54160c6bc8497fed56ce418ebb1d2a169d0) Thanks [@MrCoder](https://github.com/MrCoder)! - While the participant editor is open, or while a message is being created or reordered by drag, other diagram controls no longer react. Gap handles, the divider menu, occurrence create-drag, message reorder handles and fragment/occurrence collapse buttons stay inactive; a press on them only closes the participant editor. While a label is in edit mode, a press on a collapse button now only ends the edit; press again to collapse. Collapse keeps working in static (mermaid) rendering.
+
 ## 4.7.1
 
 ### Patch Changes
