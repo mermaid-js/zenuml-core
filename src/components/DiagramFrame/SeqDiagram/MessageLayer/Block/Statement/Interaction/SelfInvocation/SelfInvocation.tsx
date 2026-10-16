@@ -5,7 +5,7 @@ import {
   RenderMode,
   selectedMessageAtom,
 } from "@/store/Store";
-import { useCan } from "@/store/interaction/useCan";
+import { useCanReorderMessage } from "@/store/interaction/useCan";
 import { useAtomValue, useSetAtom } from "jotai";
 import { CSSProperties, useMemo, useRef } from "react";
 import { Numbering } from "../../../../Numbering";
@@ -35,8 +35,6 @@ export const SelfInvocation = (props: {
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const messageReorderEnabled = useAtomValue(enableMessageReorderAtom);
   const mode = useAtomValue(modeAtom);
-  const canReorder = useCan("reorder");
-  const reorderEnabled = messageReorderEnabled && canReorder;
 
   const content = isAsync ? props.context?.content() : undefined;
   const assignee = isAsync ? "" : props.context?.Assignment()?.getText() || "";
@@ -55,6 +53,8 @@ export const SelfInvocation = (props: {
     selectedMessage !== null &&
     selectedMessage.start === labelPosition[0] &&
     selectedMessage.end === labelPosition[1];
+  const canReorder = useCanReorderMessage(isSelected);
+  const reorderEnabled = messageReorderEnabled && canReorder;
 
   const onClick = () => {
     if (mode === RenderMode.Static) return;

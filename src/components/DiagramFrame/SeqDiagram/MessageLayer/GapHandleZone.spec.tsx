@@ -12,6 +12,10 @@ import {
   RenderMode,
   selectedAtom,
 } from "@/store/Store";
+import {
+  enterMenuAtom,
+  interactionAtom,
+} from "@/store/interaction/interactionAtom";
 import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { describe, expect, it } from "vitest";
@@ -108,5 +112,86 @@ describe("GapHandleZone interaction policy", () => {
       });
     }
     expect(store.get(createMessageDragAtom)).toBeNull();
+  });
+});
+
+describe("GapHandleZone open menus (P2)", () => {
+  const openGapMenu = (view: ReturnType<typeof render>, index: number) => {
+    const zone = view.getByTestId(`message-gap-hover-${index}`);
+    act(() => {
+      fireEvent.contextMenu(zone);
+    });
+    return zone;
+  };
+
+  it("enters gapMenu when the divider menu opens and exits on Escape", () => {
+    const { store, view } = renderGaps();
+    const zone = openGapMenu(view, 1);
+    expect(view.getByTestId("gap-insert-menu-1")).toBeTruthy();
+    expect(store.get(interactionAtom).kind).toBe("gapMenu");
+    act(() => {
+      fireEvent.keyDown(zone, { key: "Escape" });
+    });
+    expect(!!view.queryByTestId("gap-insert-menu-1")).toBe(false);
+    expect(store.get(interactionAtom).kind).toBe("idle");
+  });
+
+  it("does not offer another gap's create handle while a gap menu is open", () => {
+    const { view } = renderGaps();
+    openGapMenu(view, 1);
+    const other = view.getByTestId("message-gap-hover-0");
+    act(() => {
+      fireEvent.pointerEnter(other, { clientX: 0, clientY: 0 });
+      fireEvent.pointerMove(other, { clientX: 0, clientY: 0 });
+    });
+    expect(
+      !!view.container.querySelector(
+        '[data-testid^="message-create-handle-0-"]',
+      ),
+    ).toBe(false);
+  });
+
+  it("a right-click on another gap closes the open menu and opens that gap's", () => {
+    const { store, view } = renderGaps();
+    openGapMenu(view, 1);
+    // Browser order: pointerdown (closes the open menu), then contextmenu.
+    act(() => {
+      fireEvent.pointerDown(view.getByTestId("message-gap-hover-0"));
+    });
+    openGapMenu(view, 0);
+    expect(!!view.queryByTestId("gap-insert-menu-1")).toBe(false);
+    expect(!!view.queryByTestId("gap-insert-menu-0")).toBe(true);
+    expect(store.get(interactionAtom).kind).toBe("gapMenu");
+  });
+
+  it("does not open a second gap menu without the closing press", () => {
+    const { view } = renderGaps();
+    openGapMenu(view, 1);
+    openGapMenu(view, 0);
+    expect(!!view.queryByTestId("gap-insert-menu-0")).toBe(false);
+    expect(!!view.queryByTestId("gap-insert-menu-1")).toBe(true);
+  });
+
+  it("still inserts a divider from the open menu", () => {
+    const { store, view } = renderGaps();
+    openGapMenu(view, 1);
+    act(() => {
+      fireEvent.click(view.getByTestId("divider-insert-1"));
+    });
+    expect(store.get(codeAtom)).toContain("==");
+    expect(store.get(interactionAtom).kind).toBe("idle");
+  });
+
+  it("offers no create handle and no divider menu while the message menu is open", () => {
+    const { store, view } = renderGaps();
+    act(() => {
+      store.set(enterMenuAtom, { kind: "messageMenu", start: 1, end: 2 });
+    });
+    const zone = hoverFirstGap(view);
+    expect(!!createHandle(view)).toBe(false);
+    act(() => {
+      fireEvent.contextMenu(zone);
+    });
+    expect(!!view.queryByTestId("gap-insert-menu-1")).toBe(false);
   });
 });

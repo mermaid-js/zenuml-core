@@ -25,6 +25,11 @@ import {
   textEditingAtom,
 } from "@/store/Store";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  enterMenuAtom,
+  exitMenuAtom,
+  interactionAtom,
+} from "@/store/interaction/interactionAtom";
 import { FloatingPortal, useFloating } from "@floating-ui/react";
 import { useOutsideClick } from "@/functions/useOutsideClick";
 
@@ -66,7 +71,16 @@ export const StylePanel = () => {
   const themeClasses = Array.from(diagramElement?.classList ?? [])
     .filter((name) => name.startsWith("theme-"))
     .join(" ");
-  const [isOpen, setIsOpen] = useState(false);
+  // The open state is the diagram's interaction state (ADR 0002, P2): the
+  // menu is open while the interaction is `messageMenu`. A selected message
+  // with its menu closed is `idle` and blocks nothing.
+  const isOpen = useAtomValue(interactionAtom).kind === "messageMenu";
+  const enterMenu = useSetAtom(enterMenuAtom);
+  const exitMenu = useSetAtom(exitMenuAtom);
+  const closeMenu = useCallback(
+    () => exitMenu({ kind: "messageMenu" }),
+    [exitMenu],
+  );
   const [existingStyles, setExistingStyles] = useState<string[]>([]);
   const [hasMessageContext, setHasMessageContext] = useState(false);
 
@@ -89,11 +103,13 @@ export const StylePanel = () => {
 
   const { refs, floatingStyles } = useFloating({
     open: isOpen,
-    onOpenChange: setIsOpen,
+    onOpenChange: (open) => {
+      if (!open) closeMenu();
+    },
   });
 
   const handleClick = (style: string) => {
-    setIsOpen(false);
+    closeMenu();
     if (!hasMessageContext) return;
     updateCode(
       toggleMessageStyle({
@@ -139,16 +155,16 @@ export const StylePanel = () => {
     message.currentType = targetType;
     message.line = nextLine;
     if (labelOffset >= 0 && labelText) {
-      setSelectedMessage({
-        start: message.lineHead + labelOffset,
-        end: message.lineHead + labelOffset + labelText.length - 1,
-        token: Date.now(),
-      });
+      const start = message.lineHead + labelOffset;
+      const end = start + labelText.length - 1;
+      setSelectedMessage({ start, end, token: Date.now() });
+      // The menu stays open on the re-typed message.
+      enterMenu({ kind: "messageMenu", start, end });
     }
   };
 
   const handleRenameClick = () => {
-    setIsOpen(false);
+    closeMenu();
     const message = messageData.current;
     if (message.labelStart < 0 || message.labelEnd < 0) {
       return;
@@ -161,7 +177,7 @@ export const StylePanel = () => {
   };
 
   const handleWrapClick = (type: WrapFragmentType) => {
-    setIsOpen(false);
+    closeMenu();
     const message = messageData.current;
     const next = wrapMessageInFragment({
       code,
@@ -179,7 +195,7 @@ export const StylePanel = () => {
   };
 
   useOutsideClick(refs.floating.current, (event) => {
-    setIsOpen(false);
+    closeMenu();
     // Keep this diagram's selected message through capture while its label
     // receives a click. The label itself takes that click into editing.
     const clickedMessage = (event.target as Element | null)?.closest?.(
@@ -249,11 +265,19 @@ export const StylePanel = () => {
         });
         refs.setReference(element);
         setHasMessageContext(Boolean(context));
-        setIsOpen(true);
+        enterMenu({
+          kind: "messageMenu",
+          start: message.labelStart >= 0 ? message.labelStart : message.start,
+          end:
+            message.labelEnd >= 0
+              ? message.labelEnd
+              : (context?.stop?.stop ?? message.start),
+        });
       }, 0);
     });
   }, [
     code,
+    enterMenu,
     refs,
     setOnMessageClick,
     setSelectedMessage,
@@ -263,26 +287,26 @@ export const StylePanel = () => {
 
   useEffect(() => {
     if (!selectedMessage) {
-      setIsOpen(false);
+      closeMenu();
     }
-  }, [selectedMessage]);
+  }, [closeMenu, selectedMessage]);
 
   useEffect(() => {
-    if (textEditing) setIsOpen(false);
-  }, [textEditing]);
+    if (textEditing) closeMenu();
+  }, [closeMenu, textEditing]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") {
         return;
       }
-      setIsOpen(false);
+      closeMenu();
       setSelectedMessage(null);
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [setSelectedMessage]);
+  }, [closeMenu, setSelectedMessage]);
 
   const [openSubmenu, setOpenSubmenu] = useState<"type" | "wrap" | null>(null);
   const submenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

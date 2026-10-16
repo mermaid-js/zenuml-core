@@ -4,7 +4,9 @@ import {
   modeAtom,
   RenderMode,
   selectedAtom,
+  selectedMessageAtom,
 } from "@/store/Store";
+import { enterMenuAtom } from "@/store/interaction/interactionAtom";
 import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { mock } from "bun:test";
@@ -87,6 +89,28 @@ describe("Fragment CollapseButton interaction policy", () => {
       fireEvent.click(icon);
     });
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("does nothing while the message menu is open", () => {
+    const { onClick, icon } = renderButton((store) =>
+      store.set(enterMenuAtom, { kind: "messageMenu", start: 1, end: 2 }),
+    );
+    act(() => {
+      fireEvent.pointerDown(icon);
+      fireEvent.click(icon);
+    });
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("still collapses while a message is selected with its menu closed", () => {
+    const { onClick, icon } = renderButton((store) =>
+      store.set(selectedMessageAtom, { start: 1, end: 2, token: 1 }),
+    );
+    act(() => {
+      fireEvent.pointerDown(icon);
+      fireEvent.click(icon);
+    });
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 
   it("does nothing while a create-message drag runs", () => {

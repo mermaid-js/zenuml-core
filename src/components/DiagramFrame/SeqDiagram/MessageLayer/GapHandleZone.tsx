@@ -14,6 +14,11 @@ import {
 } from "@/store/Store";
 import { centerOf } from "./Block/Statement/utils";
 import { useCan } from "@/store/interaction/useCan";
+import {
+  enterMenuAtom,
+  exitMenuAtom,
+  interactionAtom,
+} from "@/store/interaction/interactionAtom";
 import { insertDividerInDsl } from "@/utils/insertDividerInDsl";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
@@ -21,7 +26,14 @@ import {
   FIRST_GAP_CLEARANCE,
   gapHandlesShownAtom,
 } from "./gapHandleAtoms";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 const GAP_HEIGHT_EMPTY = 48;
 const HANDLE_SIZE = 12;
@@ -60,7 +72,18 @@ export const GapHandleZone = (props: {
   const [tooltipParticipant, setTooltipParticipant] = useState<string | null>(
     null,
   );
-  const [menuOpen, setMenuOpen] = useState(false);
+  // The insert menu's open state is the diagram's interaction state (ADR
+  // 0002, P2): at most one gap menu is open, and while it is, the policy
+  // blocks every other affordance. The menu's own item is not gated.
+  const menuId = useId();
+  const interaction = useAtomValue(interactionAtom);
+  const menuOpen = interaction.kind === "gapMenu" && interaction.id === menuId;
+  const enterMenu = useSetAtom(enterMenuAtom);
+  const exitMenu = useSetAtom(exitMenuAtom);
+  const closeMenu = useCallback(
+    () => exitMenu({ kind: "gapMenu", id: menuId }),
+    [exitMenu, menuId],
+  );
   const [menuX, setMenuX] = useState(0);
   const activeParticipantRef = useRef<string | null>(null);
   const zoneRef = useRef<HTMLDivElement>(null);
@@ -83,18 +106,20 @@ export const GapHandleZone = (props: {
     setActiveParticipant(null);
     activeParticipantRef.current = null;
     setTooltipParticipant(null);
-    setMenuOpen(false);
   }, [canCreate]);
+
+  // Close this gap's menu when the zone unmounts.
+  useEffect(() => closeMenu, [closeMenu]);
 
   useEffect(() => {
     if (!menuOpen) return;
     menuItemRef.current?.focus();
     const closeOutside = (event: PointerEvent) => {
-      if (!zoneRef.current?.contains(event.target as Node)) setMenuOpen(false);
+      if (!zoneRef.current?.contains(event.target as Node)) closeMenu();
     };
     document.addEventListener("pointerdown", closeOutside);
     return () => document.removeEventListener("pointerdown", closeOutside);
-  }, [menuOpen]);
+  }, [closeMenu, menuOpen]);
 
   const participants = useMemo(
     () => OrderedParticipants(rootContext).filter((p) => p.name !== _STARTER_),
@@ -104,6 +129,9 @@ export const GapHandleZone = (props: {
   const gapHandlesShown = useAtomValue(gapHandlesShownAtom);
   const canCreateMessage = canCreate && configuredMessageCreation;
   const canInsertDivider = canCreate && dividerInsertionEnabled;
+  // The open menu's own item is its active surface: the policy blocks
+  // `createMessage` while the menu is open, but this item must still work.
+  const canUseMenuItem = menuOpen && dividerInsertionEnabled;
 
   const updateNearest = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!canCreateMessage || dragState || menuOpen) return;
@@ -165,7 +193,7 @@ export const GapHandleZone = (props: {
     (event: React.MouseEvent) => {
       event.preventDefault();
       event.stopPropagation();
-      if (!canInsertDivider) return;
+      if (!canUseMenuItem) return;
       const result = insertDividerInDsl({
         code,
         blockContext: props.blockContext,
@@ -181,7 +209,7 @@ export const GapHandleZone = (props: {
     },
     [
       code,
-      canInsertDivider,
+      canUseMenuItem,
       onContentChange,
       props.blockContext,
       props.insertIndex,
@@ -250,7 +278,7 @@ export const GapHandleZone = (props: {
         ),
       ),
     );
-    setMenuOpen(true);
+    enterMenu({ kind: "gapMenu", id: menuId });
   };
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -264,7 +292,7 @@ export const GapHandleZone = (props: {
     if (menuOpen && event.key === "Escape") {
       event.preventDefault();
       event.stopPropagation();
-      setMenuOpen(false);
+      closeMenu();
       zoneRef.current?.focus();
     } else if (
       canInsertDivider &&
@@ -335,7 +363,7 @@ export const GapHandleZone = (props: {
             Drag from {activeParticipant} to a participant
           </div>
         )}
-        {menuOpen && canInsertDivider && (
+        {canUseMenuItem && (
           <div
             role="menu"
             data-testid={`gap-insert-menu-${props.insertIndex}`}
@@ -349,8 +377,8 @@ export const GapHandleZone = (props: {
               data-testid={`divider-insert-${props.insertIndex}`}
               className="block w-full rounded px-2 py-1 text-left text-xs text-slate-800 hover:bg-slate-100 focus:bg-slate-100 focus:outline-none"
               onClick={(event) => {
-                setMenuOpen(false);
                 insertDivider(event);
+                closeMenu();
               }}
             >
               Insert divider
@@ -378,8 +406,10 @@ export const GapHandleZone = (props: {
         onPointerLeave={handlePointerLeave}
         onContextMenu={handleContextMenu}
         onKeyDown={handleKeyDown}
-        tabIndex={canInsertDivider ? 0 : undefined}
-        aria-label={canInsertDivider ? "Insertion options" : undefined}
+        tabIndex={canInsertDivider || menuOpen ? 0 : undefined}
+        aria-label={
+          canInsertDivider || menuOpen ? "Insertion options" : undefined
+        }
       >
         {renderHandles()}
       </div>
@@ -418,8 +448,10 @@ export const GapHandleZone = (props: {
         onPointerLeave={handlePointerLeave}
         onContextMenu={handleContextMenu}
         onKeyDown={handleKeyDown}
-        tabIndex={canInsertDivider ? 0 : undefined}
-        aria-label={canInsertDivider ? "Insertion options" : undefined}
+        tabIndex={canInsertDivider || menuOpen ? 0 : undefined}
+        aria-label={
+          canInsertDivider || menuOpen ? "Insertion options" : undefined
+        }
       >
         {renderHandles()}
       </div>

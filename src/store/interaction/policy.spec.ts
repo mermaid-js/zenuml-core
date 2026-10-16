@@ -11,7 +11,13 @@ import {
 } from "@/store/Store";
 import { createStore } from "jotai";
 import { describe, expect, it } from "vitest";
-import { canAtom, interactionAtom } from "./interactionAtom";
+import {
+  canAtom,
+  enterMenuAtom,
+  exitMenuAtom,
+  interactionAtom,
+  openMenuAtom,
+} from "./interactionAtom";
 import { CAPABILITIES, can, INTERACTION_KINDS, POLICY } from "./policy";
 
 const DRAG = {
@@ -50,9 +56,14 @@ describe("POLICY table", () => {
     expect(POLICY.reorderDrag.createMessage).toBe(false);
   });
 
-  it("blocks everything outside the open gap menu", () => {
+  it("blocks everything while a gap menu is open (its own item is ungated)", () => {
     const allowed = CAPABILITIES.filter((cap) => POLICY.gapMenu[cap]);
-    expect(allowed).toEqual(["createMessage"]);
+    expect(allowed).toEqual([]);
+  });
+
+  it("allows only select, reorder and text edit while the message menu is open", () => {
+    const allowed = CAPABILITIES.filter((cap) => POLICY.messageMenu[cap]);
+    expect(allowed).toEqual(["select", "reorder", "textEdit"]);
   });
 });
 
@@ -114,10 +125,10 @@ describe("interactionAtom (derived from existing atoms in P1)", () => {
     expect(store.get(interactionAtom).kind).toBe("reorderDrag");
   });
 
-  it("is messageMenu while a message is selected", () => {
+  it("stays idle while a message is selected but its menu is closed", () => {
     const store = createStore();
     store.set(selectedMessageAtom, { start: 1, end: 2, token: 1 });
-    expect(store.get(interactionAtom).kind).toBe("messageMenu");
+    expect(store.get(interactionAtom).kind).toBe("idle");
   });
 
   it("canAtom combines state, mode and the text-edit overlay", () => {
@@ -132,5 +143,64 @@ describe("interactionAtom (derived from existing atoms in P1)", () => {
     store.set(activeTextEditorsAtom, new Set());
     store.set(modeAtom, RenderMode.Static);
     expect(store.get(canAtom("reorder"))).toBe(false);
+  });
+});
+
+describe("stored menu state (P2)", () => {
+  it("is messageMenu while the message menu is open", () => {
+    const store = createStore();
+    store.set(enterMenuAtom, { kind: "messageMenu", start: 1, end: 2 });
+    expect(store.get(interactionAtom)).toEqual({
+      kind: "messageMenu",
+      start: 1,
+      end: 2,
+    });
+    store.set(exitMenuAtom, { kind: "messageMenu" });
+    expect(store.get(interactionAtom)).toEqual({ kind: "idle" });
+  });
+
+  it("is gapMenu while a gap menu is open", () => {
+    const store = createStore();
+    store.set(enterMenuAtom, { kind: "gapMenu", id: "g1" });
+    expect(store.get(interactionAtom)).toEqual({ kind: "gapMenu", id: "g1" });
+  });
+
+  it("R1: entering a menu exits the menu that was open", () => {
+    const store = createStore();
+    store.set(enterMenuAtom, { kind: "messageMenu", start: 1, end: 2 });
+    store.set(enterMenuAtom, { kind: "gapMenu", id: "g1" });
+    expect(store.get(openMenuAtom)).toEqual({ kind: "gapMenu", id: "g1" });
+  });
+
+  it("an exit only closes the menu it names", () => {
+    const store = createStore();
+    store.set(enterMenuAtom, { kind: "gapMenu", id: "g1" });
+    store.set(exitMenuAtom, { kind: "gapMenu", id: "g2" });
+    store.set(exitMenuAtom, { kind: "messageMenu" });
+    expect(store.get(openMenuAtom)).toEqual({ kind: "gapMenu", id: "g1" });
+    store.set(exitMenuAtom, { kind: "gapMenu", id: "g1" });
+    expect(store.get(openMenuAtom)).toBeNull();
+  });
+
+  it("drags and the participant editor win over a stored menu", () => {
+    const store = createStore();
+    store.set(enterMenuAtom, { kind: "messageMenu", start: 1, end: 2 });
+    store.set(createMessageDragAtom, DRAG);
+    expect(store.get(interactionAtom).kind).toBe("createDrag");
+    store.set(createMessageDragAtom, null);
+    store.set(enableParticipantStyleEditingAtom, true);
+    store.set(selectedAtom, ["A"]);
+    expect(store.get(interactionAtom).kind).toBe("participantEditor");
+  });
+
+  it("blocks create, collapse and insert participant while the message menu is open", () => {
+    const store = createStore();
+    store.set(enterMenuAtom, { kind: "messageMenu", start: 1, end: 2 });
+    expect(store.get(canAtom("createMessage"))).toBe(false);
+    expect(store.get(canAtom("collapse"))).toBe(false);
+    expect(store.get(canAtom("insertParticipant"))).toBe(false);
+    expect(store.get(canAtom("hoverAffordance"))).toBe(false);
+    expect(store.get(canAtom("reorder"))).toBe(true);
+    expect(store.get(canAtom("select"))).toBe(true);
   });
 });

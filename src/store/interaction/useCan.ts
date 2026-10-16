@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai";
 import { useRef } from "react";
-import { canAtom } from "./interactionAtom";
+import { canAtom, interactionAtom } from "./interactionAtom";
 import type { Capability } from "./policy";
 
 /**
@@ -8,6 +8,16 @@ import type { Capability } from "./policy";
  * state allows `cap`. Callers still AND their own embedder flag.
  */
 export const useCan = (cap: Capability): boolean => useAtomValue(canAtom(cap));
+
+/**
+ * `reorder` for one message. While the message menu is open, only the
+ * selected message (the one the menu belongs to) can be reordered.
+ */
+export const useCanReorderMessage = (isSelected: boolean): boolean => {
+  const canReorder = useCan("reorder");
+  const kind = useAtomValue(interactionAtom).kind;
+  return canReorder && (kind !== "messageMenu" || isSelected);
+};
 
 /**
  * Gate a click-activated control on the state at the moment of the press.
