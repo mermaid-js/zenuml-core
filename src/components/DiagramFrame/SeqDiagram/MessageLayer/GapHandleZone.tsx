@@ -5,10 +5,8 @@ import {
   createMessageDragAtom,
   diagramElementAtom,
   enableDividerInsertionAtom,
-  modeAtom,
   onContentChangeAtom,
   pendingEditableRangeAtom,
-  RenderMode,
   rootContextAtom,
   selectedAtom,
   selectedMessageAtom,
@@ -38,7 +36,6 @@ export const GapHandleZone = (props: {
   isEmpty?: boolean;
   isFirstRootGap?: boolean;
 }) => {
-  const mode = useAtomValue(modeAtom);
   const dividerInsertionEnabled = useAtomValue(enableDividerInsertionAtom);
   const textEditing = useAtomValue(textEditingAtom);
   // Mode and text editing are part of the policy; the embedder flags above
