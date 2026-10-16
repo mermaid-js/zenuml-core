@@ -138,6 +138,7 @@ export const Participant = (props: {
           : undefined
       }
       data-participant-id={props.entity.name}
+      data-cap="select"
     >
       {isParticipantDebug() && (
         <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-8 h-[2px] bg-amber-700">

@@ -1,7 +1,7 @@
 # 0002 — One interaction state and a capability policy for on-canvas controls
 
 Date: 2026-10-14
-Status: Accepted (P1 and P2 implemented; P3–P4 are follow-ups)
+Status: Accepted (P1, P2 and P3 implemented; P4 is a follow-up)
 
 ## Context
 
@@ -148,9 +148,11 @@ Notes on the table:
   controls use `useCapClick(cap, onClick)`, which decides on the state at
   `pointerdown`: the editor's click-away closes it on `pointerdown`, so a
   check at `click` time would let the same press also run the control.
-- **B — input gate.** One capture-phase `pointerdown` listener on the diagram
-  root reads the target's `data-cap`. When the current state does not allow
-  it, the listener consumes the event and exits the state (R2). P3.
+- **B — input gate.** One capture-phase `pointerdown` listener reads the
+  target's `data-cap`. When the current state does not allow it, the
+  listener consumes the press and exits the state (R2). Implemented in P3
+  (`src/store/interaction/InteractionController.tsx`); see P3 below for
+  where the listener lives.
 
 ### Phases
 
@@ -200,18 +202,124 @@ Notes on the table:
   - **`hoverAffordance` has no consumer yet.** The column is set; P4 wires
     it.
 
-- **P3 (follow-up).** Root capture gate (B) with `data-cap` attributes;
-  delete the scattered Escape / click-away listeners.
+- **P3 (done).** `InteractionController`, mounted once in `SeqDiagram`
+  (Dynamic mode), owns all input that exits a state:
+
+  ```
+  document pointerdown (capture):
+    clear the selected message unless the press is on it or in its menu
+    if textEditing or state is idle / a drag: stop
+    if target is inside [data-interaction-surface=<state.kind>]: stop
+    cap = closest [data-cap] inside the diagram
+    if cap and !can(state, cap): preventDefault, stopPropagation,
+                                 swallow the press's click / contextmenu
+    blur a focused element in the surface      // commits a draft
+    exit(state, { type: "press", target })     // listeners, then model
+  document keydown (bubble), Escape:
+    if !textEditing: exit(state, { type: "escape" }); clear selected message
+  store.sub(derivedInteractionAtom): drop a stored menu (yieldMenuAtom)
+  ```
+
+  `exit` runs the owners' `useInteractionExit` listeners, then
+  `exitInteractionAtom` writes the model: the editor clears `selectedAtom`, a
+  menu clears `openMenuAtom`, a create drag clears the drag and its
+  participant selection, a reorder clears the pending, drag and drop atoms.
+
+  `data-cap` targets: participants and messages (`select`), both collapse
+  buttons (`collapse`, through `useCapClick`'s `pressProps`), gap zones and
+  create-drag occurrences (`createMessage`), the reorder handle (`reorder`),
+  the participant insert buttons (`insertParticipant`). Active surfaces
+  (`data-interaction-surface`): the participant editor's root, the message
+  menu (`#style-panel`), and a gap zone while its menu is open.
+
+  Listeners removed, each covered by a controller test (component spec, and
+  the E2E specs that already exercised it):
+
+  | Removed                                           | Now                                      |
+  | ------------------------------------------------- | ---------------------------------------- |
+  | `ParticipantStylePanel` `document` pointerdown    | click-away; draft blur is central        |
+  | `ParticipantStylePanel` `document` keydown        | Escape                                   |
+  | `StylePanel` `useOutsideClick` (`document` click) | click-away, on `pointerdown`             |
+  | `StylePanel` `window` keydown                     | Escape                                   |
+  | `GapHandleZone` `document` pointerdown            | click-away; the open zone is the surface |
+  | `Block` `window` keydown (reorder cancel)         | Escape                                   |
+  | `MessageCreateControls` `window` keydown          | Escape                                   |
+
+  `useOutsideClick`, `useDocumentEvent` and `useLatestValue` had no other
+  users and are deleted.
+
+  Listeners kept, because they are not exit handlers:
+
+  - `ParticipantStylePanel` pending-reselect `pointerup` / `pointercancel` /
+    `keydown` (capture). They follow one press to its end so that a
+    participant node detached by a committed draft is still reselected. The
+    trigger moved into the editor's `useInteractionExit` listener.
+  - `Block` `window` pointercancel and the drag `pointermove` / `pointerup`
+    in `Block` and `MessageCreateControls`: the drags' own pointer lifecycle.
+  - `MessageReorderHandle` click suppressor: the browser retargets the
+    click after a drag.
+  - `GapHandleZone`'s `onKeyDown` Escape: an element handler that also
+    returns the focus to the zone. The central Escape covers the menu when
+    the focus is elsewhere.
+  - `Debug` keydown: not an interaction.
+
+  P3 decisions and deviations:
+
+  - **The listener is on `document`, not on the diagram root.** The
+    participant editor and the message menu render through
+    `FloatingPortal`, outside the root, and click-away must also see presses
+    on the host page. One capture listener on `document` per diagram does
+    both: it gates only targets inside its own diagram and only exits for
+    the rest. A capture listener on `document` also runs before React's
+    root-container listeners, so `stopPropagation` stops every React
+    handler on the path.
+  - **Gate B decides on the primary state only.** The text-edit overlay is
+    not gated: `preventDefault` on `pointerdown` would keep the focus, and an
+    edit ends on blur. While a text editor is active the controller does
+    nothing; the press ends the edit.
+  - **`useCapClick` stays, for the overlay.** For a primary state gate B
+    makes it redundant: a consumed press never reaches the control, and its
+    click is swallowed. The press-time record still covers the text-edit
+    overlay. `useCapClick` now also puts `data-cap` on `pressProps`, so a
+    control declares its capability once.
+  - **A consumed press swallows its `click` and `contextmenu`** until
+    `pointerup` plus one task (`pointercancel` ends it at once):
+    `preventDefault` on `pointerdown` does not cancel either.
+  - **Any button.** A right-click is a press. With a gap menu open, a
+    right-click on another gap only closes the menu; the next right-click
+    opens that gap's menu. This replaces the P2 behaviour.
+  - **Message click-away moved from `click` to `pointerdown`,** like the
+    editor and the gap menu. The rule is the same: a press anywhere but on
+    the selected message or in its menu clears the message selection, even
+    when the menu is closed.
+  - **A press on an allowed target still exits** but is not consumed: the
+    target's own handler acts on the same press (another participant
+    switches the editor, another message opens its menu).
+  - **Drags ignore presses.** A drag owns the pointer; only Escape ends it.
+    The drags' `pointerup` handlers now read the store, so a release that
+    follows Escape before React re-renders does not drop or insert.
+  - **R1 for derived states is structural.** `interactionAtom` now reads
+    `derivedInteractionAtom` (drags, editor) before the stored menu. The
+    controller subscribes to it and clears `openMenuAtom` when a derived
+    state starts, whatever code path started it, so the menu does not come
+    back when the drag or the editor ends.
+  - **Owners keep side effects, not exits.** `useInteractionExit` listeners
+    run before the model exit while the owner still sees its state. Only the
+    participant editor registers one (pending reselect).
+  - **No `textEdit` targets.** Labels sit inside messages and participants
+    and take their `select` capability. P4 can tag them if a state needs to
+    tell them apart.
+
 - **P4 (follow-up).** Replace the remaining ad-hoc predicates (for example
   `ParticipantInsertControls`, `ParticipantStylePanel`,
-  `MessageCreateControls`) with `useCan`.
+  `MessageCreateControls`) with `useCan`. Wire `hoverAffordance`. P3 did not
+  touch either.
 
 ## Consequences
 
 - While the participant editor is open, gap handles, the divider menu,
   occurrence create-drag, reorder handles and collapse buttons do not react.
-  A press on them still reaches the editor's click-away listener, which
-  closes the editor; the press itself does nothing.
+  A press on them only closes the editor (gate B consumes it, P3).
 - While a create drag runs, reorder does not start and collapse does nothing.
   While a reorder is pending or running, gap handles do not show.
 - In P1 the participant editor state is derived without the editor's anchor
@@ -228,12 +336,14 @@ Notes on the table:
 - While a message's style menu is open (P2): gap handles, the divider menu,
   occurrence create-drag, collapse buttons and participant insertion do not
   react, and only the selected message shows a reorder handle. A press on a
-  collapse button only closes the menu (its click-away runs on `click`;
-  the collapse decides on `pointerdown`). After the menu closes — a style
+  collapse button only closes the menu. After the menu closes — a style
   applied, Escape, a click elsewhere — the message can stay selected and
   nothing is blocked.
 - While a gap's insert menu is open (P2), no other gap handle, occurrence
   create-drag, reorder handle, collapse button or participant insert button
-  reacts. A press elsewhere closes the menu first (its `pointerdown`
-  click-away), so a right-click on another gap closes the open menu and
-  opens that gap's menu.
+  reacts. From P3 a press on a participant, a message or another gap
+  (right-click included) only closes the menu; the next press acts.
+- From P3, Escape closes whichever state is open — the participant editor,
+  a menu, a create drag or a reorder — from one place. A control that must
+  keep its own Escape (a picker, a text field, the gap zone) stops the
+  event; the central handler is on `document` in the bubble phase.

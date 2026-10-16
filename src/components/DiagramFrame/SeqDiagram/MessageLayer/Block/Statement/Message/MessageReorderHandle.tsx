@@ -5,6 +5,7 @@ export const MessageReorderHandle = () => (
   <button
     type="button"
     className="message-reorder-handle hide-export"
+    data-cap="reorder"
     aria-label="Drag to reorder message"
     title="Drag to reorder message"
     onPointerDownCapture={() => {

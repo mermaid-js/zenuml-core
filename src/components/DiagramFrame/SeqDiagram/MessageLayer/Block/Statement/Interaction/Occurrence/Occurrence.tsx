@@ -156,6 +156,11 @@ export const Occurrence = (props: {
       data-belongs-to={props.participant}
       data-x-offset={0}
       data-debug-center-of={computedCenter()}
+      data-cap={
+        props.enableCreateDrag && messageInsertionEnabled
+          ? "createMessage"
+          : undefined
+      }
       onPointerDown={startCreateDrag}
       title={
         dragEnabled

@@ -8,6 +8,7 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { afterEach, describe, expect, it } from "vitest";
 import { ParticipantStylePanel } from "./ParticipantStylePanel";
+import { InteractionController } from "@/store/interaction/InteractionController";
 
 const setup = () => {
   const diagram = document.createElement("div");
@@ -23,6 +24,7 @@ const setup = () => {
   store.set(selectedAtom, ["A"]);
   const view = render(
     <Provider store={store}>
+      <InteractionController />
       <ParticipantStylePanel />
     </Provider>,
   );
@@ -39,6 +41,39 @@ const setup = () => {
 // abandoned participant click.
 const clickIsNotPrevented = (other: HTMLElement) =>
   fireEvent.click(other, { cancelable: true });
+
+describe("ParticipantStylePanel exits through the interaction state (P3)", () => {
+  afterEach(() => {
+    cleanup();
+    document.body.innerHTML = "";
+  });
+
+  it("closes on a press outside the editor", () => {
+    const { other, store, view } = setup();
+    expect(view.queryByTestId("participant-style-panel")).not.toBeNull();
+    act(() => {
+      fireEvent.pointerDown(other);
+    });
+    expect(store.get(selectedAtom)).toEqual([]);
+    expect(view.queryByTestId("participant-style-panel")).toBeNull();
+  });
+
+  it("stays open on a press inside the editor", () => {
+    const { store, view } = setup();
+    act(() => {
+      fireEvent.pointerDown(view.getByLabelText("Name"));
+    });
+    expect(store.get(selectedAtom)).toEqual(["A"]);
+  });
+
+  it("closes on Escape", () => {
+    const { store } = setup();
+    act(() => {
+      fireEvent.keyDown(document, { key: "Escape" });
+    });
+    expect(store.get(selectedAtom)).toEqual([]);
+  });
+});
 
 describe("ParticipantStylePanel pending reselect cleanup", () => {
   afterEach(() => {

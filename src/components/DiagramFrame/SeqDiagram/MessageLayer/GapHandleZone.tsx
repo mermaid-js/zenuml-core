@@ -111,15 +111,11 @@ export const GapHandleZone = (props: {
   // Close this gap's menu when the zone unmounts.
   useEffect(() => closeMenu, [closeMenu]);
 
+  // A press outside the zone closes the menu through the interaction state
+  // (ADR 0002, P3); the zone is the menu's active surface while it is open.
   useEffect(() => {
-    if (!menuOpen) return;
-    menuItemRef.current?.focus();
-    const closeOutside = (event: PointerEvent) => {
-      if (!zoneRef.current?.contains(event.target as Node)) closeMenu();
-    };
-    document.addEventListener("pointerdown", closeOutside);
-    return () => document.removeEventListener("pointerdown", closeOutside);
-  }, [closeMenu, menuOpen]);
+    if (menuOpen) menuItemRef.current?.focus();
+  }, [menuOpen]);
 
   const participants = useMemo(
     () => OrderedParticipants(rootContext).filter((p) => p.name !== _STARTER_),
@@ -132,6 +128,13 @@ export const GapHandleZone = (props: {
   // The open menu's own item is its active surface: the policy blocks
   // `createMessage` while the menu is open, but this item must still work.
   const canUseMenuItem = menuOpen && dividerInsertionEnabled;
+  // Gate B (ADR 0002, P3): a press on the zone creates a message or opens
+  // the divider menu. While this zone's menu is open the zone is the menu's
+  // active surface, so a press inside it does not close the menu.
+  const zoneCapProps = {
+    "data-cap": "createMessage",
+    "data-interaction-surface": menuOpen ? "gapMenu" : undefined,
+  };
 
   const updateNearest = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!canCreateMessage || dragState || menuOpen) return;
@@ -401,6 +404,7 @@ export const GapHandleZone = (props: {
         }}
         data-testid={`message-gap-${props.insertIndex}`}
         ref={zoneRef}
+        {...zoneCapProps}
         onPointerEnter={handlePointerEnter}
         onPointerMove={updateNearest}
         onPointerLeave={handlePointerLeave}
@@ -435,6 +439,7 @@ export const GapHandleZone = (props: {
       <div
         data-testid={`message-gap-hover-${props.insertIndex}`}
         ref={zoneRef}
+        {...zoneCapProps}
         className="absolute left-0 right-0"
         style={{
           top: props.isFirstRootGap

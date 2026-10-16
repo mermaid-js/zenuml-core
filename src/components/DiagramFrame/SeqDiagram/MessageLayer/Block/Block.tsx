@@ -2,7 +2,7 @@ import { increaseNumber } from "@/utils/Numbering";
 import { Statement } from "./Statement/Statement";
 import { cn } from "@/utils";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import {
   codeAtom,
   diagramElementAtom,
@@ -34,6 +34,7 @@ export const Block = (props: {
   enableGapHandles?: boolean;
   isRoot?: boolean;
 }) => {
+  const store = useStore();
   const [code, setCode] = useAtom(codeAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
@@ -170,7 +171,11 @@ export const Block = (props: {
       }
     };
     const onPointerUp = () => {
-      const sourceKey = dragKeyRef.current;
+      // Read the store, not this render: Escape can cancel the drag after
+      // this listener was installed and before React re-renders.
+      const sourceKey = store.get(messageReorderDragAtom)
+        ? dragKeyRef.current
+        : null;
       if (
         !reorderEnabled ||
         !sourceKey ||
@@ -212,8 +217,11 @@ export const Block = (props: {
     setCode,
     setDragKey,
     setDropState,
+    store,
   ]);
 
+  // Escape cancels through the interaction state (ADR 0002, P3). A pointer
+  // cancel ends this drag's own press, so it stays here.
   useEffect(() => {
     if (!props.isRoot || (!pendingDrag && !dragKey)) return;
     const cancel = () => {
@@ -221,14 +229,9 @@ export const Block = (props: {
       setDragKey(null);
       setDropState(null);
     };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") cancel();
-    };
     window.addEventListener("pointercancel", cancel);
-    window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("pointercancel", cancel);
-      window.removeEventListener("keydown", onKeyDown);
     };
   }, [
     dragKey,
