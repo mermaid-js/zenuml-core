@@ -30,6 +30,7 @@ import {
   exitMenuAtom,
   interactionAtom,
 } from "@/store/interaction/interactionAtom";
+import { useActiveSurface, useTextEditing } from "@/store/interaction/useCan";
 import { FloatingPortal, useFloating } from "@floating-ui/react";
 
 const btns = [
@@ -66,7 +67,10 @@ export const StylePanel = () => {
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
   const setSelectedParticipants = useSetAtom(selectedAtom);
   const [selectedMessage, setSelectedMessage] = useAtom(selectedMessageAtom);
-  const textEditing = useAtomValue(textEditingAtom);
+  // A label edit that starts while the menu is open ends the menu.
+  const textEditing = useTextEditing();
+  // The menu's buttons show while `messageMenu` is the active surface.
+  const surfaceShown = useActiveSurface()?.kind === "messageMenu";
   const themeClasses = Array.from(diagramElement?.classList ?? [])
     .filter((name) => name.startsWith("theme-"))
     .join(" ");
@@ -316,7 +320,7 @@ export const StylePanel = () => {
         ref={refs.setFloating}
         style={{ ...floatingStyles, zIndex: 40 }}
       >
-        {isOpen && !textEditing && (
+        {surfaceShown && (
           <div
             className={cn(
               "flex items-center bg-white shadow-md z-40 rounded-md p-1 gap-1",

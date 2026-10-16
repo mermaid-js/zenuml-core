@@ -5,7 +5,7 @@ import {
   selectedMessageAtom,
   enableMessageReorderAtom,
 } from "@/store/Store";
-import { useCanReorderMessage } from "@/store/interaction/useCan";
+import { useCan, useCanReorderMessage } from "@/store/interaction/useCan";
 import { CSSProperties, ReactNode, useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { MessageView } from "./MessageView";
@@ -52,10 +52,13 @@ export const Message = (props: {
   const isSelected =
     selectedMessage?.start === rangeStart && selectedMessage?.end === rangeEnd;
   const canReorder = useCanReorderMessage(isSelected);
+  // ADR 0002: a click selects the message (and opens its menu) only while
+  // `select` is allowed; that also covers `RenderMode.Static`.
+  const canSelect = useCan("select");
   const reorderEnabled = allowReorder && messageReorderEnabled && canReorder;
 
   const onClick = () => {
-    if (!stylable || !messageRef.current) return;
+    if (!canSelect || !messageRef.current) return;
     setSelectedMessage(
       rangeStart != null && rangeEnd != null
         ? { start: rangeStart, end: rangeEnd, token: Date.now() }

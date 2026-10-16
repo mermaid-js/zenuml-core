@@ -41,6 +41,46 @@ test.describe("Message Reorder", () => {
     await expect(page.getByTestId("message-rename")).toHaveCount(0);
   });
 
+  // ADR 0002, P4: the hover reveal is a hover affordance; a running reorder
+  // owns the diagram, so the rows it passes over keep their handles hidden.
+  test("does not reveal other handles while a reorder runs", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/reorder-message.html");
+    const messages = page.locator(".statement-container .message");
+    await expect(messages).toHaveCount(2);
+    const first = messages.first();
+    const second = messages.nth(1);
+    const handle = first.getByRole("button", {
+      name: "Drag to reorder message",
+    });
+    const otherHandle = second.getByRole("button", {
+      name: "Drag to reorder message",
+    });
+    await second.hover();
+    await expect(otherHandle).toHaveCSS("opacity", "1");
+
+    await first.hover();
+    await handle.hover();
+    await page.mouse.down();
+    const target = await second.boundingBox();
+    if (!target) throw new Error("missing target message");
+    await page.mouse.move(
+      target.x + target.width / 2,
+      target.y + target.height / 2,
+      { steps: 12 },
+    );
+    await expect(
+      page.locator('.statement-container[data-reorder-state="dragging"]'),
+    ).toHaveCount(1);
+    await expect(otherHandle).toHaveCSS("opacity", "0");
+
+    await page.keyboard.press("Escape");
+    await page.mouse.up();
+    await second.hover();
+    await expect(otherHandle).toHaveCSS("opacity", "1");
+  });
+
   test("an arrow click opens the toolbar, while an arrow drag leaves the order alone", async ({
     page,
   }) => {

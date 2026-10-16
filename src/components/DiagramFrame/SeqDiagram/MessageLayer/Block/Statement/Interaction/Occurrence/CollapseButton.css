@@ -6,6 +6,8 @@
 .occurrence-collapsible-header .collapse-button {
   display: none;
 }
-.occurrence:hover .occurrence-collapsible-header .collapse-button.expanded {
+.occurrence:hover
+  .occurrence-collapsible-header
+  .collapse-button.expanded.hover-reveal {
   display: inline-block !important;
 }

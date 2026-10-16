@@ -6,6 +6,7 @@ import {
   messageReorderDropAtom,
   messageReorderPendingAtom,
   modeAtom,
+  RenderMode,
   selectedAtom,
   textEditingAtom,
 } from "@/store/Store";
@@ -117,6 +118,18 @@ export const exitInteractionAtom = atom(
     }
   },
 );
+
+/**
+ * The state whose own UI shows (P4): the participant editor, a menu or a
+ * drag's preview. `null` while idle, in `RenderMode.Static`, and while a text
+ * edit overlays the state (the state stays; its UI comes back when the edit
+ * ends). A surface reads this instead of combining the atoms itself.
+ */
+export const activeSurfaceAtom = atom<InteractionState | null>((get) => {
+  if (get(modeAtom) !== RenderMode.Dynamic || get(textEditingAtom)) return null;
+  const state = get(interactionAtom);
+  return state.kind === "idle" ? null : state;
+});
 
 const canAtoms = new Map<Capability, Atom<boolean>>();
 

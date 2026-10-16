@@ -1,15 +1,10 @@
 import {
   codeAtom,
-  createMessageDragAtom,
   diagramElementAtom,
-  enableParticipantStyleEditingAtom,
-  modeAtom,
   onContentChangeAtom,
   participantPreviewAtom,
-  RenderMode,
   rootContextAtom,
   selectedAtom,
-  textEditingAtom,
 } from "@/store/Store";
 import {
   formatParticipantDeclaration,
@@ -26,6 +21,7 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FloatingPortal } from "@floating-ui/react";
 import { useInteractionExit } from "@/store/interaction/useInteractionExit";
+import { useActiveSurface } from "@/store/interaction/useCan";
 import { ARCHETYPES, PRESET_COLORS } from "./participantEditor/palette";
 import { SplitSlot } from "./participantEditor/SplitSlot";
 import { ColorPicker } from "./participantEditor/ColorPicker";
@@ -63,19 +59,21 @@ const rowInputClass =
   "h-6 box-border rounded-[5px] border border-solid px-1.5 text-[13px] text-gray-900 bg-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100";
 
 export const ParticipantStylePanel = () => {
-  const mode = useAtomValue(modeAtom);
-  const enabled = useAtomValue(enableParticipantStyleEditingAtom);
   const [code, setCode] = useAtom(codeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const [selected, setSelectedRaw] = useAtom(selectedAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
-  const dragState = useAtomValue(createMessageDragAtom);
-  const textEditing = useAtomValue(textEditingAtom);
   const themeClasses = Array.from(diagramElement?.classList ?? [])
     .filter((name) => name.startsWith("theme-"))
     .join(" ");
-  const [isOpen, setIsOpen] = useState(false);
+  // The editor shows while its interaction state is current (ADR 0002): the
+  // editor flag is on, one participant is selected and no drag runs. The
+  // surface also hides in a static render and under a text edit.
+  const surface = useActiveSurface();
+  const openFor =
+    surface?.kind === "participantEditor" ? surface.participant : null;
+  const isOpen = openFor !== null;
   // The selected participant's box, in viewport coordinates.
   const [anchor, setAnchor] = useState<{
     top: number;
@@ -162,9 +160,9 @@ export const ParticipantStylePanel = () => {
   }, [isOpen, setPreview]);
 
   useEffect(() => {
-    if (selected.length === 1 && diagramElement && !dragState && !textEditing) {
+    if (openFor && diagramElement) {
       const el = diagramElement.querySelector(
-        `[data-participant-id="${selected[0]}"]`,
+        `[data-participant-id="${openFor}"]`,
       ) as HTMLElement | null;
       if (el) {
         const rect = el.getBoundingClientRect();
@@ -175,13 +173,12 @@ export const ParticipantStylePanel = () => {
           bottom: rect.bottom,
         });
       }
-      setIsOpen(true);
     } else {
-      setIsOpen(false);
       setAnchor(null);
     }
-    // `code` re-anchors the editor after an edit moves the participant box.
-  }, [selected, diagramElement, dragState, textEditing, code]);
+    // `code` re-anchors the editor after an edit moves the participant box;
+    // `selected` after a reselect of the same name.
+  }, [openFor, selected, diagramElement, code]);
 
   // Pickers open below their slot.
   useLayoutEffect(() => {
@@ -290,19 +287,11 @@ export const ParticipantStylePanel = () => {
     };
   });
 
-  if (
-    !enabled ||
-    mode !== RenderMode.Dynamic ||
-    !isOpen ||
-    textEditing ||
-    !participantName ||
-    !anchor
-  ) {
+  if (!isOpen || !participantName || !anchor) {
     return null;
   }
 
   const close = () => {
-    setIsOpen(false);
     setSelected([]);
   };
 

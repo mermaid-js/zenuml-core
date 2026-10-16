@@ -2,12 +2,8 @@ import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import {
   coordinatesAtom,
   enableParticipantInsertionAtom,
-  modeAtom,
   onContentChangeAtom,
-  RenderMode,
   rootContextAtom,
-  selectedAtom,
-  textEditingAtom,
 } from "@/store/Store";
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
 import { MARGIN } from "@/positioning/Constants";
@@ -76,12 +72,10 @@ const generateName = (existingNames: Set<string>) => {
 };
 
 export const ParticipantInsertControls = () => {
-  const mode = useAtomValue(modeAtom);
   const enabled = useAtomValue(enableParticipantInsertionAtom);
-  const textEditing = useAtomValue(textEditingAtom);
-  const selected = useAtomValue(selectedAtom);
-  // ADR 0002: hidden while another interaction (an open menu, a drag) owns
-  // the diagram. The remaining checks are folded into `useCan` in P4.
+  // ADR 0002: the policy covers the mode, the text-edit overlay and every
+  // interaction that owns the diagram (the participant editor, an open menu,
+  // a drag). The embedder flag stays here.
   const canInsert = useCan("insertParticipant");
   const coordinates = useAtomValue(coordinatesAtom);
   const rootContext = useAtomValue(rootContextAtom);
@@ -167,8 +161,7 @@ export const ParticipantInsertControls = () => {
   );
 
   const handleInsert = (insertIndex: number) => {
-    if (!rootContext || textEditing || !enabled || mode !== RenderMode.Dynamic)
-      return;
+    if (!rootContext || !enabled || !canInsert) return;
     const name = generateName(existingNames);
     const nextCode = insertParticipantIntoDsl({
       code,
@@ -181,14 +174,7 @@ export const ParticipantInsertControls = () => {
     onContentChange(nextCode);
   };
 
-  if (
-    !enabled ||
-    !canInsert ||
-    textEditing ||
-    selected.length === 1 ||
-    mode !== RenderMode.Dynamic ||
-    participantModels.length === 0
-  ) {
+  if (!enabled || !canInsert || participantModels.length === 0) {
     return null;
   }
 

@@ -1,13 +1,29 @@
+import { textEditingAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
 import { useRef } from "react";
-import { canAtom, interactionAtom } from "./interactionAtom";
-import type { Capability } from "./policy";
+import { activeSurfaceAtom, canAtom, interactionAtom } from "./interactionAtom";
+import type { Capability, InteractionState } from "./policy";
 
 /**
  * Render gate (ADR 0002, gate A): whether the diagram's current interaction
  * state allows `cap`. Callers still AND their own embedder flag.
  */
 export const useCan = (cap: Capability): boolean => useAtomValue(canAtom(cap));
+
+/**
+ * The state whose own UI shows (`activeSurfaceAtom`), or `null`. The
+ * participant editor and the message menu render while this is their state.
+ */
+export const useActiveSurface = (): InteractionState | null =>
+  useAtomValue(activeSurfaceAtom);
+
+/**
+ * The text-edit overlay: a label editor is active in this diagram. It is not
+ * a capability; `can()` already folds it in. Read it only for what the
+ * policy cannot say: stepping out of an active editor's way (hit-testing)
+ * and ending a state when an edit starts inside it.
+ */
+export const useTextEditing = (): boolean => useAtomValue(textEditingAtom);
 
 /**
  * `reorder` for one message. While the message menu is open, only the

@@ -22,6 +22,10 @@ export const CollapseButton = (props: {
           "cursor-pointer": canCollapse,
           hidden: props.collapsed,
           expanded: !props.collapsed,
+          // Shown on occurrence hover only while `collapse` is allowed (P4),
+          // like the fragment's button. Not `hoverAffordance`: collapse is
+          // view-only and stays live in a static render.
+          "hover-reveal": canCollapse,
         })}
         onClick={onClick}
         viewBox="0 0 25 25"

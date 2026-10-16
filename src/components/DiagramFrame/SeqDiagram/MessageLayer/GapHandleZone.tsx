@@ -10,10 +10,9 @@ import {
   rootContextAtom,
   selectedAtom,
   selectedMessageAtom,
-  textEditingAtom,
 } from "@/store/Store";
 import { centerOf } from "./Block/Statement/utils";
-import { useCan } from "@/store/interaction/useCan";
+import { useCan, useTextEditing } from "@/store/interaction/useCan";
 import {
   enterMenuAtom,
   exitMenuAtom,
@@ -49,10 +48,14 @@ export const GapHandleZone = (props: {
   isFirstRootGap?: boolean;
 }) => {
   const dividerInsertionEnabled = useAtomValue(enableDividerInsertionAtom);
-  const textEditing = useAtomValue(textEditingAtom);
   // Mode and text editing are part of the policy; the embedder flags above
   // stay here because createMessage spans two of them.
   const canCreate = useCan("createMessage");
+  // The handle and its tooltip are hover affordances: only idle shows them.
+  const canHover = useCan("hoverAffordance");
+  // While a label editor is active the zone steps out of its way: the zone
+  // overlaps the rows next to the gap.
+  const textEditing = useTextEditing();
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
@@ -137,7 +140,7 @@ export const GapHandleZone = (props: {
   };
 
   const updateNearest = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!canCreateMessage || dragState || menuOpen) return;
+    if (!canCreateMessage || !canHover) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const scale =
       rect.width / (event.currentTarget.offsetWidth || rect.width) || 1;
@@ -167,7 +170,7 @@ export const GapHandleZone = (props: {
       clearTimeout(hideTimerRef.current);
       hideTimerRef.current = null;
     }
-    if (canCreate && !dragState && !menuOpen) {
+    if (canCreate && canHover) {
       setHovered(true);
       updateNearest(event);
     }
@@ -257,7 +260,7 @@ export const GapHandleZone = (props: {
   };
 
   const showHandle =
-    hovered && !dragState && !menuOpen && activeParticipant && canCreateMessage;
+    hovered && activeParticipant && canCreateMessage && canHover;
   const tooltipX = activeParticipant
     ? Math.max(
         90,

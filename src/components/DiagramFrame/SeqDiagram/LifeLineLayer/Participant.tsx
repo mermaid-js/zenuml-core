@@ -18,6 +18,7 @@ import { participantTextColor, removeAlpha } from "@/utils/Color";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useRef, useState } from "react";
+import { useCan } from "@/store/interaction/useCan";
 import { ParticipantLabel } from "./ParticipantLabel";
 import { AsyncIcon } from "../../Tutorial/AsyncIcon";
 // import iconPath from "../../Tutorial/Icons"; // Removed eager import
@@ -49,7 +50,14 @@ export const Participant = (props: {
   const diagramElement = useAtomValue(diagramElementAtom);
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
-  const onSelect = useSetAtom(onSelectAtom);
+  const selectParticipant = useSetAtom(onSelectAtom);
+  // ADR 0002: selection is a capability. It is off in `RenderMode.Static`
+  // and while another interaction owns the diagram; gate B consumes a press
+  // the primary state does not allow before it gets here.
+  const canSelect = useCan("select");
+  const onSelect = (name: string) => {
+    if (canSelect) selectParticipant(name);
+  };
   const preview = useAtomValue(participantPreviewAtom);
   const [isEditingName, setIsEditingName] = useState(false);
   const intersectionTop = useIntersectionTop();

@@ -80,16 +80,18 @@
     fill: currentColor;
   }
 
-  .statement-container:hover
+  /* Hover reveal is a hover affordance (ADR 0002): Block sets
+     data-hover-reveal="off" on rows that must not reveal their handle. */
+  .statement-container:not([data-hover-reveal="off"]):hover
     > .interaction
     > .message
     > .message-reorder-handle,
-  .statement-container:hover
+  .statement-container:not([data-hover-reveal="off"]):hover
     > .interaction
     > .message-container
     > .message
     > .message-reorder-handle,
-  .statement-container:hover
+  .statement-container:not([data-hover-reveal="off"]):hover
     > .interaction
     > .self-invocation
     > .message-reorder-handle,

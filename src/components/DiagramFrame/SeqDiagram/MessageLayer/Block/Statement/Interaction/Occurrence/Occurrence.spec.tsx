@@ -177,6 +177,51 @@ describe("Occurrence", () => {
       expect(button.classList.contains("hidden")).toBe(false);
     });
 
+    // P4: hover-only hints ask `hoverAffordance`, which only idle allows.
+    it("offers the create-drag hint on hover when idle", () => {
+      const { occurrence } = renderOccurrence(NESTED);
+      expect(occurrence.getAttribute("title")).toBe(
+        "Drag to create a message from B",
+      );
+      expect(occurrence.classList.contains("cursor-crosshair")).toBe(true);
+    });
+
+    it("drops the create-drag hint while a create drag runs", () => {
+      const { store, occurrence } = renderOccurrence(NESTED);
+      act(() => {
+        store.set(createMessageDragAtom, {
+          source: "A",
+          sourceX: 0,
+          sourceY: 0,
+          pointerX: 0,
+          pointerY: 0,
+          hoverTarget: null,
+          insertIndex: 0,
+          blockContext: null,
+        });
+      });
+      expect(occurrence.getAttribute("title")).toBeNull();
+      expect(occurrence.classList.contains("cursor-crosshair")).toBe(false);
+    });
+
+    // The collapse button shows on hover only while `collapse` is allowed,
+    // like the fragment's (P4).
+    it("reveals the collapse button on hover when idle", () => {
+      const { container } = renderOccurrence(NESTED);
+      expect(container.querySelector(".collapse-button.hover-reveal")).not.toBe(
+        null,
+      );
+    });
+
+    it("does not reveal the collapse button on hover while the participant editor is open", () => {
+      const { store, container } = renderOccurrence(NESTED);
+      openParticipantEditor(store);
+      expect(container.querySelector(".collapse-button")).not.toBeNull();
+      expect(container.querySelector(".collapse-button.hover-reveal")).toBe(
+        null,
+      );
+    });
+
     it("collapses on click when idle", () => {
       const { container } = renderOccurrence(NESTED);
       const button = container.querySelector(".collapse-button")!;

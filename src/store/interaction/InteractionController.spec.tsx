@@ -53,7 +53,12 @@ const setup = (prepare?: (store: Store) => void) => {
         <div data-cap="collapse" data-testid="collapse" onClick={onCollapse}>
           <span data-testid="collapse-icon" />
         </div>
-        <div data-cap="select" data-testid="participant" onClick={onSelect} />
+        <div
+          className="participant"
+          data-cap="select"
+          data-testid="participant"
+          onClick={onSelect}
+        />
         <div
           data-cap="createMessage"
           data-testid="gap"
@@ -234,6 +239,44 @@ describe("central click-away", () => {
     const { store, view } = setup((s) => s.set(createMessageDragAtom, DRAG));
     press(view.getByTestId("background"));
     expect(store.get(createMessageDragAtom)).not.toBeNull();
+  });
+});
+
+describe("participant highlight click-away (P4, the one owner)", () => {
+  // With the participant editor off, a participant click only highlights it
+  // (`onSelectAtom` toggles, so several can be highlighted). This used to be
+  // cleared by `SeqDiagram`'s root `onClick`.
+  const highlight = (store: Store) => {
+    store.set(enableParticipantStyleEditingAtom, false);
+    store.set(selectedAtom, ["A", "B"]);
+  };
+
+  it("clears the highlight on a press on the diagram background", () => {
+    const { store, view } = setup(highlight);
+    const { consumed } = press(view.getByTestId("background"));
+    expect(consumed).toBe(false);
+    expect(store.get(selectedAtom)).toEqual([]);
+  });
+
+  it("keeps the highlight on a press on a participant", () => {
+    const { store, view } = setup(highlight);
+    press(view.getByTestId("participant"));
+    expect(store.get(selectedAtom)).toEqual(["A", "B"]);
+  });
+
+  it("keeps the highlight on a press outside the diagram", () => {
+    const { store, view } = setup(highlight);
+    press(view.getByTestId("host-page"));
+    expect(store.get(selectedAtom)).toEqual(["A", "B"]);
+  });
+
+  it("leaves a create drag's participant selection alone", () => {
+    const { store, view } = setup((s) => {
+      s.set(createMessageDragAtom, DRAG);
+      s.set(selectedAtom, ["A"]);
+    });
+    press(view.getByTestId("background"));
+    expect(store.get(selectedAtom)).toEqual(["A"]);
   });
 });
 

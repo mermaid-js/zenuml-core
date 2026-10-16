@@ -1,7 +1,11 @@
 import {
+  activeTextEditorsAtom,
   codeAtom,
+  createMessageDragAtom,
   diagramElementAtom,
   enableParticipantStyleEditingAtom,
+  modeAtom,
+  RenderMode,
   selectedAtom,
 } from "@/store/Store";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
@@ -72,6 +76,75 @@ describe("ParticipantStylePanel exits through the interaction state (P3)", () =>
       fireEvent.keyDown(document, { key: "Escape" });
     });
     expect(store.get(selectedAtom)).toEqual([]);
+  });
+});
+
+// P4: the editor shows while `participantEditor` is the active surface. These
+// pin the conditions the component used to combine itself.
+describe("ParticipantStylePanel visibility", () => {
+  afterEach(() => {
+    cleanup();
+    document.body.innerHTML = "";
+  });
+
+  const isShown = (view: ReturnType<typeof setup>["view"]) =>
+    view.queryByTestId("participant-style-panel") !== null;
+
+  it("hides while a create drag runs, and comes back after it", () => {
+    const { store, view } = setup();
+    act(() => {
+      store.set(createMessageDragAtom, {
+        source: "A",
+        sourceX: 0,
+        sourceY: 0,
+        pointerX: 0,
+        pointerY: 0,
+        hoverTarget: null,
+        insertIndex: 0,
+        blockContext: null,
+      });
+    });
+    expect(isShown(view)).toBe(false);
+    act(() => {
+      store.set(createMessageDragAtom, null);
+    });
+    expect(isShown(view)).toBe(true);
+  });
+
+  it("hides under a text edit, and comes back after it", () => {
+    const { store, view } = setup();
+    act(() => {
+      store.set(activeTextEditorsAtom, new Set([Symbol("label")]));
+    });
+    expect(isShown(view)).toBe(false);
+    act(() => {
+      store.set(activeTextEditorsAtom, new Set());
+    });
+    expect(isShown(view)).toBe(true);
+  });
+
+  it("does not show with the editor flag off", () => {
+    const { store, view } = setup();
+    act(() => {
+      store.set(enableParticipantStyleEditingAtom, false);
+    });
+    expect(isShown(view)).toBe(false);
+  });
+
+  it("does not show while several participants are selected", () => {
+    const { store, view } = setup();
+    act(() => {
+      store.set(selectedAtom, ["A", "C"]);
+    });
+    expect(isShown(view)).toBe(false);
+  });
+
+  it("does not show in a static render", () => {
+    const { store, view } = setup();
+    act(() => {
+      store.set(modeAtom, RenderMode.Static);
+    });
+    expect(isShown(view)).toBe(false);
   });
 });
 

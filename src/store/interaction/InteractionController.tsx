@@ -1,6 +1,7 @@
 import {
   diagramElementAtom,
   modeAtom,
+  selectedAtom,
   selectedMessageAtom,
   textEditingAtom,
 } from "@/store/Store";
@@ -98,9 +99,23 @@ export const InteractionController = () => {
       store.set(selectedMessageAtom, null);
     };
 
+    // A participant highlight that is not the participant editor (the editor
+    // flag is off, or several participants are highlighted) is not a primary
+    // state. A press on the diagram outside participants and messages clears
+    // it. The editor's exit and a drag own their selection, so they are left
+    // alone. This replaces `SeqDiagram`'s root `onClick` (P4).
+    const clearParticipantHighlightOutside = (target: Element | null) => {
+      if (store.get(selectedAtom).length === 0) return;
+      if (store.get(derivedInteractionAtom)) return;
+      if (!target || !store.get(diagramElementAtom)?.contains(target)) return;
+      if (target.closest(".participant, .interaction")) return;
+      store.set(selectedAtom, []);
+    };
+
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target instanceof Element ? event.target : null;
       clearMessageSelectionOutside(target);
+      clearParticipantHighlightOutside(target);
       // A text edit nests inside the state: the press ends the edit (blur)
       // and nothing else.
       if (store.get(textEditingAtom)) return;

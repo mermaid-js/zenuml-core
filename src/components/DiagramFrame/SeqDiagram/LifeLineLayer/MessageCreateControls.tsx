@@ -4,14 +4,12 @@ import {
   createMessageDragAtom,
   diagramElementAtom,
   enableMessageInsertionAtom,
-  modeAtom,
   onContentChangeAtom,
   pendingEditableRangeAtom,
-  RenderMode,
   rootContextAtom,
   selectedAtom,
-  textEditingAtom,
 } from "@/store/Store";
+import { useCan } from "@/store/interaction/useCan";
 import { insertMessageInDsl } from "@/utils/insertMessageInDsl";
 import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import { useEffect, useId, useMemo, useRef } from "react";
@@ -20,9 +18,10 @@ const DRAG_THRESHOLD = 6;
 
 export const MessageCreateControls = () => {
   const store = useStore();
-  const mode = useAtomValue(modeAtom);
   const enabled = useAtomValue(enableMessageInsertionAtom);
-  const textEditing = useAtomValue(textEditingAtom);
+  // ADR 0002: `createMessage` is allowed while a create drag runs and covers
+  // the mode and the text-edit overlay.
+  const canCreate = useCan("createMessage");
   const diagramElement = useAtomValue(diagramElementAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
@@ -49,18 +48,14 @@ export const MessageCreateControls = () => {
     dragStateRef.current = dragState;
   }, [dragState]);
 
+  // A drag that loses its capability (a text edit started) ends.
   useEffect(() => {
-    if (textEditing && dragState) setDragState(null);
-  }, [dragState, setDragState, textEditing]);
+    if (!canCreate && dragState) setDragState(null);
+  }, [canCreate, dragState, setDragState]);
 
   useEffect(() => {
     if (!diagramElement) return;
-    if (
-      isCreatingMessage &&
-      enabled &&
-      !textEditing &&
-      mode === RenderMode.Dynamic
-    ) {
+    if (isCreatingMessage && enabled && canCreate) {
       diagramElement.dataset.messageCreateDragging = "true";
     } else {
       delete diagramElement.dataset.messageCreateDragging;
@@ -68,10 +63,10 @@ export const MessageCreateControls = () => {
     return () => {
       delete diagramElement.dataset.messageCreateDragging;
     };
-  }, [diagramElement, enabled, isCreatingMessage, mode, textEditing]);
+  }, [canCreate, diagramElement, enabled, isCreatingMessage]);
 
   useEffect(() => {
-    if (!dragState || !diagramElement || textEditing) {
+    if (!dragState || !diagramElement || !canCreate) {
       dragHandledRef.current = false;
       participantScreenXRef.current = new Map();
       return;
@@ -167,7 +162,7 @@ export const MessageCreateControls = () => {
       const current = store.get(createMessageDragAtom)
         ? dragStateRef.current
         : null;
-      if (!current || dragHandledRef.current || textEditing) {
+      if (!current || dragHandledRef.current || !canCreate) {
         setDragState(null);
         return;
       }
@@ -221,16 +216,10 @@ export const MessageCreateControls = () => {
     setDragState,
     setSelectedParticipants,
     store,
-    textEditing,
+    canCreate,
   ]);
 
-  if (
-    !enabled ||
-    textEditing ||
-    mode !== RenderMode.Dynamic ||
-    !diagramElement ||
-    participants.length === 0
-  ) {
+  if (!enabled || !canCreate || !diagramElement || participants.length === 0) {
     return null;
   }
 

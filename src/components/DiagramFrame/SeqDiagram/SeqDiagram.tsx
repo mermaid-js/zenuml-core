@@ -7,8 +7,6 @@ import {
   modeAtom,
   RenderMode,
   rootContextAtom,
-  selectedAtom,
-  selectedMessageAtom,
   themeAtom,
 } from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -47,8 +45,6 @@ export const SeqDiagram = (props: {
     [coordinates],
   );
   const setDiagramElement = useSetAtom(diagramElementAtom);
-  const setSelectedParticipants = useSetAtom(selectedAtom);
-  const setSelectedMessage = useSetAtom(selectedMessageAtom);
 
   const diagramRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -101,22 +97,9 @@ export const SeqDiagram = (props: {
       )}
       style={props.style}
       ref={diagramRef}
-      onClick={(event) => {
-        const target = event.target as HTMLElement | null;
-        if (
-          target?.closest(".interaction") ||
-          target?.closest(".participant") ||
-          target?.closest("#style-panel") ||
-          // Portal clicks bubble through the React tree; keep the participant
-          // editor's selection alive while interacting with it.
-          target?.closest(".participant-style-panel")
-        ) {
-          return;
-        }
-        setSelectedParticipants([]);
-        setSelectedMessage(null);
-      }}
     >
+      {/* Selection click-away belongs to `InteractionController` (ADR 0002,
+          P4): it clears participant and message selection on `pointerdown`. */}
       {/* .zenuml is used to make sure tailwind css takes effect when naked == true;
       .bg-skin-base is repeated because .zenuml reset it to default theme. */}
       <div
