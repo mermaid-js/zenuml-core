@@ -9,12 +9,10 @@ import {
   createMessageDragAtom,
   diagramElementAtom,
   enableMessageInsertionAtom,
-  modeAtom,
-  RenderMode,
   selectedAtom,
   selectedMessageAtom,
-  textEditingAtom,
 } from "@/store/Store";
+import { useCan } from "@/store/interaction/useCan";
 import { Message } from "../../Message/Message";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 import { CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
@@ -32,9 +30,8 @@ export const Occurrence = (props: {
   interactionWidth?: number;
   enableCreateDrag?: boolean;
 }) => {
-  const mode = useAtomValue(modeAtom);
   const messageInsertionEnabled = useAtomValue(enableMessageInsertionAtom);
-  const textEditing = useAtomValue(textEditingAtom);
+  const canCreateMessage = useCan("createMessage");
   const coordinates = useAtomValue(coordinatesAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const setCreateDrag = useSetAtom(createMessageDragAtom);
@@ -97,10 +94,7 @@ export const Occurrence = (props: {
     0;
 
   const dragEnabled =
-    !!props.enableCreateDrag &&
-    messageInsertionEnabled &&
-    !textEditing &&
-    mode === RenderMode.Dynamic;
+    !!props.enableCreateDrag && messageInsertionEnabled && canCreateMessage;
 
   const startCreateDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!dragEnabled || !diagramElement) {

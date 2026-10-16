@@ -1,10 +1,14 @@
 import { RootContext } from "@/parser";
 import {
   codeAtom,
+  createMessageDragAtom,
   enableMessageInsertionAtom,
   enableMessageReorderAtom,
+  enableParticipantStyleEditingAtom,
+  messageReorderPendingAtom,
   modeAtom,
   RenderMode,
+  selectedAtom,
 } from "@/store/Store";
 import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
@@ -98,6 +102,49 @@ describe("Block drag-to-reorder gating", () => {
     });
     dragFirstMessageOntoSecond(view);
     expect(store.get(codeAtom)).not.toBe(CODE);
+  });
+});
+
+describe("Block drag-to-reorder interaction policy", () => {
+  it("does not reorder while the participant editor is open", () => {
+    const { store, view } = renderBlock({
+      mode: RenderMode.Dynamic,
+      enableMessageReorder: true,
+    });
+    act(() => {
+      store.set(enableParticipantStyleEditingAtom, true);
+      store.set(selectedAtom, ["A"]);
+    });
+    expect(view.container.querySelector(".message-reorder-handle")).toBeNull();
+    dragFirstMessageOntoSecond(view);
+    expect(store.get(codeAtom)).toBe(CODE);
+  });
+
+  it("does not start a reorder while a create-message drag runs", () => {
+    const { store, view } = renderBlock({
+      mode: RenderMode.Dynamic,
+      enableMessageReorder: true,
+    });
+    const handle = view.container.querySelector(".message-reorder-handle");
+    expect(handle).toBeTruthy();
+    act(() => {
+      store.set(createMessageDragAtom, {
+        source: "A",
+        sourceX: 0,
+        sourceY: 0,
+        pointerX: 0,
+        pointerY: 0,
+        hoverTarget: null,
+        insertIndex: 0,
+        blockContext: null,
+      });
+    });
+    if (handle!.isConnected) {
+      act(() => {
+        fireEvent.pointerDown(handle!, { clientX: 0, clientY: 0 });
+      });
+    }
+    expect(store.get(messageReorderPendingAtom)).toBeNull();
   });
 });
 
