@@ -3,6 +3,12 @@ name: Build, Test, npm Publish, and Deploy
 
 on:
   push:
+    # main only. A push to a PR branch used to start two runs of this
+    # workflow (push + pull_request). With 16 e2e shards that is
+    # 2 x (16 + test + docker) = 36 jobs at once, past GitHub's concurrent-job
+    # limit, so shards would queue and sharding would buy nothing. Branches
+    # now run once, through pull_request.
+    branches: [main]
     paths-ignore:
       - "docs/**"
       - "Integration/**"
@@ -12,6 +18,12 @@ on:
       - "docs/**"
       - "Integration/**"
       - "*.md"
+
+# One run per ref at a time. A newer push to a PR branch cancels the older run;
+# pushes to main never cancel (every main run must publish and deploy).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
