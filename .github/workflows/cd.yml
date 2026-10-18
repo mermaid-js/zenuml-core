@@ -180,6 +180,12 @@ jobs:
       - name: Checkout
         # wrangler.toml only; the site itself comes from the build-site artifact.
         uses: actions/checkout@v6
+      - name: Setup Bun
+        # wrangler-action picks the package manager from the lockfile and
+        # installs wrangler with bun; without bun on PATH it fails.
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
