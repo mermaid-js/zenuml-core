@@ -141,14 +141,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true" # publish with provenance via OIDC
 
-  # Deploy to Cloudflare Workers
-  deploy-to-cloudflare:
+  # Build the site while test and e2e run, so deploy only has to upload it.
+  # Before this job existed, deploy reinstalled and rebuilt after the gates
+  # passed: 10 s setup + 3 s install + 30 s build + 7 s wrangler = 51 s on the
+  # critical path of every run (run 38886329048, 2026-10-16).
+  build-site:
     runs-on: ubuntu-22.04
-    needs: [test, e2e]
     permissions:
       contents: read
-      deployments: write
-      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -156,16 +156,39 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.22
+      - name: Install dependencies
+        run: bun install
+      - name: Build site
+        run: bun run build:site
+      - name: Upload site
+        uses: actions/upload-artifact@v7
+        with:
+          name: site-dist
+          path: dist/
+          retention-days: 1
+          if-no-files-found: error
+
+  # Deploy to Cloudflare Workers
+  deploy-to-cloudflare:
+    runs-on: ubuntu-22.04
+    needs: [test, e2e, build-site]
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        # wrangler.toml only; the site itself comes from the build-site artifact.
+        uses: actions/checkout@v6
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-          registry-url: "https://registry.npmjs.org"
-      - name: Install dependencies
-        run: bun install
-
-      - name: Build site
-        run: bun run build:site
+      - name: Download site
+        uses: actions/download-artifact@v7
+        with:
+          name: site-dist
+          path: dist/
 
       - name: Deploy to Cloudflare Workers (Production)
         if: github.ref == 'refs/heads/main'
