@@ -15,15 +15,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 228 tests at ~1 s each on one worker (measured 2026-10-16, run
-        # 38886329048: 246 s of tests inside a 4:38 job). 16 shards cut the
-        # test step to ~15 s; the ~27 s of dispatch, job setup and
-        # Playwright/Vite startup is the fixed cost every shard pays.
+        # Shards carry equal test TIME, not equal test counts: each shard
+        # lists the suite (1 s, no browser), plans every shard from
+        # tests/shard-timings.json with scripts/e2e-shard-plan.mjs, and runs
+        # its own slice through --test-list. Count-based --shard left the
+        # slowest of 16 shards with 32 s of tests against a 22 s ideal
+        # (run 39168073343).
+        #
+        # Shard count is set by the concurrent-job cap, not by test maths:
+        # shards + test + docker-build + build-site + 2 CodeQL jobs start at
+        # once, and 20 is where a job waited for a runner (shard 15 waited
+        # 36 s in run 39168073343 with 21 jobs). 14 shards = 19 jobs.
+        #
         # workers stays 1 per shard (playwright.config.ts): the suite is
         # load-sensitive above 4 in-process workers (demo1-smoke fails 3/3 at
-        # 8 workers and passes 5/5 alone), so parallelism comes from runners,
-        # not from workers, and the one-worker zero-flake record is kept.
-        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+        # 8 workers and passes 5/5 alone), so parallelism comes from runners.
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
       - uses: actions/checkout@v6
 
@@ -61,8 +68,36 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: bun run pw:install
 
+      - name: List tests
+        run: bunx playwright test --list --reporter=json > e2e-inventory.json
+        env:
+          CI: true
+
+      - name: Plan shard ${{ matrix.shard }}/${{ strategy.job-total }}
+        run: >
+          bun scripts/e2e-shard-plan.mjs
+          --shard ${{ matrix.shard }}/${{ strategy.job-total }}
+          --inventory e2e-inventory.json
+          --timings tests/shard-timings.json
+          --out e2e-shard-tests.txt
+
+      # --test-list matches titles exactly and skips silently on a mismatch,
+      # so prove the list selects precisely the planned tests before running.
+      - name: Check the shard list selects every planned test
+        run: |
+          planned=$(grep -c . e2e-shard-tests.txt)
+          listed=$(bunx playwright test --list --reporter=json --test-list e2e-shard-tests.txt \
+            | jq '[.. | objects | select(has("specs")) | .specs[]] | length')
+          echo "planned=$planned listed=$listed"
+          if [ "$planned" != "$listed" ]; then
+            echo "::error::shard list selects $listed tests but $planned were planned"
+            exit 1
+          fi
+        env:
+          CI: true
+
       - name: Run Playwright tests (shard ${{ matrix.shard }}/${{ strategy.job-total }})
-        run: bun run pw:ci -- --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: bun run pw:ci -- --test-list e2e-shard-tests.txt
         env:
           CI: true
 
@@ -74,4 +109,5 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            e2e-shard-tests.txt
           retention-days: 30
