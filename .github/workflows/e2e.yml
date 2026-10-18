@@ -25,7 +25,10 @@ jobs:
         # Shard count is set by the concurrent-job cap, not by test maths:
         # shards + test + docker-build + build-site + 2 CodeQL jobs start at
         # once, and 20 is where a job waited for a runner (shard 15 waited
-        # 36 s in run 39168073343 with 21 jobs). 14 shards = 19 jobs.
+        # 36 s in run 39168073343 with 21 jobs). 14 shards = 19 jobs. The
+        # cap is per GitHub org and shared with mermaid's CI, so shards still
+        # queue while mermaid PRs are busy (13 of them were in flight during
+        # run 39170373781); fewer shards only lowers this repo's share.
         #
         # workers stays 1 per shard (playwright.config.ts): the suite is
         # load-sensitive above 4 in-process workers (demo1-smoke fails 3/3 at
