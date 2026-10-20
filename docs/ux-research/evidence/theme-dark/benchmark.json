@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-20T11:43:21.682Z",
+  "generated": "2026-10-20T11:57:51.478Z",
   "sequence": {
     "zenuml": "// Order placement\nClient.placeOrder(cart) {\n  Orders.validate(cart) {\n    Inventory.reserve(items)\n    if (inStock) {\n      Payments.charge(total)\n      return receipt\n    } else {\n      return backorder\n    }\n  }\n  Orders.notify()\n}",
     "mermaid": "sequenceDiagram\n  participant Client\n  participant Orders\n  participant Inventory\n  participant Payments\n  Note over Client: Order placement\n  Client->>Orders: placeOrder(cart)\n  activate Orders\n  Orders->>Inventory: reserve(items)\n  alt inStock\n    Orders->>Payments: charge(total)\n    Payments-->>Orders: receipt\n  else\n    Orders-->>Client: backorder\n  end\n  Orders->>Orders: notify()\n  deactivate Orders",
@@ -27,7 +27,7 @@
       "line": {
         "n": 34,
         "min": 48.4,
-        "median": 82.2,
+        "median": 86.5,
         "max": 105.9,
         "underFloor": 0,
         "worst": {
@@ -58,7 +58,7 @@
       "line": {
         "n": 32,
         "min": 48.4,
-        "median": 82.2,
+        "median": 86.5,
         "max": 105.9,
         "underFloor": 0,
         "worst": {
@@ -164,5 +164,5 @@
       "source": "d2 v0.9.0 --theme 200"
     }
   },
-  "markdown": "| renderer | text n | text min Lc | text median | text under floor | line n | line min Lc | line median | line under floor | worst text |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| zenuml theme-dark (DOM) | 24 | 78.5 | 94.1 | 0 | 34 | 48.4 | 82.2 | 0 | #d4d4d4 on #1f1f1f \"Order placement\" |\n| zenuml theme-dark (SVG) | 24 | 78.5 | 94.1 | 0 | 32 | 48.4 | 82.2 | 0 | #d4d4d4 on #1f1f1f \"inStock\" |\n| Mermaid 12.2.0 theme dark | 17 | 50.5 | 77.6 | 8 | 26 | 0 | 69.8 | 1 | #b8b6b6 on #474949 \"Order placement\" |\n| PlantUML -darkmode | 17 | 90.8 | 105.5 | 0 | 33 | 11.7 | 90.8 | 1 | #ffffff on #555555 \"alt\" |\n| D2 v0.9.0 theme 200 (Dark Mauve) | 13 | 68.1 | 69.5 | 12 | 16 | 60.8 | 60.8 | 0 | #bac2de on #1e1e2e \"placeOrder(cart)\" |"
+  "markdown": "| renderer | text n | text min Lc | text median | text under floor | line n | line min Lc | line median | line under floor | worst text |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| zenuml theme-dark (DOM) | 24 | 78.5 | 94.1 | 0 | 34 | 48.4 | 86.5 | 0 | #d4d4d4 on #1f1f1f \"Order placement\" |\n| zenuml theme-dark (SVG) | 24 | 78.5 | 94.1 | 0 | 32 | 48.4 | 86.5 | 0 | #d4d4d4 on #1f1f1f \"inStock\" |\n| Mermaid 12.2.0 theme dark | 17 | 50.5 | 77.6 | 8 | 26 | 0 | 69.8 | 1 | #b8b6b6 on #474949 \"Order placement\" |\n| PlantUML -darkmode | 17 | 90.8 | 105.5 | 0 | 33 | 11.7 | 90.8 | 1 | #ffffff on #555555 \"alt\" |\n| D2 v0.9.0 theme 200 (Dark Mauve) | 13 | 68.1 | 69.5 | 12 | 16 | 60.8 | 60.8 | 0 | #bac2de on #1e1e2e \"placeOrder(cart)\" |"
 }

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-20T11:46:49.977Z",
+  "generated": "2026-10-20T12:01:20.459Z",
   "args": {
     "themes": [
       "theme-default",
@@ -685,10 +685,10 @@
         "kind": "line",
         "role": "fragment-border",
         "n": 348,
-        "minLc": 80.89710246370588,
-        "medianLc": 82.18496259801859,
+        "minLc": 85.24432553278828,
+        "medianLc": 86.53218566710099,
         "floor": 45,
-        "fg": "#dadada",
+        "fg": "#e1e1e1",
         "bg": "#272727",
         "worst": "vertical-5 div>div.segment>div.block.[&>.statement-container:not(:first-child)]:border-t>div.statement-container.group/stmt>div.group.fragment"
       },
@@ -709,10 +709,10 @@
         "kind": "line",
         "role": "frame-border",
         "n": 204,
-        "minLc": 82.18496259801859,
-        "medianLc": 82.18496259801859,
+        "minLc": 86.53218566710099,
+        "medianLc": 86.53218566710099,
         "floor": 45,
-        "fg": "#dadada",
+        "fg": "#e1e1e1",
         "bg": "#1f1f1f",
         "worst": "smoke div.zenuml>div.p-1.bg-skin-canvas>div.frame.text-skin-base"
       },
@@ -721,10 +721,10 @@
         "kind": "line",
         "role": "group-outline",
         "n": 24,
-        "minLc": 82.18496259801859,
-        "medianLc": 82.18496259801859,
+        "minLc": 86.53218566710099,
+        "medianLc": 86.53218566710099,
         "floor": 45,
-        "fg": "#dadada",
+        "fg": "#e1e1e1",
         "bg": "#1f1f1f",
         "worst": "fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group"
       },
@@ -733,10 +733,10 @@
         "kind": "line",
         "role": "header-rule",
         "n": 204,
-        "minLc": 82.18496259801859,
-        "medianLc": 82.18496259801859,
+        "minLc": 86.53218566710099,
+        "medianLc": 86.53218566710099,
         "floor": 45,
-        "fg": "#dadada",
+        "fg": "#e1e1e1",
         "bg": "#1f1f1f",
         "worst": "smoke div.zenuml>div.p-1.bg-skin-canvas>div.frame.text-skin-base>div>div.header.text-skin-title"
       },
@@ -745,10 +745,10 @@
         "kind": "line",
         "role": "lifeline",
         "n": 894,
-        "minLc": 82.18496259801859,
-        "medianLc": 82.18496259801859,
+        "minLc": 86.53218566710099,
+        "medianLc": 86.53218566710099,
         "floor": 45,
-        "fg": "#dadada",
+        "fg": "#e1e1e1",
         "bg": "#1f1f1f",
         "worst": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0"
       },
@@ -769,10 +769,10 @@
         "kind": "line",
         "role": "occurrence-border",
         "n": 858,
-        "minLc": 46.284734733353574,
-        "medianLc": 82.18496259801859,
+        "minLc": 50.63195780243597,
+        "medianLc": 86.53218566710099,
         "floor": 45,
-        "fg": "#dadada",
+        "fg": "#e1e1e1",
         "bg": "#858585",
         "worst": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6"
       },
@@ -781,10 +781,10 @@
         "kind": "line",
         "role": "participant-border",
         "n": 882,
-        "minLc": 82.18496259801859,
-        "medianLc": 82.18496259801859,
+        "minLc": 86.53218566710099,
+        "medianLc": 86.53218566710099,
         "floor": 45,
-        "fg": "#dadada",
+        "fg": "#e1e1e1",
         "bg": "#1f1f1f",
         "worst": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.participant.bg-skin-participant"
       },
@@ -818,7 +818,7 @@
         "role": "svg-line",
         "n": 2028,
         "minLc": 48.35241303004335,
-        "medianLc": 82.18496259801859,
+        "medianLc": 86.53218566710099,
         "floor": 45,
         "fg": "#9f9f9f",
         "bg": "#1f1f1f",
@@ -1096,103 +1096,127 @@
     "theme-dark": [
       {
         "key": "fill:svg-fill over header",
-        "n": 4,
+        "n": 57,
         "minLc": 0,
         "example": "defect-406 g>g.fragment.fragment-opt>rect.fragment-number-bg (#e9e9e9 on #e9e9e9)"
       },
       {
         "key": "line:arrow-head over dividerBox",
-        "n": 18,
-        "minLc": 24.6,
-        "example": "demo1-smoke div.interaction.creation>div.message-container.pointer-events-none>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path (#ffffff on #d6d6d6)"
+        "n": 10,
+        "minLc": 25.8,
+        "example": "demo1-smoke div.interaction.creation>div.message-container.pointer-events-none>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path (#ffffff on #d4d4d4)"
+      },
+      {
+        "key": "line:arrow-head over header",
+        "n": 1166,
+        "minLc": 17.5,
+        "example": "smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path (#ffffff on #e1e1e1)"
+      },
+      {
+        "key": "line:divider-line over header",
+        "n": 17,
+        "minLc": 33.9,
+        "example": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left (#9f9f9f on #e1e1e1)"
       },
       {
         "key": "line:divider-line over occurrence",
-        "n": 22,
+        "n": 24,
         "minLc": 14.4,
         "example": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left (#9f9f9f on #818181)"
       },
       {
         "key": "line:fragment-border over header",
         "n": 6,
-        "minLc": 8,
-        "example": "vertical-5 div>div.segment>div.block.[&>.statement-container:not(:first-child)]:border-t>div.statement-container.group/stmt>div.group.fragment (#dadada on #ececec)"
+        "minLc": 0,
+        "example": "vertical-5 div>div.segment>div.block.[&>.statement-container:not(:first-child)]:border-t>div.statement-container.group/stmt>div.group.fragment (#e1e1e1 on #ededed)"
       },
       {
         "key": "line:group-outline over dividerBox",
         "n": 16,
         "minLc": 0,
-        "example": "demo1-smoke div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#dadada on #d4d4d4)"
+        "example": "demo1-smoke div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#e1e1e1 on #d4d4d4)"
       },
       {
         "key": "line:group-outline over header",
-        "n": 56,
+        "n": 96,
         "minLc": 0,
-        "example": "fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#dadada on #e9e9e9)"
-      },
-      {
-        "key": "line:group-outline over occurrence",
-        "n": 16,
-        "minLc": 44.8,
-        "example": "fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#dadada on #888888)"
+        "example": "fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#e1e1e1 on #e9e9e9)"
       },
       {
         "key": "line:lifeline over dividerBox",
-        "n": 42,
+        "n": 38,
         "minLc": 0,
-        "example": "demo1-smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 (#dadada on #d4d4d4)"
+        "example": "demo1-smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 (#e1e1e1 on #d4d4d4)"
       },
       {
         "key": "line:lifeline over header",
-        "n": 208,
+        "n": 2012,
         "minLc": 0,
-        "example": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 (#dadada on #e9e9e9)"
+        "example": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 (#e1e1e1 on #e1e1e1)"
       },
       {
         "key": "line:message-line over dividerBox",
-        "n": 50,
-        "minLc": 24.6,
-        "example": "demo1-smoke div.interaction.creation>div.message-container.pointer-events-none>div.message.text-[15px]>svg.absolute.left-0>line (#ffffff on #d6d6d6)"
+        "n": 44,
+        "minLc": 25.8,
+        "example": "demo1-smoke div.interaction.creation>div.message-container.pointer-events-none>div.message.text-[15px]>svg.absolute.left-0>line (#ffffff on #d4d4d4)"
       },
       {
         "key": "line:message-line over header",
-        "n": 198,
+        "n": 1388,
         "minLc": 0,
         "example": "smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.left-0>line (#ffffff on #f1f1f1)"
       },
       {
         "key": "line:occurrence-border over dividerBox",
-        "n": 34,
+        "n": 44,
         "minLc": 0,
-        "example": "demo1-smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 (#dadada on #d4d4d4)"
+        "example": "demo1-smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 (#e1e1e1 on #d4d4d4)"
       },
       {
         "key": "line:occurrence-border over header",
-        "n": 98,
+        "n": 311,
         "minLc": 0,
-        "example": "smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 (#dadada on #e8e8e8)"
+        "example": "smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 (#e1e1e1 on #e9e9e9)"
+      },
+      {
+        "key": "line:participant-border over header",
+        "n": 5,
+        "minLc": 0,
+        "example": "fragment-issue div.z-lifeline-container.relative>div.lifeline-group-container.absolute>div.lifeline-group.relative>div.lifeline.absolute>div.participant.bg-skin-participant (#e1e1e1 on #e1e1e1)"
+      },
+      {
+        "key": "line:self-arrow over header",
+        "n": 178,
+        "minLc": 17.5,
+        "example": "if-fragment svg.arrow.text-skin-message-arrow>g>svg.stroke-1>g>path (#ffffff on #e1e1e1)"
+      },
+      {
+        "key": "line:separator over header",
+        "n": 90,
+        "minLc": 33.9,
+        "example": "smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t (#9f9f9f on #e1e1e1)"
       },
       {
         "key": "line:separator over occurrence",
-        "n": 65,
+        "n": 85,
         "minLc": 14.4,
         "example": "smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t (#9f9f9f on #818181)"
       },
       {
         "key": "line:svg-line over dividerBox",
-        "n": 126,
+        "n": 120,
         "minLc": 0,
-        "example": "demo1-smoke g>line.lifeline (#dadada on #d4d4d4)"
+        "example": "demo1-smoke g>line.lifeline (#e1e1e1 on #d4d4d4)"
       },
       {
         "key": "line:svg-line over header",
-        "n": 712,
+        "n": 3196,
         "minLc": 0,
-        "example": "smoke g>line.lifeline (#dadada on #e9e9e9)"
+        "example": "smoke line.frame-header-line (#e1e1e1 on #e1e1e1)"
       },
       {
         "key": "line:svg-line over occurrence",
-        "n": 76,
+        "n": 66,
         "minLc": 14.4,
         "example": "smoke g>g.fragment.fragment-tcf>line.fragment-separator (#9f9f9f on #818181)"
       },

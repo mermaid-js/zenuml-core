@@ -17,6 +17,16 @@ test.describe("theme-dark", () => {
         timeout: 5000,
       });
       await page.waitForLoadState("networkidle");
+      // Cloud icons (@Lambda, @EC2 …) arrive through a lazy import that
+      // networkidle can miss; every icon slot must hold its <svg> first.
+      await page.waitForFunction(
+        () =>
+          Array.from(document.querySelectorAll('[aria-description^="icon for"]')).every(
+            (slot) => slot.querySelector("svg"),
+          ),
+        null,
+        { timeout: 10000 },
+      );
       await expect(page).toHaveScreenshot(`dark-dom-${name}.png`, {
         threshold: DEFAULT_THRESHOLD,
         fullPage: true,

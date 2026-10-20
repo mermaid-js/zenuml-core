@@ -22,6 +22,10 @@ const defaultConfig = {
   enableMessageReorder: true,
 };
 
+// `?theme=theme-dark` opens the demo in a theme without touching the stored
+// one; it applies to every render unless the caller passes a theme.
+const themeParam = new URLSearchParams(window.location.search).get("theme");
+
 export function initZenUml(element: HTMLElement) {
   const zenUml = new ZenUml(element);
 
@@ -34,7 +38,11 @@ export function initZenUml(element: HTMLElement) {
   // Override the render method to always use our config
   const originalRender = zenUml.render.bind(zenUml);
   zenUml.render = (content: string, config = {}) => {
-    return originalRender(content, { ...defaultConfig, ...config }).then(
+    return originalRender(content, {
+      ...defaultConfig,
+      ...(themeParam ? { theme: themeParam } : {}),
+      ...config,
+    }).then(
       (r) => {
         console.log("ZenUML Core Version:", ZenUml.version);
         return r;
@@ -49,9 +57,7 @@ export function initZenUml(element: HTMLElement) {
 const elm = document.querySelector("pre.zenuml") as HTMLElement;
 if (elm) {
   const instance = initZenUml(elm);
-  // `?theme=theme-dark` opens the demo in a theme without touching the stored one.
-  const themeParam = new URLSearchParams(window.location.search).get("theme");
-  instance.render("", themeParam ? { theme: themeParam } : {}); // Initial render with empty content
+  instance.render("", {}); // Initial render with empty content
 }
 
 // @ts-expect-error global variable

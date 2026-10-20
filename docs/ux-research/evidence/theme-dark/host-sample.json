@@ -4,20 +4,20 @@
   "case": "smoke",
   "theme": "theme-dark",
   "hostColorMode": "dark",
-  "staleRulesRemoved": 23,
+  "staleRulesRemoved": 0,
   "overlaps": [],
   "walked": 67,
   "clipped": 0,
   "hostBodyBackground": "rgb(31, 31, 33)",
   "iframeBodyBackground": "rgba(0, 0, 0, 0)",
   "frameBox": {
-    "x": 320,
-    "y": 326,
-    "width": 760,
-    "height": 1220
+    "x": 0,
+    "y": 48,
+    "width": 1400,
+    "height": 660
   },
   "items": 67,
-  "failures": 2,
+  "failures": 0,
   "summary": {
     "text:title": {
       "n": 1,
@@ -75,33 +75,33 @@
     },
     "text:participant": {
       "n": 3,
-      "minLc": 103.23203370361809,
+      "minLc": 103.25328905124402,
       "fg": "#fbfbfb",
-      "bg": "#1f1f21"
+      "bg": "#1f1f1f"
     },
     "line:frame-border": {
       "n": 1,
-      "minLc": 82.18496259801859,
-      "fg": "#dadada",
+      "minLc": 86.53218566710099,
+      "fg": "#e1e1e1",
       "bg": "#1f1f1f"
     },
     "line:header-rule": {
       "n": 1,
-      "minLc": 82.18496259801859,
-      "fg": "#dadada",
+      "minLc": 86.53218566710099,
+      "fg": "#e1e1e1",
       "bg": "#1f1f1f"
     },
     "line:participant-border": {
       "n": 4,
-      "minLc": 82.18496259801859,
-      "fg": "#dadada",
+      "minLc": 86.53218566710099,
+      "fg": "#e1e1e1",
       "bg": "#1f1f1f"
     },
     "line:lifeline": {
       "n": 4,
-      "minLc": 48.20585501093908,
-      "fg": "#dadada",
-      "bg": "#818181"
+      "minLc": 86.53218566710099,
+      "fg": "#e1e1e1",
+      "bg": "#1f1f1f"
     },
     "line:message-line": {
       "n": 6,
@@ -117,14 +117,14 @@
     },
     "line:occurrence-border": {
       "n": 3,
-      "minLc": 0,
-      "fg": "#dadada",
-      "bg": "#dadada"
+      "minLc": 85.24432553278828,
+      "fg": "#e1e1e1",
+      "bg": "#272727"
     },
     "line:fragment-border": {
       "n": 2,
-      "minLc": 82.18496259801859,
-      "fg": "#dadada",
+      "minLc": 86.53218566710099,
+      "fg": "#e1e1e1",
       "bg": "#1f1f1f"
     },
     "line:fragment-header-rule": {
@@ -152,36 +152,17 @@
       "bg": "#1f1f1f"
     },
     "fill:participant-fill": {
-      "n": 4,
+      "n": 3,
       "minLc": 0,
       "fg": "#1f1f1f",
       "bg": "#1f1f1f"
     },
     "fill:canvas": {
       "n": 1,
-      "minLc": 0,
+      "minLc": 95.5648267300278,
       "fg": "#1f1f1f",
-      "bg": "#1f1f21"
+      "bg": "#f3f0ff"
     }
   },
-  "fails": [
-    {
-      "role": "occurrence-border",
-      "kind": "line",
-      "path": "div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6",
-      "fg": "#dadada",
-      "bg": "#dadada",
-      "lc": 0,
-      "floor": 45
-    },
-    {
-      "role": "occurrence-border",
-      "kind": "line",
-      "path": "div.occurrence.min-h-6>div.block>div.statement-container.group/stmt>div.interaction.creation>div.occurrence.min-h-6",
-      "fg": "#dadada",
-      "bg": "#e1e1e1",
-      "lc": 0,
-      "floor": 45
-    }
-  ]
+  "fails": []
 }

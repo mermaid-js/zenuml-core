@@ -116,18 +116,18 @@ Overlaps under floor (drawn over a surface the role is not designed for; reporte
 | fill:svg-fill | 1336 | 0.0 | 35.1 | — | — | #1f1f1f on #1f1f1f — smoke g>g.participant.participant-starter>rect.participant-box |
 | line:arrow-head | 1512 | 105.9 | 105.9 | 45 | yes | #ffffff on #1f1f1f — smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path |
 | line:divider-line | 24 | 48.4 | 48.4 | 45 | yes | #9f9f9f on #1f1f1f — demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left |
-| line:fragment-border | 348 | 80.9 | 82.2 | 45 | yes | #dadada on #272727 — vertical-5 div>div.segment>div.block.[&>.statement-container:not(:first-child)]:border-t>div.statement-container.group/stmt>div.group.fragment |
+| line:fragment-border | 348 | 85.2 | 86.5 | 45 | yes | #e1e1e1 on #272727 — vertical-5 div>div.segment>div.block.[&>.statement-container:not(:first-child)]:border-t>div.statement-container.group/stmt>div.group.fragment |
 | line:fragment-header-rule | 348 | 93.0 | 93.0 | 45 | yes | #000000 on #e9e9e9 — smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div.header.bg-skin-fragment-header>div.name.font-normal |
-| line:frame-border | 204 | 82.2 | 82.2 | 45 | yes | #dadada on #1f1f1f — smoke div.zenuml>div.p-1.bg-skin-canvas>div.frame.text-skin-base |
-| line:group-outline | 24 | 82.2 | 82.2 | 45 | yes | #dadada on #1f1f1f — fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group |
-| line:header-rule | 204 | 82.2 | 82.2 | 45 | yes | #dadada on #1f1f1f — smoke div.zenuml>div.p-1.bg-skin-canvas>div.frame.text-skin-base>div>div.header.text-skin-title |
-| line:lifeline | 894 | 82.2 | 82.2 | 45 | yes | #dadada on #1f1f1f — smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 |
+| line:frame-border | 204 | 86.5 | 86.5 | 45 | yes | #e1e1e1 on #1f1f1f — smoke div.zenuml>div.p-1.bg-skin-canvas>div.frame.text-skin-base |
+| line:group-outline | 24 | 86.5 | 86.5 | 45 | yes | #e1e1e1 on #1f1f1f — fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group |
+| line:header-rule | 204 | 86.5 | 86.5 | 45 | yes | #e1e1e1 on #1f1f1f — smoke div.zenuml>div.p-1.bg-skin-canvas>div.frame.text-skin-base>div>div.header.text-skin-title |
+| line:lifeline | 894 | 86.5 | 86.5 | 45 | yes | #e1e1e1 on #1f1f1f — smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 |
 | line:message-line | 1140 | 105.9 | 105.9 | 45 | yes | #ffffff on #1f1f1f — smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.left-0>line |
-| line:occurrence-border | 858 | 46.3 | 82.2 | 45 | yes | #dadada on #858585 — demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 |
-| line:participant-border | 882 | 82.2 | 82.2 | 45 | yes | #dadada on #1f1f1f — smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.participant.bg-skin-participant |
+| line:occurrence-border | 858 | 50.6 | 86.5 | 45 | yes | #e1e1e1 on #858585 — demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 |
+| line:participant-border | 882 | 86.5 | 86.5 | 45 | yes | #e1e1e1 on #1f1f1f — smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.participant.bg-skin-participant |
 | line:self-arrow | 372 | 105.9 | 105.9 | 45 | yes | #ffffff on #1f1f1f — if-fragment div.statement-container.group/stmt>div.interaction.async>div.message.text-[15px]>svg.arrow.text-skin-message-arrow>path.stroke-current.stroke-1 |
 | line:separator | 120 | 48.4 | 48.4 | 45 | yes | #9f9f9f on #1f1f1f — smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t |
-| line:svg-line | 2028 | 48.4 | 82.2 | 45 | yes | #9f9f9f on #1f1f1f — smoke g>g.fragment.fragment-tcf>line.fragment-separator |
+| line:svg-line | 2028 | 48.4 | 86.5 | 45 | yes | #9f9f9f on #1f1f1f — smoke g>g.fragment.fragment-tcf>line.fragment-separator |
 | text:comment | 150 | 78.5 | 78.5 | 75 | yes | #d4d4d4 on #1f1f1f — smoke div.text-left.text-sm>div.group.fragment>div.comments.text-skin-comment>div>p "String line;" |
 | text:divider-text | 12 | 78.2 | 78.2 | 75 | yes | #000000 on #cfcfcf — demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.name "divider can be anywhere" |
 | text:fragment-condition | 240 | 78.5 | 78.5 | 75 | yes | #d4d4d4 on #1f1f1f — smoke div>div.segment>div.text-skin-fragment>div.guard-row.flex>span.bg-skin-frame.opacity-skin-guard "(line = br.readLine()) != null" |
@@ -148,22 +148,26 @@ Overlaps under floor (drawn over a surface the role is not designed for; reporte
 
 | role over surface | n | min |Lc| | example |
 | --- | --- | --- | --- |
-| fill:svg-fill over header | 4 | 0.0 | defect-406 g>g.fragment.fragment-opt>rect.fragment-number-bg (#e9e9e9 on #e9e9e9) |
-| line:arrow-head over dividerBox | 18 | 24.6 | demo1-smoke div.interaction.creation>div.message-container.pointer-events-none>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path (#ffffff on #d6d6d6) |
-| line:divider-line over occurrence | 22 | 14.4 | demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left (#9f9f9f on #818181) |
-| line:fragment-border over header | 6 | 8.0 | vertical-5 div>div.segment>div.block.[&>.statement-container:not(:first-child)]:border-t>div.statement-container.group/stmt>div.group.fragment (#dadada on #ececec) |
-| line:group-outline over dividerBox | 16 | 0.0 | demo1-smoke div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#dadada on #d4d4d4) |
-| line:group-outline over header | 56 | 0.0 | fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#dadada on #e9e9e9) |
-| line:group-outline over occurrence | 16 | 44.8 | fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#dadada on #888888) |
-| line:lifeline over dividerBox | 42 | 0.0 | demo1-smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 (#dadada on #d4d4d4) |
-| line:lifeline over header | 208 | 0.0 | smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 (#dadada on #e9e9e9) |
-| line:message-line over dividerBox | 50 | 24.6 | demo1-smoke div.interaction.creation>div.message-container.pointer-events-none>div.message.text-[15px]>svg.absolute.left-0>line (#ffffff on #d6d6d6) |
-| line:message-line over header | 198 | 0.0 | smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.left-0>line (#ffffff on #f1f1f1) |
-| line:occurrence-border over dividerBox | 34 | 0.0 | demo1-smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 (#dadada on #d4d4d4) |
-| line:occurrence-border over header | 98 | 0.0 | smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 (#dadada on #e8e8e8) |
-| line:separator over occurrence | 65 | 14.4 | smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t (#9f9f9f on #818181) |
-| line:svg-line over dividerBox | 126 | 0.0 | demo1-smoke g>line.lifeline (#dadada on #d4d4d4) |
-| line:svg-line over header | 712 | 0.0 | smoke g>line.lifeline (#dadada on #e9e9e9) |
-| line:svg-line over occurrence | 76 | 14.4 | smoke g>g.fragment.fragment-tcf>line.fragment-separator (#9f9f9f on #818181) |
+| fill:svg-fill over header | 57 | 0.0 | defect-406 g>g.fragment.fragment-opt>rect.fragment-number-bg (#e9e9e9 on #e9e9e9) |
+| line:arrow-head over dividerBox | 10 | 25.8 | demo1-smoke div.interaction.creation>div.message-container.pointer-events-none>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path (#ffffff on #d4d4d4) |
+| line:arrow-head over header | 1166 | 17.5 | smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path (#ffffff on #e1e1e1) |
+| line:divider-line over header | 17 | 33.9 | demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left (#9f9f9f on #e1e1e1) |
+| line:divider-line over occurrence | 24 | 14.4 | demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left (#9f9f9f on #818181) |
+| line:fragment-border over header | 6 | 0.0 | vertical-5 div>div.segment>div.block.[&>.statement-container:not(:first-child)]:border-t>div.statement-container.group/stmt>div.group.fragment (#e1e1e1 on #ededed) |
+| line:group-outline over dividerBox | 16 | 0.0 | demo1-smoke div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#e1e1e1 on #d4d4d4) |
+| line:group-outline over header | 96 | 0.0 | fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#e1e1e1 on #e9e9e9) |
+| line:lifeline over dividerBox | 38 | 0.0 | demo1-smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 (#e1e1e1 on #d4d4d4) |
+| line:lifeline over header | 2012 | 0.0 | smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 (#e1e1e1 on #e1e1e1) |
+| line:message-line over dividerBox | 44 | 25.8 | demo1-smoke div.interaction.creation>div.message-container.pointer-events-none>div.message.text-[15px]>svg.absolute.left-0>line (#ffffff on #d4d4d4) |
+| line:message-line over header | 1388 | 0.0 | smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.left-0>line (#ffffff on #f1f1f1) |
+| line:occurrence-border over dividerBox | 44 | 0.0 | demo1-smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 (#e1e1e1 on #d4d4d4) |
+| line:occurrence-border over header | 311 | 0.0 | smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 (#e1e1e1 on #e9e9e9) |
+| line:participant-border over header | 5 | 0.0 | fragment-issue div.z-lifeline-container.relative>div.lifeline-group-container.absolute>div.lifeline-group.relative>div.lifeline.absolute>div.participant.bg-skin-participant (#e1e1e1 on #e1e1e1) |
+| line:self-arrow over header | 178 | 17.5 | if-fragment svg.arrow.text-skin-message-arrow>g>svg.stroke-1>g>path (#ffffff on #e1e1e1) |
+| line:separator over header | 90 | 33.9 | smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t (#9f9f9f on #e1e1e1) |
+| line:separator over occurrence | 85 | 14.4 | smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t (#9f9f9f on #818181) |
+| line:svg-line over dividerBox | 120 | 0.0 | demo1-smoke g>line.lifeline (#e1e1e1 on #d4d4d4) |
+| line:svg-line over header | 3196 | 0.0 | smoke line.frame-header-line (#e1e1e1 on #e1e1e1) |
+| line:svg-line over occurrence | 66 | 14.4 | smoke g>g.fragment.fragment-tcf>line.fragment-separator (#9f9f9f on #818181) |
 | text:message over occurrence | 5 | 69.3 | demo4-fragment-span div.name.group>div.inline-block.static>div>span.assignment-return-label>span.right.editable-span-base "a" (#fbfbfb on #818181) |
 | text:svg-text over occurrence | 12 | 60.2 | smoke g>g.creation>text.seq-number "1.1" (#ededed on #818181) |
