@@ -127,9 +127,14 @@ if (write) {
   const adrFile = resolve(ROOT, "docs/adr/0004-theme-dark.md");
   let adr = readFileSync(adrFile, "utf8");
   for (const n of names) {
-    const re = new RegExp(`(<!-- TABLES:${n} -->\\n)[\\s\\S]*?(\\n<!-- /TABLES:${n} -->)`);
-    if (!re.test(adr)) throw new Error(`no TABLES:${n} markers in the ADR`);
-    adr = adr.replace(re, `$1${sections[n]()}$2`);
+    // Section names are the keys of `sections`, never raw argv.
+    if (!Object.hasOwn(sections, n)) throw new Error(`unknown section ${n}`);
+    const open = `<!-- TABLES:${n} -->\n`;
+    const close = `\n<!-- /TABLES:${n} -->`;
+    const start = adr.indexOf(open);
+    const end = start < 0 ? -1 : adr.indexOf(close, start + open.length);
+    if (start < 0 || end < 0) throw new Error(`no TABLES:${n} markers in the ADR`);
+    adr = adr.slice(0, start + open.length) + sections[n]() + adr.slice(end);
   }
   writeFileSync(adrFile, adr);
   process.stdout.write(`spliced ${names.join(", ")} into ${adrFile}\n`);

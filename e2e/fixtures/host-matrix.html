@@ -24,15 +24,24 @@
       const params = new URLSearchParams(window.location.search);
       const caseName = params.get("case") || "smoke";
       const theme = params.get("theme") || "theme-dark";
-      const hosts = (params.get("hosts") || "atlassian,github,vscode").split(",");
+      // Only the hosts styled above are accepted; the names reach the DOM as text.
+      const KNOWN_HOSTS = ["atlassian", "github", "vscode", "white"];
+      const hosts = (params.get("hosts") || "atlassian,github,vscode")
+        .split(",")
+        .filter((h) => KNOWN_HOSTS.includes(h));
       const code = CASES[caseName] || params.get("code") || "A.m()";
       window.__instances = [];
       for (const host of hosts) {
         const section = document.createElement("section");
         section.dataset.host = host;
-        section.innerHTML = `<h2>${host}</h2><pre class="zenuml" style="margin:0"></pre>`;
+        const heading = document.createElement("h2");
+        heading.textContent = host;
+        const pre = document.createElement("pre");
+        pre.className = "zenuml";
+        pre.style.margin = "0";
+        section.append(heading, pre);
         document.body.appendChild(section);
-        window.__instances.push(new ZenUml(section.querySelector("pre.zenuml")));
+        window.__instances.push(new ZenUml(pre));
       }
       // Re-render every panel in place (the audit calls this per case).
       window.__renderAll = async (c, t) => {
