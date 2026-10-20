@@ -17,8 +17,15 @@ import { renameParticipantInDsl } from "@/utils/participantRenameTransform";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import { RootContext } from "@/parser";
 import { cn } from "@/utils";
+import { usePopoverPresence } from "@/components/common/usePopoverPresence";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { FloatingPortal } from "@floating-ui/react";
 import { useInteractionExit } from "@/store/interaction/useInteractionExit";
 import { useActiveSurface } from "@/store/interaction/useCan";
@@ -74,6 +81,8 @@ export const ParticipantStylePanel = () => {
   const openFor =
     surface?.kind === "participantEditor" ? surface.participant : null;
   const isOpen = openFor !== null;
+  // P2: the editor stays mounted for its 120 ms exit animation.
+  const presence = usePopoverPresence(isOpen);
   // The selected participant's box, in viewport coordinates.
   const [anchor, setAnchor] = useState<{
     top: number;
@@ -82,7 +91,14 @@ export const ParticipantStylePanel = () => {
     bottom: number;
   } | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const participantName = selected[0] ?? null;
+  const liveParticipantName = selected[0] ?? null;
+  const lastParticipantName = useRef<string | null>(null);
+  if (liveParticipantName) lastParticipantName.current = liveParticipantName;
+  // During the exit animation the selection may already be gone; the last
+  // name keeps every piece where it was.
+  const participantName =
+    liveParticipantName ??
+    (presence.mounted ? lastParticipantName.current : null);
 
   const ordered = participantName
     ? OrderedParticipants(rootContext).find((p) => p.name === participantName)
@@ -141,6 +157,9 @@ export const ParticipantStylePanel = () => {
 
   // Picker open state lives here so Escape in a picker closes only it (D11).
   const [openPicker, setOpenPicker] = useState<Picker | null>(null);
+  const typePresence = usePopoverPresence(openPicker === "type");
+  const colorPresence = usePopoverPresence(openPicker === "color");
+  const pickerMounted = typePresence.mounted || colorPresence.mounted;
   const [stereotypeEditing, setStereotypeEditing] = useState(false);
   const [pickerPos, setPickerPos] = useState<{
     top: number;
@@ -173,19 +192,22 @@ export const ParticipantStylePanel = () => {
           bottom: rect.bottom,
         });
       }
-    } else {
+    } else if (!presence.mounted) {
       setAnchor(null);
     }
     // `code` re-anchors the editor after an edit moves the participant box;
-    // `selected` after a reselect of the same name.
-  }, [openFor, selected, diagramElement, code]);
+    // `selected` after a reselect of the same name. The anchor outlives the
+    // open state by one exit animation.
+  }, [openFor, selected, diagramElement, code, presence.mounted]);
 
   // Pickers open below their slot.
   useLayoutEffect(() => {
-    if (!anchor || !openPicker) {
+    if (!anchor || (!openPicker && !pickerMounted)) {
       setPickerPos(null);
       return;
     }
+    // A closing picker keeps its last position for the exit frame.
+    if (!openPicker) return;
     setPickerPos({
       top: anchor.top + PICKER_TOP,
       left:
@@ -193,7 +215,7 @@ export const ParticipantStylePanel = () => {
           ? anchor.right - TYPE_PICKER_WIDTH
           : anchor.right + COLOR_PICKER_LEFT,
     });
-  }, [anchor, openPicker]);
+  }, [anchor, openPicker, pickerMounted]);
 
   // A newly opened picker takes focus: its first pressed item, else its
   // first control.
@@ -231,39 +253,42 @@ export const ParticipantStylePanel = () => {
   }, [pickerPos, anchor]);
 
   // The name row is centred under the box; measure it to clamp it on screen.
-  // Its width changes with the label field (empty vs filled). It runs after
-  // every render because the row mounts late (FloatingPortal renders its
-  // children one render after the anchor is set) and re-mounts when a picker
-  // closes; the equality guard stops the loop.
+  // The row mounts one render after the anchor is set (FloatingPortal renders
+  // its children late, and the portal node may still be detached when the
+  // ref attaches, so offsetWidth is 0 there) and nothing re-renders this
+  // component afterwards. A ResizeObserver on the row reports the real width
+  // as soon as the row has layout, and again when the label field flips
+  // between empty and filled or the row re-mounts after a picker closes.
+  const [nameRowEl, setNameRowEl] = useState<HTMLDivElement | null>(null);
+  const attachNameRow = useCallback((node: HTMLDivElement | null) => {
+    nameRowRef.current = node;
+    setNameRowEl(node);
+  }, []);
   useLayoutEffect(() => {
-    const width = nameRowRef.current?.offsetWidth ?? 0;
-    if (width !== nameRowWidth) setNameRowWidth(width);
-  });
+    if (!nameRowEl) return;
+    const measure = () => setNameRowWidth(nameRowEl.offsetWidth);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(nameRowEl);
+    return () => observer.disconnect();
+  }, [nameRowEl]);
 
-  // Click-away and Escape are the interaction state's (ADR 0002, P3): it
-  // blurs a focused draft here first, so the draft commits for the
-  // participant it belongs to, then clears the selection. A draft that fails
-  // validation is discarded: closing the panel resets every draft and error
-  // from the committed declaration.
-  useInteractionExit((state, cause) => {
-    if (state.kind !== "participantEditor" || cause.type !== "press") return;
+  // A press on a participant box can commit a focused draft (the focus
+  // change blurs the field), and the commit can re-render the diagram and
+  // replace the node under the pointer, which drops the click that would
+  // select it. Follow that one press to its end and select the participant
+  // on pointerup when its node was replaced; a node that survived gets its
+  // own click, and selecting here too would toggle it back off.
+  const followPress = (target: Element | null, hit: string) => {
     cancelPending();
-    // A committed draft can re-render the diagram and replace the node under
-    // the pointer, which drops the click that would select it.
-    const target = cause.target;
-    const hit = target
-      ?.closest?.("[data-participant-id]")
-      ?.getAttribute("data-participant-id");
-    if (!hit) return;
     const token = ++interactionTokenRef.current;
     const onUp = () => {
       const current = interactionTokenRef.current === token;
       cancelPending();
-      // A connected target still gets its own click, which toggles the
-      // selection; setting it here would toggle it back off.
       if (
         current &&
-        selectedRef.current.length === 0 &&
+        selectedRef.current[0] !== hit &&
         !target?.isConnected &&
         diagramElementRef.current?.querySelector(
           `[data-participant-id="${hit}"]`,
@@ -285,9 +310,45 @@ export const ParticipantStylePanel = () => {
       document.removeEventListener("pointercancel", cancelPending, true);
       document.removeEventListener("keydown", onKey, true);
     };
+  };
+  const participantOf = (target: Element | null) =>
+    target
+      ?.closest?.("[data-participant-id]")
+      ?.getAttribute("data-participant-id") ?? null;
+
+  // Click-away and Escape are the interaction state's (ADR 0002, P3): it
+  // blurs a focused draft here first, so the draft commits for the
+  // participant it belongs to, then clears the selection. A draft that fails
+  // validation is discarded: closing the panel resets every draft and error
+  // from the committed declaration.
+  useInteractionExit((state, cause) => {
+    if (state.kind !== "participantEditor" || cause.type !== "press") return;
+    cancelPending();
+    const hit = participantOf(cause.target);
+    if (hit) followPress(cause.target, hit);
   });
 
-  if (!isOpen || !participantName || !anchor) {
+  // A press on another participant no longer exits the editor (ADR 0002,
+  // 2026-10-20): the click switches it. The press still needs following for
+  // the replaced-node case above.
+  const participantNameRef = useRef(participantName);
+  participantNameRef.current = participantName;
+  useEffect(() => {
+    if (!isOpen) return;
+    const onDown = (event: PointerEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const hit = participantOf(target);
+      if (!hit || hit === participantNameRef.current) return;
+      if (!diagramElementRef.current?.contains(target)) return;
+      followPress(target, hit);
+    };
+    document.addEventListener("pointerdown", onDown, true);
+    return () => document.removeEventListener("pointerdown", onDown, true);
+    // followPress reads refs only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  if (!presence.mounted || !participantName || !anchor) {
     return null;
   }
 
@@ -464,6 +525,7 @@ export const ParticipantStylePanel = () => {
           aria-label={`Edit participant ${participantName}`}
           className={cn(
             "participant-style-panel group fixed inset-0 pointer-events-none text-gray-700",
+            presence.state === "exit" && "[&_*]:!pointer-events-none",
             themeClasses,
           )}
           style={{ zIndex: 50 }}
@@ -482,7 +544,10 @@ export const ParticipantStylePanel = () => {
           <div
             aria-hidden="true"
             data-testid="participant-editor-mask"
-            className="absolute inset-0 pointer-events-none bg-slate-900/[0.32]"
+            className={cn(
+              "absolute inset-0 pointer-events-none bg-slate-900/[0.32]",
+              presence.state === "exit" && "zu-fade-exit",
+            )}
           />
           {showStereotypeInput ? (
             <div
@@ -578,11 +643,17 @@ export const ParticipantStylePanel = () => {
                 </svg>
               )}
             </SplitSlot>
-            {openPicker === "type" && pickerPos && (
+            {typePresence.mounted && pickerPos && (
               <div
-                ref={pickerRef}
+                ref={(el) => {
+                  pickerRef.current = el;
+                  typePresence.ref(el);
+                }}
                 // Above the name row, which it overlaps (Split-2/3 boards).
-                className="absolute z-10 pointer-events-auto"
+                className={cn(
+                  "absolute z-10 pointer-events-auto",
+                  typePresence.className,
+                )}
                 style={{ top: pickerPos.top, left: pickerPos.left }}
               >
                 <TypePicker
@@ -625,11 +696,17 @@ export const ParticipantStylePanel = () => {
                 <SlotGlyph d="M7 17L17 7" />
               )}
             </SplitSlot>
-            {openPicker === "color" && pickerPos && (
+            {colorPresence.mounted && pickerPos && (
               <div
-                ref={pickerRef}
+                ref={(el) => {
+                  pickerRef.current = el;
+                  colorPresence.ref(el);
+                }}
                 // Above the name row, which it overlaps (Split-2/3 boards).
-                className="absolute z-10 pointer-events-auto"
+                className={cn(
+                  "absolute z-10 pointer-events-auto",
+                  colorPresence.className,
+                )}
                 style={{ top: pickerPos.top, left: pickerPos.left }}
               >
                 <ColorPicker
@@ -658,9 +735,15 @@ export const ParticipantStylePanel = () => {
               }}
             >
               <div
-                ref={nameRowRef}
+                ref={(el) => {
+                  attachNameRow(el);
+                  presence.ref(el);
+                }}
                 data-testid="participant-name-row"
-                className="pointer-events-auto h-8 box-border flex items-center gap-1.5 px-1 bg-white rounded-zu-lg shadow-zu-pop-ring"
+                className={cn(
+                  "pointer-events-auto h-8 box-border flex items-center gap-1.5 px-1 bg-white rounded-zu-lg shadow-zu-pop-ring",
+                  presence.className,
+                )}
               >
                 <label htmlFor="zenuml-participant-name" className="sr-only">
                   Name
