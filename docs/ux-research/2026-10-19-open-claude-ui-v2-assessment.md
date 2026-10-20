@@ -328,6 +328,8 @@ and `dist/zenuml.esm.mjs` carries only the `privacy` icon name. No PR. Deleting 
 
 ### P1: chrome tokens
 
+**Status: merged 2026-10-20 as #489 (eee61581).** 34 `--zu-*` tokens on `.zenuml`, `*-zu-*` utilities, gates 1, 2 and 7 as scripts, Gate 1 and 2 in the CI test job. Measured after the merge: 26 chrome fields changed, all radius or shadow; motion, size and focus fields identical (`docs/ux-research/evidence/chrome-after-p1-2026-10-20.json`).
+
 | Change | Why | Evidence |
 |---|---|---|
 | Keep `--zu-dur-{fast,snap,base,sheet}` = 60/120/200/300 ms. Add `--zu-dur-slow` 450 ms, used only by the P4 release. | Backed: D1 values are real `.cds-root` tokens. | dur-fast, dur-snap, dur-base, dur-sheet, dur-slow (WEB 54339-54343 / ASAR 5766-5770) |
@@ -347,6 +349,8 @@ and `dist/zenuml.esm.mjs` carries only the `privacy` icon name. No PR. Deleting 
 
 ### P2: popover enter/exit
 
+**Status: merged 2026-10-20 as #493 (258958b2), on top of #492.** Enter 200 ms / exit 120 ms on the five popover surfaces through `usePopoverPresence`; `prefers-reduced-motion: reduce` zeroes every `--zu-dur-*`; the insert button's `transition-all` is an explicit list. Optional chip stagger and scroll fade not done. A participant switch no longer plays an exit because #492 keeps the editor mounted across the switch.
+
 | Change | Why | Evidence |
 |---|---|---|
 | Exit stays **120 ms** = `--zu-dur-snap` (borrowed). Enter stays 200 ms = `--zu-dur-base`. | Claude uses `--cds-dur-snap` for small-element exits (`cds-pill-out`, `epitaxy-band-exit`) and 150-180 ms literals for timeline status and block fades (SHARED 209, 276, 279), so the plan's 120 ms exit has a primary precedent and uses a borrowed token. Corrected 2026-10-20: an earlier draft recommended 150 ms on the false premise that no exit used 120 ms. | dur-snap (WEB 54340 / ASAR 5767; exits WEB 53701, 57942 / ASAR 5079); dur-status (SHARED 205-212, 276, 279), noted only |
@@ -358,6 +362,8 @@ and `dist/zenuml.esm.mjs` carries only the `privacy` icon name. No PR. Deleting 
 | If StylePanel submenus get a grid 0fr/1fr collapse, keep padding on an inner element. | D9 padding-leak defect. | dur-expand (component value only) |
 
 ### P3: focus and reduced motion
+
+**Status: in progress 2026-10-20 (branch `feat/zu-focus-ring-p3`).** The media-query half of the reduced-motion row landed with P2; P3 carries the host attribute and the focus ring.
 
 | Change | Why | Evidence |
 |---|---|---|
