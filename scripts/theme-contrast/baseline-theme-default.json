@@ -1,7 +1,7 @@
 {
   "purpose": "Grandfathered minima for theme-default (ADR 0004). The audit fails theme-default only on a role that was not under its floor here, or one more than 2 Lc below its recorded minimum. Regenerate with: bun run audit:contrast -- --themes theme-default --json <f> and copy summary[\"theme-default\"].",
-  "generated": "2026-10-20T11:29:17.226Z",
-  "commit": "c4899309",
+  "generated": "2026-10-20T11:46:49.977Z",
+  "commit": "5a96c315",
   "passes": [
     "theme-default/dom@1x",
     "theme-default/dom@2x",
