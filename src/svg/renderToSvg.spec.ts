@@ -394,9 +394,10 @@ A->A:m
     expect(result.svg).toContain('class="fragment fragment-alt"');
     // The keyword and condition share a baseline without bracket decoration.
     expect(result.svg).toContain('class="guard-keyword">if</text>');
-    expect(result.svg).toContain(
-      'class="fragment-condition" opacity="0.65">condition</text>',
-    );
+    // The 0.65 opacity is a theme slot (ADR 0004) in the style block, not an attribute.
+    expect(result.svg).toContain('class="fragment-condition">condition</text>');
+    expect(result.svg).toContain(".fragment-condition { font-family");
+    expect(result.svg).toMatch(/\.fragment-condition \{[^}]*opacity: 0\.65; \}/);
   });
 
   it("fragment has valid rect geometry", () => {

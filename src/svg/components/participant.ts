@@ -116,7 +116,10 @@ export function renderParticipant(p: ParticipantGeometry): string {
       icon && p.labelWidth != null ? textX + p.labelWidth / 2 : p.x;
     const stereoAnchor = "middle";
     const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET;
-    stereotypeSvg = `<text x="${stereoX}" y="${stereoY}" text-anchor="${stereoAnchor}" dominant-baseline="central" class="stereotype-label" font-size="${STEREOTYPE_FONT_SIZE}"${participantTextStyle()}>${esc("«" + p.stereotype + "»")}</text>`;
+    // The label colour comes from the palette (.stereotype-label); an author
+    // colour on the participant keeps the fixed text fill, as the label does.
+    const { textStyle: stereoTextStyle } = colorAttrs(p.color);
+    stereotypeSvg = `<text x="${stereoX}" y="${stereoY}" text-anchor="${stereoAnchor}" dominant-baseline="central" class="stereotype-label" font-size="${STEREOTYPE_FONT_SIZE}"${stereoTextStyle}>${esc("«" + p.stereotype + "»")}</text>`;
   }
 
   // Aliased labels (e.g. "b:B") — use textLength to pin the text extent to the

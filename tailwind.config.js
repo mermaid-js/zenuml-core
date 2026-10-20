@@ -6,6 +6,10 @@ module.exports = {
     "theme-default",
     "theme-mermaid",
     "theme-darcula",
+    "theme-dark",
+    "theme-clean-dark",
+    "theme-clean-light",
+    "theme-neon",
     "theme-sky",
     "theme-idle-afternoon",
     "theme-coles",
@@ -56,6 +60,10 @@ module.exports = {
           // Sequence number badge text and the guard keyword (`if`, `else`,
           // `while`). Fallbacks are the pre-slot literals (Tailwind gray-500).
           number: "var(--color-text-number, #6b7280)",
+          // A fragment's number sits inside its header band, so it can take
+          // the band's text colour when a theme sets one.
+          "fragment-number":
+            "var(--color-text-fragment-number, var(--color-text-number, #6b7280))",
           guard: "var(--color-text-guard, var(--color-text-number, #6b7280))",
           divider: "var(--color-text-divider, #333)",
           // HTTP verbs inside comment code spans (src/components/Cosmetic.scss).
@@ -74,8 +82,10 @@ module.exports = {
             "var(--color-bg-title, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
           participant:
             "var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
-          lifeline:
-            "var(--color-border-participant, var(--color-border-participant, var(--color-border-frame, var(--color-border-base, #000))))",
+          // The lifeline is drawn by LifeLine.tsx as a gradient of
+          // --color-border-base; this chain records that so the SVG palette can
+          // resolve the same value (src/svg/themes.spec.ts).
+          lifeline: "var(--color-border-base, #000)",
           // Divider note box and its rule lines (Divider.tsx keeps the same
           // chains inline, so bracket styles keep their precedence).
           divider: "var(--color-bg-divider, #fff5ad)",
@@ -120,6 +130,9 @@ module.exports = {
           // (was Tailwind's default border colour, gray-200).
           "fragment-separator":
             "var(--color-border-fragment-separator, #e5e7eb)",
+          // Rule under the fragment header name; sits on the header band.
+          "fragment-header-rule":
+            "var(--color-border-fragment-header-rule, var(--color-border-fragment-separator, #e5e7eb))",
           "comment-table": "var(--color-border-comment-table, #cbcbcb)",
         },
       },
@@ -127,6 +140,13 @@ module.exports = {
         skin: {
           group: "var(--color-border-group, #666)",
         },
+      },
+      opacity: {
+        // Comments and guard text are de-emphasised by opacity in
+        // theme-default; a dark theme carries that hierarchy in lightness
+        // instead (ADR 0004), so the opacity is a slot.
+        "skin-comment": "var(--opacity-comment, 0.5)",
+        "skin-guard": "var(--opacity-guard, 0.65)",
       },
       outlineColor: {
         skin: {

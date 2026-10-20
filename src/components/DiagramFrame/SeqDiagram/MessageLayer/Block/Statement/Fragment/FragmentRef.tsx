@@ -44,12 +44,13 @@ export const FragmentRef = (props: {
           )}
           <div className="text-skin-fragment relative min-w-9 w-max h-8 -top-[1px] -left-[1px]">
             <div className="polygon-border absolute inset-0"></div>
-            <div className="polygon-content bg-skin-frame text-skin-fragment-header relative m-px flex items-center justify-center">
+            {/* The ref box has no header band: its label sits on the frame. */}
+            <div className="polygon-content bg-skin-frame text-skin-fragment relative m-px flex items-center justify-center">
               <span
                 className={`flex items-center justify-center gap-0.5 whitespace-nowrap px-1 h-8 font-normal ${props.commentObj?.messageClassNames || ""}`}
                 style={props.commentObj?.messageStyle}
               >
-                <FragmentNumbering number={props.number} />
+                <FragmentNumbering number={props.number} onFrame />
                 <span className="fragment-type -translate-y-[1.5px] [font-variant-caps:all-small-caps]">
                   Ref
                 </span>

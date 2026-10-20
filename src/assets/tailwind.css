@@ -200,30 +200,55 @@
     --color-shadow-occurrence: 0px 2px 6px 2px #3a82ed1a;
   }
 
-  .theme-clean-dark {
-    --color-bg-base: #111628;
-    --color-text-base: #cecfd2;
-    --color-border-base: #cecfd2;
-    --color-border-frame: #cecfd2;
-
-    /* Fragment */
-    --color-text-fragment-header: #cecfd2;
-    --color-bg-fragment-header: #5964f2;
-    --color-text-fragment: #cecfd2;
-
-    /* Message */
-    --color-message-arrow: #536fff;
-
-    /* Participant */
-    --color-text-participant: #536fff;
-    --color-shadow-participant: 0px 2px 6px 2px #3a82ed1a;
-    --color-bg-participant: #5964f2;
-    --color-border-participant: #cecfd2;
-
-    /* Occurrence */
-    --color-bg-occurrence: #5964f2;
-    --color-border-occurrence: #cecfd2;
-    --color-shadow-occurrence: 0px 2px 6px 2px #3a82ed1a;
+  /* theme-dark: the one dark theme (ADR 0004). Every value is derived from
+     the measured theme-default and the host surfaces, then adjusted to the
+     APCA floors; see docs/ux-research/evidence/theme-dark/derive-dark.json
+     (scripts/theme-contrast/derive-dark.mjs regenerates it). The comment on
+     each line is the Lc the derivation computed against that slot's
+     composited background. theme-clean-dark and theme-darcula are aliases
+     kept for existing diagrams; the names will go in a later major. */
+  .theme-dark,
+  .theme-clean-dark,
+  .theme-darcula {
+    --color-bg-canvas: #1f1f1f; /* nearest neutral to Atlassian elevation.surface #1F1F21 */
+    --color-bg-frame: #1f1f1f; /* = canvas, as theme-default */
+    --color-bg-participant: #1f1f1f; /* = frame, as theme-default (edge carried by the border) */
+    --color-bg-occurrence: #818181; /* Lc 33.3 on #1f1f1f, floor 30 */
+    --color-bg-comment-code: transparent; /* no fill: theme-default's #f9f2f4 reads Lc 0 on white (a tint, not a surface); a painted code background would have to be a light chip to carry text at Lc 75 */
+    --color-bg-comment-table-head: transparent; /* no fill, as comment-code; the table keeps its borders */
+    --color-border-base: #e1e1e1; /* Lc 48.7 on #898989, floor 45 */
+    --color-border-frame: #e1e1e1; /* Lc 86.5 on #1f1f1f, floor 45 */
+    --color-border-participant: #e1e1e1; /* Lc 86.5 on #1f1f1f, floor 45 */
+    --color-border-fragment: #e1e1e1; /* Lc 86.5 on #1f1f1f, floor 45 */
+    --color-border-group: #e1e1e1; /* Lc 86.5 on #1f1f1f, floor 45 */
+    --color-outline-primary: #e1e1e1; /* Lc 86.5 on #1f1f1f, floor 45 */
+    --color-border-occurrence: #e1e1e1; /* Lc 48.7 on #898989, floor 45 */
+    --color-message-arrow: #ffffff; /* Lc 105.9 on #1f1f1f, floor 45 */
+    --color-border-fragment-separator: #9f9f9f; /* Lc 48.4 on #1f1f1f, floor 45 */
+    --color-border-comment-table: #9f9f9f; /* Lc 48.4 on #1f1f1f, floor 45 */
+    --color-bg-fragment-header: #e9e9e9; /* Lc 91.6 on #1f1f1f, floor 30 */
+    --color-text-fragment-header: #000000; /* Lc 93 on #e9e9e9, floor 75 */
+    --color-text-fragment-number: #000000; /* Lc 93 on #e9e9e9, floor 90 */
+    --color-border-fragment-header-rule: #000000; /* Lc 93 on #e9e9e9, floor 45 */
+    --color-bg-divider: #cfcfcf; /* Lc 75.5 on #1f1f1f, floor 30 */
+    --color-text-divider: #000000; /* Lc 78.2 on #cfcfcf, floor 75 */
+    --color-border-divider: #9f9f9f; /* Lc 48.4 on #1f1f1f, floor 45 */
+    --color-text-base: #fbfbfb; /* Lc 103.3 on #1f1f1f, floor 75 */
+    --color-text-title: #fbfbfb; /* Lc 103.3 on #1f1f1f, floor 75 */
+    --color-text-participant: #fbfbfb; /* Lc 103.3 on #1f1f1f, floor 75 */
+    --color-text-message: #fbfbfb; /* Lc 103.3 on #1f1f1f, floor 75 */
+    --color-text-link: #fbfbfb; /* Lc 103.3 on #1f1f1f, floor 75 */
+    --color-text-fragment: #d4d4d4; /* Lc 78.5 on #1f1f1f, floor 75 */
+    --color-text-comment: #d4d4d4; /* Lc 78.5 on #1f1f1f, floor 75 */
+    --color-text-control: #d4d4d4; /* Lc 78.5 on #1f1f1f, floor 75 */
+    --color-text-guard: #ececec; /* Lc 93.5 on #1f1f1f, floor 90 */
+    --color-text-number: #ededed; /* Lc 94.1 on #1f1f1f, floor 90 */
+    --color-bg-number: transparent; /* no badge fill: theme-default's gray-500/10 reads Lc 0 on white; a painted badge would have to be a light chip to carry 12px text at Lc 90 */
+    --color-text-http-get: #dfeafe; /* Lc 91.8 on #1f1f1f, floor 75 */
+    --color-text-http-post: #ebffee; /* Lc 102.4 on #1f1f1f, floor 75 */
+    --color-text-http-delete: #fbc7c2; /* Lc 78.1 on #1f1f1f, floor 75 */
+    --opacity-comment: 1; /* see notes */
+    --opacity-guard: 1; /* see notes */
   }
 
   .theme-neon {
@@ -258,40 +283,6 @@
     --color-border-base: #666;
     /* Occurrence */
     --color-bg-occurrence: #dedede;
-  }
-
-  .theme-darcula {
-    /* Frame */
-    --color-bg-canvas: #ffffff;
-    --color-bg-frame: #2b2b2b;
-    --color-border-frame: #cccccc;
-
-    /* Title */
-    --color-bg-title: #2b2b2b;
-    --color-text-title: #f8f8f2;
-
-    /* Participant */
-    --color-bg-participant: #444a5a;
-    --color-text-participant: #f8f8f2; /* Participant name, stereotype */
-    --color-border-participant: #cccccc;
-
-    /* Messages */
-    --color-text-message: #ffb86c;
-    --color-message-arrow: #cccccc;
-    --color-text-comment: #666666;
-
-    /* Fragment */
-    --color-bg-fragment-header: #444a5a;
-    --color-text-fragment: #8be9fd; /* Fragment Headers and conditions */
-    --color-border-fragment: #cccccc;
-
-    /* Occurrence */
-    --color-bg-occurrence: #444a5a;
-    --color-border-occurrence: #555555;
-
-    /* Other */
-    --color-text-link: #a6d2ff;
-    --color-text-control: #e2ba88;
   }
 
   .theme-sky {

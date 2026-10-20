@@ -69,7 +69,7 @@ export const FragmentAlt = (props: {
         <Comment comment={props.comment} commentObj={props.commentObj} />
       )}
       <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
-        <div className="name font-normal p-1 border-b border-skin-fragment-separator">
+        <div className="name font-normal p-1 border-b border-skin-fragment-header-rule">
           <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
             <FragmentNumbering number={props.number} />
             <Icon name="alt-fragment" />

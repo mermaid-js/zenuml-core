@@ -73,7 +73,7 @@ export const ConditionLabel = (props: {
         <EditableSpan
           text={resolveEmojiInText(labelText)}
           isEditable={isEditable}
-          className="bg-skin-frame opacity-65 condition text-sm leading-5 font-normal !px-0"
+          className="bg-skin-frame opacity-skin-guard condition text-sm leading-5 font-normal !px-0"
           onSave={handleSave}
           title="Click to edit condition"
           autoEditToken={shouldAutoEdit}

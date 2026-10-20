@@ -1,0 +1,311 @@
+{
+  "purpose": "Grandfathered minima for theme-default (ADR 0004). The audit fails theme-default only on a role that was not under its floor here, or one more than 2 Lc below its recorded minimum. Regenerate with: bun run audit:contrast -- --themes theme-default --json <f> and copy summary[\"theme-default\"].",
+  "generated": "2026-10-20T12:01:20.459Z",
+  "commit": "d8f90979",
+  "passes": [
+    "theme-default/dom@1x",
+    "theme-default/dom@2x",
+    "theme-default/svg@1x",
+    "theme-default/svg@2x",
+    "theme-default/dom@1x forced-colors",
+    "theme-default/host-matrix@1x"
+  ],
+  "roles": [
+    {
+      "kind": "fill",
+      "role": "canvas",
+      "minLc": 0,
+      "medianLc": 105.9,
+      "floor": null,
+      "n": 170
+    },
+    {
+      "kind": "fill",
+      "role": "comment-code",
+      "minLc": 0,
+      "medianLc": 0,
+      "floor": 30,
+      "n": 25
+    },
+    {
+      "kind": "fill",
+      "role": "divider-box",
+      "minLc": 0,
+      "medianLc": 0,
+      "floor": 30,
+      "n": 10
+    },
+    {
+      "kind": "fill",
+      "role": "fragment-header",
+      "minLc": 0,
+      "medianLc": 0,
+      "floor": 30,
+      "n": 290
+    },
+    {
+      "kind": "fill",
+      "role": "number-badge",
+      "minLc": 0,
+      "medianLc": 0,
+      "floor": 30,
+      "n": 1400
+    },
+    {
+      "kind": "fill",
+      "role": "occurrence",
+      "minLc": 17,
+      "medianLc": 17,
+      "floor": 30,
+      "n": 715
+    },
+    {
+      "kind": "fill",
+      "role": "participant-fill",
+      "minLc": 0,
+      "medianLc": 0,
+      "floor": null,
+      "n": 735
+    },
+    {
+      "kind": "fill",
+      "role": "svg-fill",
+      "minLc": 0,
+      "medianLc": 0,
+      "floor": null,
+      "n": 1336
+    },
+    {
+      "kind": "line",
+      "role": "arrow-head",
+      "minLc": 0,
+      "medianLc": 106,
+      "floor": 45,
+      "n": 1512
+    },
+    {
+      "kind": "line",
+      "role": "divider-line",
+      "minLc": 48.4,
+      "medianLc": 48.4,
+      "floor": 45,
+      "n": 24
+    },
+    {
+      "kind": "line",
+      "role": "fragment-border",
+      "minLc": 78.8,
+      "medianLc": 78.8,
+      "floor": 45,
+      "n": 348
+    },
+    {
+      "kind": "line",
+      "role": "fragment-header-rule",
+      "minLc": 0,
+      "medianLc": 0,
+      "floor": 45,
+      "n": 348
+    },
+    {
+      "kind": "line",
+      "role": "frame-border",
+      "minLc": 78.8,
+      "medianLc": 78.8,
+      "floor": 45,
+      "n": 204
+    },
+    {
+      "kind": "line",
+      "role": "group-outline",
+      "minLc": 23,
+      "medianLc": 78.8,
+      "floor": 45,
+      "n": 24
+    },
+    {
+      "kind": "line",
+      "role": "header-rule",
+      "minLc": 78.8,
+      "medianLc": 78.8,
+      "floor": 45,
+      "n": 204
+    },
+    {
+      "kind": "line",
+      "role": "lifeline",
+      "minLc": 78.8,
+      "medianLc": 78.8,
+      "floor": 45,
+      "n": 894
+    },
+    {
+      "kind": "line",
+      "role": "message-line",
+      "minLc": 0,
+      "medianLc": 106,
+      "floor": 45,
+      "n": 1140
+    },
+    {
+      "kind": "line",
+      "role": "occurrence-border",
+      "minLc": 56,
+      "medianLc": 78.8,
+      "floor": 45,
+      "n": 858
+    },
+    {
+      "kind": "line",
+      "role": "participant-border",
+      "minLc": 78.8,
+      "medianLc": 78.8,
+      "floor": 45,
+      "n": 882
+    },
+    {
+      "kind": "line",
+      "role": "self-arrow",
+      "minLc": 0,
+      "medianLc": 106,
+      "floor": 45,
+      "n": 372
+    },
+    {
+      "kind": "line",
+      "role": "separator",
+      "minLc": 11.8,
+      "medianLc": 11.8,
+      "floor": 45,
+      "n": 120
+    },
+    {
+      "kind": "line",
+      "role": "svg-line",
+      "minLc": 11.8,
+      "medianLc": 78.8,
+      "floor": 45,
+      "n": 2028
+    },
+    {
+      "kind": "text",
+      "role": "comment",
+      "minLc": 34.5,
+      "medianLc": 54.6,
+      "floor": 75,
+      "n": 150
+    },
+    {
+      "kind": "text",
+      "role": "divider-text",
+      "minLc": 91.5,
+      "medianLc": 91.5,
+      "floor": 75,
+      "n": 12
+    },
+    {
+      "kind": "text",
+      "role": "fragment-condition",
+      "minLc": 53.9,
+      "medianLc": 84.2,
+      "floor": 75,
+      "n": 240
+    },
+    {
+      "kind": "text",
+      "role": "fragment-label",
+      "minLc": 86.7,
+      "medianLc": 96.5,
+      "floor": 75,
+      "n": 354
+    },
+    {
+      "kind": "text",
+      "role": "fragment-number",
+      "minLc": 56.4,
+      "medianLc": 56.4,
+      "floor": 90,
+      "n": 348
+    },
+    {
+      "kind": "text",
+      "role": "fragment-section",
+      "minLc": 53.9,
+      "medianLc": 74.6,
+      "floor": 75,
+      "n": 78
+    },
+    {
+      "kind": "text",
+      "role": "group-title",
+      "minLc": 102.9,
+      "medianLc": 102.9,
+      "floor": 75,
+      "n": 18
+    },
+    {
+      "kind": "text",
+      "role": "guard-keyword",
+      "minLc": 73.6,
+      "medianLc": 73.6,
+      "floor": 90,
+      "n": 288
+    },
+    {
+      "kind": "text",
+      "role": "http-method",
+      "minLc": 34.5,
+      "medianLc": 49.7,
+      "floor": 75,
+      "n": 24
+    },
+    {
+      "kind": "text",
+      "role": "message",
+      "minLc": 83.5,
+      "medianLc": 102.9,
+      "floor": 75,
+      "n": 1374
+    },
+    {
+      "kind": "text",
+      "role": "number",
+      "minLc": 65.1,
+      "medianLc": 65.1,
+      "floor": 90,
+      "n": 1332
+    },
+    {
+      "kind": "text",
+      "role": "participant",
+      "minLc": 102.9,
+      "medianLc": 102.9,
+      "floor": 75,
+      "n": 726
+    },
+    {
+      "kind": "text",
+      "role": "svg-text",
+      "minLc": 54.2,
+      "medianLc": 86.7,
+      "floor": 90,
+      "n": 1632
+    },
+    {
+      "kind": "text",
+      "role": "text-other",
+      "minLc": 102.9,
+      "medianLc": 102.9,
+      "floor": 75,
+      "n": 18
+    },
+    {
+      "kind": "text",
+      "role": "title",
+      "minLc": 102.9,
+      "medianLc": 102.9,
+      "floor": 75,
+      "n": 48
+    }
+  ]
+}
