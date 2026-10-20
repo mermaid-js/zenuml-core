@@ -459,3 +459,9 @@ coarse`) shows handles without hover and is unchanged.
 - From P4, selection click-away runs on `pointerdown` from one owner. A
   press on empty canvas clears a participant highlight before its click,
   not after it.
+- From 2026-10-20, a press on another participant while the participant
+  editor is open does not exit the editor; the participant's click moves the
+  selection and the editor follows it. Before, the press exited and the
+  click reopened, which unmounted the editor (mask and row) between the two
+  events and flashed. A press on the canvas, a message or outside the
+  diagram still exits on `pointerdown`.

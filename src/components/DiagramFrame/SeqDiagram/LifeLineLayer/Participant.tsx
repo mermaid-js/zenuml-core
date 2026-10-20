@@ -18,7 +18,7 @@ import { participantTextColor, removeAlpha } from "@/utils/Color";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useRef, useState } from "react";
-import { useCan } from "@/store/interaction/useCan";
+import { useActiveSurface, useCan } from "@/store/interaction/useCan";
 import { ParticipantLabel } from "./ParticipantLabel";
 import { AsyncIcon } from "../../Tutorial/AsyncIcon";
 // import iconPath from "../../Tutorial/Icons"; // Removed eager import
@@ -51,12 +51,25 @@ export const Participant = (props: {
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
   const selectParticipant = useSetAtom(onSelectAtom);
+  const setSelected = useSetAtom(selectedAtom);
   // ADR 0002: selection is a capability. It is off in `RenderMode.Static`
   // and while another interaction owns the diagram; gate B consumes a press
   // the primary state does not allow before it gets here.
   const canSelect = useCan("select");
+  const surface = useActiveSurface();
   const onSelect = (name: string) => {
-    if (canSelect) selectParticipant(name);
+    if (!canSelect) return;
+    // The editor is open on another participant: the click switches it, so
+    // the selection is replaced, not extended (a two-participant highlight is
+    // not the editor). The press that precedes this click no longer exits
+    // the editor, which keeps the mask and the row mounted across the switch.
+    if (surface?.kind === "participantEditor") {
+      // The open participant stays open; only click-away closes the editor.
+      if (surface.participant === name) return;
+      setSelected([name]);
+      return;
+    }
+    selectParticipant(name);
   };
   const preview = useAtomValue(participantPreviewAtom);
   const [isEditingName, setIsEditingName] = useState(false);
