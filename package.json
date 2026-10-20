@@ -1,6 +1,6 @@
 {
   "name": "@zenuml/core",
-  "version": "4.7.2",
+  "version": "4.8.1",
   "private": false,
   "license": "MIT",
   "repository": {
@@ -34,6 +34,8 @@
     "typecheck": "tsc -b",
     "check:tokens": "node scripts/check-zu-tokens.mjs",
     "check:bundle": "node scripts/check-bundle-budget.mjs",
+    "audit:contrast": "node --no-warnings scripts/audit-theme-contrast.mjs",
+    "theme:derive-dark": "node scripts/theme-contrast/derive-dark.mjs && node scripts/theme-contrast/apply-derived.mjs",
     "parity:dualrun": "bun scripts/parity/dualrun-diff.mjs",
     "pw": "playwright test --reporter=list",
     "pw:ci": "playwright test",

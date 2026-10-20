@@ -64,7 +64,7 @@ export const FragmentTryCatchFinally = (props: {
           <Comment comment={props.comment} commentObj={props.commentObj} />
         )}
         <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
-          <div className="name font-normal p-1 border-b">
+          <div className="name font-normal p-1 border-b border-skin-fragment-header-rule">
             <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
               <FragmentNumbering number={props.number} />
               <Icon name="try-catch-fragment" />
@@ -92,11 +92,11 @@ export const FragmentTryCatchFinally = (props: {
           </div>
           {tcf.catchBlock().map((catchBlock: any, index: number) => (
             <div
-              className="segment border-t border-solid mt-2"
+              className="segment border-t border-solid border-skin-fragment-separator mt-2"
               key={index + 500}
             >
               <div
-                className="header inline-block bg-skin-frame opacity-65"
+                className="header inline-block bg-skin-frame opacity-skin-guard"
                 key={index + 1000}
               >
                 <label className="keyword catch p-1 [font-variant-caps:all-small-caps]">
@@ -115,9 +115,9 @@ export const FragmentTryCatchFinally = (props: {
             </div>
           ))}
           {finallyBlock && (
-            <div className="segment border-t border-solid mt-2">
+            <div className="segment border-t border-solid border-skin-fragment-separator mt-2">
               <div className="header flex text-skin-fragment finally">
-                <label className="keyword finally bg-skin-frame opacity-65 px-1 inline-block [font-variant-caps:all-small-caps]">
+                <label className="keyword finally bg-skin-frame opacity-skin-guard px-1 inline-block [font-variant-caps:all-small-caps]">
                   finally
                 </label>
               </div>

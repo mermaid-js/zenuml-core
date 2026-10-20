@@ -30,7 +30,6 @@ import "./components/Cosmetic-blue.scss";
 import "./components/Cosmetic-black-white.scss";
 import "./components/Cosmetic-star-uml.scss";
 import "./components/theme-blue-river.scss";
-import "./themes/theme-dark.css";
 
 import { getStartTime, calculateCostTime } from "./utils/CostTime";
 import { clearCache } from "./utils/RenderingCache";
@@ -277,9 +276,22 @@ export default class ZenUml implements IZenUml {
     });
   }
 
+  /**
+   * The host element is usually wider than the diagram; the export paints the
+   * rest with the theme's canvas colour so a dark theme stays dark edge to
+   * edge (ADR 0004). White when the canvas is transparent or not rendered yet.
+   */
+  private exportBackground(): string {
+    const canvas = this.el.querySelector(".bg-skin-canvas");
+    const color = canvas ? getComputedStyle(canvas).backgroundColor : "";
+    return color && color !== "rgba(0, 0, 0, 0)" && color !== "transparent"
+      ? color
+      : "white";
+  }
+
   async getPng(): Promise<string> {
     return htmlToImage.toPng(this.el, {
-      backgroundColor: "white",
+      backgroundColor: this.exportBackground(),
       filter: (node) => {
         return !node?.classList?.contains("hide-export");
       },

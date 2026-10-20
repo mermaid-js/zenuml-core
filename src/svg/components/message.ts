@@ -69,18 +69,20 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   // Sync: filled arrowhead at midpoint (L14,15, translate(7,10), fill=#000, Z)
   const pathEnd = isAsync ? "L1,15" : "L14,15";
   const arrowTx = isAsync ? 0 : 7;
-  const arrowFill = isAsync ? "none" : "#000";
+  // Colours come from the palette classes (.self-call-line, .arrow-head);
+  // an open (async) head keeps fill="none".
+  const arrowFill = isAsync ? ' fill="none"' : "";
   const arrowPath = isAsync
     ? "M1 1.25 L6.15 4.5 L1 7.75"
     : "M1 1.25 L6.15 4.5 L1 7.75 Z";
 
   return `<g class="message self-call">
   <svg x="${svgX}" y="${svgY}" width="30" height="24">
-    <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 ${pathEnd}" fill="none" stroke="#000" stroke-width="1"/>
+    <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 ${pathEnd}" class="self-call-line"/>
     <g transform="translate(${arrowTx}, 10)">
-      <svg height="10" width="7" viewBox="0 0 7 9">
+      <svg height="10" width="7" viewBox="0 0 7 9" class="arrow-head${isAsync ? " arrow-open" : ""}">
         <g transform="scale(-1, 1) translate(-7, 0)">
-          <path d="${arrowPath}" stroke="#000" stroke-linecap="round" fill="${arrowFill}" stroke-width="1"/>
+          <path d="${arrowPath}" stroke-linecap="round"${arrowFill} stroke-width="1"/>
         </g>
       </svg>
     </g>
@@ -122,7 +124,7 @@ function renderArrowHead(
 
   return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9" overflow="visible" class="arrow-head${isFilled ? "" : " arrow-open"}">
     <g${rtlTransform}>
-      <path d="${pathD}" transform="translate(1 0.5)" stroke="#000" stroke-linecap="round" stroke-width="1" fill="${fillAttr}"/>
+      <path d="${pathD}" transform="translate(1 0.5)" stroke-linecap="round" stroke-width="1"${fillAttr === "none" ? ' fill="none"' : ""}/>
     </g>
   </svg>`;
 }

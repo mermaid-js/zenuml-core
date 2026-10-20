@@ -73,7 +73,7 @@ export const Comment = (props: {
   return (
     <div
       className={cn(
-        "comments text-skin-comment min-w-[100px] flex text-left opacity-50 hover:opacity-100",
+        "comments text-skin-comment min-w-[100px] flex text-left opacity-skin-comment hover:opacity-100",
         props.className,
       )}
     >

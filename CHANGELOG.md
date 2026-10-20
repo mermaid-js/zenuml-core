@@ -1,5 +1,27 @@
 # @zenuml/core
 
+## 4.8.1
+
+### Patch Changes
+
+- [#505](https://github.com/mermaid-js/zenuml-core/pull/505) [`fbe9e55`](https://github.com/mermaid-js/zenuml-core/commit/fbe9e5568d5e09dcdaf8e7941fe0e38ba056fa35) Thanks [@MrCoder](https://github.com/MrCoder)! - The 30 monochrome architecture icons (`@Client`, `@Server`, `@Browser`, `@Service`, `@Controller`, `@API`, `@UI`, `@Mobile`, `@ExternalSystem`, `@Application`, `@LoadBalancer`, `@Network`, `@Cache`, `@WebServer`, `@MessageQueue`, `@Scheduler`, `@Gateway`, `@AuthenticationService`, `@MailServer`, `@GitHub`, `@Docker`, `@GitLab`, `@Jenkins`, `@PostgreSQL`, `@MongoDB`, `@Kubernetes`, `@ApacheKafka`, `@ElasticSearch`, `@Auth0`, `@Redis`) were painted in fixed black or navy and disappeared on `theme-dark`. They now use `currentColor`, so both renderers draw them in the theme's participant text colour (white on the dark canvas; the participant text grey instead of pure black in `theme-default`). A unit test now rejects any participant icon painted only in near-black. The SVG renderer's unused rule that outlined `fill="currentColor"` icon shapes is removed so the SVG and DOM renderers keep drawing the same glyphs.
+
+## 4.8.0
+
+### Minor Changes
+
+- [#494](https://github.com/mermaid-js/zenuml-core/pull/494) [`9f56672`](https://github.com/mermaid-js/zenuml-core/commit/9f566720e5d887764e3e12444c59698be14f4c28) Thanks [@MrCoder](https://github.com/MrCoder)! - Add `theme-dark`, the one dark theme, derived from the measured `theme-default` and the dark surfaces of Atlassian, GitHub and VS Code, and verified against APCA floors (text Lc 75, 12px text 90, lines 45, fills 30) by a contrast audit that now gates CI (`scripts/audit-theme-contrast.mjs`, ADR 0004).
+
+  `theme-clean-dark` and `theme-darcula` are now aliases of `theme-dark` in both the DOM and SVG renderers; the names stay until a later major release. The unused `src/themes/theme-dark.css` (whose `:root` variables leaked into host pages) is removed. `renderToSvg` accepts `theme-dark` and `theme-darcula`; the SVG palettes for `theme-clean-light`, `theme-neon` and `theme-mermaid` now carry the values the DOM renderer actually resolves (title, lifeline, fragment border/separator, comment and arrow colours), checked by a parity test. `getPng()` fills the area beside the diagram with the theme's canvas colour instead of white.
+
+### Patch Changes
+
+- [#492](https://github.com/mermaid-js/zenuml-core/pull/492) [`fd4e754`](https://github.com/mermaid-js/zenuml-core/commit/fd4e75486dfeb23e9ce52f40c95443c0fb1f6972) Thanks [@MrCoder](https://github.com/MrCoder)! - Participant editor: the name row now stays inside the viewport for the first participant (its width was measured before the row had layout, so the clamp used 0 and the row hung off the left edge), and clicking another participant switches the editor in place instead of closing it on the press and reopening it on the click, which flashed the mask and the row.
+
+- [#493](https://github.com/mermaid-js/zenuml-core/pull/493) [`258958b`](https://github.com/mermaid-js/zenuml-core/commit/258958b27a7cc33a66365ef75a39d09823959b60) Thanks [@MrCoder](https://github.com/MrCoder)! - Editor chrome motion (P2 of ADR 0003): the participant style panel, its type and colour pickers, the message style panel and the gap insert menu now open with a 200 ms fade-and-scale and close with a 120 ms reverse, driven by the `--zu-dur-*` and `--zu-ease-out` tokens. Only `transform` and `opacity` animate, so the diagram never repaints for chrome motion. Under `prefers-reduced-motion: reduce` every duration is 0 and popovers appear and disappear at once. The insert-participant button's `transition-all` is now an explicit property list.
+
+- [#489](https://github.com/mermaid-js/zenuml-core/pull/489) [`eee6158`](https://github.com/mermaid-js/zenuml-core/commit/eee61581d5388cf5f6f58980f29e35aba0d376c1) Thanks [@MrCoder](https://github.com/MrCoder)! - Editor chrome tokens (P1 of ADR 0003): the `--zu-*` design tokens are declared once on `.zenuml`, and the participant style panel, type and colour pickers, message style panel and gap menu take their corner radii, shadows and control heights from them. Panel corners and shadows change slightly; diagram rendering is unchanged. A new `bun run check:tokens` gate keeps every token sourced and keeps one-off radius and shadow values out of the chrome files.
+
 ## 4.7.2
 
 ### Patch Changes

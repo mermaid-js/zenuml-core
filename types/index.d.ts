@@ -2,7 +2,9 @@ export type SvgTheme =
   | "theme-default"
   | "theme-mermaid"
   | "theme-clean-light"
+  | "theme-dark"
   | "theme-clean-dark"
+  | "theme-darcula"
   | "theme-neon";
 
 export interface RenderOptions {
