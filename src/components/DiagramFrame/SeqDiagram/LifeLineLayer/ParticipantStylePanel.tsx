@@ -56,7 +56,7 @@ const SlotGlyph = ({ d }: { d: string }) => (
 );
 
 const rowInputClass =
-  "h-6 box-border rounded-[5px] border border-solid px-1.5 text-[13px] text-gray-900 bg-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100";
+  "h-zu-control box-border rounded-zu-md border border-solid px-1.5 text-[13px] text-gray-900 bg-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100";
 
 export const ParticipantStylePanel = () => {
   const [code, setCode] = useAtom(codeAtom);
@@ -486,7 +486,7 @@ export const ParticipantStylePanel = () => {
           />
           {showStereotypeInput ? (
             <div
-              className="absolute pointer-events-auto h-6 min-w-[104px] box-border flex items-center justify-center gap-0.5 px-2 rounded-full border border-solid border-gray-300 bg-white text-[12px] text-gray-900 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100"
+              className="absolute pointer-events-auto h-zu-control min-w-[104px] box-border flex items-center justify-center gap-0.5 px-2 rounded-full border border-solid border-gray-300 bg-white text-[12px] text-gray-900 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100"
               style={{
                 left: centerX,
                 top: anchor.top + PILL_TOP,
@@ -533,7 +533,7 @@ export const ParticipantStylePanel = () => {
             <button
               type="button"
               aria-label="Add stereotype"
-              className="absolute pointer-events-auto h-6 min-w-[104px] box-border px-3 rounded-full border border-dashed border-slate-400 bg-white text-[12px] text-gray-600 cursor-pointer hover:border-sky-500 hover:text-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+              className="absolute pointer-events-auto h-zu-control min-w-[104px] box-border px-3 rounded-full border border-dashed border-slate-400 bg-white text-[12px] text-gray-600 cursor-pointer hover:border-sky-500 hover:text-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
               style={{
                 left: centerX,
                 top: anchor.top + PILL_TOP,
@@ -618,7 +618,7 @@ export const ParticipantStylePanel = () => {
             >
               {currentColor ? (
                 <span
-                  className="block w-full h-full rounded-[4px] border-2 border-solid border-white box-border"
+                  className="block w-full h-full rounded-zu-sm border-2 border-solid border-white box-border"
                   style={{ backgroundColor: currentColor }}
                 />
               ) : (
@@ -660,7 +660,7 @@ export const ParticipantStylePanel = () => {
               <div
                 ref={nameRowRef}
                 data-testid="participant-name-row"
-                className="pointer-events-auto h-8 box-border flex items-center gap-1.5 px-1 bg-white rounded-lg shadow-[0_4px_14px_rgba(15,23,42,0.12),0_0_0_1px_rgba(15,23,42,0.08)]"
+                className="pointer-events-auto h-8 box-border flex items-center gap-1.5 px-1 bg-white rounded-zu-lg shadow-zu-pop-ring"
               >
                 <label htmlFor="zenuml-participant-name" className="sr-only">
                   Name
@@ -713,13 +713,13 @@ export const ParticipantStylePanel = () => {
               {error && (
                 <div
                   role="alert"
-                  className="pointer-events-auto max-w-[320px] px-2.5 py-1.5 box-border bg-white rounded-md text-[12px] text-red-700 shadow-[0_4px_14px_rgba(15,23,42,0.12),0_0_0_1px_rgba(220,38,38,0.35)]"
+                  className="pointer-events-auto max-w-[320px] px-2.5 py-1.5 box-border bg-white rounded-zu-md text-[12px] text-red-700 shadow-zu-pop-error"
                 >
                   {error}
                 </div>
               )}
 
-              <div className="invisible group-hover:visible group-focus-within:visible pointer-events-none px-2 py-[5px] bg-gray-800 rounded-md text-gray-50 text-[11px] font-mono whitespace-pre">
+              <div className="invisible group-hover:visible group-focus-within:visible pointer-events-none px-2 py-[5px] bg-gray-800 rounded-zu-md text-gray-50 text-[11px] font-mono whitespace-pre">
                 <code data-testid="participant-dsl-preview">{dslLine}</code>
               </div>
             </div>

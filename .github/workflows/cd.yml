@@ -75,6 +75,8 @@ jobs:
         run: bunx playwright install chromium
       - name: Lint
         run: bunx eslint src
+      - name: Chrome token gates (ADR 0003)
+        run: bun run check:tokens
       - name: Run tests
         run: bun run test
       - name: Parser consistency gate (ANTLR vs Langium side-car)

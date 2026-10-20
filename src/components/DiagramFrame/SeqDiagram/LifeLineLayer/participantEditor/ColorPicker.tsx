@@ -57,7 +57,7 @@ export function ColorPicker({
       // Width and grid columns stay inline: they are the Task 5 picker
       // contract and ColorPicker.spec reads them from `.style`.
       style={{ width: 180 }}
-      className="box-border flex flex-col gap-2 p-2.5 bg-white rounded-[10px] shadow-[0_10px_30px_rgba(15,23,42,0.16),0_0_0_1px_rgba(15,23,42,0.08)]"
+      className="box-border flex flex-col gap-2 p-2.5 bg-white rounded-zu-panel shadow-zu-pop-ring"
     >
       <div
         onPointerLeave={() => setPreview(null)}
@@ -82,9 +82,9 @@ export function ColorPicker({
               // Fill and letter colour are computed per swatch at render.
               style={{ background: hex, color: participantTextColor(hex) }}
               className={cn(
-                "w-6 h-6 box-border p-0 rounded-[5px] text-[14px] font-normal leading-none [font-family:inherit] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
+                "w-6 h-6 box-border p-0 rounded-zu-md text-[14px] font-normal leading-none [font-family:inherit] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
                 selected
-                  ? "border-2 border-solid border-white shadow-[0_0_0_1px_#0ea5e9]"
+                  ? "border-2 border-solid border-white shadow-zu-selected"
                   : "border border-solid border-black/[0.12]",
               )}
             >
@@ -112,7 +112,7 @@ export function ColorPicker({
               commit(e.currentTarget);
             }
           }}
-          className="w-full h-7 box-border border border-solid border-gray-200 rounded-md pl-[22px] pr-2 text-[12px] text-gray-900 bg-white font-mono focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          className="w-full h-7 box-border border border-solid border-gray-200 rounded-zu-md pl-[22px] pr-2 text-[12px] text-gray-900 bg-white font-mono focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
         />
       </label>
     </div>

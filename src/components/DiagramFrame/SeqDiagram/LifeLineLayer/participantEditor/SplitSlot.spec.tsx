@@ -96,7 +96,7 @@ describe("SplitSlot", () => {
       const wrapper = main.parentElement!;
       fireEvent.mouseEnter(wrapper);
       const cls = wrapper.className.split(/\s+/);
-      expect(cls).toContain("rounded-md");
+      expect(cls).toContain("rounded-zu-md");
       expect(cls).toContain("overflow-hidden");
       expect(cls).toContain("border");
       expect(cls).toContain("border-gray-300");
@@ -116,7 +116,7 @@ describe("SplitSlot", () => {
   it("not hovered: wrapper does not carry the pill border", () => {
     const { main } = setup();
     expect(main.parentElement!.className.split(/\s+/)).not.toContain("border");
-    expect(main.className).toContain("rounded-md");
+    expect(main.className).toContain("rounded-zu-md");
   });
 
   it("expanded adds ring-1 ring-sky-500 to main; collapsed does not", () => {

@@ -70,7 +70,7 @@ export function SplitSlot({
               isIcon ? "w-[27px] h-[26px]" : "w-[23px] h-[22px]",
             )
           : cn(
-              "rounded-md",
+              "rounded-zu-md",
               isIcon ? "w-7 h-7" : "w-6 h-6",
               filled
                 ? "border border-gray-300 hover:border-sky-500"
@@ -104,7 +104,7 @@ export function SplitSlot({
         "inline-flex items-stretch",
         split &&
           cn(
-            "box-border rounded-md overflow-hidden border has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sky-300",
+            "box-border rounded-zu-md overflow-hidden border has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sky-300",
             expanded ? "border-sky-500" : "border-gray-300",
           ),
         className,
