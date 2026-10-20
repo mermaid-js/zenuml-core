@@ -18,10 +18,12 @@ test.describe("theme-dark", () => {
       });
       await page.waitForLoadState("networkidle");
       // Cloud icons (@Lambda, @EC2 …) arrive through a lazy import that
-      // networkidle can miss; every icon slot must hold its <svg> first.
+      // networkidle can miss. AsyncIcon renders an empty placeholder with the
+      // same classes until the icon is in, and only the loaded icon carries
+      // aria-description, so wait until no icon container is still empty.
       await page.waitForFunction(
         () =>
-          Array.from(document.querySelectorAll('[aria-description^="icon for"]')).every(
+          Array.from(document.querySelectorAll(".participant .h-6.w-6")).every(
             (slot) => slot.querySelector("svg"),
           ),
         null,
