@@ -98,6 +98,34 @@ test.describe("popover motion (P2)", () => {
       await page.evaluate(() => new Promise((r) => setTimeout(r, 0)));
       expect(await handle!.evaluate((el) => el.isConnected)).toBe(false);
     });
+
+    test(`${surface.name} has no motion and unmounts at once with data-reduce-motion on an ancestor`, async ({
+      page,
+    }) => {
+      // P3: the host attribute goes on an ancestor of the diagram (here <html>).
+      // The popovers render in their own .zenuml portal roots, so the diagram
+      // root alone would not reach them.
+      // An init script runs before <html> exists in Chromium, so set the
+      // attribute as soon as the element appears.
+      await page.addInitScript(() => {
+        const set = () =>
+          document.documentElement?.setAttribute("data-reduce-motion", "true");
+        if (document.documentElement) return set();
+        new MutationObserver((_, observer) => {
+          if (!document.documentElement) return;
+          set();
+          observer.disconnect();
+        }).observe(document, { childList: true });
+      });
+      const root = await surface.open(page);
+      await expect(root).toBeVisible();
+      const durations = (await animationsOf(root)).map((a) => a.duration);
+      expect(durations.every((d) => d === 0)).toBe(true);
+      const handle = await root.elementHandle();
+      await page.keyboard.press("Escape");
+      await page.evaluate(() => new Promise((r) => setTimeout(r, 0)));
+      expect(await handle!.evaluate((el) => el.isConnected)).toBe(false);
+    });
   }
 
   test("type and colour pickers enter and exit inside the participant panel", async ({
