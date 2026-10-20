@@ -73,7 +73,8 @@ export const Divider = (props: {
         gap: 0,
       }}
     >
-      <div className="left" style={{ flex: 1, height: 1, backgroundColor: DIVIDER_LINE }}></div>
+      {/* Rules are borders, not backgrounds: forced-colors mode keeps borders. */}
+      <div className="left" style={{ flex: 1, height: 0, borderTop: `1px solid ${DIVIDER_LINE}` }}></div>
       <div
         style={{
           ...messageStyle.style.textStyle,
@@ -92,7 +93,7 @@ export const Divider = (props: {
       >
         {cleanNote}
       </div>
-      <div className="right" style={{ flex: 1, height: 1, backgroundColor: DIVIDER_LINE }}></div>
+      <div className="right" style={{ flex: 1, height: 0, borderTop: `1px solid ${DIVIDER_LINE}` }}></div>
     </div>
   );
 };

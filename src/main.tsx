@@ -49,7 +49,9 @@ export function initZenUml(element: HTMLElement) {
 const elm = document.querySelector("pre.zenuml") as HTMLElement;
 if (elm) {
   const instance = initZenUml(elm);
-  instance.render("", {}); // Initial render with empty content
+  // `?theme=theme-dark` opens the demo in a theme without touching the stored one.
+  const themeParam = new URLSearchParams(window.location.search).get("theme");
+  instance.render("", themeParam ? { theme: themeParam } : {}); // Initial render with empty content
 }
 
 // @ts-expect-error global variable

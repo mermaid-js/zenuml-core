@@ -1,0 +1,408 @@
+{
+  "generated": "2026-10-20T11:17:53.829Z",
+  "method": "see derive-dark.mjs header",
+  "tokens": {
+    "--color-bg-canvas": {
+      "value": "#1f1f1f",
+      "role": "fill:canvas",
+      "bg": null,
+      "lc": null,
+      "floor": null,
+      "oklch": "oklch(23.9% 0.000 89.9)",
+      "origin": "nearest neutral to Atlassian elevation.surface #1F1F21"
+    },
+    "--color-bg-frame": {
+      "value": "#1f1f1f",
+      "role": "fill:frame",
+      "bg": null,
+      "lc": null,
+      "floor": null,
+      "oklch": "oklch(23.9% 0.000 89.9)",
+      "origin": "= canvas, as theme-default"
+    },
+    "--color-bg-participant": {
+      "value": "#1f1f1f",
+      "role": "fill:participant-fill",
+      "bg": null,
+      "lc": null,
+      "floor": null,
+      "oklch": "oklch(23.9% 0.000 89.9)",
+      "origin": "= frame, as theme-default (edge carried by the border)"
+    },
+    "--color-bg-occurrence": {
+      "value": "#818181",
+      "role": "fill:occurrence",
+      "bg": "#1f1f1f",
+      "lc": 33.3,
+      "floor": 30,
+      "oklch": "oklch(60.3% 0.000 89.9)",
+      "mirroredStart": "#373737"
+    },
+    "--color-bg-comment-code": {
+      "value": "transparent",
+      "role": "fill:comment-code",
+      "bg": null,
+      "lc": null,
+      "floor": null,
+      "oklch": null,
+      "origin": "no fill: theme-default's #f9f2f4 reads Lc 0 on white (a tint, not a surface); a painted code background would have to be a light chip to carry text at Lc 75"
+    },
+    "--color-bg-comment-table-head": {
+      "value": "transparent",
+      "role": "fill:comment-table-head",
+      "bg": null,
+      "lc": null,
+      "floor": null,
+      "oklch": null,
+      "origin": "no fill, as comment-code; the table keeps its borders"
+    },
+    "--color-border-base": {
+      "value": "#dadada",
+      "role": "line:frame-border",
+      "bg": "#818181",
+      "lc": 48.2,
+      "floor": 45,
+      "oklch": "oklch(88.8% 0.000 89.9)",
+      "mirroredStart": "#a7a7a7"
+    },
+    "--color-border-frame": {
+      "value": "#dadada",
+      "role": "line:frame-border",
+      "bg": "#1f1f1f",
+      "lc": 82.2,
+      "floor": 45,
+      "oklch": "oklch(88.8% 0.000 89.9)",
+      "origin": "= border-base"
+    },
+    "--color-border-participant": {
+      "value": "#dadada",
+      "role": "line:participant-border",
+      "bg": "#1f1f1f",
+      "lc": 82.2,
+      "floor": 45,
+      "oklch": "oklch(88.8% 0.000 89.9)",
+      "origin": "= border-base (also the lifeline)"
+    },
+    "--color-border-fragment": {
+      "value": "#dadada",
+      "role": "line:fragment-border",
+      "bg": "#1f1f1f",
+      "lc": 82.2,
+      "floor": 45,
+      "oklch": "oklch(88.8% 0.000 89.9)",
+      "origin": "= border-base"
+    },
+    "--color-border-group": {
+      "value": "#dadada",
+      "role": "line:group-outline",
+      "bg": "#1f1f1f",
+      "lc": 82.2,
+      "floor": 45,
+      "oklch": "oklch(88.8% 0.000 89.9)",
+      "origin": "= border-base"
+    },
+    "--color-outline-primary": {
+      "value": "#dadada",
+      "role": "line:outline",
+      "bg": "#1f1f1f",
+      "lc": 82.2,
+      "floor": 45,
+      "oklch": "oklch(88.8% 0.000 89.9)",
+      "origin": "= border-base"
+    },
+    "--color-border-occurrence": {
+      "value": "#dadada",
+      "role": "line:occurrence-border",
+      "bg": "#818181",
+      "lc": 48.2,
+      "floor": 45,
+      "oklch": "oklch(88.8% 0.000 89.9)",
+      "mirroredStart": "#898989"
+    },
+    "--color-message-arrow": {
+      "value": "#ffffff",
+      "role": "line:message-line",
+      "bg": "#1f1f1f",
+      "lc": 105.9,
+      "floor": 45,
+      "oklch": "oklch(100.0% 0.000 89.9)",
+      "mirroredStart": "#ffffff"
+    },
+    "--color-border-fragment-separator": {
+      "value": "#9f9f9f",
+      "role": "line:separator",
+      "bg": "#1f1f1f",
+      "lc": 48.4,
+      "floor": 45,
+      "oklch": "oklch(70.3% 0.000 89.9)",
+      "mirroredStart": "#313131"
+    },
+    "--color-border-comment-table": {
+      "value": "#9f9f9f",
+      "role": "line:comment-table",
+      "bg": "#1f1f1f",
+      "lc": 48.4,
+      "floor": 45,
+      "oklch": "oklch(70.3% 0.000 89.9)",
+      "origin": "= fragment separator"
+    },
+    "--color-bg-fragment-header": {
+      "value": "#e9e9e9",
+      "role": "fill:fragment-header",
+      "bg": "#1f1f1f",
+      "lc": 91.6,
+      "floor": 30,
+      "oklch": "oklch(93.4% 0.000 89.9)",
+      "mirroredStart": "#2b2b2b",
+      "polarity": "dark"
+    },
+    "--color-text-fragment-header": {
+      "value": "#000000",
+      "role": "text:fragment-label",
+      "bg": "#e9e9e9",
+      "lc": 93,
+      "floor": 75,
+      "oklch": "oklch(0.0% 0.000 0.0)"
+    },
+    "--color-text-fragment-number": {
+      "value": "#000000",
+      "role": "text:number",
+      "bg": "#e9e9e9",
+      "lc": 93,
+      "floor": 90,
+      "oklch": "oklch(0.0% 0.000 0.0)",
+      "origin": "= text-fragment-header; the number sits in the band"
+    },
+    "--color-border-fragment-header-rule": {
+      "value": "#000000",
+      "role": "line:fragment-header-rule",
+      "bg": "#e9e9e9",
+      "lc": 93,
+      "floor": 45,
+      "oklch": "oklch(0.0% 0.000 0.0)"
+    },
+    "--color-bg-divider": {
+      "value": "#cfcfcf",
+      "role": "fill:divider-box",
+      "bg": "#1f1f1f",
+      "lc": 75.5,
+      "floor": 30,
+      "oklch": "oklch(85.5% 0.000 89.9)",
+      "mirroredStart": "#282828",
+      "polarity": "dark"
+    },
+    "--color-text-divider": {
+      "value": "#000000",
+      "role": "text:divider-text",
+      "bg": "#cfcfcf",
+      "lc": 78.2,
+      "floor": 75,
+      "oklch": "oklch(0.0% 0.000 0.0)"
+    },
+    "--color-border-divider": {
+      "value": "#9f9f9f",
+      "role": "line:divider-line",
+      "bg": "#1f1f1f",
+      "lc": 48.4,
+      "floor": 45,
+      "oklch": "oklch(70.3% 0.000 89.9)",
+      "mirroredStart": "#6a6a6a"
+    },
+    "--color-text-base": {
+      "value": "#fbfbfb",
+      "role": "text:message",
+      "bg": "#1f1f1f",
+      "lc": 103.3,
+      "floor": 75,
+      "oklch": "oklch(98.8% 0.000 89.9)",
+      "mirroredStart": "#fbfbfb"
+    },
+    "--color-text-title": {
+      "value": "#fbfbfb",
+      "role": "text:title",
+      "bg": "#1f1f1f",
+      "lc": 103.3,
+      "floor": 75,
+      "oklch": "oklch(98.8% 0.000 89.9)",
+      "origin": "= text-base"
+    },
+    "--color-text-participant": {
+      "value": "#fbfbfb",
+      "role": "text:participant",
+      "bg": "#1f1f1f",
+      "lc": 103.3,
+      "floor": 75,
+      "oklch": "oklch(98.8% 0.000 89.9)",
+      "origin": "= text-base"
+    },
+    "--color-text-message": {
+      "value": "#fbfbfb",
+      "role": "text:message",
+      "bg": "#1f1f1f",
+      "lc": 103.3,
+      "floor": 75,
+      "oklch": "oklch(98.8% 0.000 89.9)",
+      "origin": "= text-base"
+    },
+    "--color-text-link": {
+      "value": "#fbfbfb",
+      "role": "text:link",
+      "bg": "#1f1f1f",
+      "lc": 103.3,
+      "floor": 75,
+      "oklch": "oklch(98.8% 0.000 89.9)",
+      "origin": "= text-base"
+    },
+    "--color-text-fragment": {
+      "value": "#d4d4d4",
+      "role": "text:fragment-condition",
+      "bg": "#1f1f1f",
+      "lc": 78.5,
+      "floor": 75,
+      "oklch": "oklch(87.0% 0.000 89.9)",
+      "mirroredStart": "#b6b6b6"
+    },
+    "--color-text-comment": {
+      "value": "#d4d4d4",
+      "role": "text:comment",
+      "bg": "#1f1f1f",
+      "lc": 78.5,
+      "floor": 75,
+      "oklch": "oklch(87.0% 0.000 89.9)",
+      "mirroredStart": "#737373"
+    },
+    "--color-text-control": {
+      "value": "#d4d4d4",
+      "role": "text:control",
+      "bg": "#1f1f1f",
+      "lc": 78.5,
+      "floor": 75,
+      "oklch": "oklch(87.0% 0.000 89.9)",
+      "origin": "= text-comment"
+    },
+    "--color-text-guard": {
+      "value": "#ececec",
+      "role": "text:guard-keyword",
+      "bg": "#1f1f1f",
+      "lc": 93.5,
+      "floor": 90,
+      "oklch": "oklch(94.3% 0.000 89.9)",
+      "mirroredStart": "#9b9b9b"
+    },
+    "--color-text-number": {
+      "value": "#ededed",
+      "role": "text:number",
+      "bg": "#1f1f1f",
+      "lc": 94.1,
+      "floor": 90,
+      "oklch": "oklch(94.6% 0.000 89.9)",
+      "mirroredStart": "#8e8e8e"
+    },
+    "--color-bg-number": {
+      "value": "transparent",
+      "role": "fill:number-badge",
+      "bg": null,
+      "lc": null,
+      "floor": null,
+      "oklch": null,
+      "origin": "no badge fill: theme-default's gray-500/10 reads Lc 0 on white; a painted badge would have to be a light chip to carry 12px text at Lc 90"
+    },
+    "--color-text-http-get": {
+      "value": "#dfeafe",
+      "role": "text:http-method",
+      "bg": "#1f1f1f",
+      "lc": 91.8,
+      "floor": 75,
+      "oklch": "oklch(93.5% 0.030 262.5)",
+      "hue": 264
+    },
+    "--color-text-http-post": {
+      "value": "#ebffee",
+      "role": "text:http-method",
+      "bg": "#1f1f1f",
+      "lc": 102.4,
+      "floor": 75,
+      "oklch": "oklch(98.1% 0.031 149.8)",
+      "hue": 150
+    },
+    "--color-text-http-delete": {
+      "value": "#fbc7c2",
+      "role": "text:http-method",
+      "bg": "#1f1f1f",
+      "lc": 78.1,
+      "floor": 75,
+      "oklch": "oklch(87.4% 0.060 24.7)",
+      "hue": 25
+    },
+    "--opacity-comment": {
+      "value": "1",
+      "role": "text:comment",
+      "origin": "see notes"
+    },
+    "--opacity-guard": {
+      "value": "1",
+      "role": "text:fragment-condition",
+      "origin": "see notes"
+    }
+  },
+  "notes": [
+    "border-base #dadada: Lc 48.2 on the occurrence fill #818181 (the lifeline crosses bars), Lc 82.2 on the frame.",
+    "occurrence border #dadada: Lc 48.2 on the occurrence fill #818181 (nested bars), Lc 82.2 on the frame.",
+    "fragment header: a band that clears Lc 30 on #1f1f1f is #818181, on which white reads Lc 71.9 (< 75); the band is therefore a light chip #e9e9e9 with dark text #000000, light enough for its 12px number to clear Lc 90.",
+    "divider rule #9f9f9f reads Lc 23.7 against the note box #cfcfcf; the rule is measured against the frame.",
+    "fragment condition, try/catch section labels (opacity 0.65) and comments (opacity 0.5) are composited at their slot opacity; theme-dark sets --opacity-guard and --opacity-comment to 1 and carries the hierarchy in lightness instead: white at 0.5 over #1f1f1f is Lc 35.7, white at 0.65 is Lc 53.7."
+  ],
+  "canvas": {
+    "atlassianSurface": "#1F1F21",
+    "atlassianOklch": "oklch(24.0% 0.004 286.1)",
+    "canvas": "#1f1f1f",
+    "canvasOklch": "oklch(23.9% 0.000 89.9)",
+    "otherHosts": {
+      "github": "#0d1117",
+      "vscode": "#1F1F1F",
+      "mermaid": "#333"
+    }
+  },
+  "httpTints": {
+    "background": "#1f1f1f",
+    "minPairwiseLcSeparationUnderCvd": 10.3,
+    "table": {
+      "get": {
+        "hex": "#dfeafe",
+        "lc": 91.8,
+        "deuteranopia": {
+          "hex": "#e1e8fe",
+          "lc": 91.1
+        },
+        "protanopia": {
+          "hex": "#e4ebff",
+          "lc": 92.9
+        }
+      },
+      "post": {
+        "hex": "#ebffee",
+        "lc": 102.4,
+        "deuteranopia": {
+          "hex": "#fcf9ef",
+          "lc": 101.9
+        },
+        "protanopia": {
+          "hex": "#fffbed",
+          "lc": 103.2
+        }
+      },
+      "delete": {
+        "hex": "#fbc7c2",
+        "lc": 78.1,
+        "deuteranopia": {
+          "hex": "#ddd7c1",
+          "lc": 80.2
+        },
+        "protanopia": {
+          "hex": "#d1cdc1",
+          "lc": 74.3
+        }
+      }
+    }
+  }
+}
