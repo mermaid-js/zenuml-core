@@ -1,0 +1,110 @@
+{
+  "purpose": "Primary artifacts used to verify open-claude-ui v2 design-token claims; large files kept out of the repo, identified by hash.",
+  "repo_under_test": {
+    "url": "https://github.com/Caho1/open-claude-ui",
+    "analysed_app_version_per_repo_docs": "2.37337.1",
+    "readme_cited_css": "c6a992d55-C0zTICcS.css"
+  },
+  "artifacts": [
+    {
+      "file": "cf1a02a1a-DdTz_5PL.css",
+      "source": "claude.ai web bundle (stylesheet links on https://claude.ai/new)",
+      "url": "https://assets-proxy.anthropic.com/claude-ai/v2/assets/v1/cf1a02a1a-DdTz_5PL.css",
+      "version": "web, as served 2026-10-19",
+      "bytes": 26372,
+      "sha256": "0ec8b3d9d8c9f39dface5571fc02e35fb35246b6fb62cd9b36e578c8a4d47f6e",
+      "fetched": "2026-10-19"
+    },
+    {
+      "file": "c19e90103-CuNz46ca.css",
+      "source": "claude.ai web bundle (stylesheet links on https://claude.ai/new)",
+      "url": "https://assets-proxy.anthropic.com/claude-ai/v2/assets/v1/c19e90103-CuNz46ca.css",
+      "version": "web, as served 2026-10-19",
+      "bytes": 9234,
+      "sha256": "0909f93b4d15f34ed8951a627ef9a04d0dca95481b784cf7b13642c3259bd4f2",
+      "fetched": "2026-10-19"
+    },
+    {
+      "file": "c3fde7009-BH42YUtA.css",
+      "source": "claude.ai web bundle (stylesheet links on https://claude.ai/new)",
+      "url": "https://assets-proxy.anthropic.com/claude-ai/v2/assets/v1/c3fde7009-BH42YUtA.css",
+      "version": "web, as served 2026-10-19",
+      "bytes": 22502,
+      "sha256": "b480cbe40c6a9e76301911e5115b4e9f7a8bb96ab31701b61abe679241fb3b34",
+      "fetched": "2026-10-19"
+    },
+    {
+      "file": "shared-frame-24yhq5YI.css",
+      "source": "claude.ai web bundle (stylesheet links on https://claude.ai/new)",
+      "url": "https://assets-proxy.anthropic.com/claude-ai/v2/assets/v1/shared-frame-24yhq5YI.css",
+      "version": "web, as served 2026-10-19",
+      "bytes": 203,
+      "sha256": "173e04e6f901fddd6ddb7bc830b54b2ce67d73c6860ab9fb5a9bd03434ec4867",
+      "fetched": "2026-10-19"
+    },
+    {
+      "file": "shared-styles-C8bMZOEv.css",
+      "source": "claude.ai web bundle (stylesheet links on https://claude.ai/new)",
+      "url": "https://assets-proxy.anthropic.com/claude-ai/v2/assets/v1/shared-styles-C8bMZOEv.css",
+      "version": "web, as served 2026-10-19",
+      "bytes": 253911,
+      "sha256": "835bcbc35b53344b22eb66988468f900b45d808669a41e2c2959584bcbc92302",
+      "fetched": "2026-10-19"
+    },
+    {
+      "file": "c6a992d55-DvG1h1R7.css",
+      "source": "claude.ai web bundle (stylesheet links on https://claude.ai/new)",
+      "url": "https://assets-proxy.anthropic.com/claude-ai/v2/assets/v1/c6a992d55-DvG1h1R7.css",
+      "version": "web, as served 2026-10-19",
+      "bytes": 1781988,
+      "sha256": "06f4148822fbc7ad14fdab6db9a0b9d77ffe3db56d7b0badde2747ec31ac4aeb",
+      "fetched": "2026-10-19"
+    },
+    {
+      "file": "MainWindowPage-DTxMhyWF.css",
+      "source": "Claude Desktop app.asar main_window renderer",
+      "url": "file:///Applications/Claude.app/Contents/Resources/app.asar#/.vite/renderer/main_window/assets/MainWindowPage-DTxMhyWF.css",
+      "version": "Claude.app 2.42304.2 (CFBundleShortVersionString)",
+      "bytes": 251089,
+      "sha256": "16ae317b1762db1a556d1b8e6c872eab361a6a7530ffa67962b1682aa4582362",
+      "fetched": "2026-10-19"
+    }
+  ],
+  "prettified_copies": {
+    "note": "All line numbers in the 2026-10-19 assessment, the gap table and open-claude-ui-v2-claims.json refer to these prettified copies (one declaration per line), not to the minified originals above. The recorded sha256 values reproduce with prettier 3.9.10 and the recorded command (verified 2026-10-20: file argument, --no-config, and stdin all give the same hash). The repo-pinned prettier 3.5.3 reflows ~300 nested :not()/:is() selector lines in the WEB file (different hash, same line count) but leaves every referenced line unchanged. To re-check a line number: regenerate with prettier 3.9.10 and compare the hash, or regenerate with any prettier 3.x and search for the quoted text.",
+    "files": [
+      {
+        "file": "c6a992d55-DvG1h1R7.pretty.css",
+        "derived_from": "c6a992d55-DvG1h1R7.css",
+        "command": "npx -y prettier@3.9.10 --no-config --parser css --print-width 200 <original>   # prettier 3.9.10 (what `npx prettier@3` resolved to on 2026-10-19)",
+        "lines": 58179,
+        "bytes": 2113826,
+        "sha256": "7adb35eacbe111cbc95aa00297341d53320939f8908c12ceb1da09634a9ba692",
+        "sha256_with_repo_prettier_3.5.3": "6acd6e63592031f6 (prefix; same line count; every line the assessment references is byte-identical, 301 referenced lines checked 2026-10-20)"
+      },
+      {
+        "file": "shared-styles-C8bMZOEv.pretty.css",
+        "derived_from": "shared-styles-C8bMZOEv.css",
+        "command": "npx -y prettier@3.9.10 --no-config --parser css --print-width 200 <original>   # prettier 3.9.10 (what `npx prettier@3` resolved to on 2026-10-19)",
+        "lines": 6914,
+        "bytes": 282195,
+        "sha256": "f9bbafff495357a1df1eca19928e3b7c601b9c2bea92054766a60c11cd827bfd",
+        "sha256_with_repo_prettier_3.5.3": "f9bbafff495357a1 (identical) (prefix; same line count; every line the assessment references is byte-identical, 301 referenced lines checked 2026-10-20)"
+      },
+      {
+        "file": "MainWindowPage-DTxMhyWF.pretty.css",
+        "derived_from": "MainWindowPage-DTxMhyWF.css",
+        "command": "npx -y prettier@3.9.10 --no-config --parser css --print-width 200 <original>   # prettier 3.9.10 (what `npx prettier@3` resolved to on 2026-10-19)",
+        "lines": 8002,
+        "bytes": 290634,
+        "sha256": "9238a65a20c957f99da1e83a3eb9db182afcc13a0700e15743b30e034f42f64b",
+        "sha256_with_repo_prettier_3.5.3": "20ec50d56ebd5c32 (prefix; same line count; every line the assessment references is byte-identical, 301 referenced lines checked 2026-10-20)"
+      }
+    ],
+    "regenerate_originals": {
+      "web": "curl -sS -o <file>.css https://assets-proxy.anthropic.com/claude-ai/v2/assets/v1/<file>.css   # the served file may change; the sha256 above pins the 2026-10-19 bytes",
+      "asar": "npx -y @electron/asar extract-file /Applications/Claude.app/Contents/Resources/app.asar .vite/renderer/main_window/assets/MainWindowPage-DTxMhyWF.css   # Claude.app 2.42304.2",
+      "local_copies": "kept outside the repo, in the maintainer's 2026-10-19 research run folder (byte-identical copies of the three originals, sha256 as listed in artifacts)"
+    }
+  }
+}
