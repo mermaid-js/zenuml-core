@@ -171,14 +171,18 @@ describe("gate B: a press on a disallowed target only exits (R2)", () => {
     expect(store.get(interactionAtom).kind).toBe("idle");
   });
 
-  it("does not consume a press on an allowed target, but still exits", () => {
+  it("keeps the participant editor open on a press on a participant; the click switches", () => {
+    // Before 2026-10-20 the press exited the editor and the click reopened
+    // it, which unmounted the editor between the two events.
     const { store, view, onSelect } = setup(openEditor);
     const participant = view.getByTestId("participant");
     const { consumed } = press(participant);
-    release(participant);
     expect(consumed).toBe(false);
+    expect(store.get(selectedAtom)).toEqual(["A"]);
+    expect(store.get(interactionAtom).kind).toBe("participantEditor");
+    release(participant);
     expect(onSelect).toHaveBeenCalledTimes(1);
-    expect(store.get(selectedAtom)).toEqual([]);
+    expect(store.get(selectedAtom)).toEqual(["A"]);
   });
 
   it("leaves the active surface usable", () => {

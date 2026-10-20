@@ -140,6 +140,19 @@ export const InteractionController = () => {
         swallowFollowUps();
       }
 
+      // The participant editor switches on a click on another participant
+      // ("click another participant to switch"). Exiting on the press would
+      // unmount the editor between pointerdown and click and flash its mask,
+      // so the press does nothing here; the participant's click handler moves
+      // the selection and the editor follows it.
+      if (
+        state.kind === "participantEditor" &&
+        cap === "select" &&
+        capTarget?.closest(".participant")
+      ) {
+        return;
+      }
+
       // Commit a focused draft in the closing surface while its owner still
       // sees the state; a consumed press would not move the focus.
       const active = document.activeElement;

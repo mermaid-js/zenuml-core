@@ -18,7 +18,13 @@ import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import { RootContext } from "@/parser";
 import { cn } from "@/utils";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { FloatingPortal } from "@floating-ui/react";
 import { useInteractionExit } from "@/store/interaction/useInteractionExit";
 import { useActiveSurface } from "@/store/interaction/useCan";
@@ -231,39 +237,42 @@ export const ParticipantStylePanel = () => {
   }, [pickerPos, anchor]);
 
   // The name row is centred under the box; measure it to clamp it on screen.
-  // Its width changes with the label field (empty vs filled). It runs after
-  // every render because the row mounts late (FloatingPortal renders its
-  // children one render after the anchor is set) and re-mounts when a picker
-  // closes; the equality guard stops the loop.
+  // The row mounts one render after the anchor is set (FloatingPortal renders
+  // its children late, and the portal node may still be detached when the
+  // ref attaches, so offsetWidth is 0 there) and nothing re-renders this
+  // component afterwards. A ResizeObserver on the row reports the real width
+  // as soon as the row has layout, and again when the label field flips
+  // between empty and filled or the row re-mounts after a picker closes.
+  const [nameRowEl, setNameRowEl] = useState<HTMLDivElement | null>(null);
+  const attachNameRow = useCallback((node: HTMLDivElement | null) => {
+    nameRowRef.current = node;
+    setNameRowEl(node);
+  }, []);
   useLayoutEffect(() => {
-    const width = nameRowRef.current?.offsetWidth ?? 0;
-    if (width !== nameRowWidth) setNameRowWidth(width);
-  });
+    if (!nameRowEl) return;
+    const measure = () => setNameRowWidth(nameRowEl.offsetWidth);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(nameRowEl);
+    return () => observer.disconnect();
+  }, [nameRowEl]);
 
-  // Click-away and Escape are the interaction state's (ADR 0002, P3): it
-  // blurs a focused draft here first, so the draft commits for the
-  // participant it belongs to, then clears the selection. A draft that fails
-  // validation is discarded: closing the panel resets every draft and error
-  // from the committed declaration.
-  useInteractionExit((state, cause) => {
-    if (state.kind !== "participantEditor" || cause.type !== "press") return;
+  // A press on a participant box can commit a focused draft (the focus
+  // change blurs the field), and the commit can re-render the diagram and
+  // replace the node under the pointer, which drops the click that would
+  // select it. Follow that one press to its end and select the participant
+  // on pointerup when its node was replaced; a node that survived gets its
+  // own click, and selecting here too would toggle it back off.
+  const followPress = (target: Element | null, hit: string) => {
     cancelPending();
-    // A committed draft can re-render the diagram and replace the node under
-    // the pointer, which drops the click that would select it.
-    const target = cause.target;
-    const hit = target
-      ?.closest?.("[data-participant-id]")
-      ?.getAttribute("data-participant-id");
-    if (!hit) return;
     const token = ++interactionTokenRef.current;
     const onUp = () => {
       const current = interactionTokenRef.current === token;
       cancelPending();
-      // A connected target still gets its own click, which toggles the
-      // selection; setting it here would toggle it back off.
       if (
         current &&
-        selectedRef.current.length === 0 &&
+        selectedRef.current[0] !== hit &&
         !target?.isConnected &&
         diagramElementRef.current?.querySelector(
           `[data-participant-id="${hit}"]`,
@@ -285,7 +294,43 @@ export const ParticipantStylePanel = () => {
       document.removeEventListener("pointercancel", cancelPending, true);
       document.removeEventListener("keydown", onKey, true);
     };
+  };
+  const participantOf = (target: Element | null) =>
+    target
+      ?.closest?.("[data-participant-id]")
+      ?.getAttribute("data-participant-id") ?? null;
+
+  // Click-away and Escape are the interaction state's (ADR 0002, P3): it
+  // blurs a focused draft here first, so the draft commits for the
+  // participant it belongs to, then clears the selection. A draft that fails
+  // validation is discarded: closing the panel resets every draft and error
+  // from the committed declaration.
+  useInteractionExit((state, cause) => {
+    if (state.kind !== "participantEditor" || cause.type !== "press") return;
+    cancelPending();
+    const hit = participantOf(cause.target);
+    if (hit) followPress(cause.target, hit);
   });
+
+  // A press on another participant no longer exits the editor (ADR 0002,
+  // 2026-10-20): the click switches it. The press still needs following for
+  // the replaced-node case above.
+  const participantNameRef = useRef(participantName);
+  participantNameRef.current = participantName;
+  useEffect(() => {
+    if (!isOpen) return;
+    const onDown = (event: PointerEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const hit = participantOf(target);
+      if (!hit || hit === participantNameRef.current) return;
+      if (!diagramElementRef.current?.contains(target)) return;
+      followPress(target, hit);
+    };
+    document.addEventListener("pointerdown", onDown, true);
+    return () => document.removeEventListener("pointerdown", onDown, true);
+    // followPress reads refs only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   if (!isOpen || !participantName || !anchor) {
     return null;
@@ -658,7 +703,7 @@ export const ParticipantStylePanel = () => {
               }}
             >
               <div
-                ref={nameRowRef}
+                ref={attachNameRow}
                 data-testid="participant-name-row"
                 className="pointer-events-auto h-8 box-border flex items-center gap-1.5 px-1 bg-white rounded-zu-lg shadow-zu-pop-ring"
               >
