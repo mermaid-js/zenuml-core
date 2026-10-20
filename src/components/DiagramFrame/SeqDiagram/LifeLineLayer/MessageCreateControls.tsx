@@ -327,7 +327,7 @@ export const MessageCreateControls = () => {
             <div
               key={`highlight-${participant.name}`}
               data-testid={`message-create-target-${participant.name}`}
-              className="absolute z-20 rounded-md border-2 border-blue-600 pointer-events-none"
+              className="absolute z-20 rounded-zu-md border-2 border-blue-600 pointer-events-none"
               style={{
                 left:
                   (rect.left - (containerRect?.left ?? diagramRect.left)) /
@@ -345,7 +345,7 @@ export const MessageCreateControls = () => {
       {dragState && targetRect && (
         <div
           data-testid="message-create-release-tooltip"
-          className="absolute z-40 -translate-x-1/2 -translate-y-full rounded bg-gray-900 px-2 py-1 text-[11px] leading-4 text-white shadow-sm pointer-events-none"
+          className="absolute z-40 -translate-x-1/2 -translate-y-full rounded-zu-sm bg-gray-900 px-2 py-1 text-[11px] leading-4 text-white shadow-zu-sm pointer-events-none"
           style={{
             left: tooltipX,
             top:

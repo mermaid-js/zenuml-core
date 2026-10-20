@@ -133,8 +133,9 @@ describe("ColorPicker", () => {
   it("selected swatch has a 1px outer sky ring over a 2px white border", () => {
     const { view } = setup("#1d4ed8");
     const sel = view.getAllByRole("button", { pressed: true })[0];
-    expect(sel.className).toContain("shadow-[0_0_0_1px_#0ea5e9]");
-    expect(sel.className).not.toContain("shadow-[0_0_0_2px_#0ea5e9]");
+    // shadow-zu-selected = 0 0 0 1px #0ea5e9 (tailwind.config.js, zenuml-owned)
+    expect(sel.className).toContain("shadow-zu-selected");
+    expect(sel.className).not.toMatch(/shadow-\[/);
     expect(sel.className).toContain("border-2");
     expect(sel.className).toContain("border-white");
   });

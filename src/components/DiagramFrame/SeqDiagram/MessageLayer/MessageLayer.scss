@@ -17,9 +17,9 @@
   .statement-container .message {
     cursor: pointer;
     transition:
-      box-shadow 120ms ease,
-      transform 120ms ease,
-      background-color 120ms ease;
+      box-shadow var(--zu-dur-snap) ease,
+      transform var(--zu-dur-snap) ease,
+      background-color var(--zu-dur-snap) ease;
   }
 
   .statement-container .message.message-reorder-disabled {
@@ -70,7 +70,7 @@
     width: 32px;
     height: 14px;
     border: 1px solid #cbd5e1;
-    border-radius: 4px;
+    border-radius: var(--zu-radius-sm);
     background: white;
   }
 

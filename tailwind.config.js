@@ -81,6 +81,10 @@ module.exports = {
       },
       borderColor: {
         primary: "var(--color-border-primary)",
+        "zu-line-5": "var(--zu-line-5)",
+        "zu-line-10": "var(--zu-line-10)",
+        "zu-line-20": "var(--zu-line-20)",
+        "zu-line-35": "var(--zu-line-35)",
         skin: {
           frame: "var(--color-border-frame, var(--color-border-base, #000))",
           participant:
@@ -109,6 +113,46 @@ module.exports = {
       boxShadow: {
         participant: "var(--color-shadow-participant, 0 0 #0000)",
         occurrence: "var(--color-shadow-occurrence, 0 0 #0000)",
+        // --zu-* chrome tokens, declared on .zenuml in src/assets/tailwind.css
+        "zu-sm": "var(--zu-shadow-sm)",
+        "zu-md": "var(--zu-shadow-md)",
+        "zu-pop": "var(--zu-shadow-pop)",
+        "zu-pop-ring": "var(--zu-shadow-pop), var(--zu-hairline)",
+        "zu-hairline": "var(--zu-hairline)",
+        "zu-pop-error": "var(--zu-shadow-pop), 0 0 0 1px rgba(220, 38, 38, 0.35)", // zenuml-owned
+        "zu-selected": "0 0 0 1px #0ea5e9", // zenuml-owned, selection ring until P3
+      },
+      borderRadius: {
+        "zu-xs": "var(--zu-radius-xs)",
+        "zu-sm": "var(--zu-radius-sm)",
+        "zu-md": "var(--zu-radius-md)",
+        "zu-lg": "var(--zu-radius-lg)",
+        "zu-panel": "var(--zu-radius-panel)",
+        "zu-dialog": "var(--zu-radius-dialog)",
+      },
+      spacing: {
+        "zu-control": "var(--zu-h-control)",
+        "zu-control-nested": "var(--zu-h-control-nested)",
+        "zu-gap-xs": "var(--zu-gap-xs)",
+        "zu-gap-sm": "var(--zu-gap-sm)",
+        "zu-gap-md": "var(--zu-gap-md)",
+      },
+      transitionDuration: {
+        "zu-fast": "var(--zu-dur-fast)",
+        "zu-snap": "var(--zu-dur-snap)",
+        "zu-base": "var(--zu-dur-base)",
+        "zu-sheet": "var(--zu-dur-sheet)",
+        "zu-slow": "var(--zu-dur-slow)",
+      },
+      transitionTimingFunction: {
+        "zu-out": "var(--zu-ease-out)",
+        "zu-snap": "var(--zu-ease-snap)",
+        "zu-overshoot": "var(--zu-ease-overshoot)",
+        "zu-spring": "var(--zu-ease-spring)",
+        "zu-standard": "var(--zu-ease-standard)",
+      },
+      ringColor: {
+        "zu-ring": "var(--zu-ring-color)",
       },
     },
   },

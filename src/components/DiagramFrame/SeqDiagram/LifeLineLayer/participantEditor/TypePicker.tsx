@@ -81,7 +81,7 @@ export const TypePicker = ({
     <div
       role="dialog"
       aria-label="Participant type"
-      className="w-[220px] box-border p-2.5 rounded-[10px] bg-white border border-gray-200 shadow-lg flex flex-col gap-2"
+      className="w-[220px] box-border p-2.5 rounded-zu-panel bg-white border border-gray-200 shadow-zu-pop flex flex-col gap-2"
       onPointerLeave={() => setPreview(null)}
     >
       <div className="flex gap-[3px]">
@@ -92,7 +92,7 @@ export const TypePicker = ({
               key={key}
               type="button"
               className={cn(
-                "w-[30px] h-[30px] flex items-center justify-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
+                "w-[30px] h-[30px] flex items-center justify-center rounded-zu-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
                 isActive
                   ? "border-sky-500 bg-sky-50 text-sky-700"
                   : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100",
@@ -146,14 +146,14 @@ export const TypePicker = ({
               pick(results[activeResult]);
             }
           }}
-          className="w-full h-7 box-border rounded-md border border-gray-200 bg-white pl-[30px] pr-2 text-[12px] text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          className="w-full h-7 box-border rounded-zu-md border border-gray-200 bg-white pl-[30px] pr-2 text-[12px] text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
         />
         {results.length > 0 && (
           <ul
             id="zenuml-participant-icon-results"
             role="listbox"
             aria-label="Matching icons"
-            className="absolute left-0 right-0 top-full mt-1 z-10 list-none m-0 p-1 bg-white border border-gray-200 rounded-lg shadow-lg flex flex-col gap-0.5"
+            className="absolute left-0 right-0 top-full mt-1 z-10 list-none m-0 p-1 bg-white border border-gray-200 rounded-zu-lg shadow-zu-pop flex flex-col gap-0.5"
           >
             {results.map((key, index) => {
               const isActive = index === activeResult;
@@ -163,7 +163,7 @@ export const TypePicker = ({
                   role="option"
                   aria-selected={isActive}
                   className={cn(
-                    "flex items-center gap-2 h-[26px] px-2 rounded-md text-[12px] cursor-pointer",
+                    "flex items-center gap-2 h-[26px] px-2 rounded-zu-md text-[12px] cursor-pointer",
                     isActive
                       ? "bg-sky-50 text-sky-900"
                       : "text-gray-900 hover:bg-gray-100",

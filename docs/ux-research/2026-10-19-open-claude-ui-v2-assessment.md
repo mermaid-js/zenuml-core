@@ -489,8 +489,13 @@ button 16x16.
 
 ### Gate 6: diagram body unchanged (every chrome PR, P1-P4 and P6)
 
-- `bun pw` passes with no snapshot updates: `git status --porcelain -- 'tests/**/*.png'` prints nothing.
-  Never run `bun pw:update` for these PRs.
+- Diagram-body snapshots stay byte-identical: after `bun pw`, `git status --porcelain -- 'tests/**/*.png'`
+  prints nothing outside `tests/interaction/`. Never run `bun pw:update` for those files.
+- Chrome snapshots under `tests/interaction/` may change, because P1 to P4 change panel radii, shadows, focus
+  and motion by design. Each changed PNG goes through the `snapshot-visual-check` skill; every diff cluster must
+  sit on a chrome surface (panel, picker, menu, handle, tooltip) and be listed in the PR. A cluster on a lifeline,
+  arrow, label, fragment or participant box is a regression to fix, not a snapshot to update. (Amended 2026-10-20
+  with P1: the original wording forbade any PNG change, which the P1 scope itself contradicts.)
 - For each compare case, `node scripts/analyze-compare-case.mjs --case <name> --json` on the PR branch
   reports the same `diff` section as on `main` (zero new HTML/SVG divergence).
 - P5 is the exception: it changes diagram pixels and follows the `snapshot-visual-check` skill, with every

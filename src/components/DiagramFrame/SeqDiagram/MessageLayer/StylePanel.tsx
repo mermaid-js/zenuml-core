@@ -323,7 +323,7 @@ export const StylePanel = () => {
         {surfaceShown && (
           <div
             className={cn(
-              "flex items-center bg-white shadow-md z-40 rounded-md p-1 gap-1",
+              "flex items-center bg-white shadow-zu-md z-40 rounded-zu-panel p-1 gap-1",
               themeClasses,
             )}
           >
@@ -341,7 +341,7 @@ export const StylePanel = () => {
                   }
                   onClick={() => handleClick(btn.class)}
                   className={cn(
-                    "w-6 mx-1 py-1 rounded-md text-black text-center cursor-pointer hover:bg-gray-200",
+                    "w-6 mx-1 py-1 rounded-zu-md text-black text-center cursor-pointer hover:bg-gray-200",
                     [
                       btn.class,
                       { "bg-gray-100": existingStyles.includes(btn.class) },
@@ -358,7 +358,7 @@ export const StylePanel = () => {
                 type="button"
                 data-testid="message-rename"
                 className={cn(
-                  "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
                   {
                     "opacity-40 pointer-events-none":
                       messageData.current.labelStart < 0 ||
@@ -387,7 +387,7 @@ export const StylePanel = () => {
                 type="button"
                 data-testid="message-type-menu"
                 className={cn(
-                  "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
                   { "bg-gray-100": openSubmenu === "type" },
                 )}
                 title="Change message type"
@@ -398,7 +398,7 @@ export const StylePanel = () => {
                 {messageData.current.currentType} ▾
               </button>
               {openSubmenu === "type" && (
-                <div className="absolute left-0 top-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[90px]">
+                <div className="absolute left-0 top-full mt-1 bg-white shadow-zu-pop rounded-zu-lg border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[90px]">
                   {(
                     [
                       "sync",
@@ -439,7 +439,7 @@ export const StylePanel = () => {
                           setOpenSubmenu(null);
                         }}
                         className={cn(
-                          "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100",
+                          "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100",
                           {
                             "bg-gray-100 font-semibold": isCurrent,
                             "opacity-40 cursor-not-allowed": !canTransform,
@@ -465,7 +465,7 @@ export const StylePanel = () => {
                 type="button"
                 data-testid="message-wrap-menu"
                 className={cn(
-                  "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
                   { "bg-gray-100": openSubmenu === "wrap" },
                 )}
                 title="Wrap in fragment"
@@ -476,13 +476,13 @@ export const StylePanel = () => {
                 Wrap ▾
               </button>
               {openSubmenu === "wrap" && (
-                <div className="absolute left-0 top-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[70px]">
+                <div className="absolute left-0 top-full mt-1 bg-white shadow-zu-pop rounded-zu-lg border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[70px]">
                   {wrapTypes.map((type) => (
                     <button
                       type="button"
                       key={type}
                       data-testid={`message-wrap-${type}`}
-                      className="px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100"
+                      className="px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100"
                       title={`Wrap in ${type} fragment`}
                       aria-label={`Wrap in ${type} fragment`}
                       onClick={() => handleWrapClick(type)}

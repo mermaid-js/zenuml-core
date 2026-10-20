@@ -1,6 +1,6 @@
 .editable-span-base {
   padding: 0 4px;
-  border-radius: 4px;
+  border-radius: var(--zu-radius-sm);
 }
 
 .editable-span-base.editable-span-hover[role] {
@@ -13,7 +13,7 @@
   outline: 1px solid #3b82f6;
   outline-offset: 0;
   background-color: #eff6ff;
-  border-radius: 4px;
+  border-radius: var(--zu-radius-sm);
   box-shadow: none;
   cursor: text;
 }
