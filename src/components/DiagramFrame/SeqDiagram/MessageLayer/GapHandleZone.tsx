@@ -317,13 +317,16 @@ export const GapHandleZone = (props: {
     }
   };
 
+  // P4: the 12 px circle is painted; before: on the handle stretches the
+  // pointer target to 24 x 24. It is a descendant of the hover zone, so the
+  // zone stays hovered while the pointer is on it.
   function renderHandles() {
     return (
       <>
         {showHandle && (
           <button
             type="button"
-            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-500 bg-white text-slate-700 flex items-center justify-center cursor-crosshair hover:border-slate-700 hover:shadow-zu-sm focus-visible:outline-none focus-visible:shadow-zu-focus"
+            className="zu-press zu-press-offset absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full before:absolute before:-inset-[7px] before:content-[''] border border-slate-500 bg-white text-slate-700 flex items-center justify-center cursor-crosshair hover:border-slate-700 hover:shadow-zu-sm focus-visible:outline-none focus-visible:shadow-zu-focus"
             style={{
               width: HANDLE_SIZE,
               height: HANDLE_SIZE,
@@ -389,7 +392,7 @@ export const GapHandleZone = (props: {
               type="button"
               role="menuitem"
               data-testid={`divider-insert-${props.insertIndex}`}
-              className="block w-full rounded-zu-md px-2 py-1 text-left text-xs text-slate-800 hover:bg-slate-100 focus:bg-slate-100 focus:outline-none focus:shadow-zu-focus"
+              className="zu-press block w-full rounded-zu-md px-2 py-1 text-left text-xs text-slate-800 hover:bg-slate-100 focus:bg-slate-100 focus:outline-none focus:shadow-zu-focus"
               onClick={(event) => {
                 insertDivider(event);
                 closeMenu();
