@@ -55,6 +55,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${WORKSPACE}/.claude/hooks/remind-babysit-pr.sh",
+            "description": "Reminds Claude to watch CI with babysit-pr after a git push"
+          }
+        ]
+      }
     ]
   },
   "environment": {
