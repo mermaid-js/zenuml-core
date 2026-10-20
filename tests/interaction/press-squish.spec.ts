@@ -196,17 +196,19 @@ test.describe("press squish", () => {
   test.describe("reduced motion (data-reduce-motion)", () => {
     test("insert button and panel button do not squish", async ({ page }) => {
       const button = await revealInsertButton(page);
+      // The attribute goes on an ancestor of the diagram (here <body>): the
+      // popovers render in their own .zenuml portal roots, so the diagram root
+      // alone would not reach them.
       await page.evaluate(() =>
-        document
-          .querySelectorAll(".zenuml")
-          .forEach((el) => el.setAttribute("data-reduce-motion", "true")),
+        document.body.setAttribute("data-reduce-motion", "true"),
       );
       expect(await pressedTransform(page, button)).toBe("none");
       const wrap = await openMessagePanel(page);
+      // The attribute goes on an ancestor of the diagram (here <body>): the
+      // popovers render in their own .zenuml portal roots, so the diagram root
+      // alone would not reach them.
       await page.evaluate(() =>
-        document
-          .querySelectorAll(".zenuml")
-          .forEach((el) => el.setAttribute("data-reduce-motion", "true")),
+        document.body.setAttribute("data-reduce-motion", "true"),
       );
       expect(await pressedTransform(page, wrap)).toBe("none");
     });
