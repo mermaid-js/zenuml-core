@@ -144,7 +144,10 @@ function lineBackgrounds(shot, item, lr, nominal) {
   }
   const s = shot.dpr;
   const horizontal = lr.w >= lr.h;
-  const near = (p) => p && nominal && Math.max(Math.abs(p[0] - nominal[0]), Math.abs(p[1] - nominal[1]), Math.abs(p[2] - nominal[2])) <= 40;
+  // 12 per channel: a crisp 1px rule, a dash or a border is exact; a surface
+  // that merely covers the line (the SVG draws header bands over lifelines)
+  // differs by more and must not count as the line.
+  const near = (p) => p && nominal && Math.max(Math.abs(p[0] - nominal[0]), Math.abs(p[1] - nominal[1]), Math.abs(p[2] - nominal[2])) <= 12;
   const band = [Math.round(2 * s), Math.round(5 * s)];
   const vis = { a: [], b: [] };
   const all = { a: [], b: [] };
@@ -222,6 +225,9 @@ export function measure(shot, item, surfaces = null) {
     // ones on a designed surface gate, the others are overlaps.
     const hists = item.edge === "left" || item.edge === "top" ? [sides.histA] : [sides.histA, sides.histB];
     const minPx = Math.max(4, 4 * shot.dpr);
+    const key = (px) => (px[0] << 16) | (px[1] << 8) | px[2];
+    const onBothSides = (px) =>
+      hists.length === 2 && hists.every((h) => h.some((e) => key(e.px) === key(px) && e.n >= minPx));
     const evaluated = [];
     for (const hist of hists) {
       for (let i = 0; i < hist.length; i++) {
@@ -234,7 +240,13 @@ export function measure(shot, item, surfaces = null) {
         // touching the edge is not the line's background.
         if (i > 0 && (!surface || n < minPx)) continue;
         const fg = composite([nominal[0], nominal[1], nominal[2], alpha], px);
-        evaluated.push({ bg: px, bgHex, fg, lc: apcaContrast(fg, px), n, surface, designed: !surface || designed.includes(surface) });
+        // A free rule "overlaps" a foreign surface only where it runs through
+        // it (the surface shows on both sides); the far side of an edge or a
+        // surface the rule merely borders is an alternative background, not
+        // an overlap.
+        const foreign = !!surface && !designed.includes(surface);
+        const crosses = hists.length === 1 ? foreign : foreign && onBothSides(px);
+        evaluated.push({ bg: px, bgHex, fg, lc: apcaContrast(fg, px), n, surface, designed: !foreign, crosses });
       }
     }
     if (!evaluated.length) return { ...item, error: "no background pixels" };
@@ -245,7 +257,7 @@ export function measure(shot, item, surfaces = null) {
     let chosen;
     if (hists.length === 1) chosen = pool.reduce((w, e) => (Math.abs(e.lc) < Math.abs(w.lc) ? e : w));
     else chosen = pool.reduce((w, e) => (Math.abs(e.lc) > Math.abs(w.lc) ? e : w));
-    const overlaps = evaluated.filter((e) => !e.designed).map((e) => ({ bg: e.bgHex, surface: e.surface, lc: +e.lc.toFixed(1), px: e.n }));
+    const overlaps = evaluated.filter((e) => e.crosses).map((e) => ({ bg: e.bgHex, surface: e.surface, lc: +e.lc.toFixed(1), px: e.n }));
     const rendered = extreme(shot.pixels(lr), chosen.bg);
     return {
       ...finish(item, chosen.fg, chosen.bg, rendered),

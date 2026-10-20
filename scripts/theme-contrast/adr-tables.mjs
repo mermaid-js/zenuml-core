@@ -4,7 +4,7 @@
 //
 // Usage: node scripts/theme-contrast/adr-tables.mjs [measure|hosts|tokens|tints|audit|benchmark|host-sample|all]
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -118,9 +118,24 @@ const sections = {
   },
 };
 
-const which = process.argv[2] || "all";
+const argv = process.argv.slice(2);
+const write = argv.includes("--write");
+const which = argv.find((a) => a !== "--write") || "all";
 const names = which === "all" ? Object.keys(sections) : [which];
-for (const n of names) {
-  if (!sections[n]) throw new Error(`unknown section ${n}`);
-  process.stdout.write(`<!-- ${n} -->\n${sections[n]()}\n\n`);
+if (write) {
+  // Replace every `<!-- TABLES:x --> … <!-- /TABLES:x -->` block in the ADR.
+  const adrFile = resolve(ROOT, "docs/adr/0004-theme-dark.md");
+  let adr = readFileSync(adrFile, "utf8");
+  for (const n of names) {
+    const re = new RegExp(`(<!-- TABLES:${n} -->\\n)[\\s\\S]*?(\\n<!-- /TABLES:${n} -->)`);
+    if (!re.test(adr)) throw new Error(`no TABLES:${n} markers in the ADR`);
+    adr = adr.replace(re, `$1${sections[n]()}$2`);
+  }
+  writeFileSync(adrFile, adr);
+  process.stdout.write(`spliced ${names.join(", ")} into ${adrFile}\n`);
+} else {
+  for (const n of names) {
+    if (!sections[n]) throw new Error(`unknown section ${n}`);
+    process.stdout.write(`<!-- ${n} -->\n${sections[n]()}\n\n`);
+  }
 }

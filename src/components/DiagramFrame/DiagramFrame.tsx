@@ -13,11 +13,21 @@ import { Debug } from "./Debug";
 import { DiagramTitle } from "./DiagramTitle";
 import { SeqDiagram } from "./SeqDiagram/SeqDiagram";
 
-const exportConfig = {
-  backgroundColor: "white",
-  filter: (node: HTMLElement) => {
-    return !node?.classList?.contains("hide-export");
-  },
+// The export paints the host element's full box; the area beside the diagram
+// takes the theme's canvas colour so a dark theme stays dark edge to edge
+// (ADR 0004). White when the canvas is transparent.
+const exportConfig = (container: HTMLElement | null) => {
+  const color = container ? getComputedStyle(container).backgroundColor : "";
+  const backgroundColor =
+    color && color !== "rgba(0, 0, 0, 0)" && color !== "transparent"
+      ? color
+      : "white";
+  return {
+    backgroundColor,
+    filter: (node: HTMLElement) => {
+      return !node?.classList?.contains("hide-export");
+    },
+  };
 };
 
 export const DiagramFrame = ({
@@ -41,19 +51,19 @@ export const DiagramFrame = ({
 
   const toPng = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toPng(containerRef.current, exportConfig);
+    return htmlToImage.toPng(containerRef.current, exportConfig(containerRef.current));
   };
   const toSvg = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toSvg(containerRef.current, exportConfig);
+    return htmlToImage.toSvg(containerRef.current, exportConfig(containerRef.current));
   };
   const toBlob = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toBlob(containerRef.current, exportConfig);
+    return htmlToImage.toBlob(containerRef.current, exportConfig(containerRef.current));
   };
   const toJpeg = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toJpeg(containerRef.current, exportConfig);
+    return htmlToImage.toJpeg(containerRef.current, exportConfig(containerRef.current));
   };
   const zoomIn = () => {
     const newScale = Math.min(1, scale + 0.1);
