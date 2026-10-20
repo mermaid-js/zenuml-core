@@ -7,7 +7,7 @@ export const Numbering = (props: { number?: number | string }) => {
   if (!enableNumbering || props.number == null || props.number === "")
     return null;
   return (
-    <div className="message-number absolute text-xs leading-4 right-[calc(100%+4px)] top-0 px-1 bg-gray-500/10 rounded-sm whitespace-nowrap group-hover:hidden text-gray-500 font-normal">
+    <div className="message-number absolute text-xs leading-4 right-[calc(100%+4px)] top-0 px-1 bg-skin-number rounded-sm whitespace-nowrap group-hover:hidden text-skin-number font-normal">
       {props.number}
     </div>
   );

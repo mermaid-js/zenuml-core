@@ -246,8 +246,10 @@ A -> B.loadCustomerAccountAndValidateSubscription() {
   expect(actual.dom.messageNumber).toEqual(
     actual.dom.messageNumber.map(() => "12px/400"),
   );
+  // The badge fill is a theme slot (bg-skin-number, tailwind.config.js), not
+  // a stock Tailwind tint.
   expect(actual.dom.fragmentNumberClasses).toEqual([
-    expect.stringContaining("bg-gray-500/10"),
+    expect.stringContaining("bg-skin-number"),
   ]);
   expect(actual.dom.fragmentNumberClasses).toEqual([
     expect.stringContaining("rounded-sm"),
@@ -257,7 +259,7 @@ A -> B.loadCustomerAccountAndValidateSubscription() {
   ]);
   expect(
     actual.dom.messageNumberClasses.every((className) =>
-      className.includes("bg-gray-500/10"),
+      className.includes("bg-skin-number"),
     ),
   ).toBe(true);
   expect(actual.svg.fragmentNumber).toEqual(["12px/400"]);
