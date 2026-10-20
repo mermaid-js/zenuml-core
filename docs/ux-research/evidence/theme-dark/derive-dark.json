@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-20T11:17:53.829Z",
+  "generated": "2026-10-20T11:56:23.619Z",
   "method": "see derive-dark.mjs header",
   "tokens": {
     "--color-bg-canvas": {
@@ -57,66 +57,66 @@
       "origin": "no fill, as comment-code; the table keeps its borders"
     },
     "--color-border-base": {
-      "value": "#dadada",
+      "value": "#e1e1e1",
       "role": "line:frame-border",
-      "bg": "#818181",
-      "lc": 48.2,
+      "bg": "#898989",
+      "lc": 48.7,
       "floor": 45,
-      "oklch": "oklch(88.8% 0.000 89.9)",
+      "oklch": "oklch(91.0% 0.000 89.9)",
       "mirroredStart": "#a7a7a7"
     },
     "--color-border-frame": {
-      "value": "#dadada",
+      "value": "#e1e1e1",
       "role": "line:frame-border",
       "bg": "#1f1f1f",
-      "lc": 82.2,
+      "lc": 86.5,
       "floor": 45,
-      "oklch": "oklch(88.8% 0.000 89.9)",
+      "oklch": "oklch(91.0% 0.000 89.9)",
       "origin": "= border-base"
     },
     "--color-border-participant": {
-      "value": "#dadada",
+      "value": "#e1e1e1",
       "role": "line:participant-border",
       "bg": "#1f1f1f",
-      "lc": 82.2,
+      "lc": 86.5,
       "floor": 45,
-      "oklch": "oklch(88.8% 0.000 89.9)",
+      "oklch": "oklch(91.0% 0.000 89.9)",
       "origin": "= border-base (also the lifeline)"
     },
     "--color-border-fragment": {
-      "value": "#dadada",
+      "value": "#e1e1e1",
       "role": "line:fragment-border",
       "bg": "#1f1f1f",
-      "lc": 82.2,
+      "lc": 86.5,
       "floor": 45,
-      "oklch": "oklch(88.8% 0.000 89.9)",
+      "oklch": "oklch(91.0% 0.000 89.9)",
       "origin": "= border-base"
     },
     "--color-border-group": {
-      "value": "#dadada",
+      "value": "#e1e1e1",
       "role": "line:group-outline",
       "bg": "#1f1f1f",
-      "lc": 82.2,
+      "lc": 86.5,
       "floor": 45,
-      "oklch": "oklch(88.8% 0.000 89.9)",
+      "oklch": "oklch(91.0% 0.000 89.9)",
       "origin": "= border-base"
     },
     "--color-outline-primary": {
-      "value": "#dadada",
+      "value": "#e1e1e1",
       "role": "line:outline",
       "bg": "#1f1f1f",
-      "lc": 82.2,
+      "lc": 86.5,
       "floor": 45,
-      "oklch": "oklch(88.8% 0.000 89.9)",
+      "oklch": "oklch(91.0% 0.000 89.9)",
       "origin": "= border-base"
     },
     "--color-border-occurrence": {
-      "value": "#dadada",
+      "value": "#e1e1e1",
       "role": "line:occurrence-border",
-      "bg": "#818181",
-      "lc": 48.2,
+      "bg": "#898989",
+      "lc": 48.7,
       "floor": 45,
-      "oklch": "oklch(88.8% 0.000 89.9)",
+      "oklch": "oklch(91.0% 0.000 89.9)",
       "mirroredStart": "#898989"
     },
     "--color-message-arrow": {
@@ -346,8 +346,8 @@
     }
   },
   "notes": [
-    "border-base #dadada: Lc 48.2 on the occurrence fill #818181 (the lifeline crosses bars), Lc 82.2 on the frame.",
-    "occurrence border #dadada: Lc 48.2 on the occurrence fill #818181 (nested bars), Lc 82.2 on the frame.",
+    "border-base #e1e1e1: Lc 48.7 on the bar's antialiased edge #898989 (fill #818181 + 8; the lifeline crosses bars), Lc 86.5 on the frame.",
+    "occurrence border #e1e1e1: Lc 48.7 on the bar's antialiased edge #898989 (nested bars), Lc 86.5 on the frame.",
     "fragment header: a band that clears Lc 30 on #1f1f1f is #818181, on which white reads Lc 71.9 (< 75); the band is therefore a light chip #e9e9e9 with dark text #000000, light enough for its 12px number to clear Lc 90.",
     "divider rule #9f9f9f reads Lc 23.7 against the note box #cfcfcf; the rule is measured against the frame.",
     "fragment condition, try/catch section labels (opacity 0.65) and comments (opacity 0.5) are composited at their slot opacity; theme-dark sets --opacity-guard and --opacity-comment to 1 and carries the hierarchy in lightness instead: white at 0.5 over #1f1f1f is Lc 35.7, white at 0.65 is Lc 53.7."

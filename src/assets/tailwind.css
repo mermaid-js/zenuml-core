@@ -147,13 +147,13 @@
     --color-bg-occurrence: #818181; /* Lc 33.3 on #1f1f1f, floor 30 */
     --color-bg-comment-code: transparent; /* no fill: theme-default's #f9f2f4 reads Lc 0 on white (a tint, not a surface); a painted code background would have to be a light chip to carry text at Lc 75 */
     --color-bg-comment-table-head: transparent; /* no fill, as comment-code; the table keeps its borders */
-    --color-border-base: #dadada; /* Lc 48.2 on #818181, floor 45 */
-    --color-border-frame: #dadada; /* Lc 82.2 on #1f1f1f, floor 45 */
-    --color-border-participant: #dadada; /* Lc 82.2 on #1f1f1f, floor 45 */
-    --color-border-fragment: #dadada; /* Lc 82.2 on #1f1f1f, floor 45 */
-    --color-border-group: #dadada; /* Lc 82.2 on #1f1f1f, floor 45 */
-    --color-outline-primary: #dadada; /* Lc 82.2 on #1f1f1f, floor 45 */
-    --color-border-occurrence: #dadada; /* Lc 48.2 on #818181, floor 45 */
+    --color-border-base: #e1e1e1; /* Lc 48.7 on #898989, floor 45 */
+    --color-border-frame: #e1e1e1; /* Lc 86.5 on #1f1f1f, floor 45 */
+    --color-border-participant: #e1e1e1; /* Lc 86.5 on #1f1f1f, floor 45 */
+    --color-border-fragment: #e1e1e1; /* Lc 86.5 on #1f1f1f, floor 45 */
+    --color-border-group: #e1e1e1; /* Lc 86.5 on #1f1f1f, floor 45 */
+    --color-outline-primary: #e1e1e1; /* Lc 86.5 on #1f1f1f, floor 45 */
+    --color-border-occurrence: #e1e1e1; /* Lc 48.7 on #898989, floor 45 */
     --color-message-arrow: #ffffff; /* Lc 105.9 on #1f1f1f, floor 45 */
     --color-border-fragment-separator: #9f9f9f; /* Lc 48.4 on #1f1f1f, floor 45 */
     --color-border-comment-table: #9f9f9f; /* Lc 48.4 on #1f1f1f, floor 45 */

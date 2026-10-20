@@ -25,6 +25,7 @@ import { fileURLToPath } from "node:url";
 import { apcaContrast } from "../color/apca.mjs";
 import { simulateCvd } from "../color/cvd.mjs";
 import { formatOklch, inSrgbGamut, oklchToHex, srgbToOklch } from "../color/oklch.mjs";
+import { parseColor, toHex } from "../color/srgb.mjs";
 import { FLOORS } from "./roles.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -145,10 +146,16 @@ token("--color-bg-comment-code", "transparent", "fill:comment-code", null, null,
 token("--color-bg-comment-table-head", "transparent", "fill:comment-table-head", null, null, { origin: "no fill, as comment-code; the table keeps its borders" });
 
 // 3. Lines against the frame (the gate samples the frame side of a border).
+// The audit classifies a sampled pixel within 8 per channel of a surface as
+// that surface, and Chromium antialiases the edge of a nested bar to a lighter
+// blend (#898989 for #818181 on Linux), so lines that meet bars are solved
+// against the lightest shade that still counts as the bar.
+const SURFACE_TOLERANCE = 8;
+const occurrenceEdge = toHex(parseColor(occurrence).map((c) => Math.min(255, c + SURFACE_TOLERANCE)));
 // The lifeline (border-base) is drawn over occurrence bars (LifeLineLayer sits
 // above the message layer), so border-base must also clear the bar's fill.
-const border = line("--color-border-base", "line:frame-border", occurrence);
-note(`border-base ${border}: Lc ${lc(border, occurrence).toFixed(1)} on the occurrence fill ${occurrence} (the lifeline crosses bars), Lc ${lc(border, canvas).toFixed(1)} on the frame.`);
+const border = line("--color-border-base", "line:frame-border", occurrenceEdge);
+note(`border-base ${border}: Lc ${lc(border, occurrenceEdge).toFixed(1)} on the bar's antialiased edge ${occurrenceEdge} (fill ${occurrence} + ${SURFACE_TOLERANCE}; the lifeline crosses bars), Lc ${lc(border, canvas).toFixed(1)} on the frame.`);
 token("--color-border-frame", border, "line:frame-border", canvas, FLOORS.line, { origin: "= border-base" });
 token("--color-border-participant", border, "line:participant-border", canvas, FLOORS.line, { origin: "= border-base (also the lifeline)" });
 token("--color-border-fragment", border, "line:fragment-border", canvas, FLOORS.line, { origin: "= border-base" });
@@ -156,8 +163,8 @@ token("--color-border-group", border, "line:group-outline", canvas, FLOORS.line,
 token("--color-outline-primary", border, "line:outline", canvas, FLOORS.line, { origin: "= border-base" });
 // Nested occurrence bars overlap, so a border can sit on another bar's fill:
 // solve it against the fill (the harder side); the frame side then clears too.
-const occurrenceBorder = line("--color-border-occurrence", "line:occurrence-border", occurrence);
-note(`occurrence border ${occurrenceBorder}: Lc ${lc(occurrenceBorder, occurrence).toFixed(1)} on the occurrence fill ${occurrence} (nested bars), Lc ${lc(occurrenceBorder, canvas).toFixed(1)} on the frame.`);
+const occurrenceBorder = line("--color-border-occurrence", "line:occurrence-border", occurrenceEdge);
+note(`occurrence border ${occurrenceBorder}: Lc ${lc(occurrenceBorder, occurrenceEdge).toFixed(1)} on the bar's antialiased edge ${occurrenceEdge} (nested bars), Lc ${lc(occurrenceBorder, canvas).toFixed(1)} on the frame.`);
 line("--color-message-arrow", "line:message-line");
 const separator = line("--color-border-fragment-separator", "line:separator");
 token("--color-border-comment-table", separator, "line:comment-table", canvas, FLOORS.line, { origin: "= fragment separator" });
