@@ -63,7 +63,7 @@ const SlotGlyph = ({ d }: { d: string }) => (
 );
 
 const rowInputClass =
-  "h-zu-control box-border rounded-zu-md border border-solid px-1.5 text-[13px] text-gray-900 bg-white placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100";
+  "h-zu-control box-border rounded-zu-md border border-solid px-1.5 text-[13px] text-gray-900 bg-white placeholder:text-gray-500 focus:outline-none focus:shadow-zu-focus";
 
 export const ParticipantStylePanel = () => {
   const [code, setCode] = useAtom(codeAtom);
@@ -551,7 +551,7 @@ export const ParticipantStylePanel = () => {
           />
           {showStereotypeInput ? (
             <div
-              className="absolute pointer-events-auto h-zu-control min-w-[104px] box-border flex items-center justify-center gap-0.5 px-2 rounded-full border border-solid border-gray-300 bg-white text-[12px] text-gray-900 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100"
+              className="absolute pointer-events-auto h-zu-control min-w-[104px] box-border flex items-center justify-center gap-0.5 px-2 rounded-full border border-solid border-gray-300 bg-white text-[12px] text-gray-900 focus-within:shadow-zu-focus"
               style={{
                 left: centerX,
                 top: anchor.top + PILL_TOP,
@@ -598,7 +598,7 @@ export const ParticipantStylePanel = () => {
             <button
               type="button"
               aria-label="Add stereotype"
-              className="absolute pointer-events-auto h-zu-control min-w-[104px] box-border px-3 rounded-full border border-dashed border-slate-400 bg-white text-[12px] text-gray-600 cursor-pointer hover:border-sky-500 hover:text-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+              className="absolute pointer-events-auto h-zu-control min-w-[104px] box-border px-3 rounded-full border border-dashed border-slate-400 bg-white text-[12px] text-gray-600 cursor-pointer hover:border-sky-500 hover:text-sky-700 focus-visible:outline-none focus-visible:shadow-zu-focus"
               style={{
                 left: centerX,
                 top: anchor.top + PILL_TOP,

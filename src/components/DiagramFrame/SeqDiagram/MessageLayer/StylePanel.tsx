@@ -346,7 +346,7 @@ export const StylePanel = () => {
                   }
                   onClick={() => handleClick(btn.class)}
                   className={cn(
-                    "w-6 mx-1 py-1 rounded-zu-md text-black text-center cursor-pointer hover:bg-gray-200",
+                    "w-6 mx-1 py-1 rounded-zu-md text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
                     [
                       btn.class,
                       { "bg-gray-100": existingStyles.includes(btn.class) },
@@ -363,7 +363,7 @@ export const StylePanel = () => {
                 type="button"
                 data-testid="message-rename"
                 className={cn(
-                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
                   {
                     "opacity-40 pointer-events-none":
                       messageData.current.labelStart < 0 ||
@@ -392,7 +392,7 @@ export const StylePanel = () => {
                 type="button"
                 data-testid="message-type-menu"
                 className={cn(
-                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
                   { "bg-gray-100": openSubmenu === "type" },
                 )}
                 title="Change message type"
@@ -444,7 +444,7 @@ export const StylePanel = () => {
                           setOpenSubmenu(null);
                         }}
                         className={cn(
-                          "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100",
+                          "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100 focus-visible:outline-none focus-visible:shadow-zu-focus",
                           {
                             "bg-gray-100 font-semibold": isCurrent,
                             "opacity-40 cursor-not-allowed": !canTransform,
@@ -470,7 +470,7 @@ export const StylePanel = () => {
                 type="button"
                 data-testid="message-wrap-menu"
                 className={cn(
-                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
                   { "bg-gray-100": openSubmenu === "wrap" },
                 )}
                 title="Wrap in fragment"
@@ -487,7 +487,7 @@ export const StylePanel = () => {
                       type="button"
                       key={type}
                       data-testid={`message-wrap-${type}`}
-                      className="px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100"
+                      className="px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100 focus-visible:outline-none focus-visible:shadow-zu-focus"
                       title={`Wrap in ${type} fragment`}
                       aria-label={`Wrap in ${type} fragment`}
                       onClick={() => handleWrapClick(type)}
