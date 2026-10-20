@@ -1,4 +1,5 @@
 import { cn } from "@/utils";
+import { usePopoverPresence } from "@/components/common/usePopoverPresence";
 import { getLineHead, getPrevLine } from "@/utils/StringUtil";
 import {
   canTransformMessageType,
@@ -71,6 +72,8 @@ export const StylePanel = () => {
   const textEditing = useTextEditing();
   // The menu's buttons show while `messageMenu` is the active surface.
   const surfaceShown = useActiveSurface()?.kind === "messageMenu";
+  // P2: the card stays mounted for its 120 ms exit animation.
+  const presence = usePopoverPresence(surfaceShown);
   const themeClasses = Array.from(diagramElement?.classList ?? [])
     .filter((name) => name.startsWith("theme-"))
     .join(" ");
@@ -320,10 +323,12 @@ export const StylePanel = () => {
         ref={refs.setFloating}
         style={{ ...floatingStyles, zIndex: 40 }}
       >
-        {surfaceShown && (
+        {presence.mounted && (
           <div
+            ref={presence.ref}
             className={cn(
               "flex items-center bg-white shadow-zu-md z-40 rounded-zu-panel p-1 gap-1",
+              presence.className,
               themeClasses,
             )}
           >
