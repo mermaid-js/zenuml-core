@@ -320,9 +320,11 @@ as its own.
 
 ### P0: Privacy tooltip
 
-No change. The baseline confirms the defect: the declared 0.3 s transition never runs because `display`
-switches from none to block. Note that Privacy is not imported anywhere in `src` at fb11b8e6, so confirm
-the component is still shipped before spending a PR on it.
+**Moot, dropped 2026-10-20.** The baseline confirms the defect (the declared 0.3 s transition never runs
+because `display` switches from none to block), but the component is unreachable: #446 (2026-10-01) removed
+its import and its only usage from `DiagramFrame.tsx`, no `src`, story or e2e file references it since,
+and `dist/zenuml.esm.mjs` carries only the `privacy` icon name. No PR. Deleting the dead
+`src/components/DiagramFrame/Privacy/` folder is a separate cleanup item.
 
 ### P1: chrome tokens
 
