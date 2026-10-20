@@ -60,7 +60,7 @@ export function SplitSlot({
       onKeyDown={onKeyDown}
       className={cn(
         "flex items-center justify-center shrink-0 box-border cursor-pointer bg-white text-gray-700 focus:outline-none",
-        !split && "focus-visible:ring-2 focus-visible:ring-sky-300",
+        !split && "focus-visible:shadow-zu-focus",
         // Split + expanded: the wrapper border carries the highlight, so the
         // whole pill is outlined instead of one clipped half.
         expanded && !split && "ring-1 ring-sky-500",
@@ -104,7 +104,7 @@ export function SplitSlot({
         "inline-flex items-stretch",
         split &&
           cn(
-            "box-border rounded-zu-md overflow-hidden border has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sky-300",
+            "box-border rounded-zu-md overflow-hidden border has-[:focus-visible]:shadow-zu-focus",
             expanded ? "border-sky-500" : "border-gray-300",
           ),
         className,

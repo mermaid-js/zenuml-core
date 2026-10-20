@@ -323,7 +323,7 @@ export const GapHandleZone = (props: {
         {showHandle && (
           <button
             type="button"
-            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-500 bg-white text-slate-700 flex items-center justify-center cursor-crosshair hover:border-slate-700 hover:shadow-zu-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-500 bg-white text-slate-700 flex items-center justify-center cursor-crosshair hover:border-slate-700 hover:shadow-zu-sm focus-visible:outline-none focus-visible:shadow-zu-focus"
             style={{
               width: HANDLE_SIZE,
               height: HANDLE_SIZE,
@@ -389,7 +389,7 @@ export const GapHandleZone = (props: {
               type="button"
               role="menuitem"
               data-testid={`divider-insert-${props.insertIndex}`}
-              className="block w-full rounded-zu-md px-2 py-1 text-left text-xs text-slate-800 hover:bg-slate-100 focus:bg-slate-100 focus:outline-none"
+              className="block w-full rounded-zu-md px-2 py-1 text-left text-xs text-slate-800 hover:bg-slate-100 focus:bg-slate-100 focus:outline-none focus:shadow-zu-focus"
               onClick={(event) => {
                 insertDivider(event);
                 closeMenu();

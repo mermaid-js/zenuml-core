@@ -59,6 +59,10 @@
   --zu-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.07), 0 6px 16px rgba(0, 0, 0, 0.08); /* zenuml-owned */
   --zu-shadow-pop: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08); /* zenuml-owned */
   --zu-hairline: 0 0 0 var(--zu-ring-hairline) var(--zu-ring-color); /* zenuml-owned */
+  --zu-page: #ffffff; /* zenuml-owned */
+  --zu-ring-focus: #475569; /* zenuml-owned */
+  --zu-ring-glow: rgba(71, 85, 105, 0.18); /* zenuml-owned */
+  --zu-focus-ring: 0 0 0 1px var(--zu-page), 0 0 0 2px var(--zu-ring-focus), 0 0 0 6px var(--zu-ring-glow); /* zenuml-owned */
 }
 
 @media (resolution >= 2x) {
@@ -131,7 +135,10 @@
 }
 
 /* Every duration collapses to 0 under reduced motion; usePopoverPresence then
-   unmounts without an exit frame. The host attribute form lands with P3. */
+   unmounts without an exit frame. A host can force the same with
+   data-reduce-motion="true" on an ancestor of the diagram (P3). The popovers
+   render in their own .zenuml portal roots, so the attribute on the diagram
+   root alone reaches only the controls inside the diagram. */
 @media (prefers-reduced-motion: reduce) {
   .zenuml {
     --zu-dur-fast: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:1374 */
@@ -140,6 +147,15 @@
     --zu-dur-sheet: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:1374 */
     --zu-dur-slow: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:1374 */
   }
+}
+
+.zenuml[data-reduce-motion="true"],
+[data-reduce-motion="true"] .zenuml {
+  --zu-dur-fast: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:58173 */
+  --zu-dur-snap: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:58173 */
+  --zu-dur-base: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:58173 */
+  --zu-dur-sheet: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:58173 */
+  --zu-dur-slow: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:58173 */
 }
 
 @layer base {

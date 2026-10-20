@@ -69,11 +69,9 @@ test.describe("Participant name rename", () => {
 
     await name.click();
     await expect(name).toHaveAttribute("contenteditable", "true");
-    await expect(name).toHaveCSS("outline-style", "solid");
-    await expect(name).toHaveCSS("outline-width", "1px");
-    await expect(name).toHaveCSS("outline-color", "rgb(59, 130, 246)");
+    await expect(name).toHaveCSS("outline-style", "none");
+    await expect(name).toHaveCSS("box-shadow", /rgb\(71, 85, 105\)/);
     await expect(name).toHaveCSS("background-color", "rgb(239, 246, 255)");
-    await expect(name).toHaveCSS("box-shadow", "none");
     await expect(name).toHaveCSS("cursor", "text");
     await expect(participant).not.toHaveClass(/ring-1/);
     await expectParticipantScreenshot(
@@ -122,10 +120,8 @@ test.describe("Participant name rename", () => {
     await expect(participant).toHaveClass(/ring-1/);
     await page.keyboard.press("Tab");
     await expect(name).toBeFocused();
-    await expect(name).toHaveCSS("outline-style", "solid");
-    await expect(name).toHaveCSS("outline-width", "2px");
-    await expect(name).toHaveCSS("outline-color", "rgb(37, 99, 235)");
-    await expect(name).toHaveCSS("outline-offset", "2px");
+    await expect(name).toHaveCSS("outline-style", "none");
+    await expect(name).toHaveCSS("box-shadow", /rgb\(71, 85, 105\)/);
     await expectParticipantScreenshot(
       page,
       participant,

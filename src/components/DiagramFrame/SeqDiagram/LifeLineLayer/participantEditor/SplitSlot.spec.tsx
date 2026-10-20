@@ -184,15 +184,14 @@ describe("SplitSlot", () => {
 
   it("split: ring is on the wrapper, inner buttons drop their own focus ring", () => {
     const { main, view } = setup();
-    expect(main.className).toContain("focus-visible:ring-2");
-    expect(main.parentElement!.className).not.toContain("has-[:focus-visible]:ring-2");
+    expect(main.className).toContain("focus-visible:shadow-zu-focus");
+    expect(main.parentElement!.className).not.toContain("has-[:focus-visible]:shadow-zu-focus");
     fireEvent.mouseEnter(main.parentElement!);
     const wrapper = main.parentElement!.className.split(/\s+/);
-    expect(wrapper).toContain("has-[:focus-visible]:ring-2");
-    expect(wrapper).toContain("has-[:focus-visible]:ring-sky-300");
+    expect(wrapper).toContain("has-[:focus-visible]:shadow-zu-focus");
     const clear = view.getByRole("button", { name: "Remove type" });
     for (const b of [main, clear]) {
-      expect(b.className).not.toContain("focus-visible:ring-2");
+      expect(b.className).not.toContain("focus-visible:shadow-zu-focus");
     }
   });
   it("any focus (incl. mouse-path :focus) drops the native outline on both halves", () => {

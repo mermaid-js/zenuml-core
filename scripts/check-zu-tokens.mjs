@@ -48,6 +48,15 @@ function knownArtifacts() {
   return new Set((prov.prettified_copies?.files ?? []).map((f) => f.file));
 }
 
+// Innermost selector must be a `.zenuml` compound with an optional attribute
+// selector, optionally preceded by ancestors: `.zenuml`, `.zenuml[data-x="y"]`,
+// `[data-x="y"] .zenuml`. A selector list qualifies only if every member does.
+const ZENUML_SELECTOR_RE = /^(?:[^,{}]*\s)?\.zenuml(?:\[[^\]]*\])*$/;
+function isZenumlSelector(rule) {
+  const parts = rule.split(",").map((p) => p.trim());
+  return parts.length > 0 && parts.every((p) => !p.includes(":root") && ZENUML_SELECTOR_RE.test(p));
+}
+
 function checkDeclarations(errors) {
   const artifacts = knownArtifacts();
   const text = readFileSync(join(ROOT, TOKENS_FILE), "utf8");
@@ -62,9 +71,9 @@ function checkDeclarations(errors) {
     if (DECL_RE.test(raw)) {
       declared += 1;
       const rule = stack.length ? stack[stack.length - 1] : "(top level)";
-      if (!/^\.zenuml\s*$/.test(rule.trim())) {
+      if (!isZenumlSelector(rule)) {
         errors.push(
-          `${TOKENS_FILE}:${lineNo}: --zu-* token declared under "${rule.trim()}"; only ".zenuml" is allowed`,
+          `${TOKENS_FILE}:${lineNo}: --zu-* token declared under "${rule.trim()}"; only ".zenuml" (optionally with attribute selectors or ancestors) is allowed`,
         );
       }
       const m = raw.match(ORIGIN_RE);
