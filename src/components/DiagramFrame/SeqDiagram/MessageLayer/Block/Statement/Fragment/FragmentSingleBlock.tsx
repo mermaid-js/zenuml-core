@@ -78,7 +78,7 @@ export const FragmentSingleBlock = (props: FragmentSingleBlockProps) => {
           !isOpt && "rounded-t",
         )}
       >
-        <div className="name font-normal p-1 border-b">
+        <div className="name font-normal p-1 border-b border-skin-fragment-separator">
           <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
             <FragmentNumbering number={props.number} />
             <Icon name={`${kind}-fragment`} />

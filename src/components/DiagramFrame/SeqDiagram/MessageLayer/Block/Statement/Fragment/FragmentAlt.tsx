@@ -69,7 +69,7 @@ export const FragmentAlt = (props: {
         <Comment comment={props.comment} commentObj={props.commentObj} />
       )}
       <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
-        <div className="name font-normal p-1 border-b">
+        <div className="name font-normal p-1 border-b border-skin-fragment-separator">
           <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
             <FragmentNumbering number={props.number} />
             <Icon name="alt-fragment" />
@@ -105,7 +105,7 @@ export const FragmentAlt = (props: {
         {elseIfBlocks.map((elseIfBlock: any, index: number) => (
           <Fragment key={index}>
             <div
-              className="segment border-t border-solid mt-2"
+              className="segment border-t border-solid border-skin-fragment-separator mt-2"
               key={index + 500}
             >
               <div className="text-skin-fragment" key={index + 1000}>
@@ -127,7 +127,7 @@ export const FragmentAlt = (props: {
         ))}
         {elseBlock && (
           <>
-            <div className="segment border-t border-solid mt-2">
+            <div className="segment border-t border-solid border-skin-fragment-separator mt-2">
               <div className="text-skin-fragment">
                 <ConditionLabel keyword="else" />
               </div>

@@ -53,6 +53,15 @@ module.exports = {
           hover: "var(--color-text-hover)",
           link: "var(--color-text-link, var(--color-text-secondary, var(--color-text-base, #000)))",
           fill: "var(--color-text-fill)",
+          // Sequence number badge text and the guard keyword (`if`, `else`,
+          // `while`). Fallbacks are the pre-slot literals (Tailwind gray-500).
+          number: "var(--color-text-number, #6b7280)",
+          guard: "var(--color-text-guard, var(--color-text-number, #6b7280))",
+          divider: "var(--color-text-divider, #333)",
+          // HTTP verbs inside comment code spans (src/components/Cosmetic.scss).
+          "http-get": "var(--color-text-http-get, #2f3d89)",
+          "http-post": "var(--color-text-http-post, #0d4b3b)",
+          "http-delete": "var(--color-text-http-delete, #7e1e23)",
         },
       },
       backgroundColor: {
@@ -67,8 +76,15 @@ module.exports = {
             "var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
           lifeline:
             "var(--color-border-participant, var(--color-border-participant, var(--color-border-frame, var(--color-border-base, #000))))",
-          divider:
-            "var(--color-border-participant, var(--color-border-frame, var(--color-border-base, #000)))",
+          // Divider note box and its rule lines (Divider.tsx keeps the same
+          // chains inline, so bracket styles keep their precedence).
+          divider: "var(--color-bg-divider, #fff5ad)",
+          "divider-line": "var(--color-border-divider, #aaaa33)",
+          // Sequence number badge (was Tailwind gray-500/10).
+          number: "var(--color-bg-number, rgb(107 114 128 / 0.1))",
+          // Comment markdown: code spans and table header (Cosmetic.scss).
+          "comment-code": "var(--color-bg-comment-code, #f9f2f4)",
+          "comment-table-head": "var(--color-bg-comment-table-head, #e0e0e0)",
           "fragment-header":
             "var(--color-bg-fragment-header, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
           occurrence:
@@ -97,6 +113,19 @@ module.exports = {
             "var(--color-border-occurrence, var(--color-border-frame,  var(--color-border-base, #000)))",
           base: "var(--color-border-base)",
           secondary: "var(--color-border-secondary)",
+          // Dashed outline around a participant group (LifeLineGroup.tsx).
+          group: "var(--color-border-group, #666)",
+          divider: "var(--color-border-divider, #aaaa33)",
+          // Rule between fragment sections and under the fragment header name
+          // (was Tailwind's default border colour, gray-200).
+          "fragment-separator":
+            "var(--color-border-fragment-separator, #e5e7eb)",
+          "comment-table": "var(--color-border-comment-table, #cbcbcb)",
+        },
+      },
+      stroke: {
+        skin: {
+          group: "var(--color-border-group, #666)",
         },
       },
       outlineColor: {

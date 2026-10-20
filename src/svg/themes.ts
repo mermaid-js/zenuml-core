@@ -49,6 +49,18 @@ export interface SvgPalette {
   fragmentText: string;
   fragmentSeparator: string;
   commentText: string;
+  /** Dashed outline around a participant group. */
+  groupOutline: string;
+  /** Divider rule lines and the note box border. */
+  dividerLine: string;
+  dividerBg: string;
+  dividerText: string;
+  /** Sequence-number badge text; the badge fill is the same colour at `numberBgOpacity`. */
+  numberText: string;
+  numberBg: string;
+  numberBgOpacity: string;
+  /** Guard keyword (`if`, `else`, `while`) in fragment sections. */
+  guardText: string;
   fontFamily: string;
 }
 
@@ -75,6 +87,14 @@ const DEFAULT_PALETTE: SvgPalette = {
   fragmentText: "#000",
   fragmentSeparator: "#e5e7eb",
   commentText: "#333",
+  groupOutline: "#666",
+  dividerLine: "#aaaa33",
+  dividerBg: "#fff5ad",
+  dividerText: "#333",
+  numberText: "#6b7280",
+  numberBg: "#6b7280",
+  numberBgOpacity: "0.1",
+  guardText: "#6b7280",
   fontFamily: DIAGRAM_FONT_STACK,
 };
 
@@ -104,6 +124,17 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentText: "#368eff",
     fragmentSeparator: "#e5e9f0",
     commentText: "#353748",
+    // Slots every DOM theme still renders with the theme-default literals
+    // (their CSS chains fall back to these values; only a theme that sets the
+    // slot changes them).
+    groupOutline: "#666",
+    dividerLine: "#aaaa33",
+    dividerBg: "#fff5ad",
+    dividerText: "#333",
+    numberText: "#6b7280",
+    numberBg: "#6b7280",
+    numberBgOpacity: "0.1",
+    guardText: "#6b7280",
     fontFamily: DIAGRAM_FONT_STACK,
   },
 
@@ -125,6 +156,17 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentText: "#cecfd2",
     fragmentSeparator: "#cecfd2",
     commentText: "#cecfd2",
+    // Slots every DOM theme still renders with the theme-default literals
+    // (their CSS chains fall back to these values; only a theme that sets the
+    // slot changes them).
+    groupOutline: "#666",
+    dividerLine: "#aaaa33",
+    dividerBg: "#fff5ad",
+    dividerText: "#333",
+    numberText: "#6b7280",
+    numberBg: "#6b7280",
+    numberBgOpacity: "0.1",
+    guardText: "#6b7280",
     fontFamily: DIAGRAM_FONT_STACK,
   },
 
@@ -149,6 +191,17 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentText: "#8ffc5b",
     fragmentSeparator: "#60ff33",
     commentText: "#8ffc5b",
+    // Slots every DOM theme still renders with the theme-default literals
+    // (their CSS chains fall back to these values; only a theme that sets the
+    // slot changes them).
+    groupOutline: "#666",
+    dividerLine: "#aaaa33",
+    dividerBg: "#fff5ad",
+    dividerText: "#333",
+    numberText: "#6b7280",
+    numberBg: "#6b7280",
+    numberBgOpacity: "0.1",
+    guardText: "#6b7280",
     fontFamily: `"MS Sans Serif", ${DIAGRAM_FONT_STACK}`,
   },
 };
@@ -167,9 +220,10 @@ export function resolvePalette(theme?: string): SvgPalette {
 /**
  * The `<style>` body embedded in every rendered SVG.
  *
- * Sequence-number styling is deliberately kept neutral so it reads across
- * light and dark themes; the fragment number background reuses the theme's
- * fragment text colour at low opacity.
+ * Every colour comes from the palette. The DOM renderer never themed the group
+ * outline, divider, sequence numbers or guard keyword before these became
+ * slots, so every palette carries the theme-default literals for them until a
+ * theme sets the slot.
  */
 export function buildThemeStyles(p: SvgPalette): string {
   return `
@@ -191,8 +245,8 @@ export function buildThemeStyles(p: SvgPalette): string {
   .occurrence { fill: ${p.occurrenceBg}; stroke: ${p.occurrenceBorder}; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-border { fill: none; stroke: ${p.fragmentBorder}; stroke-width: 1; }
   .fragment-header { fill: ${p.fragmentHeaderBg}; fill-opacity: ${p.fragmentHeaderOpacity}; stroke: none; shape-rendering: crispEdges; }
-  .fragment-number-bg { fill: #6b7280; fill-opacity: 0.1; stroke: none; }
-  .message-number-bg { fill: #6b7280; fill-opacity: 0.1; stroke: none; }
+  .fragment-number-bg { fill: ${p.numberBg}; fill-opacity: ${p.numberBgOpacity}; stroke: none; }
+  .message-number-bg { fill: ${p.numberBg}; fill-opacity: ${p.numberBgOpacity}; stroke: none; }
   .fragment-label { font-family: ${p.fontFamily}; font-size: 14px; font-weight: 400; font-variant-caps: all-small-caps; fill: ${p.fragmentText}; }
   .fragment-condition { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.fragmentText}; }
   .fragment-separator { stroke: ${p.fragmentSeparator}; stroke-width: 1; shape-rendering: crispEdges; }
@@ -202,13 +256,13 @@ export function buildThemeStyles(p: SvgPalette): string {
   .return-arrow { stroke: ${p.messageArrow}; stroke-width: 1; fill: none; }
   .return-label { font-family: ${p.fontFamily}; font-size: 15px; fill: ${p.messageText}; }
   .return-icon { fill: ${p.messageText}; }
-  .divider-line { stroke: #aaaa33; stroke-width: 1; }
-  .divider-bg { fill: #fff5ad; stroke: #aaaa33; stroke-width: 1; }
-  .divider-label { font-family: ${p.fontFamily}; font-size: 14px; fill: #333; }
+  .divider-line { stroke: ${p.dividerLine}; stroke-width: 1; }
+  .divider-bg { fill: ${p.dividerBg}; stroke: ${p.dividerLine}; stroke-width: 1; }
+  .divider-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.dividerText}; }
   .comment-text { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.commentText}; opacity: 0.5; }
-  .guard-keyword { font-family: ${p.fontFamily}; font-size: 12px; font-weight: 400; font-variant-caps: all-small-caps; fill: #6b7280; }
-  .seq-number { font-family: ${p.fontFamily}; font-size: 12px; font-weight: 400; fill: #6b7280; }
-  .group-outline { fill: none; stroke: ${p.participantBorder}; }
+  .guard-keyword { font-family: ${p.fontFamily}; font-size: 12px; font-weight: 400; font-variant-caps: all-small-caps; fill: ${p.guardText}; }
+  .seq-number { font-family: ${p.fontFamily}; font-size: 12px; font-weight: 400; fill: ${p.numberText}; }
+  .group-outline { fill: none; stroke: ${p.groupOutline}; }
   .group-title-bg { fill: ${p.frameBg}; stroke: none; }
   .group-title-text { font-family: ${p.fontFamily}; font-size: 13px; font-weight: 400; fill: ${p.participantText}; }
 `;
