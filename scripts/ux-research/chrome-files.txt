@@ -7,8 +7,6 @@ src/components/DiagramFrame/SeqDiagram/LifeLineLayer/participantEditor/SplitSlot
 src/components/DiagramFrame/SeqDiagram/MessageLayer/StylePanel.tsx
 src/components/DiagramFrame/SeqDiagram/MessageLayer/GapHandleZone.tsx
 src/components/DiagramFrame/SeqDiagram/MessageLayer/MessageLayer.scss
-src/components/DiagramFrame/Privacy/index.tsx
-src/components/DiagramFrame/Privacy/index.module.css
 src/components/DiagramFrame/Tutorial/
 src/components/DiagramFrame/DiagramTitle/index.tsx
 src/components/DiagramFrame/Debug/index.tsx
