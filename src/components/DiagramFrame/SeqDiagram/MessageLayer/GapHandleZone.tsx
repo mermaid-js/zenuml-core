@@ -1,4 +1,6 @@
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
+import { cn } from "@/utils";
+import { usePopoverPresence } from "@/components/common/usePopoverPresence";
 import {
   codeAtom,
   coordinatesAtom,
@@ -131,6 +133,8 @@ export const GapHandleZone = (props: {
   // The open menu's own item is its active surface: the policy blocks
   // `createMessage` while the menu is open, but this item must still work.
   const canUseMenuItem = menuOpen && dividerInsertionEnabled;
+  // P2: the menu stays mounted for its 120 ms exit animation.
+  const menuPresence = usePopoverPresence(canUseMenuItem);
   // Gate B (ADR 0002, P3): a press on the zone creates a message or opens
   // the divider menu. While this zone's menu is open the zone is the menu's
   // active surface, so a press inside it does not close the menu.
@@ -354,7 +358,7 @@ export const GapHandleZone = (props: {
         )}
         {showHandle && tooltipParticipant === activeParticipant && (
           <div
-            className="absolute -translate-x-1/2 -translate-y-full rounded-zu-sm bg-gray-900 px-2 py-1 text-[11px] leading-4 text-white shadow-zu-sm pointer-events-none"
+            className="zu-fade-enter absolute -translate-x-1/2 -translate-y-full rounded-zu-sm bg-gray-900 px-2 py-1 text-[11px] leading-4 text-white shadow-zu-sm pointer-events-none"
             style={{
               left: `${tooltipX}px`,
               top: props.isFirstRootGap ? -46 : -8,
@@ -369,11 +373,15 @@ export const GapHandleZone = (props: {
             Drag from {activeParticipant} to a participant
           </div>
         )}
-        {canUseMenuItem && (
+        {menuPresence.mounted && (
           <div
+            ref={menuPresence.ref}
             role="menu"
             data-testid={`gap-insert-menu-${props.insertIndex}`}
-            className="absolute top-full mt-1 min-w-[140px] rounded-zu-lg border border-slate-200 bg-white p-1 shadow-zu-pop"
+            className={cn(
+              "absolute top-full mt-1 min-w-[140px] rounded-zu-lg border border-slate-200 bg-white p-1 shadow-zu-pop",
+              menuPresence.className,
+            )}
             style={{ left: menuX, zIndex: 60, pointerEvents: "auto" }}
           >
             <button

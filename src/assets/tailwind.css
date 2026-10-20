@@ -73,6 +73,75 @@
   }
 }
 
+/* P2: popover enter / exit. Transform and opacity only, so the diagram canvas
+   never repaints for chrome motion. Enter 200 ms (--zu-dur-base), exit 120 ms
+   (--zu-dur-snap), both on --zu-ease-out; the exit is driven by
+   usePopoverPresence, which unmounts the popover when the animation ends. */
+@keyframes zu-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes zu-pop-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+}
+
+@keyframes zu-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.zenuml .zu-pop-enter {
+  animation: zu-pop-in var(--zu-dur-base) var(--zu-ease-out) both;
+  transform-origin: 50% 0;
+}
+
+.zenuml .zu-pop-exit {
+  animation: zu-pop-out var(--zu-dur-snap) var(--zu-ease-out) both;
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+/* For roots that already carry a transform (translate utilities): fade only. */
+.zenuml .zu-fade-enter {
+  animation: zu-fade-in var(--zu-dur-base) var(--zu-ease-out) both;
+}
+
+.zenuml .zu-fade-exit {
+  opacity: 0;
+  transition: opacity var(--zu-dur-snap) var(--zu-ease-out);
+  pointer-events: none;
+}
+
+/* Every duration collapses to 0 under reduced motion; usePopoverPresence then
+   unmounts without an exit frame. The host attribute form lands with P3. */
+@media (prefers-reduced-motion: reduce) {
+  .zenuml {
+    --zu-dur-fast: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:1374 */
+    --zu-dur-snap: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:1374 */
+    --zu-dur-base: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:1374 */
+    --zu-dur-sheet: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:1374 */
+    --zu-dur-slow: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:1374 */
+  }
+}
+
 @layer base {
   :root {
     --color-bg-base: #ffffff;

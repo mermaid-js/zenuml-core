@@ -17,6 +17,7 @@ import { renameParticipantInDsl } from "@/utils/participantRenameTransform";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import { RootContext } from "@/parser";
 import { cn } from "@/utils";
+import { usePopoverPresence } from "@/components/common/usePopoverPresence";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   useCallback,
@@ -80,6 +81,8 @@ export const ParticipantStylePanel = () => {
   const openFor =
     surface?.kind === "participantEditor" ? surface.participant : null;
   const isOpen = openFor !== null;
+  // P2: the editor stays mounted for its 120 ms exit animation.
+  const presence = usePopoverPresence(isOpen);
   // The selected participant's box, in viewport coordinates.
   const [anchor, setAnchor] = useState<{
     top: number;
@@ -88,7 +91,14 @@ export const ParticipantStylePanel = () => {
     bottom: number;
   } | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const participantName = selected[0] ?? null;
+  const liveParticipantName = selected[0] ?? null;
+  const lastParticipantName = useRef<string | null>(null);
+  if (liveParticipantName) lastParticipantName.current = liveParticipantName;
+  // During the exit animation the selection may already be gone; the last
+  // name keeps every piece where it was.
+  const participantName =
+    liveParticipantName ??
+    (presence.mounted ? lastParticipantName.current : null);
 
   const ordered = participantName
     ? OrderedParticipants(rootContext).find((p) => p.name === participantName)
@@ -147,6 +157,9 @@ export const ParticipantStylePanel = () => {
 
   // Picker open state lives here so Escape in a picker closes only it (D11).
   const [openPicker, setOpenPicker] = useState<Picker | null>(null);
+  const typePresence = usePopoverPresence(openPicker === "type");
+  const colorPresence = usePopoverPresence(openPicker === "color");
+  const pickerMounted = typePresence.mounted || colorPresence.mounted;
   const [stereotypeEditing, setStereotypeEditing] = useState(false);
   const [pickerPos, setPickerPos] = useState<{
     top: number;
@@ -179,19 +192,22 @@ export const ParticipantStylePanel = () => {
           bottom: rect.bottom,
         });
       }
-    } else {
+    } else if (!presence.mounted) {
       setAnchor(null);
     }
     // `code` re-anchors the editor after an edit moves the participant box;
-    // `selected` after a reselect of the same name.
-  }, [openFor, selected, diagramElement, code]);
+    // `selected` after a reselect of the same name. The anchor outlives the
+    // open state by one exit animation.
+  }, [openFor, selected, diagramElement, code, presence.mounted]);
 
   // Pickers open below their slot.
   useLayoutEffect(() => {
-    if (!anchor || !openPicker) {
+    if (!anchor || (!openPicker && !pickerMounted)) {
       setPickerPos(null);
       return;
     }
+    // A closing picker keeps its last position for the exit frame.
+    if (!openPicker) return;
     setPickerPos({
       top: anchor.top + PICKER_TOP,
       left:
@@ -199,7 +215,7 @@ export const ParticipantStylePanel = () => {
           ? anchor.right - TYPE_PICKER_WIDTH
           : anchor.right + COLOR_PICKER_LEFT,
     });
-  }, [anchor, openPicker]);
+  }, [anchor, openPicker, pickerMounted]);
 
   // A newly opened picker takes focus: its first pressed item, else its
   // first control.
@@ -332,7 +348,7 @@ export const ParticipantStylePanel = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  if (!isOpen || !participantName || !anchor) {
+  if (!presence.mounted || !participantName || !anchor) {
     return null;
   }
 
@@ -509,6 +525,7 @@ export const ParticipantStylePanel = () => {
           aria-label={`Edit participant ${participantName}`}
           className={cn(
             "participant-style-panel group fixed inset-0 pointer-events-none text-gray-700",
+            presence.state === "exit" && "[&_*]:!pointer-events-none",
             themeClasses,
           )}
           style={{ zIndex: 50 }}
@@ -527,7 +544,10 @@ export const ParticipantStylePanel = () => {
           <div
             aria-hidden="true"
             data-testid="participant-editor-mask"
-            className="absolute inset-0 pointer-events-none bg-slate-900/[0.32]"
+            className={cn(
+              "absolute inset-0 pointer-events-none bg-slate-900/[0.32]",
+              presence.state === "exit" && "zu-fade-exit",
+            )}
           />
           {showStereotypeInput ? (
             <div
@@ -623,11 +643,17 @@ export const ParticipantStylePanel = () => {
                 </svg>
               )}
             </SplitSlot>
-            {openPicker === "type" && pickerPos && (
+            {typePresence.mounted && pickerPos && (
               <div
-                ref={pickerRef}
+                ref={(el) => {
+                  pickerRef.current = el;
+                  typePresence.ref(el);
+                }}
                 // Above the name row, which it overlaps (Split-2/3 boards).
-                className="absolute z-10 pointer-events-auto"
+                className={cn(
+                  "absolute z-10 pointer-events-auto",
+                  typePresence.className,
+                )}
                 style={{ top: pickerPos.top, left: pickerPos.left }}
               >
                 <TypePicker
@@ -670,11 +696,17 @@ export const ParticipantStylePanel = () => {
                 <SlotGlyph d="M7 17L17 7" />
               )}
             </SplitSlot>
-            {openPicker === "color" && pickerPos && (
+            {colorPresence.mounted && pickerPos && (
               <div
-                ref={pickerRef}
+                ref={(el) => {
+                  pickerRef.current = el;
+                  colorPresence.ref(el);
+                }}
                 // Above the name row, which it overlaps (Split-2/3 boards).
-                className="absolute z-10 pointer-events-auto"
+                className={cn(
+                  "absolute z-10 pointer-events-auto",
+                  colorPresence.className,
+                )}
                 style={{ top: pickerPos.top, left: pickerPos.left }}
               >
                 <ColorPicker
@@ -703,9 +735,15 @@ export const ParticipantStylePanel = () => {
               }}
             >
               <div
-                ref={attachNameRow}
+                ref={(el) => {
+                  attachNameRow(el);
+                  presence.ref(el);
+                }}
                 data-testid="participant-name-row"
-                className="pointer-events-auto h-8 box-border flex items-center gap-1.5 px-1 bg-white rounded-zu-lg shadow-zu-pop-ring"
+                className={cn(
+                  "pointer-events-auto h-8 box-border flex items-center gap-1.5 px-1 bg-white rounded-zu-lg shadow-zu-pop-ring",
+                  presence.className,
+                )}
               >
                 <label htmlFor="zenuml-participant-name" className="sr-only">
                   Name
