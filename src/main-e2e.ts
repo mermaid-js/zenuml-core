@@ -15,8 +15,11 @@ console.log("set zenUML to window");
 
 // @ts-expect-error -- dynamic import
 window.zenUml = zenUml;
+// `?theme=` lets a fixture page render any theme; the snapshot baselines were
+// taken with theme-nab, which stays the default.
+const themeParam = new URLSearchParams(window.location.search).get("theme");
 zenUml.render(code, {
-  theme: "theme-nab",
+  theme: themeParam || "theme-nab",
   // E2E fixtures exercise editing features; the published library defaults each off.
   enableParticipantInsertion: true,
   enableMessageInsertion: true,

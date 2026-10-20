@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Host matrix</title>
+    <style>
+      /* One diagram per host surface. The backgrounds are the primary page
+         surfaces of the hosts @zenuml/core is embedded in, taken from their
+         published sources (docs/adr/0004-theme-dark.md, "Host surfaces"). */
+      body { margin: 0; }
+      section { padding: 16px; }
+      section h2 { margin: 0 0 8px; font: 13px/1.4 system-ui, sans-serif; opacity: 0.7; }
+      [data-host="atlassian"] { background: #1f1f21; color: #cecfd2; }
+      [data-host="github"] { background: #0d1117; color: #f0f6fc; }
+      [data-host="vscode"] { background: #1f1f1f; color: #cccccc; }
+      [data-host="white"] { background: #ffffff; color: #222222; }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import ZenUml from "/src/core.tsx";
+      import { CASES } from "../data/compare-cases.js";
+      const params = new URLSearchParams(window.location.search);
+      const caseName = params.get("case") || "smoke";
+      const theme = params.get("theme") || "theme-dark";
+      const hosts = (params.get("hosts") || "atlassian,github,vscode").split(",");
+      const code = CASES[caseName] || params.get("code") || "A.m()";
+      window.__instances = [];
+      for (const host of hosts) {
+        const section = document.createElement("section");
+        section.dataset.host = host;
+        section.innerHTML = `<h2>${host}</h2><pre class="zenuml" style="margin:0"></pre>`;
+        document.body.appendChild(section);
+        window.__instances.push(new ZenUml(section.querySelector("pre.zenuml")));
+      }
+      // Re-render every panel in place (the audit calls this per case).
+      window.__renderAll = async (c, t) => {
+        for (const instance of window.__instances) await instance.render(c, { theme: t });
+      };
+      await window.__renderAll(code, theme);
+      window.__ready = true;
+    </script>
+  </body>
+</html>
