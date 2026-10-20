@@ -23,7 +23,6 @@ const LEGACY_DEFAULT_STYLES = `
   .participant-label { font-family: "IBM Plex Sans", Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .stereotype-label { fill: #222; }
   .participant-icon { color: #222; }
-  .participant-icon [fill="currentColor"]:not([stroke]) { stroke: #666; stroke-width: 1; }
   .lifeline { stroke: #666; stroke-width: 1; }
   .message-line { stroke: #000; stroke-width: 1; shape-rendering: crispEdges; }
   .message-label { font-family: "IBM Plex Sans", Helvetica, Verdana, serif; font-size: 15px; fill: #222; }
