@@ -108,6 +108,17 @@ These hooks execute at specific points in Claude Code's lifecycle, providing det
   - `input`: When Claude needs user input
   - `complete`: When Claude completes tasks
 
+### 5. Babysit-PR Reminder (`remind-babysit-pr.sh`)
+
+**Purpose**: After a real `git push`, tells Claude to run the `babysit-pr` skill in the same turn, so the CI run the push started is watched.
+
+**Triggers**: `PostToolUse` events on the `Bash` tool
+
+**Features**:
+- Fires only when `git push` is in command position (start of the command or after `;`, `&&`, `||`, `|`)
+- Silent for `--dry-run`, branch/tag deletion, and commands that merely mention `git push`
+- Exits immediately for every other Bash command
+
 ## Installation
 
 1. **Copy the hooks to your project**:
@@ -186,6 +197,17 @@ Add to your Claude Code `settings.json`:
           {
             "type": "command",
             "command": "${WORKSPACE}/.claude/hooks/notify.sh complete"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${WORKSPACE}/.claude/hooks/remind-babysit-pr.sh"
           }
         ]
       }
