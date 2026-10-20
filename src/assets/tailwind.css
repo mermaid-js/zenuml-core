@@ -200,7 +200,9 @@
 
 /* Every duration collapses to 0 under reduced motion; usePopoverPresence then
    unmounts without an exit frame. A host can force the same with
-   data-reduce-motion="true" on the diagram root or any ancestor (P3). */
+   data-reduce-motion="true" on an ancestor of the diagram (P3). The popovers
+   render in their own .zenuml portal roots, so the attribute on the diagram
+   root alone reaches only the controls inside the diagram. */
 @media (prefers-reduced-motion: reduce) {
   .zenuml {
     --zu-dur-fast: 0ms; /* src: c6a992d55-DvG1h1R7.pretty.css:1374 */
