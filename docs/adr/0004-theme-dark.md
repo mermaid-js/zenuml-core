@@ -65,10 +65,12 @@ the rule every future theme is accepted by.
 7. **Aliases.** `.theme-clean-dark` and `.theme-darcula` share the `.theme-dark` declaration block; the
    SVG palette maps all three names to one object. `src/themes/theme-dark.css` is deleted.
 8. **The audit gates CI.** `scripts/audit-theme-contrast.mjs` renders the corpus through both renderers
-   in both themes at 1x and 2x, in forced-colors mode and on a host-matrix page (Atlassian, GitHub,
-   VS Code backgrounds), walks every text node, line and fill, samples each background from the
-   screenshot and fails the `theme-contrast` job in `cd.yml` on any `theme-dark` element under its
-   floor or any new `theme-default` regression. The report is attached to the run.
+   in both themes (DOM at 1x and 2x; SVG at 1x, since its strokes are crispEdges and every run
+   counted the same items and failures at 1x and 2x), in forced-colors mode and on a host-matrix
+   page (Atlassian, GitHub, VS Code backgrounds), walks every text node, line and fill, samples each
+   background from the screenshot and fails the `theme-contrast` job in `cd.yml` on any `theme-dark`
+   element under its floor or any new `theme-default` regression. Passes run three at a time in
+   separate browser contexts. The report is attached to the run.
 
 ## Evidence
 

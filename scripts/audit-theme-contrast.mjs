@@ -17,8 +17,13 @@
 //                       without a baseline file)
 //   --baseline <json>   known sub-floor items for a grandfathered theme
 //                       (default scripts/theme-contrast/baseline-<theme>.json)
-//   --dpr 1,2           device scale factors (default 1,2)
+//   --dpr 1,2           device scale factors for the DOM renderer (default 1,2);
+//                       the SVG renderer runs at the lowest one only: its strokes
+//                       are crispEdges and every run counted the same items and
+//                       failures at 1x and 2x
+//   --svg-dpr 1,2       device scale factors for the SVG renderer (default: lowest of --dpr)
 //   --renderers dom,svg (default dom,svg)
+//   --parallel <n>      passes run in n browser contexts at once (default 3)
 //   --forced-colors     add a forced-colors pass (DOM, dpr 1)
 //   --host-matrix       add the host-matrix page pass (DOM, dpr 1)
 //   --cases all|a,b     (default all = HTML_VISUAL_CASES + audit extras)
@@ -53,6 +58,8 @@ function parseArgs(argv) {
     gate: null,
     baseline: null,
     dpr: [1, 2],
+    svgDpr: null,
+    parallel: 3,
     renderers: ["dom", "svg"],
     forcedColors: false,
     hostMatrix: false,
@@ -73,6 +80,8 @@ function parseArgs(argv) {
     else if (k === "--gate") a.gate = v().split(",");
     else if (k === "--baseline") a.baseline = v();
     else if (k === "--dpr") a.dpr = v().split(",").map(Number);
+    else if (k === "--svg-dpr") a.svgDpr = v().split(",").map(Number);
+    else if (k === "--parallel") a.parallel = Number(v());
     else if (k === "--renderers") a.renderers = v().split(",");
     else if (k === "--forced-colors") a.forcedColors = true;
     else if (k === "--host-matrix") a.hostMatrix = true;
@@ -185,9 +194,10 @@ async function runPass(browser, args, cases, pass, log) {
 
 function passesFor(args) {
   const passes = [];
+  const svgDpr = args.svgDpr || [Math.min(...args.dpr)];
   for (const theme of args.themes) {
     for (const renderer of args.renderers) {
-      for (const dpr of args.dpr) {
+      for (const dpr of renderer === "svg" ? svgDpr : args.dpr) {
         passes.push({ theme, renderer, dpr, forcedColors: false, label: `${theme}/${renderer}@${dpr}x` });
       }
     }
@@ -256,13 +266,24 @@ async function main() {
   const report = { generated: new Date().toISOString(), args, passes: [], summary: {}, failures: {}, gated: {}, measure: {} };
   let exitCode = 0;
   try {
+    // Passes are independent (own browser context each); run a few at once.
+    const passes = passesFor(args);
+    const results = new Array(passes.length);
+    let next = 0;
+    const worker = async () => {
+      while (next < passes.length) {
+        const i = next++;
+        const pass = passes[i];
+        log(`pass ${pass.label}`);
+        results[i] = await runPass(browser, args, cases, pass, log);
+      }
+    };
+    await Promise.all(Array.from({ length: Math.max(1, Math.min(args.parallel, passes.length)) }, worker));
     const all = [];
-    for (const pass of passesFor(args)) {
-      log(`pass ${pass.label}`);
-      const items = await runPass(browser, args, cases, pass, log);
-      all.push(...items);
-      report.passes.push({ ...pass, items: items.length, failures: failures(items).length });
-    }
+    passes.forEach((pass, i) => {
+      all.push(...results[i]);
+      report.passes.push({ ...pass, items: results[i].length, failures: failures(results[i]).length });
+    });
 
     if (args.measure) {
       for (const theme of args.themes) {

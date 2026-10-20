@@ -94,9 +94,10 @@ jobs:
       contents: read
 
   # Theme contrast audit (ADR 0004): renders the corpus through both renderers
-  # in theme-default and theme-dark at 1x and 2x, in forced-colors mode and on
-  # the host-matrix page, samples every text, line and fill against the
-  # screenshot and fails on any theme-dark element under its APCA floor.
+  # in theme-default and theme-dark (DOM at 1x and 2x, SVG at 1x), in
+  # forced-colors mode and on the host-matrix page, three passes at a time,
+  # samples every text, line and fill against the screenshot and fails on any
+  # theme-dark element under its APCA floor.
   # theme-default is grandfathered against scripts/theme-contrast/baseline-theme-default.json
   # (a new sub-floor role, or a role 2 Lc worse than recorded, fails).
   theme-contrast:
