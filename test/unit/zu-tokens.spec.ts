@@ -41,6 +41,12 @@ describe("--zu-* chrome tokens (ADR 0003)", () => {
     );
   });
 
+  it("declares the focus ring and host reduce-motion tokens", () => {
+    expect(css).toMatch(/--zu-focus-ring:\s*0 0 0 1px var\(--zu-page\)/);
+    expect(css).toMatch(/--zu-ring-focus:\s*#475569;/);
+    expect(css).toMatch(/\[data-reduce-motion="true"\] \.zenuml/);
+  });
+
   it("never declares a token on :root", () => {
     const rootBlocks = css.match(/:root\s*\{[^}]*\}/g) ?? [];
     for (const block of rootBlocks) expect(block).not.toMatch(/--zu-/);

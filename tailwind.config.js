@@ -169,6 +169,8 @@ module.exports = {
         "zu-pop-ring": "var(--zu-shadow-pop), var(--zu-hairline)",
         "zu-hairline": "var(--zu-hairline)",
         "zu-pop-error": "var(--zu-shadow-pop), 0 0 0 1px rgba(220, 38, 38, 0.35)", // zenuml-owned
+        "zu-focus": "var(--zu-focus-ring)",
+        "zu-focus-selected": "var(--zu-focus-ring), 0 0 0 1px #0ea5e9", // zenuml-owned
         "zu-selected": "0 0 0 1px #0ea5e9", // zenuml-owned, selection ring until P3
       },
       borderRadius: {

@@ -170,11 +170,13 @@ export const StylePanel = () => {
   };
 
   const handleRenameClick = () => {
-    closeMenu();
     const message = messageData.current;
+    // Disabled for a message with no label: aria-disabled keeps the control
+    // focusable and its title readable, so the click itself does nothing.
     if (message.labelStart < 0 || message.labelEnd < 0) {
       return;
     }
+    closeMenu();
     setPendingEditableRange({
       start: message.labelStart,
       end: message.labelEnd,
@@ -314,6 +316,9 @@ export const StylePanel = () => {
     if (!isOpen) setOpenSubmenu(null);
   }, [isOpen]);
 
+  const renameDisabled =
+    messageData.current.labelStart < 0 || messageData.current.labelEnd < 0;
+
   return (
     <FloatingPortal>
       <div
@@ -346,7 +351,7 @@ export const StylePanel = () => {
                   }
                   onClick={() => handleClick(btn.class)}
                   className={cn(
-                    "w-6 mx-1 py-1 rounded-zu-md text-black text-center cursor-pointer hover:bg-gray-200",
+                    "zu-press w-6 mx-1 py-1 rounded-zu-md text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
                     [
                       btn.class,
                       { "bg-gray-100": existingStyles.includes(btn.class) },
@@ -362,17 +367,19 @@ export const StylePanel = () => {
               <button
                 type="button"
                 data-testid="message-rename"
+                // Not borrowed from Claude (assessment P4): dimming a row while
+                // keeping its inner controls readable. A disabled control here
+                // is aria-disabled, stays focusable and explains itself in its
+                // title.
+                aria-disabled={renameDisabled ? "true" : undefined}
                 className={cn(
-                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  "zu-press px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
                   {
-                    "opacity-40 pointer-events-none":
-                      messageData.current.labelStart < 0 ||
-                      messageData.current.labelEnd < 0,
+                    "opacity-40 cursor-not-allowed": renameDisabled,
                   },
                 )}
                 title={
-                  messageData.current.labelStart < 0 ||
-                  messageData.current.labelEnd < 0
+                  renameDisabled
                     ? "Cannot rename: message has no label"
                     : "Rename message label"
                 }
@@ -392,7 +399,7 @@ export const StylePanel = () => {
                 type="button"
                 data-testid="message-type-menu"
                 className={cn(
-                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  "zu-press px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
                   { "bg-gray-100": openSubmenu === "type" },
                 )}
                 title="Change message type"
@@ -439,12 +446,16 @@ export const StylePanel = () => {
                         aria-label={`Change to ${type} message type`}
                         aria-pressed={isCurrent}
                         title={disabledTitle}
+                        aria-disabled={!canTransform ? "true" : undefined}
                         onClick={() => {
+                          // A disabled item does nothing and the submenu
+                          // stays open.
+                          if (!canTransform) return;
                           handleTypeClick(type);
                           setOpenSubmenu(null);
                         }}
                         className={cn(
-                          "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100",
+                          "zu-press px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100 focus-visible:outline-none focus-visible:shadow-zu-focus",
                           {
                             "bg-gray-100 font-semibold": isCurrent,
                             "opacity-40 cursor-not-allowed": !canTransform,
@@ -470,7 +481,7 @@ export const StylePanel = () => {
                 type="button"
                 data-testid="message-wrap-menu"
                 className={cn(
-                  "px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
+                  "zu-press px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
                   { "bg-gray-100": openSubmenu === "wrap" },
                 )}
                 title="Wrap in fragment"
@@ -487,7 +498,7 @@ export const StylePanel = () => {
                       type="button"
                       key={type}
                       data-testid={`message-wrap-${type}`}
-                      className="px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100"
+                      className="zu-press px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100 focus-visible:outline-none focus-visible:shadow-zu-focus"
                       title={`Wrap in ${type} fragment`}
                       aria-label={`Wrap in ${type} fragment`}
                       onClick={() => handleWrapClick(type)}

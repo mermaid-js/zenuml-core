@@ -6,6 +6,7 @@ import { renderToSvg } from "./renderToSvg";
 import { buildThemeStyles, resolvePalette, THEME_PALETTES } from "./themes";
 import type { SvgPalette, SvgTheme } from "./themes";
 import { IBM_PLEX_SANS_400_DATA_URI } from "./fonts/ibmPlexSans";
+import { themeBaseColor } from "../surface";
 
 /**
  * Pin the default <style> body so theme changes cannot silently alter its
@@ -23,7 +24,6 @@ const LEGACY_DEFAULT_STYLES = `
   .participant-label { font-family: "IBM Plex Sans", Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
   .stereotype-label { fill: #222; }
   .participant-icon { color: #222; }
-  .participant-icon [fill="currentColor"]:not([stroke]) { stroke: #666; stroke-width: 1; }
   .lifeline { stroke: #666; stroke-width: 1; }
   .message-line { stroke: #000; stroke-width: 1; shape-rendering: crispEdges; }
   .message-label { font-family: "IBM Plex Sans", Helvetica, Verdana, serif; font-size: 15px; fill: #222; }
@@ -196,6 +196,17 @@ function normalise(color: string): { hex: string; alpha: number } {
 }
 
 const cfg = tailwindConfig.theme.extend;
+describe("document backing parity with theme CSS", () => {
+  for (const selector of Object.keys(VARS).filter((key) => /^\.theme-[a-z-]+$/.test(key))) {
+    const theme = selector.slice(1);
+    it(`${theme}: opaque backing matches the declared canvas`, () => {
+      const canvas = resolveChain(cfg.backgroundColor.skin.canvas, themeVars(theme));
+      expect(canvas).toBeDefined();
+      expect(normalise(themeBaseColor(theme))).toEqual(normalise(canvas!));
+    });
+  }
+});
+
 /** Palette slot -> the tailwind.config.js chain the DOM uses for it. */
 const SLOT_CHAINS: Record<Exclude<keyof SvgPalette, "fontFamily" | "fragmentHeaderOpacity" | "numberBgOpacity">, string> = {
   frameBorder: cfg.borderColor.skin.frame,

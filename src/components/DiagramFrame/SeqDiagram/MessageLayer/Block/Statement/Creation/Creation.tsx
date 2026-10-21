@@ -34,10 +34,14 @@ export const Creation = (props: {
   const [start, stop] = [signature?.start?.start, signature?.stop?.stop];
 
 
+  // The creator is the statement's own origin, not the enclosing block's
+  // `origin` prop: a fragment hands its left-most participant to its block,
+  // which is not the creator (#322). Interaction resolves `source` the same way.
+  const source = creation?.From() || props.origin;
   const { translateX, interactionWidth, rightToLeft } = useArrow({
     context: props.context,
     origin: props.origin,
-    source: props.origin,
+    source,
     target: creation?.Owner(),
   });
 

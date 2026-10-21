@@ -286,7 +286,6 @@ export function buildThemeStyles(p: SvgPalette): string {
   .participant-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.participantText}; }
   .stereotype-label { fill: ${p.participantText}; }
   .participant-icon { color: ${p.participantText}; }
-  .participant-icon [fill="currentColor"]:not([stroke]) { stroke: ${p.participantBorder}; stroke-width: 1; }
   .lifeline { stroke: ${p.lifeline}; stroke-width: 1; }
   .message-line { stroke: ${p.messageArrow}; stroke-width: 1; shape-rendering: crispEdges; }
   .message-label { font-family: ${p.fontFamily}; font-size: 15px; fill: ${p.messageText}; }

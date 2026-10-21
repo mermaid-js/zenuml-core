@@ -67,6 +67,95 @@ describe("@ZenUML/core", function () {
     expect(el.querySelector(".message-layer")?.textContent).toContain("1");
   });
 
+  it("returns the committed canvas surface and rereads author CSS", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const zenUml = new ZenUml(el);
+    await zenUml.render("A->B: Hello", { theme: "theme-default" });
+    expect(el.querySelector(".bg-skin-canvas")).not.toBeNull();
+    expect(zenUml.getSurface().backgroundColor).toBe("rgb(255, 255, 255)");
+
+    const style = document.createElement("style");
+    style.textContent =
+      ".zenuml .bg-skin-canvas { background-color: rgb(20, 40, 60) !important; }";
+    document.head.append(style);
+    try {
+      expect(zenUml.getSurface().backgroundColor).toBe("rgb(20, 40, 60)");
+    } finally {
+      style.remove();
+    }
+  });
+
+  it("resolves a debounced render after its new tree commits", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const zenUml = new ZenUml(el);
+    await zenUml.render("A->B: first", {});
+    await zenUml.render("A->B: second", {});
+    expect(el.textContent).toContain("second");
+  });
+
+  it("uses the initial theme and semantic palette on the first commit", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const zenUml = new ZenUml(el, false, {
+      theme: "theme-dark",
+      palette: {
+        canvasBg: "#343f4b",
+        frameBg: "#424f5e",
+        participantText: "#eef2f6",
+      },
+    });
+    await zenUml.render("A->B: Hi", {});
+    const canvas = el.querySelector<HTMLElement>(".bg-skin-canvas")!;
+    expect(canvas.classList.contains("theme-dark")).toBe(true);
+    expect(canvas.style.getPropertyValue("--color-bg-canvas")).toBe("#343f4b");
+    expect(canvas.style.getPropertyValue("--color-bg-frame")).toBe("#424f5e");
+    expect(zenUml.getSurface().backgroundColor).toBe("rgb(52, 63, 75)");
+  });
+
+  it("settles superseded renders on the latest committed tree", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const zenUml = new ZenUml(el);
+    await zenUml.render("A->B: first", {});
+    const oldRender = zenUml.render("A->B: old", { theme: "theme-default" });
+    const latestRender = zenUml.render("A->B: latest", { theme: "theme-dark" });
+    await Promise.all([oldRender, latestRender]);
+    expect(el.textContent).toContain("latest");
+    expect(el.textContent).not.toContain("old");
+    expect(zenUml.getSurface().backgroundColor).toBe("rgb(31, 31, 31)");
+  });
+
+  it("ignores stale lifeline readiness from a replaced participant set", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const zenUml = new ZenUml(el);
+    await zenUml.render("A->B: first", {});
+    const oldRender = zenUml.render("C->D: old", {});
+    const latestRender = zenUml.render("E->F: latest", {});
+    await Promise.all([oldRender, latestRender]);
+    expect(el.querySelector('[data-participant-id="E"]')).not.toBeNull();
+    expect(el.querySelector('[data-participant-id="C"]')).toBeNull();
+    expect(el.textContent).toContain("latest");
+  });
+
+  it("clears a palette when an explicit undefined accompanies a theme switch", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const zenUml = new ZenUml(el, false, {
+      theme: "theme-dark",
+      palette: { canvasBg: "#343f4b" },
+    });
+    await zenUml.render("A->B: Hi", {});
+    expect(zenUml.getSurface().backgroundColor).toBe("rgb(52, 63, 75)");
+    await zenUml.render(undefined, {
+      theme: "theme-default",
+      palette: undefined,
+    });
+    expect(zenUml.getSurface().backgroundColor).toBe("rgb(255, 255, 255)");
+  });
+
   it("lets the host hide message numbering", async () => {
     const el = await renderDiagram({ enableNumbering: false });
 

@@ -71,6 +71,15 @@ the rule every future theme is accepted by.
    background from the screenshot and fails the `theme-contrast` job in `cd.yml` on any `theme-dark`
    element under its floor or any new `theme-default` regression. Passes run three at a time in
    separate browser contexts. The report is attached to the run.
+9. **Monochrome icons take the text colour.** A participant icon that is a single-colour glyph
+   (the built-in actor, boundary, control, entity, database and queue icons, and the 30
+   HLD-Architecture icons such as `@Client`, `@Server`, `@Redis`) paints with `currentColor`, so both
+   renderers draw it in `--color-text-participant` (`#fbfbfb` here, Lc 103). Brand icons (AWS, Azure,
+   GCP) keep their own colours; the darkest of them on this canvas is the SQS resource icon at Lc 31.6,
+   above the fills floor. The audit walker does not measure icons; `icon-assets.spec.ts` guards the
+   sources instead by rejecting any icon import painted only in near-black (relative luminance under
+   0.18) or with no paint at all. The HLD pack failed that test (fixed `#000000`, `#0F1729`, `#1C274C`,
+   `#231F20`, `#444444`) and was converted.
 
 ## Evidence
 
@@ -438,6 +447,9 @@ report).
   Lc): a short label that collides with an occurrence bar, a lifeline running through a header chip or
   a divider box, a separator or divider rule crossing a bar. They are layout collisions shared with
   `theme-default`; a colour change cannot remove them.
+- Icons are checked at the source, not by the pixel walker: a new icon pack must either carry its own
+  light colours or use `currentColor`. The SVG renderer no longer outlines `fill="currentColor"` shapes
+  (a rule that matched no icon); the two renderers draw identical glyphs.
 
 ## Alternatives considered
 
