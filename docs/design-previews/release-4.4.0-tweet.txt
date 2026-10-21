@@ -1,0 +1,10 @@
+@zenuml/core 4.4.0 is out.
+
+- IBM Plex Sans, bundled and embedded in SVG: I, l and 1 look different in code labels.
+- Crisp 1px lines (since 4.3.1).
+
+Fixes:
+- Nested fragments now indent at every level.
+- Fragments stay inside the frame.
+
+587K weekly downloads on npm. Thank you!

@@ -1,0 +1,50 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Default theme palette candidates</title>
+<style>body{font-family:system-ui;margin:24px;background:#fff;color:#222}main{display:grid;grid-template-columns:1fr 1fr;gap:32px}h2{font-size:16px}.sw{display:inline-block;width:14px;height:14px;border:1px solid #ccc;vertical-align:middle;margin-right:4px}td{padding:2px 12px 2px 0;font:12px ui-monospace,monospace}img{width:100%}</style>
+<div id="out"></div>
+<script type="module">
+import { renderToSvg } from "/src/svg/renderToSvg.ts";
+import { buildThemeStyles, THEME_PALETTES } from "/src/svg/themes.ts";
+const code = `title Order Checkout
+@Actor Customer
+@Boundary Web
+OrderService
+@Database DB
+Customer->Web.checkout(cart) {
+  // validate and create the order
+  order = OrderService.create(cart) {
+    if (inStock) {
+      DB.save(order)
+      return order
+    } else {
+      @return OrderService->Web: outOfStock
+    }
+    loop (each item) {
+      DB.reserve(item)
+    }
+  }
+  return receipt
+}`;
+const A = { frameBorder:"#6e7785", frameBg:"#ffffff", titleText:"#1f2733", participantBg:"#f5f6f8", participantBorder:"#6e7785", participantText:"#1f2733", messageArrow:"#3a4452", messageText:"#1f2733", occurrenceBg:"#e3e6eb", occurrenceBorder:"#6e7785", fragmentBorder:"#6e7785", fragmentHeaderBg:"#cfd5dd", fragmentHeaderOpacity:"0.498", fragmentText:"#2f4a6d", fragmentSeparator:"#d3d8df", commentText:"#3a4452", fontFamily:"Helvetica, Verdana, serif" };
+const P = {
+  "当前 theme-default": THEME_PALETTES["theme-default"],
+  "A1 墨岩 + 暗藏青": A,
+  "A2 墨岩 + logo 蓝": { ...A, fragmentText:"#1b6799" },
+  "A3 墨岩 + 文档站靛紫": { ...A, fragmentText:"#4f46e5" },
+};
+const base = renderToSvg(code).svg;
+const b64 = (s) => btoa(unescape(encodeURIComponent(s)));
+let imgs = "", tables = "";
+for (const [name, p] of Object.entries(P)) {
+  let css = buildThemeStyles(p);
+  if (p !== THEME_PALETTES["theme-default"]) css = css.replace(/(\.fragment-condition \{[^}]*fill: )[^;]+/, `$1${p.messageText}`).replace(/(\.fragment-section-label \{[^}]*fill: )[^;]+/, `$1${p.messageText}`);
+  const svg = base.replace(/<style>[\s\S]*?<\/style>/, `<style>${css}</style>`);
+  const rows = Object.entries(p).filter(([k]) => k !== "fontFamily").map(([k, v]) => `<tr><td>${k}</td><td>${v.startsWith("#") ? `<span class="sw" style="background:${v}"></span>` : ""}${v}</td></tr>`).join("");
+  imgs += `<section><h2>${name}</h2><img src="data:image/svg+xml;base64,${b64(svg)}"></section>`;
+  tables += `<section><h2>${name}</h2><table>${rows}</table></section>`;
+}
+document.getElementById("out").innerHTML = `<main>${imgs}</main><main style="grid-template-columns:repeat(4,1fr);margin-top:32px">${tables}</main>`;
+window.__badges = [...base.matchAll(/<rect[^>]*width="([\d.]+)"[^>]*number-bg"\/>\s*<text[^>]*>([^<]*)</g)].map(m => `${m[2]}=${m[1]}`);
+window.__done = true;
+</script>
