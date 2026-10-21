@@ -29,7 +29,20 @@ The Darwin visual snapshot review found six localized differences. Geometry was 
 | `svg-demo1-smoke` | 110 pixels from the red participant label changing from `#222` to white. |
 | `svg-fragment` | 9 pixels from participant C's red label at `(392, 584)` changing from `#222` to white. |
 
-No HTML baselines were updated; the implicit default theme regression was fixed. Linux equivalents still need CI artifact inspection.
+No HTML baselines were updated; the implicit default theme regression was fixed.
+
+Linux snapshots were inspected from the actual [CI run](https://github.com/mermaid-js/zenuml-core/actions/runs/39543062104), not regenerated on macOS. Across the first run and two retries, dimensions did not change and the pixels were identical. All six differences are intended paint changes with no geometry change:
+
+| Snapshot | Reviewed difference |
+| --- | --- |
+| `svg-fragment` | 7 pixels from the red participant label at `(392, 584)`. |
+| `svg-demo1-smoke` | 87 pixels from the red participant label at `(632, 72)`. |
+| `dark-svg-smoke` | 12 corner pixels changed to the canvas surface. |
+| `dark-svg-demo1-smoke` | 2,347 pixels: right-edge canvas fill at `(1784, 0)`, size `10×2255`, participant label at `(632, 72)`, and left corner pixels. |
+| `dark-svg-demo3-nested-fragments` | 12 corner pixels changed to the canvas surface. |
+| `dark-svg-fragment-issue` | 12 corner pixels changed to the canvas surface. |
+
+All other jobs in that CI run passed, including `theme-contrast`; the six expected SVG baseline differences were the only visual baseline mismatches. An unrelated HTML Rendering `fragment-issue` check missed two brand icons (257 pixels) on its first attempt and passed on retry. No HTML baseline was updated.
 
 ## Validation
 
