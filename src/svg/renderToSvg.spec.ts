@@ -595,12 +595,20 @@ A->A:m
     );
   });
 
-  it("returns an opaque canvas surface and paints the full SVG bounds", () => {
+  it("leaves the outer canvas transparent unless a backing is requested", () => {
     const dark = renderToSvg("A->B: Hi", { theme: "theme-dark" });
-    expect(dark.surface.backgroundColor).toBe("#1f1f1f");
-    expect(dark.svg).toContain(
-      `<rect class="canvas-background" x="0" y="0" width="${dark.width}" height="${dark.height}" fill="#1f1f1f"/>`,
-    );
+    expect(dark.surface.backgroundColor).toBe("transparent");
+    expect(dark.svg).not.toContain('class="canvas-background"');
+    expect(dark.svg).toContain(".frame-border-inner { fill: #1f1f1f; }");
+    const flattened = renderToSvg("A->B: Hi", {
+      theme: "theme-dark",
+      backingColor: "#343f4b",
+    });
+    expect(flattened.svg).toContain('class="export-backing"');
+    expect(flattened.svg).toContain('style="fill: rgb(52, 63, 75) !important"');
+    expect(() =>
+      renderToSvg("A->B: Hi", { backingColor: "rgba(255, 0, 0, .5)" }),
+    ).toThrow("backingColor must be an opaque CSS colour");
   });
 
   it("uses semantic palette slots without changing an explicit participant fill", () => {

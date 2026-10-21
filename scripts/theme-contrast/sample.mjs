@@ -216,14 +216,21 @@ export function measure(shot, item, surfaces = null) {
     // for an opaque line that is the nominal colour itself.
     const guess = alpha >= 0.999 ? [nominal[0], nominal[1], nominal[2]] : null;
     const sides = lineBackgrounds(shot, item, lr, guess);
-    // A box's left/top edge delineates it from the outside, so the outer side
-    // is its background. A bottom edge (the rule under a fragment header) and
+    // The outer frame borders opaque document paper: its stable, designed
+    // surface is the frame interior (side B). Its outside is host-owned and
+    // may be any colour after the outer canvas became transparent. Other
+    // box left/top edges are measured against their outside (side A).
+    // A bottom edge (the rule under a fragment header) and
     // a free rule (divider, lifeline) sit between two surfaces and are seen
     // against whichever they stand out from more. Along a free rule the
     // background changes (frame, then an occurrence bar, then a header chip):
     // every colour that covers at least 4px of the line is evaluated, the
     // ones on a designed surface gate, the others are overlaps.
-    const hists = item.edge === "left" || item.edge === "top" ? [sides.histA] : [sides.histA, sides.histB];
+    const hists = item.role === "frame-border" && (item.edge === "left" || item.edge === "top")
+      ? [sides.histB]
+      : item.edge === "left" || item.edge === "top"
+        ? [sides.histA]
+        : [sides.histA, sides.histB];
     const minPx = Math.max(4, 4 * shot.dpr);
     const key = (px) => (px[0] << 16) | (px[1] << 8) | px[2];
     const onBothSides = (px) =>

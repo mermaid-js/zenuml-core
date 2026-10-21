@@ -2,4 +2,4 @@
 "@zenuml/core": minor
 ---
 
-Expose the resolved document surface, support shared semantic palette inputs in HTML and native SVG, and make HTML render completion and export bounds deterministic.
+Make the outer canvas transparent by default while keeping the diagram frame and elements painted. Hosts own the surrounding background and can request an opaque backing when exporting PNG or SVG. Also expose shared semantic palette inputs, a raw canvas-surface read, committed HTML render completion, and deterministic export bounds.

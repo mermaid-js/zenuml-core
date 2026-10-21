@@ -5,7 +5,6 @@ import {
   themeAtom,
 } from "@/store/Store";
 import { useAtom, useAtomValue } from "jotai";
-import * as htmlToImage from "html-to-image";
 import {
   PropsWithChildren,
   RefObject,
@@ -15,37 +14,21 @@ import {
 import { cn } from "@/utils";
 import { DIAGRAM_HEADER_HEIGHT } from "@/positioning/Constants";
 import { paletteCssVariables } from "@/surface";
-import { opaqueBackground } from "@/surface";
+import { exportCanvas, exportSvg } from "@/exportBackground";
+import type { ExportOptions } from "@/exportBackground";
 import { Debug } from "./Debug";
 import { DiagramTitle } from "./DiagramTitle";
 import { SeqDiagram } from "./SeqDiagram/SeqDiagram";
-
-// Resolve translucent author canvas colours over the declared document backing
-// before exporting the intrinsic canvas box (ADR 0004).
-const exportConfig = (container: HTMLElement | null) => {
-  const color = container ? getComputedStyle(container).backgroundColor : "";
-  const backing = container?.parentElement
-    ? getComputedStyle(container.parentElement).backgroundColor
-    : "white";
-  const backgroundColor = opaqueBackground(color, backing);
-  return {
-    backgroundColor,
-    style: { backgroundColor },
-    filter: (node: HTMLElement) => {
-      return !node?.classList?.contains("hide-export");
-    },
-  };
-};
 
 export const DiagramFrame = ({
   ref,
   children,
 }: PropsWithChildren<{
   ref?: RefObject<{
-    toPng: () => Promise<string | undefined>;
-    toSvg: () => Promise<string | undefined>;
-    toBlob: () => Promise<Blob | null | undefined>;
-    toJpeg: () => Promise<string | undefined>;
+    toPng: (options?: ExportOptions) => Promise<string | undefined>;
+    toSvg: (options?: ExportOptions) => Promise<string | undefined>;
+    toBlob: (options?: ExportOptions) => Promise<Blob | null | undefined>;
+    toJpeg: (options?: ExportOptions) => Promise<string | undefined>;
     zoomIn: () => void;
     zoomOut: () => void;
   }>;
@@ -57,33 +40,28 @@ export const DiagramFrame = ({
   const palette = useAtomValue(paletteAtom);
   const title = rootContext?.title();
 
-  const toPng = async () => {
+  const toPng = async (options?: ExportOptions) => {
     if (!containerRef.current) return;
-    return htmlToImage.toPng(
-      containerRef.current,
-      exportConfig(containerRef.current),
+    return (await exportCanvas(containerRef.current, options)).toDataURL(
+      "image/png",
     );
   };
-  const toSvg = async () => {
+  const toSvg = async (options?: ExportOptions) => {
     if (!containerRef.current) return;
-    return htmlToImage.toSvg(
-      containerRef.current,
-      exportConfig(containerRef.current),
-    );
+    return exportSvg(containerRef.current, options);
   };
-  const toBlob = async () => {
+  const toBlob = async (options?: ExportOptions) => {
     if (!containerRef.current) return;
-    return htmlToImage.toBlob(
-      containerRef.current,
-      exportConfig(containerRef.current),
-    );
+    const canvas = await exportCanvas(containerRef.current, options);
+    return new Promise<Blob | null>((resolve) => canvas.toBlob(resolve));
   };
-  const toJpeg = async () => {
+  const toJpeg = async (options?: ExportOptions) => {
     if (!containerRef.current) return;
-    return htmlToImage.toJpeg(
-      containerRef.current,
-      exportConfig(containerRef.current),
-    );
+    return (
+      await exportCanvas(containerRef.current, {
+        backingColor: options?.backingColor ?? "white",
+      })
+    ).toDataURL("image/jpeg");
   };
   const zoomIn = () => {
     const newScale = Math.min(1, scale + 0.1);

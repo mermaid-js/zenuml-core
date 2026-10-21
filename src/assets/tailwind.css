@@ -290,7 +290,6 @@
   .theme-dark,
   .theme-clean-dark,
   .theme-darcula {
-    --color-bg-canvas: #1f1f1f; /* nearest neutral to Atlassian elevation.surface #1F1F21 */
     --color-bg-frame: #1f1f1f; /* = canvas, as theme-default */
     --color-bg-participant: #1f1f1f; /* = frame, as theme-default (edge carried by the border) */
     --color-bg-occurrence: #818181; /* Lc 33.3 on #1f1f1f, floor 30 */
@@ -367,7 +366,6 @@
 
   .theme-sky {
     /* Frame */
-    --color-bg-canvas: #ffffff;
     --color-bg-frame: #ffffff;
     --color-border-frame: #cccccc;
 
@@ -401,7 +399,6 @@
 
   .theme-idle-afternoon {
     /* Frame */
-    --color-bg-canvas: #d8dad9;
     --color-bg-frame: #d8dad9;
     --color-border-frame: #324939;
 
@@ -435,7 +432,6 @@
 
   .theme-coles {
     /* Frame */
-    --color-bg-canvas: #ffffff;
     --color-bg-frame: #ffde00;
     --color-border-frame: #ee141f;
 
@@ -469,7 +465,6 @@
 
   .theme-woolworths {
     /* Frame */
-    --color-bg-canvas: #e6eaf0;
     --color-bg-frame: #e6eaf0;
     --color-border-frame: #049e50;
 
@@ -503,7 +498,6 @@
 
   .theme-anz {
     /* Frame */
-    --color-bg-canvas: #ffffff;
     --color-bg-frame: #ffffff;
     --color-border-frame: #089fd8;
 
@@ -540,7 +534,6 @@
   }
 
   .theme-nab {
-    --color-bg-canvas: #ffffff;
     --color-bg-frame: #f2f4f6;
     --color-text-base: #ffffff;
     --color-outline-primary: #666;
@@ -567,7 +560,6 @@
     --color-white: #ffffff;
 
     /* Frame */
-    --color-bg-canvas: #ffffff;
     --color-bg-frame: #f2f4f6;
     --color-border-frame: #4285f4;
 
@@ -605,7 +597,6 @@
     --color-border-base: #666;
 
     /* Frame */
-    --color-bg-canvas: #f6f0de; /* Beige background */
     --color-bg-frame: #f6f0de; /* Beige frame */
     --color-border-frame: #d3c6a6; /* Light brown border */
 
@@ -644,7 +635,6 @@
     --color-backup-white: #ffffff;
 
     /* Frame */
-    --color-bg-canvas: #fafafa; /* Light gray background */
     --color-bg-frame: #fafafa; /* Light gray frame */
     --color-border-frame: #dddddd; /* Light border */
 
