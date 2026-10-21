@@ -25,7 +25,7 @@ import { fileURLToPath } from "node:url";
 import { apcaContrast } from "../color/apca.mjs";
 import { simulateCvd } from "../color/cvd.mjs";
 import { formatOklch, inSrgbGamut, oklchToHex, srgbToOklch } from "../color/oklch.mjs";
-import { parseColor, toHex } from "../color/srgb.mjs";
+import { parseColor, srgbToLinear, toHex } from "../color/srgb.mjs";
 import { FLOORS } from "./roles.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -95,7 +95,9 @@ const token = (name, value, role, bg, floor, extra = {}) => {
   };
   return value;
 };
-token("--color-bg-canvas", canvas, "fill:canvas", null, null, { origin: `nearest neutral to Atlassian elevation.surface ${atlassian}` });
+// The canvas is the derivation's base (out.canvas) but is not emitted as a
+// token: the outer padding ring is transparent and host-owned (ADR 0004
+// update, 2026-10-21), so theme-dark leaves --color-bg-canvas unset.
 token("--color-bg-frame", canvas, "fill:frame", null, null, { origin: "= canvas, as theme-default" });
 token("--color-bg-participant", canvas, "fill:participant-fill", null, null, { origin: "= frame, as theme-default (edge carried by the border)" });
 
@@ -263,6 +265,42 @@ token("--color-bg-number", "transparent", "fill:number-badge", null, null, {
       ]),
     ),
   };
+}
+
+// 7. Focus ring. --zu-focus-ring is a 1px gap in --zu-page inside a 2px ring
+//    in --zu-ring-focus. On theme-dark the gap takes the frame, so focus does
+//    not paint a white halo; the ring then stands on the frame alone, so it is
+//    solved to the line floor against the frame and checked against WCAG 2's
+//    3:1 for non-text focus indicators. The start mirrors theme-default's ring
+//    (slate-600 on white) the way every other role is mirrored.
+//    These tokens carry scope "zenuml": the diagram's inner .zenuml element
+//    declares the --zu-* tokens again, so apply-derived writes them to a rule
+//    on that element inside the theme rather than to the theme block.
+{
+  const DEFAULT_RING = "#475569"; // theme-default --zu-ring-focus
+  const start = Math.min(1, bgL + Math.abs(Lof("#ffffff") - Lof(DEFAULT_RING)));
+  const ring = solveGrey(start, canvas, FLOORS.line, +1);
+  const luminance = (hex) => {
+    const [r, g, b] = parseColor(hex).map((c) => srgbToLinear(c / 255));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const wcag = (a, b) => {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  const ratio = wcag(ring, canvas);
+  if (ratio < 3) throw new Error(`focus ring ${ring} reads ${ratio.toFixed(2)}:1 on ${canvas}, below WCAG 3:1`);
+  token("--zu-page", canvas, "fill:focus-gap", null, null, { origin: "= frame: the focus ring's gap", scope: "zenuml" });
+  token("--zu-ring-focus", ring, "line:focus-ring", canvas, FLOORS.line, { mirroredStart: grey(start), wcag: +ratio.toFixed(2), scope: "zenuml" });
+  const [r, g, b] = parseColor(ring);
+  out.tokens["--zu-ring-glow"] = { value: `rgba(${r}, ${g}, ${b}, 0.18)`, role: "fill:focus-glow", origin: "= ring at theme-default's glow alpha", scope: "zenuml" };
+  out.tokens["--zu-focus-ring"] = {
+    value: "0 0 0 1px var(--zu-page), 0 0 0 2px var(--zu-ring-focus), 0 0 0 6px var(--zu-ring-glow)",
+    role: "focus",
+    origin: "as theme-default; declared again because a custom property resolves var() where it is declared",
+    scope: "zenuml",
+  };
+  note(`focus ring ${ring}: Lc ${lc(ring, canvas).toFixed(1)}, ${ratio.toFixed(2)}:1 on the frame ${canvas}; the gap is the frame.`);
 }
 
 out.tokens["--opacity-comment"] = { value: "1", role: "text:comment", origin: "see notes" };
