@@ -7,9 +7,24 @@ export type SvgTheme =
   | "theme-darcula"
   | "theme-neon";
 
+/** Six opaque #RRGGBB colours applied to HTML and native SVG diagrams. */
+export interface DiagramPalette {
+  canvas: string;
+  content: string;
+  pocket: string;
+  border: string;
+  text: string;
+  secondaryText: string;
+}
+
+export interface CanvasSurface {
+  backgroundColor: string;
+}
+
 export interface RenderOptions {
   /** Theme name. Unknown names fall back to 'theme-default'. */
   theme?: SvgTheme;
+  palette?: DiagramPalette;
   /** Show sequence references and their badges; defaults to true. */
   enableNumbering?: boolean;
 }
@@ -21,6 +36,7 @@ export interface RenderResult {
   width: number;
   height: number;
   viewBox: string;
+  surface: CanvasSurface;
 }
 
 export declare function renderToSvg(
@@ -85,6 +101,7 @@ export interface ErrorDetail {
 
 export interface Config {
   theme?: string;
+  palette?: DiagramPalette;
   enableScopedTheming?: boolean;
   onThemeChange?: (data: { theme: string; scoped?: boolean }) => void;
   enableMultiTheme?: boolean;
@@ -103,6 +120,8 @@ interface IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml>;
+  /** Read the current computed canvas colour; call again after changing CSS. */
+  getCanvasSurface(): CanvasSurface;
 }
 
 declare class ZenUml implements IZenUml {
@@ -118,6 +137,7 @@ declare class ZenUml implements IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml>;
+  getCanvasSurface(): CanvasSurface;
   getPng(): Promise<string>;
   getSvg(): Promise<string>;
 }

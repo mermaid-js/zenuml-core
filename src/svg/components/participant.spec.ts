@@ -51,3 +51,55 @@ describe("participant box paint geometry", () => {
     }
   });
 });
+
+describe("explicit participant background contrast", () => {
+  it.each([
+    { color: "#112233", text: "#fff" },
+    { color: "FFEEDD", text: "#000" },
+  ])(
+    "uses $text on $color for top and bottom labels, stereotype, and a monochrome icon",
+    ({ color, text }) => {
+      const p = { ...participant, color, type: "actor", stereotype: "service" };
+      const top = renderParticipant(p);
+      const bottom = renderParticipantBottom(p, 120);
+      const normalizedColor = color.startsWith("#") ? color : `#${color}`;
+
+      for (const svg of [top, bottom]) {
+        expect(svg).toContain(
+          `class="participant-box" style="fill:${normalizedColor};"`,
+        );
+        expect(svg).toMatch(
+          new RegExp(`class="participant-label"[^>]*style="fill:${text};"`),
+        );
+      }
+      expect(top).toMatch(
+        new RegExp(`class="stereotype-label"[^>]*style="fill:${text};"`),
+      );
+      expect(top).toMatch(
+        new RegExp(`class="participant-icon"[^>]*style="color:${text};"`),
+      );
+      expect(top).toContain('stroke="currentColor"');
+    },
+  );
+
+  it("retains theme styling without an explicit color", () => {
+    const svg = renderParticipant({
+      ...participant,
+      type: "actor",
+      stereotype: "service",
+    });
+    expect(svg).not.toMatch(/class="participant-label"[^>]*style=/);
+    expect(svg).not.toMatch(/class="stereotype-label"[^>]*style=/);
+    expect(svg).not.toMatch(/class="participant-icon"[^>]*style=/);
+  });
+
+  it("keeps fixed brand icon colors on a dark participant", () => {
+    const svg = renderParticipant({
+      ...participant,
+      color: "#112233",
+      type: "ec2",
+    });
+    expect(svg).toMatch(/class="participant-icon"[^>]*style="color:#fff;"/);
+    expect(svg).toContain('fill="#ED7100"');
+  });
+});

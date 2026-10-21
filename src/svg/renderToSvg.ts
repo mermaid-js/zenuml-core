@@ -25,10 +25,18 @@ import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import type { DiagramGeometry } from "./geometry";
 import { buildThemeStyles, resolvePalette } from "./themes";
 import type { SvgTheme } from "./themes";
+import { resolveCanvasSurface } from "./themes";
+import {
+  mapDiagramPalette,
+  validateDiagramPalette,
+  type CanvasSurface,
+  type DiagramPalette,
+} from "@/theme/DiagramPalette";
 
 export interface RenderOptions {
   /** Theme name; see src/svg/themes.ts. Unknown names fall back to theme-default. */
   theme?: SvgTheme;
+  palette?: DiagramPalette;
   /** Show sequence references and their badges; defaults to true. */
   enableNumbering?: boolean;
   /** Optional emoji shortcode-to-Unicode cache (for future use by Task 8) */
@@ -42,6 +50,7 @@ export interface RenderResult {
   width: number;
   height: number;
   viewBox: string;
+  surface: CanvasSurface;
   /** The geometry IR used to produce this SVG (undefined for empty input) */
   geometry?: DiagramGeometry;
 }
@@ -56,6 +65,7 @@ export function renderToSvg(
   code: string,
   options?: RenderOptions,
 ): RenderResult {
+  if (options?.palette) validateDiagramPalette(options.palette);
   // 1. Parse
   const rootContext = RootContext(code);
   if (!rootContext) {
@@ -65,6 +75,10 @@ export function renderToSvg(
       width: 0,
       height: 0,
       viewBox: "0 0 0 0",
+      surface: {
+        backgroundColor:
+          options?.palette?.canvas ?? resolveCanvasSurface(options?.theme),
+      },
       geometry: undefined,
     };
   }
@@ -96,7 +110,6 @@ export function renderToSvg(
 }
 
 function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
-  void options;
   const padding = 10;
   const headerH = FRAME_VIEWPORT_HEADER_ALLOWANCE;
   // Content left offset = 1 (frame border) + 10 (seq-diagram px-2.5 padding) + frameBorderLeft
@@ -222,12 +235,28 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
 
   const viewBox = `0 0 ${viewWidth} ${viewHeight}`;
 
-  const defs = `<defs>\n  <style>${buildThemeStyles(resolvePalette(options?.theme))}</style>\n</defs>`;
-  const frame = `${frameSvg}\n${headerLineSvg}\n${titleSvg}`;
+  const svgPalette = options?.palette
+    ? {
+        ...resolvePalette(options.theme),
+        ...mapDiagramPalette(options.palette).svgColors,
+      }
+    : resolvePalette(options?.theme);
+  const defs = `<defs>\n  <style>${buildThemeStyles(svgPalette)}</style>\n</defs>`;
+  const surfaceColor =
+    options?.palette?.canvas ?? resolveCanvasSurface(options?.theme);
+  const canvasSurface = `<rect class="canvas-surface" x="0" y="0" width="${viewWidth}" height="${viewHeight}" fill="${esc(surfaceColor)}"/>\n`;
+  const frame = `${canvasSurface}${frameSvg}\n${headerLineSvg}\n${titleSvg}`;
   const content = `<g transform="translate(${contentLeftMargin}, ${headerLineY})">\n${parts.join("\n")}\n</g>`;
   const innerSvg = `${defs}\n${frame}\n${content}`;
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="${viewBox}">\n${innerSvg}\n</svg>`;
 
-  return { svg, innerSvg, width: viewWidth, height: viewHeight, viewBox };
+  return {
+    svg,
+    innerSvg,
+    width: viewWidth,
+    height: viewHeight,
+    viewBox,
+    surface: { backgroundColor: surfaceColor },
+  };
 }

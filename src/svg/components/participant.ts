@@ -1,4 +1,5 @@
 import { getEmojiUnicode } from "@/emoji/resolveEmoji";
+import { participantTextColor } from "@/utils/Color";
 import type { ParticipantGeometry } from "../geometry";
 import { getIcon } from "../icons";
 import { PARTICIPANT_EMOJI_WIDTH } from "../svgConstants";
@@ -21,7 +22,6 @@ const LABEL_HORIZONTAL_PADDING = 16;
 const STEREOTYPE_VERTICAL_OFFSET = 8;
 const STEREOTYPE_FONT_SIZE = 14;
 const BOUNDARY_ICON_VERTICAL_TWEAK = 2.75;
-const PARTICIPANT_TEXT_FILL = "#222";
 
 export function renderParticipant(p: ParticipantGeometry): string {
   if (p.isStarter) return renderStarterParticipant(p);
@@ -44,6 +44,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
 
   const textY = p.y + p.height / 2 - 0.25;
   const labelY = p.stereotype ? textY + STEREOTYPE_VERTICAL_OFFSET : textY;
+  const { fillStyle, textStyle, iconStyle } = colorAttrs(p.color);
 
   if (icon) {
     const textWidth = p.labelWidth ?? 0;
@@ -84,7 +85,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
     const scale = ICON_SIZE / Math.max(vbW, vbH);
     const iconAttrs = icon.attributes ? ` ${icon.attributes}` : "";
 
-    iconSvg = `<g class="participant-icon" transform="translate(${iconX}, ${iconY}) scale(${scale})"${iconAttrs}>
+    iconSvg = `<g class="participant-icon" transform="translate(${iconX}, ${iconY}) scale(${scale})"${iconAttrs}${iconStyle}>
     ${icon.content}
   </g>`;
   } else if (p.emoji) {
@@ -105,8 +106,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
     emojiIconSvg = `<text x="${emojiTextX}" y="${labelY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
   }
 
-  // Match the current HTML renderer: stereotypes inherit the same 14px text styling
-  // and theme-default participant text color rather than SVG-side contrast heuristics.
+  // Stereotypes inherit the same participant text color as the HTML renderer.
   let stereotypeSvg = "";
   if (p.stereotype) {
     // Stereotype is always centered over the full participant box (text-anchor="middle").
@@ -116,10 +116,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
       icon && p.labelWidth != null ? textX + p.labelWidth / 2 : p.x;
     const stereoAnchor = "middle";
     const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET;
-    // The label colour comes from the palette (.stereotype-label); an author
-    // colour on the participant keeps the fixed text fill, as the label does.
-    const { textStyle: stereoTextStyle } = colorAttrs(p.color);
-    stereotypeSvg = `<text x="${stereoX}" y="${stereoY}" text-anchor="${stereoAnchor}" dominant-baseline="central" class="stereotype-label" font-size="${STEREOTYPE_FONT_SIZE}"${stereoTextStyle}>${esc("«" + p.stereotype + "»")}</text>`;
+    stereotypeSvg = `<text x="${stereoX}" y="${stereoY}" text-anchor="${stereoAnchor}" dominant-baseline="central" class="stereotype-label" font-size="${STEREOTYPE_FONT_SIZE}"${textStyle}>${esc("«" + p.stereotype + "»")}</text>`;
   }
 
   // Aliased labels (e.g. "b:B") — use textLength to pin the text extent to the
@@ -130,8 +127,6 @@ export function renderParticipant(p: ParticipantGeometry): string {
   const textLengthAttr = useTextLength
     ? ` textLength="${p.labelWidth}" lengthAdjust="spacing"`
     : "";
-
-  const { fillStyle, textStyle } = colorAttrs(p.color);
 
   // When emoji is rendered as a separate <text> element (either emoji-only or icon+emoji),
   // do not include it as a tspan inside the label text element.
@@ -255,17 +250,16 @@ function normalizeHexColor(color: string): string {
 function colorAttrs(color: string | undefined): {
   fillStyle: string;
   textStyle: string;
+  iconStyle: string;
 } {
   if (!color) {
-    return { fillStyle: "", textStyle: "" };
+    return { fillStyle: "", textStyle: "", iconStyle: "" };
   }
   const hex = normalizeHexColor(color);
+  const textColor = participantTextColor(hex);
   return {
     fillStyle: ` style="fill:${hex};"`,
-    textStyle: participantTextStyle(),
+    textStyle: ` style="fill:${textColor};"`,
+    iconStyle: ` style="color:${textColor};"`,
   };
-}
-
-function participantTextStyle(): string {
-  return ` style="fill:${PARTICIPANT_TEXT_FILL};"`;
 }

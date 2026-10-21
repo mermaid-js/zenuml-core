@@ -65,6 +65,35 @@ describe("waitForRenderingReady", () => {
     expect(resolved).toBe(true);
   });
 
+  it("ignores obsolete lifeline names even when their count matches", async () => {
+    const store = createStore();
+    store.set(codeAtom, "A.method() { B.reply() }");
+    store.set(lifelineReadyAtom, ["A", "B"]);
+    const done = waitForRenderingReady(store, () =>
+      store.set(codeAtom, "C.method() { D.reply() }"),
+    );
+    store.set(lifelineReadyAtom, ["A", "B"]);
+    expect(store.get(renderingReadyAtom)).toBe(false);
+    store.set(lifelineReadyAtom, ["C", "D"]);
+    await done;
+    expect(store.get(renderingReadyAtom)).toBe(true);
+  });
+
+  it("keeps a same-code request pending until existing layout completes", async () => {
+    const store = createStore();
+    store.set(codeAtom, "A.method() { B.reply() }");
+    store.set(lifelineReadyAtom, []);
+    let settled = false;
+    const pending = waitForRenderingReady(store, () => {}).then(() => {
+      settled = true;
+    });
+    await Promise.resolve();
+    expect(settled).toBe(false);
+    store.set(lifelineReadyAtom, ["A", "B"]);
+    await pending;
+    expect(settled).toBe(true);
+  });
+
   it("resolves when readiness already holds before the wait begins", async () => {
     // A document with no participants is ready the moment lifelineReadyAtom is
     // emptied: 0 lifelines === 0 participants. Rendering a second such

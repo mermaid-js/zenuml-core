@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>ZenUML theme surface fixture</title>
+    <style>
+      body {
+        margin: 0;
+        background: #303944;
+      }
+      .host {
+        width: 1100px;
+        min-height: 380px;
+        background: #303944;
+      }
+      #naked-host {
+        background: #f3f5f7;
+      }
+      #native-output {
+        width: max-content;
+      }
+      #export-output {
+        width: max-content;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="framed-host" class="host"></div>
+    <div id="naked-host" class="host"></div>
+    <div id="native-output"></div>
+    <div id="export-output"></div>
+    <script type="module">
+      import ZenUml, {
+        renderToSvg,
+        ensureDiagramIconsLoaded,
+        ensureDiagramFontsLoaded,
+      } from "/src/core.tsx";
+
+      const SOFT_DARK = {
+        canvas: "#303944",
+        content: "#343F4B",
+        pocket: "#424F5E",
+        border: "#516071",
+        text: "#EEF2F6",
+        secondaryText: "#B8C3CF",
+      };
+      const SOFT_LIGHT = {
+        canvas: "#F3F5F7",
+        content: "#FFFFFF",
+        pocket: "#E8EDF2",
+        border: "#A9B6C5",
+        text: "#253344",
+        secondaryText: "#526579",
+      };
+      const CODE = `title Theme Surface
+@Actor Client #101820
+@EC2 Service #F4EBDD
+Observer
+Client.request() {
+  Service.reply() {
+    Observer.note()
+  }
+}`;
+      const STRUCTURE_CODE = `title Surface Roles
+@Actor Client #101820
+@EC2 Service #F4EBDD
+Client.request() {
+  // \`POST /orders\`
+  if (approved) {
+    Service.accept()
+  } else {
+    Service.reject()
+  }
+}
+==Audit trail==
+Client->Service: complete`;
+      const instances = {};
+
+      window.themeSurface = {
+        SOFT_DARK,
+        SOFT_LIGHT,
+        CODE,
+        STRUCTURE_CODE,
+        create(which) {
+          const host = document.getElementById(`${which}-host`);
+          const instance = new ZenUml(host, which === "naked");
+          instances[which] = instance;
+          return instance;
+        },
+        instance(which) {
+          return instances[which];
+        },
+        async native(
+          code = CODE,
+          options = { theme: "theme-dark", palette: SOFT_DARK },
+        ) {
+          await ensureDiagramFontsLoaded();
+          await ensureDiagramIconsLoaded(code);
+          const result = renderToSvg(code, options);
+          document.getElementById("native-output").innerHTML = result.svg;
+          return result;
+        },
+        showExport(dataUrl) {
+          const img = new Image();
+          img.id = "export-image";
+          img.src = dataUrl;
+          document.getElementById("export-output").replaceChildren(img);
+          return new Promise((resolve, reject) => {
+            img.onload = () =>
+              resolve({ width: img.naturalWidth, height: img.naturalHeight });
+            img.onerror = reject;
+          });
+        },
+      };
+      window.__themeSurfaceReady = true;
+    </script>
+  </body>
+</html>

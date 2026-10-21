@@ -10,10 +10,12 @@ import {
   enableScopedThemingAtom,
   lifelineReadyAtom,
   modeAtom,
+  paletteAtom,
   onContentChangeAtom,
   onEventEmitAtom,
   onThemeChangeAtom,
   RenderMode,
+  renderRevisionAtom,
   stickyOffsetAtom,
   themeAtom,
 } from "./store/Store";
@@ -38,6 +40,16 @@ import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { createStore, Provider } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
+import { CommitSignal } from "./components/CommitSignal";
+import {
+  paintSvgCanvas,
+  readCanvasSurface,
+  withOpaqueCanvasForExport,
+  validateDiagramPalette,
+  type CanvasSurface,
+  type DiagramPalette,
+} from "./theme/DiagramPalette";
+export type { CanvasSurface, DiagramPalette } from "./theme/DiagramPalette";
 export { renderToSvg } from "./svg/renderToSvg";
 export { ensureDiagramIconsLoaded } from "./svg/icons";
 import {
@@ -51,6 +63,7 @@ export type { RenderResult, RenderOptions } from "./svg/renderToSvg";
 
 export interface Config {
   theme?: string;
+  palette?: DiagramPalette;
   enableScopedTheming?: boolean;
   onThemeChange?: (data: { theme: string; scoped?: boolean }) => void;
   enableMultiTheme?: boolean;
@@ -92,7 +105,15 @@ interface IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml>;
+  getCanvasSurface(): CanvasSurface;
 }
+
+type RenderRequest = {
+  code: string;
+  theme: string;
+  config: Config | undefined;
+  revision: number;
+};
 
 export default class ZenUml implements IZenUml {
   static readonly version = VERSION;
@@ -106,12 +127,22 @@ export default class ZenUml implements IZenUml {
   private _code: string | undefined;
   private _theme: string | undefined;
   private readonly store: ReturnType<typeof createStore>;
+  readonly #root: ReturnType<typeof createRoot>;
+  private readonly naked: boolean;
   private _currentTimeout: NodeJS.Timeout | undefined;
   private _lastRenderingCostMilliseconds = 0;
   private initialRender = true;
+  private revision = 0;
+  private pending: Array<{
+    resolve: (value: IZenUml) => void;
+    reject: (reason: unknown) => void;
+  }> = [];
+  private latestRenderPromise: Promise<IZenUml> | undefined;
   constructor(el: HTMLElement | string, naked: boolean = false) {
     this.el = typeof el === "string" ? document.querySelector(el)! : el;
     this.store = createStore();
+    this.#root = createRoot(this.el);
+    this.naked = naked;
 
     this.store.sub(themeAtom, () => {
       this.store.get(onThemeChangeAtom)({
@@ -120,7 +151,11 @@ export default class ZenUml implements IZenUml {
       });
     });
 
-    createRoot(this.el).render(
+    this.addPortalRootElement();
+  }
+
+  private mount(revision: number, onCommit: (revision: number) => void): void {
+    this.#root.render(
       <StrictMode>
         <Provider store={this.store}>
           {/* IMPORTANT: The .zenuml class here works with Tailwind's important: ".zenuml" configuration.
@@ -130,13 +165,13 @@ export default class ZenUml implements IZenUml {
               .zenuml class. This provides scoped styling for the ZenUML library. */}
           <div className="zenuml">
             <ErrorBoundary>
-              {naked ? <SeqDiagram /> : <DiagramFrame />}
+              {this.naked ? <SeqDiagram canvasSurface /> : <DiagramFrame />}
             </ErrorBoundary>
+            <CommitSignal revision={revision} onCommit={onCommit} />
           </div>
         </Provider>
       </StrictMode>,
     );
-    this.addPortalRootElement();
   }
 
   // DON'T REMOVE: headlessui portal root hack
@@ -153,80 +188,112 @@ export default class ZenUml implements IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml> {
+    if (config?.palette) validateDiagramPalette(config.palette);
     if (this._currentTimeout) {
       clearTimeout(this._currentTimeout);
     }
     this._code = code === undefined ? this._code : code;
     this._theme = config?.theme || this._theme;
-    this.store.set(stickyOffsetAtom, config?.stickyOffset ?? 0);
-    this.store.set(themeAtom, this._theme || "default");
-    this.store.set(
-      enableScopedThemingAtom,
-      config?.enableScopedTheming || false,
+    const request: RenderRequest = {
+      code: this._code || "",
+      theme: this._theme || "default",
+      config,
+      revision: ++this.revision,
+    };
+    const promise = new Promise<IZenUml>((resolve, reject) =>
+      this.pending.push({ resolve, reject }),
     );
-    this.store.set(modeAtom, config?.mode || RenderMode.Dynamic);
-
-    // this.initialRender is used to avoid the first rendering is debounced by setTimeout.
-    // The first rendering should be executed immediately. It fixes the issue that causes the blank screen on mermaid live editor.
+    this.latestRenderPromise = promise;
     if (this.initialRender) {
       this.initialRender = false;
-      await this.doRender(config);
+      void this.doRender(request);
     } else {
       this._currentTimeout = setTimeout(
-        async () => await this.doRender(config),
+        () => void this.doRender(request),
         this.calculateDebounceMilliseconds(),
       );
     }
-
-    return this;
+    return promise;
   }
 
-  async doRender(config: Config | undefined) {
-    // Text is measured during render; the face must be available first.
-    await ensureDiagramFontsLoaded();
-    const start = getStartTime();
-    clearCache();
-    this.store.set(onContentChangeAtom, config?.onContentChange || (() => {}));
-    this.store.set(onThemeChangeAtom, config?.onThemeChange || (() => {}));
-    this.store.set(onEventEmitAtom, config?.onEventEmit || (() => {}));
-    if (config?.enableMultiTheme !== undefined) {
-      this.store.set(enableMultiThemeAtom, config?.enableMultiTheme);
-    }
-    if (config?.enableNumbering !== undefined) {
-      this.store.set(enableNumberingAtom, config.enableNumbering);
-    }
-    if (config?.enableParticipantInsertion !== undefined) {
+  async doRender(request: RenderRequest): Promise<void> {
+    try {
+      // Font loading can finish after a newer render was requested. Only the
+      // newest captured request may write to the store or mount React.
+      await ensureDiagramFontsLoaded();
+      if (request.revision !== this.revision) return;
+      const { config } = request;
+      const start = getStartTime();
+      clearCache();
+      this.store.set(stickyOffsetAtom, config?.stickyOffset ?? 0);
+      this.store.set(themeAtom, request.theme);
+      this.store.set(paletteAtom, config?.palette);
       this.store.set(
-        enableParticipantInsertionAtom,
-        config.enableParticipantInsertion,
+        enableScopedThemingAtom,
+        config?.enableScopedTheming || false,
       );
-    }
-    if (config?.enableMessageInsertion !== undefined) {
-      this.store.set(enableMessageInsertionAtom, config.enableMessageInsertion);
-    }
-    if (config?.enableDividerInsertion !== undefined) {
-      this.store.set(enableDividerInsertionAtom, config.enableDividerInsertion);
-    }
-    if (config?.enableParticipantStyleEditing !== undefined) {
+      this.store.set(modeAtom, config?.mode || RenderMode.Dynamic);
+      this.store.set(renderRevisionAtom, request.revision);
       this.store.set(
-        enableParticipantStyleEditingAtom,
-        config.enableParticipantStyleEditing,
+        onContentChangeAtom,
+        config?.onContentChange || (() => {}),
       );
-    }
-    if (config?.enableMessageReorder !== undefined) {
-      this.store.set(enableMessageReorderAtom, config.enableMessageReorder);
-    }
-    if (this._code === this.store.get(codeAtom)) {
-      return true;
-    } else {
-      this.store.set(lifelineReadyAtom, []);
-      await waitForRenderingReady(this.store, () => {
-        this.store.set(codeAtom, this._code || "");
+      this.store.set(onThemeChangeAtom, config?.onThemeChange || (() => {}));
+      this.store.set(onEventEmitAtom, config?.onEventEmit || (() => {}));
+      if (config?.enableMultiTheme !== undefined) {
+        this.store.set(enableMultiThemeAtom, config?.enableMultiTheme);
+      }
+      if (config?.enableNumbering !== undefined) {
+        this.store.set(enableNumberingAtom, config.enableNumbering);
+      }
+      if (config?.enableParticipantInsertion !== undefined) {
+        this.store.set(
+          enableParticipantInsertionAtom,
+          config.enableParticipantInsertion,
+        );
+      }
+      if (config?.enableMessageInsertion !== undefined) {
+        this.store.set(
+          enableMessageInsertionAtom,
+          config.enableMessageInsertion,
+        );
+      }
+      if (config?.enableDividerInsertion !== undefined) {
+        this.store.set(
+          enableDividerInsertionAtom,
+          config.enableDividerInsertion,
+        );
+      }
+      if (config?.enableParticipantStyleEditing !== undefined) {
+        this.store.set(
+          enableParticipantStyleEditingAtom,
+          config.enableParticipantStyleEditing,
+        );
+      }
+      if (config?.enableMessageReorder !== undefined) {
+        this.store.set(enableMessageReorderAtom, config.enableMessageReorder);
+      }
+      const codeChanged = request.code !== this.store.get(codeAtom);
+      if (codeChanged) this.store.set(lifelineReadyAtom, []);
+      const ready = codeChanged
+        ? waitForRenderingReady(this.store, () =>
+            this.store.set(codeAtom, request.code),
+          )
+        : waitForRenderingReady(this.store, () => {});
+      const committed = new Promise<void>((resolve) => {
+        this.mount(request.revision, (revision) => {
+          if (revision === request.revision) resolve();
+        });
       });
-    }
-    setTimeout(() => {
+      await Promise.all([committed, ready]);
+      if (request.revision !== this.revision) return;
       this._lastRenderingCostMilliseconds = calculateCostTime(start);
-    }, 0);
+      for (const item of this.pending.splice(0)) item.resolve(this);
+    } catch (error) {
+      if (request.revision === this.revision) {
+        for (const item of this.pending.splice(0)) item.reject(error);
+      }
+    }
   }
 
   calculateDebounceMilliseconds(): number {
@@ -281,28 +348,50 @@ export default class ZenUml implements IZenUml {
    * rest with the theme's canvas colour so a dark theme stays dark edge to
    * edge (ADR 0004). White when the canvas is transparent or not rendered yet.
    */
-  private exportBackground(): string {
+  getCanvasSurface(): CanvasSurface {
     const canvas = this.el.querySelector(".bg-skin-canvas");
-    const color = canvas ? getComputedStyle(canvas).backgroundColor : "";
-    return color && color !== "rgba(0, 0, 0, 0)" && color !== "transparent"
-      ? color
-      : "white";
+    // This is a read-time snapshot: call again after changing host CSS.
+    const fallback = this.store.get(paletteAtom)?.canvas;
+    return readCanvasSurface(canvas, fallback);
+  }
+
+  private async awaitActiveRender(): Promise<void> {
+    while (this.latestRenderPromise) {
+      const pending = this.latestRenderPromise;
+      await pending;
+      if (pending === this.latestRenderPromise) return;
+    }
   }
 
   async getPng(): Promise<string> {
-    return htmlToImage.toPng(this.el, {
-      backgroundColor: this.exportBackground(),
-      filter: (node) => {
-        return !node?.classList?.contains("hide-export");
-      },
-    });
+    await this.awaitActiveRender();
+    const surface = this.getCanvasSurface();
+    return withOpaqueCanvasForExport(this.el, surface, (node, cloned) =>
+      htmlToImage.toPng(node, {
+        backgroundColor: surface.backgroundColor,
+        style: cloned
+          ? { position: "relative", left: "0", top: "0" }
+          : undefined,
+        filter: (node) => !node?.classList?.contains("hide-export"),
+      }),
+    );
   }
 
   async getSvg(): Promise<string> {
-    return htmlToImage.toSvg(this.el, {
-      filter: (node) => {
-        return !node?.classList?.contains("hide-export");
-      },
-    });
+    await this.awaitActiveRender();
+    const surface = this.getCanvasSurface();
+    const svg = await withOpaqueCanvasForExport(
+      this.el,
+      surface,
+      (node, cloned) =>
+        htmlToImage.toSvg(node, {
+          backgroundColor: surface.backgroundColor,
+          style: cloned
+            ? { position: "relative", left: "0", top: "0" }
+            : undefined,
+          filter: (node) => !node?.classList?.contains("hide-export"),
+        }),
+    );
+    return paintSvgCanvas(svg, surface);
   }
 }

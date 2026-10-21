@@ -266,6 +266,17 @@ export function resolvePalette(theme?: string): SvgPalette {
   return DEFAULT_PALETTE;
 }
 
+/** Canvas colour for a named native theme; all current light themes are white. */
+export function resolveCanvasSurface(theme?: string): string {
+  return theme === "theme-dark" ||
+    theme === "theme-clean-dark" ||
+    theme === "theme-darcula"
+    ? "#1f1f1f"
+    : theme === "theme-neon"
+      ? "#000000"
+      : "#ffffff";
+}
+
 /**
  * The `<style>` body embedded in every rendered SVG.
  *

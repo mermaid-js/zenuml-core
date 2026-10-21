@@ -2,6 +2,32 @@ import { describe, it, expect } from "bun:test";
 import { renderToSvg } from "./renderToSvg";
 
 describe("renderToSvg", () => {
+  it("paints a custom canvas across rounded frame corners and reports it", () => {
+    const palette = {
+      canvas: "#303944",
+      content: "#343F4B",
+      pocket: "#424F5E",
+      border: "#516071",
+      text: "#EEF2F6",
+      secondaryText: "#B8C3CF",
+    };
+    const result = renderToSvg("A->B: hello", { palette });
+    expect(result.surface.backgroundColor).toBe(palette.canvas);
+    expect(result.innerSvg).toContain(
+      `<rect class="canvas-surface" x="0" y="0" width="${result.width}" height="${result.height}" fill="${palette.canvas}"/>`,
+    );
+    expect(result.svg).toContain(".message-label { font-family:");
+    expect(result.svg).toContain(`fill: ${palette.text};`);
+    expect(renderToSvg("A->B: hello").svg).toContain('class="canvas-surface"');
+    expect(renderToSvg("A->B: hello", { theme: "theme-dark" }).svg).toContain(
+      'fill="#1f1f1f"',
+    );
+    expect(() =>
+      renderToSvg("A->B: hello", {
+        palette: { ...palette, canvas: 'red"/><script>' },
+      }),
+    ).toThrow(/DiagramPalette.canvas/);
+  });
   it.each(["for", "while", "loop", "foreach", "forEach"])(
     "keeps the original %s loop keyword in the SVG guard",
     (keyword) => {
@@ -397,7 +423,9 @@ A->A:m
     // The 0.65 opacity is a theme slot (ADR 0004) in the style block, not an attribute.
     expect(result.svg).toContain('class="fragment-condition">condition</text>');
     expect(result.svg).toContain(".fragment-condition { font-family");
-    expect(result.svg).toMatch(/\.fragment-condition \{[^}]*opacity: 0\.65; \}/);
+    expect(result.svg).toMatch(
+      /\.fragment-condition \{[^}]*opacity: 0\.65; \}/,
+    );
   });
 
   it("fragment has valid rect geometry", () => {
