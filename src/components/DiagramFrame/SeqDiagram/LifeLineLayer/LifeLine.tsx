@@ -1,9 +1,10 @@
 import {
   coordinatesAtom,
   lifelineReadyAtom,
+  renderRevisionAtom,
   verticalCoordinatesAtom,
 } from "@/store/Store";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom, useStore } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
@@ -23,6 +24,8 @@ export const LifeLine = (props: {
   const verticalCoordinates = useAtomValue(verticalCoordinatesAtom);
   const firstRootGapClearance = useAtomValue(firstRootGapClearanceAtom);
   const setLifelineReady = useSetAtom(lifelineReadyAtom);
+  const revision = useAtomValue(renderRevisionAtom);
+  const store = useStore();
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
   const left =
@@ -42,19 +45,23 @@ export const LifeLine = (props: {
     }
 
     if (props.entity.name !== _STARTER_) {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
+        if (store.get(renderRevisionAtom) !== revision) return;
         setLifelineReady((prev) =>
           prev.includes(props.entity.name)
             ? prev
             : [...prev, props.entity.name],
         );
       }, 0);
+      return () => clearTimeout(timeout);
     }
   }, [
     props.entity.name,
     verticalCoordinates,
     firstRootGapClearance,
     setLifelineReady,
+    revision,
+    store,
   ]);
 
   return (

@@ -8,7 +8,9 @@ import {
   RenderMode,
   rootContextAtom,
   themeAtom,
+  paletteAtom,
 } from "@/store/Store";
+import { mapDiagramPalette } from "@/theme/DiagramPalette";
 import { useAtomValue, useSetAtom } from "jotai";
 import {
   CSSProperties,
@@ -33,9 +35,11 @@ import { InteractionController } from "@/store/interaction/InteractionController
 export const SeqDiagram = (props: {
   className?: string;
   style?: CSSProperties;
+  canvasSurface?: boolean;
   ref?: React.Ref<HTMLDivElement>;
 }) => {
   const theme = useAtomValue(themeAtom);
+  const palette = useAtomValue(paletteAtom);
   const mode = useAtomValue(modeAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
@@ -93,9 +97,13 @@ export const SeqDiagram = (props: {
       className={cn(
         "zenuml sequence-diagram relative box-border text-left overflow-visible px-2.5",
         theme,
+        props.canvasSurface && "bg-skin-canvas",
         props.className,
       )}
-      style={props.style}
+      style={{
+        ...props.style,
+        ...(palette ? mapDiagramPalette(palette).cssVariables : {}),
+      }}
       ref={diagramRef}
     >
       {/* Selection click-away belongs to `InteractionController` (ADR 0002,

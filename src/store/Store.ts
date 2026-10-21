@@ -8,6 +8,7 @@ import type { WidthFunc } from "../positioning/Coordinate";
 import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { CodeRange } from "../parser/CodeRange";
+import type { DiagramPalette } from "../theme/DiagramPalette";
 
 export const resolveWidthProvider = (): WidthFunc => {
   const urlParam =
@@ -58,6 +59,7 @@ export const verticalCoordinatesAtom = atom((get) => {
 });
 
 export const themeAtom = atom("theme-default");
+export const paletteAtom = atom<DiagramPalette | undefined>(undefined);
 
 export const enableScopedThemingAtom = atom<boolean>(false);
 
@@ -166,11 +168,13 @@ export const messageReorderDropAtom = atom<{
 } | null>(null);
 
 export const lifelineReadyAtom = atom<string[]>([]);
+export const renderRevisionAtom = atom(0);
 
 export const renderingReadyAtom = atom((get) => {
   const lifeLineReady = get(lifelineReadyAtom);
   const participants = get(participantsAtom);
-  return lifeLineReady.length === participants.Size();
+  const readyNames = new Set(lifeLineReady);
+  return participants.Names().every((name) => readyNames.has(name));
 });
 
 export { participantPreviewAtom } from "./participantPreviewAtom";

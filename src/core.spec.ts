@@ -9,6 +9,78 @@ import { enableNumberingAtom } from "./store/Store";
 // preload shim and does not implement stubGlobal, which throws at import time
 // and breaks `bun run test` on newer Bun (see issue #395).
 describe("@ZenUML/core", function () {
+  const palette = {
+    canvas: "#303944",
+    content: "#343F4B",
+    pocket: "#424F5E",
+    border: "#516071",
+    text: "#EEF2F6",
+    secondaryText: "#B8C3CF",
+  };
+
+  it("stages the first mount and resolves after the palette reaches both surfaces", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const diagram = new ZenUml(el);
+    expect(el.querySelector(".bg-skin-canvas")).toBeNull();
+    await diagram.render("A->B: hello", { palette });
+    const frame = el.querySelector<HTMLElement>(".bg-skin-canvas")!;
+    const sequence = el.querySelector<HTMLElement>(".sequence-diagram")!;
+    expect(frame.style.getPropertyValue("--color-bg-canvas")).toBe(
+      palette.canvas,
+    );
+    expect(sequence.style.getPropertyValue("--color-bg-canvas")).toBe(
+      palette.canvas,
+    );
+    expect(el.textContent).toContain("hello");
+    expect(Object.keys(diagram)).not.toContain("root");
+  });
+
+  it("keeps the historical implicit HTML theme while honoring an explicit named default", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const diagram = new ZenUml(el, true);
+    await diagram.render("A->B: hello", undefined);
+    expect(el.querySelector(".sequence-diagram")?.classList.contains("default")).toBe(true);
+    await diagram.render(undefined, { theme: "theme-default" });
+    expect(el.querySelector(".sequence-diagram")?.classList.contains("theme-default")).toBe(true);
+  });
+
+  it("coalesces debounced renders and settles every caller after the latest commit", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const diagram = new ZenUml(el, true);
+    await diagram.render("A->B: first", undefined);
+    const first = diagram.render("A->B: second", { palette });
+    const second = diagram.render("A->B: final", {
+      palette,
+      enableNumbering: false,
+    });
+    await Promise.all([first, second]);
+    expect(el.textContent).toContain("final");
+    expect(el.textContent).not.toContain("second");
+    expect(
+      el
+        .querySelector<HTMLElement>(".sequence-diagram")
+        ?.style.getPropertyValue("--color-bg-canvas"),
+    ).toBe(palette.canvas);
+  });
+
+  it("waits for a same-code palette change and an empty diagram", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const diagram = new ZenUml(el, true);
+    await diagram.render("A->B: hello", undefined);
+    await diagram.render(undefined, { palette });
+    expect(
+      el
+        .querySelector<HTMLElement>(".sequence-diagram")
+        ?.style.getPropertyValue("--color-bg-canvas"),
+    ).toBe(palette.canvas);
+    await diagram.render("", { palette });
+    expect(el.textContent).not.toContain("hello");
+  });
+
   beforeEach(() => {
     createStore().set(enableNumberingAtom, true);
     document.body.innerHTML = '<div class="textarea-hidden-div"></div>';

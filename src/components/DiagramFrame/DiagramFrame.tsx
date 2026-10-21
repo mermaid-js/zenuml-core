@@ -1,4 +1,15 @@
-import { rootContextAtom, scaleAtom, themeAtom } from "@/store/Store";
+import {
+  paletteAtom,
+  rootContextAtom,
+  scaleAtom,
+  themeAtom,
+} from "@/store/Store";
+import {
+  mapDiagramPalette,
+  paintSvgCanvas,
+  readCanvasSurface,
+  withOpaqueCanvasForExport,
+} from "@/theme/DiagramPalette";
 import { useAtom, useAtomValue } from "jotai";
 import * as htmlToImage from "html-to-image";
 import {
@@ -17,11 +28,7 @@ import { SeqDiagram } from "./SeqDiagram/SeqDiagram";
 // takes the theme's canvas colour so a dark theme stays dark edge to edge
 // (ADR 0004). White when the canvas is transparent.
 const exportConfig = (container: HTMLElement | null) => {
-  const color = container ? getComputedStyle(container).backgroundColor : "";
-  const backgroundColor =
-    color && color !== "rgba(0, 0, 0, 0)" && color !== "transparent"
-      ? color
-      : "white";
+  const { backgroundColor } = readCanvasSurface(container);
   return {
     backgroundColor,
     filter: (node: HTMLElement) => {
@@ -47,23 +54,64 @@ export const DiagramFrame = ({
   const rootContext = useAtomValue(rootContextAtom);
   const [scale, setScale] = useAtom(scaleAtom);
   const [theme, setTheme] = useAtom(themeAtom);
+  const palette = useAtomValue(paletteAtom);
   const title = rootContext?.title();
 
   const toPng = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toPng(containerRef.current, exportConfig(containerRef.current));
+    const container = containerRef.current;
+    const config = exportConfig(container);
+    return withOpaqueCanvasForExport(container, config, (node, cloned) =>
+      htmlToImage.toPng(node, {
+        ...config,
+        style: cloned
+          ? { position: "relative", left: "0", top: "0" }
+          : undefined,
+      }),
+    );
   };
   const toSvg = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toSvg(containerRef.current, exportConfig(containerRef.current));
+    const container = containerRef.current;
+    const config = exportConfig(container);
+    const svg = await withOpaqueCanvasForExport(
+      container,
+      config,
+      (node, cloned) =>
+        htmlToImage.toSvg(node, {
+          ...config,
+          style: cloned
+            ? { position: "relative", left: "0", top: "0" }
+            : undefined,
+        }),
+    );
+    return paintSvgCanvas(svg, config);
   };
   const toBlob = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toBlob(containerRef.current, exportConfig(containerRef.current));
+    const container = containerRef.current;
+    const config = exportConfig(container);
+    return withOpaqueCanvasForExport(container, config, (node, cloned) =>
+      htmlToImage.toBlob(node, {
+        ...config,
+        style: cloned
+          ? { position: "relative", left: "0", top: "0" }
+          : undefined,
+      }),
+    );
   };
   const toJpeg = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toJpeg(containerRef.current, exportConfig(containerRef.current));
+    const container = containerRef.current;
+    const config = exportConfig(container);
+    return withOpaqueCanvasForExport(container, config, (node, cloned) =>
+      htmlToImage.toJpeg(node, {
+        ...config,
+        style: cloned
+          ? { position: "relative", left: "0", top: "0" }
+          : undefined,
+      }),
+    );
   };
   const zoomIn = () => {
     const newScale = Math.min(1, scale + 0.1);
@@ -126,6 +174,7 @@ export const DiagramFrame = ({
     <div
       ref={containerRef}
       className={cn("p-1 bg-skin-canvas inline-block", theme)}
+      style={palette ? mapDiagramPalette(palette).cssVariables : undefined}
     >
       <Debug />
       <div className="frame text-skin-base bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded">
