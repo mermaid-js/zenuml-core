@@ -320,11 +320,15 @@ as its own.
 
 ### P0: Privacy tooltip
 
-No change. The baseline confirms the defect: the declared 0.3 s transition never runs because `display`
-switches from none to block. Note that Privacy is not imported anywhere in `src` at fb11b8e6, so confirm
-the component is still shipped before spending a PR on it.
+**Moot, dropped 2026-10-20.** The baseline confirms the defect (the declared 0.3 s transition never runs
+because `display` switches from none to block), but the component is unreachable: #446 (2026-10-01) removed
+its import and its only usage from `DiagramFrame.tsx`, no `src`, story or e2e file references it since,
+and `dist/zenuml.esm.mjs` carries only the `privacy` icon name. No PR. The dead
+`src/components/DiagramFrame/Privacy/` folder was deleted 2026-10-21 by #499 (6115bf86).
 
 ### P1: chrome tokens
+
+**Status: merged 2026-10-20 as #489 (eee61581).** 34 `--zu-*` tokens on `.zenuml`, `*-zu-*` utilities, gates 1, 2 and 7 as scripts, Gate 1 and 2 in the CI test job. Measured after the merge: 26 chrome fields changed, all radius or shadow; motion, size and focus fields identical (`docs/ux-research/evidence/chrome-after-p1-2026-10-20.json`).
 
 | Change | Why | Evidence |
 |---|---|---|
@@ -345,6 +349,8 @@ the component is still shipped before spending a PR on it.
 
 ### P2: popover enter/exit
 
+**Status: merged 2026-10-20 as #493 (258958b2), on top of #492.** Enter 200 ms / exit 120 ms on the five popover surfaces through `usePopoverPresence`; `prefers-reduced-motion: reduce` zeroes every `--zu-dur-*`; the insert button's `transition-all` is an explicit list. Optional chip stagger and scroll fade not done. A participant switch no longer plays an exit because #492 keeps the editor mounted across the switch.
+
 | Change | Why | Evidence |
 |---|---|---|
 | Exit stays **120 ms** = `--zu-dur-snap` (borrowed). Enter stays 200 ms = `--zu-dur-base`. | Claude uses `--cds-dur-snap` for small-element exits (`cds-pill-out`, `epitaxy-band-exit`) and 150-180 ms literals for timeline status and block fades (SHARED 209, 276, 279), so the plan's 120 ms exit has a primary precedent and uses a borrowed token. Corrected 2026-10-20: an earlier draft recommended 150 ms on the false premise that no exit used 120 ms. | dur-snap (WEB 54340 / ASAR 5767; exits WEB 53701, 57942 / ASAR 5079); dur-status (SHARED 205-212, 276, 279), noted only |
@@ -357,6 +363,8 @@ the component is still shipped before spending a PR on it.
 
 ### P3: focus and reduced motion
 
+**Status: merged 2026-10-21 as #500 (5071e8f8).** One ring recipe (`shadow-zu-focus`) on every chrome control; `[data-reduce-motion="true"]` zeroes every `--zu-dur-*` when set on an ancestor of the diagram (`html`, `body` or the host container), not on the `.zenuml` root alone, because the popovers render in their own portal roots. The ring's 1 px gap is a fixed white token, so on theme-dark it is expected to read as a white hairline (inferred from the token scope, not yet measured on a dark fixture); follow-up pending.
+
 | Change | Why | Evidence |
 |---|---|---|
 | One `--zu-ring`: 1px page-colour gap + 1px ring + soft glow, in slate. 1px, not 1.5px. Mark it "structure from primary, values zenuml-owned". It replaces the 6 coexisting focus styles. | Primary structure is gap + 1px ring + 6px 1px glow; its colours are accent/clay, which the neutral default theme excludes. | focus-shadow-light, focus-shadow-dark, v2doc-29 (all value-differs) |
@@ -364,6 +372,8 @@ the component is still shipped before spending a PR on it.
 | Set every `--zu-dur-*` to 0 under `prefers-reduced-motion: reduce`, **and** under a host-set `[data-reduce-motion="true"]` on `.zenuml`. | Claude has 80 `prefers-reduced-motion: reduce` blocks and 16 `no-preference` blocks on web (96 total) and a `[data-reduce-motion]` override. Embedding hosts may want to force reduced motion. | reduced-motion (WEB 1374, 58144, 58173; ASAR 3262) |
 
 ### P4: press, disabled, hit area
+
+**Status: merged 2026-10-21 as #502 (0d07dbae).** Press squish on the chrome controls (`scale(.975)`, 60 ms press, 450 ms spring release), off under `prefers-reduced-motion` and `data-reduce-motion`; 24 x 24 hit areas for the 12 px gap create handle and the 16 px participant insert button, visual unchanged; `aria-disabled` on the StylePanel items that cannot act, still focusable and titled. The optional selection pop is not done.
 
 | Change | Why | Evidence |
 |---|---|---|
