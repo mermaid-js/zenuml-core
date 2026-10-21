@@ -255,6 +255,48 @@ test.describe("Message Type Panel", () => {
     await expect(syncButton).toBeVisible();
     await expect(syncButton).toHaveClass(/opacity-40/);
     await expect(syncButton).toHaveClass(/cursor-not-allowed/);
+    // A real disabled state: announced, still focusable, and the title says why.
+    await expect(syncButton).toHaveAttribute("aria-disabled", "true");
+    await expect(syncButton).toHaveAttribute(
+      "title",
+      "Label must be a valid method name (no spaces) to switch to sync",
+    );
+    await syncButton.focus();
+    await expect(syncButton).toBeFocused();
+  });
+
+  test("clicking a disabled type item leaves the code unchanged and the submenu open", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/editable-label.html");
+    await expect(
+      page.locator(".sequence-diagram .participant").first(),
+    ).toBeVisible({
+      timeout: 5000,
+    });
+
+    const asyncMessage = page.locator(".interaction.async .message").filter({
+      hasText: "Hello Bob",
+    });
+    await clickMessageArrow(asyncMessage);
+
+    await page.getByTestId("message-type-menu").click();
+    const syncButton = page.getByTestId("message-type-sync");
+    await expect(syncButton).toHaveAttribute("aria-disabled", "true");
+    // Playwright treats aria-disabled as not enabled; force the real click.
+    await syncButton.click({ force: true });
+
+    await page.waitForTimeout(300);
+    expect(
+      await page.evaluate(() => (window as any).__lastContentChange ?? null),
+    ).toBeNull();
+    await expect(syncButton).toBeVisible();
+    await expect(page.getByTestId("message-type-return")).toBeVisible();
+    await expect(
+      page.locator(".interaction.async .message").filter({
+        hasText: "Hello Bob",
+      }),
+    ).toBeVisible();
   });
 
   test("highlights creation button when a creation message is selected", async ({
@@ -282,6 +324,14 @@ test.describe("Message Type Panel", () => {
     );
     await expect(page.getByTestId("message-type-return")).toHaveClass(
       /opacity-40/,
+    );
+    await expect(page.getByTestId("message-type-async")).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    await expect(page.getByTestId("message-type-return")).toHaveAttribute(
+      "aria-disabled",
+      "true",
     );
   });
 

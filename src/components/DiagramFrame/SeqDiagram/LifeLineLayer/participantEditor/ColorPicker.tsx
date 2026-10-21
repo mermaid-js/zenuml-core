@@ -82,7 +82,7 @@ export function ColorPicker({
               // Fill and letter colour are computed per swatch at render.
               style={{ background: hex, color: participantTextColor(hex) }}
               className={cn(
-                "w-6 h-6 box-border p-0 rounded-zu-md text-[14px] font-normal leading-none [font-family:inherit] cursor-pointer focus-visible:outline-none",
+                "zu-press w-6 h-6 box-border p-0 rounded-zu-md text-[14px] font-normal leading-none [font-family:inherit] cursor-pointer focus-visible:outline-none",
                 selected
                   ? "border-2 border-solid border-white shadow-zu-selected focus-visible:shadow-zu-focus-selected"
                   : "border border-solid border-black/[0.12] focus-visible:shadow-zu-focus",

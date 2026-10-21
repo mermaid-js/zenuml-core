@@ -59,7 +59,7 @@ export function SplitSlot({
       onClick={onOpen}
       onKeyDown={onKeyDown}
       className={cn(
-        "flex items-center justify-center shrink-0 box-border cursor-pointer bg-white text-gray-700 focus:outline-none",
+        "zu-press flex items-center justify-center shrink-0 box-border cursor-pointer bg-white text-gray-700 focus:outline-none",
         !split && "focus-visible:shadow-zu-focus",
         // Split + expanded: the wrapper border carries the highlight, so the
         // whole pill is outlined instead of one clipped half.
@@ -90,7 +90,7 @@ export function SplitSlot({
       title={`${clearLabel} ⌫`}
       onClick={onClear}
       className={cn(
-        "flex items-center justify-center shrink-0 box-border w-6 rounded-none cursor-pointer text-[14px] leading-none text-red-600 bg-red-100 hover:bg-red-200 border-gray-200 focus:outline-none",
+        "zu-press flex items-center justify-center shrink-0 box-border w-6 rounded-none cursor-pointer text-[14px] leading-none text-red-600 bg-red-100 hover:bg-red-200 border-gray-200 focus:outline-none",
         isIcon ? "h-[26px] border-l" : "h-[22px] border-r",
       )}
     >

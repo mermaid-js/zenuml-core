@@ -598,11 +598,10 @@ export const ParticipantStylePanel = () => {
             <button
               type="button"
               aria-label="Add stereotype"
-              className="absolute pointer-events-auto h-zu-control min-w-[104px] box-border px-3 rounded-full border border-dashed border-slate-400 bg-white text-[12px] text-gray-600 cursor-pointer hover:border-sky-500 hover:text-sky-700 focus-visible:outline-none focus-visible:shadow-zu-focus"
+              className="zu-press zu-press-offset absolute -translate-x-1/2 pointer-events-auto h-zu-control min-w-[104px] box-border px-3 rounded-full border border-dashed border-slate-400 bg-white text-[12px] text-gray-600 cursor-pointer hover:border-sky-500 hover:text-sky-700 focus-visible:outline-none focus-visible:shadow-zu-focus"
               style={{
                 left: centerX,
                 top: anchor.top + PILL_TOP,
-                transform: "translateX(-50%)",
               }}
               onClick={() => setStereotypeEditing(true)}
             >

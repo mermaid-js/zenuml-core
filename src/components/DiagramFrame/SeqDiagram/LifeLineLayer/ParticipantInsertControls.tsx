@@ -178,8 +178,12 @@ export const ParticipantInsertControls = () => {
     return null;
   }
 
+  // P4: the 16 px circle is what is painted; the pseudo-element stretches the
+  // click target over the whole 36 px reveal wrapper (BUTTON_INSET + 1 px
+  // border = 11 px each side). Opacity, border, colour and shadow keep their
+  // transitions through .zu-press-insert (tailwind.css).
   const insertButtonClass =
-    "absolute flex items-center justify-center rounded-full border border-slate-300 bg-white text-slate-400 text-xs leading-none opacity-0 transition-[opacity,border-color,color,box-shadow] duration-zu-snap ease-zu-standard group-hover:opacity-80 hover:!opacity-100 hover:border-sky-400 hover:text-sky-500 hover:shadow-zu-sm focus-visible:opacity-100 focus-visible:outline-none focus-visible:shadow-zu-focus";
+    "zu-press zu-press-insert absolute flex items-center justify-center rounded-full border border-slate-300 bg-white text-slate-400 text-xs leading-none opacity-0 before:absolute before:-inset-[11px] before:content-[''] group-hover:opacity-80 hover:!opacity-100 hover:border-sky-400 hover:text-sky-500 hover:shadow-zu-sm focus-visible:opacity-100 focus-visible:outline-none focus-visible:shadow-zu-focus";
   const insertButtonStyle = {
     top: BUTTON_INSET,
     left: BUTTON_INSET,

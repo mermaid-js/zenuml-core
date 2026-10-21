@@ -92,7 +92,7 @@ export const TypePicker = ({
               key={key}
               type="button"
               className={cn(
-                "w-[30px] h-[30px] flex items-center justify-center rounded-zu-md border transition-colors focus-visible:outline-none focus-visible:shadow-zu-focus",
+                "zu-press w-[30px] h-[30px] flex items-center justify-center rounded-zu-md border transition-colors focus-visible:outline-none focus-visible:shadow-zu-focus",
                 isActive
                   ? "border-sky-500 bg-sky-50 text-sky-700"
                   : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100",
