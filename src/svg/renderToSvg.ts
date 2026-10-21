@@ -25,7 +25,7 @@ import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import type { DiagramGeometry } from "./geometry";
 import { buildThemeStyles, resolvePalette } from "./themes";
 import type { SvgPalette, SvgTheme } from "./themes";
-import { nativeCanvasColor, safeSvgPalette } from "@/surface";
+import { normaliseBackingColor, safeSvgPalette } from "@/surface";
 import type { RenderSurface } from "@/surface";
 import type { DiagramPalette } from "@/surface";
 
@@ -34,6 +34,8 @@ export interface RenderOptions {
   theme?: SvgTheme;
   /** Semantic document colours; supplied slots override the selected theme. */
   palette?: DiagramPalette;
+  /** Optional opaque colour painted underneath the outer canvas once. */
+  backingColor?: string;
   /** Show sequence references and their badges; defaults to true. */
   enableNumbering?: boolean;
   /** Optional emoji shortcode-to-Unicode cache (for future use by Task 8) */
@@ -42,7 +44,7 @@ export interface RenderOptions {
 
 export interface RenderResult {
   svg: string;
-  /** Opaque base painted across the exported document bounds. */
+  /** Raw outer-canvas paint, excluding the optional export backing. */
   surface: RenderSurface;
   /** Inner SVG content (defs + g) for embedding into an existing SVG container */
   innerSvg: string;
@@ -67,10 +69,7 @@ export function renderToSvg(
     ? { ...options, palette: safeSvgPalette(options.palette) }
     : undefined;
   const surface = {
-    backgroundColor: nativeCanvasColor(
-      safeOptions?.theme,
-      safeOptions?.palette,
-    ),
+    backgroundColor: safeOptions?.palette?.canvasBg ?? "transparent",
   };
   // 1. Parse
   const rootContext = RootContext(code);
@@ -114,7 +113,7 @@ export function renderToSvg(
 
 function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
   const surface = {
-    backgroundColor: nativeCanvasColor(options?.theme, options?.palette),
+    backgroundColor: options?.palette?.canvasBg ?? "transparent",
   };
   const padding = 10;
   const headerH = FRAME_VIEWPORT_HEADER_ALLOWANCE;
@@ -244,8 +243,14 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
   const defs = `<defs>\n  <style>${buildThemeStyles(resolveSvgPalette(options))}</style>\n</defs>`;
   const frame = `${frameSvg}\n${headerLineSvg}\n${titleSvg}`;
   const content = `<g transform="translate(${contentLeftMargin}, ${headerLineY})">\n${parts.join("\n")}\n</g>`;
-  const background = `<rect class="canvas-background" x="0" y="0" width="${viewWidth}" height="${viewHeight}" fill="${surface.backgroundColor}"/>`;
-  const innerSvg = `${defs}\n${background}\n${frame}\n${content}`;
+  const backing = options?.backingColor !== undefined
+    ? `<rect class="export-backing" x="0" y="0" width="${viewWidth}" height="${viewHeight}" style="fill: ${normaliseBackingColor(options.backingColor)} !important"/>`
+    : "";
+  const background =
+    surface.backgroundColor !== "transparent"
+      ? `<rect class="canvas-background" x="0" y="0" width="${viewWidth}" height="${viewHeight}" fill="${surface.backgroundColor}"/>`
+      : "";
+  const innerSvg = `${defs}\n${backing}\n${background}\n${frame}\n${content}`;
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="${viewBox}">\n${innerSvg}\n</svg>`;
 

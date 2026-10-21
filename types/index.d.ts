@@ -12,13 +12,15 @@ export interface RenderOptions {
   theme?: SvgTheme;
   /** Semantic document colours; supplied slots override the selected theme. */
   palette?: DiagramPalette;
+  /** Optional opaque colour painted underneath the outer canvas once. */
+  backingColor?: string;
   /** Show sequence references and their badges; defaults to true. */
   enableNumbering?: boolean;
 }
 
 export interface RenderResult {
   svg: string;
-  /** Opaque base painted across the exported document bounds. */
+  /** Raw outer-canvas paint, excluding the optional export backing. */
   surface: RenderSurface;
   /** Inner SVG content (defs + g) for embedding into an existing SVG container */
   innerSvg: string;
@@ -27,9 +29,14 @@ export interface RenderResult {
   viewBox: string;
 }
 
-/** The opaque base painted across the complete exported document bounds. */
+/** Raw outer-canvas paint; transparent unless the author paints it. */
 export interface RenderSurface {
   backgroundColor: string;
+}
+
+export interface ExportOptions {
+  /** Opaque colour painted behind the diagram once. Omit to preserve alpha. */
+  backingColor?: string;
 }
 
 /** Optional semantic colour overrides shared by HTML and native SVG. */
@@ -166,10 +173,10 @@ declare class ZenUml implements IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml>;
-  /** Read the resolved opaque base after render, or again after author CSS changes. */
+  /** Read the raw canvas paint after render, or again after author CSS changes. */
   getSurface(): RenderSurface;
-  getPng(): Promise<string>;
-  getSvg(): Promise<string>;
+  getPng(options?: ExportOptions): Promise<string>;
+  getSvg(options?: ExportOptions): Promise<string>;
 }
 
 export default ZenUml;

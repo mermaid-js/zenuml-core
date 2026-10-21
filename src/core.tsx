@@ -22,8 +22,8 @@ import {
 import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { VERSION } from "./version.ts";
-import * as htmlToImage from "html-to-image";
 import Parser from "./parser/index.js";
+import colorString from "color-string";
 
 import "./assets/tailwind.css";
 import "./assets/tailwind-preflight.less";
@@ -54,7 +54,9 @@ export type { DiagramFontFamily } from "./svg/fonts/ensureDiagramFontsLoaded";
 export type { RenderResult, RenderOptions } from "./svg/renderToSvg";
 export type { RenderSurface } from "./surface";
 export type { DiagramPalette } from "./surface";
-import { canvasBackingColor, opaqueBackground } from "./surface";
+export type { ExportOptions } from "./exportBackground";
+import { exportCanvas, exportSvg } from "./exportBackground";
+import type { ExportOptions } from "./exportBackground";
 import type { RenderSurface } from "./surface";
 import type { DiagramPalette } from "./surface";
 
@@ -68,21 +70,11 @@ const RenderCommit = ({
   return null;
 };
 
-const DiagramRoot = ({ children }: PropsWithChildren) => {
-  const theme = useAtomValue(themeAtom);
-  const palette = useAtomValue(paletteAtom);
-  return (
-    <div
-      className="zenuml"
-      style={{
-        display: "inline-block",
-        backgroundColor: canvasBackingColor(theme, palette),
-      }}
-    >
-      {children}
-    </div>
-  );
-};
+const DiagramRoot = ({ children }: PropsWithChildren) => (
+  <div className="zenuml" style={{ display: "inline-block" }}>
+    {children}
+  </div>
+);
 
 export interface Config {
   theme?: string;
@@ -368,40 +360,39 @@ export default class ZenUml implements IZenUml {
     });
   }
 
-  /** The document's resolved opaque canvas base, refreshed on every call. */
+  /** The document's raw outer-canvas colour, refreshed on every call. */
   getSurface(): RenderSurface {
-    const canvas = this.el.querySelector(".bg-skin-canvas");
-    const color = canvas ? getComputedStyle(canvas).backgroundColor : "";
-    const theme =
-      canvas && [...canvas.classList].find((name) => name.startsWith("theme-"));
-    const wrapper = this.el.querySelector<HTMLElement>(".zenuml");
-    const backing = wrapper
-      ? getComputedStyle(wrapper).backgroundColor
-      : canvasBackingColor(theme ?? undefined, this.store.get(paletteAtom));
-    return { backgroundColor: opaqueBackground(color, backing) };
+    const canvas = this.el.querySelector<HTMLElement>(".bg-skin-canvas");
+    const computed = canvas && getComputedStyle(canvas).backgroundColor;
+    if (computed) return { backgroundColor: computed };
+    // CSS variables are not resolved by test DOM implementations; read the
+    // authored inline palette while preserving the browser's computed path.
+    const authored = canvas?.style.getPropertyValue("--color-bg-canvas");
+    const parsed = authored && colorString.get.rgb(authored);
+    return {
+      backgroundColor: parsed
+        ? parsed[3] === 1
+          ? `rgb(${parsed[0]}, ${parsed[1]}, ${parsed[2]})`
+          : `rgba(${parsed[0]}, ${parsed[1]}, ${parsed[2]}, ${parsed[3]})`
+        : "rgba(0, 0, 0, 0)",
+    };
   }
 
-  async getPng(): Promise<string> {
+  async getPng(options?: ExportOptions): Promise<string> {
     const documentElement =
-      this.el.querySelector<HTMLElement>(".bg-skin-canvas") ?? this.el;
-    return htmlToImage.toPng(documentElement, {
-      backgroundColor: this.getSurface().backgroundColor,
-      style: { backgroundColor: this.getSurface().backgroundColor },
-      filter: (node) => {
-        return !node?.classList?.contains("hide-export");
-      },
-    });
+      this.el.querySelector<HTMLElement>(
+        ".bg-skin-canvas, .sequence-diagram",
+      ) ?? this.el;
+    return (await exportCanvas(documentElement, options)).toDataURL(
+      "image/png",
+    );
   }
 
-  async getSvg(): Promise<string> {
+  async getSvg(options?: ExportOptions): Promise<string> {
     const documentElement =
-      this.el.querySelector<HTMLElement>(".bg-skin-canvas") ?? this.el;
-    return htmlToImage.toSvg(documentElement, {
-      backgroundColor: this.getSurface().backgroundColor,
-      style: { backgroundColor: this.getSurface().backgroundColor },
-      filter: (node) => {
-        return !node?.classList?.contains("hide-export");
-      },
-    });
+      this.el.querySelector<HTMLElement>(
+        ".bg-skin-canvas, .sequence-diagram",
+      ) ?? this.el;
+    return exportSvg(documentElement, options);
   }
 }

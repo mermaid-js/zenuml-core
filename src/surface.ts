@@ -69,55 +69,16 @@ export function safeSvgPalette(
   return safe;
 }
 
-/** The opaque base painted across the complete exported document bounds. */
+/** Raw outer-canvas paint. Transparent unless an author supplies canvasBg/CSS. */
 export interface RenderSurface {
   backgroundColor: string;
 }
 
-/** Resolve an authored CSS color over the theme's declared opaque base. */
-export function opaqueBackground(color: string, backing: string): string {
-  const fallback = colorString.get.rgb(backing) ?? [255, 255, 255, 1];
-  const base = fallback;
-  const foreground = colorString.get.rgb(color);
-  if (!foreground) return `rgb(${base[0]}, ${base[1]}, ${base[2]})`;
-  const alpha = foreground[3] ?? 1;
-  const channels = [0, 1, 2].map((i) =>
-    Math.floor(foreground[i] * alpha + base[i] * (1 - alpha)),
-  );
-  return `rgb(${channels.join(", ")})`;
-}
-
-/** The backing layer under a canvas whose own colour may have alpha. */
-export function canvasBackingColor(
-  theme: string | undefined,
-  palette?: DiagramPalette,
-): string {
-  const declared = palette?.canvasBg && colorString.get.rgb(palette.canvasBg);
-  return declared?.[3] === 1 ? palette!.canvasBg! : themeBaseColor(theme);
-}
-
-/** Preserve an opaque colour; otherwise compose it over the theme once. */
-export function nativeCanvasColor(
-  theme: string | undefined,
-  palette?: DiagramPalette,
-): string {
-  const color = palette?.canvasBg ?? themeBaseColor(theme);
-  const parsed = colorString.get.rgb(color);
-  return parsed?.[3] === 1
-    ? color
-    : opaqueBackground(color, themeBaseColor(theme));
-}
-
-export function themeBaseColor(theme: string | undefined): string {
-  const bases: Record<string, string> = {
-    "theme-dark": "#1f1f1f",
-    "theme-clean-dark": "#1f1f1f",
-    "theme-darcula": "#1f1f1f",
-    "theme-neon": "#000000",
-    "theme-idle-afternoon": "#d8dad9",
-    "theme-woolworths": "#e6eaf0",
-    "theme-creately": "#f6f0de",
-    "theme-purple": "#fafafa",
-  };
-  return bases[theme ?? ""] ?? "#ffffff";
+/** Accept only a solid opaque colour, and serialize it without SVG markup. */
+export function normaliseBackingColor(color: string): string {
+  const rgb = colorString.get.rgb(color);
+  if (!rgb || rgb[3] !== 1) {
+    throw new TypeError("backingColor must be an opaque CSS colour");
+  }
+  return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
 }

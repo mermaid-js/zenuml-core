@@ -74,14 +74,13 @@ module.exports = {
       },
       backgroundColor: {
         skin: {
-          canvas:
-            "var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))",
+          canvas: "var(--color-bg-canvas, transparent)",
           frame:
-            "var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff))))",
+            "var(--color-bg-frame, var(--color-bg-base, var(--color-backup-white, #ffffff)))",
           title:
-            "var(--color-bg-title, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
+            "var(--color-bg-title, var(--color-bg-frame, var(--color-bg-base, var(--color-backup-white, #ffffff))))",
           participant:
-            "var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
+            "var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-base, var(--color-backup-white, #ffffff))))",
           // The lifeline is drawn by LifeLine.tsx as a gradient of
           // --color-border-base; this chain records that so the SVG palette can
           // resolve the same value (src/svg/themes.spec.ts).
@@ -96,9 +95,9 @@ module.exports = {
           "comment-code": "var(--color-bg-comment-code, #f9f2f4)",
           "comment-table-head": "var(--color-bg-comment-table-head, #e0e0e0)",
           "fragment-header":
-            "var(--color-bg-fragment-header, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
+            "var(--color-bg-fragment-header, var(--color-bg-frame, var(--color-bg-base, var(--color-backup-white, #ffffff))))",
           occurrence:
-            "var(--color-bg-occurrence, var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-canvas, var(--color-bg-base, var(--color-backup-white, #ffffff))))))",
+            "var(--color-bg-occurrence, var(--color-bg-participant, var(--color-bg-frame, var(--color-bg-base, var(--color-backup-white, #ffffff)))))",
           base: "var(--color-bg-base)",
           secondary: "var(--color-bg-secondary)",
           hover: "var(--color-bg-hover)",

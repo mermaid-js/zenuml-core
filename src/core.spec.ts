@@ -73,7 +73,7 @@ describe("@ZenUML/core", function () {
     const zenUml = new ZenUml(el);
     await zenUml.render("A->B: Hello", { theme: "theme-default" });
     expect(el.querySelector(".bg-skin-canvas")).not.toBeNull();
-    expect(zenUml.getSurface().backgroundColor).toBe("rgb(255, 255, 255)");
+    expect(zenUml.getSurface().backgroundColor).toBe("rgba(0, 0, 0, 0)");
 
     const style = document.createElement("style");
     style.textContent =
@@ -124,7 +124,7 @@ describe("@ZenUML/core", function () {
     await Promise.all([oldRender, latestRender]);
     expect(el.textContent).toContain("latest");
     expect(el.textContent).not.toContain("old");
-    expect(zenUml.getSurface().backgroundColor).toBe("rgb(31, 31, 31)");
+    expect(zenUml.getSurface().backgroundColor).toBe("rgba(0, 0, 0, 0)");
   });
 
   it("ignores stale lifeline readiness from a replaced participant set", async () => {
@@ -153,7 +153,7 @@ describe("@ZenUML/core", function () {
       theme: "theme-default",
       palette: undefined,
     });
-    expect(zenUml.getSurface().backgroundColor).toBe("rgb(255, 255, 255)");
+    expect(zenUml.getSurface().backgroundColor).toBe("rgba(0, 0, 0, 0)");
   });
 
   it("lets the host hide message numbering", async () => {

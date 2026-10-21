@@ -1,5 +1,12 @@
 # 0004 — One canonical `theme-dark`, derived from measurements and gated by an APCA audit
 
+Update (2026-10-21): Decision 2 and the transparent-canvas alternative below describe the original
+opaque **outer** canvas. The current surface contract keeps the `#1f1f1f` frame and its local fills,
+but lets the narrow padding ring and rounded outer corners be transparent so the embedding host owns
+their backing. Text remains over the opaque frame. Exports preserve that alpha by default and accept
+an explicit opaque `backingColor` when a flattened image is needed. The colour measurements and APCA
+floors in this record still apply to the frame and element surfaces, not to the host-owned ring.
+
 Date: 2026-10-20
 Status: Proposed. The structure (one canonical theme, aliases, PR A then PR B, parity test, three deferred
 issues) was settled by the maintainer on 2026-10-20. Three resolutions of floor conflicts below (the chip
