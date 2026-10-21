@@ -1,5 +1,21 @@
 # @zenuml/core
 
+## 4.9.0
+
+### Minor Changes
+
+- [#510](https://github.com/mermaid-js/zenuml-core/pull/510) [`3a38c52`](https://github.com/mermaid-js/zenuml-core/commit/3a38c52b0b87b4b170620567a2e69c57efea2f05) Thanks [@MrCoder](https://github.com/MrCoder)! - Make the outer canvas transparent by default while keeping the diagram frame and elements painted. Hosts own the surrounding background and can request an opaque backing when exporting PNG or SVG. Also expose shared semantic palette inputs, a raw canvas-surface read, committed HTML render completion, and deterministic export bounds.
+
+### Patch Changes
+
+- [#504](https://github.com/mermaid-js/zenuml-core/pull/504) [`51a36bd`](https://github.com/mermaid-js/zenuml-core/commit/51a36bdac798119b7d4f2a92e61acf2a850b43d6) Thanks [@MrCoder](https://github.com/MrCoder)! - A creation message inside a fragment now starts at its creator. Before, it started at the fragment's left-most participant: when the created participant sat left of the creator the arrow collapsed and the «create» label was clipped, and when the creator was not the left-most participant the arrow started at the wrong lifeline.
+
+- [#506](https://github.com/mermaid-js/zenuml-core/pull/506) [`99ba5aa`](https://github.com/mermaid-js/zenuml-core/commit/99ba5aa07fd0ed5f690a5f2aa7f36716a04b380d) Thanks [@MrCoder](https://github.com/MrCoder)! - An icon token alone, such as `if([check])` or `while([check])`, and an unquoted condition that contains a number, such as `if(retry 3 times)`, are now valid fragment conditions instead of breaking the diagram.
+
+- [#500](https://github.com/mermaid-js/zenuml-core/pull/500) [`5071e8f`](https://github.com/mermaid-js/zenuml-core/commit/5071e8f87854d5a641b4eca89ad777f81eb92932) Thanks [@MrCoder](https://github.com/MrCoder)! - Every control in the editing chrome now shows one focus ring: a 1 px page-colour gap, a 1 px slate ring and a soft glow, on keyboard focus only. It replaces the mixed sky and slate rings and the browser default outline, and the inline name and title editor uses the same ring. Hosts can set `data-reduce-motion="true"` on an ancestor of the diagram (for example `<html>`, `<body>` or the host container) to zero the chrome durations, the same as `prefers-reduced-motion: reduce`. On the `.zenuml` root alone it reaches only the controls inside the diagram, because the popovers render in their own portal roots.
+
+- [#502](https://github.com/mermaid-js/zenuml-core/pull/502) [`0d07dba`](https://github.com/mermaid-js/zenuml-core/commit/0d07dbae6eba0740fc22ac8dbeccfb3fde261f86) Thanks [@MrCoder](https://github.com/MrCoder)! - Editing controls now give press feedback and are easier to hit: buttons in the style panels, pickers and insert controls shrink slightly while pressed (off under reduced motion), the participant insert button reacts anywhere in its 36 px area, the message create handle has a 24 px pointer target, and the Rename and message type items that cannot apply now say so to screen readers, stay focusable, keep their explanatory tooltip, and no longer close the submenu when clicked.
+
 ## 4.8.1
 
 ### Patch Changes
