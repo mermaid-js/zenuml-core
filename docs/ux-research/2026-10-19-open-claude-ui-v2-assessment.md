@@ -323,8 +323,8 @@ as its own.
 **Moot, dropped 2026-10-20.** The baseline confirms the defect (the declared 0.3 s transition never runs
 because `display` switches from none to block), but the component is unreachable: #446 (2026-10-01) removed
 its import and its only usage from `DiagramFrame.tsx`, no `src`, story or e2e file references it since,
-and `dist/zenuml.esm.mjs` carries only the `privacy` icon name. No PR. Deleting the dead
-`src/components/DiagramFrame/Privacy/` folder is a separate cleanup item.
+and `dist/zenuml.esm.mjs` carries only the `privacy` icon name. No PR. The dead
+`src/components/DiagramFrame/Privacy/` folder was deleted 2026-10-21 by #499 (6115bf86).
 
 ### P1: chrome tokens
 
@@ -363,7 +363,7 @@ and `dist/zenuml.esm.mjs` carries only the `privacy` icon name. No PR. Deleting 
 
 ### P3: focus and reduced motion
 
-**Status: in progress 2026-10-20 (branch `feat/zu-focus-ring-p3`).** The media-query half of the reduced-motion row landed with P2; P3 carries the host attribute and the focus ring.
+**Status: merged 2026-10-21 as #500 (5071e8f8).** One ring recipe (`shadow-zu-focus`) on every chrome control; `[data-reduce-motion="true"]` zeroes every `--zu-dur-*` when set on an ancestor of the diagram (`html`, `body` or the host container), not on the `.zenuml` root alone, because the popovers render in their own portal roots. The ring's 1 px gap is a fixed white token, so on theme-dark it is expected to read as a white hairline (inferred from the token scope, not yet measured on a dark fixture); follow-up pending.
 
 | Change | Why | Evidence |
 |---|---|---|
@@ -372,6 +372,8 @@ and `dist/zenuml.esm.mjs` carries only the `privacy` icon name. No PR. Deleting 
 | Set every `--zu-dur-*` to 0 under `prefers-reduced-motion: reduce`, **and** under a host-set `[data-reduce-motion="true"]` on `.zenuml`. | Claude has 80 `prefers-reduced-motion: reduce` blocks and 16 `no-preference` blocks on web (96 total) and a `[data-reduce-motion]` override. Embedding hosts may want to force reduced motion. | reduced-motion (WEB 1374, 58144, 58173; ASAR 3262) |
 
 ### P4: press, disabled, hit area
+
+**Status: merged 2026-10-21 as #502 (0d07dbae).** Press squish on the chrome controls (`scale(.975)`, 60 ms press, 450 ms spring release), off under `prefers-reduced-motion` and `data-reduce-motion`; 24 x 24 hit areas for the 12 px gap create handle and the 16 px participant insert button, visual unchanged; `aria-disabled` on the StylePanel items that cannot act, still focusable and titled. The optional selection pop is not done.
 
 | Change | Why | Evidence |
 |---|---|---|
