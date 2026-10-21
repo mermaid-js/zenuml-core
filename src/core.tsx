@@ -10,10 +10,12 @@ import {
   enableScopedThemingAtom,
   lifelineReadyAtom,
   modeAtom,
+  paletteAtom,
   onContentChangeAtom,
   onEventEmitAtom,
   onThemeChangeAtom,
   RenderMode,
+  renderRevisionAtom,
   stickyOffsetAtom,
   themeAtom,
 } from "./store/Store";
@@ -35,8 +37,10 @@ import { getStartTime, calculateCostTime } from "./utils/CostTime";
 import { clearCache } from "./utils/RenderingCache";
 import { waitForRenderingReady } from "./store/waitForRenderingReady";
 import { createRoot } from "react-dom/client";
-import { StrictMode } from "react";
-import { createStore, Provider } from "jotai";
+import { StrictMode, useLayoutEffect } from "react";
+import type { PropsWithChildren } from "react";
+import { flushSync } from "react-dom";
+import { createStore, Provider, useAtomValue } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
 export { renderToSvg } from "./svg/renderToSvg";
 export { ensureDiagramIconsLoaded } from "./svg/icons";
@@ -48,9 +52,42 @@ import {
 export { ensureDiagramFontsLoaded, getDiagramFontFaceCss, setDiagramFontUrl };
 export type { DiagramFontFamily } from "./svg/fonts/ensureDiagramFontsLoaded";
 export type { RenderResult, RenderOptions } from "./svg/renderToSvg";
+export type { RenderSurface } from "./surface";
+export type { DiagramPalette } from "./surface";
+import { canvasBackingColor, opaqueBackground } from "./surface";
+import type { RenderSurface } from "./surface";
+import type { DiagramPalette } from "./surface";
+
+const RenderCommit = ({
+  onCommit,
+}: {
+  onCommit: (revision: number) => void;
+}) => {
+  const revision = useAtomValue(renderRevisionAtom);
+  useLayoutEffect(() => onCommit(revision), [revision, onCommit]);
+  return null;
+};
+
+const DiagramRoot = ({ children }: PropsWithChildren) => {
+  const theme = useAtomValue(themeAtom);
+  const palette = useAtomValue(paletteAtom);
+  return (
+    <div
+      className="zenuml"
+      style={{
+        display: "inline-block",
+        backgroundColor: canvasBackingColor(theme, palette),
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
 export interface Config {
   theme?: string;
+  /** Semantic document colours. Supplied slots override the selected theme. */
+  palette?: DiagramPalette;
   enableScopedTheming?: boolean;
   onThemeChange?: (data: { theme: string; scoped?: boolean }) => void;
   enableMultiTheme?: boolean;
@@ -92,6 +129,7 @@ interface IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml>;
+  getSurface(): RenderSurface;
 }
 
 export default class ZenUml implements IZenUml {
@@ -109,9 +147,23 @@ export default class ZenUml implements IZenUml {
   private _currentTimeout: NodeJS.Timeout | undefined;
   private _lastRenderingCostMilliseconds = 0;
   private initialRender = true;
-  constructor(el: HTMLElement | string, naked: boolean = false) {
+  private revision = 0;
+  private committedRevision = 0;
+  private commitWaiters = new Map<number, () => void>();
+  private pendingRenders: {
+    resolve: (value: IZenUml) => void;
+    reject: (reason: unknown) => void;
+  }[] = [];
+  constructor(
+    el: HTMLElement | string,
+    naked: boolean = false,
+    initial?: Pick<Config, "theme" | "palette">,
+  ) {
     this.el = typeof el === "string" ? document.querySelector(el)! : el;
     this.store = createStore();
+    this._theme = initial?.theme;
+    this.store.set(themeAtom, initial?.theme || "theme-default");
+    this.store.set(paletteAtom, initial?.palette);
 
     this.store.sub(themeAtom, () => {
       this.store.get(onThemeChangeAtom)({
@@ -128,15 +180,31 @@ export default class ZenUml implements IZenUml {
               just ".bg-skin-canvas". This means all Tailwind utilities used in child components
               (like DiagramFrame) will only work when they are descendants of an element with the
               .zenuml class. This provides scoped styling for the ZenUML library. */}
-          <div className="zenuml">
+          <DiagramRoot>
+            <RenderCommit onCommit={this.onCommit} />
             <ErrorBoundary>
               {naked ? <SeqDiagram /> : <DiagramFrame />}
             </ErrorBoundary>
-          </div>
+          </DiagramRoot>
         </Provider>
       </StrictMode>,
     );
     this.addPortalRootElement();
+  }
+
+  private onCommit = (revision: number): void => {
+    this.committedRevision = Math.max(this.committedRevision, revision);
+    for (const [id, resolve] of this.commitWaiters) {
+      if (id <= this.committedRevision) {
+        this.commitWaiters.delete(id);
+        resolve();
+      }
+    }
+  };
+
+  private waitForCommit(revision: number): Promise<void> {
+    if (this.committedRevision >= revision) return Promise.resolve();
+    return new Promise((resolve) => this.commitWaiters.set(revision, resolve));
   }
 
   // DON'T REMOVE: headlessui portal root hack
@@ -149,17 +217,21 @@ export default class ZenUml implements IZenUml {
     document.body.append(portalRootElement);
   }
 
-  async render(
+  render(
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml> {
     if (this._currentTimeout) {
       clearTimeout(this._currentTimeout);
     }
+    const revision = ++this.revision;
     this._code = code === undefined ? this._code : code;
     this._theme = config?.theme || this._theme;
     this.store.set(stickyOffsetAtom, config?.stickyOffset ?? 0);
     this.store.set(themeAtom, this._theme || "default");
+    if (config && Object.prototype.hasOwnProperty.call(config, "palette")) {
+      this.store.set(paletteAtom, config.palette);
+    }
     this.store.set(
       enableScopedThemingAtom,
       config?.enableScopedTheming || false,
@@ -168,22 +240,39 @@ export default class ZenUml implements IZenUml {
 
     // this.initialRender is used to avoid the first rendering is debounced by setTimeout.
     // The first rendering should be executed immediately. It fixes the issue that causes the blank screen on mermaid live editor.
+    const result = new Promise<IZenUml>((resolve, reject) => {
+      this.pendingRenders.push({ resolve, reject });
+    });
+    const run = () => {
+      void this.doRender(config, revision).then(
+        () => {
+          if (revision !== this.revision) return;
+          for (const pending of this.pendingRenders.splice(0))
+            pending.resolve(this);
+        },
+        (error) => {
+          if (revision !== this.revision) return;
+          for (const pending of this.pendingRenders.splice(0))
+            pending.reject(error);
+        },
+      );
+    };
     if (this.initialRender) {
       this.initialRender = false;
-      await this.doRender(config);
+      run();
     } else {
       this._currentTimeout = setTimeout(
-        async () => await this.doRender(config),
+        run,
         this.calculateDebounceMilliseconds(),
       );
     }
-
-    return this;
+    return result;
   }
 
-  async doRender(config: Config | undefined) {
+  async doRender(config: Config | undefined, revision = this.revision) {
     // Text is measured during render; the face must be available first.
     await ensureDiagramFontsLoaded();
+    if (revision !== this.revision) return;
     const start = getStartTime();
     clearCache();
     this.store.set(onContentChangeAtom, config?.onContentChange || (() => {}));
@@ -216,17 +305,20 @@ export default class ZenUml implements IZenUml {
     if (config?.enableMessageReorder !== undefined) {
       this.store.set(enableMessageReorderAtom, config.enableMessageReorder);
     }
-    if (this._code === this.store.get(codeAtom)) {
-      return true;
-    } else {
-      this.store.set(lifelineReadyAtom, []);
-      await waitForRenderingReady(this.store, () => {
-        this.store.set(codeAtom, this._code || "");
+    const changed = this._code !== this.store.get(codeAtom);
+    const beginRender = () =>
+      flushSync(() => {
+        if (changed) this.store.set(lifelineReadyAtom, []);
+        if (changed) this.store.set(codeAtom, this._code || "");
+        this.store.set(renderRevisionAtom, revision);
       });
-    }
-    setTimeout(() => {
+    const ready = changed
+      ? waitForRenderingReady(this.store, beginRender)
+      : (beginRender(), Promise.resolve());
+    await Promise.all([this.waitForCommit(revision), ready]);
+    if (revision === this.revision) {
       this._lastRenderingCostMilliseconds = calculateCostTime(start);
-    }, 0);
+    }
   }
 
   calculateDebounceMilliseconds(): number {
@@ -276,22 +368,25 @@ export default class ZenUml implements IZenUml {
     });
   }
 
-  /**
-   * The host element is usually wider than the diagram; the export paints the
-   * rest with the theme's canvas colour so a dark theme stays dark edge to
-   * edge (ADR 0004). White when the canvas is transparent or not rendered yet.
-   */
-  private exportBackground(): string {
+  /** The document's resolved opaque canvas base, refreshed on every call. */
+  getSurface(): RenderSurface {
     const canvas = this.el.querySelector(".bg-skin-canvas");
     const color = canvas ? getComputedStyle(canvas).backgroundColor : "";
-    return color && color !== "rgba(0, 0, 0, 0)" && color !== "transparent"
-      ? color
-      : "white";
+    const theme =
+      canvas && [...canvas.classList].find((name) => name.startsWith("theme-"));
+    const wrapper = this.el.querySelector<HTMLElement>(".zenuml");
+    const backing = wrapper
+      ? getComputedStyle(wrapper).backgroundColor
+      : canvasBackingColor(theme ?? undefined, this.store.get(paletteAtom));
+    return { backgroundColor: opaqueBackground(color, backing) };
   }
 
   async getPng(): Promise<string> {
-    return htmlToImage.toPng(this.el, {
-      backgroundColor: this.exportBackground(),
+    const documentElement =
+      this.el.querySelector<HTMLElement>(".bg-skin-canvas") ?? this.el;
+    return htmlToImage.toPng(documentElement, {
+      backgroundColor: this.getSurface().backgroundColor,
+      style: { backgroundColor: this.getSurface().backgroundColor },
       filter: (node) => {
         return !node?.classList?.contains("hide-export");
       },
@@ -299,7 +394,11 @@ export default class ZenUml implements IZenUml {
   }
 
   async getSvg(): Promise<string> {
-    return htmlToImage.toSvg(this.el, {
+    const documentElement =
+      this.el.querySelector<HTMLElement>(".bg-skin-canvas") ?? this.el;
+    return htmlToImage.toSvg(documentElement, {
+      backgroundColor: this.getSurface().backgroundColor,
+      style: { backgroundColor: this.getSurface().backgroundColor },
       filter: (node) => {
         return !node?.classList?.contains("hide-export");
       },

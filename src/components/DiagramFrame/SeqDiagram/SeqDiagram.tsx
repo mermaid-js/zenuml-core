@@ -5,6 +5,7 @@ import {
   enableNumberingAtom,
   diagramElementAtom,
   modeAtom,
+  paletteAtom,
   RenderMode,
   rootContextAtom,
   themeAtom,
@@ -29,6 +30,7 @@ import { ParticipantInsertControls } from "./LifeLineLayer/ParticipantInsertCont
 import { ParticipantStylePanel } from "./LifeLineLayer/ParticipantStylePanel";
 import { EmptyDiagramPrompt } from "./EmptyDiagramPrompt";
 import { InteractionController } from "@/store/interaction/InteractionController";
+import { paletteCssVariables } from "@/surface";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -36,6 +38,7 @@ export const SeqDiagram = (props: {
   ref?: React.Ref<HTMLDivElement>;
 }) => {
   const theme = useAtomValue(themeAtom);
+  const palette = useAtomValue(paletteAtom);
   const mode = useAtomValue(modeAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
@@ -95,7 +98,10 @@ export const SeqDiagram = (props: {
         theme,
         props.className,
       )}
-      style={props.style}
+      style={{
+        ...props.style,
+        ...(palette ? paletteCssVariables(palette) : {}),
+      }}
       ref={diagramRef}
     >
       {/* Selection click-away belongs to `InteractionController` (ADR 0002,

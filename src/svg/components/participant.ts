@@ -3,6 +3,7 @@ import type { ParticipantGeometry } from "../geometry";
 import { getIcon } from "../icons";
 import { PARTICIPANT_EMOJI_WIDTH } from "../svgConstants";
 import { esc } from "./svgUtils";
+import { participantTextColor } from "@/utils/Color";
 
 /**
  * Stroke inset for SVG border-box emulation.
@@ -21,7 +22,6 @@ const LABEL_HORIZONTAL_PADDING = 16;
 const STEREOTYPE_VERTICAL_OFFSET = 8;
 const STEREOTYPE_FONT_SIZE = 14;
 const BOUNDARY_ICON_VERTICAL_TWEAK = 2.75;
-const PARTICIPANT_TEXT_FILL = "#222";
 
 export function renderParticipant(p: ParticipantGeometry): string {
   if (p.isStarter) return renderStarterParticipant(p);
@@ -84,7 +84,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
     const scale = ICON_SIZE / Math.max(vbW, vbH);
     const iconAttrs = icon.attributes ? ` ${icon.attributes}` : "";
 
-    iconSvg = `<g class="participant-icon" transform="translate(${iconX}, ${iconY}) scale(${scale})"${iconAttrs}>
+    iconSvg = `<g class="participant-icon" transform="translate(${iconX}, ${iconY}) scale(${scale})"${p.color ? ` style="color:${participantTextColor(normalizeHexColor(p.color))};"` : ""}${iconAttrs}>
     ${icon.content}
   </g>`;
   } else if (p.emoji) {
@@ -105,8 +105,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
     emojiIconSvg = `<text x="${emojiTextX}" y="${labelY}" dominant-baseline="central" ${EMOJI_FONT_ATTRS} class="participant-emoji">${esc(getEmojiUnicode(p.emoji))}</text>`;
   }
 
-  // Match the current HTML renderer: stereotypes inherit the same 14px text styling
-  // and theme-default participant text color rather than SVG-side contrast heuristics.
+  // An authored fill uses the same explicit black/white contrast as the HTML renderer.
   let stereotypeSvg = "";
   if (p.stereotype) {
     // Stereotype is always centered over the full participant box (text-anchor="middle").
@@ -116,8 +115,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
       icon && p.labelWidth != null ? textX + p.labelWidth / 2 : p.x;
     const stereoAnchor = "middle";
     const stereoY = textY - STEREOTYPE_VERTICAL_OFFSET;
-    // The label colour comes from the palette (.stereotype-label); an author
-    // colour on the participant keeps the fixed text fill, as the label does.
+    // The label colour comes from the palette unless the author set a fill.
     const { textStyle: stereoTextStyle } = colorAttrs(p.color);
     stereotypeSvg = `<text x="${stereoX}" y="${stereoY}" text-anchor="${stereoAnchor}" dominant-baseline="central" class="stereotype-label" font-size="${STEREOTYPE_FONT_SIZE}"${stereoTextStyle}>${esc("«" + p.stereotype + "»")}</text>`;
   }
@@ -262,10 +260,6 @@ function colorAttrs(color: string | undefined): {
   const hex = normalizeHexColor(color);
   return {
     fillStyle: ` style="fill:${hex};"`,
-    textStyle: participantTextStyle(),
+    textStyle: ` style="fill:${participantTextColor(hex)};"`,
   };
-}
-
-function participantTextStyle(): string {
-  return ` style="fill:${PARTICIPANT_TEXT_FILL};"`;
 }

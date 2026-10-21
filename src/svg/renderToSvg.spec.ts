@@ -397,7 +397,9 @@ A->A:m
     // The 0.65 opacity is a theme slot (ADR 0004) in the style block, not an attribute.
     expect(result.svg).toContain('class="fragment-condition">condition</text>');
     expect(result.svg).toContain(".fragment-condition { font-family");
-    expect(result.svg).toMatch(/\.fragment-condition \{[^}]*opacity: 0\.65; \}/);
+    expect(result.svg).toMatch(
+      /\.fragment-condition \{[^}]*opacity: 0\.65; \}/,
+    );
   });
 
   it("fragment has valid rect geometry", () => {
@@ -588,6 +590,41 @@ A->A:m
     );
     expect(result.innerSvg).toContain('style="fill:#0747A6;"');
     expect(result.innerSvg).toContain('class="participant-label"');
+    expect(result.innerSvg).toContain(
+      'class="participant-label" style="fill:#fff;"',
+    );
+  });
+
+  it("returns an opaque canvas surface and paints the full SVG bounds", () => {
+    const dark = renderToSvg("A->B: Hi", { theme: "theme-dark" });
+    expect(dark.surface.backgroundColor).toBe("#1f1f1f");
+    expect(dark.svg).toContain(
+      `<rect class="canvas-background" x="0" y="0" width="${dark.width}" height="${dark.height}" fill="#1f1f1f"/>`,
+    );
+  });
+
+  it("uses semantic palette slots without changing an explicit participant fill", () => {
+    const result = renderToSvg("@Boundary A #0747A6\nA->B: ping", {
+      theme: "theme-dark",
+      palette: {
+        canvasBg: "#343f4b",
+        frameBg: "#424f5e",
+        messageArrow: "#eef2f6",
+      },
+    });
+    expect(result.surface.backgroundColor).toBe("#343f4b");
+    expect(result.svg).toContain(".frame-border-inner { fill: #424f5e; }");
+    expect(result.svg).toContain(".message-line { stroke: #eef2f6;");
+    expect(result.svg).toContain('style="fill:#0747A6;"');
+    expect(result.svg).toContain('style="fill:#fff;"');
+  });
+
+  it("does not place markup from a palette value into SVG styles", () => {
+    const result = renderToSvg("A->B: ping", {
+      palette: { messageText: "red;</style><script>alert(1)</script>" },
+    });
+    expect(result.svg).not.toContain("<script>");
+    expect(result.svg).toContain(".message-label { font-family:");
   });
 
   it("renders participant group container", () => {

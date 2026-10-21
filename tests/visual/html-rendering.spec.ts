@@ -13,6 +13,14 @@ test.describe("HTML Rendering", () => {
 
       // Wait for async icon imports to complete (stereotypes like @VPC, @RDS)
       await page.waitForLoadState("networkidle");
+      await page.waitForFunction(
+        () =>
+          Array.from(document.querySelectorAll(".participant .h-6.w-6")).every(
+            (slot) => slot.querySelector("svg"),
+          ),
+        null,
+        { timeout: 10000 },
+      );
 
       await expect(page).toHaveScreenshot(`${name}.png`, {
         threshold: threshold ?? DEFAULT_THRESHOLD,
