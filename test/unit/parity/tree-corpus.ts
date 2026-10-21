@@ -93,6 +93,21 @@ const toleranceCases: TreeCorpusEntry[] = [
   { id: "tol-23b-while-no-body", code: "while(x)" },
   { id: "tol-24-empty-braces", code: "{}" },
   { id: "tol-25-free-text-condition", code: "while(no more retries)" },
+  // #366: an icon token alone is a valid condition.
+  { id: "tol-26a-if-icon-only-condition", code: "if([check]) {\n  A.m()\n}" },
+  {
+    id: "tol-26b-while-icon-only-condition",
+    code: "while([check]) {\n  A.m()\n}",
+  },
+  { id: "tol-26c-if-icon-text-condition", code: "if([check] a) {\n  A.m()\n}" },
+  // #363: bare numbers inside free-text conditions; lone number / comparison unchanged.
+  { id: "tol-27a-if-number-in-text", code: "if(retry 3 times) {\n  A.m()\n}" },
+  { id: "tol-27b-if-lone-number", code: "if(3) {\n  A.m()\n}" },
+  { id: "tol-27c-if-comparison-number", code: "if(x > 3) {\n  A.m()\n}" },
+  {
+    id: "tol-27d-while-float-in-text",
+    code: "while(wait 1.5 seconds) {\n  A.m()\n}",
+  },
 ];
 
 export const TREE_CORPUS: TreeCorpusEntry[] = [

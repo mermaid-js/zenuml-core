@@ -1472,7 +1472,7 @@ export class ParExprContext extends Ctx {
 }
 
 export class ConditionContext extends Ctx {
-  // _ast is the concrete condition value (Expr | InExpr | TextExpr); this
+  // _ast is the concrete condition value (Expr | InExpr | TextExpr | Emoji); this
   // wrapper recreates ANTLR's `condition` rule level. ANTLR's leading
   // direct-`atom` alternative maps to AtomExpr here (10-ast-mapping §5.4):
   // atom() unwraps it, and expr() deliberately excludes it.
@@ -1506,12 +1506,17 @@ export class ConditionContext extends Ctx {
     return this._ast?.$type === "TextExpr" ? this._wrap(this._ast) : null;
   }
 
+  emoji(): EmojiContext | null {
+    return this._ast?.$type === "Emoji" ? this._wrap(this._ast) : null;
+  }
+
   protected override _buildChildren(): Ctx[] {
     const child =
       this.atom() ??
       this.expr() ??
       this.inExpr() ??
       this.textExpr() ??
+      this.emoji() ??
       this._wrap(this._ast);
     return child ? [child] : [];
   }

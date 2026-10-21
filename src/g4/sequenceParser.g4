@@ -341,6 +341,7 @@ condition
  | expr
  | inExpr
  | textExpr
+ | emoji
  ;
 
 inExpr
@@ -348,5 +349,5 @@ inExpr
  ;
 
 textExpr
- : (ID | DIGIT_LEADING_NAME | NUMBER_UNIT)+
+ : (ID | DIGIT_LEADING_NAME | NUMBER_UNIT | INT | FLOAT)+
  ;
