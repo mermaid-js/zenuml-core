@@ -6,6 +6,14 @@ import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 import { centerOf } from "../utils";
 
+// Theme slots for the divider. These stay inline (not Tailwind classes) so a
+// bracket style such as `== [red] note ==` keeps the precedence it has today.
+// The chains must match tailwind.config.js `*.skin.divider` / `divider-line`;
+// src/svg/themes.spec.ts checks that.
+const DIVIDER_LINE = "var(--color-border-divider, #aaaa33)";
+const DIVIDER_BG = "var(--color-bg-divider, #fff5ad)";
+const DIVIDER_TEXT = "var(--color-text-divider, #333)";
+
 export const Divider = (props: {
   context: any;
   origin: string;
@@ -65,26 +73,27 @@ export const Divider = (props: {
         gap: 0,
       }}
     >
-      <div className="left" style={{ flex: 1, height: 1, backgroundColor: "#aaaa33" }}></div>
+      {/* Rules are borders, not backgrounds: forced-colors mode keeps borders. */}
+      <div className="left" style={{ flex: 1, height: 0, borderTop: `1px solid ${DIVIDER_LINE}` }}></div>
       <div
         style={{
           ...messageStyle.style.textStyle,
-          backgroundColor: "#fff5ad",
-          border: "1px solid #aaaa33",
+          backgroundColor: DIVIDER_BG,
+          border: `1px solid ${DIVIDER_LINE}`,
           borderRadius: 2,
           boxSizing: "border-box" as const,
           height: 28,
           padding: "0 8px",
           fontSize: 14,
           lineHeight: "26px",
-          color: "#333",
+          color: DIVIDER_TEXT,
           whiteSpace: "nowrap",
         }}
         className={cn("name", messageStyle.style.classNames)}
       >
         {cleanNote}
       </div>
-      <div className="right" style={{ flex: 1, height: 1, backgroundColor: "#aaaa33" }}></div>
+      <div className="right" style={{ flex: 1, height: 0, borderTop: `1px solid ${DIVIDER_LINE}` }}></div>
     </div>
   );
 };

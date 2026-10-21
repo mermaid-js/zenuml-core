@@ -92,7 +92,7 @@ export const TypePicker = ({
               key={key}
               type="button"
               className={cn(
-                "w-[30px] h-[30px] flex items-center justify-center rounded-zu-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300",
+                "zu-press w-[30px] h-[30px] flex items-center justify-center rounded-zu-md border transition-colors focus-visible:outline-none focus-visible:shadow-zu-focus",
                 isActive
                   ? "border-sky-500 bg-sky-50 text-sky-700"
                   : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100",
@@ -146,7 +146,7 @@ export const TypePicker = ({
               pick(results[activeResult]);
             }
           }}
-          className="w-full h-7 box-border rounded-zu-md border border-gray-200 bg-white pl-[30px] pr-2 text-[12px] text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          className="w-full h-7 box-border rounded-zu-md border border-gray-200 bg-white pl-[30px] pr-2 text-[12px] text-gray-900 placeholder:text-gray-500 focus:outline-none focus:shadow-zu-focus"
         />
         {results.length > 0 && (
           <ul

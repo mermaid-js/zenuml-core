@@ -10,15 +10,14 @@
 }
 
 .editable-span-base.editable-span-editing {
-  outline: 1px solid #3b82f6;
-  outline-offset: 0;
+  outline: none;
   background-color: #eff6ff;
   border-radius: var(--zu-radius-sm);
-  box-shadow: none;
+  box-shadow: var(--zu-focus-ring);
   cursor: text;
 }
 
 .editable-span-base:focus-visible:not(.editable-span-editing) {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--zu-focus-ring);
 }

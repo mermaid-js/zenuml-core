@@ -344,10 +344,11 @@ Atom:
 ParExpr:
     {infer ParExpr} OPAR condition=Condition? CPAR?;
 
-// condition: expr | inExpr | textExpr (leading `atom` alt folded into Expr —
-// see header note; a lone atom condition is Expr→AtomExpr).
+// condition: expr | inExpr | textExpr | emoji (leading `atom` alt folded into
+// Expr — see header note; a lone atom condition is Expr→AtomExpr). The trailing
+// emoji alt lets an icon token stand alone: `if([check])` (#366).
 Condition:
-    Expr | InExpr | TextExpr;
+    Expr | InExpr | TextExpr | Emoji;
 
 InExpr:
     {infer InExpr} left=(ID | DIGIT_LEADING_NAME) IN right=(ID | DIGIT_LEADING_NAME);
@@ -355,7 +356,7 @@ InExpr:
 // textExpr: word word+ — single words are atoms; multi-word free text only.
 // [ET #25]
 TextExpr:
-    {infer TextExpr} words+=(ID | DIGIT_LEADING_NAME | NUMBER_UNIT) (words+=(ID | DIGIT_LEADING_NAME | NUMBER_UNIT))+;
+    {infer TextExpr} words+=(ID | DIGIT_LEADING_NAME | NUMBER_UNIT | INT | FLOAT) (words+=(ID | DIGIT_LEADING_NAME | NUMBER_UNIT | INT | FLOAT))+;
 
 // ---------------------------------------------------------------------------
 // Terminals — PLACEHOLDERS ONLY (names must match lexer/tokens.ts; the

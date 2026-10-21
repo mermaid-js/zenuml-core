@@ -93,4 +93,36 @@ test.describe("Message Rename Panel", () => {
       )
       .toContain("D->C:Hello Alice");
   });
+
+  test("rename is aria-disabled for a message with no label and explains why", async ({
+    page,
+  }) => {
+    await page.goto(
+      `/e2e/fixtures/creation.html?dsl=${encodeURIComponent("A.m()\nnew B")}`,
+    );
+    await expect(
+      page.locator(".sequence-diagram .participant").first(),
+    ).toBeVisible({
+      timeout: 5000,
+    });
+
+    await clickMessageArrow(page.locator(".interaction.creation .message"));
+    const rename = page.getByTestId("message-rename");
+    await expect(rename).toBeVisible();
+    await expect(rename).toHaveAttribute("aria-disabled", "true");
+    // The title stays readable: no pointer-events: none.
+    await expect(rename).toHaveAttribute(
+      "title",
+      "Cannot rename: message has no label",
+    );
+    await expect(rename).not.toHaveCSS("pointer-events", "none");
+
+    await rename.hover();
+    // Playwright treats aria-disabled as not enabled; force the real click.
+    await rename.click({ force: true });
+    await page.waitForTimeout(200);
+    await expect(page.locator("[contenteditable='true']")).toHaveCount(0);
+    // The panel stays open: the click did nothing.
+    await expect(rename).toBeVisible();
+  });
 });

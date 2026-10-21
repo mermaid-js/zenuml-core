@@ -8,7 +8,6 @@ import { useRef, useState, useLayoutEffect, useCallback } from "react";
 const LIFELINE_GROUP_OUTLINE_MARGIN = 2;
 const GROUP_STROKE_WIDTH = 1;
 const GROUP_SW2 = GROUP_STROKE_WIDTH / 2; // 0.5
-const GROUP_STROKE_COLOR = "#666";
 const GROUP_DASH_ARRAY = "4 3";
 const GROUP_TITLE_LINE_HEIGHT = 19;
 
@@ -47,7 +46,7 @@ const GroupOutline = (props: {
       width={props.width}
       height={props.height}
       fill="none"
-      stroke={GROUP_STROKE_COLOR}
+      className="stroke-skin-group"
       strokeWidth={GROUP_STROKE_WIDTH}
       strokeDasharray={GROUP_DASH_ARRAY}
     />

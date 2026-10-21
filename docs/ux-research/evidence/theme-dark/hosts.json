@@ -1,0 +1,77 @@
+{
+  "purpose": "Dark surfaces of the hosts @zenuml/core is embedded in, read from each host's published source on 2026-10-20 (ADR 0004, step 2). Values are verbatim; the nearest-neutral canvas is derived in derive-dark.json.",
+  "hosts": {
+    "atlassian": {
+      "source": "@atlaskit/tokens@20.6.1 (npm), dist/cjs/artifacts/tokens-raw/atlassian-dark.js",
+      "integrity": "sha512-ZuyRwjlDWhcM7kmMumkAC0AxYBTl4NLN/99d9p6iu/S0OuKk4MPsFWSPgXV87XmmNaLvwHi0GZRDPwtRdRf4rw==",
+      "fetched": "2026-10-20",
+      "tokens": {
+        "elevation.surface": "#1F1F21",
+        "elevation.surface.sunken": "#18191A",
+        "elevation.surface.raised": "#242528",
+        "elevation.surface.overlay": "#2B2C2F",
+        "color.text": "#CECFD2",
+        "color.text.subtle": "#A9ABAF",
+        "color.text.subtlest": "#96999E",
+        "color.border": "#E3E4F21F",
+        "color.border.bold": "#7E8188",
+        "color.background.neutral": "#CECED912",
+        "color.background.input": "#242528"
+      }
+    },
+    "github": {
+      "source": "@primer/primitives@11.10.0 (npm), dist/css/functional/themes/dark.css",
+      "sha256": "d70cf0d4f3b2b1056030b40fcf1cd65b1d74d07dbbec002ad300e08266188d89",
+      "fetched": "2026-10-20",
+      "tokens": {
+        "--bgColor-default": "#0d1117",
+        "--bgColor-muted": "#151b23",
+        "--fgColor-default": "#f0f6fc",
+        "--fgColor-muted": "#9198a1",
+        "--borderColor-default": "#3d444d",
+        "--borderColor-muted": "#3d444db3"
+      }
+    },
+    "vscode": {
+      "source": "microsoft/vscode@edc26e3f4f8407d0b000154ae2ca9bdf693a3d60 extensions/theme-defaults/themes/dark_modern.json (includes dark_plus.json -> dark_vs.json)",
+      "sha256": {
+        "dark_modern.json": "58d4ea55a2a36f65c0d5caf033dfddc4ec7d4b3a5d8b731a84bc36001d26a339",
+        "dark_vs.json": "9fc2c16761400632eac6166ff7bb0435c5190a94bffa51ec1ef19b2ce78576b2"
+      },
+      "fetched": "2026-10-20",
+      "tokens": {
+        "dark_modern editor.background": "#1F1F1F",
+        "dark_modern editor.foreground": "#CCCCCC",
+        "dark_modern sideBar.background": "#181818",
+        "dark_modern editorWidget.background": "#202020",
+        "dark_modern widget.border": "#313131",
+        "dark_modern panel.border": "#2B2B2B",
+        "dark_modern descriptionForeground": "#9D9D9D",
+        "dark_vs editor.background": "#1E1E1E",
+        "dark_vs editor.foreground": "#D4D4D4"
+      }
+    },
+    "mermaid": {
+      "source": "mermaid-js/mermaid tag mermaid@12.2.0, packages/mermaid/src/themes/theme-dark.js (identical in the sequence-diagram section to the local checkout at 7a3856600, 2026-06-03)",
+      "sha256": "d22b8ab46292bd1406d8b8b28d42ea7b5dcebd0a7aba1dc10c392b9843d4a2bb",
+      "fetched": "2026-10-20",
+      "tokens": {
+        "background": "#333",
+        "mainBkg": "#1f2020",
+        "textColor": "#ccc",
+        "mainContrastColor": "lightgrey",
+        "border1": "#ccc",
+        "border2": "rgba(255, 255, 255, 0.25)",
+        "lineColor": "invert(background) = #ccc",
+        "actorBkg": "mainBkg = #1f2020",
+        "actorBorder": "border1 = #ccc",
+        "actorTextColor": "mainContrastColor = lightgrey",
+        "signalColor": "mainContrastColor",
+        "labelBoxBkgColor": "actorBkg",
+        "noteBkgColor": "#fff5ad",
+        "activationBkgColor": "secondBkg = lighten(mainBkg, 16)",
+        "sequenceNumberColor": "black"
+      }
+    }
+  }
+}

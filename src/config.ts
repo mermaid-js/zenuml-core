@@ -1,6 +1,9 @@
 export function getTheme(): string {
-  // Workbench preview always uses the unstyled black-on-white default.
-  return "theme-default";
+  // The workbench preview uses the unstyled black-on-white default unless the
+  // page is opened with `?theme=theme-dark` (any theme name), which applies
+  // to every render without touching the stored choice.
+  const param = new URLSearchParams(window.location.search).get("theme");
+  return param || "theme-default";
 }
 
 export function setTheme(theme: string): void {

@@ -64,7 +64,7 @@ export const ConditionLabel = (props: {
     <div className="guard-row flex items-baseline gap-1 p-1 min-h-7 leading-5 whitespace-nowrap text-skin-fragment font-normal">
       {props.keyword && (
         <span
-          className={`guard-keyword text-xs leading-4 text-gray-500 font-normal [font-variant-caps:all-small-caps]${!props.condition ? " pt-[3px]" : ""}`}
+          className={`guard-keyword text-xs leading-4 text-skin-guard font-normal [font-variant-caps:all-small-caps]${!props.condition ? " pt-[3px]" : ""}`}
         >
           {props.keyword}
         </span>
@@ -73,7 +73,7 @@ export const ConditionLabel = (props: {
         <EditableSpan
           text={resolveEmojiInText(labelText)}
           isEditable={isEditable}
-          className="bg-skin-frame opacity-65 condition text-sm leading-5 font-normal !px-0"
+          className="bg-skin-frame opacity-skin-guard condition text-sm leading-5 font-normal !px-0"
           onSave={handleSave}
           title="Click to edit condition"
           autoEditToken={shouldAutoEdit}

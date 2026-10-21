@@ -14,10 +14,11 @@
       import { renderToSvg } from "/src/svg/renderToSvg.ts";
       import { ensureDiagramFontsLoaded } from "/src/svg/fonts/ensureDiagramFontsLoaded.ts";
       import { ensureDiagramIconsLoaded } from "/src/svg/icons.ts";
-      window.__renderSvg = async (code) => {
+      // theme is optional; the audit script passes it to render theme-dark.
+      window.__renderSvg = async (code, theme) => {
         await ensureDiagramFontsLoaded();
         await ensureDiagramIconsLoaded(code);
-        const result = renderToSvg(code);
+        const result = renderToSvg(code, theme ? { theme } : undefined);
         document.getElementById("svg-output").innerHTML = result.svg;
       };
     </script>

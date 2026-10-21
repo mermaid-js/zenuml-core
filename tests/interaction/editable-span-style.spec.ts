@@ -72,9 +72,7 @@ test("message and participant EditableSpan share hover and editing styles withou
   expect(messageEditing).toMatchObject({
     backgroundColor: "rgb(239, 246, 255)",
     cursor: "text",
-    outlineColor: "rgb(59, 130, 246)",
-    outlineStyle: "solid",
-    outlineWidth: "1px",
-    boxShadow: "none",
+    outlineStyle: "none",
   });
+  expect(messageEditing.boxShadow).toContain("rgb(71, 85, 105)");
 });

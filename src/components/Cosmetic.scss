@@ -8,8 +8,10 @@
   .frame {
     .sequence-diagram {
       .comments {
+        // Colours resolve through the theme slot chains in tailwind.config.js
+        // (theme() is expanded by the Tailwind PostCSS plugin after Sass).
         code {
-          background-color: #f9f2f4;
+          background-color: theme("backgroundColor.skin.comment-code");
           padding: 2px;
           margin: 1px 0;
           border-radius: 2px;
@@ -17,15 +19,15 @@
         }
 
         .rest-api .http-method-post {
-          color: #0d4b3b;
+          color: theme("textColor.skin.http-post");
         }
 
         .rest-api .http-method-get {
-          color: #2f3d89;
+          color: theme("textColor.skin.http-get");
         }
 
         .rest-api .http-method-delete {
-          color: #7e1e23;
+          color: theme("textColor.skin.http-delete");
         }
 
         ol {
@@ -51,7 +53,7 @@
           border-collapse: collapse;
           border-spacing: 0;
           empty-cells: show;
-          border-color: #cbcbcb;
+          border-color: theme("borderColor.skin.comment-table");
 
           td,
           th {
@@ -59,7 +61,7 @@
           }
 
           thead {
-            background-color: #e0e0e0;
+            background-color: theme("backgroundColor.skin.comment-table-head");
           }
 
           td {

@@ -1,0 +1,168 @@
+{
+  "generated": "2026-10-20T11:57:51.478Z",
+  "sequence": {
+    "zenuml": "// Order placement\nClient.placeOrder(cart) {\n  Orders.validate(cart) {\n    Inventory.reserve(items)\n    if (inStock) {\n      Payments.charge(total)\n      return receipt\n    } else {\n      return backorder\n    }\n  }\n  Orders.notify()\n}",
+    "mermaid": "sequenceDiagram\n  participant Client\n  participant Orders\n  participant Inventory\n  participant Payments\n  Note over Client: Order placement\n  Client->>Orders: placeOrder(cart)\n  activate Orders\n  Orders->>Inventory: reserve(items)\n  alt inStock\n    Orders->>Payments: charge(total)\n    Payments-->>Orders: receipt\n  else\n    Orders-->>Client: backorder\n  end\n  Orders->>Orders: notify()\n  deactivate Orders",
+    "plantuml": "@startuml\nparticipant Client\nparticipant Orders\nparticipant Inventory\nparticipant Payments\nnote over Client: Order placement\nClient -> Orders: placeOrder(cart)\nactivate Orders\nOrders -> Inventory: reserve(items)\nalt inStock\n  Orders -> Payments: charge(total)\n  Payments --> Orders: receipt\nelse\n  Orders --> Client: backorder\nend\nOrders -> Orders: notify()\ndeactivate Orders\n@enduml",
+    "d2": "shape: sequence_diagram\nClient\nOrders\nInventory\nPayments\nnote: Order placement\nClient -> Orders: placeOrder(cart)\nOrders -> Inventory: reserve(items)\ninStock: {\n  Orders -> Payments: charge(total)\n  Payments -> Orders: receipt\n}\nelse: {\n  Orders -> Client: backorder\n}\nOrders -> Orders: notify()"
+  },
+  "floors": "text 75 (12px: 90), lines 45",
+  "results": {
+    "zenuml theme-dark (DOM)": {
+      "text": {
+        "n": 24,
+        "min": 78.5,
+        "median": 94.1,
+        "max": 103.3,
+        "underFloor": 0,
+        "worst": {
+          "text": "Order placement",
+          "fg": "#d4d4d4",
+          "bg": "#1f1f1f",
+          "lc": -78.5,
+          "fontSize": 14,
+          "path": "div.statement-container.group/stmt>div.interaction.sync>div.comments.text-skin-comment>div>p"
+        }
+      },
+      "line": {
+        "n": 34,
+        "min": 48.4,
+        "median": 86.5,
+        "max": 105.9,
+        "underFloor": 0,
+        "worst": {
+          "fg": "#9f9f9f",
+          "bg": "#1f1f1f",
+          "lc": -48.4,
+          "path": "div.block>div.statement-container.group/stmt>div.group.fragment>div.block>div.segment.border-t"
+        }
+      },
+      "source": "@zenuml/core theme-dark, DOM renderer"
+    },
+    "zenuml theme-dark (SVG)": {
+      "text": {
+        "n": 24,
+        "min": 78.5,
+        "median": 94.1,
+        "max": 103.3,
+        "underFloor": 0,
+        "worst": {
+          "text": "inStock",
+          "fg": "#d4d4d4",
+          "bg": "#1f1f1f",
+          "lc": -78.5,
+          "fontSize": 14,
+          "path": "g>g.fragment.fragment-alt>g.guard-row>text.fragment-condition"
+        }
+      },
+      "line": {
+        "n": 32,
+        "min": 48.4,
+        "median": 86.5,
+        "max": 105.9,
+        "underFloor": 0,
+        "worst": {
+          "fg": "#9f9f9f",
+          "bg": "#1f1f1f",
+          "lc": -48.4,
+          "path": "g>g.fragment.fragment-alt>line.fragment-separator"
+        }
+      },
+      "source": "@zenuml/core theme-dark, renderToSvg"
+    },
+    "Mermaid 12.2.0 theme dark": {
+      "text": {
+        "n": 17,
+        "min": 50.5,
+        "median": 77.6,
+        "max": 77.8,
+        "underFloor": 8,
+        "worst": {
+          "text": "Order placement",
+          "fg": "#b8b6b6",
+          "bg": "#474949",
+          "lc": -50.5,
+          "fontSize": 16,
+          "path": "g>text.noteText>tspan"
+        }
+      },
+      "line": {
+        "n": 26,
+        "min": 0,
+        "median": 69.8,
+        "max": 74,
+        "underFloor": 1,
+        "worst": {
+          "fg": "#2f2f2f",
+          "bg": "#3f3f3f",
+          "lc": 0,
+          "path": "g>rect.note"
+        }
+      },
+      "source": "mermaid@12.2.0 initialize({ theme: \"dark\" }), page background #333 (theme-dark.js background)"
+    },
+    "PlantUML -darkmode": {
+      "text": {
+        "n": 17,
+        "min": 90.8,
+        "median": 105.5,
+        "max": 106.4,
+        "underFloor": 0,
+        "worst": {
+          "text": "alt",
+          "fg": "#ffffff",
+          "bg": "#555555",
+          "lc": -90.8,
+          "fontSize": 13,
+          "path": "g>text"
+        }
+      },
+      "line": {
+        "n": 33,
+        "min": 11.7,
+        "median": 90.8,
+        "max": 106.4,
+        "underFloor": 1,
+        "worst": {
+          "fg": "#e7e7e7",
+          "bg": "#ffffff",
+          "lc": 11.7,
+          "path": "g>g.participant-lifeline>g>line"
+        }
+      },
+      "source": "PlantUML version 1.2026.9 / 18d0aae [2026-10-17 08:25:10 UTC], java -jar plantuml.jar -tsvg -darkmode"
+    },
+    "D2 v0.9.0 theme 200 (Dark Mauve)": {
+      "text": {
+        "n": 13,
+        "min": 68.1,
+        "median": 69.5,
+        "max": 80,
+        "underFloor": 12,
+        "worst": {
+          "text": "placeOrder(cart)",
+          "fg": "#bac2de",
+          "bg": "#1e1e2e",
+          "lc": -68.1,
+          "fontSize": 16,
+          "path": "svg.d2-315592439.d2-svg>g.KENsaWVudCAtJmd0OyBPcmRlcnMpWzBd>text.text-italic.fill-N2"
+        }
+      },
+      "line": {
+        "n": 16,
+        "min": 60.8,
+        "median": 60.8,
+        "max": 62.1,
+        "underFloor": 0,
+        "worst": {
+          "fg": "#cba6f7",
+          "bg": "#1e1e2e",
+          "lc": -60.8,
+          "path": "svg.d2-315592439.d2-svg>g.Q2xpZW50>g.shape>rect.stroke-B1.fill-B5"
+        }
+      },
+      "source": "d2 v0.9.0 --theme 200"
+    }
+  },
+  "markdown": "| renderer | text n | text min Lc | text median | text under floor | line n | line min Lc | line median | line under floor | worst text |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| zenuml theme-dark (DOM) | 24 | 78.5 | 94.1 | 0 | 34 | 48.4 | 86.5 | 0 | #d4d4d4 on #1f1f1f \"Order placement\" |\n| zenuml theme-dark (SVG) | 24 | 78.5 | 94.1 | 0 | 32 | 48.4 | 86.5 | 0 | #d4d4d4 on #1f1f1f \"inStock\" |\n| Mermaid 12.2.0 theme dark | 17 | 50.5 | 77.6 | 8 | 26 | 0 | 69.8 | 1 | #b8b6b6 on #474949 \"Order placement\" |\n| PlantUML -darkmode | 17 | 90.8 | 105.5 | 0 | 33 | 11.7 | 90.8 | 1 | #ffffff on #555555 \"alt\" |\n| D2 v0.9.0 theme 200 (Dark Mauve) | 13 | 68.1 | 69.5 | 12 | 16 | 60.8 | 60.8 | 0 | #bac2de on #1e1e2e \"placeOrder(cart)\" |"
+}

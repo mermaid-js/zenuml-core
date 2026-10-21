@@ -8,6 +8,7 @@ import type { WidthFunc } from "../positioning/Coordinate";
 import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { CodeRange } from "../parser/CodeRange";
+import type { DiagramPalette } from "../surface";
 
 export const resolveWidthProvider = (): WidthFunc => {
   const urlParam =
@@ -32,6 +33,8 @@ export const enum RenderMode {
 }
 
 export const codeAtom = atom("");
+/** A monotonically increasing request id observed after React commits. */
+export const renderRevisionAtom = atom(0);
 
 export const rootContextAtom = atom((get) => {
   const code = get(codeAtom);
@@ -58,6 +61,7 @@ export const verticalCoordinatesAtom = atom((get) => {
 });
 
 export const themeAtom = atom("theme-default");
+export const paletteAtom = atom<DiagramPalette | undefined>(undefined);
 
 export const enableScopedThemingAtom = atom<boolean>(false);
 
@@ -170,7 +174,9 @@ export const lifelineReadyAtom = atom<string[]>([]);
 export const renderingReadyAtom = atom((get) => {
   const lifeLineReady = get(lifelineReadyAtom);
   const participants = get(participantsAtom);
-  return lifeLineReady.length === participants.Size();
+  return participants
+    .Array()
+    .every((participant) => lifeLineReady.includes(participant.name));
 });
 
 export { participantPreviewAtom } from "./participantPreviewAtom";

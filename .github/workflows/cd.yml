@@ -93,6 +93,59 @@ jobs:
     permissions:
       contents: read
 
+  # Theme contrast audit (ADR 0004): renders the corpus through both renderers
+  # in theme-default and theme-dark (DOM at 1x and 2x, SVG at 1x), in
+  # forced-colors mode and on the host-matrix page, three passes at a time,
+  # samples every text, line and fill against the screenshot and fails on any
+  # theme-dark element under its APCA floor.
+  # theme-default is grandfathered against scripts/theme-contrast/baseline-theme-default.json
+  # (a new sub-floor role, or a role 2 Lc worse than recorded, fails).
+  theme-contrast:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Install dependencies
+        run: bun install
+      - name: Cache Playwright browsers
+        uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ hashFiles('bun.lock') }}
+          restore-keys: playwright-browsers-
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install chromium
+      - name: Audit theme contrast
+        run: >
+          bun run audit:contrast --
+          --start-server --forced-colors --host-matrix
+          --json theme-contrast/report.json --md theme-contrast/report.md
+      - name: Report
+        if: always()
+        run: |
+          if [ -f theme-contrast/report.md ]; then
+            cat theme-contrast/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: theme-contrast-report
+          path: theme-contrast/
+          retention-days: 30
+
   # Smoke-test the Dockerfile: it has no other coverage, so a package-manager
   # or script drift (e.g. package.json's build:site renamed) goes unnoticed
   # until someone tries to build the image.
@@ -123,7 +176,7 @@ jobs:
   # so versioning no longer depends on parsing commit messages.
   release:
     runs-on: ubuntu-22.04
-    needs: [test, e2e]
+    needs: [test, e2e, theme-contrast]
     permissions:
       contents: write # commit version bump, push tags, create releases
       pull-requests: write # open/update the "Version Packages" PR
@@ -185,7 +238,7 @@ jobs:
   # Deploy to Cloudflare Workers
   deploy-to-cloudflare:
     runs-on: ubuntu-22.04
-    needs: [test, e2e, build-site]
+    needs: [test, e2e, theme-contrast, build-site]
     permissions:
       contents: read
       deployments: write

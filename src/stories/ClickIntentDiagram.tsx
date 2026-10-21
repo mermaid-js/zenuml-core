@@ -20,7 +20,6 @@ import "@/components/Cosmetic-blue.scss";
 import "@/components/Cosmetic-black-white.scss";
 import "@/components/Cosmetic-star-uml.scss";
 import "@/components/theme-blue-river.scss";
-import "@/themes/theme-dark.css";
 
 export type ClickIntentMode = "Dynamic" | "Static";
 

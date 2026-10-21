@@ -63,3 +63,4 @@ storybook-static
 
 # Harness coordination files
 docs/harness/
+/theme-contrast/
