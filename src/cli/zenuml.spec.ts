@@ -45,6 +45,17 @@ async function runCli(
   return { stdout, stderr, exitCode, stdoutBytes };
 }
 
+/** Per-test budget for the tests that launch Chromium to render PNG output; the
+ * Bun default of 5 s is close to what a loaded CI runner needs for one render. */
+const PNG_TEST_TIMEOUT_MS = 30_000;
+
+/** Failure message for an exit-code assertion: the CLI's stderr and the head of
+ * its stdout, so a failure that only happens on CI can be read from the log. */
+function cliOutput(result: { stderr: string; stdout?: string }): string {
+  const stdout = (result.stdout ?? "").slice(0, 400);
+  return `--- stderr ---\n${result.stderr.trim() || "(empty)"}\n--- stdout (first 400 chars) ---\n${stdout.trim() || "(empty)"}`;
+}
+
 // Track temp files for cleanup
 const tempFiles: string[] = [];
 function tmpFile(name: string): string {
@@ -66,8 +77,9 @@ afterEach(() => {
 describe("zenuml CLI", () => {
   // (a) -h prints help text containing all flag names
   it("prints help text with all flags when -h is passed", async () => {
-    const { stdout, exitCode } = await runCli(["-h"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-h"]);
+    const { stdout, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout).toContain("-i, --input");
     expect(stdout).toContain("-o, --output");
     expect(stdout).toContain("-q, --quiet");
@@ -78,8 +90,9 @@ describe("zenuml CLI", () => {
   // (b) -V prints version matching package.json
   it("prints version matching package.json when -V is passed", async () => {
     const pkg = JSON.parse(readFileSync(PKG_PATH, "utf-8"));
-    const { stdout, exitCode } = await runCli(["-V"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-V"]);
+    const { stdout, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout.trim()).toBe(pkg.version);
   });
 
@@ -89,8 +102,9 @@ describe("zenuml CLI", () => {
     const outputPath = tmpFile("test-output.svg");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode } = await runCli(["-i", inputPath, "-o", outputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", outputPath]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
 
     const svg = readFileSync(outputPath, "utf-8");
     expect(svg).toContain('<svg xmlns=');
@@ -102,8 +116,9 @@ describe("zenuml CLI", () => {
     const outputPath = tmpFile("e2e-smoke.svg");
     writeFileSync(inputPath, CASES.smoke, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["-i", inputPath, "-o", outputPath, "-q"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", outputPath, "-q"]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stderr).not.toContain("DOMPurify.sanitize is not a function");
 
     const svg = readFileSync(outputPath, "utf-8");
@@ -113,10 +128,11 @@ describe("zenuml CLI", () => {
 
   // (d) stdin (-i -) piping works via subprocess with piped stdin
   it("reads from stdin when -i - is used", async () => {
-    const { stdout, exitCode } = await runCli(["-i", "-", "-o", "-"], {
+    const result = await runCli(["-i", "-", "-o", "-"], {
       stdin: SAMPLE_DSL,
     });
-    expect(exitCode).toBe(0);
+    const { stdout, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout).toContain('<svg xmlns=');
     expect(stdout).toContain("</svg>");
   });
@@ -126,8 +142,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("test-stdout.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { stdout, exitCode } = await runCli(["-i", inputPath, "-o", "-"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", "-"]);
+    const { stdout, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout).toContain('<svg xmlns=');
     expect(stdout).toContain("</svg>");
   });
@@ -136,8 +153,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("stdout-contract.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { stdout, stderr, exitCode } = await runCli(["-i", inputPath, "-o", "-"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", "-"]);
+    const { stdout, stderr, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout.trimStart().startsWith("<svg")).toBe(true);
     expect(stdout.trimEnd().endsWith("</svg>")).toBe(true);
     expect(stdout).not.toContain("Rendering");
@@ -152,8 +170,9 @@ describe("zenuml CLI", () => {
     const outputPath = tmpFile("stderr-progress.svg");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { stdout, stderr, exitCode } = await runCli(["-i", inputPath, "-o", outputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", outputPath]);
+    const { stdout, stderr, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout).toBe("");
     expect(stderr).toContain("Rendering");
     expect(stderr).toContain("Wrote");
@@ -161,8 +180,9 @@ describe("zenuml CLI", () => {
 
   // (f) missing -i flag exits with code 1 and error on stderr
   it("exits with code 1 and error on stderr when -i is missing", async () => {
-    const { stderr, exitCode } = await runCli([]);
-    expect(exitCode).toBe(1);
+    const result = await runCli([]);
+    const { stderr, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("-i/--input is required");
   });
 
@@ -174,17 +194,17 @@ describe("zenuml CLI", () => {
 
     // With -q, the "Wrote ..." message should not appear
     const quiet = await runCli(["-i", inputPath, "-o", outputPath, "-q"]);
-    expect(quiet.exitCode).toBe(0);
+    expect(quiet.exitCode, cliOutput(quiet)).toBe(0);
     expect(quiet.stderr).not.toContain("Wrote");
 
     // Without -q, the "Wrote ..." message should appear on stderr
     const loud = await runCli(["-i", inputPath, "-o", outputPath]);
-    expect(loud.exitCode).toBe(0);
+    expect(loud.exitCode, cliOutput(loud)).toBe(0);
     expect(loud.stderr).toContain("Wrote");
 
     // Errors still appear on stderr even with -q
     const errResult = await runCli(["-q"]);
-    expect(errResult.exitCode).toBe(1);
+    expect(errResult.exitCode, cliOutput(errResult)).toBe(1);
     expect(errResult.stderr).toContain("Error");
   });
 
@@ -195,8 +215,9 @@ describe("zenuml CLI", () => {
     tempFiles.push(expectedOutput);
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode } = await runCli(["-i", inputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(existsSync(expectedOutput)).toBe(true);
 
     const svg = readFileSync(expectedOutput, "utf-8");
@@ -214,8 +235,9 @@ describe("zenuml CLI", () => {
     const outputPath = tmpFile("png-test.png");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode } = await runCli(["-i", inputPath, "-o", outputPath, "-e", "png"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", outputPath, "-e", "png"]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(existsSync(outputPath)).toBe(true);
 
     const buf = readFileSync(outputPath);
@@ -224,18 +246,19 @@ describe("zenuml CLI", () => {
     expect(buf[1]).toBe(0x50);
     expect(buf[2]).toBe(0x4E);
     expect(buf[3]).toBe(0x47);
-  });
+  }, PNG_TEST_TIMEOUT_MS);
 
   it("prints PNG setup guidance when Chromium cannot be launched", async () => {
     const inputPath = tmpFile("png-missing-chromium.zenuml");
     const outputPath = tmpFile("png-missing-chromium.png");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["-i", inputPath, "-o", outputPath, "-e", "png"], {
+    const result = await runCli(["-i", inputPath, "-o", outputPath, "-e", "png"], {
       env: { ZENUML_CHROMIUM_PATH: "/definitely/missing/chromium" },
     });
+    const { exitCode, stderr } = result;
 
-    expect(exitCode).toBe(1);
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("PNG output requires Playwright's Chromium runtime");
     expect(stderr).toContain("npm install playwright-core");
     expect(stderr).toContain("npx playwright-core install chromium");
@@ -248,8 +271,9 @@ describe("zenuml CLI", () => {
     const outputPath = tmpFile("auto-png.png");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode } = await runCli(["-i", inputPath, "-o", outputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", outputPath]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(existsSync(outputPath)).toBe(true);
 
     const buf = readFileSync(outputPath);
@@ -258,7 +282,7 @@ describe("zenuml CLI", () => {
     expect(buf[1]).toBe(0x50);
     expect(buf[2]).toBe(0x4E);
     expect(buf[3]).toBe(0x47);
-  });
+  }, PNG_TEST_TIMEOUT_MS);
 
   // (k) Scale flag: PNG IHDR dimensions differ between --scale 1 and --scale 3
   it("produces different IHDR dimensions for --scale 1 vs --scale 3", async () => {
@@ -268,10 +292,10 @@ describe("zenuml CLI", () => {
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
     const r1 = await runCli(["-i", inputPath, "-o", outScale1, "-e", "png", "-s", "1"]);
-    expect(r1.exitCode).toBe(0);
+    expect(r1.exitCode, cliOutput(r1)).toBe(0);
 
     const r3 = await runCli(["-i", inputPath, "-o", outScale3, "-e", "png", "-s", "3"]);
-    expect(r3.exitCode).toBe(0);
+    expect(r3.exitCode, cliOutput(r3)).toBe(0);
 
     // Parse IHDR chunk: bytes 16-19 = width (big-endian), 20-23 = height (big-endian)
     const buf1 = readFileSync(outScale1);
@@ -285,7 +309,7 @@ describe("zenuml CLI", () => {
     // scale 3 should be 3x scale 1
     expect(width3).toBe(width1 * 3);
     expect(height3).toBe(height1 * 3);
-  });
+  }, PNG_TEST_TIMEOUT_MS);
 
   // (l) Background color flag accepted, produces valid PNG (smoke test)
   // (m) Config file merging with CLI flag override
@@ -297,8 +321,9 @@ describe("zenuml CLI", () => {
     writeFileSync(configPath, JSON.stringify({ outputFormat: "svg", scale: 1 }), "utf-8");
 
     // Config says SVG, but -e png overrides it → output should be PNG
-    const { exitCode } = await runCli(["-i", inputPath, "-o", outputPath, "-c", configPath, "-e", "png"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", outputPath, "-c", configPath, "-e", "png"]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(existsSync(outputPath)).toBe(true);
 
     const buf = readFileSync(outputPath);
@@ -306,15 +331,16 @@ describe("zenuml CLI", () => {
     expect(buf[1]).toBe(0x50);
     expect(buf[2]).toBe(0x4E);
     expect(buf[3]).toBe(0x47);
-  });
+  }, PNG_TEST_TIMEOUT_MS);
 
   // (n) Config file missing/invalid exits code 1 with error on stderr
   it("exits with code 1 and error when config file is missing", async () => {
     const inputPath = tmpFile("config-missing.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["-i", inputPath, "-c", "nonexistent.json"]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["-i", inputPath, "-c", "nonexistent.json"]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("Error");
     expect(stderr).toContain("config file");
   });
@@ -325,16 +351,18 @@ describe("zenuml CLI", () => {
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
     writeFileSync(configPath, "{ not valid json }", "utf-8");
 
-    const { exitCode, stderr } = await runCli(["-i", inputPath, "-c", configPath]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["-i", inputPath, "-c", configPath]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("Error");
     expect(stderr).toContain("Invalid JSON");
   });
 
   // (o) Help text includes all new flags
   it("help text documents all Sprint 2 flags (-e, -s, -b, -t, -c)", async () => {
-    const { stdout, exitCode } = await runCli(["-h"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-h"]);
+    const { stdout, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout).toContain("-e, --outputFormat");
     expect(stdout).toContain("-s, --scale");
     expect(stdout).toContain("-t, --theme");
@@ -346,8 +374,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("bad-format.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["-i", inputPath, "-e", "pdf"]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["-i", inputPath, "-e", "pdf"]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("Unsupported output format");
   });
 
@@ -363,8 +392,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("check-valid.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["--check", "-i", inputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["--check", "-i", inputPath]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stderr).toBe("");
   });
 
@@ -373,8 +403,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("check-invalid.zenuml");
     writeFileSync(inputPath, INVALID_DSL, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["--check", "-i", inputPath]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["--check", "-i", inputPath]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("line");
     expect(stderr).toContain("col");
   });
@@ -386,8 +417,9 @@ describe("zenuml CLI", () => {
     writeFileSync(f1, "A -> B: hello", "utf-8");
     writeFileSync(f2, "B -> C: world", "utf-8");
 
-    const { exitCode, stderr } = await runCli(["--check", "-i", f1, "-i", f2]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["--check", "-i", f1, "-i", f2]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stderr).toBe("");
   });
 
@@ -398,8 +430,9 @@ describe("zenuml CLI", () => {
     writeFileSync(valid, "A -> B: hello", "utf-8");
     writeFileSync(invalid, INVALID_DSL, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["--check", "-i", valid, "-i", invalid]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["--check", "-i", valid, "-i", invalid]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     // Errors should mention the invalid file
     expect(stderr).toContain("check-mix-invalid.zenuml");
     expect(stderr).toContain("line");
@@ -410,8 +443,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("check-json-valid.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stdout } = await runCli(["--check", "--json", "-i", inputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["--check", "--json", "-i", inputPath]);
+    const { exitCode, stdout } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     const results = JSON.parse(stdout);
     expect(Array.isArray(results)).toBe(true);
     expect(results.length).toBe(1);
@@ -426,8 +460,9 @@ describe("zenuml CLI", () => {
     writeFileSync(valid, "A -> B: hello", "utf-8");
     writeFileSync(invalid, INVALID_DSL, "utf-8");
 
-    const { exitCode, stdout } = await runCli(["--check", "--json", "-i", valid, "-i", invalid]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["--check", "--json", "-i", valid, "-i", invalid]);
+    const { exitCode, stdout } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     const results = JSON.parse(stdout);
     expect(results.length).toBe(2);
     // First file should pass
@@ -447,8 +482,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("parse-valid.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stdout } = await runCli(["--parse", "-i", inputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["--parse", "-i", inputPath]);
+    const { exitCode, stdout } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     const ast = JSON.parse(stdout);
     expect(ast.type).toBe("rule");
     expect(ast.ruleName).toBe("prog");
@@ -462,8 +498,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("parse-invalid.zenuml");
     writeFileSync(inputPath, INVALID_DSL, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["--parse", "-i", inputPath]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["--parse", "-i", inputPath]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("line");
     expect(stderr).toContain("col");
   });
@@ -473,17 +510,19 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("check-render-flags.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stderr } = await runCli([
+    const result = await runCli([
       "--check", "-i", inputPath, "-t", "theme-default", "-s", "3",
     ]);
-    expect(exitCode).toBe(0);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stderr).toBe("");
   });
 
   // (z) --help has --check, --parse, --json
   it("help text documents --check, --parse, and --json flags", async () => {
-    const { stdout, exitCode } = await runCli(["-h"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-h"]);
+    const { stdout, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout).toContain("--check");
     expect(stdout).toContain("--parse");
     expect(stdout).toContain("--json");
@@ -507,8 +546,9 @@ describe("zenuml CLI", () => {
     tempFiles.push(f1, f2);
 
     const globPattern = join(subDir, "*.zenuml");
-    const { exitCode, stderr } = await runCli(["-i", globPattern, "-o", outDir]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", globPattern, "-o", outDir]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
 
     // Output files should exist directly in the output directory
     const outA = join(outDir, "a.svg");
@@ -541,8 +581,9 @@ describe("zenuml CLI", () => {
     const out2 = join(subDir, "y.svg");
 
     const globPattern = join(subDir, "*.zenuml");
-    const { exitCode } = await runCli(["-i", globPattern]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", globPattern]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
 
     expect(existsSync(out1)).toBe(true);
     expect(existsSync(out2)).toBe(true);
@@ -569,8 +610,9 @@ describe("zenuml CLI", () => {
     // Use a glob for the good file plus a literal non-existent file to trigger an error
     const globPattern = join(subDir, "good.zenuml");
 
-    const { exitCode, stderr } = await runCli(["-i", globPattern, "-i", nonexistent]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["-i", globPattern, "-i", nonexistent]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("1 errors");
     expect(stderr).toContain("Rendered 1 files");
 
@@ -581,8 +623,9 @@ describe("zenuml CLI", () => {
   // (af) Empty glob → exit 1 with error
   it("empty glob pattern exits 1 with error", async () => {
     const globPattern = join(FIXTURES_DIR, "nonexistent-glob-*.zenuml");
-    const { exitCode, stderr } = await runCli(["-i", globPattern]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["-i", globPattern]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("matched no files");
   });
 
@@ -597,8 +640,9 @@ describe("zenuml CLI", () => {
     writeFileSync(f2, "C -> D: world", "utf-8");
 
     const globPattern = join(subDir, "*.zenuml");
-    const { exitCode, stderr } = await runCli(["--check", "-i", globPattern]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["--check", "-i", globPattern]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stderr).toBe("");
 
     // Cleanup
@@ -616,8 +660,9 @@ describe("zenuml CLI", () => {
     writeFileSync(f2, "C -> D: world", "utf-8");
 
     const globPattern = join(subDir, "*.zenuml");
-    const { exitCode, stderr } = await runCli(["-i", globPattern, "-q"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", globPattern, "-q"]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stderr).not.toContain("Rendering");
     expect(stderr).not.toContain("Rendered");
 
@@ -630,8 +675,9 @@ describe("zenuml CLI", () => {
     const outputPath = tmpFile("quiet-contract.svg");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { stdout, stderr, exitCode } = await runCli(["-i", inputPath, "-o", outputPath, "--quiet"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", outputPath, "--quiet"]);
+    const { stdout, stderr, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout).toBe("");
     expect(stderr).toBe("");
   });
@@ -645,8 +691,9 @@ describe("zenuml CLI", () => {
 
     const outFile = join(FIXTURES_DIR, "single-output.svg");
 
-    const { exitCode, stderr } = await runCli(["-i", f1, "-i", f2, "-o", outFile]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["-i", f1, "-i", f2, "-o", outFile]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("must be a directory");
   });
 
@@ -661,8 +708,9 @@ describe("zenuml CLI", () => {
     writeFileSync(f2, "C -> D: world", "utf-8");
 
     const globPattern = join(subDir, "*.zenuml");
-    const { exitCode, stderr, stdout } = await runCli(["-i", globPattern]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", globPattern]);
+    const { exitCode, stderr, stdout } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
 
     // Progress lines in stderr
     expect(stderr).toContain("Rendering");
@@ -682,10 +730,11 @@ describe("zenuml CLI", () => {
 
   // (aa) --check --json with stdin uses <stdin> as file field
   it("--check --json with stdin input uses '<stdin>' as file field", async () => {
-    const { exitCode, stdout } = await runCli(["--check", "--json", "-i", "-"], {
+    const result = await runCli(["--check", "--json", "-i", "-"], {
       stdin: SAMPLE_DSL,
     });
-    expect(exitCode).toBe(0);
+    const { exitCode, stdout } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     const results = JSON.parse(stdout);
     expect(results[0].file).toBe("<stdin>");
     expect(results[0].pass).toBe(true);
@@ -696,8 +745,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("parse-terminals.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stdout } = await runCli(["--parse", "-i", inputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["--parse", "-i", inputPath]);
+    const { exitCode, stdout } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     const ast = JSON.parse(stdout);
 
     // Walk the tree to find at least one terminal node
@@ -779,8 +829,9 @@ describe("zenuml CLI", () => {
     const md = `# Docs\n\n\`\`\`zenuml\nA -> B: hello\n\`\`\`\n\nSome text.\n\n\`\`\`zenuml\nB -> C: world\n\`\`\`\n`;
     writeFileSync(inputPath, md, "utf-8");
 
-    const { exitCode } = await runCli(["-i", inputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(existsSync(imgA)).toBe(true);
     expect(existsSync(imgB)).toBe(true);
     expect(existsSync(expectedOutput)).toBe(true);
@@ -803,8 +854,9 @@ describe("zenuml CLI", () => {
 
     writeFileSync(inputPath, "```zenuml\nA -> B: hi\n```\n", "utf-8");
 
-    const { exitCode } = await runCli(["--md", "-i", inputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["--md", "-i", inputPath]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(existsSync(expectedOutput)).toBe(true);
     const outputMd = readFileSync(expectedOutput, "utf-8");
     expect(outputMd).toContain("![");
@@ -819,8 +871,9 @@ describe("zenuml CLI", () => {
 
     writeFileSync(inputPath, "```zenuml\nA -> B: hi\n```\n", "utf-8");
 
-    const { exitCode } = await runCli(["-i", inputPath, "-e", "png"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-e", "png"]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(existsSync(img)).toBe(true);
 
     const buf = readFileSync(img);
@@ -828,7 +881,7 @@ describe("zenuml CLI", () => {
     expect(buf[1]).toBe(0x50);
     expect(buf[2]).toBe(0x4E);
     expect(buf[3]).toBe(0x47);
-  });
+  }, PNG_TEST_TIMEOUT_MS);
 
   // (an) Empty block skipped → 1 image only, empty block absent
   it("(an) empty zenuml block is skipped — 1 image rendered, empty block removed from output", async () => {
@@ -841,8 +894,9 @@ describe("zenuml CLI", () => {
     const md = "```zenuml\nA -> B: hi\n```\n\n```zenuml\n\n```\n";
     writeFileSync(inputPath, md, "utf-8");
 
-    const { exitCode } = await runCli(["-i", inputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(existsSync(img0)).toBe(true);
     expect(existsSync(img1)).toBe(false); // empty block, no image
 
@@ -863,8 +917,9 @@ describe("zenuml CLI", () => {
 
     writeFileSync(inputPath, "```zenuml Auth Flow\nA -> B: login\n```\n", "utf-8");
 
-    const { exitCode } = await runCli(["-i", inputPath]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
 
     const outputMd = readFileSync(expectedOutput, "utf-8");
     expect(outputMd).toContain("![Auth Flow](");
@@ -877,8 +932,9 @@ describe("zenuml CLI", () => {
     writeFileSync(f1, "```zenuml\nA -> B\n```\n", "utf-8");
     writeFileSync(f2, "```zenuml\nB -> C\n```\n", "utf-8");
 
-    const { exitCode, stderr } = await runCli(["--md", "-i", f1, "-i", f2]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["--md", "-i", f1, "-i", f2]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("single input");
   });
 
@@ -889,8 +945,9 @@ describe("zenuml CLI", () => {
 
     writeFileSync(inputPath, "```zenuml\nA -> B: hi\n```\n", "utf-8");
 
-    const { exitCode, stdout, stderr } = await runCli(["-i", inputPath, "-o", "-"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", "-"]);
+    const { exitCode, stdout, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout).toContain("![");
     expect(stdout).toContain("stdout-md-zenuml-0.svg");
     expect(stdout).not.toContain("Rendering");
@@ -905,8 +962,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("wrong-ext.zenuml");
     writeFileSync(inputPath, "A -> B: hello", "utf-8");
 
-    const { exitCode, stderr } = await runCli(["--md", "-i", inputPath]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["--md", "-i", inputPath]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain(".md");
   });
 
@@ -918,8 +976,9 @@ describe("zenuml CLI", () => {
 
     writeFileSync(inputPath, "```zenuml\nA -> B: hi\n```\n", "utf-8");
 
-    const { exitCode } = await runCli(["-i", inputPath, "-o", outMd]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-i", inputPath, "-o", outMd]);
+    const { exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(existsSync(outImg)).toBe(true);
 
     const outputMd = readFileSync(outMd, "utf-8");
@@ -936,8 +995,9 @@ describe("zenuml CLI", () => {
 
   // Test 1: -h contains -w, --watch
   it("(w1) -h includes -w, --watch flag documentation", async () => {
-    const { stdout, exitCode } = await runCli(["-h"]);
-    expect(exitCode).toBe(0);
+    const result = await runCli(["-h"]);
+    const { stdout, exitCode } = result;
+    expect(exitCode, cliOutput(result)).toBe(0);
     expect(stdout).toContain("-w, --watch");
   });
 
@@ -946,8 +1006,9 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("watch-check.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["--watch", "--check", "-i", inputPath]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["--watch", "--check", "-i", inputPath]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("incompatible");
   });
 
@@ -956,17 +1017,19 @@ describe("zenuml CLI", () => {
     const inputPath = tmpFile("watch-parse.zenuml");
     writeFileSync(inputPath, SAMPLE_DSL, "utf-8");
 
-    const { exitCode, stderr } = await runCli(["--watch", "--parse", "-i", inputPath]);
-    expect(exitCode).toBe(1);
+    const result = await runCli(["--watch", "--parse", "-i", inputPath]);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("incompatible");
   });
 
   // Test 4: stdin + --watch → exit 1
   it("(w4) --watch with stdin input exits 1 (incompatible)", async () => {
-    const { exitCode, stderr } = await runCli(["--watch", "-i", "-", "-o", "-"], {
+    const result = await runCli(["--watch", "-i", "-", "-o", "-"], {
       stdin: SAMPLE_DSL,
     });
-    expect(exitCode).toBe(1);
+    const { exitCode, stderr } = result;
+    expect(exitCode, cliOutput(result)).toBe(1);
     expect(stderr).toContain("incompatible");
   });
 
@@ -1217,10 +1280,10 @@ describe("zenuml CLI — PNG snapshots", () => {
       { cwd: resolve(import.meta.dir, "../.."), stdout: "pipe", stderr: "pipe" },
     );
     await proc.exited;
-    expect(proc.exitCode).toBe(0);
+    expect(proc.exitCode, await new Response(proc.stderr).text()).toBe(0);
 
     await assertMatchesSnapshot(readFileSync(outputPath), "basic");
-  });
+  }, PNG_TEST_TIMEOUT_MS);
 
   it("3x scale render matches snapshot", async () => {
     const inputPath = join(SNAPSHOT_DIR, "_snap-scale3.zenuml");
@@ -1233,10 +1296,10 @@ describe("zenuml CLI — PNG snapshots", () => {
       { cwd: resolve(import.meta.dir, "../.."), stdout: "pipe", stderr: "pipe" },
     );
     await proc.exited;
-    expect(proc.exitCode).toBe(0);
+    expect(proc.exitCode, await new Response(proc.stderr).text()).toBe(0);
 
     await assertMatchesSnapshot(readFileSync(outputPath), "scale3");
-  });
+  }, PNG_TEST_TIMEOUT_MS);
 
   it("multi-participant diagram matches snapshot", async () => {
     const inputPath = join(SNAPSHOT_DIR, "_snap-multi.zenuml");
@@ -1250,8 +1313,8 @@ describe("zenuml CLI — PNG snapshots", () => {
       { cwd: resolve(import.meta.dir, "../.."), stdout: "pipe", stderr: "pipe" },
     );
     await proc.exited;
-    expect(proc.exitCode).toBe(0);
+    expect(proc.exitCode, await new Response(proc.stderr).text()).toBe(0);
 
     await assertMatchesSnapshot(readFileSync(outputPath), "multi-participant");
-  });
+  }, PNG_TEST_TIMEOUT_MS);
 });
