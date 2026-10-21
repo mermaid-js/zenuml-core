@@ -1,4 +1,9 @@
-import { rootContextAtom, scaleAtom, themeAtom } from "@/store/Store";
+import {
+  paletteAtom,
+  rootContextAtom,
+  scaleAtom,
+  themeAtom,
+} from "@/store/Store";
 import { useAtom, useAtomValue } from "jotai";
 import * as htmlToImage from "html-to-image";
 import {
@@ -9,21 +14,23 @@ import {
 } from "react";
 import { cn } from "@/utils";
 import { DIAGRAM_HEADER_HEIGHT } from "@/positioning/Constants";
+import { paletteCssVariables } from "@/surface";
+import { opaqueBackground } from "@/surface";
 import { Debug } from "./Debug";
 import { DiagramTitle } from "./DiagramTitle";
 import { SeqDiagram } from "./SeqDiagram/SeqDiagram";
 
-// The export paints the host element's full box; the area beside the diagram
-// takes the theme's canvas colour so a dark theme stays dark edge to edge
-// (ADR 0004). White when the canvas is transparent.
+// Resolve translucent author canvas colours over the declared document backing
+// before exporting the intrinsic canvas box (ADR 0004).
 const exportConfig = (container: HTMLElement | null) => {
   const color = container ? getComputedStyle(container).backgroundColor : "";
-  const backgroundColor =
-    color && color !== "rgba(0, 0, 0, 0)" && color !== "transparent"
-      ? color
-      : "white";
+  const backing = container?.parentElement
+    ? getComputedStyle(container.parentElement).backgroundColor
+    : "white";
+  const backgroundColor = opaqueBackground(color, backing);
   return {
     backgroundColor,
+    style: { backgroundColor },
     filter: (node: HTMLElement) => {
       return !node?.classList?.contains("hide-export");
     },
@@ -47,23 +54,36 @@ export const DiagramFrame = ({
   const rootContext = useAtomValue(rootContextAtom);
   const [scale, setScale] = useAtom(scaleAtom);
   const [theme, setTheme] = useAtom(themeAtom);
+  const palette = useAtomValue(paletteAtom);
   const title = rootContext?.title();
 
   const toPng = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toPng(containerRef.current, exportConfig(containerRef.current));
+    return htmlToImage.toPng(
+      containerRef.current,
+      exportConfig(containerRef.current),
+    );
   };
   const toSvg = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toSvg(containerRef.current, exportConfig(containerRef.current));
+    return htmlToImage.toSvg(
+      containerRef.current,
+      exportConfig(containerRef.current),
+    );
   };
   const toBlob = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toBlob(containerRef.current, exportConfig(containerRef.current));
+    return htmlToImage.toBlob(
+      containerRef.current,
+      exportConfig(containerRef.current),
+    );
   };
   const toJpeg = async () => {
     if (!containerRef.current) return;
-    return htmlToImage.toJpeg(containerRef.current, exportConfig(containerRef.current));
+    return htmlToImage.toJpeg(
+      containerRef.current,
+      exportConfig(containerRef.current),
+    );
   };
   const zoomIn = () => {
     const newScale = Math.min(1, scale + 0.1);
@@ -126,6 +146,7 @@ export const DiagramFrame = ({
     <div
       ref={containerRef}
       className={cn("p-1 bg-skin-canvas inline-block", theme)}
+      style={palette ? paletteCssVariables(palette) : undefined}
     >
       <Debug />
       <div className="frame text-skin-base bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded">

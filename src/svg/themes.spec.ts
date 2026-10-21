@@ -6,6 +6,7 @@ import { renderToSvg } from "./renderToSvg";
 import { buildThemeStyles, resolvePalette, THEME_PALETTES } from "./themes";
 import type { SvgPalette, SvgTheme } from "./themes";
 import { IBM_PLEX_SANS_400_DATA_URI } from "./fonts/ibmPlexSans";
+import { themeBaseColor } from "../surface";
 
 /**
  * Pin the default <style> body so theme changes cannot silently alter its
@@ -195,6 +196,17 @@ function normalise(color: string): { hex: string; alpha: number } {
 }
 
 const cfg = tailwindConfig.theme.extend;
+describe("document backing parity with theme CSS", () => {
+  for (const selector of Object.keys(VARS).filter((key) => /^\.theme-[a-z-]+$/.test(key))) {
+    const theme = selector.slice(1);
+    it(`${theme}: opaque backing matches the declared canvas`, () => {
+      const canvas = resolveChain(cfg.backgroundColor.skin.canvas, themeVars(theme));
+      expect(canvas).toBeDefined();
+      expect(normalise(themeBaseColor(theme))).toEqual(normalise(canvas!));
+    });
+  }
+});
+
 /** Palette slot -> the tailwind.config.js chain the DOM uses for it. */
 const SLOT_CHAINS: Record<Exclude<keyof SvgPalette, "fontFamily" | "fragmentHeaderOpacity" | "numberBgOpacity">, string> = {
   frameBorder: cfg.borderColor.skin.frame,

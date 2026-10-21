@@ -24,11 +24,16 @@ import { messageNumberWidth } from "./components/numbering";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import type { DiagramGeometry } from "./geometry";
 import { buildThemeStyles, resolvePalette } from "./themes";
-import type { SvgTheme } from "./themes";
+import type { SvgPalette, SvgTheme } from "./themes";
+import { nativeCanvasColor, safeSvgPalette } from "@/surface";
+import type { RenderSurface } from "@/surface";
+import type { DiagramPalette } from "@/surface";
 
 export interface RenderOptions {
   /** Theme name; see src/svg/themes.ts. Unknown names fall back to theme-default. */
   theme?: SvgTheme;
+  /** Semantic document colours; supplied slots override the selected theme. */
+  palette?: DiagramPalette;
   /** Show sequence references and their badges; defaults to true. */
   enableNumbering?: boolean;
   /** Optional emoji shortcode-to-Unicode cache (for future use by Task 8) */
@@ -37,6 +42,8 @@ export interface RenderOptions {
 
 export interface RenderResult {
   svg: string;
+  /** Opaque base painted across the exported document bounds. */
+  surface: RenderSurface;
   /** Inner SVG content (defs + g) for embedding into an existing SVG container */
   innerSvg: string;
   width: number;
@@ -56,11 +63,21 @@ export function renderToSvg(
   code: string,
   options?: RenderOptions,
 ): RenderResult {
+  const safeOptions = options
+    ? { ...options, palette: safeSvgPalette(options.palette) }
+    : undefined;
+  const surface = {
+    backgroundColor: nativeCanvasColor(
+      safeOptions?.theme,
+      safeOptions?.palette,
+    ),
+  };
   // 1. Parse
   const rootContext = RootContext(code);
   if (!rootContext) {
     return {
       svg: "<svg></svg>",
+      surface,
       innerSvg: "",
       width: 0,
       height: 0,
@@ -92,11 +109,13 @@ export function renderToSvg(
   });
 
   // 5. Render to SVG
-  return { ...composeSvg(geometry, options), geometry };
+  return { ...composeSvg(geometry, safeOptions), geometry };
 }
 
 function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
-  void options;
+  const surface = {
+    backgroundColor: nativeCanvasColor(options?.theme, options?.palette),
+  };
   const padding = 10;
   const headerH = FRAME_VIEWPORT_HEADER_ALLOWANCE;
   // Content left offset = 1 (frame border) + 10 (seq-diagram px-2.5 padding) + frameBorderLeft
@@ -222,12 +241,32 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
 
   const viewBox = `0 0 ${viewWidth} ${viewHeight}`;
 
-  const defs = `<defs>\n  <style>${buildThemeStyles(resolvePalette(options?.theme))}</style>\n</defs>`;
+  const defs = `<defs>\n  <style>${buildThemeStyles(resolveSvgPalette(options))}</style>\n</defs>`;
   const frame = `${frameSvg}\n${headerLineSvg}\n${titleSvg}`;
   const content = `<g transform="translate(${contentLeftMargin}, ${headerLineY})">\n${parts.join("\n")}\n</g>`;
-  const innerSvg = `${defs}\n${frame}\n${content}`;
+  const background = `<rect class="canvas-background" x="0" y="0" width="${viewWidth}" height="${viewHeight}" fill="${surface.backgroundColor}"/>`;
+  const innerSvg = `${defs}\n${background}\n${frame}\n${content}`;
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="${viewBox}">\n${innerSvg}\n</svg>`;
 
-  return { svg, innerSvg, width: viewWidth, height: viewHeight, viewBox };
+  return {
+    svg,
+    innerSvg,
+    width: viewWidth,
+    height: viewHeight,
+    viewBox,
+    surface,
+  };
+}
+
+function resolveSvgPalette(options?: RenderOptions): SvgPalette {
+  const theme = resolvePalette(options?.theme);
+  const palette = options?.palette;
+  if (!palette) return theme;
+  return {
+    ...theme,
+    ...palette,
+    ...(palette.fragmentHeaderBg ? { fragmentHeaderOpacity: "1" } : {}),
+    ...(palette.numberBg ? { numberBgOpacity: "1" } : {}),
+  };
 }

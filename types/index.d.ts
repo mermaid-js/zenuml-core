@@ -10,17 +10,58 @@ export type SvgTheme =
 export interface RenderOptions {
   /** Theme name. Unknown names fall back to 'theme-default'. */
   theme?: SvgTheme;
+  /** Semantic document colours; supplied slots override the selected theme. */
+  palette?: DiagramPalette;
   /** Show sequence references and their badges; defaults to true. */
   enableNumbering?: boolean;
 }
 
 export interface RenderResult {
   svg: string;
+  /** Opaque base painted across the exported document bounds. */
+  surface: RenderSurface;
   /** Inner SVG content (defs + g) for embedding into an existing SVG container */
   innerSvg: string;
   width: number;
   height: number;
   viewBox: string;
+}
+
+/** The opaque base painted across the complete exported document bounds. */
+export interface RenderSurface {
+  backgroundColor: string;
+}
+
+/** Optional semantic colour overrides shared by HTML and native SVG. */
+export interface DiagramPalette {
+  canvasBg?: string;
+  frameBg?: string;
+  frameBorder?: string;
+  titleText?: string;
+  participantBg?: string;
+  participantBorder?: string;
+  participantText?: string;
+  messageArrow?: string;
+  messageText?: string;
+  lifeline?: string;
+  occurrenceBg?: string;
+  occurrenceBorder?: string;
+  fragmentBorder?: string;
+  fragmentHeaderBg?: string;
+  fragmentHeaderText?: string;
+  fragmentText?: string;
+  fragmentSeparator?: string;
+  guardOpacity?: string;
+  guardText?: string;
+  commentText?: string;
+  commentOpacity?: string;
+  groupOutline?: string;
+  dividerLine?: string;
+  dividerBg?: string;
+  dividerText?: string;
+  numberText?: string;
+  fragmentNumberText?: string;
+  numberBg?: string;
 }
 
 export declare function renderToSvg(
@@ -85,6 +126,7 @@ export interface ErrorDetail {
 
 export interface Config {
   theme?: string;
+  palette?: DiagramPalette;
   enableScopedTheming?: boolean;
   onThemeChange?: (data: { theme: string; scoped?: boolean }) => void;
   enableMultiTheme?: boolean;
@@ -103,6 +145,7 @@ interface IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml>;
+  getSurface(): RenderSurface;
 }
 
 declare class ZenUml implements IZenUml {
@@ -110,7 +153,12 @@ declare class ZenUml implements IZenUml {
   static readonly default: typeof ZenUml;
   /** Same as the named export {@link setDiagramFontUrl}. */
   static readonly setDiagramFontUrl: typeof setDiagramFontUrl;
-  constructor(el: HTMLElement | string, naked?: boolean);
+  /** Initial appearance is applied before the first committed frame. */
+  constructor(
+    el: HTMLElement | string,
+    naked?: boolean,
+    initial?: Pick<Config, "theme" | "palette">,
+  );
   get code(): string | undefined;
   get theme(): string | undefined;
   parse(text: string): Promise<ParseResult>;
@@ -118,6 +166,8 @@ declare class ZenUml implements IZenUml {
     code: string | undefined,
     config: Config | undefined,
   ): Promise<IZenUml>;
+  /** Read the resolved opaque base after render, or again after author CSS changes. */
+  getSurface(): RenderSurface;
   getPng(): Promise<string>;
   getSvg(): Promise<string>;
 }
