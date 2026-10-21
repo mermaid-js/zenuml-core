@@ -382,71 +382,6 @@ const SURFACES = [
   },
 ];
 
-// ---------- privacy (not mounted by the product at this commit) ----------
-
-async function measurePrivacy(page) {
-  const s = { name: "PrivacyTooltip" };
-  try {
-    await page.goto(`${BASE}/e2e/fixtures/insert-participant.html`);
-    await page.locator(".participant").first().waitFor();
-    s.mounted = "harness";
-    s.note =
-      "src/components/DiagramFrame/Privacy/index.tsx is not imported by any other src file at this commit (grep 'Privacy' outside the folder hits only Icons.tsx). The harness imports index.module.css through the Vite dev server and builds the same div (tooltip + bottom + privacy classes, data-tooltip text, 24x24 content) at (600,700).";
-    await page.evaluate(async () => {
-      const mod = await import("/src/components/DiagramFrame/Privacy/index.module.css");
-      const cls = mod.default;
-      const wrap = document.createElement("div");
-      wrap.style.cssText = "position:fixed;left:588px;top:688px;width:24px;";
-      const el = document.createElement("div");
-      el.className = `${cls.tooltip} ${cls.bottom} privacy whitespace-normal flex items-center`;
-      el.setAttribute(
-        "data-tooltip",
-        "We (the vendor) do not have access to your data. The diagram is generated in this browser.",
-      );
-      el.id = "measure-privacy";
-      const icon = document.createElement("span");
-      icon.style.cssText = "display:block;width:24px;height:24px;margin:auto";
-      el.appendChild(icon);
-      wrap.appendChild(el);
-      document.body.appendChild(wrap);
-      document.documentElement.dataset.privacyClasses = JSON.stringify(cls);
-    });
-    s.cssModuleClasses = JSON.parse(
-      await page.evaluate(() => document.documentElement.dataset.privacyClasses),
-    );
-    const AFTER_PROPS = [
-      "display",
-      "visibility",
-      "opacity",
-      "top",
-      "transition-property",
-      "transition-duration",
-      "transition-timing-function",
-      "transition-delay",
-      "box-shadow",
-      "border-radius",
-      "background-color",
-      "z-index",
-    ];
-    s.root = await computed(page, "#measure-privacy");
-    s.tooltipBeforeHover = await computed(page, "#measure-privacy", AFTER_PROPS, "::after");
-    await page.mouse.move(0, 0);
-    await startAnimPoll(page, null, 1200);
-    await page.mouse.move(600, 700);
-    s.tooltipImmediatelyAfterHover = await computed(page, "#measure-privacy", AFTER_PROPS, "::after");
-    s.animationPoll = await finishAnimPoll(page);
-    await page.waitForTimeout(200);
-    s.tooltipAt700msAfterHover = await computed(page, "#measure-privacy", AFTER_PROPS, "::after");
-    s.controls = [];
-    s.smallestHitArea = { w: s.root.box.w, h: s.root.box.h, control: "privacy icon (no tabindex, not focusable)" };
-    s.ok = true;
-  } catch (e) {
-    s.ok = false;
-    s.error = String(e.message || e).split("\n")[0];
-  }
-  return s;
-}
-
 // ---------- main ----------
 
 async function measureSurface(browser, def) {
@@ -503,15 +438,6 @@ for (const def of SURFACES) {
   const s = await measureSurface(browser, def);
   console.log(s.ok ? "ok" : `FAILED: ${s.error}`);
   surfaces.push(s);
-}
-{
-  const context = await browser.newContext({ viewport: VIEWPORT });
-  const page = await context.newPage();
-  process.stdout.write("measuring PrivacyTooltip... ");
-  const s = await measurePrivacy(page);
-  console.log(s.ok ? "ok" : `FAILED: ${s.error}`);
-  surfaces.push(s);
-  await context.close();
 }
 await browser.close();
 
