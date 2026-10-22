@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
-import { marked } from "marked";
+import type { marked } from "marked";
+import { lexComment } from "@/parser/commentMarkdown";
 
 // Import ONLY the core (no languages) - reduces from 2.6 MB to ~30 KB!
 import highlightjs from "highlight.js/lib/core";
@@ -14,8 +15,6 @@ highlightjs.registerLanguage("plaintext", plaintext);
 highlightjs.registerLanguage("javascript", javascript);
 highlightjs.registerLanguage("bash", bash);
 highlightjs.registerLanguage("yaml", yaml);
-
-const lexerOptions = { gfm: true, breaks: true };
 
 const ENDPOINT_PATTERN =
   /(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)\s+(.+)/i;
@@ -167,5 +166,5 @@ function renderToken(token: marked.Token, key: number): ReactNode {
 
 /** Render comment markdown as React elements; no HTML is ever injected. */
 export function markdownToReact(text: string): ReactNode[] {
-  return renderTokens(marked.lexer(text, lexerOptions));
+  return renderTokens(lexComment(text));
 }
