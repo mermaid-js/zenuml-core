@@ -88,7 +88,7 @@ export const cursorAtom = atom<number | null | undefined>(null);
 export const modeAtom = atom(RenderMode.Dynamic);
 
 // Editing feature flags. Default off so embedders (e.g. mermaid) get safe behavior;
-// embedders opt in per surface. The dev site (main.tsx) enables them explicitly.
+// embedders opt in per surface. The demo pages enable them via demoConfig() in src/config.ts.
 export const enableParticipantInsertionAtom = atom(false);
 export const enableMessageInsertionAtom = atom(false);
 export const enableDividerInsertionAtom = atom(false);
