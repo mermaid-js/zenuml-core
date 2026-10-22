@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.10.3
+
+### Patch Changes
+
+- [#563](https://github.com/mermaid-js/zenuml-core/pull/563) [`0786415`](https://github.com/mermaid-js/zenuml-core/commit/07864157c4f78dca5a22b49f35e5acb544c25720) Thanks [@MrCoder](https://github.com/MrCoder)! - Editing a fragment condition or the diagram title now counts as text editing, like editing a message or participant name. While you type, the participant and message insert buttons and the message reorder handles are hidden, so they can no longer be used by accident and disturb the edit.
+
 ## 4.10.2
 
 ### Patch Changes
