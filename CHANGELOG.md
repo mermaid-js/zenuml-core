@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.10.7
+
+### Patch Changes
+
+- [#607](https://github.com/mermaid-js/zenuml-core/pull/607) [`0922d3e`](https://github.com/mermaid-js/zenuml-core/commit/0922d3e1976a1efbc72da6027ce8d6e76a730a43) Thanks [@MrCoder](https://github.com/MrCoder)! - Fix fragment widths in the HTML renderer when a diagram has several fragments. The width of a fragment no longer depends on the fragments measured before it, so a nested fragment's title or condition no longer overflows its parent fragment by one nesting level of border.
+
 ## 4.10.6
 
 ### Patch Changes
