@@ -79,6 +79,18 @@ export async function rasterizeToPng(
 </style></head><body>${svgString}</body></html>`;
 
     await page.setContent(html, { waitUntil: "load" });
+    // `load` does not mean painted. Page.captureScreenshot copies the
+    // compositor's current surface, and on a fresh page under CPU load that
+    // surface can still be missing, which fails with "Unable to capture
+    // screenshot". Two animation frames guarantee one frame was produced.
+    // The timer only stops a page that never paints from hanging the CLI.
+    await page.evaluate(
+      () =>
+        new Promise<void>((done) => {
+          setTimeout(done, 5000);
+          requestAnimationFrame(() => requestAnimationFrame(() => done()));
+        }),
+    );
     const png = await page.screenshot({ type: "png" });
     return Buffer.from(png);
   } finally {
