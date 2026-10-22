@@ -12,8 +12,9 @@ import { fragmentOf } from "@/parser/fragmentOf";
 import type { RootContextNode, BlockNode, StatNode } from "@/parser/AntlrTypes";
 
 export interface FragmentSectionInfo {
-  label: string;
+  /** if / else if / else (alt); try / catch / finally (tcf). Unset for single-block fragments, whose guard lives on the fragment. */
   guardKeyword?: string;
+  /** Guard text: the condition of if / else if, the exception of catch. */
   condition?: string;
   /** The parse tree block node for this section (used for inner statement key lookups) */
   blockNode: BlockNode | undefined;
@@ -313,27 +314,14 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
       };
 
     case "alt": {
-      // Guard keywords are separate from editable condition text. The first
-      // section label is the kind name (matches HTML header visible text).
-      const sections = view.sections.map((s): FragmentSectionInfo => {
-        if (s.guardKeyword === "if") {
-          return {
-            label: "Alt",
-            guardKeyword: "if",
-            condition: s.condition,
-            blockNode: s.block,
-          };
-        }
-        if (s.guardKeyword === "else") {
-          return { label: "else", guardKeyword: "else", blockNode: s.block };
-        }
-        return {
-          label: `else if ${s.condition}`,
-          guardKeyword: "else if",
+      // Guard keywords stay separate from the editable condition text.
+      const sections = view.sections.map(
+        (s): FragmentSectionInfo => ({
+          guardKeyword: s.guardKeyword,
           condition: s.condition,
           blockNode: s.block,
-        };
-      });
+        }),
+      );
       const [first] = view.sections;
       const firstLabel =
         first?.guardKeyword === "if" ? (first.condition ?? "") : "";
@@ -341,15 +329,10 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
     }
 
     case "tcf": {
-      // Section labels match HTML visible text: "Try", "catch e", "finally"
       const sections = view.sections.map(
         (s): FragmentSectionInfo => ({
-          label:
-            s.guardKeyword === "try"
-              ? "Try"
-              : s.guardKeyword === "catch"
-                ? `catch ${s.condition}`
-                : "finally",
+          guardKeyword: s.guardKeyword,
+          condition: s.condition,
           blockNode: s.block,
         }),
       );
@@ -364,7 +347,7 @@ function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
         headerLabel: view.context.atom?.()?.getFormattedText?.(),
         label,
         guardKeyword: section.guardKeyword,
-        sections: [{ label, blockNode: section.block }],
+        sections: [{ blockNode: section.block }],
       };
     }
   }

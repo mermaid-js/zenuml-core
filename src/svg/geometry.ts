@@ -95,24 +95,14 @@ import type { FragmentKind } from "@/parser/fragmentOf";
 export type { FragmentKind };
 
 export interface FragmentSectionGeometry {
-  label: string;
+  /** if / else if / else (alt); try / catch / finally (tcf). Unset for par separators. */
   guardKeyword?: string;
+  /** Guard text: the condition of if / else if, the exception of catch. */
+  condition?: string;
   y: number; // top of this section (separator line y)
   height: number;
-  /** Measured glyph width of the whole label at 14px message-content font */
-  labelWidth?: number;
-  /** For bracketed section labels like [cond2], the inner text without brackets */
-  innerLabel?: string;
-  /** Measured glyph width of innerLabel */
-  innerLabelWidth?: number;
-  /** For split labels like "catch e", the leading keyword */
-  keyword?: string;
-  /** Measured glyph width of keyword */
-  keywordWidth?: number;
-  /** For split labels like "catch e", the trailing detail text */
-  detail?: string;
-  /** Measured glyph width of detail */
-  detailWidth?: number;
+  /** Measured glyph width of the catch exception at 14px message-content font */
+  conditionWidth?: number;
   /** Left inset for par separators (matches HTML paddingLeft on statement block) */
   contentInsetLeft?: number;
 }

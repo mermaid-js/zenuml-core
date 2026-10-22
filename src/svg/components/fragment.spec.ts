@@ -98,3 +98,42 @@ describe("SVG fragment header numbering", () => {
     ).toBeGreaterThanOrEqual(Math.max(...fragments.map((f) => f.x + f.width)));
   });
 });
+
+describe("SVG fragment section labels follow the guard keyword", () => {
+  const section = (guardKeyword: string, y: number, condition?: string) => ({
+    guardKeyword,
+    condition,
+    y,
+    height: 0,
+  });
+
+  it("renders catch as keyword plus exception, and finally as keyword only", () => {
+    const view = parse({
+      ...fragment,
+      kind: "tcf",
+      label: "",
+      sections: [
+        section("try", 20),
+        section("catch", 60, "IO error"),
+        section("finally", 90),
+      ],
+    });
+    const texts = [...view.querySelectorAll(".fragment-section-dim")].map((g) =>
+      [...g.querySelectorAll("text")].map((t) => t.textContent),
+    );
+    expect(texts).toEqual([["catch", "IO error"], ["finally"]]);
+  });
+
+  it("renders an alt else-if as one guard row with a two-word keyword", () => {
+    const view = parse({
+      ...fragment,
+      kind: "alt",
+      label: "a",
+      sections: [section("if", 20, "a"), section("else if", 60, "b c")],
+    });
+    const rows = view.querySelectorAll(".guard-row");
+    const last = rows[rows.length - 1];
+    expect(last.querySelector(".guard-keyword")?.textContent).toBe("else if");
+    expect(last.querySelector(".fragment-condition")?.textContent).toBe("b c");
+  });
+});
