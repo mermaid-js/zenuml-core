@@ -31,7 +31,11 @@
 
 import { RootContext } from "./index";
 import { _STARTER_, OrderedParticipants } from "./OrderedParticipants";
-import type { IParticipantModel } from "./IParticipantModel";
+import {
+  participantDisplayName,
+  participantHasIcon,
+  type IParticipantModel,
+} from "./IParticipantModel";
 import { expect } from "vitest";
 
 function getFlattenedParticipants(code: string) {
@@ -161,5 +165,42 @@ A.method(){
       { left: "", name: _STARTER_ },
       { left: _STARTER_, name: "A" },
     ]);
+  });
+});
+
+describe("OrderedParticipants model fields", () => {
+  it("carries every declared field under its own name", () => {
+    const p = getFlattenedParticipants("@Actor A as Alice\nA.m").find(
+      (x) => x.name === "A",
+    );
+    expect(p!.label).toBe("Alice");
+    expect(p!.type).toBe("Actor");
+  });
+
+  it("keeps groupId and emoji apart", () => {
+    const models = getFlattenedParticipants("group G {\n A\n}\nB\nA->B: m");
+    const a = models.find((x) => x.name === "A")!;
+    const b = models.find((x) => x.name === "B")!;
+    expect(a.groupId).toBeDefined();
+    expect(a.emoji).toBeUndefined();
+    expect(b.groupId).toBeUndefined();
+  });
+
+  it("keeps isStarter on the injected default starter and on @Starter", () => {
+    const implicit = getFlattenedParticipants("A.m");
+    expect(implicit[0].name).toBe(_STARTER_);
+    expect(implicit[0].isStarter).toBe(true);
+    expect(implicit[1].isStarter).toBeFalsy();
+
+    const declared = getFlattenedParticipants("@Starter(A)\nA->B: m");
+    expect(declared.find((x) => x.name === "A")!.isStarter).toBe(true);
+  });
+
+  it("derives label and icon through the helper functions", () => {
+    const [a, b] = getFlattenedParticipants("@Actor A as Alice\nB\nA->B: m");
+    expect(participantDisplayName(a)).toBe("Alice");
+    expect(participantDisplayName(b)).toBe("B");
+    expect(participantHasIcon(a)).toBe(true);
+    expect(participantHasIcon(b)).toBe(false);
   });
 });

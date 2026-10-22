@@ -5,47 +5,6 @@ import type { IParticipantModel } from "@/parser/IParticipantModel";
 
 export const _STARTER_ = "_STARTER_";
 
-// Define a class that implements IParticipantModel
-class Participant implements IParticipantModel {
-  name: string;
-  left: string;
-  label?: string;
-  type?: string;
-  stereotype?: string;
-  color?: string;
-  emoji?: string;
-  groupId?: string | number;
-
-  constructor(
-    name: string,
-    left: string,
-    label?: string,
-    type?: string,
-    stereotype?: string,
-    color?: string,
-    groupId?: string | number,
-    emoji?: string,
-  ) {
-    this.name = name;
-    this.left = left;
-    this.label = label;
-    this.type = type;
-    this.stereotype = stereotype;
-    this.color = color;
-    this.groupId = groupId;
-    this.emoji = emoji;
-  }
-
-  getDisplayName(): string {
-    return this.label || this.name;
-  }
-
-  hasIcon(): boolean {
-    // Only participants with a defined type property have icons
-    return this.type !== undefined;
-  }
-}
-
 // Pure function of the (immutable) parse tree; consumers only read the models.
 const orderedParticipantsCache = new WeakMap<object, IParticipantModel[]>();
 
@@ -71,20 +30,12 @@ export function OrderedParticipants(rootContext: any): IParticipantModel[] {
       isStarter: true,
     });
   }
-  const result = participantEntries.map((participant, index, entries) => {
-    const previousName = index > 0 ? entries[index - 1].name : "";
-
-    return new Participant(
-      participant.name,
-      previousName,
-      participant.label,
-      participant.type,
-      participant.stereotype,
-      participant.color,
-      participant.groupId,
-      participant.emoji,
-    );
-  });
+  const result: IParticipantModel[] = participantEntries.map(
+    (entry, index, entries) => ({
+      ...entry,
+      left: index > 0 ? entries[index - 1].name : "",
+    }),
+  );
   orderedParticipantsCache.set(rootContext, result);
   return result;
 }

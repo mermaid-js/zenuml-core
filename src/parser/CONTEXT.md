@@ -64,18 +64,11 @@ const frame = new FrameBuilder(participantNames).getFrame(context)
 ## Key Types
 
 ```typescript
-interface IParticipantModel {
-  name: string
-  left: number          // x position from coordinates
-  label?: string        // display label
-  type?: string         // @Actor, @Database, etc.
-  stereotype?: string   // <<ServiceName>>
-  color?: string        // #RRGGBB
-  emoji?: string
-  groupId?: string
-  getDisplayName(): string
-  hasIcon(): boolean
-}
+// Plain readonly data: Participant.ToValue() fields plus `left`. Fields are declared once, in Participants.ts.
+type IParticipantModel = Readonly<ReturnType<Participant['ToValue']> & { left: string }>
+// name, label, type, stereotype, color, emoji, groupId, isStarter, ... + left (previous participant's name)
+participantDisplayName(p)  // label || name
+participantHasIcon(p)      // type !== undefined
 
 interface OwnableMessage {
   from: string

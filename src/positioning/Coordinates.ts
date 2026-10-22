@@ -8,7 +8,11 @@ import {
 import { TextType } from "./Coordinate";
 import type { WidthFunc } from "./Coordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
-import type { IParticipantModel } from "@/parser/IParticipantModel";
+import {
+  participantDisplayName,
+  participantHasIcon,
+  type IParticipantModel,
+} from "@/parser/IParticipantModel";
 import { find_optimal } from "./david/DavidEisenstat";
 import { AllMessages } from "@/parser/MessageCollector";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
@@ -149,13 +153,13 @@ export class Coordinates {
     // Calculate base width from participant display name or minimum width
     // Add icon width if the participant has an icon
     // Icon's total width is 32px (24px for icon + 8px for margin)
-    const hasIcon = participant.hasIcon();
+    const hasIcon = participantHasIcon(participant);
     const iconWidth = hasIcon ? PARTICIPANT_ICON_WIDTH : 0;
     // Emoji character (~16px glyph + em-space) adds width when present
     const emojiWidth = participant.emoji ? 24 : 0;
 
     const labelWidth = this.widthProvider(
-      participant.getDisplayName(),
+      participantDisplayName(participant),
       TextType.ParticipantName,
     );
     const participantWidth =
