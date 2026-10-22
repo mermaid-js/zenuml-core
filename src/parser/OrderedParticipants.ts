@@ -1,9 +1,9 @@
 import ToCollector from "@/parser/ToCollector";
 import { AllMessages } from "@/parser/MessageCollector";
-import { blankParticipant } from "@/parser/Participants";
+import { _STARTER_, blankParticipant } from "@/parser/Participants";
 import type { IParticipantModel } from "@/parser/IParticipantModel";
 
-export const _STARTER_ = "_STARTER_";
+export { _STARTER_ };
 
 // Pure function of the (immutable) parse tree; consumers only read the models.
 const orderedParticipantsCache = new WeakMap<object, IParticipantModel[]>();
