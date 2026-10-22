@@ -181,7 +181,6 @@ export default class ZenUml implements IZenUml {
         </Provider>
       </StrictMode>,
     );
-    this.addPortalRootElement();
   }
 
   private onCommit = (revision: number): void => {
@@ -197,16 +196,6 @@ export default class ZenUml implements IZenUml {
   private waitForCommit(revision: number): Promise<void> {
     if (this.committedRevision >= revision) return Promise.resolve();
     return new Promise((resolve) => this.commitWaiters.set(revision, resolve));
-  }
-
-  // DON'T REMOVE: headlessui portal root hack
-  // ref: https://github.com/tailwindlabs/headlessui/discussions/666#discussioncomment-4966117
-  private addPortalRootElement(): void {
-    const portalRootElement = document.createElement("div");
-    portalRootElement.id = "headlessui-portal-root";
-    portalRootElement.className = "zenuml";
-    portalRootElement.append(document.createElement("div"));
-    document.body.append(portalRootElement);
   }
 
   render(

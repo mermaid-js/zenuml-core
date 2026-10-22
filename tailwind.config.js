@@ -216,5 +216,5 @@ module.exports = {
   corePlugins: {
     preflight: false,
   },
-  plugins: [require("@headlessui/tailwindcss")],
+  plugins: [],
 };
