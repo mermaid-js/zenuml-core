@@ -83,7 +83,9 @@ export const fragmentMinimumWidth = (
         ) + inset,
       );
     for (const section of info.fragmentSections ?? []) {
-      if (section.guardKeyword)
+      // Only alt guard rows are padded boxes; catch/finally labels are sized
+      // by the SVG renderer.
+      if (info.fragmentKind === "alt" && section.guardKeyword)
         width = Math.max(
           width,
           fragmentGuardWidth(section.condition ?? "", section.guardKeyword) +

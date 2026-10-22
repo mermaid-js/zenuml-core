@@ -104,82 +104,75 @@ export function renderFragment(f: FragmentGeometry): string {
       parts.push(
         `<line x1="${sepX1}" y1="${separatorY}" x2="${sepX2}" y2="${separatorY}" class="fragment-separator"/>`,
       );
-      // Section label — split into keyword + condition (e.g. "catch" + "error") as separate elements
-      // Both catch and finally have a semi-transparent white background (bg-skin-frame opacity-65)
-      if (section.label) {
-        if (f.kind === "alt") {
+      // Section label, chosen by guard keyword. Alt guards (if / else if /
+      // else) are padded guard rows; catch is keyword + exception; finally is
+      // keyword only. catch and finally sit on a semi-transparent background.
+      switch (section.guardKeyword) {
+        case "if":
+        case "else if":
+        case "else":
           parts.push(
             renderGuardRow(
               f.x + 1,
               lineY + 1,
-              section.innerLabel ?? "",
+              section.condition ?? "",
               section.guardKeyword,
             ),
           );
-          continue;
-        }
-        const labelY = lineY + 16;
-        const isFinally = section.label.startsWith("finally");
-        const isBracketed = !!section.innerLabel && section.label !== "[else]";
-        if (isBracketed) {
-          const labelX = f.x + 1;
-          parts.push(renderGuardRow(labelX, lineY + 1, section.innerLabel!));
-          continue;
-        }
-        // Split "catch error" → ["catch", "error"], "else [cond]" → ["else", "[cond]"], "finally" → ["finally"]
-        const spaceIdx = section.label.indexOf(" ");
-        if (spaceIdx > 0 && !isFinally) {
-          const keyword =
-            section.keyword || section.label.substring(0, spaceIdx);
-          const condition =
-            section.detail || section.label.substring(spaceIdx + 1);
-          const keywordWidth = measureTextWithFont(
-            keyword,
-            "14px",
-            "all-small-caps",
-          );
-          const keywordX = f.x + 5;
-          const conditionX = keywordX + keywordWidth + TEXT_PAD_X * 2;
-          // Group with opacity 0.65 matches HTML parent opacity (affects both bg and text together)
-          const bgWidth =
-            keywordWidth +
-            (section.detailWidth ?? condition.length * 7) +
-            TEXT_PAD_X * 4;
+          break;
+        case "catch":
           parts.push(
-            `<g class="fragment-section-dim">` +
-              `<rect x="${keywordX - TEXT_PAD_X}" y="${lineY + 1}" width="${bgWidth}" height="20" class="fragment-section-bg"/>` +
-              `<text x="${keywordX}" y="${labelY}" class="fragment-section-label fragment-section-keyword">${esc(keyword)}</text>` +
-              `<text x="${conditionX}" y="${labelY}" class="fragment-section-label">${esc(condition)}</text>` +
-              `</g>`,
+            renderDimmedSectionLabel(
+              f.x + 5,
+              lineY,
+              "catch",
+              section.condition ?? "",
+              section.conditionWidth,
+            ),
           );
-        } else {
-          const finallyX = f.x + 5;
-          const finallyY = labelY;
-          if (section.label === "[else]") {
-            parts.push(
-              `<text x="${finallyX}" y="${finallyY}" class="fragment-section-label fragment-section-keyword">${esc(section.label)}</text>`,
-            );
-            continue;
-          }
-          const bgWidth =
-            (isFinally
-              ? measureTextWithFont(section.label, "14px", "all-small-caps")
-              : (section.labelWidth ?? section.label.length * 7)) +
-            TEXT_PAD_X * 2;
-          const bgY = lineY + 1;
-          const bgHeight = 20;
+          break;
+        case "finally":
           parts.push(
-            `<g class="fragment-section-dim">` +
-              `<rect x="${finallyX - TEXT_PAD_X}" y="${bgY}" width="${bgWidth}" height="${bgHeight}" class="fragment-section-bg"/>` +
-              `<text x="${finallyX}" y="${finallyY}" class="fragment-section-label fragment-section-keyword">${esc(section.label)}</text>` +
-              `</g>`,
+            renderDimmedSectionLabel(f.x + 5, lineY, "finally", undefined),
           );
-        }
+          break;
       }
     }
   }
 
   return `<g class="fragment fragment-${f.kind}">\n  ${parts.join("\n  ")}\n</g>`;
+}
+
+/** catch / finally section label: small-caps keyword, optional exception text, dimmed background. */
+function renderDimmedSectionLabel(
+  keywordX: number,
+  lineY: number,
+  keyword: string,
+  condition: string | undefined,
+  conditionWidth?: number,
+): string {
+  const labelY = lineY + 16;
+  const keywordWidth = measureTextWithFont(keyword, "14px", "all-small-caps");
+  const keywordText = `<text x="${keywordX}" y="${labelY}" class="fragment-section-label fragment-section-keyword">${esc(keyword)}</text>`;
+  if (condition === undefined) {
+    return (
+      `<g class="fragment-section-dim">` +
+      `<rect x="${keywordX - TEXT_PAD_X}" y="${lineY + 1}" width="${keywordWidth + TEXT_PAD_X * 2}" height="20" class="fragment-section-bg"/>` +
+      keywordText +
+      `</g>`
+    );
+  }
+  const conditionX = keywordX + keywordWidth + TEXT_PAD_X * 2;
+  const bgWidth =
+    keywordWidth + (conditionWidth ?? condition.length * 7) + TEXT_PAD_X * 4;
+  // Group with opacity 0.65 matches HTML parent opacity (affects both bg and text together)
+  return (
+    `<g class="fragment-section-dim">` +
+    `<rect x="${keywordX - TEXT_PAD_X}" y="${lineY + 1}" width="${bgWidth}" height="20" class="fragment-section-bg"/>` +
+    keywordText +
+    `<text x="${conditionX}" y="${labelY}" class="fragment-section-label">${esc(condition)}</text>` +
+    `</g>`
+  );
 }
 
 function renderGuardRow(

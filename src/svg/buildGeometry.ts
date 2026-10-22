@@ -211,11 +211,13 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
           fragmentGuardKeyword(inner.kind, inner.guardKeyword),
         ),
       );
+    // Only alt guard rows are padded boxes; catch/finally labels are sized
+    // by the renderer.
     for (const section of inner.sections) {
-      if (section.guardKeyword)
+      if (inner.kind === "alt" && section.guardKeyword)
         inner.width = Math.max(
           inner.width,
-          fragmentGuardWidth(section.innerLabel ?? "", section.guardKeyword),
+          fragmentGuardWidth(section.condition ?? "", section.guardKeyword),
         );
     }
     for (const outer of fragments) {

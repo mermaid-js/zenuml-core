@@ -31,3 +31,30 @@ describe("walkStatements — stray icon tokens do not create spurious Loop fragm
     expect(loops[0].label).toBe("x");
   });
 });
+
+describe("walkStatements — fragment sections carry structured guards", () => {
+  const guardsOf = (dsl: string) =>
+    walkStatements(RootContext(dsl) as any)
+      .find((s) => s.kind === "fragment")
+      ?.fragmentSections?.map((s) => [s.guardKeyword, s.condition]);
+
+  it("alt keeps the two-word else-if keyword apart from its condition", () => {
+    expect(
+      guardsOf("if(a) { A.m }\nelse if(b c) { B.m }\nelse { C.m }"),
+    ).toEqual([
+      ["if", "a"],
+      ["else if", "b c"],
+      ["else", undefined],
+    ]);
+  });
+
+  it("try/catch/finally keeps the exception apart from the keyword", () => {
+    expect(
+      guardsOf("try { A.m } catch(IO ex) { B.m } finally { C.m }"),
+    ).toEqual([
+      ["try", undefined],
+      ["catch", "IO ex"],
+      ["finally", undefined],
+    ]);
+  });
+});

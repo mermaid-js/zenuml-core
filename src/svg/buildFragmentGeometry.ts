@@ -149,76 +149,14 @@ export function buildFragmentGeometry(
           : coord.top + coord.height - sectionY;
 
       sections.push({
-        label: section.label,
         guardKeyword: section.guardKeyword,
+        condition: section.condition,
         y: sectionY,
         height: sectionHeight,
-        labelWidth: section.label
-          ? measureSvgFragmentLabelWidth(resolveEmojiInText(section.label))
-          : undefined,
-        innerLabel:
-          section.condition ??
-          (/^\[\s*.*\s*\]$/.test(section.label)
-            ? section.label.slice(1, -1).trim()
-            : undefined),
-        innerLabelWidth:
-          section.condition !== undefined
-            ? measureSvgFragmentLabelWidth(
-                resolveEmojiInText(section.condition),
-              )
-            : /^\[\s*.*\s*\]$/.test(section.label)
-              ? measureSvgFragmentLabelWidth(
-                  resolveEmojiInText(section.label.slice(1, -1).trim()),
-                )
-              : undefined,
-        keyword: (() => {
-          const spaceIdx = section.label.indexOf(" ");
-          if (
-            spaceIdx > 0 &&
-            !section.label.startsWith("finally") &&
-            !section.label.startsWith("[")
-          ) {
-            return section.label.substring(0, spaceIdx);
-          }
-          return undefined;
-        })(),
-        keywordWidth: (() => {
-          const spaceIdx = section.label.indexOf(" ");
-          if (
-            spaceIdx > 0 &&
-            !section.label.startsWith("finally") &&
-            !section.label.startsWith("[")
-          ) {
-            return measureSvgFragmentLabelWidth(
-              section.label.substring(0, spaceIdx),
-            );
-          }
-          return undefined;
-        })(),
-        detail: (() => {
-          const spaceIdx = section.label.indexOf(" ");
-          if (
-            spaceIdx > 0 &&
-            !section.label.startsWith("finally") &&
-            !section.label.startsWith("[")
-          ) {
-            return section.label.substring(spaceIdx + 1);
-          }
-          return undefined;
-        })(),
-        detailWidth: (() => {
-          const spaceIdx = section.label.indexOf(" ");
-          if (
-            spaceIdx > 0 &&
-            !section.label.startsWith("finally") &&
-            !section.label.startsWith("[")
-          ) {
-            return measureSvgFragmentLabelWidth(
-              section.label.substring(spaceIdx + 1),
-            );
-          }
-          return undefined;
-        })(),
+        conditionWidth:
+          section.guardKeyword === "catch"
+            ? measureSvgFragmentLabelWidth(section.condition ?? "")
+            : undefined,
       });
     }
   }
@@ -232,7 +170,7 @@ export function buildFragmentGeometry(
     const innerStats = parBlock?.stat?.() || [];
     if (innerStats.length > 1) {
       // Dummy first section (renderer skips i=0)
-      sections.push({ label: "", y: coord.top, height: 0 });
+      sections.push({ y: coord.top, height: 0 });
       for (let i = 1; i < innerStats.length; i++) {
         const statKey = createStatementKey(innerStats[i]);
         if (!statKey) continue;
@@ -247,7 +185,6 @@ export function buildFragmentGeometry(
         // the stroke center 0.5px above the HTML border — matching the pixel row.
         const dividerY = innerCoord.top - 1;
         sections.push({
-          label: "",
           y: dividerY,
           height: 0,
           contentInsetLeft: fragBorder.left + coordinates.half(leftParticipant),
@@ -305,7 +242,7 @@ function findFragmentContext(stat: any): any {
  */
 function getDeepParticipantNames(
   fragmentCtx: any,
-  sections?: { label: string; blockNode: any }[],
+  sections?: { blockNode: any }[],
 ): string[] {
   const names = new Set(getLocalParticipantNames(fragmentCtx));
 
