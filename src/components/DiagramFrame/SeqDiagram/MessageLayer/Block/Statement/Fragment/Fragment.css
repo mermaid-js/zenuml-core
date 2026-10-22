@@ -1,0 +1,41 @@
+/* Tailwind preflight sets border-color on '*'; fragments inherit their frame colour. */
+.fragment * {
+  border-color: inherit;
+}
+
+.fragment-critical::before {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border: 1px solid;
+  pointer-events: none;
+}
+
+.fragment-critical .header::before {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid;
+  pointer-events: none;
+}
+
+/* The ref label: a pentagon (cut bottom-right corner) drawn as two stacked
+   clipped boxes. The outer one is the border, the inner one the fill. */
+.fragment-ref .polygon-border {
+  clip-path: polygon(0% 0%, 100% 0%, 100% 66%, 80% 100%, 0% 100%);
+  background-color: var(
+    --color-border-fragment,
+    var(--color-border-frame, var(--color-border-base, #000))
+  );
+}
+
+.fragment-ref .polygon-content {
+  /* The inner box is inset by the border thickness (m-px). */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 66%, 80% 100%, 0% 100%);
+}

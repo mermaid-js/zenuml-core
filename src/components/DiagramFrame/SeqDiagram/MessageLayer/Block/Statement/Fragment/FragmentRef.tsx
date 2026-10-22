@@ -5,6 +5,7 @@ import { Comment } from "../Comment/Comment";
 import { MessageLabel } from "../../../MessageLabel";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 import { labelRangeOfRef } from "@/parser/RefContext";
+import "./Fragment.css";
 
 export const FragmentRef = (props: {
   context: any;
