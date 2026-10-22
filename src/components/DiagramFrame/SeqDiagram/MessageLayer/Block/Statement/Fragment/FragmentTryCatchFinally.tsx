@@ -1,14 +1,10 @@
 import CommentClass from "@/components/Comment/Comment";
-import { useFragmentData } from "./useFragmentData";
-import { Comment } from "../Comment/Comment";
-import { FragmentNumbering } from "./FragmentNumbering";
-import { CollapseButton } from "./CollapseButton";
 import { cn } from "@/utils";
-import { Block } from "../../Block";
-import { blockLength } from "@/utils/Numbering";
+import { fragmentOf } from "@/parser/fragmentOf";
+import { FragmentFrame } from "./FragmentFrame";
+import { FragmentSections } from "./FragmentSections";
 import "./FragmentTryCatchFinally.css";
 import { useMemo } from "react";
-import Icon from "@/components/Icon/Icons";
 
 export const FragmentTryCatchFinally = (props: {
   context: any;
@@ -18,122 +14,34 @@ export const FragmentTryCatchFinally = (props: {
   number?: string;
   className?: string;
 }) => {
-  const {
-    collapsed,
-    toggleCollapse,
-    paddingLeft,
-    fragmentStyle,
-    border,
-    leftParticipant,
-  } = useFragmentData(props.context, props.origin, {
-    label: "Try",
-    number: props.number,
-  });
-
-  const exception = (ctx: any) => {
-    return ctx?.invocation()?.parameters()?.getFormattedText();
-  };
-  const blockInCatchBlock = (ctx: any) => {
-    return ctx?.braceBlock()?.block();
-  };
-
-  const tcf = props.context.tcf();
-  const blockInTryBlock = tcf?.tryBlock()?.braceBlock()?.block();
-  const finallyBlock = tcf?.finallyBlock()?.braceBlock()?.block();
-  const blockLengthAcc = useMemo(() => {
-    const acc = [blockLength(blockInTryBlock)];
-    if (tcf?.catchBlock()) {
-      tcf.catchBlock().forEach((block: any) => {
-        acc.push(acc[acc.length - 1] + blockLength(blockInCatchBlock(block)));
-      });
-    }
-    return acc;
-  }, [tcf, blockInTryBlock]);
+  const sections = useMemo(
+    () => fragmentOf(props.context)?.sections ?? [],
+    [props.context],
+  );
 
   return (
     <div className={props.className}>
-      <div
-        data-origin={props.origin}
-        data-left-participant={leftParticipant}
-        data-frame-padding-left={border.left}
-        data-frame-padding-right={border.right}
+      <FragmentFrame
+        context={props.context}
+        origin={props.origin}
+        label="Try"
+        icon="try-catch-fragment"
+        number={props.number}
+        comment={props.comment}
+        commentObj={props.commentObj}
         className="group fragment fragment-tcf tcf border-skin-fragment rounded"
-        style={fragmentStyle}
+        collapseStyle={props.commentObj?.messageStyle}
+        collapseClassName={cn(props.commentObj?.messageClassNames)}
+        expandedClassName=""
       >
-        {props.commentObj?.text && (
-          <Comment comment={props.comment} commentObj={props.commentObj} />
+        {(layout) => (
+          <FragmentSections
+            sections={sections}
+            number={props.number}
+            layout={layout}
+          />
         )}
-        <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
-          <div className="name font-normal p-1 border-b border-skin-fragment-header-rule">
-            <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
-              <FragmentNumbering number={props.number} />
-              <Icon name="try-catch-fragment" />
-              <CollapseButton
-                label="Try"
-                collapsed={collapsed}
-                onClick={toggleCollapse}
-                style={props.commentObj?.messageStyle}
-                className={cn(props.commentObj?.messageClassNames)}
-              />
-            </label>
-          </div>
-        </div>
-        <div className={collapsed ? "hidden" : ""}>
-          <div className="segment">
-            {blockInTryBlock && (
-              <Block
-                origin={leftParticipant}
-                style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInTryBlock}
-                number={`${props.number}.1`}
-                incremental
-              />
-            )}
-          </div>
-          {tcf.catchBlock().map((catchBlock: any, index: number) => (
-            <div
-              className="segment border-t border-solid border-skin-fragment-separator mt-2"
-              key={index + 500}
-            >
-              <div
-                className="header inline-block bg-skin-frame opacity-skin-guard"
-                key={index + 1000}
-              >
-                <label className="keyword catch p-1 [font-variant-caps:all-small-caps]">
-                  catch
-                </label>
-                <label className="exception p-1">{exception(catchBlock)}</label>
-              </div>
-              <Block
-                origin={leftParticipant}
-                style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInCatchBlock(catchBlock)}
-                key={index + 2000}
-                number={`${props.number}.${blockLengthAcc[index] + 1}`}
-                incremental
-              />
-            </div>
-          ))}
-          {finallyBlock && (
-            <div className="segment border-t border-solid border-skin-fragment-separator mt-2">
-              <div className="header flex text-skin-fragment finally">
-                <label className="keyword finally bg-skin-frame opacity-skin-guard px-1 inline-block [font-variant-caps:all-small-caps]">
-                  finally
-                </label>
-              </div>
-              <Block
-                origin={leftParticipant}
-                style={{ paddingLeft: `${paddingLeft}px` }}
-                context={finallyBlock}
-                number={`${props.number}.${
-                  blockLengthAcc[blockLengthAcc.length - 1] + 1
-                }`}
-                incremental
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      </FragmentFrame>
     </div>
   );
 };

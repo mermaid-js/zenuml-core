@@ -16,6 +16,8 @@ export interface FragmentSection {
   guardKeyword?: string;
   /** Editable guard text: the condition of if / else if / single-block kinds, the exception of catch. */
   condition?: string;
+  /** The ANTLR condition node behind `condition` (if / else if / single-block kinds), for editable labels. */
+  conditionContext?: any;
   /** False for sections that follow the first one (else if, else, catch, finally). */
   isLeading: boolean;
   block: BlockNode | undefined;
@@ -32,8 +34,10 @@ export interface FragmentView {
 const blockOf = (ctx: any): BlockNode | undefined =>
   ctx?.braceBlock?.()?.block?.();
 
+const conditionOf = (ctx: any): any => ctx?.parExpr?.()?.condition?.();
+
 const conditionText = (ctx: any): string =>
-  ctx?.parExpr?.()?.condition?.()?.getFormattedText?.() || "";
+  conditionOf(ctx)?.getFormattedText?.() || "";
 
 export function fragmentOf(stat: StatNode): FragmentView | null {
   for (const kind of SINGLE_BLOCK_FRAGMENT_KINDS) {
@@ -47,6 +51,7 @@ export function fragmentOf(stat: StatNode): FragmentView | null {
             guardKeyword:
               kind === "loop" ? frag.WHILE?.()?.getText?.() : undefined,
             condition: conditionText(frag),
+            conditionContext: conditionOf(frag),
             isLeading: true,
             block: blockOf(frag),
           },
@@ -63,6 +68,7 @@ export function fragmentOf(stat: StatNode): FragmentView | null {
       sections.push({
         guardKeyword: "if",
         condition: conditionText(ifBlock),
+        conditionContext: conditionOf(ifBlock),
         isLeading: true,
         block: blockOf(ifBlock),
       });
@@ -71,6 +77,7 @@ export function fragmentOf(stat: StatNode): FragmentView | null {
       sections.push({
         guardKeyword: "else if",
         condition: conditionText(elseIf),
+        conditionContext: conditionOf(elseIf),
         isLeading: false,
         block: blockOf(elseIf),
       });
