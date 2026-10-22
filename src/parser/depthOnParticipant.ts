@@ -1,17 +1,12 @@
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import type { AugmentedContext } from "@/parser/AntlrTypes";
+import type { OwnedContext } from "@/parser/AntlrTypes";
 
 // Owner/From are installed on MessageContext/CreationContext's prototypes at
-// runtime (see src/parser/Owner.js, src/parser/From.ts) — TS's inference for
+// runtime (see src/parser/Owner.ts, src/parser/From.ts) — TS's inference for
 // the ANTLR-generated classes doesn't see prototype patches applied from
 // another file (see AntlrTypes.AugmentedContext's doc comment), so narrowed
 // context values are cast to this shape at each call site below instead.
-export interface OwnedContext extends AugmentedContext {
-  Owner(): string | undefined;
-  From(): string | undefined;
-}
-
 export const matchesImplicitStarterSelf = (ctx: any, participant: string) => {
   return (
     participant === _STARTER_ &&
