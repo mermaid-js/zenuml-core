@@ -55,7 +55,7 @@ const sequenceParser = (
   await import(path.join(ROOT, "src/generated-parser/sequenceParser.js"))
 ).default;
 // Install prototype augmentations (getFormattedText, getComment, etc.)
-await import(path.join(ROOT, "src/parser/index.js"));
+await import(path.join(ROOT, "src/parser/index.ts"));
 
 function antlrRootCtx(code) {
   const chars = new antlr4.InputStream(code);
@@ -352,7 +352,7 @@ if (differingCases.length === 0) {
 
 md += `## Methodology\n\n`;
 md += `Both engines are invoked via their public facade-level API:\n`;
-md += `- **ANTLR**: \`src/parser/index.js\` prototype augmentations (getFormattedText, getComment)\n`;
+md += `- **ANTLR**: \`src/parser/index.ts\` prototype augmentations (getFormattedText, getComment)\n`;
 md += `- **Langium**: \`src/parser-langium/compat.ts\` → \`buildRootFacade\` → facade Ctx nodes\n\n`;
 md += `Serialization walks \`node.children\` (rule-level only; ANTLR terminals skipped to match\n`;
 md += `facade semantics), recording \`kind\`, \`start.start\`, \`stop.stop\`, \`getFormattedText()\`,\n`;

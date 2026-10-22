@@ -3,7 +3,7 @@
  *
  * Measures, for every compare-case DSL plus two synthetic cases (CJK-heavy,
  * large), the median-of-5 wall time of:
- *   - full parse: RootContext(code) from src/parser/index.js
+ *   - full parse: RootContext(code) from src/parser/index.ts
  *   - raw lex:    sequenceLexer + CommonTokenStream.fill() (all channels)
  *
  * Run:  bun scripts/parity/bench-parse.mjs [--json]
@@ -14,7 +14,7 @@
  */
 import antlr4 from "antlr4";
 import { CASES } from "../../e2e/data/compare-cases.js";
-import { RootContext } from "../../src/parser/index.js";
+import { RootContext } from "../../src/parser/index.ts";
 import sequenceLexer from "../../src/generated-parser/sequenceLexer.js";
 
 // --- Synthetic cases -------------------------------------------------------

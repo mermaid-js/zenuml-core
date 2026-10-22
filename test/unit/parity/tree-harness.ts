@@ -5,7 +5,7 @@
  * docs/langium-migration/02-parser-rules.md §8/§9.
  *
  * serializeTree() walks an ANTLR parse tree (as returned by RootContext(code)
- * from src/parser/index.js) and dumps a plain-JSON shape:
+ * from src/parser/index.ts) and dumps a plain-JSON shape:
  *
  *   rule node:     { kind: <context class name>, start: <char offset of first
  *                    token (ctx.start.start)>, stop: <inclusive char offset of

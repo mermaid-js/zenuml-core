@@ -16,7 +16,7 @@ import type { TextType } from "@/positioning/Coordinate";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { SINGLE_BLOCK_FRAGMENT_KINDS } from "@/positioning/vertical/StatementTypes";
-import { Participants } from "@/parser/index.js";
+import { Participants } from "@/parser/index";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";

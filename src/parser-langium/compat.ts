@@ -1,7 +1,7 @@
 /**
  * Langium-backed equivalents of the `@/parser` public surface (Stage 3+4).
  *
- * Mirrors src/parser/index.js exactly:
+ * Mirrors src/parser/index.ts exactly:
  *  - RootContext(code) -> facade ProgContext (a partial tree is ALWAYS
  *    returned, mirroring the ANTLR `_syntaxErrors`-before-prog() quirk —
  *    error recovery keeps half-typed DSL renderable);
@@ -54,7 +54,7 @@ function recordErrors(result: ParseResult<any>): void {
 
 // Memoize error-free facades so the same code parses once even when multiple
 // render paths (store, SVG export, CLI) need the tree — mirrors the ANTLR
-// rootContext cache (src/parser/index.js). Only error-free results are cached,
+// rootContext cache (src/parser/index.ts). Only error-free results are cached,
 // which keeps the ErrorDetails live-array correct: a cache hit records no new
 // errors, which is right precisely because there were none.
 const rootFacadeCache = new Map<string, ProgContext>();

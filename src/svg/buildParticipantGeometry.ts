@@ -132,7 +132,7 @@ export function collectGroupSpecs(
   return (head?.children ?? [])
     .filter((c) => c instanceof GroupContext)
     .map((g: any) => ({
-      // getFormattedText is installed on every context in src/parser/index.js
+      // getFormattedText is installed on every context in src/parser/index.ts
       name: g.name()?.getFormattedText() ?? "",
       participantNames: Participants(g)
         .Array()

@@ -16,10 +16,27 @@ import "./From";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
 import { formatText } from "@/utils/StringUtil";
+import type { AugmentedContext } from "./AntlrTypes";
 
-const errorDetails = [];
+export interface ErrorDetail {
+  line: number;
+  column: number;
+  msg: string;
+}
+
+// ANTLR-generated parser internals (`_interp`, `_errHandler`, `parser`) are not
+// declared by the JS-inferred types, so they are accessed through `any`.
+type Ctx = any;
+
+const errorDetails: ErrorDetail[] = [];
 class SeqErrorListener extends antlr4.error.ErrorListener {
-  syntaxError(recognizer, offendingSymbol, line, column, msg) {
+  syntaxError(
+    _recognizer: unknown,
+    _offendingSymbol: unknown,
+    line: number,
+    column: number,
+    msg: string,
+  ) {
     errorDetails.push({
       line,
       column,
@@ -33,17 +50,23 @@ class SeqErrorListener extends antlr4.error.ErrorListener {
 // validate()/parse() below run repeatedly or concurrently (e.g. server-side)
 // without the clear-before/clear-after dance the legacy globals require.
 class CollectingErrorListener extends antlr4.error.ErrorListener {
+  errorDetails: ErrorDetail[];
   constructor() {
     super();
-    /** @type {{ line: number, column: number, msg: string }[]} */
     this.errorDetails = [];
   }
-  syntaxError(recognizer, offendingSymbol, line, column, msg) {
+  syntaxError(
+    _recognizer: unknown,
+    _offendingSymbol: unknown,
+    line: number,
+    column: number,
+    msg: string,
+  ) {
     this.errorDetails.push({ line, column, msg });
   }
 }
 
-function createParser(code, { silent = false } = {}) {
+function createParser(code: string, { silent = false } = {}) {
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
   if (silent) {
@@ -59,10 +82,10 @@ function createParser(code, { silent = false } = {}) {
 
 // Memoize error-free parse results so the same code is parsed once even when
 // multiple render paths (store, SVG export, CLI) need the tree.
-const rootContextCache = new Map();
+const rootContextCache = new Map<string, Ctx>();
 const ROOT_CONTEXT_CACHE_MAX = 10;
 
-function rootContext(code) {
+function rootContext(code: string) {
   const cached = rootContextCache.get(code);
   if (cached) {
     return cached;
@@ -80,7 +103,7 @@ function rootContext(code) {
     const tree = sllParser.prog();
     rootContextCache.set(code, tree);
     if (rootContextCache.size > ROOT_CONTEXT_CACHE_MAX) {
-      rootContextCache.delete(rootContextCache.keys().next().value);
+      rootContextCache.delete(rootContextCache.keys().next().value as string);
     }
     return tree;
   } catch {
@@ -92,7 +115,24 @@ function rootContext(code) {
   return parser.prog();
 }
 
-antlr4.ParserRuleContext.prototype.getFormattedText = function () {
+// antlr4.ParserRuleContext is the real (un-augmented) @types/antlr4 class —
+// cast its prototype to the shape this file installs. See AugmentedContext's
+// doc comment for why `declare module` can't express this instead.
+const ParserRuleContext = antlr4.ParserRuleContext as unknown as {
+  prototype: ParserRuleContextInstalled;
+};
+
+/** AugmentedContext plus the ANTLR internals read by the two installers below. */
+interface ParserRuleContextInstalled extends AugmentedContext {
+  parser: Ctx;
+  start: Ctx;
+  stop: Ctx;
+  getSourceInterval(): Ctx;
+}
+
+ParserRuleContext.prototype.getFormattedText = function (
+  this: ParserRuleContextInstalled,
+) {
   const code = this.parser.getTokenStream().getText(this.getSourceInterval());
   // remove extra quotes, spaces and new lines
   return formatText(code);
@@ -100,19 +140,21 @@ antlr4.ParserRuleContext.prototype.getFormattedText = function () {
 
 // Comment is where users have the most flexibility. The parser should make minimal assumptions about
 // the content and the style including change of line, indentation, etc.
-antlr4.ParserRuleContext.prototype.getComment = function () {
+ParserRuleContext.prototype.getComment = function (
+  this: ParserRuleContextInstalled,
+) {
   let tokenIndex = this.start.tokenIndex;
-  let channel = sequenceLexer.channelNames.indexOf("COMMENT_CHANNEL");
+  const channel = sequenceLexer.channelNames.indexOf("COMMENT_CHANNEL");
   if (this.constructor.name === "BraceBlockContext") {
     tokenIndex = this.stop.tokenIndex;
   }
-  let hiddenTokensToLeft = this.parser
+  const hiddenTokensToLeft = this.parser
     .getTokenStream()
     .getHiddenTokensToLeft(tokenIndex, channel);
   return (
     hiddenTokensToLeft &&
     hiddenTokensToLeft
-      .map((t) => t.text.substring(2)) // skip '//'
+      .map((t: { text: string }) => t.text.substring(2)) // skip '//'
       .join("\n")
   );
 };
@@ -122,10 +164,13 @@ antlr4.ParserRuleContext.prototype.getComment = function () {
  * the error-recovered parse tree and a structured error list. Safe to call
  * repeatedly/concurrently — it does not touch the module-level ErrorDetails.
  *
- * @param {string} code ZenUML DSL source
- * @returns {{ rootContext: object, pass: boolean, errorDetails: { line: number, column: number, msg: string }[] }}
+ * @param code ZenUML DSL source
  */
-export function parse(code) {
+export function parse(code: string): {
+  rootContext: Ctx;
+  pass: boolean;
+  errorDetails: ErrorDetail[];
+} {
   const listener = new CollectingErrorListener();
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
@@ -146,10 +191,12 @@ export function parse(code) {
 /**
  * Validate ZenUML DSL syntax without exposing the parse tree. Reentrant.
  *
- * @param {string} code ZenUML DSL source
- * @returns {{ pass: boolean, errorDetails: { line: number, column: number, msg: string }[] }}
+ * @param code ZenUML DSL source
  */
-export function validate(code) {
+export function validate(code: string): {
+  pass: boolean;
+  errorDetails: ErrorDetail[];
+} {
   const { pass, errorDetails } = parse(code);
   return { pass, errorDetails };
 }
@@ -158,7 +205,7 @@ export const ProgContext = sequenceParser.ProgContext;
 export const RootContext = rootContext;
 export const GroupContext = sequenceParser.GroupContext;
 export const ParticipantContext = sequenceParser.ParticipantContext;
-export const Participants = function (ctx) {
+export const Participants = function (ctx: unknown) {
   const toCollector = ToCollector;
   return toCollector.getParticipants(ctx);
 };
@@ -168,7 +215,7 @@ export default {
   ProgContext: sequenceParser.ProgContext,
   GroupContext: sequenceParser.GroupContext,
   ParticipantContext: sequenceParser.ParticipantContext,
-  Participants: function (ctx) {
+  Participants: function (ctx: unknown) {
     const toCollector = ToCollector;
     return toCollector.getParticipants(ctx);
   },

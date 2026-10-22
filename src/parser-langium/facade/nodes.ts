@@ -14,7 +14,7 @@
  *  4. getText() concatenates non-hidden leaf texts; getFormattedText() is the
  *     raw doc slice [offset, end) through formatText (ParametersContext
  *     overrides it);
- *  5. getComment() reproduces src/parser/index.js:51-66 byte-for-byte over the
+ *  5. getComment() reproduces src/parser/index.ts:51-66 byte-for-byte over the
  *     CST leaf stream (BraceBlockContext anchors on its LAST token);
  *  6. wrapper levels (stat, head, dividerNote, parameter, condition, starter,
  *     content, property nodes) are synthesized so parentCtx chains and

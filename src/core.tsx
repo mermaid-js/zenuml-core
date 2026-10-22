@@ -22,7 +22,7 @@ import {
 import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { VERSION } from "./version.ts";
-import Parser from "./parser/index.js";
+import Parser from "./parser/index";
 import colorString from "color-string";
 
 import "./assets/tailwind.css";
