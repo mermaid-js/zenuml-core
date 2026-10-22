@@ -95,7 +95,6 @@
 
     <script type="module">
       import { waitUntil, debounce } from "./src/utils.ts";
-      import { createConfig } from "./src/config.ts";
       import { toPng } from "html-to-image";
       import { renderToSvg } from "./src/svg/renderToSvg.ts";
       import { ensureDiagramFontsLoaded } from "./src/svg/fonts/ensureDiagramFontsLoaded.ts";
@@ -176,12 +175,11 @@
       }
 
       const updateHtmlPreview = debounce((content) => {
-        const config = createConfig({
+        // main.tsx merges the demo config (theme, editing flags) into every render.
+        window.zenUml.render(content, {
           ...readFlags(),
           onContentChange: (code) => editor.setValue(code),
         });
-
-        window.zenUml.render(content, config);
       }, 400);
 
       document.querySelectorAll("[data-flag]").forEach((btn) => {
