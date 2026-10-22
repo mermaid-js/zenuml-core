@@ -89,10 +89,7 @@ export const canTransformMessageType = ({
     return isSyncableContent(parts.content);
   }
   return Boolean(
-    source &&
-      source !== STARTER &&
-      target &&
-      colonMessageParts(line),
+    source && source !== STARTER && target && colonMessageParts(line),
   );
 };
 
@@ -120,7 +117,8 @@ export const transformMessageType = ({
   if (currentType === "sync") {
     const { indent, semicolon } = splitLine(line);
     if (targetType === "async") {
-      const prefix = source && source !== STARTER ? `${source}->${target}` : target;
+      const prefix =
+        source && source !== STARTER ? `${source}->${target}` : target;
       return `${indent}${prefix}: ${signature}${semicolon}`;
     }
     if (targetType === "creation") {
@@ -151,4 +149,44 @@ export const transformMessageType = ({
 
   const arrow = targetType === "return" ? "-->" : "->";
   return `${colonParts.indent}${colonParts.from}${arrow}${colonParts.to}:${colonParts.content}${colonParts.semicolon}`;
+};
+
+type RetypeMessageInput = TransformMessageTypeInput & {
+  code: string;
+  lineHead: number;
+};
+
+/**
+ * Re-types the message on `line` (which starts at `lineHead` in `code`).
+ * Returns the whole new `code`, the new line, and the label's inclusive
+ * `[start, end]` in the new code (`null` when the signature is empty or not
+ * on the new line). Returns `null` when the change is not allowed.
+ */
+export const retypeMessageInDsl = ({
+  code,
+  lineHead,
+  ...input
+}: RetypeMessageInput): {
+  code: string;
+  line: string;
+  labelPosition: [number, number] | null;
+} | null => {
+  const nextLine = transformMessageType(input);
+  if (!nextLine) {
+    return null;
+  }
+  const lineTail = lineHead + input.line.length;
+  const labelOffset = input.signature
+    ? nextLine.lastIndexOf(input.signature)
+    : -1;
+  let labelPosition: [number, number] | null = null;
+  if (labelOffset >= 0 && input.signature) {
+    const start = lineHead + labelOffset;
+    labelPosition = [start, start + input.signature.length - 1];
+  }
+  return {
+    code: code.slice(0, lineHead) + nextLine + code.slice(lineTail),
+    line: nextLine,
+    labelPosition,
+  };
 };

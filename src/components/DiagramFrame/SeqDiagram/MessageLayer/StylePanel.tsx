@@ -4,7 +4,7 @@ import { getLineHead, getPrevLine } from "@/utils/StringUtil";
 import {
   canTransformMessageType,
   type MessageArrowType,
-  transformMessageType,
+  retypeMessageInDsl,
 } from "@/utils/messageTypeTransform";
 import {
   type WrapFragmentType,
@@ -126,43 +126,26 @@ export const StylePanel = () => {
     );
   };
 
+  // The argument shared by the type menu's disabled state and the click.
+  const typeInput = (targetType: MessageArrowType) => {
+    const { line, currentType, source, target, signature } =
+      messageData.current;
+    return { line, currentType, targetType, source, target, signature };
+  };
+
   const handleTypeClick = (targetType: MessageArrowType) => {
     const message = messageData.current;
-    if (message.currentType === targetType) return;
-    if (
-      !canTransformMessageType({
-        line: message.line,
-        currentType: message.currentType,
-        targetType,
-        source: message.source,
-        target: message.target,
-        signature: message.signature,
-      })
-    )
-      return;
-    const nextLine = transformMessageType({
-      line: message.line,
-      currentType: message.currentType,
-      targetType,
-      source: message.source,
-      target: message.target,
-      signature: message.signature,
+    const next = retypeMessageInDsl({
+      ...typeInput(targetType),
+      code,
+      lineHead: message.lineHead,
     });
-    if (!nextLine) {
-      return;
-    }
-
-    const lineTail = message.lineHead + message.line.length;
-    const labelText = message.signature;
-    const labelOffset = labelText ? nextLine.lastIndexOf(labelText) : -1;
-    updateCode(
-      code.slice(0, message.lineHead) + nextLine + code.slice(lineTail),
-    );
+    if (!next) return;
+    updateCode(next.code);
     message.currentType = targetType;
-    message.line = nextLine;
-    if (labelOffset >= 0 && labelText) {
-      const start = message.lineHead + labelOffset;
-      const end = start + labelText.length - 1;
+    message.line = next.line;
+    if (next.labelPosition) {
+      const [start, end] = next.labelPosition;
       setSelectedMessage({ start, end, token: Date.now() });
       // The menu stays open on the re-typed message.
       enterMenu({ kind: "messageMenu", start, end });
@@ -419,14 +402,9 @@ export const StylePanel = () => {
                       "creation",
                     ] as MessageArrowType[]
                   ).map((type) => {
-                    const canTransform = canTransformMessageType({
-                      line: messageData.current.line,
-                      currentType: messageData.current.currentType,
-                      targetType: type,
-                      source: messageData.current.source,
-                      target: messageData.current.target,
-                      signature: messageData.current.signature,
-                    });
+                    const canTransform = canTransformMessageType(
+                      typeInput(type),
+                    );
                     const isCurrent = messageData.current.currentType === type;
                     const disabledTitle = isCurrent
                       ? `Already ${type}`
