@@ -5,7 +5,11 @@
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { measureSvgParticipantLabelWidth } from "@/positioning/WidthProviderFunc";
-import type { IParticipantModel } from "@/parser/IParticipantModel";
+import {
+  participantDisplayName,
+  participantHasIcon,
+  type IParticipantModel,
+} from "@/parser/IParticipantModel";
 import type { HeadNode } from "@/parser/AntlrTypes";
 import { MARGIN, MIN_PARTICIPANT_WIDTH } from "@/positioning/Constants";
 import { TextType } from "@/positioning/Coordinate";
@@ -42,10 +46,12 @@ export function buildParticipants(
     let measuredTextWidth: number | undefined;
     let measuredStereotypeWidth: number | undefined;
     if (measureText && m.name !== _STARTER_) {
-      const textWidth = measureSvgParticipantLabelWidth(m.getDisplayName());
+      const textWidth = measureSvgParticipantLabelWidth(
+        participantDisplayName(m),
+      );
       measuredTextWidth = textWidth;
       const padding = PARTICIPANT_BOX_PADDING;
-      const iconWidth = m.hasIcon() ? PARTICIPANT_ICON_ROW_WIDTH : 0;
+      const iconWidth = participantHasIcon(m) ? PARTICIPANT_ICON_ROW_WIDTH : 0;
       const emojiWidth = m.emoji ? PARTICIPANT_EMOJI_WIDTH : 0;
       // When a stereotype is present, the participant box must be wide enough to fit the
       // stereotype text. HTML's box = max(contentRowWidth + padding, stereotypeGlyphWidth + 8, minWidth).
@@ -84,7 +90,7 @@ export function buildParticipants(
 
     return {
       name: m.name,
-      label: m.getDisplayName(),
+      label: participantDisplayName(m),
       x: centerX,
       y,
       width,
