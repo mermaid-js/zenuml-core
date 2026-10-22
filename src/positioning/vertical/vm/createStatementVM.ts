@@ -7,7 +7,7 @@ import { FragmentRefVM } from "./FragmentRefVM";
 import { FragmentSingleBlockVM } from "./FragmentSingleBlockVM";
 import { FragmentTryCatchVM } from "./FragmentTryCatchVM";
 import { ReturnStatementVM } from "./ReturnStatementVM";
-import { SINGLE_BLOCK_FRAGMENT_KINDS } from "../StatementTypes";
+import { fragmentOf } from "@/parser/fragmentOf";
 import type { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 import { SyncMessageStatementVM } from "./SyncMessageStatementVM";
@@ -39,25 +39,23 @@ export const createStatementVM = (
     return new DividerStatementVM(statement, runtime);
   }
 
-  for (const kind of SINGLE_BLOCK_FRAGMENT_KINDS) {
-    const fragment = statement[kind]?.();
-    if (fragment) {
-      return new FragmentSingleBlockVM(statement, fragment, runtime, kind);
+  const fragment = fragmentOf(statement);
+  if (fragment) {
+    switch (fragment.kind) {
+      case "tcf":
+        return new FragmentTryCatchVM(statement, fragment.context, runtime);
+      case "alt":
+        return new FragmentAltVM(statement, fragment.context, runtime);
+      case "ref":
+        return new FragmentRefVM(statement, runtime);
+      default:
+        return new FragmentSingleBlockVM(
+          statement,
+          fragment.context,
+          runtime,
+          fragment.kind,
+        );
     }
-  }
-
-  const tcf = statement.tcf?.();
-  if (tcf) {
-    return new FragmentTryCatchVM(statement, tcf, runtime);
-  }
-
-  const alt = statement.alt?.();
-  if (alt) {
-    return new FragmentAltVM(statement, alt, runtime);
-  }
-
-  if (statement.ref?.()) {
-    return new FragmentRefVM(statement, runtime);
   }
 
   return new EmptyStatementVM(statement, runtime);

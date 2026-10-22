@@ -8,7 +8,7 @@
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import type { FragmentKind } from "./geometry";
-import { SINGLE_BLOCK_FRAGMENT_KINDS } from "@/positioning/vertical/StatementTypes";
+import { fragmentOf } from "@/parser/fragmentOf";
 import type { RootContextNode, BlockNode, StatNode } from "@/parser/AntlrTypes";
 
 export interface FragmentSectionInfo {
@@ -298,104 +298,76 @@ interface FragmentExtract {
 }
 
 function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
-  for (const kind of SINGLE_BLOCK_FRAGMENT_KINDS) {
-    const frag = stat[kind]?.();
-    if (frag) {
-      const condition = frag.parExpr?.()?.condition?.();
-      const label = condition?.getFormattedText?.() || "";
-      return {
-        fragmentKind: kind,
-        headerLabel: frag.atom?.()?.getFormattedText?.(),
-        label,
-        guardKeyword: kind === "loop" ? frag.WHILE?.()?.getText?.() : undefined,
-        sections: [{ label, blockNode: frag.braceBlock?.()?.block?.() }],
-      };
-    }
-  }
-
-  // Alt (if/else if/else) — multiple sections
-  // Guard keywords are separate from editable condition text.
-  const alt = stat.alt?.();
-  if (alt) {
-    const sections: FragmentSectionInfo[] = [];
-    const ifBlock = alt.ifBlock?.();
-    if (ifBlock) {
-      // First section label = kind name (matches HTML header visible text)
-      sections.push({
-        label: "Alt",
-        guardKeyword: "if",
-        condition:
-          ifBlock.parExpr?.()?.condition?.()?.getFormattedText?.() || "",
-        blockNode: ifBlock.braceBlock?.()?.block?.(),
-      });
-    }
-    for (const elseIf of alt.elseIfBlock?.() || []) {
-      const condition = elseIf.parExpr?.()?.condition?.();
-      const label = condition?.getFormattedText?.() || "";
-      sections.push({
-        label: `else if ${label}`,
-        guardKeyword: "else if",
-        condition: label,
-        blockNode: elseIf.braceBlock?.()?.block?.(),
-      });
-    }
-    const elseBlock = alt.elseBlock?.();
-    if (elseBlock) {
-      sections.push({
-        label: "else",
-        guardKeyword: "else",
-        blockNode: elseBlock.braceBlock?.()?.block?.(),
-      });
-    }
-
-    const ifCondition = alt.ifBlock?.()?.parExpr?.()?.condition?.();
-    const firstLabel = ifCondition?.getFormattedText?.() || "";
-    return { fragmentKind: "alt", label: firstLabel, sections };
-  }
-
-  // Try/catch/finally — multiple sections
-  // Section labels match HTML visible text: "Try", "catch e", "finally"
-  const tcf = stat.tcf?.();
-  if (tcf) {
-    const sections: FragmentSectionInfo[] = [];
-    const tryBlock = tcf.tryBlock?.();
-    if (tryBlock) {
-      // First section label = capitalized kind name (matches HTML header)
-      sections.push({
-        label: "Try",
-        blockNode: tryBlock.braceBlock?.()?.block?.(),
-      });
-    }
-    for (const catchBlock of tcf.catchBlock?.() || []) {
-      const exception =
-        catchBlock.invocation?.()?.parameters?.()?.getFormattedText?.() || "";
-      sections.push({
-        label: `catch ${exception}`,
-        blockNode: catchBlock.braceBlock?.()?.block?.(),
-      });
-    }
-    const finallyBlock = tcf.finallyBlock?.();
-    if (finallyBlock) {
-      sections.push({
-        label: "finally",
-        blockNode: finallyBlock.braceBlock?.()?.block?.(),
-      });
-    }
-
-    return { fragmentKind: "tcf", label: "", sections };
-  }
-
-  // Ref fragment
-  const ref = stat.ref?.();
-  if (ref) {
-    const label = ref.getFormattedText?.() || "";
-    return { fragmentKind: "ref", label, sections: [] };
-  }
-
+  const view = fragmentOf(stat);
   // No recognized fragment type. Rather than defaulting to a Loop fragment
   // (which produced spurious stacked loops for stray icon tokens, issue #367),
   // return null so the caller skips this statement — matching the HTML renderer.
-  return null;
+  if (!view) return null;
+
+  switch (view.kind) {
+    case "ref":
+      return {
+        fragmentKind: "ref",
+        label: view.context.getFormattedText?.() || "",
+        sections: [],
+      };
+
+    case "alt": {
+      // Guard keywords are separate from editable condition text. The first
+      // section label is the kind name (matches HTML header visible text).
+      const sections = view.sections.map((s): FragmentSectionInfo => {
+        if (s.guardKeyword === "if") {
+          return {
+            label: "Alt",
+            guardKeyword: "if",
+            condition: s.condition,
+            blockNode: s.block,
+          };
+        }
+        if (s.guardKeyword === "else") {
+          return { label: "else", guardKeyword: "else", blockNode: s.block };
+        }
+        return {
+          label: `else if ${s.condition}`,
+          guardKeyword: "else if",
+          condition: s.condition,
+          blockNode: s.block,
+        };
+      });
+      const [first] = view.sections;
+      const firstLabel =
+        first?.guardKeyword === "if" ? (first.condition ?? "") : "";
+      return { fragmentKind: "alt", label: firstLabel, sections };
+    }
+
+    case "tcf": {
+      // Section labels match HTML visible text: "Try", "catch e", "finally"
+      const sections = view.sections.map(
+        (s): FragmentSectionInfo => ({
+          label:
+            s.guardKeyword === "try"
+              ? "Try"
+              : s.guardKeyword === "catch"
+                ? `catch ${s.condition}`
+                : "finally",
+          blockNode: s.block,
+        }),
+      );
+      return { fragmentKind: "tcf", label: "", sections };
+    }
+
+    default: {
+      const [section] = view.sections;
+      const label = section.condition ?? "";
+      return {
+        fragmentKind: view.kind,
+        headerLabel: view.context.atom?.()?.getFormattedText?.(),
+        label,
+        guardKeyword: section.guardKeyword,
+        sections: [{ label, blockNode: section.block }],
+      };
+    }
+  }
 }
 
 function blockLength(block: BlockNode): number {
@@ -413,141 +385,26 @@ function walkFragmentBlocks(
   parentNumber: string,
   depth: number,
 ): void {
-  for (const kind of SINGLE_BLOCK_FRAGMENT_KINDS) {
-    const frag = stat[kind]?.();
-    if (frag) {
-      const block = frag.braceBlock?.()?.block?.();
-      if (block)
-        results.push(
-          ...walkBlock(
-            block,
-            origin,
-            activeOccurrences,
-            parentNumber,
-            depth + 1,
-            null,
-            0,
-          ),
-        );
-      return;
-    }
-  }
+  const view = fragmentOf(stat);
+  if (!view) return;
 
-  // Alt (if/else if/else) — multiple blocks
-  const alt = stat.alt?.();
-  if (alt) {
-    const ifBlock = alt.ifBlock?.();
-    let sectionOffset = 0;
-    if (ifBlock) {
-      const block = ifBlock.braceBlock?.()?.block?.();
-      if (block) {
-        results.push(
-          ...walkBlock(
-            block,
-            origin,
-            activeOccurrences,
-            parentNumber,
-            depth + 1,
-            null,
-            sectionOffset,
-          ),
-        );
-        sectionOffset += blockLength(block);
-      }
+  let sectionOffset = 0;
+  for (const section of view.sections) {
+    const block = section.block;
+    if (!block) continue;
+    const sectionStmts = walkBlock(
+      block,
+      origin,
+      activeOccurrences,
+      parentNumber,
+      depth + 1,
+      null,
+      sectionOffset,
+    );
+    if (!section.isLeading && sectionStmts.length > 0) {
+      sectionStmts[0].sectionReset = true;
     }
-    for (const elseIf of alt.elseIfBlock?.() || []) {
-      const block = elseIf.braceBlock?.()?.block?.();
-      if (block) {
-        const sectionStmts = walkBlock(
-          block,
-          origin,
-          activeOccurrences,
-          parentNumber,
-          depth + 1,
-          null,
-          sectionOffset,
-        );
-        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
-        results.push(...sectionStmts);
-        sectionOffset += blockLength(block);
-      }
-    }
-    const elseBlock = alt.elseBlock?.();
-    if (elseBlock) {
-      const block = elseBlock.braceBlock?.()?.block?.();
-      if (block) {
-        const sectionStmts = walkBlock(
-          block,
-          origin,
-          activeOccurrences,
-          parentNumber,
-          depth + 1,
-          null,
-          sectionOffset,
-        );
-        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
-        results.push(...sectionStmts);
-      }
-    }
-    return;
-  }
-
-  // Try/catch/finally — multiple blocks
-  const tcf = stat.tcf?.();
-  if (tcf) {
-    const tryBlock = tcf.tryBlock?.();
-    let sectionOffset = 0;
-    if (tryBlock) {
-      const block = tryBlock.braceBlock?.()?.block?.();
-      if (block) {
-        results.push(
-          ...walkBlock(
-            block,
-            origin,
-            activeOccurrences,
-            parentNumber,
-            depth + 1,
-            null,
-            sectionOffset,
-          ),
-        );
-        sectionOffset += blockLength(block);
-      }
-    }
-    for (const catchBlock of tcf.catchBlock?.() || []) {
-      const block = catchBlock.braceBlock?.()?.block?.();
-      if (block) {
-        const sectionStmts = walkBlock(
-          block,
-          origin,
-          activeOccurrences,
-          parentNumber,
-          depth + 1,
-          null,
-          sectionOffset,
-        );
-        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
-        results.push(...sectionStmts);
-        sectionOffset += blockLength(block);
-      }
-    }
-    const finallyBlock = tcf.finallyBlock?.();
-    if (finallyBlock) {
-      const block = finallyBlock.braceBlock?.()?.block?.();
-      if (block) {
-        const sectionStmts = walkBlock(
-          block,
-          origin,
-          activeOccurrences,
-          parentNumber,
-          depth + 1,
-          null,
-          sectionOffset,
-        );
-        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
-        results.push(...sectionStmts);
-      }
-    }
-    return;
+    results.push(...sectionStmts);
+    sectionOffset += blockLength(block);
   }
 }

@@ -15,7 +15,7 @@ import {
 import type { TextType } from "@/positioning/Coordinate";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
-import { SINGLE_BLOCK_FRAGMENT_KINDS } from "@/positioning/vertical/StatementTypes";
+import { fragmentOf } from "@/parser/fragmentOf";
 import { Participants } from "@/parser/index";
 import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import FrameBuilder from "@/parser/FrameBuilder";
@@ -295,17 +295,7 @@ export function buildFragmentGeometry(
 }
 
 function findFragmentContext(stat: any): any {
-  for (const kind of SINGLE_BLOCK_FRAGMENT_KINDS) {
-    const frag = stat[kind]?.();
-    if (frag) return frag;
-  }
-  const alt = stat.alt?.();
-  if (alt) return alt;
-  const tcf = stat.tcf?.();
-  if (tcf) return tcf;
-  const ref = stat.ref?.();
-  if (ref) return ref;
-  return null;
+  return fragmentOf(stat)?.context ?? null;
 }
 
 /**
