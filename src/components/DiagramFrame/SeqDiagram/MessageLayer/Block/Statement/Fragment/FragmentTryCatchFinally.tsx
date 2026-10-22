@@ -3,7 +3,6 @@ import { cn } from "@/utils";
 import { fragmentOf } from "@/parser/fragmentOf";
 import { FragmentFrame } from "./FragmentFrame";
 import { FragmentSections } from "./FragmentSections";
-import "./FragmentTryCatchFinally.css";
 import { useMemo } from "react";
 
 export const FragmentTryCatchFinally = (props: {

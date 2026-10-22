@@ -3,10 +3,6 @@ import { cn } from "@/utils";
 import { Block } from "../../Block";
 import { FragmentFrame } from "./FragmentFrame";
 import { ConditionLabel } from "./ConditionLabel";
-import "./FragmentCritical.css";
-import "./FragmentLoop.css";
-import "./FragmentPar.css";
-import "./FragmentSection.css";
 
 import type { SingleBlockFragmentKind } from "@/positioning/vertical/StatementTypes";
 

@@ -6,6 +6,7 @@ import { Comment } from "../Comment/Comment";
 import { CollapseButton } from "./CollapseButton";
 import { FragmentNumbering } from "./FragmentNumbering";
 import { useFragmentData } from "./useFragmentData";
+import "./Fragment.css";
 
 /** Layout values the frame hands to its body so the blocks line up with the frame. */
 export interface FragmentFrameLayout {
