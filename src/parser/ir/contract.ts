@@ -655,6 +655,11 @@ export interface ParticipantsCollection {
   Size(): number;
   /** Declaration/mention offset ranges, or `undefined` when the name is unknown. */
   GetPositions(name: string): ReadonlySet<IrPosition> | undefined;
+  /**
+   * Offset ranges of every name-token occurrence, ignoring `as` labels — what
+   * an identifier rename rewrites. `undefined` when the name is unknown.
+   */
+  GetNamePositions(name: string): ReadonlySet<IrPosition> | undefined;
   /** Assignee offset ranges (see {@link ParticipantsCollection.GetPositions}). */
   GetAssigneePositions(name: string): ReadonlySet<IrPosition> | undefined;
 }

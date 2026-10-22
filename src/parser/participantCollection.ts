@@ -21,6 +21,9 @@ import { Participants, type Position } from "./Participants";
 // are typed loosely at this boundary.
 type Ctx = any;
 
+const rangeOf = (ctx: Ctx): Position | undefined =>
+  ctx?.start && ctx?.stop ? [ctx.start.start, ctx.stop.stop + 1] : undefined;
+
 export interface CollectState {
   participants: Participants;
   groupId: string | undefined;
@@ -72,6 +75,7 @@ export function onParticipant(ctx: Ctx, state: CollectState): void {
     comment,
     // `start`/`end` stay undefined when neither a label nor a name node exists.
     position: [start, end] as unknown as Position,
+    namePosition: rangeOf(nameCtx),
   });
 }
 
@@ -81,10 +85,15 @@ export function onTo(ctx: Ctx, state: CollectState): void {
     ctx.name?.()?.getFormattedText() || ctx.getFormattedText();
   const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
   const participantInstance = state.participants.Get(participant);
+  const namePosition = rangeOf(ctx.name?.() ?? ctx);
 
   // Skip adding participant position if label is present
   if (participantInstance?.label) {
-    state.participants.Add(participant, { isStarter: false, emoji });
+    state.participants.Add(participant, {
+      isStarter: false,
+      emoji,
+      namePosition,
+    });
   } else if (participantInstance?.assignee) {
     // If the participant has an assignee, calculate the position of the ctor and store it only.
     // Let's say the participant name is `"${assignee}:${type}"`, we need to get the position of ${type}
@@ -99,6 +108,7 @@ export function onTo(ctx: Ctx, state: CollectState): void {
       isStarter: false,
       emoji,
       position,
+      namePosition,
       assigneePosition,
     });
   } else {
@@ -106,6 +116,7 @@ export function onTo(ctx: Ctx, state: CollectState): void {
       isStarter: false,
       emoji,
       position: [ctx.start.start, ctx.stop.stop + 1],
+      namePosition,
     });
   }
 }
@@ -115,25 +126,31 @@ export function onStarter(ctx: Ctx, state: CollectState): void {
   state.participants.Add(ctx.getFormattedText(), {
     isStarter: true,
     position: [ctx.start.start, ctx.stop.stop + 1],
+    namePosition: [ctx.start.start, ctx.stop.stop + 1],
   });
 }
 
 export function onCreation(ctx: Ctx, state: CollectState): void {
   const participant = ctx.Owner();
   const ctor = ctx?.creationBody()?.construct();
+  const assignee = ctx.Assignee();
   const participantInstance = state.participants.Get(participant);
+  // The constructor is a name occurrence only without an assignee: with one,
+  // the participant is `assignee:Type` and the constructor spells just `Type`,
+  // so an identifier rename must not rewrite it.
+  const namePosition = assignee ? undefined : rangeOf(ctor);
   // Skip adding participant constructor position if label is present
   if (ctor && !participantInstance?.label) {
-    const assignee = ctx.Assignee();
     const assigneePosition = ctx.AssigneePosition();
     state.participants.Add(participant, {
       isStarter: false,
       position: [ctor.start.start, ctor.stop.stop + 1],
+      namePosition,
       assignee: assignee,
       assigneePosition: assigneePosition,
     });
   } else {
-    state.participants.Add(participant, { isStarter: false });
+    state.participants.Add(participant, { isStarter: false, namePosition });
   }
 }
 
@@ -142,6 +159,7 @@ export function onRef(ctx: Ctx, state: CollectState): void {
     state.participants.Add(participant.getText(), {
       isStarter: false,
       position: [participant.start.start, participant.stop.stop + 1],
+      namePosition: [participant.start.start, participant.stop.stop + 1],
     });
   });
 }
