@@ -1,6 +1,8 @@
 import { cn } from "@/utils";
 import IconCollapseExpanded from "./icons/collapse-expanded.svg?react";
 import IconCollapseUnexpanded from "./icons/collapse-unexpanded.svg?react";
+import IconOccurrenceCollapse from "./icons/occurrence-collapse.svg?react";
+import IconOccurrenceExpand from "./icons/occurrence-expand.svg?react";
 import IconDebug from "./icons/debug.svg?react";
 import IconPrivacy from "./icons/privacy.svg?react";
 import IconAltFragment from "./icons/alt-fragment.svg?react";
@@ -15,6 +17,8 @@ import IconTryCatchFragment from "./icons/try-catch-fragment.svg?react";
 const icons = {
   "collapse-expanded": IconCollapseExpanded,
   "collapse-unexpanded": IconCollapseUnexpanded,
+  "occurrence-collapse": IconOccurrenceCollapse,
+  "occurrence-expand": IconOccurrenceExpand,
   debug: IconDebug,
   privacy: IconPrivacy,
   "alt-fragment": IconAltFragment,

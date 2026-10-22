@@ -1,6 +1,6 @@
+import Icon from "@/components/Icon/Icons";
 import { cn } from "@/utils";
 import { useCapClick } from "@/store/interaction/useCan";
-import "./CollapseButton.css";
 
 export const CollapseButton = (props: {
   collapsed?: boolean;
@@ -14,71 +14,41 @@ export const CollapseButton = (props: {
     onClick,
   } = useCapClick("collapse", props.onClick);
   return (
-    <div className="occurrence-collapsible-header w-auto" {...pressProps}>
-      <svg
-        width="20px"
-        height="20px"
-        className={cn("collapse-button", {
-          "cursor-pointer": canCollapse,
-          hidden: props.collapsed,
-          expanded: !props.collapsed,
-          // Shown on occurrence hover only while `collapse` is allowed (P4),
-          // like the fragment's button. Not `hoverAffordance`: collapse is
-          // view-only and stays live in a static render.
-          "hover-reveal": canCollapse,
-        })}
-        onClick={onClick}
-        viewBox="0 0 25 25"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="miter"
+    <div
+      className="occurrence-collapsible-header absolute top-px -left-[5px] w-auto"
+      {...pressProps}
+    >
+      {/* Hidden until the occurrence (a `group`) is hovered, and only while
+          `collapse` is allowed (P4), like the fragment's button. Not
+          `hoverAffordance`: collapse is view-only and stays live in a static
+          render. */}
+      <div
+        className={cn(
+          "hidden",
+          canCollapse &&
+            !props.collapsed &&
+            "group-[.occurrence]:group-hover:block",
+        )}
       >
-        <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-        <g
-          id="SVGRepo_tracerCarrier"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        ></g>
-        <g id="SVGRepo_iconCarrier">
-          <line x1="13" y1="2" x2="13" y2="10"></line>
-          <polyline points="9 7 13 11 17 7"></polyline>
-          <line x1="13" y1="23" x2="13" y2="15"></line>
-          <polyline points="9 19 13 15 17 19"></polyline>
-        </g>
-      </svg>
-      <svg
-        width="20px"
-        height="20px"
-        className={cn({
+        <Icon
+          name="occurrence-collapse"
+          className={cn("w-5 h-5 collapse-button", {
+            "cursor-pointer": canCollapse,
+            hidden: props.collapsed,
+            expanded: !props.collapsed,
+            "hover-reveal": canCollapse,
+          })}
+          onClick={onClick}
+        />
+      </div>
+      <Icon
+        name="occurrence-expand"
+        className={cn("w-5 h-5", {
           "cursor-pointer": canCollapse,
           hidden: !props.collapsed,
         })}
         onClick={onClick}
-        viewBox="0 0 25 25"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="miter"
-      >
-        <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-        <g
-          id="SVGRepo_tracerCarrier"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        ></g>
-        <g id="SVGRepo_iconCarrier">
-          <line x1="13" y1="1" x2="13" y2="9"></line>
-          <polyline points="9 5 13 1 17 5"></polyline>
-          <line x1="13" y1="13" x2="13" y2="13"></line>
-          <line x1="13" y1="24" x2="13" y2="17"></line>
-          <polyline points="9 20 13 24 17 20"></polyline>
-        </g>
-      </svg>
+      />
     </div>
   );
 };
