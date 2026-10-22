@@ -1,7 +1,7 @@
+import { useCommitCode } from "@/store/useCommitCode";
 import {
   codeAtom,
   diagramElementAtom,
-  onContentChangeAtom,
   participantPreviewAtom,
   rootContextAtom,
   selectedAtom,
@@ -37,8 +37,8 @@ import {
 import { useFollowPress } from "./participantEditor/useFollowPress";
 
 export const ParticipantStylePanel = () => {
-  const [code, setCode] = useAtom(codeAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
   const rootContext = useAtomValue(rootContextAtom);
   const [selected, setSelectedRaw] = useAtom(selectedAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
@@ -141,8 +141,7 @@ export const ParticipantStylePanel = () => {
 
   const updateCode = (next: string) => {
     if (next === code) return;
-    setCode(next);
-    onContentChange(next);
+    commitCode(next);
   };
 
   // Changes apply immediately and the panel stays open, so several edits can

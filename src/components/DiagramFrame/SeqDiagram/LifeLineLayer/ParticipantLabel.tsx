@@ -1,10 +1,6 @@
-import {
-  codeAtom,
-  modeAtom,
-  onContentChangeAtom,
-  RenderMode,
-} from "@/store/Store";
-import { useAtom, useAtomValue } from "jotai";
+import { codeAtom, modeAtom, RenderMode } from "@/store/Store";
+import { useAtomValue } from "jotai";
+import { useCommitCode } from "@/store/useCommitCode";
 import { Position } from "@/parser/Participants";
 import { specialCharRegex } from "@/utils/messageNormalizers";
 import { cn } from "@/utils";
@@ -22,8 +18,8 @@ export const ParticipantLabel = (props: {
 }) => {
   const mode = useAtomValue(modeAtom);
   const updateTextEditing = useTextEditingGuard();
-  const [code, setCode] = useAtom(codeAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
   const participantIsEditable =
     mode === RenderMode.Dynamic &&
     UneditableText.indexOf(props.labelText) === -1;
@@ -68,8 +64,7 @@ export const ParticipantLabel = (props: {
       newCode = newCode.slice(0, start) + text + newCode.slice(end);
     }
 
-    setCode(newCode);
-    onContentChange(newCode);
+    commitCode(newCode);
   };
 
   const createSaveHandler = (

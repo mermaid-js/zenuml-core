@@ -1,3 +1,4 @@
+import { useCommitCode } from "@/store/useCommitCode";
 import { cn } from "@/utils";
 import { usePopoverPresence } from "@/components/common/usePopoverPresence";
 import { getLineHead, getPrevLine } from "@/utils/StringUtil";
@@ -18,7 +19,6 @@ import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import {
   codeAtom,
   diagramElementAtom,
-  onContentChangeAtom,
   onMessageClickAtom,
   pendingEditableRangeAtom,
   selectedAtom,
@@ -61,9 +61,9 @@ const wrapTypes: WrapFragmentType[] = ["alt", "loop", "opt", "par"];
 
 export const StylePanel = () => {
   const store = useStore();
-  const [code, setCode] = useAtom(codeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
   const diagramElement = useAtomValue(diagramElementAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
   const setOnMessageClick = useSetAtom(onMessageClickAtom);
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
   const setSelectedParticipants = useSetAtom(selectedAtom);
@@ -91,8 +91,7 @@ export const StylePanel = () => {
   const [hasMessageContext, setHasMessageContext] = useState(false);
 
   const updateCode = (newCode: string) => {
-    setCode(newCode);
-    onContentChange(newCode);
+    commitCode(newCode);
   };
 
   const messageData = useRef({

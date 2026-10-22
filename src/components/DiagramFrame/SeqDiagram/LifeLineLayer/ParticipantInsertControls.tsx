@@ -1,13 +1,13 @@
+import { useCommitCode } from "@/store/useCommitCode";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import {
   coordinatesAtom,
   enableParticipantInsertionAtom,
-  onContentChangeAtom,
   rootContextAtom,
 } from "@/store/Store";
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
 import { MARGIN } from "@/positioning/Constants";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
 import { useCan } from "@/store/interaction/useCan";
 import { codeAtom } from "@/store/Store";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -79,8 +79,8 @@ export const ParticipantInsertControls = () => {
   const canInsert = useCan("insertParticipant");
   const coordinates = useAtomValue(coordinatesAtom);
   const rootContext = useAtomValue(rootContextAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
-  const [code, setCode] = useAtom(codeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
 
   const participantModels = useMemo(
     () =>
@@ -170,8 +170,7 @@ export const ParticipantInsertControls = () => {
       name,
       type: "default",
     });
-    setCode(nextCode);
-    onContentChange(nextCode);
+    commitCode(nextCode);
   };
 
   if (!enabled || !canInsert || participantModels.length === 0) {

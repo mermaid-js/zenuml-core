@@ -1,10 +1,10 @@
+import { useCommitCode } from "@/store/useCommitCode";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import {
   codeAtom,
   createMessageDragAtom,
   diagramElementAtom,
   enableMessageInsertionAtom,
-  onContentChangeAtom,
   pendingEditableRangeAtom,
   rootContextAtom,
   selectedAtom,
@@ -24,10 +24,10 @@ export const MessageCreateControls = () => {
   const canCreate = useCan("createMessage");
   const diagramElement = useAtomValue(diagramElementAtom);
   const rootContext = useAtomValue(rootContextAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
   const [, setSelectedParticipants] = useAtom(selectedAtom);
-  const [code, setCode] = useAtom(codeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
   const [dragState, setDragState] = useAtom(createMessageDragAtom);
   const isCreatingMessage = Boolean(dragState);
   const dragStateRef = useRef<typeof dragState>(null);
@@ -185,8 +185,7 @@ export const MessageCreateControls = () => {
           hostContext: current.hostContext,
           insertIndex: current.insertIndex,
         });
-        setCode(next.code);
-        onContentChange(next.code);
+        commitCode(next.code);
         setPendingEditableRange({
           start: next.labelPosition[0],
           end: next.labelPosition[1],
@@ -209,9 +208,8 @@ export const MessageCreateControls = () => {
     code,
     diagramElement,
     dragState,
-    onContentChange,
     participants,
-    setCode,
+    commitCode,
     setPendingEditableRange,
     setDragState,
     setSelectedParticipants,

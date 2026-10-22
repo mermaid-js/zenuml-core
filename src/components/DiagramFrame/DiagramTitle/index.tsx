@@ -1,17 +1,15 @@
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import { EditableSpan } from "@/components/common/EditableSpan";
-import {
-  codeAtom,
-  modeAtom,
-  onContentChangeAtom,
-  RenderMode,
-} from "@/store/Store";
-import { useAtom, useAtomValue } from "jotai";
+import { codeAtom, modeAtom, RenderMode } from "@/store/Store";
+import { useAtomValue } from "jotai";
+import { useCommitCode } from "@/store/useCommitCode";
+import { useTextEditingGuard } from "@/components/common/EditableSpan/useTextEditingGuard";
 
 export const DiagramTitle = (props: { context: any }) => {
   const mode = useAtomValue(modeAtom);
-  const [code, setCode] = useAtom(codeAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
+  const updateTextEditing = useTextEditingGuard();
 
   const PLACEHOLDER = "Click to add title";
 
@@ -20,6 +18,8 @@ export const DiagramTitle = (props: { context: any }) => {
   const isEditable = mode !== RenderMode.Static;
   const hasTitle = Boolean(displayTitle);
 
+  // Not built on EditableLabelField: the title has no label range to splice.
+  // It edits the `title` token, or inserts a new first line when there is none.
   const handleSave = (newText: string) => {
     const sanitized =
       newText === PLACEHOLDER ? "" : newText.replace(/[\r\n]+/g, " ");
@@ -43,12 +43,10 @@ export const DiagramTitle = (props: { context: any }) => {
       const replacement = (leading > 0 ? "" : " ") + trimmed;
       const newCode =
         code.slice(0, contentStart) + replacement + code.slice(contentEnd);
-      setCode(newCode);
-      onContentChange(newCode);
+      commitCode(newCode);
     } else {
       const newCode = `title ${trimmed}\n${code}`;
-      setCode(newCode);
-      onContentChange(newCode);
+      commitCode(newCode);
     }
   };
 
@@ -61,6 +59,7 @@ export const DiagramTitle = (props: { context: any }) => {
           text={hasTitle ? displayTitle : PLACEHOLDER}
           isEditable={true}
           onSave={handleSave}
+          onEditingChange={updateTextEditing}
           title={hasTitle ? "Click to edit title" : "Click to add title"}
           className={
             hasTitle
