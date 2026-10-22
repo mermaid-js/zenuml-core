@@ -4,44 +4,7 @@ import Anchor2 from "@/positioning/Anchor2";
 import { coordinatesAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
-import type { AugmentedContext } from "@/parser/AntlrTypes";
-
-// Owner/From are installed on MessageContext/CreationContext's prototypes at
-// runtime (see src/parser/Owner.js, src/parser/From.ts) — TS's inference for
-// the ANTLR-generated classes doesn't see prototype patches applied from
-// another file (see AntlrTypes.AugmentedContext's doc comment), so narrowed
-// context values are cast to this shape at each call site below instead.
-interface OwnedContext extends AugmentedContext {
-  Owner(): string | undefined;
-  From(): string | undefined;
-}
-
-const matchesImplicitStarterSelf = (ctx: any, participant: string) => {
-  return (
-    participant === _STARTER_ &&
-    ctx instanceof sequenceParser.MessageContext &&
-    (ctx as unknown as OwnedContext).Owner?.() === undefined &&
-    (ctx as unknown as OwnedContext).From?.() === undefined
-  );
-};
-
-export const depthOnParticipant = (context: any, participant: any): number => {
-  return context?.getAncestors((ctx: any) => {
-    const isSync = (ctx: any) => {
-      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-      return isMessageContext || isCreationContext;
-    };
-    if (isSync(ctx)) {
-      return (
-        (ctx as unknown as OwnedContext).Owner?.() === participant ||
-        matchesImplicitStarterSelf(ctx, participant)
-      );
-    }
-    return false;
-  }).length;
-};
+import { depthOnParticipant } from "@/parser/depthOnParticipant";
 
 const depthOnParticipant4Stat = (context: any, participant: any): number => {
   if (!(context instanceof sequenceParser.StatContext)) {
