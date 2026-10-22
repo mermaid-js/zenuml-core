@@ -2,19 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import { execSync } from "child_process";
-import { readFileSync } from "fs";
 import svgr from "vite-plugin-svgr";
-
-const gitHash = process.env.DOCKER
-  ? ""
-  : execSync("git rev-parse --short HEAD").toString().trim();
-const gitBranch = process.env.DOCKER
-  ? ""
-  : execSync("git branch --show-current").toString().trim();
-
-const packageJson = JSON.parse(
-  readFileSync(resolve(__dirname, "package.json"), "utf-8"),
-);
+import { alias, versionDefines } from "./vite.shared";
 
 // e2e fixtures are served via the Vite dev server (Playwright launches
 // `bun run dev` — see playwright.config.ts), so they don't need to be part
@@ -42,11 +31,7 @@ export default defineConfig(({ mode }) => ({
       input: ["index.html", "embed.html", "renderer.html", ...e2eHtmlFiles],
     },
   },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-    },
-  },
+  resolve: { alias },
   server: {
     allowedHosts: ["mmd-zenuml-core-app.zenuml.com"],
   },
@@ -54,9 +39,7 @@ export default defineConfig(({ mode }) => ({
   define: {
     "process.env.NODE_ENV": JSON.stringify(mode),
     "process.env.VITE_BUILD_TIME": JSON.stringify(new Date().toISOString()),
-    "process.env.VITE_VERSION": JSON.stringify(packageJson.version),
-    "import.meta.env.VITE_APP_GIT_HASH": JSON.stringify(gitHash),
-    "import.meta.env.VITE_APP_GIT_BRANCH": JSON.stringify(gitBranch),
+    ...versionDefines(),
   },
   css: {
     preprocessorOptions: {
