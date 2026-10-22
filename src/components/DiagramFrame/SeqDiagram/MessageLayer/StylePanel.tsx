@@ -1,6 +1,6 @@
 import { cn } from "@/utils";
 import { usePopoverPresence } from "@/components/common/usePopoverPresence";
-import { getLineHead, getPrevLine } from "@/utils/StringUtil";
+import { getLineEnd, getLineHead, getPrevLine } from "@/utils/StringUtil";
 import {
   canTransformMessageType,
   type MessageArrowType,
@@ -215,11 +215,10 @@ export const StylePanel = () => {
         const message = messageData.current;
         message.start = context.start.start;
         message.lineHead = getLineHead(code, message.start);
-        const lineTail = code.indexOf("\n", message.lineHead);
-        message.line =
-          lineTail === -1
-            ? code.slice(message.lineHead)
-            : code.slice(message.lineHead, lineTail);
+        message.line = code.slice(
+          message.lineHead,
+          getLineEnd(code, message.lineHead),
+        );
         setExistingStyles(
           parseStyleComment(getPrevLine(code, message.start)).styles,
         );

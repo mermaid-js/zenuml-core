@@ -1,3 +1,5 @@
+import { getIndent } from "@/utils/StringUtil";
+
 export type MessageArrowType = "sync" | "async" | "return" | "creation";
 
 type TransformMessageTypeInput = {
@@ -12,7 +14,7 @@ type TransformMessageTypeInput = {
 const STARTER = "_STARTER_";
 
 const splitLine = (line: string) => {
-  const indent = line.match(/^\s*/)?.[0] || "";
+  const indent = getIndent(line);
   const content = line.slice(indent.length);
   const semicolon = content.endsWith(";") ? ";" : "";
   const body = semicolon ? content.slice(0, -1) : content;
