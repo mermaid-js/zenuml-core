@@ -24,7 +24,6 @@ tsconfig.json
 
 yarn-error.log
 
-.eslintignore
 .editorconfig
 .npmignore
 .gitignore
