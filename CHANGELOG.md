@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.10.0
+
+### Minor Changes
+
+- [#516](https://github.com/mermaid-js/zenuml-core/pull/516) [`d861e69`](https://github.com/mermaid-js/zenuml-core/commit/d861e69a0da7426b0ce970dcd264f2ab4b4006ea) Thanks [@MrCoder](https://github.com/MrCoder)! - Comments now render their markdown as React elements instead of injecting sanitised HTML. Raw HTML in a comment (for example a `<b>` tag) shows as plain text instead of being interpreted, links keep only `http`, `https` and `mailto` targets, and the `dompurify` dependency is gone. Paragraphs, line breaks, inline code, REST endpoint code spans, fenced code blocks with syntax highlighting, bold and italic render as before.
+
 ## 4.9.0
 
 ### Minor Changes
