@@ -8,7 +8,6 @@ This directory contains battle-tested hooks that enhance your Claude Code develo
 Claude Code Lifecycle
         │
         ├── PreToolUse ──────► Security Scanner
-        │                      ├── Context Injector (Gemini)
         │                      └── Context Injector (Subagents)
         │
         ├── Tool Execution
@@ -22,33 +21,15 @@ Claude Code Lifecycle
 
 These hooks execute at specific points in Claude Code's lifecycle, providing deterministic control over AI behavior.
 
+## Status: opt-in, not wired
+
+This repo has no committed `.claude/settings.json`, so none of these hooks run by default. Each one is opt-in: copy `setup/settings.json.template` to `.claude/settings.json` (or merge the entries you want) to enable it. The maintained agent workflow lives in `.claude/skills/`, `CLAUDE.md` and `AGENTS.md`.
+
 ## Available Hooks
 
-### 1. Gemini Context Injector (`gemini-context-injector.sh`)
+### 1. MCP Security Scanner (`mcp-security-scan.sh`)
 
-**Purpose**: Automatically includes your project documentation and assistant rules when starting new Gemini consultation sessions, ensuring the AI has complete context about your codebase and project standards.
-
-**Trigger**: `PreToolUse` for `mcp__gemini__consult_gemini`
-
-**Features**:
-- Detects new Gemini consultation sessions (no session_id)
-- Automatically attaches two key files:
-  - `docs/ai-context/project-structure.md` - Complete project structure and tech stack
-  - `MCP-ASSISTANT-RULES.md` - Project-specific coding standards and guidelines
-- Preserves existing file attachments
-- Session-aware (only injects on new sessions)
-- Logs all injection events for debugging
-- Fails gracefully if either file is missing
-- Handles partial availability (will attach whichever files exist)
-
-**Customization**: 
-- Copy `docs/MCP-ASSISTANT-RULES.md` template to your project root
-- Customize it with your project-specific standards, principles, and constraints
-- The hook will automatically include it in Gemini consultations
-
-### 2. MCP Security Scanner (`mcp-security-scan.sh`)
-
-**Purpose**: Prevents accidental exposure of secrets, API keys, and sensitive data when using MCP servers like Gemini or Context7.
+**Purpose**: Prevents accidental exposure of secrets, API keys, and sensitive data when using MCP servers like Context7.
 
 **Trigger**: `PreToolUse` for all MCP tools (`mcp__.*`)
 
@@ -67,7 +48,7 @@ These hooks execute at specific points in Claude Code's lifecycle, providing det
 - Update sensitive file patterns
 - Extend the whitelist for your placeholders
 
-### 3. Subagent Context Injector (`subagent-context-injector.sh`)
+### 2. Subagent Context Injector (`subagent-context-injector.sh`)
 
 **Purpose**: Automatically includes core project documentation in all sub-agent Task prompts, ensuring consistent context across multi-agent workflows.
 
@@ -91,7 +72,7 @@ These hooks execute at specific points in Claude Code's lifecycle, providing det
 - Update context in one place, affects all sub-agents
 - Clean operation with simple pass-through for non-Task tools
 
-### 4. Notification System (`notify.sh`)
+### 3. Notification System (`notify.sh`)
 
 **Purpose**: Provides pleasant audio feedback when Claude Code needs your attention or completes tasks.
 
@@ -108,7 +89,7 @@ These hooks execute at specific points in Claude Code's lifecycle, providing det
   - `input`: When Claude needs user input
   - `complete`: When Claude completes tasks
 
-### 5. Babysit-PR Reminder (`remind-babysit-pr.sh`)
+### 4. Babysit-PR Reminder (`remind-babysit-pr.sh`)
 
 **Purpose**: After a real `git push`, tells Claude to run the `babysit-pr` skill in the same turn, so the CI run the push started is watched.
 
@@ -151,15 +132,6 @@ Add to your Claude Code `settings.json`:
 {
   "hooks": {
     "PreToolUse": [
-      {
-        "matcher": "mcp__gemini__consult_gemini",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${WORKSPACE}/.claude/hooks/gemini-context-injector.sh"
-          }
-        ]
-      },
       {
         "matcher": "mcp__.*",
         "hooks": [
@@ -230,7 +202,6 @@ See `hooks/setup/settings.json.template` for the complete configuration includin
 
 The hooks system complements MCP server integrations:
 
-- **Gemini Consultation**: Context injector ensures both project structure and MCP assistant rules are included
 - **Context7 Documentation**: Security scanner protects library ID inputs
 - **All MCP Tools**: Universal security scanning before external calls
 
