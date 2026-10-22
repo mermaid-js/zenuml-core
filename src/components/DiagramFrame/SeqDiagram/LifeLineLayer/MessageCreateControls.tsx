@@ -10,6 +10,7 @@ import {
   selectedAtom,
 } from "@/store/Store";
 import { useCan } from "@/store/interaction/useCan";
+import { elementScale, rectToLocal } from "@/utils/diagramCoords";
 import { insertMessageInDsl } from "@/utils/insertMessageInDsl";
 import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import { useEffect, useId, useMemo, useRef } from "react";
@@ -87,7 +88,7 @@ export const MessageCreateControls = () => {
     }
 
     const rect = diagramElement.getBoundingClientRect();
-    const scale = rect.width / (diagramElement.offsetWidth || rect.width) || 1;
+    const scale = elementScale(diagramElement, rect);
     const movedEnough = (
       clientX: number,
       clientY: number,
@@ -222,15 +223,13 @@ export const MessageCreateControls = () => {
   }
 
   const diagramRect = diagramElement.getBoundingClientRect();
-  const scale =
-    diagramRect.width / (diagramElement.offsetWidth || diagramRect.width) || 1;
+  const scale = elementScale(diagramElement, diagramRect);
   const containerRect = containerRef.current?.getBoundingClientRect();
-  const offsetX = containerRect
-    ? (containerRect.left - diagramRect.left) / scale
-    : 0;
-  const offsetY = containerRect
-    ? (containerRect.top - diagramRect.top) / scale
-    : 0;
+  const containerLocal = containerRect
+    ? rectToLocal(diagramElement, containerRect)
+    : null;
+  const offsetX = containerLocal ? containerLocal.x : 0;
+  const offsetY = containerLocal ? containerLocal.y : 0;
   const targetElement = dragState?.hoverTarget
     ? (diagramElement.querySelector(
         `[data-participant-id="${CSS.escape(dragState.hoverTarget)}"]`,
@@ -238,8 +237,7 @@ export const MessageCreateControls = () => {
     : null;
   const targetRect = targetElement?.getBoundingClientRect();
   const targetX = targetRect
-    ? (targetRect.left + targetRect.width / 2 - diagramRect.left) / scale -
-      offsetX
+    ? rectToLocal(diagramElement, targetRect).centerX - offsetX
     : null;
   const tooltipX =
     targetX === null
