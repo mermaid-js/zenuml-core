@@ -114,3 +114,39 @@ try {
     expect(FrameBorder(frame)).toEqual({ left: 30, right: 30 });
   });
 });
+
+describe("FrameBuilder reuse", () => {
+  test("a reused builder gives each fragment the same frame as a fresh builder", () => {
+    // The opt is one level deep; the if before it is three levels deep. A
+    // builder reused across fragments must not carry the if's frames into
+    // the opt's result.
+    const code = `A B C
+if(x) {
+  if(y) {
+    if(z) {
+      A->B.m
+    }
+  }
+}
+opt {
+  B->C.n
+}`;
+    const rootContext = RootContext(code);
+    const stats = rootContext.block().stat();
+    const participants = [_STARTER_, "A", "B", "C"];
+
+    const reused = new FrameBuilder(participants);
+    const reusedBorders = stats.map((stat: any) =>
+      FrameBorder(reused.getFrame(stat)),
+    );
+    const freshBorders = stats.map((stat: any) =>
+      FrameBorder(new FrameBuilder(participants).getFrame(stat)),
+    );
+
+    expect(freshBorders).toEqual([
+      { left: 30, right: 30 },
+      { left: 10, right: 10 },
+    ]);
+    expect(reusedBorders).toEqual(freshBorders);
+  });
+});
