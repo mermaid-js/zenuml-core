@@ -1,7 +1,6 @@
 import Icon from "@/components/Icon/Icons";
 import { cn } from "@/utils";
 import { useCapClick } from "@/store/interaction/useCan";
-import "./CollapseButton.css";
 
 export const CollapseButton = (props: {
   label: string;
