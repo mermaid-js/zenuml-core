@@ -14,6 +14,7 @@ import {
 } from "@/store/Store";
 import { useCan } from "@/store/interaction/useCan";
 import { Message } from "../../Message/Message";
+import { clientToLocal, rectToLocal } from "@/utils/diagramCoords";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 import { CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { AssignmentReturnLabel } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/AssignmentReturnLabel";
@@ -122,14 +123,15 @@ export const Occurrence = (props: {
     event.preventDefault();
     event.stopPropagation();
 
-    const diagramRect = diagramElement.getBoundingClientRect();
-    const barRect = currentTarget.getBoundingClientRect();
-    const scale =
-      diagramRect.width / (diagramElement.offsetWidth || diagramRect.width) ||
-      1;
-    const sourceX =
-      (barRect.left - diagramRect.left + barRect.width / 2) / scale;
-    const sourceY = (event.clientY - diagramRect.top) / scale;
+    const { centerX: sourceX } = rectToLocal(
+      diagramElement,
+      currentTarget.getBoundingClientRect(),
+    );
+    const { y: sourceY } = clientToLocal(
+      diagramElement,
+      event.clientX,
+      event.clientY,
+    );
 
     setSelectedMessage(null);
     setSelectedParticipants([props.participant]);

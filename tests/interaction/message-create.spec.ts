@@ -620,6 +620,50 @@ test.describe("Message Create (Gap Handles)", () => {
       .toBe("A\nB\nC\nA->B.hello() {\n  B->C.newMessage()\n}");
   });
 
+  test("occurrence drag source dot stays aligned when the diagram is scaled", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/create-message.html");
+    const diagram = page.locator(".sequence-diagram");
+    await expect(diagram).toBeVisible();
+    await diagram.evaluate((element: HTMLElement) => {
+      element.style.transformOrigin = "top left";
+      element.style.transform = "scale(0.75)";
+    });
+
+    const occurrenceBox = await page
+      .locator('[data-el-type="occurrence"][data-belongs-to="B"]')
+      .boundingBox();
+    const cBox = await page.locator('[data-participant-id="C"]').boundingBox();
+    expect(occurrenceBox).toBeTruthy();
+    expect(cBox).toBeTruthy();
+
+    const downX = occurrenceBox!.x + occurrenceBox!.width / 2;
+    const downY = occurrenceBox!.y + occurrenceBox!.height / 2;
+    await page.mouse.move(downX, downY);
+    await page.mouse.down();
+    const sourceDot = await page
+      .getByTestId("message-create-source-dot")
+      .boundingBox();
+    expect(sourceDot).toBeTruthy();
+    expect(sourceDot!.x + sourceDot!.width / 2).toBeCloseTo(downX, 0);
+    expect(sourceDot!.y + sourceDot!.height / 2).toBeCloseTo(downY, 0);
+
+    await page.mouse.move(
+      cBox!.x + cBox!.width / 2,
+      cBox!.y + cBox!.height / 2,
+      {
+        steps: 10,
+      },
+    );
+    await page.mouse.up();
+    await expect
+      .poll(() =>
+        page.evaluate(() => (window as any).__lastContentChange ?? null),
+      )
+      .toBe("A\nB\nC\nA->B.hello() {\n  B->C.newMessage()\n}");
+  });
+
   test("Escape key cancels drag without creating message", async ({ page }) => {
     await page.goto("/e2e/fixtures/create-message.html");
     await expect(

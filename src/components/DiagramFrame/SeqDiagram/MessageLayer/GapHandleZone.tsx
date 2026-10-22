@@ -20,6 +20,7 @@ import {
   exitMenuAtom,
   interactionAtom,
 } from "@/store/interaction/interactionAtom";
+import { clientToLocal, rectToLocal } from "@/utils/diagramCoords";
 import { insertDividerInDsl } from "@/utils/insertDividerInDsl";
 import { useAtomValue, useSetAtom } from "jotai";
 import {
@@ -145,12 +146,13 @@ export const GapHandleZone = (props: {
 
   const updateNearest = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!canCreateMessage || !canHover) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const scale =
-      rect.width / (event.currentTarget.offsetWidth || rect.width) || 1;
+    const { x } = clientToLocal(
+      event.currentTarget,
+      event.clientX,
+      event.clientY,
+    );
     const nearest = participants.reduce<string | null>((best, participant) => {
       if (!best) return participant.name;
-      const x = (event.clientX - rect.left) / scale;
       return Math.abs(x - centerOf(coordinates, participant.name)) <
         Math.abs(x - centerOf(coordinates, best))
         ? participant.name
@@ -236,16 +238,11 @@ export const GapHandleZone = (props: {
     event.stopPropagation();
     if (!diagramElement) return;
 
-    const diagramRect = diagramElement.getBoundingClientRect();
-    const scale =
-      diagramRect.width / (diagramElement.offsetWidth || diagramRect.width) ||
-      1;
     const buttonEl = event.currentTarget as HTMLElement;
-    const buttonRect = buttonEl.getBoundingClientRect();
-    const sourceX =
-      (buttonRect.left + buttonRect.width / 2 - diagramRect.left) / scale;
-    const sourceY =
-      (buttonRect.top + buttonRect.height / 2 - diagramRect.top) / scale;
+    const { centerX: sourceX, centerY: sourceY } = rectToLocal(
+      diagramElement,
+      buttonEl.getBoundingClientRect(),
+    );
 
     setSelectedMessage(null);
     setSelectedParticipants([]);
@@ -275,17 +272,8 @@ export const GapHandleZone = (props: {
 
   const openMenu = (clientX: number, currentTarget: HTMLDivElement) => {
     if (!canInsertDivider) return;
-    const rect = currentTarget.getBoundingClientRect();
-    const scale = rect.width / (currentTarget.offsetWidth || rect.width) || 1;
-    setMenuX(
-      Math.max(
-        0,
-        Math.min(
-          (clientX - rect.left) / scale,
-          currentTarget.offsetWidth - 140,
-        ),
-      ),
-    );
+    const { x } = clientToLocal(currentTarget, clientX, 0);
+    setMenuX(Math.max(0, Math.min(x, currentTarget.offsetWidth - 140)));
     enterMenu({ kind: "gapMenu", id: menuId });
   };
 
