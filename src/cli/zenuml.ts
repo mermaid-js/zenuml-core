@@ -20,7 +20,7 @@ import {
   IBM_PLEX_SANS_400_WOFF2_BASE64,
   IBM_PLEX_SANS_FAMILY,
 } from "@/svg/fonts/ibmPlexSans";
-import Parser from "@/parser/index.js";
+import Parser from "@/parser/index";
 import {
   readFileSync,
   writeFileSync,

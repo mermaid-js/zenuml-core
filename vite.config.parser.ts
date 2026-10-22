@@ -6,7 +6,7 @@ import { defineConfig } from "vite";
 // Node-safe ESM + CJS module published at the `@zenuml/core/parser` subpath.
 // The main `.` entry (`src/core.tsx`) pulls in the React/DOM renderer and
 // cannot be imported server-side; this entry can.
-// The entry is `src/parser/public.ts` (not `index.js`) so the published bundle
+// The entry is `src/parser/public.ts` (not `index.ts`) so the published bundle
 // exports ONLY `validate`/`parse` — matching `types/parser/index.d.ts` — instead
 // of also leaking `index.js`'s in-repo ANTLR helpers into the public contract.
 // `antlr4` stays external so consumers resolve it from their own node_modules.
