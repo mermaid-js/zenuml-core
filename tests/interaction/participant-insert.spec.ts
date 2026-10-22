@@ -5,17 +5,17 @@ test.describe("Participant Insert", () => {
     page,
   }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
-    await expect(page.locator("#A .participant")).toBeVisible();
-    await expect(page.locator("#A .participant")).toHaveScreenshot(
+    await expect(page.locator("[data-lifeline-id=A] .participant")).toBeVisible();
+    await expect(page.locator("[data-lifeline-id=A] .participant")).toHaveScreenshot(
       "participant-border-1px.png",
     );
 
     const before = await page.evaluate(() => {
       const selectors = [
-        "#A .participant",
-        "#A .participant .name",
-        "#A .line",
-        "#C .participant",
+        "[data-lifeline-id=A] .participant",
+        "[data-lifeline-id=A] .participant .name",
+        "[data-lifeline-id=A] .line",
+        "[data-lifeline-id=C] .participant",
         ".message-layer .message",
       ];
       const box = (selector: string) => {
@@ -24,7 +24,7 @@ test.describe("Participant Insert", () => {
       };
       return {
         boxes: selectors.map(box),
-        border: getComputedStyle(document.querySelector("#A .participant")!)
+        border: getComputedStyle(document.querySelector("[data-lifeline-id=A] .participant")!)
           .borderTopWidth,
       };
     });
@@ -38,10 +38,10 @@ test.describe("Participant Insert", () => {
 
     const oldBoxes = await page.evaluate(() => {
       const selectors = [
-        "#A .participant",
-        "#A .participant .name",
-        "#A .line",
-        "#C .participant",
+        "[data-lifeline-id=A] .participant",
+        "[data-lifeline-id=A] .participant .name",
+        "[data-lifeline-id=A] .line",
+        "[data-lifeline-id=C] .participant",
         ".message-layer .message",
       ];
       return selectors.map((selector) => {
@@ -64,8 +64,8 @@ test.describe("Participant Insert", () => {
     const button = page.getByTestId("participant-insert-button-0");
     await expect(button).toHaveCSS("opacity", "0");
 
-    const participantA = page.locator('#A .participant');
-    const participantC = page.locator('#C .participant');
+    const participantA = page.locator('[data-lifeline-id=A] .participant');
+    const participantC = page.locator('[data-lifeline-id=C] .participant');
     const aBox = await participantA.boundingBox();
     const cBox = await participantC.boundingBox();
     const midX = (aBox!.x + aBox!.width + cBox!.x) / 2;
@@ -81,8 +81,8 @@ test.describe("Participant Insert", () => {
       timeout: 5000,
     });
 
-    const participantA = page.locator('#A .participant');
-    const participantC = page.locator('#C .participant');
+    const participantA = page.locator('[data-lifeline-id=A] .participant');
+    const participantC = page.locator('[data-lifeline-id=C] .participant');
     const aBox = await participantA.boundingBox();
     const cBox = await participantC.boundingBox();
     const midX = (aBox!.x + aBox!.width + cBox!.x) / 2;
@@ -101,9 +101,9 @@ test.describe("Participant Insert", () => {
       const read = (selector: string) =>
         document.querySelector(selector)?.getBoundingClientRect();
       return {
-        a: read('#A .participant'),
-        b: read('#B .participant'),
-        c: read('#C .participant'),
+        a: read('[data-lifeline-id=A] .participant'),
+        b: read('[data-lifeline-id=B] .participant'),
+        c: read('[data-lifeline-id=C] .participant'),
       };
     });
 
@@ -145,8 +145,8 @@ test.describe("Participant Insert", () => {
       timeout: 5000,
     });
 
-    const participantA = page.locator('#A .participant');
-    const participantC = page.locator('#C .participant');
+    const participantA = page.locator('[data-lifeline-id=A] .participant');
+    const participantC = page.locator('[data-lifeline-id=C] .participant');
     const aBox = await participantA.boundingBox();
     const cBox = await participantC.boundingBox();
     const midX = (aBox!.x + aBox!.width + cBox!.x) / 2;
@@ -157,8 +157,8 @@ test.describe("Participant Insert", () => {
     await expect(button).toBeVisible();
 
     const geometry = await page.evaluate(() => {
-      const participantA = document.querySelector('#A .participant')?.getBoundingClientRect();
-      const participantC = document.querySelector('#C .participant')?.getBoundingClientRect();
+      const participantA = document.querySelector('[data-lifeline-id=A] .participant')?.getBoundingClientRect();
+      const participantC = document.querySelector('[data-lifeline-id=C] .participant')?.getBoundingClientRect();
       const button = document.querySelector('[data-testid="participant-insert-button-0"]')?.getBoundingClientRect();
       return { participantA, participantC, button };
     });

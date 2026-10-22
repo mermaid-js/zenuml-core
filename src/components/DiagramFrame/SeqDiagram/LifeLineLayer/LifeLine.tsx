@@ -65,7 +65,7 @@ export const LifeLine = (props: {
 
   return (
     <div
-      id={props.entity.name}
+      data-lifeline-id={props.entity.name}
       entity-type={props.entity.type?.toLowerCase()}
       className={cn(
         "lifeline absolute flex flex-col h-full",

@@ -79,9 +79,8 @@ export const LifeLineGroup = (props: {
     let minLeft = Infinity;
     let maxRight = -Infinity;
     for (const name of entityNames) {
-      const escapedName = name.replace(/[^A-Za-z0-9_-]/g, "\\$&");
       const participantBox = diagramElement.querySelector(
-        `#${escapedName} .participant`,
+        `[data-lifeline-id="${CSS.escape(name)}"] .participant`,
       ) as HTMLElement | null;
       if (!participantBox) continue;
       const r = participantBox.getBoundingClientRect();

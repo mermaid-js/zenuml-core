@@ -47,10 +47,7 @@ describe("rendered diagram ids", () => {
     ).toBeGreaterThanOrEqual(2);
 
     const seen = new Map<string, number>();
-    // Lifeline ids (the participant names) repeat because SeqDiagram draws two
-    // LifeLineLayers on purpose (lines under the messages, labels on top).
-    // That is a separate defect from the icon ids this spec guards.
-    container.querySelectorAll("[id]:not(.lifeline)").forEach((el) => {
+    container.querySelectorAll("[id]").forEach((el) => {
       seen.set(el.id, (seen.get(el.id) ?? 0) + 1);
     });
     const duplicates = [...seen].filter(([, n]) => n > 1);
