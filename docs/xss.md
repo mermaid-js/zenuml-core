@@ -14,6 +14,16 @@ The following content is known to pop an alert box:
 "><img src=x onerror=alert(1)>ent #FFEBE6
 ```
 
+# Regression test
+
+The payload above, plus `<script>`, `<svg onload>` and `javascript:` variants, is placed as a participant
+name, a message label and a diagram title, and checked for both renderers:
+
+- SVG: [`src/svg/renderToSvg.xss.spec.ts`](../src/svg/renderToSvg.xss.spec.ts)
+- HTML: [`src/core.xss.spec.ts`](../src/core.xss.spec.ts)
+
+A quoted participant name cannot contain a double quote, so the quotes are dropped from the payload in that position.
+
 # Known affected products
 
 | Product           | Severity | Comment                                                             |
