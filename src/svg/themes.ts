@@ -149,6 +149,9 @@ const DARK_PALETTE: SvgPalette = {
   fontFamily: DIAGRAM_FONT_STACK,
 };
 
+// Each theme starts from DEFAULT_PALETTE and overrides only the slots its DOM
+// theme sets. A slot a theme leaves unset keeps the theme-default literal, which
+// is what the DOM renderer's CSS chain falls back to.
 export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
   "theme-default": DEFAULT_PALETTE,
 
@@ -168,6 +171,7 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
   // chains (themes.spec.ts): the title, fragment border, separator and comment
   // used to carry values the DOM never showed.
   "theme-clean-light": {
+    ...DEFAULT_PALETTE,
     frameBorder: "#e5e9f0",
     frameBg: "#ffffff",
     titleText: "#368eff",
@@ -185,23 +189,6 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentHeaderOpacity: "1",
     fragmentHeaderText: "#368eff",
     fragmentText: "#368eff",
-    guardOpacity: "0.65",
-    fragmentSeparator: "#e5e7eb",
-    commentText: "#333",
-    commentOpacity: "0.5",
-    // Slots every DOM theme still renders with the theme-default literals
-    // (their CSS chains fall back to these values; only a theme that sets the
-    // slot changes them).
-    groupOutline: "#666",
-    dividerLine: "#aaaa33",
-    dividerBg: "#fff5ad",
-    dividerText: "#333",
-    numberText: "#6b7280",
-    fragmentNumberText: "#6b7280",
-    numberBg: "#6b7280",
-    numberBgOpacity: "0.1",
-    guardText: "#6b7280",
-    fontFamily: DIAGRAM_FONT_STACK,
   },
 
   // The one dark theme (ADR 0004); theme-clean-dark and theme-darcula are
@@ -218,6 +205,7 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
   // keeps the Helvetica stack behind it, since a consumer embedding the SVG
   // will not have that @font-face rule.
   "theme-neon": {
+    ...DEFAULT_PALETTE,
     frameBorder: "#60ff33",
     frameBg: "#000000",
     titleText: "#8ffc5b",
@@ -234,23 +222,6 @@ export const THEME_PALETTES: Record<SvgTheme, SvgPalette> = {
     fragmentHeaderOpacity: "1",
     fragmentHeaderText: "#8ffc5b",
     fragmentText: "#8ffc5b",
-    guardOpacity: "0.65",
-    // Neither slot is set by `.theme-neon`; the DOM shows the defaults.
-    fragmentSeparator: "#e5e7eb",
-    commentText: "#333",
-    commentOpacity: "0.5",
-    // Slots every DOM theme still renders with the theme-default literals
-    // (their CSS chains fall back to these values; only a theme that sets the
-    // slot changes them).
-    groupOutline: "#666",
-    dividerLine: "#aaaa33",
-    dividerBg: "#fff5ad",
-    dividerText: "#333",
-    numberText: "#6b7280",
-    fragmentNumberText: "#6b7280",
-    numberBg: "#6b7280",
-    numberBgOpacity: "0.1",
-    guardText: "#6b7280",
     fontFamily: `"MS Sans Serif", ${DIAGRAM_FONT_STACK}`,
   },
 };

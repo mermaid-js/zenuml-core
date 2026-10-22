@@ -92,6 +92,13 @@ describe("SVG theme palettes", () => {
     expect(distinct.size).toBe(5);
   });
 
+  it("gives every theme exactly the theme-default slot set", () => {
+    const slots = Object.keys(THEME_PALETTES["theme-default"]).sort();
+    for (const name of Object.keys(THEME_PALETTES) as SvgTheme[]) {
+      expect(Object.keys(THEME_PALETTES[name]).sort(), name).toEqual(slots);
+    }
+  });
+
   it("falls back to theme-default for an unknown or missing theme", () => {
     expect(resolvePalette(undefined)).toBe(THEME_PALETTES["theme-default"]);
     expect(resolvePalette("theme-does-not-exist")).toBe(
