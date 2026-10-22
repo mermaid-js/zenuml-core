@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.10.1
+
+### Patch Changes
+
+- [#526](https://github.com/mermaid-js/zenuml-core/pull/526) [`cc2de78`](https://github.com/mermaid-js/zenuml-core/commit/cc2de78f8547f8a4b2a234ca71d0a96a72306456) Thanks [@MrCoder](https://github.com/MrCoder)! - Changing a participant's style no longer throws an exception when the parser crashes on the original code. It now uses the same safeguard as renaming a participant: the change applies if the result parses cleanly, and otherwise reports "Could not apply the change". Ordinary syntax errors in the original code were already handled and behave as before.
+
 ## 4.10.0
 
 ### Minor Changes
