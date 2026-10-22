@@ -60,7 +60,9 @@ export const verticalCoordinatesAtom = atom((get) => {
   return new VerticalCoordinates(rootContext);
 });
 
-export const themeAtom = atom("theme-default");
+/** The theme every instance starts with and falls back to. */
+export const DEFAULT_THEME = "theme-default";
+export const themeAtom = atom(DEFAULT_THEME);
 export const paletteAtom = atom<DiagramPalette | undefined>(undefined);
 
 export const enableScopedThemingAtom = atom<boolean>(false);

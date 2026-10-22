@@ -1,5 +1,6 @@
 import {
   codeAtom,
+  DEFAULT_THEME,
   enableDividerInsertionAtom,
   enableNumberingAtom,
   enableMessageInsertionAtom,
@@ -41,6 +42,7 @@ import { StrictMode, useLayoutEffect } from "react";
 import type { PropsWithChildren } from "react";
 import { flushSync } from "react-dom";
 import { createStore, Provider, useAtomValue } from "jotai";
+import type { WritableAtom } from "jotai";
 import { SeqDiagram } from "./components/DiagramFrame/SeqDiagram/SeqDiagram.tsx";
 export { renderToSvg } from "./svg/renderToSvg";
 export { ensureDiagramIconsLoaded } from "./svg/icons";
@@ -76,31 +78,230 @@ const DiagramRoot = ({ children }: PropsWithChildren) => (
   </div>
 );
 
+/**
+ * Options for {@link ZenUml.render}. Every option is optional.
+ *
+ * What an omitted option does on the next `render()` is fixed per option and
+ * listed on each member:
+ * - **keeps**: the value from an earlier render (or the constructor) stays.
+ * - **resets**: the option goes back to its default, so a host that wants it
+ *   must pass it on every render.
+ *
+ * Most options are written inside `render()` itself. The callbacks and the
+ * editing flags are written later, after the debounce and the font load, so a
+ * render that is replaced before then never writes them.
+ */
 export interface Config {
+  /**
+   * Theme class name, for example `"theme-clean-light"`.
+   * Written immediately. Omitted, `undefined`, `null` or `""` keeps the
+   * current theme. With no theme ever given, the first `render()` writes the
+   * name `"default"`, which no stylesheet defines.
+   */
   theme?: string;
-  /** Semantic document colours. Supplied slots override the selected theme. */
+  /**
+   * Semantic document colours. Supplied slots override the selected theme.
+   * Written immediately. Omitting the key keeps the current palette; passing
+   * the key with the value `undefined` clears it.
+   */
   palette?: DiagramPalette;
+  /**
+   * Scope the theme to the diagram instead of the page.
+   * Written immediately. Resets to `false` when omitted or falsy.
+   */
   enableScopedTheming?: boolean;
+  /**
+   * Called when the theme changes.
+   * Written after the debounce. Resets to a no-op when omitted or falsy.
+   */
   onThemeChange?: (data: { theme: string; scoped?: boolean }) => void;
+  /**
+   * Written after the debounce. Keeps the current value when `undefined`
+   * (initially `true`).
+   */
   enableMultiTheme?: boolean;
-  /** Show hierarchical message numbering. Omission preserves stored state (initially true). */
+  /**
+   * Show hierarchical message numbering.
+   * Written after the debounce. Keeps the stored value when `undefined`
+   * (initially `true`).
+   */
   enableNumbering?: boolean;
+  /**
+   * Sticky offset of the participant row.
+   * Written immediately. Resets to `0` when omitted or `null`; `false`
+   * turns sticky participants off.
+   */
   stickyOffset?: number | false;
+  /**
+   * Called with the new code after an edit.
+   * Written after the debounce. Resets to a no-op when omitted or falsy.
+   */
   onContentChange?: (code: string) => void;
+  /**
+   * Called for events the diagram emits.
+   * Written after the debounce. Resets to a no-op when omitted or falsy.
+   */
   onEventEmit?: (name: string, data: unknown) => void;
+  /**
+   * Written immediately. Resets to `RenderMode.Dynamic` when omitted or falsy.
+   */
   mode?: RenderMode;
-  // Editing feature flags. Default off; opt in per surface.
-  // Message insertion is currently broken for nested messages, so the flag
-  // exists to ship participant insertion independently.
+  // Editing feature flags. Default off; opt in per surface. Each is written
+  // after the debounce and keeps its current value when `undefined`.
+  /** Insert participants from the diagram. Default off. */
   enableParticipantInsertion?: boolean;
+  /**
+   * Insert messages from the diagram. Default off. Message insertion is
+   * currently broken for nested messages, so the flag exists to ship
+   * participant insertion independently.
+   */
   enableMessageInsertion?: boolean;
+  /** Insert dividers from the diagram. Default off. */
   enableDividerInsertion?: boolean;
+  /** Edit participant styles from the diagram. Default off. */
   enableParticipantStyleEditing?: boolean;
-  // Drag-to-reorder used to run with no flag at all — the only editing
-  // surface in the rendering core with no opt-out. Default off, like every
-  // other editing flag above.
+  /**
+   * Drag-to-reorder used to run with no flag at all, the only editing surface
+   * in the rendering core with no opt-out. Default off, like every other
+   * editing flag above.
+   */
   enableMessageReorder?: boolean;
 }
+
+type Absent = (config: Config, key: keyof Config) => boolean;
+const isUndefined: Absent = (config, key) => config[key] === undefined;
+const isNullish: Absent = (config, key) => config[key] == null;
+const isFalsy: Absent = (config, key) => !config[key];
+const isKeyMissing: Absent = (config, key) =>
+  !Object.prototype.hasOwnProperty.call(config, key);
+
+type Rule<V> = { onAbsent: "keep" } | { onAbsent: "reset"; default: V };
+
+type Binding<K extends keyof Config> = {
+  key: K;
+  atom: WritableAtom<unknown, [Exclude<Config[K], undefined>], void>;
+  /** `render()` itself, or `doRender()` after the debounce and font load. */
+  appliedIn: "render" | "doRender";
+  /** Decides whether the caller left the option out. */
+  isAbsent: Absent;
+} & Rule<Exclude<Config[K], undefined>>;
+
+const bind = <K extends keyof Config>(binding: Binding<K>) =>
+  binding as unknown as Binding<keyof Config>;
+
+const noop = () => {};
+
+/**
+ * The one place where {@link Config} is copied into the store. Order matters:
+ * entries are applied top to bottom, and the theme subscription reads the
+ * scoped-theming atom when the theme changes.
+ */
+const CONFIG_BINDINGS = [
+  bind({
+    key: "stickyOffset",
+    atom: stickyOffsetAtom,
+    appliedIn: "render",
+    isAbsent: isNullish,
+    onAbsent: "reset",
+    default: 0,
+  }),
+  bind({
+    key: "palette",
+    atom: paletteAtom,
+    appliedIn: "render",
+    isAbsent: isKeyMissing,
+    onAbsent: "keep",
+  }),
+  bind({
+    key: "enableScopedTheming",
+    atom: enableScopedThemingAtom,
+    appliedIn: "render",
+    isAbsent: isFalsy,
+    onAbsent: "reset",
+    default: false,
+  }),
+  bind({
+    key: "mode",
+    atom: modeAtom,
+    appliedIn: "render",
+    isAbsent: isFalsy,
+    onAbsent: "reset",
+    default: RenderMode.Dynamic,
+  }),
+  bind({
+    key: "onContentChange",
+    atom: onContentChangeAtom,
+    appliedIn: "doRender",
+    isAbsent: isFalsy,
+    onAbsent: "reset",
+    default: noop,
+  }),
+  bind({
+    key: "onThemeChange",
+    atom: onThemeChangeAtom,
+    appliedIn: "doRender",
+    isAbsent: isFalsy,
+    onAbsent: "reset",
+    default: noop,
+  }),
+  bind({
+    key: "onEventEmit",
+    atom: onEventEmitAtom,
+    appliedIn: "doRender",
+    isAbsent: isFalsy,
+    onAbsent: "reset",
+    default: noop,
+  }),
+  bind({
+    key: "enableMultiTheme",
+    atom: enableMultiThemeAtom,
+    appliedIn: "doRender",
+    isAbsent: isUndefined,
+    onAbsent: "keep",
+  }),
+  bind({
+    key: "enableNumbering",
+    atom: enableNumberingAtom,
+    appliedIn: "doRender",
+    isAbsent: isUndefined,
+    onAbsent: "keep",
+  }),
+  bind({
+    key: "enableParticipantInsertion",
+    atom: enableParticipantInsertionAtom,
+    appliedIn: "doRender",
+    isAbsent: isUndefined,
+    onAbsent: "keep",
+  }),
+  bind({
+    key: "enableMessageInsertion",
+    atom: enableMessageInsertionAtom,
+    appliedIn: "doRender",
+    isAbsent: isUndefined,
+    onAbsent: "keep",
+  }),
+  bind({
+    key: "enableDividerInsertion",
+    atom: enableDividerInsertionAtom,
+    appliedIn: "doRender",
+    isAbsent: isUndefined,
+    onAbsent: "keep",
+  }),
+  bind({
+    key: "enableParticipantStyleEditing",
+    atom: enableParticipantStyleEditingAtom,
+    appliedIn: "doRender",
+    isAbsent: isUndefined,
+    onAbsent: "keep",
+  }),
+  bind({
+    key: "enableMessageReorder",
+    atom: enableMessageReorderAtom,
+    appliedIn: "doRender",
+    isAbsent: isUndefined,
+    onAbsent: "keep",
+  }),
+];
 
 export interface ParseResult {
   pass: boolean;
@@ -154,7 +355,7 @@ export default class ZenUml implements IZenUml {
     this.el = typeof el === "string" ? document.querySelector(el)! : el;
     this.store = createStore();
     this._theme = initial?.theme;
-    this.store.set(themeAtom, initial?.theme || "theme-default");
+    this.store.set(themeAtom, initial?.theme || DEFAULT_THEME);
     this.store.set(paletteAtom, initial?.palette);
 
     this.store.sub(themeAtom, () => {
@@ -208,16 +409,13 @@ export default class ZenUml implements IZenUml {
     const revision = ++this.revision;
     this._code = code === undefined ? this._code : code;
     this._theme = config?.theme || this._theme;
-    this.store.set(stickyOffsetAtom, config?.stickyOffset ?? 0);
+    // The theme is not in CONFIG_BINDINGS: today it is rewritten on every
+    // render, and with no theme ever given it falls back to "default", a name
+    // no stylesheet defines (the constructor starts from DEFAULT_THEME). That
+    // fallback is kept as is here; a follow-up change replaces it with
+    // DEFAULT_THEME and moves the theme into the table.
     this.store.set(themeAtom, this._theme || "default");
-    if (config && Object.prototype.hasOwnProperty.call(config, "palette")) {
-      this.store.set(paletteAtom, config.palette);
-    }
-    this.store.set(
-      enableScopedThemingAtom,
-      config?.enableScopedTheming || false,
-    );
-    this.store.set(modeAtom, config?.mode || RenderMode.Dynamic);
+    this.applyConfig(config, "render");
 
     // this.initialRender is used to avoid the first rendering is debounced by setTimeout.
     // The first rendering should be executed immediately. It fixes the issue that causes the blank screen on mermaid live editor.
@@ -250,42 +448,29 @@ export default class ZenUml implements IZenUml {
     return result;
   }
 
+  /** Copies the options of one phase into the store; see CONFIG_BINDINGS. */
+  private applyConfig(
+    config: Config | undefined,
+    phase: Binding<keyof Config>["appliedIn"],
+  ) {
+    const given = config ?? {};
+    for (const binding of CONFIG_BINDINGS) {
+      if (binding.appliedIn !== phase) continue;
+      if (!binding.isAbsent(given, binding.key)) {
+        this.store.set(binding.atom, given[binding.key] as never);
+      } else if (binding.onAbsent === "reset") {
+        this.store.set(binding.atom, binding.default as never);
+      }
+    }
+  }
+
   async doRender(config: Config | undefined, revision = this.revision) {
     // Text is measured during render; the face must be available first.
     await ensureDiagramFontsLoaded();
     if (revision !== this.revision) return;
     const start = getStartTime();
     clearCache();
-    this.store.set(onContentChangeAtom, config?.onContentChange || (() => {}));
-    this.store.set(onThemeChangeAtom, config?.onThemeChange || (() => {}));
-    this.store.set(onEventEmitAtom, config?.onEventEmit || (() => {}));
-    if (config?.enableMultiTheme !== undefined) {
-      this.store.set(enableMultiThemeAtom, config?.enableMultiTheme);
-    }
-    if (config?.enableNumbering !== undefined) {
-      this.store.set(enableNumberingAtom, config.enableNumbering);
-    }
-    if (config?.enableParticipantInsertion !== undefined) {
-      this.store.set(
-        enableParticipantInsertionAtom,
-        config.enableParticipantInsertion,
-      );
-    }
-    if (config?.enableMessageInsertion !== undefined) {
-      this.store.set(enableMessageInsertionAtom, config.enableMessageInsertion);
-    }
-    if (config?.enableDividerInsertion !== undefined) {
-      this.store.set(enableDividerInsertionAtom, config.enableDividerInsertion);
-    }
-    if (config?.enableParticipantStyleEditing !== undefined) {
-      this.store.set(
-        enableParticipantStyleEditingAtom,
-        config.enableParticipantStyleEditing,
-      );
-    }
-    if (config?.enableMessageReorder !== undefined) {
-      this.store.set(enableMessageReorderAtom, config.enableMessageReorder);
-    }
+    this.applyConfig(config, "doRender");
     const changed = this._code !== this.store.get(codeAtom);
     const beginRender = () =>
       flushSync(() => {
