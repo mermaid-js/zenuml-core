@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.10.2
+
+### Patch Changes
+
+- [#549](https://github.com/mermaid-js/zenuml-core/pull/549) [`d3da222`](https://github.com/mermaid-js/zenuml-core/commit/d3da222d7ff496b6f6636217b9cfff46b03d9a8e) Thanks [@MrCoder](https://github.com/MrCoder)! - The library no longer adds an empty portal element to the page body for each diagram it creates, and it drops an unused dependency on Headless UI. Popovers are not affected.
+
 ## 4.10.1
 
 ### Patch Changes
