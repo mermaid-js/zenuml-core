@@ -164,8 +164,8 @@ test.describe("one focus ring on every chrome control", () => {
     await expect(
       page.locator(".sequence-diagram .participant").first(),
     ).toBeVisible({ timeout: 5000 });
-    const a = await page.locator("#A .participant").boundingBox();
-    const c = await page.locator("#C .participant").boundingBox();
+    const a = await page.locator("[data-lifeline-id=A] .participant").boundingBox();
+    const c = await page.locator("[data-lifeline-id=C] .participant").boundingBox();
     await page.mouse.move(
       (a!.x + a!.width + c!.x) / 2,
       a!.y + a!.height / 2,
