@@ -1,6 +1,6 @@
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { Fixture } from "../../../../../../../test/unit/parser/fixture/Fixture";
-import { depthOnParticipant } from "./useArrow";
+import { depthOnParticipant } from "@/parser/depthOnParticipant";
 
 describe("depthOnParticipant", () => {
   it("counts the implicit starter self occurrence for nested root self-sync messages", () => {

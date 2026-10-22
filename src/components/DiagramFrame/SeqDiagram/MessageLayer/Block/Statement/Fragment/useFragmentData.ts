@@ -15,37 +15,12 @@ import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { useEffect, useMemo, useState } from "react";
 import { walkStatements } from "@/svg/walkStatements";
 
-import sequenceParser from "@/generated-parser/sequenceParser";
+import { depthOnParticipant } from "@/parser/depthOnParticipant";
 import Anchor2 from "@/positioning/Anchor2";
 import { centerOf } from "../utils";
 import { createStore, useAtomValue, useStore } from "jotai";
-import type { AugmentedContext } from "@/parser/AntlrTypes";
 
 type Store = ReturnType<typeof createStore>;
-
-// Owner is installed on MessageContext/CreationContext's prototypes at
-// runtime (see src/parser/Owner.js) — TS's inference for the ANTLR-generated
-// classes doesn't see prototype patches applied from another file (see
-// AntlrTypes.AugmentedContext's doc comment), so the narrowed context value
-// is cast to this shape below.
-interface OwnedContext extends AugmentedContext {
-  Owner(): string | undefined;
-}
-
-// Helper function to calculate the depth/layers on a participant due to nested calls
-const depthOnParticipant = (context: any, participant: any): number => {
-  return context?.getAncestors((ctx: any) => {
-    const isSync = (ctx: any) => {
-      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-      return isMessageContext || isCreationContext;
-    };
-    if (isSync(ctx)) {
-      return (ctx as unknown as OwnedContext).Owner() === participant;
-    }
-    return false;
-  }).length;
-};
 
 const getLeftParticipant = (store: Store, context: any) => {
   const allParticipants = store.get(coordinatesAtom).orderedParticipantNames();
@@ -60,7 +35,7 @@ const getBorder = (store: Store, context: any) => {
   return FrameBorder(frame);
 };
 
-const getOffsetX = (store: Store, context: any, origin: string) => {
+export const getOffsetX = (store: Store, context: any, origin: string) => {
   const coordinates = store.get(coordinatesAtom);
   const leftParticipant = getLeftParticipant(store, context) || "";
   const halfLeftParticipant = coordinates.half(leftParticipant);
