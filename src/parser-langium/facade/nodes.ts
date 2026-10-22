@@ -788,7 +788,7 @@ export class StatContext extends Ctx {
 
   /**
    * The inferred sender ("current lifeline") of this statement
-   * (src/parser/Origin.js StatContext override — the generic
+   * (src/parser/Origin.ts StatContext override — the generic
    * ParserRuleContext.Origin latent-loop is deliberately NOT ported).
    */
   Origin(): string | undefined {
@@ -1349,7 +1349,7 @@ export class RetContext extends Ctx {
     );
   }
 
-  /** Port of src/parser/RetContext.js ReturnTo() — the hairiest upward walk. */
+  /** Port of src/parser/RetContext.ts ReturnTo() — the hairiest upward walk. */
   ReturnTo(): string | undefined {
     const asyncToCtx =
       this.asyncMessage()?.to() || this.returnAsyncMessage()?.to();

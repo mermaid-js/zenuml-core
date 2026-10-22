@@ -1,6 +1,16 @@
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
+import type { AntlrNode, AugmentedContext } from "./AntlrTypes";
 
-const ProgContext = sequenceParser.ProgContext;
+interface ProgContextInstalled extends AugmentedContext {
+  head(): {
+    starterExp(): { starter(): AntlrNode | null } | null;
+  } | null;
+  Starter(): string | undefined;
+}
+
+const ProgContext = sequenceParser.ProgContext as any as {
+  prototype: ProgContextInstalled;
+};
 
 /**
  * When does Starter need to be treated differently?
@@ -37,6 +47,6 @@ const ProgContext = sequenceParser.ProgContext;
  * _STARTER_ is of the renderer's concern. It is not a concern of the parser.
  */
 
-ProgContext.prototype.Starter = function () {
-  return this.head()?.starterExp()?.starter()?.getFormattedText();
+ProgContext.prototype.Starter = function (this: ProgContextInstalled) {
+  return this.head()?.starterExp()?.starter()?.getFormattedText?.();
 };

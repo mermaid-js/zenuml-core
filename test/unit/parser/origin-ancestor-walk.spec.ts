@@ -1,7 +1,7 @@
 import vm from "node:vm";
 import { Fixture } from "./fixture/Fixture";
 
-// src/parser/Origin.js installs a generic ParserRuleContext.prototype.Origin
+// src/parser/Origin.ts installs a generic ParserRuleContext.prototype.Origin
 // that walks from `this.parentCtx` up to the nearest StatContext/ProgContext
 // ancestor:
 //

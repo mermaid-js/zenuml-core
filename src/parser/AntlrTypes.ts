@@ -32,7 +32,7 @@ export interface AntlrNode {
 /**
  * The real shape of any ANTLR ParserRuleContext-derived node in this
  * codebase once the runtime prototype augmentations installed by
- * src/parser/index.js, src/parser/Origin.js and
+ * src/parser/index.js, src/parser/Origin.ts and
  * src/parser/utils/cloest-ancestor/ClosestAncestor.ts have run — every
  * generated context class extends antlr4.ParserRuleContext, and those
  * modules patch its prototype directly at runtime.
@@ -60,8 +60,28 @@ export interface AugmentedContext {
   parentCtx: AugmentedContext | null;
   /** Installed in src/parser/utils/cloest-ancestor/ClosestAncestor.ts. */
   ClosestAncestorStat(): AugmentedContext | undefined;
-  /** Installed in src/parser/Origin.js. */
+  /** Installed in src/parser/Origin.ts. */
   Origin(): string | undefined;
+}
+
+/**
+ * `Owner()` / `From()` as installed on MessageContext / CreationContext
+ * prototypes (src/parser/Owner.ts, src/parser/From.ts). Cast context values to
+ * this shape at the point of use, like {@link AugmentedContext}.
+ */
+export interface OwnedContext extends AugmentedContext {
+  Owner(): string | undefined;
+  From(): string | undefined;
+}
+
+/**
+ * `Owner()` / `From()` as installed on MessageContext / CreationContext
+ * prototypes (src/parser/Owner.ts, src/parser/From.ts). Cast context values to
+ * this shape at the point of use, like {@link AugmentedContext}.
+ */
+export interface OwnedContext extends AugmentedContext {
+  Owner(): string | undefined;
+  From(): string | undefined;
 }
 
 /** A block containing statements: `{ stat1; stat2; }` */
