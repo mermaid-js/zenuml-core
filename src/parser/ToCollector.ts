@@ -1,18 +1,28 @@
-import { Participants } from "./Participants";
+import { Participants, type Position } from "./Participants";
 import antlr4 from "antlr4";
 import { default as sequenceParserListener } from "../generated-parser/sequenceParserListener";
 
-let participants = undefined;
+// Parse-tree contexts reach the listener callbacks as ANTLR-generated classes
+// whose prototype augmentations (Owner, From, getComment, ...) are not visible
+// to TypeScript (see AntlrTypes.AugmentedContext), so they are typed loosely
+// at this boundary.
+type Ctx = any;
+
+let participants: Participants = undefined as unknown as Participants;
 // Depth counter: parameters and conditions nest, and an inner exit must not
 // re-enable collection while the outer one is still open.
 let isBlind = 0;
-let groupId = undefined;
-const ToCollector = new sequenceParserListener();
+let groupId: string | undefined = undefined;
+const ToCollector = new sequenceParserListener() as any as {
+  [callback: string]: (ctx: Ctx) => void;
+} & {
+  getParticipants(context: unknown): Participants;
+};
 
 // Rules:
 // 1. Later declaration win
 // 2. Participant declaration overwrite cannot be overwritten by To or Starter
-const onParticipant = function (ctx) {
+const onParticipant = function (ctx: Ctx) {
   // if(!(ctx?.name())) return;
   if (isBlind) return;
   const type = ctx?.participantType()?.getFormattedText().replace("@", "");
@@ -29,7 +39,7 @@ const onParticipant = function (ctx) {
   const color = ctx.COLOR()?.getText();
   const comment = ctx.getComment();
   const nameCtx = ctx.name();
-  let start, end;
+  let start: number | undefined, end: number | undefined;
 
   // When label is present, it means we edit label in diagram and update its code regardless of the occurrence of the participant name
   if (labelCtx) {
@@ -54,14 +64,16 @@ const onParticipant = function (ctx) {
     explicit,
     color,
     comment,
-    position: [start, end],
+    // `start`/`end` stay undefined when neither a label nor a name node exists.
+    position: [start, end] as unknown as Position,
   });
 };
 ToCollector.enterParticipant = onParticipant;
 
-const onTo = function (ctx) {
+const onTo = function (ctx: Ctx) {
   if (isBlind) return;
-  let participant = ctx.name?.()?.getFormattedText() || ctx.getFormattedText();
+  const participant =
+    ctx.name?.()?.getFormattedText() || ctx.getFormattedText();
   const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
   const participantInstance = participants.Get(participant);
 
@@ -73,8 +85,8 @@ const onTo = function (ctx) {
     // Let's say the participant name is `"${assignee}:${type}"`, we need to get the position of ${type}
     // e.g. ret = new A() "ret:A".method()
     const start = ctx.start.start + participantInstance.assignee.length + 2;
-    const position = [start, ctx.stop.stop];
-    const assigneePosition = [
+    const position: Position = [start, ctx.stop.stop];
+    const assigneePosition: Position = [
       ctx.start.start + 1,
       ctx.start.start + participantInstance.assignee.length + 1,
     ];
@@ -96,15 +108,15 @@ const onTo = function (ctx) {
 ToCollector.enterFrom = onTo;
 ToCollector.enterTo = onTo;
 
-ToCollector.enterStarter = function (ctx) {
-  let participant = ctx.getFormattedText();
+ToCollector.enterStarter = function (ctx: Ctx) {
+  const participant = ctx.getFormattedText();
   participants.Add(participant, {
     isStarter: true,
     position: [ctx.start.start, ctx.stop.stop + 1],
   });
 };
 
-ToCollector.enterCreation = function (ctx) {
+ToCollector.enterCreation = function (ctx: Ctx) {
   if (isBlind) return;
   const participant = ctx.Owner();
   const ctor = ctx?.creationBody()?.construct();
@@ -126,8 +138,8 @@ ToCollector.enterCreation = function (ctx) {
   }
 };
 
-ToCollector.enterRef = function (ctx) {
-  ctx.Participants().forEach((participant) => {
+ToCollector.enterRef = function (ctx: Ctx) {
+  ctx.Participants().forEach((participant: Ctx) => {
     participants.Add(participant.getText(), {
       isStarter: false,
       position: [participant.start.start, participant.stop.stop + 1],
@@ -151,7 +163,7 @@ ToCollector.exitCondition = function () {
   isBlind--;
 };
 
-ToCollector.enterGroup = function (ctx) {
+ToCollector.enterGroup = function (ctx: Ctx) {
   // group { A } => groupId = undefined
   // group group1 { A } => groupId = "group1"
   groupId = ctx.name()?.getFormattedText();
@@ -161,31 +173,31 @@ ToCollector.exitGroup = function () {
   groupId = undefined;
 };
 
-ToCollector.enterRet = function (ctx) {
+ToCollector.enterRet = function (ctx: Ctx) {
   if (ctx.asyncMessage()) {
     // it will visit the asyncMessage later
     return;
   }
   const returnFrom = ctx.From();
-  returnFrom && participants.Add(returnFrom);
+  if (returnFrom) participants.Add(returnFrom);
   const returnTo = ctx.ReturnTo();
-  returnTo && participants.Add(returnTo);
+  if (returnTo) participants.Add(returnTo);
 };
 
 const walker = antlr4.tree.ParseTreeWalker.DEFAULT;
 
 // The walk is a pure function of the (immutable) parse tree and consumers only
 // read the returned Participants, so results are cached per context node.
-const participantsCache = new WeakMap();
+const participantsCache = new WeakMap<object, Participants>();
 
-ToCollector.getParticipants = function (context) {
+ToCollector.getParticipants = function (context: unknown) {
   if (!context) return new Participants();
-  const cached = participantsCache.get(context);
+  const cached = participantsCache.get(context as object);
   if (cached) return cached;
   participants = new Participants();
   isBlind = 0;
-  walker.walk(this, context);
-  participantsCache.set(context, participants);
+  walker.walk(this as any, context as any);
+  participantsCache.set(context as object, participants);
   return participants;
 };
 
