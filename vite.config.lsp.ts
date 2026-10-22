@@ -1,6 +1,7 @@
 /* eslint-env node */
 import { resolve } from "path";
 import { defineConfig } from "vite";
+import { alias } from "./vite.shared";
 
 // ZenUML LSP server build (Node target). Side-car consumer of the Langium
 // parser; fully self-contained — langium + chevrotain + vscode-languageserver
@@ -25,9 +26,5 @@ export default defineConfig({
       },
     },
   },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-    },
-  },
+  resolve: { alias },
 });

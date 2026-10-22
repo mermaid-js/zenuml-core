@@ -5,22 +5,10 @@ import react from "@vitejs/plugin-react";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 import svgr from "vite-plugin-svgr";
 import { visualizer } from "rollup-plugin-visualizer";
-import { execSync } from "child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "fs";
+import { mkdirSync, writeFileSync } from "fs";
 import type { Plugin } from "vite";
 import { packageFontFiles } from "./src/svg/fonts/packageFontFiles";
-
-// Read version from package.json
-const packageJson = JSON.parse(
-  readFileSync(resolve(__dirname, "package.json"), "utf-8"),
-);
-
-const gitHash = process.env.DOCKER
-  ? ""
-  : execSync("git rev-parse --short HEAD").toString().trim();
-const gitBranch = process.env.DOCKER
-  ? ""
-  : execSync("git branch --show-current").toString().trim();
+import { alias, versionDefines } from "./vite.shared";
 
 const isReleaseBuild = process.env.RELEASE === "1";
 const shouldAnalyzeBundle = process.env.ANALYZE === "1";
@@ -88,11 +76,7 @@ export default defineConfig({
       ],
     },
   },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-    },
-  },
+  resolve: { alias },
   plugins: [
     svgr(),
     react(),
@@ -111,8 +95,6 @@ export default defineConfig({
   ],
   define: {
     "process.env.NODE_ENV": '"production"',
-    "process.env.VITE_VERSION": JSON.stringify(packageJson.version),
-    "import.meta.env.VITE_APP_GIT_HASH": JSON.stringify(gitHash),
-    "import.meta.env.VITE_APP_GIT_BRANCH": JSON.stringify(gitBranch),
+    ...versionDefines(),
   },
 });

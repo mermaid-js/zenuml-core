@@ -234,6 +234,13 @@ jobs:
           path: dist/
           retention-days: 1
           if-no-files-found: error
+      # The library, CLI and parser configs are otherwise first built by the
+      # release job on main. They share vite.shared.ts with the site config, so
+      # build them here too: a config break fails the PR, not the publish. This
+      # runs after the upload (it overwrites dist/) and in a job that finishes
+      # well before the e2e gate, so it adds no wall time.
+      - name: Build library, CLI and parser
+        run: bun run build
 
   # Deploy to Cloudflare Workers
   deploy-to-cloudflare:
