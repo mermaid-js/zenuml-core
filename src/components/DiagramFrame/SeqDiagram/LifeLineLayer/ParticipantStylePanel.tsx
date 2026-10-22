@@ -22,44 +22,19 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { FloatingPortal } from "@floating-ui/react";
 import { useActiveSurface } from "@/store/interaction/useCan";
-import { ARCHETYPES, PRESET_COLORS } from "./participantEditor/palette";
-import { SplitSlot } from "./participantEditor/SplitSlot";
-import { ColorPicker } from "./participantEditor/ColorPicker";
-import { ArchetypeGlyph, TypePicker } from "./participantEditor/TypePicker";
+import { NameRow } from "./participantEditor/NameRow";
+import { SlotBar } from "./participantEditor/SlotBar";
+import { StereotypePill } from "./participantEditor/StereotypePill";
 import {
   useParticipantDrafts,
   type DraftField,
 } from "./participantEditor/useParticipantDrafts";
 import {
   usePickerPlacement,
-  VIEWPORT_MARGIN,
   type Anchor,
   type Picker,
 } from "./participantEditor/usePickerPlacement";
 import { useFollowPress } from "./participantEditor/useFollowPress";
-
-// Offsets from the participant box (D14), matching the Split-* canvas boards.
-const ICON_SLOT = { dx: -14, dy: 6, size: 28 };
-const COLOR_SLOT = { dx: -12, dy: 8, size: 24 };
-const PILL_TOP = -32;
-const NAME_ROW_GAP = 8;
-
-const SlotGlyph = ({ d }: { d: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    className="w-4 h-4"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.6"
-    strokeLinecap="round"
-    aria-hidden="true"
-  >
-    <path d={d} />
-  </svg>
-);
-
-const rowInputClass =
-  "h-zu-control box-border rounded-zu-md border border-solid px-1.5 text-[13px] text-gray-900 bg-white placeholder:text-gray-500 focus:outline-none focus:shadow-zu-focus";
 
 export const ParticipantStylePanel = () => {
   const [code, setCode] = useAtom(codeAtom);
@@ -104,22 +79,7 @@ export const ParticipantStylePanel = () => {
 
   // Called where the original resync effects were, so their place in the
   // effect order is kept.
-  const {
-    nameDraft,
-    setNameDraft,
-    stereotypeDraft,
-    setStereotypeDraft,
-    labelDraft,
-    setLabelDraft,
-    nameError,
-    setNameError,
-    styleError,
-    setStyleError,
-    commitName: commitNameDraft,
-    commitStereotype: commitStereotypeDraft,
-    commitLabel: commitLabelDraft,
-    discard,
-  } = useParticipantDrafts(participantName, declaration);
+  const drafts = useParticipantDrafts(participantName, declaration);
 
   // Picker open state lives here so Escape in a picker closes only it (D11).
   const [openPicker, setOpenPicker] = useState<Picker | null>(null);
@@ -158,14 +118,7 @@ export const ParticipantStylePanel = () => {
 
   // Called right after the anchor effect, where its picker effects were, so
   // the layout and passive effect order is unchanged.
-  const {
-    typePresence,
-    colorPresence,
-    pickerPos,
-    pickerRef,
-    attachNameRow,
-    nameRowWidth,
-  } = usePickerPlacement(anchor, openPicker);
+  const placement = usePickerPlacement(anchor, openPicker);
 
   // Press-following (ADR 0002) runs last, where its exit listener and
   // pointerdown effect were. Its unmount cleanup moved here from the top;
@@ -219,16 +172,16 @@ export const ParticipantStylePanel = () => {
       updates,
     );
     if ("error" in result) {
-      setStyleError(result.error);
+      drafts.setStyleError(result.error);
       return false;
     }
-    setStyleError(null);
+    drafts.setStyleError(null);
     updateCode(result.code);
     return true;
   };
 
   const commitName = (): boolean =>
-    commitNameDraft(
+    drafts.commitName(
       (draft) =>
         renameParticipantInDsl(code, rootContext, participantName, draft),
       (result) => {
@@ -238,9 +191,9 @@ export const ParticipantStylePanel = () => {
       },
     );
 
-  const commitStereotype = (): boolean => commitStereotypeDraft(applyStyle);
+  const commitStereotype = (): boolean => drafts.commitStereotype(applyStyle);
 
-  const commitLabel = (): boolean => commitLabelDraft(applyStyle);
+  const commitLabel = (): boolean => drafts.commitLabel(applyStyle);
 
   const onEnterBlur = (commit: () => boolean, field: DraftField) => ({
     onBlur: () => {
@@ -249,7 +202,7 @@ export const ParticipantStylePanel = () => {
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Escape") {
         // Discard the draft and close; the blur on unmount must not commit.
-        discard(field);
+        drafts.discard(field);
         close();
         return;
       }
@@ -266,25 +219,7 @@ export const ParticipantStylePanel = () => {
   const dslLine = formatParticipantDeclaration(
     declaration ?? { name: participantName },
   );
-  const typeName = currentType
-    ? (ARCHETYPES.find(
-        ({ key }) => key.toLowerCase() === currentType.toLowerCase(),
-      )?.label ?? `@${currentType}`)
-    : null;
-  const colorName = currentColor
-    ? (PRESET_COLORS.find(({ hex }) => hex === currentColor)?.name ??
-      currentColor)
-    : null;
-  const error = nameError ?? styleError;
-
-  const centerX = (anchor.left + anchor.right) / 2;
-  const nameRowLeft = Math.max(
-    VIEWPORT_MARGIN,
-    Math.min(
-      centerX - nameRowWidth / 2,
-      window.innerWidth - nameRowWidth - VIEWPORT_MARGIN,
-    ),
-  );
+  const error = drafts.nameError ?? drafts.styleError;
 
   const togglePicker = (picker: Picker) =>
     setOpenPicker((open) => (open === picker ? null : picker));
@@ -311,9 +246,6 @@ export const ParticipantStylePanel = () => {
       focusSlot(openPicker);
     }
   };
-
-  const stereotypeHandlers = onEnterBlur(commitStereotype, "stereotype");
-  const showStereotypeInput = stereotypeEditing || !!currentStereotype;
 
   return (
     <FloatingPortal>
@@ -352,258 +284,62 @@ export const ParticipantStylePanel = () => {
               presence.state === "exit" && "zu-fade-exit",
             )}
           />
-          {showStereotypeInput ? (
-            <div
-              className="absolute pointer-events-auto h-zu-control min-w-[104px] box-border flex items-center justify-center gap-0.5 px-2 rounded-full border border-solid border-gray-300 bg-white text-[12px] text-gray-900 focus-within:shadow-zu-focus"
-              style={{
-                left: centerX,
-                top: anchor.top + PILL_TOP,
-                transform: "translateX(-50%)",
-              }}
-            >
-              <label
-                htmlFor="zenuml-participant-stereotype"
-                className="sr-only"
-              >
-                Stereotype
-              </label>
-              <span className="text-gray-500" aria-hidden="true">
-                «
-              </span>
-              <input
-                id="zenuml-participant-stereotype"
-                type="text"
-                value={stereotypeDraft}
-                size={Math.max(stereotypeDraft.length, 8)}
-                autoFocus={stereotypeEditing && !currentStereotype}
-                onChange={(e) => {
-                  setStereotypeDraft(e.target.value);
-                  setStyleError(null);
-                }}
-                onBlur={() => {
-                  stereotypeHandlers.onBlur();
-                  setStereotypeEditing(false);
-                }}
-                onKeyDown={(e) => {
-                  stereotypeHandlers.onKeyDown(e);
-                  // An erased stereotype turns back into the placeholder.
-                  if (e.key === "Enter" && !stereotypeDraft.trim()) {
-                    setStereotypeEditing(false);
-                  }
-                }}
-                className="h-5 box-border border-0 px-0.5 bg-transparent text-[12px] text-center text-gray-900 focus:outline-none"
-              />
-              <span className="text-gray-500" aria-hidden="true">
-                »
-              </span>
-            </div>
-          ) : (
-            <button
-              type="button"
-              aria-label="Add stereotype"
-              className="zu-press zu-press-offset absolute -translate-x-1/2 pointer-events-auto h-zu-control min-w-[104px] box-border px-3 rounded-full border border-dashed border-slate-400 bg-white text-[12px] text-gray-600 cursor-pointer hover:border-sky-500 hover:text-sky-700 focus-visible:outline-none focus-visible:shadow-zu-focus"
-              style={{
-                left: centerX,
-                top: anchor.top + PILL_TOP,
-              }}
-              onClick={() => setStereotypeEditing(true)}
-            >
-              «stereotype»
-            </button>
-          )}
+          <StereotypePill
+            anchor={anchor}
+            editing={stereotypeEditing}
+            setEditing={setStereotypeEditing}
+            currentStereotype={currentStereotype}
+            draft={drafts.stereotypeDraft}
+            onDraftChange={(value) => {
+              drafts.setStereotypeDraft(value);
+              drafts.setStyleError(null);
+            }}
+            handlers={onEnterBlur(commitStereotype, "stereotype")}
+          />
 
-          <div data-editor-slot="type" onKeyDown={onPickerKeyDown}>
-            <SplitSlot
-              kind="icon"
-              filled={!!currentType}
-              label={typeName ? `Set icon (${typeName})` : "Set icon"}
-              clearLabel="Remove type"
-              expanded={openPicker === "type"}
-              onOpen={() => togglePicker("type")}
-              onClear={() => pick("type", { type: null })}
-              className="absolute pointer-events-auto"
-              style={{
-                left: anchor.left + ICON_SLOT.dx,
-                top: anchor.top + ICON_SLOT.dy,
-              }}
-            >
-              {currentType ? (
-                <ArchetypeGlyph typeKey={currentType} />
-              ) : (
-                <svg
-                  viewBox="0 0 24 24"
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  aria-hidden="true"
-                >
-                  <rect x="4" y="4" width="16" height="16" rx="3" />
-                  <circle cx="9" cy="9" r="1.5" />
-                  <path d="M20 15l-4-4-8 9" />
-                </svg>
-              )}
-            </SplitSlot>
-            {typePresence.mounted && pickerPos && (
-              <div
-                ref={(el) => {
-                  pickerRef.current = el;
-                  typePresence.ref(el);
-                }}
-                // Above the name row, which it overlaps (Split-2/3 boards).
-                className={cn(
-                  "absolute z-10 pointer-events-auto",
-                  typePresence.className,
-                )}
-                style={{ top: pickerPos.top, left: pickerPos.left }}
-              >
-                <TypePicker
-                  participantName={participantName}
-                  currentType={currentType}
-                  onPick={(type) => pick("type", { type })}
-                  onClose={() => {
-                    closePicker();
-                    focusSlot("type");
-                  }}
-                />
-              </div>
-            )}
-          </div>
-
-          <div data-editor-slot="color" onKeyDown={onPickerKeyDown}>
-            <SplitSlot
-              kind="color"
-              filled={!!currentColor}
-              label={`Set color (${colorName ?? "none"})`}
-              clearLabel="Remove colour"
-              expanded={openPicker === "color"}
-              onOpen={() => togglePicker("color")}
-              onClear={() => pick("color", { color: null })}
-              className="absolute pointer-events-auto"
-              // Anchored by its right edge so the clear half widens into
-              // the box.
-              style={{
-                left: anchor.right + COLOR_SLOT.dx + COLOR_SLOT.size,
-                top: anchor.top + COLOR_SLOT.dy,
-                transform: "translateX(-100%)",
-              }}
-            >
-              {currentColor ? (
-                <span
-                  className="block w-full h-full rounded-zu-sm border-2 border-solid border-white box-border"
-                  style={{ backgroundColor: currentColor }}
-                />
-              ) : (
-                <SlotGlyph d="M7 17L17 7" />
-              )}
-            </SplitSlot>
-            {colorPresence.mounted && pickerPos && (
-              <div
-                ref={(el) => {
-                  pickerRef.current = el;
-                  colorPresence.ref(el);
-                }}
-                // Above the name row, which it overlaps (Split-2/3 boards).
-                className={cn(
-                  "absolute z-10 pointer-events-auto",
-                  colorPresence.className,
-                )}
-                style={{ top: pickerPos.top, left: pickerPos.left }}
-              >
-                <ColorPicker
-                  participantName={participantName}
-                  currentColor={currentColor}
-                  onPick={(color) => pick("color", { color })}
-                  onClose={() => {
-                    closePicker();
-                    focusSlot("color");
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          <SlotBar
+            anchor={anchor}
+            participantName={participantName}
+            currentType={currentType}
+            currentColor={currentColor}
+            openPicker={openPicker}
+            typePresence={placement.typePresence}
+            colorPresence={placement.colorPresence}
+            pickerPos={placement.pickerPos}
+            pickerRef={placement.pickerRef}
+            togglePicker={togglePicker}
+            pick={pick}
+            closePicker={closePicker}
+            focusSlot={focusSlot}
+            onPickerKeyDown={onPickerKeyDown}
+          />
 
           {/* Hidden while a picker is open: the picker covers this spot. */}
           {!openPicker && (
-            <div
-              className="absolute flex flex-col items-center gap-2.5"
-              style={{
-                // Centred on the (clamped) name row, so the tooltip and the
-                // error block share its centre.
-                left: nameRowLeft + nameRowWidth / 2,
-                top: anchor.bottom + NAME_ROW_GAP,
-                transform: "translateX(-50%)",
+            <NameRow
+              anchor={anchor}
+              nameRowWidth={placement.nameRowWidth}
+              rowRef={(el) => {
+                placement.attachNameRow(el);
+                presence.ref(el);
               }}
-            >
-              <div
-                ref={(el) => {
-                  attachNameRow(el);
-                  presence.ref(el);
-                }}
-                data-testid="participant-name-row"
-                className={cn(
-                  "pointer-events-auto h-8 box-border flex items-center gap-1.5 px-1 bg-white rounded-zu-lg shadow-zu-pop-ring",
-                  presence.className,
-                )}
-              >
-                <label htmlFor="zenuml-participant-name" className="sr-only">
-                  Name
-                </label>
-                <input
-                  id="zenuml-participant-name"
-                  type="text"
-                  value={nameDraft}
-                  onChange={(e) => {
-                    setNameDraft(e.target.value);
-                    setNameError(null);
-                  }}
-                  aria-invalid={nameError ? true : undefined}
-                  {...onEnterBlur(commitName, "name")}
-                  className={cn(
-                    rowInputClass,
-                    "w-[76px] font-semibold",
-                    nameError
-                      ? "border-red-600"
-                      : "border-transparent hover:border-gray-200",
-                  )}
-                />
-                <span className="text-[12px] text-gray-600">as</span>
-                <label htmlFor="zenuml-participant-label" className="sr-only">
-                  Display as
-                </label>
-                <input
-                  id="zenuml-participant-label"
-                  type="text"
-                  value={labelDraft}
-                  placeholder="Display name"
-                  onChange={(e) => {
-                    setLabelDraft(e.target.value);
-                    setStyleError(null);
-                  }}
-                  {...onEnterBlur(commitLabel, "label")}
-                  className={cn(
-                    rowInputClass,
-                    labelDraft
-                      ? "w-[124px] border-gray-200"
-                      : "w-[104px] border-dashed border-slate-300",
-                  )}
-                />
-              </div>
-
-              {error && (
-                <div
-                  role="alert"
-                  className="pointer-events-auto max-w-[320px] px-2.5 py-1.5 box-border bg-white rounded-zu-md text-[12px] text-red-700 shadow-zu-pop-error"
-                >
-                  {error}
-                </div>
-              )}
-
-              <div className="invisible group-hover:visible group-focus-within:visible pointer-events-none px-2 py-[5px] bg-gray-800 rounded-zu-md text-gray-50 text-[11px] font-mono whitespace-pre">
-                <code data-testid="participant-dsl-preview">{dslLine}</code>
-              </div>
-            </div>
+              rowClassName={presence.className}
+              nameDraft={drafts.nameDraft}
+              nameError={drafts.nameError}
+              onNameChange={(value) => {
+                drafts.setNameDraft(value);
+                drafts.setNameError(null);
+              }}
+              nameHandlers={onEnterBlur(commitName, "name")}
+              labelDraft={drafts.labelDraft}
+              onLabelChange={(value) => {
+                drafts.setLabelDraft(value);
+                drafts.setStyleError(null);
+              }}
+              labelHandlers={onEnterBlur(commitLabel, "label")}
+              error={error}
+              dslLine={dslLine}
+            />
           )}
         </div>
       </div>
