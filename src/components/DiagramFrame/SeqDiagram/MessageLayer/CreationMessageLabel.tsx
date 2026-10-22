@@ -2,7 +2,10 @@ import { modeAtom } from "@/store/Store";
 import { cn } from "@/utils";
 import { useAtomValue } from "jotai";
 import { RenderMode } from "@/store/Store";
-import { EditableLabelField } from "./EditableLabelField";
+import {
+  EditableLabelField,
+  useReselectSavedMessage,
+} from "./EditableLabelField";
 
 export interface CreationMessageLabelProps {
   labelText: string;
@@ -18,6 +21,7 @@ export const CreationMessageLabel = ({
   className,
 }: CreationMessageLabelProps) => {
   const mode = useAtomValue(modeAtom);
+  const reselect = useReselectSavedMessage();
   const isEditable = mode !== RenderMode.Static;
 
   // In static/readonly mode, render plain text with default "create" if empty
@@ -37,6 +41,7 @@ export const CreationMessageLabel = ({
         text={labelText}
         position={labelPosition}
         normalizeText={normalizeText}
+        afterSave={reselect}
         className={cn("right", className)}
       />
       <span>»</span>

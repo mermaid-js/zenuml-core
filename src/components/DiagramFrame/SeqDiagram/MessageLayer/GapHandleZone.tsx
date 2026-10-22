@@ -1,3 +1,4 @@
+import { useCommitCode } from "@/store/useCommitCode";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import { cn } from "@/utils";
 import { usePopoverPresence } from "@/components/common/usePopoverPresence";
@@ -7,7 +8,6 @@ import {
   createMessageDragAtom,
   diagramElementAtom,
   enableDividerInsertionAtom,
-  onContentChangeAtom,
   pendingEditableRangeAtom,
   rootContextAtom,
   selectedAtom,
@@ -21,7 +21,7 @@ import {
   interactionAtom,
 } from "@/store/interaction/interactionAtom";
 import { insertDividerInDsl } from "@/utils/insertDividerInDsl";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import {
   configuredMessageCreationAtom,
   FIRST_GAP_CLEARANCE,
@@ -66,8 +66,8 @@ export const GapHandleZone = (props: {
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const setSelectedParticipants = useSetAtom(selectedAtom);
 
-  const [code, setCode] = useAtom(codeAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
 
   const [hovered, setHovered] = useState(false);
@@ -209,8 +209,7 @@ export const GapHandleZone = (props: {
         blockContext: props.blockContext,
         insertIndex: props.insertIndex,
       });
-      setCode(result.code);
-      onContentChange(result.code);
+      commitCode(result.code);
       setPendingEditableRange({
         start: result.labelPosition[0],
         end: result.labelPosition[1],
@@ -220,10 +219,9 @@ export const GapHandleZone = (props: {
     [
       code,
       canUseMenuItem,
-      onContentChange,
       props.blockContext,
       props.insertIndex,
-      setCode,
+      commitCode,
       setPendingEditableRange,
     ],
   );

@@ -1,21 +1,24 @@
-import { codeAtom, modeAtom, onContentChangeAtom, RenderMode } from "@/store/Store";
-import { useAtom, useAtomValue } from "jotai";
+import { useCommitCode } from "@/store/useCommitCode";
+import { codeAtom, modeAtom, RenderMode } from "@/store/Store";
+import { useAtomValue } from "jotai";
 
 export const EmptyDiagramPrompt = () => {
   const mode = useAtomValue(modeAtom);
-  const [code, setCode] = useAtom(codeAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
 
   if (mode !== RenderMode.Dynamic) return null;
 
   const handleClick = () => {
     const nextCode = code.trim() ? `${code.trim()}\nA` : "A";
-    setCode(nextCode);
-    onContentChange(nextCode);
+    commitCode(nextCode);
   };
 
   return (
-    <div className="flex items-center justify-center" style={{ minHeight: 120 }}>
+    <div
+      className="flex items-center justify-center"
+      style={{ minHeight: 120 }}
+    >
       <button
         type="button"
         data-testid="empty-diagram-prompt"

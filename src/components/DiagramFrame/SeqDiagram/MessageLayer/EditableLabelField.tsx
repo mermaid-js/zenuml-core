@@ -1,22 +1,51 @@
 import {
   codeAtom,
   modeAtom,
-  onContentChangeAtom,
   pendingEditableRangeAtom,
+  RenderMode,
   selectedMessageAtom,
 } from "@/store/Store";
+import { useCommitCode } from "@/store/useCommitCode";
 import { useTextEditingGuard } from "@/components/common/EditableSpan/useTextEditingGuard";
 import { cn } from "@/utils";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useCallback } from "react";
 import { formatText } from "@/utils/StringUtil";
 import { EditableSpan } from "@/components/common/EditableSpan";
-import { RenderMode } from "@/store/Store";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
+import { resolveAutoEditToken } from "@/utils/pendingEditableRange";
+
+/** The range the saved text now occupies in the new code (both ends inclusive). */
+export type SavedRange = { start: number; end: number };
+
+/**
+ * An `afterSave` that selects the text that was just edited, so the message
+ * it belongs to stays highlighted. Message labels use it; fragment conditions
+ * do not.
+ */
+export const useReselectSavedMessage = () => {
+  const setSelectedMessage = useSetAtom(selectedMessageAtom);
+  return useCallback(
+    ({ start, end }: SavedRange) =>
+      setSelectedMessage({ start, end, token: Date.now() }),
+    [setSelectedMessage],
+  );
+};
 
 interface EditableLabelFieldProps {
   text: string;
-  position: [number, number];
+  /** `[start, end]` of the label in the code; `end` is inclusive. */
+  position: readonly [number | undefined, number | undefined];
   normalizeText?: (text: string) => string;
+  /** Runs after the new code is committed. */
+  afterSave?: (saved: SavedRange) => void;
+  /**
+   * Which render modes allow editing. Each label keeps the rule it had before
+   * they shared this component, so this does not change what is editable:
+   * - `"interactive"` (default): every mode except Static.
+   * - `"dynamic"`: Dynamic mode only.
+   */
+  editableIn?: "interactive" | "dynamic";
   className?: string;
   title?: string;
 }
@@ -25,24 +54,27 @@ export const EditableLabelField = ({
   text,
   position,
   normalizeText,
+  afterSave,
+  editableIn = "interactive",
   className,
   title = "Click to edit",
 }: EditableLabelFieldProps) => {
   const mode = useAtomValue(modeAtom);
   const updateTextEditing = useTextEditingGuard();
-  const [code, setCode] = useAtom(codeAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
   const pendingEditableRange = useAtomValue(pendingEditableRangeAtom);
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
-  const setSelectedMessage = useSetAtom(selectedMessageAtom);
-  const isEditable = mode !== RenderMode.Static;
+  const isEditable =
+    editableIn === "dynamic"
+      ? mode === RenderMode.Dynamic
+      : mode !== RenderMode.Static;
   const formattedText = resolveEmojiInText(formatText(text ?? ""));
-  const shouldAutoEdit =
-    pendingEditableRange !== null &&
-    pendingEditableRange.start === position[0] &&
-    pendingEditableRange.end === position[1]
-      ? pendingEditableRange.token
-      : undefined;
+  const shouldAutoEdit = resolveAutoEditToken(
+    pendingEditableRange,
+    position[0],
+    position[1],
+  );
 
   const handleSave = (newText: string) => {
     // If text is empty or same as what was displayed, bail out
@@ -59,14 +91,8 @@ export const EditableLabelField = ({
       return;
     }
 
-    const newCode = code.slice(0, start) + normalizedText + code.slice(end + 1);
-    setCode(newCode);
-    onContentChange(newCode);
-    setSelectedMessage({
-      start,
-      end: start + normalizedText.length - 1,
-      token: Date.now(),
-    });
+    commitCode(code.slice(0, start) + normalizedText + code.slice(end + 1));
+    afterSave?.({ start, end: start + normalizedText.length - 1 });
     if (shouldAutoEdit) {
       setPendingEditableRange(null);
     }

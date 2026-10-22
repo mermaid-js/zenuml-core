@@ -1,3 +1,4 @@
+import { useCommitCode } from "@/store/useCommitCode";
 import { useEffect, useRef } from "react";
 import { useAtom, useAtomValue, useStore } from "jotai";
 import {
@@ -7,7 +8,6 @@ import {
   messageReorderDragAtom,
   messageReorderDropAtom,
   messageReorderPendingAtom,
-  onContentChangeAtom,
 } from "@/store/Store";
 import { reorderMessageInDsl } from "@/utils/messageReorderTransform";
 import { useCan } from "@/store/interaction/useCan";
@@ -53,9 +53,9 @@ export const rowUnderPointer = (
  */
 export const useMessageReorderDrag = () => {
   const store = useStore();
-  const [code, setCode] = useAtom(codeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
   const diagramElement = useAtomValue(diagramElementAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
   const [dragKey, setDragKey] = useAtom(messageReorderDragAtom);
   const dragKeyRef = useRef<string | null>(null);
   const [pendingDrag, setPendingDrag] = useAtom(messageReorderPendingAtom);
@@ -173,8 +173,7 @@ export const useMessageReorderDrag = () => {
         targetRange: parseStatementKey(dropState.key),
         place: dropState.place,
       });
-      setCode(nextCode);
-      onContentChange(nextCode);
+      commitCode(nextCode);
       setDragKey(null);
       setDropState(null);
     };
@@ -190,9 +189,8 @@ export const useMessageReorderDrag = () => {
     diagramElement,
     dragKey,
     dropState,
-    onContentChange,
     reorderEnabled,
-    setCode,
+    commitCode,
     setDragKey,
     setDropState,
     store,
