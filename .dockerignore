@@ -8,8 +8,6 @@ dist
 .prettierrc
 .prettierignore
 .editorconfig
-.eslintignore
-.eslintrc.js
 .git-blame-ignore-revs
 .vscode
 docs

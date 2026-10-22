@@ -4,7 +4,7 @@ import { createStore } from "jotai";
 import { enableNumberingAtom } from "./store/Store";
 
 // IntersectionObserver is already mocked globally by the test setup files
-// (test-setup.ts for `bun test`, test/setup.ts for vitest). Do NOT re-stub it
+// (test/setup.ts, loaded by both `bun test` and vitest). Do NOT re-stub it
 // here with vi.stubGlobal: Bun >=1.3 injects a native `vi` that shadows the
 // preload shim and does not implement stubGlobal, which throws at import time
 // and breaks `bun run test` on newer Bun (see issue #395).
