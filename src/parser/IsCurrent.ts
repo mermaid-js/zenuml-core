@@ -1,43 +1,30 @@
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
-import type { AugmentedContext } from "./AntlrTypes";
-
-interface Token {
-  start: number;
-  stop: number;
-}
-
-/** MessageContext / CreationContext once Body and isCurrent are installed. */
-interface CurrentableContext extends AugmentedContext {
-  start: Token;
-  Body(): { stop: Token };
-  creationBody?(): { stop: Token };
-  messageBody?(): { stop: Token };
-  isCurrent(cursor: number | null | undefined): boolean;
-}
+import {
+  augment,
+  type CreationContextAugmented,
+  type MessageContextAugmented,
+} from "./ContextAugmentations";
 
 const seqParser = sequenceParser;
 
-const CreationContext = seqParser.CreationContext as any as {
-  prototype: CurrentableContext;
-};
-CreationContext.prototype.Body = CreationContext.prototype.creationBody!;
-CreationContext.prototype.isCurrent = function (
-  this: CurrentableContext,
-  cursor: number | null | undefined,
-) {
-  return isCurrent.bind(this)(cursor);
-};
+/** MessageContext / CreationContext once Body and isCurrent are installed. */
+type CurrentableContext = CreationContextAugmented | MessageContextAugmented;
 
-const MessageContext = seqParser.MessageContext as any as {
-  prototype: CurrentableContext;
-};
-MessageContext.prototype.Body = MessageContext.prototype.messageBody!;
-MessageContext.prototype.isCurrent = function (
-  this: CurrentableContext,
-  cursor: number | null | undefined,
-) {
-  return isCurrent.bind(this)(cursor);
-};
+// `Body` is the generated `creationBody` / `messageBody` accessor, copied at
+// install time exactly as the plain prototype assignment did.
+augment<CreationContextAugmented>(seqParser.CreationContext, {
+  Body: seqParser.CreationContext.prototype.creationBody,
+  isCurrent(cursor: number | null | undefined) {
+    return isCurrent.bind(this)(cursor);
+  },
+});
+
+augment<MessageContextAugmented>(seqParser.MessageContext, {
+  Body: seqParser.MessageContext.prototype.messageBody,
+  isCurrent(cursor: number | null | undefined) {
+    return isCurrent.bind(this)(cursor);
+  },
+});
 
 function isCurrent(
   this: CurrentableContext,

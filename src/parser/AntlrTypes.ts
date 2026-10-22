@@ -1,3 +1,5 @@
+import type { MessageContextAugmented } from "./ContextAugmentations";
+
 /**
  * TypeScript interfaces for ANTLR-generated parse tree nodes.
  *
@@ -12,14 +14,15 @@
  * - The `*Node` interfaces (tree-walk projection) declare every member
  *   OPTIONAL, because the walkers in `src/svg` and the renderer probe methods
  *   that only some context kinds have (`node.block?.()`).
- * - The `*Context` / domain interfaces (prototype-augmentation projection,
- *   formerly `src/parser/Parser.types.ts`) declare members REQUIRED, because
- *   `src/parser/SignatureText.ts` installs prototype methods against them and
- *   calls `this.messageBody()` / `this.content()` unguarded.
+ * - The `*ContextAugmented` interfaces in `ContextAugmentations.ts`
+ *   (prototype-augmentation projection) declare members REQUIRED, because the
+ *   prototype installers call `this.messageBody()` / `this.content()`
+ *   unguarded. The small domain shapes below (`Parameter`, `Func`, ...) are
+ *   the building blocks they share.
  *
- * A `*Node` value is therefore not assignable to its `*Context` twin — see the
- * "kept apart" note below each pair. Merging them would silently drop the
- * required-ness the prototype installers rely on.
+ * A `*Node` value is therefore not assignable to its `*ContextAugmented` twin.
+ * Merging them would silently drop the required-ness the prototype installers
+ * rely on.
  */
 
 /** Base interface for any ANTLR parse tree node */
@@ -67,22 +70,11 @@ export interface AugmentedContext {
 /**
  * `Owner()` / `From()` as installed on MessageContext / CreationContext
  * prototypes (src/parser/Owner.ts, src/parser/From.ts). Cast context values to
- * this shape at the point of use, like {@link AugmentedContext}.
+ * this shape at the point of use, like {@link AugmentedContext}. A pick of
+ * {@link MessageContextAugmented} in `ContextAugmentations.ts`.
  */
-export interface OwnedContext extends AugmentedContext {
-  Owner(): string | undefined;
-  From(): string | undefined;
-}
-
-/**
- * `Owner()` / `From()` as installed on MessageContext / CreationContext
- * prototypes (src/parser/Owner.ts, src/parser/From.ts). Cast context values to
- * this shape at the point of use, like {@link AugmentedContext}.
- */
-export interface OwnedContext extends AugmentedContext {
-  Owner(): string | undefined;
-  From(): string | undefined;
-}
+export type OwnedContext = AugmentedContext &
+  Pick<MessageContextAugmented, "Owner" | "From">;
 
 /** A block containing statements: `{ stat1; stat2; }` */
 export interface BlockNode extends AntlrNode {
@@ -192,14 +184,12 @@ export interface SingleBlockFragmentNode extends AntlrNode {
 }
 
 /* ------------------------------------------------------------------------ */
-/* Prototype-augmentation projection (merged from src/parser/Parser.types.ts) */
-/*                                                                          */
-/* Required-member shapes used by src/parser/SignatureText.ts to type the    */
-/* generated context classes it patches. Kept separate from the `*Node`      */
-/* interfaces above: `MessageNode`/`CreationNode`/`ReturnNode`/              */
-/* `AsyncMessageNode` declare the same concepts with every member optional,  */
-/* and collapsing each pair into one declaration would drop the required-ness*/
-/* these installers depend on.                                              */
+/* Required-member building blocks for the prototype-augmentation projection */
+/* in ContextAugmentations.ts. Kept separate from the `*Node` interfaces     */
+/* above: `MessageNode`/`CreationNode`/`ReturnNode`/`AsyncMessageNode`      */
+/* declare the same concepts with every member optional, and collapsing each */
+/* pair into one declaration would drop the required-ness the installers    */
+/* depend on.                                                               */
 /* ------------------------------------------------------------------------ */
 
 /** Any context whose formatted source text the parser layer reads. */
@@ -239,46 +229,4 @@ export interface Parameters extends BaseContext {
 
 export interface Func {
   signature(): Signature[];
-}
-
-export interface MessageBody {
-  func(): Func;
-}
-
-export interface CreationBody {
-  parameters(): Parameters;
-}
-
-export interface AsyncMessage {
-  content(): Content;
-}
-
-/** Kept apart from {@link MessageNode}: `messageBody()` is required here. */
-export interface MessageContext extends BaseContext {
-  messageBody(): MessageBody;
-  SignatureText(): string;
-}
-
-/** Kept apart from {@link AsyncMessageNode}: `content()` is required here. */
-export interface AsyncMessageContext extends BaseContext {
-  content(): Content;
-  SignatureText(): string;
-}
-
-/** Same shape as {@link AsyncMessageContext}; distinct grammar rule, one declaration. */
-export type ReturnAsyncMessageContext = AsyncMessageContext;
-
-/** Kept apart from {@link CreationNode}: `creationBody()` is required here. */
-export interface CreationContext extends BaseContext {
-  creationBody(): CreationBody;
-  SignatureText(): string;
-  ParametersText(): string;
-}
-
-/** Kept apart from {@link ReturnNode}: `asyncMessage()`/`expr()` are required here. */
-export interface RetContext extends BaseContext {
-  asyncMessage(): AsyncMessage;
-  returnAsyncMessage(): AsyncMessage;
-  expr(): Expression;
-  SignatureText(): string;
 }

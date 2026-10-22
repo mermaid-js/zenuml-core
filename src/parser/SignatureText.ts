@@ -1,12 +1,14 @@
 import sequenceParser from "../generated-parser/sequenceParser";
-import type {
-  AsyncMessageContext,
-  CreationContext,
-  MessageContext,
-  Parameter,
-  RetContext,
-  ReturnAsyncMessageContext,
-} from "./AntlrTypes";
+import type { Parameter } from "./AntlrTypes";
+import {
+  augment,
+  type AsyncMessageContextAugmented,
+  type CreationContextAugmented,
+  type MessageContextAugmented,
+  type ParametersContextAugmented,
+  type RetContextAugmented,
+  type ReturnAsyncMessageContextAugmented,
+} from "./ContextAugmentations";
 
 // Helper function to format a single parameter
 function formatParameter(param: Parameter): string {
@@ -39,88 +41,64 @@ function formatParameters(params: Parameter[]): string {
   return params.map(formatParameter).join(",");
 }
 
-// Get the parser contexts and assert their types
-const MessageContext = sequenceParser.MessageContext as any as {
-  new (): MessageContext;
-  prototype: MessageContext;
-};
-const ParametersContext = sequenceParser.ParametersContext as any as {
-  new (): any;
-  prototype: any;
-};
-const AsyncMessageContext = sequenceParser.AsyncMessageContext as any as {
-  new (): AsyncMessageContext;
-  prototype: AsyncMessageContext;
-};
-const CreationContext = sequenceParser.CreationContext as any as {
-  new (): CreationContext;
-  prototype: CreationContext;
-};
-const RetContext = sequenceParser.RetContext as any as {
-  new (): RetContext;
-  prototype: RetContext;
-};
-const ReturnAsyncMessageContext =
-  sequenceParser.ReturnAsyncMessageContext as any as {
-    new (): ReturnAsyncMessageContext;
-    prototype: ReturnAsyncMessageContext;
-  };
+augment<MessageContextAugmented>(sequenceParser.MessageContext, {
+  SignatureText(): string {
+    return (
+      this.messageBody()
+        ?.func()
+        ?.signature()
+        ?.map((s) => s?.getFormattedText())
+        .join(".") ?? ""
+    );
+  },
+});
 
-// Now we can safely extend the prototypes with proper typing
-MessageContext.prototype.SignatureText = function (
-  this: MessageContext,
-): string {
-  return (
-    this.messageBody()
-      ?.func()
-      ?.signature()
-      ?.map((s) => s?.getFormattedText())
-      .join(".") ?? ""
-  );
-};
+augment<AsyncMessageContextAugmented>(sequenceParser.AsyncMessageContext, {
+  SignatureText(): string {
+    return this.content()?.getFormattedText() ?? "";
+  },
+});
 
-AsyncMessageContext.prototype.SignatureText = function (
-  this: AsyncMessageContext,
-): string {
-  return this.content()?.getFormattedText() ?? "";
-};
+augment<CreationContextAugmented>(sequenceParser.CreationContext, {
+  ParametersText(): string {
+    const params = this.creationBody()!.parameters();
+    return params?.parameter()?.length > 0
+      ? formatParameters(params.parameter())
+      : "";
+  },
+  SignatureText(): string {
+    const text = this.ParametersText() || "create";
+    return `«${text}»`;
+  },
+});
 
-CreationContext.prototype.ParametersText = function (
-  this: CreationContext,
-): string {
-  const params = this.creationBody().parameters();
-  return params?.parameter()?.length > 0
-    ? formatParameters(params.parameter())
-    : "";
-};
+augment<RetContextAugmented>(sequenceParser.RetContext, {
+  SignatureText(): string {
+    return (
+      this.asyncMessage()?.content()?.getFormattedText() ??
+      this.returnAsyncMessage()?.content()?.getFormattedText() ??
+      this.expr()?.getFormattedText() ??
+      ""
+    );
+  },
+});
 
-CreationContext.prototype.SignatureText = function (
-  this: CreationContext,
-): string {
-  const text = this.ParametersText() || "create";
-  return `«${text}»`;
-};
-
-RetContext.prototype.SignatureText = function (this: RetContext): string {
-  return (
-    this.asyncMessage()?.content()?.getFormattedText() ??
-    this.returnAsyncMessage()?.content()?.getFormattedText() ??
-    this.expr()?.getFormattedText() ??
-    ""
-  );
-};
-
-ReturnAsyncMessageContext.prototype.SignatureText = function (
-  this: ReturnAsyncMessageContext,
-): string {
-  return this.content()?.getFormattedText() ?? "";
-};
+augment<ReturnAsyncMessageContextAugmented>(
+  sequenceParser.ReturnAsyncMessageContext,
+  {
+    SignatureText(): string {
+      return this.content()?.getFormattedText() ?? "";
+    },
+  },
+);
 
 // Enhance ParametersContext to properly format named parameters
-ParametersContext.prototype.getFormattedText = function (): string {
-  const params = this.parameter();
-  if (!params || params.length === 0) {
-    return "";
-  }
-  return formatParameters(params);
-};
+augment<ParametersContextAugmented>(sequenceParser.ParametersContext, {
+  getFormattedText(): string {
+    const params = this.parameter();
+    if (!params || params.length === 0) {
+      return "";
+    }
+    return formatParameters(params);
+  },
+});
