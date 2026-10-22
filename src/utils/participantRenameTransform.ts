@@ -1,11 +1,14 @@
 import antlr4 from "antlr4";
 import sequenceParser from "@/generated-parser/sequenceParser";
 import sequenceParserListener from "@/generated-parser/sequenceParserListener";
-import { Participants, parse } from "@/parser";
+import { Participants } from "@/parser";
 import {
-  readParticipantDeclaration,
-  type ParticipantDeclaration,
-} from "./participantStyleTransform";
+  parseNotWorse,
+  safeParse,
+  sameDeclaration,
+  squash,
+} from "./dslRoundTrip";
+import { readParticipantDeclaration } from "./participantStyleTransform";
 
 type Range = [number, number];
 
@@ -99,28 +102,17 @@ export type RenameResult = { code: string; name: string } | { error: string };
 // `parse` is the silent, reentrant entry point, so rejected candidates do not
 // print ANTLR errors to the console.
 const analyse = (code: string) => {
+  const parsed = safeParse(code);
+  if (!parsed) return null;
   try {
-    const parsed = parse(code);
     return {
-      pass: !!parsed.pass,
-      errors: parsed.errorDetails?.length ?? 0,
-      rootContext: parsed.rootContext,
+      ...parsed,
       names: Participants(parsed.rootContext).Names() as string[],
     };
   } catch {
     return null;
   }
 };
-
-const squash = (text: string | undefined) => (text ?? "").replace(/\s+/g, "");
-
-const sameDeclaration = (
-  a: ParticipantDeclaration,
-  b: ParticipantDeclaration,
-) =>
-  (["type", "stereotype", "emoji", "width", "label", "color"] as const).every(
-    (key) => squash(a[key]) === squash(b[key]),
-  );
 
 const apply = (code: string, positions: Range[], text: string) => {
   let result = code;
@@ -167,13 +159,7 @@ export const renameParticipantInDsl = (
     ? [text, `"${text}"`]
     : [`"${text}"`];
   let collided = false;
-  const base = (() => {
-    try {
-      return parse(code);
-    } catch {
-      return null;
-    }
-  })();
+  const base = safeParse(code);
   const oldShape = treeShape(rootContext);
   const oldDeclaration = readParticipantDeclaration(rootContext, oldName);
   for (const candidate of candidates) {
@@ -186,9 +172,7 @@ export const renameParticipantInDsl = (
       !next.names.includes(oldName) &&
       added.length === 1
     ) {
-      const parseOk = base?.pass
-        ? next.pass
-        : next.errors <= (base?.errorDetails?.length ?? 0);
+      const parseOk = parseNotWorse(base, next);
       const nameOk = squash(added[0]) === squash(text);
       let declOk = true;
       if (oldDeclaration) {
