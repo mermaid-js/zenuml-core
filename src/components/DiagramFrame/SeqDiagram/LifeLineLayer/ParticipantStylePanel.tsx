@@ -33,6 +33,10 @@ import { ARCHETYPES, PRESET_COLORS } from "./participantEditor/palette";
 import { SplitSlot } from "./participantEditor/SplitSlot";
 import { ColorPicker } from "./participantEditor/ColorPicker";
 import { ArchetypeGlyph, TypePicker } from "./participantEditor/TypePicker";
+import {
+  useParticipantDrafts,
+  type DraftField,
+} from "./participantEditor/useParticipantDrafts";
 
 // Offsets from the participant box (D14), matching the Split-* canvas boards.
 const ICON_SLOT = { dx: -14, dy: 6, size: 28 };
@@ -110,17 +114,7 @@ export const ParticipantStylePanel = () => {
   const currentColor =
     (declaration?.color ?? ordered?.color)?.toLowerCase() ?? null;
   const currentStereotype = declaration?.stereotype ?? "";
-  const currentLabel = declaration?.label ?? "";
 
-  // Text fields are committed on Enter/blur, so they keep local drafts that
-  // resync whenever the participant or its declaration changes underneath.
-  const [nameDraft, setNameDraft] = useState("");
-  const [stereotypeDraft, setStereotypeDraft] = useState("");
-  const [labelDraft, setLabelDraft] = useState("");
-  const [nameError, setNameError] = useState<string | null>(null);
-  const [styleError, setStyleError] = useState<string | null>(null);
-  // Escape discards the drafts; the blur that follows must not commit them.
-  const skipCommitRef = useRef(false);
   // Outside click on a participant: the panel may re-render the diagram and
   // detach the clicked node before its click event fires, so the reselection
   // is deferred to pointerup and cancelled by any later interaction.
@@ -140,20 +134,24 @@ export const ParticipantStylePanel = () => {
     setSelectedRaw(next);
   };
   useEffect(() => () => cancelPendingRef.current?.(), []);
-  // `participantName` is a dependency of every draft so that switching to
-  // another participant whose value is identical (e.g. both unlabeled) still
-  // resets the field.
-  useEffect(() => {
-    setNameDraft(participantName ?? "");
-    setNameError(null);
-    setStyleError(null);
-    skipCommitRef.current = false;
-  }, [participantName]);
-  useEffect(
-    () => setStereotypeDraft(currentStereotype),
-    [participantName, currentStereotype],
-  );
-  useEffect(() => setLabelDraft(currentLabel), [participantName, currentLabel]);
+  // Called here, after the unmount cleanup above, so its three resync
+  // effects keep their place in the effect order.
+  const {
+    nameDraft,
+    setNameDraft,
+    stereotypeDraft,
+    setStereotypeDraft,
+    labelDraft,
+    setLabelDraft,
+    nameError,
+    setNameError,
+    styleError,
+    setStyleError,
+    commitName: commitNameDraft,
+    commitStereotype: commitStereotypeDraft,
+    commitLabel: commitLabelDraft,
+    discard,
+  } = useParticipantDrafts(participantName, declaration);
 
   // Picker open state lives here so Escape in a picker closes only it (D11).
   const [openPicker, setOpenPicker] = useState<Picker | null>(null);
@@ -397,54 +395,29 @@ export const ParticipantStylePanel = () => {
     return true;
   };
 
-  const commitName = (): boolean => {
-    if (skipCommitRef.current) return true;
-    if (nameDraft.trim() === participantName) {
-      setNameDraft(participantName);
-      setNameError(null);
-      return true;
-    }
-    const result = renameParticipantInDsl(
-      code,
-      rootContext,
-      participantName,
-      nameDraft,
+  const commitName = (): boolean =>
+    commitNameDraft(
+      (draft) =>
+        renameParticipantInDsl(code, rootContext, participantName, draft),
+      (result) => {
+        updateCode(result.code);
+        // The selection must use the parser's canonical identity.
+        setSelected([result.name]);
+      },
     );
-    if ("error" in result) {
-      setNameError(result.error);
-      return false;
-    }
-    setNameError(null);
-    setNameDraft(result.name);
-    updateCode(result.code);
-    // The selection must use the parser's canonical identity.
-    setSelected([result.name]);
-    return true;
-  };
 
-  const commitStereotype = (): boolean => {
-    if (skipCommitRef.current) return true;
-    const next = stereotypeDraft.trim();
-    if (next === currentStereotype) return true;
-    return applyStyle({ stereotype: next || null });
-  };
+  const commitStereotype = (): boolean => commitStereotypeDraft(applyStyle);
 
-  const commitLabel = (): boolean => {
-    if (skipCommitRef.current) return true;
-    const next = labelDraft.trim();
-    if (next === currentLabel) return true;
-    return applyStyle({ label: next || null });
-  };
+  const commitLabel = (): boolean => commitLabelDraft(applyStyle);
 
-  const onEnterBlur = (commit: () => boolean, reset: () => void) => ({
+  const onEnterBlur = (commit: () => boolean, field: DraftField) => ({
     onBlur: () => {
       commit();
     },
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Escape") {
         // Discard the draft and close; the blur on unmount must not commit.
-        skipCommitRef.current = true;
-        reset();
+        discard(field);
         close();
         return;
       }
@@ -507,9 +480,7 @@ export const ParticipantStylePanel = () => {
     }
   };
 
-  const stereotypeHandlers = onEnterBlur(commitStereotype, () =>
-    setStereotypeDraft(currentStereotype),
-  );
+  const stereotypeHandlers = onEnterBlur(commitStereotype, "stereotype");
   const showStereotypeInput = stereotypeEditing || !!currentStereotype;
 
   return (
@@ -756,9 +727,7 @@ export const ParticipantStylePanel = () => {
                     setNameError(null);
                   }}
                   aria-invalid={nameError ? true : undefined}
-                  {...onEnterBlur(commitName, () =>
-                    setNameDraft(participantName),
-                  )}
+                  {...onEnterBlur(commitName, "name")}
                   className={cn(
                     rowInputClass,
                     "w-[76px] font-semibold",
@@ -780,9 +749,7 @@ export const ParticipantStylePanel = () => {
                     setLabelDraft(e.target.value);
                     setStyleError(null);
                   }}
-                  {...onEnterBlur(commitLabel, () =>
-                    setLabelDraft(currentLabel),
-                  )}
+                  {...onEnterBlur(commitLabel, "label")}
                   className={cn(
                     rowInputClass,
                     labelDraft
