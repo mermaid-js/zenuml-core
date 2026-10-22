@@ -19,7 +19,7 @@ describe("CreationContext", () => {
 
 describe("message - creation", () => {
   test("A.m", () => {
-    let message = Fixture.firstStatement("new A").creation();
+    const message = Fixture.firstStatement("new A").creation();
     expect(message.SignatureText()).toBe("«create»");
   });
 });
