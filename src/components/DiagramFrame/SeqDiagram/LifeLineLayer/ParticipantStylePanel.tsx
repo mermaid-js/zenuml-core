@@ -19,13 +19,7 @@ import { RootContext } from "@/parser";
 import { cn } from "@/utils";
 import { usePopoverPresence } from "@/components/common/usePopoverPresence";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { FloatingPortal } from "@floating-ui/react";
 import { useInteractionExit } from "@/store/interaction/useInteractionExit";
 import { useActiveSurface } from "@/store/interaction/useCan";
@@ -37,20 +31,18 @@ import {
   useParticipantDrafts,
   type DraftField,
 } from "./participantEditor/useParticipantDrafts";
+import {
+  usePickerPlacement,
+  VIEWPORT_MARGIN,
+  type Anchor,
+  type Picker,
+} from "./participantEditor/usePickerPlacement";
 
 // Offsets from the participant box (D14), matching the Split-* canvas boards.
 const ICON_SLOT = { dx: -14, dy: 6, size: 28 };
 const COLOR_SLOT = { dx: -12, dy: 8, size: 24 };
 const PILL_TOP = -32;
 const NAME_ROW_GAP = 8;
-// Pickers open below their slot: type picker right-aligned with the box,
-// colour picker starting just left of the colour slot.
-const PICKER_TOP = 42;
-const TYPE_PICKER_WIDTH = 220;
-const COLOR_PICKER_LEFT = -44;
-const VIEWPORT_MARGIN = 8;
-
-type Picker = "type" | "color";
 
 const SlotGlyph = ({ d }: { d: string }) => (
   <svg
@@ -88,12 +80,7 @@ export const ParticipantStylePanel = () => {
   // P2: the editor stays mounted for its 120 ms exit animation.
   const presence = usePopoverPresence(isOpen);
   // The selected participant's box, in viewport coordinates.
-  const [anchor, setAnchor] = useState<{
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
-  } | null>(null);
+  const [anchor, setAnchor] = useState<Anchor | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const liveParticipantName = selected[0] ?? null;
   const lastParticipantName = useRef<string | null>(null);
@@ -155,17 +142,7 @@ export const ParticipantStylePanel = () => {
 
   // Picker open state lives here so Escape in a picker closes only it (D11).
   const [openPicker, setOpenPicker] = useState<Picker | null>(null);
-  const typePresence = usePopoverPresence(openPicker === "type");
-  const colorPresence = usePopoverPresence(openPicker === "color");
-  const pickerMounted = typePresence.mounted || colorPresence.mounted;
   const [stereotypeEditing, setStereotypeEditing] = useState(false);
-  const [pickerPos, setPickerPos] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
-  const pickerRef = useRef<HTMLDivElement>(null);
-  const nameRowRef = useRef<HTMLDivElement>(null);
-  const [nameRowWidth, setNameRowWidth] = useState(0);
   const setPreview = useSetAtom(participantPreviewAtom);
   useEffect(() => {
     setOpenPicker(null);
@@ -198,79 +175,16 @@ export const ParticipantStylePanel = () => {
     // open state by one exit animation.
   }, [openFor, selected, diagramElement, code, presence.mounted]);
 
-  // Pickers open below their slot.
-  useLayoutEffect(() => {
-    if (!anchor || (!openPicker && !pickerMounted)) {
-      setPickerPos(null);
-      return;
-    }
-    // A closing picker keeps its last position for the exit frame.
-    if (!openPicker) return;
-    setPickerPos({
-      top: anchor.top + PICKER_TOP,
-      left:
-        openPicker === "type"
-          ? anchor.right - TYPE_PICKER_WIDTH
-          : anchor.right + COLOR_PICKER_LEFT,
-    });
-  }, [anchor, openPicker, pickerMounted]);
-
-  // A newly opened picker takes focus: its first pressed item, else its
-  // first control.
-  const focusedPickerRef = useRef<Picker | null>(null);
-  useEffect(() => {
-    if (!openPicker || !pickerPos) {
-      if (!openPicker) focusedPickerRef.current = null;
-      return;
-    }
-    if (focusedPickerRef.current === openPicker) return;
-    focusedPickerRef.current = openPicker;
-    const root = pickerRef.current;
-    (
-      root?.querySelector<HTMLElement>('button[aria-pressed="true"]') ??
-      root?.querySelector<HTMLElement>("button")
-    )?.focus();
-  }, [openPicker, pickerPos]);
-
-  // Clamp the open picker to the viewport after it renders.
-  useLayoutEffect(() => {
-    if (!pickerRef.current || !pickerPos || !anchor) return;
-    const picker = pickerRef.current.getBoundingClientRect();
-    let { top, left } = pickerPos;
-    const margin = VIEWPORT_MARGIN;
-    if (left + picker.width > window.innerWidth - margin) {
-      left = window.innerWidth - picker.width - margin;
-    }
-    if (left < margin) left = margin;
-    if (top + picker.height > window.innerHeight - margin) {
-      top = anchor.top - picker.height - margin; // flip above participant
-    }
-    if (top !== pickerPos.top || left !== pickerPos.left) {
-      setPickerPos({ top, left });
-    }
-  }, [pickerPos, anchor]);
-
-  // The name row is centred under the box; measure it to clamp it on screen.
-  // The row mounts one render after the anchor is set (FloatingPortal renders
-  // its children late, and the portal node may still be detached when the
-  // ref attaches, so offsetWidth is 0 there) and nothing re-renders this
-  // component afterwards. A ResizeObserver on the row reports the real width
-  // as soon as the row has layout, and again when the label field flips
-  // between empty and filled or the row re-mounts after a picker closes.
-  const [nameRowEl, setNameRowEl] = useState<HTMLDivElement | null>(null);
-  const attachNameRow = useCallback((node: HTMLDivElement | null) => {
-    nameRowRef.current = node;
-    setNameRowEl(node);
-  }, []);
-  useLayoutEffect(() => {
-    if (!nameRowEl) return;
-    const measure = () => setNameRowWidth(nameRowEl.offsetWidth);
-    measure();
-    if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(nameRowEl);
-    return () => observer.disconnect();
-  }, [nameRowEl]);
+  // Called right after the anchor effect, where its picker effects were, so
+  // the layout and passive effect order is unchanged.
+  const {
+    typePresence,
+    colorPresence,
+    pickerPos,
+    pickerRef,
+    attachNameRow,
+    nameRowWidth,
+  } = usePickerPlacement(anchor, openPicker);
 
   // A press on a participant box can commit a focused draft (the focus
   // change blurs the field), and the commit can re-render the diagram and
