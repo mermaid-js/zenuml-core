@@ -6,6 +6,8 @@ import {
   enableMessageInsertionAtom,
   enableMessageReorderAtom,
   enableParticipantStyleEditingAtom,
+  messageReorderDragAtom,
+  messageReorderDropAtom,
   messageReorderPendingAtom,
   modeAtom,
   RenderMode,
@@ -15,7 +17,7 @@ import {
 import { enterMenuAtom } from "@/store/interaction/interactionAtom";
 import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Block } from "./Block";
 import { InteractionController } from "@/store/interaction/InteractionController";
 
@@ -417,5 +419,96 @@ describe("Block reorder and the central Escape (ADR 0002, P3)", () => {
       fireEvent.pointerUp(window);
     });
     expect(store.get(codeAtom)).toBe(CODE);
+  });
+});
+
+describe("Block reorder session ownership", () => {
+  // A handle press arms MessageReorderHandle's one-shot click suppressor (no
+  // click follows a synthetic press). Spend it so later specs see clean state.
+  afterEach(() => {
+    act(() => {
+      fireEvent.pointerUp(window);
+    });
+    document.body.click();
+  });
+
+  const renderRoot = (isRoot = true) => {
+    const store = createStore();
+    store.set(codeAtom, CODE);
+    store.set(modeAtom, RenderMode.Dynamic);
+    store.set(enableMessageReorderAtom, true);
+    const ctx = RootContext(CODE);
+    const view = render(
+      <Provider store={store}>
+        <Block context={ctx?.block()} number="1" isRoot={isRoot} />
+      </Provider>,
+    );
+    return { store, view };
+  };
+
+  it("resets every reorder atom and restores the cursor when reorder turns off mid-drag", () => {
+    document.body.style.cursor = "";
+    const { store, view } = renderRoot();
+    const containers = view.container.querySelectorAll(".statement-container");
+    const handle = containers[0].querySelector(".message-reorder-handle")!;
+    act(() => {
+      fireEvent.pointerDown(handle, { clientX: 0, clientY: 0 });
+    });
+    act(() => {
+      fireEvent.pointerMove(window, { clientX: 0, clientY: 100 });
+    });
+    act(() => {
+      fireEvent.pointerMove(containers[1], { clientX: 0, clientY: 100 });
+    });
+    expect(store.get(messageReorderDragAtom)).not.toBeNull();
+    expect(document.body.style.cursor).toBe("grabbing");
+    act(() => {
+      store.set(activeTextEditorsAtom, new Set([Symbol("label")]));
+    });
+    expect(store.get(messageReorderPendingAtom)).toBeNull();
+    expect(store.get(messageReorderDragAtom)).toBeNull();
+    expect(store.get(messageReorderDropAtom)).toBeNull();
+    expect(document.body.style.cursor).toBe("");
+    act(() => {
+      fireEvent.pointerUp(window);
+    });
+  });
+
+  it("a nested (non-root) Block runs no reorder session", () => {
+    const { store } = renderRoot(false);
+    act(() => {
+      store.set(messageReorderPendingAtom, {
+        key: "1-2",
+        startX: 0,
+        startY: 0,
+      });
+    });
+    // No session: no grabbing cursor, no pointer listeners, no reset on disable.
+    expect(document.body.style.cursor).toBe("");
+    act(() => {
+      fireEvent.pointerMove(window, { clientX: 100, clientY: 100 });
+    });
+    expect(store.get(messageReorderPendingAtom)).not.toBeNull();
+    act(() => {
+      store.set(activeTextEditorsAtom, new Set([Symbol("label")]));
+    });
+    expect(store.get(messageReorderPendingAtom)).not.toBeNull();
+  });
+
+  it("restores the cursor and removes window listeners when the root Block unmounts mid-press", () => {
+    document.body.style.cursor = "";
+    const { store, view } = renderRoot();
+    const handle = view.container.querySelector(".message-reorder-handle")!;
+    act(() => {
+      fireEvent.pointerDown(handle, { clientX: 0, clientY: 0 });
+    });
+    expect(document.body.style.cursor).toBe("grabbing");
+    view.unmount();
+    expect(document.body.style.cursor).toBe("");
+    act(() => {
+      fireEvent.pointerMove(window, { clientX: 100, clientY: 100 });
+    });
+    expect(store.get(messageReorderDragAtom)).toBeNull();
+    expect(store.get(messageReorderPendingAtom)).not.toBeNull();
   });
 });
