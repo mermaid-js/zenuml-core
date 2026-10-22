@@ -91,15 +91,8 @@ export interface CreationGeometry {
 
 // ─── Fragments ─────────────────────────────────────────────────────
 
-export type FragmentKind =
-  | "loop"
-  | "alt"
-  | "par"
-  | "opt"
-  | "section"
-  | "critical"
-  | "tcf"
-  | "ref";
+import type { FragmentKind } from "@/parser/fragmentOf";
+export type { FragmentKind };
 
 export interface FragmentSectionGeometry {
   label: string;
