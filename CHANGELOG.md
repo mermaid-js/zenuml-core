@@ -1,5 +1,13 @@
 # @zenuml/core
 
+## 4.10.4
+
+### Patch Changes
+
+- [#566](https://github.com/mermaid-js/zenuml-core/pull/566) [`46a2ac1`](https://github.com/mermaid-js/zenuml-core/commit/46a2ac1a553b6aa62224a53251099d264ea38439) Thanks [@MrCoder](https://github.com/MrCoder)! - The label of a ref fragment is drawn with its cut bottom-right corner (the UML pentagon) and a border in the frame colour again. The styles that draw it were in a stylesheet that was never loaded since the React migration, so the label showed as a plain rectangle. The fragment styles now live in one stylesheet instead of one copy per fragment kind.
+
+- [#569](https://github.com/mermaid-js/zenuml-core/pull/569) [`47de578`](https://github.com/mermaid-js/zenuml-core/commit/47de578d83bba04a96a753666e0538f77f809dcd) Thanks [@MrCoder](https://github.com/MrCoder)! - The ref fragment label now draws as a clean pentagon: the cut corner no longer shows a header-coloured triangle behind it, and the label's bottom edge is visible.
+
 ## 4.10.3
 
 ### Patch Changes
