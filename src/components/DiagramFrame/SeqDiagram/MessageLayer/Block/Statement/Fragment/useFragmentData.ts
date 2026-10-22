@@ -35,7 +35,7 @@ const getBorder = (store: Store, context: any) => {
   return FrameBorder(frame);
 };
 
-export const getOffsetX =(store: Store, context: any, origin: string) => {
+export const getOffsetX = (store: Store, context: any, origin: string) => {
   const coordinates = store.get(coordinatesAtom);
   const leftParticipant = getLeftParticipant(store, context) || "";
   const halfLeftParticipant = coordinates.half(leftParticipant);
