@@ -1,5 +1,13 @@
 # @zenuml/core
 
+## 4.10.5
+
+### Patch Changes
+
+- [#573](https://github.com/mermaid-js/zenuml-core/pull/573) [`4c5ca30`](https://github.com/mermaid-js/zenuml-core/commit/4c5ca300d584df8cca92009fcb759f0a999b311f) Thanks [@MrCoder](https://github.com/MrCoder)! - Diagrams no longer contain repeated element ids from the collapse icons, which accessibility checkers flagged as invalid HTML. The occurrence collapse icons now come from the shared icon set, and the unused collapse button stylesheets are gone. The icons look the same.
+
+- [#577](https://github.com/mermaid-js/zenuml-core/pull/577) [`1742019`](https://github.com/mermaid-js/zenuml-core/commit/174201956b0216a7a1b823722ac170d47f9d116c) Thanks [@MrCoder](https://github.com/MrCoder)! - Lifelines no longer use the participant name as their HTML id, so a diagram no longer contains repeated ids or ids that clash with the host page. Names with spaces or leading digits no longer produce invalid ids. To select a lifeline, use the `data-lifeline-id` attribute, for example `[data-lifeline-id="Order Service"]`.
+
 ## 4.10.4
 
 ### Patch Changes
