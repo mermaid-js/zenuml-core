@@ -61,6 +61,45 @@ describe("@ZenUML/core", function () {
     }
   });
 
+  it("adds no element to document.body when a ZenUml is constructed", () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const bodyChildren = () => Array.from(document.body.children);
+    const before = bodyChildren();
+
+    new ZenUml(el);
+
+    const after = bodyChildren();
+    expect(after.length).toBe(before.length);
+    expect(after.every((child, i) => child === before[i])).toBe(true);
+  });
+
+  it("leaves no portal root of its own in document.body after rendering", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const before = new Set(Array.from(document.body.children));
+
+    const zenUml = new ZenUml(el);
+    await zenUml.render("Alice->Bob: Hello", {});
+    await waitFor(() => {
+      expect(el.textContent).toContain("Hello");
+    });
+
+    // Rendering may add floating-ui portals (the popovers) and the shared
+    // intersection detector. Nothing else, and in particular no empty
+    // headlessui portal root.
+    const added = Array.from(document.body.children).filter(
+      (child) => !before.has(child),
+    );
+    const unexpected = added.filter(
+      (child) =>
+        !child.hasAttribute("data-floating-ui-portal") &&
+        child.id !== "zenuml-intersection-detector-container",
+    );
+    expect(unexpected).toEqual([]);
+    expect(document.getElementById("headlessui-portal-root")).toBeNull();
+  });
+
   it("shows message numbering by default", async () => {
     const el = await renderDiagram();
 
