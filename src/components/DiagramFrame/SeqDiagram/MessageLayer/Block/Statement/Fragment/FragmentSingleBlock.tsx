@@ -1,12 +1,8 @@
 import CommentClass from "@/components/Comment/Comment";
-import Icon from "@/components/Icon/Icons";
 import { cn } from "@/utils";
 import { Block } from "../../Block";
-import { FragmentNumbering } from "./FragmentNumbering";
-import { Comment } from "../Comment/Comment";
-import { CollapseButton } from "./CollapseButton";
+import { FragmentFrame } from "./FragmentFrame";
 import { ConditionLabel } from "./ConditionLabel";
-import { useFragmentData } from "./useFragmentData";
 import "./FragmentCritical.css";
 import "./FragmentLoop.css";
 import "./FragmentPar.css";
@@ -38,17 +34,6 @@ export const FragmentSingleBlock = (props: FragmentSingleBlockProps) => {
   const { kind } = props;
   const fragment = props.context[kind]();
   const label = fragment?.atom?.()?.getFormattedText() ?? labels[kind];
-  const {
-    collapsed,
-    toggleCollapse,
-    paddingLeft,
-    fragmentStyle,
-    border,
-    leftParticipant,
-  } = useFragmentData(props.context, props.origin, {
-    label,
-    number: props.number,
-  });
   const block = fragment?.braceBlock()?.block();
   const condition = fragment?.parExpr?.()?.condition?.();
   const isOpt = kind === "opt";
@@ -57,50 +42,31 @@ export const FragmentSingleBlock = (props: FragmentSingleBlockProps) => {
   const renderBlock = isOpt || isLoop || Boolean(block);
 
   const content = (
-    <div
-      data-origin={props.origin}
-      data-left-participant={leftParticipant}
-      data-frame-padding-left={border.left}
-      data-frame-padding-right={border.right}
+    <FragmentFrame
+      context={props.context}
+      origin={props.origin}
+      label={label}
+      icon={`${kind}-fragment`}
+      number={props.number}
+      comment={props.comment}
+      commentObj={props.commentObj}
       className={cn(
         "group fragment border-skin-fragment rounded",
         kind === "opt" ? "opt" : `fragment-${kind} ${kind}`,
         isOpt && props.className,
       )}
-      style={fragmentStyle}
-    >
-      {props.commentObj?.text && (
-        <Comment comment={props.comment} commentObj={props.commentObj} />
+      headerClassName={cn("relative", !isOpt && "rounded-t")}
+      expandedClassName=""
+      collapseStyle={
+        isOpt ? props.commentObj?.textStyle : props.commentObj?.messageStyle
+      }
+      collapseClassName={cn(
+        isOpt
+          ? props.commentObj?.classNames
+          : props.commentObj?.messageClassNames,
       )}
-      <div
-        className={cn(
-          "header bg-skin-fragment-header text-skin-fragment-header leading-4 relative",
-          !isOpt && "rounded-t",
-        )}
-      >
-        <div className="name font-normal p-1 border-b border-skin-fragment-header-rule">
-          <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
-            <FragmentNumbering number={props.number} />
-            <Icon name={`${kind}-fragment`} />
-            <CollapseButton
-              label={label}
-              collapsed={collapsed}
-              onClick={toggleCollapse}
-              style={
-                isOpt
-                  ? props.commentObj?.textStyle
-                  : props.commentObj?.messageStyle
-              }
-              className={cn(
-                isOpt
-                  ? props.commentObj?.classNames
-                  : props.commentObj?.messageClassNames,
-              )}
-            />
-          </label>
-        </div>
-      </div>
-      <div className={cn({ hidden: collapsed })}>
+    >
+      {({ leftParticipant, paddingLeft }) => (
         <div className="segment">
           {isSection ? (
             <div className="text-skin-fragment flex" />
@@ -135,8 +101,8 @@ export const FragmentSingleBlock = (props: FragmentSingleBlockProps) => {
             />
           )}
         </div>
-      </div>
-    </div>
+      )}
+    </FragmentFrame>
   );
 
   return isOpt ? content : <div className={props.className}>{content}</div>;

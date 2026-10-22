@@ -1,15 +1,10 @@
 import CommentClass from "@/components/Comment/Comment";
-import { blockLength } from "@/utils/Numbering";
-import { CollapseButton } from "./CollapseButton";
-import { Block } from "../../Block";
-import { useFragmentData } from "./useFragmentData";
-import { Comment } from "../Comment/Comment";
-import { FragmentNumbering } from "./FragmentNumbering";
 import { cn } from "@/utils";
-import { ConditionLabel } from "./ConditionLabel";
+import { fragmentOf } from "@/parser/fragmentOf";
+import { FragmentFrame } from "./FragmentFrame";
+import { FragmentSections } from "./FragmentSections";
 import "./FragmentAlt.css";
-import { Fragment, useMemo } from "react";
-import Icon from "@/components/Icon/Icons";
+import { useMemo } from "react";
 
 export const FragmentAlt = (props: {
   context: any;
@@ -19,131 +14,35 @@ export const FragmentAlt = (props: {
   number?: string;
   className?: string;
 }) => {
-  const alt = props.context.alt();
-  const ifBlock = alt?.ifBlock();
-  const elseIfBlocks = alt?.elseIfBlock();
-  const elseBlock = alt?.elseBlock()?.braceBlock()?.block();
-  const blockInIfBlock = alt?.ifBlock()?.braceBlock()?.block();
-  const blockLengthAcc = useMemo(() => {
-    const acc = [blockLength(blockInIfBlock)];
-    if (alt?.elseIfBlock()) {
-      alt.elseIfBlock().forEach((block: any) => {
-        acc.push(acc[acc.length - 1] + blockLength(blockInElseIfBlock(block)));
-      });
-    }
-    return acc;
-  }, [alt, blockInIfBlock]);
-
-  function conditionFromIfElseBlock(block: any) {
-    return block?.parExpr()?.condition();
-  }
-
-  function blockInElseIfBlock(block: any) {
-    return block?.braceBlock()?.block();
-  }
-
-  const {
-    collapsed,
-    toggleCollapse,
-    paddingLeft,
-    fragmentStyle,
-    leftParticipant,
-  } = useFragmentData(props.context, props.origin, {
-    label: "Alt",
-    number: props.number,
-  });
+  const sections = useMemo(
+    () => fragmentOf(props.context)?.sections ?? [],
+    [props.context],
+  );
 
   return (
-    <div
-      data-origin={props.origin}
-      data-left-participant={props.origin}
-      data-frame-padding-left={props.commentObj?.messageStyle?.paddingLeft}
-      data-frame-padding-right={props.commentObj?.messageStyle?.paddingRight}
+    <FragmentFrame
+      context={props.context}
+      origin={props.origin}
+      label="Alt"
+      icon="alt-fragment"
+      number={props.number}
+      comment={props.comment}
+      commentObj={props.commentObj}
       className={cn(
         "group fragment fragment-alt alt border-skin-fragment rounded",
         props.className,
       )}
-      style={fragmentStyle}
+      collapseStyle={props.commentObj?.messageStyle}
+      collapseClassName={cn(props.commentObj?.messageClassNames)}
+      expandedClassName="block"
     >
-      {props.commentObj?.text && (
-        <Comment comment={props.comment} commentObj={props.commentObj} />
+      {(layout) => (
+        <FragmentSections
+          sections={sections}
+          number={props.number}
+          layout={layout}
+        />
       )}
-      <div className="header bg-skin-fragment-header text-skin-fragment-header leading-4 rounded-t relative">
-        <div className="name font-normal p-1 border-b border-skin-fragment-header-rule">
-          <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
-            <FragmentNumbering number={props.number} />
-            <Icon name="alt-fragment" />
-            <CollapseButton
-              label="Alt"
-              collapsed={collapsed}
-              onClick={toggleCollapse}
-              style={props.commentObj?.messageStyle}
-              className={cn(props.commentObj?.messageClassNames)}
-            />
-          </label>
-        </div>
-      </div>
-
-      <div className={collapsed ? "hidden" : "block"}>
-        <div className="segment">
-          <div className="text-skin-fragment">
-            <ConditionLabel
-              keyword="if"
-              condition={conditionFromIfElseBlock(ifBlock)}
-            />
-          </div>
-          {blockInIfBlock && (
-            <Block
-              origin={leftParticipant}
-              style={{ paddingLeft: `${paddingLeft}px` }}
-              context={blockInIfBlock}
-              number={`${props.number}.1`}
-              incremental
-            />
-          )}
-        </div>
-        {elseIfBlocks.map((elseIfBlock: any, index: number) => (
-          <Fragment key={index}>
-            <div
-              className="segment border-t border-solid border-skin-fragment-separator mt-2"
-              key={index + 500}
-            >
-              <div className="text-skin-fragment" key={index + 1000}>
-                <ConditionLabel
-                  keyword="else if"
-                  condition={conditionFromIfElseBlock(elseIfBlock)}
-                />
-              </div>
-              <Block
-                origin={leftParticipant}
-                style={{ paddingLeft: `${paddingLeft}px` }}
-                context={blockInElseIfBlock(elseIfBlock)}
-                key={index + 2000}
-                number={`${props.number}.${blockLengthAcc[index] + 1}`}
-                incremental
-              />
-            </div>
-          </Fragment>
-        ))}
-        {elseBlock && (
-          <>
-            <div className="segment border-t border-solid border-skin-fragment-separator mt-2">
-              <div className="text-skin-fragment">
-                <ConditionLabel keyword="else" />
-              </div>
-              <Block
-                origin={leftParticipant}
-                style={{ paddingLeft: `${paddingLeft}px` }}
-                context={elseBlock}
-                number={`${props.number}.${
-                  blockLengthAcc[blockLengthAcc.length - 1] + 1
-                }`}
-                incremental
-              />
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+    </FragmentFrame>
   );
 };
