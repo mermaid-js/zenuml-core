@@ -12,7 +12,6 @@ import {
   modeAtom,
   paletteAtom,
   onContentChangeAtom,
-  onEventEmitAtom,
   onThemeChangeAtom,
   RenderMode,
   renderRevisionAtom,
@@ -87,7 +86,6 @@ export interface Config {
   enableNumbering?: boolean;
   stickyOffset?: number | false;
   onContentChange?: (code: string) => void;
-  onEventEmit?: (name: string, data: unknown) => void;
   mode?: RenderMode;
   // Editing feature flags. Default off; opt in per surface.
   // Message insertion is currently broken for nested messages, so the flag
@@ -269,7 +267,6 @@ export default class ZenUml implements IZenUml {
     clearCache();
     this.store.set(onContentChangeAtom, config?.onContentChange || (() => {}));
     this.store.set(onThemeChangeAtom, config?.onThemeChange || (() => {}));
-    this.store.set(onEventEmitAtom, config?.onEventEmit || (() => {}));
     if (config?.enableMultiTheme !== undefined) {
       this.store.set(enableMultiThemeAtom, config?.enableMultiTheme);
     }

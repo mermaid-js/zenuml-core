@@ -78,7 +78,6 @@ These atoms hold functions passed in from the embedding application:
 |---|---|---|
 | `onContentChangeAtom` | `(code: string) => void` | Called when user edits DSL |
 | `onThemeChangeAtom` | `(data: { theme, scoped }) => void` | Called on theme change |
-| `onEventEmitAtom` | `(name, data) => void` | Generic event bus |
 | `onElementClickAtom` | `(codeRange: CodeRange) => void` | Called on diagram element click |
 | `onMessageClickAtom` | `(context, element) => void` | Called on message click |
 

@@ -140,10 +140,6 @@ export const onThemeChangeAtom = atomWithFunctionValue<
   (data: { theme: string; scoped: boolean }) => void
 >(() => {});
 
-export const onEventEmitAtom = atomWithFunctionValue<
-  (name: string, data: any) => void
->(() => {});
-
 export const createMessageDragAtom = atom<{
   source: string;
   sourceX: number;

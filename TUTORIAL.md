@@ -52,7 +52,6 @@ The `render` method accepts a configuration object with the following properties
 - `enableMultiTheme`: A boolean that indicates whether to enable multi-theme support.
 - `stickyOffset`: A number that indicates the offset for the sticky header.
 - `onContentChange`: A callback function that is called when the content of the diagram is changed.
-- `onEventEmit`: A callback function that is called when an event is emitted from the diagram.
 - `mode`: The rendering mode. Can be `RenderMode.Dynamic` or `RenderMode.Static`.
 
 ### Example
