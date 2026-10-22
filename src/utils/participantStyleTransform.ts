@@ -1,4 +1,9 @@
-import { parse } from "@/parser";
+import {
+  DECLARATION_KEYS,
+  parseNotWorse,
+  safeParse,
+  sameDeclaration,
+} from "./dslRoundTrip";
 
 export type ParticipantUpdates = {
   color?: string | null; // null = remove color
@@ -133,9 +138,6 @@ const buildStyle = (
 
 export type StyleResult = { code: string } | { error: string };
 
-const squash = (text: string | undefined | null) =>
-  (text ?? "").replace(/\s+/g, "");
-
 /**
  * `setParticipantStyleInDsl` plus a round-trip check: the result must parse
  * (or not add parse errors to an already broken input) and read back as the
@@ -149,8 +151,7 @@ export const setParticipantStyleChecked = (
   updates: ParticipantUpdates,
 ): StyleResult => {
   const before = readParticipantDeclaration(rootContext, participantName);
-  const base = parse(code);
-  const baseErrors = base.errorDetails?.length ?? 0;
+  const base = safeParse(code);
 
   const expected = (): ParticipantDeclaration | null => {
     if (!before) return null;
@@ -171,27 +172,16 @@ export const setParticipantStyleChecked = (
             ? "Not a valid display name"
             : "Could not apply the change",
     });
-    const parsed = parse(next);
-    if (
-      base.pass ? !parsed.pass : (parsed.errorDetails?.length ?? 0) > baseErrors
-    )
-      return failure();
+    const parsed = safeParse(next);
+    if (!parsed || !parseNotWorse(base, parsed)) return failure();
     const read = readParticipantDeclaration(
       parsed.rootContext,
       participantName,
     );
     const want = expected();
     if (!read || !want) return failure();
-    for (const key of [
-      "name",
-      "type",
-      "stereotype",
-      "emoji",
-      "width",
-      "label",
-      "color",
-    ] as const) {
-      if (squash(read[key]) !== squash(want[key])) return failure();
+    if (!sameDeclaration(read, want, ["name", ...DECLARATION_KEYS])) {
+      return failure();
     }
     return null;
   };

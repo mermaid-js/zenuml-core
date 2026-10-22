@@ -17,9 +17,9 @@ export const DECLARATION_KEYS = [
   "color",
 ] as const;
 
-type Declaration = Partial<Record<string, string | null | undefined>>;
-
-export const sameDeclaration = <K extends string = (typeof DECLARATION_KEYS)[number]>(
+export const sameDeclaration = <
+  K extends string = (typeof DECLARATION_KEYS)[number],
+>(
   a: Partial<Record<K, string | null | undefined>>,
   b: Partial<Record<K, string | null | undefined>>,
   keys: readonly K[] = DECLARATION_KEYS as unknown as readonly K[],
@@ -53,5 +53,3 @@ export const parseNotWorse = (
   base: ParseSnapshot | null,
   next: ParseSnapshot,
 ): boolean => (base?.pass ? next.pass : next.errors <= (base?.errors ?? 0));
-
-export type { Declaration };

@@ -1,21 +1,25 @@
-import { describe, expect, it, vi } from "vitest";
-import { RootContext } from "@/parser";
-import { setParticipantStyleChecked } from "./participantStyleTransform";
+import { describe, expect, it, mock } from "bun:test";
+import * as actual from "@/parser";
 
-const ORIGINAL = "A\nA->B: hi";
+// A unique original so the module mock, which bun shares across spec files,
+// only ever throws for this one string.
+const ORIGINAL = "A\nA->B: hi // base-parse-throws-sentinel";
 
 // The parser can throw on malformed input. Make it throw only for the original
 // code so the style transform meets an unparsable base but a parsable result.
-vi.mock("@/parser", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/parser")>();
-  return {
-    ...actual,
-    parse: (code: string) => {
-      if (code === "A\nA->B: hi") throw new Error("parser blew up");
-      return actual.parse(code);
-    },
-  };
-});
+const realParse = actual.parse;
+mock.module("@/parser", () => ({
+  ...actual,
+  parse: (code: string) => {
+    if (code === ORIGINAL) throw new Error("parser blew up");
+    return realParse(code);
+  },
+}));
+
+const { RootContext } = await import("@/parser");
+const { setParticipantStyleChecked } = await import(
+  "./participantStyleTransform"
+);
 
 describe("participantStyleTransform when the original code cannot be parsed", () => {
   it("still applies a style change that yields clean DSL", () => {
@@ -23,6 +27,6 @@ describe("participantStyleTransform when the original code cannot be parsed", ()
       setParticipantStyleChecked(ORIGINAL, RootContext(ORIGINAL), "A", {
         type: "Actor",
       }),
-    ).toEqual({ code: "@Actor A\nA->B: hi" });
+    ).toEqual({ code: "@Actor A\nA->B: hi // base-parse-throws-sentinel" });
   });
 });
