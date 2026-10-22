@@ -12,7 +12,17 @@
  *    preserved structurally: those rules cannot occur inside parameters or
  *    conditions, so non-descent is behavior-identical (07 'port verbatim').
  */
-import { Participants } from "@/parser/Participants";
+import { _STARTER_, type Participants } from "@/parser/Participants";
+import {
+  createCollectState,
+  onCreation,
+  onParticipant,
+  onRef,
+  onRet,
+  onStarter,
+  onTo,
+  type CollectState,
+} from "@/parser/participantCollection";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
 import type { OwnableMessage } from "@/parser/OwnableMessage";
 import { topLevelFrame, type Frame } from "@/positioning/FrameBorder";
@@ -40,139 +50,13 @@ import {
   ToContext,
 } from "./nodes";
 
-// Same sentinel exported by @/parser/OrderedParticipants — duplicated here as
-// a literal to keep this module free of the ToCollector/OrderedParticipants
-// import cycle (OrderedParticipants -> ToCollector -> this module).
-const _STARTER_ = "_STARTER_";
-
 /* ------------------------------------------------------------------ */
 /* ToCollector — participants collection (src/parser/ToCollector.js)    */
 /* ------------------------------------------------------------------ */
 
-interface CollectState {
-  participants: Participants;
-  groupId: string | undefined;
-}
-
-function onParticipant(ctx: any, state: CollectState): void {
-  const type = ctx?.participantType()?.getFormattedText().replace("@", "");
-  const participant =
-    ctx?.name()?.getFormattedText() || "Missing `Participant`";
-  const stereotype = ctx.stereotype()?.name()?.getFormattedText();
-  const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
-  const width =
-    (ctx.width && ctx.width() && Number.parseInt(ctx.width().getText())) ||
-    undefined;
-  const labelCtx = ctx.label && ctx.label();
-  const label = labelCtx?.name()?.getFormattedText();
-  const explicit = true;
-  const color = ctx.COLOR()?.getText();
-  const comment = ctx.getComment();
-  const nameCtx = ctx.name();
-  let start: number | undefined, end: number | undefined;
-
-  if (labelCtx) {
-    const labelNameCtx = labelCtx.name();
-    if (labelNameCtx) {
-      start = labelNameCtx.start.start;
-      end = labelNameCtx.stop.stop + 1;
-    }
-  } else if (nameCtx) {
-    start = nameCtx.start.start;
-    end = nameCtx.stop.stop + 1;
-  }
-
-  state.participants.Add(participant, {
-    isStarter: false,
-    type,
-    stereotype,
-    emoji,
-    width,
-    groupId: state.groupId,
-    label,
-    explicit,
-    color,
-    comment,
-    position: [start, end] as any,
-  });
-}
-
-function onTo(ctx: any, state: CollectState): void {
-  const participant =
-    ctx.name?.()?.getFormattedText() || ctx.getFormattedText();
-  const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
-  const participantInstance = state.participants.Get(participant);
-
-  if (participantInstance?.label) {
-    state.participants.Add(participant, { isStarter: false, emoji });
-  } else if ((participantInstance as any)?.assignee) {
-    const assignee = (participantInstance as any).assignee as string;
-    const start = ctx.start.start + assignee.length + 2;
-    const position: [number, number] = [start, ctx.stop.stop];
-    const assigneePosition: [number, number] = [
-      ctx.start.start + 1,
-      ctx.start.start + assignee.length + 1,
-    ];
-    state.participants.Add(participant, {
-      isStarter: false,
-      emoji,
-      position,
-      assigneePosition,
-    });
-  } else {
-    state.participants.Add(participant, {
-      isStarter: false,
-      emoji,
-      position: [ctx.start.start, ctx.stop.stop + 1],
-    });
-  }
-}
-
 function onStarterExp(ctx: StarterExpContext, state: CollectState): void {
   const starter = ctx.starter();
-  if (!starter) return;
-  state.participants.Add(starter.getFormattedText(), {
-    isStarter: true,
-    position: [starter.start.start, starter.stop!.stop + 1],
-  });
-}
-
-function onCreation(ctx: any, state: CollectState): void {
-  const participant = ctx.Owner();
-  const ctor = ctx?.creationBody()?.construct();
-  const participantInstance = state.participants.Get(participant);
-  if (ctor && !participantInstance?.label) {
-    const assignee = ctx.Assignee();
-    const assigneePosition = ctx.AssigneePosition();
-    state.participants.Add(participant, {
-      isStarter: false,
-      position: [ctor.start.start, ctor.stop.stop + 1],
-      assignee,
-      assigneePosition,
-    });
-  } else {
-    state.participants.Add(participant, { isStarter: false });
-  }
-}
-
-function onRef(ctx: any, state: CollectState): void {
-  ctx.Participants().forEach((participant: any) => {
-    state.participants.Add(participant.getText(), {
-      isStarter: false,
-      position: [participant.start.start, participant.stop.stop + 1],
-    });
-  });
-}
-
-function onRet(ctx: any, state: CollectState): void {
-  if (ctx.asyncMessage()) {
-    // The walk descends into the asyncMessage afterwards (ANTLR parity).
-    return;
-  }
-  const returnFrom = ctx.From();
-  if (returnFrom) state.participants.Add(returnFrom);
-  const returnTo = ctx.ReturnTo();
-  if (returnTo) state.participants.Add(returnTo);
+  if (starter) onStarter(starter, state);
 }
 
 function collect(node: Ctx, state: CollectState): void {
@@ -211,10 +95,7 @@ function collect(node: Ctx, state: CollectState): void {
  */
 export const LangiumToCollector = {
   getParticipants(context: any): Participants {
-    const state: CollectState = {
-      participants: new Participants(),
-      groupId: undefined,
-    };
+    const state = createCollectState();
     if (context) collect(context, state);
     return state.participants;
   },

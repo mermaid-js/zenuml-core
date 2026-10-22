@@ -1,5 +1,8 @@
 export type Position = [number, number];
 
+// Name of the implicit participant that owns top-level messages.
+export const _STARTER_ = "_STARTER_";
+
 interface ParticipantOptions {
   isStarter?: boolean;
   stereotype?: string;
