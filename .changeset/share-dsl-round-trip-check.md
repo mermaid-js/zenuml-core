@@ -2,4 +2,4 @@
 "@zenuml/core": patch
 ---
 
-Changing a participant's style, such as its type, now still works when the original code cannot be parsed. Before, the style change failed with an error in that case.
+Changing a participant's style no longer throws an exception when the parser crashes on the original code. It now uses the same safeguard as renaming a participant: the change applies if the result parses cleanly, and otherwise reports "Could not apply the change". Ordinary syntax errors in the original code were already handled and behave as before.
