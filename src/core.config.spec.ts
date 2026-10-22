@@ -236,6 +236,23 @@ describe("ZenUml.render(code, config): keep or reset of omitted options", () => 
     expect(store.get(paletteAtom)).toEqual(PALETTE);
   });
 
+  it("pins today's fallback: a render with no theme ever given writes the name default", async () => {
+    // Known oddity kept on purpose in this refactor. No stylesheet defines a
+    // theme named "default"; the constructor starts from "theme-default". The
+    // follow-up change that switches the fallback to "theme-default" flips this
+    // test (see the render-default-theme-class changeset there).
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const zenUml = new ZenUml(el);
+    const store = (zenUml as unknown as { store: Store }).store;
+    expect(store.get(themeAtom)).toBe("theme-default");
+    await zenUml.render(CODE, {});
+    expect(store.get(themeAtom)).toBe("default");
+    const canvas = el.querySelector(".bg-skin-canvas");
+    expect(canvas?.classList.contains("default")).toBe(true);
+    expect(canvas?.classList.contains("theme-default")).toBe(false);
+  });
+
   describe("when each option is written", () => {
     const immediate = (store: Store) => {
       expect(store.get(themeAtom)).toBe("theme-clean-light");
