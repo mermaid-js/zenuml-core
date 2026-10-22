@@ -2,29 +2,26 @@ import antlr4 from "antlr4";
 import { default as sequenceLexer } from "../../generated-parser/sequenceLexer";
 import { default as sequenceParser } from "../../generated-parser/sequenceParser";
 import type { AugmentedContext } from "../AntlrTypes";
+import { augment } from "../ContextAugmentations";
 
 // AtomContext is a labeled-alternative ANTLR rule: parser.atom() is
 // statically typed as the base AtomContext, but at runtime returns one of
 // its subclasses (NumberUnitAtomContext here). getFormattedText is installed
 // on the shared base's prototype below; TS can't see prototype patches
 // applied from another file (see AntlrTypes.AugmentedContext's doc comment),
-// so the assignment target and parseAtom's return are cast explicitly.
+// so it is installed through `augment` and parseAtom's return is cast explicitly.
 type NumberUnitContext = { NUMBER_UNIT?(): { getText(): string } };
 
-const AtomContext = sequenceParser.AtomContext as any as {
-  prototype: AugmentedContext & NumberUnitContext;
-};
-
 // Add getFormattedText to the atom context prototype
-AtomContext.prototype.getFormattedText = function (
-  this: AugmentedContext & NumberUnitContext,
-) {
-  const numberUnit = this.NUMBER_UNIT?.();
-  if (numberUnit) {
-    return numberUnit.getText();
-  }
-  return this.getText();
-};
+augment<AugmentedContext & NumberUnitContext>(sequenceParser.AtomContext, {
+  getFormattedText() {
+    const numberUnit = this.NUMBER_UNIT?.();
+    if (numberUnit) {
+      return numberUnit.getText();
+    }
+    return this.getText();
+  },
+});
 
 type NumberUnitAtomContextInstance = InstanceType<
   typeof sequenceParser.NumberUnitAtomContext
@@ -92,11 +89,14 @@ describe("NumberUnit", () => {
 
     it("should parse decimal numbers with unit and verify token", () => {
       const ast1 = parseAtom("1.5kg");
-      const token1 = (ast1.NUMBER_UNIT() as unknown as TerminalTokenNode).symbol;
+      const token1 = (ast1.NUMBER_UNIT() as unknown as TerminalTokenNode)
+        .symbol;
       const ast2 = parseAtom("0.5h");
-      const token2 = (ast2.NUMBER_UNIT() as unknown as TerminalTokenNode).symbol;
+      const token2 = (ast2.NUMBER_UNIT() as unknown as TerminalTokenNode)
+        .symbol;
       const ast3 = parseAtom(".5m");
-      const token3 = (ast3.NUMBER_UNIT() as unknown as TerminalTokenNode).symbol;
+      const token3 = (ast3.NUMBER_UNIT() as unknown as TerminalTokenNode)
+        .symbol;
 
       expect(ast1.getFormattedText()).toBe("1.5kg");
       expect(sequenceParser.symbolicNames[token1.type]).toBe("NUMBER_UNIT");

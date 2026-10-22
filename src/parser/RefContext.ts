@@ -1,5 +1,7 @@
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
 
+import { augment, type RefContextAugmented } from "./ContextAugmentations";
+
 const seqParser = sequenceParser;
 const RefContext = seqParser.RefContext;
 
@@ -12,16 +14,15 @@ function isSynthesizedName(name: any): boolean {
   return name.stop.tokenIndex < name.start.tokenIndex;
 }
 
-// @ts-expect-error -- ANTLR generated code
-RefContext.prototype.Content = function () {
-  const first = this.name()[0];
-  return isSynthesizedName(first) ? undefined : first;
-};
-
-// @ts-expect-error -- ANTLR generated code
-RefContext.prototype.Participants = function () {
-  return this.name().slice(1) ?? [];
-};
+augment<RefContextAugmented>(RefContext, {
+  Content() {
+    const first = this.name()[0];
+    return isSynthesizedName(first) ? undefined : first;
+  },
+  Participants() {
+    return this.name().slice(1) ?? [];
+  },
+});
 
 // Inclusive [start, end] character range of a ref's first name (its label),
 // or [-1, -1] when the name is missing/synthesized so the UI renders an empty,

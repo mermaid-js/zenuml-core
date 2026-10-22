@@ -16,7 +16,10 @@ import "./From";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
 import { formatText } from "@/utils/StringUtil";
-import type { AugmentedContext } from "./AntlrTypes";
+import {
+  augment,
+  type ParserRuleContextAugmented,
+} from "./ContextAugmentations";
 
 export interface ErrorDetail {
   line: number;
@@ -115,49 +118,32 @@ function rootContext(code: string) {
   return parser.prog();
 }
 
-// antlr4.ParserRuleContext is the real (un-augmented) @types/antlr4 class —
-// cast its prototype to the shape this file installs. See AugmentedContext's
-// doc comment for why `declare module` can't express this instead.
-const ParserRuleContext = antlr4.ParserRuleContext as unknown as {
-  prototype: ParserRuleContextInstalled;
-};
+augment<ParserRuleContextAugmented>(antlr4.ParserRuleContext, {
+  getFormattedText() {
+    const code = this.parser.getTokenStream().getText(this.getSourceInterval());
+    // remove extra quotes, spaces and new lines
+    return formatText(code);
+  },
 
-/** AugmentedContext plus the ANTLR internals read by the two installers below. */
-interface ParserRuleContextInstalled extends AugmentedContext {
-  parser: Ctx;
-  start: Ctx;
-  stop: Ctx;
-  getSourceInterval(): Ctx;
-}
-
-ParserRuleContext.prototype.getFormattedText = function (
-  this: ParserRuleContextInstalled,
-) {
-  const code = this.parser.getTokenStream().getText(this.getSourceInterval());
-  // remove extra quotes, spaces and new lines
-  return formatText(code);
-};
-
-// Comment is where users have the most flexibility. The parser should make minimal assumptions about
-// the content and the style including change of line, indentation, etc.
-ParserRuleContext.prototype.getComment = function (
-  this: ParserRuleContextInstalled,
-) {
-  let tokenIndex = this.start.tokenIndex;
-  const channel = sequenceLexer.channelNames.indexOf("COMMENT_CHANNEL");
-  if (this.constructor.name === "BraceBlockContext") {
-    tokenIndex = this.stop.tokenIndex;
-  }
-  const hiddenTokensToLeft = this.parser
-    .getTokenStream()
-    .getHiddenTokensToLeft(tokenIndex, channel);
-  return (
-    hiddenTokensToLeft &&
-    hiddenTokensToLeft
-      .map((t: { text: string }) => t.text.substring(2)) // skip '//'
-      .join("\n")
-  );
-};
+  // Comment is where users have the most flexibility. The parser should make minimal assumptions about
+  // the content and the style including change of line, indentation, etc.
+  getComment() {
+    let tokenIndex = this.start.tokenIndex;
+    const channel = sequenceLexer.channelNames.indexOf("COMMENT_CHANNEL");
+    if (this.constructor.name === "BraceBlockContext") {
+      tokenIndex = this.stop.tokenIndex;
+    }
+    const hiddenTokensToLeft = this.parser
+      .getTokenStream()
+      .getHiddenTokensToLeft(tokenIndex, channel);
+    return (
+      hiddenTokensToLeft &&
+      hiddenTokensToLeft
+        .map((t: { text: string }) => t.text.substring(2)) // skip '//'
+        .join("\n")
+    );
+  },
+});
 
 /**
  * Parse ZenUML DSL with a per-call (reentrant) error listener and return both

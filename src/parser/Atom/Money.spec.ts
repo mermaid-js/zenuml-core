@@ -2,29 +2,26 @@ import antlr4 from "antlr4";
 import { default as sequenceLexer } from "../../generated-parser/sequenceLexer";
 import { default as sequenceParser } from "../../generated-parser/sequenceParser";
 import type { AugmentedContext } from "../AntlrTypes";
+import { augment } from "../ContextAugmentations";
 
 // AtomContext is a labeled-alternative ANTLR rule: parser.atom() is
 // statically typed as the base AtomContext, but at runtime returns one of
 // its subclasses (MoneyAtomContext here). getFormattedText is installed on
 // the shared base's prototype below; TS can't see prototype patches applied
-// from another file (see AntlrTypes.AugmentedContext's doc comment), so the
-// assignment target and parseAtom's return are cast explicitly.
+// from another file (see AntlrTypes.AugmentedContext's doc comment), so it is
+// installed through `augment` and parseAtom's return is cast explicitly.
 type MoneyContext = { MONEY?(): { getText(): string } };
 
-const AtomContext = sequenceParser.AtomContext as any as {
-  prototype: AugmentedContext & MoneyContext;
-};
-
 // Add getFormattedText to the atom context prototype
-AtomContext.prototype.getFormattedText = function (
-  this: AugmentedContext & MoneyContext,
-) {
-  const money = this.MONEY?.();
-  if (money) {
-    return money.getText();
-  }
-  return this.getText();
-};
+augment<AugmentedContext & MoneyContext>(sequenceParser.AtomContext, {
+  getFormattedText() {
+    const money = this.MONEY?.();
+    if (money) {
+      return money.getText();
+    }
+    return this.getText();
+  },
+});
 
 type MoneyAtomContextInstance = InstanceType<
   typeof sequenceParser.MoneyAtomContext
@@ -88,6 +85,5 @@ describe("Money", () => {
       expect(ast3.getFormattedText()).toBe("$.50");
       expect(sequenceParser.symbolicNames[token3.type]).toBe("MONEY");
     });
-
   });
 });
