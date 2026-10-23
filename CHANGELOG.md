@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.11.0
+
+### Minor Changes
+
+- [#647](https://github.com/mermaid-js/zenuml-core/pull/647) [`c00f0aa`](https://github.com/mermaid-js/zenuml-core/commit/c00f0aa1725b67d3d8156122728acbc7801ec1b5) Thanks [@MrCoder](https://github.com/MrCoder)! - `onEventEmit` fires again. Each completed in-diagram edit now calls it once with `("trackEvent", { label, action, category: "sequence" })`. The actions are `title_edited`, `participant_added`, `participant_renamed`, `message_inserted`, `message_label_edited`, `message_reordered`, `divider_inserted` and `fragment_condition_edited`. The payload carries no diagram text. The unused internal `EventBus` module is removed.
+
 ## 4.10.8
 
 ### Patch Changes
