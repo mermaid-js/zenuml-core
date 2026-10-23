@@ -6,6 +6,7 @@ import {
   selectedMessageAtom,
 } from "@/store/Store";
 import { useCommitCode } from "@/store/useCommitCode";
+import type { TrackedEdit } from "@/store/trackEvent";
 import { useTextEditingGuard } from "@/components/common/EditableSpan/useTextEditingGuard";
 import { cn } from "@/utils";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -32,6 +33,8 @@ export const useReselectSavedMessage = () => {
   );
 };
 
+const MESSAGE_LABEL_EDITED: TrackedEdit = { action: "message_label_edited" };
+
 interface EditableLabelFieldProps {
   text: string;
   /** `[start, end]` of the label in the code; `end` is inclusive. */
@@ -48,6 +51,8 @@ interface EditableLabelFieldProps {
   editableIn?: "interactive" | "dynamic";
   className?: string;
   title?: string;
+  /** The usage event a save reports to the host. */
+  trackAs?: TrackedEdit;
 }
 
 export const EditableLabelField = ({
@@ -58,6 +63,7 @@ export const EditableLabelField = ({
   editableIn = "interactive",
   className,
   title = "Click to edit",
+  trackAs = MESSAGE_LABEL_EDITED,
 }: EditableLabelFieldProps) => {
   const mode = useAtomValue(modeAtom);
   const updateTextEditing = useTextEditingGuard();
@@ -91,7 +97,10 @@ export const EditableLabelField = ({
       return;
     }
 
-    commitCode(code.slice(0, start) + normalizedText + code.slice(end + 1));
+    commitCode(
+      code.slice(0, start) + normalizedText + code.slice(end + 1),
+      trackAs,
+    );
     afterSave?.({ start, end: start + normalizedText.length - 1 });
     if (shouldAutoEdit) {
       setPendingEditableRange(null);

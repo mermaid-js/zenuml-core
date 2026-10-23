@@ -36,6 +36,7 @@ export const ConditionLabel = (props: {
           editableIn="dynamic"
           className="bg-skin-frame opacity-skin-guard condition text-sm leading-5 font-normal !px-0"
           title="Click to edit condition"
+          trackAs={{ action: "fragment_condition_edited" }}
         />
       )}
     </div>

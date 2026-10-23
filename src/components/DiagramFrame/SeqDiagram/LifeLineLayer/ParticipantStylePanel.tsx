@@ -1,4 +1,5 @@
 import { useCommitCode } from "@/store/useCommitCode";
+import type { TrackedEdit } from "@/store/trackEvent";
 import {
   codeAtom,
   diagramElementAtom,
@@ -139,9 +140,9 @@ export const ParticipantStylePanel = () => {
     setSelected([]);
   };
 
-  const updateCode = (next: string) => {
+  const updateCode = (next: string, edit?: TrackedEdit) => {
     if (next === code) return;
-    commitCode(next);
+    commitCode(next, edit);
   };
 
   // Changes apply immediately and the panel stays open, so several edits can
@@ -184,7 +185,10 @@ export const ParticipantStylePanel = () => {
       (draft) =>
         renameParticipantInDsl(code, rootContext, participantName, draft),
       (result) => {
-        updateCode(result.code);
+        updateCode(result.code, {
+          action: "participant_renamed",
+          label: "editor",
+        });
         // The selection must use the parser's canonical identity.
         setSelected([result.name]);
       },

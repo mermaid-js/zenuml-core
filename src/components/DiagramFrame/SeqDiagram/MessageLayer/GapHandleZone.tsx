@@ -211,7 +211,7 @@ export const GapHandleZone = (props: {
         blockContext: props.blockContext,
         insertIndex: props.insertIndex,
       });
-      commitCode(result.code);
+      commitCode(result.code, { action: "divider_inserted" });
       setPendingEditableRange({
         start: result.labelPosition[0],
         end: result.labelPosition[1],
