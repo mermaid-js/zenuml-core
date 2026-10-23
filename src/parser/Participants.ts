@@ -1,5 +1,8 @@
 export type Position = [number, number];
 
+// Name of the implicit participant that owns top-level messages.
+export const _STARTER_ = "_STARTER_";
+
 interface ParticipantOptions {
   isStarter?: boolean;
   stereotype?: string;
@@ -13,6 +16,8 @@ interface ParticipantOptions {
   assignee?: string;
   emoji?: string;
   position?: Position;
+  // Range of the name token itself, even when `position` points at a label.
+  namePosition?: Position;
   assigneePosition?: Position;
 }
 
@@ -110,6 +115,10 @@ export class Participant {
 
 export class Participants {
   private participants = new Map<string, Participant>();
+  // Every occurrence of each participant's name token. `Participant.positions`
+  // holds display ranges instead (the `as` label when there is one, for inline
+  // canvas editing); an identifier rename needs these.
+  private namePositions = new Map<string, Set<Position>>();
 
   public Add(name: string, options: ParticipantOptions = {}): void {
     if (!name) {
@@ -124,9 +133,17 @@ export class Participants {
     }
 
     // Add positions
-    const { position, assigneePosition } = options;
+    const { position, namePosition, assigneePosition } = options;
     if (position) {
       participant.AddPosition(position);
+    }
+    let namePositions = this.namePositions.get(name);
+    if (!namePositions) {
+      namePositions = new Set();
+      this.namePositions.set(name, namePositions);
+    }
+    if (namePosition) {
+      namePositions.add(namePosition);
     }
     if (assigneePosition) {
       participant.assigneePositions.add(assigneePosition);
@@ -172,6 +189,10 @@ export class Participants {
 
   GetPositions(name: string) {
     return this.participants.get(name)?.positions;
+  }
+
+  GetNamePositions(name: string) {
+    return this.namePositions.get(name);
   }
 
   GetAssigneePositions(name: string) {

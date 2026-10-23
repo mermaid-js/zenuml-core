@@ -134,4 +134,16 @@ describe("renameParticipantInDsl tree shape", () => {
     const result = renamed("A->B: first\nB->A: second", "A", "title");
     expect(result.code).toBe('"title"->B: first\nB->"title": second');
   });
+
+  it("renames a constructor only when the creation has no assignee", () => {
+    expect(renamed('C as "Cee"\nA->B.m() {\n  new C()\n}', "C", "Z").code).toBe(
+      'Z as "Cee"\nA->B.m() {\n  new Z()\n}',
+    );
+    expect(
+      renamed("A->B.m() {\n  c = new C()\n}\nC->A: x", "C", "Z").code,
+    ).toBe("A->B.m() {\n  c = new C()\n}\nZ->A: x");
+    expect(rename("A->B.m() {\n  c = new C()\n}", "c:C", "Z")).toEqual({
+      error: "Rename assigned participants in the code editor",
+    });
+  });
 });

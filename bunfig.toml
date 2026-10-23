@@ -7,9 +7,8 @@ preload = ["./test-setup.ts"]
 # Project root directory
 root = "./"
 
-# Note: To exclude /tests folder (Playwright tests), use the npm script:
-# bun run test:bun
-# Or run directly: bun test 'src/**/*.{spec,test}.{ts,tsx}' 'test/**/*.{spec,test}.{ts,tsx}'
+# Note: bare `bun test` also picks up the /tests folder (Playwright E2E).
+# Use `bun run test` (= `bun test src test/unit`) to run only the unit tests.
 
 # Coverage configuration
 # Disabled by default due to resource issues with large asset files

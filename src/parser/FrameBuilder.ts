@@ -116,6 +116,10 @@ class FrameBuilder extends sequenceParserListener {
 
   getFrame(context: any) {
     if (!context) return null;
+    // Each call starts a new walk, so a builder reused across fragments does
+    // not carry frames from an earlier call into this result.
+    this.topLevelFrames = [];
+    this.parents = [];
     context.children.map((child: any) => {
       walker.walk(this, child);
     });

@@ -24,7 +24,6 @@ tsconfig.json
 
 yarn-error.log
 
-.eslintignore
 .editorconfig
 .npmignore
 .gitignore
@@ -45,7 +44,6 @@ AGENTS.md
 CLAUDE.md
 DEPLOYMENT.md
 IMPLEMENTATION_PLAN.md
-MCP-ASSISTANT-RULES.md
 TUTORIAL.md
 README_CN.md
 Dockerfile

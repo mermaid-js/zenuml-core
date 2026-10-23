@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import ZenUml, { ParseResult } from "../src/core";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import ZenUml from "./core";
 
 describe("ZenUml.parse", () => {
   // Mock DOM elements since we're running in a test environment
@@ -20,7 +20,6 @@ describe("ZenUml.parse", () => {
       B.process()
     }`;
     const result: any = await zenUml.parse(validCode);
-    console.log("parse result", result);
     expect(result.pass).toBe(true);
     expect(result.errorDetails.length).toBe(0);
   });
@@ -31,7 +30,6 @@ describe("ZenUml.parse", () => {
       B.-process()
     }`;
     const result: any = await zenUml.parse(validCode);
-    console.log("parse result", result);
     expect(result.pass).toBe(false);
     expect(result.errorDetails.length).toBeGreaterThan(0);
     expect(result.errorDetails[0].line).toBe(2);

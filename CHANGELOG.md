@@ -1,5 +1,17 @@
 # @zenuml/core
 
+## 4.10.7
+
+### Patch Changes
+
+- [#607](https://github.com/mermaid-js/zenuml-core/pull/607) [`0922d3e`](https://github.com/mermaid-js/zenuml-core/commit/0922d3e1976a1efbc72da6027ce8d6e76a730a43) Thanks [@MrCoder](https://github.com/MrCoder)! - Fix fragment widths in the HTML renderer when a diagram has several fragments. The width of a fragment no longer depends on the fragments measured before it, so a nested fragment's title or condition no longer overflows its parent fragment by one nesting level of border.
+
+## 4.10.6
+
+### Patch Changes
+
+- [#601](https://github.com/mermaid-js/zenuml-core/pull/601) [`ccb6cce`](https://github.com/mermaid-js/zenuml-core/commit/ccb6cce0c521e11ca76bfab69de0a7f01bd6eb06) Thanks [@MrCoder](https://github.com/MrCoder)! - The `zenuml` CLI no longer fails now and then with "Unable to capture screenshot" when it writes PNG output on a busy machine. It now waits for the browser to paint the diagram before it takes the image.
+
 ## 4.10.5
 
 ### Patch Changes

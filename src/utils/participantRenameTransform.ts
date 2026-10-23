@@ -1,6 +1,4 @@
-import antlr4 from "antlr4";
 import sequenceParser from "@/generated-parser/sequenceParser";
-import sequenceParserListener from "@/generated-parser/sequenceParserListener";
 import { Participants } from "@/parser";
 import {
   parseNotWorse,
@@ -11,64 +9,6 @@ import {
 import { readParticipantDeclaration } from "./participantStyleTransform";
 
 type Range = [number, number];
-
-// `Participants.GetPositions` records the `as` label instead of the identifier
-// when a participant has one, because inline renaming on the canvas edits the
-// displayed text. Renaming the identifier itself needs every occurrence of the
-// name token, so this walks the tree with the same hooks `ToCollector` uses
-// but always records the name.
-const collectNamePositions = (rootContext: any, name: string): Range[] => {
-  const positions: Range[] = [];
-  let blind = 0;
-  const push = (ctx: any) => {
-    if (ctx?.start && ctx?.stop)
-      positions.push([ctx.start.start, ctx.stop.stop + 1]);
-  };
-  const matches = (ctx: any) =>
-    (ctx?.name?.()?.getFormattedText?.() ?? ctx?.getFormattedText?.()) === name;
-
-  const listener: any = new (sequenceParserListener as any)();
-  listener.enterParticipant = (ctx: any) => {
-    if (blind > 0) return;
-    if (ctx?.name?.()?.getFormattedText?.() === name) push(ctx.name());
-  };
-  const onEndpoint = (ctx: any) => {
-    if (blind > 0) return;
-    if (matches(ctx)) push(ctx.name?.() ?? ctx);
-  };
-  listener.enterFrom = onEndpoint;
-  listener.enterTo = onEndpoint;
-  listener.enterStarter = (ctx: any) => {
-    if (blind > 0) return;
-    if (ctx?.getFormattedText?.() === name) push(ctx);
-  };
-  listener.enterCreation = (ctx: any) => {
-    if (blind > 0) return;
-    const ctor = ctx?.creationBody?.()?.construct?.();
-    if (ctor && ctx?.Owner?.() === name && !ctx?.Assignee?.()) push(ctor);
-  };
-  listener.enterRef = (ctx: any) => {
-    if (blind > 0) return;
-    ctx?.Participants?.()?.forEach((participant: any) => {
-      if (participant?.getText?.() === name) push(participant);
-    });
-  };
-  listener.enterParameters = () => {
-    blind++;
-  };
-  listener.exitParameters = () => {
-    blind--;
-  };
-  listener.enterCondition = () => {
-    blind++;
-  };
-  listener.exitCondition = () => {
-    blind--;
-  };
-
-  antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, rootContext);
-  return positions;
-};
 
 // Identifier and string tokens are interchangeable: quoting a name must not
 // count as a structural change.
@@ -140,19 +80,22 @@ export const renameParticipantInDsl = (
     return { error: "Rename assigned participants in the code editor" };
   }
 
-  const oldNames = (() => {
+  const oldParticipants = (() => {
     try {
-      return Participants(rootContext).Names() as string[];
+      return Participants(rootContext);
     } catch {
       return null;
     }
   })();
-  if (!oldNames) return { error: "Not a valid participant name" };
+  if (!oldParticipants) return { error: "Not a valid participant name" };
+  const oldNames = oldParticipants.Names() as string[];
   const oldSet = new Set(oldNames);
 
-  const positions = collectNamePositions(rootContext, oldName).sort(
-    (a, b) => b[0] - a[0],
-  );
+  // Name-token ranges, not `GetPositions`: those point at the `as` label when
+  // a participant has one, while a rename rewrites the identifier itself.
+  const positions: Range[] = [
+    ...(oldParticipants.GetNamePositions(oldName) ?? []),
+  ].sort((a, b) => b[0] - a[0]);
   if (positions.length === 0) return { error: "Not a valid participant name" };
 
   const candidates = PLAIN_NAME.test(text)

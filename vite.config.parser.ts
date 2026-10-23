@@ -1,6 +1,7 @@
 /* eslint-env node */
 import { resolve } from "path";
 import { defineConfig } from "vite";
+import { alias } from "./vite.shared";
 
 // Headless parser build: bundles the DOM-free ANTLR parser layer into a
 // Node-safe ESM + CJS module published at the `@zenuml/core/parser` subpath.
@@ -26,9 +27,5 @@ export default defineConfig({
       external: ["antlr4"],
     },
   },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-    },
-  },
+  resolve: { alias },
 });
