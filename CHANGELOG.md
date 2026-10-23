@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.10.8
+
+### Patch Changes
+
+- [#590](https://github.com/mermaid-js/zenuml-core/pull/590) [`3093816`](https://github.com/mermaid-js/zenuml-core/commit/3093816f328af95beef32a18d9ab875f97ecdf6a) Thanks [@MrCoder](https://github.com/MrCoder)! - A diagram rendered without a theme now uses the default theme. Before, the first `render(code, {})` on a new instance switched the diagram to a theme named "default", which no stylesheet defines, so it lost the default theme's colours. The theme `"theme-default"` is now the only fallback.
+
 ## 4.10.7
 
 ### Patch Changes
