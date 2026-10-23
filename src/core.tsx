@@ -95,8 +95,7 @@ export interface Config {
   /**
    * Theme class name, for example `"theme-clean-light"`.
    * Written immediately. Omitted, `undefined`, `null` or `""` keeps the
-   * current theme. With no theme ever given, the first `render()` writes the
-   * name `"default"`, which no stylesheet defines.
+   * current theme (initially `"theme-default"`).
    */
   theme?: string;
   /**
@@ -204,6 +203,13 @@ const CONFIG_BINDINGS = [
     isAbsent: isNullish,
     onAbsent: "reset",
     default: 0,
+  }),
+  bind({
+    key: "theme",
+    atom: themeAtom,
+    appliedIn: "render",
+    isAbsent: isFalsy,
+    onAbsent: "keep",
   }),
   bind({
     key: "palette",
@@ -409,12 +415,6 @@ export default class ZenUml implements IZenUml {
     const revision = ++this.revision;
     this._code = code === undefined ? this._code : code;
     this._theme = config?.theme || this._theme;
-    // The theme is not in CONFIG_BINDINGS: today it is rewritten on every
-    // render, and with no theme ever given it falls back to "default", a name
-    // no stylesheet defines (the constructor starts from DEFAULT_THEME). That
-    // fallback is kept as is here; a follow-up change replaces it with
-    // DEFAULT_THEME and moves the theme into the table.
-    this.store.set(themeAtom, this._theme || "default");
     this.applyConfig(config, "render");
 
     // this.initialRender is used to avoid the first rendering is debounced by setTimeout.
