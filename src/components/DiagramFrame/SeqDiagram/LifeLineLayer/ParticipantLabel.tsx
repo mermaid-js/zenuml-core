@@ -64,7 +64,7 @@ export const ParticipantLabel = (props: {
       newCode = newCode.slice(0, start) + text + newCode.slice(end);
     }
 
-    commitCode(newCode);
+    commitCode(newCode, { action: "participant_renamed", label: "inline" });
   };
 
   const createSaveHandler = (

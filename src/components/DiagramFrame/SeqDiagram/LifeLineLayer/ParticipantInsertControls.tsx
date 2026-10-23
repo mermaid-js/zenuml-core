@@ -170,7 +170,7 @@ export const ParticipantInsertControls = () => {
       name,
       type: "default",
     });
-    commitCode(nextCode);
+    commitCode(nextCode, { action: "participant_added", label: "gap" });
   };
 
   if (!enabled || !canInsert || participantModels.length === 0) {

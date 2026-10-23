@@ -82,7 +82,7 @@ The `Block` component applies `top` / `height` as inline styles when in `html` v
 
 All inter-component communication goes through Jotai atoms — there are no prop drilling chains beyond one level. Components call `useSetAtom` to update state; derived atoms recompute automatically.
 
-Callback atoms (`onContentChangeAtom`, `onThemeChangeAtom`, `onEventEmitAtom`) let the embedding application subscribe to diagram events without tight coupling.
+Callback atoms (`onContentChangeAtom`, `onThemeChangeAtom`, `onEventEmitAtom`) let the embedding application subscribe to diagram events without tight coupling. `onEventEmitAtom` carries usage events: each completed in-diagram edit commits through `useCommitCode` with an optional `TrackedEdit`, which calls `onEventEmit("trackEvent", { label, action, category: "sequence" })` once. The event list is in the `Config.onEventEmit` JSDoc in `src/core.tsx`.
 
 ## Error Handling
 

@@ -137,8 +137,24 @@ export interface Config {
    */
   onContentChange?: (code: string) => void;
   /**
-   * Called for events the diagram emits.
+   * Called for usage events the diagram emits.
    * Written after the debounce. Resets to a no-op when omitted or falsy.
+   *
+   * Each completed in-diagram edit calls it once, never per keystroke,
+   * hover or drag frame:
+   * `onEventEmit("trackEvent", { label, action, category: "sequence" })`.
+   * The payload carries no diagram text.
+   *
+   * | `action` | `label` | Fires when |
+   * |---|---|---|
+   * | `title_edited` | `added` / `changed` | a title edit is saved |
+   * | `participant_added` | `gap` / `empty_diagram` | an insert button or the empty-diagram prompt adds a participant |
+   * | `participant_renamed` | `inline` / `editor` | a participant name is saved on the lifeline or in the participant editor |
+   * | `message_inserted` | `""` | a create-message drag is dropped on a participant |
+   * | `message_label_edited` | `""` | a message, creation, assignee or return-type label is saved |
+   * | `message_reordered` | `""` | a reorder drag is dropped |
+   * | `divider_inserted` | `""` | a divider is inserted from the gap menu |
+   * | `fragment_condition_edited` | `""` | a fragment condition is saved |
    */
   onEventEmit?: (name: string, data: unknown) => void;
   /**

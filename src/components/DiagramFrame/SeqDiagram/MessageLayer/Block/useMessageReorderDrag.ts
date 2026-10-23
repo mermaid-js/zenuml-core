@@ -173,7 +173,7 @@ export const useMessageReorderDrag = () => {
         targetRange: parseStatementKey(dropState.key),
         place: dropState.place,
       });
-      commitCode(nextCode);
+      commitCode(nextCode, { action: "message_reordered" });
       setDragKey(null);
       setDropState(null);
     };

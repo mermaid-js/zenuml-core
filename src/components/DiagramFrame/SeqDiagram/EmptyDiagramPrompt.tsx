@@ -11,7 +11,10 @@ export const EmptyDiagramPrompt = () => {
 
   const handleClick = () => {
     const nextCode = code.trim() ? `${code.trim()}\nA` : "A";
-    commitCode(nextCode);
+    commitCode(nextCode, {
+      action: "participant_added",
+      label: "empty_diagram",
+    });
   };
 
   return (

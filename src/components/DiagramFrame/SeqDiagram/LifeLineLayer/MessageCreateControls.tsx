@@ -186,7 +186,7 @@ export const MessageCreateControls = () => {
           hostContext: current.hostContext,
           insertIndex: current.insertIndex,
         });
-        commitCode(next.code);
+        commitCode(next.code, { action: "message_inserted" });
         setPendingEditableRange({
           start: next.labelPosition[0],
           end: next.labelPosition[1],

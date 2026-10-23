@@ -43,10 +43,10 @@ export const DiagramTitle = (props: { context: any }) => {
       const replacement = (leading > 0 ? "" : " ") + trimmed;
       const newCode =
         code.slice(0, contentStart) + replacement + code.slice(contentEnd);
-      commitCode(newCode);
+      commitCode(newCode, { action: "title_edited", label: "changed" });
     } else {
       const newCode = `title ${trimmed}\n${code}`;
-      commitCode(newCode);
+      commitCode(newCode, { action: "title_edited", label: "added" });
     }
   };
 
