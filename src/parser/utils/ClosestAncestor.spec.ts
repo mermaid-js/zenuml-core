@@ -1,4 +1,4 @@
-import { Fixture } from "../../../../test/unit/parser/fixture/Fixture";
+import { Fixture } from "../../../test/unit/parser/fixture/Fixture";
 
 describe("get closest ancestors", () => {
   it.each([

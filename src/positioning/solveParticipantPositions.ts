@@ -1,3 +1,4 @@
+ // DavidEisenstat algorithm for optimal participant positioning.
 interface IDual {
   position: number;
   velocity: number;
@@ -111,14 +112,14 @@ function positionsFromTable(table: any) {
 }
 
 // Entry point for the layout algorithm.
-function find_optimal(matrix: Array<Array<number>>) {
+function solveParticipantPositions(matrix: Array<Array<number>>) {
   const n = matrix.length;
   const graph = graphFromMatrix(n, matrix);
   const gaps = [];
   for (let j = 1; j < n; j++) {
     gaps.push(Dual(0, 1));
   }
-   
+
   while (true) {
     const [delta, table] = longestPathTable(graph, gaps);
     if (delta == Infinity) {
@@ -132,4 +133,4 @@ function find_optimal(matrix: Array<Array<number>>) {
   }
 }
 
-export { find_optimal };
+export { solveParticipantPositions };

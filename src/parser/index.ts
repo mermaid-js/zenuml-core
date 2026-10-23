@@ -13,7 +13,7 @@ import "./Divider/DividerContext";
 import "./SignatureText";
 import "./Messages/MessageContext";
 import "./From";
-import "./utils/cloest-ancestor/ClosestAncestor";
+import "./utils/ClosestAncestor";
 import "./AncestorPath";
 import { formatText } from "@/utils/StringUtil";
 import {

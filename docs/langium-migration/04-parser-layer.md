@@ -94,7 +94,7 @@ collectors.
   `./TitleContext`, `./IsCurrent`, `./Owner`, `./ProgContext`, `./RetContext`,
   `./RefContext`, `./Origin`, `./Divider/DividerContext`, `./SignatureText`,
   `./Messages/MessageContext`, `./From`, `./key/Key`,
-  `./utils/cloest-ancestor/ClosestAncestor`, `./AncestorPath`.
+  `./utils/ClosestAncestor`, `./AncestorPath`.
 - `Depth(ctx)` delegates to `ChildFragmentDetector.depth(...)`; `Participants(ctx)`
   delegates to `ToCollector.getParticipants(ctx)`.
 
@@ -398,7 +398,7 @@ strips leading/trailing `=` runs. Returns the divider's display text.
 React key / memo key). **Grep found no non-spec consumers of `.Key()`** — likely dead;
 confirm before porting. Langium equivalent: `` `${$cstNode.offset}:${$cstNode.end}` ``.
 
-### 3.12 `src/parser/utils/cloest-ancestor/ClosestAncestor.ts` (31 lines; directory name is a typo of "closest")
+### 3.12 `src/parser/utils/ClosestAncestor.ts` (31 lines; directory name is a typo of "closest")
 
 **Augments:**
 - `ParserRuleContext.prototype.ClosestAncestorStat()` — returns `this` if it *is* a
@@ -582,7 +582,7 @@ migration.
 `Message.SignatureText.spec.ts`, `MessageContext/MessageContext.spec.ts`,
 `Messages/Assignment.spec.ts`, `Messages/MessageContext.spec.ts`,
 `NamedParameter.spec.ts`, `OrderedParticipants.spec.ts`, `Participants.spec.ts`,
-`Title/Title.spec.ts`, `utils/cloest-ancestor/ClosestAncestor.spec.ts`.
+`Title/Title.spec.ts`, `utils/ClosestAncestor.spec.ts`.
 
 Note the spec-only directories: `Atom/`, `Creation/`, `Title/`, `MessageContext/` contain
 no implementation files. The specs collectively encode grammar behavior (Chinese/emoji
@@ -632,7 +632,7 @@ the regression suite the Langium grammar must pass.
 `ChildFragmentDetecotr.js`, `Origin.js`, `Owner.js`, `From.ts`, `SignatureText.ts`,
 `RetContext.js`, `ProgContext.js`, `TitleContext.js`, `RefContext.ts`,
 `Divider/DividerContext.ts`, `IsCurrent.js`, `key/Key.ts`,
-`utils/cloest-ancestor/ClosestAncestor.ts`, `AncestorPath.ts`,
+`utils/ClosestAncestor.ts`, `AncestorPath.ts`,
 `Messages/MessageContext.ts`, `Messages/Assignment.ts`, `ContextsFixture.ts`. (21 — all
 of section 1, 2, 3 plus the fixture.)
 
@@ -663,7 +663,7 @@ of section 1, 2, 3 plus the fixture.)
 | `Divider/DividerContext.ts` | 16 | **REWRITE** | `=`-trimming logic ports verbatim |
 | `IsCurrent.js` | 26 | **REWRITE** | Cursor hit-test on `$cstNode` offsets |
 | `key/Key.ts` | 5 | **REWRITE / likely DELETE** | No non-spec consumers found |
-| `utils/cloest-ancestor/ClosestAncestor.ts` | 31 | **REWRITE** | → `AstUtils.getContainerOfType`; fix the directory-name typo while at it |
+| `utils/ClosestAncestor.ts` | 31 | **REWRITE** | → `AstUtils.getContainerOfType`; fix the directory-name typo while at it |
 | `AncestorPath.ts` | 19 | **REWRITE** | `$container` chain collector; 2 renderer consumers |
 | `Messages/MessageContext.ts` | 28 | **REWRITE** | `Statements()` becomes a property/util over Langium blocks |
 | `Messages/Assignment.ts` | 76 | **SPLIT** | `Assignment` class PORT-AS-IS; `extractAssignmentFromContext` REWRITE |

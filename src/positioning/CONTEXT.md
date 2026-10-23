@@ -17,11 +17,11 @@ Computes the 2D pixel coordinates of every element in the diagram — participan
 
 | File | Role |
 |---|---|
-| `Coordinates.ts` | Horizontal layout. Builds a pairwise distance matrix from text widths, solves optimal spacing via `david/DavidEisenstat.ts`. Caches results. |
+| `Coordinates.ts` | Horizontal layout. Builds a pairwise distance matrix from text widths, solves optimal spacing via `solveParticipantPositions.ts`. Caches results. |
 | `VerticalCoordinates.ts` | Vertical layout. Creates a `BlockVM` tree from the parse tree, calls `layout()`, returns a map of statement key → `StatementCoordinate`. |
 | `FrameBorder.ts` | Computes fragment bounding box (left, right, top, bottom) by walking the `Frame` tree from `FrameBuilder`. |
 | `LocalParticipants.ts` | Returns participant names scoped to a given context (for fragment-local layouts). |
-| `Anchor2.ts` | Models a participant's visual anchor point. `centerToEdge()` and `edgeOffset()` compute `translateX`/`width` for arrows. |
+| `Anchor.ts` | Models a participant's visual anchor point. `centerToEdge()` and `edgeOffset()` compute `translateX`/`width` for arrows. |
 | `Constants.ts` | Dimension constants: `ARROW_HEAD_WIDTH`, `OCCURRENCE_WIDTH`, `MIN_PARTICIPANT_WIDTH`, `LIFELINE_WIDTH`, etc. |
 | `vertical/vm/` | VM layer — one VM class per statement type. See sub-section below. |
 
@@ -82,7 +82,7 @@ Participant width = `labelWidth + iconWidth (40px if typed) + emojiWidth (24px) 
 
 ## Anchor Model
 
-`Anchor2` computes arrow geometry given a sender and receiver participant:
+`Anchor` computes arrow geometry given a sender and receiver participant:
 
 ```typescript
 anchor.centerToEdge()   // half-width from center to lifeline edge

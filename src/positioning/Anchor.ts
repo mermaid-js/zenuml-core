@@ -3,7 +3,7 @@ import {
   OCCURRENCE_BAR_SIDE_WIDTH,
 } from "@/positioning/Constants";
 
-export default class Anchor2 {
+export default class Anchor {
   constructor(
     private position: number,
     private layers: number,
@@ -12,17 +12,17 @@ export default class Anchor2 {
   /**
    * centerToEdge is used for translateX calculations.
    */
-  centerToEdge(other: Anchor2): number {
+  centerToEdge(other: Anchor): number {
     return other.rightEdgeOfRightWall() - this.centerOfRightWall();
   }
 
-  centerToCenter(other: Anchor2): number {
+  centerToCenter(other: Anchor): number {
     return other.centerOfRightWall() - this.centerOfRightWall();
   }
   /**
    * edgeOffset is used for interactionWidth calculations.
    */
-  edgeOffset(other: Anchor2): number {
+  edgeOffset(other: Anchor): number {
     const isRightToLeft = other.position < this.position;
 
     const rightEdgeOfLeftAnchor = isRightToLeft

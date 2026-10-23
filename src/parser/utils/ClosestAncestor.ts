@@ -1,5 +1,5 @@
 import { default as antlr4 } from "antlr4";
-import { default as sequenceParser } from "../../../generated-parser/sequenceParser";
+import { default as sequenceParser } from "../../generated-parser/sequenceParser";
 import {
   augment,
   type ParserRuleContextAugmented,
