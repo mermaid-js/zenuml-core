@@ -1,4 +1,5 @@
 import { MouseEvent, KeyboardEvent } from "react";
+import { swallowFollowUps } from "@/store/interaction/swallowFollowUps";
 
 /** The only pointer target that can start a message reorder. */
 export const MessageReorderHandle = () => (
@@ -11,20 +12,7 @@ export const MessageReorderHandle = () => (
     onPointerDownCapture={() => {
       // A browser can retarget the click after a drag to the message under
       // the release point. Consume that click before it opens the toolbar.
-      const suppressClick = (event: Event) => {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        cleanup();
-      };
-      const cleanup = () => {
-        document.removeEventListener("click", suppressClick, true);
-        window.removeEventListener("pointerup", afterPointerUp);
-        window.removeEventListener("pointercancel", cleanup);
-      };
-      const afterPointerUp = () => window.setTimeout(cleanup, 0);
-      document.addEventListener("click", suppressClick, true);
-      window.addEventListener("pointerup", afterPointerUp, { once: true });
-      window.addEventListener("pointercancel", cleanup, { once: true });
+      swallowFollowUps(["click"]);
     }}
     onClick={(event: MouseEvent<HTMLButtonElement>) => event.stopPropagation()}
     onKeyDown={(event: KeyboardEvent<HTMLButtonElement>) => {
