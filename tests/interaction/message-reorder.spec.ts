@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures";
+import { test, expect, openDiagram, lastContentChange } from "../fixtures";
 import { clickMessageArrow } from "./clickMessageArrow";
 
 test.describe("Message Reorder", () => {
@@ -34,9 +34,7 @@ test.describe("Message Reorder", () => {
     );
     await page.mouse.up();
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
+      .poll(lastContentChange(page))
       .toContain("A->C: second\nA->B: first");
     await expect(page.getByTestId("message-rename")).toHaveCount(0);
   });
@@ -110,9 +108,7 @@ test.describe("Message Reorder", () => {
       0,
     );
     await page.mouse.up();
-    expect(
-      await page.evaluate(() => (window as any).__lastContentChange ?? null),
-    ).toBeNull();
+    expect(await lastContentChange(page)()).toBeNull();
   });
 
   test("a handle click and an invalid drop leave the menu closed and content unchanged", async ({
@@ -135,9 +131,7 @@ test.describe("Message Reorder", () => {
       0,
     );
     await expect(page.getByTestId("message-rename")).toHaveCount(0);
-    expect(
-      await page.evaluate(() => (window as any).__lastContentChange ?? null),
-    ).toBeNull();
+    expect(await lastContentChange(page)()).toBeNull();
   });
 
   test("keyboard focus reveals the handle without opening the toolbar", async ({
@@ -194,9 +188,7 @@ test.describe("Message Reorder", () => {
     );
     await page.mouse.move(10, 10, { steps: 12 });
     await page.mouse.up();
-    expect(
-      await page.evaluate(() => (window as any).__lastContentChange ?? null),
-    ).toBeNull();
+    expect(await lastContentChange(page)()).toBeNull();
   });
 
   test("Escape cancels an active handle drag", async ({ page }) => {
@@ -225,9 +217,7 @@ test.describe("Message Reorder", () => {
       0,
     );
     await page.mouse.up();
-    expect(
-      await page.evaluate(() => (window as any).__lastContentChange ?? null),
-    ).toBeNull();
+    expect(await lastContentChange(page)()).toBeNull();
     await expect
       .poll(() => page.evaluate(() => document.body.style.cursor))
       .toBe("");
@@ -236,12 +226,7 @@ test.describe("Message Reorder", () => {
   test("reorders top-level messages by dragging one above another", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/reorder-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/reorder-message.html");
 
     const messages = page.locator(".statement-container .message");
     const count = await messages.count();
@@ -267,21 +252,14 @@ test.describe("Message Reorder", () => {
     await page.mouse.up();
 
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
+      .poll(lastContentChange(page))
       .toContain("A\nB\nC\nA->C: second\nA->B: first");
   });
 
   test("reorders top-level messages by dragging one below another", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/reorder-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/reorder-message.html");
 
     const messages = page.locator(".statement-container .message");
     const count = await messages.count();
@@ -307,19 +285,12 @@ test.describe("Message Reorder", () => {
     await page.mouse.up();
 
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
+      .poll(lastContentChange(page))
       .toContain("A\nB\nC\nA->C: second\nA->B: first");
   });
 
   test("shows a grab cursor only on the message handle", async ({ page }) => {
-    await page.goto("/e2e/fixtures/reorder-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/reorder-message.html");
 
     const firstMessage = page.locator(".statement-container .message").first();
     await firstMessage.hover();
@@ -336,12 +307,7 @@ test.describe("Message Reorder", () => {
   test("shows immediate pending feedback on pointer down before drag threshold", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/reorder-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/reorder-message.html");
 
     const firstMessage = page.locator(".statement-container .message").first();
     const handle = firstMessage.getByRole("button", {
@@ -365,12 +331,7 @@ test.describe("Message Reorder", () => {
   test("keeps the grabbing cursor while actively dragging", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/reorder-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/reorder-message.html");
 
     const messages = page.locator(".statement-container .message");
     const firstMessage = messages.nth(0);

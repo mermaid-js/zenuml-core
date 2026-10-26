@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures";
+import { test, expect, openDiagram } from "../fixtures";
 import { PNG } from "pngjs";
 import { TEST_CASES } from "../test-cases";
 
@@ -118,10 +118,7 @@ test.describe("fragment header alignment", () => {
         deviceScaleFactor: dpr,
       });
       try {
-        await page.goto("/e2e/fixtures/fixture.html?case=fragment");
-        await expect(
-          page.locator(".sequence-diagram .participant").first(),
-        ).toBeVisible();
+        await openDiagram(page, "/e2e/fixtures/fixture.html?case=fragment");
         await page.waitForLoadState("networkidle");
         const headers = await page.evaluate(() => {
           const rect = (el: Element | null | undefined) => {

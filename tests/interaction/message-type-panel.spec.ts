@@ -1,5 +1,16 @@
-import { test, expect } from "../fixtures";
+import { test, expect, openDiagram, lastContentChange } from "../fixtures";
 import { clickMessageArrow } from "./clickMessageArrow";
+import type { Page } from "@playwright/test";
+
+const setMessageType = async (
+  page: Page,
+  type: "sync" | "async" | "return",
+) => {
+  await page.getByTestId("message-type-menu").click();
+  const button = page.getByTestId(`message-type-${type}`);
+  await expect(button).toBeVisible();
+  await button.click();
+};
 
 test.describe("Message Type Panel", () => {
   test("switches an async message to a return message and updates DSL", async ({
@@ -10,22 +21,14 @@ test.describe("Message Type Panel", () => {
       logs.push(msg.text());
     });
 
-    await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     const asyncMessage = page.locator(".interaction.async .message").filter({
       hasText: "Hello Bob",
     });
     await clickMessageArrow(asyncMessage);
 
-    await page.getByTestId("message-type-menu").click();
-    const returnButton = page.getByTestId("message-type-return");
-    await expect(returnButton).toBeVisible();
-    await returnButton.click();
+    await setMessageType(page, "return");
 
     await expect(
       page.locator(".interaction.return .message .editable-span-base").filter({
@@ -52,22 +55,14 @@ test.describe("Message Type Panel", () => {
       logs.push(msg.text());
     });
 
-    await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     const returnMessage = page.locator(".interaction.return .message").filter({
       hasText: "Response payload",
     });
     await clickMessageArrow(returnMessage);
 
-    await page.getByTestId("message-type-menu").click();
-    const asyncButton = page.getByTestId("message-type-async");
-    await expect(asyncButton).toBeVisible();
-    await asyncButton.click();
+    await setMessageType(page, "async");
 
     await expect(
       page.locator(".interaction.async .message .editable-span-base").filter({
@@ -89,22 +84,14 @@ test.describe("Message Type Panel", () => {
   test("switches a sync message to async and back to sync (roundtrip)", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/type-switch.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/type-switch.html");
 
     const syncMessage = page.locator(".interaction.sync .message").filter({
       hasText: "login",
     });
     await clickMessageArrow(syncMessage);
 
-    await page.getByTestId("message-type-menu").click();
-    const asyncButton = page.getByTestId("message-type-async");
-    await expect(asyncButton).toBeVisible();
-    await asyncButton.click();
+    await setMessageType(page, "async");
 
     await expect(
       page.locator(".interaction.async .message .editable-span-base").filter({
@@ -118,10 +105,7 @@ test.describe("Message Type Panel", () => {
       }),
     );
 
-    await page.getByTestId("message-type-menu").click();
-    const syncButton = page.getByTestId("message-type-sync");
-    await expect(syncButton).toBeVisible();
-    await syncButton.click();
+    await setMessageType(page, "sync");
 
     await expect(
       page.locator(".interaction.sync .message .editable-span-base").filter({
@@ -129,32 +113,20 @@ test.describe("Message Type Panel", () => {
       }),
     ).toBeVisible({ timeout: 10000 });
 
-    await expect
-      .poll(async () =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toContain("A->B.login()");
+    await expect.poll(lastContentChange(page)).toContain("A->B.login()");
   });
 
   test("switches an async message with method-like content to sync", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/type-switch.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/type-switch.html");
 
     const asyncMessage = page.locator(".interaction.async .message").filter({
       hasText: "validate",
     });
     await clickMessageArrow(asyncMessage);
 
-    await page.getByTestId("message-type-menu").click();
-    const syncButton = page.getByTestId("message-type-sync");
-    await expect(syncButton).toBeVisible();
-    await syncButton.click();
+    await setMessageType(page, "sync");
 
     await expect(
       page.locator(".interaction.sync .message .editable-span-base").filter({
@@ -162,32 +134,20 @@ test.describe("Message Type Panel", () => {
       }),
     ).toBeVisible({ timeout: 10000 });
 
-    await expect
-      .poll(async () =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toContain("B->C.validate()");
+    await expect.poll(lastContentChange(page)).toContain("B->C.validate()");
   });
 
   test("switches a sync message to return and updates DSL", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/type-switch.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/type-switch.html");
 
     const syncMessage = page.locator(".interaction.sync .message").filter({
       hasText: "login",
     });
     await clickMessageArrow(syncMessage);
 
-    await page.getByTestId("message-type-menu").click();
-    const returnButton = page.getByTestId("message-type-return");
-    await expect(returnButton).toBeVisible();
-    await returnButton.click();
+    await setMessageType(page, "return");
 
     await expect(
       page.locator(".interaction.return .message .editable-span-base").filter({
@@ -195,32 +155,20 @@ test.describe("Message Type Panel", () => {
       }),
     ).toBeVisible({ timeout: 10000 });
 
-    await expect
-      .poll(async () =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toContain("A-->B: login");
+    await expect.poll(lastContentChange(page)).toContain("A-->B: login");
   });
 
   test("switches a return message to sync and updates DSL", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/type-switch.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/type-switch.html");
 
     const returnMessage = page.locator(".interaction.return .message").filter({
       hasText: "token",
     });
     await clickMessageArrow(returnMessage);
 
-    await page.getByTestId("message-type-menu").click();
-    const syncButton = page.getByTestId("message-type-sync");
-    await expect(syncButton).toBeVisible();
-    await syncButton.click();
+    await setMessageType(page, "sync");
 
     await expect(
       page.locator(".interaction.sync .message .editable-span-base").filter({
@@ -228,22 +176,13 @@ test.describe("Message Type Panel", () => {
       }),
     ).toBeVisible({ timeout: 10000 });
 
-    await expect
-      .poll(async () =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toContain("B->A.token()");
+    await expect.poll(lastContentChange(page)).toContain("B->A.token()");
   });
 
   test("disables sync button for async messages with spaces in content", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     const asyncMessage = page.locator(".interaction.async .message").filter({
       hasText: "Hello Bob",
@@ -268,12 +207,7 @@ test.describe("Message Type Panel", () => {
   test("clicking a disabled type item leaves the code unchanged and the submenu open", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     const asyncMessage = page.locator(".interaction.async .message").filter({
       hasText: "Hello Bob",
@@ -287,9 +221,7 @@ test.describe("Message Type Panel", () => {
     await syncButton.click({ force: true });
 
     await page.waitForTimeout(300);
-    expect(
-      await page.evaluate(() => (window as any).__lastContentChange ?? null),
-    ).toBeNull();
+    expect(await lastContentChange(page)()).toBeNull();
     await expect(syncButton).toBeVisible();
     await expect(page.getByTestId("message-type-return")).toBeVisible();
     await expect(
@@ -302,12 +234,7 @@ test.describe("Message Type Panel", () => {
   test("highlights creation button when a creation message is selected", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     const creationMessage = page.locator(".interaction.creation .message");
     await clickMessageArrow(creationMessage);
@@ -338,12 +265,7 @@ test.describe("Message Type Panel", () => {
   test("converts a sync message to creation and updates DSL", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/type-switch.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/type-switch.html");
 
     const syncMessage = page.locator(".interaction.sync .message").filter({
       hasText: "login",
@@ -359,10 +281,6 @@ test.describe("Message Type Panel", () => {
       timeout: 10000,
     });
 
-    await expect
-      .poll(async () =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toContain("new B(login())");
+    await expect.poll(lastContentChange(page)).toContain("new B(login())");
   });
 });

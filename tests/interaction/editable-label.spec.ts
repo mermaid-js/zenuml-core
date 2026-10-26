@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures";
+import { test, expect, openDiagram, lastContentChange } from "../fixtures";
 import { clickMessageArrow } from "./clickMessageArrow";
 
 test("one real click on a message label opens inline editing", async ({
@@ -17,11 +17,7 @@ test("one real click on a message label opens inline editing", async ({
   await page.keyboard.press("Enter");
   await expect(label).not.toHaveAttribute("contenteditable", "true");
   await expect(label).toHaveText("renamed()");
-  await expect
-    .poll(() =>
-      page.evaluate(() => (window as any).__lastContentChange ?? null),
-    )
-    .toContain('A."renamed()"');
+  await expect.poll(lastContentChange(page)).toContain('A."renamed()"');
   await expect(page.getByTestId("participant-insert-button-0")).toHaveCount(1);
 });
 
@@ -41,11 +37,7 @@ test("a real double click edits, and an outside click saves", async ({
   await page.locator(".header").click();
   await expect(label).not.toHaveAttribute("contenteditable", "true");
   await expect(label).toHaveText("outsideSaved()");
-  await expect
-    .poll(() =>
-      page.evaluate(() => (window as any).__lastContentChange ?? null),
-    )
-    .toContain('A."outsideSaved()"');
+  await expect.poll(lastContentChange(page)).toContain('A."outsideSaved()"');
 });
 
 test("arrow click selects the message, then a label click edits without reopening the toolbar", async ({
@@ -91,13 +83,7 @@ async function clickToEdit(messageLabel: import("@playwright/test").Locator) {
 
 test.describe("Editable Label", () => {
   test("Special characters & extra spaces", async ({ page }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    // Wait until the participant has rendered
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
     await expect(page.getByText("method()", { exact: false })).toBeVisible();
     await expect(page.getByText("Alice", { exact: false })).toBeVisible();
 
@@ -132,13 +118,7 @@ test.describe("Editable Label", () => {
   });
 
   test("Self message", async ({ page }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    // Wait until the participant has rendered
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     // Edit the message - use a stable locator that won't change with text
     const messageLabel = page.locator(".self-invocation .editable-span-base");
@@ -173,13 +153,7 @@ test.describe("Editable Label", () => {
   });
 
   test("Async message", async ({ page }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    // Wait until the participant has rendered
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     // Edit the message - use stable locator with text filter
     const messageLabel = page
@@ -213,13 +187,7 @@ test.describe("Editable Label", () => {
   });
 
   test("Creation message", async ({ page }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    // Wait until the participant has rendered
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     // Edit the message - use stable locator
     const messageLabel = page.locator(
@@ -247,13 +215,7 @@ test.describe("Editable Label", () => {
   });
 
   test("ESC cancels edit and reverts to original text", async ({ page }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    // Wait until the participant has rendered
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     // Edit the message - use stable locator
     const messageLabel = page

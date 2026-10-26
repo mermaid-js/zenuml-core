@@ -1,3 +1,4 @@
+import { openDiagram } from "../fixtures";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
 // ADR 0003, P4 (hit areas): the painted circle stays 12 / 16 px, the pointer
@@ -37,15 +38,12 @@ async function expectTargetFrom(page: Page, control: Locator) {
 }
 
 async function revealInsertButton(page: Page) {
-  await page.goto("/e2e/fixtures/insert-participant.html");
-  await expect(
-    page.locator(".sequence-diagram .participant").first(),
-  ).toBeVisible({ timeout: 5000 });
+  await openDiagram(page, "/e2e/fixtures/insert-participant.html");
   const a = await page
-    .locator('[data-lifeline-id=A] .participant')
+    .locator("[data-lifeline-id=A] .participant")
     .boundingBox();
   const c = await page
-    .locator('[data-lifeline-id=C] .participant')
+    .locator("[data-lifeline-id=C] .participant")
     .boundingBox();
   await page.mouse.move((a!.x + a!.width + c!.x) / 2, a!.y + a!.height / 2);
   const button = page.getByTestId("participant-insert-button-0");

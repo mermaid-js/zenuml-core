@@ -1,5 +1,5 @@
 import type { CDPSession, Page } from "@playwright/test";
-import { test, expect } from "../fixtures";
+import { test, expect, lastContentChange } from "../fixtures";
 
 test.use({
   hasTouch: true,
@@ -48,8 +48,7 @@ const finishTouch = (cdp: CDPSession, type: "touchEnd" | "touchCancel") =>
     touchPoints: [],
   });
 
-const contentChange = (page: Page) =>
-  page.evaluate(() => (window as any).__lastContentChange ?? "");
+const contentChange = (page: Page) => lastContentChange(page, "")();
 
 test("a visible handle reorders messages with native touch without opening the menu", async ({
   page,

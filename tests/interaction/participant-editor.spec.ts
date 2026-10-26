@@ -1,7 +1,7 @@
+import { lastContentChange } from "../fixtures";
 import { expect, test, type Page } from "@playwright/test";
 
-const lastCode = (page: Page) =>
-  page.evaluate(() => (window as any).__lastContentChange ?? "");
+const lastCode = (page: Page) => lastContentChange(page, "")();
 
 const openPanel = async (page: Page, id: string) => {
   const participant = page.locator(`.participant[data-participant-id="${id}"]`);
@@ -649,7 +649,9 @@ test.describe("participant editor", () => {
 
     await pickColor(page, "Blue");
     await page.mouse.move(600, 600);
-    await expect(panel.getByRole("button", { name: "Remove colour" })).toHaveCount(0);
+    await expect(
+      panel.getByRole("button", { name: "Remove colour" }),
+    ).toHaveCount(0);
     // Keyboard flow is kept: focus returns to the slot.
     await expect(colorSlot(page)).toBeFocused();
   });
@@ -668,7 +670,9 @@ test.describe("participant editor", () => {
     await page.keyboard.press("Shift");
     await colorSlot(page).focus();
 
-    await expect(panel.getByRole("button", { name: "Remove colour" })).toBeVisible();
+    await expect(
+      panel.getByRole("button", { name: "Remove colour" }),
+    ).toBeVisible();
     const shadows = await colorSlot(page).evaluate((el) => ({
       main: getComputedStyle(el).boxShadow,
       wrapper: getComputedStyle(el.parentElement!).boxShadow,

@@ -1,4 +1,10 @@
-import { test, expect } from "../fixtures";
+import {
+  test,
+  expect,
+  openDiagram,
+  lastContentChange,
+  renderWithContentChange,
+} from "../fixtures";
 import type { Page } from "@playwright/test";
 
 const hoverGapNear = async (page: Page, gapIndex: number, name: string) => {
@@ -59,11 +65,7 @@ test.describe("Message Create (Gap Handles)", () => {
     await page.goto("/e2e/fixtures/create-message.html");
     await hoverGapNear(page, 0, "A");
     await page.getByTestId("message-create-handle-0-A").click();
-    await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toBeNull();
+    await expect.poll(lastContentChange(page)).toBeNull();
   });
 
   test("uses crosshair cursors for message creation and restores them on Escape", async ({
@@ -141,11 +143,7 @@ test.describe("Message Create (Gap Handles)", () => {
     await expect(page.getByTestId("message-create-target-C")).toBeVisible();
     await page.mouse.up();
 
-    await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toContain("A->C.newMessage()");
+    await expect.poll(lastContentChange(page)).toContain("A->C.newMessage()");
     await expect(page.locator(".sequence-diagram")).not.toHaveAttribute(
       "data-message-create-dragging",
     );
@@ -245,11 +243,7 @@ test.describe("Message Create (Gap Handles)", () => {
     await expect(
       page.getByTestId("message-create-handle-0-A"),
     ).not.toBeVisible();
-    await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toBeNull();
+    await expect.poll(lastContentChange(page)).toBeNull();
   });
 
   test("divider stays available from the gap context menu", async ({
@@ -269,27 +263,18 @@ test.describe("Message Create (Gap Handles)", () => {
     await gap.click({ button: "right" });
     await expect(menu).toBeVisible();
     await page.getByTestId("divider-insert-1").click();
-    await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toContain("==Divider==");
+    await expect.poll(lastContentChange(page)).toContain("==Divider==");
   });
 
   test("divider-only mode keeps its keyboard insertion menu", async ({
     page,
   }) => {
     await page.goto("/e2e/fixtures/create-message.html");
-    await page.evaluate(() =>
-      (window as any).zenUml.render("A\nB\nC\nA->B.hello()", {
-        theme: "theme-nab",
-        enableMessageInsertion: false,
-        enableDividerInsertion: true,
-        onContentChange: (code: string) => {
-          (window as any).__lastContentChange = code;
-        },
-      }),
-    );
+    await renderWithContentChange(page, "A\nB\nC\nA->B.hello()", {
+      theme: "theme-nab",
+      enableMessageInsertion: false,
+      enableDividerInsertion: true,
+    });
     const gap = page.getByTestId("message-gap-hover-1");
     await expect(gap).toBeVisible();
     await hoverGapNear(page, 1, "A");
@@ -298,11 +283,7 @@ test.describe("Message Create (Gap Handles)", () => {
     await page.keyboard.press("Shift+F10");
     await expect(page.getByTestId("divider-insert-1")).toBeFocused();
     await page.getByTestId("divider-insert-1").click();
-    await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toContain("==Divider==");
+    await expect.poll(lastContentChange(page)).toContain("==Divider==");
   });
 
   test("long participant names wrap inside the diagram tooltips", async ({
@@ -431,12 +412,7 @@ test.describe("Message Create (Gap Handles)", () => {
   test("dragging from the first gap inserts before the first message", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/create-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/create-message.html");
 
     await hoverGapNear(page, 0, "A");
     const handle = page.getByTestId("message-create-handle-0-A");
@@ -461,9 +437,7 @@ test.describe("Message Create (Gap Handles)", () => {
     await page.mouse.up();
 
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
+      .poll(lastContentChange(page))
       .toBe("A\nB\nC\nA->C.newMessage()\nA->B.hello()");
   });
 
@@ -501,20 +475,11 @@ test.describe("Message Create (Gap Handles)", () => {
     });
     await expect(page.getByTestId("message-create-target-C")).toBeVisible();
     await page.mouse.up();
-    await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toContain("A->C.newMessage()");
+    await expect.poll(lastContentChange(page)).toContain("A->C.newMessage()");
   });
 
   test("shows drag handles on gap hover", async ({ page }) => {
-    await page.goto("/e2e/fixtures/create-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/create-message.html");
 
     // Gap hover zone at index 1 (after first message, clearly below participant headers)
     const gapHover = page.getByTestId("message-gap-hover-1");
@@ -531,12 +496,7 @@ test.describe("Message Create (Gap Handles)", () => {
   test("drag from handle to participant creates a message", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/create-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/create-message.html");
 
     // Hover gap-1 (after the existing message) to reveal handles
     await hoverGapNear(page, 1, "A");
@@ -565,23 +525,14 @@ test.describe("Message Create (Gap Handles)", () => {
     );
     await page.mouse.up();
 
-    // A new message should have been created and __lastContentChange updated
-    await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toMatch(/A->C/);
+    // A new message should have been created and its emitted DSL updated
+    await expect.poll(lastContentChange(page)).toMatch(/A->C/);
   });
 
   test("drag from a sync occurrence bar to a participant creates a nested message", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/create-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/create-message.html");
 
     const occurrence = page.locator(
       '[data-el-type="occurrence"][data-belongs-to="B"]',
@@ -614,9 +565,7 @@ test.describe("Message Create (Gap Handles)", () => {
     await page.mouse.up();
 
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
+      .poll(lastContentChange(page))
       .toBe("A\nB\nC\nA->B.hello() {\n  B->C.newMessage()\n}");
   });
 
@@ -658,19 +607,12 @@ test.describe("Message Create (Gap Handles)", () => {
     );
     await page.mouse.up();
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
+      .poll(lastContentChange(page))
       .toBe("A\nB\nC\nA->B.hello() {\n  B->C.newMessage()\n}");
   });
 
   test("Escape key cancels drag without creating message", async ({ page }) => {
-    await page.goto("/e2e/fixtures/create-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/create-message.html");
 
     await hoverGapNear(page, 1, "A");
 
@@ -700,9 +642,7 @@ test.describe("Message Create (Gap Handles)", () => {
     await page.mouse.up();
 
     // Content should not have changed (original only has A->B.hello())
-    const content = await page.evaluate(
-      () => (window as any).__lastContentChange ?? null,
-    );
+    const content = await lastContentChange(page)();
     if (content !== null) {
       expect(content).not.toMatch(/A->C/);
     }
@@ -711,12 +651,7 @@ test.describe("Message Create (Gap Handles)", () => {
   test("shows gap containers at start and end of message list", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/create-message.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/create-message.html");
 
     // The fixture has 1 message (A->B.hello()), so gap-0 (before) and gap-1 (after) should exist
     await expect(page.getByTestId("message-gap-0")).toBeAttached();

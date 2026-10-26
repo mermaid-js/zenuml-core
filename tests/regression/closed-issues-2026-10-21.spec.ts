@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { test, expect } from "../fixtures";
+import { test, expect, openDiagram } from "../fixtures";
 import { CASES } from "../../e2e/data/compare-cases.js";
 import { clickMessageArrow } from "../interaction/clickMessageArrow";
 
@@ -9,10 +9,10 @@ import { clickMessageArrow } from "../interaction/clickMessageArrow";
 
 const open = async (page: Page, dsl: string) => {
   await page.setViewportSize({ width: 900, height: 760 });
-  await page.goto(`/e2e/fixtures/creation.html?dsl=${encodeURIComponent(dsl)}`);
-  await expect(
-    page.locator(".sequence-diagram .participant").first(),
-  ).toBeVisible();
+  await openDiagram(
+    page,
+    `/e2e/fixtures/creation.html?dsl=${encodeURIComponent(dsl)}`,
+  );
 };
 
 const rects = (page: Page, selector: string) =>

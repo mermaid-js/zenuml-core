@@ -1,15 +1,10 @@
-import { test, expect } from "../fixtures";
+import { test, expect, openDiagram, lastContentChange } from "../fixtures";
 
 test.describe("Message Reorder in Fragment", () => {
   test("reorders messages inside an alt fragment by dragging", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/reorder-fragment.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/reorder-fragment.html");
 
     const messages = page.locator(
       ".fragment-alt .statement-container .message",
@@ -36,9 +31,7 @@ test.describe("Message Reorder in Fragment", () => {
     await page.mouse.up();
 
     await expect
-      .poll(async () =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
+      .poll(lastContentChange(page))
       .toContain("A->C: beta\n  A->B: alpha");
     await expect
       .poll(() => page.evaluate(() => document.body.style.cursor))
@@ -46,12 +39,7 @@ test.describe("Message Reorder in Fragment", () => {
   });
 
   test("shows the handle on messages inside a fragment", async ({ page }) => {
-    await page.goto("/e2e/fixtures/reorder-fragment.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/reorder-fragment.html");
 
     const message = page
       .locator(".fragment-alt .statement-container .message")
@@ -70,12 +58,7 @@ test.describe("Message Reorder in Fragment", () => {
   test("moves a top-level message into a fragment by dragging onto a fragment message", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/reorder-cross-fragment.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/reorder-cross-fragment.html");
 
     const outside = page.locator(".statement-container .message").filter({
       hasText: "outside()",
@@ -97,9 +80,7 @@ test.describe("Message Reorder in Fragment", () => {
     });
     await page.mouse.up();
 
-    await expect.poll(() =>
-      page.evaluate(() => (window as any).__lastContentChange ?? null),
-    ).toContain(`if(ready) {
+    await expect.poll(lastContentChange(page)).toContain(`if(ready) {
   B->A.outside()
   A->B.alpha()
   A->C.beta()
@@ -109,12 +90,7 @@ test.describe("Message Reorder in Fragment", () => {
   test("moves a fragment message out to the top level by dragging onto a top-level message", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/reorder-cross-fragment.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/reorder-cross-fragment.html");
 
     const alpha = page
       .locator(".fragment-alt .statement-container .message")
@@ -136,9 +112,7 @@ test.describe("Message Reorder in Fragment", () => {
     });
     await page.mouse.up();
 
-    await expect.poll(() =>
-      page.evaluate(() => (window as any).__lastContentChange ?? null),
-    ).toContain(`A
+    await expect.poll(lastContentChange(page)).toContain(`A
 B
 C
 A->B.alpha()

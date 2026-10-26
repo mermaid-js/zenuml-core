@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures";
+import { test, expect, lastContentChange } from "../fixtures";
 import { clickMessageArrow } from "./clickMessageArrow";
 
 test.describe("style panel application", () => {
@@ -23,9 +23,7 @@ test.describe("style panel application", () => {
 
     await bold.click();
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? ""),
-      )
+      .poll(lastContentChange(page, ""))
       .toContain("// [font-bold]\nD->C: Hello Bob");
     await expect(message.locator(".editable-span-base")).toHaveCSS(
       "font-weight",
@@ -34,9 +32,7 @@ test.describe("style panel application", () => {
     await clickMessageArrow(message);
     await panel.getByRole("button", { name: "italic" }).click();
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? ""),
-      )
+      .poll(lastContentChange(page, ""))
       .toContain("// [font-bold, italic]\nD->C: Hello Bob");
     await expect(message.locator(".editable-span-base")).toHaveCSS(
       "font-weight",
@@ -72,9 +68,7 @@ test.describe("style panel application", () => {
       .click();
 
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? ""),
-      )
+      .poll(lastContentChange(page, ""))
       .toMatch(/^A #fda4af\nC\nA->C: Ping/);
     await expect(participant).toHaveCSS(
       "background-color",
@@ -88,9 +82,7 @@ test.describe("style panel application", () => {
       .getByRole("button", { name: "Actor", exact: true })
       .click();
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? ""),
-      )
+      .poll(lastContentChange(page, ""))
       .toMatch(/^@Actor A #fda4af\nC\nA->C: Ping/);
   });
 
@@ -112,9 +104,7 @@ test.describe("style panel application", () => {
       .click();
 
     await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? ""),
-      )
+      .poll(lastContentChange(page, ""))
       .toMatch(/^@Actor A\nC\nA->C: Ping/);
   });
 });

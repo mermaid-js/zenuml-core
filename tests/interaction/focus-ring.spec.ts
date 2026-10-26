@@ -1,3 +1,4 @@
+import { openDiagram } from "../fixtures";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { clickMessageArrow } from "./clickMessageArrow";
 
@@ -160,16 +161,14 @@ test.describe("one focus ring on every chrome control", () => {
   });
 
   test("participant insert button", async ({ page }) => {
-    await page.goto("/e2e/fixtures/insert-participant.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({ timeout: 5000 });
-    const a = await page.locator("[data-lifeline-id=A] .participant").boundingBox();
-    const c = await page.locator("[data-lifeline-id=C] .participant").boundingBox();
-    await page.mouse.move(
-      (a!.x + a!.width + c!.x) / 2,
-      a!.y + a!.height / 2,
-    );
+    await openDiagram(page, "/e2e/fixtures/insert-participant.html");
+    const a = await page
+      .locator("[data-lifeline-id=A] .participant")
+      .boundingBox();
+    const c = await page
+      .locator("[data-lifeline-id=C] .participant")
+      .boundingBox();
+    await page.mouse.move((a!.x + a!.width + c!.x) / 2, a!.y + a!.height / 2);
     const button = page.getByTestId("participant-insert-button-0");
     await expect(button).toHaveCSS("opacity", /^0\.[1-9]|^1$/);
     await expectRing(page, button);
