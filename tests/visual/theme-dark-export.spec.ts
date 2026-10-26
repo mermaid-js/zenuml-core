@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures";
+import { test, expect, openDiagram } from "../fixtures";
 import { PNG } from "pngjs";
 
 /** Outer pixels keep alpha while the theme paints the frame and elements. */
@@ -51,10 +51,10 @@ test.describe("theme-dark export", () => {
   test("getPng preserves transparent gutters and optional backing", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/fixture.html?case=smoke&theme=theme-dark");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible();
+    await openDiagram(
+      page,
+      "/e2e/fixtures/fixture.html?case=smoke&theme=theme-dark",
+    );
     await page.waitForLoadState("networkidle");
 
     const [transparent, flattened] = await page.evaluate(() =>
@@ -87,10 +87,10 @@ test.describe("theme-dark export", () => {
   test("getSvg omits backing by default and places explicit backing below content", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/fixture.html?case=smoke&theme=theme-dark");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible();
+    await openDiagram(
+      page,
+      "/e2e/fixtures/fixture.html?case=smoke&theme=theme-dark",
+    );
     const [raw, flat] = await page.evaluate(() =>
       Promise.all([
         (window as any).zenUml.getSvg(),
@@ -108,10 +108,10 @@ test.describe("theme-dark export", () => {
   test("author CSS alpha survives export and backing composites it once", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/fixture.html?case=smoke&theme=theme-dark");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible();
+    await openDiagram(
+      page,
+      "/e2e/fixtures/fixture.html?case=smoke&theme=theme-dark",
+    );
     await page.evaluate(() => {
       const style = document.createElement("style");
       style.textContent =

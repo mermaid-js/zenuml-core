@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures";
+import { test, expect, openDiagram } from "../fixtures";
 import { DEFAULT_THRESHOLD } from "../test-cases";
 
 const EMOJI_PARTICIPANT_CASES: { name: string; threshold?: number }[] = [
@@ -12,12 +12,7 @@ const EMOJI_PARTICIPANT_CASES: { name: string; threshold?: number }[] = [
 test.describe("Emoji on Participants", () => {
   for (const { name, threshold } of EMOJI_PARTICIPANT_CASES) {
     test(name, async ({ page }) => {
-      await page.goto(`/e2e/fixtures/fixture.html?case=${name}`);
-
-      // Wait for diagram to render
-      await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
-        timeout: 5000,
-      });
+      await openDiagram(page, `/e2e/fixtures/fixture.html?case=${name}`);
 
       // Wait for async icon imports to complete (stereotypes, @Database etc.)
       await page.waitForLoadState("networkidle");

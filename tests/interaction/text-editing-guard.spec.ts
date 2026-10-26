@@ -1,4 +1,4 @@
-import { expect, test } from "../fixtures";
+import { expect, test, lastContentChange } from "../fixtures";
 import { clickMessageArrow } from "./clickMessageArrow";
 
 test("participant editing hides insertion and blocks message drag until editing ends", async ({
@@ -115,9 +115,7 @@ test("message text selection cannot start reorder, and reorder works after editi
   );
   await expect(page.locator('[data-reorder-state="dragging"]')).toHaveCount(0);
   await page.mouse.up();
-  expect(
-    await page.evaluate(() => (window as any).__lastContentChange ?? null),
-  ).toBeNull();
+  expect(await lastContentChange(page)()).toBeNull();
 
   await page.keyboard.press("Escape");
   await expect(label).not.toHaveAttribute("contenteditable", "true");
@@ -140,9 +138,7 @@ test("message text selection cannot start reorder, and reorder works after editi
   );
   await page.mouse.up();
   await expect
-    .poll(() =>
-      page.evaluate(() => (window as any).__lastContentChange ?? null),
-    )
+    .poll(lastContentChange(page))
     .toContain("A->C: second\nA->B: first");
 });
 
@@ -190,7 +186,5 @@ test("dragging an idle message label does not reorder it", async ({ page }) => {
   );
   await expect(page.locator('[data-reorder-state="dragging"]')).toHaveCount(0);
   await page.mouse.up();
-  expect(
-    await page.evaluate(() => (window as any).__lastContentChange ?? null),
-  ).toBeNull();
+  expect(await lastContentChange(page)()).toBeNull();
 });

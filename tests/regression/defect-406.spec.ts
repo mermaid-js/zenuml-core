@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures";
+import { test, expect, waitForDiagram } from "../fixtures";
 
 test.describe("Defect 406", () => {
   test.beforeEach(async ({ page }) => {
@@ -13,9 +13,7 @@ test.describe("Defect 406", () => {
       timeout: 5000,
     });
     // Wait until the participant has rendered
-    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
-      timeout: 5000,
-    });
+    await waitForDiagram(page);
     await expect(page).toHaveScreenshot({
       threshold: 0.01,
       fullPage: true,

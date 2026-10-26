@@ -1,16 +1,11 @@
-import { test, expect } from "../fixtures";
+import { test, expect, openDiagram, lastContentChange } from "../fixtures";
 import { clickMessageArrow } from "./clickMessageArrow";
 
 test.describe("Message Rename Panel", () => {
   test("selects a message and clears selection on empty canvas click", async ({
     page,
   }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     const asyncMessage = page
       .locator(".interaction.async .message")
@@ -27,12 +22,7 @@ test.describe("Message Rename Panel", () => {
   });
 
   test("clears message selection with escape", async ({ page }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     const asyncMessage = page
       .locator(".interaction.async .message")
@@ -49,12 +39,7 @@ test.describe("Message Rename Panel", () => {
   });
 
   test("renames an async message from the toolbar", async ({ page }) => {
-    await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
+    await openDiagram(page, "/e2e/fixtures/editable-label.html");
 
     const asyncMessage = page
       .locator(".interaction.async .message")
@@ -87,24 +72,16 @@ test.describe("Message Rename Panel", () => {
       .filter({ hasText: "Hello Alice" });
     await expect(renamedMessage).toBeVisible({ timeout: 10000 });
     await expect(renamedMessage).toHaveAttribute("data-selected", "true");
-    await expect
-      .poll(() =>
-        page.evaluate(() => (window as any).__lastContentChange ?? null),
-      )
-      .toContain("D->C:Hello Alice");
+    await expect.poll(lastContentChange(page)).toContain("D->C:Hello Alice");
   });
 
   test("rename is aria-disabled for a message with no label and explains why", async ({
     page,
   }) => {
-    await page.goto(
+    await openDiagram(
+      page,
       `/e2e/fixtures/creation.html?dsl=${encodeURIComponent("A.m()\nnew B")}`,
     );
-    await expect(
-      page.locator(".sequence-diagram .participant").first(),
-    ).toBeVisible({
-      timeout: 5000,
-    });
 
     await clickMessageArrow(page.locator(".interaction.creation .message"));
     const rename = page.getByTestId("message-rename");
