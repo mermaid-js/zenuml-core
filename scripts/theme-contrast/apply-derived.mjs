@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Transcribe docs/ux-research/evidence/theme-dark/derive-dark.json into
 //   - the `.theme-dark, .theme-clean-dark, .theme-darcula` block in src/assets/tailwind.css
+//   - the theme-dark focus tokens on `.zenuml` in the same file
 //   - the DARK_PALETTE object in src/svg/themes.ts
 // Idempotent; run after scripts/theme-contrast/derive-dark.mjs.
 
@@ -12,19 +13,27 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const derived = JSON.parse(readFileSync(resolve(ROOT, "docs/ux-research/evidence/theme-dark/derive-dark.json"), "utf8"));
 const T = Object.fromEntries(Object.entries(derived.tokens).map(([k, v]) => [k, v]));
 
-// 1. CSS block
+// 1. CSS blocks: the theme block, and the focus tokens on the inner .zenuml
+//    (it declares the --zu-* tokens again, so the theme block cannot reach them)
 {
   const file = resolve(ROOT, "src/assets/tailwind.css");
-  const css = readFileSync(file, "utf8");
-  const open = "  .theme-darcula {\n";
-  const start = css.indexOf(open);
-  const end = css.indexOf("\n  }\n", start);
-  if (start < 0 || end < 0) throw new Error("theme-dark block not found in tailwind.css");
-  const lines = Object.entries(T).map(([name, t]) => {
+  let css = readFileSync(file, "utf8");
+  // --zu-* lines also carry the origin marker the ADR 0003 token gate requires.
+  const line = (indent) => ([name, t]) => {
     const c = t.lc != null ? `Lc ${t.lc} on ${t.bg}, floor ${t.floor}` : t.origin || "";
-    return `    ${name}: ${t.value};${c ? ` /* ${c} */` : ""}`;
-  });
-  writeFileSync(file, css.slice(0, start + open.length) + lines.join("\n") + css.slice(end));
+    const owned = name.startsWith("--zu-") ? " /* zenuml-owned */" : "";
+    return `${indent}${name}: ${t.value};${c ? ` /* ${c} */` : ""}${owned}`;
+  };
+  const replaceBlock = (open, close, lines) => {
+    const start = css.indexOf(open);
+    const end = css.indexOf(close, start);
+    if (start < 0 || end < 0) throw new Error(`block ${JSON.stringify(open)} not found in tailwind.css`);
+    css = css.slice(0, start + open.length) + lines.join("\n") + css.slice(end);
+  };
+  const entries = Object.entries(T);
+  replaceBlock("  .theme-darcula {\n", "\n  }\n", entries.filter(([, t]) => t.scope !== "zenuml").map(line("    ")));
+  replaceBlock(".theme-dark .zenuml, .theme-clean-dark .zenuml, .theme-darcula .zenuml {\n", "\n}\n", entries.filter(([, t]) => t.scope === "zenuml").map(line("  ")));
+  writeFileSync(file, css);
 }
 
 // 2. SVG palette
