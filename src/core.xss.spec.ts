@@ -1,4 +1,9 @@
-import { waitFor } from "@testing-library/react";
+import {
+  PAYLOADS,
+  POSITIONS,
+  FORBIDDEN_SELECTOR,
+} from "../test/unit/xss/fixtures";
+import { act, waitFor } from "@testing-library/react";
 import ZenUml from "./core";
 
 /**
@@ -6,49 +11,19 @@ import ZenUml from "./core";
  * Diagram text must reach the DOM as text, never as markup.
  */
 
-const PAYLOADS = [
-  // The payload from docs/xss.md
-  `"><img src=x onerror=alert(1)>ent #FFEBE6`,
-  `<script>alert(1)</script>`,
-  `"><svg onload=alert(1)>`,
-  `javascript:alert(1)`,
-];
-
-// A quoted participant name cannot contain a double quote, so the quotes of a
-// payload are dropped for that position.
-const forQuotedName = (payload: string) => payload.replace(/"/g, "");
-
-const POSITIONS: {
-  position: string;
-  build: (label: string) => string;
-  adapt: (payload: string) => string;
-}[] = [
-  {
-    position: "participant name",
-    build: (label) => `"${label}"->B: hi`,
-    adapt: forQuotedName,
-  },
-  {
-    position: "message label",
-    build: (label) => `A->B: ${label}`,
-    adapt: (payload) => payload,
-  },
-  {
-    position: "diagram title",
-    build: (label) => `title ${label}\nA->B: hi`,
-    adapt: (payload) => payload,
-  },
-];
-
-const FORBIDDEN_SELECTOR = "script, img, iframe, foreignObject, a";
-
 async function renderDiagram(
   code: string,
   expectedText: string,
 ): Promise<HTMLElement> {
   const el = document.createElement("div");
   document.body.appendChild(el);
-  await new ZenUml(el).render(code, {});
+  let rendering: Promise<unknown>;
+  await act(async () => {
+    // render() waits for a React commit. Let act flush that commit before
+    // awaiting the renderer's completion promise, rather than deadlocking it.
+    rendering = new ZenUml(el).render(code, {});
+  });
+  await rendering!;
   await waitFor(() => {
     expect(el.textContent).toContain(expectedText);
   });
@@ -68,16 +43,17 @@ describe("ZenUml XSS regression (docs/xss.md)", () => {
     document.body.innerHTML = "";
   });
 
-  for (const { position, build, adapt } of POSITIONS) {
+  for (const { position, build, adapt, htmlText } of POSITIONS) {
     describe(`payload as ${position}`, () => {
       for (const payload of PAYLOADS) {
         it(`keeps ${JSON.stringify(payload)} as text`, async () => {
           const raw = adapt(payload);
+          const expectedText = htmlText?.(raw) ?? raw;
           const benign = await renderDiagram(build("benign"), "benign");
           const benignNames = elementNames(benign);
           benign.remove();
 
-          const el = await renderDiagram(build(raw), raw);
+          const el = await renderDiagram(build(raw), expectedText);
 
           expect(el.querySelectorAll(FORBIDDEN_SELECTOR).length).toBe(0);
           for (const node of el.querySelectorAll("*")) {
@@ -94,7 +70,8 @@ describe("ZenUml XSS regression (docs/xss.md)", () => {
           expect(elementNames(el)).toEqual(benignNames);
           // The payload is present as the text of a single label.
           const labels = [...el.querySelectorAll("*")].filter(
-            (n) => n.children.length === 0 && n.textContent?.trim() === raw,
+            (n) =>
+              n.children.length === 0 && n.textContent?.trim() === expectedText,
           );
           expect(labels.length).toBeGreaterThan(0);
         });
