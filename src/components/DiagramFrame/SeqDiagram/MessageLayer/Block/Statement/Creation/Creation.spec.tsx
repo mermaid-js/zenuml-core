@@ -1,6 +1,6 @@
 import { Fixture } from "../../../../../../../../test/unit/parser/fixture/Fixture";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import Anchor2 from "@/positioning/Anchor2";
+import Anchor from "@/positioning/Anchor";
 import { codeAtom } from "@/store/Store";
 import { render } from "@testing-library/react";
 import { Creation } from "./Creation";
@@ -55,8 +55,8 @@ describe("Creation", () => {
     // `-` is for margin and `=` is for participant width.
     // `---xxx--->` is for message arrow and `[]` is for occurrence.
     // TODO: add a test case where the width is caused by the message
-    const anchorStarter = new Anchor2(100, 0);
-    const anchorA = new Anchor2(200, 1);
+    const anchorStarter = new Anchor(100, 0);
+    const anchorA = new Anchor(200, 1);
     const expected = anchorStarter.edgeOffset(anchorA);
     expect(creationWrapper.container.querySelector("div")?.style.width).toBe(
       expected + "px",
@@ -82,8 +82,8 @@ describe("Creation", () => {
     // -====A====--====B====-
     //      []]<--<<c>>--
     // There is enough space for the message arrow and occurrence.
-    const anchorA = new Anchor2(100, 2);
-    const anchorB = new Anchor2(200, 1);
+    const anchorA = new Anchor(100, 2);
+    const anchorB = new Anchor(200, 1);
     const expected = anchorA.edgeOffset(anchorB);
     expect(creationWrapper.container.querySelector("div")?.style.width).toBe(
       expected + "px",
@@ -112,8 +112,8 @@ describe("Creation", () => {
     // -====A====--====B====-
     //      []]--<<c>>--
     // There is enough space for the message and occurrence.
-    const anchorA = new Anchor2(100, 2);
-    const anchorB = new Anchor2(200, 1);
+    const anchorA = new Anchor(100, 2);
+    const anchorB = new Anchor(200, 1);
     const expected = anchorA.edgeOffset(anchorB);
     expect(creationWrapper.container.querySelector("div")?.style.width).toBe(
       expected + "px",

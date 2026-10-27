@@ -36,7 +36,7 @@ export interface AntlrNode {
  * The real shape of any ANTLR ParserRuleContext-derived node in this
  * codebase once the runtime prototype augmentations installed by
  * src/parser/index.ts, src/parser/Origin.ts and
- * src/parser/utils/cloest-ancestor/ClosestAncestor.ts have run — every
+ * src/parser/utils/ClosestAncestor.ts have run — every
  * generated context class extends antlr4.ParserRuleContext, and those
  * modules patch its prototype directly at runtime.
  *
@@ -61,7 +61,7 @@ export interface AugmentedContext {
   /** Installed in src/parser/index.ts. */
   getComment(): string | undefined;
   parentCtx: AugmentedContext | null;
-  /** Installed in src/parser/utils/cloest-ancestor/ClosestAncestor.ts. */
+  /** Installed in src/parser/utils/ClosestAncestor.ts. */
   ClosestAncestorStat(): AugmentedContext | undefined;
   /** Installed in src/parser/Origin.ts. */
   Origin(): string | undefined;

@@ -1,6 +1,6 @@
-import Anchor2 from "@/positioning/Anchor2";
+import Anchor from "@/positioning/Anchor";
 
-describe("Anchor2", () => {
+describe("Anchor", () => {
   describe("Center of Right Wall", () => {
     test.each([
       {
@@ -27,7 +27,7 @@ describe("Anchor2", () => {
     ])(
       "$name => $explanation = $expected",
       ({ position, layers, expected }) => {
-        const a = new Anchor2(position, layers);
+        const a = new Anchor(position, layers);
 
         expect(a.centerOfRightWall()).toBe(expected);
       },
@@ -60,7 +60,7 @@ describe("Anchor2", () => {
     ])(
       "$name => $explanation = $expected",
       ({ position, layers, expected }) => {
-        const a = new Anchor2(position, layers);
+        const a = new Anchor(position, layers);
 
         expect(a.rightEdgeOfRightWall()).toBe(expected);
       },
@@ -93,7 +93,7 @@ describe("Anchor2", () => {
     ])(
       "$name => $explanation = $expected",
       ({ position, layers, expected }) => {
-        const a = new Anchor2(position, layers);
+        const a = new Anchor(position, layers);
 
         expect(a.leftEdgeOfRightWall()).toBe(expected);
       },
@@ -164,8 +164,8 @@ describe("Anchor2", () => {
     ])(
       "$name => $explanation = $expected",
       ({ anchor1, anchor2, expectedLtr, expectedRtl }) => {
-        const a1 = new Anchor2(anchor1.position, anchor1.layers);
-        const a2 = new Anchor2(anchor2.position, anchor2.layers);
+        const a1 = new Anchor(anchor1.position, anchor1.layers);
+        const a2 = new Anchor(anchor2.position, anchor2.layers);
 
         expect(a1.centerToEdge(a2)).toBe(expectedLtr);
         expect(a2.centerToEdge(a1)).toBe(expectedRtl);
@@ -244,8 +244,8 @@ describe("Anchor2", () => {
     ])(
       "$name => $explanation = $expected",
       ({ anchor1, anchor2, expected }) => {
-        const a1 = new Anchor2(anchor1.position, anchor1.layers);
-        const a2 = new Anchor2(anchor2.position, anchor2.layers);
+        const a1 = new Anchor(anchor1.position, anchor1.layers);
+        const a2 = new Anchor(anchor2.position, anchor2.layers);
 
         expect(a1.edgeOffset(a2)).toBe(expected);
         expect(a2.edgeOffset(a1)).toBe(expected * -1);
@@ -253,8 +253,8 @@ describe("Anchor2", () => {
     );
 
     test("Same anchor", () => {
-      const a1 = new Anchor2(100, 2);
-      const a2 = new Anchor2(100, 2);
+      const a1 = new Anchor(100, 2);
+      const a2 = new Anchor(100, 2);
 
       expect(a1.edgeOffset(a2)).toBe(-15);
       expect(a2.edgeOffset(a1)).toBe(-15);

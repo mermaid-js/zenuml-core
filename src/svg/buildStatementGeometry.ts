@@ -15,7 +15,7 @@ import {
 } from "@/positioning/Constants";
 import { COMMENT_LINE_HEIGHT } from "@/positioning/vertical/LayoutMetrics";
 import { TextType } from "@/positioning/Coordinate";
-import Anchor2 from "@/positioning/Anchor2";
+import Anchor from "@/positioning/Anchor";
 import { buildFragmentGeometry } from "./buildFragmentGeometry";
 import { buildCallGeometry } from "./buildCallGeometry";
 import type { CallGeometry } from "./buildCallGeometry";
@@ -283,22 +283,22 @@ export function buildReturnGeometry(
   const rawToX = coordinates.getPosition(info.to);
   const isReverse = rawToX < rawFromX;
   // Return lines run edge-to-edge between occurrence walls; reuse the very
-  // same wall arithmetic the HTML path uses (src/positioning/Anchor2.ts).
+  // same wall arithmetic the HTML path uses (src/positioning/Anchor.ts).
   // LTR: from.rightEdge → to.leftEdge;  RTL: to.rightEdge ← from.leftEdge
-  const fromAnchor = new Anchor2(rawFromX, info.senderOccurrenceDepth);
-  const toAnchor = new Anchor2(rawToX, info.targetOccurrenceDepth || 0);
+  const fromAnchor = new Anchor(rawFromX, info.senderOccurrenceDepth);
+  const toAnchor = new Anchor(rawToX, info.targetOccurrenceDepth || 0);
   // +1: occurrence stroke extends 1px beyond fill area (stroke-width=2,
-  // centered). Not part of Anchor2 — kept as a separate addition.
+  // centered). Not part of Anchor — kept as a separate addition.
   const RETURN_STROKE_OFFSET = 1;
   const fromX = isReverse
     ? fromAnchor.leftEdgeOfRightWall()
     : fromAnchor.rightEdgeOfRightWall() + RETURN_STROKE_OFFSET;
-  // HTML Anchor2.edgeOffset subtracts LIFELINE_WIDTH from the container width.
+  // HTML Anchor.edgeOffset subtracts LIFELINE_WIDTH from the container width.
   // For RTL returns, add LIFELINE_WIDTH to reach the inner edge of the target.
   // For LTR returns, the +1 stroke correction on fromX already accounts for
-  // the Anchor2 LIFELINE_WIDTH subtraction — applying it again on toX would
+  // the Anchor LIFELINE_WIDTH subtraction — applying it again on toX would
   // double-count and shrink the arrow by 2px instead of 1px. Neither term is
-  // part of Anchor2, so both stay outside the accessor call.
+  // part of Anchor, so both stay outside the accessor call.
   const toX = isReverse
     ? toAnchor.rightEdgeOfRightWall() + LIFELINE_WIDTH
     : toAnchor.leftEdgeOfRightWall();

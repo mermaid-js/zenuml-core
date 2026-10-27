@@ -62,7 +62,7 @@ indexing scheme (used as React keys / cache keys downstream).
 method calls (`func: signature (DOT signature)*`) being flattened back into a dotted
 signature string.
 
-### 2.3 `/…/src/parser/utils/cloest-ancestor/ClosestAncestor.spec.ts`
+### 2.3 `/…/src/parser/utils/ClosestAncestor.spec.ts`
 `ctx.ClosestAncestorStat()` returns the nearest enclosing `stat` whose `.start.start` /
 `.stop.stop` are **absolute character offsets** (e.g. for `"A.m {B.m}"` the first child stat
 spans offsets 5–7). Pins offset-accurate start/stop tokens on every node.
