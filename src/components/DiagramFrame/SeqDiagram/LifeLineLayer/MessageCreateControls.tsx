@@ -135,8 +135,8 @@ export const MessageCreateControls = () => {
       const target = participantAt(event.target);
       if (!target) return;
       setDragState((prev) =>
-        prev && prev.hoverTarget !== target
-          ? { ...prev, hoverTarget: target }
+        prev && prev.pointedTarget !== target
+          ? { ...prev, hoverTarget: target, pointedTarget: target }
           : prev,
       );
     };
@@ -438,7 +438,7 @@ export const MessageCreateControls = () => {
         <MessageTargetPicker
           source={dragState.source}
           participants={participantNames}
-          hovered={dragState.hoverTarget}
+          hovered={dragState.pointedTarget ?? null}
           left={dragState.sourceX - offsetX}
           top={dragState.sourceY - offsetY}
           onHover={(target: string | null) =>
