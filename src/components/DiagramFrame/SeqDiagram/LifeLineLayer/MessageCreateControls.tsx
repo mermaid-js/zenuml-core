@@ -13,7 +13,7 @@ import { useCan } from "@/store/interaction/useCan";
 import { elementScale, rectToLocal } from "@/utils/diagramCoords";
 import { insertMessageInDsl } from "@/utils/insertMessageInDsl";
 import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
-import { swallowFollowUps } from "@/store/interaction/InteractionController";
+import { swallowFollowUps } from "@/store/interaction/swallowFollowUps";
 import { useCallback, useEffect, useId, useMemo, useRef } from "react";
 import { MessageTargetPicker } from "./MessageTargetPicker";
 
