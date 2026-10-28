@@ -132,6 +132,22 @@ test.describe("Message create: target picker", () => {
     await expect.poll(() => lastChange(page)).toMatch(/A->C\.newMessage\(\)/);
   });
 
+  test("keyboard: an arrow key pressed right after opening is not undone", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/create-message.html");
+    const gap = page.getByTestId("message-gap-hover-1");
+    await gap.focus();
+    // No wait between the keys: the picker's own preview of the first
+    // option must not pull the selection back after ArrowDown.
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("ArrowDown");
+    const picker = page.getByTestId("message-create-target-picker");
+    await expect(picker.getByRole("option", { name: "C" })).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect.poll(() => lastChange(page)).toMatch(/A->C\.newMessage\(\)/);
+  });
+
   test("keyboard: Escape returns focus to the gap", async ({ page }) => {
     await page.goto("/e2e/fixtures/create-message.html");
     const gap = page.getByTestId("message-gap-hover-1");
