@@ -38,11 +38,7 @@ test.describe("Message create: target picker", () => {
   }) => {
     const picker = await openPickerByClick(page);
     await expect(picker).toHaveAttribute("role", "listbox");
-    await expect(picker.getByRole("option")).toHaveText([
-      "A (self)",
-      "B",
-      "C",
-    ]);
+    await expect(picker.getByRole("option")).toHaveText(["A (self)", "B", "C"]);
     await expect(picker.getByRole("option", { name: "B" })).toBeFocused();
     await expect(page.getByTestId("message-create-source-dot")).toBeVisible();
     await expect.poll(() => lastChange(page)).toBeNull();
@@ -88,7 +84,10 @@ test.describe("Message create: target picker", () => {
   }) => {
     await openPickerByClick(page);
     const diagram = await page.locator(".sequence-diagram").boundingBox();
-    await page.mouse.click(diagram!.x + 4, diagram!.y + diagram!.height - 4);
+    await page.mouse.click(
+      diagram!.x + diagram!.width - 4,
+      diagram!.y + diagram!.height - 4,
+    );
     await expect(page.getByTestId("message-create-target-picker")).toHaveCount(
       0,
     );
@@ -118,7 +117,9 @@ test.describe("Message create: target picker", () => {
     const gap = page.getByTestId("message-gap-hover-1");
     await gap.focus();
     await page.keyboard.press("Enter");
-    await expect(page.getByTestId("message-create-target-picker")).toBeVisible();
+    await expect(
+      page.getByTestId("message-create-target-picker"),
+    ).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.getByTestId("message-create-target-picker")).toHaveCount(
       0,

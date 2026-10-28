@@ -156,6 +156,12 @@ export const createMessageDragAtom = atom<{
   insertIndex: number;
   blockContext: any | null;
   hostContext?: any;
+  // The target is chosen in the picker instead of by dragging: after a click
+  // on the handle, a keyboard start, or a drag released away from any
+  // participant. The insert position and source stay as they were.
+  picking?: boolean;
+  // Where focus goes back to when the picker closes without a message.
+  returnFocus?: HTMLElement | null;
 } | null>(null);
 
 export const messageReorderDragAtom = atom<string | null>(null);

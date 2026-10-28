@@ -39,7 +39,7 @@ const surfaceSelector = (state: InteractionState) =>
  * `preventDefault` on `pointerdown` does not cancel `click` or `contextmenu`.
  * Swallow them until the press ends.
  */
-const swallowFollowUps = () => {
+export const swallowFollowUps = () => {
   const swallow = (event: Event) => {
     event.preventDefault();
     event.stopImmediatePropagation();
