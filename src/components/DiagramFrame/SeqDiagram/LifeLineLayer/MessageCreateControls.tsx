@@ -116,8 +116,9 @@ export const MessageCreateControls = () => {
   );
 
   // Picking: a press on a participant chooses it, a press in the picker is
-  // the picker's own, and any other press cancels. Window capture runs
-  // before the InteractionController's document listener.
+  // the picker's own, and any other press cancels; inside the diagram that
+  // press is consumed. Window capture runs before the InteractionController's
+  // document listener.
   useEffect(() => {
     if (!dragState?.picking || !diagramElement || !canCreate) return;
     const participantAt = (target: EventTarget | null) => {
@@ -146,6 +147,15 @@ export const MessageCreateControls = () => {
         event.target.closest('[data-interaction-surface="createDrag"]')
       )
         return;
+      // Outside the diagram the press belongs to the host: cancel and let it
+      // act, as the InteractionController does for menus (ADR 0002, R2).
+      if (
+        !(event.target instanceof Node) ||
+        !diagramElement.contains(event.target)
+      ) {
+        closePicker(false);
+        return;
+      }
       event.preventDefault();
       event.stopPropagation();
       swallowFollowUps();

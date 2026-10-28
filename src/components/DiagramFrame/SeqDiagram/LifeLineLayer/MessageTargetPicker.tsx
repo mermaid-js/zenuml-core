@@ -72,7 +72,9 @@ export const MessageTargetPicker = (props: {
         onCancel();
         return;
       case "Tab":
-        event.preventDefault();
+        // Leave without a message. Focus goes back to where the picker was
+        // opened from before the browser moves it on, so Tab is not trapped.
+        onCancel();
         return;
     }
   };
