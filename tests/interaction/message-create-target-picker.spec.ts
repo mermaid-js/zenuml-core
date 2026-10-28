@@ -114,6 +114,53 @@ test.describe("Message create: target picker", () => {
     await expect.poll(() => lastChange(page)).toBeNull();
   });
 
+  test("a press outside the diagram cancels the picker and still reaches its target", async ({
+    page,
+  }) => {
+    await openPickerByClick(page);
+    // An embedder's own control, outside the diagram.
+    await page.evaluate(() => {
+      const button = document.createElement("button");
+      button.id = "host-button";
+      button.textContent = "Host action";
+      button.style.cssText = "position:fixed;right:8px;bottom:8px";
+      button.addEventListener("click", () => {
+        (window as any).__hostClicked = true;
+      });
+      document.body.appendChild(button);
+    });
+    await page.locator("#host-button").click();
+    await expect(page.getByTestId("message-create-target-picker")).toHaveCount(
+      0,
+    );
+    await expect
+      .poll(() => page.evaluate(() => (window as any).__hostClicked ?? false))
+      .toBe(true);
+    await expect.poll(() => lastChange(page)).toBeNull();
+  });
+
+  test("keyboard: Tab leaves the picker without creating a message", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/create-message.html");
+    const gap = page.getByTestId("message-gap-hover-1");
+    await gap.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByTestId("message-create-target-picker"),
+    ).toBeVisible();
+    await page.keyboard.press("Tab");
+    await expect(page.getByTestId("message-create-target-picker")).toHaveCount(
+      0,
+    );
+    // Focus moves on from the gap instead of being trapped or lost.
+    await expect(gap).not.toBeFocused();
+    expect(
+      await page.evaluate(() => document.activeElement !== document.body),
+    ).toBe(true);
+    await expect.poll(() => lastChange(page)).toBeNull();
+  });
+
   test("keyboard: Enter on a message gap opens the picker, arrows and Enter create", async ({
     page,
   }) => {
