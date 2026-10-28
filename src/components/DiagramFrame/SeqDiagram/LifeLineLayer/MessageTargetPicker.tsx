@@ -12,6 +12,8 @@ export const MessageTargetPicker = (props: {
   participants: string[];
   left: number;
   top: number;
+  /** The participant the pointer is on, on the diagram. */
+  hovered: string | null;
   onHover: (target: string | null) => void;
   onPick: (target: string) => void;
   onCancel: () => void;
@@ -27,6 +29,15 @@ export const MessageTargetPicker = (props: {
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const onHoverRef = useRef(onHover);
   onHoverRef.current = onHover;
+
+  // Pointing at a participant on the diagram makes its option active, so the
+  // list and the diagram preview never disagree.
+  const { hovered } = props;
+  useEffect(() => {
+    if (!hovered) return;
+    const index = participants.indexOf(hovered);
+    if (index >= 0) setActive(index);
+  }, [hovered, participants]);
 
   // The active option holds focus and is previewed on the diagram.
   useEffect(() => {

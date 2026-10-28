@@ -129,8 +129,11 @@ export const MessageCreateControls = () => {
       const name = element.dataset.participantId;
       return name && participants.some((p) => p.name === name) ? name : null;
     };
+    // The preview stays on the last participant pointed at, or on the
+    // picker's active option, when the pointer leaves the participants.
     const onPointerMove = (event: PointerEvent) => {
       const target = participantAt(event.target);
+      if (!target) return;
       setDragState((prev) =>
         prev && prev.hoverTarget !== target
           ? { ...prev, hoverTarget: target }
@@ -435,6 +438,7 @@ export const MessageCreateControls = () => {
         <MessageTargetPicker
           source={dragState.source}
           participants={participantNames}
+          hovered={dragState.hoverTarget}
           left={dragState.sourceX - offsetX}
           top={dragState.sourceY - offsetY}
           onHover={(target: string | null) =>

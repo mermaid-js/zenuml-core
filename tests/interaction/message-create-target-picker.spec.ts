@@ -55,6 +55,26 @@ test.describe("Message create: target picker", () => {
     );
   });
 
+  test("pointing at a participant on the diagram makes its option active", async ({
+    page,
+  }) => {
+    const picker = await openPickerByClick(page);
+    await page.locator('[data-participant-id="C"]').hover();
+    await expect(picker.getByRole("option", { name: "C" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.getByTestId("message-create-target-C")).toBeVisible();
+    // Leaving the participants keeps the preview on C.
+    const diagram = await page.locator(".sequence-diagram").boundingBox();
+    await page.mouse.move(diagram!.x + diagram!.width - 4, diagram!.y + 4);
+    await expect(page.getByTestId("message-create-target-C")).toBeVisible();
+    await expect(picker.getByRole("option", { name: "C" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
   test("choosing a picker option creates a sync message", async ({ page }) => {
     const picker = await openPickerByClick(page);
     await picker.getByRole("option", { name: "C" }).click();
