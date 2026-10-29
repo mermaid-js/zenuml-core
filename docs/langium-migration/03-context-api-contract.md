@@ -149,7 +149,7 @@ Direct call sites in the four renderer dirs. The Langium grammar/AST must preser
 | `name()` | `ParticipantStylePanel.tsx:137`, `utils/participantStyleTransform.ts:28,52` | `name()?.getFormattedText()` — quote-stripped name. |
 | `participantType()` | `participantStyleTransform.ts:42` | `@Actor` etc.; `.replace("@","")`. |
 | `COLOR()` | `participantStyleTransform.ts:43` | Terminal: `COLOR?.()?.getText()` (`#ff0000`). |
-| `label()` / `stereotype()` / `emoji()` | `participantStyleTransform.ts:44-46` | each `?.name()?.getFormattedText()` (emoji via `name?.()`). |
+| `label()` / `stereotype()` / `emoji()` | `participantStyleTransform.ts:44-46` | each `?.name()?.getFormattedText()` (emoji via `name?.()`); `stereotype().name()` is dual (array of words for `<<a b>>`), read through `stereotypeName()` in `src/parser/stereotypeName.ts`. |
 | `start/stop` | `participantStyleTransform.ts:60-61` (rewrite declaration range) | |
 
 ### GroupContext

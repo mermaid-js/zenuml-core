@@ -28,7 +28,7 @@
 | `GroupContext` | `Group` | `Prog.headElements[i]` / `Group.participants[i]` | direct |
 | `ParticipantContext` | `Participant` | `Prog.headElements[i]`, `Group.participants[i]` | direct |
 | `ParticipantTypeContext` | — | `Participant.participantType` (raw `@…` string) | property (CST segment via `findNodeForProperty`) |
-| `StereotypeContext` | `Stereotype` | `Participant.stereotype` | direct |
+| `StereotypeContext` | `Stereotype` | `Participant.stereotype` | direct; `name()` is dual over `Stereotype.names[]` (one `NameContext` per word of `<<a b>>`) |
 | `LabelContext` | `Label` | `Participant.label` | direct |
 | `EmojiContext` | `Emoji` | `Participant.emoji`, `From/To.emoji`, `MethodName.emoji` | direct. ANTLR's `EMOJI_SHORTCODE` alternative is dropped: the token is referenced by `sequenceParser.g4` but **never defined in the lexer** — it can never match |
 | `NameContext` | — (datatype rule `Name returns string`) | `.name` on Participant/Group/Stereotype/Label/Emoji/From/To/MethodName; `Ref.names[]`; `CreationBody.construct`; `Assignment.type`; `Declaration.type` | property |
@@ -161,8 +161,10 @@ atoms in ANTLR — unreachable as textExpr).
 ANTLR's full-context prediction binds `<<name` (unclosed) as stereotype `<<`
 plus PARTICIPANT name `name` (golden `tol-05c`); the grammar encodes this by
 requiring `>>`/`>` after the stereotype name. Residual divergence: `<<a b`
-(two words, never closed) binds `a` to the participant here while ANTLR would
-swallow `a` into the stereotype — not corpus-reachable, live-typing edge only.
+(two words, never closed) binds `a` to the participant here while ANTLR makes
+`a` the stereotype and `b` the participant — not corpus-reachable, live-typing
+edge only. A CLOSED stereotype accepts several words on both engines
+(`<< a b >>` → `names: ["a", "b"]`, golden `tol-05d`).
 
 ### 5.6 `participant` left-factored
 Type-led / stereotype-led / name-led alternatives (token-deterministic, same

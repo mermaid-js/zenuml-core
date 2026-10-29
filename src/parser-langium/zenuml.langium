@@ -73,15 +73,18 @@ Participant:
   | {infer Participant} stereotype=Stereotype (emoji=Emoji? name=Name width=INT? label=Label? color=COLOR?)?
   | {infer Participant} emoji=Emoji? name=Name width=INT? label=Label? color=COLOR?;
 
-// stereotype: SOPEN name SCLOSE | SOPEN name GT? | (LT|SOPEN)(GT|SCLOSE)?  [ET #5]
+// stereotype: SOPEN name+ SCLOSE | SOPEN name GT? | (LT|SOPEN)(GT|SCLOSE)?  [ET #5]
+// A closed stereotype may hold several words (`<< legacy system >>`); the
+// unclosed tolerance (`<<name`, `<<name>`) stays single-word so `<<a b` keeps
+// binding `b` as the participant name on ANTLR.
 // The closer is REQUIRED in the name-bearing alternative: ANTLR's full-context
-// prediction binds an uncloseed `<<name` as stereotype(`<<`) + participant
+// prediction binds an unclosed `<<name` as stereotype(`<<`) + participant
 // name "name" (pinned by golden tol-05c-stereotype-partial). Residual edge:
 // `<<a b` (two words, no closer) binds a to the participant here, while ANTLR
-// would swallow a into the stereotype — not corpus-reachable, documented in
-// 10-ast-mapping.md.
+// makes a the stereotype and b the participant — not corpus-reachable,
+// documented in 10-ast-mapping.md.
 Stereotype:
-    {infer Stereotype} SOPEN name=Name (SCLOSE | GT)
+    {infer Stereotype} SOPEN names+=Name ((names+=Name)* SCLOSE | GT)
   | {infer Stereotype} (LT | SOPEN) (GT | SCLOSE)?;
 
 // label: AS name | AS  [ET #6]

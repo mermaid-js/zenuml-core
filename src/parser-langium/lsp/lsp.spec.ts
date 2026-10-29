@@ -101,5 +101,13 @@ describe("ZenUML LSP", () => {
         hover: /\*\*Participant\*\* `@Actor` `Admin`/,
       });
     });
+
+    test("hovering a participant shows a multi-word stereotype", async () => {
+      await hover({
+        text: "<<legacy system>> <|>Admin\nAdmin->DB: query",
+        index: 0,
+        hover: /\*\*Participant\*\* `Admin` «legacy system»/,
+      });
+    });
   });
 });

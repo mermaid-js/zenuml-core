@@ -19,8 +19,8 @@ export class ZenUmlHoverProvider extends AstNodeHoverProvider {
   ): MaybePromise<string | undefined> {
     if (isParticipant(node)) {
       const type = node.participantType ? ` \`${node.participantType}\`` : "";
-      const stereotype = node.stereotype?.name
-        ? ` «${node.stereotype.name}»`
+      const stereotype = node.stereotype?.names?.length
+        ? ` «${node.stereotype.names.join(" ")}»`
         : "";
       return `**Participant**${type} \`${node.name ?? "?"}\`${stereotype}`;
     }

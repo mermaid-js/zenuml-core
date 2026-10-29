@@ -650,13 +650,28 @@ export class ParticipantContext extends Ctx {
 }
 
 export class StereotypeContext extends Ctx {
-  name(): NameContext | null {
-    return this._propNode(NameContext, "name");
+  /** ANTLR `stereotype: SOPEN name+ SCLOSE | …` — one NameContext per word. */
+  name(i?: number): any {
+    return dual(this._names(), i);
+  }
+
+  private _names(): NameContext[] {
+    const ast = this._ast;
+    if (!ast?.$cstNode || !ast.names?.length) return [];
+    return this._synth(ast, "names", () => {
+      const csts = GrammarUtils.findNodesForProperty(ast.$cstNode, "names");
+      return csts.map(
+        (cst: CstNode) =>
+          new NameContext(this._doc, null, this, {
+            offset: cst.offset,
+            end: cst.end,
+          }),
+      );
+    });
   }
 
   protected override _buildChildren(): Ctx[] {
-    const name = this.name();
-    return name ? [name] : [];
+    return this._names();
   }
 }
 

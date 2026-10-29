@@ -51,6 +51,7 @@ const toleranceCases: TreeCorpusEntry[] = [
   { id: "tol-05a-stereotype-open", code: "<<" },
   { id: "tol-05b-stereotype-empty", code: "<<>>" },
   { id: "tol-05c-stereotype-partial", code: "<<name" },
+  { id: "tol-05d-stereotype-multiword", code: "<< a b >> A" },
   { id: "tol-06-as-no-alias", code: "A as" },
   { id: "tol-07a-bare-annotation-participant", code: "@Actor" },
   { id: "tol-07b-bare-stereotype-participant", code: "<<x>>" },

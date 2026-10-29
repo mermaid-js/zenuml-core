@@ -55,6 +55,19 @@ describe("participantStyleTransform", () => {
     );
   });
 
+  it("keeps a multi-word stereotype when changing something else", () => {
+    expect(apply("<<a b>> A\nA->B: hi", "A", { color: "#3b82f6" })).toBe(
+      "<<a b>> A #3b82f6\nA->B: hi",
+    );
+    expect(apply("<< a  b >> A\nA->B: hi", "A", { color: "#3b82f6" })).toBe(
+      "<<a  b>> A #3b82f6\nA->B: hi",
+    );
+    const code = "<<a b>> A\nA->B: hi";
+    expect(readParticipantDeclaration(RootContext(code), "A")?.stereotype).toBe(
+      "a b",
+    );
+  });
+
   it("keeps existing quoted labels quoted when changing something else", () => {
     expect(
       apply('A as "Alice Smith"\nA->B: hi', "A", { color: "#3b82f6" }),

@@ -4,6 +4,7 @@ import {
   safeParse,
   sameDeclaration,
 } from "./dslRoundTrip";
+import { stereotypeName, stereotypeNameRange } from "@/parser/stereotypeName";
 
 export type ParticipantUpdates = {
   color?: string | null; // null = remove color
@@ -73,7 +74,7 @@ export const readParticipantDeclaration = (
     type:
       ctx.participantType?.()?.getFormattedText()?.replace("@", "") ??
       undefined,
-    stereotype: ctx.stereotype?.()?.name?.()?.getFormattedText() ?? undefined,
+    stereotype: stereotypeName(ctx.stereotype?.()) ?? undefined,
     emoji: ctx.emoji?.()?.name?.()?.getFormattedText() ?? undefined,
     width: ctx.width?.()?.getFormattedText() ?? undefined,
     label: ctx.label?.()?.name?.()?.getFormattedText() ?? undefined,
@@ -82,8 +83,13 @@ export const readParticipantDeclaration = (
 };
 
 const rawOf = (code: string, ctx: any): string | undefined =>
-  ctx?.start && ctx?.stop
-    ? code.slice(ctx.start.start, ctx.stop.stop + 1)
+  rawOfRange(code, ctx, ctx);
+
+// Source text from the first token of `first` to the last token of `last`
+// (inner whitespace included) — for multi-node spans such as `<<a  b>>`.
+const rawOfRange = (code: string, first: any, last: any): string | undefined =>
+  first?.start && last?.stop
+    ? code.slice(first.start.start, last.stop.stop + 1)
     : undefined;
 
 // Untouched attributes keep their original source spelling (quotes included);
@@ -108,7 +114,7 @@ const buildStyle = (
     if (updates.stereotype)
       parts.push(`<<${quoteIfNeeded(updates.stereotype, forceQuotes)}>>`);
   } else if (existing.stereotype) {
-    const raw = rawOf(code, ctx.stereotype?.()?.name?.());
+    const raw = rawOfRange(code, ...stereotypeNameRange(ctx.stereotype?.()));
     parts.push(`<<${raw ?? quoteIfNeeded(existing.stereotype)}>>`);
   }
 
