@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.12.1
+
+### Patch Changes
+
+- [#657](https://github.com/mermaid-js/zenuml-core/pull/657) [`431457a`](https://github.com/mermaid-js/zenuml-core/commit/431457a9bd77a985a0edcfbd1b1abe8e84a2a893) Thanks [@MrCoder](https://github.com/MrCoder)! - Participant spacing now accounts for the «stereotype» row. A stereotype wider than the participant name (for example `<<alongstereotype_aaaaa>> a`) used to overlap the neighbouring participant box and be clipped by the diagram frame; the positioning engine now reserves the wider of the name row and the stereotype, so the boxes keep their normal gap and the frame grows to fit them.
+
 ## 4.12.0
 
 ### Minor Changes
