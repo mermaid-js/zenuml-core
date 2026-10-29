@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.12.0
+
+### Minor Changes
+
+- [#654](https://github.com/mermaid-js/zenuml-core/pull/654) [`f5f5e92`](https://github.com/mermaid-js/zenuml-core/commit/f5f5e92dbdc1a7e59a21fcec62a1f2caeadb7f6b) Thanks [@MrCoder](https://github.com/MrCoder)! - Accept multi-word stereotypes: `<<legacy system>> A` now parses (on both the ANTLR and Langium parsers) and renders the stereotype as `legacy system`, the same as `<<"legacy system">> A`. Previously the line was a syntax error that also dropped every participant of the diagram.
+
 ## 4.11.0
 
 ### Minor Changes
