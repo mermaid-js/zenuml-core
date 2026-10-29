@@ -145,3 +145,43 @@ describe("Let us focus on order", () => {
     expect(coordinates.getPosition("B1")).toBe(posB1);
   });
 });
+
+// #655: the box grows to fit a long «stereotype», so the slot must too —
+// otherwise neighbouring boxes overlap and the first one is clipped by the
+// frame. The stub measures the digits after the first character, so «300x»
+// is 300px wide while the names stay 1px.
+describe("participant width includes the stereotype", () => {
+  beforeEach(() => {
+    clearCache();
+  });
+
+  it("widens the slot when the stereotype is wider than the name", () => {
+    const rootContext = RootContext("<<300x>> A1 <<300x>> B1");
+    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const half = (300 + MARGIN) / 2;
+    expect(coordinates.half("A1")).toBe(half);
+    expect(coordinates.getPosition("A1")).toBe(half);
+    expect(coordinates.getPosition("B1")).toBe(half * 3);
+    expect(coordinates.distance("A1", "B1")).toBeGreaterThanOrEqual(
+      coordinates.half("A1") + coordinates.half("B1"),
+    );
+    expect(coordinates.getWidth()).toBe(half * 4);
+  });
+
+  it("keeps the minimum slot for a short stereotype", () => {
+    const rootContext = RootContext("<<10x>> A1 <<10x>> B1");
+    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    const posA1 = MIN_PARTICIPANT_WIDTH / 2 + MARGIN / 2;
+    expect(coordinates.getPosition("A1")).toBe(posA1);
+    expect(coordinates.getPosition("B1")).toBe(
+      posA1 + MIN_PARTICIPANT_WIDTH + MARGIN,
+    );
+  });
+
+  it("uses whichever of the name row and the stereotype is wider", () => {
+    const rootContext = RootContext("<<300x>> A200 <<100x>> B400");
+    const coordinates = new Coordinates(rootContext, stubWidthProvider);
+    expect(coordinates.half("A200")).toBe((300 + MARGIN) / 2);
+    expect(coordinates.half("B400")).toBe((400 + MARGIN) / 2);
+  });
+});
