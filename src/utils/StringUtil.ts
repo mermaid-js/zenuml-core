@@ -26,6 +26,15 @@ export const getPrevLineHead = (code: string, position: number) => {
   }
   return 0;
 };
+export const getLineTail = (code: string, index: number) => {
+  const next = code.indexOf("\n", index);
+  return next === -1 ? code.length : next + 1;
+};
+export const getLineEnd = (code: string, index: number) => {
+  const next = code.indexOf("\n", index);
+  return next === -1 ? code.length : next;
+};
+export const getIndent = (line: string) => line.match(/^\s*/)?.[0] ?? "";
 export const getPrevLine = (code: string, position: number) => {
   const lineHead = getLineHead(code, position);
   if (lineHead === 0) return "";
