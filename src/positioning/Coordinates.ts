@@ -162,9 +162,21 @@ export class Coordinates {
       participantDisplayName(participant),
       TextType.ParticipantName,
     );
+    // The «stereotype» row sits above the name row and the box grows to fit
+    // whichever is wider, so the slot must as well (#655). Both renderers draw
+    // it at the participant font size.
+    const stereotypeWidth = participant.stereotype
+      ? this.widthProvider(
+          `«${participant.stereotype}»`,
+          TextType.ParticipantName,
+        )
+      : 0;
     const participantWidth =
-      Math.max(labelWidth + iconWidth + emojiWidth, MIN_PARTICIPANT_WIDTH) +
-      MARGIN;
+      Math.max(
+        labelWidth + iconWidth + emojiWidth,
+        stereotypeWidth,
+        MIN_PARTICIPANT_WIDTH,
+      ) + MARGIN;
 
     this.participantWidthCache.set(participant.name, participantWidth);
     return participantWidth;

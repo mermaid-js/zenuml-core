@@ -54,6 +54,9 @@ gh pr create --title "<concise title>" --body "$(cat <<'EOF'
 ## Summary
 <bullet points>
 
+## Before / after
+<only when the change is visible: screenshots of the same diagram before and after, same renderer/theme/viewport, plus measurements if useful>
+
 ## Test plan
 <what was tested>
 EOF
@@ -61,6 +64,8 @@ EOF
 ```
 
 The PR targets `main` on `mermaid-js/zenuml-core`.
+
+**Before/after always comes with screenshots.** If the branch changes anything a user can see (layout, spacing, colours, text, icons, exports), the PR body carries a before and an after screenshot of the same diagram, captured the same way (renderer, theme, viewport), with a one-line caption saying what to look at. A table of pixel measurements is a complement, not a substitute. Capture the "before" from `main` (or the pre-fix commit) before pushing the fix; `e2e/fixtures/creation.html?dsl=...` renders arbitrary DSL and `e2e/fixtures/svg-test.html` + `window.__renderSvg(code)` covers the SVG export. Attach the images to the PR; when the environment cannot upload images to GitHub (API-only access), send them to the user, keep them in the scratchpad with `before`/`after` in the file names, and say in the PR body that the screenshots were shared out of band.
 
 ### 4. Hand off to babysit-pr — always
 
