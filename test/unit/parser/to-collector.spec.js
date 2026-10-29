@@ -75,7 +75,13 @@ describe("with interface", () => {
     ["<<A>> X 1024", "A"],
     ["<<A>> X <<B>> X", "A"], // Ignore redefining
     ["<<A>> X\n<<B>> X", "A"],
-  ])("code:%s => width:%s", (code, stereotype) => {
+    ["<< A >> X", "A"],
+    ["<<A B>> X", "A B"],
+    ["<< A B >> X", "A B"],
+    ["<<  A   B  >> X", "A B"],
+    ["<<A B C>> X", "A B C"],
+    ['<<"A B">> X', "A B"],
+  ])("code:%s => stereotype:%s", (code, stereotype) => {
     // `A` will be parsed as a participant which matches `participant EOF`
     let participants = getParticipants(code);
     expect(participants.Size()).toBe(1);

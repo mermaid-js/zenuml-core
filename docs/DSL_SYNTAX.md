@@ -90,6 +90,15 @@ participant <<Service>> OrderService
 @Control <<API>> Gateway
 ```
 
+A closed stereotype may contain several words. Inner whitespace is collapsed
+to single spaces, so the three declarations below all render as `legacy system`:
+
+```
+<<legacy system>> Mainframe
+<< legacy   system >> Mainframe
+<<"legacy system">> Mainframe
+```
+
 ### Color
 
 Append a hex color code to set the participant's header color:

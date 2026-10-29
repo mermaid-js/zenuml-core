@@ -149,9 +149,15 @@ export interface LabelContext extends IrNode {
   name(): NameContext | null;
 }
 
-/** `<<stereotype>>` node under a participant. */
+/**
+ * `<<stereotype>>` node under a participant. A closed stereotype may hold
+ * several words (`<< legacy system >>`): one NameContext per word, in source
+ * order. Dual arity like {@link BlockContext.stat}. Read the joined text via
+ * `stereotypeName()` in `src/parser/stereotypeName.ts`.
+ */
 export interface StereotypeContext extends IrNode {
-  name(): NameContext | null;
+  name(): NameContext[];
+  name(i: number): NameContext | null;
 }
 
 /** Emoji declaration under a participant. `name` is OPTIONAL here (09 §3.3). */

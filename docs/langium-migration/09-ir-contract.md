@@ -266,7 +266,8 @@ Kind-specific members only; every kind also carries the base surface
 | `StarterContext` | (base only) | offsets + formatted text |
 | `ParticipantContext` | `name()`, `participantType()`, `COLOR()`, `label()`, `stereotype()`, `emoji()` | participantStyleTransform.ts, ParticipantStylePanel.tsx; `instanceof` in LifeLineLayer.tsx |
 | `GroupContext` | `name()` | LifeLineGroup.tsx; `instanceof` in LifeLineLayer.tsx |
-| `LabelContext` / `StereotypeContext` | `name()` | participantStyleTransform.ts |
+| `LabelContext` | `name()` | participantStyleTransform.ts |
+| `StereotypeContext` | `name()` (dual: one `NameContext` per word of `<<a b>>`) | participantStyleTransform.ts, participantCollection.ts via `stereotypeName()` |
 | `EmojiContext` | `name?()` (optional method) | participantStyleTransform.ts |
 | `ParticipantTypeContext` / `NameContext` | (base only) | formatted text + offsets |
 | `BlockContext` | `stat()` (dual) | Block.tsx, BlockVM, StatementVM, Numbering.ts, insert*InDsl.ts, Occurrence.tsx |

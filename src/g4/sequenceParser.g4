@@ -43,7 +43,7 @@ participant
  ;
 
 stereotype
- : SOPEN name SCLOSE
+ : SOPEN name+ SCLOSE                 // <<Service>>, << legacy system >> (multi-word)
  | SOPEN name GT?
  | (LT | SOPEN) (GT | SCLOSE)?         // Some people may write <<>> first then put in the interface name
  ;

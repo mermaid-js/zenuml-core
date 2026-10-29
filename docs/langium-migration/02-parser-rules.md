@@ -118,8 +118,8 @@ Direct token: `COLOR` (a `#rrggbb`-style token).
 
 | Alt | Body | Notes |
 |---|---|---|
-| 1 | `SOPEN name SCLOSE` | `<<name>>` complete. |
-| 2 | `SOPEN name GT?` | **[ET]** unclosed: `<<name` or `<<name>`. |
+| 1 | `SOPEN name+ SCLOSE` | `<<name>>` complete; several words allowed (`<< legacy system >>`), one `name` per word. |
+| 2 | `SOPEN name GT?` | **[ET]** unclosed: `<<name` or `<<name>` — single word only, so `<<a b` keeps `b` as the participant. |
 | 3 | `(LT | SOPEN) (GT | SCLOSE)?` | **[ET]** comment: "Some people may write `<<>>` first then put in the interface name" — matches `<`, `<<`, `<>`, `<<>>`, `<< >`, etc. |
 
 Direct tokens: `SOPEN` (`<<`), `SCLOSE` (`>>`), `LT` (`<`), `GT` (`>`). Note `LT`/`GT` are also relational operators in `expr` — context-dependent reuse, a known migration hazard.

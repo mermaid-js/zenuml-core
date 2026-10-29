@@ -14,6 +14,7 @@
  * 2. A participant declaration overwrite cannot be overwritten by To or Starter
  */
 import { Participants, type Position } from "./Participants";
+import { stereotypeName } from "./stereotypeName";
 
 // Parse-tree contexts reach the handlers as ANTLR-generated classes (or their
 // Langium facade twins) whose prototype augmentations (Owner, From, getComment,
@@ -37,7 +38,7 @@ export function onParticipant(ctx: Ctx, state: CollectState): void {
   const type = ctx?.participantType()?.getFormattedText().replace("@", "");
   const participant =
     ctx?.name()?.getFormattedText() || "Missing `Participant`";
-  const stereotype = ctx.stereotype()?.name()?.getFormattedText();
+  const stereotype = stereotypeName(ctx.stereotype());
   const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
   const width =
     (ctx.width && ctx.width() && Number.parseInt(ctx.width().getText())) ||

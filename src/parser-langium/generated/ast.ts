@@ -1158,12 +1158,12 @@ export function isStat(item: unknown): item is Stat {
 export interface Stereotype extends langium.AstNode {
     readonly $container: Participant;
     readonly $type: 'Stereotype';
-    name?: Name;
+    names: Array<Name>;
 }
 
 export const Stereotype = {
     $type: 'Stereotype',
-    name: 'name'
+    names: 'names'
 } as const;
 
 export function isStereotype(item: unknown): item is Stereotype {
@@ -2108,8 +2108,9 @@ export class ZenUmlAstReflection extends langium.AbstractAstReflection {
         Stereotype: {
             name: Stereotype.$type,
             properties: {
-                name: {
-                    name: Stereotype.name
+                names: {
+                    name: Stereotype.names,
+                    defaultValue: []
                 }
             },
             superTypes: []
