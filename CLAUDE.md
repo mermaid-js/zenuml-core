@@ -116,6 +116,7 @@ When starting work on a bug (especially from a GitHub issue):
 2. **Capture a baseline** — if the bug is visual, take a Playwright snapshot or screenshot of the broken state before fixing. This serves as evidence of what changed.
 3. **Fix the code** — make the minimal change to fix the bug.
 4. **Verify the fix** — the failing test from step 1 must now pass. All other existing tests must still pass.
+5. **Show before and after** — whenever you report a before/after comparison (PR description, issue comment, or a reply to the user) and the change is visible, always include screenshots: the baseline from step 2 next to the same diagram rendered after the fix, taken with the same renderer, theme, and viewport. Measurements and tables complement the images, they do not replace them. Keep the files in the session scratchpad with `before`/`after` in their names, send them to the user, and attach them to the PR; if the tooling at hand cannot upload images to GitHub, say so in the PR body and name the files so a human can drop them in.
 
 Never skip the reproduction step. If you can't reproduce it, you don't understand the bug well enough to fix it.
 
