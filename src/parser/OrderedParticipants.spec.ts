@@ -203,4 +203,16 @@ describe("OrderedParticipants model fields", () => {
     expect(participantHasIcon(a)).toBe(true);
     expect(participantHasIcon(b)).toBe(false);
   });
+
+  it("has no icon for a type that no icon exists for (#661)", () => {
+    const [unknown, cloud, starter] = getFlattenedParticipants(
+      '@Alice "Alice"\n@CloudFront CDN\n@Starter(S)\nS->CDN: m',
+    );
+    expect(unknown.type).toBe("Alice");
+    expect(participantHasIcon(unknown)).toBe(false);
+    // Types with an icon, whatever the case, keep it.
+    expect(participantHasIcon(cloud)).toBe(true);
+    // Starter: its own icon decision is unchanged by the fix.
+    expect(starter.isStarter).toBe(true);
+  });
 });

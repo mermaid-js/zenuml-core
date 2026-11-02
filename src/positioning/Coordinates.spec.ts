@@ -25,6 +25,14 @@ describe("get absolute position of a participant", () => {
     expect(coordinates.getPosition("A1")).toBe(50);
   });
 
+  it("reserves no icon width for a type without an icon (#661)", () => {
+    const width = (code: string) =>
+      new Coordinates(RootContext(code), stubWidthProvider).getPosition("A300");
+    expect(width("@Alice A300")).toBe(width("A300"));
+    // A type that has an icon still reserves the slot.
+    expect(width("@Actor A300")).toBeGreaterThan(width("A300"));
+  });
+
   it("One wide participant", () => {
     const rootContext = RootContext("A300");
     const coordinates = new Coordinates(rootContext, stubWidthProvider);

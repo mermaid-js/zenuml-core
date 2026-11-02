@@ -78,7 +78,7 @@ resolveWidthProvider()
   // Controlled by URL param ?WIDTH_PROVIDER=canvas or env VITE_WIDTH_PROVIDER
 ```
 
-Participant width = `labelWidth + iconWidth (40px if typed) + emojiWidth (24px) + margin (20px)`, minimum 80px.
+Participant width = `labelWidth + iconWidth (40px if the type has an icon) + emojiWidth (24px) + margin (20px)`, minimum 80px.
 
 ## Anchor Model
 

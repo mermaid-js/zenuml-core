@@ -1,4 +1,5 @@
 import type { Participant } from "@/parser/Participants";
+import { hasIconFor } from "@/components/DiagramFrame/Tutorial/IconKeys";
 
 /**
  * A participant in display order: the plain `ToValue()` data of a parsed
@@ -18,7 +19,7 @@ export function participantDisplayName(p: IParticipantModel): string {
   return p.label || p.name;
 }
 
-/** Only participants with a defined type have icons. */
+/** Only participants whose type has an icon reserve an icon slot (#661). */
 export function participantHasIcon(p: IParticipantModel): boolean {
-  return p.type !== undefined;
+  return hasIconFor(p.type);
 }
