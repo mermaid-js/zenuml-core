@@ -68,7 +68,7 @@ const frame = new FrameBuilder(participantNames).getFrame(context)
 type IParticipantModel = Readonly<ReturnType<Participant['ToValue']> & { left: string }>
 // name, label, type, stereotype, color, emoji, groupId, isStarter, ... + left (previous participant's name)
 participantDisplayName(p)  // label || name
-participantHasIcon(p)      // type !== undefined
+participantHasIcon(p)      // the type has an icon (hasIconFor), see #661
 
 interface OwnableMessage {
   from: string

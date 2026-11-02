@@ -21,6 +21,7 @@ import { useMemo, useRef, useState } from "react";
 import { useActiveSurface, useCan } from "@/store/interaction/useCan";
 import { ParticipantLabel } from "./ParticipantLabel";
 import { AsyncIcon } from "../../Tutorial/AsyncIcon";
+import { hasIconFor } from "../../Tutorial/IconKeys";
 // import iconPath from "../../Tutorial/Icons"; // Removed eager import
 
 const INTERSECTION_ERROR_MARGIN = 10;
@@ -120,7 +121,12 @@ export const Participant = (props: {
   );
 
   // Determine icon key
-  const iconKey = isDefaultStarter ? "actor" : effectiveType?.toLowerCase();
+  // A type without an icon gets no slot, as in the layout (#661).
+  const iconKey = isDefaultStarter
+    ? "actor"
+    : hasIconFor(effectiveType)
+      ? effectiveType?.toLowerCase()
+      : undefined;
 
   return (
     <div

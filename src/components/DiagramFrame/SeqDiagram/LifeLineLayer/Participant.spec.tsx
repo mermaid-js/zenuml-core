@@ -97,3 +97,21 @@ describe("Participant select capability", () => {
     expect(clickBox(RenderMode.Static)).toEqual([]);
   });
 });
+
+describe("Participant icon slot (#661)", () => {
+  const slot = (entity: Record<string, string>) =>
+    renderParticipant(entity).box().querySelector(".h-6.w-6");
+
+  it("renders no icon slot for a type that has no icon", () => {
+    expect(slot({ name: "Alice", type: "Alice" })).toBeNull();
+  });
+
+  it("renders no icon slot for an untyped participant", () => {
+    expect(slot({ name: "Alice" })).toBeNull();
+  });
+
+  it("keeps the slot for a type that has an icon, also while it loads", () => {
+    expect(slot({ name: "DB", type: "Database" })).not.toBeNull();
+    expect(slot({ name: "CDN", type: "CloudFront" })).not.toBeNull();
+  });
+});
