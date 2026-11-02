@@ -33,64 +33,48 @@
   <body>
     <div class="app-shell">
       <header class="toolbar">
-        <div class="toolbar-title">
-          <strong>ZenUML Workbench</strong>
-          <span>Design, render, and inspect a sequence</span>
+        <strong class="product-name">ZenUML</strong>
+        <span class="saved-state" role="status" aria-label="Saving…" title="Saving…"></span>
+        <div class="view-tabs" role="group" aria-label="Preview mode">
+          <button id="view-svg" class="tool-chip">SVG</button>
+          <button id="view-dom" class="tool-chip">DOM</button>
+          <button id="view-split" class="tool-chip">Split</button>
         </div>
-        <nav class="toolbar-actions" aria-label="Workbench tools">
-          <a class="tool-link" href="/e2e/tools/compare.html" target="_blank" rel="noreferrer">Compare Cases ↗</a>
-          <a class="tool-link" href="/e2e/tools/svg-preview.html" target="_blank" rel="noreferrer">SVG Only ↗</a>
-          <button onclick="exportDiagram()" class="tool-button primary">Export PNG</button>
-        </nav>
+        <button class="tool-chip menu-button" type="button" popovertarget="overflow-menu" aria-label="More tools">⋯</button>
+        <div id="overflow-menu" class="overflow-menu" popover>
+          <button class="menu-row" type="button" data-closes-menu onclick="loadExample('basic')">Basic sample<span class="menu-hint" aria-hidden="true">Load</span></button>
+          <button class="menu-row" type="button" data-closes-menu onclick="loadExample('advanced')">Advanced sample<span class="menu-hint" aria-hidden="true">Load</span></button>
+          <button class="menu-row" type="button" data-closes-menu onclick="clearEditor()">Clear editor<span class="menu-hint" aria-hidden="true">Clear</span></button>
+          <a class="menu-row" href="/e2e/tools/compare.html" target="_blank" rel="noreferrer">Compare Cases<span class="menu-hint" aria-hidden="true">↗</span></a>
+          <a class="menu-row" href="/e2e/tools/svg-preview.html" target="_blank" rel="noreferrer">SVG Only<span class="menu-hint" aria-hidden="true">↗</span></a>
+          <button class="menu-row" type="button" data-closes-menu onclick="exportDiagram()">Export PNG<span class="menu-hint" aria-hidden="true">↓</span></button>
+          <button class="menu-row capability-switch" type="button" role="switch" data-flag="enableParticipantInsertion">Insert participant<span class="switch-track" aria-hidden="true"></span></button>
+          <button class="menu-row capability-switch" type="button" role="switch" data-flag="enableMessageInsertion">Insert message<span class="switch-track" aria-hidden="true"></span></button>
+          <button class="menu-row capability-switch" type="button" role="switch" data-flag="enableDividerInsertion">Insert divider<span class="switch-track" aria-hidden="true"></span></button>
+          <button class="menu-row capability-switch" type="button" role="switch" data-flag="enableParticipantStyleEditing">Style participant<span class="switch-track" aria-hidden="true"></span></button>
+          <button id="width-provider-toggle" class="menu-row" type="button">Text width<span class="menu-hint" aria-hidden="true"></span></button>
+        </div>
       </header>
 
       <main class="workspace mode-svg" id="workspace">
-        <article class="panel editor-panel">
-          <div class="panel-header">
-            <div class="panel-title"><h2>Editor</h2></div>
-            <div class="panel-actions">
-              <button onclick="loadExample('basic')" class="tool-button">Basic</button>
-              <button onclick="loadExample('advanced')" class="tool-button">Advanced</button>
-              <button onclick="clearEditor()" class="tool-button">Clear</button>
-            </div>
-          </div>
-          <div class="saved-state" role="status">Saving…</div>
+        <article class="panel editor-panel" aria-label="Editor">
           <div class="panel-body editor-body"><textarea id="text" style="display: none"></textarea></div>
         </article>
 
         <div id="editor-resizer" class="workspace-resizer" role="separator" aria-orientation="vertical" aria-label="Resize editor"></div>
 
-        <article class="panel preview-panel">
-          <div class="panel-header preview-header">
-            <div class="panel-title"><h2>Preview</h2></div>
-            <div class="view-tabs" role="group" aria-label="Preview mode">
-              <button id="view-svg" class="tool-chip">SVG</button>
-              <button id="view-dom" class="tool-chip">DOM</button>
-              <button id="view-split" class="tool-chip">Split</button>
+        <article class="panel preview-panel" aria-label="Preview">
+          <div class="preview-views">
+            <div class="html-panel preview-view">
+              <div class="preview-stage html-stage"><div class="fit-box"><div class="fit-content"><pre class="zenuml"></pre></div></div></div>
+            </div>
+            <div class="svg-panel preview-view">
+              <div class="preview-stage svg-stage"><div class="fit-box"><div class="fit-content"><div id="svg-container"></div></div></div></div>
             </div>
           </div>
-          <div class="preview-canvas">
-            <div class="preview-views">
-              <div class="html-panel preview-view">
-                <div class="preview-stage html-stage"><div class="stage-caption">Sequence preview</div><pre class="zenuml"></pre></div>
-              </div>
-              <div class="svg-panel preview-view">
-                <div class="preview-stage svg-stage"><div class="stage-caption">Sequence preview</div><div id="svg-container"></div></div>
-              </div>
-            </div>
-          </div>
-          <section class="capabilities" aria-label="DOM editing capabilities">
-            <div class="capabilities-title">DOM EDITING <span>· enabled controls appear on the diagram</span></div>
-            <div class="capability-list">
-              <button class="capability-switch" type="button" role="switch" data-flag="enableParticipantInsertion" aria-label="Insert participant"><span>Insert participant</span><span class="switch-track" aria-hidden="true"></span></button>
-              <button class="capability-switch" type="button" role="switch" data-flag="enableMessageInsertion" aria-label="Insert message"><span>Insert message</span><span class="switch-track" aria-hidden="true"></span></button>
-              <button class="capability-switch" type="button" role="switch" data-flag="enableDividerInsertion" aria-label="Insert divider"><span>Insert divider</span><span class="switch-track" aria-hidden="true"></span></button>
-              <button class="capability-switch" type="button" role="switch" data-flag="enableParticipantStyleEditing" aria-label="Style participant"><span>Style participant</span><span class="switch-track" aria-hidden="true"></span></button>
-            </div>
-          </section>
         </article>
       </main>
-      <footer class="diagnostics-footer"><span class="render-indicator" role="status">Waiting</span><span id="svg-stats" class="stats-text">SVG: waiting</span><button id="width-provider-toggle" class="width-toggle" type="button"></button></footer>
+      <footer class="diagnostics-footer"><span class="render-indicator" role="status">Waiting</span><span id="svg-stats" class="stats-text">SVG: waiting</span><button id="zoom-toggle" class="zoom-toggle" type="button"></button></footer>
     </div>
 
     <script type="module">
@@ -119,6 +103,11 @@
         split: document.getElementById("view-split"),
       };
       const minEditorWidth = 280;
+      const minEditorHeight = 80;
+      const minPreviewHeight = 160;
+      // Top bar + divider + status line, which match the heights in workbench.css.
+      const chromeHeight = 64;
+      const stackedLayout = window.matchMedia("(max-width: 1024px)");
 
       function clampEditorWidth(nextWidth) {
         const maxEditorWidth = Math.max(minEditorWidth, window.innerWidth - 412);
@@ -129,6 +118,78 @@
         const clampedWidth = clampEditorWidth(nextWidth);
         document.documentElement.style.setProperty("--editor-width", `${clampedWidth}px`);
         localStorage.setItem("zenuml-workbench-editor-width", String(clampedWidth));
+      }
+
+      function clampEditorHeight(nextHeight) {
+        const maxEditorHeight = Math.max(minEditorHeight, window.innerHeight - chromeHeight - minPreviewHeight);
+        return Math.min(Math.max(nextHeight, minEditorHeight), maxEditorHeight);
+      }
+
+      function setEditorHeight(nextHeight) {
+        const clampedHeight = clampEditorHeight(nextHeight);
+        document.documentElement.style.setProperty("--editor-height", `${clampedHeight}px`);
+        localStorage.setItem("zenuml-workbench-editor-height", String(clampedHeight));
+      }
+
+      function syncResizerOrientation() {
+        editorResizer.setAttribute("aria-orientation", stackedLayout.matches ? "horizontal" : "vertical");
+      }
+      stackedLayout.addEventListener("change", syncResizerOrientation);
+      syncResizerOrientation();
+
+      const zoomToggle = document.getElementById("zoom-toggle");
+      const previewViews = [...document.querySelectorAll(".preview-view")];
+      const stagePadding = 16;
+      let zoomMode = localStorage.getItem("zenuml-workbench-zoom") === "actual" ? "actual" : "fit";
+
+      // Scale a wrapper, never pre.zenuml or the svg: PNG export clones those with
+      // their computed style. Width only, because sequence diagrams scroll down.
+      // Split view uses one scale so both renderings stay comparable.
+      function applyZoom() {
+        const shown = previewViews.filter((view) => view.clientWidth > 0);
+        let scale = 1;
+        if (zoomMode === "fit") {
+          shown.forEach((view) => {
+            const naturalWidth = view.querySelector(".fit-content").offsetWidth;
+            if (naturalWidth) scale = Math.min(scale, (view.clientWidth - stagePadding) / naturalWidth);
+          });
+        }
+        shown.forEach((view) => {
+          const content = view.querySelector(".fit-content");
+          const box = view.querySelector(".fit-box");
+          content.style.transform = scale < 1 ? `scale(${scale})` : "";
+          box.style.width = `${content.offsetWidth * scale}px`;
+          box.style.height = `${content.offsetHeight * scale}px`;
+        });
+        const percent = `${Math.round(scale * 100)}%`;
+        zoomToggle.textContent = zoomMode === "fit" ? `Fit ${percent}` : "100%";
+        zoomToggle.setAttribute("aria-label", `Zoom ${zoomToggle.textContent}`);
+        zoomToggle.title = zoomMode === "fit" ? "Show at actual size" : "Fit to panel width";
+      }
+
+      zoomToggle.addEventListener("click", () => {
+        zoomMode = zoomMode === "fit" ? "actual" : "fit";
+        localStorage.setItem("zenuml-workbench-zoom", zoomMode);
+        applyZoom();
+      });
+
+      const zoomObserver = new ResizeObserver(applyZoom);
+      zoomObserver.observe(document.querySelector(".preview-panel"));
+      document.querySelectorAll(".fit-content").forEach((content) => zoomObserver.observe(content));
+
+      new ResizeObserver(() => editor.refresh()).observe(document.querySelector(".editor-body"));
+
+      const overflowMenu = document.getElementById("overflow-menu");
+      overflowMenu.querySelectorAll("[data-closes-menu]").forEach((item) => {
+        item.addEventListener("click", () => overflowMenu.hidePopover());
+      });
+
+      function setSavedState(message, failed = false) {
+        const savedState = document.querySelector(".saved-state");
+        savedState.setAttribute("aria-label", message);
+        savedState.title = message;
+        savedState.classList.toggle("is-failed", failed);
+        savedState.textContent = failed ? "Not saved" : "";
       }
 
       function setViewMode(mode) {
@@ -142,6 +203,7 @@
         });
 
         localStorage.setItem("zenuml-workbench-view", validMode);
+        applyZoom();
       }
 
       const FLAG_KEYS = [
@@ -214,8 +276,8 @@
           }
 
           svgContainer.innerHTML = result.svg;
-          svgStats.textContent = `SVG ${result.width} × ${result.height}   ${dt} ms`;
-          document.querySelector(".render-indicator").innerHTML = '<span class="saved-dot" aria-hidden="true"></span> Rendered';
+          svgStats.textContent = `· ${result.width} × ${result.height} · ${dt} ms`;
+          document.querySelector(".render-indicator").textContent = "Rendered";
         } catch (error) {
           console.error("Failed to render native SVG preview:", error);
           svgContainer.innerHTML = `
@@ -233,16 +295,17 @@
       });
 
       editorResizer.addEventListener("pointerdown", (event) => {
-        if (window.innerWidth <= 1024) {
-          return;
-        }
-
         event.preventDefault();
         workspace.classList.add("is-resizing");
         editorResizer.setPointerCapture(event.pointerId);
 
         const onPointerMove = (moveEvent) => {
-          setEditorWidth(moveEvent.clientX - workspace.getBoundingClientRect().left);
+          const origin = workspace.getBoundingClientRect();
+          if (stackedLayout.matches) {
+            setEditorHeight(moveEvent.clientY - origin.top);
+          } else {
+            setEditorWidth(moveEvent.clientX - origin.left);
+          }
         };
 
         const stopResize = () => {
@@ -262,6 +325,10 @@
         if (savedWidth) {
           setEditorWidth(savedWidth);
         }
+        const savedHeight = Number(localStorage.getItem("zenuml-workbench-editor-height"));
+        if (savedHeight) {
+          setEditorHeight(savedHeight);
+        }
       });
 
       editor.on("change", function (cm) {
@@ -275,9 +342,9 @@
             // Save to localStorage
             try {
               localStorage.setItem("zenuml-cm-code", content);
-              document.querySelector(".saved-state").innerHTML = '<span class="saved-dot" aria-hidden="true"></span> Saved locally in this browser';
+              setSavedState("Saved locally in this browser");
             } catch {
-              document.querySelector(".saved-state").textContent = "Could not save in this browser";
+              setSavedState("Could not save in this browser", true);
             }
           },
         );
@@ -350,6 +417,11 @@ WebApp --> Customer: Order confirmation`,
         setEditorWidth(savedEditorWidth);
       }
 
+      const savedEditorHeight = Number(localStorage.getItem("zenuml-workbench-editor-height"));
+      if (savedEditorHeight) {
+        setEditorHeight(savedEditorHeight);
+      }
+
       setViewMode(localStorage.getItem("zenuml-workbench-view") || "svg");
     </script>
     <script type="module">
@@ -357,8 +429,7 @@ WebApp --> Customer: Order confirmation`,
       const wp = params.get("WIDTH_PROVIDER") || import.meta.env.VITE_WIDTH_PROVIDER || "browser";
       const toggle = document.getElementById("width-provider-toggle");
       const isCanvas = wp === "canvas";
-      toggle.textContent = "Text width: " + (isCanvas ? "Canvas" : "Browser") + " ▾";
-      toggle.classList.toggle("is-active", isCanvas);
+      toggle.querySelector(".menu-hint").textContent = isCanvas ? "Canvas" : "Browser";
       toggle.title = "Click to switch to " + (isCanvas ? "browser" : "canvas");
       toggle.addEventListener("click", () => {
         const next = isCanvas ? "browser" : "canvas";
