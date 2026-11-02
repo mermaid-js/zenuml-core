@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.12.2
+
+### Patch Changes
+
+- [#662](https://github.com/mermaid-js/zenuml-core/pull/662) [`7809909`](https://github.com/mermaid-js/zenuml-core/commit/7809909e23b3a3f370090d0ad6108c2fe0d2b1e3) Thanks [@MrCoder](https://github.com/MrCoder)! - Do not reserve an icon slot for a participant type that has no icon. A declaration such as `@Alice "Alice"` no longer pushes the name 28px to the right or adds extra width ([#661](https://github.com/mermaid-js/zenuml-core/issues/661)).
+
 ## 4.12.1
 
 ### Patch Changes
