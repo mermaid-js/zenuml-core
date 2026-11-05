@@ -1,6 +1,7 @@
 import { describe, it, expect } from "bun:test";
 import { RootContext, parse } from "./index";
 import { renderToSvg } from "@/svg/renderToSvg";
+import sequenceParser from "../generated-parser/sequenceParser";
 
 // Issue #672: a dangling `->`, `=`, `@return` or unclosed `"` must not draw an
 // element that the DSL does not contain.
@@ -132,4 +133,46 @@ describe("valid DSL close to the dangling forms is unchanged (#672)", () => {
     expect(svgTexts('"Bob Smith"')).toContain("Bob Smith");
     expect(svgTexts('A->B: "hello')).toContain("&quot;hello");
   });
+});
+
+describe("pruning survives minified class names (#672)", () => {
+  // A production bundle renames the generated classes, so the prune must not
+  // look at `constructor.name`.
+  const classes: any[] = [
+    sequenceParser.BlockContext,
+    sequenceParser.StatContext,
+  ];
+  const original = classes.map((c) => c.name);
+
+  function minify() {
+    classes.forEach((c, i) =>
+      Object.defineProperty(c, "name", { value: `m${i}`, configurable: true }),
+    );
+  }
+  function restore() {
+    classes.forEach((c, i) =>
+      Object.defineProperty(c, "name", {
+        value: original[i],
+        configurable: true,
+      }),
+    );
+  }
+
+  it.each(["A->", "r =", "@return", "if(x) {\n  A->\n}", "A.b() {\n  r =\n}"])(
+    "%j is still dropped",
+    (code) => {
+      minify();
+      try {
+        // RootContext caches by text; a comment line keeps this parse fresh.
+        const fresh = `// minified\n${code}`;
+        const empty = code.includes("{")
+          ? code.replace(/\n {2}[^\n]*\n/, "\n")
+          : "";
+        expect(numbers(fresh)).toEqual(empty ? numbers(empty) : []);
+        if (!code.includes("{")) expect(statements(fresh)).toHaveLength(0);
+      } finally {
+        restore();
+      }
+    },
+  );
 });

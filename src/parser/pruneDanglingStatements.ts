@@ -5,9 +5,14 @@
 // participant collection in step. The tokens stay in the token stream, so
 // source ranges and comments are not affected.
 
+import sequenceParser from "../generated-parser/sequenceParser";
+
+// Class identity, not `constructor.name`: a minified bundle renames classes.
+const BlockContext = sequenceParser.BlockContext;
+const StatContext = sequenceParser.StatContext;
+
 type Node = {
   children?: Node[] | null;
-  constructor: { name: string };
   [member: string]: any;
 };
 
@@ -44,17 +49,16 @@ function isDanglingStat(stat: Node): boolean {
 }
 
 export function pruneDanglingStatements(root: Node): void {
-  const visit = (node: Node) => {
+  const visit = (node: Node): void => {
     const children = node.children;
     if (!children) return;
-    if (node.constructor.name === "BlockContext") {
+    if (node instanceof BlockContext) {
       const kept = children.filter(
-        (child) =>
-          child.constructor.name !== "StatContext" || !isDanglingStat(child),
+        (child) => !(child instanceof StatContext) || !isDanglingStat(child),
       );
-      if (kept.length !== children.length) node.children = kept;
+      if (kept.length !== children.length) (node as Node).children = kept;
     }
-    for (const child of node.children!) {
+    for (const child of (node as Node).children!) {
       if (child.children) visit(child);
     }
   };
