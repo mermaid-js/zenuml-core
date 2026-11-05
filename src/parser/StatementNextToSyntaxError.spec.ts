@@ -124,9 +124,9 @@ describe("valid message forms keep their parse", () => {
     ["A.b: hi", ["A", ""]],
     ["A.b.c: hi", ["A", ""], ["b", ""]],
     ["A.b.c = d()", ["A", ""], ["b", ""], [undefined, "d()"]],
-    ["r =\nb: hi", [undefined, ""]],
-    ["r =\nb->c: hi", [undefined, ""]],
-    ["r =\nb = c()", [undefined, ""], [undefined, "c()"]],
+    ["r =\nb: hi"],
+    ["r =\nb->c: hi"],
+    ["r =\nb = c()", [undefined, "c()"]],
   ])("%s stays separate statements", (code, ...expected) => {
     expect(validate(code).pass).toBe(true);
     expect(messages(RootContext(code))).toEqual(expected);
