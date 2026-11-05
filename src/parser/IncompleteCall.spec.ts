@@ -205,7 +205,7 @@ describe("valid multi-line DSL is unchanged (#671)", () => {
         ["C", "m()"],
       ],
     ],
-    // Several calls on one line, and a block after the call.
+    // Several calls on one line.
     [
       "A.b(x); C.d(y)",
       [
