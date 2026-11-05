@@ -1,6 +1,6 @@
 {
   "name": "Node.js & Browser Tools",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
   "features": {
     "ghcr.io/devcontainers/features/node:2": {
       "version": "none"

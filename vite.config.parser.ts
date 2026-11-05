@@ -14,8 +14,9 @@ import { alias } from "./vite.shared";
 // antlr4 is ESM-only, so `require("antlr4")` in the CJS bundle returns its module
 // namespace (`{ __esModule, default }`), and Rollup's default interop would read
 // the API off that namespace instead of `.default`. `interop: "auto"` honors
-// `__esModule`. The CJS entry needs a Node with `require(esm)` on by default
-// (>=20.19 or >=22.12); older versions throw ERR_REQUIRE_ESM.
+// `__esModule`. The CJS entry needs a Node with `require(esm)` on by default,
+// which is why `engines.node` starts at 22.12; older versions can throw
+// ERR_REQUIRE_ESM.
 export default defineConfig({
   build: {
     target: "esnext",
