@@ -298,7 +298,19 @@ export abstract class Ctx {
 
   getFormattedText(): string {
     const { offset, end } = this._span();
-    return formatText(this._doc.text.slice(offset, end));
+    const text = formatText(this._doc.text.slice(offset, end));
+    // A lone unclosed string (`"Bob Sm`) is a name still being typed; mirror
+    // the ANTLR side, which drops the opening quote (src/parser/index.ts).
+    const doc = this._doc;
+    const first = doc.lowerBound(offset);
+    const leaf = doc.leaves[first];
+    if (leaf && leaf.type === "USTRING" && leaf.offset < end) {
+      let next = first + 1;
+      while (doc.leaves[next]?.hidden) next++;
+      const after = doc.leaves[next];
+      if (!after || after.offset >= end) return text.replace(/^"/, "");
+    }
+    return text;
   }
 
   /* ---- comments (normative algorithm, 09 §3.4) ---- */
