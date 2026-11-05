@@ -36,6 +36,8 @@ const malformedCases: TreeCorpusEntry[] = [
   { id: "malformed-half-arrow", code: "A -" },
   { id: "malformed-nested-if-typo", code: "if(x) { if(y() {}}" },
   { id: "malformed-if-unclosed-paren", code: "if(x" },
+  { id: "malformed-unclosed-quote-participant", code: '"Bob Sm' },
+  { id: "malformed-unclosed-quote-method", code: 'A."b' },
 ];
 
 // 02-parser-rules.md §8 — the 25 tolerance points. Rows listing several input
