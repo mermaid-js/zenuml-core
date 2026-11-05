@@ -77,69 +77,47 @@
                             {
                               "kind": "StatContext",
                               "start": 11,
-                              "stop": 7,
-                              "children": [
-                                {
-                                  "kind": "MessageContext",
-                                  "start": 11,
-                                  "stop": 7,
-                                  "children": [
-                                    {
-                                      "kind": "MessageBodyContext",
-                                      "start": 11,
-                                      "stop": 7,
-                                      "children": []
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "kind": "StatContext",
-                              "start": 11,
-                              "stop": 12,
-                              "children": [
-                                {
-                                  "kind": "MessageContext",
-                                  "start": 11,
-                                  "stop": 12,
-                                  "children": [
-                                    {
-                                      "kind": "MessageBodyContext",
-                                      "start": 11,
-                                      "stop": 12,
-                                      "children": [
-                                        {
-                                          "token": "ID",
-                                          "text": "P",
-                                          "error": true
-                                        },
-                                        {
-                                          "token": "DOT",
-                                          "text": ".",
-                                          "error": true
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "kind": "StatContext",
-                              "start": 13,
                               "stop": 15,
                               "children": [
                                 {
                                   "kind": "MessageContext",
-                                  "start": 13,
+                                  "start": 11,
                                   "stop": 15,
                                   "children": [
                                     {
                                       "kind": "MessageBodyContext",
-                                      "start": 13,
+                                      "start": 11,
                                       "stop": 15,
                                       "children": [
+                                        {
+                                          "kind": "FromToContext",
+                                          "start": 11,
+                                          "stop": 12,
+                                          "children": [
+                                            {
+                                              "kind": "ToContext",
+                                              "start": 11,
+                                              "stop": 11,
+                                              "children": [
+                                                {
+                                                  "kind": "NameContext",
+                                                  "start": 11,
+                                                  "stop": 11,
+                                                  "children": [
+                                                    {
+                                                      "token": "ID",
+                                                      "text": "P"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "token": "DOT",
+                                              "text": "."
+                                            }
+                                          ]
+                                        },
                                         {
                                           "kind": "FuncContext",
                                           "start": 13,

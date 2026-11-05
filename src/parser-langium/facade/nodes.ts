@@ -30,6 +30,10 @@ import { GrammarUtils, isCompositeCstNode, isLeafCstNode } from "langium";
 import type { AstNode, CstNode } from "langium";
 import { formatText } from "@/utils/StringUtil";
 import { Assignment } from "@/parser/Messages/Assignment";
+import {
+  hoistNamelessCreations,
+  isNamelessCreation,
+} from "@/parser/NamelessCreation";
 
 /* ------------------------------------------------------------------ */
 /* Document context: flattened leaf stream + memoization caches        */
@@ -298,7 +302,19 @@ export abstract class Ctx {
 
   getFormattedText(): string {
     const { offset, end } = this._span();
-    return formatText(this._doc.text.slice(offset, end));
+    const text = formatText(this._doc.text.slice(offset, end));
+    // A lone unclosed string (`"Bob Sm`) is a name still being typed; mirror
+    // the ANTLR side, which drops the opening quote (src/parser/index.ts).
+    const doc = this._doc;
+    const first = doc.lowerBound(offset);
+    const leaf = doc.leaves[first];
+    if (leaf && leaf.type === "USTRING" && leaf.offset < end) {
+      let next = first + 1;
+      while (doc.leaves[next]?.hidden) next++;
+      const after = doc.leaves[next];
+      if (!after || after.offset >= end) return text.length > 1 ? text.replace(/^"/, "") : text;
+    }
+    return text;
   }
 
   /* ---- comments (normative algorithm, 09 §3.4) ---- */
@@ -702,9 +718,13 @@ export class EmojiContext extends Ctx {
 /* ------------------------------------------------------------------ */
 
 export class BlockContext extends Ctx {
+  /** A nameless `new` is replaced by its body's statements (#673). */
   stat(i?: number): any {
-    const arr = (this._ast.stats ?? []).map((s: any) => this._statWrapper(s));
-    return dual(arr, i);
+    return dual(hoistNamelessCreations(this._rawStats()), i);
+  }
+
+  private _rawStats(): StatContext[] {
+    return (this._ast.stats ?? []).map((s: any) => this._statWrapper(s));
   }
 
   /** ANTLR block.stop = last stat's stop, which can be an EVENT_END. */
@@ -721,7 +741,7 @@ export class BlockContext extends Ctx {
   }
 
   protected override _buildChildren(): Ctx[] {
-    return this.stat();
+    return this._rawStats();
   }
 }
 
@@ -810,7 +830,10 @@ export class StatContext extends Ctx {
     let ctx: Ctx | null = this.parentCtx;
     while (ctx) {
       if (ctx instanceof ProgContext) return ctx.Starter();
-      if (ctx instanceof MessageContext || ctx instanceof CreationContext) {
+      if (
+        ctx instanceof MessageContext ||
+        (ctx instanceof CreationContext && !isNamelessCreation(ctx))
+      ) {
         const receiver = ctx.Owner();
         if (receiver) return receiver;
       }
@@ -836,7 +859,10 @@ export class StatContext extends Ctx {
 
 function getOwnerFromAncestor(ctx: Ctx | null): string | undefined {
   while (ctx) {
-    if (ctx instanceof CreationContext || ctx instanceof MessageContext)
+    if (
+      (ctx instanceof CreationContext && !isNamelessCreation(ctx)) ||
+      ctx instanceof MessageContext
+    )
       return ctx.Owner();
     ctx = ctx.parentCtx;
   }

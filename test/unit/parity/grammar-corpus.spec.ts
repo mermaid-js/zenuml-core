@@ -72,6 +72,13 @@ const RECOVERY_CASES = new Set([
   "malformed-lone-brace", // `{`
   "malformed-par-unclosed-brace", // `par {`
   "malformed-section-unclosed-brace", // `section {`
+  // #670: the shared header recovery reports the missing `(` or `{` in both
+  // engines. The token it adds leaves no error node in the ANTLR golden.
+  "tol-28a-if-no-paren-next-line",
+  "tol-28d-opt-open-paren",
+  "tol-28e-try-no-brace",
+  "tol-28f-ref-no-paren",
+  "tol-28g-ref-open-list",
 ]);
 
 describe("grammar corpus — all 198 tree-corpus cases (raw Langium AST)", () => {
@@ -151,6 +158,34 @@ describe("grammar corpus — recovery cases keep statements outside the damage",
       k.startsWith("$") ? undefined : v,
     );
     expect(text).toContain('"after"');
+  });
+
+  it("tol-28: an incomplete fragment header leaves the next lines alone (#670)", () => {
+    const expected: [string, string, number][] = [
+      ["if\nA.c()\nA.d()", "Alt", 1],
+      ["if(a ==\nA.c()\nA.d()", "Alt", 0],
+      ["while(\nA.c()\nA.d()", "Loop", 0],
+      ["opt(\nA.c()\nA.d()", "Opt", 1],
+      ["try\nA.c()\nA.d()", "Tcf", 1],
+      ["ref\nA.c()\nA.d()", "Ref", 1],
+      ["ref(x,\nA.c()\nA.d()", "Ref", 1],
+    ];
+    for (const [code, fragment, errors] of expected) {
+      const result = parseZen(code);
+      const types = (result.value as any).block.stats.map((s: any) => s.$type);
+      expect(types).toEqual([fragment, "Message", "Message"]);
+      expect(result.parserErrors).toHaveLength(0);
+      expect(result.lexerErrors).toHaveLength(errors);
+    }
+  });
+
+  it("tol-28: a closed multi-line header keeps its valid parse (#670)", () => {
+    for (const code of ["if(a ==\n  b) {\n}", "ref(x,\n  A)"]) {
+      const result = parseZen(code);
+      expect((result.value as any).block.stats).toHaveLength(1);
+      expect(result.parserErrors).toHaveLength(0);
+      expect(result.lexerErrors).toHaveLength(0);
+    }
   });
 
   it("tol-09a/b: `A ~>` degrades like ANTLR (errors, non-null AST)", () => {

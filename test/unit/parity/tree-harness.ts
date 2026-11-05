@@ -32,11 +32,12 @@ import sequenceParser from "../../../src/generated-parser/sequenceParser";
 // RootContext export.
 import "../../../src/parser/index";
 import { keepBlocksWithOwners } from "../../../src/parser/BlockOwnership";
-import sequenceLexer from "../../../src/generated-parser/sequenceLexer";
+import { HeaderRecoveringLexer } from "../../../src/parser/HeaderRecoveringLexer";
 
 function antlrRootContext(code: string) {
   const chars = new antlr4.InputStream(code);
-  const lexer = new sequenceLexer(chars);
+  const lexer = new HeaderRecoveringLexer(chars);
+  lexer.removeErrorListeners();
   const tokens = new antlr4.CommonTokenStream(lexer);
   const parser = keepBlocksWithOwners(new sequenceParser(tokens));
   parser.removeErrorListeners();

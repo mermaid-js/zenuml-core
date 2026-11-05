@@ -4,6 +4,41 @@ options {
   tokenVocab = sequenceLexer;
 }
 
+@members {
+  // Predicates for messageBody. See the comment on that rule.
+  const P = sequenceParser;
+  const NAME_START = [P.ID, P.DIGIT_LEADING_NAME, P.CSTRING, P.USTRING, P.LBRACKET, P.EMOJI_SHORTCODE];
+  // After a leading name, these show a new statement: `b->c`, `b - c`, `b <- c`, `b = d()`, `b, c = d()`, `b: e`.
+  const NEW_STATEMENT = [P.ARROW, P.MINUS, P.RETURN_ARROW, P.ASSIGN, P.COMMA, P.COL];
+  // The offset of the token after the `emoji? name` that starts at offset i.
+  this.afterName = function(i) {
+    const first = this._input.LA(i);
+    return i + (first === P.LBRACKET ? 4 : first === P.EMOJI_SHORTCODE ? 2 : 1);
+  };
+  // `A.`: the name is the target of a message, not the first signature of a func.
+  this.isTargetAhead = function() {
+    return this._input.LA(this.afterName(1)) === P.DOT;
+  };
+  // After `A.`: `b`, `b()` or `b.c()` is the func of this message. `b: e` and `b.c: e` are new statements.
+  this.isFuncAhead = function() {
+    let i = 1;
+    while (NAME_START.includes(this._input.LA(i))) {
+      i = this.afterName(i);
+      if (this._input.LA(i) !== P.DOT) {
+        return !NEW_STATEMENT.includes(this._input.LA(i));
+      }
+      i += 1;
+    }
+    return false;
+  };
+  // After `r =`: the message that follows is the assigned value.
+  this.isAssignedMessageAhead = function() {
+    const afterFrom = this.afterName(1);
+    const hasFrom = this._input.LA(afterFrom) === P.ARROW;
+    return this.isTargetAhead() || this.isFuncAhead() || (hasFrom && this._input.LA(this.afterName(afterFrom + 1)) === P.DOT);
+  };
+}
+
 prog
  : title? EOF                            // An empty string is a valid prog
 // | LT EOF                       // Parser auto recover from this
@@ -168,10 +203,16 @@ message
 // - fromTo (+ optional func): `A->B.m()` or `A->B.` and `B.m()` or `B.`
 // We flatten `func` at this rule level (not inside fromTo) so
 // messageBody().func() remains available for callers that rely on it.
+// `A.b()` also fits `func` with `A` as its first signature, and `A.` followed by a
+// new statement `b()`. `r = A.b()` also fits `r =` followed by a new statement.
+// ANTLR settles such an ambiguity by reading past the end of the statement, so an
+// error in the next token invalidates a complete statement, and recovery splits it
+// into three messages. It always settled on the first alternative, and the
+// predicates choose that alternative at once, so valid input parses the same.
 messageBody
- : assignment (fromTo (func)? | func)?
- | fromTo (func)?
- | func
+ : assignment (fromTo (func | {!this.isFuncAhead()}?) | {!this.isTargetAhead()}? func | {!this.isAssignedMessageAhead()}?)
+ | fromTo (func | {!this.isFuncAhead()}?)
+ | {!this.isTargetAhead()}? func
  ;
 
 // Only the target (from/to) and dot; func is flattened at messageBody level

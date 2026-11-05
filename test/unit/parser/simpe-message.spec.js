@@ -44,13 +44,12 @@ describe("message - incomplete", () => {
   expect(message.messageBody().fromTo().to().getText()).toBe("A");
   });
 
-  // This will be parsed as to statements: `A.` and `m(`, so the first statement has a null func.
-  // The editor should close the () in most cases. We do not add alternative rules to allow this
-  // to be parsed as one statement, because it causes other issues.
+  // The grammar alone parses this as two statements, `A.` and `m(`. The parser
+  // closes an unclosed call first; see repairIncompleteCalls.
   test("A.m(", () => {
     let message = Fixture.firstStatement("A.m(").message();
-    let signatureElement = message.messageBody().func();
-    expect(signatureElement).toBeNull();
+    expect(message.messageBody().fromTo().to().getText()).toBe("A");
+    expect(message.SignatureText()).toBe("m()");
   });
 });
 

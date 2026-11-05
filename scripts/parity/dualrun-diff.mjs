@@ -48,9 +48,9 @@ const { TREE_CORPUS } = await import(
 // ANTLR engine (parse + serialize via its own facade-compatible API)
 // ---------------------------------------------------------------------------
 import antlr4 from "antlr4";
-const sequenceLexer = (
-  await import(path.join(ROOT, "src/generated-parser/sequenceLexer.js"))
-).default;
+const { HeaderRecoveringLexer } = await import(
+  path.join(ROOT, "src/parser/HeaderRecoveringLexer.ts")
+);
 const sequenceParser = (
   await import(path.join(ROOT, "src/generated-parser/sequenceParser.js"))
 ).default;
@@ -62,7 +62,8 @@ const { keepBlocksWithOwners } = await import(
 
 function antlrRootCtx(code) {
   const chars = new antlr4.InputStream(code);
-  const lexer = new sequenceLexer(chars);
+  const lexer = new HeaderRecoveringLexer(chars);
+  lexer.removeErrorListeners();
   const tokens = new antlr4.CommonTokenStream(lexer);
   const parser = keepBlocksWithOwners(new sequenceParser(tokens));
   parser.removeErrorListeners();

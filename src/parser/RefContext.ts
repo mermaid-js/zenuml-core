@@ -9,9 +9,10 @@ const RefContext = seqParser.RefContext;
 // `ref()` so the `ref` rule can still match. A synthesized name has an
 // inverted token interval (stop before start) and yields empty source text;
 // it must not surface as content, an editable label, or an edit range.
+// HeaderRecoveringLexer adds an empty name for `ref` + a new line in the same way.
 function isSynthesizedName(name: any): boolean {
   if (!name || !name.start || !name.stop) return true;
-  return name.stop.tokenIndex < name.start.tokenIndex;
+  return name.stop.tokenIndex < name.start.tokenIndex || name.getText() === "";
 }
 
 augment<RefContextAugmented>(RefContext, {
