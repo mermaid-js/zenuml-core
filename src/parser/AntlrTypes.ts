@@ -135,6 +135,7 @@ export interface AsyncMessageNode extends AntlrNode {
 export interface CreationNode extends AntlrNode {
   From?(): string;
   Owner?(): string;
+  Constructor?(): string | undefined;
   SignatureText?(): string;
   braceBlock?(): { block?(): BlockNode } | null;
   Assignment?(): { assignee?: string } | null;

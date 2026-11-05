@@ -18,6 +18,10 @@ export const createStatementVM = (
 ): StatementVM => {
   const creation = statement.creation?.();
   if (creation) {
+    // `new` with no class name yet draws nothing (#673).
+    if (!creation.Constructor?.()) {
+      return new EmptyStatementVM(statement, runtime);
+    }
     return new CreationStatementVM(statement, creation, runtime);
   }
 
