@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { RootContext } from "./index";
+import { RootContext, parse } from "./index";
 import { renderToSvg } from "@/svg/renderToSvg";
 
 // Issue #672: a dangling `->`, `=`, `@return` or unclosed `"` must not draw an
@@ -60,6 +60,50 @@ describe("unclosed quote is not kept in names and labels (#672)", () => {
     const texts = svgTexts('A."b');
     expect(texts).toContain("b");
     expect(texts.join("|")).not.toContain("&quot;");
+  });
+});
+
+describe("a lone quote is not stripped to an empty name (#672)", () => {
+  // Stripping would give an empty participant name, which throws
+  // "Participant name is required" and replaces the whole diagram.
+  it.each(['A->"', '"', 'A."', '@Starter("', 'r = "', 'A.a()\nB->"'])(
+    "%j renders without throwing",
+    (code) => {
+      expect(() => renderToSvg(code)).not.toThrow();
+    },
+  );
+
+  it("keeps the quote as the name when nothing follows it", () => {
+    expect(svgTexts('A->"')).toContain("&quot;");
+    expect(svgTexts('A.a()\nB->"')).toContain("&quot;");
+  });
+
+  it("an unclosed string that holds more text loses only its opening quote", () => {
+    // `".m()` is one unclosed string, so the participant is `.m()`.
+    expect(svgTexts('".m()')).toContain(".m()");
+  });
+});
+
+describe("dangling statements are dropped at any depth (#672)", () => {
+  it.each([
+    ["if(x) {\n  A->\n}", "if(x) {\n}"],
+    ["A.b() {\n  r =\n}", "A.b() {\n}"],
+    ["if(x) {\n  while(y) {\n    A->\n  }\n}", "if(x) {\n  while(y) {\n  }\n}"],
+  ])("%j renders like %j", (code, empty) => {
+    expect(numbers(code)).toEqual(numbers(empty));
+    expect(svgTexts(code)).toEqual(svgTexts(empty));
+  });
+
+  it("parse() returns the same pruned tree", () => {
+    const block = parse("if(x) {\n  A->\n}").rootContext.block();
+    const ifBlock = block.stat()[0].alt().ifBlock();
+    expect(ifBlock.braceBlock().block().stat()).toHaveLength(0);
+    const call = parse("A.b() {\n  r =\n}").rootContext.block().stat()[0];
+    expect(call.message().braceBlock().block().stat()).toHaveLength(0);
+  });
+
+  it("two bare `@return` lines leave nothing", () => {
+    expect(statements("@return\n@return")).toHaveLength(0);
   });
 });
 

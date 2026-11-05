@@ -308,7 +308,7 @@ export abstract class Ctx {
       let next = first + 1;
       while (doc.leaves[next]?.hidden) next++;
       const after = doc.leaves[next];
-      if (!after || after.offset >= end) return text.replace(/^"/, "");
+      if (!after || after.offset >= end) return text.length > 1 ? text.replace(/^"/, "") : text;
     }
     return text;
   }

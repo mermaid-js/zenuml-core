@@ -134,7 +134,8 @@ augment<ParserRuleContextAugmented>(antlr4.ParserRuleContext, {
       this.start === this.stop &&
       this.start.type === sequenceLexer.USTRING
     ) {
-      return text.replace(/^"/, "");
+      // A lone `"` stays as it is: an empty name would throw downstream.
+      return text.length > 1 ? text.replace(/^"/, "") : text;
     }
     return text;
   },
@@ -181,6 +182,7 @@ export function parse(code: string): {
   parser.removeErrorListeners();
   parser.addErrorListener(listener);
   const tree = parser.prog();
+  pruneDanglingStatements(tree);
   return {
     rootContext: tree,
     pass: listener.errorDetails.length === 0,
