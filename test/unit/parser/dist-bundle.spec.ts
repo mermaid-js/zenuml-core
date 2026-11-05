@@ -11,7 +11,9 @@ const REPO_ROOT = resolve(import.meta.dir, "../../..");
 const OUT_DIR = resolve(REPO_ROOT, "node_modules/.cache/parser-bundle-test");
 const BUILD_TIMEOUT_MS = 60_000;
 
-const pkg = JSON.parse(readFileSync(resolve(REPO_ROOT, "package.json"), "utf8"));
+const pkg = JSON.parse(
+  readFileSync(resolve(REPO_ROOT, "package.json"), "utf8"),
+);
 const parserExport = pkg.exports["./parser"];
 const bundlePath = (target: string) => resolve(OUT_DIR, basename(target));
 
