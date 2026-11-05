@@ -83,11 +83,11 @@ describe("Origin Function", () => {
   });
 
   test("Embedded incomplete creation", () => {
-    let creation = Fixture.firstStatement("new { m2 }").creation();
-    expectText(creation).toBe("new{m2}"); // invalid code, so
-    let m2 = creation.Statements()[0].message();
-    expectText(m2).toBe("m2");
-    expect(creation.Statements()[0].Origin()).toBe("Missing Constructor");
+    // A nameless `new` is transparent (#673): its body is listed in its place
+    // and is not sent from a "Missing Constructor" participant.
+    const stat = Fixture.firstStatement("new { m2 }");
+    expectText(stat.message()).toBe("m2");
+    expect(stat.Origin()).toBe(undefined);
   });
 
   test("Embedded in if", () => {

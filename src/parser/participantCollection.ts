@@ -36,8 +36,10 @@ export function createCollectState(): CollectState {
 
 export function onParticipant(ctx: Ctx, state: CollectState): void {
   const type = ctx?.participantType()?.getFormattedText().replace("@", "");
-  const participant =
-    ctx?.name()?.getFormattedText() || "Missing `Participant`";
+  const participant = ctx?.name()?.getFormattedText();
+  // A declaration still being typed (`@`, `<<S>>`, `@Actor`) has no name yet:
+  // draw nothing until it does (#673).
+  if (!participant) return;
   const stereotype = stereotypeName(ctx.stereotype());
   const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
   const width =
@@ -138,8 +140,10 @@ export function onStarter(ctx: Ctx, state: CollectState): void {
 }
 
 export function onCreation(ctx: Ctx, state: CollectState): void {
-  const participant = ctx.Owner();
   const ctor = ctx?.creationBody()?.construct();
+  // `new` without a class name yet declares no participant (#673).
+  if (!ctor) return;
+  const participant = ctx.Owner();
   const assignee = ctx.Assignee();
   const participantInstance = state.participants.Get(participant);
   // The constructor is a name occurrence only without an assignee: with one,
