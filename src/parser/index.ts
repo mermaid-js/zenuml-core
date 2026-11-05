@@ -32,21 +32,6 @@ export interface ErrorDetail {
 type Ctx = any;
 
 const errorDetails: ErrorDetail[] = [];
-class SeqErrorListener extends antlr4.error.ErrorListener {
-  syntaxError(
-    _recognizer: unknown,
-    _offendingSymbol: unknown,
-    line: number,
-    column: number,
-    msg: string,
-  ) {
-    errorDetails.push({
-      line,
-      column,
-      msg,
-    });
-  }
-}
 
 // Reentrant error listener: collects syntax errors into its OWN instance array
 // instead of the shared module-level `errorDetails`. This is what lets
@@ -69,18 +54,131 @@ class CollectingErrorListener extends antlr4.error.ErrorListener {
   }
 }
 
-function createParser(code: string, { silent = false } = {}) {
+function isTopLevelBlock(ctx: Ctx) {
+  return (
+    ctx instanceof sequenceParser.BlockContext &&
+    ctx.parentCtx instanceof sequenceParser.ProgContext
+  );
+}
+
+// The statement loop of `block` ends at a token that cannot start a statement.
+// At the top level nothing can use that token, so `prog` would fail on it. This
+// strategy reports the token and stays in the loop, so that one pass finds every
+// stray token between statements.
+class StrayStatementStrategy extends antlr4.error.DefaultErrorStrategy {
+  sync(recognizer: Ctx) {
+    if (isTopLevelBlock(recognizer._ctx)) {
+      while (!recognizer.isExpectedToken(recognizer.getTokenStream().LA(1))) {
+        const token = recognizer.getCurrentToken();
+        const display = (this as Ctx).getTokenErrorDisplay(token);
+        recognizer.notifyErrorListeners(
+          `mismatched input ${display} expecting <EOF>`,
+          token,
+          null,
+        );
+        recognizer.consume();
+      }
+    }
+    super.sync(recognizer);
+  }
+}
+
+// `prog` has nowhere to go after its catch clause: when it fails, every token
+// that is left becomes an error node and no statement is built from them. This
+// listener remembers the tokens that StrayStatementStrategy skipped, and the
+// token that made `prog` fail. An error that `prog` recovers from without an
+// exception (one extra token just before EOF) loses nothing, so it is not stray.
+class StrayTokenListener extends CollectingErrorListener {
+  strays: { token: Ctx; error: ErrorDetail }[] = [];
+  syntaxError(
+    recognizer: Ctx,
+    offendingSymbol: Ctx,
+    line: number,
+    column: number,
+    msg: string,
+    e?: unknown,
+  ) {
+    super.syntaxError(recognizer, offendingSymbol, line, column, msg);
+    const ctx = recognizer._ctx;
+    if (
+      isTopLevelBlock(ctx) ||
+      (e &&
+        ctx instanceof sequenceParser.ProgContext &&
+        offendingSymbol.type !== antlr4.Token.EOF)
+    ) {
+      this.strays.push({ token: offendingSymbol, error: { line, column, msg } });
+    }
+  }
+}
+
+function byPosition(a: ErrorDetail, b: ErrorDetail) {
+  return a.line - b.line || a.column - b.column;
+}
+
+// SLL prediction is an order of magnitude faster than full LL and, when it
+// succeeds, is guaranteed to produce the same parse tree. BailErrorStrategy
+// aborts on the first syntax error. Returns null for invalid input.
+function parseWithSll(tokens: Ctx) {
+  tokens.seek(0);
+  const parser: Ctx = new sequenceParser(tokens);
+  parser.removeErrorListeners();
+  parser._interp.predictionMode = antlr4.atn.PredictionMode.SLL;
+  parser._errHandler = new antlr4.error.BailErrorStrategy();
+  try {
+    const tree = parser.prog();
+    // A grammar action can report an error without an exception.
+    return parser._syntaxErrors === 0 ? tree : null;
+  } catch {
+    return null;
+  }
+}
+
+// A stray token in the document head costs one pass, so garbage input must not
+// scale with its length. After this many passes the remaining tokens truncate
+// the document, as every stray token did before they were skipped.
+const MAX_STRAY_PASSES = 8;
+
+/**
+ * Parses with full LL. Tokens the parser cannot place at the top level are
+ * reported and moved off the default channel, and the document is parsed again
+ * without them. Input with no top-level error takes one pass and is not changed.
+ *
+ * Only the errors for those tokens are kept from that pass. Its other errors can
+ * be side effects of the stray tokens, and the real ones come back in the final
+ * pass.
+ */
+function parseSkippingStrayTokens(tokens: Ctx) {
+  const strayErrors: ErrorDetail[] = [];
+  for (let pass = 1; ; pass++) {
+    tokens.seek(0);
+    const parser: Ctx = new sequenceParser(tokens);
+    const listener = new StrayTokenListener();
+    parser.removeErrorListeners();
+    parser.addErrorListener(listener);
+    parser._errHandler = new StrayStatementStrategy();
+    const tree = parser.prog();
+    if (listener.strays.length === 0 || pass === MAX_STRAY_PASSES) {
+      return {
+        tree,
+        errors: [...strayErrors, ...listener.errorDetails].sort(byPosition),
+      };
+    }
+    for (const { token, error } of listener.strays) {
+      token.channel = antlr4.Token.HIDDEN_CHANNEL;
+      strayErrors.push(error);
+    }
+    const sllTree = parseWithSll(tokens);
+    if (sllTree) {
+      return { tree: sllTree, errors: strayErrors.sort(byPosition) };
+    }
+  }
+}
+
+function createSilentTokens(code: string) {
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
-  if (silent) {
-    lexer.removeErrorListeners();
-  }
-  const tokens = new antlr4.CommonTokenStream(lexer);
-  const parser = new sequenceParser(tokens);
-  if (silent) {
-    parser.removeErrorListeners();
-  }
-  return parser;
+  lexer.removeErrorListeners();
+  return new antlr4.CommonTokenStream(lexer);
 }
 
 // Memoize error-free parse results so the same code is parsed once even when
@@ -94,28 +192,27 @@ function rootContext(code: string) {
     return cached;
   }
 
-  // Two-stage parsing: SLL prediction is an order of magnitude faster than
-  // full LL and, when it succeeds, is guaranteed to produce the same parse
-  // tree. BailErrorStrategy aborts on the first syntax error so invalid input
-  // falls through to the full LL parse below, which keeps error recovery and
-  // error reporting behavior unchanged.
-  const sllParser = createParser(code, { silent: true });
-  sllParser._interp.predictionMode = antlr4.atn.PredictionMode.SLL;
-  sllParser._errHandler = new antlr4.error.BailErrorStrategy();
-  try {
-    const tree = sllParser.prog();
-    rootContextCache.set(code, tree);
+  // Two-stage parsing: invalid input falls through from SLL to the full LL parse
+  // below, which does the error recovery and error reporting.
+  const sllTree = parseWithSll(createSilentTokens(code));
+  if (sllTree) {
+    rootContextCache.set(code, sllTree);
     if (rootContextCache.size > ROOT_CONTEXT_CACHE_MAX) {
       rootContextCache.delete(rootContextCache.keys().next().value as string);
     }
-    return tree;
-  } catch {
-    // fall through to full LL parse
+    return sllTree;
   }
 
-  const parser = createParser(code);
-  parser.addErrorListener(new SeqErrorListener());
-  return parser.prog();
+  const chars = new antlr4.InputStream(code);
+  const lexer = new sequenceLexer(chars);
+  const { tree, errors } = parseSkippingStrayTokens(
+    new antlr4.CommonTokenStream(lexer),
+  );
+  for (const { line, column, msg } of errors) {
+    console.error(`line ${line}:${column} ${msg}`);
+  }
+  errorDetails.push(...errors);
+  return tree;
 }
 
 augment<ParserRuleContextAugmented>(antlr4.ParserRuleContext, {
@@ -157,20 +254,19 @@ export function parse(code: string): {
   pass: boolean;
   errorDetails: ErrorDetail[];
 } {
-  const listener = new CollectingErrorListener();
+  const lexerListener = new CollectingErrorListener();
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
   lexer.removeErrorListeners();
-  lexer.addErrorListener(listener);
-  const tokens = new antlr4.CommonTokenStream(lexer);
-  const parser = new sequenceParser(tokens);
-  parser.removeErrorListeners();
-  parser.addErrorListener(listener);
-  const tree = parser.prog();
+  lexer.addErrorListener(lexerListener);
+  const { tree, errors } = parseSkippingStrayTokens(
+    new antlr4.CommonTokenStream(lexer),
+  );
+  const allErrors = [...lexerListener.errorDetails, ...errors].sort(byPosition);
   return {
     rootContext: tree,
-    pass: listener.errorDetails.length === 0,
-    errorDetails: listener.errorDetails,
+    pass: allErrors.length === 0,
+    errorDetails: allErrors,
   };
 }
 
