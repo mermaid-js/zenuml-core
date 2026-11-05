@@ -32,6 +32,7 @@
     "release": "bun run build:release && changeset publish",
     "test": "bun test src test/unit",
     "typecheck": "tsc -b",
+    "check:surfaces": "node scripts/check-surfaces.mjs",
     "check:tokens": "node scripts/check-zu-tokens.mjs",
     "check:bundle": "node scripts/check-bundle-budget.mjs",
     "audit:contrast": "node --no-warnings scripts/audit-theme-contrast.mjs",
