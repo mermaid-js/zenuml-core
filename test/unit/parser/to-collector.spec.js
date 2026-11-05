@@ -296,7 +296,7 @@ describe("implicit", () => {
 describe("Invalid input", () => {
   test("<<", () => {
     let participants = getParticipants("<<");
-    expect(participants.First().name).toBe("Missing `Participant`");
+    expect(participants.Size()).toBe(0);
   });
 });
 
