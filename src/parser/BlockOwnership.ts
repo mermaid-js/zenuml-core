@@ -131,7 +131,7 @@ function isStray(parser: Parser): boolean {
   );
 }
 
-class BlockOwnershipErrorStrategy extends antlr4.error.DefaultErrorStrategy {
+export class BlockOwnershipErrorStrategy extends antlr4.error.DefaultErrorStrategy {
   sync(parser: Parser) {
     if (
       parser._ctx instanceof sequenceParser.BlockContext ||

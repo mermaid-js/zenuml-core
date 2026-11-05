@@ -51,6 +51,7 @@ describe("a statement next to a syntax error stays one message", () => {
       [
         ["P", "x()"],
         ["A", "b()"],
+        ["A", "c()"],
       ],
     ],
     [

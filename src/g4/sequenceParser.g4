@@ -63,7 +63,8 @@ group
 
 // [Perf] Changing starter to name does not help.
 starterExp
- : STARTER_LXR (OPAR starter? CPAR)?
+ // A missing `)` must not take the statements after it, but it is still an error.
+ : STARTER_LXR (OPAR starter? (CPAR | {this.notifyErrorListeners("missing ')' after @Starter");}))?
  | ANNOTATION
  ;
 
