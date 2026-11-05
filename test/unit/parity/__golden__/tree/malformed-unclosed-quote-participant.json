@@ -1,0 +1,36 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 6,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 6,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 6,
+          "children": [
+            {
+              "kind": "NameContext",
+              "start": 0,
+              "stop": 6,
+              "children": [
+                {
+                  "token": "USTRING",
+                  "text": "\"Bob Sm"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

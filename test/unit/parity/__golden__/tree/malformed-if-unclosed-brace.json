@@ -1,0 +1,87 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 7,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 7,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 7,
+          "children": [
+            {
+              "kind": "AltContext",
+              "start": 0,
+              "stop": 7,
+              "children": [
+                {
+                  "kind": "IfBlockContext",
+                  "start": 0,
+                  "stop": 7,
+                  "children": [
+                    {
+                      "token": "IF",
+                      "text": "if"
+                    },
+                    {
+                      "kind": "ParExprContext",
+                      "start": 2,
+                      "stop": 5,
+                      "children": [
+                        {
+                          "token": "OPAR",
+                          "text": "("
+                        },
+                        {
+                          "kind": "ConditionContext",
+                          "start": 3,
+                          "stop": 4,
+                          "children": [
+                            {
+                              "kind": "IdAtomContext",
+                              "start": 3,
+                              "stop": 4,
+                              "children": [
+                                {
+                                  "token": "ID",
+                                  "text": "ok"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "CPAR",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "BraceBlockContext",
+                      "start": 7,
+                      "stop": 7,
+                      "children": [
+                        {
+                          "token": "OBRACE",
+                          "text": "{"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}
