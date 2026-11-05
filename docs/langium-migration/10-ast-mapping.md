@@ -202,7 +202,8 @@ equality:
 
 | Input | ANTLR golden | Langium/Chevrotain |
 |---|---|---|
-| `A.m {` | message + orphan anonymous section | single message with recovered braceBlock (CBRACE inserted) |
+| `{` | no fragment: the unclosed `{` is dropped (#668) | anonymous section (CBRACE inserted) |
+| `if(ok) {`, `/`, `P.c()`, `}` | one `if` body: the `/` is dropped (#668) | `alt` is kept; statement offsets differ (Chevrotain recovery) |
 | `new A(` | creation + recovery artifact | single creation (CPAR inserted) |
 | `try` | bare Tcf via recovery | Tcf with OBRACE/CBRACE insertion |
 | `A ~>` | error nodes only (no head) | participant `A` + parser errors (`~` is OTHER in both) |
