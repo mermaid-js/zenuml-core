@@ -1,6 +1,7 @@
 import antlr4 from "antlr4";
 import { default as sequenceLexer } from "../generated-parser/sequenceLexer";
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
+import { HeaderRecoveringLexer } from "./HeaderRecoveringLexer";
 import ToCollector from "./ToCollector";
 import "./TitleContext";
 import "./IsCurrent";
@@ -71,7 +72,7 @@ class CollectingErrorListener extends antlr4.error.ErrorListener {
 
 function createParser(code: string, { silent = false } = {}) {
   const chars = new antlr4.InputStream(code);
-  const lexer = new sequenceLexer(chars);
+  const lexer = new HeaderRecoveringLexer(chars);
   if (silent) {
     lexer.removeErrorListeners();
   }
@@ -104,17 +105,23 @@ function rootContext(code: string) {
   sllParser._errHandler = new antlr4.error.BailErrorStrategy();
   try {
     const tree = sllParser.prog();
-    rootContextCache.set(code, tree);
-    if (rootContextCache.size > ROOT_CONTEXT_CACHE_MAX) {
-      rootContextCache.delete(rootContextCache.keys().next().value as string);
+    // A recovered header parses cleanly but is not error-free: fall through so
+    // the full parse below reports its error.
+    if (!(sllParser.getTokenStream() as Ctx).tokenSource.reportedHeaderError) {
+      rootContextCache.set(code, tree);
+      if (rootContextCache.size > ROOT_CONTEXT_CACHE_MAX) {
+        rootContextCache.delete(rootContextCache.keys().next().value as string);
+      }
+      return tree;
     }
-    return tree;
   } catch {
     // fall through to full LL parse
   }
 
   const parser = createParser(code);
-  parser.addErrorListener(new SeqErrorListener());
+  const listener = new SeqErrorListener();
+  (parser.getTokenStream() as Ctx).tokenSource.addErrorListener(listener);
+  parser.addErrorListener(listener);
   return parser.prog();
 }
 
@@ -159,7 +166,7 @@ export function parse(code: string): {
 } {
   const listener = new CollectingErrorListener();
   const chars = new antlr4.InputStream(code);
-  const lexer = new sequenceLexer(chars);
+  const lexer = new HeaderRecoveringLexer(chars);
   lexer.removeErrorListeners();
   lexer.addErrorListener(listener);
   const tokens = new antlr4.CommonTokenStream(lexer);
