@@ -117,21 +117,17 @@ Stat:
 // ---------------------------------------------------------------------------
 
 Par:
-    {infer Par} PAR parExpr=ParExpr? braceBlock=BraceBlock
-  | {infer Par} PAR;                                              // [ET #10]
+    {infer Par} PAR (parExpr=ParExpr? braceBlock=BraceBlock)?;    // [ET #10] block optional
 
 Opt:
-    {infer Opt} OPT parExpr=ParExpr? braceBlock=BraceBlock
-  | {infer Opt} OPT;                                              // [ET #10]
+    {infer Opt} OPT (parExpr=ParExpr? braceBlock=BraceBlock)?;    // [ET #10] block optional
 
 Critical:
-    {infer Critical} CRITICAL parExpr=ParExpr? braceBlock=BraceBlock
-  | {infer Critical} CRITICAL;                                    // [ET #10]
+    {infer Critical} CRITICAL (parExpr=ParExpr? braceBlock=BraceBlock)?;  // [ET #10] block optional
 
 Section:
-    {infer Section} SECTION (OPAR atom=Atom? CPAR)? braceBlock=BraceBlock
-  | {infer Section} braceBlock=BraceBlock                         // [ET #11] anonymous section
-  | {infer Section} SECTION;                                      // [ET #10]
+    {infer Section} SECTION ((OPAR atom=Atom? CPAR)? braceBlock=BraceBlock)?  // [ET #10] block optional
+  | {infer Section} braceBlock=BraceBlock;                        // [ET #11] anonymous section
 
 // ref: REF OPAR (name (COMMA name*)*) CPAR SCOL? — lenient comma list kept.
 Ref:

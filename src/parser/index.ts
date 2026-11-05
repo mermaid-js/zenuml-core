@@ -1,6 +1,8 @@
 import antlr4 from "antlr4";
 import { default as sequenceLexer } from "../generated-parser/sequenceLexer";
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
+import { repairIncompleteCalls } from "./repairIncompleteCalls";
+import { HeaderRecoveringLexer } from "./HeaderRecoveringLexer";
 import ToCollector from "./ToCollector";
 import "./TitleContext";
 import "./IsCurrent";
@@ -15,6 +17,11 @@ import "./Messages/MessageContext";
 import "./From";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
+import { pruneDanglingStatements } from "./pruneDanglingStatements";
+import {
+  BlockOwnershipErrorStrategy,
+  keepBlocksWithOwners,
+} from "./BlockOwnership";
 import { formatText } from "@/utils/StringUtil";
 import {
   augment,
@@ -65,7 +72,7 @@ function isTopLevelBlock(ctx: Ctx) {
 // At the top level nothing can use that token, so `prog` would fail on it. This
 // strategy reports the token and stays in the loop, so that one pass finds every
 // stray token between statements.
-class StrayStatementStrategy extends antlr4.error.DefaultErrorStrategy {
+class StrayStatementStrategy extends BlockOwnershipErrorStrategy {
   sync(recognizer: Ctx) {
     if (isTopLevelBlock(recognizer._ctx)) {
       while (!recognizer.isExpectedToken(recognizer.getTokenStream().LA(1))) {
@@ -101,10 +108,8 @@ class StrayTokenListener extends CollectingErrorListener {
     super.syntaxError(recognizer, offendingSymbol, line, column, msg);
     const ctx = recognizer._ctx;
     if (
-      isTopLevelBlock(ctx) ||
-      (e &&
-        ctx instanceof sequenceParser.ProgContext &&
-        offendingSymbol.type !== antlr4.Token.EOF)
+      offendingSymbol.type !== antlr4.Token.EOF &&
+      (isTopLevelBlock(ctx) || (e && ctx instanceof sequenceParser.ProgContext))
     ) {
       this.strays.push({ token: offendingSymbol, error: { line, column, msg } });
     }
@@ -126,8 +131,13 @@ function parseWithSll(tokens: Ctx) {
   parser._errHandler = new antlr4.error.BailErrorStrategy();
   try {
     const tree = parser.prog();
-    // A grammar action can report an error without an exception.
-    return parser._syntaxErrors === 0 ? tree : null;
+    // A grammar action can report an error without an exception, and a recovered
+    // header parses cleanly but is not error-free.
+    if (parser._syntaxErrors !== 0 || tokens.tokenSource.reportedHeaderError) {
+      return null;
+    }
+    pruneDanglingStatements(tree);
+    return tree;
   } catch {
     return null;
   }
@@ -148,16 +158,17 @@ const MAX_STRAY_PASSES = 8;
  * pass.
  */
 function parseSkippingStrayTokens(tokens: Ctx) {
-  const strayErrors: ErrorDetail[] = [];
+  const strayErrors: ErrorDetail[] = [...repairIncompleteCalls(tokens)];
   for (let pass = 1; ; pass++) {
     tokens.seek(0);
-    const parser: Ctx = new sequenceParser(tokens);
+    const parser: Ctx = keepBlocksWithOwners(new sequenceParser(tokens));
     const listener = new StrayTokenListener();
     parser.removeErrorListeners();
     parser.addErrorListener(listener);
     parser._errHandler = new StrayStatementStrategy();
     const tree = parser.prog();
     if (listener.strays.length === 0 || pass === MAX_STRAY_PASSES) {
+      pruneDanglingStatements(tree);
       return {
         tree,
         errors: [...strayErrors, ...listener.errorDetails].sort(byPosition),
@@ -176,7 +187,7 @@ function parseSkippingStrayTokens(tokens: Ctx) {
 
 function createSilentTokens(code: string) {
   const chars = new antlr4.InputStream(code);
-  const lexer = new sequenceLexer(chars);
+  const lexer = new HeaderRecoveringLexer(chars);
   lexer.removeErrorListeners();
   return new antlr4.CommonTokenStream(lexer);
 }
@@ -204,14 +215,16 @@ function rootContext(code: string) {
   }
 
   const chars = new antlr4.InputStream(code);
-  const lexer = new sequenceLexer(chars);
+  const lexer = new HeaderRecoveringLexer(chars);
+  const lexerListener = new CollectingErrorListener();
+  lexer.addErrorListener(lexerListener);
   const { tree, errors } = parseSkippingStrayTokens(
     new antlr4.CommonTokenStream(lexer),
   );
   for (const { line, column, msg } of errors) {
     console.error(`line ${line}:${column} ${msg}`);
   }
-  errorDetails.push(...errors);
+  errorDetails.push(...[...lexerListener.errorDetails, ...errors].sort(byPosition));
   return tree;
 }
 
@@ -219,7 +232,18 @@ augment<ParserRuleContextAugmented>(antlr4.ParserRuleContext, {
   getFormattedText() {
     const code = this.parser.getTokenStream().getText(this.getSourceInterval());
     // remove extra quotes, spaces and new lines
-    return formatText(code);
+    const text = formatText(code);
+    // A lone unclosed string (`"Bob Sm`) is a name that is still being typed:
+    // formatText only strips a closing pair, so drop the opening quote here.
+    if (
+      this.start &&
+      this.start === this.stop &&
+      this.start.type === sequenceLexer.USTRING
+    ) {
+      // A lone `"` stays as it is: an empty name would throw downstream.
+      return text.length > 1 ? text.replace(/^"/, "") : text;
+    }
+    return text;
   },
 
   // Comment is where users have the most flexibility. The parser should make minimal assumptions about
@@ -256,7 +280,7 @@ export function parse(code: string): {
 } {
   const lexerListener = new CollectingErrorListener();
   const chars = new antlr4.InputStream(code);
-  const lexer = new sequenceLexer(chars);
+  const lexer = new HeaderRecoveringLexer(chars);
   lexer.removeErrorListeners();
   lexer.addErrorListener(lexerListener);
   const { tree, errors } = parseSkippingStrayTokens(

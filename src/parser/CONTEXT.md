@@ -13,7 +13,7 @@ DSL text
   │
   ▼
 RootContext(code)          ← src/parser/index.ts
-  │  ├─ sequenceLexer      ← src/generated-parser/sequenceLexer.js
+  │  ├─ HeaderRecoveringLexer ← src/parser/HeaderRecoveringLexer.ts (extends sequenceLexer)
   │  └─ sequenceParser     ← src/generated-parser/sequenceParser.js
   │
   ▼
@@ -32,6 +32,7 @@ ProgContext (ANTLR parse tree)
 | `src/g4/sequenceLexer.g4` | ANTLR lexer grammar. Channels: `HIDDEN` (whitespace), `COMMENT_CHANNEL`, `MODIFIER_CHANNEL`. |
 | `src/g4/sequenceParser.g4` | ANTLR parser grammar. Top rule: `prog → title? head? block`. |
 | `src/generated-parser/` | ANTLR output — do not edit by hand. Regenerate with `bun antlr`. |
+| `src/parser/HeaderRecoveringLexer.ts` | Ends an unclosed fragment header at the end of its line, so the next line stays a statement. Never rewrites complete DSL. The plan is in `headerRecovery.ts`, shared with Langium. |
 | `src/parser/index.ts` | Entry point. `RootContext(code)` → `ProgContext`. Adds prototype methods: `getFormattedText()`, `getComment()`. Collects errors via `SeqErrorListener`. |
 | `src/parser/Participants.ts` | `Participant` model + `Participants` collection (Map). Tracks name, type, stereotype, label, color, emoji, width, groupId, positions. |
 | `src/parser/ToCollector.js` | ANTLR listener. Walks parse tree → populates `Participants` from declarations, from/to mentions, `new` constructors, `ref` targets. |
