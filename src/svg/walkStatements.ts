@@ -165,8 +165,6 @@ function walkBlock(
 
     const creation = stat.creation?.();
     if (creation) {
-      // `new` with no class name yet draws nothing (#673).
-      if (!creation.Constructor?.()) continue;
       const from = creation.From?.() || currentOrigin;
       const to = creation.Owner?.() || "";
       const label = normalizeLabel(creation.SignatureText?.() || "«create»");

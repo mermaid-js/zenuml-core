@@ -51,10 +51,7 @@ export const Statement = (props: {
     case Boolean(props.context.ref()):
       return <FragmentRef {...subProps} />;
     case Boolean(props.context.creation()):
-      // `new` with no class name yet draws nothing (#673).
-      return props.context.creation().Constructor() ? (
-        <Creation {...subProps} />
-      ) : null;
+      return <Creation {...subProps} />;
     case Boolean(props.context.message()):
       return <Interaction {...subProps} />;
     case Boolean(props.context.asyncMessage()):
