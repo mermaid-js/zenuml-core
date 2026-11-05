@@ -1,0 +1,37 @@
+name: Bug report
+description: Report a parsing or rendering problem in @zenuml/core.
+labels:
+  - bug
+  - needs-triage
+body:
+  - type: input
+    id: core-version
+    attributes:
+      label: Core version
+      description: The exact @zenuml/core version. Run `npm ls @zenuml/core` to find it. If you use ZenUML through another product, also name that product and its version.
+      placeholder: 4.13.0
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe what you saw and what you expected. Add a screenshot if the problem is visible.
+    validations:
+      required: true
+  - type: input
+    id: repro-link
+    attributes:
+      label: Repro link
+      description: A link that shows the problem, if you have one.
+      placeholder: https://
+    validations:
+      required: false
+  - type: textarea
+    id: dsl
+    attributes:
+      label: DSL
+      description: The smallest diagram text that shows the problem.
+      render: text
+    validations:
+      required: false
