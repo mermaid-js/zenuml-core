@@ -1,6 +1,7 @@
 import antlr4 from "antlr4";
 import { default as sequenceLexer } from "../generated-parser/sequenceLexer";
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
+import { repairIncompleteCalls } from "./repairIncompleteCalls";
 import ToCollector from "./ToCollector";
 import "./TitleContext";
 import "./IsCurrent";
@@ -117,6 +118,7 @@ function rootContext(code: string) {
 
   const parser = createParser(code);
   parser.addErrorListener(new SeqErrorListener());
+  errorDetails.push(...repairIncompleteCalls(parser.getTokenStream()));
   const tree = parser.prog();
   pruneDanglingStatements(tree);
   return tree;
@@ -181,6 +183,7 @@ export function parse(code: string): {
   const parser = new sequenceParser(tokens);
   parser.removeErrorListeners();
   parser.addErrorListener(listener);
+  listener.errorDetails.push(...repairIncompleteCalls(tokens));
   const tree = parser.prog();
   pruneDanglingStatements(tree);
   return {
