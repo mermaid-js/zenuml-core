@@ -84,6 +84,9 @@ export function onParticipant(ctx: Ctx, state: CollectState): void {
 export function onTo(ctx: Ctx, state: CollectState): void {
   const participant =
     ctx.name?.()?.getFormattedText() || ctx.getFormattedText();
+  // An empty quoted name (`A->""`) names no participant: an editor that
+  // auto-closes quotes produces it on the way to `A->"Bob"`.
+  if (!participant) return;
   const emoji = ctx.emoji?.()?.name?.()?.getFormattedText();
   const participantInstance = state.participants.Get(participant);
   const namePosition = rangeOf(ctx.name?.() ?? ctx);
@@ -124,7 +127,10 @@ export function onTo(ctx: Ctx, state: CollectState): void {
 
 /** `ctx` is the `starter` rule context. */
 export function onStarter(ctx: Ctx, state: CollectState): void {
-  state.participants.Add(ctx.getFormattedText(), {
+  const name = ctx.getFormattedText();
+  // `@Starter("")` declares no starter.
+  if (!name) return;
+  state.participants.Add(name, {
     isStarter: true,
     position: [ctx.start.start, ctx.stop.stop + 1],
     namePosition: [ctx.start.start, ctx.stop.stop + 1],
