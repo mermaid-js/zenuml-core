@@ -15,7 +15,12 @@
  *                   strips `^` from ID, etc. — Stage 2 wants the RAW source
  *                   text in the AST, matching ANTLR token text.
  */
-import { Lexer as ChevrotainLexer } from "chevrotain";
+import {
+  Lexer as ChevrotainLexer,
+  createTokenInstance,
+  type IToken,
+  type TokenType,
+} from "chevrotain";
 import {
   createDefaultCoreModule,
   createDefaultSharedCoreModule,
@@ -30,11 +35,14 @@ import type {
   GrammarAST,
   LangiumCoreServices,
   LangiumSharedCoreServices,
+  LexerResult,
   Module,
   ParseResult,
   PartialLangiumCoreServices,
+  TokenizeOptions,
   ValueType,
 } from "langium";
+import { isEmptyPlan, planHeaderRecovery } from "../parser/headerRecovery";
 import {
   ZenUmlGeneratedModule,
   ZenUmlGeneratedSharedModule,
@@ -52,6 +60,80 @@ class ZenLexer extends DefaultLexer {
       safeMode: true,
       errorMessageProvider: services.parser.LexerErrorMessageProvider,
     });
+  }
+
+  override tokenize(text: string, options?: TokenizeOptions): LexerResult {
+    const result = super.tokenize(text, options);
+    const { tokens } = result;
+    const plan = planHeaderRecovery([
+      ...tokens.map((t) => ({
+        kind: t.tokenType.name,
+        line: t.startLine ?? 0,
+      })),
+      { kind: "EOF", line: 0 },
+    ]);
+    if (isEmptyPlan(plan)) return result;
+
+    const errors = plan.errors.map(({ at, expected }) => {
+      const offending = tokens[at];
+      return {
+        offset: offending.startOffset,
+        line: offending.startLine,
+        column: offending.startColumn,
+        length: offending.image.length,
+        message: `missing ${expected} at '${offending.image}'`,
+      };
+    });
+
+    const merges = new Map(plan.merges.map((m) => [m.first, m.last]));
+    const recovered: IToken[] = [];
+    for (let index = 0; index < tokens.length; index++) {
+      const last = merges.get(index);
+      if (last === undefined) {
+        recovered.push(tokens[index]);
+      } else {
+        recovered.push(this.mergedToken(text, tokens[index], tokens[last]));
+        index = last;
+      }
+      for (const kind of plan.insertions.get(index) ?? []) {
+        recovered.push(this.emptyTokenAfter(kind, tokens[index]));
+      }
+    }
+    return {
+      ...result,
+      tokens: recovered,
+      errors: [...result.errors, ...errors],
+    };
+  }
+
+  private mergedToken(text: string, first: IToken, last: IToken): IToken {
+    return createTokenInstance(
+      (this.definition as Record<string, TokenType>).ID,
+      text.slice(first.startOffset, (last.endOffset ?? 0) + 1),
+      first.startOffset,
+      last.endOffset ?? 0,
+      first.startLine ?? 0,
+      last.endLine ?? 0,
+      first.startColumn ?? 0,
+      last.endColumn ?? 0,
+    );
+  }
+
+  // No width: it starts right after the token it follows.
+  private emptyTokenAfter(kind: string, before: IToken): IToken {
+    const end = before.endOffset ?? 0;
+    const line = before.endLine ?? 0;
+    const column = before.endColumn ?? 0;
+    return createTokenInstance(
+      (this.definition as Record<string, TokenType>)[kind],
+      "",
+      end + 1,
+      end,
+      line,
+      line,
+      column + 1,
+      column,
+    );
   }
 }
 

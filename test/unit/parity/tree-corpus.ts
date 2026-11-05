@@ -111,6 +111,17 @@ const toleranceCases: TreeCorpusEntry[] = [
     id: "tol-27d-while-float-in-text",
     code: "while(wait 1.5 seconds) {\n  A.m()\n}",
   },
+  // #670: an incomplete fragment header ends at its line; the next line stays a
+  // statement. Closed multi-line headers (28h, 28i) keep their valid parse.
+  { id: "tol-28a-if-no-paren-next-line", code: "if\nA.c()\nA.d()" },
+  { id: "tol-28b-if-partial-condition", code: "if(a ==\nA.c()\nA.d()" },
+  { id: "tol-28c-while-open-paren", code: "while(\nA.c()\nA.d()" },
+  { id: "tol-28d-opt-open-paren", code: "opt(\nA.c()\nA.d()" },
+  { id: "tol-28e-try-no-brace", code: "try\nA.c()\nA.d()" },
+  { id: "tol-28f-ref-no-paren", code: "ref\nA.c()\nA.d()" },
+  { id: "tol-28g-ref-open-list", code: "ref(x,\nA.c()\nA.d()" },
+  { id: "tol-28h-if-multi-line-closed", code: "if(a ==\n  b) {\n}" },
+  { id: "tol-28i-ref-multi-line-closed", code: "ref(x,\n  A)" },
 ];
 
 export const TREE_CORPUS: TreeCorpusEntry[] = [

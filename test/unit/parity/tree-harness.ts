@@ -31,11 +31,12 @@ import sequenceParser from "../../../src/generated-parser/sequenceParser";
 // ANTLR pipeline directly instead of going through the (engine-flag-aware)
 // RootContext export.
 import "../../../src/parser/index";
-import sequenceLexer from "../../../src/generated-parser/sequenceLexer";
+import { HeaderRecoveringLexer } from "../../../src/parser/HeaderRecoveringLexer";
 
 function antlrRootContext(code: string) {
   const chars = new antlr4.InputStream(code);
-  const lexer = new sequenceLexer(chars);
+  const lexer = new HeaderRecoveringLexer(chars);
+  lexer.removeErrorListeners();
   const tokens = new antlr4.CommonTokenStream(lexer);
   const parser = new sequenceParser(tokens);
   parser.removeErrorListeners();
