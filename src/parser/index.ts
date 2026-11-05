@@ -15,6 +15,7 @@ import "./Messages/MessageContext";
 import "./From";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
+import { keepBlocksWithOwners } from "./BlockOwnership";
 import { formatText } from "@/utils/StringUtil";
 import {
   augment,
@@ -113,7 +114,7 @@ function rootContext(code: string) {
     // fall through to full LL parse
   }
 
-  const parser = createParser(code);
+  const parser = keepBlocksWithOwners(createParser(code));
   parser.addErrorListener(new SeqErrorListener());
   return parser.prog();
 }
@@ -163,7 +164,7 @@ export function parse(code: string): {
   lexer.removeErrorListeners();
   lexer.addErrorListener(listener);
   const tokens = new antlr4.CommonTokenStream(lexer);
-  const parser = new sequenceParser(tokens);
+  const parser = keepBlocksWithOwners(new sequenceParser(tokens));
   parser.removeErrorListeners();
   parser.addErrorListener(listener);
   const tree = parser.prog();

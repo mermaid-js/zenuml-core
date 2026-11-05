@@ -11,12 +11,12 @@
         {
           "kind": "StatContext",
           "start": 0,
-          "stop": 2,
+          "stop": 4,
           "children": [
             {
               "kind": "MessageContext",
               "start": 0,
-              "stop": 2,
+              "stop": 4,
               "children": [
                 {
                   "kind": "MessageBodyContext",
@@ -85,21 +85,7 @@
                       ]
                     }
                   ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "kind": "StatContext",
-          "start": 4,
-          "stop": 4,
-          "children": [
-            {
-              "kind": "SectionContext",
-              "start": 4,
-              "stop": 4,
-              "children": [
+                },
                 {
                   "kind": "BraceBlockContext",
                   "start": 4,

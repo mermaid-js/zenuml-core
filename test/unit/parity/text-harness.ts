@@ -26,13 +26,14 @@
 // (ANTLR BASELINE: the harness must not follow the ZENUML_PARSER engine
 // flag, so it builds the ANTLR pipeline directly.)
 import "../../../src/parser/index";
+import { keepBlocksWithOwners } from "../../../src/parser/BlockOwnership";
 import sequenceLexer from "../../../src/generated-parser/sequenceLexer";
 
 function antlrRootContext(code: string) {
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
   const tokens = new antlr4.CommonTokenStream(lexer);
-  const parser = new sequenceParser(tokens);
+  const parser = keepBlocksWithOwners(new sequenceParser(tokens));
   parser.removeErrorListeners();
   return parser.prog();
 }

@@ -17,14 +17,12 @@
  * `stat.stop - 1`. No other adjustment is applied.
  *
  * Exclusions (each must cite why; target <10):
- *  - malformed-unclosed-brace-after-message (`A.m {`): ANTLR's
- *    DefaultErrorStrategy splits this into message(A.m) [0,2] + orphan
- *    anonymous section [4,4]; Chevrotain recovery instead attaches the
- *    recovered braceBlock to the message → one stat [0,4]. Legitimate
- *    recovery-shape difference (gap G7) — grammar-strict input.
- *  - malformed-unclosed-paren-in-creation (`new A(`): same mechanism — ANTLR
- *    yields creation [0,2] + orphan section-ish recovery [4,5]; Chevrotain
- *    keeps a single creation [0,5] with an inserted CPAR. Gap G7.
+ *  - malformed-unclosed-paren-in-creation (`new A(`): ANTLR yields creation
+ *    [0,2] + orphan section-ish recovery [4,5]; Chevrotain keeps a single
+ *    creation [0,5] with an inserted CPAR. Gap G7.
+ *  - malformed-if-closed-body-with-error, malformed-lone-brace (#668): ANTLR
+ *    drops a token that no statement can use; Chevrotain recovers differently.
+ *    Gap G7.
  */
 import { describe, expect, it } from "bun:test";
 import fs from "node:fs";
@@ -37,12 +35,16 @@ const GOLDEN_DIR = path.join(import.meta.dir, "__golden__", "tree");
 
 const EXCLUSIONS = new Map<string, string>([
   [
-    "malformed-unclosed-brace-after-message",
-    "G7 recovery shape: ANTLR splits `A.m {` into message + orphan section; Chevrotain attaches the recovered braceBlock to the message",
-  ],
-  [
     "malformed-unclosed-paren-in-creation",
     "G7 recovery shape: ANTLR splits `new A(` into creation + recovery artifact; Chevrotain inserts CPAR inside the single creation",
+  ],
+  [
+    "malformed-if-closed-body-with-error",
+    "G7 recovery shape: ANTLR drops the stray `/` and keeps one body; Chevrotain recovers differently",
+  ],
+  [
+    "malformed-lone-brace",
+    "G7 recovery shape: ANTLR drops an unclosed ownerless `{`; Chevrotain inserts CBRACE and keeps an anonymous section",
   ],
 ]);
 

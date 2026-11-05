@@ -63,6 +63,15 @@ const RECOVERY_CASES = new Set([
   "malformed-unclosed-brace-after-message", // `A.m {`
   "malformed-unclosed-paren-in-creation", // `new A(`
   "malformed-bare-try", // `try`
+  // #668: a `{` block that does not parse stays with its owner.
+  "malformed-open-blocks-as-typed",
+  "malformed-if-unclosed-brace", // `if(ok) {`
+  "malformed-while-unclosed-body",
+  "malformed-if-closed-body-with-error",
+  "malformed-if-missing-brace-before-else",
+  "malformed-lone-brace", // `{`
+  "malformed-par-unclosed-brace", // `par {`
+  "malformed-section-unclosed-brace", // `section {`
 ]);
 
 describe("grammar corpus — all 198 tree-corpus cases (raw Langium AST)", () => {
@@ -94,14 +103,24 @@ describe("grammar corpus — recovery cases keep statements outside the damage",
     const result = parseZen("A.m {");
     const value = result.value as any;
     expect(result.parserErrors.length).toBeGreaterThan(0);
-    // ANTLR golden: message(A.m) + orphan anonymous section. Chevrotain
-    // attaches the recovered braceBlock to the message instead — the message
-    // itself (from/to/method) must survive intact.
+    // Both engines attach the recovered braceBlock to the message (#668). The
+    // message itself (from/to/method) must survive intact.
     const message = value.block.stats[0];
     expect(message.$type).toBe("Message");
     expect(message.body.fromTo.to.name).toBe("A");
     expect(message.body.func.signatures[0].methodName.name).toBe("m");
   });
+
+  it.each(["par {", "opt {", "critical {", "section {"])(
+    "`%s` keeps the block on its fragment, as in ANTLR (#668)",
+    (code) => {
+      const result = parseZen(code);
+      const stats = (result.value as any).block.stats;
+      expect(result.parserErrors.length).toBeGreaterThan(0);
+      expect(stats).toHaveLength(1);
+      expect(stats[0].braceBlock).toBeTruthy();
+    },
+  );
 
   it("malformed-unclosed-paren-in-creation: `new A(` keeps the creation", () => {
     const result = parseZen("new A(");

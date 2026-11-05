@@ -56,12 +56,15 @@ const sequenceParser = (
 ).default;
 // Install prototype augmentations (getFormattedText, getComment, etc.)
 await import(path.join(ROOT, "src/parser/index.ts"));
+const { keepBlocksWithOwners } = await import(
+  path.join(ROOT, "src/parser/BlockOwnership.ts")
+);
 
 function antlrRootCtx(code) {
   const chars = new antlr4.InputStream(code);
   const lexer = new sequenceLexer(chars);
   const tokens = new antlr4.CommonTokenStream(lexer);
-  const parser = new sequenceParser(tokens);
+  const parser = keepBlocksWithOwners(new sequenceParser(tokens));
   parser.removeErrorListeners();
   return parser.prog();
 }

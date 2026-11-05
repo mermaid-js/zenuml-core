@@ -36,6 +36,24 @@ const malformedCases: TreeCorpusEntry[] = [
   { id: "malformed-half-arrow", code: "A -" },
   { id: "malformed-nested-if-typo", code: "if(x) { if(y() {}}" },
   { id: "malformed-if-unclosed-paren", code: "if(x" },
+  // #668: a `{` block that does not parse stays with its owner.
+  {
+    id: "malformed-open-blocks-as-typed",
+    code: "Client\nAPI\nClient->API: login\nAPI.validate(token) {\n  Auth.check(token)\n  if(ok) {\n",
+  },
+  { id: "malformed-if-unclosed-brace", code: "if(ok) {" },
+  { id: "malformed-while-unclosed-body", code: "while(x) {\n  A.b();" },
+  {
+    id: "malformed-if-closed-body-with-error",
+    code: "if(ok) {\n  P.a()\n  /\n  P.c()\n}\nP.d()",
+  },
+  {
+    id: "malformed-if-missing-brace-before-else",
+    code: "if(x) {\n  A.b()\nelse {\n  A.c()\n}\nA.d()",
+  },
+  { id: "malformed-lone-brace", code: "{" },
+  { id: "malformed-par-unclosed-brace", code: "par {" },
+  { id: "malformed-section-unclosed-brace", code: "section {" },
 ];
 
 // 02-parser-rules.md §8 — the 25 tolerance points. Rows listing several input
