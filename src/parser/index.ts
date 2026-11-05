@@ -130,7 +130,8 @@ augment<ParserRuleContextAugmented>(antlr4.ParserRuleContext, {
   getComment() {
     let tokenIndex = this.start.tokenIndex;
     const channel = sequenceLexer.channelNames.indexOf("COMMENT_CHANNEL");
-    if (this.constructor.name === "BraceBlockContext") {
+    // Compare the class, not its name: the published bundles minify class names.
+    if (this instanceof sequenceParser.BraceBlockContext) {
       tokenIndex = this.stop.tokenIndex;
     }
     const hiddenTokensToLeft = this.parser
