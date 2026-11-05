@@ -1,0 +1,23 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 0,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 0,
+      "children": [
+        {
+          "token": "OBRACE",
+          "text": "{",
+          "error": true
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

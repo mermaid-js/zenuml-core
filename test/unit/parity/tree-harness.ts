@@ -31,6 +31,7 @@ import sequenceParser from "../../../src/generated-parser/sequenceParser";
 // ANTLR pipeline directly instead of going through the (engine-flag-aware)
 // RootContext export.
 import "../../../src/parser/index";
+import { keepBlocksWithOwners } from "../../../src/parser/BlockOwnership";
 import { HeaderRecoveringLexer } from "../../../src/parser/HeaderRecoveringLexer";
 
 function antlrRootContext(code: string) {
@@ -38,7 +39,7 @@ function antlrRootContext(code: string) {
   const lexer = new HeaderRecoveringLexer(chars);
   lexer.removeErrorListeners();
   const tokens = new antlr4.CommonTokenStream(lexer);
-  const parser = new sequenceParser(tokens);
+  const parser = keepBlocksWithOwners(new sequenceParser(tokens));
   parser.removeErrorListeners();
   return parser.prog();
 }

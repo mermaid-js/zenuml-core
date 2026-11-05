@@ -17,6 +17,7 @@ import "./Messages/MessageContext";
 import "./From";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
+import { keepBlocksWithOwners } from "./BlockOwnership";
 import { pruneDanglingStatements } from "./pruneDanglingStatements";
 import { formatText } from "@/utils/StringUtil";
 import {
@@ -121,7 +122,7 @@ function rootContext(code: string) {
     // fall through to full LL parse
   }
 
-  const parser = createParser(code);
+  const parser = keepBlocksWithOwners(createParser(code));
   const listener = new SeqErrorListener();
   (parser.getTokenStream() as Ctx).tokenSource.addErrorListener(listener);
   parser.addErrorListener(listener);
@@ -187,7 +188,7 @@ export function parse(code: string): {
   lexer.removeErrorListeners();
   lexer.addErrorListener(listener);
   const tokens = new antlr4.CommonTokenStream(lexer);
-  const parser = new sequenceParser(tokens);
+  const parser = keepBlocksWithOwners(new sequenceParser(tokens));
   parser.removeErrorListeners();
   parser.addErrorListener(listener);
   listener.errorDetails.push(...repairIncompleteCalls(tokens));

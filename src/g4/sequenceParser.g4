@@ -155,25 +155,21 @@ stat
  ;
 
 par
- : PAR parExpr? braceBlock
- | PAR
+ : PAR (parExpr? braceBlock)?
  ;
 
 opt
- : OPT parExpr? braceBlock
- | OPT
+ : OPT (parExpr? braceBlock)?
  ;
 
 critical
-  : CRITICAL parExpr? braceBlock
-  | CRITICAL
+  : CRITICAL (parExpr? braceBlock)?
  ;
 
 // section(name) {}
 section
-  : SECTION (OPAR atom? CPAR)? braceBlock
+  : SECTION ((OPAR atom? CPAR)? braceBlock)?  // The block is optional: error tolerance for incomplete section
   | braceBlock    // allows anonymous section. This is mostly for error tolerance (e.g. ref(x) { m1 }).
-  | SECTION       // Error tolerance for incomplete section
  ;
 
 creation
