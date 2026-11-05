@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "bun:test";
+import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync, rmSync } from "node:fs";
 import { basename, resolve } from "node:path";
@@ -8,7 +8,12 @@ import { basename, resolve } from "node:path";
 // These tests build the real bundles and run them in a real Node child process.
 const REPO_ROOT = resolve(import.meta.dir, "../../..");
 // Inside node_modules so that the bundle's external `antlr4` still resolves.
-const OUT_DIR = resolve(REPO_ROOT, "node_modules/.cache/parser-bundle-test");
+// Worktrees can share one node_modules through a symlink, so each run needs its
+// own directory: a shared one is deleted under any other run that is using it.
+const OUT_DIR = resolve(
+  REPO_ROOT,
+  `node_modules/.cache/parser-bundle-test-${process.pid}`,
+);
 const BUILD_TIMEOUT_MS = 60_000;
 
 const pkg = JSON.parse(
@@ -77,6 +82,10 @@ describe("@zenuml/core/parser bundles in Node", () => {
       stdio: "pipe",
     });
   }, BUILD_TIMEOUT_MS);
+
+  afterAll(() => {
+    rmSync(OUT_DIR, { recursive: true, force: true });
+  });
 
   for (const { name, run } of cases) {
     it(`${name} loads, then validate() and parse() work`, () => {
