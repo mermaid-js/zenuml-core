@@ -16,6 +16,7 @@ import "./Messages/MessageContext";
 import "./From";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
+import { pruneDanglingStatements } from "./pruneDanglingStatements";
 import { formatText } from "@/utils/StringUtil";
 import {
   augment,
@@ -105,6 +106,7 @@ function rootContext(code: string) {
   sllParser._errHandler = new antlr4.error.BailErrorStrategy();
   try {
     const tree = sllParser.prog();
+    pruneDanglingStatements(tree);
     rootContextCache.set(code, tree);
     if (rootContextCache.size > ROOT_CONTEXT_CACHE_MAX) {
       rootContextCache.delete(rootContextCache.keys().next().value as string);
@@ -117,14 +119,27 @@ function rootContext(code: string) {
   const parser = createParser(code);
   parser.addErrorListener(new SeqErrorListener());
   errorDetails.push(...repairIncompleteCalls(parser.getTokenStream()));
-  return parser.prog();
+  const tree = parser.prog();
+  pruneDanglingStatements(tree);
+  return tree;
 }
 
 augment<ParserRuleContextAugmented>(antlr4.ParserRuleContext, {
   getFormattedText() {
     const code = this.parser.getTokenStream().getText(this.getSourceInterval());
     // remove extra quotes, spaces and new lines
-    return formatText(code);
+    const text = formatText(code);
+    // A lone unclosed string (`"Bob Sm`) is a name that is still being typed:
+    // formatText only strips a closing pair, so drop the opening quote here.
+    if (
+      this.start &&
+      this.start === this.stop &&
+      this.start.type === sequenceLexer.USTRING
+    ) {
+      // A lone `"` stays as it is: an empty name would throw downstream.
+      return text.length > 1 ? text.replace(/^"/, "") : text;
+    }
+    return text;
   },
 
   // Comment is where users have the most flexibility. The parser should make minimal assumptions about
@@ -170,6 +185,7 @@ export function parse(code: string): {
   parser.addErrorListener(listener);
   listener.errorDetails.push(...repairIncompleteCalls(tokens));
   const tree = parser.prog();
+  pruneDanglingStatements(tree);
   return {
     rootContext: tree,
     pass: listener.errorDetails.length === 0,

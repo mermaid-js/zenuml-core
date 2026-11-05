@@ -1,6 +1,7 @@
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
 import { default as antlr4 } from "antlr4";
 import type { OwnedContext } from "./AntlrTypes";
+import { isNamelessCreation } from "./NamelessCreation";
 import {
   augment,
   type ParserRuleContextAugmented,
@@ -28,7 +29,10 @@ augment<StatContextAugmented>(sequenceParser.StatContext, {
       if (ctx instanceof ProgContext) {
         return (ctx as unknown as ProgContextAugmented).Starter();
       }
-      if (ctx instanceof MessageContext || ctx instanceof CreationContext) {
+      if (
+        ctx instanceof MessageContext ||
+        (ctx instanceof CreationContext && !isNamelessCreation(ctx))
+      ) {
         const receiver = (ctx as unknown as OwnedContext).Owner();
         if (receiver) {
           return receiver;
