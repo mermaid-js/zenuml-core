@@ -87,6 +87,16 @@ API.validate(token) {
     expect(signatures(stats[1])).toEqual(["d()"]);
   });
 
+  it("a syntax error as the first token of a body stays with its owner", () => {
+    const tree = root("if(ok) {\n  /\n  P.a()\n}\nP.b()");
+    expect(sections(tree)).toHaveLength(0);
+    const stats = topStats(tree);
+    expect(stats).toHaveLength(2);
+    expect(signatures(stats[0].alt().ifBlock())).toEqual(["a()"]);
+    expect(signatures(stats[1])).toEqual(["b()"]);
+    expect(parse("if(ok) {\n  /\n  P.a()\n}\nP.b()").pass).toBe(false);
+  });
+
   it("a missing `}` before `else` keeps both branches in one alt", () => {
     const tree = root("if(x) {\n  A.b()\nelse {\n  A.c()\n}\nA.d()");
     expect(sections(tree)).toHaveLength(0);
