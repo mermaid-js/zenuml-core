@@ -1,8 +1,8 @@
 // The grammar accepts a few half-typed forms on purpose, so the editor keeps a
 // parse tree while the user types: `A->`, `r =` and `@return`. They have no
-// target, no call and no message, so nothing should be drawn for them.
-// Removing them from the tree keeps the HTML and SVG renderers, numbering and
-// participant collection in step. The tokens stay in the token stream, so
+// target, no call and no message, so no message is drawn for them. Removing
+// them from the block keeps the HTML and SVG renderers and numbering in step.
+// A dangling arrow keeps its source participant. The tokens stay in the token stream, so
 // source ranges and comments are not affected.
 
 import sequenceParser from "../generated-parser/sequenceParser";
@@ -53,10 +53,24 @@ export function pruneDanglingStatements(root: Node): void {
     const children = node.children;
     if (!children) return;
     if (node instanceof BlockContext) {
-      const kept = children.filter(
-        (child) => !(child instanceof StatContext) || !isDanglingStat(child),
-      );
-      if (kept.length !== children.length) (node as Node).children = kept;
+      let changed = false;
+      const kept: Node[] = [];
+      for (const child of children) {
+        if (!(child instanceof StatContext) || !isDanglingStat(child)) {
+          kept.push(child);
+          continue;
+        }
+        changed = true;
+        // `A->` still names a participant: keep its `from` node in the block
+        // (not as a statement) so participant collection sees it, and draw
+        // no message.
+        const from = child.asyncMessage?.()?.from?.();
+        if (from) {
+          (from as Node).parentCtx = node;
+          kept.push(from);
+        }
+      }
+      if (changed) (node as Node).children = kept;
     }
     for (const child of (node as Node).children!) {
       if (child.children) visit(child);

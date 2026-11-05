@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { RootContext, parse } from "./index";
+import { RootContext, parse, Participants } from "./index";
 import { renderToSvg } from "@/svg/renderToSvg";
 import sequenceParser from "../generated-parser/sequenceParser";
 
@@ -8,6 +8,10 @@ import sequenceParser from "../generated-parser/sequenceParser";
 
 function statements(code: string): any[] {
   return RootContext(code).block?.()?.stat?.() ?? [];
+}
+
+function participantNames(code: string): string[] {
+  return Participants(RootContext(code)).Names();
 }
 
 function svgTexts(code: string): string[] {
@@ -92,7 +96,11 @@ describe("dangling statements are dropped at any depth (#672)", () => {
     ["if(x) {\n  while(y) {\n    A->\n  }\n}", "if(x) {\n  while(y) {\n  }\n}"],
   ])("%j renders like %j", (code, empty) => {
     expect(numbers(code)).toEqual(numbers(empty));
-    expect(svgTexts(code)).toEqual(svgTexts(empty));
+    // A dangling arrow keeps its source participant, so only `r =` has the
+    // same texts as the empty block.
+    if (!code.includes("->")) {
+      expect(svgTexts(code)).toEqual(svgTexts(empty));
+    }
   });
 
   it("parse() returns the same pruned tree", () => {
@@ -175,4 +183,58 @@ describe("pruning survives minified class names (#672)", () => {
       }
     },
   );
+});
+
+describe("a dangling arrow keeps its source participant (#672)", () => {
+  it.each([
+    ["A->", ["A"]],
+    ["A-", ["A"]],
+    ["A -", ["A"]],
+    ["X.a()\nA->", ["X", "A"]],
+    ["A\nB\nA->", ["A", "B"]],
+    ["if(x) {\n  A->\n}", ["A"]],
+    ["A.b() {\n  C->\n}", ["A", "C"]],
+    ["r =", []],
+    ["@return", []],
+  ])("%j has participants %j", (code, names) => {
+    expect(participantNames(code)).toEqual(names);
+  });
+
+  it.each(["A->", "A-", "A\nB\nA->", "if(x) {\n  A->\n}"])(
+    "%j draws no message",
+    (code) => {
+      expect(statements(code).length === 0 || code.startsWith("if")).toBe(true);
+      expect(numbers(code).filter((n) => n.includes("."))).toEqual([]);
+    },
+  );
+
+  it("`A.b() {` / `C->` / `}` draws b() as 1 like an empty block", () => {
+    expect(numbers("A.b() {\n  C->\n}")).toEqual(["1"]);
+    expect(svgTexts("A.b() {\n  C->\n}")).toContain("b()");
+  });
+
+  it("`X.a()` then `A->` leaves a() as number 1", () => {
+    expect(numbers("X.a()\nA->")).toEqual(["1"]);
+  });
+
+  it("the source participant is kept when the classes are minified", () => {
+    const classes: any[] = [
+      sequenceParser.BlockContext,
+      sequenceParser.StatContext,
+    ];
+    const original = classes.map((c) => c.name);
+    classes.forEach((c, i) =>
+      Object.defineProperty(c, "name", { value: `m${i}`, configurable: true }),
+    );
+    try {
+      expect(participantNames("// minified\nA->")).toEqual(["A"]);
+    } finally {
+      classes.forEach((c, i) =>
+        Object.defineProperty(c, "name", {
+          value: original[i],
+          configurable: true,
+        }),
+      );
+    }
+  });
 });
