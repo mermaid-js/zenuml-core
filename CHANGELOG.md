@@ -1,5 +1,19 @@
 # @zenuml/core
 
+## 4.13.1
+
+### Patch Changes
+
+- [#698](https://github.com/mermaid-js/zenuml-core/pull/698) [`95f2acc`](https://github.com/mermaid-js/zenuml-core/commit/95f2acc4a39e5f8f39b5f007cd8f02f9b29dbaef) Thanks [@MrCoder](https://github.com/MrCoder)! - An arrow to an empty quoted name with no label, such as `B->""`, now keeps its source participant and draws no message, like `B->`, and the layout no longer logs a console warning for messages that have no target.
+
+- [#700](https://github.com/mermaid-js/zenuml-core/pull/700) [`1c7bbe2`](https://github.com/mermaid-js/zenuml-core/commit/1c7bbe2020ddc19cd1bd7302f8f6398550e4d703) Thanks [@MrCoder](https://github.com/MrCoder)! - The Langium parser, which powers editor autocomplete, now keeps the statements after a stray top-level token such as `/`, `=`, `else` or an extra `}` or `)`.
+
+- [#701](https://github.com/mermaid-js/zenuml-core/pull/701) [`8462662`](https://github.com/mermaid-js/zenuml-core/commit/846266205892b22c10fb5b739fef3a2b597294b0) Thanks [@MrCoder](https://github.com/MrCoder)! - Read `A.b: x` as `A->b: x`, read `@return x` with no arrow as `return x` and drop a bare `@return`, so neither takes the next token, and keep the closing brace after a bare `@return`.
+
+- [#699](https://github.com/mermaid-js/zenuml-core/pull/699) [`5e23155`](https://github.com/mermaid-js/zenuml-core/commit/5e23155621fb5f9f2c6878d458f414fde7927020) Thanks [@MrCoder](https://github.com/MrCoder)! - A trailing dot at the end of a line no longer swallows the next line when that line begins with a name and a dot, so it stays its own message.
+
+- [#697](https://github.com/mermaid-js/zenuml-core/pull/697) [`da22db0`](https://github.com/mermaid-js/zenuml-core/commit/da22db0fc0ea0b4d4d7e50f7ad0587719579dee5) Thanks [@MrCoder](https://github.com/MrCoder)! - Keep the statements visible when a participant name is followed by a `{` that has no closing `}`.
+
 ## 4.13.0
 
 ### Minor Changes
