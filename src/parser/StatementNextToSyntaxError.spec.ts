@@ -122,7 +122,7 @@ describe("valid message forms keep their parse", () => {
     ["A.\nb - c", ["A", ""]],
     ["A.\nb = c()", ["A", ""], [undefined, "c()"]],
     ["A.\nb, c = d()", ["A", ""], [undefined, "d()"]],
-    ["A.b: hi", ["A", ""]],
+    // `A.b: hi` on one line is read as `A->b: hi` (#672), see BareReturnAndDotColon.spec.ts.
     ["A.b.c: hi", ["A", ""], ["b", ""]],
     ["A.b.c = d()", ["A", ""], ["b", ""], [undefined, "d()"]],
     ["r =\nb: hi"],

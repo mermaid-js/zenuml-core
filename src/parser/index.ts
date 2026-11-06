@@ -2,6 +2,7 @@ import antlr4 from "antlr4";
 import { default as sequenceLexer } from "../generated-parser/sequenceLexer";
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
 import { repairIncompleteCalls } from "./repairIncompleteCalls";
+import { readDotColonAsArrow, repairLooseTokens } from "./repairLooseTokens";
 import { HeaderRecoveringLexer } from "./HeaderRecoveringLexer";
 import ToCollector from "./ToCollector";
 import "./TitleContext";
@@ -125,6 +126,7 @@ function byPosition(a: ErrorDetail, b: ErrorDetail) {
 // succeeds, is guaranteed to produce the same parse tree. BailErrorStrategy
 // aborts on the first syntax error. Returns null for invalid input.
 function parseWithSll(tokens: Ctx) {
+  readDotColonAsArrow(tokens);
   tokens.seek(0);
   const parser: Ctx = new sequenceParser(tokens);
   parser.removeErrorListeners();
@@ -159,7 +161,10 @@ const MAX_STRAY_PASSES = 8;
  * pass.
  */
 function parseSkippingStrayTokens(tokens: Ctx) {
-  const strayErrors: ErrorDetail[] = [...repairIncompleteCalls(tokens)];
+  const strayErrors: ErrorDetail[] = [
+    ...repairIncompleteCalls(tokens),
+    ...repairLooseTokens(tokens),
+  ];
   for (let pass = 1; ; pass++) {
     tokens.seek(0);
     const parser: Ctx = recoverAtEof(
