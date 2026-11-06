@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@zenuml/core — Sequence diagrams from text, in the browser</title>
+<meta name="description" content="Sequence diagrams from text: @zenuml/core is a JavaScript library that turns a Markdown-inspired DSL into interactive diagrams in the browser. MIT, no server.">
+<link rel="canonical" href="https://core.zenuml.com/">
+<meta property="og:title" content="@zenuml/core — Sequence diagrams from text">
+<meta property="og:description" content="A JavaScript sequence-diagram library that turns Markdown-inspired text into interactive diagrams entirely in the browser — no server required. MIT, v4.1.0.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://core.zenuml.com/">
+<meta property="og:image" content="https://core.zenuml.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ZenUML DSL text on the left rendered into a sequence diagram on the right">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="@zenuml/core — Sequence diagrams from text">
+<meta name="twitter:description" content="A JavaScript sequence-diagram library that turns Markdown-inspired text into interactive diagrams entirely in the browser — no server required. MIT, v4.1.0.">
+<meta name="twitter:image" content="https://core.zenuml.com/assets/og-image.png">
+<meta name="twitter:image:alt" content="ZenUML DSL text on the left rendered into a sequence diagram on the right">
+<meta name="theme-color" content="#FAFAF9">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<style>
+  /* pre-Tailwind paint guard */
+  html{background:#FAFAF9}
+  body{background:#FAFAF9;color:#0C0A09;margin:0}
+</style>
+<script>document.documentElement.classList.add('js');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- fonts load async (media=print swap) so the stylesheet never blocks first paint;
+     metric-overridden local fallbacks (see @font-face below) absorb the FOUT shift -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"></noscript>
+<!-- Tailwind utilities compiled statically (tailwindcss CLI --minify) — no runtime JIT, no blocking third-party script -->
+<style id="tw">*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:JetBrains Mono,JBM Fallback,JBM Fallback2,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.invisible{visibility:hidden}.static{position:static}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.right-3{right:.75rem}.top-0{top:0}.top-3{top:.75rem}.z-50{z-index:50}.col-span-2{grid-column:span 2/span 2}.m-0{margin:0}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-8{margin-bottom:2rem}.ml-auto{margin-left:auto}.mt-10{margin-top:2.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-7{margin-top:1.75rem}.mt-8{margin-top:2rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-14{height:3.5rem}.min-h-\[14rem\]{min-height:14rem}.min-h-\[18rem\]{min-height:18rem}.min-h-\[7\.5rem\]{min-height:7.5rem}.min-w-0{min-width:0}.max-w-\[38ch\]{max-width:38ch}.max-w-\[52ch\]{max-width:52ch}.max-w-\[62ch\]{max-width:62ch}.max-w-\[72ch\]{max-width:72ch}.flex-1{flex:1 1 0%}.flex-none{flex:none}.cursor-pointer{cursor:pointer}.resize{resize:both}.list-none{list-style-type:none}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-10{gap:2.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-x-4{-moz-column-gap:1rem;column-gap:1rem}.gap-x-6{-moz-column-gap:1.5rem;column-gap:1.5rem}.gap-y-3{row-gap:.75rem}.gap-y-8{row-gap:2rem}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.border{border-width:1px}.border-0{border-width:0}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-hair{--tw-border-opacity:1;border-color:rgb(214 211 209/var(--tw-border-opacity,1))}.border-white\/10{border-color:hsla(0,0%,100%,.1)}.bg-paper{--tw-bg-opacity:1;background-color:rgb(250 250 249/var(--tw-bg-opacity,1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.p-0{padding:0}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.\!pt-10{padding-top:2.5rem!important}.pl-1{padding-left:.25rem}.pt-6{padding-top:1.5rem}.font-body{font-family:Helvetica Neue,Helvetica,Arial,system-ui,sans-serif}.font-mono{font-family:JetBrains Mono,JBM Fallback,JBM Fallback2,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.text-\[0\.6875rem\]{font-size:.6875rem}.text-\[0\.875em\]{font-size:.875em}.text-\[0\.875rem\]{font-size:.875rem}.text-\[0\.9375rem\]{font-size:.9375rem}.text-\[1\.0625rem\]{font-size:1.0625rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.tracking-\[0\.08em\]{letter-spacing:.08em}.tracking-tight{letter-spacing:-.025em}.\!text-teal{--tw-text-opacity:1!important;color:rgb(15 118 110/var(--tw-text-opacity,1))!important}.text-char{--tw-text-opacity:1;color:rgb(12 10 9/var(--tw-text-opacity,1))}.text-ink{--tw-text-opacity:1;color:rgb(15 23 42/var(--tw-text-opacity,1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184/var(--tw-text-opacity,1))}.text-stone-500{--tw-text-opacity:1;color:rgb(120 113 108/var(--tw-text-opacity,1))}.text-stone-600{--tw-text-opacity:1;color:rgb(87 83 78/var(--tw-text-opacity,1))}.text-stone-700{--tw-text-opacity:1;color:rgb(68 64 60/var(--tw-text-opacity,1))}.text-teal{--tw-text-opacity:1;color:rgb(15 118 110/var(--tw-text-opacity,1))}.no-underline{text-decoration-line:none}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.ease-out{transition-timing-function:cubic-bezier(0,0,.2,1)}@media (min-width:640px){.sm\:inline{display:inline}.sm\:gap-7{gap:1.75rem}}@media (min-width:768px){.md\:col-span-1{grid-column:span 1/span 1}.md\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.md\:grid-cols-\[1fr_auto_auto_auto\]{grid-template-columns:1fr auto auto auto}.md\:gap-14{gap:3.5rem}.md\:py-14{padding-top:3.5rem;padding-bottom:3.5rem}}@media (min-width:1024px){.lg\:grid-cols-\[minmax\(0\2c 5fr\)_minmax\(0\2c 7fr\)\]{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}.lg\:border-b-0{border-bottom-width:0}.lg\:border-r{border-right-width:1px}.lg\:\!pt-16{padding-top:4rem!important}}@media (min-width:1280px){.xl\:gap-14{gap:3.5rem}}</style>
+<style>
+/* metric-overridden local fallbacks — JetBrains Mono (UPM 1000, asc 1020, desc 300,
+   advance 600) mapped onto Menlo / Consolas so the async webfont swap barely shifts */
+@font-face{font-family:'JBM Fallback';src:local('Menlo');size-adjust:99.66%;ascent-override:102.35%;descent-override:30.1%;line-gap-override:0%}
+@font-face{font-family:'JBM Fallback2';src:local('Consolas');size-adjust:109.13%;ascent-override:93.47%;descent-override:27.49%;line-gap-override:0%}
+
+/* ============ DESIGN TOKENS ============ */
+:root{
+  --ink:#0F172A; --teal:#0F766E; --paper:#FAFAF9; --char:#0C0A09; --hair:#D6D3D1;
+  --mono:'JetBrains Mono','JBM Fallback','JBM Fallback2',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --body:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif; /* system stack — no webfont cost, no personality competing with the diagrams */
+  /* modular scale — 1.25 ratio on a 16px base */
+  --fs--1:.75rem;   /* 12 captions, indexes */
+  --fs-0:.8125rem;  /* 13 code */
+  --fs-1:1rem;      /* 16 body */
+  --fs-2:1.0625rem; /* 17 lede */
+  --fs-3:1.3125rem; /* 21 */
+  --fs-4:1.75rem;   /* 28 */
+  --fs-5:2.375rem;  /* 38 h2 */
+  /* spacing rhythm — 8px base */
+  --sec-y:clamp(3.5rem, 8vw, 6rem);
+}
+html{scroll-behavior:smooth}
+[id]{scroll-margin-top:4.5rem}
+body{font-family:var(--body);font-size:var(--fs-1);line-height:1.6;-webkit-font-smoothing:antialiased}
+::selection{background:var(--teal);color:#fff}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:0}
+pre,code,kbd,textarea{font-family:var(--mono);font-variant-ligatures:none} /* -> must read as two characters */
+button,a,input,textarea,.chip,details{border-radius:0} /* discipline: zero radius */
+
+/* ============ STRUCTURE ============ */
+.wrap{max-width:1200px;margin:0 auto;padding-left:20px;padding-right:20px}
+@media(min-width:768px){.wrap{padding-left:32px;padding-right:32px}}
+@media(min-width:1280px){.rails{border-left:1px solid var(--hair);border-right:1px solid var(--hair)}}
+.sec{padding-top:var(--sec-y);padding-bottom:var(--sec-y)}
+.idx{font-family:var(--mono);font-size:var(--fs--1);letter-spacing:.08em;color:var(--teal);font-weight:500;text-transform:uppercase}
+.h1{font-family:var(--mono);font-weight:700;text-transform:uppercase;letter-spacing:-0.02em;line-height:1.04;font-size:clamp(2.375rem,4.6vw,3.5rem);color:var(--ink)}
+.h2{font-family:var(--mono);font-weight:700;text-transform:uppercase;letter-spacing:-0.01em;line-height:1.1;font-size:clamp(1.375rem,2.6vw,2rem);color:var(--ink)}
+.hl{background:var(--teal);color:#fff;padding:0 .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.cap{font-family:var(--mono);font-size:var(--fs--1);letter-spacing:.12em;text-transform:uppercase}
+
+/* ============ CHIPS / BUTTONS / LINKS ============ */
+.chip{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--hair);background:#fff;
+  font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;padding:.375rem .75rem;color:var(--ink);text-transform:uppercase}
+.chip i{width:.5rem;height:.5rem;background:var(--teal);display:inline-block}
+.btn-ink{display:inline-flex;align-items:center;gap:.625rem;background:var(--ink);color:#fff;
+  font-family:var(--mono);font-weight:600;font-size:.9375rem;padding:.875rem 1.5rem;border:1px solid var(--ink);
+  text-decoration:none;transition:background-color .15s ease,border-color .15s ease}
+.btn-ink:hover{background:var(--teal);border-color:var(--teal)}
+.btn-ink:hover .arr-d{transform:translateY(3px)}
+.btn-ink:hover .arr-r{transform:translateX(3px)}
+.btn-arrow{transition:transform .15s ease}
+/* at lg the demo sits to the RIGHT of the CTA — the arrow must agree */
+.arr-r{display:none}
+@media(min-width:1024px){.arr-d{display:none}.arr-r{display:inline-block}}
+.plink{font-family:var(--mono);font-size:.875rem;color:var(--ink);text-decoration:underline;
+  text-decoration-color:var(--hair);text-underline-offset:5px;transition:text-decoration-color .15s ease,color .15s ease}
+.plink:hover{text-decoration-color:var(--teal);color:var(--teal)}
+.navlink{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--char);
+  text-decoration:none;padding:.25rem 0;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.navlink:hover{color:var(--teal);border-bottom-color:var(--teal)}
+.cmd{display:inline-flex;max-width:100%;align-items:center;gap:.75rem;border:1px solid var(--hair);background:#fff;padding:.6875rem 1rem}
+.cmd code{font-size:.9375rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow-x:auto}
+
+/* ============ PANELS (shared editor/diagram grammar) ============ */
+.panel{border:1px solid var(--hair);background:#fff;display:flex;flex-direction:column}
+.panel-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  border-bottom:1px solid var(--hair);background:var(--paper);padding:0 1rem;height:2.25rem;flex:none}
+.panel-bar .t{font-family:var(--mono);font-size:.6875rem;letter-spacing:.12em;text-transform:uppercase;color:#78716C;
+  flex:1 1 auto;min-width:8ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} /* left title wins the space fight; the status ellipsizes first */
+.panel-bar .ok{font-family:var(--mono);font-size:.6875rem;letter-spacing:.06em;color:var(--teal);white-space:nowrap;
+  min-width:0;overflow:hidden;text-overflow:ellipsis}
+.panel-bar .ok.err{color:var(--char);font-weight:700}
+.gutter{user-select:none;-webkit-user-select:none;text-align:right;color:#78716C;background:#fff;
+  border-right:1px solid #E7E5E4;padding:1rem .75rem 1rem 1rem;font-size:var(--fs-0);line-height:1.75;margin:0;flex:none}
+.codepane{padding:1rem;font-size:var(--fs-0);line-height:1.75;overflow-x:auto;margin:0;color:var(--char);flex:1 1 auto;min-width:0;tab-size:2;
+  /* edge shadows appear only while content hides off-screen — signals horizontal scroll */
+  background:
+    linear-gradient(to right,#fff 30%,rgba(255,255,255,0)) left center,
+    linear-gradient(to left,#fff 30%,rgba(255,255,255,0)) right center,
+    linear-gradient(to right,rgba(12,10,9,.14),rgba(12,10,9,0)) left center,
+    linear-gradient(to left,rgba(12,10,9,.14),rgba(12,10,9,0)) right center;
+  background-repeat:no-repeat;background-color:#fff;
+  background-size:2.5rem 100%,2.5rem 100%,.875rem 100%,.875rem 100%;
+  background-attachment:local,local,scroll,scroll;
+  scrollbar-width:thin;scrollbar-color:var(--hair) transparent}
+.codepane::-webkit-scrollbar{height:8px}
+.codepane::-webkit-scrollbar-thumb{background:var(--hair)}
+.codepane::-webkit-scrollbar-track{background:transparent}
+.ed{display:block;width:100%;border:0;background:transparent;color:var(--char);resize:none;overflow:hidden;
+  padding:1rem;font-size:var(--fs-0);line-height:1.75;min-height:7.5rem;tab-size:2}
+.render-status{border-top:1px solid var(--hair);padding:.5rem 1rem;font-family:var(--mono);
+  font-size:.6875rem;letter-spacing:.1em;text-transform:uppercase;color:#78716C;flex:none}
+.render-status.live{color:var(--teal)}
+.render-status .dot{display:inline-block;width:.5rem;height:.5rem;margin-right:.5rem;vertical-align:baseline;border:1px solid currentColor}
+.render-status.live .dot{background:var(--teal);border-color:var(--teal);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* caret in hero editor */
+.caret{display:inline-block;width:.5em;height:1.1em;background:var(--teal);vertical-align:text-bottom;animation:blink 1.06s steps(1,end) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* pipeline arrow between hero panels */
+.pipe-line{stroke:var(--ink);stroke-width:1.5}
+.pipe-head{stroke:var(--ink);stroke-width:1.5;fill:none}
+.pipe .pipe-pulse{opacity:0}
+.pipe.fired .pipe-pulse{animation:travel 1s ease-out 1 forwards}
+@keyframes travel{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(18px)}}
+
+/* ============ LIVE STAGE — true in-place crossfade ============ */
+/* fallback <img> and live host share one grid cell; hydration fades, never reflows twice */
+.stage{display:grid;justify-items:center;align-items:center;padding:1.5rem;min-width:0;overflow:auto}
+.stage>*{grid-area:1/1}
+.stage .fallback{transition:opacity .42s ease;max-width:100%;height:auto}
+.stage .live-host{opacity:0;pointer-events:none;transition:opacity .42s ease;max-width:100%;min-width:0}
+.stage.is-live .live-host{opacity:1;pointer-events:auto}
+.stage.is-live .fallback{opacity:0;pointer-events:none}
+.stage.settled .fallback{display:none}
+/* live hydration renders the framed DiagramFrame in static mode so the crossfade
+   from the CLI-rendered fallback is near-imperceptible; hide the two bits of
+   frame chrome (privacy icon, empty footer strip) the static SVG doesn't have */
+.stage .live-host .privacy{display:none!important}
+.stage .live-host .frame>.footer{display:none!important}
+
+/* section 03 output pane: FIT-TO-WIDTH by default — the whole diagram is visible
+   at a glance (uniform scale, same math as the hero's fit()); the 100% toggle
+   restores natural size (14px labels) with top-left-anchored scroll */
+#stage-ex3{padding:1rem;overflow:auto;
+  scrollbar-width:thin;scrollbar-color:var(--hair) transparent}
+#stage-ex3.natural{justify-items:start;align-items:start}
+#stage-ex3.natural .fallback{max-width:none}
+#stage-ex3::-webkit-scrollbar{height:8px;width:8px}
+#stage-ex3::-webkit-scrollbar-thumb{background:var(--hair)}
+@media(min-width:1024px){#stage-ex3{max-height:44rem}} /* only bites in 100% mode — fit height stays well under it */
+html:not(.js) #ex3-zoom{display:none} /* the toggle is JS-driven; the no-JS default (fit) needs none */
+
+/* small-screen helpers */
+@media(max-width:639px){.xs-hide{display:none}}
+.pipe-cap{white-space:nowrap}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ============ TERMINAL — the page's only dark surface ============ */
+.term{background:var(--ink);color:#E7E5E4;border:1px solid var(--ink)}
+.term .bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  border-bottom:1px solid rgba(255,255,255,.12);padding:.625rem 1.25rem}
+.term .bar span{font-family:var(--mono);font-size:.6875rem;letter-spacing:.12em;text-transform:uppercase;color:#94A3B8}
+.install-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  border-bottom:1px solid rgba(255,255,255,.12);padding:.75rem 1.25rem;flex-wrap:wrap}
+.install-row code{font-size:.9375rem;color:#fff;font-weight:600}
+.install-row .alt{color:#94A3B8;font-weight:400;font-size:.8125rem}
+.tab{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:#94A3B8;
+  padding:.625rem 1rem;border:0;background:transparent;cursor:pointer;box-shadow:inset 0 -2px 0 transparent;transition:color .15s,box-shadow .15s}
+.tab:hover{color:#E7E5E4}
+.tab[aria-selected="true"]{color:#fff;box-shadow:inset 0 -2px 0 var(--teal)}
+.term pre{padding:1.25rem 1.25rem 1.5rem;font-size:var(--fs-0);line-height:1.8;overflow-x:auto;margin:0;color:#E7E5E4}
+.tk-k{color:#fff;font-weight:700}
+.tk-s{color:#5EEAD4}
+.tk-c{color:#94A3B8}
+.copy-btn{font-family:var(--mono);font-size:.625rem;letter-spacing:.12em;text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.25);color:#CBD5E1;background:transparent;padding:.375rem .625rem;cursor:pointer;
+  transition:border-color .15s,color .15s}
+.copy-btn:hover{border-color:#5EEAD4;color:#5EEAD4}
+.copy-btn.copied{border-color:var(--teal);color:#5EEAD4}
+.copy-btn.light{border-color:var(--hair);color:#57534E;background:#fff}
+.copy-btn.light:hover{border-color:var(--teal);color:var(--teal)}
+.copy-btn.light.copied{border-color:var(--teal);color:var(--teal)}
+.copy-btn.light[aria-pressed="true"]{border-color:var(--teal);color:var(--teal)}
+/* touch targets: keep the 26px visual, extend the tap area to ~44px on coarse pointers.
+   :not(.absolute) so the utility-positioned pane buttons keep position:absolute —
+   they are already positioned, so the ::after overlay anchors to them regardless */
+.copy-btn:not(.absolute){position:relative}
+@media(pointer:coarse){.copy-btn::after{content:'';position:absolute;inset:-9px}}
+
+/* compact pipeline rows (CLI + parser) */
+.tool-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:.375rem .75rem;border-top:1px solid var(--hair);padding:.875rem 0;
+  font-family:var(--mono);font-size:var(--fs-0);color:#44403C}
+.tool-row:last-child{border-bottom:1px solid var(--hair)}
+.tool-row b{color:var(--ink);font-weight:700}
+
+/* ============ TRUST STRIP ============ */
+.fact p:first-child{font-family:var(--mono);font-weight:700;color:var(--ink);line-height:1;margin:0;font-size:clamp(1.5rem,3.2vw,2.25rem)}
+.fact p:last-child{margin:.625rem 0 0}
+
+/* ============ FAQ — collapsed details ============ */
+.faq details{border-top:1px solid var(--hair)}
+.faq details:last-of-type{border-bottom:1px solid var(--hair)}
+.faq summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;justify-content:space-between;gap:1.5rem;
+  padding:1.25rem 0;font-family:var(--mono);font-weight:700;font-size:var(--fs-2);letter-spacing:-0.01em;color:var(--ink)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'+';font-weight:500;color:var(--teal);flex:none;transition:transform .2s ease}
+.faq details[open] summary::after{content:'−'}
+.faq summary:hover{color:var(--teal)}
+.faq details p{margin:0 0 1.5rem;max-width:62ch;color:#292524;font-size:var(--fs-1)}
+.faq details p code{font-family:var(--mono);font-size:.875em;color:var(--ink)} /* backticks stay in textContent — byte-identical to the FAQPage JSON-LD */
+
+/* ============ SCROLL REVEAL — transform-only, never hides content ============
+   No opacity gate: non-scrolling headless captures (social scrapers, print,
+   screenshot services, AI crawlers) always see the full page. */
+html.js .reveal{transform:translateY(14px);transition:transform .55s ease}
+html.js .reveal.in{transform:none}
+@media print{html.js .reveal{transform:none}}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  html.js .reveal{transform:none;transition:none}
+  .caret{animation:none}
+  .render-status.live .dot{animation:none}
+  .pipe.fired .pipe-pulse{animation:none;opacity:0}
+  .stage .fallback,.stage .live-host{transition:none}
+  .btn-ink,.btn-arrow,.tab,.copy-btn,.navlink,.plink,.faq summary::after{transition:none}
+}
+
+/* single embedded logo asset, shared by nav + footer */
+.logo-mark{display:block;width:22px;height:22px;background:url(data:image/png;base64,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) center/contain no-repeat;flex:none}
+
+.skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:#fff;font-family:var(--mono);padding:.75rem 1rem;z-index:100}
+.skip:focus{left:0}
+
+/* the library's invisible scroll detector keeps its creation-time width after
+   a window resize; clamp it so it can never widen the document */
+#zenuml-intersection-detector-container{max-width:100vw;overflow:hidden}
+</style>
+
+<!-- ============ STRUCTURED DATA (GEO) ============ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "@zenuml/core",
+  "alternateName": "ZenUML Core",
+  "url": "https://core.zenuml.com",
+  "description": "@zenuml/core is a JavaScript sequence-diagram library that turns Markdown-inspired text definitions into interactive diagrams entirely in the browser — no server required.",
+  "potentialAction": {
+    "@type": "ReadAction",
+    "target": "https://core.zenuml.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ZenUML",
+    "url": "https://zenuml.com"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "ZenUML",
+  "url": "https://zenuml.com",
+  "logo": "https://core.zenuml.com/assets/logo.png",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "hello@zenuml.com",
+    "contactType": "customer support"
+  },
+  "sameAs": [
+    "https://github.com/mermaid-js/zenuml-core",
+    "https://www.npmjs.com/package/@zenuml/core",
+    "https://app.zenuml.com"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "@zenuml/core",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any (browser); Node.js >= 20 for CLI, headless parser, and LSP",
+  "softwareVersion": "4.1.0",
+  "license": "https://opensource.org/licenses/MIT",
+  "url": "https://core.zenuml.com",
+  "installUrl": "https://www.npmjs.com/package/@zenuml/core",
+  "description": "A JavaScript sequence-diagram library that turns Markdown-inspired text definitions into interactive diagrams entirely in the browser — no server required. One DSL feeds an interactive React 19 HTML renderer and a headless native-SVG renderer, plus a server-safe parser subpath, a CLI, and a Langium-based language server.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ZenUML",
+    "url": "https://zenuml.com"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "@zenuml/core",
+  "codeRepository": "https://github.com/mermaid-js/zenuml-core",
+  "programmingLanguage": ["JavaScript", "TypeScript"],
+  "runtimePlatform": "Node.js >= 20",
+  "license": "https://opensource.org/licenses/MIT",
+  "version": "4.1.0",
+  "url": "https://core.zenuml.com",
+  "description": "Source code for @zenuml/core, the MIT-licensed sequence-diagram engine hosted in the mermaid-js GitHub organization. ANTLR4-based DSL parser, React 19 HTML renderer, and headless native-SVG renderer."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is @zenuml/core?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "@zenuml/core is a JavaScript sequence-diagram library that turns Markdown-inspired text definitions into interactive diagrams entirely in the browser, with no server required. It is published on npm under the MIT license, and it is the engine that powers ZenUML syntax support in the Mermaid ecosystem."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I install @zenuml/core?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Install @zenuml/core from npm with `npm install @zenuml/core` or `bun add @zenuml/core`. The package requires Node.js 20 or later and ships both an ESM bundle (dist/zenuml.esm.mjs) for modern bundlers and a UMD bundle (dist/zenuml.js) for browser scripts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is ZenUML part of Mermaid?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ZenUML is not a Mermaid competitor — it is an alternative sequence-diagram syntax available inside the Mermaid ecosystem, and it is also usable standalone. The @zenuml/core repository lives in the mermaid-js GitHub organization, and Mermaid's mermaid-zenuml package calls this library's renderer."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does ZenUML require a server to render diagrams?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. ZenUML diagrams are defined as plain text and rendered fully client-side in the browser. One DSL feeds two renderers: an interactive React 19 HTML renderer and a headless native-SVG renderer exported as renderToSvg()."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I validate ZenUML syntax on the server in Node.js?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The @zenuml/core/parser subpath exports a reentrant validate(code) function that returns { pass, errorDetails } and a parse(code) function that adds an error-recovered rootContext parse tree. It imports cleanly server-side and is safe to call repeatedly or concurrently in Node."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What UML fragments does ZenUML support?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ZenUML supports the full UML fragment set: if/else (alt), while/for/loop, opt, par, critical, section/frame, try/catch/finally, and ref. Conditions accept real expressions, including comparison, boolean, arithmetic, function calls, and the in operator."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I export ZenUML diagrams as PNG or SVG?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The ZenUml instance provides getPng() and getSvg() methods that return data URLs. The package also ships a zenuml CLI binary that renders .zenuml files to SVG or PNG, supports stdin/stdout pipes, and offers --check syntax validation and --parse AST-as-JSON output."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is @zenuml/core free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. @zenuml/core is open source under the MIT license and free to install from npm. The current version is 4.1.0."
+      }
+    }
+  ]
+}
+</script>
+</head>
+
+<body class="bg-paper text-char font-body antialiased">
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- ============ NAV ============ -->
+<header class="border-b border-hair sticky top-0 z-50 bg-paper">
+  <nav class="wrap flex items-center justify-between h-14" aria-label="Primary">
+    <a href="#top" class="flex items-center gap-2.5 no-underline">
+      <span class="logo-mark" role="img" aria-label="ZenUML logo"></span>
+      <span class="hidden sm:inline font-mono font-bold text-[0.9375rem] tracking-tight text-ink">@zenuml/core</span>
+    </a>
+    <div class="flex items-center gap-4 sm:gap-7">
+      <a class="navlink" href="https://github.com/mermaid-js/zenuml-core/blob/main/docs/DSL_SYNTAX.md" rel="noopener">Syntax</a>
+      <a class="navlink" href="https://app.zenuml.com" rel="noopener">Playground</a>
+      <a class="navlink" href="https://github.com/mermaid-js/zenuml-core" rel="noopener">GitHub</a>
+      <a class="navlink" href="https://www.npmjs.com/package/@zenuml/core" rel="noopener">npm</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+<div class="rails" id="top">
+
+<!-- ============ 01 — HERO: text in, live diagram out ============ -->
+<section class="sec !pt-10 lg:!pt-16" aria-labelledby="hero-h1">
+  <div class="wrap">
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-10 xl:gap-14 items-center">
+
+      <!-- LEFT: value prop + CTA -->
+      <div>
+        <p class="idx mb-5">[ 01 — INPUT&nbsp;→&nbsp;OUTPUT ]</p>
+        <div class="mb-5"><span class="chip"><i aria-hidden="true"></i>OPEN SOURCE · MIT · v4.1.0</span></div>
+        <h1 id="hero-h1" class="h1"><span class="hl">Sequence diagrams</span><br>
+from text.</h1>
+        <p class="mt-4 font-mono text-teal text-[0.9375rem] font-medium">Help documentation catch up with development.</p>
+        <p class="mt-4 max-w-[52ch] text-[1.0625rem] leading-relaxed text-stone-700">
+          @zenuml/core is a JavaScript sequence-diagram library that turns Markdown-inspired text
+          definitions into interactive diagrams entirely in the browser — no server required.
+        </p>
+        <div class="mt-7 flex flex-wrap items-center gap-4">
+          <a href="#demo" id="cta-try" class="btn-ink">Try it live <span class="btn-arrow arr-d" aria-hidden="true">↓</span><span class="btn-arrow arr-r" aria-hidden="true">→</span></a>
+          <span class="cmd">
+            <code id="install-cmd">npm install @zenuml/core</code>
+            <button class="copy-btn light flex-none" data-copy-target="install-cmd" aria-label="Copy npm install command">copy</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- RIGHT: the signature demo — this editor and diagram ARE the product -->
+      <div id="demo">
+        <div class="panel" role="group" aria-label="ZenUML DSL editor">
+          <div class="panel-bar">
+            <span class="t">hello.zenuml<span class="xs-hide"> — editable</span></span>
+            <span class="ok" id="v-status" role="status">validate() → pass: true</span>
+          </div>
+          <div class="flex">
+            <pre class="gutter" id="hero-gutter" aria-hidden="true">1
+2</pre>
+            <div class="flex-1 min-w-0">
+              <pre class="codepane min-h-[7.5rem]" id="hero-pre" aria-label="ZenUML DSL source"><span id="hero-typed">Alice -&gt; Bob: Hello Bob!
+Bob -&gt; Alice: Hello Alice!</span><span class="caret" aria-hidden="true"></span></pre>
+              <textarea class="ed" id="hero-editor" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off"
+                aria-label="ZenUML DSL editor — edit the text to re-render the diagram" hidden>Alice -&gt; Bob: Hello Bob!
+Bob -&gt; Alice: Hello Alice!</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 py-1.5 pl-1" aria-hidden="true">
+          <svg class="pipe" id="hero-pipe" width="14" height="34" viewBox="0 0 14 34" fill="none">
+            <line class="pipe-line" x1="7" y1="1" x2="7" y2="29"/>
+            <path class="pipe-head" d="M1 23 L7 31 L13 23"/>
+            <rect class="pipe-pulse" x="4" y="3" width="6" height="8" fill="#0F766E"/>
+          </svg>
+          <span class="cap pipe-cap text-stone-600">parse → layout → render<span class="xs-hide"> — all in this tab</span></span>
+        </div>
+
+        <div class="panel">
+          <div class="panel-bar">
+            <span class="t">output<span class="xs-hide"> — sequence diagram</span></span>
+            <span class="ok" id="hero-mode">static svg</span>
+          </div>
+          <div class="stage min-h-[14rem]" id="stage-hero">
+            <img class="fallback" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMjYiIGhlaWdodD0iMjExIiB2aWV3Qm94PSIwIDAgMjI2IDIxMSI+CjxkZWZzPgogIDxzdHlsZT4KICAuZnJhbWUtYm9yZGVyLW91dGVyIHsgZmlsbDogIzY2NjsgfQogIC5mcmFtZS1ib3JkZXItaW5uZXIgeyBmaWxsOiAjZmZmZmZmOyB9CiAgLmZyYW1lLWhlYWRlci1iZyB7IGZpbGw6ICNmZmZmZmY7IH0KICAuZnJhbWUtaGVhZGVyLWxpbmUgeyBzdHJva2U6ICM2NjY7IHN0cm9rZS13aWR0aDogMTsgc2hhcGUtcmVuZGVyaW5nOiBjcmlzcEVkZ2VzOyB9CiAgLmZyYW1lLXRpdGxlIHsgZm9udC1mYW1pbHk6IEhlbHZldGljYSwgVmVyZGFuYSwgc2VyaWY7IGZvbnQtc2l6ZTogMTZweDsgZm9udC13ZWlnaHQ6IDYwMDsgZmlsbDogIzIyMjsgfQogIC5wYXJ0aWNpcGFudC1ib3ggeyBmaWxsOiAjZmZmZmZmOyBzdHJva2U6ICM2NjY7IHN0cm9rZS13aWR0aDogMjsgfQogIC5wYXJ0aWNpcGFudC1sYWJlbCB7IGZvbnQtZmFtaWx5OiBIZWx2ZXRpY2EsIFZlcmRhbmEsIHNlcmlmOyBmb250LXNpemU6IDE2cHg7IGZpbGw6ICMyMjI7IH0KICAucGFydGljaXBhbnQtaWNvbiB7IGNvbG9yOiAjMjIyOyB9CiAgLnBhcnRpY2lwYW50LWljb24gW2ZpbGw9ImN1cnJlbnRDb2xvciJdOm5vdChbc3Ryb2tlXSkgeyBzdHJva2U6ICM2NjY7IHN0cm9rZS13aWR0aDogMTsgfQogIC5saWZlbGluZSB7IHN0cm9rZTogIzY2Njsgc3Ryb2tlLXdpZHRoOiAxOyB9CiAgLm1lc3NhZ2UtbGluZSB7IHN0cm9rZTogIzAwMDsgc3Ryb2tlLXdpZHRoOiAyOyBzaGFwZS1yZW5kZXJpbmc6IGNyaXNwRWRnZXM7IH0KICAubWVzc2FnZS1sYWJlbCB7IGZvbnQtZmFtaWx5OiBIZWx2ZXRpY2EsIFZlcmRhbmEsIHNlcmlmOyBmb250LXNpemU6IDE0cHg7IGZpbGw6ICMyMjI7IH0KICAuYXJyb3ctaGVhZCB7IGZpbGw6ICMwMDA7IHN0cm9rZTogIzAwMDsgc3Ryb2tlLXdpZHRoOiAyOyB9CiAgLmFycm93LW9wZW4geyBmaWxsOiBub25lOyB9CiAgLm9jY3VycmVuY2UgeyBmaWxsOiAjZGVkZWRlOyBzdHJva2U6ICM2NjY7IHN0cm9rZS13aWR0aDogMjsgc2hhcGUtcmVuZGVyaW5nOiBjcmlzcEVkZ2VzOyB9CiAgLmZyYWdtZW50LWJvcmRlciB7IGZpbGw6IG5vbmU7IHN0cm9rZTogIzY2Njsgc3Ryb2tlLXdpZHRoOiAxOyBzaGFwZS1yZW5kZXJpbmc6IGNyaXNwRWRnZXM7IH0KICAuZnJhZ21lbnQtaGVhZGVyIHsgZmlsbDogI2RlZGVkZTsgZmlsbC1vcGFjaXR5OiAwLjQ5ODsgc3Ryb2tlOiBub25lOyBzaGFwZS1yZW5kZXJpbmc6IGNyaXNwRWRnZXM7IH0KICAuZnJhZ21lbnQtbGFiZWwgeyBmb250LWZhbWlseTogSGVsdmV0aWNhLCBWZXJkYW5hLCBzZXJpZjsgZm9udC1zaXplOiAxNHB4OyBmb250LXdlaWdodDogNjAwOyBmaWxsOiAjMDAwOyB9CiAgLmZyYWdtZW50LWNvbmRpdGlvbiB7IGZvbnQtZmFtaWx5OiBIZWx2ZXRpY2EsIFZlcmRhbmEsIHNlcmlmOyBmb250LXNpemU6IDE0cHg7IGZpbGw6ICMwMDA7IH0KICAuZnJhZ21lbnQtc2VwYXJhdG9yIHsgc3Ryb2tlOiAjZTVlN2ViOyBzdHJva2Utd2lkdGg6IDE7IHNoYXBlLXJlbmRlcmluZzogY3Jpc3BFZGdlczsgfQogIC5mcmFnbWVudC1zZWN0aW9uLWxhYmVsIHsgZm9udC1mYW1pbHk6IEhlbHZldGljYSwgVmVyZGFuYSwgc2VyaWY7IGZvbnQtc2l6ZTogMTRweDsgZmlsbDogIzAwMDsgfQogIC5yZXR1cm4tbGluZSB7IHN0cm9rZTogIzAwMDsgc3Ryb2tlLXdpZHRoOiAyOyBzdHJva2UtZGFzaGFycmF5OiA2LDQ7IHNoYXBlLXJlbmRlcmluZzogY3Jpc3BFZGdlczsgfQogIC5yZXR1cm4tYXJyb3cgeyBzdHJva2U6ICMwMDA7IHN0cm9rZS13aWR0aDogMjsgZmlsbDogbm9uZTsgfQogIC5yZXR1cm4tbGFiZWwgeyBmb250LWZhbWlseTogSGVsdmV0aWNhLCBWZXJkYW5hLCBzZXJpZjsgZm9udC1zaXplOiAxNHB4OyBmaWxsOiAjMjIyOyB9CiAgLnJldHVybi1pY29uIHsgZmlsbDogIzIyMjsgfQogIC5kaXZpZGVyLWxpbmUgeyBzdHJva2U6ICNhYWFhMzM7IHN0cm9rZS13aWR0aDogMTsgfQogIC5kaXZpZGVyLWJnIHsgZmlsbDogI2ZmZjVhZDsgc3Ryb2tlOiAjYWFhYTMzOyBzdHJva2Utd2lkdGg6IDE7IH0KICAuZGl2aWRlci1sYWJlbCB7IGZvbnQtZmFtaWx5OiBIZWx2ZXRpY2EsIFZlcmRhbmEsIHNlcmlmOyBmb250LXNpemU6IDE0cHg7IGZpbGw6ICMzMzM7IH0KICAuY29tbWVudC10ZXh0IHsgZm9udC1mYW1pbHk6IEhlbHZldGljYSwgVmVyZGFuYSwgc2VyaWY7IGZvbnQtc2l6ZTogMTRweDsgZmlsbDogIzMzMzsgb3BhY2l0eTogMC41OyB9CiAgLnNlcS1udW1iZXIgeyBmb250LWZhbWlseTogSGVsdmV0aWNhLCBWZXJkYW5hLCBzZXJpZjsgZm9udC1zaXplOiAxMnB4OyBmb250LXdlaWdodDogMTAwOyBmaWxsOiAjNmI3MjgwOyB9CiAgLmdyb3VwLW91dGxpbmUgeyBmaWxsOiBub25lOyBzdHJva2U6ICM2NjY7IH0KICAuZ3JvdXAtdGl0bGUtYmcgeyBmaWxsOiAjZmZmZmZmOyBzdHJva2U6IG5vbmU7IH0KICAuZ3JvdXAtdGl0bGUtdGV4dCB7IGZvbnQtZmFtaWx5OiBIZWx2ZXRpY2EsIFZlcmRhbmEsIHNlcmlmOyBmb250LXNpemU6IDEzcHg7IGZvbnQtd2VpZ2h0OiA0MDA7IGZpbGw6ICMyMjI7IH0KPC9zdHlsZT4KPC9kZWZzPgo8cmVjdCBjbGFzcz0iZnJhbWUtYm9yZGVyLW91dGVyIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjI2IiBoZWlnaHQ9IjIxMSIgcng9IjQiIGZpbGw9IiM2NjYiLz4KPHJlY3QgY2xhc3M9ImZyYW1lLWJvcmRlci1pbm5lciIgeD0iMSIgeT0iMSIgd2lkdGg9IjIyNCIgaGVpZ2h0PSIyMDkiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+CjxsaW5lIGNsYXNzPSJmcmFtZS1oZWFkZXItbGluZSIgeDE9IjEiIHkxPSIzMy41IiB4Mj0iMjI1IiB5Mj0iMzMuNSIvPgoKPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTEsIDM0KSI+CjxsaW5lIHgxPSI1MC41IiB5MT0iNjgiIHgyPSI1MC41IiB5Mj0iMTc2IiBjbGFzcz0ibGlmZWxpbmUiIHN0cm9rZS1kYXNoYXJyYXk9IjUsNSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPgo8bGluZSB4MT0iMTU0LjUiIHkxPSI2OCIgeDI9IjE1NC41IiB5Mj0iMTc2IiBjbGFzcz0ibGlmZWxpbmUiIHN0cm9rZS1kYXNoYXJyYXk9IjUsNSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPgo8ZyBjbGFzcz0icGFydGljaXBhbnQiIGRhdGEtcGFydGljaXBhbnQ9IkFsaWNlIj4KICA8cmVjdCB4PSIxMSIgeT0iMjkiIHdpZHRoPSI3OCIgaGVpZ2h0PSIzOCIgcng9IjMiIGNsYXNzPSJwYXJ0aWNpcGFudC1ib3giLz4KICAKICAKICAKICA8dGV4dCB4PSI1MCIgeT0iNDcuNzUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiBjbGFzcz0icGFydGljaXBhbnQtbGFiZWwiPkFsaWNlPC90ZXh0Pgo8L2c+CjxnIGNsYXNzPSJwYXJ0aWNpcGFudCIgZGF0YS1wYXJ0aWNpcGFudD0iQm9iIj4KICA8cmVjdCB4PSIxMTUiIHk9IjI5IiB3aWR0aD0iNzgiIGhlaWdodD0iMzgiIHJ4PSIzIiBjbGFzcz0icGFydGljaXBhbnQtYm94Ii8+CiAgCiAgCiAgCiAgPHRleHQgeD0iMTU0IiB5PSI0Ny43NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiIGNsYXNzPSJwYXJ0aWNpcGFudC1sYWJlbCI+Qm9iPC90ZXh0Pgo8L2c+CjxnIGNsYXNzPSJtZXNzYWdlIj4KICA8bGluZSB4MT0iNTEiIHkxPSI4NyIgeDI9IjE1NCIgeTI9Ijg3IiBjbGFzcz0ibWVzc2FnZS1saW5lIi8+CiAgPHN2ZyB4PSIxNDciIHk9IjgyIiB3aWR0aD0iNyIgaGVpZ2h0PSIxMCIgdmlld0JveD0iMCAwIDcgOSIgb3ZlcmZsb3c9InZpc2libGUiIGNsYXNzPSJhcnJvdy1oZWFkIGFycm93LW9wZW4iPgogICAgPGc+CiAgICAgIDxwYXRoIGQ9Ik0xIDEuMjUgTDYuMTUgNC41IEwxIDcuNzUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiLz4KICAgIDwvZz4KICA8L3N2Zz4KICA8dGV4dCB4PSI5OSIgeT0iODQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJtZXNzYWdlLWxhYmVsIj5IZWxsbyBCb2IhPC90ZXh0PgogIDx0ZXh0IHg9IjQ3IiB5PSI4NCIgdGV4dC1hbmNob3I9ImVuZCIgY2xhc3M9InNlcS1udW1iZXIiPjE8L3RleHQ+CjwvZz4KPGcgY2xhc3M9Im1lc3NhZ2UiPgogIDxsaW5lIHgxPSIxNTQiIHkxPSIxMTkiIHgyPSI1MSIgeTI9IjExOSIgY2xhc3M9Im1lc3NhZ2UtbGluZSIvPgogIDxzdmcgeD0iNTEiIHk9IjExNCIgd2lkdGg9IjciIGhlaWdodD0iMTAiIHZpZXdCb3g9IjAgMCA3IDkiIG92ZXJmbG93PSJ2aXNpYmxlIiBjbGFzcz0iYXJyb3ctaGVhZCBhcnJvdy1vcGVuIj4KICAgIDxnIHRyYW5zZm9ybT0ic2NhbGUoLTEsIDEpIHRyYW5zbGF0ZSgtNywgMCkiPgogICAgICA8cGF0aCBkPSJNMSAxLjI1IEw2LjE1IDQuNSBMMSA3Ljc1IiBzdHJva2U9IiMwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8L2c+CiAgPC9zdmc+CiAgPHRleHQgeD0iMTA2IiB5PSIxMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJtZXNzYWdlLWxhYmVsIj5IZWxsbyBBbGljZSE8L3RleHQ+CiAgPHRleHQgeD0iNDciIHk9IjExNiIgdGV4dC1hbmNob3I9ImVuZCIgY2xhc3M9InNlcS1udW1iZXIiPjI8L3RleHQ+CjwvZz4KPC9nPgo8L3N2Zz4=" width="226" height="211"
+                 alt="Sequence diagram rendered from the DSL above: Alice sends the message “Hello Bob!” to Bob, and Bob replies “Hello Alice!”. Pre-rendered to SVG by the zenuml CLI.">
+          </div>
+          <div class="render-status" id="hero-status" role="status"><span class="dot" aria-hidden="true"></span>STATIC SVG — PRE-RENDERED BY THE ZENUML CLI</div>
+        </div>
+        <p class="cap text-stone-600 mt-3 pl-1" id="edit-hint" hidden>✎ edit the text above — the diagram re-renders in your browser</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 — ADD IT TO YOUR APP ============ -->
+<section class="sec border-t border-hair" id="integrate" aria-labelledby="int-h2">
+  <div class="wrap">
+    <p class="idx mb-4 reveal">[ 02 — ADD IT TO YOUR APP ]</p>
+    <h2 id="int-h2" class="h2 reveal">Pick your surface.</h2>
+    <p class="mt-4 max-w-[62ch] text-stone-700 reveal">Four ways in. Every snippet is complete and runs against v4.1.0 unmodified.</p>
+
+    <!-- The page's only dark surface -->
+    <div class="term mt-8 reveal">
+      <div class="bar">
+        <span>TERMINAL — @zenuml/core@4.1.0</span>
+        <span class="hidden sm:inline">ESM + UMD</span>
+      </div>
+      <div class="install-row">
+        <code id="term-install">npm install @zenuml/core <span class="alt"># or: bun add @zenuml/core</span></code>
+        <button class="copy-btn flex-none" data-copy-target="term-install" data-copy="npm install @zenuml/core" aria-label="Copy npm install command">copy</button>
+      </div>
+      <div class="flex flex-wrap border-b border-white/10" role="tablist" aria-label="Integration examples">
+        <button class="tab" role="tab" id="tab-esm" aria-selected="true" aria-controls="pane-esm" data-tab="esm">esm / bundler</button>
+        <button class="tab" role="tab" id="tab-umd" aria-selected="false" aria-controls="pane-umd" data-tab="umd" tabindex="-1">&lt;script&gt; umd</button>
+        <button class="tab" role="tab" id="tab-mmd" aria-selected="false" aria-controls="pane-mmd" data-tab="mmd" tabindex="-1">inside mermaid</button>
+        <button class="tab" role="tab" id="tab-node" aria-selected="false" aria-controls="pane-node" data-tab="node" tabindex="-1">validate (node)</button>
+      </div>
+
+      <div class="relative" id="pane-esm" role="tabpanel" aria-labelledby="tab-esm" data-pane="esm" tabindex="0">
+        <button class="copy-btn absolute top-3 right-3" data-copy-target="code-esm" aria-label="Copy ESM quickstart code">copy</button>
+        <pre id="code-esm"><span class="tk-k">import</span> ZenUml <span class="tk-k">from</span> <span class="tk-s">'@zenuml/core'</span>;
+<span class="tk-k">const</span> el = document.getElementById(<span class="tk-s">'zenuml-container'</span>);
+<span class="tk-k">const</span> zenUml = <span class="tk-k">new</span> ZenUml(el);
+<span class="tk-k">const</span> code = <span class="tk-s">'A-&gt;B: message'</span>;
+<span class="tk-k">const</span> config = { theme: <span class="tk-s">'default'</span> };
+zenUml.render(code, config);</pre>
+      </div>
+
+      <div class="relative" id="pane-umd" role="tabpanel" aria-labelledby="tab-umd" data-pane="umd" tabindex="0" hidden>
+        <button class="copy-btn absolute top-3 right-3" data-copy-target="code-umd" aria-label="Copy UMD script-tag code">copy</button>
+        <pre id="code-umd">&lt;div id=<span class="tk-s">"zenuml-container"</span>&gt;&lt;/div&gt;
+&lt;script src=<span class="tk-s">"https://cdn.jsdelivr.net/npm/@zenuml/core@4.1.0/dist/zenuml.js"</span>&gt;&lt;/script&gt;
+&lt;script&gt;
+  <span class="tk-k">const</span> ZenUml = window.zenuml.default;
+  <span class="tk-k">const</span> zenUml = <span class="tk-k">new</span> ZenUml(document.getElementById(<span class="tk-s">'zenuml-container'</span>));
+  zenUml.render(<span class="tk-s">'A-&gt;B: message'</span>, { theme: <span class="tk-s">'default'</span> });
+&lt;/script&gt;</pre>
+      </div>
+
+      <div class="relative" id="pane-mmd" role="tabpanel" aria-labelledby="tab-mmd" data-pane="mmd" tabindex="0" hidden>
+        <button class="copy-btn absolute top-3 right-3" data-copy-target="code-mmd" aria-label="Copy Mermaid integration code">copy</button>
+        <pre id="code-mmd"><span class="tk-c">// ZenUML is an alternative sequence-diagram syntax inside the Mermaid ecosystem.</span>
+<span class="tk-k">import</span> mermaid <span class="tk-k">from</span> <span class="tk-s">'mermaid'</span>;
+<span class="tk-k">import</span> zenuml <span class="tk-k">from</span> <span class="tk-s">'@mermaid-js/mermaid-zenuml'</span>;
+<span class="tk-k">await</span> mermaid.registerExternalDiagrams([zenuml]);
+
+<span class="tk-c">// then, in any mermaid code fence:</span>
+<span class="tk-c">//   zenuml</span>
+<span class="tk-c">//       Alice -&gt; Bob: Hello Bob!</span>
+<span class="tk-c">//       Bob -&gt; Alice: Hello Alice!</span></pre>
+      </div>
+
+      <div class="relative" id="pane-node" role="tabpanel" aria-labelledby="tab-node" data-pane="node" tabindex="0" hidden>
+        <button class="copy-btn absolute top-3 right-3" data-copy-target="code-node" aria-label="Copy server-side validation code">copy</button>
+        <pre id="code-node"><span class="tk-k">import</span> { validate } <span class="tk-k">from</span> <span class="tk-s">'@zenuml/core/parser'</span>;
+<span class="tk-k">const</span> { pass, errorDetails } = validate(<span class="tk-s">'A-&gt;B: hello'</span>);
+<span class="tk-c">// pass === true; errorDetails is [] on success, [{ line, column, msg }] on syntax errors</span></pre>
+      </div>
+
+      <div class="border-t border-white/10 px-5 py-3">
+        <p class="font-mono text-[0.6875rem] tracking-[0.08em] uppercase text-slate-400 m-0">
+          Renders client-side. Ships ESM + UMD. Node &gt;= 20 for the headless parser.
+        </p>
+      </div>
+    </div>
+
+    <!-- pipeline fit: CLI + headless parser, one line each -->
+    <h2 class="vh" id="tools-h2">Sequence-diagram CLI and headless parser</h2>
+    <div class="mt-8 reveal">
+      <div class="tool-row">
+        <b>zenuml</b><span class="text-stone-500">CLI</span>
+        <span>— renders .zenuml files to SVG/PNG · stdin/stdout pipes · --check · --parse AST JSON</span>
+        <a class="plink" href="https://github.com/mermaid-js/zenuml-core/blob/main/src/cli/zenuml.ts" rel="noopener">source ↗</a>
+      </div>
+      <div class="tool-row">
+        <b>'@zenuml/core/parser'</b>
+        <span>— reentrant validate() / parse(), zero DOM, Node ≥ 20</span>
+        <button class="plink bg-transparent border-0 p-0 cursor-pointer" data-goto-tab="node" type="button">validate tab ↑</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 — THE SYNTAX ============ -->
+<section class="sec border-t border-hair" id="syntax" aria-labelledby="syn-h2">
+  <div class="wrap">
+    <p class="idx mb-4 reveal">[ 03 — THE SYNTAX ]</p>
+    <h2 id="syn-h2" class="h2 reveal">Control flow, verbatim.</h2>
+    <p class="mt-4 max-w-[62ch] text-stone-700 reveal">
+      One machine-verified example (<code class="font-mono text-[0.875em] text-teal">pass: true</code>) —
+      typed participants, nested calls, async messages, a divider.
+      <a class="plink" href="https://github.com/mermaid-js/zenuml-core/blob/main/docs/DSL_SYNTAX.md" rel="noopener">Full syntax reference ↗</a>
+    </p>
+
+    <div class="mt-8 grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] border border-hair bg-white reveal">
+      <div class="flex flex-col lg:border-r border-b lg:border-b-0 border-hair">
+        <div class="panel-bar"><span class="t">order.zenuml</span><span class="ok">30 lines</span></div>
+        <div class="flex flex-1">
+          <pre class="gutter" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+          <pre class="codepane" id="dsl-src-3" tabindex="0" role="region" aria-label="ZenUML DSL source for the order-processing example — scrollable">title Order Processing
+
+@Actor Customer
+@Boundary WebApp
+@Control OrderService
+@Entity OrderDB
+@Queue NotificationQueue
+
+@Starter(Customer)
+
+// Place order
+Customer -&gt; WebApp: submitOrder(cartId)
+
+WebApp.processOrder(cartId) {
+  if (cart.isEmpty()) {
+    return error("Empty cart")
+  }
+
+  String orderId = new OrderService(cart) {
+    OrderService -&gt; OrderDB: persist(order)
+    return orderId
+  }
+
+  // Notify async
+  WebApp -&gt; NotificationQueue: orderCreated(orderId)
+}
+
+== Confirmation ==
+
+WebApp --&gt; Customer: orderConfirmed(orderId)</pre>
+        </div>
+      </div>
+      <div class="flex flex-col">
+        <div class="panel-bar">
+          <span class="t">output</span>
+          <span class="ok"><span id="ex3-status">fit to width</span> · static svg<span class="xs-hide"> — rendered by the zenuml cli</span></span>
+          <button class="copy-btn light flex-none" id="ex3-zoom" type="button" aria-pressed="false" aria-label="Show diagram at 100% size with scrolling; press again to fit to width">100%</button>
+        </div>
+        <div class="stage min-h-[18rem] flex-1" id="stage-ex3" role="region" aria-label="Rendered order-processing diagram — scrollable at 100% size">
+          <img class="fallback" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5OTgiIGhlaWdodD0iNjI4IiB2aWV3Qm94PSIwIDAgOTk4IDYyOCI+CjxkZWZzPgogIDxzdHlsZT4KICAuZnJhbWUtYm9yZGVyLW91dGVyIHsgZmlsbDogIzY2NjsgfQogIC5mcmFtZS1ib3JkZXItaW5uZXIgeyBmaWxsOiAjZmZmZmZmOyB9CiAgLmZyYW1lLWhlYWRlci1iZyB7IGZpbGw6ICNmZmZmZmY7IH0KICAuZnJhbWUtaGVhZGVyLWxpbmUgeyBzdHJva2U6ICM2NjY7IHN0cm9rZS13aWR0aDogMTsgc2hhcGUtcmVuZGVyaW5nOiBjcmlzcEVkZ2VzOyB9CiAgLmZyYW1lLXRpdGxlIHsgZm9udC1mYW1pbHk6IEhlbHZldGljYSwgVmVyZGFuYSwgc2VyaWY7IGZvbnQtc2l6ZTogMTZweDsgZm9udC13ZWlnaHQ6IDYwMDsgZmlsbDogIzIyMjsgfQogIC5wYXJ0aWNpcGFudC1ib3ggeyBmaWxsOiAjZmZmZmZmOyBzdHJva2U6ICM2NjY7IHN0cm9rZS13aWR0aDogMjsgfQogIC5wYXJ0aWNpcGFudC1sYWJlbCB7IGZvbnQtZmFtaWx5OiBIZWx2ZXRpY2EsIFZlcmRhbmEsIHNlcmlmOyBmb250LXNpemU6IDE2cHg7IGZpbGw6ICMyMjI7IH0KICAucGFydGljaXBhbnQtaWNvbiB7IGNvbG9yOiAjMjIyOyB9CiAgLnBhcnRpY2lwYW50LWljb24gW2ZpbGw9ImN1cnJlbnRDb2xvciJdOm5vdChbc3Ryb2tlXSkgeyBzdHJva2U6ICM2NjY7IHN0cm9rZS13aWR0aDogMTsgfQogIC5saWZlbGluZSB7IHN0cm9rZTogIzY2Njsgc3Ryb2tlLXdpZHRoOiAxOyB9CiAgLm1lc3NhZ2UtbGluZSB7IHN0cm9rZTogIzAwMDsgc3Ryb2tlLXdpZHRoOiAyOyBzaGFwZS1yZW5kZXJpbmc6IGNyaXNwRWRnZXM7IH0KICAubWVzc2FnZS1sYWJlbCB7IGZvbnQtZmFtaWx5OiBIZWx2ZXRpY2EsIFZlcmRhbmEsIHNlcmlmOyBmb250LXNpemU6IDE0cHg7IGZpbGw6ICMyMjI7IH0KICAuYXJyb3ctaGVhZCB7IGZpbGw6ICMwMDA7IHN0cm9rZTogIzAwMDsgc3Ryb2tlLXdpZHRoOiAyOyB9CiAgLmFycm93LW9wZW4geyBmaWxsOiBub25lOyB9CiAgLm9jY3VycmVuY2UgeyBmaWxsOiAjZGVkZWRlOyBzdHJva2U6ICM2NjY7IHN0cm9rZS13aWR0aDogMjsgc2hhcGUtcmVuZGVyaW5nOiBjcmlzcEVkZ2VzOyB9CiAgLmZyYWdtZW50LWJvcmRlciB7IGZpbGw6IG5vbmU7IHN0cm9rZTogIzY2Njsgc3Ryb2tlLXdpZHRoOiAxOyBzaGFwZS1yZW5kZXJpbmc6IGNyaXNwRWRnZXM7IH0KICAuZnJhZ21lbnQtaGVhZGVyIHsgZmlsbDogI2RlZGVkZTsgZmlsbC1vcGFjaXR5OiAwLjQ5ODsgc3Ryb2tlOiBub25lOyBzaGFwZS1yZW5kZXJpbmc6IGNyaXNwRWRnZXM7IH0KICAuZnJhZ21lbnQtbGFiZWwgeyBmb250LWZhbWlseTogSGVsdmV0aWNhLCBWZXJkYW5hLCBzZXJpZjsgZm9udC1zaXplOiAxNHB4OyBmb250LXdlaWdodDogNjAwOyBmaWxsOiAjMDAwOyB9CiAgLmZyYWdtZW50LWNvbmRpdGlvbiB7IGZvbnQtZmFtaWx5OiBIZWx2ZXRpY2EsIFZlcmRhbmEsIHNlcmlmOyBmb250LXNpemU6IDE0cHg7IGZpbGw6ICMwMDA7IH0KICAuZnJhZ21lbnQtc2VwYXJhdG9yIHsgc3Ryb2tlOiAjZTVlN2ViOyBzdHJva2Utd2lkdGg6IDE7IHNoYXBlLXJlbmRlcmluZzogY3Jpc3BFZGdlczsgfQogIC5mcmFnbWVudC1zZWN0aW9uLWxhYmVsIHsgZm9udC1mYW1pbHk6IEhlbHZldGljYSwgVmVyZGFuYSwgc2VyaWY7IGZvbnQtc2l6ZTogMTRweDsgZmlsbDogIzAwMDsgfQogIC5yZXR1cm4tbGluZSB7IHN0cm9rZTogIzAwMDsgc3Ryb2tlLXdpZHRoOiAyOyBzdHJva2UtZGFzaGFycmF5OiA2LDQ7IHNoYXBlLXJlbmRlcmluZzogY3Jpc3BFZGdlczsgfQogIC5yZXR1cm4tYXJyb3cgeyBzdHJva2U6ICMwMDA7IHN0cm9rZS13aWR0aDogMjsgZmlsbDogbm9uZTsgfQogIC5yZXR1cm4tbGFiZWwgeyBmb250LWZhbWlseTogSGVsdmV0aWNhLCBWZXJkYW5hLCBzZXJpZjsgZm9udC1zaXplOiAxNHB4OyBmaWxsOiAjMjIyOyB9CiAgLnJldHVybi1pY29uIHsgZmlsbDogIzIyMjsgfQogIC5kaXZpZGVyLWxpbmUgeyBzdHJva2U6ICNhYWFhMzM7IHN0cm9rZS13aWR0aDogMTsgfQogIC5kaXZpZGVyLWJnIHsgZmlsbDogI2ZmZjVhZDsgc3Ryb2tlOiAjYWFhYTMzOyBzdHJva2Utd2lkdGg6IDE7IH0KICAuZGl2aWRlci1sYWJlbCB7IGZvbnQtZmFtaWx5OiBIZWx2ZXRpY2EsIFZlcmRhbmEsIHNlcmlmOyBmb250LXNpemU6IDE0cHg7IGZpbGw6ICMzMzM7IH0KICAuY29tbWVudC10ZXh0IHsgZm9udC1mYW1pbHk6IEhlbHZldGljYSwgVmVyZGFuYSwgc2VyaWY7IGZvbnQtc2l6ZTogMTRweDsgZmlsbDogIzMzMzsgb3BhY2l0eTogMC41OyB9CiAgLnNlcS1udW1iZXIgeyBmb250LWZhbWlseTogSGVsdmV0aWNhLCBWZXJkYW5hLCBzZXJpZjsgZm9udC1zaXplOiAxMnB4OyBmb250LXdlaWdodDogMTAwOyBmaWxsOiAjNmI3MjgwOyB9CiAgLmdyb3VwLW91dGxpbmUgeyBmaWxsOiBub25lOyBzdHJva2U6ICM2NjY7IH0KICAuZ3JvdXAtdGl0bGUtYmcgeyBmaWxsOiAjZmZmZmZmOyBzdHJva2U6IG5vbmU7IH0KICAuZ3JvdXAtdGl0bGUtdGV4dCB7IGZvbnQtZmFtaWx5OiBIZWx2ZXRpY2EsIFZlcmRhbmEsIHNlcmlmOyBmb250LXNpemU6IDEzcHg7IGZvbnQtd2VpZ2h0OiA0MDA7IGZpbGw6ICMyMjI7IH0KPC9zdHlsZT4KPC9kZWZzPgo8cmVjdCBjbGFzcz0iZnJhbWUtYm9yZGVyLW91dGVyIiB4PSIwIiB5PSIwIiB3aWR0aD0iOTk4IiBoZWlnaHQ9IjYyOCIgcng9IjQiIGZpbGw9IiM2NjYiLz4KPHJlY3QgY2xhc3M9ImZyYW1lLWJvcmRlci1pbm5lciIgeD0iMSIgeT0iMSIgd2lkdGg9Ijk5NiIgaGVpZ2h0PSI2MjYiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+CjxsaW5lIGNsYXNzPSJmcmFtZS1oZWFkZXItbGluZSIgeDE9IjEiIHkxPSIzMy41IiB4Mj0iOTk3IiB5Mj0iMzMuNSIvPgo8dGV4dCB4PSI1IiB5PSIxNi43NSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiIGNsYXNzPSJmcmFtZS10aXRsZSI+T3JkZXIgUHJvY2Vzc2luZzwvdGV4dD4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjEsIDM0KSI+CjxsaW5lIHgxPSI2NSIgeTE9IjY4IiB4Mj0iNjUiIHkyPSI1OTMiIGNsYXNzPSJsaWZlbGluZSIgc3Ryb2tlLWRhc2hhcnJheT0iNSw1IiBzdHJva2UtZGFzaG9mZnNldD0iNSIgc2hhcGUtcmVuZGVyaW5nPSJjcmlzcEVkZ2VzIi8+CjxsaW5lIHgxPSIyNjMiIHkxPSI2OCIgeDI9IjI2MyIgeTI9IjU5MyIgY2xhc3M9ImxpZmVsaW5lIiBzdHJva2UtZGFzaGFycmF5PSI1LDUiIHN0cm9rZS1kYXNob2Zmc2V0PSI1IiBzaGFwZS1yZW5kZXJpbmc9ImNyaXNwRWRnZXMiLz4KPGxpbmUgeDE9IjQwMC41IiB5MT0iNjgiIHgyPSI0MDAuNSIgeTI9IjU5MyIgY2xhc3M9ImxpZmVsaW5lIiBzdHJva2UtZGFzaGFycmF5PSI1LDUiIHN0cm9rZS1kYXNob2Zmc2V0PSI1IiBzaGFwZS1yZW5kZXJpbmc9ImNyaXNwRWRnZXMiLz4KPGxpbmUgeDE9IjUzOSIgeTE9IjY4IiB4Mj0iNTM5IiB5Mj0iNTkzIiBjbGFzcz0ibGlmZWxpbmUiIHN0cm9rZS1kYXNoYXJyYXk9IjUsNSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjUiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPgo8bGluZSB4MT0iNjk0IiB5MT0iNjgiIHgyPSI2OTQiIHkyPSI1OTMiIGNsYXNzPSJsaWZlbGluZSIgc3Ryb2tlLWRhc2hhcnJheT0iNSw1IiBzdHJva2UtZGFzaG9mZnNldD0iNSIgc2hhcGUtcmVuZGVyaW5nPSJjcmlzcEVkZ2VzIi8+CjxsaW5lIHgxPSI4NzIiIHkxPSIzMDEiIHgyPSI4NzIiIHkyPSI1OTMiIGNsYXNzPSJsaWZlbGluZSIgc3Ryb2tlLWRhc2hhcnJheT0iNSw1IiBzdHJva2UtZGFzaG9mZnNldD0iNSIgc2hhcGUtcmVuZGVyaW5nPSJjcmlzcEVkZ2VzIi8+CjxnIGNsYXNzPSJwYXJ0aWNpcGFudCIgZGF0YS1wYXJ0aWNpcGFudD0iQ3VzdG9tZXIiPgogIDxyZWN0IHg9IjguODI1MDAwNzYyOTM5NDUzIiB5PSIyOSIgd2lkdGg9IjExMS4zNDk5OTg0NzQxMjExIiBoZWlnaHQ9IjM4IiByeD0iMyIgY2xhc3M9InBhcnRpY2lwYW50LWJveCIvPgogIDxnIGNsYXNzPSJwYXJ0aWNpcGFudC1pY29uIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMS44MjUwMDA3NjI5Mzk0NTMsIDM2KSBzY2FsZSgxKSIgZmlsbD0ibm9uZSI+CiAgICA8Zz4KICAgIDxwYXRoIGQ9Ik0xNS41NDg5IDQuMTk3NzFDMTUuNTQ4OSA1LjE4NzczIDE1LjE0ODUgNi4xMzcyMSAxNC40MzU4IDYuODM3MjZDMTMuNzIzMSA3LjUzNzMxIDEyLjc1NjUgNy45MzA1OCAxMS43NDg2IDcuOTMwNThDMTAuNzQwNyA3LjkzMDU4IDkuNzc0MDMgNy41MzczMSA5LjA2MTMzIDYuODM3MjZDOC4zNDg2MyA2LjEzNzIxIDcuOTQ4MjQgNS4xODc3MyA3Ljk0ODI0IDQuMTk3NzFDNy45NDgyNCAzLjIwNzY4IDguMzQ4NjMgMi4yNTgyMiA5LjA2MTMzIDEuNTU4MThDOS43NzQwMyAwLjg1ODEyNiAxMC43NDA3IDAuNDY0ODQ0IDExLjc0ODYgMC40NjQ4NDRDMTIuNzU2NSAwLjQ2NDg0NCAxMy43MjMxIDAuODU4MTI2IDE0LjQzNTggMS41NTgxOEMxNS4xNDg1IDIuMjU4MjIgMTUuNTQ4OSAzLjIwNzY4IDE1LjU0ODkgNC4xOTc3MVoiIHN0cm9rZT0iY3VycmVudENvbG9yIi8+CiAgICA8cGF0aCBkPSJNNi41NDg4MyAxMS4yMTUyTDE3LjIwMjUgMTEuMjA3M00xMS43NDcxIDguMDY2NDFWMTkuNTgwNlY4LjA2NjQxWk0xMS43NDcxIDE5LjQzODVMNi43OTc4OSAyMy41NzM4TDExLjc0NzEgMTkuNDM4NVpNMTEuNzU1MSAxOS40Mzg1TDE3LjE4NjQgMjMuMzA1NUwxMS43NTUxIDE5LjQzODVaIiBzdHJva2U9ImN1cnJlbnRDb2xvciIvPgogIDwvZz4KICA8L2c+CiAgCiAgCiAgPHRleHQgeD0iNDMuODI1MDAwNzYyOTM5NDUiIHk9IjQ3Ljc1IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiBjbGFzcz0icGFydGljaXBhbnQtbGFiZWwiPkN1c3RvbWVyPC90ZXh0Pgo8L2c+CjxnIGNsYXNzPSJwYXJ0aWNpcGFudCIgZGF0YS1wYXJ0aWNpcGFudD0iV2ViQXBwIj4KICA8cmVjdCB4PSIyMTAuOTU0OTk5OTIzNzA2MDUiIHk9IjI5IiB3aWR0aD0iMTAzLjA5MDAwMDE1MjU4Nzg5IiBoZWlnaHQ9IjM4IiByeD0iMyIgY2xhc3M9InBhcnRpY2lwYW50LWJveCIvPgogIDxnIGNsYXNzPSJwYXJ0aWNpcGFudC1pY29uIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTMuOTU0OTk5OTIzNzA2MDUsIDM4Ljc1KSBzY2FsZSgwLjIzNzYyMzc2MjM3NjIzNzYpIiBmaWxsPSJub25lIj4KICAgIDxwYXRoIGQ9Ik05Ni4zNTYzIDM5LjQ0NzlDOTYuMzU2MyA0OC40OTA0IDkyLjY3NTUgNTcuMTYyNSA4Ni4xMjM3IDYzLjU1NjZDNzkuNTcxOCA2OS45NTA2IDcwLjY4NTYgNzMuNTQyNyA2MS40MTk5IDczLjU0MjdDNTIuMTU0MSA3My41NDI3IDQzLjI2NzkgNjkuOTUwNiAzNi43MTYxIDYzLjU1NjZDMzAuMTY0MiA1Ny4xNjI1IDI2LjQ4MzQgNDguNDkwNCAyNi40ODM0IDM5LjQ0NzlDMjYuNDgzNCAzMC4xNDcgMzAuMTY0MiAyMS4yMjcxIDM2LjcxNjEgMTQuNjUwNEM0My4yNjc5IDguMDczNjYgNTIuMTU0MSA0LjM3ODkxIDYxLjQxOTkgNC4zNzg5MUM3MC42ODU2IDQuMzc4OTEgNzkuNTcxOCA4LjA3MzY2IDg2LjEyMzcgMTQuNjUwNEM5Mi42NzU1IDIxLjIyNzEgOTYuMzU2MyAzMC4xNDcgOTYuMzU2MyAzOS40NDc5VjM5LjQ0NzlaIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSI0Ii8+Cgk8cGF0aCBkPSJNMjcuMzYxMSAzOS40NDgySDMuOTM5NDUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjQiLz4KCTxwYXRoIGQ9Ik00LjkxNTA0IDQuMzc4OTFWNzQuNTE2OCIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iNCIvPgogIDwvZz4KICAKICAKICA8dGV4dCB4PSIyNDUuOTU0OTk5OTIzNzA2MDUiIHk9IjQ3Ljc1IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiBjbGFzcz0icGFydGljaXBhbnQtbGFiZWwiPldlYkFwcDwvdGV4dD4KPC9nPgo8ZyBjbGFzcz0icGFydGljaXBhbnQiIGRhdGEtcGFydGljaXBhbnQ9Ik9yZGVyU2VydmljZSI+CiAgPHJlY3QgeD0iMzMxLjg3NSIgeT0iMjkiIHdpZHRoPSIxMzYuMjUiIGhlaWdodD0iMzgiIHJ4PSIzIiBjbGFzcz0icGFydGljaXBhbnQtYm94Ii8+CiAgPGcgY2xhc3M9InBhcnRpY2lwYW50LWljb24iIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMzNC44NzUsIDM2KSBzY2FsZSgwLjI3OTA2OTc2NzQ0MTg2MDQ2KSIgZmlsbD0ibm9uZSI+CiAgICA8Zz4KCQk8cGF0aCBkPSJNNzQuMDE0OSA0Ni44ODg4Qzc0LjAxNDkgNTEuNTc1NSA3My4wOTE4IDU2LjIxNjMgNzEuMjk4MyA2MC41NDYzQzY5LjUwNDggNjQuODc2MiA2Ni44NzYgNjguODEwNSA2My41NjIgNzIuMTI0NUM2MC4yNDggNzUuNDM4NSA1Ni4zMTM3IDc4LjA2NzMgNTEuOTgzOCA3OS44NjA4QzQ3LjY1MzggODEuNjU0MyA0My4wMTMgODIuNTc3NCAzOC4zMjYzIDgyLjU3NzRDMzMuNjM5NiA4Mi41Nzc0IDI4Ljk5ODggODEuNjU0MyAyNC42Njg5IDc5Ljg2MDhDMjAuMzM4OSA3OC4wNjczIDE2LjQwNDYgNzUuNDM4NSAxMy4wOTA3IDcyLjEyNDVDOS43NzY2NiA2OC44MTA1IDcuMTQ3ODUgNjQuODc2MiA1LjM1NDMzIDYwLjU0NjNDMy41NjA4MSA1Ni4yMTYzIDIuNjM3NyA1MS41NzU1IDIuNjM3NyA0Ni44ODg4QzIuNjM3NyA0Mi4yMDIxIDMuNTYwODEgMzcuNTYxMyA1LjM1NDMzIDMzLjIzMTRDNy4xNDc4NSAyOC45MDE0IDkuNzc2NjYgMjQuOTY3MSAxMy4wOTA3IDIxLjY1MzJDMTYuNDA0NiAxOC4zMzkyIDIwLjMzODkgMTUuNzEwNCAyNC42Njg5IDEzLjkxNjhDMjguOTk4OCAxMi4xMjMzIDMzLjYzOTYgMTEuMjAwMiAzOC4zMjYzIDExLjIwMDJDNDMuMDEzIDExLjIwMDIgNDcuNjUzOCAxMi4xMjMzIDUxLjk4MzggMTMuOTE2OEM1Ni4zMTM3IDE1LjcxMDQgNjAuMjQ4IDE4LjMzOTIgNjMuNTYyIDIxLjY1MzJDNjYuODc2IDI0Ljk2NzEgNjkuNTA0OCAyOC45MDE0IDcxLjI5ODMgMzMuMjMxNEM3My4wOTE4IDM3LjU2MTMgNzQuMDE0OSA0Mi4yMDIxIDc0LjAxNDkgNDYuODg4OFY0Ni44ODg4WiIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iNC45ODIwMyIvPgoJCTxwYXRoIGQ9Ik00Ny41MzUyIDIuMzAzNzFMMzcuNTM1MiAxMS41MDAxTDQ3LjUzNTIgMjAuNjk2NiIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iNiIvPgoJPC9nPgogIDwvZz4KICAKICAKICA8dGV4dCB4PSIzNjYuODc1IiB5PSI0Ny43NSIgdGV4dC1hbmNob3I9InN0YXJ0IiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgY2xhc3M9InBhcnRpY2lwYW50LWxhYmVsIj5PcmRlclNlcnZpY2U8L3RleHQ+CjwvZz4KPGcgY2xhc3M9InBhcnRpY2lwYW50IiBkYXRhLXBhcnRpY2lwYW50PSJPcmRlckRCIj4KICA8cmVjdCB4PSI0ODUuOTM0OTk5NDY1OTQyNCIgeT0iMjkiIHdpZHRoPSIxMDUuMTMwMDAxMDY4MTE1MjMiIGhlaWdodD0iMzgiIHJ4PSIzIiBjbGFzcz0icGFydGljaXBhbnQtYm94Ii8+CiAgPGcgY2xhc3M9InBhcnRpY2lwYW50LWljb24iIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQ4OC45MzQ5OTk0NjU5NDI0LCAzNikgc2NhbGUoMC4zKSIgZmlsbD0ibm9uZSI+CiAgICA8Zz4KCQk8cGF0aCBkPSJNNzQuMDE0OSAzOC44ODg4Qzc0LjAxNDkgNDMuNTc1NSA3My4wOTE4IDQ4LjIxNjMgNzEuMjk4MyA1Mi41NDYzQzY5LjUwNDggNTYuODc2MiA2Ni44NzYgNjAuODEwNSA2My41NjIgNjQuMTI0NUM2MC4yNDggNjcuNDM4NSA1Ni4zMTM3IDcwLjA2NzMgNTEuOTgzOCA3MS44NjA4QzQ3LjY1MzggNzMuNjU0MyA0My4wMTMgNzQuNTc3NCAzOC4zMjYzIDc0LjU3NzRDMzMuNjM5NiA3NC41Nzc0IDI4Ljk5ODggNzMuNjU0MyAyNC42Njg5IDcxLjg2MDhDMjAuMzM4OSA3MC4wNjczIDE2LjQwNDYgNjcuNDM4NSAxMy4wOTA3IDY0LjEyNDVDOS43NzY2NiA2MC44MTA1IDcuMTQ3ODUgNTYuODc2MiA1LjM1NDMzIDUyLjU0NjNDMy41NjA4MSA0OC4yMTYzIDIuNjM3NyA0My41NzU1IDIuNjM3NyAzOC44ODg4QzIuNjM3NyAzNC4yMDIxIDMuNTYwODEgMjkuNTYxMyA1LjM1NDMzIDI1LjIzMTRDNy4xNDc4NSAyMC45MDE0IDkuNzc2NjYgMTYuOTY3MSAxMy4wOTA3IDEzLjY1MzJDMTYuNDA0NiAxMC4zMzkyIDIwLjMzODkgNy43MTAzNSAyNC42Njg5IDUuOTE2ODNDMjguOTk4OCA0LjEyMzMxIDMzLjYzOTYgMy4yMDAyIDM4LjMyNjMgMy4yMDAyQzQzLjAxMyAzLjIwMDIgNDcuNjUzOCA0LjEyMzMxIDUxLjk4MzggNS45MTY4M0M1Ni4zMTM3IDcuNzEwMzUgNjAuMjQ4IDEwLjMzOTIgNjMuNTYyIDEzLjY1MzJDNjYuODc2IDE2Ljk2NzEgNjkuNTA0OCAyMC45MDE0IDcxLjI5ODMgMjUuMjMxNEM3My4wOTE4IDI5LjU2MTMgNzQuMDE0OSAzNC4yMDIxIDc0LjAxNDkgMzguODg4OFYzOC44ODg4WiIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iNC45ODIwMyIvPgoJCTxwYXRoIGQ9Ik0yLjY5OTIyIDc1LjQ3MjdMNzUuNjk5MiA3NS41MTU0IiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSI0Ii8+Cgk8L2c+CiAgPC9nPgogIAogIAogIDx0ZXh0IHg9IjUyMC45MzQ5OTk0NjU5NDI0IiB5PSI0Ny43NSIgdGV4dC1hbmNob3I9InN0YXJ0IiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgY2xhc3M9InBhcnRpY2lwYW50LWxhYmVsIj5PcmRlckRCPC90ZXh0Pgo8L2c+CjxnIGNsYXNzPSJwYXJ0aWNpcGFudCIgZGF0YS1wYXJ0aWNpcGFudD0iTm90aWZpY2F0aW9uUXVldWUiPgogIDxyZWN0IHg9IjYwOC45MDQ5OTg3NzkyOTY5IiB5PSIyOSIgd2lkdGg9IjE2OS4xOTAwMDI0NDE0MDYyNSIgaGVpZ2h0PSIzOCIgcng9IjMiIGNsYXNzPSJwYXJ0aWNpcGFudC1ib3giLz4KICAKICAKICAKICA8dGV4dCB4PSI2OTMuNSIgeT0iNDcuNzUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiBjbGFzcz0icGFydGljaXBhbnQtbGFiZWwiPk5vdGlmaWNhdGlvblF1ZXVlPC90ZXh0Pgo8L2c+CjxyZWN0IHg9IjI1Ni41IiB5PSIxMzkiIHdpZHRoPSIxMyIgaGVpZ2h0PSIzMDkiIHJ4PSIxIiBjbGFzcz0ib2NjdXJyZW5jZSIgZGF0YS1wYXJ0aWNpcGFudD0iV2ViQXBwIi8+CjxyZWN0IHg9Ijg2NS41IiB5PSIzMDAiIHdpZHRoPSIxMyIgaGVpZ2h0PSI3OCIgcng9IjEiIGNsYXNzPSJvY2N1cnJlbmNlIiBkYXRhLXBhcnRpY2lwYW50PSJvcmRlcklkOk9yZGVyU2VydmljZSIvPgo8ZyBjbGFzcz0icGFydGljaXBhbnQiIGRhdGEtcGFydGljaXBhbnQ9Im9yZGVySWQ6T3JkZXJTZXJ2aWNlIj4KICA8cmVjdCB4PSI3ODkuODA1MDAwMzA1MTc1OCIgeT0iMjYyIiB3aWR0aD0iMTYzLjM4OTk5OTM4OTY0ODQ0IiBoZWlnaHQ9IjM4IiByeD0iMyIgY2xhc3M9InBhcnRpY2lwYW50LWJveCIvPgogIAogIAogIAogIDx0ZXh0IHg9Ijg3MS41IiB5PSIyODAuNzUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiBjbGFzcz0icGFydGljaXBhbnQtbGFiZWwiIHRleHRMZW5ndGg9IjE0OS4zODk5OTkzODk2NDg0NCIgbGVuZ3RoQWRqdXN0PSJzcGFjaW5nIj5vcmRlcklkOk9yZGVyU2VydmljZTwvdGV4dD4KPC9nPgo8ZyBjbGFzcz0ibWVzc2FnZSI+CiAgPGxpbmUgeDE9IjY1LjUiIHkxPSIxMDciIHgyPSIyNjIuNSIgeTI9IjEwNyIgY2xhc3M9Im1lc3NhZ2UtbGluZSIvPgogIDxzdmcgeD0iMjU1LjUiIHk9IjEwMiIgd2lkdGg9IjciIGhlaWdodD0iMTAiIHZpZXdCb3g9IjAgMCA3IDkiIG92ZXJmbG93PSJ2aXNpYmxlIiBjbGFzcz0iYXJyb3ctaGVhZCBhcnJvdy1vcGVuIj4KICAgIDxnPgogICAgICA8cGF0aCBkPSJNMSAxLjI1IEw2LjE1IDQuNSBMMSA3Ljc1IiBzdHJva2U9IiMwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8L2c+CiAgPC9zdmc+CiAgPHRleHQgeD0iMTYwLjUiIHk9IjEwNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9Im1lc3NhZ2UtbGFiZWwiPnN1Ym1pdE9yZGVyKGNhcnRJZCk8L3RleHQ+CiAgPHRleHQgeD0iNjEuNSIgeT0iMTA0IiB0ZXh0LWFuY2hvcj0iZW5kIiBjbGFzcz0ic2VxLW51bWJlciI+MTwvdGV4dD4KPC9nPgo8ZyBjbGFzcz0ibWVzc2FnZSI+CiAgPGxpbmUgeDE9IjY1LjUiIHkxPSIxMzkiIHgyPSIyNTUuNSIgeTI9IjEzOSIgY2xhc3M9Im1lc3NhZ2UtbGluZSIvPgogIDxzdmcgeD0iMjQ4LjUiIHk9IjEzNCIgd2lkdGg9IjciIGhlaWdodD0iMTAiIHZpZXdCb3g9IjAgMCA3IDkiIG92ZXJmbG93PSJ2aXNpYmxlIiBjbGFzcz0iYXJyb3ctaGVhZCI+CiAgICA8Zz4KICAgICAgPHBhdGggZD0iTTEgMS4yNSBMNi4xNSA0LjUgTDEgNy43NSBaIiBzdHJva2U9IiMwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSIjMDAwIi8+CiAgICA8L2c+CiAgPC9zdmc+CiAgPHRleHQgeD0iMTU3IiB5PSIxMzYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJtZXNzYWdlLWxhYmVsIj5wcm9jZXNzT3JkZXIoY2FydElkKTwvdGV4dD4KICA8dGV4dCB4PSI2MS41IiB5PSIxMzYiIHRleHQtYW5jaG9yPSJlbmQiIGNsYXNzPSJzZXEtbnVtYmVyIj4yPC90ZXh0Pgo8L2c+CjxnIGNsYXNzPSJtZXNzYWdlIj4KICA8bGluZSB4MT0iNDAxIiB5MT0iMzMyIiB4Mj0iNTM4LjUiIHkyPSIzMzIiIGNsYXNzPSJtZXNzYWdlLWxpbmUiLz4KICA8c3ZnIHg9IjUzMS41IiB5PSIzMjciIHdpZHRoPSI3IiBoZWlnaHQ9IjEwIiB2aWV3Qm94PSIwIDAgNyA5IiBvdmVyZmxvdz0idmlzaWJsZSIgY2xhc3M9ImFycm93LWhlYWQgYXJyb3ctb3BlbiI+CiAgICA8Zz4KICAgICAgPHBhdGggZD0iTTEgMS4yNSBMNi4xNSA0LjUgTDEgNy43NSIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgogICAgPC9nPgogIDwvc3ZnPgogIDx0ZXh0IHg9IjQ2Ni4yNSIgeT0iMzI5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0ibWVzc2FnZS1sYWJlbCI+cGVyc2lzdChvcmRlcik8L3RleHQ+CiAgPHRleHQgeD0iMzk3IiB5PSIzMjkiIHRleHQtYW5jaG9yPSJlbmQiIGNsYXNzPSJzZXEtbnVtYmVyIj4yLjIuMTwvdGV4dD4KPC9nPgo8ZyBjbGFzcz0ibWVzc2FnZSI+CiAgPGxpbmUgeDE9IjI3MC41IiB5MT0iNDMwIiB4Mj0iNjkzLjUiIHkyPSI0MzAiIGNsYXNzPSJtZXNzYWdlLWxpbmUiLz4KICA8c3ZnIHg9IjY4Ni41IiB5PSI0MjUiIHdpZHRoPSI3IiBoZWlnaHQ9IjEwIiB2aWV3Qm94PSIwIDAgNyA5IiBvdmVyZmxvdz0idmlzaWJsZSIgY2xhc3M9ImFycm93LWhlYWQgYXJyb3ctb3BlbiI+CiAgICA8Zz4KICAgICAgPHBhdGggZD0iTTEgMS4yNSBMNi4xNSA0LjUgTDEgNy43NSIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgogICAgPC9nPgogIDwvc3ZnPgogIDx0ZXh0IHg9IjQ3OC41IiB5PSI0MjciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJtZXNzYWdlLWxhYmVsIj5vcmRlckNyZWF0ZWQob3JkZXJJZCk8L3RleHQ+CiAgPHRleHQgeD0iMjY2LjUiIHk9IjQyNyIgdGV4dC1hbmNob3I9ImVuZCIgY2xhc3M9InNlcS1udW1iZXIiPjIuMzwvdGV4dD4KPC9nPgo8ZyBjbGFzcz0iY3JlYXRpb24iPgogIDxsaW5lIHgxPSIyNzAuNSIgeTE9IjI4MSIgeDI9Ijc4OC44MDUwMDAzMDUxNzU4IiB5Mj0iMjgxIiBjbGFzcz0ibWVzc2FnZS1saW5lIiBzdHJva2UtZGFzaGFycmF5PSI2LDQiLz4KICA8cG9seWxpbmUgcG9pbnRzPSI3ODMuNjU1MDAwMzA1MTc1OCwyNzcuNzUgNzg4LjgwNTAwMDMwNTE3NTgsMjgxIDc4My42NTUwMDAzMDUxNzU4LDI4NC4yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBjbGFzcz0iYXJyb3ctaGVhZCBhcnJvdy1vcGVuIi8+CiAgPHRleHQgeD0iNTI2LjY1MjUwMDE1MjU4NzkiIHk9IjI3OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9Im1lc3NhZ2UtbGFiZWwiPjx0c3Bhbj7CqzwvdHNwYW4+PHRzcGFuIGR4PSI0Ij5jYXJ0PC90c3Bhbj48dHNwYW4gZHg9IjQiPsK7PC90c3Bhbj48L3RleHQ+CiAgPHRleHQgeD0iMjY2LjUiIHk9IjI3OCIgdGV4dC1hbmNob3I9ImVuZCIgY2xhc3M9InNlcS1udW1iZXIiPjIuMjwvdGV4dD4KPC9nPgo8ZyBjbGFzcz0icmV0dXJuIj4KICA8bGluZSB4MT0iMjU1LjUiIHkxPSIyMzQiIHgyPSI2NS41IiB5Mj0iMjM0IiBjbGFzcz0icmV0dXJuLWxpbmUiLz4KICA8cG9seWxpbmUgcG9pbnRzPSI3MC42NSwyMzAuNzUgNjUuNSwyMzQgNzAuNjUsMjM3LjI1IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGNsYXNzPSJyZXR1cm4tYXJyb3ciLz4KICA8dGV4dCB4PSIxNjQiIHk9IjIzMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9InJldHVybi1sYWJlbCI+ZXJyb3IoJnF1b3Q7RW1wdHkgY2FydCZxdW90Oyk8L3RleHQ+CiAgPHRleHQgeD0iNjEuNSIgeT0iMjMxIiB0ZXh0LWFuY2hvcj0iZW5kIiBjbGFzcz0ic2VxLW51bWJlciI+Mi4xLjE8L3RleHQ+CjwvZz4KPGcgY2xhc3M9InJldHVybiI+CiAgPGxpbmUgeDE9Ijg2NC41IiB5MT0iMzY1IiB4Mj0iMjcwLjUiIHkyPSIzNjUiIGNsYXNzPSJyZXR1cm4tbGluZSIvPgogIDxwb2x5bGluZSBwb2ludHM9IjI3NS42NSwzNjEuNzUgMjcwLjUsMzY1IDI3NS42NSwzNjguMjUiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgY2xhc3M9InJldHVybi1hcnJvdyIvPgogIDx0ZXh0IHg9IjU3MSIgeT0iMzYyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0icmV0dXJuLWxhYmVsIj5vcmRlcklkPC90ZXh0PgogIDx0ZXh0IHg9IjI2Ni41IiB5PSIzNjIiIHRleHQtYW5jaG9yPSJlbmQiIGNsYXNzPSJzZXEtbnVtYmVyIj4yLjIuMjwvdGV4dD4KPC9nPgo8ZyBjbGFzcz0icmV0dXJuIj4KICA8bGluZSB4MT0iODY1LjUiIHkxPSIzODEiIHgyPSIyNzEuNSIgeTI9IjM4MSIgY2xhc3M9InJldHVybi1saW5lIi8+CiAgPHBvbHlsaW5lIHBvaW50cz0iMjc2LjY1LDM3Ny43NSAyNzEuNSwzODEgMjc2LjY1LDM4NC4yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBjbGFzcz0icmV0dXJuLWFycm93Ii8+CiAgPHRleHQgeD0iNTcyIiB5PSIzNzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJyZXR1cm4tbGFiZWwiPm9yZGVySWQ8L3RleHQ+CiAgPHRleHQgeD0iMjY3LjUiIHk9IjM3OCIgdGV4dC1hbmNob3I9ImVuZCIgY2xhc3M9InNlcS1udW1iZXIiPjIuMi4zPC90ZXh0Pgo8L2c+CjxnIGNsYXNzPSJyZXR1cm4iPgogIDxsaW5lIHgxPSIyNjIuNSIgeTE9IjUzNiIgeDI9IjY1LjUiIHkyPSI1MzYiIGNsYXNzPSJyZXR1cm4tbGluZSIvPgogIDxwb2x5bGluZSBwb2ludHM9IjcwLjY1LDUzMi43NSA2NS41LDUzNiA3MC42NSw1MzkuMjUiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgY2xhc3M9InJldHVybi1hcnJvdyIvPgogIDx0ZXh0IHg9IjE2Ny41IiB5PSI1MzMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJyZXR1cm4tbGFiZWwiPm9yZGVyQ29uZmlybWVkKG9yZGVySWQpPC90ZXh0PgogIDx0ZXh0IHg9IjYxLjUiIHk9IjUzMyIgdGV4dC1hbmNob3I9ImVuZCIgY2xhc3M9InNlcS1udW1iZXIiPjQ8L3RleHQ+CjwvZz4KPGcgY2xhc3M9ImZyYWdtZW50IGZyYWdtZW50LWFsdCI+CiAgPHJlY3QgeD0iLTkuNSIgeT0iMTU2LjUiIHdpZHRoPSIzNDIiIGhlaWdodD0iODgiIHJ4PSI0IiBjbGFzcz0iZnJhZ21lbnQtYm9yZGVyIi8+CiAgPHJlY3QgeD0iLTkiIHk9IjE1NyIgd2lkdGg9IjM0MSIgaGVpZ2h0PSIyNSIgY2xhc3M9ImZyYWdtZW50LWhlYWRlciIvPgogIDxzdmcgeD0iLTUiIHk9IjE1NyIgd2lkdGg9IjIwIiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiPgogICAgICA8cGF0aCBkPSJNMTIgOEwyMCAxMkwxMiAxNkw0IDEyTDEyIDhaIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KICAgIDwvc3ZnPgogIDx0ZXh0IHg9IjE3IiB5PSIxNjkiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiBjbGFzcz0iZnJhZ21lbnQtbGFiZWwiPkFsdDwvdGV4dD4KICA8dGV4dCB4PSItMTMiIHk9IjE2NSIgdGV4dC1hbmNob3I9ImVuZCIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiIGNsYXNzPSJzZXEtbnVtYmVyIj4yLjE8L3RleHQ+CiAgPGc+PHRleHQgeD0iLTkiIHk9IjE5NyIgY2xhc3M9ImZyYWdtZW50LWNvbmRpdGlvbiI+WzwvdGV4dD48dGV4dCB4PSItMS4xMDk5OTk5OTk5OTk5OTk0IiB5PSIxOTciIGNsYXNzPSJmcmFnbWVudC1jb25kaXRpb24iIG9wYWNpdHk9IjAuNjUiPmNhcnQuaXNFbXB0eSgpPC90ZXh0Pjx0ZXh0IHg9Ijg5LjIyOTk5NjMzNzg5MDYzIiB5PSIxOTciIGNsYXNzPSJmcmFnbWVudC1jb25kaXRpb24iPl08L3RleHQ+PC9nPgo8L2c+CjxnIGNsYXNzPSJkaXZpZGVyIj4KICA8bGluZSB4MT0iMCIgeTE9IjQ4NSIgeDI9IjQyOS4zMTQ5OTg2MjY3MDkiIHkyPSI0ODUiIGNsYXNzPSJkaXZpZGVyLWxpbmUiLz4KICA8bGluZSB4MT0iNTI2LjY4NTAwMTM3MzI5MSIgeTE9IjQ4NSIgeDI9Ijk1NiIgeTI9IjQ4NSIgY2xhc3M9ImRpdmlkZXItbGluZSIvPgogIDxyZWN0IHg9IjQyOS44MTQ5OTg2MjY3MDkiIHk9IjQ3MS41IiB3aWR0aD0iOTYuMzcwMDAyNzQ2NTgyMDMiIGhlaWdodD0iMjciIHJ4PSIyIiBjbGFzcz0iZGl2aWRlci1iZyIvPgogIDx0ZXh0IHg9IjQ3OCIgeT0iNDg1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgY2xhc3M9ImRpdmlkZXItbGFiZWwiPkNvbmZpcm1hdGlvbjwvdGV4dD4KPC9nPgo8dGV4dCBjbGFzcz0iY29tbWVudC10ZXh0Ij48dHNwYW4geD0iNjUuNSIgeT0iODciPlBsYWNlIG9yZGVyPC90c3Bhbj48L3RleHQ+Cjx0ZXh0IGNsYXNzPSJjb21tZW50LXRleHQiPjx0c3BhbiB4PSIyNzAuNSIgeT0iNDEwIj5Ob3RpZnkgYXN5bmM8L3RzcGFuPjwvdGV4dD4KPC9nPgo8L3N2Zz4=" width="998" height="628"
+               alt="Order Processing sequence diagram: the Customer actor submits an order to WebApp; WebApp processes it, returning an error for an empty cart, creating an OrderService that persists the order to OrderDB, then asynchronously notifying NotificationQueue; after a Confirmation divider, WebApp confirms the order to the Customer. Pre-rendered to SVG by the zenuml CLI.">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 — TRUST STRIP ============ -->
+<section class="border-t border-b border-hair" aria-labelledby="facts-h2">
+  <div class="wrap py-10 md:py-14">
+    <h2 class="vh" id="facts-h2">Project facts</h2>
+    <p class="idx mb-8 reveal" aria-hidden="true">[ 04 — FACTS ]</p>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-y-8 gap-x-6 reveal">
+      <div class="fact"><p>v4.1.0</p><p class="cap text-stone-500">current release</p></div>
+      <div class="fact"><p>MIT</p><p class="cap text-stone-500">license</p></div>
+      <div class="fact"><p>REACT&nbsp;19</p><p class="cap text-stone-500">renderer</p></div>
+      <div class="fact"><p>ANTLR4</p><p class="cap text-stone-500">grammar-backed parser</p></div>
+      <div class="fact col-span-2 md:col-span-1"><p>13</p><p class="cap text-stone-500">named themes</p></div>
+    </div>
+    <div class="mt-10 pt-6 border-t border-hair flex flex-wrap items-center gap-x-4 gap-y-3 reveal">
+      <span class="cap text-stone-500">Powers ZenUML inside:</span>
+      <span class="chip">Mermaid</span>
+      <span class="chip">Confluence</span>
+      <span class="chip">JetBrains IDEs</span>
+      <span class="chip">Chrome</span>
+      <a class="plink ml-auto" href="https://github.com/mermaid-js/zenuml-core" rel="noopener">GitHub — mermaid-js/zenuml-core ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 — FAQ ============ -->
+<section class="sec" id="faq" aria-labelledby="faq-h2">
+  <div class="wrap">
+    <p class="idx mb-4 reveal">[ 05 — FAQ ]</p>
+    <h2 id="faq-h2" class="h2 reveal">Asked and answered.</h2>
+
+    <div class="faq mt-8 max-w-[72ch] reveal">
+      <details>
+        <summary>What is @zenuml/core?</summary>
+        <p>@zenuml/core is a JavaScript sequence-diagram library that turns Markdown-inspired text definitions into interactive diagrams entirely in the browser, with no server required. It is published on npm under the MIT license, and it is the engine that powers ZenUML syntax support in the Mermaid ecosystem.</p>
+      </details>
+      <details>
+        <summary>How do I install @zenuml/core?</summary>
+        <p>Install @zenuml/core from npm with <code>`npm install @zenuml/core`</code> or <code>`bun add @zenuml/core`</code>. The package requires Node.js 20 or later and ships both an ESM bundle (dist/zenuml.esm.mjs) for modern bundlers and a UMD bundle (dist/zenuml.js) for browser scripts.</p>
+      </details>
+      <details>
+        <summary>Is ZenUML part of Mermaid?</summary>
+        <p>ZenUML is not a Mermaid competitor — it is an alternative sequence-diagram syntax available inside the Mermaid ecosystem, and it is also usable standalone. The @zenuml/core repository lives in the mermaid-js GitHub organization, and Mermaid's mermaid-zenuml package calls this library's renderer.</p>
+      </details>
+      <details>
+        <summary>Does ZenUML require a server to render diagrams?</summary>
+        <p>No. ZenUML diagrams are defined as plain text and rendered fully client-side in the browser. One DSL feeds two renderers: an interactive React 19 HTML renderer and a headless native-SVG renderer exported as renderToSvg().</p>
+      </details>
+      <details>
+        <summary>Can I validate ZenUML syntax on the server in Node.js?</summary>
+        <p>Yes. The @zenuml/core/parser subpath exports a reentrant validate(code) function that returns { pass, errorDetails } and a parse(code) function that adds an error-recovered rootContext parse tree. It imports cleanly server-side and is safe to call repeatedly or concurrently in Node.</p>
+      </details>
+      <details>
+        <summary>What UML fragments does ZenUML support?</summary>
+        <p>ZenUML supports the full UML fragment set: if/else (alt), while/for/loop, opt, par, critical, section/frame, try/catch/finally, and ref. Conditions accept real expressions, including comparison, boolean, arithmetic, function calls, and the in operator.</p>
+      </details>
+      <details>
+        <summary>Can I export ZenUML diagrams as PNG or SVG?</summary>
+        <p>Yes. The ZenUml instance provides getPng() and getSvg() methods that return data URLs. The package also ships a zenuml CLI binary that renders .zenuml files to SVG or PNG, supports stdin/stdout pipes, and offers --check syntax validation and --parse AST-as-JSON output.</p>
+      </details>
+      <details>
+        <summary>Is @zenuml/core free to use?</summary>
+        <p>Yes. @zenuml/core is open source under the MIT license and free to install from npm. The current version is 4.1.0.</p>
+      </details>
+    </div>
+
+    <p class="mt-8 reveal"><a class="plink" href="/about/">More about the project — the diagrams-as-code philosophy →</a> <a class="plink" href="/llms.txt">Machine-readable reference — /llms.txt</a></p>
+  </div>
+</section>
+
+</div><!-- /rails -->
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="border-t border-hair">
+  <div class="wrap py-12">
+    <div class="grid gap-10 md:grid-cols-[1fr_auto_auto_auto] md:gap-14">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="logo-mark" role="img" aria-label="ZenUML logo"></span>
+          <span class="font-mono font-bold text-[0.9375rem] text-ink">@zenuml/core</span>
+        </div>
+        <p class="mt-3 max-w-[38ch] text-[0.875rem] text-stone-600">
+          Markdown-inspired text in, interactive sequence diagrams out. Parsed, laid out, and rendered in the browser.
+        </p>
+      </div>
+      <nav aria-label="Project">
+        <p class="cap text-stone-500 mb-3">Project</p>
+        <ul class="list-none p-0 m-0 space-y-2">
+          <li><a class="plink" href="https://github.com/mermaid-js/zenuml-core" rel="noopener">GitHub</a></li>
+          <li><a class="plink" href="https://www.npmjs.com/package/@zenuml/core" rel="noopener">npm</a></li>
+          <li><a class="plink" href="https://app.zenuml.com" rel="noopener">Playground — app.zenuml.com</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Documentation">
+        <p class="cap text-stone-500 mb-3">Docs</p>
+        <ul class="list-none p-0 m-0 space-y-2">
+          <li><a class="plink" href="https://github.com/mermaid-js/zenuml-core/blob/main/docs/DSL_SYNTAX.md" rel="noopener">Syntax reference</a></li>
+          <li><a class="plink" href="https://mermaid.js.org/syntax/zenuml.html" rel="noopener">ZenUML in Mermaid</a></li>
+          <li><a class="plink" href="/llms.txt">/llms.txt</a></li>
+        </ul>
+      </nav>
+      <!-- DEPLOY CHECKLIST (site-integration task): /about/, /privacy/, /terms/ and
+           /llms.txt (+ /llms-full.txt sharing the FAQ answers) do NOT ship in
+           fireworks-output/ — create them at deploy time or these links 404.
+           The JTBD contract requires the links; do not remove them from this page. -->
+      <nav aria-label="Site">
+        <p class="cap text-stone-500 mb-3">Site</p>
+        <ul class="list-none p-0 m-0 space-y-2">
+          <li><a class="plink" href="/about/">About</a></li>
+          <li><a class="plink" href="/privacy/">Privacy</a></li>
+          <li><a class="plink" href="/terms/">Terms</a></li>
+          <li><a class="plink" href="mailto:hello@zenuml.com">Contact — hello@zenuml.com</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="mt-10 pt-6 border-t border-hair flex flex-wrap items-center justify-between gap-3">
+      <p class="font-mono text-[0.6875rem] tracking-[0.08em] uppercase text-stone-500 m-0">MIT License · © 2022 Peng Xiao</p>
+      <p class="font-mono text-[0.6875rem] tracking-[0.08em] uppercase text-stone-500 m-0">The diagrams on this page are rendered by @zenuml/core v4.1.0</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- verbatim DSL source (machine-verified, pass:true) ----------
+     The order-flow example in section 03 keeps its CLI-rendered static SVG
+     permanently: it is already authentic output of this library, and a live
+     re-render would drop the frame title and clip on small screens. Live
+     hydration is reserved for the hero. */
+  var EX1 = "Alice -> Bob: Hello Bob!\nBob -> Alice: Hello Alice!";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var typedSpan = $('hero-typed'), heroPre = $('hero-pre'), editor = $('hero-editor'),
+      gutter = $('hero-gutter'), vstatus = $('v-status'), pipe = $('hero-pipe'),
+      editHint = $('edit-hint');
+
+  function setGutter(text) {
+    var lines = text.split('\n').length, out = [];
+    for (var i = 1; i <= Math.max(lines, 1); i++) out.push(i);
+    gutter.textContent = out.join('\n');
+  }
+  function autosize() {
+    editor.style.height = 'auto';
+    editor.style.height = Math.max(editor.scrollHeight, 120) + 'px';
+  }
+  function showEditor() {
+    heroPre.hidden = true;
+    editor.hidden = false;
+    editor.value = EX1;
+    setGutter(EX1);
+    autosize();
+  }
+
+  /* ---------- hero typing — types itself once, then becomes a real editor ----------
+     finishTyping() lets the primary CTA cancel the animation instantly: the
+     typing loop is a garnish and must never gate the editor. */
+  var typingDone, finishTyping = null;
+  if (reduced) {
+    showEditor();
+    typingDone = Promise.resolve();
+  } else {
+    typingDone = new Promise(function (resolve) {
+      var timer = null, finished = false;
+      function finish() {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        if (pipe) pipe.classList.add('fired');
+        showEditor();
+        resolve();
+      }
+      finishTyping = finish;
+      typedSpan.textContent = '';
+      setGutter('');
+      var i = 0;
+      function tick() {
+        if (finished) return;
+        i += 1;
+        var t = EX1.slice(0, i);
+        typedSpan.textContent = t;
+        setGutter(t);
+        if (i < EX1.length) {
+          timer = setTimeout(tick, 22 + Math.random() * 42);
+        } else {
+          if (pipe) pipe.classList.add('fired');
+          timer = setTimeout(finish, 350);
+        }
+      }
+      timer = setTimeout(tick, 500);
+    });
+  }
+
+  /* ---------- copy buttons ---------- */
+  function legacyCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', '');
+    ta.style.position = 'absolute'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) { /* noop */ }
+    document.body.removeChild(ta);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-copy-target]'), function (btn) {
+    btn.addEventListener('click', function () {
+      var el = $(btn.getAttribute('data-copy-target'));
+      if (!el) return;
+      var text = btn.getAttribute('data-copy') || el.textContent;
+      function done() {
+        var prev = btn.textContent;
+        btn.textContent = 'copied ✓';
+        btn.classList.add('copied');
+        setTimeout(function () { btn.textContent = prev; btn.classList.remove('copied'); }, 1600);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { legacyCopy(text); done(); });
+      } else { legacyCopy(text); done(); }
+    });
+  });
+
+  /* ---------- terminal tabs (click + arrow keys) ---------- */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab[data-tab]'));
+  function selectTab(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pane]'), function (p) {
+      if (p.getAttribute('data-pane') === tab.getAttribute('data-tab')) p.removeAttribute('hidden');
+      else p.setAttribute('hidden', '');
+    });
+    if (focus) tab.focus();
+  }
+  tabs.forEach(function (tab, idx) {
+    tab.addEventListener('click', function () { selectTab(tab, false); });
+    tab.addEventListener('keydown', function (ev) {
+      var n = null;
+      if (ev.key === 'ArrowRight') n = tabs[(idx + 1) % tabs.length];
+      else if (ev.key === 'ArrowLeft') n = tabs[(idx - 1 + tabs.length) % tabs.length];
+      else if (ev.key === 'Home') n = tabs[0];
+      else if (ev.key === 'End') n = tabs[tabs.length - 1];
+      if (n) { ev.preventDefault(); selectTab(n, true); }
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-goto-tab]'), function (btn) {
+    btn.addEventListener('click', function () {
+      var tab = document.querySelector('.tab[data-tab="' + btn.getAttribute('data-goto-tab') + '"]');
+      if (tab) { selectTab(tab, false); tab.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' }); }
+    });
+  });
+
+  /* ---------- section 03 zoom: FIT (default) ⇄ 100% natural-size scroll ----------
+     Fit is pure CSS (max-width:100% on the fallback), so the flagship diagram is
+     fully visible in any static glance; 100% restores 14px labels + scrolling. */
+  var ex3 = $('stage-ex3'), ex3btn = $('ex3-zoom'), ex3status = $('ex3-status');
+  if (ex3 && ex3btn) {
+    ex3btn.addEventListener('click', function () {
+      var natural = ex3.classList.toggle('natural');
+      ex3btn.setAttribute('aria-pressed', String(natural));
+      if (ex3status) ex3status.textContent = natural ? 'scroll →' : 'fit to width';
+      /* only a tab stop while it actually scrolls (100% mode) — keyboard users can arrow-pan it */
+      if (natural) ex3.setAttribute('tabindex', '0');
+      else { ex3.removeAttribute('tabindex'); ex3.scrollLeft = 0; ex3.scrollTop = 0; }
+    });
+  }
+
+  /* ---------- scroll reveal (gated behind html.js — page is complete without JS) ---------- */
+  var revealEls = document.querySelectorAll('.reveal');
+  if (!reduced && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    Array.prototype.forEach.call(revealEls, function (el) { io.observe(el); });
+    /* safety: settle every reveal shortly after load regardless of intersection */
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        Array.prototype.forEach.call(revealEls, function (el) { el.classList.add('in'); });
+      }, 1200);
+    });
+  } else {
+    Array.prototype.forEach.call(revealEls, function (el) { el.classList.add('in'); });
+  }
+
+  /* ---------- live hydration: the page proves "no server required" ----------
+     The hero's static SVG fallback was pre-rendered by the zenuml CLI. After
+     first paint we load the real UMD bundle and re-render the hero live, in
+     this browser, with @zenuml/core itself — framed DiagramFrame in static
+     mode, the same layout the CLI SVG mirrors, so the crossfade is a near
+     no-op until the status line flips to LIVE. If the CDN is unreachable the
+     CLI-rendered fallback simply remains. */
+  var zHero = null, heroHost = null, parserValidate = null;
+  var HERO_CONFIG = { theme: 'default', mode: 'static' };
+
+  function fit(stage, host) {
+    if (!stage || !host) return;
+    host.style.zoom = '';
+    var w = host.scrollWidth;
+    var avail = stage.clientWidth - 48;
+    if (w > avail && avail > 0) {
+      host.style.zoom = String(avail / w); /* no floor — never clip, always fit */
+    }
+  }
+
+  function goLive(stage, host) {
+    fit(stage, host);
+    stage.classList.add('is-live');
+    setTimeout(function () { stage.classList.add('settled'); fit(stage, host); }, reduced ? 0 : 460);
+    var st = $('hero-status');
+    if (st) {
+      st.classList.add('live');
+      st.innerHTML = '<span class="dot" aria-hidden="true"></span>LIVE — RENDERED IN THIS BROWSER BY @zenuml/core@4.1.0 · NO SERVER ROUND-TRIPS';
+    }
+    /* the panel-bar label only claims "interactive dom" once the DOM actually is */
+    var mode = $('hero-mode');
+    if (mode) mode.textContent = 'interactive dom';
+    if (editHint) editHint.hidden = false;
+  }
+
+  function hydrate() {
+    var Z = window.zenuml && (window.zenuml.default || window.zenuml);
+    if (typeof Z !== 'function') return;
+    var stage = $('stage-hero');
+    if (stage) {
+      var host = document.createElement('div');
+      host.className = 'live-host';
+      stage.appendChild(host);
+      try {
+        var z = new Z(host); /* framed DiagramFrame — matches the CLI fallback */
+        zHero = z; heroHost = host;
+        z.render(EX1, HERO_CONFIG).then(function () {
+          requestAnimationFrame(function () {
+            typingDone.then(function () { goLive(stage, host); });
+          });
+        }).catch(function () { /* keep CLI fallback */ });
+      } catch (e) { /* keep CLI fallback */ }
+    }
+    loadParser();
+  }
+
+  /* headless parser, loaded via a real module script (no eval/new Function, so
+     strict-CSP deployments without 'unsafe-eval' keep structured validation) —
+     same subpath the "validate (node)" tab documents */
+  function loadParser() {
+    window.addEventListener('zenuml-parser-ready', function () {
+      var m = window.__zenumlParser;
+      if (m && typeof m.validate === 'function') parserValidate = m.validate;
+    }, { once: true });
+    var s = document.createElement('script');
+    s.type = 'module';
+    s.textContent =
+      "import * as m from 'https://cdn.jsdelivr.net/npm/@zenuml/core@4.1.0/dist/parser/index.mjs/+esm';" +
+      "window.__zenumlParser = m; window.dispatchEvent(new Event('zenuml-parser-ready'));";
+    document.body.appendChild(s);
+    /* if the import fails the editor still re-renders, with an honest status line */
+  }
+
+  /* ---------- editable hero: debounce → validate() → re-render ---------- */
+  var renderBusy = false, renderQueued = null, debounceT = null;
+
+  function setStatus(ok, msg) {
+    vstatus.textContent = msg;
+    vstatus.title = msg;
+    vstatus.classList.toggle('err', !ok);
+  }
+  function renderHero(code) {
+    if (!zHero) return;
+    if (renderBusy) { renderQueued = code; return; }
+    renderBusy = true;
+    zHero.render(code, HERO_CONFIG)
+      .catch(function () {
+        /* keep last good frame, but never lie about it */
+        setStatus(false, '✗ did not parse');
+      })
+      .then(function () {
+        renderBusy = false;
+        fit($('stage-hero'), heroHost);
+        if (renderQueued !== null) { var q = renderQueued; renderQueued = null; renderHero(q); }
+      });
+  }
+  function onEdit() {
+    var code = editor.value;
+    if (!zHero) { setStatus(false, 'live render offline — showing CLI-rendered SVG'); return; }
+    if (!code.trim()) { setStatus(false, '✗ empty input'); return; }
+    if (parserValidate) {
+      try {
+        var r = parserValidate(code);
+        if (!r.pass) {
+          var e = (r.errorDetails && r.errorDetails[0]) || {};
+          setStatus(false, '✗ ' + (e.line != null ? e.line : '?') + ':' + (e.column != null ? e.column : '?') + ' ' + (e.msg || 'syntax error'));
+          return; /* keep last good render */
+        }
+        setStatus(true, 'validate() → pass: true');
+      } catch (err) { /* fall through to render */ }
+    } else {
+      /* parser module unavailable (CSP, CDN) — say so instead of showing a stale pass */
+      setStatus(true, 're-rendering — validation offline');
+    }
+    renderHero(code);
+  }
+  editor.addEventListener('input', function () {
+    setGutter(editor.value);
+    autosize();
+    clearTimeout(debounceT);
+    debounceT = setTimeout(onEdit, 260);
+  });
+
+  /* "Try it live" cancels the typing garnish and focuses the editor immediately —
+     the primary CTA is never dead, even in the first seconds. preventDefault is
+     load-bearing: the anchor's own #demo fragment navigation would run AFTER this
+     handler and move focus back to the document, silently undoing editor.focus(). */
+  var ctaTry = $('cta-try');
+  if (ctaTry) {
+    ctaTry.addEventListener('click', function (ev) {
+      ev.preventDefault(); /* href="#demo" stays for no-JS; with JS we own scroll + focus */
+      if (finishTyping) finishTyping(); /* synchronously reveals the editor */
+      var demo = $('demo');
+      if (demo) demo.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      if (!editor.hidden) editor.focus({ preventScroll: true }); /* immediate — the CTA is never a dead click */
+    });
+  }
+
+  /* refit the live hero diagram on resize */
+  var resizeT = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeT);
+    resizeT = setTimeout(function () {
+      var s1 = $('stage-hero');
+      if (s1 && s1.classList.contains('is-live')) fit(s1, s1.querySelector('.live-host'));
+    }, 150);
+  });
+
+  /* ---------- boot the real library after first paint ---------- */
+  function boot() {
+    window.process = window.process || { env: 'production' };
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@zenuml/core@4.1.0/dist/zenuml.js';
+    s.async = true;
+    s.onload = hydrate;
+    /* onerror: fallbacks remain — the page is complete without JS or CDN */
+    document.body.appendChild(s);
+  }
+  if (document.readyState === 'complete') {
+    setTimeout(boot, 120);
+  } else {
+    window.addEventListener('load', function () {
+      if ('requestIdleCallback' in window) requestIdleCallback(boot, { timeout: 2500 });
+      else setTimeout(boot, 300);
+    });
+  }
+})();
+</script>
+</body>
+</html>
