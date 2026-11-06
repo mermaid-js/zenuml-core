@@ -47,6 +47,7 @@ export interface RepairError {
  * | ----------------------|--------------------------|
  * | `B.` + `A.c()`        | `B.;` + `A.c()`          |
  * | `B.b(x).` + `A.c()`   | `B.b(x)` + `A.c()`       |
+ * | `B.b().c.` + `A.d()`  | `B.b().c` + `A.d()`      |
  *
  * @returns one error per repair, because the source is still incomplete.
  */
@@ -91,7 +92,9 @@ export function repairIncompleteCalls(stream: Token): RepairError[] {
     if (token.type === P.OPAR) depth++;
     else if (token.type === P.CPAR) depth = Math.max(0, depth - 1);
     if (depth === 0 && isDanglingTargetDot(visible, index)) {
-      toTerminateAfter.push(token);
+      // `A.b.` names a chain member, not the target: drop the dot, as in `b(x).`.
+      if (visible[index - 2]?.type === P.DOT) toRemove.add(token);
+      else toTerminateAfter.push(token);
       errors.push({
         line: token.line,
         column: token.column,

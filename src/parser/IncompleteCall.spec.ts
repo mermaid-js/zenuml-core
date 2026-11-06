@@ -209,8 +209,38 @@ describe("a trailing dot before a line that starts a new statement (#671)", () =
         ["A", "c()"],
       ],
     ],
+    // A dot after a chain member, not after the target: the dot is dropped.
+    [
+      "A.b().c.\nd.e()",
+      [
+        ["A", "b().c"],
+        ["d", "e()"],
+      ],
+    ],
+    [
+      "A.b.\nc.d()",
+      [
+        ["A", "b"],
+        ["c", "d()"],
+      ],
+    ],
+    [
+      "A->B.c.\nD.e()",
+      [
+        ["B", "c"],
+        ["D", "e()"],
+      ],
+    ],
   ])("%j", (code, expected) => {
     expect(statements(code)).toEqual(expected);
+  });
+
+  it("reports the dot after a chain member", () => {
+    const result = parse("A.b().c.\nd.e()");
+    expect(result.pass).toBe(false);
+    expect(result.errorDetails).toEqual([
+      { line: 1, column: 7, msg: "extraneous '.' at the end of this line" },
+    ]);
   });
 
   it("keeps a fragment on the next line", () => {
@@ -249,6 +279,7 @@ describe("valid multi-line DSL is unchanged (#671)", () => {
     ["B.c.d()", [["B", "c.d()"]]],
     ["B.b(x).c.d()", [["B", "b(x).c.d()"]]],
     ["A.b(x.\ny.z)", [["A", "b(x.y.z)"]]],
+    ["A.b(x.c.\ny.z)", [["A", "b(x.c.y.z)"]]],
     // A message that ends in a dot without a chain.
     ["B.", [["B", ""]]],
     [
