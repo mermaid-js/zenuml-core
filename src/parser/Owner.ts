@@ -6,9 +6,6 @@
  */
 
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
-
-// Owner of a `new` with no type yet. It names no participant.
-export const MISSING_CONSTRUCTOR = "Missing Constructor";
 import {
   augment,
   type AsyncMessageContextAugmented,
@@ -19,6 +16,9 @@ import {
 } from "./ContextAugmentations";
 import type { AugmentedContext } from "./AntlrTypes";
 import { hoistNamelessCreations, isNamelessCreation } from "./NamelessCreation";
+
+// Owner of a `new` with no type yet. It names no participant.
+export const MISSING_CONSTRUCTOR = "Missing Constructor";
 
 /** Any context that carries `To()` once this file has run. */
 interface HasTo extends AugmentedContext {
