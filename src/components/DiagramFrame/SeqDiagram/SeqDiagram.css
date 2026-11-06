@@ -12,6 +12,13 @@
   cursor: crosshair !important;
 }
 
+/* While a message is being created, a participant is a target, not a name to
+   rename: its hover chip would compete with the target outline. */
+.zenuml.sequence-diagram[data-message-create-dragging]
+  .editable-span-base.editable-span-hover[role] {
+  background-color: transparent;
+}
+
 /* .participant is shared by MessageLayer and LifeLineLayer */
 .zenuml .participant {
   /* don't override */
