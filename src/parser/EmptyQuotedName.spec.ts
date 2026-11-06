@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { RootContext } from "./index";
 import ToCollector from "./ToCollector";
 import { renderToSvg } from "../svg/renderToSvg";
+import { AllMessages } from "./MessageCollector";
 
 // Issue #674: an empty quoted name used as an arrow endpoint, call target or
 // starter made `Participants.Add` throw, which replaced the whole diagram with
@@ -64,5 +65,55 @@ describe("neighbouring valid and already tolerated input is unchanged", () => {
   ])("%s", (code, expected) => {
     expect(() => collect(code)).not.toThrow();
     if (expected) expect(names(code)).toEqual(expected as string[]);
+  });
+});
+
+// An arrow to an empty name with no label is a dangling arrow, the same as
+// `B->` (#672): the source participant stays and no message is drawn.
+// Message numbers are SVG text nodes that hold only digits.
+const numbers = (code: string) =>
+  [...renderToSvg(code).svg.matchAll(/<text[^>]*>(\d+(?:\.\d+)*)</g)].map(
+    (m) => m[1],
+  );
+const messageCount = (code: string) => AllMessages(RootContext(code)).length;
+
+describe("an arrow to an empty name without a label draws no message", () => {
+  it.each([
+    ['A.a()\nB->""', ["1"]],
+    ['A.a()\nA.b()\nB->""', ["1", "2"]],
+    ['A.a()\nB->"":', ["1"]],
+    ["A.a()\nB->", ["1"]],
+  ])("%s", (code, expected) => {
+    expect(numbers(code)).toEqual(expected);
+  });
+
+  it("keeps the source participant, like B->", () => {
+    expect(names('A.a()\nB->""')).toEqual(names("A.a()\nB->"));
+    expect(names('A.a()\nB->""')).toContain("B");
+  });
+
+  it("collects the same messages as B->", () => {
+    expect(messageCount('A.a()\nB->""')).toBe(messageCount("A.a()\nB->"));
+  });
+
+  it("drops it in a nested block too", () => {
+    // "1" is the number of the if fragment itself.
+    expect(numbers('if(x) {\n  A.a()\n  B->""\n}').sort()).toEqual([
+      "1",
+      "1.1",
+    ]);
+    expect(numbers('A.b() {\n  A.a()\n  B->""\n}').sort()).toEqual([
+      "1",
+      "1.1",
+    ]);
+  });
+
+  it.each([
+    ['A.a()\nB->"": x', ["1", "2"]],
+    ['A.a()\nB->"".m()', ["1", "2"]],
+    ["A.a()\nB->C: x", ["1", "2"]],
+    ['A.a()\nB->"C D": x', ["1", "2"]],
+  ])("still draws a message for %s", (code, expected) => {
+    expect(numbers(code)).toEqual(expected);
   });
 });
