@@ -20,7 +20,12 @@ function isDanglingStat(stat: Node): boolean {
   const async = stat.asyncMessage?.();
   if (async) {
     // `A->` and `A -` (the second alternative of asyncMessage with no `to`).
-    return !async.to?.();
+    const to = async.to?.();
+    if (!to) return true;
+    // `A->""` and `A->"":` name no target and carry no label: the same
+    // dangling arrow. `A->"": x` has a label, so it stays a message.
+    const emptyName = !(to.name?.()?.getFormattedText() || to.getFormattedText());
+    return emptyName && !async.content?.()?.getFormattedText();
   }
 
   const ret = stat.ret?.();

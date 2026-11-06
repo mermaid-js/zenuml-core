@@ -6,6 +6,9 @@
  */
 
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
+
+// Owner of a `new` with no type yet. It names no participant.
+export const MISSING_CONSTRUCTOR = "Missing Constructor";
 import {
   augment,
   type AsyncMessageContextAugmented,
@@ -45,7 +48,7 @@ augment<CreationContextAugmented>(CreationContext, {
   },
   Owner() {
     if (!this.Constructor()) {
-      return "Missing Constructor";
+      return MISSING_CONSTRUCTOR;
     }
     const assignee = this.Assignee();
     const type = this.Constructor();
