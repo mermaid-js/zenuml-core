@@ -7,7 +7,7 @@
 <meta name="description" content="Sequence diagrams from text: @zenuml/core is a JavaScript library that turns a Markdown-inspired DSL into interactive diagrams in the browser. MIT, no server.">
 <link rel="canonical" href="https://core.zenuml.com/">
 <meta property="og:title" content="@zenuml/core — Sequence diagrams from text">
-<meta property="og:description" content="A JavaScript sequence-diagram library that turns Markdown-inspired text into interactive diagrams entirely in the browser — no server required. MIT, v4.1.0.">
+<meta property="og:description" content="A JavaScript sequence-diagram library that turns Markdown-inspired text into interactive diagrams entirely in the browser — no server required. MIT, v{{ZENUML_VERSION}}.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://core.zenuml.com/">
 <meta property="og:image" content="https://core.zenuml.com/assets/og-image.png">
@@ -16,7 +16,7 @@
 <meta property="og:image:alt" content="ZenUML DSL text on the left rendered into a sequence diagram on the right">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="@zenuml/core — Sequence diagrams from text">
-<meta name="twitter:description" content="A JavaScript sequence-diagram library that turns Markdown-inspired text into interactive diagrams entirely in the browser — no server required. MIT, v4.1.0.">
+<meta name="twitter:description" content="A JavaScript sequence-diagram library that turns Markdown-inspired text into interactive diagrams entirely in the browser — no server required. MIT, v{{ZENUML_VERSION}}.">
 <meta name="twitter:image" content="https://core.zenuml.com/assets/og-image.png">
 <meta name="twitter:image:alt" content="ZenUML DSL text on the left rendered into a sequence diagram on the right">
 <meta name="theme-color" content="#FAFAF9">
@@ -307,7 +307,7 @@ html.js .reveal.in{transform:none}
   "name": "@zenuml/core",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any (browser); Node.js >= 20 for CLI, headless parser, and LSP",
-  "softwareVersion": "4.1.0",
+  "softwareVersion": "{{ZENUML_VERSION}}",
   "license": "https://opensource.org/licenses/MIT",
   "url": "https://core.zenuml.com",
   "installUrl": "https://www.npmjs.com/package/@zenuml/core",
@@ -333,7 +333,7 @@ html.js .reveal.in{transform:none}
   "programmingLanguage": ["JavaScript", "TypeScript"],
   "runtimePlatform": "Node.js >= 20",
   "license": "https://opensource.org/licenses/MIT",
-  "version": "4.1.0",
+  "version": "{{ZENUML_VERSION}}",
   "url": "https://core.zenuml.com",
   "description": "Source code for @zenuml/core, the MIT-licensed sequence-diagram engine hosted in the mermaid-js GitHub organization. ANTLR4-based DSL parser, React 19 HTML renderer, and headless native-SVG renderer."
 }
@@ -404,7 +404,7 @@ html.js .reveal.in{transform:none}
       "name": "Is @zenuml/core free to use?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. @zenuml/core is open source under the MIT license and free to install from npm. The current version is 4.1.0."
+        "text": "Yes. @zenuml/core is open source under the MIT license and free to install from npm. The current version is {{ZENUML_VERSION}}."
       }
     }
   ]
@@ -442,7 +442,7 @@ html.js .reveal.in{transform:none}
       <!-- LEFT: value prop + CTA -->
       <div>
         <p class="idx mb-5">[ 01 — INPUT&nbsp;→&nbsp;OUTPUT ]</p>
-        <div class="mb-5"><span class="chip"><i aria-hidden="true"></i>OPEN SOURCE · MIT · v4.1.0</span></div>
+        <div class="mb-5"><span class="chip"><i aria-hidden="true"></i>OPEN SOURCE · MIT · v{{ZENUML_VERSION}}</span></div>
         <h1 id="hero-h1" class="h1"><span class="hl">Sequence diagrams</span><br>
 from text.</h1>
         <p class="mt-4 font-mono text-teal text-[0.9375rem] font-medium">Help documentation catch up with development.</p>
@@ -511,12 +511,12 @@ Bob -&gt; Alice: Hello Alice!</textarea>
   <div class="wrap">
     <p class="idx mb-4 reveal">[ 02 — ADD IT TO YOUR APP ]</p>
     <h2 id="int-h2" class="h2 reveal">Pick your surface.</h2>
-    <p class="mt-4 max-w-[62ch] text-stone-700 reveal">Four ways in. Every snippet is complete and runs against v4.1.0 unmodified.</p>
+    <p class="mt-4 max-w-[62ch] text-stone-700 reveal">Four ways in. Every snippet is complete and runs against v{{ZENUML_VERSION}} unmodified.</p>
 
     <!-- The page's only dark surface -->
     <div class="term mt-8 reveal">
       <div class="bar">
-        <span>TERMINAL — @zenuml/core@4.1.0</span>
+        <span>TERMINAL — @zenuml/core@{{ZENUML_VERSION}}</span>
         <span class="hidden sm:inline">ESM + UMD</span>
       </div>
       <div class="install-row">
@@ -543,7 +543,7 @@ zenUml.render(code, config);</pre>
       <div class="relative" id="pane-umd" role="tabpanel" aria-labelledby="tab-umd" data-pane="umd" tabindex="0" hidden>
         <button class="copy-btn absolute top-3 right-3" data-copy-target="code-umd" aria-label="Copy UMD script-tag code">copy</button>
         <pre id="code-umd">&lt;div id=<span class="tk-s">"zenuml-container"</span>&gt;&lt;/div&gt;
-&lt;script src=<span class="tk-s">"https://cdn.jsdelivr.net/npm/@zenuml/core@4.1.0/dist/zenuml.js"</span>&gt;&lt;/script&gt;
+&lt;script src=<span class="tk-s">"https://cdn.jsdelivr.net/npm/@zenuml/core@{{ZENUML_VERSION}}/dist/zenuml.js"</span>&gt;&lt;/script&gt;
 &lt;script&gt;
   <span class="tk-k">const</span> ZenUml = window.zenuml.default;
   <span class="tk-k">const</span> zenUml = <span class="tk-k">new</span> ZenUml(document.getElementById(<span class="tk-s">'zenuml-container'</span>));
@@ -693,7 +693,7 @@ WebApp --&gt; Customer: orderConfirmed(orderId)</pre>
     <h2 class="vh" id="facts-h2">Project facts</h2>
     <p class="idx mb-8 reveal" aria-hidden="true">[ 04 — FACTS ]</p>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-y-8 gap-x-6 reveal">
-      <div class="fact"><p>v4.1.0</p><p class="cap text-stone-500">current release</p></div>
+      <div class="fact"><p>v{{ZENUML_VERSION}}</p><p class="cap text-stone-500">current release</p></div>
       <div class="fact"><p>MIT</p><p class="cap text-stone-500">license</p></div>
       <div class="fact"><p>REACT&nbsp;19</p><p class="cap text-stone-500">renderer</p></div>
       <div class="fact"><p>ANTLR4</p><p class="cap text-stone-500">grammar-backed parser</p></div>
@@ -747,7 +747,7 @@ WebApp --&gt; Customer: orderConfirmed(orderId)</pre>
       </details>
       <details>
         <summary>Is @zenuml/core free to use?</summary>
-        <p>Yes. @zenuml/core is open source under the MIT license and free to install from npm. The current version is 4.1.0.</p>
+        <p>Yes. @zenuml/core is open source under the MIT license and free to install from npm. The current version is {{ZENUML_VERSION}}.</p>
       </details>
     </div>
 
@@ -803,7 +803,7 @@ WebApp --&gt; Customer: orderConfirmed(orderId)</pre>
     </div>
     <div class="mt-10 pt-6 border-t border-hair flex flex-wrap items-center justify-between gap-3">
       <p class="font-mono text-[0.6875rem] tracking-[0.08em] uppercase text-stone-500 m-0">MIT License · © 2022 Peng Xiao</p>
-      <p class="font-mono text-[0.6875rem] tracking-[0.08em] uppercase text-stone-500 m-0">The diagrams on this page are rendered by @zenuml/core v4.1.0</p>
+      <p class="font-mono text-[0.6875rem] tracking-[0.08em] uppercase text-stone-500 m-0">The diagrams on this page are rendered by @zenuml/core v{{ZENUML_VERSION}}</p>
     </div>
   </div>
 </footer>
@@ -1000,7 +1000,7 @@ WebApp --&gt; Customer: orderConfirmed(orderId)</pre>
     var st = $('hero-status');
     if (st) {
       st.classList.add('live');
-      st.innerHTML = '<span class="dot" aria-hidden="true"></span>LIVE — RENDERED IN THIS BROWSER BY @zenuml/core@4.1.0 · NO SERVER ROUND-TRIPS';
+      st.innerHTML = '<span class="dot" aria-hidden="true"></span>LIVE — RENDERED IN THIS BROWSER BY @zenuml/core@{{ZENUML_VERSION}} · NO SERVER ROUND-TRIPS';
     }
     /* the panel-bar label only claims "interactive dom" once the DOM actually is */
     var mode = $('hero-mode');
@@ -1040,7 +1040,7 @@ WebApp --&gt; Customer: orderConfirmed(orderId)</pre>
     var s = document.createElement('script');
     s.type = 'module';
     s.textContent =
-      "import * as m from 'https://cdn.jsdelivr.net/npm/@zenuml/core@4.1.0/dist/parser/index.mjs/+esm';" +
+      "import * as m from 'https://cdn.jsdelivr.net/npm/@zenuml/core@{{ZENUML_VERSION}}/dist/parser/index.mjs/+esm';" +
       "window.__zenumlParser = m; window.dispatchEvent(new Event('zenuml-parser-ready'));";
     document.body.appendChild(s);
     /* if the import fails the editor still re-renders, with an honest status line */
@@ -1125,7 +1125,7 @@ WebApp --&gt; Customer: orderConfirmed(orderId)</pre>
   function boot() {
     window.process = window.process || { env: 'production' };
     var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/@zenuml/core@4.1.0/dist/zenuml.js';
+    s.src = 'https://cdn.jsdelivr.net/npm/@zenuml/core@{{ZENUML_VERSION}}/dist/zenuml.js';
     s.async = true;
     s.onload = hydrate;
     /* onerror: fallbacks remain — the page is complete without JS or CDN */

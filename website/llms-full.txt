@@ -227,7 +227,7 @@ page via scoped theming.
 | Fact | Value |
 |---|---|
 | npm package name | `@zenuml/core` |
-| Version | 4.1.0 |
+| Version | {{ZENUML_VERSION}} |
 | License | MIT (Copyright (c) 2022 Peng Xiao) |
 | GitHub repo | https://github.com/mermaid-js/zenuml-core |
 | UMD bundle | `./dist/zenuml.js` |
@@ -269,4 +269,4 @@ Q: Can I export ZenUML diagrams as PNG or SVG?
 A: Yes. The ZenUml instance provides getPng() and getSvg() methods that return data URLs. The package also ships a zenuml CLI binary that renders .zenuml files to SVG or PNG, supports stdin/stdout pipes, and offers --check syntax validation and --parse AST-as-JSON output.
 
 Q: Is @zenuml/core free to use?
-A: Yes. @zenuml/core is open source under the MIT license and free to install from npm. The current version is 4.1.0.
+A: Yes. @zenuml/core is open source under the MIT license and free to install from npm. The current version is {{ZENUML_VERSION}}.

@@ -1,6 +1,8 @@
 # Marketing site (website/) → https://core.zenuml.com
 # Deliberately separate from wrangler.toml (zenuml-web-renderer, dist/) so CI's
-# deploy-to-cloudflare job is untouched. Deploy: npx wrangler deploy --config wrangler.website.toml
+# deploy-to-cloudflare job is untouched. CI deploys it after each npm release
+# (deploy-website in cd.yml). By hand: bun run build:website, then
+# npx wrangler deploy --config wrangler.website.toml
 name = "zenuml-core-website"
 compatibility_date = "2026-07-02"
 
@@ -9,5 +11,5 @@ routes = [
 ]
 
 [assets]
-directory = "website"
+directory = "dist-website"
 not_found_handling = "404-page"

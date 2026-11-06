@@ -16,6 +16,7 @@
     "cli": "bun src/cli/zenuml.ts",
     "preview": "bun run --bun vite preview --port 14000 --host",
     "build:site": "bun run --bun vite build",
+    "build:website": "node scripts/build-website.mjs",
     "build:gh-pages": "bun run --bun vite build --mode gh-pages",
     "build:lib": "bun run --bun vite build -c vite.config.lib.ts",
     "build:cli": "bun run --bun vite build -c vite.config.cli.ts",

@@ -198,6 +198,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: bun install
       - name: Create Release PR or Publish to npm
+        id: changesets
         uses: changesets/action@v1
         with:
           version: bun run changeset:version
@@ -207,6 +208,79 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true" # publish with provenance via OIDC
+    outputs:
+      # "true" only on the run that published to npm (a version PR merge).
+      published: ${{ steps.changesets.outputs.published }}
+
+  # Deploy core.zenuml.com (website/, wrangler.website.toml) after each npm
+  # release, so the site shows and runs the version that was just published.
+  deploy-website:
+    runs-on: ubuntu-22.04
+    needs: [release]
+    if: needs.release.outputs.published == 'true'
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Bun
+        # wrangler-action installs wrangler with bun (see deploy-to-cloudflare).
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Read the released version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Build website
+        run: node scripts/build-website.mjs --version "${{ steps.version.outputs.version }}"
+      # The page loads the library and the parser from jsDelivr at this exact
+      # version. Ask npm first: a jsDelivr request for a version npm does not
+      # have yet can cache the 404.
+      - name: Wait for npm and jsDelivr
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          urls=(
+            "https://registry.npmjs.org/@zenuml%2fcore/$VERSION"
+            "https://cdn.jsdelivr.net/npm/@zenuml/core@$VERSION/dist/zenuml.js"
+            "https://cdn.jsdelivr.net/npm/@zenuml/core@$VERSION/dist/parser/index.mjs/+esm"
+          )
+          for url in "${urls[@]}"; do
+            for attempt in $(seq 1 40); do
+              if curl -fsS -o /dev/null "$url"; then
+                echo "Ready after $attempt attempt(s): $url"
+                continue 2
+              fi
+              sleep 15
+            done
+            echo "::error::Not available after 10 minutes: $url"
+            exit 1
+          done
+      # Until the secret is set, the job ends here without failing, so the
+      # release run stays green and check-surfaces.yml still runs and reports
+      # core.zenuml.com as behind.
+      - name: Check deploy token
+        id: token
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=core.zenuml.com not deployed::Secret CLOUDFLARE_API_TOKEN is not set."
+          fi
+      - name: Deploy core.zenuml.com
+        if: steps.token.outputs.present == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --config wrangler.website.toml
 
   # Build the site while test and e2e run, so deploy only has to upload it.
   # Before this job existed, deploy reinstalled and rebuilt after the gates

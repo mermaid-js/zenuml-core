@@ -2,7 +2,7 @@
 
 > A JavaScript sequence-diagram library that turns Markdown-inspired text definitions into interactive diagrams entirely in the browser — no server required. MIT-licensed, published on npm, and the engine behind ZenUML syntax support in the Mermaid ecosystem.
 
-ZenUML uses a code-like DSL — method calls (`A.method()`), nested blocks, return-value assignment, and if/else, loop, opt, par, critical, try/catch/finally and ref fragments — instead of an arrow-per-line syntax. One DSL feeds two renderers: an interactive React 19 HTML renderer and a headless native-SVG renderer (`renderToSvg()`). The package also ships a server-safe parser subpath (`@zenuml/core/parser`), a `zenuml` CLI for rendering `.zenuml` files to SVG/PNG, and a Langium-based language server. Current version: 4.1.0. Node.js >= 20 is required for the tooling.
+ZenUML uses a code-like DSL — method calls (`A.method()`), nested blocks, return-value assignment, and if/else, loop, opt, par, critical, try/catch/finally and ref fragments — instead of an arrow-per-line syntax. One DSL feeds two renderers: an interactive React 19 HTML renderer and a headless native-SVG renderer (`renderToSvg()`). The package also ships a server-safe parser subpath (`@zenuml/core/parser`), a `zenuml` CLI for rendering `.zenuml` files to SVG/PNG, and a Langium-based language server. Current version: {{ZENUML_VERSION}}. Node.js >= 20 is required for the tooling.
 
 ## Docs
 
