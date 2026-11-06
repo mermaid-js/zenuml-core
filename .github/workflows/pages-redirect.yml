@@ -1,0 +1,40 @@
+name: GitHub Pages redirect
+
+# mermaid-js.github.io/zenuml-core served a 4.0.0 demo that nothing updated
+# (last deployed 2025-08-02 from the `dragging` ref). It now only redirects to
+# core.zenuml.com, which cd.yml deploys after each release.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "pages-redirect/**"
+      - ".github/workflows/pages-redirect.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+      - name: Upload redirect page
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: pages-redirect
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

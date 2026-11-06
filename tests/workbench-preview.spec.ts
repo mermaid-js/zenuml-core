@@ -1,6 +1,17 @@
 import { expect, test } from "@playwright/test";
 import { stat } from "node:fs/promises";
 
+test("toolbar shows the build version and commit", async ({ page }) => {
+  await page.goto("/");
+  const label = page.locator("#build-label");
+  await expect(label).toBeVisible();
+  await expect(label).toHaveText(/^\d+\.\d+\.\d+(-[\w.]+)?( · [0-9a-f]{7,})?$/);
+  const hash = ((await label.textContent()) ?? "").split(" · ")[1];
+  if (hash) {
+    await expect(label).toHaveAttribute("href", `https://github.com/mermaid-js/zenuml-core/commit/${hash}`);
+  }
+});
+
 test("workbench keeps rendering and saved controls in the redesigned shell", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
@@ -18,6 +29,9 @@ test("workbench keeps rendering and saved controls in the redesigned shell", asy
   await page.getByRole("button", { name: "DOM", exact: true }).click();
   await expect(page.locator("pre.zenuml")).toContainText("Hello Bob!");
   await page.screenshot({ path: "test-results/workbench-desktop-dom.png" });
+  // The build label changes with every commit. Hidden, it keeps its space, so
+  // the rest of the toolbar is compared as it is. The reload below drops this.
+  await page.addStyleTag({ content: "#build-label { visibility: hidden; }" });
   await expect(page).toHaveScreenshot("workbench-desktop-dom.png", {
     animations: "disabled",
     mask: [page.locator("#svg-stats"), page.locator(".CodeMirror-cursor")],
