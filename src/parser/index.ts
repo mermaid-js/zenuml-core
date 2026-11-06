@@ -18,6 +18,7 @@ import "./Messages/MessageContext";
 import "./From";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
+import { recoverAtEof } from "./recoverAtEof";
 import { pruneDanglingStatements } from "./pruneDanglingStatements";
 import {
   BlockOwnershipErrorStrategy,
@@ -166,7 +167,9 @@ function parseSkippingStrayTokens(tokens: Ctx) {
   ];
   for (let pass = 1; ; pass++) {
     tokens.seek(0);
-    const parser: Ctx = keepBlocksWithOwners(new sequenceParser(tokens));
+    const parser: Ctx = recoverAtEof(
+      keepBlocksWithOwners(new sequenceParser(tokens)),
+    );
     const listener = new StrayTokenListener();
     parser.removeErrorListeners();
     parser.addErrorListener(listener);
@@ -210,7 +213,12 @@ function rootContext(code: string) {
 
   // Two-stage parsing: invalid input falls through from SLL to the full LL parse
   // below, which does the error recovery and error reporting.
-  const sllTree = parseWithSll(createSilentTokens(code));
+  // A document that needs a repair is incomplete, even when its tokens parse.
+  const silentTokens = createSilentTokens(code);
+  const sllTree =
+    repairIncompleteCalls(silentTokens).length === 0
+      ? parseWithSll(silentTokens)
+      : null;
   if (sllTree) {
     rootContextCache.set(code, sllTree);
     if (rootContextCache.size > ROOT_CONTEXT_CACHE_MAX) {

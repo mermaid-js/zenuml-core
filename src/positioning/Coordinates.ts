@@ -8,6 +8,7 @@ import {
 import { TextType } from "./Coordinate";
 import type { WidthFunc } from "./Coordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
+import { MISSING_CONSTRUCTOR } from "@/parser/Owner";
 import {
   participantDisplayName,
   participantHasIcon,
@@ -112,6 +113,9 @@ export class Coordinates {
     for (const message of ownableMessages) {
       // The message array is shared (cached per parse tree), so derive the
       // effective source locally instead of mutating the message.
+      // No target (a self-call with no owner, a call on an empty name, a `new`
+      // with no type) means no participant to look up and no gap to widen.
+      if (!message.to || message.to === MISSING_CONSTRUCTOR) continue;
       const from = message.from || _STARTER_;
       const indexFrom = this.participantIndexByName.get(from) ?? -1;
       const indexTo = this.participantIndexByName.get(message.to) ?? -1;

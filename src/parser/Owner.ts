@@ -17,6 +17,9 @@ import {
 import type { AugmentedContext } from "./AntlrTypes";
 import { hoistNamelessCreations, isNamelessCreation } from "./NamelessCreation";
 
+// Owner of a `new` with no type yet. It names no participant.
+export const MISSING_CONSTRUCTOR = "Missing Constructor";
+
 /** Any context that carries `To()` once this file has run. */
 interface HasTo extends AugmentedContext {
   To(): string | undefined;
@@ -45,7 +48,7 @@ augment<CreationContextAugmented>(CreationContext, {
   },
   Owner() {
     if (!this.Constructor()) {
-      return "Missing Constructor";
+      return MISSING_CONSTRUCTOR;
     }
     const assignee = this.Assignee();
     const type = this.Constructor();
