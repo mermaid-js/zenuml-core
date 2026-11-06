@@ -175,6 +175,58 @@ describe("a chain that ends in a trailing dot (#671)", () => {
   });
 });
 
+describe("a trailing dot before a line that starts a new statement (#671)", () => {
+  it.each([
+    [
+      "A.a()\nB.\nA.c()\nA.d()",
+      [
+        ["A", "a()"],
+        ["B", ""],
+        ["A", "c()"],
+        ["A", "d()"],
+      ],
+    ],
+    [
+      "A.a()\nB.b(x).\nA.c()\nA.d()",
+      [
+        ["A", "a()"],
+        ["B", "b(x)"],
+        ["A", "c()"],
+        ["A", "d()"],
+      ],
+    ],
+    [
+      "B.\nc.d()",
+      [
+        ["B", ""],
+        ["c", "d()"],
+      ],
+    ],
+    [
+      "B.b(x).\nA.c()",
+      [
+        ["B", "b(x)"],
+        ["A", "c()"],
+      ],
+    ],
+  ])("%j", (code, expected) => {
+    expect(statements(code)).toEqual(expected);
+  });
+
+  it("keeps a fragment on the next line", () => {
+    const stats = RootContext("B.\nif(x) {\n  A.c()\n}").block().stat();
+    expect(stats).toHaveLength(2);
+  });
+
+  it("reports the dot", () => {
+    const result = parse("B.\nA.c()");
+    expect(result.pass).toBe(false);
+    expect(result.errorDetails).toEqual([
+      { line: 1, column: 1, msg: "extraneous '.' at the end of this line" },
+    ]);
+  });
+});
+
 describe("valid multi-line DSL is unchanged (#671)", () => {
   it.each([
     // Multi-line argument lists.
@@ -191,11 +243,12 @@ describe("valid multi-line DSL is unchanged (#671)", () => {
     ["A.b().\nc()", [["A", "b().c()"]]],
     ["B.b(x).\nc()", [["B", "b(x).c()"]]],
     ["A.\nb()", [["A", "b()"]]],
-    // The same shape as `B.\nA.c()` in the issue, which stays one message: the
-    // newline is the only thing that could tell them apart.
-    ["B.\nc.d()", [["B", "c.d()"]]],
-    ["B.\nA.c()", [["B", "A.c()"]]],
-    ["B.b(x).\nA.c()", [["B", "b(x).A.c()"]]],
+    // A name alone on the next line, or a dot on the same line, stays a chain.
+    // (`B.` + `name.` on the next line is a new statement: see the describe above.)
+    ["B.\nc()", [["B", "c()"]]],
+    ["B.c.d()", [["B", "c.d()"]]],
+    ["B.b(x).c.d()", [["B", "b(x).c.d()"]]],
+    ["A.b(x.\ny.z)", [["A", "b(x.y.z)"]]],
     // A message that ends in a dot without a chain.
     ["B.", [["B", ""]]],
     [

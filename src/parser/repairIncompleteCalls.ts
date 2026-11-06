@@ -34,12 +34,19 @@ export interface RepairError {
  * | `A.b(x,` + `y`       | `A.b(x,y)`              |
  * | `A.b().` + `if(x) {` | `A.b()` + `if(x) {`     |
  *
- * A valid document is out of reach: every `(` in it has its `)`, and a chain's
- * `.` is always followed by a signature. Line breaks therefore only ever decide
- * among parses of a broken document.
+ * Every `(` in a valid document has its `)`, and a chain's `.` is always followed
+ * by a signature, so apart from the case below line breaks only decide among
+ * parses of a broken document.
  *
- * `B.` + `A.c()` is not repaired. It is the valid chain `B.A.c()`, the same shape
- * as `B.` + `c.d()`.
+ * A valid document is not out of reach in one case. `B.` + `c.d()` is the valid
+ * chain `B.c.d()` to the grammar, and so is `B.b(x).` + `c.d()`. When the first
+ * line ends in that `.` and the next begins `name.`, the line break wins: the
+ * first line is a message of its own and the next line starts a statement.
+ *
+ * | Source                | Tokens the parser sees   |
+ * | ----------------------|--------------------------|
+ * | `B.` + `A.c()`        | `B.;` + `A.c()`          |
+ * | `B.b(x).` + `A.c()`   | `B.b(x)` + `A.c()`       |
  *
  * @returns one error per repair, because the source is still incomplete.
  */
@@ -52,6 +59,7 @@ export function repairIncompleteCalls(stream: Token): RepairError[] {
   const errors: RepairError[] = [];
   const toRemove = new Set<Token>();
   const toCloseAfter: Token[] = [];
+  const toTerminateAfter: Token[] = [];
 
   for (const index of unclosedCallParens(visible)) {
     const open = visible[index];
@@ -78,9 +86,23 @@ export function repairIncompleteCalls(stream: Token): RepairError[] {
     }
   });
 
+  let depth = 0;
+  visible.forEach((token, index) => {
+    if (token.type === P.OPAR) depth++;
+    else if (token.type === P.CPAR) depth = Math.max(0, depth - 1);
+    if (depth === 0 && isDanglingTargetDot(visible, index)) {
+      toTerminateAfter.push(token);
+      errors.push({
+        line: token.line,
+        column: token.column,
+        msg: "extraneous '.' at the end of this line",
+      });
+    }
+  });
+
   if (errors.length === 0) return errors;
 
-  stream.tokens = rebuild(stream.tokens, toCloseAfter, toRemove);
+  stream.tokens = rebuild(stream.tokens, toCloseAfter, toRemove, toTerminateAfter);
   stream.tokens.forEach((t: Token, i: number) => {
     t.tokenIndex = i;
   });
@@ -143,19 +165,63 @@ function isDanglingChainDot(visible: Token[], index: number): boolean {
   const next = visible[index + 1];
   if (!SIGNATURE_STARTS.has(next.type)) return true;
   return (
-    NAMES.has(next.type) && NEW_STATEMENT_AFTER_NAME.has(visible[index + 2]?.type)
+    NAMES.has(next.type) &&
+    (NEW_STATEMENT_AFTER_NAME.has(visible[index + 2]?.type) ||
+      startsNextLineWithDot(visible, index))
   );
 }
 
-function rebuild(tokens: Token[], closeAfter: Token[], remove: Set<Token>) {
+/**
+ * The `.` in `B.`, when it ends its line and the next line begins `name.`. The
+ * dot cannot be told from a chain by the grammar (`B.` + `c.d()` is the chain
+ * `B.c.d()`), so the line break decides: the dot ends the message, and `name.`
+ * starts another.
+ */
+function isDanglingTargetDot(visible: Token[], index: number): boolean {
+  const token = visible[index];
+  return (
+    token.type === P.DOT &&
+    NAMES.has(visible[index - 1]?.type) &&
+    startsNextLineWithDot(visible, index)
+  );
+}
+
+/** The tokens after `visible[index]` are `name .` on a later line. */
+function startsNextLineWithDot(visible: Token[], index: number): boolean {
+  const [next, after] = [visible[index + 1], visible[index + 2]];
+  return (
+    next !== undefined &&
+    next.line > visible[index].line &&
+    NAMES.has(next.type) &&
+    after?.type === P.DOT
+  );
+}
+
+function rebuild(
+  tokens: Token[],
+  closeAfter: Token[],
+  remove: Set<Token>,
+  terminateAfter: Token[],
+) {
   const result: Token[] = [];
   for (const token of tokens) {
     if (!remove.has(token)) result.push(token);
     for (const anchor of closeAfter) {
       if (anchor === token) result.push(closingParen(token));
     }
+    for (const anchor of terminateAfter) {
+      if (anchor === token) result.push(statementEnd(token));
+    }
   }
   return result;
+}
+
+/** A `;` with an empty range after `previous`, so the message ends there. */
+function statementEnd(previous: Token): Token {
+  const token = closingParen(previous);
+  token.type = P.SCOL;
+  token.text = ";";
+  return token;
 }
 
 /** An empty range at the end of `previous`, so source offsets stay real. */
