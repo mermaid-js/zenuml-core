@@ -72,7 +72,9 @@ describe("neighbouring valid and already tolerated input is unchanged", () => {
 // `B->` (#672): the source participant stays and no message is drawn.
 // Message numbers are SVG text nodes that hold only digits.
 const numbers = (code: string) =>
-  [...renderToSvg(code).svg.matchAll(/<text[^>]*>(\d+(?:\.\d+)*)</g)].map((m) => m[1]);
+  [...renderToSvg(code).svg.matchAll(/<text[^>]*>(\d+(?:\.\d+)*)</g)].map(
+    (m) => m[1],
+  );
 const messageCount = (code: string) => AllMessages(RootContext(code)).length;
 
 describe("an arrow to an empty name without a label draws no message", () => {
