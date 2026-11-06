@@ -208,7 +208,12 @@ function rootContext(code: string) {
 
   // Two-stage parsing: invalid input falls through from SLL to the full LL parse
   // below, which does the error recovery and error reporting.
-  const sllTree = parseWithSll(createSilentTokens(code));
+  // A document that needs a repair is incomplete, even when its tokens parse.
+  const silentTokens = createSilentTokens(code);
+  const sllTree =
+    repairIncompleteCalls(silentTokens).length === 0
+      ? parseWithSll(silentTokens)
+      : null;
   if (sllTree) {
     rootContextCache.set(code, sllTree);
     if (rootContextCache.size > ROOT_CONTEXT_CACHE_MAX) {
