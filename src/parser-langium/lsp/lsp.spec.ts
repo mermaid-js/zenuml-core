@@ -71,6 +71,27 @@ describe("ZenUML LSP", () => {
       });
     });
 
+    test("offers participants declared before and after a stray token (#667)", async () => {
+      const expected = ["P", "Q", "R"];
+      for (const text of [
+        "Q.x()\nP.a()\n<|>\n/\nP.c()\nR.d()",
+        "Q.x()\nP.a()\n/\nP.c()\nR.d()\n<|>",
+        "Q.x()\nP.a()\nelse\nP.c()\nR.d()\n<|>",
+        "Q.x()\nP.a()\n}\nP.c()\nR.d()\n<|>",
+      ]) {
+        await completion({
+          text,
+          index: 0,
+          assert: (completions) => {
+            const participants = completions.items
+              .filter((i) => i.detail === "participant")
+              .map((i) => i.label);
+            expect(participants).toEqual(expected);
+          },
+        });
+      }
+    });
+
     test("empty document offers no participant suggestions", async () => {
       await completion({
         text: "<|>",

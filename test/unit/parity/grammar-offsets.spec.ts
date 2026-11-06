@@ -46,6 +46,14 @@ const EXCLUSIONS = new Map<string, string>([
     "malformed-lone-brace",
     "G7 recovery shape: ANTLR drops an unclosed ownerless `{`; Chevrotain inserts CBRACE and keeps an anonymous section",
   ],
+  [
+    "compare-emoji-colon-override",
+    "Stray-token recovery (#667): the golden is plain prog(), which stops at the stray token; Langium now keeps the statements after it, as the recovering ANTLR parse does",
+  ],
+  [
+    "compare-emoji-in-conditions",
+    "Stray-token recovery (#667): the golden is plain prog(), which stops at the stray token; Langium now keeps the statements after it, as the recovering ANTLR parse does",
+  ],
 ]);
 
 interface GoldenNode {
