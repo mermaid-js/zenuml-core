@@ -7,9 +7,8 @@ preload = ["./test-setup.ts"]
 # Project root directory
 root = "./"
 
-# Note: To exclude /tests folder (Playwright tests), use the npm script:
-# bun run test:bun
-# Or run directly: bun test 'src/**/*.{spec,test}.{ts,tsx}' 'test/**/*.{spec,test}.{ts,tsx}'
+# Note: bare `bun test` also picks up the /tests folder (Playwright E2E).
+# Use `bun run test` (= `bun test src test/unit`) to run only the unit tests.
 
 # Coverage configuration
 # Disabled by default due to resource issues with large asset files
@@ -30,8 +29,12 @@ peer = true
 dev = true
 optional = true
 
-# Auto install dependencies
-auto = "auto"
+# Never fetch a package that is not in package.json. With bun's default
+# ("auto") a directory without node_modules — a fresh clone before `bun
+# install`, or a script run outside the installed tree — resolves an unknown
+# import by downloading that name from npm and executing it, with no prompt and
+# no lockfile entry. A typo then runs whatever is published under the typo.
+auto = "disable"
 
 # Disable cache if needed
 # disable = false
@@ -47,6 +50,3 @@ print = "bun"
 # Bun runtime settings for scripts
 # Silent mode for cleaner output
 # silent = false
-
-# Automatically install missing packages when running scripts
-autoInstall = true

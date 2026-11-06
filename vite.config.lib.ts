@@ -5,20 +5,10 @@ import react from "@vitejs/plugin-react";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 import svgr from "vite-plugin-svgr";
 import { visualizer } from "rollup-plugin-visualizer";
-import { execSync } from "child_process";
-import { readFileSync } from "fs";
-
-// Read version from package.json
-const packageJson = JSON.parse(
-  readFileSync(resolve(__dirname, "package.json"), "utf-8"),
-);
-
-const gitHash = process.env.DOCKER
-  ? ""
-  : execSync("git rev-parse --short HEAD").toString().trim();
-const gitBranch = process.env.DOCKER
-  ? ""
-  : execSync("git branch --show-current").toString().trim();
+import { mkdirSync, writeFileSync } from "fs";
+import type { Plugin } from "vite";
+import { packageFontFiles } from "./src/svg/fonts/packageFontFiles";
+import { alias, versionDefines } from "./vite.shared";
 
 const isReleaseBuild = process.env.RELEASE === "1";
 const shouldAnalyzeBundle = process.env.ANALYZE === "1";
@@ -37,9 +27,31 @@ function manualChunks(id: string) {
   }
 }
 
+// Ship the font files as package assets (`@zenuml/core/fonts/*`) so consumers
+// whose Content-Security-Policy refuses data: fonts can serve them from their
+// own origin. Written straight to dist/fonts/: the build has two outputs (esm,
+// umd), and the files are the same for both.
+function packageFonts(): Plugin {
+  return {
+    name: "zenuml-package-fonts",
+    apply: "build",
+    closeBundle() {
+      const dir = resolve(__dirname, "dist/fonts");
+      mkdirSync(dir, { recursive: true });
+      for (const { fileName, source } of packageFontFiles()) {
+        writeFileSync(resolve(dir, fileName), source);
+      }
+    },
+  };
+}
+
 export default defineConfig({
   build: {
     target: "esnext",
+    // Don't rake the demo site's public/ (fonts, vendor/, demo html, CNAME) into
+    // the published package — matches cli/parser/lsp configs. build:site uses
+    // vite.config.ts, which is unaffected and still ships public assets.
+    copyPublicDir: false,
     // https://vitejs.dev/guide/build.html#library-mode
     lib: {
       entry: resolve(__dirname, "src/core.tsx"),
@@ -64,15 +76,12 @@ export default defineConfig({
       ],
     },
   },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-    },
-  },
+  resolve: { alias },
   plugins: [
     svgr(),
     react(),
     cssInjectedByJsPlugin(),
+    packageFonts(),
     ...(shouldAnalyzeBundle
       ? [
           visualizer({
@@ -86,8 +95,6 @@ export default defineConfig({
   ],
   define: {
     "process.env.NODE_ENV": '"production"',
-    "process.env.VITE_VERSION": JSON.stringify(packageJson.version),
-    "import.meta.env.VITE_APP_GIT_HASH": JSON.stringify(gitHash),
-    "import.meta.env.VITE_APP_GIT_BRANCH": JSON.stringify(gitBranch),
+    ...versionDefines(),
   },
 });

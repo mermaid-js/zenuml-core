@@ -1,6 +1,6 @@
 {
   "name": "@zenuml/core",
-  "version": "4.1.0",
+  "version": "4.13.0",
   "private": false,
   "license": "MIT",
   "repository": {
@@ -8,7 +8,8 @@
   },
   "files": [
     "dist/",
-    "types/"
+    "types/",
+    "!dist/**/*.map"
   ],
   "scripts": {
     "dev": "vite dev --port 14000 --host 0.0.0.0",
@@ -30,21 +31,21 @@
     "changeset:version": "changeset version",
     "release": "bun run build:release && changeset publish",
     "test": "bun test src test/unit",
+    "typecheck": "tsc -b",
+    "check:surfaces": "node scripts/check-surfaces.mjs",
+    "check:tokens": "node scripts/check-zu-tokens.mjs",
+    "check:bundle": "node scripts/check-bundle-budget.mjs",
+    "audit:contrast": "node --no-warnings scripts/audit-theme-contrast.mjs",
+    "theme:derive-dark": "node scripts/theme-contrast/derive-dark.mjs && node scripts/theme-contrast/apply-derived.mjs",
     "parity:dualrun": "bun scripts/parity/dualrun-diff.mjs",
     "pw": "playwright test --reporter=list",
     "pw:ci": "playwright test",
-    "measure:layout": "COLLECT_LAYOUT_METRICS=1 playwright test tests/layout-metrics.spec.ts --reporter=line --project=chromium",
-    "snapshots:dual": "node scripts/snapshot-dual.js",
     "pw:update": "playwright test --update-snapshots --reporter=list",
     "pw:update-ci": "playwright test --update-snapshots --reporter=github",
     "pw:ui": "playwright test --ui",
     "pw:smoke": "playwright test smoke",
     "analyze:compare-case": "node scripts/analyze-compare-case.mjs",
     "pw:install": "playwright install-deps && playwright install chromium",
-    "antlr:setup": "python3 -m pip install antlr4-tools",
-    "antlr:generate": "pwd && cd ./src/g4-units/hello-world && antlr4 Hello.g4",
-    "antlr:javac": "pwd && cd ./src/g4-units/hello-world && CLASSPATH=\"../../../antlr/antlr-4.11.1-complete.jar:$CLASSPATH\" javac *.java",
-    "antlr:grun": "pwd && cd ./src/g4-units/hello-world && grun Hello r -tokens",
     "antlr": "bun run antlr:lexer && bun run antlr:parser",
     "antlr:clear": "rm -rf src/generated-parser/*",
     "langium:generate": "langium generate",
@@ -52,11 +53,6 @@
     "antlr:parser": "java -Duser.dir=$(pwd)/src/g4 -cp $(pwd)/antlr/antlr-4.11.1-complete.jar org.antlr.v4.Tool -o ./src/generated-parser -Dlanguage=JavaScript sequenceParser.g4",
     "eslint": "eslint --fix --ext .js,.ts,.tsx,.jsx src",
     "prettier": "bun run --bun prettier --write --ignore-unknown \"src/**/*.{js,ts,json,htm,html}\"",
-    "git:branch:clean:gone": "git fetch -p && git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -d",
-    "git:branch:clean:merged": "git branch --merged|egrep -v \"(\\*|master|main|dev|skip_branch_name)\" | xargs git branch -d",
-    "git:branch:safe-delete": "echo '> git log --graph --left-right --cherry --oneline another-branch...main'",
-    "git:forget": "git rm -r --cached . && git add . && git commit -m \"Forget all ignored files\"",
-    "test:specs": "echo \"Error: test:specs is not supported\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "bun run --bun storybook build",
     "worker:dev": "bun run build:site && bun run --bun wrangler dev",
@@ -91,10 +87,11 @@
         "types": "./types/parser/index.d.ts",
         "default": "./dist/parser/index.cjs"
       }
-    }
+    },
+    "./fonts/*": "./dist/fonts/*"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12.0"
   },
   "postcss": {
     "plugins": {
@@ -104,13 +101,9 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.16",
-    "@headlessui/react": "^2.2.9",
-    "@headlessui/tailwindcss": "^0.2.2",
     "antlr4": "~4.11.0",
-    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "color-string": "^2.1.4",
-    "dompurify": "^3.3.1",
     "highlight.js": "^11.10.0",
     "html-to-image": "^1.11.13",
     "jotai": "^2.16.1",
@@ -131,10 +124,12 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@types/antlr4": "~4.11.6",
+    "@types/bun": "^1.3.14",
     "@types/color-string": "^1.5.5",
     "@types/jsdom": "^21.1.7",
     "@types/marked": "^4.3.2",
     "@types/node": "^22.19.3",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.7.0",
@@ -159,6 +154,7 @@
     "prettier": "3.5.3",
     "rollup-plugin-visualizer": "^6.0.5",
     "sass": "^1.97.2",
+    "sharp": "^0.35.5",
     "storybook": "^9.1.17",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.7.3",

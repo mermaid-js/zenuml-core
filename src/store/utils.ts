@@ -1,24 +1,52 @@
-import { SetStateAction, useSetAtom } from "jotai";
-import { Setter } from "jotai";
-import { atom, Getter } from "jotai";
-import { useEffect } from "react";
+import { atom } from "jotai";
 
-export const atomWithLocalStorage = <T>(key: string, initialValue: T) => {
-  const getInitialValue = (): T => {
-    const item = localStorage.getItem(key);
-    if (item !== null) {
-      return JSON.parse(item);
+/** Not yet read from storage — distinct from a stored `undefined`. */
+const UNREAD = Symbol("unread");
+
+/**
+ * An atom backed by localStorage.
+ *
+ * The key is a function and storage is read on first use, not at module load.
+ * Reading eagerly made importing this module — and therefore the package entry
+ * and its `renderToSvg` export — throw `ReferenceError: location is not
+ * defined` in Node, and throw in a browser configured to block site data.
+ *
+ * The first read is memoized per atom, matching the previous behaviour where
+ * the initial value was computed once and shared by every store.
+ */
+export const atomWithLocalStorage = <T>(key: () => string, initialValue: T) => {
+  let cached: { value: T } | undefined;
+
+  const readInitialValue = (): T => {
+    if (cached) return cached.value;
+    let value = initialValue;
+    try {
+      const item = localStorage.getItem(key());
+      if (item !== null) value = JSON.parse(item);
+    } catch {
+      // No storage available (Node, private browsing, blocked site data) or
+      // an unparsable entry: fall back to the supplied default.
     }
-    return initialValue;
+    cached = { value };
+    return value;
   };
-  const baseAtom = atom(getInitialValue());
+
+  const baseAtom = atom<T | typeof UNREAD>(UNREAD);
+  const resolve = (stored: T | typeof UNREAD): T =>
+    stored === UNREAD ? readInitialValue() : stored;
+
   const derivedAtom = atom(
-    (get) => get(baseAtom),
+    (get) => resolve(get(baseAtom)),
     (get, set, update: T) => {
       const nextValue =
-        typeof update === "function" ? update(get(baseAtom)) : update;
+        typeof update === "function" ? update(resolve(get(baseAtom))) : update;
       set(baseAtom, nextValue);
-      localStorage.setItem(key, JSON.stringify(nextValue));
+      try {
+        localStorage.setItem(key(), JSON.stringify(nextValue));
+      } catch {
+        // Storage unavailable — keep the in-memory value.
+      }
+      cached = { value: nextValue };
     },
   );
   return derivedAtom;
@@ -34,53 +62,3 @@ export const atomWithFunctionValue = <T extends Function>(value: T) => {
   );
   return derivedAtom;
 };
-
-export const atomWithCallback = <T>(
-  value: T,
-  listener: (get: Getter, value: T) => void,
-) => {
-  const baseAtom = atom(value);
-  const derivedAtom = atom(
-    (get) => get(baseAtom),
-    (get, set, update: T) => {
-      set(baseAtom, update);
-      listener(get, update);
-    },
-  );
-  return derivedAtom;
-};
-
-type Listener<Value> = (
-  get: Getter,
-  set: Setter,
-  newVal: Value,
-  prevVal: Value,
-) => void;
-
-export function atomWithListeners<Value>(initialValue: Value) {
-  const baseAtom = atom(initialValue);
-  const listenersAtom = atom<Listener<Value>[]>([]);
-  const anAtom = atom(
-    (get) => get(baseAtom),
-    (get, set, arg: SetStateAction<Value>) => {
-      const prevVal = get(baseAtom);
-      set(baseAtom, arg);
-      const newVal = get(baseAtom);
-      get(listenersAtom).forEach((callback) => {
-        callback(get, set, newVal, prevVal);
-      });
-    },
-  );
-  const useListener = (callback: Listener<Value>) => {
-    const setListeners = useSetAtom(listenersAtom);
-    useEffect(() => {
-      setListeners((prev) => [...prev, callback]);
-      return () =>
-        setListeners((prev) => {
-          const index = prev.indexOf(callback);
-          return [...prev.slice(0, index), ...prev.slice(index + 1)];
-        });
-    }, [setListeners, callback]);
-  };
-  return [anAtom, listenersAtom, useListener] as const;
-}

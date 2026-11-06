@@ -12,8 +12,8 @@ Converts ZenUML DSL text into a structured parse tree and semantic data model us
 DSL text
   │
   ▼
-RootContext(code)          ← src/parser/index.js
-  │  ├─ sequenceLexer      ← src/generated-parser/sequenceLexer.js
+RootContext(code)          ← src/parser/index.ts
+  │  ├─ HeaderRecoveringLexer ← src/parser/HeaderRecoveringLexer.ts (extends sequenceLexer)
   │  └─ sequenceParser     ← src/generated-parser/sequenceParser.js
   │
   ▼
@@ -32,15 +32,15 @@ ProgContext (ANTLR parse tree)
 | `src/g4/sequenceLexer.g4` | ANTLR lexer grammar. Channels: `HIDDEN` (whitespace), `COMMENT_CHANNEL`, `MODIFIER_CHANNEL`. |
 | `src/g4/sequenceParser.g4` | ANTLR parser grammar. Top rule: `prog → title? head? block`. |
 | `src/generated-parser/` | ANTLR output — do not edit by hand. Regenerate with `bun antlr`. |
-| `src/parser/index.js` | Entry point. `RootContext(code)` → `ProgContext`. Adds prototype methods: `getFormattedText()`, `getComment()`. Collects errors via `SeqErrorListener`. |
+| `src/parser/HeaderRecoveringLexer.ts` | Ends an unclosed fragment header at the end of its line, so the next line stays a statement. Never rewrites complete DSL. The plan is in `headerRecovery.ts`, shared with Langium. |
+| `src/parser/index.ts` | Entry point. `RootContext(code)` → `ProgContext`. Adds prototype methods: `getFormattedText()`, `getComment()`. Collects errors via `SeqErrorListener`. |
 | `src/parser/Participants.ts` | `Participant` model + `Participants` collection (Map). Tracks name, type, stereotype, label, color, emoji, width, groupId, positions. |
 | `src/parser/ToCollector.js` | ANTLR listener. Walks parse tree → populates `Participants` from declarations, from/to mentions, `new` constructors, `ref` targets. |
 | `src/parser/MessageCollector.ts` | ANTLR listener → `OwnableMessage[]` (from, to, signature, type enum). Used by horizontal coordinate solver. |
 | `src/parser/FrameBuilder.ts` | ANTLR listener → nested `Frame` tree for fragments. Each frame: `{ type, left, right, children }`. Used to draw fragment borders. |
 | `src/parser/OrderedParticipants.ts` | `OrderedParticipants(rootContext)` → `IParticipantModel[]` in insertion order. Injects `_STARTER_` when needed. |
 | `src/parser/Messages/MessageContext.ts` | Extends ANTLR `MessageContext` with `Statements()` helper for nested statement access. |
-| `src/parser/AntlrTypes.ts` | TypeScript types wrapping ANTLR context nodes. |
-| `src/parser/Parser.types.ts` | Domain types: `Parameter`, `NamedParameter`, `Declaration`, `Signature`, `MessageContext`, `AsyncMessageContext`, `CreationContext`. |
+| `src/parser/AntlrTypes.ts` | TypeScript types wrapping ANTLR context nodes. Two projections in one file: the all-optional `*Node` shapes the tree walkers probe, and the required-member `BaseContext` / `Parameter` / `MessageContext` / `AsyncMessageContext` / `CreationContext` / `RetContext` shapes `SignatureText.ts` patches prototypes against (merged in from the former `Parser.types.ts`). |
 
 ## Public API
 
@@ -65,18 +65,11 @@ const frame = new FrameBuilder(participantNames).getFrame(context)
 ## Key Types
 
 ```typescript
-interface IParticipantModel {
-  name: string
-  left: number          // x position from coordinates
-  label?: string        // display label
-  type?: string         // @Actor, @Database, etc.
-  stereotype?: string   // <<ServiceName>>
-  color?: string        // #RRGGBB
-  emoji?: string
-  groupId?: string
-  getDisplayName(): string
-  hasIcon(): boolean
-}
+// Plain readonly data: Participant.ToValue() fields plus `left`. Fields are declared once, in Participants.ts.
+type IParticipantModel = Readonly<ReturnType<Participant['ToValue']> & { left: string }>
+// name, label, type, stereotype, color, emoji, groupId, isStarter, ... + left (previous participant's name)
+participantDisplayName(p)  // label || name
+participantHasIcon(p)      // the type has an icon (hasIconFor), see #661
 
 interface OwnableMessage {
   from: string

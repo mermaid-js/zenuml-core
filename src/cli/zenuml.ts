@@ -12,18 +12,28 @@
  *   zenuml --check -i diagram.zenuml      # validate syntax (exit 0 = valid)
  *   zenuml --parse -i diagram.zenuml      # output AST as JSON
  */
-import { renderToSvg } from "@/svg/renderToSvg";
-import type { RenderOptions } from "@/svg/renderToSvg";
 import { setCanvasContext } from "@/positioning/WidthProviderFunc";
-import Parser from "@/parser/index.js";
 import {
-  readFileSync,
-  writeFileSync,
-  mkdirSync,
-  statSync,
-  watch as fsWatch,
-} from "node:fs";
-import { resolve, basename, extname, dirname, join } from "node:path";
+  IBM_PLEX_SANS_400_WOFF2_BASE64,
+  IBM_PLEX_SANS_FAMILY,
+} from "@/svg/fonts/ibmPlexSans";
+import Parser from "@/parser/index";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { parseArgs, loadConfigFile } from "./args";
+import { serializeParseTree } from "./astSerializer";
+import { checkOne } from "./check";
+import type { FileCheckResult } from "./check";
+import { expandInputs, isDirectory, readCode } from "./inputs";
+import { extractZenumlBlocks } from "./markdown";
+import { closeBrowser } from "./png";
+import { renderMarkdownFile, renderOneFile } from "./render";
+import type { RenderConfig } from "./render";
+import { startWatchMode } from "./watch";
+
+export { extractZenumlBlocks, startWatchMode };
+export type { ZenumlBlock } from "./markdown";
+export type { WatchHandle } from "./watch";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -53,7 +63,9 @@ Rendering:
   -o, --output <file>          Output file (use "-" for stdout; default: <input>.svg)
   -e, --outputFormat <format>  Output format: "svg" (default) or "png"
   -s, --scale <factor>         Pixel scale factor for PNG (default: 2; ignored for SVG)
-  -t, --theme <name>           Theme name passed to renderer (e.g. "theme-default")
+  -t, --theme <name>           Theme: default, mermaid, clean-light, dark, neon
+                               (clean-dark and darcula are aliases of dark;
+                               prefix "theme-"; unknown names use default)
   -c, --configFile <file>      JSON config file with { theme, scale, outputFormat }
   --md                         Markdown mode: render zenuml code blocks and produce output Markdown
 
@@ -97,494 +109,6 @@ To use an existing Chrome/Chromium binary:
 }
 
 // ---------------------------------------------------------------------------
-// Markdown block extractor
-// ---------------------------------------------------------------------------
-
-export interface ZenumlBlock {
-  /** Zero-based index of this block among all zenuml blocks in the document */
-  index: number;
-  /** The ZenUML DSL code inside the fence (may be empty string for empty blocks) */
-  code: string;
-  /** Title extracted from the info string after "zenuml" (trimmed), or empty string */
-  title: string;
-  /** The full raw fence text including the opening and closing ``` lines */
-  raw: string;
-  /** True if the code (trimmed) is empty — these blocks should be excluded from rendering */
-  empty: boolean;
-}
-
-/**
- * Extract all ```zenuml ... ``` fenced code blocks from Markdown text.
- * Returns one ZenumlBlock per block, in document order.
- */
-export function extractZenumlBlocks(md: string): ZenumlBlock[] {
-  const results: ZenumlBlock[] = [];
-  // Match fenced code blocks that start with ```zenuml (with optional title after)
-  // Handles both ``` and ~~~ fences but we only care about backtick fences for ZenUML
-  const fencePattern = /^(`{3,})zenuml([^\n]*)\n([\s\S]*?)\n?\1\s*$/gm;
-  let match: RegExpExecArray | null;
-  let blockIndex = 0;
-  while ((match = fencePattern.exec(md)) !== null) {
-    const raw = match[0];
-    const infoExtra = match[2]; // everything after "zenuml" on the opening line
-    const code = match[3]; // content between fences
-    const title = infoExtra.trim();
-    const empty = code.trim().length === 0;
-    results.push({ index: blockIndex++, code, title, raw, empty });
-  }
-  return results;
-}
-
-// ---------------------------------------------------------------------------
-// Glob expansion
-// ---------------------------------------------------------------------------
-
-/** Check if a string contains glob metacharacters. */
-function isGlobPattern(s: string): boolean {
-  return /[*?[]/.test(s);
-}
-
-/** Expand inputs: literal paths pass through; glob patterns are expanded.
- *  Returns the expanded list. Throws if a glob pattern matches zero files. */
-function expandInputs(inputs: string[]): string[] {
-  const result: string[] = [];
-  for (const input of inputs) {
-    if (input === "-" || !isGlobPattern(input)) {
-      result.push(input);
-      continue;
-    }
-    // Glob expansion
-    const glob = new Bun.Glob(input);
-    const matches: string[] = [];
-    for (const match of glob.scanSync({
-      cwd: process.cwd(),
-      onlyFiles: true,
-    })) {
-      matches.push(match);
-    }
-    if (matches.length === 0) {
-      throw new Error(`Glob pattern "${input}" matched no files`);
-    }
-    // Sort for deterministic order
-    matches.sort();
-    result.push(...matches);
-  }
-  return result;
-}
-
-/** Check if a path is an existing directory. */
-function isDirectory(p: string): boolean {
-  try {
-    return statSync(p).isDirectory();
-  } catch {
-    return false;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Argument parsing
-// ---------------------------------------------------------------------------
-
-interface CliArgs {
-  inputs: string[];
-  output?: string;
-  outputFormat?: string;
-  scale?: number;
-  theme?: string;
-  configFile?: string;
-  check: boolean;
-  parse: boolean;
-  json: boolean;
-  quiet: boolean;
-  help: boolean;
-  version: boolean;
-  md: boolean;
-  watch: boolean;
-}
-
-function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = {
-    inputs: [],
-    check: false,
-    parse: false,
-    json: false,
-    quiet: false,
-    help: false,
-    version: false,
-    md: false,
-    watch: false,
-  };
-  let i = 0;
-  while (i < argv.length) {
-    const arg = argv[i];
-    switch (arg) {
-      case "-i":
-      case "--input":
-        i++;
-        args.inputs.push(argv[i]);
-        break;
-      case "-o":
-      case "--output":
-        i++;
-        args.output = argv[i];
-        break;
-      case "-e":
-      case "--outputFormat":
-        i++;
-        args.outputFormat = argv[i];
-        break;
-      case "-s":
-      case "--scale":
-        i++;
-        args.scale = Number(argv[i]);
-        break;
-      case "-t":
-      case "--theme":
-        i++;
-        args.theme = argv[i];
-        break;
-      case "-c":
-      case "--configFile":
-        i++;
-        args.configFile = argv[i];
-        break;
-      case "--md":
-        args.md = true;
-        break;
-      case "--check":
-        args.check = true;
-        break;
-      case "--parse":
-        args.parse = true;
-        break;
-      case "--json":
-        args.json = true;
-        break;
-      case "-q":
-      case "--quiet":
-        args.quiet = true;
-        break;
-      case "-h":
-      case "--help":
-        args.help = true;
-        break;
-      case "-V":
-      case "--version":
-        args.version = true;
-        break;
-      case "-w":
-      case "--watch":
-        args.watch = true;
-        break;
-      default:
-        process.stderr.write(
-          `Unknown option: ${arg}\nRun "zenuml --help" for usage.\n`,
-        );
-        process.exit(1);
-    }
-    i++;
-  }
-  return args;
-}
-
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
-
-/** Load and merge config file values (if any). CLI flags override config. */
-function loadConfigFile(filePath: string): Record<string, unknown> {
-  const resolved = resolve(filePath);
-  let raw: string;
-  try {
-    raw = readFileSync(resolved, "utf-8");
-  } catch {
-    process.stderr.write(`Error: Cannot read config file: ${resolved}\n`);
-    process.exit(1);
-  }
-  try {
-    return JSON.parse(raw);
-  } catch {
-    process.stderr.write(`Error: Invalid JSON in config file: ${resolved}\n`);
-    process.exit(1);
-  }
-}
-
-/** Shared Playwright browser instance — launched once, reused across renders. */
-let _browser: Awaited<
-  ReturnType<(typeof import("playwright-core"))["chromium"]["launch"]>
-> | null = null;
-
-function pngRuntimeHelp(detail: string): string {
-  return [
-    detail,
-    "",
-    "PNG output requires Playwright's Chromium runtime.",
-    "Install it with:",
-    "  npm install playwright-core",
-    "  npx playwright-core install chromium",
-    "",
-    "Or point ZenUML at an existing Chrome/Chromium binary:",
-    "  ZENUML_CHROMIUM_PATH=/path/to/chrome zenuml -i diagram.zenuml -o diagram.png",
-  ].join("\n");
-}
-
-async function getPlaywrightBrowser() {
-  if (_browser) return _browser;
-  let playwright: typeof import("playwright-core");
-  try {
-    playwright = await import("playwright-core");
-  } catch (error) {
-    throw new Error(
-      pngRuntimeHelp(
-        `Cannot load optional dependency "playwright-core": ${error instanceof Error ? error.message : String(error)}`,
-      ),
-    );
-  }
-
-  const executablePath = process.env["ZENUML_CHROMIUM_PATH"];
-  try {
-    _browser = await playwright.chromium.launch(
-      executablePath ? { executablePath } : undefined,
-    );
-    return _browser;
-  } catch (error) {
-    throw new Error(
-      pngRuntimeHelp(
-        `Cannot launch Chromium${executablePath ? ` at ${executablePath}` : ""}: ${error instanceof Error ? error.message : String(error)}`,
-      ),
-    );
-  }
-}
-
-/** Shut down the shared browser (call before process exit). */
-async function closeBrowser() {
-  if (_browser) {
-    await _browser.close();
-    _browser = null;
-  }
-}
-
-/** Rasterize an SVG string to PNG bytes using headless Chromium (Playwright). */
-async function rasterizeToPng(
-  svgString: string,
-  svgWidth: number,
-  svgHeight: number,
-  scale: number,
-): Promise<Buffer> {
-  const browser = await getPlaywrightBrowser();
-  const page = await browser.newPage({
-    viewport: {
-      width: Math.ceil(svgWidth),
-      height: Math.ceil(svgHeight),
-    },
-    deviceScaleFactor: scale,
-  });
-
-  try {
-    const html = `<!DOCTYPE html>
-<html><head><style>
-  html, body { margin: 0; padding: 0; background: white; overflow: hidden; }
-  svg { display: block; width: ${svgWidth}px; height: ${svgHeight}px; }
-</style></head><body>${svgString}</body></html>`;
-
-    await page.setContent(html, { waitUntil: "load" });
-    const png = await page.screenshot({ type: "png" });
-    return Buffer.from(png);
-  } finally {
-    await page.close();
-  }
-}
-
-// ---------------------------------------------------------------------------
-// AST Serializer — converts ANTLR parse tree to JSON-safe plain object
-// ---------------------------------------------------------------------------
-
-interface AstNode {
-  type: string;
-  ruleName?: string;
-  text?: string;
-  children?: AstNode[];
-}
-
-/** Get rule names from the parser embedded in a context node. */
-function getRuleNames(ctx: any): string[] | undefined {
-  return ctx?.parser?.ruleNames;
-}
-
-/** A Langium-facade Ctx node (no ANTLR `.parser`/`.symbol`, carries `_doc`). */
-function isFacadeNode(node: any): boolean {
-  return (
-    !!node &&
-    node.symbol === undefined &&
-    !node.parser &&
-    !!node._doc &&
-    typeof node.constructor?.name === "string" &&
-    node.constructor.name.endsWith("Context")
-  );
-}
-
-/** Facade class name -> ANTLR rule name, e.g. ProgContext -> prog. */
-function facadeRuleName(className: string): string {
-  const base = className.endsWith("Context")
-    ? className.slice(0, -"Context".length)
-    : className;
-  return base.charAt(0).toLowerCase() + base.slice(1);
-}
-
-/**
- * Serialize a Langium-facade node to the same shape as the ANTLR path:
- * `{type:"rule", ruleName, children}` with terminal leaves the node owns
- * directly (those not inside any child rule span) interleaved in source order.
- */
-function serializeFacadeNode(node: any): AstNode {
-  const result: AstNode = {
-    type: "rule",
-    ruleName: facadeRuleName(node.constructor.name),
-  };
-
-  const ruleChildren: any[] = node.children ?? [];
-  const childSpans = ruleChildren.map((c) => ({
-    c,
-    start: c.start?.start ?? null,
-    end: c.stop?.stop ?? null, // inclusive
-  }));
-
-  const items: Array<{ off: number; node: AstNode }> = [];
-  for (const cs of childSpans) {
-    if (cs.start !== null) {
-      items.push({ off: cs.start, node: serializeParseTree(cs.c) });
-    }
-  }
-
-  const nodeStart: number | undefined = node.start?.start;
-  const nodeStop: number | null | undefined = node.stop?.stop; // inclusive
-  if (nodeStart !== undefined && nodeStop !== null && nodeStop !== undefined) {
-    for (const leaf of node._doc.leaves as Array<{
-      offset: number;
-      hidden: boolean;
-      text: string;
-    }>) {
-      if (leaf.offset < nodeStart) continue;
-      if (leaf.offset > nodeStop) break;
-      if (leaf.hidden) continue;
-      const covered = childSpans.some(
-        (cs) =>
-          cs.start !== null &&
-          cs.end !== null &&
-          leaf.offset >= cs.start &&
-          leaf.offset <= cs.end,
-      );
-      if (covered) continue;
-      items.push({
-        off: leaf.offset,
-        node: { type: "terminal", text: leaf.text },
-      });
-    }
-  }
-
-  items.sort((a, b) => a.off - b.off);
-  if (items.length > 0) {
-    result.children = items.map((it) => it.node);
-  }
-  return result;
-}
-
-/** Serialize an ANTLR (or Langium-facade) parse tree node to a JSON-safe object. */
-function serializeParseTree(node: any): AstNode {
-  if (!node) return { type: "null" };
-
-  // Terminal node (leaf token)
-  if (node.symbol !== undefined) {
-    return {
-      type: "terminal",
-      text: node.getText(),
-    };
-  }
-
-  // Langium-facade rule node
-  if (isFacadeNode(node)) {
-    return serializeFacadeNode(node);
-  }
-
-  // ANTLR parser rule context node
-  const ruleNames = getRuleNames(node);
-  const ruleName =
-    ruleNames && node.ruleIndex !== undefined
-      ? ruleNames[node.ruleIndex]
-      : undefined;
-
-  const result: AstNode = {
-    type: "rule",
-  };
-  if (ruleName) {
-    result.ruleName = ruleName;
-  }
-
-  const children = node.children;
-  if (children && children.length > 0) {
-    result.children = children.map((child: any) => serializeParseTree(child));
-  }
-
-  return result;
-}
-
-// ---------------------------------------------------------------------------
-// Check mode — validate syntax without rendering
-// ---------------------------------------------------------------------------
-
-interface FileCheckResult {
-  file: string;
-  pass: boolean;
-  errors: Array<{ line: number; column: number; msg: string }>;
-}
-
-/** Read code from a file path or stdin ("-"). */
-async function readCode(input: string): Promise<string> {
-  if (input === "-") {
-    return readStdin();
-  }
-  const inputPath = resolve(input);
-  try {
-    return readFileSync(inputPath, "utf-8");
-  } catch {
-    throw new Error(`Cannot read input file: ${inputPath}`);
-  }
-}
-
-/** Parse one file/input and return check result. Clears Parser.ErrorDetails before each parse. */
-async function checkOne(input: string): Promise<FileCheckResult> {
-  const fileName = input === "-" ? "<stdin>" : input;
-  let code: string;
-  try {
-    code = await readCode(input);
-  } catch (err: any) {
-    return {
-      file: fileName,
-      pass: false,
-      errors: [{ line: 0, column: 0, msg: err.message }],
-    };
-  }
-
-  // Clear accumulated errors before parsing
-  Parser.Errors.length = 0;
-  Parser.ErrorDetails.length = 0;
-
-  Parser.RootContext(code);
-
-  const errors = Parser.ErrorDetails.map((e: any) => ({
-    line: e.line,
-    column: e.column,
-    msg: e.msg,
-  }));
-
-  return {
-    file: fileName,
-    pass: errors.length === 0,
-    errors,
-  };
-}
-
-// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -594,7 +118,13 @@ async function main(): Promise<void> {
   // produces incorrect layout (wrong participant spacing and message positioning).
   if (!globalThis.OffscreenCanvas && typeof document === "undefined") {
     try {
-      const { createCanvas } = await import("@napi-rs/canvas");
+      const { createCanvas, GlobalFonts } = await import("@napi-rs/canvas");
+      // Register before creating the context: a context resolves its fonts
+      // when it is created, so a later registration is not picked up.
+      GlobalFonts.register(
+        Buffer.from(IBM_PLEX_SANS_400_WOFF2_BASE64, "base64"),
+        IBM_PLEX_SANS_FAMILY,
+      );
       setCanvasContext(createCanvas(1, 1).getContext("2d") as any);
     } catch {
       // If @napi-rs/canvas is unavailable, fall back to character estimates
@@ -707,7 +237,6 @@ async function main(): Promise<void> {
     }
 
     // Clear accumulated errors before parsing
-    Parser.Errors.length = 0;
     Parser.ErrorDetails.length = 0;
 
     const tree = Parser.RootContext(code);
@@ -721,186 +250,6 @@ async function main(): Promise<void> {
 
     const ast = serializeParseTree(tree);
     process.stdout.write(JSON.stringify(ast, null, 2) + "\n");
-    process.exit(0);
-  }
-
-  // ---------------------------------------------------------------------------
-  // --md mode: render Markdown with zenuml code blocks
-  // ---------------------------------------------------------------------------
-  // Determine if we're in Markdown mode: explicit --md flag or auto-detect from extension
-  const isMdMode =
-    args.md ||
-    expandedInputs.some((f) => f !== "-" && /\.(?:md|markdown)$/i.test(f));
-
-  if (isMdMode) {
-    // Validate: --md with multiple inputs is an error
-    if (expandedInputs.length > 1) {
-      process.stderr.write(
-        "Error: --md mode supports only a single input file.\n",
-      );
-      process.exit(1);
-    }
-    const inputArg = expandedInputs[0];
-
-    // Validate: --md with non-.md input is an error (only when --md was explicitly passed)
-    if (args.md && inputArg !== "-") {
-      const ext = extname(inputArg).toLowerCase();
-      if (ext !== ".md" && ext !== ".markdown") {
-        process.stderr.write(
-          `Error: --md flag requires a .md or .markdown input file, got: ${inputArg}\n`,
-        );
-        process.exit(1);
-      }
-    }
-
-    // Read markdown content
-    let mdContent: string;
-    try {
-      mdContent = await readCode(inputArg);
-    } catch (err: any) {
-      process.stderr.write(`Error: ${err.message}\n`);
-      process.exit(1);
-    }
-
-    // Effective format for diagram images
-    const effectiveFormat = args.outputFormat ?? "svg";
-    if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
-      process.stderr.write(
-        `Error: Unsupported output format: "${effectiveFormat}". Use "svg" or "png".\n`,
-      );
-      process.exit(1);
-    }
-
-    // Determine output dir for images:
-    // If -o is given (and not stdout), use that file's directory
-    // Otherwise if input is a file, use input's directory
-    // For -o - (stdout), images go adjacent to the input file (or cwd for stdin)
-    let imageDir: string;
-    let mdOutputPath: string;
-
-    if (args.output && args.output !== "-") {
-      const resolvedOutput = resolve(args.output);
-      imageDir = dirname(resolvedOutput);
-      mdOutputPath = resolvedOutput;
-    } else if (args.output === "-") {
-      // stdout: images go adjacent to input or cwd
-      if (inputArg !== "-") {
-        imageDir = dirname(resolve(inputArg));
-      } else {
-        imageDir = process.cwd();
-      }
-      mdOutputPath = "-";
-    } else {
-      // No -o: default output is {stem}-rendered.md adjacent to input
-      if (inputArg !== "-") {
-        const resolvedInput = resolve(inputArg);
-        const inputDir = dirname(resolvedInput);
-        const ext = extname(inputArg);
-        const stem = basename(inputArg, ext);
-        imageDir = inputDir;
-        mdOutputPath = join(inputDir, `${stem}-rendered.md`);
-      } else {
-        imageDir = process.cwd();
-        mdOutputPath = "-";
-      }
-    }
-
-    // Determine stem for image file names (from input or output path)
-    let imageStem: string;
-    if (inputArg !== "-") {
-      const ext = extname(inputArg);
-      imageStem = basename(inputArg, ext);
-    } else if (mdOutputPath !== "-") {
-      const ext = extname(mdOutputPath);
-      imageStem = basename(mdOutputPath, ext);
-    } else {
-      imageStem = "diagram";
-    }
-
-    // Extract zenuml blocks
-    const blocks = extractZenumlBlocks(mdContent);
-
-    // Effective render options
-    const effectiveScale = args.scale ?? 2;
-    const effectiveTheme = args.theme;
-    const renderOptions: RenderOptions = {};
-    if (effectiveTheme) {
-      renderOptions.theme = effectiveTheme as RenderOptions["theme"];
-    }
-
-    // Render each non-empty block and collect image paths
-    const imageFiles: Map<number, string> = new Map();
-    for (const block of blocks) {
-      if (block.empty) continue;
-      const imageFilename = `${imageStem}-zenuml-${block.index}.${effectiveFormat}`;
-      const imageFilePath = join(imageDir, imageFilename);
-
-      let svg: string;
-      let svgWidth: number;
-      let svgHeight: number;
-      try {
-        const result = renderToSvg(block.code, renderOptions);
-        svg = result.svg;
-        svgWidth = result.width;
-        svgHeight = result.height;
-      } catch (err: any) {
-        process.stderr.write(
-          `Error: Failed to render zenuml block ${block.index}: ${err.message}\n`,
-        );
-        process.exit(1);
-      }
-
-      // Ensure image directory exists
-      mkdirSync(imageDir, { recursive: true });
-
-      if (effectiveFormat === "png") {
-        const pngBuffer = await rasterizeToPng(
-          svg,
-          svgWidth,
-          svgHeight,
-          effectiveScale,
-        );
-        writeFileSync(imageFilePath, pngBuffer);
-      } else {
-        writeFileSync(imageFilePath, svg, "utf-8");
-      }
-
-      if (!args.quiet) {
-        process.stderr.write(`Wrote ${imageFilePath}\n`);
-      }
-
-      imageFiles.set(block.index, imageFilename);
-    }
-
-    // Replace blocks in the Markdown
-    let outputMd = mdContent;
-    // Process blocks in reverse order so that string offsets remain valid
-    // We need to find and replace each raw block
-    // Re-scan in reverse order to replace correctly
-    const sortedBlocks = [...blocks].reverse();
-    for (const block of sortedBlocks) {
-      const altText = block.title || `diagram ${block.index + 1}`;
-      if (block.empty) {
-        // Remove empty blocks entirely
-        outputMd = outputMd.replace(block.raw, "");
-      } else {
-        const imageFilename = imageFiles.get(block.index)!;
-        const replacement = `![${altText}](${imageFilename})`;
-        outputMd = outputMd.replace(block.raw, replacement);
-      }
-    }
-
-    // Write output Markdown
-    if (mdOutputPath === "-") {
-      process.stdout.write(outputMd);
-    } else {
-      mkdirSync(dirname(mdOutputPath), { recursive: true });
-      writeFileSync(mdOutputPath, outputMd, "utf-8");
-      if (!args.quiet) {
-        process.stderr.write(`Wrote ${mdOutputPath}\n`);
-      }
-    }
-
     process.exit(0);
   }
 
@@ -936,128 +285,41 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  const config: RenderConfig = {
+    configScale,
+    configTheme,
+    configOutputFormat,
+    multipleInputs,
+  };
+
+  // Markdown mode is explicit with --md or inferred from the input extension.
+  const isMdMode =
+    args.md ||
+    expandedInputs.some((f) => f !== "-" && /\.(?:md|markdown)$/i.test(f));
+  if (isMdMode && multipleInputs) {
+    process.stderr.write(
+      "Error: --md mode supports only a single input file.\n",
+    );
+    process.exit(1);
+  }
+
+  const inputArg = expandedInputs[0];
+  if (args.md && inputArg !== "-" && !/\.(?:md|markdown)$/i.test(inputArg)) {
+    process.stderr.write(
+      `Error: --md flag requires a .md or .markdown input file, got: ${inputArg}\n`,
+    );
+    process.exit(1);
+  }
+
   // ---------------------------------------------------------------------------
   // --watch mode
   // ---------------------------------------------------------------------------
   if (args.watch) {
-    const renderForWatch = async (inputArg: string): Promise<void> => {
-      await renderOneFile(inputArg, args, {
-        configScale,
-        configTheme,
-        configOutputFormat,
-        multipleInputs,
-      });
-    };
-
-    const renderMdForWatch = async (inputArg: string): Promise<void> => {
-      // Re-invoke main md render for this file by delegating back through renderOneFile
-      // but we need md-specific rendering — so call the same md render path.
-      // For simplicity, we re-read and re-run the md render inline.
-      let mdContent: string;
-      try {
-        mdContent = readFileSync(resolve(inputArg), "utf-8");
-      } catch {
-        throw new Error(`Cannot read input file: ${resolve(inputArg)}`);
-      }
-
-      const effectiveFormat = args.outputFormat ?? "svg";
-      if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
-        throw new Error(
-          `Unsupported output format: "${effectiveFormat}". Use "svg" or "png".`,
-        );
-      }
-
-      let mdOutputPath: string;
-      let imageDir: string;
-
-      if (args.output && args.output !== "-") {
-        const resolvedOutput = resolve(args.output);
-        imageDir = dirname(resolvedOutput);
-        mdOutputPath = resolvedOutput;
-      } else if (args.output === "-") {
-        imageDir = dirname(resolve(inputArg));
-        mdOutputPath = "-";
-      } else {
-        const resolvedInput = resolve(inputArg);
-        const inputDir = dirname(resolvedInput);
-        const ext = extname(inputArg);
-        const stem = basename(inputArg, ext);
-        imageDir = inputDir;
-        mdOutputPath = join(inputDir, `${stem}-rendered.md`);
-      }
-
-      const ext = extname(inputArg);
-      const imageStem = basename(inputArg, ext);
-      const blocks = extractZenumlBlocks(mdContent);
-
-      const effectiveScale = args.scale ?? configScale ?? 2;
-      const effectiveTheme = args.theme ?? configTheme;
-      const renderOptions: RenderOptions = {};
-      if (effectiveTheme) {
-        renderOptions.theme = effectiveTheme as RenderOptions["theme"];
-      }
-
-      const imageFiles: Map<number, string> = new Map();
-      for (const block of blocks) {
-        if (block.empty) continue;
-        const imageFilename = `${imageStem}-zenuml-${block.index}.${effectiveFormat}`;
-        const imageFilePath = join(imageDir, imageFilename);
-
-        const result = renderToSvg(block.code, renderOptions);
-        const { svg, width: svgWidth, height: svgHeight } = result;
-
-        mkdirSync(imageDir, { recursive: true });
-
-        if (effectiveFormat === "png") {
-          const pngBuffer = await rasterizeToPng(
-            svg,
-            svgWidth,
-            svgHeight,
-            effectiveScale,
-          );
-          writeFileSync(imageFilePath, pngBuffer);
-        } else {
-          writeFileSync(imageFilePath, svg, "utf-8");
-        }
-
-        imageFiles.set(block.index, imageFilename);
-      }
-
-      let outputMd = mdContent;
-      const sortedBlocks = [...blocks].reverse();
-      for (const block of sortedBlocks) {
-        const altText = block.title || `diagram ${block.index + 1}`;
-        if (block.empty) {
-          outputMd = outputMd.replace(block.raw, "");
-        } else {
-          const imageFilename = imageFiles.get(block.index)!;
-          const replacement = `![${altText}](${imageFilename})`;
-          outputMd = outputMd.replace(block.raw, replacement);
-        }
-      }
-
-      if (mdOutputPath === "-") {
-        process.stdout.write(outputMd);
-      } else {
-        mkdirSync(dirname(mdOutputPath), { recursive: true });
-        writeFileSync(mdOutputPath, outputMd, "utf-8");
-      }
-    };
-
-    // Detect md inputs
-    const hasMdInputs = expandedInputs.some((f) =>
-      /\.(?:md|markdown)$/i.test(f),
-    );
-    const renderMdFnForWatch = hasMdInputs ? renderMdForWatch : undefined;
-
-    const watchHandle = await startWatchMode(
-      expandedInputs,
-      renderForWatch,
-      undefined,
-      undefined,
-      undefined,
-      renderMdFnForWatch,
-    );
+    const renderForWatch = (input: string) =>
+      isMdMode
+        ? renderMarkdownFile(input, args, config)
+        : renderOneFile(input, args, config);
+    const watchHandle = await startWatchMode(expandedInputs, renderForWatch);
 
     process.on("SIGINT", () => {
       watchHandle.shutdown();
@@ -1067,6 +329,16 @@ async function main(): Promise<void> {
     // Keep the process alive (watch mode runs indefinitely)
     await new Promise<void>(() => {});
     return;
+  }
+
+  if (isMdMode) {
+    try {
+      await renderMarkdownFile(inputArg, args, config);
+      process.exit(0);
+    } catch (err: any) {
+      process.stderr.write(`Error: ${err.message}\n`);
+      process.exit(1);
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1104,264 +376,6 @@ async function main(): Promise<void> {
   if (errors > 0) {
     process.exit(1);
   }
-}
-
-/** Render a single input file to its output. Throws on failure. */
-async function renderOneFile(
-  inputArg: string,
-  args: CliArgs,
-  config: {
-    configScale?: number;
-    configTheme?: string;
-    configOutputFormat?: string;
-    multipleInputs: boolean;
-  },
-): Promise<void> {
-  // Resolve effective values: CLI flag > config > default
-  const outputPath = resolveOutput(inputArg, args.output, ".svg");
-  const autoFormatFromExt =
-    outputPath !== "-" && extname(outputPath).toLowerCase() === ".png"
-      ? "png"
-      : undefined;
-  const effectiveFormat =
-    args.outputFormat ??
-    config.configOutputFormat ??
-    autoFormatFromExt ??
-    "svg";
-
-  // Validate format
-  if (effectiveFormat !== "svg" && effectiveFormat !== "png") {
-    throw new Error(
-      `Unsupported output format: "${effectiveFormat}". Use "svg" or "png".`,
-    );
-  }
-
-  const effectiveScale = args.scale ?? config.configScale ?? 2;
-  const effectiveTheme = args.theme ?? config.configTheme;
-
-  // Read input
-  let code: string;
-  if (inputArg === "-") {
-    code = await readStdin();
-  } else {
-    const inputPath = resolve(inputArg);
-    try {
-      code = readFileSync(inputPath, "utf-8");
-    } catch {
-      throw new Error(`Cannot read input file: ${inputPath}`);
-    }
-  }
-
-  // Build render options
-  const renderOptions: RenderOptions = {};
-  if (effectiveTheme) {
-    renderOptions.theme = effectiveTheme as RenderOptions["theme"];
-  }
-
-  // Render SVG
-  let svg: string;
-  let svgWidth: number;
-  let svgHeight: number;
-  try {
-    const result = renderToSvg(code, renderOptions);
-    svg = result.svg;
-    svgWidth = result.width;
-    svgHeight = result.height;
-  } catch (err: any) {
-    throw new Error(`Failed to render diagram: ${err.message}`);
-  }
-
-  // Determine final output path (adjust extension if format is png and no explicit -o)
-  let finalOutputPath = outputPath;
-  if (effectiveFormat === "png" && finalOutputPath !== "-") {
-    if (!args.output || isDirectory(resolve(args.output!))) {
-      // Auto-generated or directory-based path: swap extension for .png
-      const ext = extname(finalOutputPath);
-      finalOutputPath = finalOutputPath.slice(0, -ext.length) + ".png";
-    }
-  }
-
-  // Ensure output directory exists
-  if (finalOutputPath !== "-") {
-    const dir = dirname(finalOutputPath);
-    mkdirSync(dir, { recursive: true });
-  }
-
-  // Write output
-  if (effectiveFormat === "png") {
-    const pngBuffer = await rasterizeToPng(
-      svg,
-      svgWidth,
-      svgHeight,
-      effectiveScale,
-    );
-    if (finalOutputPath === "-") {
-      process.stdout.write(pngBuffer);
-    } else {
-      try {
-        writeFileSync(finalOutputPath, pngBuffer);
-        if (!args.quiet) {
-          process.stderr.write(`Wrote ${finalOutputPath}\n`);
-        }
-      } catch {
-        throw new Error(`Cannot write output file: ${finalOutputPath}`);
-      }
-    }
-  } else {
-    // SVG output
-    if (finalOutputPath === "-") {
-      process.stdout.write(svg);
-    } else {
-      try {
-        writeFileSync(finalOutputPath, svg, "utf-8");
-        if (!args.quiet) {
-          process.stderr.write(`Wrote ${finalOutputPath}\n`);
-        }
-      } catch {
-        throw new Error(`Cannot write output file: ${finalOutputPath}`);
-      }
-    }
-  }
-}
-
-function resolveOutput(
-  input: string,
-  output: string | undefined,
-  defaultExt: string = ".svg",
-): string {
-  if (output !== undefined) {
-    if (output === "-") return "-";
-    const resolvedOutput = resolve(output);
-    if (isDirectory(resolvedOutput)) {
-      // -o is a directory: output inside it using just the input's basename
-      if (input === "-") return "-"; // stdin + directory doesn't make sense, fall to stdout
-      const ext = extname(input);
-      const base = basename(input, ext);
-      return join(resolvedOutput, `${base}${defaultExt}`);
-    }
-    return resolvedOutput;
-  }
-  if (input === "-") return "-"; // stdin without -o → stdout
-  // No -o: output adjacent to input with swapped extension
-  const ext = extname(input);
-  const base = basename(input, ext);
-  const dir = dirname(resolve(input));
-  return join(dir, `${base}${defaultExt}`);
-}
-
-async function readStdin(): Promise<string> {
-  const chunks: Uint8Array[] = [];
-  for await (const chunk of Bun.stdin.stream()) {
-    chunks.push(chunk as Uint8Array);
-  }
-  return Buffer.concat(chunks).toString("utf-8");
-}
-
-// ---------------------------------------------------------------------------
-// Watch mode
-// ---------------------------------------------------------------------------
-
-/** Return a timestamp string in [HH:MM:SS] format using local time. */
-function watchTimestamp(): string {
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mm = String(now.getMinutes()).padStart(2, "0");
-  const ss = String(now.getSeconds()).padStart(2, "0");
-  return `[${hh}:${mm}:${ss}]`;
-}
-
-export interface WatchHandle {
-  shutdown: () => void;
-}
-
-/**
- * Start watch mode.
- *
- * @param inputs      Resolved file paths to watch and render.
- * @param renderFn    Called with a file path to re-render it. Must return a Promise.
- * @param watchFn     Factory for a watcher. Defaults to node:fs.watch. Must return { close() }.
- * @param log         Log function for render messages. Defaults to process.stderr.write.
- * @param delayMs     Debounce delay in milliseconds. Defaults to 100.
- * @param renderMdFn  Optional alternative render function for .md files. When provided,
- *                    .md inputs are rendered with this function instead of renderFn.
- */
-export async function startWatchMode(
-  inputs: string[],
-  renderFn: (path: string) => Promise<void>,
-  watchFn?: (path: string, handler: () => void) => { close(): void },
-  log?: (msg: string) => void,
-  delayMs?: number,
-  renderMdFn?: (path: string) => Promise<void>,
-): Promise<WatchHandle> {
-  const logFn = log ?? ((msg: string) => process.stderr.write(msg + "\n"));
-  const delay = delayMs ?? 100;
-
-  // Default watcher using node:fs.watch
-  const watchFactory =
-    watchFn ??
-    ((path: string, handler: () => void) => {
-      const watcher = fsWatch(path, () => handler());
-      return { close: () => watcher.close() };
-    });
-
-  // Pick which render function to use for a given file
-  function pickRender(p: string): (path: string) => Promise<void> {
-    if (renderMdFn && /\.(?:md|markdown)$/i.test(p)) {
-      return renderMdFn;
-    }
-    return renderFn;
-  }
-
-  // Perform initial render for all inputs
-  for (const input of inputs) {
-    const rf = pickRender(input);
-    const ts = watchTimestamp();
-    try {
-      await rf(input);
-      logFn(`${ts} Rendered ${input} -> done`);
-    } catch (err: any) {
-      logFn(`${ts} Error: ${input}: ${err.message}`);
-    }
-  }
-
-  // Set up per-file debounced watchers
-  const handles: Array<{ close(): void }> = [];
-  const timers = new Map<string, ReturnType<typeof setTimeout>>();
-
-  for (const input of inputs) {
-    const rf = pickRender(input);
-    const handle = watchFactory(input, () => {
-      // Debounce: clear any pending timer for this file
-      const existing = timers.get(input);
-      if (existing !== undefined) clearTimeout(existing);
-      const t = setTimeout(async () => {
-        timers.delete(input);
-        const ts = watchTimestamp();
-        try {
-          await rf(input);
-          logFn(`${ts} Rendered ${input} -> done`);
-        } catch (err: any) {
-          logFn(`${ts} Error: ${input}: ${err.message}`);
-        }
-      }, delay);
-      timers.set(input, t);
-    });
-    handles.push(handle);
-  }
-
-  function shutdown(): void {
-    // Cancel pending debounce timers
-    for (const t of timers.values()) {
-      clearTimeout(t);
-    }
-    timers.clear();
-    // Close all watchers
-    for (const h of handles) {
-      h.close();
-    }
-  }
-
-  return { shutdown };
 }
 
 if (import.meta.main) {

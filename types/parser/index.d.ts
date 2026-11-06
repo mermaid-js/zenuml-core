@@ -1,8 +1,15 @@
 /**
  * `@zenuml/core/parser` — headless, server-safe ANTLR parsing/validation for
  * ZenUML DSL. Unlike the default `@zenuml/core` entry (a browser/DOM bundle),
- * this subpath imports cleanly in Node and is reentrant (safe to call
- * repeatedly/concurrently — it does not touch any shared module state).
+ * this subpath imports cleanly in Node, and `validate`/`parse` are reentrant:
+ * each call builds its own lexer/parser/error listener, so calls are safe to
+ * make repeatedly and concurrently.
+ *
+ * Import-time side effect: loading this module applies ZenUML's ANTLR prototype
+ * augmentation (methods such as `getFormattedText` are patched onto
+ * `antlr4.ParserRuleContext.prototype`). This is a one-time, process-wide
+ * mutation of the `antlr4` package you have installed — harmless on its own,
+ * but relevant if another library in the same process also depends on `antlr4`.
  */
 
 export interface ErrorDetail {

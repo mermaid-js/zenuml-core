@@ -1,0 +1,168 @@
+{
+  "url": "https://lite-stg.atlassian.net/wiki/spaces/SD/pages/99876891/Smoke+Test+2026-06-02T09-14-25+Lite+ojg8n",
+  "frame": "https://1ue4lio-tt9gj2at2-1uik47gz7y--12inh91-cwq9e668r-21ppsujwd.cdn.prod.atlassian-dev.net/8ad26115-211f-4216-971b-0540f606303d/5ea0d957-4b7d-47e5-b8cc-7d5fb4fc2338/cd582713-e4f4-4f65-bf94-ab928809c3b0/main/_ctx_H4sIAAAAAAACA62S0U_CMBDG_5c-kq1LfNwbjqmLSozbmyHk3Gqpaa_LemYg4X-3S0CYMKKGt_Z6933f_dI1E7IRzrH4Zc2gqrqz6G5sQVS7OIpGXFortSCQBhCkaHhpDZsFjFa1YDHLHse3ac42wd8Egu-GskJuljXqrh5p9eoio5Y1oNDhVaiBhCNuFPJ398upRpS2qbzRdmofNk-es6fibNqe8IHhiFcKZANGrzio3sPO-GjiU-CH-VkeMhiQdx6cQjnk3rYtrzUgHRv13Ft3cold-aB3T-smLZK7efKQpdNinmeT9By3S9Gx-BY6kqFWJE63_A_UhWhcj5P7dDrZ4vCvC-sIwXQdXeQuOwfS4JwC5CjI6yr04bT_yspi4hdU0rObbb4A3yq6RX4DAAA/?platformFeatureFlags=forge-ui-iframe-analytics%2Cforge-ui-bridge-core-reset%2Cforge-ui-iframe-ufo-perf-observers%2Cplatform-dst-lozenge-tag-badge-visual-uplifts%2Cplatform-dst-motion-uplift-popup%2Cplatform-dst-motion-uplift-modal%2Cplatform-dst-motion-uplift-spotlight%2Cplatform-dst-motion-uplift%2Cplatform-dst-motion-theme-default",
+  "case": "smoke",
+  "theme": "theme-dark",
+  "hostColorMode": "dark",
+  "staleRulesRemoved": 0,
+  "overlaps": [],
+  "walked": 67,
+  "clipped": 0,
+  "hostBodyBackground": "rgb(31, 31, 33)",
+  "iframeBodyBackground": "rgba(0, 0, 0, 0)",
+  "frameBox": {
+    "x": 0,
+    "y": 48,
+    "width": 1400,
+    "height": 660
+  },
+  "items": 67,
+  "failures": 0,
+  "summary": {
+    "text:title": {
+      "n": 1,
+      "minLc": 103.25328905124402,
+      "fg": "#fbfbfb",
+      "bg": "#1f1f1f"
+    },
+    "text:message": {
+      "n": 7,
+      "minLc": 103.25328905124402,
+      "fg": "#fbfbfb",
+      "bg": "#1f1f1f"
+    },
+    "text:number": {
+      "n": 6,
+      "minLc": 94.13873542130412,
+      "fg": "#ededed",
+      "bg": "#1f1f1f"
+    },
+    "text:fragment-number": {
+      "n": 2,
+      "minLc": 93.02203045799166,
+      "fg": "#000000",
+      "bg": "#e9e9e9"
+    },
+    "text:fragment-label": {
+      "n": 2,
+      "minLc": 93.02203045799166,
+      "fg": "#000000",
+      "bg": "#e9e9e9"
+    },
+    "text:comment": {
+      "n": 1,
+      "minLc": 78.51253097439259,
+      "fg": "#d4d4d4",
+      "bg": "#1f1f1f"
+    },
+    "text:guard-keyword": {
+      "n": 1,
+      "minLc": 93.49751766674514,
+      "fg": "#ececec",
+      "bg": "#1f1f1f"
+    },
+    "text:fragment-condition": {
+      "n": 1,
+      "minLc": 78.51253097439259,
+      "fg": "#d4d4d4",
+      "bg": "#1f1f1f"
+    },
+    "text:fragment-section": {
+      "n": 2,
+      "minLc": 103.25328905124402,
+      "fg": "#fbfbfb",
+      "bg": "#1f1f1f"
+    },
+    "text:participant": {
+      "n": 3,
+      "minLc": 103.25328905124402,
+      "fg": "#fbfbfb",
+      "bg": "#1f1f1f"
+    },
+    "line:frame-border": {
+      "n": 1,
+      "minLc": 86.53218566710099,
+      "fg": "#e1e1e1",
+      "bg": "#1f1f1f"
+    },
+    "line:header-rule": {
+      "n": 1,
+      "minLc": 86.53218566710099,
+      "fg": "#e1e1e1",
+      "bg": "#1f1f1f"
+    },
+    "line:participant-border": {
+      "n": 4,
+      "minLc": 86.53218566710099,
+      "fg": "#e1e1e1",
+      "bg": "#1f1f1f"
+    },
+    "line:lifeline": {
+      "n": 4,
+      "minLc": 86.53218566710099,
+      "fg": "#e1e1e1",
+      "bg": "#1f1f1f"
+    },
+    "line:message-line": {
+      "n": 6,
+      "minLc": 105.90397146346729,
+      "fg": "#ffffff",
+      "bg": "#1f1f1f"
+    },
+    "line:arrow-head": {
+      "n": 6,
+      "minLc": 105.90397146346729,
+      "fg": "#ffffff",
+      "bg": "#1f1f1f"
+    },
+    "line:occurrence-border": {
+      "n": 3,
+      "minLc": 85.24432553278828,
+      "fg": "#e1e1e1",
+      "bg": "#272727"
+    },
+    "line:fragment-border": {
+      "n": 2,
+      "minLc": 86.53218566710099,
+      "fg": "#e1e1e1",
+      "bg": "#1f1f1f"
+    },
+    "line:fragment-header-rule": {
+      "n": 2,
+      "minLc": 93.02203045799166,
+      "fg": "#000000",
+      "bg": "#e9e9e9"
+    },
+    "line:separator": {
+      "n": 1,
+      "minLc": 48.35241303004335,
+      "fg": "#9f9f9f",
+      "bg": "#1f1f1f"
+    },
+    "fill:occurrence": {
+      "n": 3,
+      "minLc": 33.25920755303889,
+      "fg": "#818181",
+      "bg": "#1f1f1f"
+    },
+    "fill:fragment-header": {
+      "n": 2,
+      "minLc": 91.58182319890136,
+      "fg": "#e9e9e9",
+      "bg": "#1f1f1f"
+    },
+    "fill:participant-fill": {
+      "n": 3,
+      "minLc": 0,
+      "fg": "#1f1f1f",
+      "bg": "#1f1f1f"
+    },
+    "fill:canvas": {
+      "n": 1,
+      "minLc": 95.5648267300278,
+      "fg": "#1f1f1f",
+      "bg": "#f3f0ff"
+    }
+  },
+  "fails": []
+}

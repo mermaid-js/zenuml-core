@@ -21,6 +21,52 @@ You can use it ZenUML on your favorite platforms and applications:
 ZenUML can be integrated with your favorite tools and platforms as a library or an embeddable widget.
 Please follow the [integration tutorial](./TUTORIAL.md) for detailed steps.
 
+## Fonts and Content-Security-Policy
+
+Diagrams use IBM Plex Sans. By default the browser renderer loads it from a
+`data:` URI embedded in the library, so it needs no configuration. If your
+page's Content-Security-Policy has a `font-src` without `data:` (Atlassian
+Forge Custom UI, for example), that load is refused and diagrams render with
+the fallback fonts (Helvetica, Verdana).
+
+To keep IBM Plex Sans under such a policy, serve the font file this package
+ships from an origin the policy allows, and tell the renderer its URL before
+the first render:
+
+```js
+import ZenUml, { setDiagramFontUrl } from "@zenuml/core";
+// With Vite; other bundlers have an equivalent "asset URL" import.
+import plexUrl from "@zenuml/core/fonts/IBMPlexSans-Regular-Latin1.woff2?url";
+
+setDiagramFontUrl(plexUrl); // or ZenUml.setDiagramFontUrl(plexUrl) with the UMD build
+```
+
+The package ships these files under `@zenuml/core/fonts/`:
+
+| File                               | Used for                                                                                                                                                            |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IBMPlexSans-Regular-Latin1.woff2` | All themes. Byte-identical to the embedded font. Licence: `IBM-Plex-LICENSE.txt` (SIL OFL 1.1).                                                                     |
+| `MS-Sans-Serif.ttf`                | `theme-neon` in the HTML renderer. Not embedded: it loads only after `setDiagramFontUrl(url, "MS Sans Serif")`. Licence: `MS-Sans-Serif-NOTICE.txt` (CC BY-SA 3.0). |
+
+`setDiagramFontUrl(null)` restores the default. Setting a different URL makes
+the next render load the font again. If the renderer's own load was refused
+and your page registers an "IBM Plex Sans" face itself later, the renderer
+notices and re-measures text on the next render.
+
+To rasterise the rendered DOM (for example with html-to-image), pass the
+embedded font rule so the image does not fall back to other fonts. An SVG image
+can only use fonts embedded in it, and a `data:` URI inside the image is not
+subject to the page's `font-src`:
+
+```js
+import { getDiagramFontFaceCss } from "@zenuml/core";
+import { toPng } from "html-to-image";
+
+const png = await toPng(element, {
+  fontEmbedCSS: await getDiagramFontFaceCss(),
+});
+```
+
 # Development
 
 ## Technical Requirements

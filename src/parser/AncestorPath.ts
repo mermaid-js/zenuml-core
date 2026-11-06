@@ -1,19 +1,23 @@
 import { default as antlr4 } from "antlr4";
+import {
+  augment,
+  type ParserRuleContextAugmented,
+} from "./ContextAugmentations";
+import type { AugmentedContext } from "./AntlrTypes";
 
-// TypeScript cannot infer that the method exists on the prototype chain
-(antlr4.ParserRuleContext.prototype as any).getAncestors = function (
-  predicate?: (ctx: antlr4.ParserRuleContext) => boolean,
-): antlr4.ParserRuleContext[] {
-  const ancestors = [];
-  if (!predicate || predicate(this)) {
-    ancestors.push(this);
-  }
-  let current = this.parentCtx;
-  while (current) {
-    if (!predicate || predicate(current)) {
-      ancestors.push(current);
+augment<ParserRuleContextAugmented>(antlr4.ParserRuleContext, {
+  getAncestors(predicate?: (ctx: AugmentedContext) => boolean) {
+    const ancestors: AugmentedContext[] = [];
+    if (!predicate || predicate(this)) {
+      ancestors.push(this);
     }
-    current = current.parentCtx;
-  }
-  return ancestors;
-};
+    let current = this.parentCtx;
+    while (current) {
+      if (!predicate || predicate(current)) {
+        ancestors.push(current);
+      }
+      current = current.parentCtx;
+    }
+    return ancestors;
+  },
+});

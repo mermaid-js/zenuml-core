@@ -7,12 +7,20 @@ test.describe("HTML Rendering", () => {
       await page.goto(`/e2e/fixtures/fixture.html?case=${name}`);
 
       // Wait for diagram to render
-      await expect(page.locator(".privacy>span>svg")).toBeVisible({
+      await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
         timeout: 5000,
       });
 
       // Wait for async icon imports to complete (stereotypes like @VPC, @RDS)
       await page.waitForLoadState("networkidle");
+      await page.waitForFunction(
+        () =>
+          Array.from(document.querySelectorAll(".participant .h-6.w-6")).every(
+            (slot) => slot.querySelector("svg"),
+          ),
+        null,
+        { timeout: 10000 },
+      );
 
       await expect(page).toHaveScreenshot(`${name}.png`, {
         threshold: threshold ?? DEFAULT_THRESHOLD,

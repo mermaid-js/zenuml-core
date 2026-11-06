@@ -1,0 +1,52 @@
+name: CI timing
+
+# Records the wall-clock time of every completed cd.yml run in that run's
+# job summary and as an annotation, so a speed regression is visible without
+# opening the API. Runs after cd.yml has finished, so it never adds to the
+# time it measures. Only reports; the 60 s budget is not enforced.
+
+on:
+  workflow_run:
+    workflows: ["Build, Test, npm Publish, and Deploy"]
+    types: [completed]
+
+permissions:
+  actions: read
+
+jobs:
+  record:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Record wall time of the completed run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          BUDGET_SECONDS: 60
+        run: |
+          run=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}")
+          created=$(jq -r .created_at <<<"$run")
+          updated=$(jq -r .updated_at <<<"$run")
+          conclusion=$(jq -r .conclusion <<<"$run")
+          event=$(jq -r .event <<<"$run")
+          branch=$(jq -r .head_branch <<<"$run")
+          sha=$(jq -r '.head_sha[:8]' <<<"$run")
+          wall=$(( $(date -d "$updated" +%s) - $(date -d "$created" +%s) ))
+
+          jobs=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/jobs?per_page=100" \
+            --jq '.jobs[] | "| \(.name) | \(.conclusion) | \(((.completed_at|fromdateiso8601) - (.started_at|fromdateiso8601))) s |"')
+
+          {
+            echo "## cd.yml run ${RUN_ID}: ${wall} s wall (${conclusion}, ${event}, ${branch} @ ${sha})"
+            echo
+            echo "Budget: ${BUDGET_SECONDS} s. Measured as the run's created_at to updated_at."
+            echo
+            echo "| job | conclusion | span |"
+            echo "|---|---|---|"
+            echo "$jobs"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$wall" -gt "$BUDGET_SECONDS" ]; then
+            echo "::warning title=cd.yml wall time::${wall} s, over the ${BUDGET_SECONDS} s budget (run ${RUN_ID}, ${branch} @ ${sha})"
+          else
+            echo "::notice title=cd.yml wall time::${wall} s, within the ${BUDGET_SECONDS} s budget (run ${RUN_ID}, ${branch} @ ${sha})"
+          fi

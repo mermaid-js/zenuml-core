@@ -24,7 +24,6 @@ classDiagram
       +constructor(statement, runtime)
       +measure(top, origin)* StatementCoordinate
       #measureComment(context?) number
-      #resolveFragmentOrigin(fallbackOrigin) string
       #findLeftParticipant(ctx, fallbackOrigin) string
     }
 
@@ -57,31 +56,8 @@ classDiagram
     StatementVM <|-- DividerStatementVM
     StatementVM <|-- EmptyStatementVM
 
-    class FragmentVM {
-      <<abstract>>
-      #beginFragment(context, top) object
-      #finalizeFragment(top, cursor, meta) object
-    }
-
-    StatementVM <|-- FragmentVM
-
-    class FragmentLoopVM {
-      +kind: "loop"
-    }
     class FragmentSingleBlockVM {
-      <<abstract>>
-    }
-    class FragmentOptVM {
-      +kind: "opt"
-    }
-    class FragmentParVM {
-      +kind: "par"
-    }
-    class FragmentSectionVM {
-      +kind: "section"
-    }
-    class FragmentCriticalVM {
-      +kind: "critical"
+      +kind: "loop" | "opt" | "par" | "section" | "critical"
     }
     class FragmentTryCatchVM {
       +kind: "tcf"
@@ -93,15 +69,10 @@ classDiagram
       +kind: "ref"
     }
 
-    FragmentVM <|-- FragmentLoopVM
-    FragmentVM <|-- FragmentSingleBlockVM
-    FragmentSingleBlockVM <|-- FragmentOptVM
-    FragmentSingleBlockVM <|-- FragmentParVM
-    FragmentSingleBlockVM <|-- FragmentSectionVM
-    FragmentSingleBlockVM <|-- FragmentCriticalVM
-    FragmentVM <|-- FragmentTryCatchVM
-    FragmentVM <|-- FragmentAltVM
-    FragmentVM <|-- FragmentRefVM
+    StatementVM <|-- FragmentSingleBlockVM
+    StatementVM <|-- FragmentTryCatchVM
+    StatementVM <|-- FragmentAltVM
+    StatementVM <|-- FragmentRefVM
 
     class createStatementVM {
       <<function>>

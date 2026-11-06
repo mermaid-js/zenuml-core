@@ -4,11 +4,13 @@ import {
   createMessageDragAtom,
   diagramElementAtom,
   enableMessageInsertionAtom,
+  enableParticipantStyleEditingAtom,
   modeAtom,
   RenderMode,
   selectedAtom,
   selectedMessageAtom,
 } from "@/store/Store";
+import { enterMenuAtom } from "@/store/interaction/interactionAtom";
 import { act, fireEvent, render } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { describe, expect, it } from "vitest";
@@ -128,5 +130,131 @@ describe("Occurrence", () => {
     expect(dragState?.insertIndex).toBe(1);
     expect(dragState?.blockContext).toBe(message?.braceBlock?.()?.block?.());
     expect(dragState?.hostContext).toBe(message);
+  });
+
+  describe("interaction policy", () => {
+    const NESTED = "A\nB\nC\nA->B.hello() {\n  B->C.work()\n}";
+    const openParticipantEditor = (
+      store: ReturnType<typeof renderOccurrence>["store"],
+    ) =>
+      act(() => {
+        store.set(enableParticipantStyleEditingAtom, true);
+        store.set(selectedAtom, ["A"]);
+      });
+
+    it("does not start a create drag while the participant editor is open", () => {
+      const { store, occurrence } = renderOccurrence(NESTED);
+      openParticipantEditor(store);
+      act(() => {
+        fireEvent.pointerDown(occurrence, { clientX: 118, clientY: 70 });
+      });
+      expect(store.get(createMessageDragAtom)).toBeNull();
+      expect(store.get(selectedAtom)).toEqual(["A"]);
+    });
+
+    it("does not start a create drag while the message menu is open", () => {
+      const { store, occurrence } = renderOccurrence(NESTED);
+      act(() => {
+        store.set(selectedMessageAtom, { start: 1, end: 2, token: 1 });
+        store.set(enterMenuAtom, { kind: "messageMenu", start: 1, end: 2 });
+      });
+      act(() => {
+        fireEvent.pointerDown(occurrence, { clientX: 118, clientY: 70 });
+      });
+      expect(store.get(createMessageDragAtom)).toBeNull();
+    });
+
+    it("does not collapse while the message menu is open", () => {
+      const { store, container } = renderOccurrence(NESTED);
+      act(() => {
+        store.set(enterMenuAtom, { kind: "messageMenu", start: 1, end: 2 });
+      });
+      const button = container.querySelector(".collapse-button")!;
+      act(() => {
+        fireEvent.pointerDown(button);
+        fireEvent.click(button);
+      });
+      expect(button.classList.contains("hidden")).toBe(false);
+    });
+
+    // P4: hover-only hints ask `hoverAffordance`, which only idle allows.
+    it("offers the create-drag hint on hover when idle", () => {
+      const { occurrence } = renderOccurrence(NESTED);
+      expect(occurrence.getAttribute("title")).toBe(
+        "Drag to create a message from B",
+      );
+      expect(occurrence.classList.contains("cursor-crosshair")).toBe(true);
+    });
+
+    it("drops the create-drag hint while a create drag runs", () => {
+      const { store, occurrence } = renderOccurrence(NESTED);
+      act(() => {
+        store.set(createMessageDragAtom, {
+          source: "A",
+          sourceX: 0,
+          sourceY: 0,
+          pointerX: 0,
+          pointerY: 0,
+          hoverTarget: null,
+          insertIndex: 0,
+          blockContext: null,
+        });
+      });
+      expect(occurrence.getAttribute("title")).toBeNull();
+      expect(occurrence.classList.contains("cursor-crosshair")).toBe(false);
+    });
+
+    // The collapse button shows on hover only while `collapse` is allowed,
+    // like the fragment's (P4).
+    it("reveals the collapse button on hover when idle", () => {
+      const { container } = renderOccurrence(NESTED);
+      expect(container.querySelector(".collapse-button.hover-reveal")).not.toBe(
+        null,
+      );
+    });
+
+    it("does not reveal the collapse button on hover while the participant editor is open", () => {
+      const { store, container } = renderOccurrence(NESTED);
+      openParticipantEditor(store);
+      expect(container.querySelector(".collapse-button")).not.toBeNull();
+      expect(container.querySelector(".collapse-button.hover-reveal")).toBe(
+        null,
+      );
+    });
+
+    it("collapses on click when idle", () => {
+      const { container } = renderOccurrence(NESTED);
+      const button = container.querySelector(".collapse-button")!;
+      act(() => {
+        fireEvent.click(button);
+      });
+      expect(button.classList.contains("hidden")).toBe(true);
+    });
+
+    it("does not collapse while the participant editor is open", () => {
+      const { store, container } = renderOccurrence(NESTED);
+      openParticipantEditor(store);
+      const button = container.querySelector(".collapse-button")!;
+      act(() => {
+        fireEvent.click(button);
+      });
+      expect(button.classList.contains("hidden")).toBe(false);
+    });
+
+    it("ignores a click whose press started while the editor was open", () => {
+      const { store, container } = renderOccurrence(NESTED);
+      openParticipantEditor(store);
+      const button = container.querySelector(".collapse-button")!;
+      act(() => {
+        fireEvent.pointerDown(button);
+      });
+      act(() => {
+        store.set(selectedAtom, []);
+      });
+      act(() => {
+        fireEvent.click(button);
+      });
+      expect(button.classList.contains("hidden")).toBe(false);
+    });
   });
 });

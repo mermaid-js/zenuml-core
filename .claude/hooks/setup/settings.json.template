@@ -2,16 +2,6 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "mcp__gemini__consult_gemini",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${WORKSPACE}/.claude/hooks/gemini-context-injector.sh",
-            "description": "Automatically adds project structure to new Gemini sessions"
-          }
-        ]
-      },
-      {
         "matcher": "mcp__.*",
         "hooks": [
           {
@@ -52,6 +42,18 @@
             "type": "command",
             "command": "${WORKSPACE}/.claude/hooks/notify.sh complete",
             "description": "Plays sound when Claude completes tasks"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${WORKSPACE}/.claude/hooks/remind-babysit-pr.sh",
+            "description": "Reminds Claude to watch CI with babysit-pr after a git push"
           }
         ]
       }

@@ -1,0 +1,2249 @@
+{
+  "date": "2026-10-19",
+  "measuredAt": "2026-10-19T12:04:31.552Z",
+  "commit": "fb11b8e6",
+  "baseUrl": "http://localhost:14000",
+  "viewport": {
+    "width": 1200,
+    "height": 800
+  },
+  "browser": "chromium (playwright 1.57.0)",
+  "animationPollWindowMs": 600,
+  "surfaces": [
+    {
+      "name": "ParticipantStylePanel",
+      "url": "/e2e/fixtures/insert-participant.html",
+      "animationPoll": {
+        "windowMs": 600,
+        "framesSampled": 79,
+        "rootAppearedAtMs": 72,
+        "animations": []
+      },
+      "root": {
+        "selector": "[data-testid=\"participant-style-panel\"]",
+        "box": {
+          "w": 1200,
+          "h": 800
+        },
+        "transition-property": "all",
+        "transition-duration": "0s",
+        "transition-timing-function": "ease",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "none",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "z-index": "50",
+        "opacity": "1",
+        "position": "fixed"
+      },
+      "card": {
+        "selector": "[data-testid=\"participant-name-row\"]",
+        "box": {
+          "w": 212.265625,
+          "h": 32
+        },
+        "transition-property": "all",
+        "transition-duration": "0s",
+        "transition-timing-function": "ease",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(15, 23, 42, 0.12) 0px 4px 14px 0px, rgba(15, 23, 42, 0.08) 0px 0px 0px 1px",
+        "border-radius": "8px",
+        "background-color": "rgb(255, 255, 255)",
+        "z-index": "auto",
+        "opacity": "1",
+        "position": "static"
+      },
+      "mask": {
+        "selector": "[data-testid=\"participant-editor-mask\"]",
+        "box": {
+          "w": 1200,
+          "h": 800
+        },
+        "transition-property": "all",
+        "transition-duration": "0s",
+        "transition-timing-function": "ease",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "none",
+        "border-radius": "0px",
+        "background-color": "rgba(15, 23, 42, 0.32)",
+        "z-index": "auto",
+        "opacity": "1",
+        "position": "absolute"
+      },
+      "controls": [
+        {
+          "id": "ParticipantStylePanel-0",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Add stereotype",
+          "title": null,
+          "text": "«stereotype»",
+          "tabIndex": 0,
+          "box": {
+            "w": 104,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(75, 85, 99)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(148, 163, 184)",
+            "borderRadius": "9999px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(148, 163, 184)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ParticipantStylePanel-1",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Set icon",
+          "title": null,
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 28,
+            "h": 28
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(156, 163, 175)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(156, 163, 175)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(156, 163, 175)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ParticipantStylePanel-2",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Set color (none)",
+          "title": null,
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(156, 163, 175)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(156, 163, 175)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(156, 163, 175)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ParticipantStylePanel-3",
+          "tag": "input",
+          "role": null,
+          "ariaLabel": null,
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 76,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(224, 242, 254) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(14, 165, 233)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ParticipantStylePanel-4",
+          "tag": "input",
+          "role": null,
+          "ariaLabel": null,
+          "title": null,
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 104,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(203, 213, 225)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(224, 242, 254) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(14, 165, 233)",
+            "opacity": "1"
+          }
+        }
+      ],
+      "smallestHitArea": {
+        "w": 24,
+        "h": 24,
+        "control": "Set color (none)",
+        "opacityAtMeasure": "1",
+        "meets24x24": true,
+        "meets44x44": false
+      },
+      "ok": true
+    },
+    {
+      "name": "TypePicker",
+      "url": "/e2e/fixtures/insert-participant.html",
+      "animationPoll": {
+        "windowMs": 600,
+        "framesSampled": 76,
+        "rootAppearedAtMs": 27,
+        "animations": []
+      },
+      "root": {
+        "selector": "[role=\"dialog\"][aria-label=\"Participant type\"]",
+        "box": {
+          "w": 220,
+          "h": 88
+        },
+        "transition-property": "all",
+        "transition-duration": "0s",
+        "transition-timing-function": "ease",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px",
+        "border-radius": "10px",
+        "background-color": "rgb(255, 255, 255)",
+        "z-index": "auto",
+        "opacity": "1",
+        "position": "static"
+      },
+      "controls": [
+        {
+          "id": "TypePicker-0",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Actor",
+          "title": "Actor",
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 30,
+            "h": 30
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(55, 65, 81)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "color, background-color, border-color, text-decoration-color, fill, stroke",
+            "transitionDuration": "0.15s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "TypePicker-1",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Boundary",
+          "title": "Boundary",
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 30,
+            "h": 30
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(55, 65, 81)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "color, background-color, border-color, text-decoration-color, fill, stroke",
+            "transitionDuration": "0.15s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "TypePicker-2",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Control",
+          "title": "Control",
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 30,
+            "h": 30
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(55, 65, 81)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "color, background-color, border-color, text-decoration-color, fill, stroke",
+            "transitionDuration": "0.15s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "TypePicker-3",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Entity",
+          "title": "Entity",
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 30,
+            "h": 30
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(55, 65, 81)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "color, background-color, border-color, text-decoration-color, fill, stroke",
+            "transitionDuration": "0.15s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "TypePicker-4",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Database",
+          "title": "Database",
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 30,
+            "h": 30
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(55, 65, 81)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "color, background-color, border-color, text-decoration-color, fill, stroke",
+            "transitionDuration": "0.15s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "TypePicker-5",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Queue",
+          "title": "Queue",
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 30,
+            "h": 30
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(55, 65, 81)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "color, background-color, border-color, text-decoration-color, fill, stroke",
+            "transitionDuration": "0.15s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "TypePicker-6",
+          "tag": "input",
+          "role": "combobox",
+          "ariaLabel": "Search icons",
+          "title": null,
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 198,
+            "h": 28
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "-2px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(224, 242, 254) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(14, 165, 233)",
+            "opacity": "1"
+          }
+        }
+      ],
+      "smallestHitArea": {
+        "w": 30,
+        "h": 30,
+        "control": "Actor",
+        "opacityAtMeasure": "1",
+        "meets24x24": true,
+        "meets44x44": false
+      },
+      "optionsAfterSearch": [
+        {
+          "id": "typeopt-0",
+          "tag": "li",
+          "role": "option",
+          "ariaLabel": null,
+          "title": null,
+          "text": "@s3",
+          "tabIndex": -1,
+          "box": {
+            "w": 188,
+            "h": 26
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": null,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(12, 74, 110)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          }
+        },
+        {
+          "id": "typeopt-1",
+          "tag": "li",
+          "role": "option",
+          "ariaLabel": null,
+          "title": null,
+          "text": "@s3glacier",
+          "tabIndex": -1,
+          "box": {
+            "w": 188,
+            "h": 26
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": null,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          }
+        },
+        {
+          "id": "typeopt-2",
+          "tag": "li",
+          "role": "option",
+          "ariaLabel": null,
+          "title": null,
+          "text": "@amazons3lens",
+          "tabIndex": -1,
+          "box": {
+            "w": 188,
+            "h": 26
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": null,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          }
+        },
+        {
+          "id": "typeopt-3",
+          "tag": "li",
+          "role": "option",
+          "ariaLabel": null,
+          "title": null,
+          "text": "@amazons3batch",
+          "tabIndex": -1,
+          "box": {
+            "w": 188,
+            "h": 26
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": null,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          }
+        },
+        {
+          "id": "typeopt-4",
+          "tag": "li",
+          "role": "option",
+          "ariaLabel": null,
+          "title": null,
+          "text": "@amazons3vault",
+          "tabIndex": -1,
+          "box": {
+            "w": 188,
+            "h": 26
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": null,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          }
+        },
+        {
+          "id": "typeopt-5",
+          "tag": "li",
+          "role": "option",
+          "ariaLabel": null,
+          "title": null,
+          "text": "@amazons3bucket",
+          "tabIndex": -1,
+          "box": {
+            "w": 188,
+            "h": 26
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": null,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          }
+        },
+        {
+          "id": "typeopt-6",
+          "tag": "li",
+          "role": "option",
+          "ariaLabel": null,
+          "title": null,
+          "text": "@amazons3lambda",
+          "tabIndex": -1,
+          "box": {
+            "w": 188,
+            "h": 26
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": null,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          }
+        },
+        {
+          "id": "typeopt-7",
+          "tag": "li",
+          "role": "option",
+          "ariaLabel": null,
+          "title": null,
+          "text": "@amazons3object",
+          "tabIndex": -1,
+          "box": {
+            "w": 188,
+            "h": 26
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": null,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          }
+        }
+      ],
+      "optionsAfterSearchSmallest": {
+        "w": 188,
+        "h": 26,
+        "control": "@s3",
+        "opacityAtMeasure": "1",
+        "meets24x24": true,
+        "meets44x44": false
+      },
+      "ok": true
+    },
+    {
+      "name": "ColorPicker",
+      "url": "/e2e/fixtures/insert-participant.html",
+      "animationPoll": {
+        "windowMs": 600,
+        "framesSampled": 75,
+        "rootAppearedAtMs": 25,
+        "animations": []
+      },
+      "root": {
+        "selector": "[role=\"dialog\"][aria-label=\"Participant colour\"]",
+        "box": {
+          "w": 180,
+          "h": 107
+        },
+        "transition-property": "all",
+        "transition-duration": "0s",
+        "transition-timing-function": "ease",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(15, 23, 42, 0.16) 0px 10px 30px 0px, rgba(15, 23, 42, 0.08) 0px 0px 0px 1px",
+        "border-radius": "10px",
+        "background-color": "rgb(255, 255, 255)",
+        "z-index": "auto",
+        "opacity": "1",
+        "position": "static"
+      },
+      "controls": [
+        {
+          "id": "ColorPicker-0",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Rose",
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ColorPicker-1",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Amber",
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ColorPicker-2",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Emerald",
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ColorPicker-3",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Blue",
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ColorPicker-4",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Violet",
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ColorPicker-5",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Deep rose",
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(255, 255, 255)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ColorPicker-6",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Brown",
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(255, 255, 255)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ColorPicker-7",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Deep emerald",
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(255, 255, 255)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ColorPicker-8",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Deep blue",
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(255, 255, 255)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ColorPicker-9",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Deep violet",
+          "title": null,
+          "text": "A",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(255, 255, 255)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "borderRadius": "5px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(125, 211, 252) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgba(0, 0, 0, 0.12)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ColorPicker-10",
+          "tag": "input",
+          "role": null,
+          "ariaLabel": "Custom hex color",
+          "title": null,
+          "text": "",
+          "tabIndex": 0,
+          "box": {
+            "w": 160,
+            "h": 28
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(17, 24, 39)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(224, 242, 254) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(14, 165, 233)",
+            "opacity": "1"
+          }
+        }
+      ],
+      "smallestHitArea": {
+        "w": 24,
+        "h": 24,
+        "control": "Rose",
+        "opacityAtMeasure": "1",
+        "meets24x24": true,
+        "meets44x44": false
+      },
+      "ok": true
+    },
+    {
+      "name": "MessageStylePanel",
+      "url": "/e2e/fixtures/editable-label.html",
+      "animationPoll": {
+        "windowMs": 600,
+        "framesSampled": 70,
+        "rootAppearedAtMs": 9,
+        "animations": []
+      },
+      "root": {
+        "selector": "#style-panel",
+        "box": {
+          "w": 344.140625,
+          "h": 36
+        },
+        "transition-property": "all",
+        "transition-duration": "0s",
+        "transition-timing-function": "ease",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "none",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "z-index": "40",
+        "opacity": "1",
+        "position": "absolute"
+      },
+      "card": {
+        "selector": "#style-panel > div",
+        "box": {
+          "w": 344.140625,
+          "h": 36
+        },
+        "transition-property": "all",
+        "transition-duration": "0s",
+        "transition-timing-function": "ease",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0px 2px 4px -2px",
+        "border-radius": "6px",
+        "background-color": "rgb(255, 255, 255)",
+        "z-index": "40",
+        "opacity": "1",
+        "position": "static"
+      },
+      "controls": [
+        {
+          "id": "MessageStylePanel-0",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "bold",
+          "title": "Apply bold",
+          "text": "B",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 28
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "auto",
+            "outlineWidth": "1px",
+            "outlineColor": "rgb(0, 95, 204)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "MessageStylePanel-1",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "italic",
+          "title": "Apply italic",
+          "text": "I",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 28
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "auto",
+            "outlineWidth": "1px",
+            "outlineColor": "rgb(0, 95, 204)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "MessageStylePanel-2",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "underline",
+          "title": "Apply underline",
+          "text": "U",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 28
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "auto",
+            "outlineWidth": "1px",
+            "outlineColor": "rgb(0, 95, 204)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "MessageStylePanel-3",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "strikethrough",
+          "title": "Apply strikethrough",
+          "text": "S",
+          "tabIndex": 0,
+          "box": {
+            "w": 24,
+            "h": 28
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "auto",
+            "outlineWidth": "1px",
+            "outlineColor": "rgb(0, 95, 204)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "MessageStylePanel-4",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": null,
+          "title": "Rename message label",
+          "text": "RENAME",
+          "tabIndex": 0,
+          "box": {
+            "w": 61.28,
+            "h": 22
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "auto",
+            "outlineWidth": "1px",
+            "outlineColor": "rgb(0, 95, 204)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "MessageStylePanel-5",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": null,
+          "title": "Change message type",
+          "text": "ASYNC ▾",
+          "tabIndex": 0,
+          "box": {
+            "w": 62.02,
+            "h": 22
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "auto",
+            "outlineWidth": "1px",
+            "outlineColor": "rgb(0, 95, 204)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "MessageStylePanel-6",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": null,
+          "title": "Wrap in fragment",
+          "text": "WRAP ▾",
+          "tabIndex": 0,
+          "box": {
+            "w": 57.84,
+            "h": 22
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(0, 0, 0)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "6px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "auto",
+            "outlineWidth": "1px",
+            "outlineColor": "rgb(0, 95, 204)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        }
+      ],
+      "smallestHitArea": {
+        "w": 24,
+        "h": 28,
+        "control": "bold",
+        "opacityAtMeasure": "1",
+        "meets24x24": true,
+        "meets44x44": false
+      },
+      "ok": true
+    },
+    {
+      "name": "GapHandleZoneMenu",
+      "url": "/e2e/fixtures/create-message.html",
+      "createHandle": {
+        "root": {
+          "selector": "[data-testid=\"message-create-handle-1-B\"]",
+          "box": {
+            "w": 12,
+            "h": 12
+          },
+          "transition-property": "all",
+          "transition-duration": "0s",
+          "transition-timing-function": "ease",
+          "transition-delay": "0s",
+          "animation-name": "none",
+          "animation-duration": "0s",
+          "box-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "border-radius": "9999px",
+          "background-color": "rgb(255, 255, 255)",
+          "z-index": "50",
+          "opacity": "1",
+          "position": "absolute"
+        },
+        "controls": [
+          {
+            "id": "handle-0",
+            "tag": "button",
+            "role": null,
+            "ariaLabel": "Drag to create a message from B",
+            "title": null,
+            "text": "",
+            "tabIndex": 0,
+            "box": {
+              "w": 12,
+              "h": 12
+            },
+            "visibleOpacity": "1",
+            "disabledAttr": false,
+            "disabledProp": false,
+            "ariaDisabled": null,
+            "pointerEvents": "auto",
+            "rest": {
+              "outlineStyle": "none",
+              "outlineWidth": "0px",
+              "outlineColor": "rgb(51, 65, 85)",
+              "outlineOffset": "0px",
+              "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+              "borderColor": "rgb(51, 65, 85)",
+              "borderRadius": "9999px",
+              "transitionProperty": "all",
+              "transitionDuration": "0s"
+            }
+          }
+        ]
+      },
+      "animationPoll": {
+        "windowMs": 600,
+        "framesSampled": 72,
+        "rootAppearedAtMs": 5,
+        "animations": []
+      },
+      "keyboardFocus": {
+        "method": "real keyboard (focus gap, Shift+F10)",
+        "isActiveElement": true,
+        "matchesFocusVisible": true,
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "none",
+        "backgroundColor": "rgb(241, 245, 249)"
+      },
+      "root": {
+        "selector": "[data-testid=\"gap-insert-menu-1\"]",
+        "box": {
+          "w": 140,
+          "h": 34
+        },
+        "transition-property": "all",
+        "transition-duration": "0s",
+        "transition-timing-function": "ease",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px",
+        "border-radius": "4px",
+        "background-color": "rgb(255, 255, 255)",
+        "z-index": "60",
+        "opacity": "1",
+        "position": "absolute"
+      },
+      "controls": [
+        {
+          "id": "GapHandleZoneMenu-0",
+          "tag": "button",
+          "role": "menuitem",
+          "ariaLabel": null,
+          "title": null,
+          "text": "Insert divider",
+          "tabIndex": 0,
+          "box": {
+            "w": 130,
+            "h": 24
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "borderRadius": "4px",
+            "transitionProperty": "all",
+            "transitionDuration": "0s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineColor": "rgba(0, 0, 0, 0)",
+            "outlineOffset": "2px",
+            "boxShadow": "none",
+            "borderColor": "rgb(229, 231, 235)",
+            "opacity": "1"
+          }
+        }
+      ],
+      "smallestHitArea": {
+        "w": 130,
+        "h": 24,
+        "control": "Insert divider",
+        "opacityAtMeasure": "1",
+        "meets24x24": true,
+        "meets44x44": false
+      },
+      "ok": true
+    },
+    {
+      "name": "ParticipantInsertControls",
+      "url": "/e2e/fixtures/insert-participant.html",
+      "buttonAtRest": {
+        "selector": "[data-testid=\"participant-insert-button-0\"]",
+        "box": {
+          "w": 16,
+          "h": 16
+        },
+        "transition-property": "all",
+        "transition-duration": "0.15s",
+        "transition-timing-function": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "none",
+        "border-radius": "9999px",
+        "background-color": "rgb(255, 255, 255)",
+        "z-index": "auto",
+        "opacity": "0",
+        "position": "absolute"
+      },
+      "hitWrapperAtRest": {
+        "w": 36,
+        "h": 36,
+        "className": "group absolute -translate-x-1/2",
+        "pointerEvents": "auto"
+      },
+      "animationPoll": {
+        "windowMs": 600,
+        "framesSampled": 72,
+        "rootAppearedAtMs": 0,
+        "animations": [
+          {
+            "kind": "CSSTransition",
+            "name": "border-bottom-color",
+            "duration": 150,
+            "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+            "delay": 0,
+            "pseudoElement": null,
+            "target": "button[data-testid=participant-insert-button-0].absolute.flex.items-center.justify-center",
+            "firstSeenMs": 12,
+            "lastSeenMs": 159,
+            "playStates": [
+              "running"
+            ]
+          },
+          {
+            "kind": "CSSTransition",
+            "name": "border-left-color",
+            "duration": 150,
+            "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+            "delay": 0,
+            "pseudoElement": null,
+            "target": "button[data-testid=participant-insert-button-0].absolute.flex.items-center.justify-center",
+            "firstSeenMs": 12,
+            "lastSeenMs": 159,
+            "playStates": [
+              "running"
+            ]
+          },
+          {
+            "kind": "CSSTransition",
+            "name": "border-right-color",
+            "duration": 150,
+            "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+            "delay": 0,
+            "pseudoElement": null,
+            "target": "button[data-testid=participant-insert-button-0].absolute.flex.items-center.justify-center",
+            "firstSeenMs": 12,
+            "lastSeenMs": 159,
+            "playStates": [
+              "running"
+            ]
+          },
+          {
+            "kind": "CSSTransition",
+            "name": "border-top-color",
+            "duration": 150,
+            "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+            "delay": 0,
+            "pseudoElement": null,
+            "target": "button[data-testid=participant-insert-button-0].absolute.flex.items-center.justify-center",
+            "firstSeenMs": 12,
+            "lastSeenMs": 159,
+            "playStates": [
+              "running"
+            ]
+          },
+          {
+            "kind": "CSSTransition",
+            "name": "box-shadow",
+            "duration": 150,
+            "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+            "delay": 0,
+            "pseudoElement": null,
+            "target": "button[data-testid=participant-insert-button-0].absolute.flex.items-center.justify-center",
+            "firstSeenMs": 12,
+            "lastSeenMs": 159,
+            "playStates": [
+              "running"
+            ]
+          },
+          {
+            "kind": "CSSTransition",
+            "name": "color",
+            "duration": 150,
+            "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+            "delay": 0,
+            "pseudoElement": null,
+            "target": "button[data-testid=participant-insert-button-0].absolute.flex.items-center.justify-center",
+            "firstSeenMs": 12,
+            "lastSeenMs": 159,
+            "playStates": [
+              "running"
+            ]
+          },
+          {
+            "kind": "CSSTransition",
+            "name": "opacity",
+            "duration": 150,
+            "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+            "delay": 0,
+            "pseudoElement": null,
+            "target": "button[data-testid=participant-insert-button-0].absolute.flex.items-center.justify-center",
+            "firstSeenMs": 12,
+            "lastSeenMs": 159,
+            "playStates": [
+              "running"
+            ]
+          }
+        ]
+      },
+      "root": {
+        "selector": "[data-testid=\"participant-insert-button-0\"]",
+        "box": {
+          "w": 16,
+          "h": 16
+        },
+        "transition-property": "all",
+        "transition-duration": "0.15s",
+        "transition-timing-function": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "border-radius": "9999px",
+        "background-color": "rgb(255, 255, 255)",
+        "z-index": "auto",
+        "opacity": "1",
+        "position": "absolute"
+      },
+      "controls": [
+        {
+          "id": "ParticipantInsertControls-0",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Add participant at the start",
+          "title": "Add participant",
+          "text": "+",
+          "tabIndex": 0,
+          "box": {
+            "w": 16,
+            "h": 16
+          },
+          "visibleOpacity": "0",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(148, 163, 184)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(203, 213, 225)",
+            "borderRadius": "9999px",
+            "transitionProperty": "all",
+            "transitionDuration": "0.15s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(148, 163, 184)",
+            "outlineOffset": "0px",
+            "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(203, 213, 225)",
+            "opacity": "0"
+          }
+        },
+        {
+          "id": "ParticipantInsertControls-1",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Insert participant between A and C",
+          "title": "Insert participant between A and C",
+          "text": "+",
+          "tabIndex": 0,
+          "box": {
+            "w": 16,
+            "h": 16
+          },
+          "visibleOpacity": "1",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(14, 165, 233)",
+            "outlineOffset": "0px",
+            "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+            "borderColor": "rgb(56, 189, 248)",
+            "borderRadius": "9999px",
+            "transitionProperty": "all",
+            "transitionDuration": "0.15s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(14, 165, 233)",
+            "outlineOffset": "0px",
+            "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+            "borderColor": "rgb(56, 189, 248)",
+            "opacity": "1"
+          }
+        },
+        {
+          "id": "ParticipantInsertControls-2",
+          "tag": "button",
+          "role": null,
+          "ariaLabel": "Add participant",
+          "title": "Add participant",
+          "text": "+",
+          "tabIndex": 0,
+          "box": {
+            "w": 16,
+            "h": 16
+          },
+          "visibleOpacity": "0",
+          "disabledAttr": false,
+          "disabledProp": false,
+          "ariaDisabled": null,
+          "pointerEvents": "auto",
+          "rest": {
+            "outlineStyle": "none",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(148, 163, 184)",
+            "outlineOffset": "0px",
+            "boxShadow": "none",
+            "borderColor": "rgb(203, 213, 225)",
+            "borderRadius": "9999px",
+            "transitionProperty": "all",
+            "transitionDuration": "0.15s"
+          },
+          "focused": {
+            "method": "CDP CSS.forcePseudoState(focus,focus-visible) + element.focus()",
+            "isActiveElement": true,
+            "matchesFocusVisibleNatively": true,
+            "outlineStyle": "solid",
+            "outlineWidth": "0px",
+            "outlineColor": "rgb(148, 163, 184)",
+            "outlineOffset": "0px",
+            "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "borderColor": "rgb(203, 213, 225)",
+            "opacity": "0"
+          }
+        }
+      ],
+      "smallestHitArea": {
+        "w": 16,
+        "h": 16,
+        "control": "Add participant at the start",
+        "opacityAtMeasure": "0",
+        "meets24x24": false,
+        "meets44x44": false
+      },
+      "buttonAfterHover": {
+        "selector": "[data-testid=\"participant-insert-button-0\"]",
+        "box": {
+          "w": 16,
+          "h": 16
+        },
+        "transition-property": "all",
+        "transition-duration": "0.15s",
+        "transition-timing-function": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "border-radius": "9999px",
+        "background-color": "rgb(255, 255, 255)",
+        "z-index": "auto",
+        "opacity": "1",
+        "position": "absolute"
+      },
+      "ok": true
+    },
+    {
+      "name": "PrivacyTooltip",
+      "mounted": "harness",
+      "note": "src/components/DiagramFrame/Privacy/index.tsx is not imported by any other src file at this commit (grep 'Privacy' outside the folder hits only Icons.tsx). The harness imports index.module.css through the Vite dev server and builds the same div (tooltip + bottom + privacy classes, data-tooltip text, 24x24 content) at (600,700).",
+      "cssModuleClasses": {
+        "tooltip": "_tooltip_5kyas_1",
+        "bottom": "_bottom_5kyas_29"
+      },
+      "root": {
+        "selector": "#measure-privacy",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "transition-property": "all",
+        "transition-duration": "0s",
+        "transition-timing-function": "ease",
+        "transition-delay": "0s",
+        "animation-name": "none",
+        "animation-duration": "0s",
+        "box-shadow": "none",
+        "border-radius": "0px",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "z-index": "10",
+        "opacity": "1",
+        "position": "relative"
+      },
+      "tooltipBeforeHover": {
+        "selector": "#measure-privacy",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "display": "none",
+        "visibility": "visible",
+        "opacity": "0",
+        "top": "80%",
+        "transition-property": "opacity, top",
+        "transition-duration": "0.3s, 0.3s",
+        "transition-timing-function": "ease, cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        "transition-delay": "0.3s, 0.3s",
+        "box-shadow": "none",
+        "border-radius": "4px",
+        "background-color": "rgb(232, 233, 233)",
+        "z-index": "auto"
+      },
+      "tooltipImmediatelyAfterHover": {
+        "selector": "#measure-privacy",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "top": "31.1875px",
+        "transition-property": "opacity, top",
+        "transition-duration": "0.3s, 0.3s",
+        "transition-timing-function": "ease, cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        "transition-delay": "0.3s, 0.3s",
+        "box-shadow": "none",
+        "border-radius": "4px",
+        "background-color": "rgb(232, 233, 233)",
+        "z-index": "auto"
+      },
+      "animationPoll": {
+        "windowMs": 600,
+        "framesSampled": 72,
+        "rootAppearedAtMs": null,
+        "animations": []
+      },
+      "tooltipAt700msAfterHover": {
+        "selector": "#measure-privacy",
+        "box": {
+          "w": 24,
+          "h": 24
+        },
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "top": "31.1875px",
+        "transition-property": "opacity, top",
+        "transition-duration": "0.3s, 0.3s",
+        "transition-timing-function": "ease, cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        "transition-delay": "0.3s, 0.3s",
+        "box-shadow": "none",
+        "border-radius": "4px",
+        "background-color": "rgb(232, 233, 233)",
+        "z-index": "auto"
+      },
+      "controls": [],
+      "smallestHitArea": {
+        "w": 24,
+        "h": 24,
+        "control": "privacy icon (no tabindex, not focusable)"
+      },
+      "ok": true
+    }
+  ]
+}

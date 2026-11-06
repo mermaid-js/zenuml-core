@@ -1,4 +1,3 @@
-import logger from "@/logger/logger";
 import { cn } from "@/utils";
 import { Message } from "../Message/Message";
 import { Occurrence } from "../Interaction/Occurrence/Occurrence";
@@ -13,7 +12,6 @@ import { cursorAtom, onElementClickAtom } from "@/store/Store";
 import { Comment } from "../Comment/Comment";
 import { useEffect, useRef, useState } from "react";
 import { useArrow } from "../useArrow";
-import { EventBus } from "@/EventBus";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 import { CreationMessageLabel } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/CreationMessageLabel";
 
@@ -36,10 +34,14 @@ export const Creation = (props: {
   const [start, stop] = [signature?.start?.start, signature?.stop?.stop];
 
 
+  // The creator is the statement's own origin, not the enclosing block's
+  // `origin` prop: a fragment hands its left-most participant to its block,
+  // which is not the creator (#322). Interaction resolves `source` the same way.
+  const source = creation?.From() || props.origin;
   const { translateX, interactionWidth, rightToLeft } = useArrow({
     context: props.context,
     origin: props.origin,
-    source: props.origin,
+    source,
     target: creation?.Owner(),
   });
 
@@ -62,12 +64,6 @@ export const Creation = (props: {
 
     // Get the actual width from the DOM element
     setParticipantWidth(participantElement.getBoundingClientRect().width);
-    logger.debug(
-      `Found participant element for ${target}, width: ${participantWidth}px`,
-    );
-
-    EventBus.emit("participant_set_top");
-    logger.debug(`Init or update message container for ${target}`);
   }, [target, participantWidth]);
 
   return (

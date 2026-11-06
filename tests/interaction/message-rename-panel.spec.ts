@@ -1,16 +1,21 @@
 import { test, expect } from "../fixtures";
+import { clickMessageArrow } from "./clickMessageArrow";
 
 test.describe("Message Rename Panel", () => {
-  test("selects a message and clears selection on empty canvas click", async ({ page }) => {
+  test("selects a message and clears selection on empty canvas click", async ({
+    page,
+  }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(
+      page.locator(".sequence-diagram .participant").first(),
+    ).toBeVisible({
       timeout: 5000,
     });
 
     const asyncMessage = page
       .locator(".interaction.async .message")
       .filter({ hasText: "Hello Bob" });
-    await asyncMessage.click();
+    await clickMessageArrow(asyncMessage);
 
     await expect(asyncMessage).toHaveAttribute("data-selected", "true");
     await expect(page.getByTestId("message-rename")).toBeVisible();
@@ -23,14 +28,16 @@ test.describe("Message Rename Panel", () => {
 
   test("clears message selection with escape", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(
+      page.locator(".sequence-diagram .participant").first(),
+    ).toBeVisible({
       timeout: 5000,
     });
 
     const asyncMessage = page
       .locator(".interaction.async .message")
       .filter({ hasText: "Hello Bob" });
-    await asyncMessage.click();
+    await clickMessageArrow(asyncMessage);
 
     await expect(asyncMessage).toHaveAttribute("data-selected", "true");
     await expect(page.getByTestId("message-rename")).toBeVisible();
@@ -43,14 +50,16 @@ test.describe("Message Rename Panel", () => {
 
   test("renames an async message from the toolbar", async ({ page }) => {
     await page.goto("/e2e/fixtures/editable-label.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(
+      page.locator(".sequence-diagram .participant").first(),
+    ).toBeVisible({
       timeout: 5000,
     });
 
     const asyncMessage = page
       .locator(".interaction.async .message")
       .filter({ hasText: "Hello Bob" });
-    await asyncMessage.click();
+    await clickMessageArrow(asyncMessage);
 
     const renameButton = page.getByTestId("message-rename");
     await expect(renameButton).toBeVisible();
@@ -79,7 +88,41 @@ test.describe("Message Rename Panel", () => {
     await expect(renamedMessage).toBeVisible({ timeout: 10000 });
     await expect(renamedMessage).toHaveAttribute("data-selected", "true");
     await expect
-      .poll(() => page.evaluate(() => (window as any).__lastContentChange ?? null))
+      .poll(() =>
+        page.evaluate(() => (window as any).__lastContentChange ?? null),
+      )
       .toContain("D->C:Hello Alice");
+  });
+
+  test("rename is aria-disabled for a message with no label and explains why", async ({
+    page,
+  }) => {
+    await page.goto(
+      `/e2e/fixtures/creation.html?dsl=${encodeURIComponent("A.m()\nnew B")}`,
+    );
+    await expect(
+      page.locator(".sequence-diagram .participant").first(),
+    ).toBeVisible({
+      timeout: 5000,
+    });
+
+    await clickMessageArrow(page.locator(".interaction.creation .message"));
+    const rename = page.getByTestId("message-rename");
+    await expect(rename).toBeVisible();
+    await expect(rename).toHaveAttribute("aria-disabled", "true");
+    // The title stays readable: no pointer-events: none.
+    await expect(rename).toHaveAttribute(
+      "title",
+      "Cannot rename: message has no label",
+    );
+    await expect(rename).not.toHaveCSS("pointer-events", "none");
+
+    await rename.hover();
+    // Playwright treats aria-disabled as not enabled; force the real click.
+    await rename.click({ force: true });
+    await page.waitForTimeout(200);
+    await expect(page.locator("[contenteditable='true']")).toHaveCount(0);
+    // The panel stays open: the click did nothing.
+    await expect(rename).toBeVisible();
   });
 });

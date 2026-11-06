@@ -14,7 +14,7 @@
  *  4. getText() concatenates non-hidden leaf texts; getFormattedText() is the
  *     raw doc slice [offset, end) through formatText (ParametersContext
  *     overrides it);
- *  5. getComment() reproduces src/parser/index.js:51-66 byte-for-byte over the
+ *  5. getComment() reproduces src/parser/index.ts:51-66 byte-for-byte over the
  *     CST leaf stream (BraceBlockContext anchors on its LAST token);
  *  6. wrapper levels (stat, head, dividerNote, parameter, condition, starter,
  *     content, property nodes) are synthesized so parentCtx chains and
@@ -30,6 +30,10 @@ import { GrammarUtils, isCompositeCstNode, isLeafCstNode } from "langium";
 import type { AstNode, CstNode } from "langium";
 import { formatText } from "@/utils/StringUtil";
 import { Assignment } from "@/parser/Messages/Assignment";
+import {
+  hoistNamelessCreations,
+  isNamelessCreation,
+} from "@/parser/NamelessCreation";
 
 /* ------------------------------------------------------------------ */
 /* Document context: flattened leaf stream + memoization caches        */
@@ -298,7 +302,19 @@ export abstract class Ctx {
 
   getFormattedText(): string {
     const { offset, end } = this._span();
-    return formatText(this._doc.text.slice(offset, end));
+    const text = formatText(this._doc.text.slice(offset, end));
+    // A lone unclosed string (`"Bob Sm`) is a name still being typed; mirror
+    // the ANTLR side, which drops the opening quote (src/parser/index.ts).
+    const doc = this._doc;
+    const first = doc.lowerBound(offset);
+    const leaf = doc.leaves[first];
+    if (leaf && leaf.type === "USTRING" && leaf.offset < end) {
+      let next = first + 1;
+      while (doc.leaves[next]?.hidden) next++;
+      const after = doc.leaves[next];
+      if (!after || after.offset >= end) return text.length > 1 ? text.replace(/^"/, "") : text;
+    }
+    return text;
   }
 
   /* ---- comments (normative algorithm, 09 §3.4) ---- */
@@ -650,13 +666,28 @@ export class ParticipantContext extends Ctx {
 }
 
 export class StereotypeContext extends Ctx {
-  name(): NameContext | null {
-    return this._propNode(NameContext, "name");
+  /** ANTLR `stereotype: SOPEN name+ SCLOSE | …` — one NameContext per word. */
+  name(i?: number): any {
+    return dual(this._names(), i);
+  }
+
+  private _names(): NameContext[] {
+    const ast = this._ast;
+    if (!ast?.$cstNode || !ast.names?.length) return [];
+    return this._synth(ast, "names", () => {
+      const csts = GrammarUtils.findNodesForProperty(ast.$cstNode, "names");
+      return csts.map(
+        (cst: CstNode) =>
+          new NameContext(this._doc, null, this, {
+            offset: cst.offset,
+            end: cst.end,
+          }),
+      );
+    });
   }
 
   protected override _buildChildren(): Ctx[] {
-    const name = this.name();
-    return name ? [name] : [];
+    return this._names();
   }
 }
 
@@ -687,9 +718,13 @@ export class EmojiContext extends Ctx {
 /* ------------------------------------------------------------------ */
 
 export class BlockContext extends Ctx {
+  /** A nameless `new` is replaced by its body's statements (#673). */
   stat(i?: number): any {
-    const arr = (this._ast.stats ?? []).map((s: any) => this._statWrapper(s));
-    return dual(arr, i);
+    return dual(hoistNamelessCreations(this._rawStats()), i);
+  }
+
+  private _rawStats(): StatContext[] {
+    return (this._ast.stats ?? []).map((s: any) => this._statWrapper(s));
   }
 
   /** ANTLR block.stop = last stat's stop, which can be an EVENT_END. */
@@ -706,7 +741,7 @@ export class BlockContext extends Ctx {
   }
 
   protected override _buildChildren(): Ctx[] {
-    return this.stat();
+    return this._rawStats();
   }
 }
 
@@ -788,14 +823,17 @@ export class StatContext extends Ctx {
 
   /**
    * The inferred sender ("current lifeline") of this statement
-   * (src/parser/Origin.js StatContext override — the generic
+   * (src/parser/Origin.ts StatContext override — the generic
    * ParserRuleContext.Origin latent-loop is deliberately NOT ported).
    */
   Origin(): string | undefined {
     let ctx: Ctx | null = this.parentCtx;
     while (ctx) {
       if (ctx instanceof ProgContext) return ctx.Starter();
-      if (ctx instanceof MessageContext || ctx instanceof CreationContext) {
+      if (
+        ctx instanceof MessageContext ||
+        (ctx instanceof CreationContext && !isNamelessCreation(ctx))
+      ) {
         const receiver = ctx.Owner();
         if (receiver) return receiver;
       }
@@ -821,7 +859,10 @@ export class StatContext extends Ctx {
 
 function getOwnerFromAncestor(ctx: Ctx | null): string | undefined {
   while (ctx) {
-    if (ctx instanceof CreationContext || ctx instanceof MessageContext)
+    if (
+      (ctx instanceof CreationContext && !isNamelessCreation(ctx)) ||
+      ctx instanceof MessageContext
+    )
       return ctx.Owner();
     ctx = ctx.parentCtx;
   }
@@ -1202,10 +1243,6 @@ export class CreationContext extends Ctx {
     return this.creationBody()?.construct()?.getFormattedText();
   }
 
-  To(): string | undefined {
-    return this.Constructor();
-  }
-
   Owner(): string | undefined {
     if (!this.Constructor()) return "Missing Constructor";
     const assignee = this.Assignee();
@@ -1230,10 +1267,6 @@ export class CreationContext extends Ctx {
   SignatureText(): string {
     const text = this.ParametersText() || "create";
     return `«${text}»`;
-  }
-
-  isParamValid(): boolean {
-    return (this.creationBody()!.parameters()?.parameter()?.length ?? 0) > 0;
   }
 
   Assignment(): Assignment | undefined {
@@ -1357,7 +1390,7 @@ export class RetContext extends Ctx {
     );
   }
 
-  /** Port of src/parser/RetContext.js ReturnTo() — the hairiest upward walk. */
+  /** Port of src/parser/RetContext.ts ReturnTo() — the hairiest upward walk. */
   ReturnTo(): string | undefined {
     const asyncToCtx =
       this.asyncMessage()?.to() || this.returnAsyncMessage()?.to();
@@ -1480,7 +1513,7 @@ export class ParExprContext extends Ctx {
 }
 
 export class ConditionContext extends Ctx {
-  // _ast is the concrete condition value (Expr | InExpr | TextExpr); this
+  // _ast is the concrete condition value (Expr | InExpr | TextExpr | Emoji); this
   // wrapper recreates ANTLR's `condition` rule level. ANTLR's leading
   // direct-`atom` alternative maps to AtomExpr here (10-ast-mapping §5.4):
   // atom() unwraps it, and expr() deliberately excludes it.
@@ -1514,12 +1547,17 @@ export class ConditionContext extends Ctx {
     return this._ast?.$type === "TextExpr" ? this._wrap(this._ast) : null;
   }
 
+  emoji(): EmojiContext | null {
+    return this._ast?.$type === "Emoji" ? this._wrap(this._ast) : null;
+  }
+
   protected override _buildChildren(): Ctx[] {
     const child =
       this.atom() ??
       this.expr() ??
       this.inExpr() ??
       this.textExpr() ??
+      this.emoji() ??
       this._wrap(this._ast);
     return child ? [child] : [];
   }

@@ -8,17 +8,7 @@ import type { WidthFunc } from "../positioning/Coordinate";
 import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { CodeRange } from "../parser/CodeRange";
-import logger from "@/logger/logger";
-
-type VerticalMode = "html" | "legacy";
-const resolveVerticalMode = (): VerticalMode => {
-  const mode =
-    import.meta.env.VITE_VERTICAL_MODE === "legacy" ? "legacy" : "html";
-  logger.info(
-    `[VerticalMode] resolved="${mode}" (VITE_VERTICAL_MODE="${import.meta.env.VITE_VERTICAL_MODE}")`,
-  );
-  return mode;
-};
+import type { DiagramPalette } from "../surface";
 
 export const resolveWidthProvider = (): WidthFunc => {
   const urlParam =
@@ -29,13 +19,12 @@ export const resolveWidthProvider = (): WidthFunc => {
     (urlParam || import.meta.env.VITE_WIDTH_PROVIDER) === "canvas"
       ? "canvas"
       : "browser";
-  logger.debug(`[ZenUML] WidthProvider: ${mode}`);
   return mode === "canvas" ? WidthProviderOnCanvas : WidthProviderOnBrowser;
 };
 
 /*
  * RenderMode
- * Static: Compatible with Mermaid which renders once and never update. It also disables sticky participants and hides the footer
+ * Static: Compatible with Mermaid which renders once and never updates. It also disables sticky participants.
  * Dynamic: Render once and update when code changes
  */
 export const enum RenderMode {
@@ -44,19 +33,13 @@ export const enum RenderMode {
 }
 
 export const codeAtom = atom("");
+/** A monotonically increasing request id observed after React commits. */
+export const renderRevisionAtom = atom(0);
 
 export const rootContextAtom = atom((get) => {
   const code = get(codeAtom);
   if (!code.trim()) return null;
   return RootContext(code);
-});
-
-export const titleAtom = atom<string | undefined>((get) => {
-  const titleContext = get(rootContextAtom)?.title();
-  if (!titleContext || typeof (titleContext as any).content !== "function") {
-    return undefined;
-  }
-  return (titleContext as any).content();
 });
 
 export const participantsAtom = atom((get) => {
@@ -69,12 +52,7 @@ export const coordinatesAtom = atom(
   (get) => new Coordinates(get(rootContextAtom), resolveWidthProvider()),
 );
 
-export const verticalModeAtom = atom<VerticalMode>(resolveVerticalMode());
-
 export const verticalCoordinatesAtom = atom((get) => {
-  if (get(verticalModeAtom) === "legacy") {
-    return null;
-  }
   const rootContext = get(rootContextAtom);
   if (!rootContext) {
     return null;
@@ -82,14 +60,12 @@ export const verticalCoordinatesAtom = atom((get) => {
   return new VerticalCoordinates(rootContext);
 });
 
-export const themeAtom = atom("theme-default");
+/** The theme every instance starts with and falls back to. */
+export const DEFAULT_THEME = "theme-default";
+export const themeAtom = atom(DEFAULT_THEME);
+export const paletteAtom = atom<DiagramPalette | undefined>(undefined);
 
 export const enableScopedThemingAtom = atom<boolean>(false);
-
-export const themeIconDotAtom = atomWithLocalStorage(
-  `${location.hostname}-zenuml-theme-icon-dot`,
-  "1",
-);
 
 export const enableMultiThemeAtom = atom(true);
 
@@ -111,19 +87,26 @@ export const onSelectAtom = atom(null, (get, set, payload: string) => {
 
 export const cursorAtom = atom<number | null | undefined>(null);
 
-export const showTipsAtom = atom(false);
-
 export const modeAtom = atom(RenderMode.Dynamic);
 
 // Editing feature flags. Default off so embedders (e.g. mermaid) get safe behavior;
-// embedders opt in per surface. The dev site (main.tsx) enables them explicitly.
+// embedders opt in per surface. The demo pages enable them via demoConfig() in src/config.ts.
 export const enableParticipantInsertionAtom = atom(false);
 export const enableMessageInsertionAtom = atom(false);
 export const enableDividerInsertionAtom = atom(false);
 export const enableParticipantStyleEditingAtom = atom(false);
+export const enableMessageReorderAtom = atom(false);
+
+// Each ZenUml instance has its own Jotai store, so text editing blocks only
+// structural controls in that diagram. Tokens let multiple editors clean up
+// independently if a component unmounts while editing.
+export const activeTextEditorsAtom = atom<Set<symbol>>(new Set<symbol>());
+export const textEditingAtom = atom(
+  (get) => get(activeTextEditorsAtom).size > 0,
+);
 
 export const enableNumberingAtom = atomWithLocalStorage(
-  `${location.hostname}-zenuml-numbering`,
+  () => `${location.hostname}-zenuml-numbering`,
   true,
 );
 
@@ -131,11 +114,9 @@ export const stickyOffsetAtom = atom<number | false>(0);
 
 export const diagramElementAtom = atom<HTMLElement | null>(null);
 
-export const onElementClickAtom = atomWithFunctionValue(
-  (codeRange: CodeRange) => {
-    logger.debug("Element clicked", codeRange);
-  },
-);
+export const onElementClickAtom = atomWithFunctionValue<
+  (codeRange: CodeRange) => void
+>(() => {});
 
 export const onMessageClickAtom = atomWithFunctionValue<
   (context: any, element: HTMLElement) => void
@@ -194,6 +175,10 @@ export const lifelineReadyAtom = atom<string[]>([]);
 
 export const renderingReadyAtom = atom((get) => {
   const lifeLineReady = get(lifelineReadyAtom);
-  const { participants } = get(participantsAtom);
-  return lifeLineReady.length === Array.from(participants).length;
+  const participants = get(participantsAtom);
+  return participants
+    .Array()
+    .every((participant) => lifeLineReady.includes(participant.name));
 });
+
+export { participantPreviewAtom } from "./participantPreviewAtom";

@@ -1,0 +1,1257 @@
+{
+  "generated": "2026-10-20T12:01:20.459Z",
+  "args": {
+    "themes": [
+      "theme-default",
+      "theme-dark"
+    ],
+    "gate": null,
+    "baseline": null,
+    "dpr": [
+      1,
+      2
+    ],
+    "renderers": [
+      "dom",
+      "svg"
+    ],
+    "forcedColors": true,
+    "hostMatrix": true,
+    "cases": "all",
+    "baseUrl": "http://127.0.0.1:14010",
+    "startServer": false,
+    "port": 14020,
+    "json": "/private/tmp/claude-501/-Users-pengxiao-workspaces-zenuml-mmd-zenuml-core/e7d8d2af-204d-4c2c-bef6-b48912df9778/scratchpad/audit-full.json",
+    "md": "/private/tmp/claude-501/-Users-pengxiao-workspaces-zenuml-mmd-zenuml-core/e7d8d2af-204d-4c2c-bef6-b48912df9778/scratchpad/audit-full.md",
+    "measure": false,
+    "quick": false
+  },
+  "passes": [
+    {
+      "theme": "theme-default",
+      "renderer": "dom",
+      "dpr": 1,
+      "forcedColors": false,
+      "label": "theme-default/dom@1x",
+      "items": 2768,
+      "failures": 676
+    },
+    {
+      "theme": "theme-default",
+      "renderer": "dom",
+      "dpr": 2,
+      "forcedColors": false,
+      "label": "theme-default/dom@2x",
+      "items": 2768,
+      "failures": 676
+    },
+    {
+      "theme": "theme-default",
+      "renderer": "svg",
+      "dpr": 1,
+      "forcedColors": false,
+      "label": "theme-default/svg@1x",
+      "items": 2503,
+      "failures": 312
+    },
+    {
+      "theme": "theme-default",
+      "renderer": "svg",
+      "dpr": 2,
+      "forcedColors": false,
+      "label": "theme-default/svg@2x",
+      "items": 2503,
+      "failures": 312
+    },
+    {
+      "theme": "theme-default",
+      "renderer": "dom",
+      "dpr": 1,
+      "forcedColors": true,
+      "label": "theme-default/dom@1x forced-colors",
+      "items": 2097,
+      "failures": 590
+    },
+    {
+      "theme": "theme-default",
+      "renderer": "host-matrix",
+      "dpr": 1,
+      "forcedColors": false,
+      "label": "theme-default/host-matrix@1x",
+      "items": 8304,
+      "failures": 2028
+    },
+    {
+      "theme": "theme-dark",
+      "renderer": "dom",
+      "dpr": 1,
+      "forcedColors": false,
+      "label": "theme-dark/dom@1x",
+      "items": 2483,
+      "failures": 0
+    },
+    {
+      "theme": "theme-dark",
+      "renderer": "dom",
+      "dpr": 2,
+      "forcedColors": false,
+      "label": "theme-dark/dom@2x",
+      "items": 2483,
+      "failures": 0
+    },
+    {
+      "theme": "theme-dark",
+      "renderer": "svg",
+      "dpr": 1,
+      "forcedColors": false,
+      "label": "theme-dark/svg@1x",
+      "items": 2503,
+      "failures": 0
+    },
+    {
+      "theme": "theme-dark",
+      "renderer": "svg",
+      "dpr": 2,
+      "forcedColors": false,
+      "label": "theme-dark/svg@2x",
+      "items": 2503,
+      "failures": 0
+    },
+    {
+      "theme": "theme-dark",
+      "renderer": "dom",
+      "dpr": 1,
+      "forcedColors": true,
+      "label": "theme-dark/dom@1x forced-colors",
+      "items": 2097,
+      "failures": 0
+    },
+    {
+      "theme": "theme-dark",
+      "renderer": "host-matrix",
+      "dpr": 1,
+      "forcedColors": false,
+      "label": "theme-dark/host-matrix@1x",
+      "items": 7449,
+      "failures": 0
+    }
+  ],
+  "summary": {
+    "theme-default": [
+      {
+        "key": "fill:canvas",
+        "kind": "fill",
+        "role": "canvas",
+        "n": 170,
+        "minLc": 0,
+        "medianLc": 105.88271611584135,
+        "floor": null,
+        "fg": "#ffffff",
+        "bg": "#ffffff",
+        "worst": "smoke div.zenuml>div.p-1.bg-skin-canvas"
+      },
+      {
+        "key": "fill:comment-code",
+        "kind": "fill",
+        "role": "comment-code",
+        "n": 25,
+        "minLc": 0,
+        "medianLc": 0,
+        "floor": 30,
+        "fg": "#fbf8f9",
+        "bg": "#ffffff",
+        "worst": "demo1-smoke div.interaction.sync>div.comments.text-skin-comment>div>p>code.rest-api"
+      },
+      {
+        "key": "fill:divider-box",
+        "kind": "fill",
+        "role": "divider-box",
+        "n": 10,
+        "minLc": 0,
+        "medianLc": 0,
+        "floor": 30,
+        "fg": "#fff5ad",
+        "bg": "#ffffff",
+        "worst": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.name"
+      },
+      {
+        "key": "fill:fragment-header",
+        "kind": "fill",
+        "role": "fragment-header",
+        "n": 290,
+        "minLc": 0,
+        "medianLc": 0,
+        "floor": 30,
+        "fg": "#efefef",
+        "bg": "#ffffff",
+        "worst": "smoke div.block>div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div.header.bg-skin-fragment-header"
+      },
+      {
+        "key": "fill:number-badge",
+        "kind": "fill",
+        "role": "number-badge",
+        "n": 1400,
+        "minLc": 0,
+        "medianLc": 0,
+        "floor": 30,
+        "fg": "#f0f1f2",
+        "bg": "#ffffff",
+        "worst": "smoke div.block>div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>div.message-number.absolute"
+      },
+      {
+        "key": "fill:occurrence",
+        "kind": "fill",
+        "role": "occurrence",
+        "n": 715,
+        "minLc": 16.987610364324844,
+        "medianLc": 16.987610364324844,
+        "floor": 30,
+        "fg": "#dedede",
+        "bg": "#ffffff",
+        "worst": "smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6"
+      },
+      {
+        "key": "fill:participant-fill",
+        "kind": "fill",
+        "role": "participant-fill",
+        "n": 735,
+        "minLc": 0,
+        "medianLc": 0,
+        "floor": null,
+        "fg": "#ffffff",
+        "bg": "#ffffff",
+        "worst": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.participant.bg-skin-participant"
+      },
+      {
+        "key": "fill:svg-fill",
+        "kind": "fill",
+        "role": "svg-fill",
+        "n": 1336,
+        "minLc": 0,
+        "medianLc": 0,
+        "floor": null,
+        "fg": "#ffffff",
+        "bg": "#ffffff",
+        "worst": "smoke rect.frame-border-outer"
+      },
+      {
+        "key": "line:arrow-head",
+        "kind": "line",
+        "role": "arrow-head",
+        "n": 1512,
+        "minLc": 0,
+        "medianLc": 106.04067321268862,
+        "floor": 45,
+        "fg": "#000000",
+        "bg": "#000000",
+        "worst": "smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path"
+      },
+      {
+        "key": "line:divider-line",
+        "kind": "line",
+        "role": "divider-line",
+        "n": 24,
+        "minLc": 48.41659493223608,
+        "medianLc": 48.41659493223608,
+        "floor": 45,
+        "fg": "#aaaa33",
+        "bg": "#ffffff",
+        "worst": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left"
+      },
+      {
+        "key": "line:fragment-border",
+        "kind": "line",
+        "role": "fragment-border",
+        "n": 348,
+        "minLc": 78.75210854041671,
+        "medianLc": 78.75210854041671,
+        "floor": 45,
+        "fg": "#666666",
+        "bg": "#ffffff",
+        "worst": "smoke div.occurrence.min-h-6>div.block>div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment"
+      },
+      {
+        "key": "line:fragment-header-rule",
+        "kind": "line",
+        "role": "fragment-header-rule",
+        "n": 348,
+        "minLc": 0,
+        "medianLc": 0,
+        "floor": 45,
+        "fg": "#e5e7eb",
+        "bg": "#efefef",
+        "worst": "smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div.header.bg-skin-fragment-header>div.name.font-normal"
+      },
+      {
+        "key": "line:frame-border",
+        "kind": "line",
+        "role": "frame-border",
+        "n": 204,
+        "minLc": 78.75210854041671,
+        "medianLc": 78.75210854041671,
+        "floor": 45,
+        "fg": "#666666",
+        "bg": "#ffffff",
+        "worst": "smoke div.zenuml>div.p-1.bg-skin-canvas>div.frame.text-skin-base"
+      },
+      {
+        "key": "line:group-outline",
+        "kind": "line",
+        "role": "group-outline",
+        "n": 24,
+        "minLc": 23.043559570042547,
+        "medianLc": 78.75210854041671,
+        "floor": 45,
+        "fg": "#666666",
+        "bg": "#000000",
+        "worst": "fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group"
+      },
+      {
+        "key": "line:header-rule",
+        "kind": "line",
+        "role": "header-rule",
+        "n": 204,
+        "minLc": 78.75210854041671,
+        "medianLc": 78.75210854041671,
+        "floor": 45,
+        "fg": "#666666",
+        "bg": "#ffffff",
+        "worst": "smoke div.zenuml>div.p-1.bg-skin-canvas>div.frame.text-skin-base>div>div.header.text-skin-title"
+      },
+      {
+        "key": "line:lifeline",
+        "kind": "line",
+        "role": "lifeline",
+        "n": 894,
+        "minLc": 78.75210854041671,
+        "medianLc": 78.75210854041671,
+        "floor": 45,
+        "fg": "#666666",
+        "bg": "#ffffff",
+        "worst": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0"
+      },
+      {
+        "key": "line:message-line",
+        "kind": "line",
+        "role": "message-line",
+        "n": 1140,
+        "minLc": 0,
+        "medianLc": 106.04067321268862,
+        "floor": 45,
+        "fg": "#000000",
+        "bg": "#000000",
+        "worst": "smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.left-0>line"
+      },
+      {
+        "key": "line:occurrence-border",
+        "kind": "line",
+        "role": "occurrence-border",
+        "n": 858,
+        "minLc": 55.95753624675426,
+        "medianLc": 78.75210854041671,
+        "floor": 45,
+        "fg": "#666666",
+        "bg": "#d8d8d8",
+        "worst": "demo1-smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6"
+      },
+      {
+        "key": "line:participant-border",
+        "kind": "line",
+        "role": "participant-border",
+        "n": 882,
+        "minLc": 78.75210854041671,
+        "medianLc": 78.75210854041671,
+        "floor": 45,
+        "fg": "#666666",
+        "bg": "#ffffff",
+        "worst": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.participant.bg-skin-participant"
+      },
+      {
+        "key": "line:self-arrow",
+        "kind": "line",
+        "role": "self-arrow",
+        "n": 372,
+        "minLc": 0,
+        "medianLc": 106.04067321268862,
+        "floor": 45,
+        "fg": "#000000",
+        "bg": "#000000",
+        "worst": "if-fragment div.statement-container.group/stmt>div.interaction.async>div.message.text-[15px]>svg.arrow.text-skin-message-arrow>path.stroke-current.stroke-1"
+      },
+      {
+        "key": "line:separator",
+        "kind": "line",
+        "role": "separator",
+        "n": 120,
+        "minLc": 11.795426536961662,
+        "medianLc": 11.795426536961662,
+        "floor": 45,
+        "fg": "#e5e7eb",
+        "bg": "#ffffff",
+        "worst": "smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t"
+      },
+      {
+        "key": "line:svg-line",
+        "kind": "line",
+        "role": "svg-line",
+        "n": 2028,
+        "minLc": 11.795426536961662,
+        "medianLc": 78.75210854041671,
+        "floor": 45,
+        "fg": "#e5e7eb",
+        "bg": "#ffffff",
+        "worst": "smoke g>g.fragment.fragment-tcf>line.fragment-separator"
+      },
+      {
+        "key": "text:comment",
+        "kind": "text",
+        "role": "comment",
+        "n": 150,
+        "minLc": 34.526461579764,
+        "medianLc": 54.62184067441377,
+        "floor": 75,
+        "fg": "#808080",
+        "bg": "#000000",
+        "worst": "smoke div.text-left.text-sm>div.group.fragment>div.comments.text-skin-comment>div>p \"String line;\""
+      },
+      {
+        "key": "text:divider-text",
+        "kind": "text",
+        "role": "divider-text",
+        "n": 12,
+        "minLc": 91.52252390143568,
+        "medianLc": 91.52252390143568,
+        "floor": 75,
+        "fg": "#333333",
+        "bg": "#fff5ad",
+        "worst": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.name \"divider can be anywhere\""
+      },
+      {
+        "key": "text:fragment-condition",
+        "kind": "text",
+        "role": "fragment-condition",
+        "n": 240,
+        "minLc": 53.93568588528027,
+        "medianLc": 84.1862330717342,
+        "floor": 75,
+        "fg": "#a6a6a6",
+        "bg": "#000000",
+        "worst": "smoke div>div.segment>div.text-skin-fragment>div.guard-row.flex>span.bg-skin-frame.opacity-skin-guard \"(line = br.readLine()) != null\""
+      },
+      {
+        "key": "text:fragment-label",
+        "kind": "text",
+        "role": "fragment-label",
+        "n": 354,
+        "minLc": 86.66727444353049,
+        "medianLc": 96.53233245974126,
+        "floor": 75,
+        "fg": "#000000",
+        "bg": "#dedede",
+        "worst": "fragments-return div.header.bg-skin-fragment-header>div.name.font-normal>label.p-0.flex>div.collapsible-header.flex>label.mb-0.-translate-y-[1.5px] \"Try\""
+      },
+      {
+        "key": "text:fragment-number",
+        "kind": "text",
+        "role": "fragment-number",
+        "n": 348,
+        "minLc": 56.39649167359349,
+        "medianLc": 56.39649167359349,
+        "floor": 90,
+        "fg": "#6b7280",
+        "bg": "#e1e2e3",
+        "worst": "smoke div.group.fragment>div.header.bg-skin-fragment-header>div.name.font-normal>label.p-0.flex>span.fragment-number.shrink-0 \"1.2\""
+      },
+      {
+        "key": "text:fragment-section",
+        "kind": "text",
+        "role": "fragment-section",
+        "n": 78,
+        "minLc": 53.93568588528027,
+        "medianLc": 74.60304270102547,
+        "floor": 75,
+        "fg": "#a6a6a6",
+        "bg": "#000000",
+        "worst": "smoke div.group.fragment>div>div.segment.border-t>div.header.inline-block>label.keyword.catch \"catch\""
+      },
+      {
+        "key": "text:group-title",
+        "kind": "text",
+        "role": "group-title",
+        "n": 18,
+        "minLc": 102.87965801428527,
+        "medianLc": 102.87965801428527,
+        "floor": 75,
+        "fg": "#222222",
+        "bg": "#ffffff",
+        "worst": "fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>div.z-10.absolute>span.text-skin-lifeline-group-name \"Backend\""
+      },
+      {
+        "key": "text:guard-keyword",
+        "kind": "text",
+        "role": "guard-keyword",
+        "n": 288,
+        "minLc": 73.55181974517487,
+        "medianLc": 73.55181974517487,
+        "floor": 90,
+        "fg": "#6b7280",
+        "bg": "#ffffff",
+        "worst": "smoke div>div.segment>div.text-skin-fragment>div.guard-row.flex>span.guard-keyword.text-xs \"while\""
+      },
+      {
+        "key": "text:http-method",
+        "kind": "text",
+        "role": "http-method",
+        "n": 24,
+        "minLc": 34.526461579764,
+        "medianLc": 49.68240872519378,
+        "floor": 75,
+        "fg": "#808080",
+        "bg": "#000000",
+        "worst": "demo1-smoke div.comments.text-skin-comment>div>p>code.rest-api>span.http-method-post \"POST\""
+      },
+      {
+        "key": "text:message",
+        "kind": "text",
+        "role": "message",
+        "n": 1374,
+        "minLc": 83.50625924512714,
+        "medianLc": 102.87965801428527,
+        "floor": 75,
+        "fg": "#222222",
+        "bg": "#dedede",
+        "worst": "demo4-fragment-span div.name.group>div.inline-block.static>div>span.assignment-return-label>span.right.editable-span-base \"a\""
+      },
+      {
+        "key": "text:number",
+        "kind": "text",
+        "role": "number",
+        "n": 1332,
+        "minLc": 65.13803917088606,
+        "medianLc": 65.13803917088606,
+        "floor": 90,
+        "fg": "#6b7280",
+        "bg": "#f0f1f2",
+        "worst": "smoke div.block>div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>div.message-number.absolute \"1\""
+      },
+      {
+        "key": "text:participant",
+        "kind": "text",
+        "role": "participant",
+        "n": 726,
+        "minLc": 102.87965801428527,
+        "medianLc": 102.87965801428527,
+        "floor": 75,
+        "fg": "#222222",
+        "bg": "#ffffff",
+        "worst": "smoke div.flex.items-center>div.h-5.group>div.flex.items-center>div.flex.items-center>span.name.leading-4 \"MarkdownJavaFxHtmlPanel\""
+      },
+      {
+        "key": "text:svg-text",
+        "kind": "text",
+        "role": "svg-text",
+        "n": 1632,
+        "minLc": 54.17842097601675,
+        "medianLc": 86.66727444353049,
+        "floor": 90,
+        "fg": "#6b7280",
+        "bg": "#dedede",
+        "worst": "smoke g>g.creation>text.seq-number \"1.1\""
+      },
+      {
+        "key": "text:text-other",
+        "kind": "text",
+        "role": "text-other",
+        "n": 18,
+        "minLc": 102.87965801428527,
+        "medianLc": 102.87965801428527,
+        "floor": 75,
+        "fg": "#222222",
+        "bg": "#ffffff",
+        "worst": "vertical-8 div.block>div.statement-container.group/stmt>div.interaction.return>div.flex.items-center>span.name.text-[15px] \"from if to original source\""
+      },
+      {
+        "key": "text:title",
+        "kind": "text",
+        "role": "title",
+        "n": 48,
+        "minLc": 102.87965801428527,
+        "medianLc": 102.87965801428527,
+        "floor": 75,
+        "fg": "#222222",
+        "bg": "#ffffff",
+        "worst": "smoke div>div.header.text-skin-title>div.right.flex-grow>div.title.text-skin-title>span.!p-0.editable-span-base \"ABCD Title\""
+      }
+    ],
+    "theme-dark": [
+      {
+        "key": "fill:canvas",
+        "kind": "fill",
+        "role": "canvas",
+        "n": 170,
+        "minLc": 0,
+        "medianLc": 0,
+        "floor": null,
+        "fg": "#1f1f1f",
+        "bg": "#1f1f21",
+        "worst": "smoke@atlassian div.zenuml>div.p-1.bg-skin-canvas"
+      },
+      {
+        "key": "fill:divider-box",
+        "kind": "fill",
+        "role": "divider-box",
+        "n": 10,
+        "minLc": 75.49062285726436,
+        "medianLc": 75.49062285726436,
+        "floor": 30,
+        "fg": "#cfcfcf",
+        "bg": "#1f1f1f",
+        "worst": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.name"
+      },
+      {
+        "key": "fill:fragment-header",
+        "kind": "fill",
+        "role": "fragment-header",
+        "n": 290,
+        "minLc": 91.58182319890136,
+        "medianLc": 91.58182319890136,
+        "floor": 30,
+        "fg": "#e9e9e9",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.block>div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div.header.bg-skin-fragment-header"
+      },
+      {
+        "key": "fill:occurrence",
+        "kind": "fill",
+        "role": "occurrence",
+        "n": 715,
+        "minLc": 33.25920755303889,
+        "medianLc": 33.25920755303889,
+        "floor": 30,
+        "fg": "#818181",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6"
+      },
+      {
+        "key": "fill:participant-fill",
+        "kind": "fill",
+        "role": "participant-fill",
+        "n": 735,
+        "minLc": 0,
+        "medianLc": 0,
+        "floor": null,
+        "fg": "#1f1f1f",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.participant.bg-skin-participant"
+      },
+      {
+        "key": "fill:svg-fill",
+        "kind": "fill",
+        "role": "svg-fill",
+        "n": 1336,
+        "minLc": 0,
+        "medianLc": 35.06445488363881,
+        "floor": null,
+        "fg": "#1f1f1f",
+        "bg": "#1f1f1f",
+        "worst": "smoke g>g.participant.participant-starter>rect.participant-box"
+      },
+      {
+        "key": "line:arrow-head",
+        "kind": "line",
+        "role": "arrow-head",
+        "n": 1512,
+        "minLc": 105.90397146346729,
+        "medianLc": 105.90397146346729,
+        "floor": 45,
+        "fg": "#ffffff",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path"
+      },
+      {
+        "key": "line:divider-line",
+        "kind": "line",
+        "role": "divider-line",
+        "n": 24,
+        "minLc": 48.35241303004335,
+        "medianLc": 48.35241303004335,
+        "floor": 45,
+        "fg": "#9f9f9f",
+        "bg": "#1f1f1f",
+        "worst": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left"
+      },
+      {
+        "key": "line:fragment-border",
+        "kind": "line",
+        "role": "fragment-border",
+        "n": 348,
+        "minLc": 85.24432553278828,
+        "medianLc": 86.53218566710099,
+        "floor": 45,
+        "fg": "#e1e1e1",
+        "bg": "#272727",
+        "worst": "vertical-5 div>div.segment>div.block.[&>.statement-container:not(:first-child)]:border-t>div.statement-container.group/stmt>div.group.fragment"
+      },
+      {
+        "key": "line:fragment-header-rule",
+        "kind": "line",
+        "role": "fragment-header-rule",
+        "n": 348,
+        "minLc": 93.02203045799166,
+        "medianLc": 93.02203045799166,
+        "floor": 45,
+        "fg": "#000000",
+        "bg": "#e9e9e9",
+        "worst": "smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div.header.bg-skin-fragment-header>div.name.font-normal"
+      },
+      {
+        "key": "line:frame-border",
+        "kind": "line",
+        "role": "frame-border",
+        "n": 204,
+        "minLc": 86.53218566710099,
+        "medianLc": 86.53218566710099,
+        "floor": 45,
+        "fg": "#e1e1e1",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.zenuml>div.p-1.bg-skin-canvas>div.frame.text-skin-base"
+      },
+      {
+        "key": "line:group-outline",
+        "kind": "line",
+        "role": "group-outline",
+        "n": 24,
+        "minLc": 86.53218566710099,
+        "medianLc": 86.53218566710099,
+        "floor": 45,
+        "fg": "#e1e1e1",
+        "bg": "#1f1f1f",
+        "worst": "fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group"
+      },
+      {
+        "key": "line:header-rule",
+        "kind": "line",
+        "role": "header-rule",
+        "n": 204,
+        "minLc": 86.53218566710099,
+        "medianLc": 86.53218566710099,
+        "floor": 45,
+        "fg": "#e1e1e1",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.zenuml>div.p-1.bg-skin-canvas>div.frame.text-skin-base>div>div.header.text-skin-title"
+      },
+      {
+        "key": "line:lifeline",
+        "kind": "line",
+        "role": "lifeline",
+        "n": 894,
+        "minLc": 86.53218566710099,
+        "medianLc": 86.53218566710099,
+        "floor": 45,
+        "fg": "#e1e1e1",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0"
+      },
+      {
+        "key": "line:message-line",
+        "kind": "line",
+        "role": "message-line",
+        "n": 1140,
+        "minLc": 105.90397146346729,
+        "medianLc": 105.90397146346729,
+        "floor": 45,
+        "fg": "#ffffff",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.left-0>line"
+      },
+      {
+        "key": "line:occurrence-border",
+        "kind": "line",
+        "role": "occurrence-border",
+        "n": 858,
+        "minLc": 50.63195780243597,
+        "medianLc": 86.53218566710099,
+        "floor": 45,
+        "fg": "#e1e1e1",
+        "bg": "#858585",
+        "worst": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6"
+      },
+      {
+        "key": "line:participant-border",
+        "kind": "line",
+        "role": "participant-border",
+        "n": 882,
+        "minLc": 86.53218566710099,
+        "medianLc": 86.53218566710099,
+        "floor": 45,
+        "fg": "#e1e1e1",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.participant.bg-skin-participant"
+      },
+      {
+        "key": "line:self-arrow",
+        "kind": "line",
+        "role": "self-arrow",
+        "n": 372,
+        "minLc": 105.90397146346729,
+        "medianLc": 105.90397146346729,
+        "floor": 45,
+        "fg": "#ffffff",
+        "bg": "#1f1f1f",
+        "worst": "if-fragment div.statement-container.group/stmt>div.interaction.async>div.message.text-[15px]>svg.arrow.text-skin-message-arrow>path.stroke-current.stroke-1"
+      },
+      {
+        "key": "line:separator",
+        "kind": "line",
+        "role": "separator",
+        "n": 120,
+        "minLc": 48.35241303004335,
+        "medianLc": 48.35241303004335,
+        "floor": 45,
+        "fg": "#9f9f9f",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t"
+      },
+      {
+        "key": "line:svg-line",
+        "kind": "line",
+        "role": "svg-line",
+        "n": 2028,
+        "minLc": 48.35241303004335,
+        "medianLc": 86.53218566710099,
+        "floor": 45,
+        "fg": "#9f9f9f",
+        "bg": "#1f1f1f",
+        "worst": "smoke g>g.fragment.fragment-tcf>line.fragment-separator"
+      },
+      {
+        "key": "text:comment",
+        "kind": "text",
+        "role": "comment",
+        "n": 150,
+        "minLc": 78.51253097439259,
+        "medianLc": 78.51253097439259,
+        "floor": 75,
+        "fg": "#d4d4d4",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.text-left.text-sm>div.group.fragment>div.comments.text-skin-comment>div>p \"String line;\""
+      },
+      {
+        "key": "text:divider-text",
+        "kind": "text",
+        "role": "divider-text",
+        "n": 12,
+        "minLc": 78.17553977551361,
+        "medianLc": 78.17553977551361,
+        "floor": 75,
+        "fg": "#000000",
+        "bg": "#cfcfcf",
+        "worst": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.name \"divider can be anywhere\""
+      },
+      {
+        "key": "text:fragment-condition",
+        "kind": "text",
+        "role": "fragment-condition",
+        "n": 240,
+        "minLc": 78.51253097439259,
+        "medianLc": 78.51253097439259,
+        "floor": 75,
+        "fg": "#d4d4d4",
+        "bg": "#1f1f1f",
+        "worst": "smoke div>div.segment>div.text-skin-fragment>div.guard-row.flex>span.bg-skin-frame.opacity-skin-guard \"(line = br.readLine()) != null\""
+      },
+      {
+        "key": "text:fragment-label",
+        "kind": "text",
+        "role": "fragment-label",
+        "n": 354,
+        "minLc": 78.51253097439259,
+        "medianLc": 93.02203045799166,
+        "floor": 75,
+        "fg": "#d4d4d4",
+        "bg": "#1f1f1f",
+        "worst": "audit-ref-guards div.header.bg-skin-fragment-header>div.text-skin-fragment.relative>div.polygon-content.bg-skin-frame>span.flex.items-center>span.fragment-type.-translate-y-[1.5px] \"Ref\""
+      },
+      {
+        "key": "text:fragment-number",
+        "kind": "text",
+        "role": "fragment-number",
+        "n": 348,
+        "minLc": 93.02203045799166,
+        "medianLc": 93.02203045799166,
+        "floor": 90,
+        "fg": "#000000",
+        "bg": "#e9e9e9",
+        "worst": "smoke div.group.fragment>div.header.bg-skin-fragment-header>div.name.font-normal>label.p-0.flex>span.fragment-number.shrink-0 \"1.2\""
+      },
+      {
+        "key": "text:fragment-section",
+        "kind": "text",
+        "role": "fragment-section",
+        "n": 78,
+        "minLc": 78.51253097439259,
+        "medianLc": 103.25328905124402,
+        "floor": 75,
+        "fg": "#d4d4d4",
+        "bg": "#1f1f1f",
+        "worst": "fragment div.group.fragment>div>div.segment.border-t>div.header.flex>label.keyword.finally \"finally\""
+      },
+      {
+        "key": "text:group-title",
+        "kind": "text",
+        "role": "group-title",
+        "n": 18,
+        "minLc": 103.25328905124402,
+        "medianLc": 103.25328905124402,
+        "floor": 75,
+        "fg": "#fbfbfb",
+        "bg": "#1f1f1f",
+        "worst": "fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>div.z-10.absolute>span.text-skin-lifeline-group-name \"Backend\""
+      },
+      {
+        "key": "text:guard-keyword",
+        "kind": "text",
+        "role": "guard-keyword",
+        "n": 288,
+        "minLc": 93.49751766674514,
+        "medianLc": 93.49751766674514,
+        "floor": 90,
+        "fg": "#ececec",
+        "bg": "#1f1f1f",
+        "worst": "smoke div>div.segment>div.text-skin-fragment>div.guard-row.flex>span.guard-keyword.text-xs \"while\""
+      },
+      {
+        "key": "text:http-method",
+        "kind": "text",
+        "role": "http-method",
+        "n": 24,
+        "minLc": 78.06429510245593,
+        "medianLc": 102.41688960819846,
+        "floor": 75,
+        "fg": "#fbc7c2",
+        "bg": "#1f1f1f",
+        "worst": "audit-markdown div.comments.text-skin-comment>div>p>code.rest-api>span.http-method-delete \"DELETE\""
+      },
+      {
+        "key": "text:message",
+        "kind": "text",
+        "role": "message",
+        "n": 1374,
+        "minLc": 69.27418146416449,
+        "medianLc": 103.25328905124402,
+        "floor": 75,
+        "fg": "#fbfbfb",
+        "bg": "#818181",
+        "worst": "demo4-fragment-span div.name.group>div.inline-block.static>div>span.assignment-return-label>span.right.editable-span-base \"a\""
+      },
+      {
+        "key": "text:number",
+        "kind": "text",
+        "role": "number",
+        "n": 1332,
+        "minLc": 94.13873542130412,
+        "medianLc": 94.13873542130412,
+        "floor": 90,
+        "fg": "#ededed",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.block>div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>div.message-number.absolute \"1\""
+      },
+      {
+        "key": "text:participant",
+        "kind": "text",
+        "role": "participant",
+        "n": 726,
+        "minLc": 103.25328905124402,
+        "medianLc": 103.25328905124402,
+        "floor": 75,
+        "fg": "#fbfbfb",
+        "bg": "#1f1f1f",
+        "worst": "smoke div.flex.items-center>div.h-5.group>div.flex.items-center>div.flex.items-center>span.name.leading-4 \"MarkdownJavaFxHtmlPanel\""
+      },
+      {
+        "key": "text:svg-text",
+        "kind": "text",
+        "role": "svg-text",
+        "n": 1632,
+        "minLc": 60.159627834224615,
+        "medianLc": 94.13873542130412,
+        "floor": 90,
+        "fg": "#ededed",
+        "bg": "#818181",
+        "worst": "smoke g>g.creation>text.seq-number \"1.1\""
+      },
+      {
+        "key": "text:text-other",
+        "kind": "text",
+        "role": "text-other",
+        "n": 18,
+        "minLc": 103.25328905124402,
+        "medianLc": 103.25328905124402,
+        "floor": 75,
+        "fg": "#fbfbfb",
+        "bg": "#1f1f1f",
+        "worst": "vertical-8 div.block>div.statement-container.group/stmt>div.interaction.return>div.flex.items-center>span.name.text-[15px] \"from if to original source\""
+      },
+      {
+        "key": "text:title",
+        "kind": "text",
+        "role": "title",
+        "n": 48,
+        "minLc": 103.25328905124402,
+        "medianLc": 103.25328905124402,
+        "floor": 75,
+        "fg": "#fbfbfb",
+        "bg": "#1f1f1f",
+        "worst": "smoke div>div.header.text-skin-title>div.right.flex-grow>div.title.text-skin-title>span.!p-0.editable-span-base \"ABCD Title\""
+      }
+    ]
+  },
+  "overlaps": {
+    "theme-default": [
+      {
+        "key": "fill:number-badge over header",
+        "n": 290,
+        "minLc": 0,
+        "example": "smoke div.group.fragment>div.header.bg-skin-fragment-header>div.name.font-normal>label.p-0.flex>span.fragment-number.shrink-0 (#e1e2e3 on #efefef)"
+      },
+      {
+        "key": "fill:participant-fill over header",
+        "n": 23,
+        "minLc": 0,
+        "example": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.participant.bg-skin-participant (#ffffff on #f0f1f2)"
+      },
+      {
+        "key": "fill:participant-fill over occurrence",
+        "n": 240,
+        "minLc": 19.464032685435523,
+        "example": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.participant.bg-skin-participant (#ffffff on #dedede)"
+      },
+      {
+        "key": "fill:svg-fill over header",
+        "n": 118,
+        "minLc": 0,
+        "example": "smoke g>g.fragment.fragment-tcf>rect.fragment-number-bg (#e1e2e3 on #efefef)"
+      },
+      {
+        "key": "fill:svg-fill over occurrence",
+        "n": 100,
+        "minLc": 19.464032685435523,
+        "example": "smoke g>g.participant>rect.participant-box (#ffffff on #dedede)"
+      },
+      {
+        "key": "line:divider-line over occurrence",
+        "n": 10,
+        "minLc": 29,
+        "example": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left (#aaaa33 on #dedede)"
+      },
+      {
+        "key": "line:fragment-header-rule over occurrence",
+        "n": 360,
+        "minLc": 0,
+        "example": "smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div.header.bg-skin-fragment-header>div.name.font-normal (#e5e7eb on #dedede)"
+      },
+      {
+        "key": "line:separator over occurrence",
+        "n": 45,
+        "minLc": 0,
+        "example": "smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t (#e5e7eb on #dedede)"
+      },
+      {
+        "key": "line:svg-line over dividerBox",
+        "n": 16,
+        "minLc": 41.3,
+        "example": "demo1-smoke g>g.divider>line.divider-line (#aaaa33 on #fff5ad)"
+      },
+      {
+        "key": "line:svg-line over header",
+        "n": 20,
+        "minLc": 0,
+        "example": "smoke g>g.fragment.fragment-tcf>line.fragment-separator (#e5e7eb on #f3f3f3)"
+      },
+      {
+        "key": "line:svg-line over occurrence",
+        "n": 56,
+        "minLc": 0,
+        "example": "smoke g>g.fragment.fragment-tcf>line.fragment-separator (#e5e7eb on #dedede)"
+      },
+      {
+        "key": "text:fragment-number over occurrence",
+        "n": 285,
+        "minLc": 56.39649167359349,
+        "example": "smoke div.group.fragment>div.header.bg-skin-fragment-header>div.name.font-normal>label.p-0.flex>span.fragment-number.shrink-0 \"1.2\" (#6b7280 on #e1e2e3)"
+      },
+      {
+        "key": "text:number over header",
+        "n": 700,
+        "minLc": 65.13803917088606,
+        "example": "smoke div.block>div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>div.message-number.absolute \"1\" (#6b7280 on #f0f1f2)"
+      },
+      {
+        "key": "text:svg-text over occurrence",
+        "n": 126,
+        "minLc": 54.17842097601675,
+        "example": "smoke g>g.creation>text.seq-number \"1.1\" (#6b7280 on #dedede)"
+      }
+    ],
+    "theme-dark": [
+      {
+        "key": "fill:svg-fill over header",
+        "n": 57,
+        "minLc": 0,
+        "example": "defect-406 g>g.fragment.fragment-opt>rect.fragment-number-bg (#e9e9e9 on #e9e9e9)"
+      },
+      {
+        "key": "line:arrow-head over dividerBox",
+        "n": 10,
+        "minLc": 25.8,
+        "example": "demo1-smoke div.interaction.creation>div.message-container.pointer-events-none>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path (#ffffff on #d4d4d4)"
+      },
+      {
+        "key": "line:arrow-head over header",
+        "n": 1166,
+        "minLc": 17.5,
+        "example": "smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.text-skin-message-arrow>path (#ffffff on #e1e1e1)"
+      },
+      {
+        "key": "line:divider-line over header",
+        "n": 17,
+        "minLc": 33.9,
+        "example": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left (#9f9f9f on #e1e1e1)"
+      },
+      {
+        "key": "line:divider-line over occurrence",
+        "n": 24,
+        "minLc": 14.4,
+        "example": "demo1-smoke div.segment>div.block>div.statement-container.group/stmt>div.divider.text-left>div.left (#9f9f9f on #818181)"
+      },
+      {
+        "key": "line:fragment-border over header",
+        "n": 6,
+        "minLc": 0,
+        "example": "vertical-5 div>div.segment>div.block.[&>.statement-container:not(:first-child)]:border-t>div.statement-container.group/stmt>div.group.fragment (#e1e1e1 on #ededed)"
+      },
+      {
+        "key": "line:group-outline over dividerBox",
+        "n": 16,
+        "minLc": 0,
+        "example": "demo1-smoke div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#e1e1e1 on #d4d4d4)"
+      },
+      {
+        "key": "line:group-outline over header",
+        "n": 96,
+        "minLc": 0,
+        "example": "fragment-issue div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline-group-container.absolute>svg>rect.stroke-skin-group (#e1e1e1 on #e9e9e9)"
+      },
+      {
+        "key": "line:lifeline over dividerBox",
+        "n": 38,
+        "minLc": 0,
+        "example": "demo1-smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 (#e1e1e1 on #d4d4d4)"
+      },
+      {
+        "key": "line:lifeline over header",
+        "n": 2012,
+        "minLc": 0,
+        "example": "smoke div.relative.z-container>div.life-line-layer.lifeline-layer>div.z-lifeline-container.relative>div.lifeline.absolute>div.line.w0 (#e1e1e1 on #e1e1e1)"
+      },
+      {
+        "key": "line:message-line over dividerBox",
+        "n": 44,
+        "minLc": 25.8,
+        "example": "demo1-smoke div.interaction.creation>div.message-container.pointer-events-none>div.message.text-[15px]>svg.absolute.left-0>line (#ffffff on #d4d4d4)"
+      },
+      {
+        "key": "line:message-line over header",
+        "n": 1388,
+        "minLc": 0,
+        "example": "smoke div.statement-container.group/stmt>div.interaction.sync>div.message.text-[15px]>svg.absolute.left-0>line (#ffffff on #f1f1f1)"
+      },
+      {
+        "key": "line:occurrence-border over dividerBox",
+        "n": 44,
+        "minLc": 0,
+        "example": "demo1-smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 (#e1e1e1 on #d4d4d4)"
+      },
+      {
+        "key": "line:occurrence-border over header",
+        "n": 311,
+        "minLc": 0,
+        "example": "smoke div.message-layer.relative>div.block>div.statement-container.group/stmt>div.interaction.sync>div.occurrence.min-h-6 (#e1e1e1 on #e9e9e9)"
+      },
+      {
+        "key": "line:participant-border over header",
+        "n": 5,
+        "minLc": 0,
+        "example": "fragment-issue div.z-lifeline-container.relative>div.lifeline-group-container.absolute>div.lifeline-group.relative>div.lifeline.absolute>div.participant.bg-skin-participant (#e1e1e1 on #e1e1e1)"
+      },
+      {
+        "key": "line:self-arrow over header",
+        "n": 178,
+        "minLc": 17.5,
+        "example": "if-fragment svg.arrow.text-skin-message-arrow>g>svg.stroke-1>g>path (#ffffff on #e1e1e1)"
+      },
+      {
+        "key": "line:separator over header",
+        "n": 90,
+        "minLc": 33.9,
+        "example": "smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t (#9f9f9f on #e1e1e1)"
+      },
+      {
+        "key": "line:separator over occurrence",
+        "n": 85,
+        "minLc": 14.4,
+        "example": "smoke div.statement-container.group/stmt>div.text-left.text-sm>div.group.fragment>div>div.segment.border-t (#9f9f9f on #818181)"
+      },
+      {
+        "key": "line:svg-line over dividerBox",
+        "n": 120,
+        "minLc": 0,
+        "example": "demo1-smoke g>line.lifeline (#e1e1e1 on #d4d4d4)"
+      },
+      {
+        "key": "line:svg-line over header",
+        "n": 3196,
+        "minLc": 0,
+        "example": "smoke line.frame-header-line (#e1e1e1 on #e1e1e1)"
+      },
+      {
+        "key": "line:svg-line over occurrence",
+        "n": 66,
+        "minLc": 14.4,
+        "example": "smoke g>g.fragment.fragment-tcf>line.fragment-separator (#9f9f9f on #818181)"
+      },
+      {
+        "key": "text:message over occurrence",
+        "n": 5,
+        "minLc": 69.27418146416449,
+        "example": "demo4-fragment-span div.name.group>div.inline-block.static>div>span.assignment-return-label>span.right.editable-span-base \"a\" (#fbfbfb on #818181)"
+      },
+      {
+        "key": "text:svg-text over occurrence",
+        "n": 12,
+        "minLc": 60.159627834224615,
+        "example": "smoke g>g.creation>text.seq-number \"1.1\" (#ededed on #818181)"
+      }
+    ]
+  },
+  "gated": {
+    "theme-default": {
+      "gated": false,
+      "baseline": "/Users/pengxiao/workspaces/zenuml/mmd-zenuml-core/scripts/theme-contrast/baseline-theme-default.json",
+      "failures": 4594,
+      "newFailures": 0
+    },
+    "theme-dark": {
+      "gated": true,
+      "baseline": null,
+      "failures": 0,
+      "newFailures": 0
+    }
+  },
+  "failures": {
+    "theme-dark": [],
+    "theme-default": {
+      "count": 4594
+    }
+  }
+}

@@ -2,12 +2,12 @@ import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import {
   coordinatesAtom,
+  enableNumberingAtom,
   diagramElementAtom,
   modeAtom,
+  paletteAtom,
   RenderMode,
   rootContextAtom,
-  selectedAtom,
-  selectedMessageAtom,
   themeAtom,
 } from "@/store/Store";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -18,6 +18,9 @@ import {
   useMemo,
   useRef,
 } from "react";
+import { walkStatements } from "@/svg/walkStatements";
+import { fragmentMinimumWidth } from "@/positioning/FragmentHeaderWidth";
+import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { TotalWidth } from "./WidthOfContext";
 import "./SeqDiagram.css";
 import { cn } from "@/utils";
@@ -26,6 +29,8 @@ import { MessageLayer } from "./MessageLayer/MessageLayer";
 import { ParticipantInsertControls } from "./LifeLineLayer/ParticipantInsertControls";
 import { ParticipantStylePanel } from "./LifeLineLayer/ParticipantStylePanel";
 import { EmptyDiagramPrompt } from "./EmptyDiagramPrompt";
+import { InteractionController } from "@/store/interaction/InteractionController";
+import { paletteCssVariables } from "@/surface";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -33,16 +38,16 @@ export const SeqDiagram = (props: {
   ref?: React.Ref<HTMLDivElement>;
 }) => {
   const theme = useAtomValue(themeAtom);
+  const palette = useAtomValue(paletteAtom);
   const mode = useAtomValue(modeAtom);
   const rootContext = useAtomValue(rootContextAtom);
   const coordinates = useAtomValue(coordinatesAtom);
+  const enableNumbering = useAtomValue(enableNumberingAtom);
   const isEmpty = useMemo(
     () => coordinates.orderedParticipantNames().length === 0,
     [coordinates],
   );
   const setDiagramElement = useSetAtom(diagramElementAtom);
-  const setSelectedParticipants = useSetAtom(selectedAtom);
-  const setSelectedMessage = useSetAtom(selectedMessageAtom);
 
   const diagramRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -65,8 +70,26 @@ export const SeqDiagram = (props: {
     //   [MessageLayer width] <- contextWidth
     //  [Frame width        ]
     // || <- frameBorderLeft extra width provided by container
-    return contextWidth - frameBorderLeft;
-  }, [rootContext, coordinates, frameBorderLeft]);
+    const infos = walkStatements(rootContext!);
+    const participants = coordinates.orderedParticipantNames();
+    const builder = new FrameBuilder(participants);
+    let contentWidth = contextWidth - frameBorderLeft;
+    for (const info of infos) {
+      if (info.kind !== "fragment") continue;
+      const locals = getLocalParticipantNames(info.statNode);
+      const left = participants.find((name) => locals.includes(name));
+      if (!left) continue;
+      const border = FrameBorder(builder.getFrame(info.statNode));
+      const fragmentLeft =
+        coordinates.getPosition(left) - coordinates.half(left) - border.left;
+      contentWidth = Math.max(
+        contentWidth,
+        fragmentLeft +
+          fragmentMinimumWidth(info, infos, coordinates, enableNumbering),
+      );
+    }
+    return contentWidth;
+  }, [rootContext, coordinates, frameBorderLeft, enableNumbering]);
 
   return (
     <div
@@ -75,21 +98,14 @@ export const SeqDiagram = (props: {
         theme,
         props.className,
       )}
-      style={props.style}
-      ref={diagramRef}
-      onClick={(event) => {
-        const target = event.target as HTMLElement | null;
-        if (
-          target?.closest(".interaction") ||
-          target?.closest(".participant") ||
-          target?.closest("#style-panel")
-        ) {
-          return;
-        }
-        setSelectedParticipants([]);
-        setSelectedMessage(null);
+      style={{
+        ...props.style,
+        ...(palette ? paletteCssVariables(palette) : {}),
       }}
+      ref={diagramRef}
     >
+      {/* Selection click-away belongs to `InteractionController` (ADR 0002,
+          P4): it clears participant and message selection on `pointerdown`. */}
       {/* .zenuml is used to make sure tailwind css takes effect when naked == true;
       .bg-skin-base is repeated because .zenuml reset it to default theme. */}
       <div
@@ -132,6 +148,7 @@ export const SeqDiagram = (props: {
               </div>
             </div>
             <ParticipantStylePanel />
+            <InteractionController />
           </>
         ) : (
           <>

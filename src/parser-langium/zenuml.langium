@@ -73,15 +73,18 @@ Participant:
   | {infer Participant} stereotype=Stereotype (emoji=Emoji? name=Name width=INT? label=Label? color=COLOR?)?
   | {infer Participant} emoji=Emoji? name=Name width=INT? label=Label? color=COLOR?;
 
-// stereotype: SOPEN name SCLOSE | SOPEN name GT? | (LT|SOPEN)(GT|SCLOSE)?  [ET #5]
+// stereotype: SOPEN name+ SCLOSE | SOPEN name GT? | (LT|SOPEN)(GT|SCLOSE)?  [ET #5]
+// A closed stereotype may hold several words (`<< legacy system >>`); the
+// unclosed tolerance (`<<name`, `<<name>`) stays single-word so `<<a b` keeps
+// binding `b` as the participant name on ANTLR.
 // The closer is REQUIRED in the name-bearing alternative: ANTLR's full-context
-// prediction binds an uncloseed `<<name` as stereotype(`<<`) + participant
+// prediction binds an unclosed `<<name` as stereotype(`<<`) + participant
 // name "name" (pinned by golden tol-05c-stereotype-partial). Residual edge:
 // `<<a b` (two words, no closer) binds a to the participant here, while ANTLR
-// would swallow a into the stereotype — not corpus-reachable, documented in
-// 10-ast-mapping.md.
+// makes a the stereotype and b the participant — not corpus-reachable,
+// documented in 10-ast-mapping.md.
 Stereotype:
-    {infer Stereotype} SOPEN name=Name (SCLOSE | GT)
+    {infer Stereotype} SOPEN names+=Name ((names+=Name)* SCLOSE | GT)
   | {infer Stereotype} (LT | SOPEN) (GT | SCLOSE)?;
 
 // label: AS name | AS  [ET #6]
@@ -114,21 +117,17 @@ Stat:
 // ---------------------------------------------------------------------------
 
 Par:
-    {infer Par} PAR parExpr=ParExpr? braceBlock=BraceBlock
-  | {infer Par} PAR;                                              // [ET #10]
+    {infer Par} PAR (parExpr=ParExpr? braceBlock=BraceBlock)?;    // [ET #10] block optional
 
 Opt:
-    {infer Opt} OPT parExpr=ParExpr? braceBlock=BraceBlock
-  | {infer Opt} OPT;                                              // [ET #10]
+    {infer Opt} OPT (parExpr=ParExpr? braceBlock=BraceBlock)?;    // [ET #10] block optional
 
 Critical:
-    {infer Critical} CRITICAL parExpr=ParExpr? braceBlock=BraceBlock
-  | {infer Critical} CRITICAL;                                    // [ET #10]
+    {infer Critical} CRITICAL (parExpr=ParExpr? braceBlock=BraceBlock)?;  // [ET #10] block optional
 
 Section:
-    {infer Section} SECTION (OPAR atom=Atom? CPAR)? braceBlock=BraceBlock
-  | {infer Section} braceBlock=BraceBlock                         // [ET #11] anonymous section
-  | {infer Section} SECTION;                                      // [ET #10]
+    {infer Section} SECTION ((OPAR atom=Atom? CPAR)? braceBlock=BraceBlock)?  // [ET #10] block optional
+  | {infer Section} braceBlock=BraceBlock;                        // [ET #11] anonymous section
 
 // ref: REF OPAR (name (COMMA name*)*) CPAR SCOL? — lenient comma list kept.
 Ref:
@@ -344,10 +343,11 @@ Atom:
 ParExpr:
     {infer ParExpr} OPAR condition=Condition? CPAR?;
 
-// condition: expr | inExpr | textExpr (leading `atom` alt folded into Expr —
-// see header note; a lone atom condition is Expr→AtomExpr).
+// condition: expr | inExpr | textExpr | emoji (leading `atom` alt folded into
+// Expr — see header note; a lone atom condition is Expr→AtomExpr). The trailing
+// emoji alt lets an icon token stand alone: `if([check])` (#366).
 Condition:
-    Expr | InExpr | TextExpr;
+    Expr | InExpr | TextExpr | Emoji;
 
 InExpr:
     {infer InExpr} left=(ID | DIGIT_LEADING_NAME) IN right=(ID | DIGIT_LEADING_NAME);
@@ -355,7 +355,7 @@ InExpr:
 // textExpr: word word+ — single words are atoms; multi-word free text only.
 // [ET #25]
 TextExpr:
-    {infer TextExpr} words+=(ID | DIGIT_LEADING_NAME | NUMBER_UNIT) (words+=(ID | DIGIT_LEADING_NAME | NUMBER_UNIT))+;
+    {infer TextExpr} words+=(ID | DIGIT_LEADING_NAME | NUMBER_UNIT | INT | FLOAT) (words+=(ID | DIGIT_LEADING_NAME | NUMBER_UNIT | INT | FLOAT))+;
 
 // ---------------------------------------------------------------------------
 // Terminals — PLACEHOLDERS ONLY (names must match lexer/tokens.ts; the

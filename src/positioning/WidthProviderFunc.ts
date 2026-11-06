@@ -1,56 +1,67 @@
 import { TextType } from "@/positioning/Coordinate";
-import { getCache, setCache } from "./../utils/RenderingCache";
-import logger from "@/logger/logger";
+import {
+  clearPersistentCache,
+  getCache,
+  setCache,
+} from "./../utils/RenderingCache";
+import { DIAGRAM_FONT_STACK } from "@/svg/fonts/ibmPlexSans";
 
-const FONT_FAMILY = "Helvetica, Verdana, serif";
-const FONT_SIZE_PARTICIPANT = "16px"; // 1rem — used for ALL measurements (see getFontSpec comment)
+const FONT_FAMILY = DIAGRAM_FONT_STACK;
+const FONT_SIZE_PARTICIPANT = "14px";
+const FONT_SIZE_MESSAGE = "15px";
 const FONT_SIZE_FRAGMENT = "14px";
 
-function getFontSpec(): string {
-  // WidthProviderOnBrowser has a latent bug: it creates a hidden div with
-  // fontSize set once on the first call (always 16px for participant names,
-  // since withParticipantGaps runs before withMessageGaps in Coordinates).
-  // The div is reused for all subsequent calls without updating fontSize,
-  // so ALL measurements effectively happen at 16px.
-  // To match HTML Coordinates output, we always use 16px here too.
-  return `${FONT_SIZE_PARTICIPANT} ${FONT_FAMILY}`;
+function getFontSize(type: TextType): string {
+  return type === TextType.MessageContent
+    ? FONT_SIZE_MESSAGE
+    : FONT_SIZE_PARTICIPANT;
 }
 
-let canvasCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
+function getFontSpec(type: TextType): string {
+  return `${getFontSize(type)} ${FONT_FAMILY}`;
+}
+
+let canvasCtx:
+  | CanvasRenderingContext2D
+  | OffscreenCanvasRenderingContext2D
+  | null = null;
 
 /** Inject a custom canvas context (e.g., from @napi-rs/canvas for accurate text measurement in Node/Bun). */
-export function setCanvasContext(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null): void {
+export function setCanvasContext(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null,
+): void {
+  if (ctx === canvasCtx) return;
   canvasCtx = ctx;
+  // Widths measured with the previous backend (or with the character-count
+  // estimate used when there was none) are not comparable to widths from this
+  // one, and the backend is not part of any cache key.
+  clearPersistentCache();
 }
 
-function getCanvasContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null {
+function getCanvasContext():
+  | CanvasRenderingContext2D
+  | OffscreenCanvasRenderingContext2D
+  | null {
   if (canvasCtx) return canvasCtx;
   try {
     if (typeof OffscreenCanvas !== "undefined") {
       canvasCtx = new OffscreenCanvas(1, 1).getContext("2d");
-      logger.debug("[ZenUML] WidthProviderOnCanvas: using OffscreenCanvas");
     } else if (typeof document !== "undefined") {
       canvasCtx = document.createElement("canvas").getContext("2d");
-      logger.debug("[ZenUML] WidthProviderOnCanvas: using <canvas> element");
-    } else {
-      logger.debug("[ZenUML] WidthProviderOnCanvas: no canvas available, using character estimate fallback");
     }
   } catch {
-    logger.debug("[ZenUML] WidthProviderOnCanvas: canvas creation failed, using character estimate fallback");
+    // canvas creation failed; caller falls back to a character-count estimate
   }
   return canvasCtx;
 }
 
-export function WidthProviderOnCanvas(
-  text: string,
-  type: TextType,
-): number {
+export function WidthProviderOnCanvas(text: string, type: TextType): number {
   // Trim whitespace to match browser behavior: DOM scrollWidth (used by
   // WidthProviderOnBrowser) ignores leading/trailing spaces because the hidden
   // div has display:inline + width:0px.  Canvas measureText includes them,
   // so we trim to keep both providers consistent.
   const measured = text.trim();
-  const cacheKey = `WidthProviderOnCanvas_${measured}_${type}`;
+  const cacheKey = `WidthProviderOnCanvas_${getFontSpec(type)}_${measured}_${type}`;
   const cacheValue = getCache(cacheKey);
   if (cacheValue != null) {
     return cacheValue;
@@ -58,57 +69,79 @@ export function WidthProviderOnCanvas(
 
   const ctx = getCanvasContext();
   if (!ctx) {
-    // Fallback: estimate based on character count (always 16px to match browser)
-    const width = Math.ceil(measured.length * 16 * 0.6);
-    setCache(cacheKey, width, true);
+    // Fallback: estimate based on character count at the rendered font size.
+    // Cached for this render only — a canvas may be installed later
+    // (src/cli/zenuml.ts does exactly that), and a persisted estimate could
+    // never be corrected.
+    const width = Math.ceil(
+      measured.length * Number.parseFloat(getFontSize(type)) * 0.6,
+    );
+    setCache(cacheKey, width);
     return width;
   }
 
-  ctx.font = getFontSpec();
+  ctx.font = getFontSpec(type);
+  ctx.fontVariantCaps = "normal";
   const width = Math.round(ctx.measureText(measured).width);
   setCache(cacheKey, width, true);
   return width;
 }
 
-// eslint-disable-next-line no-misleading-character-class
-const EMOJI_PATTERN = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
+// The class deliberately lists the variation selectors and the zero-width
+// joiner as single code points: this is a "does the text contain any emoji
+// machinery" probe, not a matcher for whole grapheme clusters.
+const EMOJI_PATTERN =
+  // eslint-disable-next-line no-misleading-character-class
+  /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/u;
 
 /**
  * Measure text width using SVG <text> element (accurate for emoji).
  * Canvas measureText returns wider values for emoji than SVG actually renders.
  */
-function measureWithSvg(text: string, fontSize: string): number | null {
+function measureWithSvg(
+  text: string,
+  fontSize: string,
+  caps = "normal",
+): number | null {
   if (typeof document === "undefined") return null;
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("style", "position:absolute;left:-9999px;top:-9999px");
   const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
   textEl.setAttribute("font-family", FONT_FAMILY);
   textEl.setAttribute("font-size", fontSize);
+  textEl.style.fontVariantCaps = caps;
+  if (typeof textEl.getBBox !== "function") return null;
   textEl.textContent = text;
   svg.appendChild(textEl);
   document.body.appendChild(svg);
   const width = textEl.getBBox().width;
   document.body.removeChild(svg);
-  return width;
+  return Number.isFinite(width) && width > 0 ? width : null;
 }
 
-export function measureTextWithFont(text: string, fontSize: string): number {
+export function measureTextWithFont(
+  text: string,
+  fontSize: string,
+  caps: "normal" | "all-small-caps" = "normal",
+): number {
   const measured = text.trim();
   if (!measured) return 0;
 
-  // Use SVG measurement for text containing emoji — canvas measureText
-  // returns wider values for emoji glyphs than SVG <text> actually renders.
+  // Native SVG matches rendered emoji and synthetic small caps more accurately
+  // than canvas measurement, whose caps shaping differs between backends.
   const hasEmoji = EMOJI_PATTERN.test(measured);
-  const cacheKey = hasEmoji
-    ? `measureTextWithFont_svg_${fontSize}_${measured}`
-    : `measureTextWithFont_${fontSize}_${measured}`;
+  const font = `${fontSize} ${FONT_FAMILY}`;
+  const cacheKey =
+    (hasEmoji
+      ? `measureTextWithFont_svg_${font}_${measured}`
+      : `measureTextWithFont_${font}_${measured}`) + `_${caps}`;
   const cacheValue = getCache(cacheKey);
   if (cacheValue != null) {
     return cacheValue;
   }
 
-  if (hasEmoji) {
-    const svgWidth = measureWithSvg(measured, fontSize);
+  if (hasEmoji || caps !== "normal") {
+    const svgWidth = measureWithSvg(measured, fontSize, caps);
     if (svgWidth != null) {
       setCache(cacheKey, svgWidth, true);
       return svgWidth;
@@ -117,14 +150,28 @@ export function measureTextWithFont(text: string, fontSize: string): number {
 
   const ctx = getCanvasContext();
   if (!ctx) {
+    // Estimate only — not persisted, for the reason above.
     const px = Number.parseFloat(fontSize) || 14;
     const width = Math.ceil(measured.length * px * 0.6);
-    setCache(cacheKey, width, true);
+    setCache(cacheKey, width);
     return width;
   }
 
-  ctx.font = `${fontSize} ${FONT_FAMILY}`;
-  const width = ctx.measureText(measured).width;
+  ctx.font = font;
+  ctx.fontVariantCaps = "normal";
+  const normalWidth = ctx.measureText(measured).width;
+  let width = normalWidth;
+  if (caps !== "normal") {
+    const normalProbe = ctx.measureText("iiii").width;
+    ctx.fontVariantCaps = caps;
+    // Some server canvas backends accept the property without shaping caps.
+    // Reserve a conservative uppercase width there; keep source text unchanged.
+    width =
+      Math.abs(ctx.measureText("iiii").width - normalProbe) > 0.01
+        ? ctx.measureText(measured).width
+        : Math.max(normalWidth, ctx.measureText(measured.toUpperCase()).width);
+    ctx.fontVariantCaps = "normal";
+  }
   setCache(cacheKey, width, true);
   return width;
 }
@@ -141,7 +188,7 @@ export default function WidthProviderOnBrowser(
   text: string,
   type: TextType,
 ): number {
-  const cacheKey = `WidthProviderOnBrowser_${text}_${type}`;
+  const cacheKey = `WidthProviderOnBrowser_${getFontSpec(type)}_${text}_${type}`;
   const cacheValue = getCache(cacheKey);
   if (cacheValue != null) {
     return cacheValue;
@@ -152,9 +199,7 @@ export default function WidthProviderOnBrowser(
   if (!hiddenDiv) {
     const newDiv = document.createElement("div");
     newDiv.className = "textarea-hidden-div ";
-    newDiv.style.fontSize =
-      type === TextType.MessageContent ? "0.875rem" : "1rem";
-    newDiv.style.fontFamily = "Helvetica, Verdana, serif";
+    newDiv.style.fontFamily = FONT_FAMILY;
     newDiv.style.display = "inline";
     // newDiv.style.zIndex = '-9999';
     newDiv.style.whiteSpace = "nowrap";
@@ -172,8 +217,8 @@ export default function WidthProviderOnBrowser(
     document.body.appendChild(newDiv);
     hiddenDiv = newDiv;
   }
-  // hiddenDiv.className = 'textarea-hidden-div ' + (type === TextType.ParticipantName ? 'participant' : 'message');
-
+  // A single measurement element serves both roles; update its font on every call.
+  hiddenDiv.style.fontSize = getFontSize(type);
   hiddenDiv.textContent = text;
   const scrollWidth = hiddenDiv.scrollWidth;
   setCache(cacheKey, scrollWidth, true);

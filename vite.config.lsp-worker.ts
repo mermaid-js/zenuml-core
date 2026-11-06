@@ -1,6 +1,7 @@
 /* eslint-env node */
 import { resolve } from "path";
 import { defineConfig } from "vite";
+import { alias } from "./vite.shared";
 
 // ZenUML LSP server as a browser Web Worker bundle (serverless). Self-contained
 // (langium + chevrotain + vscode-languageserver/browser all inlined) so a
@@ -20,9 +21,5 @@ export default defineConfig({
       fileName: () => "zenuml-server.worker.js",
     },
   },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-    },
-  },
+  resolve: { alias },
 });

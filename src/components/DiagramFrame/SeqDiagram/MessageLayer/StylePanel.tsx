@@ -1,26 +1,38 @@
+import { useCommitCode } from "@/store/useCommitCode";
 import { cn } from "@/utils";
-import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/StringUtil";
+import { usePopoverPresence } from "@/components/common/usePopoverPresence";
+import { getLineHead, getPrevLine } from "@/utils/StringUtil";
 import {
   canTransformMessageType,
   type MessageArrowType,
-  transformMessageType,
+  retypeMessageInDsl,
 } from "@/utils/messageTypeTransform";
 import {
   type WrapFragmentType,
   wrapMessageInFragment,
 } from "@/utils/messageWrapTransform";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import {
+  parseStyleComment,
+  toggleMessageStyle,
+} from "@/utils/messageStyleToggle";
+import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import {
   codeAtom,
-  onContentChangeAtom,
+  diagramElementAtom,
   onMessageClickAtom,
   pendingEditableRangeAtom,
   selectedAtom,
   selectedMessageAtom,
+  textEditingAtom,
 } from "@/store/Store";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  enterMenuAtom,
+  exitMenuAtom,
+  interactionAtom,
+} from "@/store/interaction/interactionAtom";
+import { useActiveSurface, useTextEditing } from "@/store/interaction/useCan";
 import { FloatingPortal, useFloating } from "@floating-ui/react";
-import { useOutsideClick } from "@/functions/useOutsideClick";
 
 const btns = [
   {
@@ -48,28 +60,43 @@ const btns = [
 const wrapTypes: WrapFragmentType[] = ["alt", "loop", "opt", "par"];
 
 export const StylePanel = () => {
-  const [code, setCode] = useAtom(codeAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
+  const store = useStore();
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
+  const diagramElement = useAtomValue(diagramElementAtom);
   const setOnMessageClick = useSetAtom(onMessageClickAtom);
   const setPendingEditableRange = useSetAtom(pendingEditableRangeAtom);
   const setSelectedParticipants = useSetAtom(selectedAtom);
   const [selectedMessage, setSelectedMessage] = useAtom(selectedMessageAtom);
-  const [isOpen, setIsOpen] = useState(false);
+  // A label edit that starts while the menu is open ends the menu.
+  const textEditing = useTextEditing();
+  // The menu's buttons show while `messageMenu` is the active surface.
+  const surfaceShown = useActiveSurface()?.kind === "messageMenu";
+  // P2: the card stays mounted for its 120 ms exit animation.
+  const presence = usePopoverPresence(surfaceShown);
+  const themeClasses = Array.from(diagramElement?.classList ?? [])
+    .filter((name) => name.startsWith("theme-"))
+    .join(" ");
+  // The open state is the diagram's interaction state (ADR 0002, P2): the
+  // menu is open while the interaction is `messageMenu`. A selected message
+  // with its menu closed is `idle` and blocks nothing.
+  const isOpen = useAtomValue(interactionAtom).kind === "messageMenu";
+  const enterMenu = useSetAtom(enterMenuAtom);
+  const exitMenu = useSetAtom(exitMenuAtom);
+  const closeMenu = useCallback(
+    () => exitMenu({ kind: "messageMenu" }),
+    [exitMenu],
+  );
   const [existingStyles, setExistingStyles] = useState<string[]>([]);
   const [hasMessageContext, setHasMessageContext] = useState(false);
 
   const updateCode = (newCode: string) => {
-    setCode(newCode);
-    onContentChange(newCode);
+    commitCode(newCode);
   };
 
   const messageData = useRef({
     start: 0,
     lineHead: 0,
-    prevLine: "",
-    leadingSpaces: "",
-    prevLineIsComment: false,
-    hasStyleBrackets: false,
     line: "",
     currentType: "sync" as MessageArrowType,
     source: "",
@@ -81,97 +108,57 @@ export const StylePanel = () => {
 
   const { refs, floatingStyles } = useFloating({
     open: isOpen,
-    onOpenChange: setIsOpen,
+    onOpenChange: (open) => {
+      if (!open) closeMenu();
+    },
   });
 
   const handleClick = (style: string) => {
-    setIsOpen(false);
+    closeMenu();
     if (!hasMessageContext) return;
-    const message = messageData.current;
-    if (message.prevLineIsComment) {
-      let newComment = "";
-      if (message.hasStyleBrackets) {
-        let updatedStyles;
+    updateCode(
+      toggleMessageStyle({
+        code,
+        messageStart: messageData.current.start,
+        style,
+      }),
+    );
+  };
 
-        if (existingStyles.includes(style)) {
-          updatedStyles = existingStyles.filter((s) => s !== style);
-        } else {
-          updatedStyles = [...existingStyles, style];
-        }
-
-        newComment = `${message.leadingSpaces}// [${updatedStyles
-          .filter(Boolean)
-          .join(", ")}] ${message.prevLine
-          .slice(message.prevLine.indexOf("]") + 1)
-          .trimStart()}`;
-      } else {
-        newComment = `${message.leadingSpaces}// [${style}] ${message.prevLine
-          .slice((message.prevLine.match(/\/\/*/)?.index || -2) + 2)
-          .trimStart()}`;
-      }
-      if (!newComment.endsWith("\n")) newComment += "\n";
-      updateCode(
-        code.slice(0, getPrevLineHead(code, message.start)) +
-          newComment +
-          code.slice(message.lineHead),
-      );
-    } else {
-      updateCode(
-        code.slice(0, message.lineHead) +
-          `${message.leadingSpaces}// [${style}]\n` +
-          code.slice(message.lineHead),
-      );
-    }
+  // The argument shared by the type menu's disabled state and the click.
+  const typeInput = (targetType: MessageArrowType) => {
+    const { line, currentType, source, target, signature } =
+      messageData.current;
+    return { line, currentType, targetType, source, target, signature };
   };
 
   const handleTypeClick = (targetType: MessageArrowType) => {
     const message = messageData.current;
-    if (message.currentType === targetType) return;
-    if (!canTransformMessageType({
-      line: message.line,
-      currentType: message.currentType,
-      targetType,
-      source: message.source,
-      target: message.target,
-      signature: message.signature,
-    })) return;
-    const nextLine = transformMessageType({
-      line: message.line,
-      currentType: message.currentType,
-      targetType,
-      source: message.source,
-      target: message.target,
-      signature: message.signature,
+    const next = retypeMessageInDsl({
+      ...typeInput(targetType),
+      code,
+      lineHead: message.lineHead,
     });
-    if (!nextLine) {
-      return;
-    }
-
-    const lineTail = message.lineHead + message.line.length;
-    const labelText = message.signature;
-    const labelOffset = labelText ? nextLine.lastIndexOf(labelText) : -1;
-    updateCode(
-      code.slice(0, message.lineHead) +
-        nextLine +
-        code.slice(lineTail),
-    );
+    if (!next) return;
+    updateCode(next.code);
     message.currentType = targetType;
-    message.line = nextLine;
-    if (labelOffset >= 0 && labelText) {
-      setSelectedMessage({
-        start: message.lineHead + labelOffset,
-        end: message.lineHead + labelOffset + labelText.length - 1,
-        token: Date.now(),
-      });
+    message.line = next.line;
+    if (next.labelPosition) {
+      const [start, end] = next.labelPosition;
+      setSelectedMessage({ start, end, token: Date.now() });
+      // The menu stays open on the re-typed message.
+      enterMenu({ kind: "messageMenu", start, end });
     }
   };
 
   const handleRenameClick = () => {
-    setIsOpen(false);
     const message = messageData.current;
+    // Disabled for a message with no label: aria-disabled keeps the control
+    // focusable and its title readable, so the click itself does nothing.
     if (message.labelStart < 0 || message.labelEnd < 0) {
       return;
     }
+    closeMenu();
     setPendingEditableRange({
       start: message.labelStart,
       end: message.labelEnd,
@@ -180,7 +167,7 @@ export const StylePanel = () => {
   };
 
   const handleWrapClick = (type: WrapFragmentType) => {
-    setIsOpen(false);
+    closeMenu();
     const message = messageData.current;
     const next = wrapMessageInFragment({
       code,
@@ -197,57 +184,42 @@ export const StylePanel = () => {
     });
   };
 
-  useOutsideClick(refs.floating.current, () => {
-    setIsOpen(false);
-    setSelectedMessage(null);
-  });
+  // Click-away and Escape belong to the interaction state (ADR 0002, P3):
+  // `InteractionController` closes this menu and clears the message
+  // selection, keeping it when the press lands on the selected message.
 
   useEffect(() => {
     setOnMessageClick((context: any, element: HTMLElement) => {
       // make sure this is triggered after the outsideclicking
       setTimeout(() => {
+        // A quick double click can begin editing before this callback runs.
+        if (store.get(textEditingAtom)) return;
         const message = messageData.current;
         message.start = context.start.start;
         message.lineHead = getLineHead(code, message.start);
         const lineTail = code.indexOf("\n", message.lineHead);
-        message.line = lineTail === -1
-          ? code.slice(message.lineHead)
-          : code.slice(message.lineHead, lineTail);
-        message.prevLine = getPrevLine(code, message.start);
-        message.leadingSpaces =
-          code.slice(message.lineHead).match(/^\s*/)?.[0] || "";
-        message.prevLineIsComment = message.prevLine.trim().startsWith("//");
-        if (message.prevLineIsComment) {
-          const trimedPrevLine = message.prevLine
-            .trimStart()
-            .slice(2)
-            .trimStart();
-          const styleStart = trimedPrevLine.indexOf("[");
-          const styleEnd = trimedPrevLine.indexOf("]");
-          message.hasStyleBrackets = Boolean(styleStart === 0 && styleEnd);
-          if (message.hasStyleBrackets) {
-            setExistingStyles(
-              trimedPrevLine
-                .slice(styleStart + 1, styleEnd)
-                .split(",")
-                .map((s) => s.trim()),
-            );
-          } else {
-            setExistingStyles([]);
-          }
-        }
+        message.line =
+          lineTail === -1
+            ? code.slice(message.lineHead)
+            : code.slice(message.lineHead, lineTail);
+        setExistingStyles(
+          parseStyleComment(getPrevLine(code, message.start)).styles,
+        );
         const interactionElement = element.closest(".interaction");
         const classList = interactionElement?.classList;
-        const signatureCtx = context?.messageBody?.()?.func?.()?.signature?.()?.[0];
+        const signatureCtx = context
+          ?.messageBody?.()
+          ?.func?.()
+          ?.signature?.()?.[0];
         const asyncContent = context?.content?.();
         const creationParams = context?.creationBody?.()?.parameters?.();
         message.currentType = classList?.contains("creation")
           ? "creation"
           : classList?.contains("return")
-          ? "return"
-          : classList?.contains("async")
-          ? "async"
-          : "sync";
+            ? "return"
+            : classList?.contains("async")
+              ? "async"
+              : "sync";
         message.source = interactionElement?.getAttribute("data-source") || "";
         message.target = interactionElement?.getAttribute("data-target") || "";
         message.signature =
@@ -268,40 +240,52 @@ export const StylePanel = () => {
         setSelectedParticipants([]);
         setSelectedMessage({
           start: message.labelStart >= 0 ? message.labelStart : message.start,
-          end: message.labelEnd >= 0 ? message.labelEnd : (context?.stop?.stop ?? message.start),
+          end:
+            message.labelEnd >= 0
+              ? message.labelEnd
+              : (context?.stop?.stop ?? message.start),
           token: Date.now(),
         });
         refs.setReference(element);
         setHasMessageContext(Boolean(context));
-        setIsOpen(true);
+        enterMenu({
+          kind: "messageMenu",
+          start: message.labelStart >= 0 ? message.labelStart : message.start,
+          end:
+            message.labelEnd >= 0
+              ? message.labelEnd
+              : (context?.stop?.stop ?? message.start),
+        });
       }, 0);
     });
-  }, [code, refs, setOnMessageClick, setSelectedMessage, setSelectedParticipants]);
+  }, [
+    code,
+    enterMenu,
+    refs,
+    setOnMessageClick,
+    setSelectedMessage,
+    setSelectedParticipants,
+    store,
+  ]);
 
   useEffect(() => {
     if (!selectedMessage) {
-      setIsOpen(false);
+      closeMenu();
     }
-  }, [selectedMessage]);
+  }, [closeMenu, selectedMessage]);
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") {
-        return;
-      }
-      setIsOpen(false);
-      setSelectedMessage(null);
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [setSelectedMessage]);
+    if (textEditing) closeMenu();
+  }, [closeMenu, textEditing]);
 
   const [openSubmenu, setOpenSubmenu] = useState<"type" | "wrap" | null>(null);
   const submenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const openSub = useCallback((menu: "type" | "wrap") => {
-    if (submenuTimer.current) { clearTimeout(submenuTimer.current); submenuTimer.current = null; }
+    if (submenuTimer.current) {
+      clearTimeout(submenuTimer.current);
+      submenuTimer.current = null;
+    }
     setOpenSubmenu(menu);
   }, []);
 
@@ -314,165 +298,197 @@ export const StylePanel = () => {
     if (!isOpen) setOpenSubmenu(null);
   }, [isOpen]);
 
+  const renameDisabled =
+    messageData.current.labelStart < 0 || messageData.current.labelEnd < 0;
+
   return (
     <FloatingPortal>
-    <div id="style-panel" ref={refs.setFloating} style={{ ...floatingStyles, zIndex: 40 }}>
-      {isOpen && (
-        <div className="flex items-center bg-white shadow-md z-40 rounded-md p-1 gap-1">
-          <div className="flex">
-            {btns.map((btn) => (
+      <div
+        id="style-panel"
+        className="zenuml"
+        data-interaction-surface="messageMenu"
+        ref={refs.setFloating}
+        style={{ ...floatingStyles, zIndex: 40 }}
+      >
+        {presence.mounted && (
+          <div
+            ref={presence.ref}
+            className={cn(
+              "flex items-center bg-white shadow-zu-md z-40 rounded-zu-panel p-1 gap-1",
+              presence.className,
+              themeClasses,
+            )}
+          >
+            <div className="flex">
+              {btns.map((btn) => (
+                <button
+                  type="button"
+                  key={btn.name}
+                  aria-label={btn.name}
+                  aria-pressed={existingStyles.includes(btn.class)}
+                  title={
+                    existingStyles.includes(btn.class)
+                      ? `Remove ${btn.name}`
+                      : `Apply ${btn.name}`
+                  }
+                  onClick={() => handleClick(btn.class)}
+                  className={cn(
+                    "zu-press w-6 mx-1 py-1 rounded-zu-md text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
+                    [
+                      btn.class,
+                      { "bg-gray-100": existingStyles.includes(btn.class) },
+                    ],
+                  )}
+                >
+                  {btn.content}
+                </button>
+              ))}
+            </div>
+            <div className="w-px self-stretch bg-gray-200" />
+            <div className="flex items-center gap-1">
               <button
                 type="button"
-                key={btn.name}
-                aria-label={btn.name}
-                aria-pressed={existingStyles.includes(btn.class)}
-                title={existingStyles.includes(btn.class) ? `Remove ${btn.name}` : `Apply ${btn.name}`}
-                onClick={() => handleClick(btn.class)}
+                data-testid="message-rename"
+                // Not borrowed from Claude (assessment P4): dimming a row while
+                // keeping its inner controls readable. A disabled control here
+                // is aria-disabled, stays focusable and explains itself in its
+                // title.
+                aria-disabled={renameDisabled ? "true" : undefined}
                 className={cn(
-                  "w-6 mx-1 py-1 rounded-md text-black text-center cursor-pointer hover:bg-gray-200",
-                  [
-                    btn.class,
-                    { "bg-gray-100": existingStyles.includes(btn.class) },
-                  ],
+                  "zu-press px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
+                  {
+                    "opacity-40 cursor-not-allowed": renameDisabled,
+                  },
                 )}
+                title={
+                  renameDisabled
+                    ? "Cannot rename: message has no label"
+                    : "Rename message label"
+                }
+                onClick={handleRenameClick}
               >
-                {btn.content}
+                Rename
               </button>
-            ))}
-          </div>
-          <div className="w-px self-stretch bg-gray-200" />
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              data-testid="message-rename"
-              className={cn(
-                "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
-                {
-                  "opacity-40 pointer-events-none":
-                    messageData.current.labelStart < 0 ||
-                    messageData.current.labelEnd < 0,
-                },
-              )}
-              title={
-                messageData.current.labelStart < 0 ||
-                messageData.current.labelEnd < 0
-                  ? "Cannot rename: message has no label"
-                  : "Rename message label"
-              }
-              onClick={handleRenameClick}
+            </div>
+            <div className="w-px self-stretch bg-gray-200" />
+            {/* Type submenu trigger */}
+            <div
+              className="relative"
+              onPointerEnter={() => openSub("type")}
+              onPointerLeave={closeSub}
             >
-              Rename
-            </button>
-          </div>
-          <div className="w-px self-stretch bg-gray-200" />
-          {/* Type submenu trigger */}
-          <div
-            className="relative"
-            onPointerEnter={() => openSub("type")}
-            onPointerLeave={closeSub}
-          >
-            <button
-              type="button"
-              data-testid="message-type-menu"
-              className={cn(
-                "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
-                { "bg-gray-100": openSubmenu === "type" },
+              <button
+                type="button"
+                data-testid="message-type-menu"
+                className={cn(
+                  "zu-press px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
+                  { "bg-gray-100": openSubmenu === "type" },
+                )}
+                title="Change message type"
+                aria-expanded={openSubmenu === "type"}
+                aria-haspopup="true"
+                onClick={() => openSub("type")}
+              >
+                {messageData.current.currentType} ▾
+              </button>
+              {openSubmenu === "type" && (
+                <div className="absolute left-0 top-full mt-1 bg-white shadow-zu-pop rounded-zu-lg border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[90px]">
+                  {(
+                    [
+                      "sync",
+                      "async",
+                      "return",
+                      "creation",
+                    ] as MessageArrowType[]
+                  ).map((type) => {
+                    const canTransform = canTransformMessageType(
+                      typeInput(type),
+                    );
+                    const isCurrent = messageData.current.currentType === type;
+                    const disabledTitle = isCurrent
+                      ? `Already ${type}`
+                      : !canTransform && type === "sync"
+                        ? "Label must be a valid method name (no spaces) to switch to sync"
+                        : !canTransform &&
+                            messageData.current.currentType === "creation"
+                          ? "Cannot convert creation messages"
+                          : !canTransform
+                            ? `Cannot convert to ${type}`
+                            : undefined;
+                    return (
+                      <button
+                        type="button"
+                        key={type}
+                        data-testid={`message-type-${type}`}
+                        aria-label={`Change to ${type} message type`}
+                        aria-pressed={isCurrent}
+                        title={disabledTitle}
+                        aria-disabled={!canTransform ? "true" : undefined}
+                        onClick={() => {
+                          // A disabled item does nothing and the submenu
+                          // stays open.
+                          if (!canTransform) return;
+                          handleTypeClick(type);
+                          setOpenSubmenu(null);
+                        }}
+                        className={cn(
+                          "zu-press px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100 focus-visible:outline-none focus-visible:shadow-zu-focus",
+                          {
+                            "bg-gray-100 font-semibold": isCurrent,
+                            "opacity-40 cursor-not-allowed": !canTransform,
+                            "cursor-pointer": canTransform && !isCurrent,
+                          },
+                        )}
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
-              title="Change message type"
-              aria-expanded={openSubmenu === "type"}
-              aria-haspopup="true"
-              onClick={() => openSub("type")}
+            </div>
+            <div className="w-px self-stretch bg-gray-200" />
+            {/* Wrap submenu trigger */}
+            <div
+              className="relative"
+              onPointerEnter={() => openSub("wrap")}
+              onPointerLeave={closeSub}
             >
-              {messageData.current.currentType} ▾
-            </button>
-            {openSubmenu === "type" && (
-              <div className="absolute left-0 top-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[90px]">
-                {(["sync", "async", "return", "creation"] as MessageArrowType[]).map((type) => {
-                  const canTransform = canTransformMessageType({
-                    line: messageData.current.line,
-                    currentType: messageData.current.currentType,
-                    targetType: type,
-                    source: messageData.current.source,
-                    target: messageData.current.target,
-                    signature: messageData.current.signature,
-                  });
-                  const isCurrent = messageData.current.currentType === type;
-                  const disabledTitle = isCurrent
-                    ? `Already ${type}`
-                    : !canTransform && type === "sync"
-                    ? "Label must be a valid method name (no spaces) to switch to sync"
-                    : !canTransform && messageData.current.currentType === "creation"
-                    ? "Cannot convert creation messages"
-                    : !canTransform
-                    ? `Cannot convert to ${type}`
-                    : undefined;
-                  return (
+              <button
+                type="button"
+                data-testid="message-wrap-menu"
+                className={cn(
+                  "zu-press px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200 focus-visible:outline-none focus-visible:shadow-zu-focus",
+                  { "bg-gray-100": openSubmenu === "wrap" },
+                )}
+                title="Wrap in fragment"
+                aria-expanded={openSubmenu === "wrap"}
+                aria-haspopup="true"
+                onClick={() => openSub("wrap")}
+              >
+                Wrap ▾
+              </button>
+              {openSubmenu === "wrap" && (
+                <div className="absolute left-0 top-full mt-1 bg-white shadow-zu-pop rounded-zu-lg border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[70px]">
+                  {wrapTypes.map((type) => (
                     <button
                       type="button"
                       key={type}
-                      data-testid={`message-type-${type}`}
-                      aria-label={`Change to ${type} message type`}
-                      aria-pressed={isCurrent}
-                      title={disabledTitle}
-                      onClick={() => { handleTypeClick(type); setOpenSubmenu(null); }}
-                      className={cn(
-                        "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-left hover:bg-gray-100",
-                        {
-                          "bg-gray-100 font-semibold": isCurrent,
-                          "opacity-40 cursor-not-allowed": !canTransform,
-                          "cursor-pointer": canTransform && !isCurrent,
-                        },
-                      )}
+                      data-testid={`message-wrap-${type}`}
+                      className="zu-press px-2 py-1 rounded-zu-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100 focus-visible:outline-none focus-visible:shadow-zu-focus"
+                      title={`Wrap in ${type} fragment`}
+                      aria-label={`Wrap in ${type} fragment`}
+                      onClick={() => handleWrapClick(type)}
                     >
                       {type}
                     </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-          <div className="w-px self-stretch bg-gray-200" />
-          {/* Wrap submenu trigger */}
-          <div
-            className="relative"
-            onPointerEnter={() => openSub("wrap")}
-            onPointerLeave={closeSub}
-          >
-            <button
-              type="button"
-              data-testid="message-wrap-menu"
-              className={cn(
-                "px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-center cursor-pointer hover:bg-gray-200",
-                { "bg-gray-100": openSubmenu === "wrap" },
+                  ))}
+                </div>
               )}
-              title="Wrap in fragment"
-              aria-expanded={openSubmenu === "wrap"}
-              aria-haspopup="true"
-              onClick={() => openSub("wrap")}
-            >
-              Wrap ▾
-            </button>
-            {openSubmenu === "wrap" && (
-              <div className="absolute left-0 top-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 p-1 flex flex-col gap-0.5 z-50 min-w-[70px]">
-                {wrapTypes.map((type) => (
-                  <button
-                    type="button"
-                    key={type}
-                    data-testid={`message-wrap-${type}`}
-                    className="px-2 py-1 rounded-md text-[11px] uppercase tracking-wide text-black text-left cursor-pointer hover:bg-gray-100"
-                    title={`Wrap in ${type} fragment`}
-                    aria-label={`Wrap in ${type} fragment`}
-                    onClick={() => handleWrapClick(type)}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            )}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
     </FloatingPortal>
   );
 };

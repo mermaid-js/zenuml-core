@@ -7,22 +7,38 @@ import {
   diagramElementAtom,
   modeAtom,
   onSelectAtom,
+  participantPreviewAtom,
   participantsAtom,
   RenderMode,
   selectedAtom,
   stickyOffsetAtom,
 } from "@/store/Store";
 import { cn } from "@/utils";
-import { brightnessIgnoreAlpha, removeAlpha } from "@/utils/Color";
+import { participantTextColor, removeAlpha } from "@/utils/Color";
 import { getElementDistanceToTop } from "@/utils/dom";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useActiveSurface, useCan } from "@/store/interaction/useCan";
 import { ParticipantLabel } from "./ParticipantLabel";
 import { AsyncIcon } from "../../Tutorial/AsyncIcon";
+import { hasIconFor } from "../../Tutorial/IconKeys";
 // import iconPath from "../../Tutorial/Icons"; // Removed eager import
 
 const INTERSECTION_ERROR_MARGIN = 10;
-const PARTICIPANT_DEBUG = Boolean(localStorage.getItem("zenumlDebug"));
+// Read on first use, not at module load: this module is reachable from the
+// package entry, which must import in Node (and in a browser that blocks site
+// data) without throwing.
+let participantDebug: boolean | undefined;
+const isParticipantDebug = (): boolean => {
+  if (participantDebug === undefined) {
+    try {
+      participantDebug = Boolean(localStorage.getItem("zenumlDebug"));
+    } catch {
+      participantDebug = false;
+    }
+  }
+  return participantDebug;
+};
 
 export const Participant = (props: {
   entity: Record<string, string>;
@@ -35,20 +51,39 @@ export const Participant = (props: {
   const diagramElement = useAtomValue(diagramElementAtom);
   const stickyOffset = useAtomValue(stickyOffsetAtom);
   const selected = useAtomValue(selectedAtom);
-  const onSelect = useSetAtom(onSelectAtom);
+  const selectParticipant = useSetAtom(onSelectAtom);
+  const setSelected = useSetAtom(selectedAtom);
+  // ADR 0002: selection is a capability. It is off in `RenderMode.Static`
+  // and while another interaction owns the diagram; gate B consumes a press
+  // the primary state does not allow before it gets here.
+  const canSelect = useCan("select");
+  const surface = useActiveSurface();
+  const onSelect = (name: string) => {
+    if (!canSelect) return;
+    // The editor is open on another participant: the click switches it, so
+    // the selection is replaced, not extended (a two-participant highlight is
+    // not the editor). The press that precedes this click no longer exits
+    // the editor, which keeps the mask and the row mounted across the switch.
+    if (surface?.kind === "participantEditor") {
+      // The open participant stays open; only click-away closes the editor.
+      if (surface.participant === name) return;
+      setSelected([name]);
+      return;
+    }
+    selectParticipant(name);
+  };
+  const preview = useAtomValue(participantPreviewAtom);
+  const [isEditingName, setIsEditingName] = useState(false);
   const intersectionTop = useIntersectionTop();
   const [scrollTop] = useDocumentScroll();
 
   const isDefaultStarter = props.entity.name === _STARTER_;
 
   const labelPositions = Array.from(
-    (participants.GetPositions(props.entity.name) as [number, number][]) ?? [],
+    participants.GetPositions(props.entity.name) ?? [],
   ).sort((a, b) => b[0] - a[0]);
   const assigneePositions = Array.from(
-    (participants.GetAssigneePositions(props.entity.name) as [
-      number,
-      number,
-    ][]) ?? [],
+    participants.GetAssigneePositions(props.entity.name) ?? [],
   ).sort((a, b) => b[0] - a[0]);
 
   const calcOffset = () => {
@@ -68,38 +103,39 @@ export const Participant = (props: {
   };
 
   // We use this method to simulate sticky behavior. CSS sticky is not working out of an iframe.
-  const stickyVerticalOffset = mode === RenderMode.Static || stickyOffset === false ? 0 : calcOffset();
+  const stickyVerticalOffset =
+    mode === RenderMode.Static || stickyOffset === false ? 0 : calcOffset();
 
-  const backgroundColor = props.entity.color
-    ? removeAlpha(props.entity.color)
+  const activePreview = preview?.name === props.entity.name ? preview : null;
+  const effectiveColor = activePreview?.color ?? props.entity.color;
+  const effectiveType = activePreview?.type ?? props.entity.type;
+
+  const backgroundColor = effectiveColor
+    ? removeAlpha(effectiveColor)
     : undefined;
-  const color = useMemo(() => {
-    if (!props.entity.color) {
-      return undefined;
-    }
-    const bgColor =
-      elRef.current &&
-      window
-        .getComputedStyle(elRef.current)
-        .getPropertyValue("background-color");
-    if (!bgColor) {
-      return undefined;
-    }
-    return brightnessIgnoreAlpha(bgColor) > 128 ? "#000" : "#fff";
-  }, [props.entity.color]);
+  // Derive from the effective colour, not the DOM: during a preview the DOM
+  // still shows the previous background when this memo runs.
+  const color = useMemo(
+    () => (backgroundColor ? participantTextColor(backgroundColor) : undefined),
+    [backgroundColor],
+  );
 
   // Determine icon key
+  // A type without an icon gets no slot, as in the layout (#661).
   const iconKey = isDefaultStarter
     ? "actor"
-    : props.entity.type?.toLowerCase();
+    : hasIconFor(effectiveType)
+      ? effectiveType?.toLowerCase()
+      : undefined;
 
   return (
     <div
       className={cn(
-        "participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-base leading-4 flex flex-col justify-center z-10 h-10 top-8",
+        "participant bg-skin-participant shadow-participant border-skin-participant text-skin-participant rounded text-sm font-normal leading-4 flex flex-col justify-center z-10 h-10 top-8",
         {
           selected: selected.includes(props.entity.name),
-          "ring-2 ring-sky-400": selected.includes(props.entity.name),
+          "ring-1 ring-sky-400":
+            selected.includes(props.entity.name) && !isEditingName,
           "cursor-pointer": mode === RenderMode.Dynamic && !isDefaultStarter,
         },
       )}
@@ -117,12 +153,21 @@ export const Participant = (props: {
           onSelect(props.entity.name);
         }
       }}
-      tabIndex={mode === RenderMode.Dynamic && !isDefaultStarter ? 0 : undefined}
-      role={mode === RenderMode.Dynamic && !isDefaultStarter ? "button" : undefined}
-      title={mode === RenderMode.Dynamic && !isDefaultStarter ? "Click to style participant" : undefined}
+      tabIndex={
+        mode === RenderMode.Dynamic && !isDefaultStarter ? 0 : undefined
+      }
+      role={
+        mode === RenderMode.Dynamic && !isDefaultStarter ? "button" : undefined
+      }
+      title={
+        mode === RenderMode.Dynamic && !isDefaultStarter
+          ? "Click to style participant"
+          : undefined
+      }
       data-participant-id={props.entity.name}
+      data-cap="select"
     >
-      {PARTICIPANT_DEBUG && (
+      {isParticipantDebug() && (
         <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-8 h-[2px] bg-amber-700">
           <div className="w-full h-full bg-black" />
         </div>
@@ -137,7 +182,7 @@ export const Participant = (props: {
         )}
 
         {!isDefaultStarter && (
-          <div className="h-5 group flex flex-col justify-center">
+          <div className="h-5 group flex flex-col items-center justify-center">
             {props.entity.stereotype && (
               <label className="interface leading-4">
                 «{props.entity.stereotype}»
@@ -145,7 +190,10 @@ export const Participant = (props: {
             )}
             <div className="flex items-center">
               {props.entity.emoji && (
-                <span className="mr-1 flex-shrink-0" data-testid="participant-emoji">
+                <span
+                  className="mr-1 flex-shrink-0"
+                  data-testid="participant-emoji"
+                >
                   {getEmojiUnicode(props.entity.emoji)}
                 </span>
               )}
@@ -158,6 +206,7 @@ export const Participant = (props: {
                 labelPositions={labelPositions}
                 assignee={props.entity.assignee}
                 assigneePositions={assigneePositions}
+                onNameEditingChange={setIsEditingName}
               />
             </div>
           </div>

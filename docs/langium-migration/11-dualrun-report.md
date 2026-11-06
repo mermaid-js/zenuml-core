@@ -1,13 +1,13 @@
 # Gate-3 Dual-Run A/B Parity Report
 
-Generated: 2026-06-13T08:42:33.356Z
+Generated: 2026-10-20T14:53:11.134Z
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Total corpus cases | 198 |
-| Identical (ANTLR == Langium facade) | 190 |
+| Total corpus cases | 208 |
+| Identical (ANTLR == Langium facade) | 200 |
 | Differing — explained (G7 recovery) | 8 |
 | Differing — **UNEXPLAINED (failures)** | 0 |
 

@@ -16,6 +16,8 @@ export interface EditableSpanProps {
   title?: string;
   autoEditToken?: number;
   selectAllOnEdit?: boolean;
+  onEditingChange?: (editing: boolean) => void;
+  ignoreEnterKeyupAfterStart?: boolean;
 }
 
 export const EditableSpan = ({
@@ -26,6 +28,8 @@ export const EditableSpan = ({
   title = "Click to edit",
   autoEditToken,
   selectAllOnEdit = false,
+  onEditingChange,
+  ignoreEnterKeyupAfterStart = false,
 }: EditableSpanProps) => {
   const [editing, setEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -33,6 +37,18 @@ export const EditableSpan = ({
   const spanRef = useRef<HTMLSpanElement>(null);
   const cancelRef = useRef(false);
   const pendingFocusRef = useRef<{ x: number; y: number } | null>(null);
+  const ignoreEnterKeyupRef = useRef(false);
+  const consumedAutoEditTokenRef = useRef<number | undefined>(undefined);
+  const editingRef = useRef(false);
+  const onEditingChangeRef = useRef(onEditingChange);
+  onEditingChangeRef.current = onEditingChange;
+
+  const changeEditing = (next: boolean) => {
+    if (editingRef.current === next) return;
+    editingRef.current = next;
+    setEditing(next);
+    onEditingChangeRef.current?.(next);
+  };
 
   const applyFocus = (clickPoint: { x: number; y: number } | null) => {
     const target = spanRef.current;
@@ -87,6 +103,9 @@ export const EditableSpan = ({
     e.stopPropagation();
 
     cancelRef.current = false;
+    if (ignoreEnterKeyupAfterStart && "key" in e && e.key === "Enter") {
+      ignoreEnterKeyupRef.current = true;
+    }
     const target = e.target as HTMLElement | null;
     pendingFocusRef.current =
       selectAllOnEdit || !("clientX" in e)
@@ -96,17 +115,15 @@ export const EditableSpan = ({
       originalTextRef.current = target.innerText ?? "";
     }
 
-    setEditing(true);
+    changeEditing(true);
   };
 
   const handleClick = (e: MouseEvent) => {
-    if (editing || !isEditable) return;
-    // If inside a message, only start editing when that message is already
-    // selected. Otherwise let the click propagate to select it first.
-    const message = (e.currentTarget as HTMLElement).closest(".message");
-    if (message && message.getAttribute("data-selected") !== "true") {
+    if (editing) {
+      e.stopPropagation();
       return;
     }
+    if (!isEditable) return;
     startEditing(e);
   };
 
@@ -128,8 +145,8 @@ export const EditableSpan = ({
   const handleBlur = () => {
     if (!editing) return;
     if (cancelRef.current) return;
-    
-    setEditing(false);
+
+    changeEditing(false);
     setIsHovered(false);
     saveText();
   };
@@ -152,12 +169,12 @@ export const EditableSpan = ({
       e.preventDefault();
       e.stopPropagation();
       cancelRef.current = true;
-      
+
       const target = e.target as HTMLElement | null;
       if (target) {
         target.innerText = originalTextRef.current;
       }
-      setEditing(false);
+      changeEditing(false);
       setIsHovered(false);
       return;
     }
@@ -170,12 +187,16 @@ export const EditableSpan = ({
 
   const handleKeyup = (e: KeyboardEvent) => {
     if (!isEditable) return;
+    if (e.key === "Enter" && ignoreEnterKeyupRef.current) {
+      ignoreEnterKeyupRef.current = false;
+      return;
+    }
     if (!editing) return;
 
     if (e.key === "Enter" || e.key === "Tab") {
       // Prevent handleBlur from calling saveText again (stale closure double-save)
       cancelRef.current = true;
-      setEditing(false);
+      changeEditing(false);
       setIsHovered(false);
       saveText();
     }
@@ -196,14 +217,32 @@ export const EditableSpan = ({
   };
 
   useEffect(() => {
-    if (!autoEditToken || !isEditable) {
+    if (
+      !autoEditToken ||
+      !isEditable ||
+      consumedAutoEditTokenRef.current === autoEditToken
+    ) {
       return;
     }
+    consumedAutoEditTokenRef.current = autoEditToken;
     originalTextRef.current = spanRef.current?.innerText ?? text;
     cancelRef.current = false;
     pendingFocusRef.current = null;
-    setEditing(true);
+    changeEditing(true);
   }, [autoEditToken, isEditable, text]);
+
+  useEffect(() => {
+    if (!isEditable && editingRef.current) {
+      changeEditing(false);
+    }
+  }, [isEditable]);
+
+  useEffect(() => {
+    if (editingRef.current) onEditingChangeRef.current?.(true);
+    return () => {
+      if (editingRef.current) onEditingChangeRef.current?.(false);
+    };
+  }, []);
 
   return (
     <span

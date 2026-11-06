@@ -1,15 +1,23 @@
 .editable-span-base {
   padding: 0 4px;
-  border-radius: 4px;
+  border-radius: var(--zu-radius-sm);
 }
 
-.editable-span-editing {
-  outline: 2px dashed #93c5fd;
-  background-color: #eff6ff;
-}
-
-.editable-span-hover {
-  outline: 2px dashed #d1d5db;
+.editable-span-base.editable-span-hover[role] {
+  outline: none;
   background-color: #f3f4f6;
   cursor: text;
+}
+
+.editable-span-base.editable-span-editing {
+  outline: none;
+  background-color: #eff6ff;
+  border-radius: var(--zu-radius-sm);
+  box-shadow: var(--zu-focus-ring);
+  cursor: text;
+}
+
+.editable-span-base:focus-visible:not(.editable-span-editing) {
+  outline: none;
+  box-shadow: var(--zu-focus-ring);
 }

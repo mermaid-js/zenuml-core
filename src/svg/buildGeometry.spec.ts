@@ -31,8 +31,8 @@ A->B.method() {
   @return B->A: ret2
 }`;
     const returns = getReturns(code);
-    const ret1 = returns.find(r => r.label === "ret1")!;
-    const ret2 = returns.find(r => r.label === "ret2")!;
+    const ret1 = returns.find((r) => r.label === "ret1")!;
+    const ret2 = returns.find((r) => r.label === "ret2")!;
     console.log(`ret1.y=${ret1.y} ret2.y=${ret2.y} gap=${ret2.y - ret1.y}`);
 
     // HTML: ret1=119, ret2=152 → gap=33; SVG now matches HTML exactly
@@ -79,7 +79,9 @@ A->B.method()
   A -> B: elseMsg
 }`;
     const geometry = getGeometry(code);
-    const messageNumbers = Object.fromEntries(geometry.messages.map((m) => [m.label, m.number]));
+    const messageNumbers = Object.fromEntries(
+      geometry.messages.map((m) => [m.label, m.number]),
+    );
 
     expect(messageNumbers.msg1).toBe("1.1");
     expect(messageNumbers.tryMsg).toBe("1.2.1");
@@ -87,5 +89,61 @@ A->B.method()
     expect(messageNumbers.finallyMsg).toBe("1.2.3");
     expect(messageNumbers.elseIfMsg).toBe("1.3");
     expect(messageNumbers.elseMsg).toBe("1.4");
+  });
+});
+
+describe("buildGeometry nested fragments", () => {
+  it("indents every nesting level on the left, as the DOM renderer does", () => {
+    // Four fragments that all start at participant A: the DOM places each one
+    // FRAGMENT_PADDING_X (10px) inside its container on the left.
+    const code = `A B
+if(x) {
+  loop(y) {
+    opt {
+      par {
+        A->B.m()
+      }
+    }
+  }
+}`;
+    const fragments = [...getGeometry(code).fragments].sort(
+      (a, b) => a.y - b.y,
+    );
+    expect(fragments.map((f) => f.kind)).toEqual(["alt", "loop", "opt", "par"]);
+    const steps = fragments.slice(1).map((f, i) => f.x - fragments[i].x);
+    expect(steps).toEqual([10, 10, 10]);
+  });
+});
+
+describe("buildGeometry top-level fragments of different depth", () => {
+  it("places each fragment by its own nesting border, as the DOM renderer does", () => {
+    // alt (1 level) then try > par > alt (3 levels), all over A..B. The DOM
+    // puts a fragment `border.left` px left of its first participant, so the
+    // shallow alt starts 20px right of the deep try.
+    const code = `A B
+if(x) {
+  A->B.m()
+}
+try {
+  A->B.m()
+} catch {
+  par {
+    if(y) {
+      A->B.m()
+    }
+  }
+}`;
+    const [shallowAlt, tcf, par, innerAlt] = [
+      ...getGeometry(code).fragments,
+    ].sort((a, b) => a.y - b.y);
+    expect([shallowAlt.kind, tcf.kind, par.kind, innerAlt.kind]).toEqual([
+      "alt",
+      "tcf",
+      "par",
+      "alt",
+    ]);
+    expect([shallowAlt.x - tcf.x, par.x - tcf.x, innerAlt.x - tcf.x]).toEqual([
+      20, 10, 20,
+    ]);
   });
 });

@@ -1,7 +1,7 @@
 import type { StatementCoordinate } from "../StatementCoordinate";
-import { FragmentVM } from "./FragmentVM";
+import { StatementVM } from "./StatementVM";
 
-export class FragmentRefVM extends FragmentVM {
+export class FragmentRefVM extends StatementVM {
   readonly kind = "ref" as const;
 
   public measure(top: number): StatementCoordinate {

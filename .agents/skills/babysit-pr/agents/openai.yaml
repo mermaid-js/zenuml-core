@@ -1,7 +1,0 @@
-interface:
-  display_name: "Babysit PR"
-  short_description: "Monitor and fix failing PR CI checks"
-  default_prompt: "Use $babysit-pr to diagnose failing GitHub Actions checks on a zenuml-core PR, fix what is actionable, push updates, and watch CI until it is green."
-
-policy:
-  allow_implicit_invocation: true

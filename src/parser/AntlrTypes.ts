@@ -1,3 +1,5 @@
+import type { MessageContextAugmented } from "./ContextAugmentations";
+
 /**
  * TypeScript interfaces for ANTLR-generated parse tree nodes.
  *
@@ -6,9 +8,21 @@
  * codebase, providing documentation and IntelliSense without pretending the
  * shapes are fully known at compile time.
  *
- * Methods use optional chaining patterns (e.g. `node.block?.()`) because
- * not all context types have all methods — each grammar rule produces a
- * different context class.
+ * The file holds two projections of that same parse tree, and they are NOT
+ * interchangeable:
+ *
+ * - The `*Node` interfaces (tree-walk projection) declare every member
+ *   OPTIONAL, because the walkers in `src/svg` and the renderer probe methods
+ *   that only some context kinds have (`node.block?.()`).
+ * - The `*ContextAugmented` interfaces in `ContextAugmentations.ts`
+ *   (prototype-augmentation projection) declare members REQUIRED, because the
+ *   prototype installers call `this.messageBody()` / `this.content()`
+ *   unguarded. The small domain shapes below (`Parameter`, `Func`, ...) are
+ *   the building blocks they share.
+ *
+ * A `*Node` value is therefore not assignable to its `*ContextAugmented` twin.
+ * Merging them would silently drop the required-ness the prototype installers
+ * rely on.
  */
 
 /** Base interface for any ANTLR parse tree node */
@@ -18,6 +32,50 @@ export interface AntlrNode {
   getComment?(): string;
 }
 
+/**
+ * The real shape of any ANTLR ParserRuleContext-derived node in this
+ * codebase once the runtime prototype augmentations installed by
+ * src/parser/index.ts, src/parser/Origin.ts and
+ * src/parser/utils/cloest-ancestor/ClosestAncestor.ts have run — every
+ * generated context class extends antlr4.ParserRuleContext, and those
+ * modules patch its prototype directly at runtime.
+ *
+ * TypeScript's inference for the ANTLR-generated classes (src/generated-parser)
+ * does not see prototype patches applied from other files: neither
+ * `declare module "antlr4"` (merges only with the named-import view of
+ * ParserRuleContext, not the `antlr4.ParserRuleContext` namespace-member
+ * view every generated class's `extends` clause uses) nor
+ * `declare module "@/generated-parser/sequenceParser"` (breaks the module's
+ * inferred default export entirely — sequenceParser.js has no named class
+ * exports to merge against) actually bridges this gap. Both were tried and
+ * reverted; see git history on this file.
+ *
+ * So: cast ANTLR context values to this type (or an intersection adding a
+ * specific context's own generated methods) explicitly at the point of use,
+ * instead of relying on the compiler to infer the augmentation.
+ */
+export interface AugmentedContext {
+  getText(): string;
+  /** Installed in src/parser/index.ts. */
+  getFormattedText(): string;
+  /** Installed in src/parser/index.ts. */
+  getComment(): string | undefined;
+  parentCtx: AugmentedContext | null;
+  /** Installed in src/parser/utils/cloest-ancestor/ClosestAncestor.ts. */
+  ClosestAncestorStat(): AugmentedContext | undefined;
+  /** Installed in src/parser/Origin.ts. */
+  Origin(): string | undefined;
+}
+
+/**
+ * `Owner()` / `From()` as installed on MessageContext / CreationContext
+ * prototypes (src/parser/Owner.ts, src/parser/From.ts). Cast context values to
+ * this shape at the point of use, like {@link AugmentedContext}. A pick of
+ * {@link MessageContextAugmented} in `ContextAugmentations.ts`.
+ */
+export type OwnedContext = AugmentedContext &
+  Pick<MessageContextAugmented, "Owner" | "From">;
+
 /** A block containing statements: `{ stat1; stat2; }` */
 export interface BlockNode extends AntlrNode {
   stat?(): StatNode[];
@@ -26,6 +84,13 @@ export interface BlockNode extends AntlrNode {
 /** The root context returned by Parser.RootContext() */
 export interface RootContextNode extends AntlrNode {
   block?(): BlockNode;
+  /** Participant declarations and `group` blocks before the first statement. */
+  head?(): HeadNode | null;
+}
+
+/** The diagram head: its children are participant and group contexts. */
+export interface HeadNode extends AntlrNode {
+  children?: unknown[] | null;
 }
 
 /** A statement node — dispatches to one of: message, asyncMessage, creation, ret, divider, alt, tcf, loop, etc. */
@@ -111,6 +176,57 @@ export interface CatchBlockNode extends AntlrNode {
 
 /** Single-block fragments: loop, opt, par, critical, section */
 export interface SingleBlockFragmentNode extends AntlrNode {
+  atom?(): AntlrNode | null;
+  /** Loop aliases share WHILE token kind; getText preserves the source keyword. */
+  WHILE?(): AntlrNode | null;
   parExpr?(): { condition?(): AntlrNode } | null;
   braceBlock?(): { block?(): BlockNode } | null;
+}
+
+/* ------------------------------------------------------------------------ */
+/* Required-member building blocks for the prototype-augmentation projection */
+/* in ContextAugmentations.ts. Kept separate from the `*Node` interfaces     */
+/* above: `MessageNode`/`CreationNode`/`ReturnNode`/`AsyncMessageNode`      */
+/* declare the same concepts with every member optional, and collapsing each */
+/* pair into one declaration would drop the required-ness the installers    */
+/* depend on.                                                               */
+/* ------------------------------------------------------------------------ */
+
+/** Any context whose formatted source text the parser layer reads. */
+export interface BaseContext {
+  getFormattedText(): string;
+}
+
+/**
+ * `signature`, `content` and `expr` contexts are read through
+ * `getFormattedText()` only, so they are the same shape as {@link BaseContext}
+ * — aliased rather than re-declared three times.
+ */
+export type Signature = BaseContext;
+export type Content = BaseContext;
+export type Expression = BaseContext;
+
+export interface Parameter extends BaseContext {
+  length: number;
+  namedParameter?(): NamedParameter | null;
+  expr?(): Expression | null;
+  declaration?(): Declaration | null;
+}
+
+export interface NamedParameter extends BaseContext {
+  ID(): { getText(): string };
+  expr(): Expression;
+}
+
+export interface Declaration extends BaseContext {
+  type(): { getText(): string };
+  ID(): { getText(): string };
+}
+
+export interface Parameters extends BaseContext {
+  parameter(): Parameter[];
+}
+
+export interface Func {
+  signature(): Signature[];
 }

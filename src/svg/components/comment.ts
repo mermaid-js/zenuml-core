@@ -1,4 +1,5 @@
-import { marked } from "marked";
+import type { marked } from "marked";
+import { lexComment } from "@/parser/commentMarkdown";
 import type { CommentGeometry } from "../geometry";
 import { esc, styleToAttr } from "./svgUtils";
 
@@ -9,7 +10,7 @@ import { esc, styleToAttr } from "./svgUtils";
  * and the rendered text content matches what HTML shows.
  */
 function markdownToSvgLines(text: string): string[] {
-  const tokens = marked.lexer(text, { gfm: true, breaks: true });
+  const tokens = lexComment(text);
   return collectLines(tokens);
 }
 
@@ -58,10 +59,14 @@ function collectLines(tokens: marked.TokensList | marked.Token[]): string[] {
         pushFragment(esc(token.text));
         return;
       case "strong":
-        pushFragment(`<tspan font-weight="bold">${collectLines(token.tokens || []).join("")}</tspan>`);
+        pushFragment(
+          `<tspan font-weight="bold">${collectLines(token.tokens || []).join("")}</tspan>`,
+        );
         return;
       case "em":
-        pushFragment(`<tspan font-style="italic">${collectLines(token.tokens || []).join("")}</tspan>`);
+        pushFragment(
+          `<tspan font-style="italic">${collectLines(token.tokens || []).join("")}</tspan>`,
+        );
         return;
       case "text":
         if ("tokens" in token && token.tokens) {

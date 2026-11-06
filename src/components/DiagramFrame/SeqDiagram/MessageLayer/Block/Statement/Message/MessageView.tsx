@@ -10,9 +10,10 @@ export type MessageViewProps = {
   number?: string;
   rtl?: string | boolean;
   onClick?: () => void;
-  messageRef?: RefObject<HTMLDivElement>;
+  messageRef?: RefObject<HTMLDivElement | null>;
   "data-selected"?: string;
   title?: string;
+  reorderHandle?: ReactNode;
   children: ReactNode;
 };
 
@@ -36,48 +37,59 @@ export const MessageView = ({
   messageRef,
   "data-selected": dataSelected,
   title,
+  reorderHandle,
   children,
 }: MessageViewProps) => {
   const isDashed = type === "creation" || type === "return";
   const isFilled = type === "sync";
   const arrowPath = rtl
-    ? (isFilled ? RTL_FILLED : RTL_OPEN)
-    : (isFilled ? LTR_FILLED : LTR_OPEN);
+    ? isFilled
+      ? RTL_FILLED
+      : RTL_OPEN
+    : isFilled
+      ? LTR_FILLED
+      : LTR_OPEN;
 
   return (
     <div
       className={cn(
-        "message leading-none border-b-2 border-transparent flex items-end relative",
+        "message text-[15px] leading-none border-b !border-transparent flex items-end relative",
         className,
       )}
       style={style}
       onClick={onClick}
-      onKeyDown={onClick ? (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick();
-        }
-      } : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
       tabIndex={onClick ? 0 : undefined}
       role={onClick ? "button" : undefined}
       ref={messageRef}
+      data-cap={onClick ? "select" : undefined}
       data-selected={dataSelected}
       title={title}
     >
-      {/* Line spanning full width */}
+      {reorderHandle}
+      {/* At 1px, center the crisp line and antialiased head on the same half-pixel. */}
       <svg
         className="absolute left-0 w-full text-skin-message-arrow pointer-events-none"
         height="2"
         preserveAspectRatio="none"
-        style={{ overflow: "visible", bottom: "-2px" }}
+        style={{ overflow: "visible", bottom: "-1px" }}
       >
         <line
           x1={rtl ? "100%" : "0"}
-          y1="1"
+          y1="1.5"
           x2={rtl ? "0" : "100%"}
-          y2="1"
+          y2="1.5"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1"
           strokeDasharray={isDashed ? "6,4" : undefined}
           shapeRendering="crispEdges"
         />
@@ -91,13 +103,14 @@ export const MessageView = ({
         width="7"
         height="10"
         viewBox="0 0 7 9"
-        style={{ overflow: "visible", bottom: "-6px" }}
+        style={{ overflow: "visible", bottom: "-5px" }}
       >
         <path
           d={arrowPath}
+          transform={rtl ? "translate(-1 0.5)" : "translate(1 0.5)"}
           stroke="currentColor"
           strokeLinecap="round"
-          strokeWidth="2"
+          strokeWidth="1"
           fill={isFilled ? "currentColor" : "none"}
         />
       </svg>
@@ -107,9 +120,7 @@ export const MessageView = ({
         style={{ [rtl ? "paddingLeft" : "paddingRight"]: "7px" }}
       >
         <div className="inline-block static min-h-[1em]">
-          <div style={textStyle}>
-            {children}
-          </div>
+          <div style={textStyle}>{children}</div>
         </div>
       </div>
       <Numbering number={number} />

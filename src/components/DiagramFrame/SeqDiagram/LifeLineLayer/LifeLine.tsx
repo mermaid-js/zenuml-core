@@ -1,21 +1,16 @@
-import logger from "@/logger/logger";
 import {
   coordinatesAtom,
   lifelineReadyAtom,
+  renderRevisionAtom,
   verticalCoordinatesAtom,
-  verticalModeAtom,
-  diagramElementAtom,
-  scaleAtom,
 } from "@/store/Store";
-import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useAtomValue, useSetAtom, useStore } from "jotai";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils";
 import { Participant } from "./Participant";
 import { centerOf } from "../MessageLayer/Block/Statement/utils";
+import { firstRootGapClearanceAtom } from "../MessageLayer/gapHandleAtoms";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import { EventBus } from "@/EventBus";
-
-// const logger = parentLogger.child({ name: "LifeLine" });
 
 export const LifeLine = (props: {
   entity: any;
@@ -27,85 +22,31 @@ export const LifeLine = (props: {
   const elRef = useRef<HTMLDivElement>(null);
   const coordinates = useAtomValue(coordinatesAtom);
   const verticalCoordinates = useAtomValue(verticalCoordinatesAtom);
-  const verticalMode = useAtomValue(verticalModeAtom);
-  const diagramElement = useAtomValue(diagramElementAtom);
-  const scale = useAtomValue(scaleAtom);
+  const firstRootGapClearance = useAtomValue(firstRootGapClearanceAtom);
   const setLifelineReady = useSetAtom(lifelineReadyAtom);
+  const revision = useAtomValue(renderRevisionAtom);
+  const store = useStore();
   const PARTICIPANT_TOP_SPACE_FOR_GROUP = 20;
   const [top, setTop] = useState(PARTICIPANT_TOP_SPACE_FOR_GROUP);
   const left =
     centerOf(coordinates, props.entity.name) - (props.groupLeft || 0);
 
-  const measureFromDOM = useCallback(() => {
-    // escape entity name to avoid invalid selector errors
-    const escapedName = props.entity.name.replace(/[^A-Za-z0-9_-]/g, "\\$&");
-    const firstMessage = diagramElement?.querySelector(
-      `[data-to="${escapedName}"]`,
-    ) as HTMLElement | null;
-    const isVisible = firstMessage?.offsetParent != null;
-    if (
-      firstMessage &&
-      firstMessage.getAttribute("data-type") === "creation" &&
-      isVisible
-    ) {
-      const rootY = elRef.current?.getBoundingClientRect().y || 0;
-      const messageY = firstMessage.getBoundingClientRect().y;
-      setTop((messageY - rootY) / (scale || 1));
-    } else {
-      setTop(PARTICIPANT_TOP_SPACE_FOR_GROUP);
-    }
-  }, [diagramElement, props.entity.name, scale]);
-
   useEffect(() => {
-    const resolveFromVM = () => {
-      if (!verticalCoordinates) return false;
+    if (verticalCoordinates) {
       const creationTop = verticalCoordinates.getCreationTop(props.entity.name);
-      const resolvedTop =
+      setTop(
         creationTop != null
-          ? Math.max(PARTICIPANT_TOP_SPACE_FOR_GROUP, creationTop)
-          : PARTICIPANT_TOP_SPACE_FOR_GROUP;
-      // logger.debug(
-      //   `LifeLine top resolved for ${props.entity.name}: ${resolvedTop}px`,
-      // );
-      // if (
-      //   typeof window !== "undefined" &&
-      //   (window as any).__ZEN_CAPTURE_VERTICAL
-      // ) {
-      //   (window as any).__zenumlVerticalEntries = verticalCoordinates.entries();
-      //   const registry =
-      //     (window as any).__zenumlLifelineDebug ||
-      //     ((window as any).__zenumlLifelineDebug = {});
-      //   registry[props.entity.name] = {
-      //     creationTop,
-      //     resolvedTop,
-      //     8,
-      //     components: verticalCoordinates.getCreationTopComponents(
-      //       props.entity.name,
-      //     ),
-      //   };
-      //   // Also export the full creation top records for all participants
-      //   (window as any).__zenumlCreationTopRecords =
-      //     verticalCoordinates.getCreationTopRecords();
-      // }
-      if (creationTop != null) {
-        logger.info(`[LifeLine] creation participant="${props.entity.name}" creationTop=${creationTop} resolvedTop=${resolvedTop}`);
-      }
-      setTop(resolvedTop);
-      return true;
-    };
-
-    // console.info("LifeLine:verticalMode", verticalMode);
-    if (verticalMode === "html") {
-      resolveFromVM();
-    } else {
-      const rerun = () => setTimeout(measureFromDOM, 0);
-      setTimeout(measureFromDOM, 0);
-      EventBus.on("participant_set_top", rerun);
-      return () => EventBus.off("participant_set_top", rerun);
+          ? Math.max(
+              PARTICIPANT_TOP_SPACE_FOR_GROUP,
+              creationTop + firstRootGapClearance,
+            )
+          : PARTICIPANT_TOP_SPACE_FOR_GROUP,
+      );
     }
 
     if (props.entity.name !== _STARTER_) {
       setTimeout(() => {
+        if (store.get(renderRevisionAtom) !== revision) return;
         setLifelineReady((prev) =>
           prev.includes(props.entity.name)
             ? prev
@@ -116,14 +57,15 @@ export const LifeLine = (props: {
   }, [
     props.entity.name,
     verticalCoordinates,
-    verticalMode,
+    firstRootGapClearance,
     setLifelineReady,
-    measureFromDOM,
+    revision,
+    store,
   ]);
 
   return (
     <div
-      id={props.entity.name}
+      data-lifeline-id={props.entity.name}
       entity-type={props.entity.type?.toLowerCase()}
       className={cn(
         "lifeline absolute flex flex-col h-full",

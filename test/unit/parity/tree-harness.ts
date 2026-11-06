@@ -5,7 +5,7 @@
  * docs/langium-migration/02-parser-rules.md §8/§9.
  *
  * serializeTree() walks an ANTLR parse tree (as returned by RootContext(code)
- * from src/parser/index.js) and dumps a plain-JSON shape:
+ * from src/parser/index.ts) and dumps a plain-JSON shape:
  *
  *   rule node:     { kind: <context class name>, start: <char offset of first
  *                    token (ctx.start.start)>, stop: <inclusive char offset of
@@ -31,13 +31,15 @@ import sequenceParser from "../../../src/generated-parser/sequenceParser";
 // ANTLR pipeline directly instead of going through the (engine-flag-aware)
 // RootContext export.
 import "../../../src/parser/index";
-import sequenceLexer from "../../../src/generated-parser/sequenceLexer";
+import { keepBlocksWithOwners } from "../../../src/parser/BlockOwnership";
+import { HeaderRecoveringLexer } from "../../../src/parser/HeaderRecoveringLexer";
 
 function antlrRootContext(code: string) {
   const chars = new antlr4.InputStream(code);
-  const lexer = new sequenceLexer(chars);
+  const lexer = new HeaderRecoveringLexer(chars);
+  lexer.removeErrorListeners();
   const tokens = new antlr4.CommonTokenStream(lexer);
-  const parser = new sequenceParser(tokens);
+  const parser = keepBlocksWithOwners(new sequenceParser(tokens));
   parser.removeErrorListeners();
   return parser.prog();
 }

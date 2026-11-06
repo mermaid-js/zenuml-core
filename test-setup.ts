@@ -1,6 +1,6 @@
 /**
- * Test setup file for Bun test runner
- * This file is preloaded before all tests to set up the test environment
+ * Bun-specific test preload (see bunfig.toml): happy-dom + Bun globals + `vi` shim.
+ * Shared setup lives in test/setup.ts, which Vitest also uses.
  */
 
 // Set up DOM environment using happy-dom (faster than jsdom)
@@ -61,49 +61,9 @@ global.vi = {
   mocked: (fn: any) => fn as jest.Mock,
 };
 
-// Set up global test utilities if needed
-import "@testing-library/jest-dom";
-
-// Configure Testing Library
-import { configure } from "@testing-library/react";
-
-configure({
-  // Reduce timeout for faster test failures
-  asyncUtilTimeout: 2000,
-  // Show better error messages
-  getElementError: (message, container) => {
-    const error = new Error(message || "");
-    error.name = "TestingLibraryElementError";
-    return error;
-  },
-});
-
-// Mock IntersectionObserver if needed (not available in happy-dom by default)
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-  takeRecords() {
-    return [];
-  }
-};
-
-// Mock ResizeObserver if needed
-global.ResizeObserver = class ResizeObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-};
-
-// Inject @napi-rs/canvas for accurate text measurement in all tests.
-// happy-dom's canvas doesn't do real text measurement, which causes
-// WidthProviderOnCanvas to return inaccurate widths.
-import { createCanvas } from "@napi-rs/canvas";
-import { setCanvasContext } from "./src/positioning/WidthProviderFunc";
-const _napiCanvas = createCanvas(1, 1);
-setCanvasContext(_napiCanvas.getContext("2d") as unknown as CanvasRenderingContext2D);
+// Runner-neutral setup shared with Vitest (Testing Library, observers, canvas).
+// Dynamic import so it runs after happy-dom is registered (static imports hoist).
+await import("./test/setup");
 
 // Add custom matchers or global test utilities here
 // For example:

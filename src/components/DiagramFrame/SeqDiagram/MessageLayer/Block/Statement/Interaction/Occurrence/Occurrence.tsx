@@ -1,5 +1,4 @@
 import { CollapseButton } from "./CollapseButton";
-import { EventBus } from "@/EventBus";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/utils";
 import { Block } from "../../../Block";
@@ -10,12 +9,12 @@ import {
   createMessageDragAtom,
   diagramElementAtom,
   enableMessageInsertionAtom,
-  modeAtom,
-  RenderMode,
   selectedAtom,
   selectedMessageAtom,
 } from "@/store/Store";
+import { useCan } from "@/store/interaction/useCan";
 import { Message } from "../../Message/Message";
+import { clientToLocal, rectToLocal } from "@/utils/diagramCoords";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
 import { CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { AssignmentReturnLabel } from "@/components/DiagramFrame/SeqDiagram/MessageLayer/AssignmentReturnLabel";
@@ -32,8 +31,9 @@ export const Occurrence = (props: {
   interactionWidth?: number;
   enableCreateDrag?: boolean;
 }) => {
-  const mode = useAtomValue(modeAtom);
   const messageInsertionEnabled = useAtomValue(enableMessageInsertionAtom);
+  const canCreateMessage = useCan("createMessage");
+  const canHover = useCan("hoverAffordance");
   const coordinates = useAtomValue(coordinatesAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
   const setCreateDrag = useSetAtom(createMessageDragAtom);
@@ -41,16 +41,16 @@ export const Occurrence = (props: {
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
   const [collapsed, setCollapsed] = useState(false);
 
-  const debug = localStorage.getItem("zenumlDebug");
+  // Guarded: an embedder may block site data, and this component is reachable
+  // from the package entry.
+  let debug: string | null = null;
+  try {
+    debug = localStorage.getItem("zenumlDebug");
+  } catch {
+    debug = null;
+  }
 
-  const computedCenter = () => {
-    try {
-      return centerOf(coordinates, props.participant);
-    } catch (e) {
-      console.error(e);
-      return 0;
-    }
-  };
+  const computedCenter = () => centerOf(coordinates, props.participant);
   const hasAnyStatementsExceptReturn = () => {
     const braceBlock = props.context.braceBlock();
     if (!braceBlock) return false;
@@ -62,10 +62,6 @@ export const Occurrence = (props: {
   };
   const toggle = () => {
     setCollapsed(!collapsed);
-
-    //update participant top in this cases: has child and sibling creation statement
-    //e.g. : a.call() { b = new B(); b.call() { c = new C() c.call(){return}}}
-    EventBus.emit("participant_set_top");
   };
 
   useEffect(() => {
@@ -100,9 +96,10 @@ export const Occurrence = (props: {
     0;
 
   const dragEnabled =
-    !!props.enableCreateDrag &&
-    messageInsertionEnabled &&
-    mode === RenderMode.Dynamic;
+    !!props.enableCreateDrag && messageInsertionEnabled && canCreateMessage;
+  // The crosshair and the title are hover hints. A running create drag keeps
+  // `createMessage` (it must finish) but not `hoverAffordance`.
+  const showDragHint = dragEnabled && canHover;
 
   const startCreateDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!dragEnabled || !diagramElement) {
@@ -126,10 +123,15 @@ export const Occurrence = (props: {
     event.preventDefault();
     event.stopPropagation();
 
-    const diagramRect = diagramElement.getBoundingClientRect();
-    const barRect = currentTarget.getBoundingClientRect();
-    const sourceX = barRect.left - diagramRect.left + barRect.width / 2;
-    const sourceY = event.clientY - diagramRect.top;
+    const { centerX: sourceX } = rectToLocal(
+      diagramElement,
+      currentTarget.getBoundingClientRect(),
+    );
+    const { y: sourceY } = clientToLocal(
+      diagramElement,
+      event.clientX,
+      event.clientY,
+    );
 
     setSelectedMessage(null);
     setSelectedParticipants([props.participant]);
@@ -149,10 +151,10 @@ export const Occurrence = (props: {
   return (
     <div
       className={cn(
-        "occurrence min-h-6 shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border-2 relative left-full w-[15px] mt-[-2px] pl-[6px]",
+        "occurrence group min-h-6 shadow-occurrence border-skin-occurrence bg-skin-occurrence rounded-sm border relative left-full w-[15px] mt-[-2px] pl-[7px] pr-px pt-px pb-px",
         { "right-to-left left-[-14px]": props.rtl },
         {
-          "cursor-grab": dragEnabled,
+          "cursor-crosshair": showDragHint,
         },
         props.className,
       )}
@@ -160,9 +162,14 @@ export const Occurrence = (props: {
       data-belongs-to={props.participant}
       data-x-offset={0}
       data-debug-center-of={computedCenter()}
+      data-cap={
+        props.enableCreateDrag && messageInsertionEnabled
+          ? "createMessage"
+          : undefined
+      }
       onPointerDown={startCreateDrag}
       title={
-        dragEnabled
+        showDragHint
           ? `Drag to create a message from ${props.participant}`
           : undefined
       }
@@ -197,6 +204,7 @@ export const Occurrence = (props: {
             )}
           >
             <Message
+              allowReorder={false}
               className={cn(
                 "return transform -translate-y-full pointer-events-auto",
                 props.messageClassNames,

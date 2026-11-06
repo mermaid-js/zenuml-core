@@ -3,7 +3,6 @@ import type { StatementCoordinate } from "@/positioning/vertical/StatementCoordi
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
 import { AllMessages } from "@/parser/MessageCollector";
 import type { LayoutRuntime } from "./vertical/vm/types";
-import logger from "@/logger/logger";
 import { BlockVM } from "./vertical/vm/BlockVM";
 import { DEFAULT_LAYOUT_METRICS as metrics } from "./vertical/LayoutMetrics";
 
@@ -16,25 +15,20 @@ export class VerticalCoordinates {
     const rootBlock = rootContext?.block?.() ?? rootContext;
 
     const participants = OrderedParticipants(rootContext).map((p) => p.name);
-    // console.info("participants", participants);
 
     const messages = AllMessages(rootContext);
-    // console.info("messages", JSON.stringify(messages));
     const originParticipant =
       messages.length === 0 ? _STARTER_ : messages[0].from || _STARTER_;
 
     const runtime: LayoutRuntime = {
       metrics,
-      rootBlock,
       participants,
-      originParticipant,
       recordCoordinate: (statement: any, coordinate: StatementCoordinate) => {
         const key = createStatementKey(statement);
         this.statementMap.set(key, coordinate);
       },
       updateCreationTop: (participant: string, top: number) => {
         const paddingTop = top - 8; // .life-line-layer, .pt-2
-        logger.info(`[VerticalCoordinates] updateCreationTop participant="${participant}" raw=${top} paddingTop=${paddingTop}`);
         this.creationTops.set(participant, paddingTop);
       },
     };
@@ -49,14 +43,6 @@ export class VerticalCoordinates {
 
   getStatementCoordinate(key: string): StatementCoordinate | undefined {
     return this.statementMap.get(key);
-  }
-
-  getStatementCoordinateFor(statement: any): StatementCoordinate | undefined {
-    return this.statementMap.get(createStatementKey(statement));
-  }
-
-  entries(): Array<[string, StatementCoordinate]> {
-    return Array.from(this.statementMap.entries());
   }
 
   getTotalHeight(): number {

@@ -1,242 +1,351 @@
+import { useCommitCode } from "@/store/useCommitCode";
+import type { TrackedEdit } from "@/store/trackEvent";
 import {
   codeAtom,
-  createMessageDragAtom,
   diagramElementAtom,
-  enableParticipantStyleEditingAtom,
-  modeAtom,
-  onContentChangeAtom,
-  RenderMode,
+  participantPreviewAtom,
   rootContextAtom,
   selectedAtom,
 } from "@/store/Store";
-import { setParticipantStyleInDsl } from "@/utils/participantStyleTransform";
+import {
+  formatParticipantDeclaration,
+  readParticipantDeclaration,
+  setParticipantStyleChecked,
+  type ParticipantUpdates,
+} from "@/utils/participantStyleTransform";
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
+import { renameParticipantInDsl } from "@/utils/participantRenameTransform";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
-import { useAtom, useAtomValue } from "jotai";
+import { RootContext } from "@/parser";
+import { cn } from "@/utils";
+import { usePopoverPresence } from "@/components/common/usePopoverPresence";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { FloatingPortal } from "@floating-ui/react";
-
-const PRESET_COLORS: { hex: string; name: string }[] = [
-  { hex: "#ef4444", name: "Red" },
-  { hex: "#f97316", name: "Orange" },
-  { hex: "#eab308", name: "Yellow" },
-  { hex: "#22c55e", name: "Green" },
-  { hex: "#14b8a6", name: "Teal" },
-  { hex: "#3b82f6", name: "Blue" },
-  { hex: "#8b5cf6", name: "Purple" },
-  { hex: "#ec4899", name: "Pink" },
-  { hex: "#94a3b8", name: "Gray" },
-  { hex: "#ffffff", name: "White" },
-];
-
-const PARTICIPANT_TYPES = [
-  { key: "Actor", label: "Actor", icon: "👤" },
-  { key: "Boundary", label: "Boundary", icon: "⬡" },
-  { key: "Control", label: "Control", icon: "⟳" },
-  { key: "Entity", label: "Entity", icon: "□" },
-  { key: "Database", label: "Database", icon: "🗄" },
-  { key: "Queue", label: "Queue", icon: "≡" },
-];
+import { useActiveSurface } from "@/store/interaction/useCan";
+import { NameRow } from "./participantEditor/NameRow";
+import { SlotBar } from "./participantEditor/SlotBar";
+import { StereotypePill } from "./participantEditor/StereotypePill";
+import {
+  useParticipantDrafts,
+  type DraftField,
+} from "./participantEditor/useParticipantDrafts";
+import {
+  usePickerPlacement,
+  type Anchor,
+  type Picker,
+} from "./participantEditor/usePickerPlacement";
+import { useFollowPress } from "./participantEditor/useFollowPress";
 
 export const ParticipantStylePanel = () => {
-  const mode = useAtomValue(modeAtom);
-  const enabled = useAtomValue(enableParticipantStyleEditingAtom);
-  const [code, setCode] = useAtom(codeAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
   const rootContext = useAtomValue(rootContextAtom);
-  const [selected, setSelected] = useAtom(selectedAtom);
+  const [selected, setSelectedRaw] = useAtom(selectedAtom);
   const diagramElement = useAtomValue(diagramElementAtom);
-  const dragState = useAtomValue(createMessageDragAtom);
-  const [isOpen, setIsOpen] = useState(false);
-  const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
+  const themeClasses = Array.from(diagramElement?.classList ?? [])
+    .filter((name) => name.startsWith("theme-"))
+    .join(" ");
+  // The editor shows while its interaction state is current (ADR 0002): the
+  // editor flag is on, one participant is selected and no drag runs. The
+  // surface also hides in a static render and under a text edit.
+  const surface = useActiveSurface();
+  const openFor =
+    surface?.kind === "participantEditor" ? surface.participant : null;
+  const isOpen = openFor !== null;
+  // P2: the editor stays mounted for its 120 ms exit animation.
+  const presence = usePopoverPresence(isOpen);
+  // The selected participant's box, in viewport coordinates.
+  const [anchor, setAnchor] = useState<Anchor | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const participantName = selected[0] ?? null;
+  const liveParticipantName = selected[0] ?? null;
+  const lastParticipantName = useRef<string | null>(null);
+  if (liveParticipantName) lastParticipantName.current = liveParticipantName;
+  // During the exit animation the selection may already be gone; the last
+  // name keeps every piece where it was.
+  const participantName =
+    liveParticipantName ??
+    (presence.mounted ? lastParticipantName.current : null);
 
-  const currentParticipant = participantName
+  const ordered = participantName
     ? OrderedParticipants(rootContext).find((p) => p.name === participantName)
     : null;
-  const currentColor = currentParticipant?.color?.toLowerCase() ?? null;
-  const currentType = currentParticipant?.type ?? null;
+  const declaration = participantName
+    ? readParticipantDeclaration(rootContext, participantName)
+    : null;
+  const currentType = declaration?.type ?? ordered?.type ?? null;
+  const currentColor =
+    (declaration?.color ?? ordered?.color)?.toLowerCase() ?? null;
+  const currentStereotype = declaration?.stereotype ?? "";
+
+  // Called where the original resync effects were, so their place in the
+  // effect order is kept.
+  const drafts = useParticipantDrafts(participantName, declaration);
+
+  // Picker open state lives here so Escape in a picker closes only it (D11).
+  const [openPicker, setOpenPicker] = useState<Picker | null>(null);
+  const [stereotypeEditing, setStereotypeEditing] = useState(false);
+  const setPreview = useSetAtom(participantPreviewAtom);
+  useEffect(() => {
+    setOpenPicker(null);
+    setStereotypeEditing(false);
+  }, [participantName, isOpen]);
+  // A hover preview never outlives the selection (D12).
+  useEffect(() => {
+    if (!isOpen) setPreview(null);
+  }, [isOpen, setPreview]);
 
   useEffect(() => {
-    if (selected.length === 1 && diagramElement && !dragState) {
+    if (openFor && diagramElement) {
       const el = diagramElement.querySelector(
-        `[data-participant-id="${selected[0]}"]`,
+        `[data-participant-id="${openFor}"]`,
       ) as HTMLElement | null;
       if (el) {
         const rect = el.getBoundingClientRect();
-        setPanelPos({ top: rect.bottom + 6, left: rect.left });
+        setAnchor({
+          top: rect.top,
+          left: rect.left,
+          right: rect.right,
+          bottom: rect.bottom,
+        });
       }
-      setIsOpen(true);
-    } else {
-      setIsOpen(false);
-      setPanelPos(null);
+    } else if (!presence.mounted) {
+      setAnchor(null);
     }
-  }, [selected, diagramElement, dragState]);
+    // `code` re-anchors the editor after an edit moves the participant box;
+    // `selected` after a reselect of the same name. The anchor outlives the
+    // open state by one exit animation.
+  }, [openFor, selected, diagramElement, code, presence.mounted]);
 
-  // Clamp panel position to stay within viewport after it renders
-  useEffect(() => {
-    if (!isOpen || !panelRef.current || !panelPos) return;
-    const panel = panelRef.current.getBoundingClientRect();
-    let { top, left } = panelPos;
-    const margin = 8;
-    if (left + panel.width > window.innerWidth - margin) {
-      left = window.innerWidth - panel.width - margin;
-    }
-    if (left < margin) left = margin;
-    if (top + panel.height > window.innerHeight - margin) {
-      top = panelPos.top - panel.height - 12; // flip above participant
-    }
-    if (top !== panelPos.top || left !== panelPos.left) {
-      setPanelPos({ top, left });
-    }
-  }, [isOpen, panelPos]);
+  // Called right after the anchor effect, where its picker effects were, so
+  // the layout and passive effect order is unchanged.
+  const placement = usePickerPlacement(anchor, openPicker);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-        setSelected([]);
-      }
-    };
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsOpen(false);
-        setSelected([]);
-      }
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isOpen, setSelected]);
+  // Press-following (ADR 0002) runs last, where its exit listener and
+  // pointerdown effect were. Its unmount cleanup moved here from the top;
+  // it has no mount body, so its place among the effects does not matter.
+  const { setSelected } = useFollowPress({
+    diagramElement,
+    isOpen,
+    participantName,
+    selected,
+    setSelected: setSelectedRaw,
+  });
 
-  if (
-    !enabled ||
-    mode !== RenderMode.Dynamic ||
-    !isOpen ||
-    !participantName ||
-    !panelPos
-  ) {
+  if (!presence.mounted || !participantName || !anchor) {
     return null;
   }
 
-  const applyStyle = (updates: { color?: string | null; type?: string | null }) => {
-    let workingCode = code;
-    const workingContext = rootContext;
+  const close = () => {
+    setSelected([]);
+  };
 
-    // If participant has no explicit declaration, insert one first
-    const participants = OrderedParticipants(rootContext).filter(
-      (p) => p.name !== _STARTER_,
-    );
-    const hasExplicitDecl =
-      (rootContext?.head?.()?.participant?.() ?? []).some(
-        (ctx: any) => ctx?.name()?.getFormattedText() === participantName,
-      );
-    if (!hasExplicitDecl) {
-      const insertIndex = participants.findIndex((p) => p.name === participantName);
+  const updateCode = (next: string, edit?: TrackedEdit) => {
+    if (next === code) return;
+    commitCode(next, edit);
+  };
+
+  // Changes apply immediately and the panel stays open, so several edits can
+  // be made in one visit. An inferred participant gets its declaration line
+  // written first, then the update is applied to that line.
+  const applyStyle = (updates: ParticipantUpdates): boolean => {
+    let workingCode = code;
+    let workingRoot = rootContext;
+    if (!declaration) {
+      const insertIndex = OrderedParticipants(rootContext)
+        .filter((p) => p.name !== _STARTER_)
+        .findIndex((p) => p.name === participantName);
       workingCode = insertParticipantIntoDsl({
         code: workingCode,
-        rootContext: workingContext,
+        rootContext,
         insertIndex,
         name: participantName,
         type: "default",
+        materializeExisting: true,
       });
-      const newCode = setParticipantStyleInDsl(workingCode, workingContext, participantName, updates);
-      const finalCode = newCode !== workingCode ? newCode : workingCode;
-      setCode(finalCode);
-      onContentChange(finalCode);
-      setIsOpen(false);
-      setSelected([]);
-      return;
+      workingRoot = RootContext(workingCode);
     }
+    const result = setParticipantStyleChecked(
+      workingCode,
+      workingRoot,
+      participantName,
+      updates,
+    );
+    if ("error" in result) {
+      drafts.setStyleError(result.error);
+      return false;
+    }
+    drafts.setStyleError(null);
+    updateCode(result.code);
+    return true;
+  };
 
-    const newCode = setParticipantStyleInDsl(workingCode, workingContext, participantName, updates);
-    if (newCode === workingCode) return;
-    setCode(newCode);
-    onContentChange(newCode);
-    setIsOpen(false);
-    setSelected([]);
+  const commitName = (): boolean =>
+    drafts.commitName(
+      (draft) =>
+        renameParticipantInDsl(code, rootContext, participantName, draft),
+      (result) => {
+        updateCode(result.code, {
+          action: "participant_renamed",
+          label: "editor",
+        });
+        // The selection must use the parser's canonical identity.
+        setSelected([result.name]);
+      },
+    );
+
+  const commitStereotype = (): boolean => drafts.commitStereotype(applyStyle);
+
+  const commitLabel = (): boolean => drafts.commitLabel(applyStyle);
+
+  const onEnterBlur = (commit: () => boolean, field: DraftField) => ({
+    onBlur: () => {
+      commit();
+    },
+    onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Escape") {
+        // Discard the draft and close; the blur on unmount must not commit.
+        drafts.discard(field);
+        close();
+        return;
+      }
+      if (e.key === "Enter") {
+        // A rejected draft keeps focus, its text and the error alert.
+        e.preventDefault();
+        commit();
+      }
+      // Keep other keys from reaching the canvas shortcuts.
+      e.stopPropagation();
+    },
+  });
+
+  const dslLine = formatParticipantDeclaration(
+    declaration ?? { name: participantName },
+  );
+  const error = drafts.nameError ?? drafts.styleError;
+
+  const togglePicker = (picker: Picker) =>
+    setOpenPicker((open) => (open === picker ? null : picker));
+  const closePicker = () => setOpenPicker(null);
+  // Keyboard users keep their place: closing a picker by pick, clear or
+  // Escape returns focus to the slot button that opened it.
+  const focusSlot = (picker: Picker) =>
+    panelRef.current
+      ?.querySelector<HTMLElement>(
+        `[data-editor-slot="${picker}"] button[aria-label^="Set "]`,
+      )
+      ?.focus();
+  const pick = (picker: Picker, updates: ParticipantUpdates) => {
+    setPreview(null);
+    setOpenPicker(null);
+    focusSlot(picker);
+    applyStyle(updates);
+  };
+  // Escape anywhere in a slot or its picker closes only the picker (D11).
+  const onPickerKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape" && openPicker) {
+      e.stopPropagation();
+      closePicker();
+      focusSlot(openPicker);
+    }
   };
 
   return (
     <FloatingPortal>
-    <div
-      ref={panelRef}
-      className="bg-white rounded-lg shadow-lg border border-gray-200 p-2 flex flex-col gap-2"
-      style={{ position: "fixed", zIndex: 50, minWidth: 180, top: panelPos.top, left: panelPos.left }}
-      data-testid="participant-style-panel"
-    >
-      <div className="text-[10px] uppercase tracking-wide text-gray-400 font-semibold px-1">Color</div>
-      <div className="flex flex-wrap gap-1 px-1">
-        {PRESET_COLORS.map(({ hex, name }) => {
-          const isActive = currentColor === hex.toLowerCase();
-          return (
-            <button
-              key={hex}
-              type="button"
-              className={`w-5 h-5 rounded-full border hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 ${
-                isActive ? "border-sky-500 ring-2 ring-sky-400 ring-offset-1" : "border-gray-300"
-              }`}
-              style={{ backgroundColor: hex }}
-              title={isActive ? `${name} (current)` : name}
-              aria-label={`Set color to ${name}`}
-              aria-pressed={isActive}
-              onClick={() => applyStyle({ color: hex })}
+      <div className="zenuml">
+        {/* One root owns every piece so the click-away `contains()` check
+            covers them all. It spans the viewport without catching pointer
+            events; each piece opts back in. */}
+        <div
+          ref={panelRef}
+          role="dialog"
+          data-interaction-surface="participantEditor"
+          aria-label={`Edit participant ${participantName}`}
+          className={cn(
+            "participant-style-panel group fixed inset-0 pointer-events-none text-gray-700",
+            presence.state === "exit" && "[&_*]:!pointer-events-none",
+            themeClasses,
+          )}
+          style={{ zIndex: 50 }}
+          data-testid="participant-style-panel"
+          onPointerDown={(e) => {
+            // A press elsewhere in the editor closes an open picker.
+            const target = e.target as Element;
+            if (openPicker && !target.closest("[data-editor-slot]")) {
+              closePicker();
+            }
+          }}
+        >
+          {/* Dims the whole diagram, selected box included. First child, so
+              every editor piece stacks above it. Never catches pointer
+              events: click-away and reselect still reach the diagram. */}
+          <div
+            aria-hidden="true"
+            data-testid="participant-editor-mask"
+            className={cn(
+              "absolute inset-0 pointer-events-none bg-slate-900/[0.32]",
+              presence.state === "exit" && "zu-fade-exit",
+            )}
+          />
+          <StereotypePill
+            anchor={anchor}
+            editing={stereotypeEditing}
+            setEditing={setStereotypeEditing}
+            currentStereotype={currentStereotype}
+            draft={drafts.stereotypeDraft}
+            onDraftChange={(value) => {
+              drafts.setStereotypeDraft(value);
+              drafts.setStyleError(null);
+            }}
+            handlers={onEnterBlur(commitStereotype, "stereotype")}
+          />
+
+          <SlotBar
+            anchor={anchor}
+            participantName={participantName}
+            currentType={currentType}
+            currentColor={currentColor}
+            openPicker={openPicker}
+            typePresence={placement.typePresence}
+            colorPresence={placement.colorPresence}
+            pickerPos={placement.pickerPos}
+            pickerRef={placement.pickerRef}
+            togglePicker={togglePicker}
+            pick={pick}
+            closePicker={closePicker}
+            focusSlot={focusSlot}
+            onPickerKeyDown={onPickerKeyDown}
+          />
+
+          {/* Hidden while a picker is open: the picker covers this spot. */}
+          {!openPicker && (
+            <NameRow
+              anchor={anchor}
+              nameRowWidth={placement.nameRowWidth}
+              rowRef={(el) => {
+                placement.attachNameRow(el);
+                presence.ref(el);
+              }}
+              rowClassName={presence.className}
+              nameDraft={drafts.nameDraft}
+              nameError={drafts.nameError}
+              onNameChange={(value) => {
+                drafts.setNameDraft(value);
+                drafts.setNameError(null);
+              }}
+              nameHandlers={onEnterBlur(commitName, "name")}
+              labelDraft={drafts.labelDraft}
+              onLabelChange={(value) => {
+                drafts.setLabelDraft(value);
+                drafts.setStyleError(null);
+              }}
+              labelHandlers={onEnterBlur(commitLabel, "label")}
+              error={error}
+              dslLine={dslLine}
             />
-          );
-        })}
-        <button
-          type="button"
-          className="w-5 h-5 rounded-full border border-dashed border-gray-400 text-gray-400 text-[9px] hover:scale-110 transition-transform flex items-center justify-center"
-          title="Remove color"
-          aria-label="Remove color"
-          onClick={() => applyStyle({ color: null })}
-        >
-          ✕
-        </button>
+          )}
+        </div>
       </div>
-
-      <div className="w-full h-px bg-gray-100" />
-
-      <div className="text-[10px] uppercase tracking-wide text-gray-400 font-semibold px-1">Type</div>
-      <div className="flex flex-wrap gap-1 px-1">
-        {PARTICIPANT_TYPES.map(({ key, label, icon }) => {
-          const isActive = currentType?.toLowerCase() === key.toLowerCase();
-          return (
-            <button
-              key={key}
-              type="button"
-              className={`flex flex-col items-center gap-0.5 px-1.5 py-1 rounded border text-[10px] min-w-[36px] hover:bg-gray-100 ${
-                isActive
-                  ? "border-sky-400 bg-sky-50 text-sky-700"
-                  : "border-gray-200 text-gray-700"
-              }`}
-              title={isActive ? `${label} (current)` : `Set type to ${label}`}
-              aria-label={`Set type to ${label}`}
-              aria-pressed={isActive}
-              onClick={() => applyStyle({ type: key })}
-            >
-              <span className="text-sm leading-none">{icon}</span>
-              <span>{label}</span>
-            </button>
-          );
-        })}
-        <button
-          type="button"
-          className="flex flex-col items-center gap-0.5 px-1.5 py-1 rounded border border-dashed border-gray-300 text-gray-400 hover:bg-gray-100 text-[10px] min-w-[36px]"
-          title="Remove type"
-          aria-label="Remove type"
-          onClick={() => applyStyle({ type: null })}
-        >
-          <span className="text-sm leading-none">□</span>
-          <span>None</span>
-        </button>
-      </div>
-    </div>
     </FloatingPortal>
   );
 };

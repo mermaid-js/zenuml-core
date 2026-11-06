@@ -1,19 +1,6 @@
-import logger from "@/logger/logger";
-
-function buildCostDesc(diff: number): string {
-  const seconds = Math.floor(diff / 1000);
-  const milliseconds = Math.floor(diff % 1000);
-  const microseconds = Math.floor(((diff % 1000) - milliseconds) * 1000);
-  return seconds + "s " + milliseconds + "ms " + microseconds + "μs";
-}
-
-export const calculateCostTime = (
-  processName: string,
-  processStartTime: number,
-) => {
+export const calculateCostTime = (processStartTime: number) => {
   const now = getStartTime();
   const diff = now - processStartTime;
-  logger.debug(processName + " cost: " + buildCostDesc(diff));
   return diff;
 };
 

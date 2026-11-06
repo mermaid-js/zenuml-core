@@ -1,6 +1,7 @@
 import type { MessageGeometry, SelfCallGeometry } from "../geometry";
 import { esc, styleToAttr } from "./svgUtils";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
+import { renderMessageNumber } from "./numbering";
 
 export function renderMessage(m: MessageGeometry): string {
   // HTML arrow SVG container spans from left_lifeline_center+1 to right_lifeline_center.
@@ -14,21 +15,24 @@ export function renderMessage(m: MessageGeometry): string {
   // shifting the label center toward the source. +0.5 for lifeline width averaging.
   const direction = Math.sign(m.toX - m.fromX);
   const labelX = (m.fromX + m.toX) / 2 - direction * 3.5 + 0.5;
-  const labelY = m.y - 3.5;
+  // A 15px HTML line box places its alphabetic baseline 2.5px above the shaft.
+  // Number badges retain their independent 12px baseline.
+  const labelY = m.y - 2.5;
 
   const dashAttr = m.arrowStyle === "dashed" ? ' stroke-dasharray="6,4"' : "";
   const styleAttr = m.style ? ` style="${styleToAttr(m.style)}"` : "";
 
-  // Sequence number: positioned to the LEFT of the message with 4px gap (matching HTML pr-1).
+  // Sequence badge sits to the left of the message with a 4px gutter.
   const numberX = Math.min(fromX, toX) - 4;
-  const numberSvg = m.number
-    ? `<text x="${numberX}" y="${labelY}" text-anchor="end" class="seq-number">${esc(m.number)}</text>`
-    : "";
+  const numberSvg = renderMessageNumber(m.number, numberX, m.y - 3.5);
 
-  const lineY = m.y - 0.5;
+  // The 1px crisp shaft and antialiased head need a shared center at a
+  // half-pixel coordinate. Keep the head's outer SVG box at its old position.
+  const headCenterY = m.y - 0.5;
+  const lineY = headCenterY + 0.5;
   return `<g class="message">
   <line x1="${fromX}" y1="${lineY}" x2="${toX}" y2="${lineY}" class="message-line"${dashAttr}/>
-  ${renderArrowHead(toX, lineY, m.isReverse, m.arrowStyle)}
+  ${renderArrowHead(toX, headCenterY, m.isReverse, m.arrowStyle)}
   <text x="${labelX}" y="${labelY}" text-anchor="middle" class="message-label"${styleAttr}>${esc(resolveEmojiInText(m.label))}</text>
   ${numberSvg}
 </g>`;
@@ -48,9 +52,7 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   // For async, labelY = s.y + 15, but number should be at s.y + 11 (4px higher).
   // For sync, labelY = s.y + 11, number at same Y (both flush with container).
   const numberY = s.y + 12;
-  const numberSvg = s.number
-    ? `<text x="${x1 - 3}" y="${numberY}" text-anchor="end" class="seq-number">${esc(s.number)}</text>`
-    : "";
+  const numberSvg = renderMessageNumber(s.number, x1 - 3, numberY);
 
   // Reuse the exact same SVG structure as the HTML SelfInvocation component:
   //   <svg width="30" height="24">
@@ -67,18 +69,20 @@ export function renderSelfCall(s: SelfCallGeometry): string {
   // Sync: filled arrowhead at midpoint (L14,15, translate(7,10), fill=#000, Z)
   const pathEnd = isAsync ? "L1,15" : "L14,15";
   const arrowTx = isAsync ? 0 : 7;
-  const arrowFill = isAsync ? "none" : "#000";
+  // Colours come from the palette classes (.self-call-line, .arrow-head);
+  // an open (async) head keeps fill="none".
+  const arrowFill = isAsync ? ' fill="none"' : "";
   const arrowPath = isAsync
-    ? 'M1 1.25 L6.15 4.5 L1 7.75'
-    : 'M1 1.25 L6.15 4.5 L1 7.75 Z';
+    ? "M1 1.25 L6.15 4.5 L1 7.75"
+    : "M1 1.25 L6.15 4.5 L1 7.75 Z";
 
   return `<g class="message self-call">
   <svg x="${svgX}" y="${svgY}" width="30" height="24">
-    <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 ${pathEnd}" fill="none" stroke="#000" stroke-width="2"/>
+    <path d="M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 ${pathEnd}" class="self-call-line"/>
     <g transform="translate(${arrowTx}, 10)">
-      <svg height="10" width="7" viewBox="0 0 7 9">
+      <svg height="10" width="7" viewBox="0 0 7 9" class="arrow-head${isAsync ? " arrow-open" : ""}">
         <g transform="scale(-1, 1) translate(-7, 0)">
-          <path d="${arrowPath}" stroke="#000" stroke-linecap="round" fill="${arrowFill}" stroke-width="2"/>
+          <path d="${arrowPath}" stroke-linecap="round"${arrowFill} stroke-width="1"/>
         </g>
       </svg>
     </g>
@@ -114,12 +118,13 @@ function renderArrowHead(
   // 0.85px too far outward on both LTR and RTL arrows.
   const svgX = pointsLeft ? tipX : tipX - 7;
   const svgY = tipY - 5;
-  const rtlTransform = pointsLeft ? ' transform="scale(-1, 1) translate(-7, 0)"' : "";
+  const rtlTransform = pointsLeft
+    ? ' transform="scale(-1, 1) translate(-7, 0)"'
+    : "";
 
   return `<svg x="${svgX}" y="${svgY}" width="7" height="10" viewBox="0 0 7 9" overflow="visible" class="arrow-head${isFilled ? "" : " arrow-open"}">
     <g${rtlTransform}>
-      <path d="${pathD}" stroke="#000" stroke-linecap="round" stroke-width="2" fill="${fillAttr}"/>
+      <path d="${pathD}" transform="translate(1 0.5)" stroke-linecap="round" stroke-width="1"${fillAttr === "none" ? ' fill="none"' : ""}/>
     </g>
   </svg>`;
 }
-

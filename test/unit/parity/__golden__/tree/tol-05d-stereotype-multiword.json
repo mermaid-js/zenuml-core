@@ -1,0 +1,73 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 10,
+  "children": [
+    {
+      "kind": "HeadContext",
+      "start": 0,
+      "stop": 10,
+      "children": [
+        {
+          "kind": "ParticipantContext",
+          "start": 0,
+          "stop": 10,
+          "children": [
+            {
+              "kind": "StereotypeContext",
+              "start": 0,
+              "stop": 8,
+              "children": [
+                {
+                  "token": "SOPEN",
+                  "text": "<<"
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 3,
+                  "stop": 3,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "a"
+                    }
+                  ]
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 5,
+                  "stop": 5,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "b"
+                    }
+                  ]
+                },
+                {
+                  "token": "SCLOSE",
+                  "text": ">>"
+                }
+              ]
+            },
+            {
+              "kind": "NameContext",
+              "start": 10,
+              "stop": 10,
+              "children": [
+                {
+                  "token": "ID",
+                  "text": "A"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

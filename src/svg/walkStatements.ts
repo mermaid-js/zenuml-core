@@ -8,17 +8,21 @@
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import type { FragmentKind } from "./geometry";
+import { fragmentOf } from "@/parser/fragmentOf";
 import type { RootContextNode, BlockNode, StatNode } from "@/parser/AntlrTypes";
 
 export interface FragmentSectionInfo {
-  label: string;
+  /** if / else if / else (alt); try / catch / finally (tcf). Unset for single-block fragments, whose guard lives on the fragment. */
+  guardKeyword?: string;
+  /** Guard text: the condition of if / else if, the exception of catch. */
+  condition?: string;
   /** The parse tree block node for this section (used for inner statement key lookups) */
   blockNode: BlockNode | undefined;
 }
 
 export interface StatementInfo {
   key: string;
-  kind: "sync" | "async" | "creation" | "return" | "divider" | "fragment" | "empty";
+  kind: "sync" | "async" | "creation" | "return" | "divider" | "fragment";
   from: string;
   to: string;
   label: string;
@@ -29,6 +33,8 @@ export interface StatementInfo {
   fragmentKind?: FragmentKind;
   /** For fragments: condition/label text */
   fragmentLabel?: string;
+  fragmentHeaderLabel?: string;
+  guardKeyword?: string;
   /** For fragments: section info (for alt/tcf with multiple sections) */
   fragmentSections?: FragmentSectionInfo[];
   /** Inline comment text (e.g. // String line) */
@@ -81,7 +87,9 @@ function walkBlock(
 
     index++;
     const ordinal = indexOffset + index;
-    const number = parentNumber ? `${parentNumber}.${ordinal}` : String(ordinal);
+    const number = parentNumber
+      ? `${parentNumber}.${ordinal}`
+      : String(ordinal);
     const comment = stat.getComment?.() || "";
 
     const message = stat.message?.();
@@ -90,22 +98,68 @@ function walkBlock(
       const to = message.Owner?.() || _STARTER_;
       const label = normalizeLabel(message.SignatureText?.() || "");
       const nestedBlock = message.braceBlock?.()?.block?.();
-      results.push({ key, kind: "sync", from, to, label, isSelf: from === to, hasBlock: !!nestedBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), targetOccurrenceDepth: activeOccurrences.get(to) || 0, number, depth, parentBlockKind });
+      results.push({
+        key,
+        kind: "sync",
+        from,
+        to,
+        label,
+        isSelf: from === to,
+        hasBlock: !!nestedBlock,
+        comment,
+        statNode: stat,
+        senderOccurrenceDepth: activeOccurrences.get(from) || 0,
+        targetHasOccurrence: activeOccurrences.has(to),
+        targetOccurrenceDepth: activeOccurrences.get(to) || 0,
+        number,
+        depth,
+        parentBlockKind,
+      });
 
       if (nestedBlock) {
         const innerOccs = new Map(activeOccurrences);
         innerOccs.set(to, (innerOccs.get(to) || 0) + 1);
-        results.push(...walkBlock(nestedBlock, to, innerOccs, number, depth + 1, "sync", 0));
+        results.push(
+          ...walkBlock(
+            nestedBlock,
+            to,
+            innerOccs,
+            number,
+            depth + 1,
+            "sync",
+            0,
+          ),
+        );
       }
       continue;
     }
 
     const asyncMsg = stat.asyncMessage?.();
     if (asyncMsg) {
-      const from = asyncMsg.From?.() || asyncMsg.ProvidedFrom?.() || asyncMsg.Origin?.() || currentOrigin;
-      const to = asyncMsg.Owner?.() || asyncMsg.to?.()?.getFormattedText?.() || from;
-      const label = normalizeLabel(asyncMsg.content?.()?.getText?.() || asyncMsg.SignatureText?.() || "");
-      results.push({ key, kind: "async", from, to, label, isSelf: from === to, hasBlock: false, comment, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), number, depth });
+      const from =
+        asyncMsg.From?.() ||
+        asyncMsg.ProvidedFrom?.() ||
+        asyncMsg.Origin?.() ||
+        currentOrigin;
+      const to =
+        asyncMsg.Owner?.() || asyncMsg.to?.()?.getFormattedText?.() || from;
+      const label = normalizeLabel(
+        asyncMsg.content?.()?.getText?.() || asyncMsg.SignatureText?.() || "",
+      );
+      results.push({
+        key,
+        kind: "async",
+        from,
+        to,
+        label,
+        isSelf: from === to,
+        hasBlock: false,
+        comment,
+        senderOccurrenceDepth: activeOccurrences.get(from) || 0,
+        targetHasOccurrence: activeOccurrences.has(to),
+        number,
+        depth,
+      });
       continue;
     }
 
@@ -115,12 +169,37 @@ function walkBlock(
       const to = creation.Owner?.() || "";
       const label = normalizeLabel(creation.SignatureText?.() || "«create»");
       const creationBlock = creation.braceBlock?.()?.block?.();
-      results.push({ key, kind: "creation", from, to, label, isSelf: false, hasBlock: !!creationBlock, comment, statNode: stat, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetHasOccurrence: activeOccurrences.has(to), number, depth, parentBlockKind });
+      results.push({
+        key,
+        kind: "creation",
+        from,
+        to,
+        label,
+        isSelf: false,
+        hasBlock: !!creationBlock,
+        comment,
+        statNode: stat,
+        senderOccurrenceDepth: activeOccurrences.get(from) || 0,
+        targetHasOccurrence: activeOccurrences.has(to),
+        number,
+        depth,
+        parentBlockKind,
+      });
 
       if (creationBlock) {
         const innerOccs = new Map(activeOccurrences);
         innerOccs.set(to, (innerOccs.get(to) || 0) + 1);
-        results.push(...walkBlock(creationBlock, to || currentOrigin, innerOccs, number, depth + 1, "creation", 0));
+        results.push(
+          ...walkBlock(
+            creationBlock,
+            to || currentOrigin,
+            innerOccs,
+            number,
+            depth + 1,
+            "creation",
+            0,
+          ),
+        );
       }
       continue;
     }
@@ -130,15 +209,45 @@ function walkBlock(
       const label = normalizeLabel(ret.SignatureText?.() || "");
       const asyncMessage = ret?.asyncMessage?.();
       const from = asyncMessage?.From?.() || ret?.From?.() || currentOrigin;
-      const to = asyncMessage?.to?.()?.getFormattedText?.() || ret?.ReturnTo?.() || _STARTER_;
-      results.push({ key, kind: "return", from, to, label, isSelf: from === to, hasBlock: false, comment, senderOccurrenceDepth: activeOccurrences.get(from) || 0, targetOccurrenceDepth: activeOccurrences.get(to) || 0, number, depth, parentBlockKind });
+      const to =
+        asyncMessage?.to?.()?.getFormattedText?.() ||
+        ret?.ReturnTo?.() ||
+        _STARTER_;
+      results.push({
+        key,
+        kind: "return",
+        from,
+        to,
+        label,
+        isSelf: from === to,
+        hasBlock: false,
+        comment,
+        senderOccurrenceDepth: activeOccurrences.get(from) || 0,
+        targetOccurrenceDepth: activeOccurrences.get(to) || 0,
+        number,
+        depth,
+        parentBlockKind,
+      });
       continue;
     }
 
     const divider = stat.divider?.();
     if (divider) {
-      const label = normalizeLabel(divider.getFormattedText?.() || divider.getText?.() || "");
-      results.push({ key, kind: "divider", from: "", to: "", label, isSelf: false, hasBlock: false, senderOccurrenceDepth: 0, number, depth });
+      const label = normalizeLabel(
+        divider.getFormattedText?.() || divider.getText?.() || "",
+      );
+      results.push({
+        key,
+        kind: "divider",
+        from: "",
+        to: "",
+        label,
+        isSelf: false,
+        hasBlock: false,
+        senderOccurrenceDepth: 0,
+        number,
+        depth,
+      });
       continue;
     }
 
@@ -159,6 +268,8 @@ function walkBlock(
       hasBlock: false,
       fragmentKind: fragmentInfo.fragmentKind,
       fragmentLabel: fragmentInfo.label,
+      fragmentHeaderLabel: fragmentInfo.headerLabel,
+      guardKeyword: fragmentInfo.guardKeyword,
       fragmentSections: fragmentInfo.sections,
       comment,
       statNode: stat,
@@ -166,173 +277,117 @@ function walkBlock(
       number,
       depth,
     });
-    walkFragmentBlocks(stat, currentOrigin, results, activeOccurrences, number, depth);
+    walkFragmentBlocks(
+      stat,
+      currentOrigin,
+      results,
+      activeOccurrences,
+      number,
+      depth,
+    );
   }
 
   return results;
 }
 
 interface FragmentExtract {
+  headerLabel?: string;
   fragmentKind: FragmentKind;
   label: string;
+  guardKeyword?: string;
   sections: FragmentSectionInfo[];
 }
 
 function extractFragmentInfo(stat: StatNode): FragmentExtract | null {
-  // Single-block fragments: loop, opt, par, critical, section
-  for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
-    const frag = stat[kind]?.();
-    if (frag) {
-      const condition = frag.parExpr?.()?.condition?.();
-      const label = condition?.getFormattedText?.() || "";
-      return {
-        fragmentKind: kind,
-        label,
-        sections: [{ label, blockNode: frag.braceBlock?.()?.block?.() }],
-      };
-    }
-  }
-
-  // Alt (if/else if/else) — multiple sections
-  // Section labels match HTML visible text: "Alt", "[cond2]", "[else]"
-  const alt = stat.alt?.();
-  if (alt) {
-    const sections: FragmentSectionInfo[] = [];
-    const ifBlock = alt.ifBlock?.();
-    if (ifBlock) {
-      // First section label = kind name (matches HTML header visible text)
-      sections.push({ label: "Alt", blockNode: ifBlock.braceBlock?.()?.block?.() });
-    }
-    for (const elseIf of alt.elseIfBlock?.() || []) {
-      const condition = elseIf.parExpr?.()?.condition?.();
-      const label = condition?.getFormattedText?.() || "";
-      // HTML renders as "[ cond ]" (condition in brackets with spaces, "else if" is hidden)
-      sections.push({ label: `[ ${label} ]`, blockNode: elseIf.braceBlock?.()?.block?.() });
-    }
-    const elseBlock = alt.elseBlock?.();
-    if (elseBlock) {
-      sections.push({ label: "[else]", blockNode: elseBlock.braceBlock?.()?.block?.() });
-    }
-
-    const ifCondition = alt.ifBlock?.()?.parExpr?.()?.condition?.();
-    const firstLabel = ifCondition?.getFormattedText?.() || "";
-    return { fragmentKind: "alt", label: firstLabel, sections };
-  }
-
-  // Try/catch/finally — multiple sections
-  // Section labels match HTML visible text: "Try", "catch e", "finally"
-  const tcf = stat.tcf?.();
-  if (tcf) {
-    const sections: FragmentSectionInfo[] = [];
-    const tryBlock = tcf.tryBlock?.();
-    if (tryBlock) {
-      // First section label = capitalized kind name (matches HTML header)
-      sections.push({ label: "Try", blockNode: tryBlock.braceBlock?.()?.block?.() });
-    }
-    for (const catchBlock of tcf.catchBlock?.() || []) {
-      const exception = catchBlock.invocation?.()?.parameters?.()?.getFormattedText?.() || "";
-      sections.push({ label: `catch ${exception}`, blockNode: catchBlock.braceBlock?.()?.block?.() });
-    }
-    const finallyBlock = tcf.finallyBlock?.();
-    if (finallyBlock) {
-      sections.push({ label: "finally", blockNode: finallyBlock.braceBlock?.()?.block?.() });
-    }
-
-    return { fragmentKind: "tcf", label: "", sections };
-  }
-
-  // Ref fragment
-  const ref = stat.ref?.();
-  if (ref) {
-    const label = ref.getFormattedText?.() || "";
-    return { fragmentKind: "ref", label, sections: [] };
-  }
-
+  const view = fragmentOf(stat);
   // No recognized fragment type. Rather than defaulting to a Loop fragment
   // (which produced spurious stacked loops for stray icon tokens, issue #367),
   // return null so the caller skips this statement — matching the HTML renderer.
-  return null;
+  if (!view) return null;
+
+  switch (view.kind) {
+    case "ref":
+      return {
+        fragmentKind: "ref",
+        label: view.context.getFormattedText?.() || "",
+        sections: [],
+      };
+
+    case "alt": {
+      // Guard keywords stay separate from the editable condition text.
+      const sections = view.sections.map(
+        (s): FragmentSectionInfo => ({
+          guardKeyword: s.guardKeyword,
+          condition: s.condition,
+          blockNode: s.block,
+        }),
+      );
+      const [first] = view.sections;
+      const firstLabel =
+        first?.guardKeyword === "if" ? (first.condition ?? "") : "";
+      return { fragmentKind: "alt", label: firstLabel, sections };
+    }
+
+    case "tcf": {
+      const sections = view.sections.map(
+        (s): FragmentSectionInfo => ({
+          guardKeyword: s.guardKeyword,
+          condition: s.condition,
+          blockNode: s.block,
+        }),
+      );
+      return { fragmentKind: "tcf", label: "", sections };
+    }
+
+    default: {
+      const [section] = view.sections;
+      const label = section.condition ?? "";
+      return {
+        fragmentKind: view.kind,
+        headerLabel: view.context.atom?.()?.getFormattedText?.(),
+        label,
+        guardKeyword: section.guardKeyword,
+        sections: [{ blockNode: section.block }],
+      };
+    }
+  }
 }
 
 function blockLength(block: BlockNode): number {
-  return (block?.stat?.() || []).filter((stat: StatNode) => !!createStatementKey(stat)).length;
+  return (block?.stat?.() || []).filter(
+    (stat: StatNode) => !!createStatementKey(stat),
+  ).length;
 }
 
 /** Recurse into fragment inner blocks (loop, opt, alt, try/catch, etc.) */
-function walkFragmentBlocks(stat: StatNode, origin: string, results: StatementInfo[], activeOccurrences: Map<string, number>, parentNumber: string, depth: number): void {
-  // Single-block fragments: loop, opt, par, critical, section
-  for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
-    const frag = stat[kind]?.();
-    if (frag) {
-      const block = frag.braceBlock?.()?.block?.();
-      if (block) results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, 0));
-      return;
-    }
-  }
+function walkFragmentBlocks(
+  stat: StatNode,
+  origin: string,
+  results: StatementInfo[],
+  activeOccurrences: Map<string, number>,
+  parentNumber: string,
+  depth: number,
+): void {
+  const view = fragmentOf(stat);
+  if (!view) return;
 
-  // Alt (if/else if/else) — multiple blocks
-  const alt = stat.alt?.();
-  if (alt) {
-    const ifBlock = alt.ifBlock?.();
-    let sectionOffset = 0;
-    if (ifBlock) {
-      const block = ifBlock.braceBlock?.()?.block?.();
-      if (block) {
-        results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset));
-        sectionOffset += blockLength(block);
-      }
+  let sectionOffset = 0;
+  for (const section of view.sections) {
+    const block = section.block;
+    if (!block) continue;
+    const sectionStmts = walkBlock(
+      block,
+      origin,
+      activeOccurrences,
+      parentNumber,
+      depth + 1,
+      null,
+      sectionOffset,
+    );
+    if (!section.isLeading && sectionStmts.length > 0) {
+      sectionStmts[0].sectionReset = true;
     }
-    for (const elseIf of alt.elseIfBlock?.() || []) {
-      const block = elseIf.braceBlock?.()?.block?.();
-      if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
-        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
-        results.push(...sectionStmts);
-        sectionOffset += blockLength(block);
-      }
-    }
-    const elseBlock = alt.elseBlock?.();
-    if (elseBlock) {
-      const block = elseBlock.braceBlock?.()?.block?.();
-      if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
-        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
-        results.push(...sectionStmts);
-      }
-    }
-    return;
-  }
-
-  // Try/catch/finally — multiple blocks
-  const tcf = stat.tcf?.();
-  if (tcf) {
-    const tryBlock = tcf.tryBlock?.();
-    let sectionOffset = 0;
-    if (tryBlock) {
-      const block = tryBlock.braceBlock?.()?.block?.();
-      if (block) {
-        results.push(...walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset));
-        sectionOffset += blockLength(block);
-      }
-    }
-    for (const catchBlock of tcf.catchBlock?.() || []) {
-      const block = catchBlock.braceBlock?.()?.block?.();
-      if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
-        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
-        results.push(...sectionStmts);
-        sectionOffset += blockLength(block);
-      }
-    }
-    const finallyBlock = tcf.finallyBlock?.();
-    if (finallyBlock) {
-      const block = finallyBlock.braceBlock?.()?.block?.();
-      if (block) {
-        const sectionStmts = walkBlock(block, origin, activeOccurrences, parentNumber, depth + 1, null, sectionOffset);
-        if (sectionStmts.length > 0) sectionStmts[0].sectionReset = true;
-        results.push(...sectionStmts);
-      }
-    }
-    return;
+    results.push(...sectionStmts);
+    sectionOffset += blockLength(block);
   }
 }

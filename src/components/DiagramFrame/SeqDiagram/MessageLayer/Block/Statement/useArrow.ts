@@ -4,39 +4,17 @@ import Anchor2 from "@/positioning/Anchor2";
 import { coordinatesAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
-
-const matchesImplicitStarterSelf = (ctx: any, participant: string) => {
-  return (
-    participant === _STARTER_ &&
-    ctx instanceof sequenceParser.MessageContext &&
-    ctx.Owner?.() === undefined &&
-    ctx.From?.() === undefined
-  );
-};
-
-export const depthOnParticipant = (context: any, participant: any): number => {
-  return context?.getAncestors((ctx: any) => {
-    const isSync = (ctx: any) => {
-      const isMessageContext = ctx instanceof sequenceParser.MessageContext;
-      const isCreationContext = ctx instanceof sequenceParser.CreationContext;
-      return isMessageContext || isCreationContext;
-    };
-    if (isSync(ctx)) {
-      return (
-        ctx.Owner?.() === participant || matchesImplicitStarterSelf(ctx, participant)
-      );
-    }
-    return false;
-  }).length;
-};
+import { depthOnParticipant } from "@/parser/depthOnParticipant";
 
 const depthOnParticipant4Stat = (context: any, participant: any): number => {
   if (!(context instanceof sequenceParser.StatContext)) {
     return 0;
   }
 
-  const child = context?.children?.[0];
+  // `children` is a real antlr4 runtime field that @types/antlr4 omits from
+  // its declarations (see AntlrTypes.ts / antlr4/context/ParserRuleContext.js).
+  const stat = context as { children?: unknown[] | null };
+  const child = stat.children?.[0];
   if (!child) {
     return 0;
   }

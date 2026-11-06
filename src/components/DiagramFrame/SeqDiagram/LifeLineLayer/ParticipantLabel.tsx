@@ -1,14 +1,11 @@
-import {
-  codeAtom,
-  modeAtom,
-  onContentChangeAtom,
-  RenderMode,
-} from "@/store/Store";
-import { useAtom, useAtomValue } from "jotai";
+import { codeAtom, modeAtom, RenderMode } from "@/store/Store";
+import { useAtomValue } from "jotai";
+import { useCommitCode } from "@/store/useCommitCode";
 import { Position } from "@/parser/Participants";
 import { specialCharRegex } from "@/utils/messageNormalizers";
 import { cn } from "@/utils";
 import { EditableSpan } from "@/components/common/EditableSpan";
+import { useTextEditingGuard } from "@/components/common/EditableSpan/useTextEditingGuard";
 
 const UneditableText = ["Missing Constructor", "ZenUML"];
 
@@ -17,10 +14,12 @@ export const ParticipantLabel = (props: {
   labelPositions?: Array<[number, number]>;
   assignee?: string;
   assigneePositions?: Array<[number, number]>;
+  onNameEditingChange?: (editing: boolean) => void;
 }) => {
   const mode = useAtomValue(modeAtom);
-  const [code, setCode] = useAtom(codeAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
+  const updateTextEditing = useTextEditingGuard();
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
   const participantIsEditable =
     mode === RenderMode.Dynamic &&
     UneditableText.indexOf(props.labelText) === -1;
@@ -65,11 +64,13 @@ export const ParticipantLabel = (props: {
       newCode = newCode.slice(0, start) + text + newCode.slice(end);
     }
 
-    setCode(newCode);
-    onContentChange(newCode);
+    commitCode(newCode, { action: "participant_renamed", label: "inline" });
   };
 
-  const createSaveHandler = (positions: Array<Position>, originalText: string) => {
+  const createSaveHandler = (
+    positions: Array<Position>,
+    originalText: string,
+  ) => {
     return (newText: string) => {
       // If text is empty or same as the original label text, bail out
       if (newText === "" || newText === originalText) {
@@ -116,13 +117,18 @@ export const ParticipantLabel = (props: {
       <EditableSpan
         text={displayText}
         isEditable={props.assignee ? assigneeIsEditable : participantIsEditable}
-        className={cn("name leading-4 right px-1")}
+        className={cn("name leading-4 right px-1 participant-name")}
+        onEditingChange={(editing) => {
+          updateTextEditing(editing);
+          props.onNameEditingChange?.(editing);
+        }}
+        ignoreEnterKeyupAfterStart
         onSave={
           props.assignee
             ? createCombinedSaveHandler(displayText)
             : createSaveHandler(props.labelPositions ?? [], props.labelText)
         }
-        title="Double-click to edit"
+        title="Click to rename"
       />
     </div>
   );

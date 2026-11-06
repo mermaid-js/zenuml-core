@@ -3,11 +3,14 @@ import {
   onMessageClickAtom,
   RenderMode,
   selectedMessageAtom,
+  enableMessageReorderAtom,
 } from "@/store/Store";
+import { useCan, useCanReorderMessage } from "@/store/interaction/useCan";
 import { CSSProperties, ReactNode, useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { MessageView } from "./MessageView";
 import { cn } from "@/utils.ts";
+import { MessageReorderHandle } from "./MessageReorderHandle";
 
 type Context = any;
 
@@ -20,6 +23,7 @@ export const Message = (props: {
   className?: string;
   style?: CSSProperties;
   number?: string;
+  allowReorder?: boolean;
   children: ReactNode;
 }) => {
   const {
@@ -31,9 +35,11 @@ export const Message = (props: {
     className,
     style,
     number,
+    allowReorder = true,
     children,
   } = props;
   const mode = useAtomValue(modeAtom);
+  const messageReorderEnabled = useAtomValue(enableMessageReorderAtom);
   const onMessageClick = useAtomValue(onMessageClickAtom);
   const selectedMessage = useAtomValue(selectedMessageAtom);
   const setSelectedMessage = useSetAtom(selectedMessageAtom);
@@ -45,9 +51,14 @@ export const Message = (props: {
   ];
   const isSelected =
     selectedMessage?.start === rangeStart && selectedMessage?.end === rangeEnd;
+  const canReorder = useCanReorderMessage(isSelected);
+  // ADR 0002: a click selects the message (and opens its menu) only while
+  // `select` is allowed; that also covers `RenderMode.Static`.
+  const canSelect = useCan("select");
+  const reorderEnabled = allowReorder && messageReorderEnabled && canReorder;
 
   const onClick = () => {
-    if (!stylable || !messageRef.current) return;
+    if (!canSelect || !messageRef.current) return;
     setSelectedMessage(
       rangeStart != null && rangeEnd != null
         ? { start: rangeStart, end: rangeEnd, token: Date.now() }
@@ -60,19 +71,24 @@ export const Message = (props: {
     <MessageView
       type={type}
       textStyle={textStyle}
-      className={cn({"cursor-pointer": stylable}, className)}
+      className={cn(
+        {
+          "cursor-pointer": stylable,
+          "message-reorder-disabled": !reorderEnabled,
+        },
+        className,
+      )}
       style={style}
       number={number}
       rtl={rtl}
       onClick={onClick}
       messageRef={messageRef}
       data-selected={isSelected ? "true" : "false"}
+      reorderHandle={reorderEnabled ? <MessageReorderHandle /> : undefined}
       title={
         !stylable
           ? undefined
-          : isSelected
-          ? "Click label to edit · drag to reorder"
-          : "Click to select · drag to reorder"
+          : `Click label to edit · click arrow to select${reorderEnabled ? " · drag handle to reorder" : ""}`
       }
       children={children}
     />

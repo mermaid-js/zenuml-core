@@ -8,6 +8,7 @@ import ActorSvg from "@/assets/actor.svg?raw";
 import BoundarySvg from "@/assets/Robustness_Diagram_Boundary.svg?raw";
 import ControlSvg from "@/assets/Robustness_Diagram_Control.svg?raw";
 import DatabaseSvg from "@/assets/database.svg?raw";
+import QueueSvg from "@/assets/queue.svg?raw";
 import EntitySvg from "@/assets/Robustness_Diagram_Entity.svg?raw";
 import Ec2Svg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Compute/Res_Amazon-EC2_Instance_48.svg?raw";
 import IamSvg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Security-Identity-Compliance/Res_AWS-Identity-Access-Management_IAM-Access-Analyzer_48.svg?raw";
@@ -15,6 +16,7 @@ import LambdaSvg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_013120
 import SnsSvg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-Simple-Notification-Service_Topic_48.svg?raw";
 import SqsSvg from "@/assets/AWS-Asset-Package_02062024/Resource-Icons_01312024/Res_Application-Integration/Res_Amazon-Simple-Queue-Service_Queue_48.svg?raw";
 import AzureFunctionSvg from "@/assets/Azure_Public_Service_Icons/Icons/Compute/10029-icon-service-Function-Apps.svg?raw";
+import { loadIcon } from "@/components/DiagramFrame/Tutorial/LazyIcons";
 
 export interface IconDefinition {
   /** ViewBox for the icon (default "0 0 24 24") */
@@ -77,7 +79,45 @@ export const ICONS: Record<string, IconDefinition> = {
   boundary: parseRawSvg(BoundarySvg),
   control: parseRawSvg(ControlSvg),
   entity: parseRawSvg(EntitySvg),
+  queue: parseRawSvg(QueueSvg),
 };
+
+/**
+ * Icons outside {@link ICONS} (the ~500 cloud icons), loaded on demand by
+ * {@link ensureDiagramIconsLoaded} from the same source as the HTML renderer.
+ */
+const loadedIcons = new Map<string, IconDefinition>();
+const iconLoads = new Map<string, Promise<void>>();
+
+function loadExtraIcon(key: string): Promise<void> {
+  let load = iconLoads.get(key);
+  if (!load) {
+    load = loadIcon(key)
+      .then((raw) => {
+        if (raw) loadedIcons.set(key, parseRawSvg(raw));
+      })
+      // A missing or failing icon falls back to the text label.
+      .catch(() => {});
+    iconLoads.set(key, load);
+  }
+  return load;
+}
+
+/**
+ * Load the participant icons a diagram uses that are not built in, so that a
+ * following synchronous renderToSvg() can draw them. Await it before
+ * renderToSvg(), like ensureDiagramFontsLoaded(). Every `@Name` annotation in
+ * the code is tried; names that are not icons (e.g. `@return`) are ignored.
+ * Never rejects.
+ */
+export async function ensureDiagramIconsLoaded(code: string): Promise<void> {
+  const keys = new Set<string>();
+  for (const match of code.matchAll(/@([A-Za-z][\w]*)/g)) {
+    const key = match[1].toLowerCase();
+    if (!ICONS[key]) keys.add(key);
+  }
+  await Promise.all([...keys].map(loadExtraIcon));
+}
 
 /**
  * Get icon definition for a participant type.
@@ -86,5 +126,5 @@ export const ICONS: Record<string, IconDefinition> = {
 export function getIcon(type: string | undefined): IconDefinition | undefined {
   if (!type) return undefined;
   const key = type.toLowerCase();
-  return ICONS[key];
+  return ICONS[key] ?? loadedIcons.get(key);
 }

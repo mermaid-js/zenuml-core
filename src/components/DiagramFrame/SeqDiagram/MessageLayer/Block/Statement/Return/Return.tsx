@@ -32,7 +32,8 @@ export const Return = (props: {
   const target = ret?.ReturnTo() || _STARTER_;
 
   const messageContext = asyncMessage?.content() || ret?.expr();
-  let start = -1, stop = -1;
+  let start = -1,
+    stop = -1;
   if (messageContext instanceof sequenceParser.AtomExprContext) {
     const ret = messageContext.atom();
     [start, stop] = [ret?.start?.start, ret?.stop?.stop];
@@ -90,7 +91,7 @@ export const Return = (props: {
               d="M288 192h-87.16l27.58-27.58a21.33 21.33 0 1 0-30.17-30.17l-64 64a21.33 21.33 0 0 0 0 30.17l64 64a21.33 21.33 0 0 0 30.17-30.17l-27.58-27.58H288a53.33 53.33 0 0 1 0 106.67h-32a21.33 21.33 0 0 0 0 42.66h32a96 96 0 0 0 0-192Z"
             />
           </svg>
-          <span className="name">{signature}</span>
+          <span className="name text-[15px]">{signature}</span>
         </div>
       )}
       {!isSelf && (

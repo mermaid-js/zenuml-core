@@ -1,5 +1,8 @@
 import { cn } from "@/utils";
-import { EditableLabelField } from "./EditableLabelField";
+import {
+  EditableLabelField,
+  useReselectSavedMessage,
+} from "./EditableLabelField";
 
 export interface AssignmentReturnLabelProps {
   assignee: string;
@@ -18,12 +21,14 @@ export const AssignmentReturnLabel = ({
   normalizeText,
   className,
 }: AssignmentReturnLabelProps) => {
+  const reselect = useReselectSavedMessage();
   return (
     <span className={cn("assignment-return-label", className)}>
       <EditableLabelField
         text={assignee}
         position={assigneePosition}
         normalizeText={normalizeText}
+        afterSave={reselect}
         className="right"
         title="Double-click to edit assignee"
       />
@@ -33,6 +38,7 @@ export const AssignmentReturnLabel = ({
           <EditableLabelField
             text={type}
             position={typePosition}
+            afterSave={reselect}
             className="right"
             title="Double-click to edit type"
           />

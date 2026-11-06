@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Block } from "./Block/Block";
 import { centerOf } from "./Block/Statement/utils";
 import { StylePanel } from "./StylePanel";
@@ -8,9 +8,6 @@ import { AllMessages } from "@/parser/MessageCollector";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
 import "./MessageLayer.scss";
 
-import parentLogger from "../../../../logger/logger";
-
-const logger = parentLogger.child({ name: "MessageLayer" });
 export const MessageLayer = (props: {
   context: any;
   style?: React.CSSProperties;
@@ -26,15 +23,6 @@ export const MessageLayer = (props: {
   }, [rootContext]);
 
   const paddingLeft = centerOf(coordinates, origin) + 1;
-
-  const [mounted, setMounted] = useState(false);
-  if (mounted) {
-    logger.debug("MessageLayer updated");
-  }
-  useEffect(() => {
-    setMounted(true);
-    logger.debug("MessageLayer mounted");
-  }, []);
 
   return (
     <div

@@ -1,15 +1,14 @@
+import { useCommitCode } from "@/store/useCommitCode";
 import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
 import {
   coordinatesAtom,
   enableParticipantInsertionAtom,
-  modeAtom,
-  onContentChangeAtom,
-  RenderMode,
   rootContextAtom,
 } from "@/store/Store";
 import { insertParticipantIntoDsl } from "@/utils/participantInsertTransform";
 import { MARGIN } from "@/positioning/Constants";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
+import { useCan } from "@/store/interaction/useCan";
 import { codeAtom } from "@/store/Store";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
@@ -73,17 +72,21 @@ const generateName = (existingNames: Set<string>) => {
 };
 
 export const ParticipantInsertControls = () => {
-  const mode = useAtomValue(modeAtom);
   const enabled = useAtomValue(enableParticipantInsertionAtom);
+  // ADR 0002: the policy covers the mode, the text-edit overlay and every
+  // interaction that owns the diagram (the participant editor, an open menu,
+  // a drag). The embedder flag stays here.
+  const canInsert = useCan("insertParticipant");
   const coordinates = useAtomValue(coordinatesAtom);
   const rootContext = useAtomValue(rootContextAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
-  const [code, setCode] = useAtom(codeAtom);
+  const code = useAtomValue(codeAtom);
+  const commitCode = useCommitCode();
 
   const participantModels = useMemo(
     () =>
-      OrderedParticipants(rootContext)
-        .filter((participant) => participant.name !== _STARTER_),
+      OrderedParticipants(rootContext).filter(
+        (participant) => participant.name !== _STARTER_,
+      ),
     [rootContext],
   );
 
@@ -158,7 +161,7 @@ export const ParticipantInsertControls = () => {
   );
 
   const handleInsert = (insertIndex: number) => {
-    if (!rootContext) return;
+    if (!rootContext || !enabled || !canInsert) return;
     const name = generateName(existingNames);
     const nextCode = insertParticipantIntoDsl({
       code,
@@ -167,20 +170,25 @@ export const ParticipantInsertControls = () => {
       name,
       type: "default",
     });
-    setCode(nextCode);
-    onContentChange(nextCode);
+    commitCode(nextCode, { action: "participant_added", label: "gap" });
   };
 
-  if (
-    !enabled ||
-    mode !== RenderMode.Dynamic ||
-    participantModels.length === 0
-  ) {
+  if (!enabled || !canInsert || participantModels.length === 0) {
     return null;
   }
 
-  const insertButtonClass = "absolute flex items-center justify-center rounded-full border border-slate-300 bg-white text-slate-400 text-xs leading-none opacity-0 transition-all group-hover:opacity-80 hover:!opacity-100 hover:border-sky-400 hover:text-sky-500 hover:shadow-sm focus-visible:opacity-100 focus-visible:border-sky-400 focus-visible:text-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300";
-  const insertButtonStyle = { top: BUTTON_INSET, left: BUTTON_INSET, width: BUTTON_SIZE, height: BUTTON_SIZE };
+  // P4: the 16 px circle is what is painted; the pseudo-element stretches the
+  // click target over the whole 36 px reveal wrapper (BUTTON_INSET + 1 px
+  // border = 11 px each side). Opacity, border, colour and shadow keep their
+  // transitions through .zu-press-insert (tailwind.css).
+  const insertButtonClass =
+    "zu-press zu-press-insert absolute flex items-center justify-center rounded-full border border-slate-300 bg-white text-slate-400 text-xs leading-none opacity-0 before:absolute before:-inset-[11px] before:content-[''] group-hover:opacity-80 hover:!opacity-100 hover:border-sky-400 hover:text-sky-500 hover:shadow-zu-sm focus-visible:opacity-100 focus-visible:outline-none focus-visible:shadow-zu-focus";
+  const insertButtonStyle = {
+    top: BUTTON_INSET,
+    left: BUTTON_INSET,
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
+  };
 
   return (
     <>
@@ -209,6 +217,7 @@ export const ParticipantInsertControls = () => {
         >
           <button
             type="button"
+            data-cap="insertParticipant"
             data-testid="participant-prepend-button"
             title="Add participant"
             aria-label="Add participant at the start"
@@ -234,6 +243,7 @@ export const ParticipantInsertControls = () => {
         >
           <button
             type="button"
+            data-cap="insertParticipant"
             data-testid={`participant-insert-button-${index}`}
             title={`Insert participant between ${participantModels[index].name} and ${participantModels[index + 1].name}`}
             aria-label={`Insert participant between ${participantModels[index].name} and ${participantModels[index + 1].name}`}
@@ -258,6 +268,7 @@ export const ParticipantInsertControls = () => {
         >
           <button
             type="button"
+            data-cap="insertParticipant"
             data-testid="participant-append-button"
             title="Add participant"
             aria-label="Add participant"

@@ -1,0 +1,11 @@
+MS-Sans-Serif.ttf
+
+"MS Sans Serif" by lou, built with FontStruct.
+Copyright lou 2017.
+Source: http://fontstruct.com/fontstructions/show/1384746/ms-sans-serif
+
+Licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported
+licence (CC BY-SA 3.0): http://creativecommons.org/licenses/by-sa/3.0/
+
+The file is redistributed unmodified. FontStruct is a trademark of
+FSI FontShop International GmbH.

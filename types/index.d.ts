@@ -1,9 +1,27 @@
+export type SvgTheme =
+  | "theme-default"
+  | "theme-mermaid"
+  | "theme-clean-light"
+  | "theme-dark"
+  | "theme-clean-dark"
+  | "theme-darcula"
+  | "theme-neon";
+
 export interface RenderOptions {
-  theme?: 'theme-default' | 'theme-mermaid';
+  /** Theme name. Unknown names fall back to 'theme-default'. */
+  theme?: SvgTheme;
+  /** Semantic document colours; supplied slots override the selected theme. */
+  palette?: DiagramPalette;
+  /** Optional opaque colour painted underneath the outer canvas once. */
+  backingColor?: string;
+  /** Show sequence references and their badges; defaults to true. */
+  enableNumbering?: boolean;
 }
 
 export interface RenderResult {
   svg: string;
+  /** Raw outer-canvas paint, excluding the optional export backing. */
+  surface: RenderSurface;
   /** Inner SVG content (defs + g) for embedding into an existing SVG container */
   innerSvg: string;
   width: number;
@@ -11,7 +29,96 @@ export interface RenderResult {
   viewBox: string;
 }
 
-export declare function renderToSvg(code: string, options?: RenderOptions): RenderResult;
+/** Raw outer-canvas paint; transparent unless the author paints it. */
+export interface RenderSurface {
+  backgroundColor: string;
+}
+
+export interface ExportOptions {
+  /** Opaque colour painted behind the diagram once. Omit to preserve alpha. */
+  backingColor?: string;
+}
+
+/** Optional semantic colour overrides shared by HTML and native SVG. */
+export interface DiagramPalette {
+  canvasBg?: string;
+  frameBg?: string;
+  frameBorder?: string;
+  titleText?: string;
+  participantBg?: string;
+  participantBorder?: string;
+  participantText?: string;
+  messageArrow?: string;
+  messageText?: string;
+  lifeline?: string;
+  occurrenceBg?: string;
+  occurrenceBorder?: string;
+  fragmentBorder?: string;
+  fragmentHeaderBg?: string;
+  fragmentHeaderText?: string;
+  fragmentText?: string;
+  fragmentSeparator?: string;
+  guardOpacity?: string;
+  guardText?: string;
+  commentText?: string;
+  commentOpacity?: string;
+  groupOutline?: string;
+  dividerLine?: string;
+  dividerBg?: string;
+  dividerText?: string;
+  numberText?: string;
+  fragmentNumberText?: string;
+  numberBg?: string;
+}
+
+export declare function renderToSvg(
+  code: string,
+  options?: RenderOptions,
+): RenderResult;
+
+/**
+ * Make the diagram typefaces available to text measurement and rendering in a
+ * browser. `ZenUml.render()` awaits it; call it yourself before
+ * `renderToSvg()`. Never rejects: a refused font falls back to the font stack.
+ */
+export declare function ensureDiagramFontsLoaded(): Promise<void>;
+
+/**
+ * Load the participant icons `code` uses that `renderToSvg()` does not build
+ * in (e.g. `@VPC`, `@RDS` and the other cloud icons), so the next
+ * `renderToSvg(code)` draws them. Await it before `renderToSvg()`. Never
+ * rejects: an unknown or failing icon falls back to the text label.
+ */
+export declare function ensureDiagramIconsLoaded(code: string): Promise<void>;
+
+/** Font families whose file URL can be set with {@link setDiagramFontUrl}. */
+export type DiagramFontFamily = "IBM Plex Sans" | "MS Sans Serif";
+
+/**
+ * Set the URL the browser renderer loads a diagram font from, instead of its
+ * default. Call before rendering. Use it when the page's Content-Security-Policy
+ * refuses `data:` fonts, with the font file this package ships at
+ * `@zenuml/core/fonts/IBMPlexSans-Regular-Latin1.woff2`, served from an origin
+ * the policy allows.
+ *
+ * `family` defaults to "IBM Plex Sans", which otherwise loads from an embedded
+ * `data:` URI. "MS Sans Serif" (theme-neon, `@zenuml/core/fonts/MS-Sans-Serif.ttf`)
+ * is only loaded when set. `null` restores the default. Changing the URL makes
+ * the next render load the font again.
+ */
+export declare function setDiagramFontUrl(
+  url: string | null,
+  family?: DiagramFontFamily,
+): void;
+
+/**
+ * The IBM Plex Sans `@font-face` rule with the font embedded as a `data:` URI,
+ * for rasterising the rendered DOM — e.g. html-to-image's `fontEmbedCSS`
+ * option. SVG-as-image can only use embedded fonts, and html-to-image does not
+ * see faces registered with the FontFace API. Works on pages whose
+ * Content-Security-Policy refuses data: fonts for the document itself.
+ */
+export declare function getDiagramFontFaceCss(): Promise<string | undefined>;
 
 export interface ParseResult {
   pass: boolean;
@@ -24,11 +131,14 @@ export interface ErrorDetail {
   msg: string;
 }
 
-interface Config {
+export interface Config {
   theme?: string;
+  palette?: DiagramPalette;
   enableScopedTheming?: boolean;
   onThemeChange?: (data: { theme: string; scoped?: boolean }) => void;
   enableMultiTheme?: boolean;
+  /** Show hierarchical message numbering. Omission preserves stored state (initially true). */
+  enableNumbering?: boolean;
   stickyOffset?: number | false;
   onContentChange?: (code: string) => void;
   mode?: string;
@@ -38,19 +148,35 @@ interface IZenUml {
   get code(): string | undefined;
   get theme(): string | undefined;
   parse(text: string): Promise<ParseResult>;
-  render(code: string | undefined, config: Config | undefined): Promise<IZenUml>;
+  render(
+    code: string | undefined,
+    config: Config | undefined,
+  ): Promise<IZenUml>;
+  getSurface(): RenderSurface;
 }
 
 declare class ZenUml implements IZenUml {
   static readonly version: string;
   static readonly default: typeof ZenUml;
-  constructor(el: HTMLElement | string, naked?: boolean);
+  /** Same as the named export {@link setDiagramFontUrl}. */
+  static readonly setDiagramFontUrl: typeof setDiagramFontUrl;
+  /** Initial appearance is applied before the first committed frame. */
+  constructor(
+    el: HTMLElement | string,
+    naked?: boolean,
+    initial?: Pick<Config, "theme" | "palette">,
+  );
   get code(): string | undefined;
   get theme(): string | undefined;
   parse(text: string): Promise<ParseResult>;
-  render(code: string | undefined, config: Config | undefined): Promise<IZenUml>;
-  getPng(): Promise<string>;
-  getSvg(): Promise<string>;
+  render(
+    code: string | undefined,
+    config: Config | undefined,
+  ): Promise<IZenUml>;
+  /** Read the raw canvas paint after render, or again after author CSS changes. */
+  getSurface(): RenderSurface;
+  getPng(options?: ExportOptions): Promise<string>;
+  getSvg(options?: ExportOptions): Promise<string>;
 }
 
 export default ZenUml;

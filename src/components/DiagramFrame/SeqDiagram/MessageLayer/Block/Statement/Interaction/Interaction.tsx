@@ -76,6 +76,7 @@ export const Interaction = (props: {
           textStyle={messageTextStyle}
           context={message}
           number={props.number}
+          type="sync"
         />
       ) : (
         <Message

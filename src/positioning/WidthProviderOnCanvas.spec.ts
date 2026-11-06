@@ -20,19 +20,25 @@ describe("WidthProviderOnCanvas", () => {
 
   it("wider text produces larger width", () => {
     const short = WidthProviderOnCanvas("A", TextType.ParticipantName);
-    const long = WidthProviderOnCanvas("ABCDEFGHIJKLMNOP", TextType.ParticipantName);
+    const long = WidthProviderOnCanvas(
+      "ABCDEFGHIJKLMNOP",
+      TextType.ParticipantName,
+    );
     expect(long).toBeGreaterThan(short);
   });
 
-  it("matches browser width-provider behavior across text types", () => {
+  it("measures message labels at 15px and participant labels at 14px", () => {
     const text = "SameText";
     const participant = WidthProviderOnCanvas(text, TextType.ParticipantName);
     const message = WidthProviderOnCanvas(text, TextType.MessageContent);
-    expect(participant).toBe(message);
+    expect(message).toBeGreaterThan(participant);
   });
 
   it("handles special characters", () => {
-    const width = WidthProviderOnCanvas("hello() -> world", TextType.MessageContent);
+    const width = WidthProviderOnCanvas(
+      "hello() -> world",
+      TextType.MessageContent,
+    );
     expect(width).toBeGreaterThan(0);
   });
 

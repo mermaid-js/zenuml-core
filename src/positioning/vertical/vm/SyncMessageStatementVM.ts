@@ -1,4 +1,8 @@
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import {
+  MESSAGE_HEIGHT,
+  SELF_MESSAGE_HEIGHT,
+} from "@/positioning/vertical/LayoutMetrics";
 import type { StatementCoordinate } from "../StatementCoordinate";
 import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
@@ -25,7 +29,7 @@ export class SyncMessageStatementVM extends StatementVM {
     const assignee = this.message.Assignment?.();
 
     const isSelf = source === target;
-    const messageHeight = isSelf ? 30 : 16;
+    const messageHeight = isSelf ? SELF_MESSAGE_HEIGHT : MESSAGE_HEIGHT;
     cursor += messageHeight;
 
     if (block) {
@@ -43,7 +47,6 @@ export class SyncMessageStatementVM extends StatementVM {
     }
 
     const height = cursor - top;
-    // console.info("syncMessageVM::end", height, commentHeight, messageHeight);
 
     return { top, height, kind: this.kind };
   }

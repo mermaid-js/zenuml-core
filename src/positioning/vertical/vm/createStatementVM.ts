@@ -3,14 +3,11 @@ import { CreationStatementVM } from "./CreationStatementVM";
 import { DividerStatementVM } from "./DividerStatementVM";
 import { EmptyStatementVM } from "./EmptyStatementVM";
 import { FragmentAltVM } from "./FragmentAltVM";
-import { FragmentCriticalVM } from "./FragmentCriticalVM";
-import { FragmentLoopVM } from "./FragmentLoopVM";
-import { FragmentOptVM } from "./FragmentOptVM";
-import { FragmentParVM } from "./FragmentParVM";
 import { FragmentRefVM } from "./FragmentRefVM";
-import { FragmentSectionVM } from "./FragmentSectionVM";
+import { FragmentSingleBlockVM } from "./FragmentSingleBlockVM";
 import { FragmentTryCatchVM } from "./FragmentTryCatchVM";
 import { ReturnStatementVM } from "./ReturnStatementVM";
+import { fragmentOf } from "@/parser/fragmentOf";
 import type { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 import { SyncMessageStatementVM } from "./SyncMessageStatementVM";
@@ -42,43 +39,23 @@ export const createStatementVM = (
     return new DividerStatementVM(statement, runtime);
   }
 
-  const loop = statement.loop?.();
-  if (loop) {
-    return new FragmentLoopVM(statement, loop, runtime);
-  }
-
-  const opt = statement.opt?.();
-  if (opt) {
-    return new FragmentOptVM(statement, opt, runtime);
-  }
-
-  const par = statement.par?.();
-  if (par) {
-    return new FragmentParVM(statement, par, runtime);
-  }
-
-  const section = statement.section?.();
-  if (section) {
-    return new FragmentSectionVM(statement, section, runtime);
-  }
-
-  const critical = statement.critical?.();
-  if (critical) {
-    return new FragmentCriticalVM(statement, critical, runtime);
-  }
-
-  const tcf = statement.tcf?.();
-  if (tcf) {
-    return new FragmentTryCatchVM(statement, tcf, runtime);
-  }
-
-  const alt = statement.alt?.();
-  if (alt) {
-    return new FragmentAltVM(statement, alt, runtime);
-  }
-
-  if (statement.ref?.()) {
-    return new FragmentRefVM(statement, runtime);
+  const fragment = fragmentOf(statement);
+  if (fragment) {
+    switch (fragment.kind) {
+      case "tcf":
+        return new FragmentTryCatchVM(statement, fragment.context, runtime);
+      case "alt":
+        return new FragmentAltVM(statement, fragment.context, runtime);
+      case "ref":
+        return new FragmentRefVM(statement, runtime);
+      default:
+        return new FragmentSingleBlockVM(
+          statement,
+          fragment.context,
+          runtime,
+          fragment.kind,
+        );
+    }
   }
 
   return new EmptyStatementVM(statement, runtime);

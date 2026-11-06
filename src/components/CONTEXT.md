@@ -53,7 +53,7 @@ DiagramFrame                          ← outer container, theme, title, control
 
 ### `DiagramFrame`
 
-Top-level component. Sets up `JotaiProvider` with initial atom values from props. Renders title, theme selector, tips dialog, and `SeqDiagram`.
+Top-level component. Renders the diagram title, privacy indicator, and `SeqDiagram`. Host applications own surrounding controls such as theme selection and viewport zoom.
 
 ### `SeqDiagram`
 
@@ -68,7 +68,7 @@ Renders three visual layers via `renderMode` prop:
 
 ### `Block`
 
-Maps a statement list from the parse tree. In `html` vertical mode, reads `verticalCoordinatesAtom` to set `top` and `height` on each statement. In `legacy` mode, uses CSS flow layout.
+Maps a statement list from the parse tree and lays the statements out with CSS flow. It does not read `verticalCoordinatesAtom`; the pre-computed vertical coordinates are consumed by `LifeLine` (for a created participant's top) and by the SVG renderer.
 
 ### `Statement`
 
@@ -98,10 +98,6 @@ This returns the arrow's starting x position and width, derived from the sender/
 |---|---|
 | `RenderMode.Dynamic` (html) | Full interactive mode. Vertical coordinates computed from parse tree. Supports selection, highlighting, insertion controls. |
 | `RenderMode.Static` (svg) | Minimal mode for SVG export. No interactive overlays. |
-
-Vertical layout mode is resolved separately:
-- `"html"` — uses `VerticalCoordinates` for absolute positioning (default)
-- `"legacy"` — CSS flow layout (fallback)
 
 ## Feature Flags
 

@@ -118,8 +118,8 @@ Direct token: `COLOR` (a `#rrggbb`-style token).
 
 | Alt | Body | Notes |
 |---|---|---|
-| 1 | `SOPEN name SCLOSE` | `<<name>>` complete. |
-| 2 | `SOPEN name GT?` | **[ET]** unclosed: `<<name` or `<<name>`. |
+| 1 | `SOPEN name+ SCLOSE` | `<<name>>` complete; several words allowed (`<< legacy system >>`), one `name` per word. |
+| 2 | `SOPEN name GT?` | **[ET]** unclosed: `<<name` or `<<name>` — single word only, so `<<a b` keeps `b` as the participant. |
 | 3 | `(LT | SOPEN) (GT | SCLOSE)?` | **[ET]** comment: "Some people may write `<<>>` first then put in the interface name" — matches `<`, `<<`, `<>`, `<<>>`, `<< >`, etc. |
 
 Direct tokens: `SOPEN` (`<<`), `SCLOSE` (`>>`), `LT` (`<`), `GT` (`>`). Note `LT`/`GT` are also relational operators in `expr` — context-dependent reuse, a known migration hazard.
@@ -189,24 +189,22 @@ Direct tokens: `SOPEN` (`<<`), `SCLOSE` (`>>`), `LT` (`<`), `GT` (`>`). Note `LT
 
 | Alt | Body | Notes |
 |---|---|---|
-| 1 | `PAR parExpr? braceBlock` | `par { ... }`; parExpr rarely used but allowed. |
-| 2 | `PAR` | **[ET]** bare keyword while typing. |
+| 1 | `PAR (parExpr? braceBlock)?` | `par { ... }`; parExpr rarely used but allowed. The group is optional **[ET]**: bare keyword while typing. |
 
 ### 3.20 `opt` (g4 L127–130)
 
-Identical shape to `par`: `OPT parExpr? braceBlock | OPT` (alt 2 **[ET]**).
+Identical shape to `par`: `OPT (parExpr? braceBlock)?` (optional group **[ET]**).
 
 ### 3.21 `critical` (g4 L132–135)
 
-Identical shape: `CRITICAL parExpr? braceBlock | CRITICAL` (alt 2 **[ET]**).
+Identical shape: `CRITICAL (parExpr? braceBlock)?` (optional group **[ET]**).
 
 ### 3.22 `section` (g4 L138–142)
 
 | Alt | Body | Notes |
 |---|---|---|
-| 1 | `SECTION (OPAR atom? CPAR)? braceBlock` | `section(name) { ... }`; arg is an `atom`, not parExpr; parens optional, atom inside optional **[ET]**. |
-| 2 | `braceBlock` | **Anonymous section** — a bare `{ ... }` block is a statement. Comment: "mostly for error tolerance (e.g. `ref(x) { m1 }`)" — when a construct loses its header, the orphan braces still parse. **[ET]** but also a real feature (anonymous grouping). |
-| 3 | `SECTION` | **[ET]** bare keyword. |
+| 1 | `SECTION ((OPAR atom? CPAR)? braceBlock)?` | `section(name) { ... }`; arg is an `atom`, not parExpr; parens optional, atom inside optional **[ET]**. The group is optional **[ET]**: bare keyword. |
+| 2 | `braceBlock` | **Anonymous section** — a complete bare `{ ... }` block is a statement. Comment: "mostly for error tolerance (e.g. `ref(x) { m1 }`)" — when a construct loses its header, the orphan braces still parse. **[ET]** but also a real feature (anonymous grouping). A `{` with no owner and no `}` is not a section: the recovering parser drops it (`src/parser/BlockOwnership.ts`, #668). |
 
 `SECTION` token matches `'section' | 'frame'`.
 

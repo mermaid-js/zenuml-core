@@ -87,7 +87,7 @@ zenuml-core/
 | Entry | File | Purpose |
 |---|---|---|
 | npm package | `src/core.tsx` | `ZenUml` class, `defineCustomElement()` |
-| Dev server | `src/main.ts` | Development playground |
+| Dev server | `src/main.tsx`, `src/main.ts` | Development playground; both build their config with `demoConfig()` in `src/config.ts` (via `src/demo-init.ts`) |
 | Demo site | `index.html` | Vite site root |
 
 ## Test Layout

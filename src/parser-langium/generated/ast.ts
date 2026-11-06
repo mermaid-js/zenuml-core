@@ -302,7 +302,7 @@ export function isCatchBlock(item: unknown): item is CatchBlock {
     return reflection.isInstance(item, CatchBlock.$type);
 }
 
-export type Condition = Expr | InExpr | TextExpr;
+export type Condition = Emoji | Expr | InExpr | TextExpr;
 
 export const Condition = {
     $type: 'Condition'
@@ -460,7 +460,7 @@ export function isElseIfBlock(item: unknown): item is ElseIfBlock {
 }
 
 export interface Emoji extends langium.AstNode {
-    readonly $container: From | MethodName | Participant | To;
+    readonly $container: From | MethodName | ParExpr | Participant | To;
     readonly $type: 'Emoji';
     name?: Name;
 }
@@ -1158,12 +1158,12 @@ export function isStat(item: unknown): item is Stat {
 export interface Stereotype extends langium.AstNode {
     readonly $container: Participant;
     readonly $type: 'Stereotype';
-    name?: Name;
+    names: Array<Name>;
 }
 
 export const Stereotype = {
     $type: 'Stereotype',
-    name: 'name'
+    names: 'names'
 } as const;
 
 export function isStereotype(item: unknown): item is Stereotype {
@@ -1624,7 +1624,7 @@ export class ZenUmlAstReflection extends langium.AbstractAstReflection {
                     name: Emoji.name
                 }
             },
-            superTypes: []
+            superTypes: [Condition.$type]
         },
         EqualityExpr: {
             name: EqualityExpr.$type,
@@ -2108,8 +2108,9 @@ export class ZenUmlAstReflection extends langium.AbstractAstReflection {
         Stereotype: {
             name: Stereotype.$type,
             properties: {
-                name: {
-                    name: Stereotype.name
+                names: {
+                    name: Stereotype.names,
+                    defaultValue: []
                 }
             },
             superTypes: []

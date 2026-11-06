@@ -4,26 +4,29 @@
  */
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
+import { measureSvgParticipantLabelWidth } from "@/positioning/WidthProviderFunc";
 import {
-  measureSvgParticipantLabelWidth,
-} from "@/positioning/WidthProviderFunc";
-import type { IParticipantModel } from "@/parser/IParticipantModel";
-import {
-  MARGIN,
-  MIN_PARTICIPANT_WIDTH,
-} from "@/positioning/Constants";
+  participantDisplayName,
+  participantHasIcon,
+  type IParticipantModel,
+} from "@/parser/IParticipantModel";
+import type { HeadNode } from "@/parser/AntlrTypes";
+import { MARGIN, MIN_PARTICIPANT_WIDTH } from "@/positioning/Constants";
 import { TextType } from "@/positioning/Coordinate";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
-import type { ParticipantGeometry, LifelineGeometry, GroupGeometry } from "./geometry";
+import { GroupContext, Participants } from "@/parser";
+import type {
+  ParticipantGeometry,
+  LifelineGeometry,
+  GroupGeometry,
+} from "./geometry";
 import {
   PARTICIPANT_TOP_SPACE,
   PARTICIPANT_BOX_PADDING,
-  PARTICIPANT_BOX_PADDING_ASSIGNEE,
   PARTICIPANT_ICON_ROW_WIDTH,
   PARTICIPANT_EMOJI_WIDTH,
   PARTICIPANT_VISUAL_HEIGHT,
   PARTICIPANT_MAX_WIDTH,
-  snapX,
 } from "./svgConstants";
 
 export function buildParticipants(
@@ -32,69 +35,77 @@ export function buildParticipants(
   verticalCoordinates: VerticalCoordinates,
   measureText?: (text: string, type: TextType) => number,
 ): ParticipantGeometry[] {
-  return models
-    .map((m) => {
-      const centerX = snapX(coordinates.getPosition(m.name));
-      const halfWidth = coordinates.half(m.name);
-      // Compute visual box width from raw text measurement + CSS decorations.
-      // The positioning engine clamps labelWidth to MIN_PARTICIPANT_WIDTH, losing
-      // the actual text width.  Re-measure here to get the correct box size.
-      // HTML box = max(textWidth + BOX_PADDING, MIN_PARTICIPANT_WIDTH).
-      // Assignee participants (name contains ":") render two EditableSpan components
-      // in HTML, each with 8px horizontal padding (EditableSpan.css .editable-span-base).
-      const isAssignee = m.name.includes(":") && m.getDisplayName() === m.name;
-      let width: number;
-      let measuredTextWidth: number | undefined;
-      let measuredStereotypeWidth: number | undefined;
-      if (measureText && m.name !== _STARTER_) {
-        const textWidth = measureSvgParticipantLabelWidth(m.getDisplayName());
-        measuredTextWidth = textWidth;
-        const padding = isAssignee ? PARTICIPANT_BOX_PADDING_ASSIGNEE : PARTICIPANT_BOX_PADDING;
-        const iconWidth = m.hasIcon() ? PARTICIPANT_ICON_ROW_WIDTH : 0;
-        const emojiWidth = m.emoji ? PARTICIPANT_EMOJI_WIDTH : 0;
-        // When a stereotype is present, the participant box must be wide enough to fit the
-        // stereotype text. HTML's box = max(contentRowWidth + padding, stereotypeGlyphWidth + 8, minWidth).
-        // The +8 = 4px box padding (2px * 2) + 4px border (2px * 2), both included in border-box sizing.
-        const STEREOTYPE_BOX_OVERHEAD = 8;
-        if (m.stereotype) {
-          measuredStereotypeWidth = measureSvgParticipantLabelWidth(`«${m.stereotype}»`);
-        }
-        const stereotypeBoxWidth = measuredStereotypeWidth != null
+  return models.map((m) => {
+    const centerX = coordinates.getPosition(m.name);
+    const halfWidth = coordinates.half(m.name);
+    // Compute visual box width from raw text measurement + CSS decorations.
+    // The positioning engine clamps labelWidth to MIN_PARTICIPANT_WIDTH, losing
+    // the actual text width.  Re-measure here to get the correct box size.
+    // HTML box = max(textWidth + BOX_PADDING, MIN_PARTICIPANT_WIDTH).
+    let width: number;
+    let measuredTextWidth: number | undefined;
+    let measuredStereotypeWidth: number | undefined;
+    if (measureText && m.name !== _STARTER_) {
+      const textWidth = measureSvgParticipantLabelWidth(
+        participantDisplayName(m),
+      );
+      measuredTextWidth = textWidth;
+      const padding = PARTICIPANT_BOX_PADDING;
+      const iconWidth = participantHasIcon(m) ? PARTICIPANT_ICON_ROW_WIDTH : 0;
+      const emojiWidth = m.emoji ? PARTICIPANT_EMOJI_WIDTH : 0;
+      // When a stereotype is present, the participant box must be wide enough to fit the
+      // stereotype text. HTML's box = max(contentRowWidth + padding, stereotypeGlyphWidth + 8, minWidth).
+      // The +8 = 4px box padding (2px * 2) + 4px border (2px * 2), both included in border-box sizing.
+      const STEREOTYPE_BOX_OVERHEAD = 8;
+      if (m.stereotype) {
+        measuredStereotypeWidth = measureSvgParticipantLabelWidth(
+          `«${m.stereotype}»`,
+        );
+      }
+      const stereotypeBoxWidth =
+        measuredStereotypeWidth != null
           ? measuredStereotypeWidth + STEREOTYPE_BOX_OVERHEAD
           : 0;
-        width = Math.min(Math.max(textWidth + padding + iconWidth + emojiWidth, stereotypeBoxWidth, MIN_PARTICIPANT_WIDTH), PARTICIPANT_MAX_WIDTH);
-      } else {
-        width = Math.min(halfWidth * 2 - MARGIN, PARTICIPANT_MAX_WIDTH);
-      }
-      if (m.name === _STARTER_) width = Math.min(width, 80); // match HTML min-width: 80px
-      const creationTop = verticalCoordinates.getCreationTop(m.name);
-      const isStarter = m.name === _STARTER_;
-      // updateCreationTop subtracts 8px for HTML CSS padding (.life-line-layer .pt-2);
-      // SVG has no such padding, so add 8 back to recover the raw VM top, plus the
-      // SVG stroke-model offset is already accounted for by PARTICIPANT_TOP_SPACE.
-      const y =
-        creationTop != null
-          ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 8)
-          : PARTICIPANT_TOP_SPACE;
+      width = Math.min(
+        Math.max(
+          textWidth + padding + iconWidth + emojiWidth,
+          stereotypeBoxWidth,
+          MIN_PARTICIPANT_WIDTH,
+        ),
+        PARTICIPANT_MAX_WIDTH,
+      );
+    } else {
+      width = Math.min(halfWidth * 2 - MARGIN, PARTICIPANT_MAX_WIDTH);
+    }
+    if (m.name === _STARTER_) width = Math.min(width, 80); // match HTML min-width: 80px
+    const creationTop = verticalCoordinates.getCreationTop(m.name);
+    const isStarter = m.name === _STARTER_;
+    // updateCreationTop subtracts 8px for HTML CSS padding (.life-line-layer .pt-2);
+    // SVG has no such padding, so add 8 back to recover the raw VM top, plus the
+    // SVG stroke-model offset is already accounted for by PARTICIPANT_TOP_SPACE.
+    const y =
+      creationTop != null
+        ? Math.max(PARTICIPANT_TOP_SPACE, creationTop + 8)
+        : PARTICIPANT_TOP_SPACE;
 
-      return {
-        name: m.name,
-        label: m.getDisplayName(),
-        x: centerX,
-        y,
-        width,
-        height: PARTICIPANT_VISUAL_HEIGHT,
-        isStarter,
-        showBottom: creationTop == null && !isStarter,
-        labelWidth: measuredTextWidth,
-        type: m.type,
-        stereotype: m.stereotype,
-        stereotypeWidth: measuredStereotypeWidth,
-        color: m.color,
-        emoji: m.emoji,
-        groupId: m.groupId,
-      };
-    });
+    return {
+      name: m.name,
+      label: participantDisplayName(m),
+      x: centerX,
+      y,
+      width,
+      height: PARTICIPANT_VISUAL_HEIGHT,
+      isStarter,
+      showBottom: creationTop == null && !isStarter,
+      labelWidth: measuredTextWidth,
+      type: m.type,
+      stereotype: m.stereotype,
+      stereotypeWidth: measuredStereotypeWidth,
+      color: m.color,
+      emoji: m.emoji,
+      groupId: m.groupId,
+    };
+  });
 }
 
 export function buildLifelines(
@@ -110,33 +121,50 @@ export function buildLifelines(
   }));
 }
 
+/** One `group` block from the DSL: its name ("" when unnamed) and members. */
+export interface GroupSpec {
+  name: string;
+  participantNames: string[];
+}
+
 /**
- * Build group geometry by grouping participants that share the same groupId.
+ * The `group` blocks of a diagram, in DSL order, read from the parse tree the
+ * same way the HTML renderer's LifeLineLayer does. Unnamed groups are kept:
+ * the parser gives them no groupId, so grouping by groupId would drop them.
+ */
+export function collectGroupSpecs(
+  head: HeadNode | null | undefined,
+): GroupSpec[] {
+  return (head?.children ?? [])
+    .filter((c) => c instanceof GroupContext)
+    .map((g: any) => ({
+      // getFormattedText is installed on every context in src/parser/index.ts
+      name: g.name()?.getFormattedText() ?? "",
+      participantNames: Participants(g)
+        .Array()
+        .map((e: { name: string }) => e.name),
+    }));
+}
+
+/**
+ * Build group geometry, one group per `group` block.
  * Each group gets a bounding box from leftmost to rightmost participant,
  * with a small margin matching the HTML renderer's LIFELINE_GROUP_OUTLINE_MARGIN.
  */
 export function buildGroups(
   participants: ParticipantGeometry[],
   diagramHeight: number,
+  groupSpecs: GroupSpec[],
 ): GroupGeometry[] {
   // Group outline extends 2px outside the participant bounding box on each side.
   const GROUP_OUTLINE_MARGIN = -2;
 
-  // Collect participants by groupId
-  const groupMap = new Map<string | number, ParticipantGeometry[]>();
-  for (const p of participants) {
-    if (p.groupId != null) {
-      const existing = groupMap.get(p.groupId);
-      if (existing) {
-        existing.push(p);
-      } else {
-        groupMap.set(p.groupId, [p]);
-      }
-    }
-  }
-
+  const byName = new Map(participants.map((p) => [p.name, p]));
   const groups: GroupGeometry[] = [];
-  for (const [groupId, members] of groupMap) {
+  for (const spec of groupSpecs) {
+    const members = spec.participantNames
+      .map((n) => byName.get(n))
+      .filter((p): p is ParticipantGeometry => p !== undefined);
     if (members.length === 0) continue;
 
     // Find bounding box from leftmost to rightmost participant
@@ -170,9 +198,8 @@ export function buildGroups(
     // K=13 is a compromise: g.height=211.5, rendered bottom=255 (viewBox edge), <g> h≈213 (dh≈+1)
     const height = Math.max(0, diagramHeight - y + 13);
 
-    // Use groupId as the display name (the parser sets groupId = group name from DSL)
     groups.push({
-      name: String(groupId),
+      name: spec.name,
       x,
       y,
       width,

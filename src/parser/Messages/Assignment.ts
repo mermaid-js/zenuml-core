@@ -1,5 +1,11 @@
 import sequenceParser from "../../generated-parser/sequenceParser";
 
+import {
+  augment,
+  type CreationContextAugmented,
+  type MessageContextAugmented,
+} from "../ContextAugmentations";
+
 const seqParser = sequenceParser;
 const MessageContext = seqParser.MessageContext;
 const CreationContext = seqParser.CreationContext;
@@ -19,10 +25,10 @@ export class Assignment implements IAssignment {
   assigneePosition: [number, number];
   typePosition: [number, number];
   constructor(
-    assignee: string | undefined, 
-    type: string | undefined, 
+    assignee: string | undefined,
+    type: string | undefined,
     assigneePosition: [number, number],
-    typePosition: [number, number]
+    typePosition: [number, number],
   ) {
     // check if type is defined, assignee must be defined
     if (type && !assignee) {
@@ -41,20 +47,18 @@ export class Assignment implements IAssignment {
   }
 }
 
-function extractAssignmentFromContext(assignmentContext: any): Assignment | undefined {
+function extractAssignmentFromContext(
+  assignmentContext: any,
+): Assignment | undefined {
   if (!assignmentContext) {
     return undefined;
   }
-  // @ts-expect-error -- ANTLR generated code
   const assignee = assignmentContext?.assignee()?.getFormattedText();
-  // @ts-expect-error -- ANTLR generated code
   const type = assignmentContext?.type()?.getFormattedText();
-  // @ts-expect-error -- ANTLR generated code
   const assigneeCtx = assignmentContext?.assignee();
   const assigneePosition: [number, number] = assigneeCtx
     ? [assigneeCtx.start.start, assigneeCtx.stop.stop]
     : [-1, -1];
-  // @ts-expect-error -- ANTLR generated code
   const typeCtx = assignmentContext?.type();
   const typePosition: [number, number] = typeCtx
     ? [typeCtx.start.start, typeCtx.stop.stop]
@@ -65,12 +69,14 @@ function extractAssignmentFromContext(assignmentContext: any): Assignment | unde
   return undefined;
 }
 
-// @ts-expect-error -- ANTLR generated code
-MessageContext.prototype.Assignment = function () {
-  return extractAssignmentFromContext(this.messageBody().assignment());
-};
+augment<MessageContextAugmented>(MessageContext, {
+  Assignment() {
+    return extractAssignmentFromContext(this.messageBody()!.assignment());
+  },
+});
 
-// @ts-expect-error -- ANTLR generated code
-CreationContext.prototype.Assignment = function () {
-  return extractAssignmentFromContext(this.creationBody()?.assignment());
-};
+augment<CreationContextAugmented>(CreationContext, {
+  Assignment() {
+    return extractAssignmentFromContext(this.creationBody()?.assignment());
+  },
+});

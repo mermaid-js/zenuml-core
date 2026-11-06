@@ -79,7 +79,7 @@ Output formats:
 
 ### E2E Screenshot Snapshot Updates
 
-Never update Playwright screenshots just to make a failing snapshot test pass. Before committing any updated E2E screenshot:
+Never update Playwright screenshots just to make a failing snapshot test pass. Follow the `snapshot-visual-check` skill (`.claude/skills/snapshot-visual-check/`) for the step-by-step procedure and the `diff-crops.mjs` helper. Before committing any updated E2E screenshot:
 
 1. Compare the before and after screenshots and identify exactly where the visual differences are.
 2. Use the existing diagram diff workflow where applicable: run `node scripts/analyze-compare-case.mjs --case <name> --json` for structured attribution, or `--output-dir <dir>` to save `html.png`, `svg.png`, `diff.png`, and `report.json`.
@@ -116,6 +116,7 @@ When starting work on a bug (especially from a GitHub issue):
 2. **Capture a baseline** — if the bug is visual, take a Playwright snapshot or screenshot of the broken state before fixing. This serves as evidence of what changed.
 3. **Fix the code** — make the minimal change to fix the bug.
 4. **Verify the fix** — the failing test from step 1 must now pass. All other existing tests must still pass.
+5. **Show before and after** — whenever you report a before/after comparison (PR description, issue comment, or a reply to the user) and the change is visible, always include screenshots: the baseline from step 2 next to the same diagram rendered after the fix, taken with the same renderer, theme, and viewport. Measurements and tables complement the images, they do not replace them. Keep the files in the session scratchpad with `before`/`after` in their names, send them to the user, and attach them to the PR; if the tooling at hand cannot upload images to GitHub, say so in the PR body and name the files so a human can drop them in.
 
 Never skip the reproduction step. If you can't reproduce it, you don't understand the bug well enough to fix it.
 
@@ -133,3 +134,17 @@ Never skip the reproduction step. If you can't reproduce it, you don't understan
 - E2E tests use visual snapshots for regression testing
 - The library is published as `@zenuml/core` to npm
 - GitHub Pages deployment is automated via GitHub Actions
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues on `mermaid-js/zenuml-core` (via the `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one root `GLOSSARY.md` plus `docs/adr/`, both created lazily. The `src/*/CONTEXT.md` files are module architecture docs, not glossaries. See `docs/agents/domain.md`.

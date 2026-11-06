@@ -1,17 +1,71 @@
 import { test, expect } from "../fixtures";
 
 test.describe("Participant Insert", () => {
+  test("participant borders are 1px without changing box or label geometry", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    await expect(page.locator("[data-lifeline-id=A] .participant")).toBeVisible();
+    await expect(page.locator("[data-lifeline-id=A] .participant")).toHaveScreenshot(
+      "participant-border-1px.png",
+    );
+
+    const before = await page.evaluate(() => {
+      const selectors = [
+        "[data-lifeline-id=A] .participant",
+        "[data-lifeline-id=A] .participant .name",
+        "[data-lifeline-id=A] .line",
+        "[data-lifeline-id=C] .participant",
+        ".message-layer .message",
+      ];
+      const box = (selector: string) => {
+        const rect = document.querySelector(selector)?.getBoundingClientRect();
+        return rect && [rect.x, rect.y, rect.width, rect.height];
+      };
+      return {
+        boxes: selectors.map(box),
+        border: getComputedStyle(document.querySelector("[data-lifeline-id=A] .participant")!)
+          .borderTopWidth,
+      };
+    });
+
+    await page.locator(".participant").evaluateAll((participants) => {
+      for (const participant of participants as HTMLElement[]) {
+        participant.style.borderWidth = "2px";
+        participant.style.padding = "0 2px";
+      }
+    });
+
+    const oldBoxes = await page.evaluate(() => {
+      const selectors = [
+        "[data-lifeline-id=A] .participant",
+        "[data-lifeline-id=A] .participant .name",
+        "[data-lifeline-id=A] .line",
+        "[data-lifeline-id=C] .participant",
+        ".message-layer .message",
+      ];
+      return selectors.map((selector) => {
+        const rect = document.querySelector(selector)?.getBoundingClientRect();
+        return rect && [rect.x, rect.y, rect.width, rect.height];
+      });
+    });
+
+    expect(before.border).toBe("1px");
+    expect(before.boxes.every(Boolean)).toBe(true);
+    expect(before.boxes).toEqual(oldBoxes);
+  });
+
   test("shows insert button on hover between participants", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
     const button = page.getByTestId("participant-insert-button-0");
     await expect(button).toHaveCSS("opacity", "0");
 
-    const participantA = page.locator('#A .participant');
-    const participantC = page.locator('#C .participant');
+    const participantA = page.locator('[data-lifeline-id=A] .participant');
+    const participantC = page.locator('[data-lifeline-id=C] .participant');
     const aBox = await participantA.boundingBox();
     const cBox = await participantC.boundingBox();
     const midX = (aBox!.x + aBox!.width + cBox!.x) / 2;
@@ -23,12 +77,12 @@ test.describe("Participant Insert", () => {
 
   test("one-click inserts a participant between two lifelines and rewrites DSL", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
-    const participantA = page.locator('#A .participant');
-    const participantC = page.locator('#C .participant');
+    const participantA = page.locator('[data-lifeline-id=A] .participant');
+    const participantC = page.locator('[data-lifeline-id=C] .participant');
     const aBox = await participantA.boundingBox();
     const cBox = await participantC.boundingBox();
     const midX = (aBox!.x + aBox!.width + cBox!.x) / 2;
@@ -47,9 +101,9 @@ test.describe("Participant Insert", () => {
       const read = (selector: string) =>
         document.querySelector(selector)?.getBoundingClientRect();
       return {
-        a: read('#A .participant'),
-        b: read('#B .participant'),
-        c: read('#C .participant'),
+        a: read('[data-lifeline-id=A] .participant'),
+        b: read('[data-lifeline-id=B] .participant'),
+        c: read('[data-lifeline-id=C] .participant'),
       };
     });
 
@@ -64,14 +118,35 @@ test.describe("Participant Insert", () => {
       .toContain("A\nB\nC\nA->C: Ping");
   });
 
+  test("hides the insert buttons while one participant is selected", async ({
+    page,
+  }) => {
+    await page.goto("/e2e/fixtures/insert-participant.html");
+    const participant = page.locator('.participant[data-participant-id="A"]');
+    await expect(participant).toBeVisible({ timeout: 5000 });
+    const buttons = page.locator(
+      '[data-testid^="participant-insert-button-"], [data-testid="participant-prepend-button"], [data-testid="participant-append-button"]',
+    );
+    await expect(buttons.first()).toBeAttached();
+
+    const box = await participant.boundingBox();
+    await participant.click({ position: { x: 3, y: box!.height - 3 } });
+    await expect(page.getByTestId("participant-style-panel")).toBeVisible();
+    await expect(buttons).toHaveCount(0);
+
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("participant-style-panel")).toHaveCount(0);
+    await expect(buttons.first()).toBeAttached();
+  });
+
   test("insert button is vertically centered with participant headers", async ({ page }) => {
     await page.goto("/e2e/fixtures/insert-participant.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({
+    await expect(page.locator(".sequence-diagram .participant").first()).toBeVisible({
       timeout: 5000,
     });
 
-    const participantA = page.locator('#A .participant');
-    const participantC = page.locator('#C .participant');
+    const participantA = page.locator('[data-lifeline-id=A] .participant');
+    const participantC = page.locator('[data-lifeline-id=C] .participant');
     const aBox = await participantA.boundingBox();
     const cBox = await participantC.boundingBox();
     const midX = (aBox!.x + aBox!.width + cBox!.x) / 2;
@@ -82,8 +157,8 @@ test.describe("Participant Insert", () => {
     await expect(button).toBeVisible();
 
     const geometry = await page.evaluate(() => {
-      const participantA = document.querySelector('#A .participant')?.getBoundingClientRect();
-      const participantC = document.querySelector('#C .participant')?.getBoundingClientRect();
+      const participantA = document.querySelector('[data-lifeline-id=A] .participant')?.getBoundingClientRect();
+      const participantC = document.querySelector('[data-lifeline-id=C] .participant')?.getBoundingClientRect();
       const button = document.querySelector('[data-testid="participant-insert-button-0"]')?.getBoundingClientRect();
       return { participantA, participantC, button };
     });
@@ -105,7 +180,7 @@ test.describe("Participant Insert", () => {
 test.describe("Empty Diagram Prompt", () => {
   test("clicking the empty diagram prompt adds the first participant", async ({ page }) => {
     await page.goto("/e2e/fixtures/empty-diagram.html");
-    await expect(page.locator(".privacy>span>svg")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId("empty-diagram-prompt")).toBeVisible({ timeout: 5000 });
 
     const prompt = page.getByTestId("empty-diagram-prompt");
     await expect(prompt).toBeVisible();

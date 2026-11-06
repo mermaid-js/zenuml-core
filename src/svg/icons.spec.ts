@@ -2,9 +2,9 @@ import { describe, it, expect } from "bun:test";
 import { getIcon, ICONS } from "./icons";
 
 describe("Icon definitions", () => {
-  it("exports 11 common icons", () => {
+  it("exports 12 common icons", () => {
     const iconKeys = Object.keys(ICONS);
-    expect(iconKeys.length).toBe(11);
+    expect(iconKeys.length).toBe(12);
     expect(iconKeys).toContain("actor");
     expect(iconKeys).toContain("database");
     expect(iconKeys).toContain("ec2");
@@ -31,6 +31,26 @@ describe("Icon definitions", () => {
 
   it("preserves root svg presentation attributes for stroke-only icons", () => {
     expect(ICONS.actor.attributes).toContain('fill="none"');
+  });
+
+  it("draws every UML participant icon stroke at 1px when rendered at 24px", () => {
+    for (const key of ["actor", "boundary", "control", "entity", "database"]) {
+      const icon = ICONS[key];
+      const [, , w, h] = (icon.viewBox || "0 0 24 24").split(" ").map(Number);
+      const scale = 24 / Math.max(w, h);
+      const shapes = icon.content.match(/<(path|ellipse|circle|line)\b[^>]*>/g) ?? [];
+      expect(shapes.length).toBeGreaterThan(0);
+      for (const shape of shapes) {
+        expect(shape).toContain('stroke="currentColor"');
+        const sw = Number(shape.match(/stroke-width="([^"]+)"/)?.[1] ?? 1);
+        expect(sw * scale).toBeCloseTo(1, 3);
+      }
+    }
+  });
+
+  it("getIcon resolves the Queue archetype for the SVG renderer", () => {
+    expect(getIcon("Queue")).toBe(ICONS.queue);
+    expect(ICONS.queue).toBeDefined();
   });
 
   it("getIcon returns icon for valid type", () => {

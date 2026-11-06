@@ -2,19 +2,23 @@ import { increaseNumber } from "@/utils/Numbering";
 import { Statement } from "./Statement/Statement";
 import { cn } from "@/utils";
 import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
-  codeAtom,
+  enableMessageReorderAtom,
   messageReorderDragAtom,
   messageReorderDropAtom,
   messageReorderPendingAtom,
-  onContentChangeAtom,
+  selectedAtom,
+  selectedMessageAtom,
 } from "@/store/Store";
-import { reorderMessageInDsl } from "@/utils/messageReorderTransform";
-import { Fragment, useEffect, useRef } from "react";
+import { useCan } from "@/store/interaction/useCan";
+import {
+  exitMenuAtom,
+  interactionAtom,
+} from "@/store/interaction/interactionAtom";
+import { Fragment } from "react";
 import { GapHandleZone } from "../GapHandleZone";
-
-const DRAG_THRESHOLD = 4;
+import { MessageReorderSession } from "./MessageReorderSession";
 
 export const Block = (props: {
   origin?: string;
@@ -27,95 +31,28 @@ export const Block = (props: {
   enableGapHandles?: boolean;
   isRoot?: boolean;
 }) => {
-  const [code, setCode] = useAtom(codeAtom);
-  const onContentChange = useAtomValue(onContentChangeAtom);
   const statements: any[] = props.context?.stat() || [];
   const enableGapHandles = props.enableGapHandles ?? false;
-  const [dragKey, setDragKey] = useAtom(messageReorderDragAtom);
-  const dragKeyRef = useRef<string | null>(null);
+  const dragKey = useAtomValue(messageReorderDragAtom);
   const [pendingDrag, setPendingDrag] = useAtom(messageReorderPendingAtom);
   const [dropState, setDropState] = useAtom(messageReorderDropAtom);
-
-  useEffect(() => {
-    dragKeyRef.current = dragKey;
-  }, [dragKey]);
-
-  useEffect(() => {
-    if (!pendingDrag && !dragKey) {
-      return;
-    }
-
-    const previousCursor = document.body.style.cursor;
-    document.body.style.cursor = "grabbing";
-
-    return () => {
-      document.body.style.cursor = previousCursor;
-    };
-  }, [dragKey, pendingDrag]);
-
-  useEffect(() => {
-    if (!props.isRoot) {
-      return;
-    }
-    if (!pendingDrag || dragKey) {
-      return;
-    }
-
-    const onPointerMove = (event: PointerEvent) => {
-      const deltaX = Math.abs(event.clientX - pendingDrag.startX);
-      const deltaY = Math.abs(event.clientY - pendingDrag.startY);
-      if (Math.max(deltaX, deltaY) < DRAG_THRESHOLD) {
-        return;
-      }
-      setDragKey(pendingDrag.key);
-      setPendingDrag(null);
-    };
-
-    const onPointerUp = () => {
-      setPendingDrag(null);
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp, { once: true });
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    };
-  }, [dragKey, pendingDrag, props.isRoot, setDragKey, setPendingDrag]);
-
-  useEffect(() => {
-    if (!props.isRoot) {
-      return;
-    }
-    if (!dragKey) {
-      return;
-    }
-    const onPointerUp = () => {
-      const sourceKey = dragKeyRef.current;
-      if (!sourceKey || !dropState || dropState.key === sourceKey) {
-        setDragKey(null);
-        setDropState(null);
-        return;
-      }
-      const [sourceStart, sourceEnd] = sourceKey.split("-").map(Number);
-      const [targetStart, targetEnd] = dropState.key.split("-").map(Number);
-      const nextCode = reorderMessageInDsl({
-        code,
-        sourceRange: [sourceStart, sourceEnd],
-        targetRange: [targetStart, targetEnd],
-        place: dropState.place,
-      });
-      setCode(nextCode);
-      onContentChange(nextCode);
-      setDragKey(null);
-      setDropState(null);
-    };
-
-    window.addEventListener("pointerup", onPointerUp, { once: true });
-    return () => {
-      window.removeEventListener("pointerup", onPointerUp);
-    };
-  }, [code, dragKey, dropState, onContentChange, props.isRoot, setCode, setDragKey, setDropState]);
+  const enableMessageReorder = useAtomValue(enableMessageReorderAtom);
+  const canReorder = useCan("reorder");
+  // A row reveals its reorder handle on hover only when hover affordances are
+  // allowed (idle), or when the row is part of the current state: the moving
+  // message of a reorder, or the selected message of an open menu (the other
+  // rows render no handle then).
+  const canHover = useCan("hoverAffordance");
+  const interactionKind = useAtomValue(interactionAtom).kind;
+  const setSelectedMessage = useSetAtom(selectedMessageAtom);
+  const setSelectedParticipants = useSetAtom(selectedAtom);
+  const exitMenu = useSetAtom(exitMenuAtom);
+  // Unlike every other editing surface, this drag used to run with no
+  // `enable*` flag and no respect for `RenderMode.Static` — a render-only
+  // host (SVG export, a static embed) could have its diagram silently
+  // rewritten by an accidental drag. `reorder` also covers the mode, text
+  // editing and any other interaction that owns the diagram (ADR 0002).
+  const reorderEnabled = enableMessageReorder && canReorder;
 
   const getNumber = (index: number) => {
     if (props.number) {
@@ -132,6 +69,7 @@ export const Block = (props: {
       style={props.style}
       data-origin={props.origin}
     >
+      {props.isRoot && <MessageReorderSession />}
       {enableGapHandles && statements.length === 0 && (
         <GapHandleZone
           insertIndex={0}
@@ -146,8 +84,12 @@ export const Block = (props: {
           dragKey === statementKey
             ? "dragging"
             : pendingDrag?.key === statementKey
-            ? "pending"
-            : "idle";
+              ? "pending"
+              : "idle";
+        const hoverReveal =
+          canHover ||
+          interactionKind === "messageMenu" ||
+          reorderState !== "idle";
         return (
           <Fragment key={index}>
             {enableGapHandles && (
@@ -155,25 +97,35 @@ export const Block = (props: {
                 insertIndex={index}
                 blockContext={props.context}
                 origin={props.origin || ""}
+                isFirstRootGap={props.isRoot && index === 0}
               />
             )}
             <div
-              className={cn("statement-container group/stmt my-4 flex flex-col relative", {
-                "select-none": reorderState !== "idle",
-                "cursor-grabbing": reorderState === "dragging",
-              })}
+              className={cn(
+                "statement-container group/stmt my-4 flex flex-col relative",
+                {
+                  "select-none": reorderState !== "idle",
+                  "cursor-grabbing": reorderState === "dragging",
+                },
+              )}
               data-origin={props.origin}
               data-statement-key={statementKey}
               data-reorder-state={reorderState}
+              data-hover-reveal={hoverReveal ? undefined : "off"}
               onPointerDown={(event) => {
-                const target = event.target as HTMLElement | null;
-                if (
-                  !target?.closest(".message") ||
-                  target.closest("[contenteditable='true']")
-                ) {
+                if (!reorderEnabled || event.button !== 0) {
                   return;
                 }
+                const target = event.target as HTMLElement | null;
+                if (!target?.closest(".message-reorder-handle")) {
+                  return;
+                }
+                event.preventDefault();
                 event.stopPropagation();
+                // R1: the reorder drag replaces the open message menu.
+                exitMenu({ kind: "messageMenu" });
+                setSelectedMessage(null);
+                setSelectedParticipants([]);
                 setPendingDrag({
                   key: statementKey,
                   startX: event.clientX,
@@ -182,24 +134,31 @@ export const Block = (props: {
                 setDropState(null);
               }}
               onPointerMove={(event) => {
-                if (!dragKey) {
+                if (!dragKey || !reorderEnabled) {
                   return;
                 }
                 if (statementKey === dragKey) {
                   return;
                 }
                 event.stopPropagation();
-                const rect = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
+                const rect = (
+                  event.currentTarget as HTMLDivElement
+                ).getBoundingClientRect();
                 setDropState({
                   key: statementKey,
-                  place: event.clientY < rect.top + rect.height / 2 ? "before" : "after",
+                  place:
+                    event.clientY < rect.top + rect.height / 2
+                      ? "before"
+                      : "after",
                 });
               }}
             >
               {dropState?.key === statementKey && (
                 <div
                   className="absolute left-0 right-0 h-0.5 bg-sky-500 z-20"
-                  style={{ [dropState.place === "before" ? "top" : "bottom"]: -8 }}
+                  style={{
+                    [dropState.place === "before" ? "top" : "bottom"]: -8,
+                  }}
                 />
               )}
               <Statement

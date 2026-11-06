@@ -1,0 +1,90 @@
+name: Check public entries
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_run:
+    workflows: ["Build, Test, npm Publish, and Deploy"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      stale_probe:
+        description: Add an old jsDelivr entry to prove the job turns red. No issue is opened.
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: check-surfaces
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    # workflow_run fires after every main push. Only a successful version PR merge is a release.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.event.workflow_run.head_commit.message, 'chore: version packages'))
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Install dependencies
+        run: bun install
+      - name: Cache Playwright browsers
+        uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ hashFiles('bun.lock') }}
+          restore-keys: playwright-browsers-
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install chromium
+      - name: Check entries
+        id: check
+        env:
+          # A new release needs time to reach the registry, CDNs, and deploys.
+          ATTEMPTS: ${{ github.event_name == 'workflow_run' && '4' || '2' }}
+          WAIT_SECONDS: ${{ github.event_name == 'workflow_run' && '180' || '30' }}
+          STALE_PROBE: ${{ inputs.stale_probe && 'true' || 'false' }}
+        run: |
+          args=(--attempts "$ATTEMPTS" --wait-seconds "$WAIT_SECONDS" --report report.md)
+          if [ "$STALE_PROBE" = "true" ]; then
+            args+=(--add-script "Stale probe=https://cdn.jsdelivr.net/npm/@zenuml/core@4.1.0/dist/zenuml.js")
+          fi
+          set +e
+          node scripts/check-surfaces.mjs "${args[@]}"
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          if [ -f report.md ]; then cat report.md >> "$GITHUB_STEP_SUMMARY"; fi
+          exit "$code"
+      - name: Open or update the stale entries issue
+        if: failure() && steps.check.outputs.exit_code == '1' && inputs.stale_probe != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TITLE: "Public entries are not on npm latest"
+        run: |
+          { cat report.md; echo; echo "Last failed run: $RUN_URL"; } > issue.md
+          number=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number,title \
+            --jq "map(select(.title == \"$TITLE\"))[0].number // empty")
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file issue.md
+          else
+            gh issue create --title "$TITLE" --body-file issue.md --label needs-triage
+          fi

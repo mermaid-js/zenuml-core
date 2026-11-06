@@ -7,20 +7,29 @@
  */
 import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
+import { FRAGMENT_PADDING_X } from "@/positioning/Constants";
 import {
-  FRAGMENT_MIN_WIDTH,
-  FRAGMENT_PADDING_X,
-} from "@/positioning/Constants";
+  fragmentHeaderLabel,
+  fragmentHeaderWidth,
+} from "@/positioning/FragmentHeaderWidth";
+import {
+  fragmentGuardKeyword,
+  fragmentGuardWidth,
+} from "@/positioning/FragmentGuardWidth";
 import { TextType } from "@/positioning/Coordinate";
-import { OrderedParticipants, _STARTER_ } from "@/parser/OrderedParticipants";
-import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { AllMessages } from "@/parser/MessageCollector";
+import { OrderedParticipants } from "@/parser/OrderedParticipants";
+import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
 import type { DiagramGeometry, FragmentGeometry } from "./geometry";
 import type { RootContextNode } from "@/parser/AntlrTypes";
 import { PARTICIPANT_VISUAL_HEIGHT } from "./svgConstants";
-import { buildParticipants, buildLifelines, buildGroups } from "./buildParticipantGeometry";
+import {
+  buildParticipants,
+  buildLifelines,
+  buildGroups,
+  collectGroupSpecs,
+} from "./buildParticipantGeometry";
 import { buildMessages } from "./buildStatementGeometry";
 
 export interface BuildGeometryInput {
@@ -29,10 +38,12 @@ export interface BuildGeometryInput {
   verticalCoordinates: VerticalCoordinates;
   title?: string;
   measureText?: (text: string, type: TextType) => number;
+  enableNumbering?: boolean;
 }
 
 export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
-  const { rootContext, coordinates, verticalCoordinates, title, measureText } = input;
+  const { rootContext, coordinates, verticalCoordinates, title, measureText } =
+    input;
   const participantModels = OrderedParticipants(rootContext);
   const totalHeight = verticalCoordinates.getTotalHeight();
 
@@ -56,7 +67,29 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     participants,
     measureText,
   );
-  const { messages, selfCalls, occurrences, creations, fragments, returns, dividers, comments } = buildResult;
+  const {
+    messages,
+    selfCalls,
+    occurrences,
+    creations,
+    fragments,
+    returns,
+    dividers,
+    comments,
+  } = buildResult;
+  // Remove references before measuring header widths and export badge padding.
+  if (input.enableNumbering === false) {
+    const numberedItems = [
+      ...messages,
+      ...selfCalls,
+      ...fragments,
+      ...returns,
+      ...creations.map((creation) => creation.message),
+    ];
+    for (const numbered of numberedItems) {
+      numbered.number = undefined;
+    }
+  }
 
   // Compute diagram height from the positioning engine's totalHeight (primary) or
   // max rendered content Y (fallback). Returns need more bottom overhead than other elements
@@ -66,10 +99,12 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
   // bottom space = viewHeight_overhead(47) - headerLineY(34)).
   let maxOccBottom = 0;
   let maxOtherY = 0;
-  for (const o of occurrences) maxOccBottom = Math.max(maxOccBottom, o.y + o.height);
+  for (const o of occurrences)
+    maxOccBottom = Math.max(maxOccBottom, o.y + o.height);
   for (const m of messages) maxOtherY = Math.max(maxOtherY, m.y);
   for (const s of selfCalls) maxOtherY = Math.max(maxOtherY, s.y + s.height);
-  for (const c of creations) maxOtherY = Math.max(maxOtherY, c.message.y + PARTICIPANT_VISUAL_HEIGHT);
+  for (const c of creations)
+    maxOtherY = Math.max(maxOtherY, c.message.y + PARTICIPANT_VISUAL_HEIGHT);
   for (const f of fragments) maxOtherY = Math.max(maxOtherY, f.y + f.height);
   for (const d of dividers) maxOtherY = Math.max(maxOtherY, d.y);
   const diagramHeight = Math.max(
@@ -81,35 +116,17 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
   const lifelineBottom = diagramHeight + PARTICIPANT_VISUAL_HEIGHT - 28;
 
   // Build lifelines AFTER height adjustment so they extend to the correct bottom
-  const lifelines = buildLifelines(
-    participants,
-    lifelineBottom,
-  );
+  const lifelines = buildLifelines(participants, lifelineBottom);
 
-  // Compute diagramWidth matching HTML's TotalWidth formula (WidthOfContext.ts).
-  // HTML uses participantWidth = distance(left, right) + half(left) + half(right),
-  // NOT coordinates.getWidth() (which can include extra left(firstParticipant) offset).
-  // In SVG, border.left/.right are added separately in composeSvg, so we include only
-  // participantWidth + extraWidthDueToSelfMessage here.
-  const localParticipants = getLocalParticipantNames(rootContext);
-  const orderedNames = coordinates.orderedParticipantNames();
-  const leftParticipant = orderedNames.find(p => localParticipants.includes(p)) || "";
-  const rightParticipant = orderedNames.slice().reverse().find(p => localParticipants.includes(p)) || "";
-
-  const participantWidth =
-    coordinates.distance(leftParticipant, rightParticipant) +
-    coordinates.half(leftParticipant) +
-    coordinates.half(rightParticipant);
-
-  const selfMessages = AllMessages(rootContext).filter(m => m.from === m.to);
-  const extraWidths = selfMessages.map(m =>
-    coordinates.getMessageWidth(m) -
-    coordinates.distance(m.from || _STARTER_, rightParticipant) -
-    coordinates.half(rightParticipant)
-  );
-  const extraWidthDueToSelfMessage = Math.max(0, ...extraWidths);
-
-  let diagramWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH) + extraWidthDueToSelfMessage;
+  // Diagram width is HTML's canonical TotalWidth (WidthOfContext.ts), which is
+  // max(participantWidth, FRAGMENT_MIN_WIDTH) + border.left + border.right +
+  // extraWidthDueToSelfMessage. The SVG path adds border.left/.right separately
+  // during composition (see the fragment shifts below and composeSvg), so the
+  // two border terms are subtracted back out here rather than threaded through
+  // TotalWidth as a flag — `frameBorder` above is built from exactly the same
+  // (rootContext, orderedParticipantNames) pair TotalWidth uses internally.
+  let diagramWidth =
+    TotalWidth(rootContext, coordinates) - frameBorder.left - frameBorder.right;
 
   // Expand width to fit labels that extend beyond
   if (measureText) {
@@ -140,34 +157,24 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     }
   }
 
-  // Shift fragment left edges into the diagram padding area (matching HTML CSS
-  // where fragments use left: -frameBorderLeft). Position-only shift.
-  // Also shift fragment-level comments by the same amount so they stay aligned.
-  for (const f of fragments) {
-    f.x -= frameBorder.left;
-  }
-  for (const c of comments) {
-    if (c.fragmentComment) {
-      c.x -= frameBorder.left;
-    }
-  }
-
-  // Compute spatial nesting depth for each fragment (how many other fragments
-  // fully contain it). This is more accurate than info.depth which includes
-  // message block nesting, not just fragment nesting.
+  // Spatial nesting depth of each fragment (how many other fragments fully
+  // contain it). Fragment x already includes its own nesting border (see
+  // buildFragmentGeometry); the depth is used only to extend right edges below.
   const nestDepths = new Map<FragmentGeometry, number>();
   for (const inner of fragments) {
     let nestDepth = 0;
     for (const outer of fragments) {
       if (outer === inner) continue;
-      if (outer.x <= inner.x && outer.y <= inner.y &&
-          outer.x + outer.width >= inner.x + inner.width &&
-          outer.y + outer.height >= inner.y + inner.height) {
+      if (
+        outer.x <= inner.x &&
+        outer.y <= inner.y &&
+        outer.x + outer.width >= inner.x + inner.width &&
+        outer.y + outer.height >= inner.y + inner.height
+      ) {
         nestDepth++;
       }
     }
     nestDepths.set(inner, nestDepth);
-    inner.x += nestDepth * FRAGMENT_PADDING_X;
   }
 
   // Extend fragment right edges into the frameBorder area ONLY when the
@@ -186,8 +193,57 @@ export function buildGeometry(input: BuildGeometryInput): DiagramGeometry {
     }
   }
 
-  // Build group geometry from participants that share a groupId
-  const groups = buildGroups(participants, diagramHeight);
+  // Size titles after spatial nesting is established, then keep their enclosing
+  // fragments and the exported viewBox large enough for the complete header.
+  for (const inner of [...fragments].sort((a, b) => a.height - b.height)) {
+    inner.width = Math.max(
+      inner.width,
+      fragmentHeaderWidth(
+        inner.headerLabel ?? fragmentHeaderLabel(inner.kind),
+        inner.number,
+      ),
+    );
+    if (inner.label)
+      inner.width = Math.max(
+        inner.width,
+        fragmentGuardWidth(
+          inner.label,
+          fragmentGuardKeyword(inner.kind, inner.guardKeyword),
+        ),
+      );
+    // Only alt guard rows are padded boxes; catch/finally labels are sized
+    // by the renderer.
+    for (const section of inner.sections) {
+      if (inner.kind === "alt" && section.guardKeyword)
+        inner.width = Math.max(
+          inner.width,
+          fragmentGuardWidth(section.condition ?? "", section.guardKeyword),
+        );
+    }
+    for (const outer of fragments) {
+      if (
+        outer.y < inner.y &&
+        outer.y + outer.height >= inner.y + inner.height &&
+        outer.x <= inner.x
+      ) {
+        outer.width = Math.max(
+          outer.width,
+          inner.x + inner.width + FRAGMENT_PADDING_X - outer.x,
+        );
+      }
+    }
+    diagramWidth = Math.max(
+      diagramWidth,
+      inner.x + inner.width - frameBorder.right,
+    );
+  }
+
+  // One group per `group` block, named or not (as the HTML renderer draws them)
+  const groups = buildGroups(
+    participants,
+    diagramHeight,
+    collectGroupSpecs(rootContext?.head?.()),
+  );
 
   return {
     width: diagramWidth,

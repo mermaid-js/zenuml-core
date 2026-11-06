@@ -1,5 +1,8 @@
 export type Position = [number, number];
 
+// Name of the implicit participant that owns top-level messages.
+export const _STARTER_ = "_STARTER_";
+
 interface ParticipantOptions {
   isStarter?: boolean;
   stereotype?: string;
@@ -13,39 +16,45 @@ interface ParticipantOptions {
   assignee?: string;
   emoji?: string;
   position?: Position;
+  // Range of the name token itself, even when `position` points at a label.
+  namePosition?: Position;
   assigneePosition?: Position;
 }
 
 export const blankParticipant = {
   name: "",
-  color: undefined,
-  comment: undefined,
-  explicit: undefined,
-  groupId: undefined,
-  isStarter: undefined,
-  label: undefined,
-  stereotype: undefined,
-  type: undefined,
-  width: undefined,
-  assignee: undefined,
-  emoji: undefined,
-  positions: new Set(),
-  assigneePositions: new Set(),
+  color: undefined as string | undefined,
+  comment: undefined as string | undefined,
+  explicit: undefined as boolean | undefined,
+  groupId: undefined as number | string | undefined,
+  isStarter: undefined as boolean | undefined,
+  label: undefined as string | undefined,
+  stereotype: undefined as string | undefined,
+  type: undefined as string | undefined,
+  width: undefined as number | undefined,
+  assignee: undefined as string | undefined,
+  emoji: undefined as string | undefined,
+  positions: new Set<Position>(),
+  assigneePositions: new Set<Position>(),
 };
 
 export class Participant {
   name: string;
-  private stereotype: string | undefined;
+  // Fields the renderer-facing ParticipantView (ir/contract.ts) exposes are
+  // public; they were already fully exposed via ToValue(), so the previous
+  // `private` was inconsistent encapsulation. `width` stays private — it is not
+  // part of ParticipantView.
+  stereotype: string | undefined;
   private width: number | undefined;
-  private groupId: number | string | undefined;
+  groupId: number | string | undefined;
   explicit: boolean | undefined;
   isStarter: boolean | undefined;
   label: string | undefined;
-  private type: string | undefined;
-  private color: string | undefined;
-  private comment: string | undefined;
-  private assignee: string | undefined;
-  private emoji: string | undefined;
+  type: string | undefined;
+  color: string | undefined;
+  comment: string | undefined;
+  assignee: string | undefined;
+  emoji: string | undefined;
   positions: Set<Position> = new Set();
   assigneePositions: Set<Position> = new Set();
 
@@ -106,6 +115,10 @@ export class Participant {
 
 export class Participants {
   private participants = new Map<string, Participant>();
+  // Every occurrence of each participant's name token. `Participant.positions`
+  // holds display ranges instead (the `as` label when there is one, for inline
+  // canvas editing); an identifier rename needs these.
+  private namePositions = new Map<string, Set<Position>>();
 
   public Add(name: string, options: ParticipantOptions = {}): void {
     if (!name) {
@@ -120,9 +133,17 @@ export class Participants {
     }
 
     // Add positions
-    const { position, assigneePosition } = options;
+    const { position, namePosition, assigneePosition } = options;
     if (position) {
       participant.AddPosition(position);
+    }
+    let namePositions = this.namePositions.get(name);
+    if (!namePositions) {
+      namePositions = new Set();
+      this.namePositions.set(name, namePositions);
+    }
+    if (namePosition) {
+      namePositions.add(namePosition);
     }
     if (assigneePosition) {
       participant.assigneePositions.add(assigneePosition);
@@ -137,7 +158,7 @@ export class Participants {
 
   // Items in entries are in the order of entry insertion:
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
-  private Array() {
+  Array() {
     return Array.from(this.participants.entries()).map((entry) => entry[1]);
   }
 
@@ -168,6 +189,10 @@ export class Participants {
 
   GetPositions(name: string) {
     return this.participants.get(name)?.positions;
+  }
+
+  GetNamePositions(name: string) {
+    return this.namePositions.get(name);
   }
 
   GetAssigneePositions(name: string) {

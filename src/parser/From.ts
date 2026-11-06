@@ -1,64 +1,80 @@
 import sequenceParser from "../generated-parser/sequenceParser";
+import {
+  augment,
+  type AsyncMessageContextAugmented,
+  type CreationContextAugmented,
+  type MessageContextAugmented,
+  type RetContextAugmented,
+  type ReturnAsyncMessageContextAugmented,
+} from "./ContextAugmentations";
+import type { AugmentedContext } from "./AntlrTypes";
 
 const seqParser = sequenceParser;
-const CreationContext = seqParser.CreationContext;
 const StatContext = seqParser.StatContext;
-const MessageContext = seqParser.MessageContext;
-const AsyncMessageContext = seqParser.AsyncMessageContext;
-const ReturnAsyncMessageContext = seqParser.ReturnAsyncMessageContext;
-const RetContext = seqParser.RetContext;
 
-// @ts-expect-error -- ANTLR generated code
-CreationContext.prototype.From = function () {
-  // @ts-expect-error -- ANTLR generated code
-  if (this.parentCtx instanceof StatContext) {
-    // @ts-expect-error -- ANTLR generated code
-    return this.ClosestAncestorStat().Origin();
-  }
-  return undefined;
-};
+augment<CreationContextAugmented>(seqParser.CreationContext, {
+  From() {
+    if (this.parentCtx instanceof StatContext) {
+      return this.ClosestAncestorStat()?.Origin();
+    }
+    return undefined;
+  },
+});
 
-// @ts-expect-error -- ANTLR generated code
-MessageContext.prototype.ProvidedFrom = function () {
-  // @ts-expect-error -- ANTLR generated code
-  const fromCtx = this.messageBody()?.fromTo()?.from();
-  return fromCtx?.name?.()?.getFormattedText() || fromCtx?.getFormattedText();
-};
-// @ts-expect-error -- ANTLR generated code
-MessageContext.prototype.From = function () {
-  // @ts-expect-error -- ANTLR generated code
-  return this.ProvidedFrom() || this.ClosestAncestorStat().Origin();
-};
+/** Shared by MessageContext, AsyncMessageContext and ReturnAsyncMessageContext. */
+interface HasProvidedFrom extends AugmentedContext {
+  ProvidedFrom(): string | undefined;
+}
 
-// @ts-expect-error -- ANTLR generated code
-AsyncMessageContext.prototype.ProvidedFrom = function () {
-  // @ts-expect-error -- ANTLR generated code
+// MessageContext, AsyncMessageContext and ReturnAsyncMessageContext all
+// resolve From identically: prefer their own ProvidedFrom(), else fall back
+// to the enclosing statement's Origin(). Installing the same function on each
+// prototype keeps the body single-sourced while each context class still
+// gets its own From property.
+function fromProvidedOrOrigin(this: HasProvidedFrom) {
+  return this.ProvidedFrom() || this.ClosestAncestorStat()?.Origin();
+}
+
+augment<MessageContextAugmented>(seqParser.MessageContext, {
+  ProvidedFrom() {
+    const fromCtx = this.messageBody()?.fromTo?.()?.from?.();
+    return (
+      fromCtx?.name?.()?.getFormattedText?.() || fromCtx?.getFormattedText?.()
+    );
+  },
+  From: fromProvidedOrOrigin,
+});
+
+// AsyncMessageContext and ReturnAsyncMessageContext resolve ProvidedFrom
+// identically (unlike MessageContext, which reaches its `from` node through
+// messageBody()?.fromTo()).
+function providedFromDirectFrom(this: AsyncMessageContextAugmented) {
   const fromCtx = this.from();
-  return fromCtx?.name?.()?.getFormattedText() || fromCtx?.getFormattedText();
-};
+  return (
+    fromCtx?.name?.()?.getFormattedText?.() || fromCtx?.getFormattedText?.()
+  );
+}
 
-// @ts-expect-error -- ANTLR generated code
-AsyncMessageContext.prototype.From = function () {
-  // @ts-expect-error -- ANTLR generated code
-  return this.ProvidedFrom() || this.ClosestAncestorStat().Origin();
-};
+augment<AsyncMessageContextAugmented>(seqParser.AsyncMessageContext, {
+  ProvidedFrom: providedFromDirectFrom,
+  From: fromProvidedOrOrigin,
+});
 
-// @ts-expect-error -- ANTLR generated code
-ReturnAsyncMessageContext.prototype.ProvidedFrom = function () {
-  // @ts-expect-error -- ANTLR generated code
-  const fromCtx = this.from();
-  return fromCtx?.name?.()?.getFormattedText() || fromCtx?.getFormattedText();
-};
+augment<ReturnAsyncMessageContextAugmented>(
+  seqParser.ReturnAsyncMessageContext,
+  {
+    ProvidedFrom: providedFromDirectFrom,
+    From: fromProvidedOrOrigin,
+  },
+);
 
-// @ts-expect-error -- ANTLR generated code
-ReturnAsyncMessageContext.prototype.From = function () {
-  // @ts-expect-error -- ANTLR generated code
-  return this.ProvidedFrom() || this.ClosestAncestorStat().Origin();
-};
-
-// @ts-expect-error -- ANTLR generated code
-RetContext.prototype.From = function () {
-  // @ts-expect-error -- ANTLR generated code
-  return this.asyncMessage()?.From() || this.returnAsyncMessage()?.From() || this.ClosestAncestorStat().Origin();
-};
+augment<RetContextAugmented>(seqParser.RetContext, {
+  From() {
+    return (
+      this.asyncMessage()?.From?.() ||
+      this.returnAsyncMessage()?.From?.() ||
+      this.ClosestAncestorStat()?.Origin()
+    );
+  },
+});
 export {};

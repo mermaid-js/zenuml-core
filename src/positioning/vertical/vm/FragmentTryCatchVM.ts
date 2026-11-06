@@ -1,8 +1,8 @@
 import type { StatementCoordinate } from "../StatementCoordinate";
-import { FragmentVM } from "./FragmentVM";
+import { StatementVM } from "./StatementVM";
 import type { LayoutRuntime } from "./types";
 
-export class FragmentTryCatchVM extends FragmentVM {
+export class FragmentTryCatchVM extends StatementVM {
   readonly kind = "tcf" as const;
 
   constructor(
@@ -43,7 +43,6 @@ export class FragmentTryCatchVM extends FragmentVM {
     }
 
     cursor += this.metrics.fragmentPaddingBottom + 1; // .fragment =>padding-bottom: 10px
-    // console.info("FragmentTryCatchVM::end", cursor, cursor - top);
 
     return {
       top,

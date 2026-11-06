@@ -30,7 +30,6 @@
       .diff-panel.visible { display: block; }
       .diff-panel .panel-content canvas { max-width: 100%; }
       #html-output .footer { display: none !important; }
-      #html-output .privacy { visibility: hidden !important; width: 0 !important; overflow: hidden !important; }
     </style>
   </head>
   <body>
@@ -62,6 +61,9 @@
     <script type="module">
       import ZenUml from "/src/core.tsx";
       import { renderToSvg } from "/src/svg/renderToSvg.ts";
+      import { ensureDiagramFontsLoaded } from "/src/svg/fonts/ensureDiagramFontsLoaded.ts";
+      import { ensureDiagramIconsLoaded } from "/src/svg/icons.ts";
+      await ensureDiagramFontsLoaded();
 
       import { CASES } from "../data/compare-cases.js";
       import { diffImages, DEFAULTS } from "../data/diff-algorithm.js";
@@ -109,6 +111,7 @@
         document.getElementById("svg-output").appendChild(errP);
       } else {
         // SVG side
+        await ensureDiagramIconsLoaded(code);
         const result = renderToSvg(code);
         document.getElementById("svg-output").innerHTML = result.svg;
 

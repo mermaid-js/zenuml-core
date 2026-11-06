@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-19",
+  "commit": "fb11b8e6",
+  "files": [
+    {
+      "path": "dist/cloud-icons-eHuugVSv.js",
+      "bytes": 1575958,
+      "gzip_bytes": 471618
+    },
+    {
+      "path": "dist/zenuml.esm.mjs",
+      "bytes": 2340499,
+      "gzip_bytes": 450152
+    },
+    {
+      "path": "dist/zenuml.js",
+      "bytes": 3355605,
+      "gzip_bytes": 846969
+    }
+  ]
+}

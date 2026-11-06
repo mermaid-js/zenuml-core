@@ -7,26 +7,29 @@ import type { Coordinates } from "@/positioning/Coordinates";
 import type { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { measureSvgFragmentLabelWidth } from "@/positioning/WidthProviderFunc";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
+import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import {
-  FRAGMENT_MIN_WIDTH,
-} from "@/positioning/Constants";
+  FRAGMENT_BORDER_WIDTH,
+  FRAGMENT_GUARD_HEIGHT,
+} from "@/positioning/vertical/LayoutMetrics";
 import type { TextType } from "@/positioning/Coordinate";
-import { _STARTER_ } from "@/parser/OrderedParticipants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
-import { Participants } from "@/parser/index.js";
-import { AllMessages } from "@/parser/MessageCollector";
+import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
+import { fragmentOf } from "@/parser/fragmentOf";
+import { Participants } from "@/parser/index";
+import { TotalWidth } from "@/components/DiagramFrame/SeqDiagram/WidthOfContext";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder from "@/positioning/FrameBorder";
-import type { FragmentGeometry, FragmentSectionGeometry, CommentGeometry } from "./geometry";
+import type {
+  FragmentGeometry,
+  FragmentSectionGeometry,
+  CommentGeometry,
+} from "./geometry";
 import type { StatementInfo } from "./walkStatements";
 
 export interface BuildFragmentResult {
   fragment: FragmentGeometry;
   comment?: CommentGeometry;
-}
-
-function snapX(x: number): number {
-  return x;
 }
 
 const COMMENT_FONT_ASCENT = 15;
@@ -37,50 +40,39 @@ export function buildFragmentGeometry(
   coordinates: Coordinates,
   verticalCoordinates: VerticalCoordinates,
   allParticipants: string[],
-  measureText?: (text: string, type: TextType) => number,
+  // Accepted for call-site symmetry with buildStatementGeometry's other
+  // builders, but fragment label width is always measured via
+  // measureSvgFragmentLabelWidth below — this is not wired to a custom
+  // measurer today. See src/svg/buildFragmentGeometry.ts TS6133 fix.
+  _measureText?: (text: string, type: TextType) => number,
   commentHeight: number = 0,
   commentText?: string,
   commentStyle?: Record<string, string>,
   commentYBase?: number,
 ): BuildFragmentResult | null {
-  // Get the fragment's parse tree node to find local participants
-  const statNode = info.statNode;
-  if (!statNode) return null;
+  // Get the fragment's parse tree node to find local participants.
+  // Invariant: callers only reach this function for StatementInfo entries
+  // with kind === "fragment", which walkStatements.ts only produces when
+  // extractFragmentInfo() matched one of the same seven fragment accessors
+  // (loop/opt/par/critical/section/alt/tcf/ref) that findFragmentContext()
+  // below checks — so statNode is always set and fragmentCtx is always found.
+  const statNode = info.statNode!;
 
   // Find the fragment context node (loop, alt, opt, etc.)
   const fragmentCtx = findFragmentContext(statNode);
-  if (!fragmentCtx) {
-    // Fallback: use full diagram width
-    return {
-      fragment: {
-        kind: info.fragmentKind!,
-        label: info.fragmentLabel || "",
-        labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(resolveEmojiInText(info.fragmentLabel)) : undefined,
-        x: 0,
-        y: coord.top,
-        width: coordinates.getWidth(),
-        height: coord.height,
-        headerY: coord.top + 1 + commentHeight,
-        sections: [],
-        number: info.number,
-        depth: info.depth,
-      },
-      comment: commentText && commentYBase != null ? {
-        x: 1,
-        y: commentYBase + 1 + COMMENT_FONT_ASCENT,
-        text: commentText,
-        style: commentStyle,
-        fragmentComment: true,
-      } : undefined,
-    };
-  }
 
-  // Compute fragment width from local participants, including nested fragments.
-  // getLocalParticipantNames only does shallow extraction; we also walk inner
-  // section blocks to capture participants inside nested par/alt/loop/etc.
-  const localNames = getDeepParticipantNames(fragmentCtx, info.fragmentSections);
-  const leftParticipant = allParticipants.find((p) => localNames.includes(p)) || "";
-  const rightParticipant = allParticipants.slice().reverse().find((p) => localNames.includes(p)) || "";
+  // Left/right participants of the fragment, used below to place its left edge.
+  const localNames = getDeepParticipantNames(
+    fragmentCtx,
+    info.fragmentSections,
+  );
+  const leftParticipant =
+    allParticipants.find((p) => localNames.includes(p)) || "";
+  const rightParticipant =
+    allParticipants
+      .slice()
+      .reverse()
+      .find((p) => localNames.includes(p)) || "";
 
   // Fragment's own border — use statNode (not fragmentCtx) to match HTML's
   // TotalWidth which receives the stat context containing the fragment.
@@ -92,28 +84,33 @@ export function buildFragmentGeometry(
   let fragX: number;
 
   if (leftParticipant && rightParticipant) {
-    const participantWidth =
-      coordinates.distance(leftParticipant, rightParticipant) +
-      coordinates.half(leftParticipant) +
-      coordinates.half(rightParticipant);
-    // Self-call extra width — matches HTML's TotalWidth (WidthOfContext.ts)
-    const selfMessages = AllMessages(statNode).filter((m: any) => m.from === m.to);
-    const extraWidths = selfMessages.map(
-      (m: any) =>
-        coordinates.getMessageWidth(m) -
-        coordinates.distance(m.from || _STARTER_, rightParticipant) -
-        coordinates.half(rightParticipant),
-    );
-    const extraWidth = Math.max(0, ...extraWidths);
-    fragWidth = Math.max(participantWidth, FRAGMENT_MIN_WIDTH) + fragBorder.left + fragBorder.right + extraWidth;
-    fragX = snapX(coordinates.getPosition(leftParticipant)) - coordinates.half(leftParticipant);
+    // Width is HTML's canonical TotalWidth (WidthOfContext.ts) on the same stat
+    // context fragBorder is built from: participant span floored at
+    // FRAGMENT_MIN_WIDTH, plus the frame border on both sides, plus the
+    // self-message extra width.
+    //
+    // TotalWidth derives its own left/right participants from
+    // getLocalParticipantNames(statNode); that set is identical to localNames
+    // above — ToCollector walks the whole subtree (ParseTreeWalker.DEFAULT with
+    // no enterStat listener), so Participants(statNode) === Participants(
+    // fragmentCtx) and already subsumes every section block, and a fragment
+    // context's parent is always its StatContext so the two Origin() values
+    // agree. localNames is still needed here because fragX hangs off
+    // leftParticipant, which TotalWidth does not expose.
+    fragWidth = TotalWidth(statNode, coordinates);
+    // Like useFragmentData's offsetX: the fragment starts its own nesting
+    // border to the left of its first participant.
+    fragX =
+      coordinates.getPosition(leftParticipant) -
+      coordinates.half(leftParticipant) -
+      fragBorder.left;
   } else {
     fragWidth = Math.max(FRAGMENT_MIN_WIDTH, coordinates.getWidth());
-    fragX = 0;
+    fragX = -fragBorder.left;
   }
 
-  // No explicit nesting indent needed — fragBorder.left/right from FrameBorder
-  // already accounts for inner nesting depth, matching HTML's TotalWidth formula.
+  // fragX already includes this fragment's own nesting border, so nested and
+  // sibling fragments of any depth line up as in the DOM.
 
   // Build section geometry for multi-section fragments (alt, tcf)
   const sections: FragmentSectionGeometry[] = [];
@@ -130,60 +127,36 @@ export function buildFragmentGeometry(
         if (sectionBlock) {
           const innerStats = sectionBlock.stat?.() || [];
           if (innerStats.length > 0) {
-            const firstStatKey = createStatementKeyFromStat(innerStats[0]);
+            const firstStatKey = createStatementKey(innerStats[0]);
             if (firstStatKey) {
-              const innerCoord = verticalCoordinates.getStatementCoordinate(firstStatKey);
+              const innerCoord =
+                verticalCoordinates.getStatementCoordinate(firstStatKey);
               if (innerCoord) {
                 // Section separator is positioned above the first inner statement
-                // with label space (20px) and padding (8+8+1px border)
-                sectionY = innerCoord.top - 20 - 8 - 8 - 1;
+                // Alt guard rows use 28px; catch/finally keep their 20px labels.
+                const labelHeight =
+                  info.fragmentKind === "alt" ? FRAGMENT_GUARD_HEIGHT : 20;
+                sectionY = innerCoord.top - labelHeight - 8 - 8 - 1;
               }
             }
           }
         }
       }
 
-      const sectionHeight = i < info.fragmentSections.length - 1
-        ? 0  // Height computed by renderer from next section's Y
-        : coord.top + coord.height - sectionY;
+      const sectionHeight =
+        i < info.fragmentSections.length - 1
+          ? 0 // Height computed by renderer from next section's Y
+          : coord.top + coord.height - sectionY;
 
       sections.push({
-        label: section.label,
+        guardKeyword: section.guardKeyword,
+        condition: section.condition,
         y: sectionY,
         height: sectionHeight,
-        labelWidth: section.label ? measureSvgFragmentLabelWidth(resolveEmojiInText(section.label)) : undefined,
-        innerLabel: /^\[\s*.*\s*\]$/.test(section.label) ? section.label.slice(1, -1).trim() : undefined,
-        innerLabelWidth: /^\[\s*.*\s*\]$/.test(section.label)
-          ? measureSvgFragmentLabelWidth(resolveEmojiInText(section.label.slice(1, -1).trim()))
-          : undefined,
-        keyword: (() => {
-          const spaceIdx = section.label.indexOf(" ");
-          if (spaceIdx > 0 && !section.label.startsWith("finally") && !section.label.startsWith("[")) {
-            return section.label.substring(0, spaceIdx);
-          }
-          return undefined;
-        })(),
-        keywordWidth: (() => {
-          const spaceIdx = section.label.indexOf(" ");
-          if (spaceIdx > 0 && !section.label.startsWith("finally") && !section.label.startsWith("[")) {
-            return measureSvgFragmentLabelWidth(section.label.substring(0, spaceIdx));
-          }
-          return undefined;
-        })(),
-        detail: (() => {
-          const spaceIdx = section.label.indexOf(" ");
-          if (spaceIdx > 0 && !section.label.startsWith("finally") && !section.label.startsWith("[")) {
-            return section.label.substring(spaceIdx + 1);
-          }
-          return undefined;
-        })(),
-        detailWidth: (() => {
-          const spaceIdx = section.label.indexOf(" ");
-          if (spaceIdx > 0 && !section.label.startsWith("finally") && !section.label.startsWith("[")) {
-            return measureSvgFragmentLabelWidth(section.label.substring(spaceIdx + 1));
-          }
-          return undefined;
-        })(),
+        conditionWidth:
+          section.guardKeyword === "catch"
+            ? measureSvgFragmentLabelWidth(section.condition ?? "")
+            : undefined,
       });
     }
   }
@@ -197,9 +170,9 @@ export function buildFragmentGeometry(
     const innerStats = parBlock?.stat?.() || [];
     if (innerStats.length > 1) {
       // Dummy first section (renderer skips i=0)
-      sections.push({ label: "", y: coord.top, height: 0 });
+      sections.push({ y: coord.top, height: 0 });
       for (let i = 1; i < innerStats.length; i++) {
-        const statKey = createStatementKeyFromStat(innerStats[i]);
+        const statKey = createStatementKey(innerStats[i]);
         if (!statKey) continue;
         const innerCoord = verticalCoordinates.getStatementCoordinate(statKey);
         if (!innerCoord) continue;
@@ -212,7 +185,6 @@ export function buildFragmentGeometry(
         // the stroke center 0.5px above the HTML border — matching the pixel row.
         const dividerY = innerCoord.top - 1;
         sections.push({
-          label: "",
           y: dividerY,
           height: 0,
           contentInsetLeft: fragBorder.left + coordinates.half(leftParticipant),
@@ -238,13 +210,19 @@ export function buildFragmentGeometry(
   return {
     fragment: {
       kind: info.fragmentKind!,
+      headerLabel: info.fragmentHeaderLabel,
       label: info.fragmentLabel || "",
-      labelWidth: info.fragmentLabel ? measureSvgFragmentLabelWidth(resolveEmojiInText(info.fragmentLabel)) : undefined,
+      guardKeyword: info.guardKeyword,
+      labelWidth: info.fragmentLabel
+        ? measureSvgFragmentLabelWidth(resolveEmojiInText(info.fragmentLabel))
+        : undefined,
       x: fragX,
       y: coord.top,
       width: fragWidth,
       height: coord.height,
-      headerY: coord.top + 1 + commentHeight,
+      // The header sits just inside the fragment's 1px top border, below any
+      // inline comment — the same offset FragmentSingleBlockVM.measure() applies.
+      headerY: coord.top + FRAGMENT_BORDER_WIDTH + commentHeight,
       sections,
       number: info.number,
       depth: info.depth,
@@ -254,23 +232,7 @@ export function buildFragmentGeometry(
 }
 
 function findFragmentContext(stat: any): any {
-  for (const kind of ["loop", "opt", "par", "critical", "section"] as const) {
-    const frag = stat[kind]?.();
-    if (frag) return frag;
-  }
-  const alt = stat.alt?.();
-  if (alt) return alt;
-  const tcf = stat.tcf?.();
-  if (tcf) return tcf;
-  const ref = stat.ref?.();
-  if (ref) return ref;
-  return null;
-}
-
-/** Inline version of createStatementKey to avoid circular import issues */
-function createStatementKeyFromStat(statement: any): string {
-  if (!statement?.start || !statement?.stop) return "";
-  return `${statement.start.start}-${statement.stop.stop}`;
+  return fragmentOf(stat)?.context ?? null;
 }
 
 /**
@@ -280,7 +242,7 @@ function createStatementKeyFromStat(statement: any): string {
  */
 function getDeepParticipantNames(
   fragmentCtx: any,
-  sections?: { label: string; blockNode: any }[],
+  sections?: { blockNode: any }[],
 ): string[] {
   const names = new Set(getLocalParticipantNames(fragmentCtx));
 

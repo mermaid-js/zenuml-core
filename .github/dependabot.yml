@@ -10,3 +10,11 @@ updates:
    directory: "/"
    schedule:
      interval: weekly
+ # The repo locks dependencies with bun.lock. Without a "bun" entry, Dependabot
+ # security updates run as npm_and_yarn and fail. open-pull-requests-limit: 0
+ # keeps security updates on and turns off routine version-update PRs.
+ - package-ecosystem: "bun"
+   directory: "/"
+   schedule:
+     interval: weekly
+   open-pull-requests-limit: 0

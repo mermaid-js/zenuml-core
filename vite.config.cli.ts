@@ -1,6 +1,7 @@
 /* eslint-env node */
 import { resolve } from "path";
 import { defineConfig } from "vite";
+import { alias } from "./vite.shared";
 
 export default defineConfig({
   build: {
@@ -21,9 +22,5 @@ export default defineConfig({
       },
     },
   },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-    },
-  },
+  resolve: { alias },
 });

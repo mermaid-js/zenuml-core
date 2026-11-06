@@ -3,15 +3,27 @@ name: Build, Test, npm Publish, and Deploy
 
 on:
   push:
+    # main only. A push to a PR branch used to start two runs of this
+    # workflow (push + pull_request). With 16 e2e shards that is
+    # 2 x (16 + test + docker) = 36 jobs at once, past GitHub's concurrent-job
+    # limit, so shards would queue and sharding would buy nothing. Branches
+    # now run once, through pull_request.
+    branches: [main]
     paths-ignore:
       - "docs/**"
-      - "integration/**"
+      - "Integration/**"
       - "*.md"
   pull_request:
     paths-ignore:
       - "docs/**"
-      - "integration/**"
+      - "Integration/**"
       - "*.md"
+
+# One run per ref at a time. A newer push to a PR branch cancels the older run;
+# pushes to main never cancel (every main run must publish and deploy).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -38,6 +50,12 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
         run: bun install
+      - name: Typecheck
+        # tsc -b (project references), not bare `tsc --noEmit` — the root
+        # tsconfig.json has "files": [] so a bare `tsc --noEmit` checks zero
+        # files and always exits 0. `-b` builds tsconfig.app.json (src) and
+        # tsconfig.node.json (vite.config.ts), which is the real check.
+        run: bun run typecheck
       - name: Cache Playwright browsers
         uses: actions/cache@v5
         id: playwright-cache
@@ -45,18 +63,20 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ hashFiles('bun.lock') }}
           restore-keys: playwright-browsers-
-      # Must run on every job, even on a Playwright browser cache hit. The cache
-      # restores only the browser binary (~/.cache/ms-playwright), NOT the apt
-      # system packages that `playwright install-deps` provides. The CLI PNG tests
-      # measure text via @napi-rs/canvas, which reads system fonts through
-      # fontconfig; without those fonts it falls back to wider metrics, changing
-      # the rendered diagram width and failing the committed snapshots (which were
-      # generated with fonts present). `playwright install chromium` is a fast
-      # no-op when the binary is already cached, so this stays cheap.
-      - name: Install Playwright Chromium + system fonts for CLI PNG tests
-        run: bun run pw:install
+      # Browser binary only, no `playwright install-deps`. That apt step cost
+      # 46 s on every run (154 packages, 88 MB; run 38886329048, 2026-10-16)
+      # and was added in #394 for CLI PNG snapshots that no longer exist:
+      # src/cli/zenuml.spec.ts now checks the PNG header bytes and the
+      # scale-3 width ratio, and the CLI registers its own IBM Plex Sans for
+      # @napi-rs/canvas measurement. Chromium's shared libraries are already
+      # on the ubuntu-22.04 runner image.
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install chromium
       - name: Lint
         run: bunx eslint src
+      - name: Chrome token gates (ADR 0003)
+        run: bun run check:tokens
       - name: Run tests
         run: bun run test
       - name: Parser consistency gate (ANTLR vs Langium side-car)
@@ -73,6 +93,75 @@ jobs:
     permissions:
       contents: read
 
+  # Theme contrast audit (ADR 0004): renders the corpus through both renderers
+  # in theme-default and theme-dark (DOM at 1x and 2x, SVG at 1x), in
+  # forced-colors mode and on the host-matrix page, three passes at a time,
+  # samples every text, line and fill against the screenshot and fails on any
+  # theme-dark element under its APCA floor.
+  # theme-default is grandfathered against scripts/theme-contrast/baseline-theme-default.json
+  # (a new sub-floor role, or a role 2 Lc worse than recorded, fails).
+  theme-contrast:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Install dependencies
+        run: bun install
+      - name: Cache Playwright browsers
+        uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ hashFiles('bun.lock') }}
+          restore-keys: playwright-browsers-
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install chromium
+      - name: Audit theme contrast
+        run: >
+          bun run audit:contrast --
+          --start-server --forced-colors --host-matrix
+          --json theme-contrast/report.json --md theme-contrast/report.md
+      - name: Report
+        if: always()
+        run: |
+          if [ -f theme-contrast/report.md ]; then
+            cat theme-contrast/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: theme-contrast-report
+          path: theme-contrast/
+          retention-days: 30
+
+  # Smoke-test the Dockerfile: it has no other coverage, so a package-manager
+  # or script drift (e.g. package.json's build:site renamed) goes unnoticed
+  # until someone tries to build the image.
+  docker-build:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+
   # Release via Changesets.
   #
   # On every push to main this job runs the changesets action:
@@ -87,7 +176,7 @@ jobs:
   # so versioning no longer depends on parsing commit messages.
   release:
     runs-on: ubuntu-22.04
-    needs: [test, e2e]
+    needs: [test, e2e, theme-contrast]
     permissions:
       contents: write # commit version bump, push tags, create releases
       pull-requests: write # open/update the "Version Packages" PR
@@ -119,14 +208,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true" # publish with provenance via OIDC
 
-  # Deploy to Cloudflare Workers
-  deploy-to-cloudflare:
+  # Build the site while test and e2e run, so deploy only has to upload it.
+  # Before this job existed, deploy reinstalled and rebuilt after the gates
+  # passed: 10 s setup + 3 s install + 30 s build + 7 s wrangler = 51 s on the
+  # critical path of every run (run 38886329048, 2026-10-16).
+  build-site:
     runs-on: ubuntu-22.04
-    needs: [test, e2e]
     permissions:
       contents: read
-      deployments: write
-      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -134,16 +223,52 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.22
+      - name: Install dependencies
+        run: bun install
+      - name: Build site
+        run: bun run build:site
+      - name: Upload site
+        uses: actions/upload-artifact@v7
+        with:
+          name: site-dist
+          path: dist/
+          retention-days: 1
+          if-no-files-found: error
+      # The library, CLI and parser configs are otherwise first built by the
+      # release job on main. They share vite.shared.ts with the site config, so
+      # build them here too: a config break fails the PR, not the publish. This
+      # runs after the upload (it overwrites dist/) and in a job that finishes
+      # well before the e2e gate, so it adds no wall time.
+      - name: Build library, CLI and parser
+        run: bun run build
+
+  # Deploy to Cloudflare Workers
+  deploy-to-cloudflare:
+    runs-on: ubuntu-22.04
+    needs: [test, e2e, theme-contrast, build-site]
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        # wrangler.toml only; the site itself comes from the build-site artifact.
+        uses: actions/checkout@v6
+      - name: Setup Bun
+        # wrangler-action picks the package manager from the lockfile and
+        # installs wrangler with bun; without bun on PATH it fails.
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-          registry-url: "https://registry.npmjs.org"
-      - name: Install dependencies
-        run: bun install
-
-      - name: Build site
-        run: bun run build:site
+      - name: Download site
+        uses: actions/download-artifact@v7
+        with:
+          name: site-dist
+          path: dist/
 
       - name: Deploy to Cloudflare Workers (Production)
         if: github.ref == 'refs/heads/main'
@@ -163,10 +288,9 @@ jobs:
           command: deploy --env staging
 
       - name: Comment on PR with Staging URL
-        if: github.event_name == 'pull_request' && github.ref != 'refs/heads/main'
+        if: github.event_name == 'pull_request' && github.ref != 'refs/heads/main' && steps.deploy_staging.outputs.deployment-url != ''
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            🚀 Staging deployment available at: https://zenuml-web-renderer-staging.${{ vars.CLOUDFLARE_ACCOUNT_ID }}.workers.dev
-            (Note: The subdomain part might vary based on Cloudflare configuration.)
+            🚀 Staging deployment available at: ${{ steps.deploy_staging.outputs.deployment-url }}

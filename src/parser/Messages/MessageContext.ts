@@ -1,4 +1,11 @@
 import sequenceParser from "../../generated-parser/sequenceParser";
+import {
+  augment,
+  type CreationContextAugmented,
+  type IfBlockContextAugmented,
+  type LoopContextAugmented,
+  type MessageContextAugmented,
+} from "../ContextAugmentations";
 import "./Assignment";
 
 const seqParser = sequenceParser;
@@ -7,22 +14,26 @@ const CreationContext = seqParser.CreationContext;
 const IfBlockContext = seqParser.IfBlockContext;
 const LoopContext = seqParser.LoopContext;
 
-// @ts-expect-error -- ANTLR generated code
-MessageContext.prototype.Statements = function () {
-  return this.braceBlock()?.block()?.stat() || [];
-};
+augment<MessageContextAugmented>(MessageContext, {
+  Statements() {
+    return this.braceBlock()?.block()?.stat() || [];
+  },
+});
 
-// @ts-expect-error -- ANTLR generated code
-CreationContext.prototype.Statements = function () {
-  return this.braceBlock()?.block()?.stat() || [];
-};
+augment<CreationContextAugmented>(CreationContext, {
+  Statements() {
+    return this.braceBlock()?.block()?.stat() || [];
+  },
+});
 
-// @ts-expect-error -- ANTLR generated code
-IfBlockContext.prototype.Statements = function () {
-  return this.braceBlock()?.block()?.stat() || [];
-};
+augment<IfBlockContextAugmented>(IfBlockContext, {
+  Statements() {
+    return this.braceBlock()?.block()?.stat() || [];
+  },
+});
 
-// @ts-expect-error -- ANTLR generated code
-LoopContext.prototype.Statements = function () {
-  return this.braceBlock()?.block()?.stat() || [];
-};
+augment<LoopContextAugmented>(LoopContext, {
+  Statements() {
+    return this.braceBlock()?.block()?.stat() || [];
+  },
+});

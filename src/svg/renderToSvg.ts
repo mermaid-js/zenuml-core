@@ -4,6 +4,7 @@
  * Pipeline: parse → layout → geometry IR → SVG primitives → compose
  */
 import { RootContext } from "@/parser";
+import { DIAGRAM_HEADER_HEIGHT } from "@/positioning/Constants";
 import { Coordinates } from "@/positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import { WidthProviderOnCanvas } from "@/positioning/WidthProviderFunc";
@@ -18,17 +19,33 @@ import { renderReturn } from "./components/return";
 import { renderDivider } from "./components/divider";
 import { renderComment } from "./components/comment";
 import { renderGroup } from "./components/group";
+import { esc } from "./components/svgUtils";
+import { messageNumberWidth } from "./components/numbering";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import type { DiagramGeometry } from "./geometry";
+import { buildThemeStyles, resolvePalette } from "./themes";
+import type { SvgPalette, SvgTheme } from "./themes";
+import { normaliseBackingColor, safeSvgPalette } from "@/surface";
+import type { RenderSurface } from "@/surface";
+import type { DiagramPalette } from "@/surface";
 
 export interface RenderOptions {
-  theme?: "theme-default" | "theme-mermaid";
+  /** Theme name; see src/svg/themes.ts. Unknown names fall back to theme-default. */
+  theme?: SvgTheme;
+  /** Semantic document colours; supplied slots override the selected theme. */
+  palette?: DiagramPalette;
+  /** Optional opaque colour painted underneath the outer canvas once. */
+  backingColor?: string;
+  /** Show sequence references and their badges; defaults to true. */
+  enableNumbering?: boolean;
   /** Optional emoji shortcode-to-Unicode cache (for future use by Task 8) */
   emojiCache?: Map<string, string>;
 }
 
 export interface RenderResult {
   svg: string;
+  /** Raw outer-canvas paint, excluding the optional export backing. */
+  surface: RenderSurface;
   /** Inner SVG content (defs + g) for embedding into an existing SVG container */
   innerSvg: string;
   width: number;
@@ -38,50 +55,34 @@ export interface RenderResult {
   geometry?: DiagramGeometry;
 }
 
-const FRAME_HEADER_HEIGHT = 28;
+// Legacy viewport sizing allowance: content starts at DIAGRAM_HEADER_HEIGHT + 1,
+// while the geometry already includes its own bottom space. Keep this allowance
+// separate from the shared, painted header height.
+const FRAME_VIEWPORT_HEADER_ALLOWANCE = 28;
 const FRAME_BORDER_RADIUS = 4;
 
-const DEFAULT_THEME_STYLES = `
-  .frame-border-outer { fill: #666; }
-  .frame-border-inner { fill: #ffffff; }
-  .frame-header-bg { fill: #ffffff; }
-  .frame-header-line { stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
-  .frame-title { font-family: Helvetica, Verdana, serif; font-size: 16px; font-weight: 600; fill: #222; }
-  .participant-box { fill: #ffffff; stroke: #666; stroke-width: 2; }
-  .participant-label { font-family: Helvetica, Verdana, serif; font-size: 16px; fill: #222; }
-  .participant-icon { color: #222; }
-  .participant-icon [fill="currentColor"]:not([stroke]) { stroke: #666; stroke-width: 1; }
-  .lifeline { stroke: #666; stroke-width: 1; }
-  .message-line { stroke: #000; stroke-width: 2; shape-rendering: crispEdges; }
-  .message-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
-  .arrow-head { fill: #000; stroke: #000; stroke-width: 2; }
-  .arrow-open { fill: none; }
-  .occurrence { fill: #dedede; stroke: #666; stroke-width: 2; shape-rendering: crispEdges; }
-  .fragment-border { fill: none; stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
-  .fragment-header { fill: #dedede; fill-opacity: 0.498; stroke: none; shape-rendering: crispEdges; }
-  .fragment-label { font-family: Helvetica, Verdana, serif; font-size: 14px; font-weight: 600; fill: #000; }
-  .fragment-condition { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
-  .fragment-separator { stroke: #e5e7eb; stroke-width: 1; shape-rendering: crispEdges; }
-  .fragment-section-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #000; }
-  .return-line { stroke: #000; stroke-width: 2; stroke-dasharray: 6,4; shape-rendering: crispEdges; }
-  .return-arrow { stroke: #000; stroke-width: 2; fill: none; }
-  .return-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
-  .return-icon { fill: #222; }
-  .divider-line { stroke: #aaaa33; stroke-width: 1; }
-  .divider-bg { fill: #fff5ad; stroke: #aaaa33; stroke-width: 1; }
-  .divider-label { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; }
-  .comment-text { font-family: Helvetica, Verdana, serif; font-size: 14px; fill: #333; opacity: 0.5; }
-  .seq-number { font-family: Helvetica, Verdana, serif; font-size: 12px; font-weight: 100; fill: #6b7280; }
-  .group-outline { fill: none; stroke: #666; }
-  .group-title-bg { fill: #ffffff; stroke: none; }
-  .group-title-text { font-family: Helvetica, Verdana, serif; font-size: 13px; font-weight: 400; fill: #222; }
-`;
-
-export function renderToSvg(code: string, options?: RenderOptions): RenderResult {
+export function renderToSvg(
+  code: string,
+  options?: RenderOptions,
+): RenderResult {
+  const safeOptions = options
+    ? { ...options, palette: safeSvgPalette(options.palette) }
+    : undefined;
+  const surface = {
+    backgroundColor: safeOptions?.palette?.canvasBg ?? "transparent",
+  };
   // 1. Parse
   const rootContext = RootContext(code);
   if (!rootContext) {
-    return { svg: "<svg></svg>", innerSvg: "", width: 0, height: 0, viewBox: "0 0 0 0", geometry: undefined };
+    return {
+      svg: "<svg></svg>",
+      surface,
+      innerSvg: "",
+      width: 0,
+      height: 0,
+      viewBox: "0 0 0 0",
+      geometry: undefined,
+    };
   }
 
   // 2. Layout (uses canvas provider — no DOM)
@@ -103,20 +104,57 @@ export function renderToSvg(code: string, options?: RenderOptions): RenderResult
     verticalCoordinates,
     title,
     measureText: WidthProviderOnCanvas,
+    enableNumbering: options?.enableNumbering,
   });
 
   // 5. Render to SVG
-  return { ...composeSvg(geometry, options), geometry };
+  return { ...composeSvg(geometry, safeOptions), geometry };
 }
 
 function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
-  void options;
+  const surface = {
+    backgroundColor: options?.palette?.canvasBg ?? "transparent",
+  };
   const padding = 10;
-  const headerH = FRAME_HEADER_HEIGHT;
+  const headerH = FRAME_VIEWPORT_HEADER_ALLOWANCE;
   // Content left offset = 1 (frame border) + 10 (seq-diagram px-2.5 padding) + frameBorderLeft
   // This matches the HTML layout: .frame(1px border) > .sequence-diagram(px-2.5) > div(paddingLeft:frameBorderLeft) > content
-  const contentLeftMargin = 1 + padding + g.frameBorderLeft;
-  const viewWidth = g.width + contentLeftMargin + padding + g.frameBorderRight + 1;
+  let contentLeftMargin = 1 + padding + g.frameBorderLeft;
+  // Deep sequence references can be wider than their source participant's
+  // left margin. Keep their full badge inside the exported frame.
+  let numberLeft = 0;
+  for (const message of [
+    ...g.messages,
+    ...g.creations.map((creation) => creation.message),
+  ]) {
+    if (!message.number) continue;
+    numberLeft = Math.min(
+      numberLeft,
+      Math.min(message.fromX, message.toX) +
+        1 -
+        4 -
+        messageNumberWidth(message.number),
+    );
+  }
+  for (const call of g.selfCalls) {
+    if (call.number)
+      numberLeft = Math.min(
+        numberLeft,
+        call.x - 3 - messageNumberWidth(call.number),
+      );
+  }
+  for (const returned of g.returns) {
+    if (returned.number && !returned.isSelf)
+      numberLeft = Math.min(
+        numberLeft,
+        Math.min(returned.fromX, returned.toX) -
+          4 -
+          messageNumberWidth(returned.number),
+      );
+  }
+  contentLeftMargin += Math.max(0, padding - contentLeftMargin - numberLeft);
+  const viewWidth =
+    g.width + contentLeftMargin + padding + g.frameBorderRight + 1;
   const viewHeight = g.height + padding * 2 + headerH - 1; // -1 to match HTML CSS border-box visual height
 
   const parts: string[] = [];
@@ -133,7 +171,7 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
 
   // Participants — split into non-creation (painted before occurrences) and
   // creation (painted after occurrences so the participant box covers the bar)
-  const creationNames = new Set(g.creations.map(c => c.participant.name));
+  const creationNames = new Set(g.creations.map((c) => c.participant.name));
   for (const p of g.participants) {
     if (!creationNames.has(p.name)) {
       parts.push(renderParticipant(p));
@@ -193,30 +231,47 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
     `<rect class="frame-border-outer" x="0" y="0" width="${viewWidth}" height="${viewHeight}" rx="${r}" fill="#666"/>`,
     `<rect class="frame-border-inner" x="1" y="1" width="${viewWidth - 2}" height="${viewHeight - 2}" rx="${Math.max(0, r - 1)}" fill="#fff"/>`,
   ].join("\n");
-  const contentPaddingTop = 6; // tuned to match HTML content Y offset (~34px below frame top)
-  const headerLineY = headerH + contentPaddingTop; // 34 — content group Y offset
+  const headerLineY = 1 + DIAGRAM_HEADER_HEIGHT; // Outer frame border + shared header layout.
   const headerLineDrawY = headerLineY - 0.5; // 33.5 — half-pixel for crisp 1px line at pixel row 33, matching HTML header border-bottom
   const headerLineSvg = `<line class="frame-header-line" x1="1" y1="${headerLineDrawY}" x2="${viewWidth - 1}" y2="${headerLineDrawY}"/>`;
   const titleSvg = g.title
-    ? `<text x="5" y="${headerLineDrawY / 2}" dominant-baseline="central" class="frame-title">${escXml(g.title)}</text>`
+    ? `<text x="5" y="${headerLineDrawY / 2}" dominant-baseline="central" class="frame-title">${esc(g.title)}</text>`
     : "";
 
   const viewBox = `0 0 ${viewWidth} ${viewHeight}`;
 
-  const defs = `<defs>\n  <style>${DEFAULT_THEME_STYLES}</style>\n</defs>`;
+  const defs = `<defs>\n  <style>${buildThemeStyles(resolveSvgPalette(options))}</style>\n</defs>`;
   const frame = `${frameSvg}\n${headerLineSvg}\n${titleSvg}`;
   const content = `<g transform="translate(${contentLeftMargin}, ${headerLineY})">\n${parts.join("\n")}\n</g>`;
-  const innerSvg = `${defs}\n${frame}\n${content}`;
+  const backing = options?.backingColor !== undefined
+    ? `<rect class="export-backing" x="0" y="0" width="${viewWidth}" height="${viewHeight}" style="fill: ${normaliseBackingColor(options.backingColor)} !important"/>`
+    : "";
+  const background =
+    surface.backgroundColor !== "transparent"
+      ? `<rect class="canvas-background" x="0" y="0" width="${viewWidth}" height="${viewHeight}" fill="${surface.backgroundColor}"/>`
+      : "";
+  const innerSvg = `${defs}\n${backing}\n${background}\n${frame}\n${content}`;
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="${viewBox}">\n${innerSvg}\n</svg>`;
 
-  return { svg, innerSvg, width: viewWidth, height: viewHeight, viewBox };
+  return {
+    svg,
+    innerSvg,
+    width: viewWidth,
+    height: viewHeight,
+    viewBox,
+    surface,
+  };
 }
 
-function escXml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+function resolveSvgPalette(options?: RenderOptions): SvgPalette {
+  const theme = resolvePalette(options?.theme);
+  const palette = options?.palette;
+  if (!palette) return theme;
+  return {
+    ...theme,
+    ...palette,
+    ...(palette.fragmentHeaderBg ? { fragmentHeaderOpacity: "1" } : {}),
+    ...(palette.numberBg ? { numberBgOpacity: "1" } : {}),
+  };
 }

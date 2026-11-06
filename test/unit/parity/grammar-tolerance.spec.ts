@@ -77,17 +77,17 @@ describe("grammar tolerance — 02 §8 checklist (raw Langium AST)", () => {
     const open = parseClean("<<").headElements[0];
     expect(open.$type).toBe("Participant");
     expect(open.stereotype.$type).toBe("Stereotype");
-    expect(open.stereotype.name).toBeUndefined();
+    expect(open.stereotype.names ?? []).toEqual([]);
 
     const empty = parseClean("<<>>").headElements[0];
     expect(empty.stereotype.$type).toBe("Stereotype");
-    expect(empty.stereotype.name).toBeUndefined();
+    expect(empty.stereotype.names ?? []).toEqual([]);
 
     // ANTLR full-context behavior (golden tol-05c): the unclosed word binds
     // to the PARTICIPANT name, stereotype stays bare `<<`.
     const partial = parseClean("<<name").headElements[0];
     expect(partial.stereotype.$type).toBe("Stereotype");
-    expect(partial.stereotype.name).toBeUndefined();
+    expect(partial.stereotype.names ?? []).toEqual([]);
     expect(partial.name).toBe("name");
   });
 
@@ -106,8 +106,13 @@ describe("grammar tolerance — 02 §8 checklist (raw Langium AST)", () => {
 
     const stereotyped = parseClean("<<x>>").headElements[0];
     expect(stereotyped.$type).toBe("Participant");
-    expect(stereotyped.stereotype.name).toBe("x");
+    expect(stereotyped.stereotype.names).toEqual(["x"]);
     expect(stereotyped.name).toBeUndefined();
+
+    // A closed stereotype may hold several words (issue #653).
+    const multi = parseClean("<< a b >> A").headElements[0];
+    expect(multi.stereotype.names).toEqual(["a", "b"]);
+    expect(multi.name).toBe("A");
   });
 
   it("#8 `return` with no expression", () => {

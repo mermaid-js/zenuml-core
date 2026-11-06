@@ -14,7 +14,6 @@ codeAtom (string)
   ▼
 rootContextAtom (ProgContext | null)    ← RootContext(code)
   │
-  ├─▶ titleAtom (string | null)         ← rootContext.title()
   ├─▶ participantsAtom (Participants)   ← Participants(rootContext)
   ├─▶ coordinatesAtom (Coordinates)     ← new Coordinates(rootContext, widthProvider)
   └─▶ verticalCoordinatesAtom           ← new VerticalCoordinates(rootContext) | null
@@ -28,10 +27,9 @@ rootContextAtom (ProgContext | null)    ← RootContext(code)
 |---|---|---|
 | `codeAtom` | `string` | User's DSL source code |
 | `rootContextAtom` | `ProgContext \| null` | Parsed ANTLR tree |
-| `titleAtom` | `string \| null` | Diagram title extracted from tree |
 | `participantsAtom` | `Participants` | Participants map from ToCollector |
 | `coordinatesAtom` | `Coordinates` | Horizontal layout |
-| `verticalCoordinatesAtom` | `VerticalCoordinates \| null` | Vertical layout (null in legacy mode) |
+| `verticalCoordinatesAtom` | `VerticalCoordinates \| null` | Vertical layout (null when the code is empty) |
 
 ### Rendering
 
@@ -40,7 +38,6 @@ rootContextAtom (ProgContext | null)    ← RootContext(code)
 | `themeAtom` | `string` | `"theme-default"` | CSS theme class |
 | `scaleAtom` | `number` | `1` | Zoom level |
 | `modeAtom` | `RenderMode` | `Dynamic` | `Dynamic` (html) or `Static` (svg) |
-| `verticalModeAtom` | `"html" \| "legacy"` | resolved | Vertical layout engine |
 | `diagramElementAtom` | `HTMLElement \| null` | `null` | Ref to diagram DOM node |
 
 ### Selection / Interaction
@@ -61,9 +58,8 @@ rootContextAtom (ProgContext | null)    ← RootContext(code)
 | `enableDividerInsertionAtom` | `false` | Show divider insert controls |
 | `enableParticipantStyleEditingAtom` | `false` | Click-to-edit participant styles |
 | `enableNumberingAtom` | `true` (localStorage) | Auto-number messages |
-| `enableMultiThemeAtom` | `true` | Theme picker visible |
+| `enableMultiThemeAtom` | `true` | Legacy host configuration compatibility |
 | `enableScopedThemingAtom` | `false` | Scoped CSS theming |
-| `showTipsAtom` | `false` | Tutorial tips dialog |
 
 ### Drag & Drop
 
@@ -82,7 +78,7 @@ These atoms hold functions passed in from the embedding application:
 |---|---|---|
 | `onContentChangeAtom` | `(code: string) => void` | Called when user edits DSL |
 | `onThemeChangeAtom` | `(data: { theme, scoped }) => void` | Called on theme change |
-| `onEventEmitAtom` | `(name, data) => void` | Generic event bus |
+| `onEventEmitAtom` | `(name, data) => void` | Usage events: one `("trackEvent", { label, action, category })` per completed edit, sent through `useCommitCode` (see `trackEvent.ts` and `Config.onEventEmit`) |
 | `onElementClickAtom` | `(codeRange: CodeRange) => void` | Called on diagram element click |
 | `onMessageClickAtom` | `(context, element) => void` | Called on message click |
 

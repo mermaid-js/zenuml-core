@@ -36,6 +36,26 @@ const malformedCases: TreeCorpusEntry[] = [
   { id: "malformed-half-arrow", code: "A -" },
   { id: "malformed-nested-if-typo", code: "if(x) { if(y() {}}" },
   { id: "malformed-if-unclosed-paren", code: "if(x" },
+  // #668: a `{` block that does not parse stays with its owner.
+  {
+    id: "malformed-open-blocks-as-typed",
+    code: "Client\nAPI\nClient->API: login\nAPI.validate(token) {\n  Auth.check(token)\n  if(ok) {\n",
+  },
+  { id: "malformed-if-unclosed-brace", code: "if(ok) {" },
+  { id: "malformed-while-unclosed-body", code: "while(x) {\n  A.b();" },
+  {
+    id: "malformed-if-closed-body-with-error",
+    code: "if(ok) {\n  P.a()\n  /\n  P.c()\n}\nP.d()",
+  },
+  {
+    id: "malformed-if-missing-brace-before-else",
+    code: "if(x) {\n  A.b()\nelse {\n  A.c()\n}\nA.d()",
+  },
+  { id: "malformed-lone-brace", code: "{" },
+  { id: "malformed-par-unclosed-brace", code: "par {" },
+  { id: "malformed-section-unclosed-brace", code: "section {" },
+  { id: "malformed-unclosed-quote-participant", code: '"Bob Sm' },
+  { id: "malformed-unclosed-quote-method", code: 'A."b' },
 ];
 
 // 02-parser-rules.md §8 — the 25 tolerance points. Rows listing several input
@@ -51,6 +71,7 @@ const toleranceCases: TreeCorpusEntry[] = [
   { id: "tol-05a-stereotype-open", code: "<<" },
   { id: "tol-05b-stereotype-empty", code: "<<>>" },
   { id: "tol-05c-stereotype-partial", code: "<<name" },
+  { id: "tol-05d-stereotype-multiword", code: "<< a b >> A" },
   { id: "tol-06-as-no-alias", code: "A as" },
   { id: "tol-07a-bare-annotation-participant", code: "@Actor" },
   { id: "tol-07b-bare-stereotype-participant", code: "<<x>>" },
@@ -93,6 +114,32 @@ const toleranceCases: TreeCorpusEntry[] = [
   { id: "tol-23b-while-no-body", code: "while(x)" },
   { id: "tol-24-empty-braces", code: "{}" },
   { id: "tol-25-free-text-condition", code: "while(no more retries)" },
+  // #366: an icon token alone is a valid condition.
+  { id: "tol-26a-if-icon-only-condition", code: "if([check]) {\n  A.m()\n}" },
+  {
+    id: "tol-26b-while-icon-only-condition",
+    code: "while([check]) {\n  A.m()\n}",
+  },
+  { id: "tol-26c-if-icon-text-condition", code: "if([check] a) {\n  A.m()\n}" },
+  // #363: bare numbers inside free-text conditions; lone number / comparison unchanged.
+  { id: "tol-27a-if-number-in-text", code: "if(retry 3 times) {\n  A.m()\n}" },
+  { id: "tol-27b-if-lone-number", code: "if(3) {\n  A.m()\n}" },
+  { id: "tol-27c-if-comparison-number", code: "if(x > 3) {\n  A.m()\n}" },
+  {
+    id: "tol-27d-while-float-in-text",
+    code: "while(wait 1.5 seconds) {\n  A.m()\n}",
+  },
+  // #670: an incomplete fragment header ends at its line; the next line stays a
+  // statement. Closed multi-line headers (28h, 28i) keep their valid parse.
+  { id: "tol-28a-if-no-paren-next-line", code: "if\nA.c()\nA.d()" },
+  { id: "tol-28b-if-partial-condition", code: "if(a ==\nA.c()\nA.d()" },
+  { id: "tol-28c-while-open-paren", code: "while(\nA.c()\nA.d()" },
+  { id: "tol-28d-opt-open-paren", code: "opt(\nA.c()\nA.d()" },
+  { id: "tol-28e-try-no-brace", code: "try\nA.c()\nA.d()" },
+  { id: "tol-28f-ref-no-paren", code: "ref\nA.c()\nA.d()" },
+  { id: "tol-28g-ref-open-list", code: "ref(x,\nA.c()\nA.d()" },
+  { id: "tol-28h-if-multi-line-closed", code: "if(a ==\n  b) {\n}" },
+  { id: "tol-28i-ref-multi-line-closed", code: "ref(x,\n  A)" },
 ];
 
 export const TREE_CORPUS: TreeCorpusEntry[] = [

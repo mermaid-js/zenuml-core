@@ -8,8 +8,11 @@ import {
 import { TextType } from "./Coordinate";
 import type { WidthFunc } from "./Coordinate";
 import { _STARTER_, OrderedParticipants } from "@/parser/OrderedParticipants";
-import type { IParticipantModel } from "@/parser/IParticipantModel";
-import logger from "@/logger/logger";
+import {
+  participantDisplayName,
+  participantHasIcon,
+  type IParticipantModel,
+} from "@/parser/IParticipantModel";
 import { find_optimal } from "./david/DavidEisenstat";
 import { AllMessages } from "@/parser/MessageCollector";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
@@ -59,7 +62,6 @@ export class Coordinates {
     }
     const leftGap = this.getParticipantGap(this.participantModels[0]);
     const position = leftGap + this.positionsCache[pIndex];
-    logger.debug(`Position of ${participantName} is ${position}`);
     return position;
   }
 
@@ -119,17 +121,11 @@ export class Coordinates {
       }
       const leftIndex = Math.min(indexFrom, indexTo);
       const rightIndex = Math.max(indexFrom, indexTo);
-      try {
-        const messageWidth = this.getMessageWidth(message);
-        this.m[leftIndex][rightIndex] = Math.max(
-          messageWidth + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH,
-          this.m[leftIndex][rightIndex],
-        );
-      } catch {
-        console.warn(
-          `Could not set message gap between ${from} and ${message.to}`,
-        );
-      }
+      const messageWidth = this.getMessageWidth(message);
+      this.m[leftIndex][rightIndex] = Math.max(
+        messageWidth + ARROW_HEAD_WIDTH + OCCURRENCE_WIDTH,
+        this.m[leftIndex][rightIndex],
+      );
     }
   }
   private withParticipantGaps(participantModels: IParticipantModel[]) {
@@ -157,23 +153,32 @@ export class Coordinates {
     // Calculate base width from participant display name or minimum width
     // Add icon width if the participant has an icon
     // Icon's total width is 32px (24px for icon + 8px for margin)
-    const hasIcon = participant.hasIcon();
+    const hasIcon = participantHasIcon(participant);
     const iconWidth = hasIcon ? PARTICIPANT_ICON_WIDTH : 0;
     // Emoji character (~16px glyph + em-space) adds width when present
     const emojiWidth = participant.emoji ? 24 : 0;
 
     const labelWidth = this.widthProvider(
-      participant.getDisplayName(),
+      participantDisplayName(participant),
       TextType.ParticipantName,
     );
+    // The «stereotype» row sits above the name row and the box grows to fit
+    // whichever is wider, so the slot must as well (#655). Both renderers draw
+    // it at the participant font size.
+    const stereotypeWidth = participant.stereotype
+      ? this.widthProvider(
+          `«${participant.stereotype}»`,
+          TextType.ParticipantName,
+        )
+      : 0;
     const participantWidth =
-      Math.max(labelWidth + iconWidth + emojiWidth, MIN_PARTICIPANT_WIDTH) +
-      MARGIN;
+      Math.max(
+        labelWidth + iconWidth + emojiWidth,
+        stereotypeWidth,
+        MIN_PARTICIPANT_WIDTH,
+      ) + MARGIN;
 
     this.participantWidthCache.set(participant.name, participantWidth);
-    logger.debug(
-      `Width of ${participant.name} is ${participantWidth}; labelWidth: ${labelWidth}`,
-    );
     return participantWidth;
   }
 }

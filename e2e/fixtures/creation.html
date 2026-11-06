@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>creation</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="diagram" class="diagram">
+      <pre class="zenuml" style="margin: 0" id="zenuml-code"></pre>
+    </div>
+    <script type="module">
+      const dsl = new URLSearchParams(window.location.search).get("dsl");
+      document.getElementById("zenuml-code").textContent = dsl ?? "new A";
+    </script>
+    <script type="module" src="/src/main-e2e.ts"></script>
+  </body>
+</html>
