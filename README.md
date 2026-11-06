@@ -6,6 +6,11 @@ ZenUML is JavaScript-based diagramming tool that requires **no server**. It uses
 and a renderer to create and modify sequence diagrams. The main purpose of ZenUML is to
 help documentation catch up with development.
 
+## Try it
+
+- [core.zenuml.com](https://core.zenuml.com): edit a diagram in the browser with the latest release.
+- [Workbench](https://zenuml-web-renderer.zenuml.workers.dev): the newest build of `main`, with its version and commit in the toolbar.
+
 ZenUML allows even non-programmers to easily create beautiful sequence diagrams through
 the [ZenUML Live Editor](https://app.zenuml.com).
 

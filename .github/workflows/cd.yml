@@ -208,6 +208,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true" # publish with provenance via OIDC
+      # Release notes link to core.zenuml.com and to this exact version on
+      # jsDelivr. The publish is already done, so a failure here must not fail
+      # the job: deploy-website needs the release job to succeed.
+      - name: Add try links to the GitHub Release
+        if: steps.changesets.outputs.published == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/add-release-try-links.mjs "$(node -p "require('./package.json').version")"
     outputs:
       # "true" only on the run that published to npm (a version PR merge).
       published: ${{ steps.changesets.outputs.published }}
