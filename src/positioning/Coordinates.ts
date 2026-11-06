@@ -14,7 +14,7 @@ import {
   participantHasIcon,
   type IParticipantModel,
 } from "@/parser/IParticipantModel";
-import { find_optimal } from "./david/DavidEisenstat";
+import { solveParticipantPositions } from "./solveParticipantPositions";
 import { AllMessages } from "@/parser/MessageCollector";
 import { OwnableMessageType } from "@/parser/OwnableMessage";
 import type { OwnableMessage } from "@/parser/OwnableMessage";
@@ -59,7 +59,7 @@ export class Coordinates {
     }
 
     if (!this.positionsCache) {
-      this.positionsCache = find_optimal(this.m);
+      this.positionsCache = solveParticipantPositions(this.m);
     }
     const leftGap = this.getParticipantGap(this.participantModels[0]);
     const position = leftGap + this.positionsCache[pIndex];

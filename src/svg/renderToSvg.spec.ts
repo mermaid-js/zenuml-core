@@ -440,7 +440,7 @@ A->A:m
   });
 
   it("standalone return line width accounts for LIFELINE_WIDTH", () => {
-    // RTL standalone return: B→A. HTML Anchor2.edgeOffset subtracts
+    // RTL standalone return: B→A. HTML Anchor.edgeOffset subtracts
     // LIFELINE_WIDTH (1px) from the gap between occurrence edges.
     // The SVG return line width should match.
     const result = renderToSvg("A->B.method() {\n  return result\n}");
