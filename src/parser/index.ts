@@ -17,6 +17,7 @@ import "./Messages/MessageContext";
 import "./From";
 import "./utils/cloest-ancestor/ClosestAncestor";
 import "./AncestorPath";
+import { recoverAtEof } from "./recoverAtEof";
 import { pruneDanglingStatements } from "./pruneDanglingStatements";
 import {
   BlockOwnershipErrorStrategy,
@@ -161,7 +162,9 @@ function parseSkippingStrayTokens(tokens: Ctx) {
   const strayErrors: ErrorDetail[] = [...repairIncompleteCalls(tokens)];
   for (let pass = 1; ; pass++) {
     tokens.seek(0);
-    const parser: Ctx = keepBlocksWithOwners(new sequenceParser(tokens));
+    const parser: Ctx = recoverAtEof(
+      keepBlocksWithOwners(new sequenceParser(tokens)),
+    );
     const listener = new StrayTokenListener();
     parser.removeErrorListeners();
     parser.addErrorListener(listener);
