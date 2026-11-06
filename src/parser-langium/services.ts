@@ -27,6 +27,7 @@ import {
   DefaultLexer,
   DefaultValueConverter,
   EmptyFileSystem,
+  createLangiumParser,
   inject,
 } from "langium";
 import type {
@@ -34,6 +35,7 @@ import type {
   CstNode,
   GrammarAST,
   LangiumCoreServices,
+  LangiumParser,
   LangiumSharedCoreServices,
   LexerResult,
   Module,
@@ -62,7 +64,32 @@ class ZenLexer extends DefaultLexer {
     });
   }
 
+  /**
+   * Start offsets of stray top-level tokens that the next `tokenize` moves to
+   * the hidden channel. Set only by `withStrayTokenRecovery` for one parse.
+   */
+  strayOffsets: ReadonlySet<number> = new Set();
+
   override tokenize(text: string, options?: TokenizeOptions): LexerResult {
+    return this.hideStrayTokens(this.recoverHeader(text, options));
+  }
+
+  private hideStrayTokens(result: LexerResult): LexerResult {
+    if (this.strayOffsets.size === 0) return result;
+    const stray = (t: IToken) =>
+      t.image.length > 0 && this.strayOffsets.has(t.startOffset);
+    const hidden = result.tokens.filter(stray);
+    if (hidden.length === 0) return result;
+    return {
+      ...result,
+      tokens: result.tokens.filter((t) => !stray(t)),
+      hidden: [...result.hidden, ...hidden].sort(
+        (a, b) => a.startOffset - b.startOffset,
+      ),
+    };
+  }
+
+  private recoverHeader(text: string, options?: TokenizeOptions): LexerResult {
     const result = super.tokenize(text, options);
     const { tokens } = result;
     const plan = planHeaderRecovery([
@@ -148,6 +175,55 @@ class ZenValueConverter extends DefaultValueConverter {
   }
 }
 
+// Upper bound on re-parses for one document: one pass per stray token.
+const MAX_STRAY_PASSES = 64;
+
+/**
+ * Stray top-level tokens (`/`, `=`, `else`, an extra `}` or `)`) stop the entry
+ * rule, so Chevrotain reports "Expecting end of file" and every later
+ * statement is dropped. The ANTLR parser keeps them (issue 667); do the same:
+ * move the offending token to the hidden channel and parse again, so statements
+ * after it stay in the AST (and in editor completion). The stray token's error
+ * is kept. Valid input has no such error and is parsed once, as before.
+ *
+ * Detection uses the exception's `name` string, never a class name, so it
+ * survives minification.
+ */
+function withStrayTokenRecovery(
+  parser: LangiumParser,
+  lexer: ZenLexer,
+): LangiumParser {
+  const parse = parser.parse.bind(parser) as LangiumParser["parse"];
+  parser.parse = ((input: string, options?: Parameters<typeof parse>[1]) => {
+    const found = new Set<number>();
+    const strayErrors: ParseResult["parserErrors"] = [];
+    try {
+      for (let pass = 0; ; pass++) {
+        const result = parse(input, options);
+        const stray = result.parserErrors.find(
+          (e) =>
+            e.name === "NotAllInputParsedException" &&
+            e.token.image.length > 0 &&
+            !found.has(e.token.startOffset),
+        );
+        if (!stray || pass >= MAX_STRAY_PASSES) {
+          if (strayErrors.length === 0) return result;
+          return {
+            ...result,
+            parserErrors: [...strayErrors, ...result.parserErrors],
+          };
+        }
+        found.add(stray.token.startOffset);
+        strayErrors.push(stray);
+        lexer.strayOffsets = found;
+      }
+    } finally {
+      lexer.strayOffsets = new Set();
+    }
+  }) as LangiumParser["parse"];
+  return parser;
+}
+
 export const ZenUmlModule: Module<
   LangiumCoreServices,
   PartialLangiumCoreServices
@@ -156,6 +232,11 @@ export const ZenUmlModule: Module<
     TokenBuilder: () => new ZenTokenBuilder(),
     Lexer: (services) => new ZenLexer(services),
     ValueConverter: () => new ZenValueConverter(),
+    LangiumParser: (services) =>
+      withStrayTokenRecovery(
+        createLangiumParser(services),
+        services.parser.Lexer as ZenLexer,
+      ),
   },
 };
 
