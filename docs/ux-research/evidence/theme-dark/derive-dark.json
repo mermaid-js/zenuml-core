@@ -1,16 +1,7 @@
 {
-  "generated": "2026-10-20T11:56:23.619Z",
+  "generated": "2026-10-21T12:38:31.382Z",
   "method": "see derive-dark.mjs header",
   "tokens": {
-    "--color-bg-canvas": {
-      "value": "#1f1f1f",
-      "role": "fill:canvas",
-      "bg": null,
-      "lc": null,
-      "floor": null,
-      "oklch": "oklch(23.9% 0.000 89.9)",
-      "origin": "nearest neutral to Atlassian elevation.surface #1F1F21"
-    },
     "--color-bg-frame": {
       "value": "#1f1f1f",
       "role": "fill:frame",
@@ -334,6 +325,39 @@
       "oklch": "oklch(87.4% 0.060 24.7)",
       "hue": 25
     },
+    "--zu-page": {
+      "value": "#1f1f1f",
+      "role": "fill:focus-gap",
+      "bg": null,
+      "lc": null,
+      "floor": null,
+      "oklch": "oklch(23.9% 0.000 89.9)",
+      "origin": "= frame: the focus ring's gap",
+      "scope": "zenuml"
+    },
+    "--zu-ring-focus": {
+      "value": "#bcbcbc",
+      "role": "line:focus-ring",
+      "bg": "#1f1f1f",
+      "lc": 64.3,
+      "floor": 45,
+      "oklch": "oklch(79.5% 0.000 89.9)",
+      "mirroredStart": "#bcbcbc",
+      "wcag": 8.68,
+      "scope": "zenuml"
+    },
+    "--zu-ring-glow": {
+      "value": "rgba(188, 188, 188, 0.18)",
+      "role": "fill:focus-glow",
+      "origin": "= ring at theme-default's glow alpha",
+      "scope": "zenuml"
+    },
+    "--zu-focus-ring": {
+      "value": "0 0 0 1px var(--zu-page), 0 0 0 2px var(--zu-ring-focus), 0 0 0 6px var(--zu-ring-glow)",
+      "role": "focus",
+      "origin": "as theme-default; declared again because a custom property resolves var() where it is declared",
+      "scope": "zenuml"
+    },
     "--opacity-comment": {
       "value": "1",
       "role": "text:comment",
@@ -350,7 +374,8 @@
     "occurrence border #e1e1e1: Lc 48.7 on the bar's antialiased edge #898989 (nested bars), Lc 86.5 on the frame.",
     "fragment header: a band that clears Lc 30 on #1f1f1f is #818181, on which white reads Lc 71.9 (< 75); the band is therefore a light chip #e9e9e9 with dark text #000000, light enough for its 12px number to clear Lc 90.",
     "divider rule #9f9f9f reads Lc 23.7 against the note box #cfcfcf; the rule is measured against the frame.",
-    "fragment condition, try/catch section labels (opacity 0.65) and comments (opacity 0.5) are composited at their slot opacity; theme-dark sets --opacity-guard and --opacity-comment to 1 and carries the hierarchy in lightness instead: white at 0.5 over #1f1f1f is Lc 35.7, white at 0.65 is Lc 53.7."
+    "fragment condition, try/catch section labels (opacity 0.65) and comments (opacity 0.5) are composited at their slot opacity; theme-dark sets --opacity-guard and --opacity-comment to 1 and carries the hierarchy in lightness instead: white at 0.5 over #1f1f1f is Lc 35.7, white at 0.65 is Lc 53.7.",
+    "focus ring #bcbcbc: Lc 64.3, 8.68:1 on the frame #1f1f1f; the gap is the frame."
   ],
   "canvas": {
     "atlassianSurface": "#1F1F21",
