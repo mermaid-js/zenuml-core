@@ -40,6 +40,13 @@ a { text-decoration: none; }
   font: 500 12px Inter, "Segoe UI", system-ui, sans-serif;
 }
 .toolbar .tool-link:hover { background: none; color: white; }
+.toolbar .build-label {
+  color: #afc0d1;
+  font: 500 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.toolbar .build-label[href]:hover { color: white; text-decoration: underline; }
 .toolbar .tool-button.primary {
   height: 36px;
   padding: 0 17px;
