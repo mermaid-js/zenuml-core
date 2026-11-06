@@ -38,12 +38,14 @@ const STATEMENT_END = new Set([
  * | Source                  | Tokens the parser sees      |
  * | ------------------------|-----------------------------|
  * | `@return` + `}`         | `}`                         |
- * | `@return x`             | nothing                     |
+ * | `@return x y`           | `return` `x y` (one token)  |
  *
  * - `@return` needs a `from->to`. With nothing after it, or with only names on
- *   its line, it is not a return, and the grammar's error recovery would use the
- *   next token for it: `}` of the enclosing block, or `x` as a self-call. The
- *   tokens move off the default channel, as for any other stray token.
+ *   its line, the grammar's error recovery would use the next token for it: `}`
+ *   of the enclosing block, or `x` as a self-call.
+ * - With nothing after it, it is hidden, as for any other stray token.
+ * - With only names after it, it is read as `return` with those names as its
+ *   label, which is what `return x` draws.
  *
  * @returns one error per repair, because the source is still incomplete.
  */
@@ -54,15 +56,20 @@ export function repairLooseTokens(stream: Token): RepairError[] {
 
   visible.forEach((token, index) => {
     if (token.type === P.ANNOTATION_RET) {
-      const dropped = looseReturnLabel(visible, index);
-      if (!dropped) return;
-      [token, ...dropped].forEach((t) => {
-        t.channel = antlr4.Token.HIDDEN_CHANNEL;
-      });
+      const label = looseReturnLabel(visible, index);
+      if (!label) return;
+      if (label.length === 0) {
+        token.channel = antlr4.Token.HIDDEN_CHANNEL;
+      } else {
+        readAsReturn(token, label);
+      }
       errors.push({
         line: token.line,
         column: token.column,
-        msg: "'@return' needs a 'from->to: message' to be a return",
+        msg:
+          label.length === 0
+            ? "'@return' needs a 'from->to: message' to be a return"
+            : "'@return' needs a 'from->to: message'; read as 'return'",
       });
     }
   });
@@ -87,6 +94,25 @@ export function readDotColonAsArrow(stream: Token): void {
   });
 }
 
+/**
+ * `@return x y` becomes `return x y` with the label as one token, so the return
+ * is labelled `x y` and no word becomes a self-call. The label token keeps the
+ * source range of all its words; the other words leave the default channel.
+ */
+function readAsReturn(annotation: Token, label: Token[]): void {
+  annotation.type = P.RETURN;
+  annotation.text = "return";
+  const [first, ...rest] = label;
+  const last = label[label.length - 1];
+  if (rest.length > 0) {
+    first.text = first.getInputStream().getText(first.start, last.stop);
+    first.stop = last.stop;
+  }
+  rest.forEach((t) => {
+    t.channel = antlr4.Token.HIDDEN_CHANNEL;
+  });
+}
+
 function visibleTokens(stream: Token): Token[] {
   stream.fill();
   return stream.tokens.filter(
@@ -98,7 +124,10 @@ function visibleTokens(stream: Token): Token[] {
  * The tokens a loose `@return` takes with it: none when it carries a message.
  * `undefined` when it is a real `@return` or the next statement.
  */
-function looseReturnLabel(visible: Token[], index: number): Token[] | undefined {
+function looseReturnLabel(
+  visible: Token[],
+  index: number,
+): Token[] | undefined {
   const next = visible[index + 1];
   if (next.type === P.CBRACE) return [];
 

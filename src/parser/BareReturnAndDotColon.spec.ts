@@ -25,30 +25,44 @@ function numbers(code: string): string[] {
   ].map((m) => m[1]);
 }
 
-describe("`@return x` is not a return, and `x` is not a self-call (#672)", () => {
-  it("leaves the next message as number 1", () => {
+describe("`@return x` is one return labelled x, and `x` is not a self-call (#672)", () => {
+  it("draws what `return x` draws", () => {
     const code = "@return x\nA.c()";
-    expect(statements(code)).toHaveLength(1);
-    expect(numbers(code)).toEqual(["1"]);
-    expect(svgTexts(code)).toEqual(svgTexts("A.c()"));
-    expect(participantNames(code)).toEqual(["A"]);
+    expect(statements(code)).toHaveLength(2);
+    expect(numbers(code)).toEqual(numbers("return x\nA.c()"));
+    expect(svgTexts(code)).toEqual(svgTexts("return x\nA.c()"));
+    expect(participantNames(code)).toEqual(participantNames("return x\nA.c()"));
   });
 
-  it.each(["@return x y", "@Reply x", "@return x\n", "@return x"])(
-    "%j draws nothing",
+  it.each(["@return x", "@Reply x", "@return x\n", '@return "x"'])(
+    "%j is one return",
     (code) => {
-      expect(statements(code)).toHaveLength(0);
-      expect(numbers(code)).toEqual([]);
+      expect(statements(code)).toHaveLength(1);
+      expect(statements(code)[0].ret()).toBeTruthy();
+      expect(svgTexts(code)).toContain("x");
     },
   );
 
-  it("drops it inside a block as well", () => {
-    expect(numbers("A.m() {\n  @return x\n  B.n()\n}")).toEqual(
-      numbers("A.m() {\n  B.n()\n}"),
-    );
-    expect(svgTexts("A.m() {\n  @return x\n  B.n()\n}")).toEqual(
-      svgTexts("A.m() {\n  B.n()\n}"),
-    );
+  it("keeps every word of the label", () => {
+    const code = "@return x y\nA.c()";
+    expect(statements(code)).toHaveLength(2);
+    expect(svgTexts(code)).toContain("x y");
+    expect(numbers(code)).toEqual(numbers("return x\nA.c()"));
+  });
+
+  it("returns to the caller inside a block", () => {
+    const code = "A.m() {\n  @return x\n  B.n()\n}";
+    expect(numbers(code)).toEqual(numbers("A.m() {\n  return x\n  B.n()\n}"));
+    expect(svgTexts(code)).toEqual(svgTexts("A.m() {\n  return x\n  B.n()\n}"));
+  });
+
+  it("still reports the missing `from->to: message`", () => {
+    expect(validate("@return x\nA.c()").pass).toBe(false);
+  });
+
+  it("draws nothing for a bare `@return`", () => {
+    expect(numbers("@return\nA.c()")).toEqual(["1"]);
+    expect(svgTexts("@return\nA.c()")).toEqual(svgTexts("A.c()"));
   });
 
   it("keeps the valid forms of `@return`", () => {
@@ -113,7 +127,10 @@ describe("a bare `@return` before `}` keeps the brace (#672)", () => {
     ["A.m() {\n  @return\n}\nB.c()", "A.m() {\n}\nB.c()"],
     ["A.m() {\n  B.n()\n  @return\n}\nB.c()", "A.m() {\n  B.n()\n}\nB.c()"],
     ["if(x) {\n  @return\n}\nB.c()", "if(x) {\n}\nB.c()"],
-    ["if(x) {\n  @return\n} else {\n  B.n()\n}", "if(x) {\n} else {\n  B.n()\n}"],
+    [
+      "if(x) {\n  @return\n} else {\n  B.n()\n}",
+      "if(x) {\n} else {\n  B.n()\n}",
+    ],
     [
       "A.m() {\n  while(y) {\n    @return\n  }\n  B.n()\n}",
       "A.m() {\n  while(y) {\n  }\n  B.n()\n}",
