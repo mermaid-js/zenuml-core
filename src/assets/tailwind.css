@@ -66,6 +66,16 @@
   --zu-focus-ring: 0 0 0 1px var(--zu-page), 0 0 0 2px var(--zu-ring-focus), 0 0 0 6px var(--zu-ring-glow); /* zenuml-owned */
 }
 
+/* theme-dark focus ring (ADR 0004). The diagram's inner .zenuml declares the
+   --zu-* tokens again, so the theme block cannot reach them; this rule sets
+   them on that element. Written by scripts/theme-contrast/apply-derived.mjs. */
+.theme-dark .zenuml, .theme-clean-dark .zenuml, .theme-darcula .zenuml {
+  --zu-page: #1f1f1f; /* = frame: the focus ring's gap */ /* zenuml-owned */
+  --zu-ring-focus: #bcbcbc; /* Lc 64.3 on #1f1f1f, floor 45 */ /* zenuml-owned */
+  --zu-ring-glow: rgba(188, 188, 188, 0.18); /* = ring at theme-default's glow alpha */ /* zenuml-owned */
+  --zu-focus-ring: 0 0 0 1px var(--zu-page), 0 0 0 2px var(--zu-ring-focus), 0 0 0 6px var(--zu-ring-glow); /* as theme-default; declared again because a custom property resolves var() where it is declared */ /* zenuml-owned */
+}
+
 @media (resolution >= 2x) {
   .zenuml {
     --zu-ring-hairline: 0.5px; /* src: c6a992d55-DvG1h1R7.pretty.css:55082 */
