@@ -55,7 +55,7 @@ test.describe("Message Create (Gap Handles)", () => {
     );
   });
 
-  test("clicking the handle leaves the diagram unchanged", async ({ page }) => {
+  test("clicking the handle inserts nothing by itself", async ({ page }) => {
     await page.goto("/e2e/fixtures/create-message.html");
     await hoverGapNear(page, 0, "A");
     await page.getByTestId("message-create-handle-0-A").click();
@@ -172,7 +172,7 @@ test.describe("Message Create (Gap Handles)", () => {
     ).toBe("pointer");
   });
 
-  test("drag preview highlights a valid target and invalid release cancels", async ({
+  test("drag preview highlights a valid target and invalid release inserts nothing", async ({
     page,
   }) => {
     await page.goto("/e2e/fixtures/create-message.html");
