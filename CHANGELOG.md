@@ -1,5 +1,53 @@
 # @zenuml/core
 
+## 4.13.1
+
+### Patch Changes
+
+- [#698](https://github.com/mermaid-js/zenuml-core/pull/698) [`95f2acc`](https://github.com/mermaid-js/zenuml-core/commit/95f2acc4a39e5f8f39b5f007cd8f02f9b29dbaef) Thanks [@MrCoder](https://github.com/MrCoder)! - An arrow to an empty quoted name with no label, such as `B->""`, now keeps its source participant and draws no message, like `B->`, and the layout no longer logs a console warning for messages that have no target.
+
+- [#700](https://github.com/mermaid-js/zenuml-core/pull/700) [`1c7bbe2`](https://github.com/mermaid-js/zenuml-core/commit/1c7bbe2020ddc19cd1bd7302f8f6398550e4d703) Thanks [@MrCoder](https://github.com/MrCoder)! - The Langium parser, which powers editor autocomplete, now keeps the statements after a stray top-level token such as `/`, `=`, `else` or an extra `}` or `)`.
+
+- [#701](https://github.com/mermaid-js/zenuml-core/pull/701) [`8462662`](https://github.com/mermaid-js/zenuml-core/commit/846266205892b22c10fb5b739fef3a2b597294b0) Thanks [@MrCoder](https://github.com/MrCoder)! - Read `A.b: x` as `A->b: x`, read `@return x` with no arrow as `return x` and drop a bare `@return`, so neither takes the next token, and keep the closing brace after a bare `@return`.
+
+- [#699](https://github.com/mermaid-js/zenuml-core/pull/699) [`5e23155`](https://github.com/mermaid-js/zenuml-core/commit/5e23155621fb5f9f2c6878d458f414fde7927020) Thanks [@MrCoder](https://github.com/MrCoder)! - A trailing dot at the end of a line no longer swallows the next line when that line begins with a name and a dot, so it stays its own message.
+
+- [#697](https://github.com/mermaid-js/zenuml-core/pull/697) [`da22db0`](https://github.com/mermaid-js/zenuml-core/commit/da22db0fc0ea0b4d4d7e50f7ad0587719579dee5) Thanks [@MrCoder](https://github.com/MrCoder)! - Keep the statements visible when a participant name is followed by a `{` that has no closing `}`.
+
+## 4.13.0
+
+### Minor Changes
+
+- [#687](https://github.com/mermaid-js/zenuml-core/pull/687) [`591abaf`](https://github.com/mermaid-js/zenuml-core/commit/591abaf27f655121dc7226e5fb4f138f01d97765) Thanks [@MrCoder](https://github.com/MrCoder)! - Raise the declared Node version from 20 or later to 22.12 or later. Node 20 reached end of life on 30 April 2026, and the CJS entry of `@zenuml/core/parser` needs `require(esm)`, which every Node version from 22.12 has on by default. Browser use does not change.
+
+### Patch Changes
+
+- [#681](https://github.com/mermaid-js/zenuml-core/pull/681) [`402d561`](https://github.com/mermaid-js/zenuml-core/commit/402d56128e77eae43c1364f7be8b6794f3c63af9) Thanks [@MrCoder](https://github.com/MrCoder)! - Fix a spurious Section fragment for a `{` block that does not parse. An unclosed block, or a closed block with a syntax error in its body, now stays with its owner (`if`, `else`, `while`, `par`, a message), so the owner keeps its body and its numbering. A missing `}` before `else` keeps both branches in one `alt`. A `{` with no owner and no `}` renders no fragment and reports an error. Complete anonymous `{ ... }` blocks, `section(x) { ... }` and `frame(x) { ... }` are unchanged.
+
+- [#680](https://github.com/mermaid-js/zenuml-core/pull/680) [`6a43f2b`](https://github.com/mermaid-js/zenuml-core/commit/6a43f2bbc03210f18c9582d8064bdea2cde9a8e6) Thanks [@MrCoder](https://github.com/MrCoder)! - Fix `getComment()` on a brace block in the published bundles. It read the comment before the opening brace, not the closing brace, because the check compared a class name that the bundles minify. Rendered diagrams do not change: only code that walks the parse tree from `@zenuml/core/parser` and calls `getComment()` on a brace block sees the difference.
+
+- [#678](https://github.com/mermaid-js/zenuml-core/pull/678) [`300540d`](https://github.com/mermaid-js/zenuml-core/commit/300540d25e37a8f46a95730d77f47793457e0be8) Thanks [@MrCoder](https://github.com/MrCoder)! - An unclosed call no longer breaks the message or absorbs the next line. `A.b(` is one message labelled `b()`, `A.b(x` is one message labelled `b(x)`, `new B(` creates `B`, and a statement on the next line stays a statement. A chain that ends in a dot, such as `A.b().`, keeps its message when nothing can continue the chain. The missing paren and the extra dot are still reported as syntax errors.
+
+- [#677](https://github.com/mermaid-js/zenuml-core/pull/677) [`89679e2`](https://github.com/mermaid-js/zenuml-core/commit/89679e23d7a3188d7ba341f0ef8e622c1ac45ab9) Thanks [@MrCoder](https://github.com/MrCoder)! - A half-typed arrow, assignment or return no longer draws an element the text does not contain. A line with only `A->`, only `r =`, or only `@return` is skipped, so the HTML and SVG renderers agree and the next message keeps its number. An unclosed quote in a participant or method name no longer shows the raw quote.
+
+- [#675](https://github.com/mermaid-js/zenuml-core/pull/675) [`e345ed6`](https://github.com/mermaid-js/zenuml-core/commit/e345ed69d67dbad676d3e598dd4bd3deeb8ff11d) Thanks [@MrCoder](https://github.com/MrCoder)! - An empty quoted name used as an arrow target, call target or starter no longer replaces the whole diagram with a rendering error. The arrow or call is drawn as if the target were missing, and an empty starter is ignored.
+
+- [#682](https://github.com/mermaid-js/zenuml-core/pull/682) [`0ef46a9`](https://github.com/mermaid-js/zenuml-core/commit/0ef46a9d15238cd43976a7c51efcf6dc9cfe43ae) Thanks [@MrCoder](https://github.com/MrCoder)! - An incomplete fragment header no longer swallows the next statement. A header that never closes (`if`, `if(a ==`, `while(`, `opt(`, `try`, `ref`, `ref(x,` and the same forms of `par`, `critical`, `section`, `catch` and `finally`) now ends at the end of its line, so the next line stays a message. Multi-line headers that do close, such as `if(a ==` followed by `b) {`, parse as before.
+
+- [#676](https://github.com/mermaid-js/zenuml-core/pull/676) [`62ddbd1`](https://github.com/mermaid-js/zenuml-core/commit/62ddbd1451e64066304e9a5bd8263fcf114664d3) Thanks [@MrCoder](https://github.com/MrCoder)! - Stop drawing placeholder participants while a declaration is still being typed. A participant with a stereotype, type or icon but no name yet, and a `new` with no class name yet, no longer add a box labelled with internal placeholder text, and an unfinished `new` no longer draws a creation arrow. The diagram looks the same as an empty one until the name exists.
+
+- [#684](https://github.com/mermaid-js/zenuml-core/pull/684) [`defa65c`](https://github.com/mermaid-js/zenuml-core/commit/defa65cc7662e33dcfe91407b19b8be586fb2a29) Thanks [@MrCoder](https://github.com/MrCoder)! - Fix `require("@zenuml/core/parser")`, which threw `Cannot read properties of undefined (reading 'ATNDeserializer')` at load. The CJS entry now reads the default export of the ESM-only `antlr4` package. It needs a Node version with `require(esm)` on by default (20.19 or later in the 20 line, 22.12 or later in the 22 line); older versions still throw `ERR_REQUIRE_ESM`. The ESM entry does not change.
+
+- [#683](https://github.com/mermaid-js/zenuml-core/pull/683) [`ad56fe4`](https://github.com/mermaid-js/zenuml-core/commit/ad56fe407fabd419c09aa869b1792afd2ddfe5e6) Thanks [@MrCoder](https://github.com/MrCoder)! - Keep a complete message as one statement when the next token is a syntax error. Before, a call such as `A.b()` at the end of an unclosed block, or before an extra closing bracket, rendered as three self-calls and lost its target.
+
+- [#679](https://github.com/mermaid-js/zenuml-core/pull/679) [`6377006`](https://github.com/mermaid-js/zenuml-core/commit/6377006b635dafdd5ee2932f9559f800c6dd27a5) Thanks [@MrCoder](https://github.com/MrCoder)! - Keep the statements after a stray top-level token. A token the parser cannot place at the top level, such as an extra closing brace or the first character of a comment being typed, no longer drops the rest of the diagram. An unclosed `@Starter(` no longer blanks the diagram. `parse()` and `validate()` still report these tokens as errors.
+
+## 4.12.2
+
+### Patch Changes
+
+- [#662](https://github.com/mermaid-js/zenuml-core/pull/662) [`7809909`](https://github.com/mermaid-js/zenuml-core/commit/7809909e23b3a3f370090d0ad6108c2fe0d2b1e3) Thanks [@MrCoder](https://github.com/MrCoder)! - Do not reserve an icon slot for a participant type that has no icon. A declaration such as `@Alice "Alice"` no longer pushes the name 28px to the right or adds extra width ([#661](https://github.com/mermaid-js/zenuml-core/issues/661)).
+
 ## 4.12.1
 
 ### Patch Changes

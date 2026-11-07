@@ -1,0 +1,70 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 10,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 10,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 10,
+          "children": [
+            {
+              "kind": "RefContext",
+              "start": 0,
+              "stop": 10,
+              "children": [
+                {
+                  "token": "REF",
+                  "text": "ref"
+                },
+                {
+                  "token": "OPAR",
+                  "text": "("
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 4,
+                  "stop": 4,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "x"
+                    }
+                  ]
+                },
+                {
+                  "token": "COMMA",
+                  "text": ","
+                },
+                {
+                  "kind": "NameContext",
+                  "start": 9,
+                  "stop": 9,
+                  "children": [
+                    {
+                      "token": "ID",
+                      "text": "A"
+                    }
+                  ]
+                },
+                {
+                  "token": "CPAR",
+                  "text": ")"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

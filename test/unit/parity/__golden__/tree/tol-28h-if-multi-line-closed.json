@@ -1,0 +1,127 @@
+{
+  "kind": "ProgContext",
+  "start": 0,
+  "stop": 15,
+  "children": [
+    {
+      "kind": "BlockContext",
+      "start": 0,
+      "stop": 15,
+      "children": [
+        {
+          "kind": "StatContext",
+          "start": 0,
+          "stop": 15,
+          "children": [
+            {
+              "kind": "AltContext",
+              "start": 0,
+              "stop": 15,
+              "children": [
+                {
+                  "kind": "IfBlockContext",
+                  "start": 0,
+                  "stop": 15,
+                  "children": [
+                    {
+                      "token": "IF",
+                      "text": "if"
+                    },
+                    {
+                      "kind": "ParExprContext",
+                      "start": 2,
+                      "stop": 11,
+                      "children": [
+                        {
+                          "token": "OPAR",
+                          "text": "("
+                        },
+                        {
+                          "kind": "ConditionContext",
+                          "start": 3,
+                          "stop": 10,
+                          "children": [
+                            {
+                              "kind": "EqualityExprContext",
+                              "start": 3,
+                              "stop": 10,
+                              "children": [
+                                {
+                                  "kind": "AtomExprContext",
+                                  "start": 3,
+                                  "stop": 3,
+                                  "children": [
+                                    {
+                                      "kind": "IdAtomContext",
+                                      "start": 3,
+                                      "stop": 3,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "a"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "token": "EQ",
+                                  "text": "=="
+                                },
+                                {
+                                  "kind": "AtomExprContext",
+                                  "start": 10,
+                                  "stop": 10,
+                                  "children": [
+                                    {
+                                      "kind": "IdAtomContext",
+                                      "start": 10,
+                                      "stop": 10,
+                                      "children": [
+                                        {
+                                          "token": "ID",
+                                          "text": "b"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "token": "CPAR",
+                          "text": ")"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "BraceBlockContext",
+                      "start": 13,
+                      "stop": 15,
+                      "children": [
+                        {
+                          "token": "OBRACE",
+                          "text": "{"
+                        },
+                        {
+                          "token": "CBRACE",
+                          "text": "}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "token": "EOF",
+      "text": "<EOF>"
+    }
+  ]
+}

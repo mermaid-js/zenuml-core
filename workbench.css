@@ -28,6 +28,8 @@ a { text-decoration: none; }
 .saved-state { display: inline-flex; align-items: center; gap: 4px; color: #ffb4a8; font-size: 10px; white-space: nowrap; }
 .saved-state::before { content: ""; width: 6px; height: 6px; flex: none; border-radius: 50%; background: #1eae9d; }
 .saved-state.is-failed::before { background: #e5534b; }
+.build-label { min-width: 0; overflow: hidden; color: #afc0d1; font: 500 10px ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; text-overflow: ellipsis; }
+.build-label[href]:hover { color: #f7fbff; text-decoration: underline; }
 .view-tabs { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .tool-chip {
   height: 24px;

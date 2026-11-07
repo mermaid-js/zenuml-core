@@ -35,6 +35,7 @@
       <header class="toolbar">
         <strong class="product-name">ZenUML</strong>
         <span class="saved-state" role="status" aria-label="Saving…" title="Saving…"></span>
+        <a id="build-label" class="build-label" target="_blank" rel="noreferrer" title="Version and commit of this build"></a>
         <div class="view-tabs" role="group" aria-label="Preview mode">
           <button id="view-svg" class="tool-chip">SVG</button>
           <button id="view-dom" class="tool-chip">DOM</button>
@@ -423,6 +424,18 @@ WebApp --> Customer: Order confirmation`,
       }
 
       setViewMode(localStorage.getItem("zenuml-workbench-view") || "svg");
+    </script>
+    <script type="module">
+      import { VERSION } from "./src/version.ts";
+      import { buildLabel } from "./src/workbench/buildLabel.ts";
+      const { text, href } = buildLabel({
+        version: VERSION,
+        gitHash: import.meta.env.VITE_APP_GIT_HASH || "",
+      });
+      const label = document.getElementById("build-label");
+      label.textContent = text;
+      if (href) label.href = href;
+      label.hidden = !text;
     </script>
     <script type="module">
       const params = new URLSearchParams(location.search);

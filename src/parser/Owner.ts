@@ -15,6 +15,10 @@ import {
   type ReturnAsyncMessageContextAugmented,
 } from "./ContextAugmentations";
 import type { AugmentedContext } from "./AntlrTypes";
+import { hoistNamelessCreations, isNamelessCreation } from "./NamelessCreation";
+
+// Owner of a `new` with no type yet. It names no participant.
+export const MISSING_CONSTRUCTOR = "Missing Constructor";
 
 /** Any context that carries `To()` once this file has run. */
 interface HasTo extends AugmentedContext {
@@ -44,7 +48,7 @@ augment<CreationContextAugmented>(CreationContext, {
   },
   Owner() {
     if (!this.Constructor()) {
-      return "Missing Constructor";
+      return MISSING_CONSTRUCTOR;
     }
     const assignee = this.Assignee();
     const type = this.Constructor();
@@ -63,7 +67,10 @@ function getOwnerFromAncestor(
   ctx: AugmentedContext | null,
 ): string | undefined {
   while (ctx) {
-    if (ctx instanceof CreationContext || ctx instanceof MessageContext) {
+    if (
+      (ctx instanceof CreationContext && !isNamelessCreation(ctx)) ||
+      ctx instanceof MessageContext
+    ) {
       return (ctx as unknown as MessageContextAugmented).Owner();
     }
     ctx = ctx.parentCtx;
@@ -113,3 +120,18 @@ augment<RetContextAugmented>(RetMessageContext, {
     return this.ReturnTo();
   },
 });
+
+// A block lists the statements of a nameless `new` in its place (#673).
+// The generated `BlockContext.stat` is a class field, so a prototype override
+// would be shadowed; wrap each block as the parser creates it instead.
+const parserProto = seqParser.prototype as any;
+const parseBlock = parserProto.block;
+parserProto.block = function (...args: unknown[]) {
+  const ctx = parseBlock.apply(this, args);
+  const rawStat = ctx.stat;
+  ctx.stat = function (i?: number) {
+    const stats = hoistNamelessCreations(rawStat.call(this));
+    return i === undefined || i === null ? stats : (stats[i] ?? null);
+  };
+  return ctx;
+};

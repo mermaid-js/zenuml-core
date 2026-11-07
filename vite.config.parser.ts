@@ -11,6 +11,12 @@ import { alias } from "./vite.shared";
 // exports ONLY `validate`/`parse` — matching `types/parser/index.d.ts` — instead
 // of also leaking `index.js`'s in-repo ANTLR helpers into the public contract.
 // `antlr4` stays external so consumers resolve it from their own node_modules.
+// antlr4 is ESM-only, so `require("antlr4")` in the CJS bundle returns its module
+// namespace (`{ __esModule, default }`), and Rollup's default interop would read
+// the API off that namespace instead of `.default`. `interop: "auto"` honors
+// `__esModule`. The CJS entry needs a Node with `require(esm)` on by default,
+// which is why `engines.node` starts at 22.12; older versions can throw
+// ERR_REQUIRE_ESM.
 export default defineConfig({
   build: {
     target: "esnext",
@@ -25,6 +31,7 @@ export default defineConfig({
     sourcemap: process.env.RELEASE === "1",
     rollupOptions: {
       external: ["antlr4"],
+      output: { interop: "auto" },
     },
   },
   resolve: { alias },
