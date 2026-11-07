@@ -42,6 +42,7 @@ for (const [name, code] of Object.entries(cases)) {
     );
 
     const frame = page.locator(".frame");
+    await page.getByRole("button", { name: "More tools" }).click();
     const insertMessage = page.getByRole("switch", { name: "Insert message" });
     const insertDivider = page.getByRole("switch", { name: "Insert divider" });
     await expect(insertMessage).toHaveAttribute("aria-checked", "true");
