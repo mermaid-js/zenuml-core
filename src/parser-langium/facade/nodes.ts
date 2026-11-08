@@ -1,6 +1,6 @@
 /**
- * Stage-3 compatibility facade — ANTLR-context-shaped classes over the
- * Langium AST (src/parser-langium/generated/ast.ts).
+ * Compatibility facade — ANTLR-context-shaped classes over the Langium AST
+ * used by the LSP / editor side-car (src/parser-langium/generated/ast.ts).
  *
  * Binding contract: src/parser/ir/contract.ts (+ docs/langium-migration/09).
  * Design rules implemented here (07-risk-map §3.4):
@@ -1924,31 +1924,6 @@ const CLASS_BY_TYPE: Record<string, CtxClass> = {
   StringAtom: StringAtomContext,
   NilAtom: NilAtomContext,
 };
-
-/**
- * ANTLR context class NAME -> facade class, for the Stage-3 generated-parser
- * `instanceof` shim (src/parser-langium/instanceof-shim.ts). Keys are derived
- * from string literals (the Langium `$type` + "Context", plus the synthesized
- * kinds that have no `$type`) so they survive identifier minification — the
- * generated parser is referenced by stable property name on both sides.
- */
-export const FACADE_CLASS_BY_NAME: Record<string, CtxClass> = {};
-for (const [type, cls] of Object.entries(CLASS_BY_TYPE)) {
-  FACADE_CLASS_BY_NAME[`${type}Context`] = cls;
-}
-for (const [name, cls] of Object.entries({
-  StatContext,
-  NameContext,
-  ParticipantTypeContext,
-  WidthContext,
-  StarterContext,
-  ContentContext,
-  TypeContext,
-  ConstructContext,
-  DividerNoteContext,
-})) {
-  FACADE_CLASS_BY_NAME[name] = cls as CtxClass;
-}
 
 class GenericContext extends Ctx {}
 

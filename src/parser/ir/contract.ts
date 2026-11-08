@@ -697,7 +697,7 @@ export type ContextClass<T extends IrNode> = abstract new (
 
 /**
  * The module-level contract of `@/parser` (named exports + default export
- * object). The Stage-3 facade entry module must satisfy this shape.
+ * object). The Langium facade entry module must satisfy this shape.
  */
 export interface ParserModule {
   /** See {@link RootContextFn}. */

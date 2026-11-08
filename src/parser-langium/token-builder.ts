@@ -1,5 +1,5 @@
 /**
- * Langium TokenBuilder override — Stage 2 of the ANTLR4 → Langium migration.
+ * Langium TokenBuilder override for the LSP / editor side-car parser.
  *
  * The `.langium` grammar's terminal regexes are PLACEHOLDERS. This builder is
  * the authoritative token source: it returns the parity-proven Stage-1
