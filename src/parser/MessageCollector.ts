@@ -3,6 +3,15 @@ import antlr4 from "antlr4";
 
 import sequenceParserListener from "../generated-parser/sequenceParserListener";
 
+// Parse tree node of each collected message. Kept beside the message because
+// messages are plain data that callers compare and copy.
+const messageContexts = new WeakMap<OwnableMessage, any>();
+
+/** Parse tree node a message returned by AllMessages was collected from. */
+export function contextOfMessage(message: OwnableMessage): any {
+  return messageContexts.get(message);
+}
+
 export class MessageCollector extends sequenceParserListener {
   private isBlind = false;
   private ownableMessages: Array<OwnableMessage> = [];
@@ -36,12 +45,14 @@ export class MessageCollector extends sequenceParserListener {
         signature = `${assignment.getText()} = ${signature}`;
       }
     }
-    this.ownableMessages.push({
+    const message = {
       from: from,
       signature: signature,
       type,
       to: owner,
-    });
+    };
+    messageContexts.set(message, ctx);
+    this.ownableMessages.push(message);
   };
 
   enterParameters() {

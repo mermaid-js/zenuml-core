@@ -1,10 +1,15 @@
-import { AllMessages } from "@/parser/MessageCollector";
+import { AllMessages, contextOfMessage } from "@/parser/MessageCollector";
+import { depthOnParticipant } from "@/parser/depthOnParticipant";
 import FrameBuilder from "@/parser/FrameBuilder";
 import FrameBorder, { Frame } from "@/positioning/FrameBorder";
 import { Coordinates } from "@/positioning/Coordinates";
-import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
+import {
+  FRAGMENT_MIN_WIDTH,
+  OCCURRENCE_BAR_SIDE_WIDTH,
+} from "@/positioning/Constants";
 import { getLocalParticipantNames } from "@/positioning/LocalParticipants";
 import { _STARTER_ } from "@/parser/OrderedParticipants";
+import type { OwnableMessage } from "@/parser/OwnableMessage";
 
 export function TotalWidth(ctx: any, coordinates: Coordinates) {
   const allParticipants = coordinates.orderedParticipantNames();
@@ -40,6 +45,15 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
   );
 }
 
+// Starts from the parent because a message is not its own activation. Walks to
+// the root because an activation can enclose the fragment being measured.
+function enclosingActivations(message: OwnableMessage) {
+  return depthOnParticipant(
+    contextOfMessage(message).parentCtx,
+    message.from || _STARTER_,
+  );
+}
+
 function extraWidthDueToSelfMessage(
   ctx: any,
   rightParticipant: string,
@@ -48,10 +62,12 @@ function extraWidthDueToSelfMessage(
   const allMessages = AllMessages(ctx);
   const widths = allMessages
     .filter((m) => m.from === m.to)
-    // 37 is arrow width (30) + half occurrence width(7)
+    // A self message starts at the right wall of its innermost activation
+    // bar, so each enclosing bar pushes its label right.
     .map(
       (m) =>
-        coordinates.getMessageWidth(m) -
+        coordinates.getMessageWidth(m) +
+        enclosingActivations(m) * OCCURRENCE_BAR_SIDE_WIDTH -
         coordinates.distance(m.from || _STARTER_, rightParticipant) -
         coordinates.half(rightParticipant),
     );

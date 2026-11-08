@@ -7,6 +7,7 @@ import {
   FRAGMENT_PADDING_X,
   MARGIN,
   MIN_PARTICIPANT_WIDTH,
+  OCCURRENCE_BAR_SIDE_WIDTH,
 } from "@/positioning/Constants";
 
 describe("TotalWidth", () => {
@@ -57,6 +58,20 @@ describe("TotalWidth", () => {
   });
 
   describe("self message width calculations", () => {
+    // A self call is drawn from the right wall of its innermost activation
+    // bar, so each enclosing activation on the same participant moves its
+    // label right by one bar side.
+    test.each([
+      ["one activation", "if(x) { A.m { a300 } }", 470, 1],
+      ["activation outside the fragment", "A.m { if(x) { a300 } }", 470, 1],
+      ["three activations", "if(x) { A.m { b0 { c0 { a300 } } } }", 470, 3],
+      ["an activation on the starter", "if(x) { b0 { a300 } }", 370, 1],
+    ])("self call inside %s", (_, code, widthWithoutOffset, depth) => {
+      expect(getTotalWidth(code)).toBe(
+        widthWithoutOffset + depth * OCCURRENCE_BAR_SIDE_WIDTH,
+      );
+    });
+
     test("includes extra width from single self message", () => {
       // -====S====--====A====--====B====-
       //[     --------->  -self-<]
@@ -68,6 +83,7 @@ describe("TotalWidth", () => {
         getParticipantWidth() +
         getParticipantWidth() / 2 +
         100 + // self message width
+        OCCURRENCE_BAR_SIDE_WIDTH + // B.method's activation shifts the label
         FRAGMENT_PADDING_X;
 
       expect(totalWidth).toBe(expectedWidth);
@@ -86,6 +102,7 @@ describe("TotalWidth", () => {
         getParticipantWidth() +
         getParticipantWidth() / 2 +
         200 + // widest self message
+        OCCURRENCE_BAR_SIDE_WIDTH + // B1.method's activation shifts the label
         FRAGMENT_PADDING_X;
 
       expect(totalWidth).toBe(expectedWidth);
