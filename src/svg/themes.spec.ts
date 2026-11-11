@@ -21,7 +21,7 @@ const LEGACY_DEFAULT_STYLES = `
   .frame-title { font-family: "IBM Plex Sans", Helvetica, Verdana, serif; font-size: 14px; font-weight: 400; fill: #222; }
   .participant-box { fill: #ffffff; stroke: #666; stroke-width: 1; }
   .participant-label { font-family: "IBM Plex Sans", Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
-  .stereotype-label { fill: #222; }
+  .stereotype-label { font-family: "IBM Plex Sans", Helvetica, Verdana, serif; fill: #222; }
   .participant-icon { color: #222; }
   .lifeline { stroke: #666; stroke-width: 1; }
   .message-line { stroke: #000; stroke-width: 1; shape-rendering: crispEdges; }

@@ -255,7 +255,7 @@ export function buildThemeStyles(p: SvgPalette): string {
   .frame-title { font-family: ${p.fontFamily}; font-size: 14px; font-weight: 400; fill: ${p.titleText}; }
   .participant-box { fill: ${p.participantBg}; stroke: ${p.participantBorder}; stroke-width: 1; }
   .participant-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.participantText}; }
-  .stereotype-label { fill: ${p.participantText}; }
+  .stereotype-label { font-family: ${p.fontFamily}; fill: ${p.participantText}; }
   .participant-icon { color: ${p.participantText}; }
   .lifeline { stroke: ${p.lifeline}; stroke-width: 1; }
   .message-line { stroke: ${p.messageArrow}; stroke-width: 1; shape-rendering: crispEdges; }
