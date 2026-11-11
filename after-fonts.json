@@ -1,0 +1,26 @@
+[
+  {
+    "selector": ".stereotype-label",
+    "text": "«BFF»",
+    "fontFamily": "\"IBM Plex Sans\", Helvetica, Verdana, serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "fontStyle": "normal"
+  },
+  {
+    "selector": ".participant-label",
+    "text": "OrderService",
+    "fontFamily": "\"IBM Plex Sans\", Helvetica, Verdana, serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "fontStyle": "normal"
+  },
+  {
+    "selector": ".message-label",
+    "text": "create(payload)",
+    "fontFamily": "\"IBM Plex Sans\", Helvetica, Verdana, serif",
+    "fontSize": "15px",
+    "fontWeight": "400",
+    "fontStyle": "normal"
+  }
+]
