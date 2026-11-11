@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.13.2
+
+### Patch Changes
+
+- [#710](https://github.com/mermaid-js/zenuml-core/pull/710) [`2f35f7c`](https://github.com/mermaid-js/zenuml-core/commit/2f35f7c5811ee556b1888302fa16a6663136a650) Thanks [@MrCoder](https://github.com/MrCoder)! - Use the selected theme's font for SVG participant stereotypes, including standalone exports.
+
 ## 4.13.1
 
 ### Patch Changes
