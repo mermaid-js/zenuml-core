@@ -1,15 +1,10 @@
-import { getLineHead } from "@/utils/StringUtil";
+import { getLineHead, getLineTail } from "@/utils/StringUtil";
 
 type InsertDividerInput = {
   code: string;
   label?: string;
   blockContext: any;
   insertIndex: number;
-};
-
-const lineTail = (code: string, index: number) => {
-  const next = code.indexOf("\n", index);
-  return next === -1 ? code.length : next + 1;
 };
 
 export const insertDividerInDsl = ({
@@ -36,7 +31,7 @@ export const insertDividerInDsl = ({
 
   if (insertIndex >= statements.length) {
     const lastStat = statements[statements.length - 1];
-    insertionOffset = lineTail(code, lastStat.stop.stop);
+    insertionOffset = getLineTail(code, lastStat.stop.stop);
   } else {
     const targetStat = statements[insertIndex];
     insertionOffset = getLineHead(code, targetStat.start.start);

@@ -1,4 +1,9 @@
-import { getLineHead, getPrevLine, getPrevLineHead } from "@/utils/StringUtil";
+import {
+  getIndent,
+  getLineHead,
+  getPrevLine,
+  getPrevLineHead,
+} from "@/utils/StringUtil";
 
 const COMMENT_PREFIX = "//";
 
@@ -51,7 +56,7 @@ export const toggleMessageStyle = ({
   style: string;
 }): string => {
   const lineHead = getLineHead(code, messageStart);
-  const leadingSpaces = code.slice(lineHead).match(/^\s*/)?.[0] ?? "";
+  const leadingSpaces = getIndent(code.slice(lineHead));
   const prevLine = getPrevLine(code, messageStart);
   const parsed = parseStyleComment(prevLine);
 
@@ -64,7 +69,7 @@ export const toggleMessageStyle = ({
   }
 
   const prevLineHead = getPrevLineHead(code, messageStart);
-  const prevIndent = prevLine.match(/^\s*/)?.[0] ?? "";
+  const prevIndent = getIndent(prevLine);
 
   if (parsed.hasStyleBrackets) {
     const nextStyles = parsed.styles.includes(style)

@@ -1,4 +1,4 @@
-import { getLineHead } from "@/utils/StringUtil";
+import { getIndent, getLineHead, getLineTail } from "@/utils/StringUtil";
 
 type InsertMessageInput = {
   code: string;
@@ -8,11 +8,6 @@ type InsertMessageInput = {
   blockContext?: any;
   hostContext?: any;
   insertIndex: number;
-};
-
-const lineTail = (code: string, index: number) => {
-  const next = code.indexOf("\n", index);
-  return next === -1 ? code.length : next + 1;
 };
 
 const quoteParticipantIfNecessary = (participant: string) => {
@@ -40,9 +35,9 @@ export const insertMessageInDsl = ({
 
   if (!resolvedBlockContext && hostContext) {
     const lineStart = getLineHead(code, hostContext.start.start);
-    const lineEnd = lineTail(code, hostContext.stop.stop);
+    const lineEnd = getLineTail(code, hostContext.stop.stop);
     const originalLine = code.slice(lineStart, lineEnd).replace(/\n$/, "");
-    const indent = originalLine.match(/^\s*/)?.[0] ?? "";
+    const indent = getIndent(originalLine);
     const trimmedLine = originalLine.trimStart();
     const innerIndent = `${indent}  `;
     const trailingNewline =
@@ -75,7 +70,7 @@ export const insertMessageInDsl = ({
 
   if (insertIndex >= statements.length) {
     const lastStat = statements[statements.length - 1];
-    insertionOffset = lineTail(code, lastStat.stop.stop);
+    insertionOffset = getLineTail(code, lastStat.stop.stop);
   } else {
     const targetStat = statements[insertIndex];
     insertionOffset = getLineHead(code, targetStat.start.start);

@@ -1,4 +1,4 @@
-import { getLineHead } from "@/utils/StringUtil";
+import { getIndent, getLineHead, getLineTail } from "@/utils/StringUtil";
 
 type ReorderMessageInput = {
   code: string;
@@ -6,13 +6,6 @@ type ReorderMessageInput = {
   targetRange: [number, number];
   place: "before" | "after";
 };
-
-const lineTail = (code: string, index: number) => {
-  const next = code.indexOf("\n", index);
-  return next === -1 ? code.length : next + 1;
-};
-
-const getIndent = (line: string) => line.match(/^\s*/)?.[0] ?? "";
 
 const getBaseIndent = (text: string) => {
   const lines = text.split("\n").filter((line) => line.trim().length > 0);
@@ -49,9 +42,9 @@ export const reorderMessageInDsl = ({
   const [sourceStart, sourceEnd] = sourceRange;
   const [targetStart, targetEnd] = targetRange;
   const sourceLineStart = getLineHead(code, sourceStart);
-  const sourceLineEnd = lineTail(code, sourceEnd);
+  const sourceLineEnd = getLineTail(code, sourceEnd);
   const targetLineStart = getLineHead(code, targetStart);
-  const targetLineEnd = lineTail(code, targetEnd);
+  const targetLineEnd = getLineTail(code, targetEnd);
 
   if (sourceLineStart === targetLineStart) {
     return code;
