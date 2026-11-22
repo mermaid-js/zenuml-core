@@ -1,0 +1,464 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ZenUML 绘制动画</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Drafting desk: real renderer on white paper, quiet instrument panel around it. */
+:root {
+  --bg: #eef0f2; --panel: #ffffff; --ink: #1b2026; --muted: #5d6670; --line: #d3d8de;
+  --accent: #1f4fd8; --accent-soft: #e4eafb; --pass: #17693f; --pass-bg: #e2f2e9; --fail: #a4301f; --fail-bg: #fae8e4;
+  --warn: #875a00; --warn-bg: #f8efd9;
+  --sans: "IBM Plex Sans", -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15181c; --panel: #1e2227; --ink: #e7eaee; --muted: #9aa4af; --line: #343a42;
+  --accent: #86a5ff; --accent-soft: #252f4a; --pass: #7ed3a3; --pass-bg: #1b3327; --fail: #f19a8b; --fail-bg: #3b211c;
+  --warn: #e6c374; --warn-bg: #352c17; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15181c; --panel: #1e2227; --ink: #e7eaee; --muted: #9aa4af; --line: #343a42;
+  --accent: #86a5ff; --accent-soft: #252f4a; --pass: #7ed3a3; --pass-bg: #1b3327; --fail: #f19a8b; --fail-bg: #3b211c;
+  --warn: #e6c374; --warn-bg: #352c17; color-scheme: dark }
+html { font-size: 16px; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--sans); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 64px; }
+.zi-wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+h1 { font-size: 24px; line-height: 1.3; margin: 0; font-weight: 600; text-wrap: balance; }
+h2 { font-size: 18px; margin: 0 0 10px; font-weight: 600; text-wrap: balance; }
+p { margin: 0 0 10px; max-width: 72ch; }
+.zi-head { display: flex; flex-direction: column; gap: 8px; }
+.zi-verdict { background: var(--warn-bg); color: var(--ink); padding: 12px 14px; border-left: 3px solid var(--warn); max-width: 90ch; }
+.zi-verdict strong { color: var(--warn); }
+.zi-desk { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.zi-left { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.zi-label { font-size: 12px; color: var(--muted); letter-spacing: .02em; }
+#zi-code { width: 100%; box-sizing: border-box; height: 300px; resize: vertical; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; font: 14px/1.55 var(--mono); tab-size: 2; }
+#zi-code:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.zi-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.zi-btn { font: 500 13px var(--sans); background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; cursor: pointer; min-height: 32px; }
+.zi-btn:hover { border-color: var(--accent); }
+.zi-btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+select.zi-btn { max-width: 100%; }
+.zi-seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: var(--panel); }
+.zi-seg button { font: 500 13px var(--sans); border: 0; background: transparent; color: var(--ink); padding: 6px 12px; cursor: pointer; min-height: 32px; }
+.zi-seg button + button { border-left: 1px solid var(--line); }
+.zi-seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+.zi-right { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.zi-panes { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+.zi-panes[data-view="compare"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.zi-pane { background: #fff; border: 1px solid var(--line); border-radius: 4px; display: flex; flex-direction: column; min-width: 0; }
+.zi-pane-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; padding: 6px 10px; font: 12px/1.4 var(--sans); background: var(--panel); color: var(--ink); border-bottom: 1px solid var(--line); }
+.zi-count { color: var(--muted); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.zi-host { height: 480px; overflow: auto; padding: 8px; box-sizing: border-box; background: #fff; }
+.zi-host > svg { display: block; }
+.zi-hud { display: flex; flex-wrap: wrap; gap: 4px 18px; font: 12px/1.5 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; min-height: 20px; }
+.zi-hud b { color: var(--ink); font-weight: 500; }
+.zi-hold { color: var(--warn); }
+.zi-tune { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; }
+.zi-tune label { display: flex; align-items: center; gap: 6px; }
+.zi-tune input[type=range] { width: 120px; }
+.zi-tune output { font-family: var(--mono); font-size: 12px; min-width: 52px; font-variant-numeric: tabular-nums; }
+.zi-sec { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px; min-width: 0; }
+.zi-scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); font-size: 12px; white-space: nowrap; }
+td.zi-num { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+code { font: 13px var(--mono); }
+.zi-pill { display: inline-block; font: 500 12px var(--sans); padding: 1px 7px; border-radius: 3px; white-space: nowrap; }
+.zi-pass { background: var(--pass-bg); color: var(--pass); }
+.zi-fail { background: var(--fail-bg); color: var(--fail); }
+.zi-wait { background: var(--warn-bg); color: var(--warn); }
+.zi-note { color: var(--muted); font-size: 13px; }
+.zi-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.zi-grid2 > * { min-width: 0; }
+#zi-rec-out { width: 100%; box-sizing: border-box; height: 96px; font: 12px/1.5 var(--mono); background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 8px; }
+ol, ul { margin: 0; padding-left: 20px; }
+li { margin-bottom: 4px; max-width: 72ch; }
+@media (max-width: 880px) {
+  .zi-desk, .zi-grid2 { grid-template-columns: minmax(0, 1fr); }
+  .zi-panes[data-view="compare"] { grid-template-columns: minmax(0, 1fr); }
+  .zi-host { height: 380px; }
+  #zi-code { height: 200px; }
+}
+</style>
+
+<div class="zi-wrap">
+  <header class="zi-head">
+    <h1>ZenUML 写作时的绘制动画</h1>
+    <div class="zi-verdict" id="zi-verdict"></div>
+  </header>
+
+  <section class="zi-desk" aria-label="试用区">
+    <div class="zi-left">
+      <label class="zi-label" for="zi-code">在这里打字。右边是当前构建的真实渲染器。</label>
+      <textarea id="zi-code" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+      <div class="zi-row">
+        <select class="zi-btn" id="zi-scene" aria-label="重放场景">
+          <option value="blank">从空白开始写</option>
+          <option value="existing">引用已有 participant</option>
+          <option value="mid">在文档中间插入 if</option>
+        </select>
+      </div>
+      <div class="zi-row" role="group" aria-label="重放">
+        <button class="zi-btn" data-wpm="40">重放 40 WPM</button>
+        <button class="zi-btn" data-wpm="80">80</button>
+        <button class="zi-btn" data-wpm="120">120</button>
+        <button class="zi-btn" id="zi-paste">粘贴 50 行</button>
+        <button class="zi-btn" id="zi-replay">回放演示</button>
+        <button class="zi-btn" id="zi-stop">停止</button>
+      </div>
+      <div class="zi-tune">
+        <label>笔画上限 <input type="range" id="zi-dmax" min="100" max="500" step="10"><output id="zi-dmax-o"></output></label>
+        <label>等待上限 <input type="range" id="zi-dwell" min="150" max="800" step="10"><output id="zi-dwell-o"></output></label>
+      </div>
+    </div>
+    <div class="zi-right">
+      <div class="zi-row">
+        <div class="zi-seg" role="group" aria-label="方案">
+          <button data-view="C">C 门控加笔画预算</button>
+          <button data-view="B">B 字面笔画</button>
+          <button data-view="A">A 现在</button>
+          <button data-view="compare">三个并排</button>
+        </div>
+      </div>
+      <div class="zi-hud" id="zi-hud" aria-live="off"></div>
+      <div class="zi-panes" id="zi-panes"></div>
+    </div>
+  </section>
+
+  <section class="zi-sec">
+    <h2>事先固定的门槛和实测结果</h2>
+    <p class="zi-note">门槛在实测前写好，没有改动。首轮 C 在 40 WPM 落后 331 ms，所以把笔画上限从 260 ms 降到 240 ms 后重测；这是改设计，不是改门槛。元素和宽度指标来自仓库 150 个 compare-case，按 80 WPM 逐键输入，共 1027 行。第一笔、落后量和粘贴来自 3 个场景的实时重放，C 跑 27 次，A、B 各跑 9 次。按键流都是合成的，不是真人。第一笔在无头 Chromium 的脚本侧测量，不含合成器和屏幕延迟。</p>
+    <div class="zi-scroll"><table id="zi-results"></table></div>
+  </section>
+
+  <section class="zi-grid2">
+    <div class="zi-sec">
+      <h2>为什么不能直接画</h2>
+      <p>下面是当前 HEAD 的 <code>renderToSvg</code> 逐键输出。解析结果本身就在闪，笔画只会把闪烁放大。</p>
+      <div class="zi-scroll"><table>
+        <tr><th>输入</th><th>解析器给出的结果</th></tr>
+        <tr><td><code>Alice-&gt;Bob: ok</code></td><td>两人图的宽度：222、322、222、322、222</td></tr>
+        <tr><td><code>Alice-&gt;B</code>、<code>Alice-&gt;Bo</code></td><td>多出 participant <code>B</code>、<code>Bo</code>，打完 <code>Bob</code> 才消失</td></tr>
+        <tr><td><code>Bob</code>，还没打 <code>.</code></td><td>变成 self-call，并多出 <code>_STARTER_</code></td></tr>
+        <tr><td>文档中间打 <code>if</code></td><td>后面的 <code>A.c()</code> 消失，打到 <code>if(x</code> 才回来</td></tr>
+        <tr><td><code>Bob.getOrders(</code></td><td>消息标签变空，多一个 self-call，打上 <code>)</code> 才恢复</td></tr>
+      </table></div>
+    </div>
+    <div class="zi-sec">
+      <h2>2021 年那次为什么被删</h2>
+      <p>commit <code>47e5a4d5</code> 删掉动画时写的是 “Causing confusion during writing”。我用 Vue 2.6.12 和同样的模板做了最小复现。</p>
+      <div class="zi-scroll"><table>
+        <tr><th>操作</th><th>实际播放动画的行</th></tr>
+        <tr><td>在第 2 行插入 <code>NEW</code></td><td>最后一行 <code>c()</code>，不是 <code>NEW</code></td></tr>
+        <tr><td>只改第 1 行文字</td><td>没有动画</td></tr>
+        <tr><td>解析抖动：少一行又回来</td><td>最后一行 <code>c()</code> 再播一次</td></tr>
+      </table></div>
+      <p class="zi-note" style="margin-top:10px">原因是 <code>:key="index"</code>：动画落在错误的元素上，还会被解析抖动反复触发。复现只跑了这个模板，没有重建 2020 年的完整应用。</p>
+    </div>
+  </section>
+
+  <section class="zi-sec">
+    <h2>动效规格</h2>
+    <div class="zi-scroll"><table>
+      <tr><th>元素或事件</th><th>写作时（方案 C）</th><th>回放演示</th><th>打断或例外</th></tr>
+      <tr><td>新 participant</td><td>框 0–55%，生命线 35–100%，名字 45–100%。总长为笔画时长 D</td><td>同样顺序，D = 520 ms</td><td>新元素到达时，进行中的笔画直接到终态</td></tr>
+      <tr><td>新 message</td><td>线 0–70%，箭头 62–82%，已有文字 55–100%</td><td>同样顺序，D = 520 ms</td><td>同帧有新 participant 时最多晚 0.3 D，整批不超过 250 ms</td></tr>
+      <tr><td>自己打出的文字</td><td>每键直接出现，不做动画</td><td>整段擦除式显现</td><td>打字本身就是书写</td></tr>
+      <tr><td>已有元素移动</td><td>110 ms 缓出，从当前位置继续</td><td>同左</td><td>连续按键不累积</td></tr>
+      <tr><td>删除</td><td>90 ms 淡出，不倒放</td><td>不适用</td><td>只有用户真的删除时才出现</td></tr>
+      <tr><td>一次新增 5 个及以上</td><td>每个 120 ms，错开，总长 240 ms</td><td>不适用</td><td>超过 120 个时直接显示</td></tr>
+      <tr><td>减少动态效果</td><td>保留门控，不播动画</td><td>不播</td><td>跟随系统设置</td></tr>
+    </table></div>
+    <p class="zi-note" style="margin-top:10px">D = clamp(1.6 × 按键间隔 EMA, 110, 240) ms，等待 = clamp(2.5 × EMA, 250, 500) ms，EMA 系数 0.3。这些是设计取值，还没有真人数据校准。</p>
+  </section>
+
+  <section class="zi-sec">
+    <h2>门控规则</h2>
+    <p>门控只看前后两次文本的差异，不需要光标 API。它决定送给渲染器的文本，原文不变。</p>
+    <div class="zi-scroll"><table>
+      <tr><th>正在打的行</th><th>送去渲染</th><th>图上发生什么</th><th>何时放行</th></tr>
+      <tr><td><code>Bo</code></td><td>去掉这一行</td><td>图不动</td><td>打出分隔符、换行或停顿</td></tr>
+      <tr><td><code>re</code>（关键字前缀）</td><td>去掉这一行</td><td>图不动</td><td>关键字打完，或换行</td></tr>
+      <tr><td><code>Bob.</code></td><td>原样</td><td>箭头立刻开始画</td><td>马上</td></tr>
+      <tr><td><code>Bob.getOr</code></td><td>原样</td><td>标签随键增长</td><td>马上</td></tr>
+      <tr><td><code>Bob.getOrders(</code></td><td>补 <code>)</code></td><td>标签不闪</td><td>马上</td></tr>
+      <tr><td><code>Alice-&gt;Bo</code>，已有 <code>Bob</code></td><td>去掉这一行</td><td>不出现假 participant</td><td>名字完全匹配，或打 <code>:</code></td></tr>
+      <tr><td><code>if(x</code></td><td><code>if(x) {</code> 并在后面补 <code>}</code></td><td>fragment 出现，后面语句不丢</td><td>马上</td></tr>
+      <tr><td>其他任何情况，这一键会让已有元素消失</td><td>沿用上一帧</td><td>图不动</td><td>下一键恢复，最多等 1200 ms</td></tr>
+    </table></div>
+  </section>
+
+  <section class="zi-grid2">
+    <div class="zi-sec">
+      <h2>录一段真实按键</h2>
+      <p>现在仓库和 Mixpanel 都没有按键级数据。录下来才能替换合成流。录制内容只留在这个页面里，点复制后才离开。里面有你打的原文，请用不敏感的内容。</p>
+      <div class="zi-row" style="margin-bottom:8px">
+        <button class="zi-btn" id="zi-rec" aria-pressed="false">开始录制</button>
+        <button class="zi-btn" id="zi-copy">复制 JSONL</button>
+        <button class="zi-btn" id="zi-play">重放下面的内容</button>
+        <span class="zi-note" id="zi-rec-state"></span>
+      </div>
+      <textarea id="zi-rec-out" spellcheck="false" aria-label="录制结果" placeholder="录制结果出现在这里，也可以粘贴别人的录制来重放"></textarea>
+    </div>
+    <div class="zi-sec">
+      <h2>对照试验方案</h2>
+      <ol>
+        <li>8 到 12 人，用过 ZenUML 或 Mermaid。每人都用 A、B、C，顺序用拉丁方打乱，不告诉差异。</li>
+        <li>任务：抄写 3 份复杂度相近、约 15 行的 DSL，每份最多 3 分钟。全程录按键。</li>
+        <li>打字指标：WPM 和退格占比，用录制文件计算。</li>
+        <li>变化检测：随机遮住图，问“刚才新增了什么”，记准确率。</li>
+        <li>通过条件：C 相对 A 的 WPM 下降不超过 2%，错误率不上升，变化检测不低于 A。</li>
+        <li>样本小，只作方向判断。结果不明确时，上线前再用 feature flag 看关闭率和投诉。</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="zi-sec">
+    <h2>这个原型还不能证明什么</h2>
+    <ul>
+      <li>没有真人数据。所有速度和 WPM 都来自合成按键流。</li>
+      <li>第一笔时间不含合成器和屏幕延迟，需要高速摄像才算端到端。</li>
+      <li>原型基于 <code>renderToSvg</code>。<code>ZenUml.render()</code> 走 React 组件，并有等于上次渲染耗时、最长 2 秒的防抖（<code>src/core.tsx:506</code>）。上线要另做方案。</li>
+      <li>编辑器内的直接操作（比如点按钮加 participant）没有打字问题，可能更适合先用动画。这里没有测。</li>
+      <li>大图超出视口、滚动跟随、主题适配都只做了最低限度。</li>
+    </ul>
+    <p class="zi-note" style="margin-top:10px">门控生成的文本 <code>@Starter("")</code> 会让渲染器抛错，原型保留上一帧。构建：<code>zenuml-2d36d191.js</code>，来自 commit 2d36d191。B 方案使用和 C 相同的身份匹配，差异只来自门控和时长预算。</p>
+  </section>
+</div>
+
+<script src="zenuml-2d36d191.js"></script>
+<script src="engine.js"></script>
+<script>
+(function () {
+  'use strict';
+  const I = window.ZmlInk, R = window.zenuml.renderToSvg, $ = (s) => document.querySelector(s);
+  const cache = new Map();
+  const render = (c) => {
+    if (cache.has(c)) return cache.get(c);
+    const r = R(c);
+    cache.set(c, r);
+    if (cache.size > 300) cache.delete(cache.keys().next().value);
+    return r;
+  };
+
+  /*RESULTS*/
+  const M = {
+    verdict: '<strong>结论：按事先定的规则，现在不建议在写作时开动画，只保留回放。</strong> 方案 C 通过了 6 条自动门槛中的 5 条。宽度跳变没过：1027 行里有 46 行（4.5%）跳了 2 次以上，现状是 389 行（37.9%）。真人试验也还没做。门控不依赖动画，大幅减少了图的抖动，可以单独评估。下面的 C 可以先试手感。',
+    rows: [
+      ['短命元素（存活不足 500 ms）', '0', '1330', '1330', '0', 'pass'],
+      ['每条语句的宽度跳变（单帧变化至少 20 px）', '每条 ≤ 1 次', '389 行超标', '389 行超标', '46 行超标，最多 4 次', 'fail'],
+      ['无歧义按键到第一笔 p95', '≤ 50 ms', '没有笔画', '26 ms', '8 ms', 'pass'],
+      ['笔画最大落后量', '≤ 250 ms', '0', '9041 ms', '243 ms', 'pass'],
+      ['粘贴 50 行到稳定', '≤ 300 ms', '0', '35613 ms', '254 ms', 'pass'],
+      ['结束帧和静态渲染一致', '差异 0', '9/9 次', '9/9 次', '150/150 用例', 'pass'],
+      ['被试打字速度', '下降 ≤ 2%', '基线', '待测', '待测', 'wait'],
+      ['被试错误率', '不上升', '基线', '待测', '待测', 'wait'],
+      ['没留到最终文档的元素（参考）', '无门槛', '3124', '3124', '111', 'none'],
+      ['停顿放行到第一笔 p95（参考）', '无门槛', '不适用', '不适用', '519 ms，5 次', 'none'],
+    ],
+  };
+  /*END*/
+
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ARM_NAME = { A: 'A 现在', B: 'B 字面笔画', C: 'C 门控加笔画预算' };
+  const HOLD_TEXT = {
+    bare: '等这个词打完', target: '等目标名字打完', keyword: '等关键字打完', arrow: '等箭头打完', assign: '等赋值打完',
+    'new-name': '等名字打完', string: '等引号闭合', divider: '等分隔线打完', return: '等 return 打完',
+    loss: '这一键会让元素消失，暂不显示', throw: '渲染器拒绝这段文本，保留上一帧',
+  };
+
+  const SEED = 'Client\nAPI\nClient->API: login\nAPI.validate(token) {\n  Auth.check(token)\n  if(ok) {\n    return session\n  }\n}\n';
+  const SCENES = {
+    blank: { pre: '', text: SEED, post: '' },
+    existing: { pre: 'Alice\nBob\nAlice->Bob: hi\n', text: 'Alice->Bob: ok\nBob.getOrders()\n', post: '' },
+    mid: { pre: 'A.a()\n', text: 'if(x) {\n  A.b()\n}\n', post: 'A.c()\nA.d()\n' },
+  };
+
+  let view = 'C', session = null, stages = [], run = 0;
+  const panes = $('#zi-panes'), ta = $('#zi-code');
+
+  function hookStage(stage, countEl) {
+    const c = { jumps: 0, gone: 0 };
+    const orig = stage.mount.bind(stage);
+    stage.counts = c;
+    const paint = () => { countEl.textContent = '宽度跳变 ' + c.jumps + ' · 消失 ' + c.gone; };
+    stage.mount = (r, o = {}) => {
+      if (stage.geometryWidth !== undefined && Math.abs(r.width - stage.geometryWidth) >= I.WIDTH_JUMP_PX) c.jumps++;
+      if (stage.ents && !(session.feed.edit && session.feed.edit.removed)) {
+        const rc = I.reconcile(stage.ents, I.extract(I.parseSvg(r.svg), r.geometry));
+        c.gone += rc.groups.participants.gone.length + rc.groups.stmts.gone.length + rc.groups.frags.gone.length;
+      }
+      stage.geometryWidth = r.width;
+      const out = orig(r, REDUCED ? { ...o, animate: false } : o);
+      paint();
+      if (out.born) {
+        const host = stage.host, last = out.ents.stmts[out.ents.stmts.length - 1];
+        if (last && last.node.getBoundingClientRect) {
+          const a = last.node.getBoundingClientRect(), b = host.getBoundingClientRect();
+          if (a.bottom > b.bottom - 24) host.scrollTop += a.bottom - b.bottom + 48;
+        }
+      }
+      return out;
+    };
+    paint();
+  }
+
+  function build() {
+    run++;
+    const code = ta.value;
+    panes.dataset.view = view === 'compare' ? 'compare' : 'single';
+    panes.innerHTML = '';
+    session = new I.Session(render);
+    stages = [];
+    for (const arm of view === 'compare' ? ['A', 'B', 'C'] : [view]) {
+      const pane = document.createElement('div');
+      pane.className = 'zi-pane';
+      pane.innerHTML = '<div class="zi-pane-head"><span>' + ARM_NAME[arm] + '</span><span class="zi-count"></span></div><div class="zi-host"></div>';
+      panes.appendChild(pane);
+      const st = new I.Stage(pane.querySelector('.zi-host'), arm);
+      session.add(st);
+      hookStage(st, pane.querySelector('.zi-count'));
+      stages.push(st);
+    }
+    session.reset(code);
+    document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+    hud();
+  }
+
+  function hud() {
+    const t = session.tempo;
+    const debt = Math.max(0, ...stages.map((s) => s.debt()));
+    const status = session.status || (session.feed.lossSince !== null ? 'loss' : null);
+    const isC = stages.some((s) => s.arm === 'C');
+    $('#zi-hud').innerHTML =
+      '<span>节奏 <b>' + t.wpm + ' WPM</b></span><span>笔画 <b>' + t.duration + ' ms</b></span><span>等待 <b>' + t.dwell + ' ms</b></span>' +
+      '<span>墨迹落后 <b>' + Math.round(debt) + ' ms</b></span>' +
+      (isC && status ? '<span class="zi-hold">' + (HOLD_TEXT[status] || status) + '</span>' : '');
+  }
+  setInterval(() => { if (session) hud(); }, 80);
+
+  // Recording is a by-product of the one input path every stream uses.
+  let rec = null;
+  function onText(code) {
+    if (rec) {
+      const e = I.locateEdit(rec.code, code);
+      const pos = commonPrefix(rec.code, code);
+      rec.lines.push(JSON.stringify({ t: Math.round(performance.now() - rec.t0), pos, del: e.removed.length, ins: e.inserted }));
+      rec.code = code;
+      $('#zi-rec-state').textContent = rec.lines.length + ' 个事件';
+    }
+    session.input(code, performance.now());
+    hud();
+  }
+  const commonPrefix = (a, b) => { let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++; return i; };
+  ta.addEventListener('input', () => onText(ta.value));
+
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  async function play(stream) {
+    const me = ++run;
+    ta.value = stream[0].code;
+    session.reset(stream[0].code);
+    stages.forEach((s) => { if (s.counts) { s.counts.jumps = 0; s.counts.gone = 0; } s.host.scrollTop = 0; });
+    const t0 = performance.now();
+    for (let i = 1; i < stream.length; i++) {
+      const wait = t0 + stream[i].t - performance.now();
+      if (wait > 0) await sleep(wait);
+      if (me !== run) return;
+      ta.value = stream[i].code;
+      session.input(stream[i].code, performance.now());
+      hud();
+    }
+  }
+  document.querySelectorAll('[data-wpm]').forEach((b) => b.addEventListener('click', () => {
+    const s = SCENES[$('#zi-scene').value];
+    play(I.typeStream(s.pre, s.text, s.post, +b.dataset.wpm, Math.floor(Math.random() * 1e6)));
+  }));
+  $('#zi-paste').addEventListener('click', () => {
+    const lines = [];
+    for (let i = 0; i < 50; i++) lines.push('Svc' + (i % 6) + '.op' + i + '()');
+    const base = 'Alice\nBob\nAlice->Bob: hi\n';
+    play([{ t: 0, code: base }, { t: 250, code: base + lines.join('\n') + '\n' }]);
+  });
+  $('#zi-stop').addEventListener('click', () => { run++; });
+
+  // Replay is free of the typing budget, so it gets the full pen sequence.
+  $('#zi-replay').addEventListener('click', async () => {
+    const me = ++run;
+    const full = (ta.value.trim() ? ta.value : SEED).split('\n').filter((l) => l.trim());
+    session.reset('');
+    ta.value = '';
+    let cum = '';
+    const replayC = session.stages.filter((s) => s.arm === 'C');
+    for (const line of full) {
+      await sleep(replayC.length ? 620 : 800);
+      if (me !== run) return;
+      cum += line + '\n';
+      ta.value = cum;
+      session.input(cum, performance.now(), { duration: 520 });
+    }
+  });
+
+  document.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => { view = b.dataset.view; build(); }));
+
+  const bindRange = (id, key) => {
+    const el = $('#zi-' + id), out = $('#zi-' + id + '-o');
+    el.value = I.C[key];
+    const up = () => { I.C[key] = +el.value; out.textContent = el.value + ' ms'; };
+    el.addEventListener('input', up);
+    up();
+  };
+  bindRange('dmax', 'D_MAX');
+  bindRange('dwell', 'DWELL_MAX');
+
+  $('#zi-rec').addEventListener('click', (ev) => {
+    const b = ev.currentTarget;
+    if (rec) {
+      $('#zi-rec-out').value = [JSON.stringify({ start: rec.start, build: '2d36d191' }), ...rec.lines].join('\n');
+      rec = null;
+      b.textContent = '开始录制';
+      b.setAttribute('aria-pressed', 'false');
+    } else {
+      rec = { t0: performance.now(), code: ta.value, start: ta.value, lines: [] };
+      b.textContent = '结束录制';
+      b.setAttribute('aria-pressed', 'true');
+      $('#zi-rec-state').textContent = '录制中，去上面打字';
+      ta.focus();
+    }
+  });
+  $('#zi-copy').addEventListener('click', async () => {
+    const out = $('#zi-rec-out'), st = $('#zi-rec-state');
+    try { await navigator.clipboard.writeText(out.value); st.textContent = '已复制'; }
+    catch { out.focus(); out.select(); st.textContent = '已选中，请手动复制'; }
+  });
+  $('#zi-play').addEventListener('click', () => {
+    const st = $('#zi-rec-state');
+    try {
+      const rows = $('#zi-rec-out').value.split('\n').filter(Boolean).map((l) => JSON.parse(l));
+      const stream = [{ t: 0, code: rows[0].start }];
+      let code = rows[0].start;
+      for (const e of rows.slice(1)) {
+        code = code.slice(0, e.pos) + e.ins + code.slice(e.pos + e.del);
+        stream.push({ t: e.t, code });
+      }
+      if (stream.length < 2) throw new Error('empty');
+      play(stream);
+      st.textContent = '重放 ' + (stream.length - 1) + ' 个事件';
+    } catch (e) { st.textContent = '没有可重放的录制。先录一段，或粘贴 JSONL。'; }
+  });
+
+  // Results tables come from the harness output embedded above.
+  const pill = (state) => state === 'pass' ? '<span class="zi-pill zi-pass">通过</span>' : state === 'fail' ? '<span class="zi-pill zi-fail">未通过</span>' : state === 'wait' ? '<span class="zi-pill zi-wait">待测</span>' : '<span class="zi-note">参考</span>';
+  if (M) {
+    $('#zi-verdict').innerHTML = M.verdict;
+    $('#zi-results').innerHTML = '<tr><th>指标</th><th>门槛</th><th>A 现在</th><th>B 字面笔画</th><th>C</th><th>C 判定</th></tr>' +
+      M.rows.map((r) => '<tr><td>' + r[0] + '</td><td class="zi-num">' + r[1] + '</td><td class="zi-num">' + r[2] + '</td><td class="zi-num">' + r[3] + '</td><td class="zi-num">' + r[4] + '</td><td>' + pill(r[5]) + '</td></tr>').join('');
+  }
+
+  ta.value = SEED;
+  build();
+})();
+</script>
+
+</body></html>
