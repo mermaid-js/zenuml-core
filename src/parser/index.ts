@@ -268,15 +268,27 @@ augment<ParserRuleContextAugmented>(antlr4.ParserRuleContext, {
     if (this instanceof sequenceParser.BraceBlockContext) {
       tokenIndex = this.stop.tokenIndex;
     }
-    const hiddenTokensToLeft = this.parser
-      .getTokenStream()
-      .getHiddenTokensToLeft(tokenIndex, channel);
-    return (
-      hiddenTokensToLeft &&
-      hiddenTokensToLeft
-        .map((t: { text: string }) => t.text.substring(2)) // skip '//'
-        .join("\n")
-    );
+    const stream = this.parser.getTokenStream();
+    const comments = [...(stream.getHiddenTokensToLeft(tokenIndex, channel) ?? [])];
+    // ADR 0005: `@return` may stand on the line above its message. A comment
+    // between the annotation and the message belongs to this statement too (#713).
+    const ret =
+      this instanceof sequenceParser.StatContext
+        ? this.ret()
+        : this instanceof sequenceParser.RetContext
+          ? this
+          : null;
+    // A TerminalNode at runtime; the generated typings call it a Token.
+    const annotation: any = ret?.ANNOTATION_RET?.();
+    if (annotation) {
+      comments.push(
+        ...(stream.getHiddenTokensToRight(annotation.symbol.tokenIndex, channel) ?? []),
+      );
+    }
+    if (comments.length === 0) return null as unknown as undefined;
+    return comments
+      .map((t: { text: string }) => t.text.substring(2)) // skip '//'
+      .join("\n");
   },
 });
 

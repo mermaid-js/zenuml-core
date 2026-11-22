@@ -335,6 +335,15 @@ export abstract class Ctx {
       if (!leaf.hidden) break;
       if (leaf.type === "COMMENT") comments.unshift(leaf.text.substring(2));
     }
+    // ADR 0005: `@return` may stand on the line above its message. A comment
+    // between the annotation and the message belongs to this statement too (#713).
+    if (leaves[anchor]?.type === "ANNOTATION_RET") {
+      for (let i = anchor + 1; i < leaves.length; i++) {
+        const leaf = leaves[i];
+        if (!leaf.hidden) break;
+        if (leaf.type === "COMMENT") comments.push(leaf.text.substring(2));
+      }
+    }
     return comments.length ? comments.join("\n") : null;
   }
 
