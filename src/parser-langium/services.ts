@@ -116,7 +116,10 @@ class ZenLexer extends DefaultLexer {
     const recovered: IToken[] = [];
     for (let index = 0; index < tokens.length; index++) {
       const last = merges.get(index);
-      if (last === undefined) {
+      const retype = plan.retypes.get(index);
+      if (last === undefined && retype) {
+        recovered.push(this.retypedToken(retype, tokens[index]));
+      } else if (last === undefined) {
         recovered.push(tokens[index]);
       } else {
         recovered.push(this.mergedToken(text, tokens[index], tokens[last]));
@@ -143,6 +146,20 @@ class ZenLexer extends DefaultLexer {
       last.endLine ?? 0,
       first.startColumn ?? 0,
       last.endColumn ?? 0,
+    );
+  }
+
+  // Same text and source range, another kind (ADR 0007: `return` as `@return`).
+  private retypedToken(kind: string, token: IToken): IToken {
+    return createTokenInstance(
+      (this.definition as Record<string, TokenType>)[kind],
+      token.image,
+      token.startOffset,
+      token.endOffset ?? 0,
+      token.startLine ?? 0,
+      token.endLine ?? 0,
+      token.startColumn ?? 0,
+      token.endColumn ?? 0,
     );
   }
 

@@ -1,7 +1,7 @@
 # 0007 — `return A->B: msg` draws an async return, on one line
 
 Date: 2026-11-22
-Status: Proposed. Not implemented.
+Status: Accepted by the maintainer on 2026-11-22. Implemented in the same change.
 
 ## Context
 
@@ -36,8 +36,10 @@ by `}` in all 84 occurrences.
 ## Decision
 
 1. `return <from>-><to>: <message>`, on one line, draws an async return from `<from>` to `<to>`. It renders the
-   same as `@return <from>-><to>: <message>`. Whether `return <to>: <message>` (no caller) is also
-   accepted is left to the implementation; it must be decided with a test of how it reads today.
+   same as `@return <from>-><to>: <message>`. `return <from>-><to>.m()` is a call, not a message, and keeps
+   its reading. `return <to>: <message>` with no caller is not changed: the two parsers read it differently
+   today (ANTLR: an empty `return`, then an async message; Langium: `return <to>`), and this decision does
+   not settle that.
 2. `return` reads only what is on its own line. A `return` with nothing after it on its line is an empty
    return, and the next line is the next statement. This applies to every form of `return`, not only the new
    one.
@@ -62,16 +64,17 @@ by `}` in all 84 occurrences.
 - A diagram that has `return` and a statement on the next line stops swallowing that statement. The corpus has
   0 such cases. While a user types `return` above an existing line, that line no longer flickers into the
   return value.
-- Both parsers need the change: the ANTLR grammar (`src/g4/sequenceParser.g4`, rule `ret`) and the Langium
-  grammar (`src/parser-langium/zenuml.langium`), with the facade (`src/parser-langium/facade/nodes.ts`) and
-  editor autocomplete.
-- The same-line rule needs the line of each token, because the lexer hides newlines. In ANTLR this can be a
-  semantic predicate on the alternatives of `ret` that compares token lines. Langium needs an equal rule.
-- ADR 0006 named one gap: a top-level `return` whose owner is the `@Starter` participant. A return that names
-  its owner, `return X->X: value`, may close that gap. This is not verified; check it with a rendering test
-  when this is built.
-- Implementation must render before and after for the cases in the table, on both parsers, and must add
-  parity tests between ANTLR and Langium.
+- Implementation: no grammar change. Both parsers read their tokens through one shared plan
+  (`src/parser/headerRecovery.ts`), which already knows the line of each token. The plan gives `return` the
+  token kind of `@return` when `name ->` follows on its line, and adds `;` after a `return` that ends its
+  line. ANTLR (`HeaderRecoveringLexer`) and Langium (`ZenLexer`) apply the plan alike.
+- Langium read `return` + newline + `B->A: msg` as `return B` before this change, unlike ANTLR. The line rule
+  makes both read it the same way.
+- ADR 0006 named one gap: a top-level `return` whose owner is the `@Starter` participant. Verified on the
+  three corpus diagrams with that gap: without `@Starter`, with explicit callers and `return X->X: value`,
+  each renders the same SVG as the original.
+- Impact measured before release: 700 unique diagrams (private customer corpora and the repository's compare
+  cases) render the same SVG before and after.
 
 ## Alternatives rejected
 
