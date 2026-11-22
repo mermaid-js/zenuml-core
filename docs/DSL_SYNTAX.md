@@ -272,6 +272,18 @@ return A->B: response text
 
 Write it on one line. It draws a dashed return message from `A` to `B` ([ADR 0007](adr/0007-return-with-an-arrow.md)).
 
+Leave out the caller to return from the participant whose method you are in ([ADR 0008](adr/0008-return-without-a-caller.md)):
+
+```
+A.m() {
+  B.n() {
+    return A: response text
+  }
+}
+```
+
+This draws the same dashed return from `B` to `A` as `return B->A: response text`.
+
 Legacy forms, still supported and drawn the same:
 
 ```
