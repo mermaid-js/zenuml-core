@@ -9,10 +9,10 @@ It is not product code. Nothing in `src/` uses it.
 |---|---|
 | `index.html` | The prototype page: three arms side by side, measured results, motion spec, gate rules, keystroke recorder |
 | `engine.js` | Prototype engine (`window.ZmlInk`): gate, reconcile, Feed, Stage, Session |
-| `zenuml-2d36d191.js` | UMD build of `@zenuml/core` at commit `2d36d191` (4.12.2). The page calls its `renderToSvg` |
+| `zenuml-260ab6e6.js` | UMD build of `@zenuml/core` from main at commit `260ab6e6`. The page calls its `renderToSvg` |
 
-The three files are byte-for-byte copies of the published artifact
-<https://claude.ai/artifact/975W8JjsDvEttSc25JkUYg> (private), saved on 2026-11-22.
+The page and `engine.js` were first copied from the published artifact
+<https://claude.ai/artifact/975W8JjsDvEttSc25JkUYg> (private) on 2026-11-22. The renderer was then replaced: the original `2d36d191` build is in git history (commit b79dcaf1).
 
 ## Run
 
@@ -33,6 +33,8 @@ Then open <http://localhost:14731>.
 | C | Gate on incomplete text, plus a stroke time budget |
 
 ## Result
+
+Measured on the old renderer `2d36d191`, not re-measured on `260ab6e6`.
 
 Thresholds were fixed before measurement. Arm C passed 5 of the 6 automatic thresholds.
 It failed "at most one width jump per statement": 46 of 1027 lines jumped two or more times

@@ -130,6 +130,7 @@ li { margin-bottom: 4px; max-width: 72ch; }
 
   <section class="zi-sec">
     <h2>事先固定的门槛和实测结果</h2>
+    <p class="zi-note"><strong>注意：这张表是在旧版本 2d36d191 上测的。</strong>页面现在用的是 main 的 260ab6e6，之后修了很多不完整 DSL 的解析问题，表里的数字没有重测。</p>
     <p class="zi-note">门槛在实测前写好，没有改动。首轮 C 在 40 WPM 落后 331 ms，所以把笔画上限从 260 ms 降到 240 ms 后重测；这是改设计，不是改门槛。元素和宽度指标来自仓库 150 个 compare-case，按 80 WPM 逐键输入，共 1027 行。第一笔、落后量和粘贴来自 3 个场景的实时重放，C 跑 27 次，A、B 各跑 9 次。按键流都是合成的，不是真人。第一笔在无头 Chromium 的脚本侧测量，不含合成器和屏幕延迟。</p>
     <div class="zi-scroll"><table id="zi-results"></table></div>
   </section>
@@ -225,11 +226,11 @@ li { margin-bottom: 4px; max-width: 72ch; }
       <li>编辑器内的直接操作（比如点按钮加 participant）没有打字问题，可能更适合先用动画。这里没有测。</li>
       <li>大图超出视口、滚动跟随、主题适配都只做了最低限度。</li>
     </ul>
-    <p class="zi-note" style="margin-top:10px">门控生成的文本 <code>@Starter("")</code> 会让渲染器抛错，原型保留上一帧。构建：<code>zenuml-2d36d191.js</code>，来自 commit 2d36d191。B 方案使用和 C 相同的身份匹配，差异只来自门控和时长预算。</p>
+    <p class="zi-note" style="margin-top:10px">门控生成的文本 <code>@Starter("")</code> 会让渲染器抛错，原型保留上一帧。当前渲染器：<code>zenuml-260ab6e6.js</code>，来自 main 的 commit 260ab6e6。上面的结果表和结论是 11 月 5 日在旧版本 2d36d191 上测的，和当前渲染器的行为可能不一致。B 方案使用和 C 相同的身份匹配，差异只来自门控和时长预算。</p>
   </section>
 </div>
 
-<script src="zenuml-2d36d191.js"></script>
+<script src="zenuml-260ab6e6.js"></script>
 <script src="engine.js"></script>
 <script>
 (function () {
@@ -246,7 +247,7 @@ li { margin-bottom: 4px; max-width: 72ch; }
 
   /*RESULTS*/
   const M = {
-    verdict: '<strong>结论：按事先定的规则，现在不建议在写作时开动画，只保留回放。</strong> 方案 C 通过了 6 条自动门槛中的 5 条。宽度跳变没过：1027 行里有 46 行（4.5%）跳了 2 次以上，现状是 389 行（37.9%）。真人试验也还没做。门控不依赖动画，大幅减少了图的抖动，可以单独评估。下面的 C 可以先试手感。',
+    verdict: '<strong>结论（11 月 5 日在旧版本 2d36d191 上测得）：按事先定的规则，现在不建议在写作时开动画，只保留回放。</strong> 方案 C 通过了 6 条自动门槛中的 5 条。宽度跳变没过：1027 行里有 46 行（4.5%）跳了 2 次以上，现状是 389 行（37.9%）。真人试验也还没做。门控不依赖动画，大幅减少了图的抖动，可以单独评估。下面的 C 可以先试手感。',
     rows: [
       ['短命元素（存活不足 500 ms）', '0', '1330', '1330', '0', 'pass'],
       ['每条语句的宽度跳变（单帧变化至少 20 px）', '每条 ≤ 1 次', '389 行超标', '389 行超标', '46 行超标，最多 4 次', 'fail'],
@@ -416,7 +417,7 @@ li { margin-bottom: 4px; max-width: 72ch; }
   $('#zi-rec').addEventListener('click', (ev) => {
     const b = ev.currentTarget;
     if (rec) {
-      $('#zi-rec-out').value = [JSON.stringify({ start: rec.start, build: '2d36d191' }), ...rec.lines].join('\n');
+      $('#zi-rec-out').value = [JSON.stringify({ start: rec.start, build: '260ab6e6' }), ...rec.lines].join('\n');
       rec = null;
       b.textContent = '开始录制';
       b.setAttribute('aria-pressed', 'false');
