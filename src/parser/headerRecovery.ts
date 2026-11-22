@@ -47,6 +47,7 @@ const HEADER_RULES = new Map<string, HeaderRule>([
   ["CRITICAL", { hasParens: true, body: "withParens" }],
   ["SECTION", { hasParens: true, body: "withParens" }],
   ["REF", { hasParens: true, parenRequired: true }],
+  ["ELSE", {}],
   ["TRY", { body: "always" }],
   ["CATCH", { hasParens: true, body: "always" }],
   ["FINALLY", { body: "always" }],
@@ -148,12 +149,34 @@ export function planHeaderRecovery(
     return end;
   };
 
+  // A `}` with no `{` to match, after a header that has no `{`, means the header
+  // lost its `{` while the `}` of its body is still there: `} else` typed over
+  // `} else {` inside a block (#714). Such a header gets a `{` alone, so the
+  // body's `}` closes the body and not the enclosing block. Without such a `}`
+  // the header gets `{}` (#670) instead.
+  const unmatchedCloses: number[] = [];
+  let depth = 0;
+  tokens.forEach(({ kind }, index) => {
+    if (kind === "OBRACE") depth++;
+    else if (kind === "CBRACE" && --depth < 0) {
+      unmatchedCloses.push(index);
+      depth = 0;
+    }
+  });
+  const takeUnmatchedCloseAfter = (index: number): boolean => {
+    const at = unmatchedCloses.findIndex((close) => close > index);
+    if (at < 0) return false;
+    unmatchedCloses.splice(at, 1);
+    return true;
+  };
+
   for (let index = 0; index < tokens.length; index++) {
     const keyword = tokens[index];
     const rule = HEADER_RULES.get(keyword.kind);
     if (!rule) continue;
     const next = tokens[index + 1];
     if (next.kind === "EOF") break; // Nothing follows, so nothing can be swallowed.
+    if (keyword.kind === "ELSE" && next.kind === "IF") continue; // IF's rule applies.
 
     let headerEnd = index;
     let hasParens = false;
@@ -176,7 +199,11 @@ export function planHeaderRecovery(
     const needsBody =
       rule.body === "always" || (rule.body === "withParens" && hasParens);
     const following = tokens[headerEnd + 1];
-    if (needsBody && following.kind !== "EOF" && following.kind !== "OBRACE") {
+    const bodyMissing = following.kind !== "EOF" && following.kind !== "OBRACE";
+    if (bodyMissing && takeUnmatchedCloseAfter(headerEnd)) {
+      insertAfter(headerEnd, "OBRACE");
+      plan.errors.push({ at: headerEnd + 1, expected: "'{'" });
+    } else if (needsBody && bodyMissing) {
       insertAfter(headerEnd, "OBRACE", "CBRACE");
       plan.errors.push({ at: headerEnd + 1, expected: "'{'" });
     }
