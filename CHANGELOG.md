@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.14.1
+
+### Patch Changes
+
+- [#723](https://github.com/mermaid-js/zenuml-core/pull/723) [`ff6fd7f`](https://github.com/mermaid-js/zenuml-core/commit/ff6fd7f71a2c178d20f7610a2278aeea5f86d398) Thanks [@MrCoder](https://github.com/MrCoder)! - In `renderToSvg`, a comment above a return message is now drawn on its own row above the return arrow, starting at the arrow's left end, the same as the DOM renderer. Before, it was drawn on the arrow's row at the sender and was cut off at the right edge of the diagram.
+
 ## 4.14.0
 
 ### Minor Changes
