@@ -39,7 +39,7 @@ by `}` in all 84 occurrences.
    same as `@return <from>-><to>: <message>`. `return <from>-><to>.m()` is a call, not a message, and keeps
    its reading. `return <to>: <message>` with no caller is not changed: the two parsers read it differently
    today (ANTLR: an empty `return`, then an async message; Langium: `return <to>`), and this decision does
-   not settle that.
+   not settle that. ADR 0008 settles it.
 2. `return` reads only what is on its own line. A `return` with nothing after it on its line is an empty
    return, and the next line is the next statement. This applies to every form of `return`, not only the new
    one.

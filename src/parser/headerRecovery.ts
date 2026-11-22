@@ -225,7 +225,8 @@ const NAME_KINDS = new Set(["ID", "DIGIT_LEADING_NAME", "CSTRING", "USTRING"]);
 // ADR 0007. `return` reads only what is on its own line.
 // - `return B->A: msg` is an async return: `return` takes the kind of `@return`,
 //   so both forms parse and render alike. `return B->A.m()` (a call, not a
-//   message) keeps its reading.
+//   message) keeps its reading. `return A: msg` (ADR 0008) does the same, with
+//   no caller, like `@return A: msg`.
 // - A `return` with nothing after it on its line is an empty return: `;` is
 //   added, so the next line is a statement and not the return value.
 function planReturnLines(
@@ -258,6 +259,17 @@ function planReturnLines(
         onLine(afterTo, line) &&
         (tokens[afterTo].kind === "DOT" || tokens[afterTo].kind === "OPAR");
       if (!isCall) plan.retypes.set(index, "ANNOTATION_RET");
+      return;
+    }
+
+    // ADR 0008: `return A: msg` has no caller, like `@return A: msg`.
+    if (
+      onLine(index + 1, line) &&
+      NAME_KINDS.has(next.kind) &&
+      onLine(index + 2, line) &&
+      tokens[index + 2].kind === "COL"
+    ) {
+      plan.retypes.set(index, "ANNOTATION_RET");
       return;
     }
 
