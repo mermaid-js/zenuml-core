@@ -34,14 +34,30 @@ Then open <http://localhost:14731>.
 
 ## Result
 
-Measured on the old renderer `2d36d191`, not re-measured on `260ab6e6`.
+Thresholds were fixed before measurement. Frame metrics were re-measured on 2026-11-22 with the same `engine.js`, the same 150 compare-cases (1,027 lines, 80 WPM, seed 3) and both renderers. The old bundle reproduces the Nov 5 numbers exactly.
 
-Thresholds were fixed before measurement. Arm C passed 5 of the 6 automatic thresholds.
-It failed "at most one width jump per statement": 46 of 1027 lines jumped two or more times
-(arm A: 389 lines). The human typing trial was not run.
+| Metric | Threshold | A on `2d36d191` | A on `260ab6e6` | C on `2d36d191` | C on `260ab6e6` |
+|---|---|---|---|---|---|
+| Elements alive under 500 ms | 0 | 1,330 | 509 | 0 | 0 |
+| Lines with 2+ width jumps (20 px or more) | 0 | 389 | 183 | 46 | 31 (max 4) |
+| Elements not in the final document (reference) | none | 3,124 | 891 | 111 | 49 |
+| Final frame equals static render | 150/150 | 150 | 150 | 150 | 150 |
+| Render throws | none | 1 | 0 | – | – |
 
-Verdict under the rule agreed in advance: no animation while typing; keep replay only.
-The gate reduces diagram flicker without animation and can be evaluated on its own.
+Arm C still fails the width-jump threshold. Of its 31 lines, 11 grow once per new participant, 16 shrink and grow back (real flicker, for example `new B(` and `"space in name"->`), and 4 are fragment headers growing by 20 px.
+
+First stroke, stroke lag and 50-line paste were not re-measured: they depend on stage timing, and render cost is unchanged (p95 24 ms on `2d36d191`, 25 ms on `260ab6e6`). The human typing trial was not run.
+
+Verdict under the rule agreed in advance is unchanged: no animation while typing; keep replay only. Parser fixes since Nov 5 halved raw flicker (arm A), so the gate matters less than before but still removes all short-lived elements.
+
+Re-run:
+
+```bash
+node docs/spikes/writing-animation/measure/frames.mjs docs/spikes/writing-animation/zenuml-260ab6e6.js /tmp/frames.json
+node docs/spikes/writing-animation/measure/jumps.mjs docs/spikes/writing-animation/zenuml-260ab6e6.js
+```
+
+The old bundle is in git history at commit b79dcaf1.
 
 ## Known limits
 
