@@ -108,8 +108,13 @@ export function buildMessages(
     };
 
     // --- Comments (inline, above the statement) ---
-    // Fragment comments are positioned inside buildFragmentGeometry (at fragX, not sender lifeline).
-    if (commentObj?.text && info.kind !== "fragment") {
+    // Fragment comments are positioned inside buildFragmentGeometry (at fragX,
+    // not sender lifeline); return comments below, once the arrow is known.
+    if (
+      commentObj?.text &&
+      info.kind !== "fragment" &&
+      !(info.kind === "return" && !info.isSelf)
+    ) {
       out.comments.push(buildInlineComment(info, commentObj, ctx));
     }
 
@@ -134,6 +139,11 @@ export function buildMessages(
       case "return": {
         const ret = buildReturnGeometry(info, ctx);
         out.returns.push(ret.geometry);
+        if (commentObj?.text && !info.isSelf) {
+          out.comments.push(
+            buildReturnComment(info, ret.geometry, commentObj, ctx),
+          );
+        }
         out.maxReturnBottom = Math.max(out.maxReturnBottom, ret.bottom);
         break;
       }
@@ -273,6 +283,34 @@ export function buildInlineComment(
   };
 }
 
+/**
+ * Comment above a return (#721). HTML renders it inside the return's own box
+ * (Return.tsx), which spans the arrow: so it starts at the arrow's left end,
+ * on its own row above the arrow, whichever way the arrow points.
+ */
+export function buildReturnComment(
+  info: StatementInfo,
+  ret: ReturnGeometry,
+  commentObj: CommentClass,
+  ctx: StatementContext,
+): CommentGeometry {
+  const COMMENT_FONT_ASCENT = 15;
+  // The box's left edge is the left participant's lifeline, moved past its
+  // occurrence bar when it has one: the same offset buildInlineComment uses.
+  const left = ret.isReverse ? info.to : info.from;
+  const leftDepth = ret.isReverse
+    ? info.targetOccurrenceDepth || 0
+    : info.senderOccurrenceDepth;
+  const offset = leftDepth >= 1 ? OCCURRENCE_BAR_SIDE_WIDTH + 1 : 1;
+  const codeSpanPadding = commentObj.text.trimStart().startsWith("`") ? 2 : 0;
+  return {
+    x: ctx.coordinates.getPosition(left) + offset + codeSpanPadding,
+    y: ctx.coord.top + ctx.adjust + COMMENT_FONT_ASCENT,
+    text: commentObj.text,
+    style: cssToSvgStyle(commentObj.commentStyle),
+  };
+}
+
 /** A `return` statement, plus the lowest point it needs below it. */
 export function buildReturnGeometry(
   info: StatementInfo,
@@ -311,9 +349,14 @@ export function buildReturnGeometry(
   //   - all other returns (root/async, or height>0): SVG needs 15.5
   // These are +0.5 adjustments on the original 16/15 split, validated by
   // emoji-async-return (root returns: 87.4%->97%) and emoji-return-chain (block returns: 94.5%->98%).
-  const returnOffset = coord.height === 0 ? 16.5 : 15.5;
-  const returnY = coord.top + adjust + returnOffset;
-  const returnBottomPad = coord.height === 0 ? 45.5 : 44.5;
+  // A comment above a non-self return takes its own row (#721); a self
+  // return keeps its existing layout. coord.height includes that row, so the
+  // two sub-cases above are told apart by the height without it.
+  const commentOffset = info.isSelf ? 0 : ctx.commentHeight;
+  const isCollapsed = coord.height - commentOffset === 0;
+  const returnOffset = isCollapsed ? 16.5 : 15.5;
+  const returnY = coord.top + adjust + returnOffset + commentOffset;
+  const returnBottomPad = isCollapsed ? 45.5 : 44.5;
   return {
     geometry: {
       fromX,
