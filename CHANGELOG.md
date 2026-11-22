@@ -1,5 +1,17 @@
 # @zenuml/core
 
+## 4.14.0
+
+### Minor Changes
+
+- [#720](https://github.com/mermaid-js/zenuml-core/pull/720) [`202e581`](https://github.com/mermaid-js/zenuml-core/commit/202e581a88c4b5e11300e90cc68b026f3579b50e) Thanks [@MrCoder](https://github.com/MrCoder)! - `return A->B: msg` on one line now draws an async return from `A` to `B`, the same as `@return A->B: msg`. A `return` with nothing after it on its line now ends there, so the next line is the next statement and no longer becomes the return value. `@return`, `@reply` and `A-->B` keep working.
+
+### Patch Changes
+
+- [#719](https://github.com/mermaid-js/zenuml-core/pull/719) [`0a82d61`](https://github.com/mermaid-js/zenuml-core/commit/0a82d6136141c6d18a981c9b4a9047678c6ba67a) Thanks [@MrCoder](https://github.com/MrCoder)! - Keep a comment written between `@return` (or `@reply`) on its own line and the message under it. The comment now renders above the return, like a comment written above `@return`.
+
+- [#715](https://github.com/mermaid-js/zenuml-core/pull/715) [`fbc957f`](https://github.com/mermaid-js/zenuml-core/commit/fbc957f760e572ee70cd854c2f1fe081c8735ccf) Thanks [@MrCoder](https://github.com/MrCoder)! - Keep later statements inside their block while `} else`, `} else if(`, `} catch` or `} finally` is still being typed without its `{`. The branch's existing `}` now closes the new branch instead of the enclosing block.
+
 ## 4.13.2
 
 ### Patch Changes
