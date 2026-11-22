@@ -1,5 +1,11 @@
 # @zenuml/core
 
+## 4.15.0
+
+### Minor Changes
+
+- [#726](https://github.com/mermaid-js/zenuml-core/pull/726) [`c889ff4`](https://github.com/mermaid-js/zenuml-core/commit/c889ff4285cfa0c85b4e1103f17f7cdb3294228c) Thanks [@MrCoder](https://github.com/MrCoder)! - `return A: msg` on one line now draws an async return to `A` from the participant whose method it is in, the same as `@return A: msg`. Before, it drew an empty return and a separate solid message, and the editor read it as `return A`.
+
 ## 4.14.1
 
 ### Patch Changes
