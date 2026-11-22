@@ -267,13 +267,16 @@ B: event payload
 ### Async return
 
 ```
+return A->B: response text
+```
+
+Write it on one line. It draws a dashed return message from `A` to `B` ([ADR 0007](adr/0007-return-with-an-arrow.md)).
+
+Legacy forms, still supported and drawn the same:
+
+```
 A --> B: response text
-```
-
-Or using annotation:
-
-```
-@Return A --> B: response
+@return A->B: response text
 ```
 
 ---
@@ -296,6 +299,14 @@ With semicolon:
 
 ```
 return value;
+```
+
+`return` reads only what is on its own line. A `return` with nothing after it ends there, and the next line is
+the next statement:
+
+```
+return
+Audit.log()   // a call after the return, not the return value
 ```
 
 ---
@@ -569,7 +580,7 @@ Annotations start with `@` and serve multiple purposes:
 | `@Collections` | Participant type: collections icon |
 | `@Queue` | Participant type: queue icon |
 | `@Starter` / `@starter` | Designate the initiating participant |
-| `@Return` / `@return` | Mark an async return message |
+| `@Return` / `@return` | Mark an async return message (legacy: prefer `return A->B: msg`) |
 | `@Reply` / `@reply` | Alias for `@Return` |
 
 Any other `@Name` token is treated as a participant type annotation.

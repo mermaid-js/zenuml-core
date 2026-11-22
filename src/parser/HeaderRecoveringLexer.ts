@@ -71,10 +71,19 @@ class RecoveringLexer extends lexerClass {
       ]),
     );
 
+    const retypes = new Map(
+      [...plan.retypes].map(([index, kind]) => [
+        positions[index],
+        this.retypedToken(visible[index], kind),
+      ]),
+    );
+
     const recovered: Token[] = [];
     for (let position = 0; position < tokens.length; position++) {
       const merge = merges.get(position);
-      recovered.push(merge ? merge.token : tokens[position]);
+      recovered.push(
+        merge ? merge.token : (retypes.get(position) ?? tokens[position]),
+      );
       if (merge) position = positions[merge.last];
       recovered.push(...(insertions.get(position) ?? []));
     }
@@ -91,6 +100,20 @@ class RecoveringLexer extends lexerClass {
       last.stop,
       first.line,
       first.column,
+    );
+  }
+
+  // Same text and source range, another kind (ADR 0007: `return` as `@return`).
+  private retypedToken(token: Token, kind: string): Token {
+    return this._factory.create(
+      token.source,
+      lexerClass[kind],
+      token.text,
+      token.channel,
+      token.start,
+      token.stop,
+      token.line,
+      token.column,
     );
   }
 

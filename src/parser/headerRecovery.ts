@@ -6,8 +6,12 @@
 //
 // This plan looks at the whole token list instead. A header that never closes
 // ends at the end of its line, and the tokens the grammar needs are added there.
-// Complete DSL is never rewritten: every edit needs a `(` with no matching `)`,
-// or a keyword with its `(` or `{` missing. Both engines apply the same plan, in
+// Complete headers are never rewritten: every header edit needs a `(` with no
+// matching `)`, or a keyword with its `(` or `{` missing.
+//
+// The plan also applies the line rules of `return` (ADR 0007), which do change
+// complete DSL on purpose: `return B->A: msg` is read as `@return B->A: msg`, and
+// a `return` with nothing after it on its line ends there. Both engines apply the same plan, in
 // HeaderRecoveringLexer (ANTLR) and ZenLexer (Langium). This file imports
 // neither, so the browser bundle of one engine does not pull in the other.
 
@@ -23,6 +27,8 @@ export interface HeaderRecoveryPlan {
   merges: { first: number; last: number }[];
   /** Token kinds to add, with no width and no text, after a token index. */
   insertions: Map<number, string[]>;
+  /** A new kind for the token at an index. Its text and position stay. */
+  retypes: Map<number, string>;
   /** Syntax errors to report: `missing <expected> at <token at index>`. */
   errors: { at: number; expected: string }[];
 }
@@ -105,6 +111,7 @@ export function planHeaderRecovery(
   const plan: HeaderRecoveryPlan = {
     merges: [],
     insertions: new Map(),
+    retypes: new Map(),
     errors: [],
   };
   const insertAfter = (index: number, ...kinds: string[]) => {
@@ -209,10 +216,61 @@ export function planHeaderRecovery(
     }
     index = headerEnd;
   }
+  planReturnLines(tokens, plan, insertAfter);
   return plan;
+}
+
+const NAME_KINDS = new Set(["ID", "DIGIT_LEADING_NAME", "CSTRING", "USTRING"]);
+
+// ADR 0007. `return` reads only what is on its own line.
+// - `return B->A: msg` is an async return: `return` takes the kind of `@return`,
+//   so both forms parse and render alike. `return B->A.m()` (a call, not a
+//   message) keeps its reading.
+// - A `return` with nothing after it on its line is an empty return: `;` is
+//   added, so the next line is a statement and not the return value.
+function planReturnLines(
+  tokens: readonly HeaderToken[],
+  plan: HeaderRecoveryPlan,
+  insertAfter: (index: number, ...kinds: string[]) => void,
+): void {
+  const merged = new Set<number>();
+  for (const { first, last } of plan.merges) {
+    for (let index = first; index <= last; index++) merged.add(index);
+  }
+  const onLine = (index: number, line: number) =>
+    index < tokens.length &&
+    tokens[index].kind !== "EOF" &&
+    tokens[index].line === line;
+
+  tokens.forEach(({ kind, line }, index) => {
+    if (kind !== "RETURN" || merged.has(index)) return;
+    const next = tokens[index + 1];
+    if (!next || next.kind === "EOF") return;
+
+    if (
+      onLine(index + 1, line) &&
+      NAME_KINDS.has(next.kind) &&
+      onLine(index + 2, line) &&
+      tokens[index + 2].kind === "ARROW"
+    ) {
+      const afterTo = index + 4;
+      const isCall =
+        onLine(afterTo, line) &&
+        (tokens[afterTo].kind === "DOT" || tokens[afterTo].kind === "OPAR");
+      if (!isCall) plan.retypes.set(index, "ANNOTATION_RET");
+      return;
+    }
+
+    if (next.kind === "CBRACE" || next.kind === "SCOL") return;
+    if (next.line !== line) insertAfter(index, "SCOL");
+  });
 }
 
 /** Whether the plan changes the token list at all. */
 export function isEmptyPlan(plan: HeaderRecoveryPlan): boolean {
-  return plan.merges.length === 0 && plan.insertions.size === 0;
+  return (
+    plan.merges.length === 0 &&
+    plan.insertions.size === 0 &&
+    plan.retypes.size === 0
+  );
 }
