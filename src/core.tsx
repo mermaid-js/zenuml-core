@@ -10,6 +10,9 @@ import {
   enableParticipantStyleEditingAtom,
   enableScopedThemingAtom,
   enableWritingAnimationAtom,
+  writingMotionAtom,
+  writingStrokeAtom,
+  type WritingMotion,
   lifelineReadyAtom,
   modeAtom,
   paletteAtom,
@@ -477,6 +480,9 @@ export default class ZenUml implements IZenUml {
     if (gated) {
       this.writingGate.input(raw, performance.now());
       gated = !this.writingGate.bulk;
+      if (this.store.get(writingMotionAtom)) {
+        this.store.set(writingStrokeAtom, this.writingGate.stroke);
+      }
     }
     if (!gated) this.writingGate.reset(raw);
 
@@ -508,6 +514,17 @@ export default class ZenUml implements IZenUml {
       );
     }
     return result;
+  }
+
+  /**
+   * @internal ADR 0009, Decision 4: turns writing-time motion on for this
+   * diagram. Not a `Config` option and not a supported API: only the
+   * prototype and trial pages call it, until gates G5 and G6 pass. `"gated"`
+   * plays only while `enableWritingAnimation` is on; `"raw"` plays on every
+   * raw frame, without the gate (the trial's arm B).
+   */
+  _setWritingMotion(motion: WritingMotion) {
+    this.store.set(writingMotionAtom, motion);
   }
 
   private settleRenders() {

@@ -6,6 +6,7 @@ import {
   modeAtom,
   renderCodeAtom,
   RenderMode,
+  writingMotionAtom,
 } from "./store/Store";
 import { interactionAtom } from "./store/interaction/interactionAtom";
 
@@ -131,5 +132,34 @@ describe("enableWritingAnimation", () => {
     });
     await zenUml.render("A.m()\nre", { onContentChange });
     expect(onContentChange).not.toHaveBeenCalled();
+  });
+});
+
+describe("writing-time motion (internal)", () => {
+  it("is off by default and only an internal call turns it on", async () => {
+    const { el, zenUml, store } = mount();
+    await zenUml.render("A.m()", { enableWritingAnimation: true });
+    expect(store.get(writingMotionAtom)).toBe(false);
+    expect(el.querySelector("[data-identity]")).toBeNull();
+
+    zenUml._setWritingMotion("gated");
+    await zenUml.render("A.m()\nA.n()\n", {});
+    expect(el.querySelector("[data-identity]")).not.toBeNull();
+  });
+
+  it("gated motion does not play while enableWritingAnimation is off", async () => {
+    const { el, zenUml } = mount();
+    zenUml._setWritingMotion("gated");
+    await zenUml.render("A.m()\nA.n()", {});
+    expect(el.querySelector("[data-identity]")).toBeNull();
+  });
+
+  it("raw motion plays without the gate (trial arm B)", async () => {
+    const { el, zenUml, store } = mount();
+    await zenUml.render("A.m()", {});
+    zenUml._setWritingMotion("raw");
+    await zenUml.render("A.m()\nA.n()", {});
+    expect(store.get(enableWritingAnimationAtom)).toBe(false);
+    expect(el.querySelector("[data-identity]")).not.toBeNull();
   });
 });

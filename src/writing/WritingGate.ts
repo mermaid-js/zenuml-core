@@ -1,4 +1,5 @@
 import { gate, locateEdit, type Edit } from "./gate";
+import { strokeMs } from "./motion";
 import { lostElements, type Shown } from "./shown";
 
 /** The loss guard keeps the last frame at most this long (ADR 0009). */
@@ -25,6 +26,11 @@ export class Tempo {
         this.ema += EMA_ALPHA * (gap - this.ema);
     }
     this.last = t;
+  }
+
+  /** Stroke time D of writing-time motion (ADR 0009, Decision 4). */
+  get stroke(): number {
+    return strokeMs(this.ema);
   }
 
   /** How long a held line waits before the gate looks at it again. */
@@ -78,6 +84,11 @@ export class WritingGate {
     this.raw = raw;
     this.lastInput = now;
     if (this.edit.removed || this.edit.bulk) this.removedSinceCommit = true;
+  }
+
+  /** Stroke time D for the current typing tempo. */
+  get stroke(): number {
+    return this.tempo.stroke;
   }
 
   /** The last edit was a paste of two or more lines: it is not gated. */

@@ -21,6 +21,18 @@ describe("Tempo", () => {
   });
 });
 
+describe("Tempo.stroke", () => {
+  it("is the motion stroke time D for the current tempo", () => {
+    const fast = new Tempo();
+    for (let t = 0; t < 2000; t += 20) fast.key(t);
+    expect(fast.stroke).toBe(110);
+    const mid = new Tempo();
+    for (let t = 0; t < 4000; t += 100) mid.key(t);
+    expect(mid.stroke).toBe(160);
+    expect(new Tempo().stroke).toBe(240);
+  });
+});
+
 describe("WritingGate", () => {
   it("does not parse on commit (the option-off path only commits)", () => {
     let parses = 0;

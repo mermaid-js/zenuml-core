@@ -31,6 +31,7 @@ import { ParticipantStylePanel } from "./LifeLineLayer/ParticipantStylePanel";
 import { EmptyDiagramPrompt } from "./EmptyDiagramPrompt";
 import { InteractionController } from "@/store/interaction/InteractionController";
 import { paletteCssVariables } from "@/surface";
+import { useWritingMotion } from "@/writing/useWritingMotion";
 
 export const SeqDiagram = (props: {
   className?: string;
@@ -53,6 +54,9 @@ export const SeqDiagram = (props: {
   useEffect(() => {
     setDiagramElement(diagramRef.current);
   });
+
+  // ADR 0009, Decision 4: off unless the internal motion flag is on.
+  useWritingMotion(diagramRef, rootContext);
 
   useImperativeHandle(props.ref, () => {
     return diagramRef.current!;
