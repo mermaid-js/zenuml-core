@@ -187,6 +187,11 @@ export function walkDiagram(spec) {
           color = m ? m[1] : cs.borderLeftColor;
         }
         if (lr.edge !== "row" && lr.edge !== "column" && lr.edge !== "svg" && width === 0) continue;
+        if (lr.colorProp === "--tab-rule" && cs.forcedColorAdjust === "none") {
+          // The gradient uses CanvasText in forced colours. Text inside the
+          // tab still follows the system palette and resolves it to RGB.
+          color = getComputedStyle(el.firstElementChild).color;
+        }
         if (color === "currentcolor") color = cs.color;
         const opacity = effectiveOpacity(el, root);
         if (opacity < 0.05) continue;

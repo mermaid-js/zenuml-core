@@ -43,14 +43,13 @@ test("workbench keeps rendering and saved controls in the redesigned shell", asy
   await page.getByRole("button", { name: "DOM", exact: true }).click();
   await expect(page.locator("pre.zenuml")).toContainText("Hello Bob!");
   await page.screenshot({ path: "test-results/workbench-desktop-dom.png" });
-  // Preserve the toolbar layout and keep the unfocused editor caret out of
-  // the screenshot. A mask would move with CodeMirror's caret position.
+  // Hide the per-build label, the editor caret, and the variable render time
+  // while preserving their space in the layout.
   await page.addStyleTag({
-    content: "#build-label, .CodeMirror-cursors { visibility: hidden; }",
+    content: "#build-label, #svg-stats, .CodeMirror-cursors { visibility: hidden; }",
   });
   await expect(page).toHaveScreenshot("workbench-desktop-dom.png", {
     animations: "disabled",
-    mask: [page.locator("#svg-stats")],
   });
   await expect(page.getByRole("button", { name: "DOM", exact: true })).toHaveAttribute("aria-pressed", "true");
   await openMenu(page);

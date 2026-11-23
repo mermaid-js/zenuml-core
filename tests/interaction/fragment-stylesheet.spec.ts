@@ -97,4 +97,16 @@ test("title and fragment tabs fit their content in both renderers", async ({
     .locator(":scope > .header > .frame-tab")
     .boundingBox();
   expect(collapsedTab?.width).toBe(sizes.fragmentTabWidth);
+
+  await page.emulateMedia({ forcedColors: "active" });
+  const title = page.locator("#frame-tabs-dom .title.frame-tab");
+  await expect(title).toHaveCSS("forced-color-adjust", "none");
+  await expect(fragment.locator(":scope > .header > .frame-tab")).toHaveCSS(
+    "forced-color-adjust",
+    "none",
+  );
+  await expect(title.locator(":scope > span")).toHaveCSS(
+    "forced-color-adjust",
+    "auto",
+  );
 });
