@@ -5,6 +5,10 @@ import { planMotion, type Box, type MotionPlan } from "./motion";
 
 /** FLIP: a kept element eases from its old place in this many ms. */
 const GLIDE_MS = 110;
+/** A new participant's border draws over this share of D ... */
+const BORDER_SHARE = 0.55;
+/** ... and its label starts at this share of D. */
+const LABEL_AT = 0.45;
 
 const PARTICIPANT = "[data-participant-id]";
 const STATEMENT = "[data-identity]";
@@ -90,13 +94,27 @@ export function play(
         { duration: GLIDE_MS, easing: "ease-out" },
       );
   }
+  const wipe = (
+    el: Element | null | undefined,
+    delay: number,
+    duration: number,
+  ) =>
+    el?.animate(
+      [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }],
+      { duration, delay, easing: "linear", fill: "backwards" },
+    );
   for (const { key, delay, duration } of plan.reveals) {
-    elements
-      .get(key)
-      ?.animate(
-        [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }],
-        { duration, delay, easing: "linear", fill: "backwards" },
-      );
+    const el = elements.get(key);
+    if (!key.startsWith("p:")) {
+      wipe(el, delay, duration);
+      continue;
+    }
+    // Design note, section 4: the border draws over 0-55% of D, then the
+    // label wipes in over 45-100%. The label is the box's last child.
+    const border = Math.round(BORDER_SHARE * duration);
+    const labelAt = Math.round(LABEL_AT * duration);
+    wipe(el, delay, border);
+    wipe(el?.lastElementChild, delay + labelAt, duration - labelAt);
   }
 }
 
@@ -137,7 +155,7 @@ export function useWritingMotion(
     }
     // A new frame ends any motion in progress at its final state.
     for (const node of last.current.elements.values()) {
-      node.getAnimations?.().forEach((a) => a.finish());
+      node.getAnimations?.({ subtree: true }).forEach((a) => a.finish());
     }
     el.querySelectorAll<HTMLElement>("[data-writing-ghost]").forEach((g) =>
       g.remove(),

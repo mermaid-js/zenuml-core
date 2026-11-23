@@ -11,7 +11,6 @@ import {
   enableScopedThemingAtom,
   enableWritingAnimationAtom,
   writingMotionAtom,
-  writingStrokeAtom,
   type WritingMotion,
   lifelineReadyAtom,
   modeAtom,
@@ -480,9 +479,6 @@ export default class ZenUml implements IZenUml {
     if (gated) {
       this.writingGate.input(raw, performance.now());
       gated = !this.writingGate.bulk;
-      if (this.store.get(writingMotionAtom)) {
-        this.store.set(writingStrokeAtom, this.writingGate.stroke);
-      }
     }
     if (!gated) this.writingGate.reset(raw);
 
