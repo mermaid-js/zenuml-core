@@ -17,6 +17,7 @@ const SVG = "http://www.w3.org/2000/svg";
  * stroke. The real border is hidden from `start` until the stroke ends.
  */
 function trace(
+  key: string,
   el: HTMLElement,
   root: HTMLElement,
   start: number,
@@ -30,8 +31,8 @@ function trace(
   const origin = root.getBoundingClientRect();
   const r = el.getBoundingClientRect();
   const svg = document.createElementNS(SVG, "svg");
-  svg.setAttribute("data-writing-stroke", "");
-  svg.setAttribute("data-writing-ghost", "");
+  // Tagged with its participant, so a later frame can move it (followStrokes).
+  svg.setAttribute("data-writing-stroke", key);
   svg.setAttribute("width", String(r.width));
   svg.setAttribute("height", String(r.height));
   Object.assign(svg.style, {
@@ -195,7 +196,7 @@ export function play(
     // border around it. The label is the box's last child.
     wipe(el?.lastElementChild, delay, Math.round(LABEL_SHARE * duration));
     const strokeAt = delay + Math.round(STROKE_AT * duration);
-    if (el) trace(el, root, delay, strokeAt, duration);
+    if (el) trace(key, el, root, delay, strokeAt, duration);
     // The lifeline draws down from the box once the border is closed.
     for (const line of linesOf(key)) {
       line.animate(
@@ -209,6 +210,50 @@ export function play(
       );
     }
   }
+}
+
+const isGlide = (a: Animation) =>
+  (a.effect as KeyframeEffect | null)
+    ?.getKeyframes?.()
+    .some((k) => "transform" in k) ?? false;
+
+/**
+ * Before a new frame is measured: finish glides, which would distort the
+ * measurement, and drop fading ghosts of removed elements. Reveals and pen
+ * strokes are paint only, so they run on: a frame every keystroke must not
+ * cut off a participant that is still being drawn.
+ */
+export function settle(root: HTMLElement, elements: Map<string, HTMLElement>) {
+  for (const node of elements.values()) {
+    node
+      .getAnimations?.({ subtree: true })
+      .forEach((a) => isGlide(a) && a.finish());
+  }
+  root
+    .querySelectorAll<HTMLElement>("[data-writing-ghost]")
+    .forEach((g) => g.remove());
+}
+
+/**
+ * After a new frame is measured: a pen stroke still drawing follows its
+ * participant to its new place; a stroke whose participant is gone is removed,
+ * and the participant's hidden border with it.
+ */
+export function followStrokes(
+  root: HTMLElement,
+  boxes: Map<string, Box>,
+  elements: Map<string, HTMLElement>,
+) {
+  root.querySelectorAll<SVGElement>("[data-writing-stroke]").forEach((svg) => {
+    const key = svg.getAttribute("data-writing-stroke") ?? "";
+    const box = boxes.get(key);
+    if (!box || !elements.has(key)) {
+      svg.remove();
+      return;
+    }
+    svg.style.left = `${box.x}px`;
+    svg.style.top = `${box.y}px`;
+  });
 }
 
 const empty = (): Measured => ({
@@ -246,14 +291,9 @@ export function useWritingMotion(
       primed.current = false;
       return;
     }
-    // A new frame ends any motion in progress at its final state.
-    for (const node of last.current.elements.values()) {
-      node.getAnimations?.({ subtree: true }).forEach((a) => a.finish());
-    }
-    el.querySelectorAll<HTMLElement>("[data-writing-ghost]").forEach((g) =>
-      g.remove(),
-    );
+    settle(el, last.current.elements);
     const next = measure(el);
+    followStrokes(el, next.boxes, next.elements);
     if (
       primed.current &&
       !reducedMotion() &&

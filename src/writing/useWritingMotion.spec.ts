@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { measure, play } from "./useWritingMotion";
+import { followStrokes, measure, play, settle } from "./useWritingMotion";
 
 describe("measure", () => {
   it("keys participants and statements, and links a statement to its keyed parent", () => {
@@ -123,5 +123,59 @@ describe("play", () => {
     ];
     expect(box.animate).toHaveBeenCalledWith(...glide);
     expect(line.animate).toHaveBeenCalledWith(...glide);
+  });
+});
+
+// Demo feedback: Shop was drawn with no motion. The next keystroke's frame
+// came 150-200 ms later and finished every animation, cutting off the 576 ms
+// participant draw. A new frame now finishes only glides, which would distort
+// the measurement; reveals and pen strokes keep running.
+describe("settle", () => {
+  const fake = (frame: Keyframe) => ({
+    effect: { getKeyframes: () => [frame] },
+    finish: vi.fn(),
+  });
+
+  it("finishes glides but lets reveals run on", () => {
+    const root = document.createElement("div");
+    root.innerHTML = `<div data-participant-id="A"></div>`;
+    const box = root.firstElementChild as HTMLElement;
+    const glide = fake({ transform: "translate(4px, 0)" });
+    const reveal = fake({ clipPath: "inset(0 100% 0 0)" });
+    box.getAnimations = (() => [glide, reveal]) as never;
+    settle(root, new Map([["p:A", box]]));
+    expect(glide.finish).toHaveBeenCalled();
+    expect(reveal.finish).not.toHaveBeenCalled();
+  });
+
+  it("drops fading ghosts but keeps pen strokes", () => {
+    const root = document.createElement("div");
+    root.innerHTML = `<div data-writing-ghost></div><svg data-writing-stroke="p:A"></svg>`;
+    settle(root, new Map());
+    expect(root.querySelector("[data-writing-ghost]")).toBeNull();
+    expect(root.querySelector("[data-writing-stroke]")).not.toBeNull();
+  });
+});
+
+describe("followStrokes", () => {
+  it("moves a pen stroke to its participant's new place", () => {
+    const root = document.createElement("div");
+    root.innerHTML = `<svg data-writing-stroke="p:A" style="left: 0px; top: 0px"></svg>`;
+    const box = document.createElement("div");
+    followStrokes(
+      root,
+      new Map([["p:A", { kind: "participant", x: 40, y: 8, parent: null }]]),
+      new Map([["p:A", box]]),
+    );
+    const stroke = root.querySelector<SVGElement>("[data-writing-stroke]")!;
+    expect(stroke.style.left).toBe("40px");
+    expect(stroke.style.top).toBe("8px");
+  });
+
+  it("removes a pen stroke whose participant is gone", () => {
+    const root = document.createElement("div");
+    root.innerHTML = `<svg data-writing-stroke="p:A"></svg>`;
+    followStrokes(root, new Map(), new Map());
+    expect(root.querySelector("[data-writing-stroke]")).toBeNull();
   });
 });
