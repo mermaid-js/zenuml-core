@@ -1,5 +1,6 @@
 import {
   coordinatesAtom,
+  identityKeysAtom,
   modeAtom,
   participantsAtom,
   RenderMode,
@@ -22,6 +23,7 @@ export const LifeLineLayer = (props: {
   const mode = useAtomValue(modeAtom);
   const coordinates = useAtomValue(coordinatesAtom);
   const participants = useAtomValue(participantsAtom);
+  const identityKeys = useAtomValue(identityKeysAtom);
 
   const starterParticipant = useMemo(() => {
     const names = coordinates.orderedParticipantNames();
@@ -41,7 +43,9 @@ export const LifeLineLayer = (props: {
   const explicitChildren = useMemo(() => {
     const seen = new Set<string>();
     return ((props.context?.children as any[]) || [])
-      .filter((c) => c instanceof GroupContext || c instanceof ParticipantContext)
+      .filter(
+        (c) => c instanceof GroupContext || c instanceof ParticipantContext,
+      )
       .filter((c) => {
         if (!(c instanceof ParticipantContext)) return true;
         const name = Participants(c).First()?.name;
@@ -73,25 +77,23 @@ export const LifeLineLayer = (props: {
           />
         )}
         {explicitChildren.map((child, index) => (
-            <Fragment key={index}>
-              {child instanceof GroupContext && (
-                <LifeLineGroup
-                  key={index}
-                  context={child}
-                  renderParticipants={props.renderParticipants}
-                  renderLifeLine={props.renderLifeLine}
-                />
-              )}
-              {child instanceof ParticipantContext && (
-                <LifeLine
-                  key={index}
-                  entity={Participants(child).First()}
-                  renderParticipants={props.renderParticipants}
-                  renderLifeLine={props.renderLifeLine}
-                />
-              )}
-            </Fragment>
-          ))}
+          <Fragment key={identityKeys.get(child) ?? `index-${index}`}>
+            {child instanceof GroupContext && (
+              <LifeLineGroup
+                context={child}
+                renderParticipants={props.renderParticipants}
+                renderLifeLine={props.renderLifeLine}
+              />
+            )}
+            {child instanceof ParticipantContext && (
+              <LifeLine
+                entity={Participants(child).First()}
+                renderParticipants={props.renderParticipants}
+                renderLifeLine={props.renderLifeLine}
+              />
+            )}
+          </Fragment>
+        ))}
         {participants.ImplicitArray().map((entity: any) => (
           <LifeLine
             key={entity.name}

@@ -9,6 +9,7 @@ import { Coordinates } from "../positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
 import type { CodeRange } from "../parser/CodeRange";
 import type { DiagramPalette } from "../surface";
+import { createIdentityTracker } from "@/parser/identity/identityKeys";
 
 export const resolveWidthProvider = (): WidthFunc => {
   const urlParam =
@@ -41,6 +42,21 @@ export const rootContextAtom = atom((get) => {
   if (!code.trim()) return null;
   return RootContext(code);
 });
+
+/**
+ * One identity tracker per store. A read-only atom with no dependencies is
+ * created once per store, so two diagrams never share the previous parse.
+ */
+const identityTrackerAtom = atom(() => createIdentityTracker());
+
+/**
+ * Identity keys of the current parse (ADR 0009, gate G7): statements,
+ * fragment sections and header participants and groups keep their key while
+ * the text around them changes. Components use them as React keys.
+ */
+export const identityKeysAtom = atom((get) =>
+  get(identityTrackerAtom).update(get(rootContextAtom)),
+);
 
 export const participantsAtom = atom((get) => {
   const rootContext = get(rootContextAtom);

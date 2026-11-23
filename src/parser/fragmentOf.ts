@@ -18,6 +18,8 @@ export interface FragmentSection {
   condition?: string;
   /** The ANTLR condition node behind `condition` (if / else if / single-block kinds), for editable labels. */
   conditionContext?: any;
+  /** The section's ANTLR node (`ifBlock`, `catchBlock`, the fragment itself for single-block kinds...). */
+  context: any;
   /** False for sections that follow the first one (else if, else, catch, finally). */
   isLeading: boolean;
   block: BlockNode | undefined;
@@ -48,6 +50,7 @@ export function fragmentOf(stat: StatNode): FragmentView | null {
         context: frag,
         sections: [
           {
+            context: frag,
             guardKeyword:
               kind === "loop" ? frag.WHILE?.()?.getText?.() : undefined,
             condition: conditionText(frag),
@@ -66,6 +69,7 @@ export function fragmentOf(stat: StatNode): FragmentView | null {
     const ifBlock = alt.ifBlock?.();
     if (ifBlock) {
       sections.push({
+        context: ifBlock,
         guardKeyword: "if",
         condition: conditionText(ifBlock),
         conditionContext: conditionOf(ifBlock),
@@ -75,6 +79,7 @@ export function fragmentOf(stat: StatNode): FragmentView | null {
     }
     for (const elseIf of alt.elseIfBlock?.() || []) {
       sections.push({
+        context: elseIf,
         guardKeyword: "else if",
         condition: conditionText(elseIf),
         conditionContext: conditionOf(elseIf),
@@ -85,6 +90,7 @@ export function fragmentOf(stat: StatNode): FragmentView | null {
     const elseBlock = alt.elseBlock?.();
     if (elseBlock) {
       sections.push({
+        context: elseBlock,
         guardKeyword: "else",
         isLeading: false,
         block: blockOf(elseBlock),
@@ -99,6 +105,7 @@ export function fragmentOf(stat: StatNode): FragmentView | null {
     const tryBlock = tcf.tryBlock?.();
     if (tryBlock) {
       sections.push({
+        context: tryBlock,
         guardKeyword: "try",
         isLeading: true,
         block: blockOf(tryBlock),
@@ -106,6 +113,7 @@ export function fragmentOf(stat: StatNode): FragmentView | null {
     }
     for (const catchBlock of tcf.catchBlock?.() || []) {
       sections.push({
+        context: catchBlock,
         guardKeyword: "catch",
         condition:
           catchBlock.invocation?.()?.parameters?.()?.getFormattedText?.() || "",
@@ -116,6 +124,7 @@ export function fragmentOf(stat: StatNode): FragmentView | null {
     const finallyBlock = tcf.finallyBlock?.();
     if (finallyBlock) {
       sections.push({
+        context: finallyBlock,
         guardKeyword: "finally",
         isLeading: false,
         block: blockOf(finallyBlock),
