@@ -171,7 +171,13 @@ export function gateLine(line: string, ctx: GateContext): GatedLine {
   if (BLOCK_BARE.test(s)) return hold("keyword");
   if (/=\s*$/.test(s) && parenDepth(s) <= 0) return hold("assign");
 
-  const rhs = (s.match(/^(?:[\w$<>[\],]+\s+)?[\w$]+\s*=\s*(.*)$/) || [])[1];
+  // `Type name = rhs`, where a generic type may hold angle brackets
+  // (`List<A> xs = `). Brackets become `_` for the match only; the
+  // replacement keeps every index, so `rhs` is sliced from `s`.
+  const assign = s
+    .replace(/[<>]/g, "_")
+    .match(/^(?:[\w$[\],]+\s+)?[\w$]+\s*=\s*(.*)$/);
+  const rhs = assign ? s.slice(assign[0].length - assign[1].length) : undefined;
   const t = rhs !== undefined ? rhs : s;
   if (/^new(\s+[^\s(]*)?$/.test(t)) return hold("new-name");
   if (rhs !== undefined && /^[\w$]+$/.test(t)) return hold("bare");

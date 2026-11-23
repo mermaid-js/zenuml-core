@@ -104,6 +104,13 @@ describe("incomplete lines from the ADR", () => {
     expect(g).toEqual({ code: "if(x) {\n}", reason: null });
   });
 
+  it("reads an assignment with a generic type", () => {
+    expect(gateLine("List<A> xs = new", ctx(false)).reason).toBe("new-name");
+    expect(gateLine("Map<K,V> m = A.get(", ctx(false)).text).toBe(
+      "Map<K,V> m = A.get()",
+    );
+  });
+
   it("leaves a comment and an empty line alone", () => {
     expect(gateLine("// note", ctx(false)).text).toBe("// note");
     expect(gateLine("", ctx(false)).text).toBe("");
