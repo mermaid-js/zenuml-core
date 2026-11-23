@@ -115,8 +115,15 @@ export function walkDiagram(spec) {
         const hasFill = fill && fill !== "none" && (tag === "rect" || tag === "polygon" || tag === "path" || tag === "circle" || tag === "ellipse");
         const rr = rectOf(r);
         if (hasStroke) {
+          const tabRule = el.matches(".fragment-header-rule, path.frame-header-line");
+          // A tab rule has a vertical and a diagonal edge too. Sample its
+          // horizontal edge against the tab fill above it, like the DOM rule.
+          const ruleRect = tabRule ? rectOf(el.previousElementSibling.getBoundingClientRect()) : rr;
+          const role = el.matches(".fragment-header-rule")
+            ? "fragment-header-rule"
+            : tabRule ? "header-rule" : "svg-line";
           items.push({
-            kind: "line", role: "svg-line", host, path: cssPath(el, svg), rect: rr, edge: "svg",
+            kind: "line", role, host, path: cssPath(el, svg), rect: ruleRect, edge: tabRule ? "bottom" : "svg",
             color: stroke, opacity: effectiveOpacity(el, svg) * (parseFloat(cs.strokeOpacity) || 1),
             strokeWidth: parseFloat(cs.strokeWidth) || 1,
           });
