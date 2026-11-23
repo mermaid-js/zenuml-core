@@ -1,5 +1,13 @@
 # @zenuml/core
 
+## 4.15.1
+
+### Patch Changes
+
+- [#731](https://github.com/mermaid-js/zenuml-core/pull/731) [`18bc1c4`](https://github.com/mermaid-js/zenuml-core/commit/18bc1c4cfdda0205d21fe8d5ae3ab86805bfcf66) Thanks [@MrCoder](https://github.com/MrCoder)! - A collapsed fragment or occurrence stays collapsed while you edit other lines.
+
+- [#729](https://github.com/mermaid-js/zenuml-core/pull/729) [`3e4d987`](https://github.com/mermaid-js/zenuml-core/commit/3e4d9872fc94387aa701283af8c1b3779552ff30) Thanks [@MrCoder](https://github.com/MrCoder)! - Statements, fragment sections and header participants and groups now keep their React identity while the text around them changes (ADR 0009, gate G7). Inserting a statement in the middle no longer re-renders the statements after it into their neighbours' DOM nodes. Rendering is unchanged.
+
 ## 4.15.0
 
 ### Minor Changes
