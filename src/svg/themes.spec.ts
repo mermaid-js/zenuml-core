@@ -17,7 +17,7 @@ const LEGACY_DEFAULT_STYLES = `
   .frame-border-outer { fill: #666; }
   .frame-border-inner { fill: #ffffff; }
   .frame-header-bg { fill: #ffffff; }
-  .frame-header-line { stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
+  .frame-header-line { fill: none; stroke: #666; stroke-width: 1; }
   .frame-title { font-family: "IBM Plex Sans", Helvetica, Verdana, serif; font-size: 14px; font-weight: 400; fill: #222; }
   .participant-box { fill: #ffffff; stroke: #666; stroke-width: 1; }
   .participant-label { font-family: "IBM Plex Sans", Helvetica, Verdana, serif; font-size: 14px; fill: #222; }
@@ -31,7 +31,8 @@ const LEGACY_DEFAULT_STYLES = `
   .self-call-line { stroke: #000; stroke-width: 1; fill: none; }
   .occurrence { fill: #dedede; stroke: #666; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-border { fill: none; stroke: #666; stroke-width: 1; }
-  .fragment-header { fill: #dedede; fill-opacity: 0.498; stroke: none; shape-rendering: crispEdges; }
+  .fragment-header { fill: #dedede; fill-opacity: 0.498; stroke: none; }
+  .fragment-header-rule { fill: none; stroke: #e5e7eb; stroke-width: 1; }
   .fragment-number-bg { fill: #6b7280; fill-opacity: 0.1; stroke: none; }
   .message-number-bg { fill: #6b7280; fill-opacity: 0.1; stroke: none; }
   .fragment-label { font-family: "IBM Plex Sans", Helvetica, Verdana, serif; font-size: 14px; font-weight: 400; font-variant-caps: all-small-caps; fill: #000; }
@@ -95,7 +96,10 @@ describe("SVG theme palettes", () => {
   it("gives every theme exactly the theme-default slot set", () => {
     const slots = Object.keys(THEME_PALETTES["theme-default"]).sort();
     for (const name of Object.keys(THEME_PALETTES) as SvgTheme[]) {
-      expect(Object.keys(THEME_PALETTES[name]).sort(), name).toEqual(slots);
+      const requiredSlots = Object.keys(THEME_PALETTES[name])
+        .filter((slot) => slot !== "fragmentHeaderRule" && slot !== "titleBg")
+        .sort();
+      expect(requiredSlots, name).toEqual(slots);
     }
   });
 
@@ -220,6 +224,7 @@ const SLOT_CHAINS: Record<Exclude<keyof SvgPalette, "fontFamily" | "fragmentHead
   frameBorder: cfg.borderColor.skin.frame,
   frameBg: cfg.backgroundColor.skin.frame,
   titleText: cfg.textColor.skin.title,
+  titleBg: cfg.backgroundColor.skin.title,
   participantBg: cfg.backgroundColor.skin.participant,
   participantBorder: cfg.borderColor.skin.participant,
   lifeline: cfg.backgroundColor.skin.lifeline,
@@ -230,6 +235,7 @@ const SLOT_CHAINS: Record<Exclude<keyof SvgPalette, "fontFamily" | "fragmentHead
   occurrenceBorder: cfg.borderColor.skin.occurrence,
   fragmentBorder: cfg.borderColor.skin.fragment,
   fragmentHeaderBg: cfg.backgroundColor.skin["fragment-header"],
+  fragmentHeaderRule: cfg.borderColor.skin["fragment-header-rule"],
   fragmentHeaderText: cfg.textColor.skin["fragment-header"],
   fragmentText: cfg.textColor.skin.fragment,
   guardOpacity: cfg.opacity["skin-guard"],
@@ -265,7 +271,13 @@ describe("SVG palette parity with the DOM slot chains", () => {
           continue;
         }
         const dom = normalise(resolved);
-        const svg = normalise(palette[slot]);
+        const value =
+          slot === "titleBg"
+            ? (palette.titleBg ?? palette.frameBg)
+            : slot === "fragmentHeaderRule"
+              ? (palette.fragmentHeaderRule ?? palette.fragmentSeparator)
+              : palette[slot];
+        const svg = normalise(value);
         if (slot === "fragmentHeaderBg") {
           if (dom.alpha.toFixed(3) !== Number(palette.fragmentHeaderOpacity).toFixed(3)) {
             mismatches.push(`fragmentHeaderOpacity: DOM ${dom.alpha.toFixed(3)} vs SVG ${palette.fragmentHeaderOpacity}`);

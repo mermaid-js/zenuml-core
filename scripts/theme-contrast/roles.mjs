@@ -53,7 +53,7 @@ export const TEXT_ROLES = [
  */
 export const LINE_ROLES = [
   { role: "frame-border", selector: ".frame", edge: "left", colorProp: "border-left-color" },
-  { role: "header-rule", selector: ".frame > div > .header", edge: "bottom", colorProp: "border-bottom-color" },
+  { role: "header-rule", selector: ".title.frame-tab", edge: "bottom", colorProp: "--tab-rule" },
   { role: "participant-border", selector: ".participant", edge: "left", colorProp: "border-left-color" },
   { role: "lifeline", selector: ".lifeline .line", edge: "column", colorProp: "background-image" },
   { role: "message-line", selector: ".message > svg line", edge: "svg", colorProp: "stroke" },
@@ -61,7 +61,7 @@ export const LINE_ROLES = [
   { role: "self-arrow", selector: ".self-invocation svg.arrow polyline, .self-invocation svg.arrow path", edge: "svg", colorProp: "stroke" },
   { role: "occurrence-border", selector: ".occurrence", edge: "left", colorProp: "border-left-color" },
   { role: "fragment-border", selector: ".fragment:not(.fragment-ref)", edge: "left", colorProp: "border-left-color" },
-  { role: "fragment-header-rule", selector: ".fragment > .header > .name", edge: "bottom", colorProp: "border-bottom-color" },
+  { role: "fragment-header-rule", selector: ".fragment > .header > .frame-tab", edge: "bottom", colorProp: "--tab-rule" },
   { role: "separator", selector: ".segment.border-t", edge: "top", colorProp: "border-top-color" },
   { role: "group-outline", selector: "[data-group-overlay] rect", edge: "svg", colorProp: "stroke" },
   { role: "divider-line", selector: ".divider .left, .divider .right", edge: "top", colorProp: "border-top-color" },
@@ -69,7 +69,7 @@ export const LINE_ROLES = [
 
 export const FILL_ROLES = [
   { role: "occurrence", selector: ".occurrence", gate: true },
-  { role: "fragment-header", selector: ".fragment:not(.fragment-ref) > .header", gate: true },
+  { role: "fragment-header", selector: ".fragment > .header > .frame-tab", colorProp: "--tab-fill", gate: true },
   { role: "number-badge", selector: ".message-number, .fragment-number", gate: true },
   { role: "divider-box", selector: ".divider .name", gate: true },
   { role: "comment-code", selector: ".comments code", gate: true },

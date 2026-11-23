@@ -17,14 +17,14 @@ export function walkDiagram(spec) {
     (el) => !el.parentElement || !el.parentElement.closest(rootSel),
   );
   // The theme's surfaces, as the page paints them (first instance of each).
-  const surfaceOf = (sel) => {
+  const surfaceOf = (sel, property = "background-color") => {
     const el = document.querySelector(sel);
-    return el ? getComputedStyle(el).backgroundColor : null;
+    return el ? getComputedStyle(el).getPropertyValue(property).trim() : null;
   };
   const surfaces = {
     frame: surfaceOf(".frame") || surfaceOf(".frame-border-inner"),
     occurrence: surfaceOf(".occurrence"),
-    header: surfaceOf(".fragment:not(.fragment-ref) > .header"),
+    header: surfaceOf(".fragment > .header > .frame-tab", "--tab-fill"),
     dividerBox: surfaceOf(".divider .name"),
   };
   if (spec.mode === "svg") {
@@ -170,7 +170,7 @@ export function walkDiagram(spec) {
         let width = 1;
         if (lr.edge === "left") width = parseFloat(cs.borderLeftWidth) || 0;
         if (lr.edge === "top") width = parseFloat(cs.borderTopWidth) || 0;
-        if (lr.edge === "bottom") width = parseFloat(cs.borderBottomWidth) || 0;
+        if (lr.edge === "bottom" && lr.colorProp !== "--tab-rule") width = parseFloat(cs.borderBottomWidth) || 0;
         if (lr.edge === "svg") width = parseFloat(cs.strokeWidth) || 1;
         if (lr.edge === "row") width = r.height;
         if (lr.edge === "column") width = r.width;
@@ -200,12 +200,13 @@ export function walkDiagram(spec) {
         const cs = getComputedStyle(el);
         const opacity = effectiveOpacity(el, root);
         if (opacity < 0.05) continue;
+        const color = cs.getPropertyValue(fr.colorProp ?? "background-color").trim();
         // An unpainted background is not a fill (theme-dark drops the number
         // badge and code span fills this way).
-        if (/^rgba\(.*,\s*0\)$/.test(cs.backgroundColor) || cs.backgroundColor === "transparent") continue;
+        if (!color || /^rgba\(.*,\s*0\)$/.test(color) || color === "transparent") continue;
         items.push({
           kind: "fill", role: fr.role, host, path: cssPath(el, root), rect: rectOf(r),
-          color: cs.backgroundColor, opacity, gate: fr.gate !== false, userStyled: userStyled(el, root),
+          color, opacity, gate: fr.gate !== false, userStyled: userStyled(el, root),
         });
       }
     }

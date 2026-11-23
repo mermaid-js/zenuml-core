@@ -4,15 +4,19 @@
  * Pipeline: parse → layout → geometry IR → SVG primitives → compose
  */
 import { RootContext } from "@/parser";
-import { DIAGRAM_HEADER_HEIGHT } from "@/positioning/Constants";
+import { DIAGRAM_HEADER_HEIGHT, FRAME_TAB_CUT } from "@/positioning/Constants";
 import { Coordinates } from "@/positioning/Coordinates";
 import { VerticalCoordinates } from "@/positioning/VerticalCoordinates";
-import { WidthProviderOnCanvas } from "@/positioning/WidthProviderFunc";
+import {
+  measureTextWithFont,
+  WidthProviderOnCanvas,
+} from "@/positioning/WidthProviderFunc";
 import { buildGeometry } from "./buildGeometry";
 import { renderParticipant } from "./components/participant";
 import { renderLifeline } from "./components/lifeline";
 import { renderMessage, renderSelfCall } from "./components/message";
 import { renderOccurrence } from "./components/occurrence";
+import { renderFrameTab } from "./components/frameTab";
 import { renderFragment } from "./components/fragment";
 import { renderCreation } from "./components/creation";
 import { renderReturn } from "./components/return";
@@ -153,8 +157,15 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
       );
   }
   contentLeftMargin += Math.max(0, padding - contentLeftMargin - numberLeft);
-  const viewWidth =
-    g.width + contentLeftMargin + padding + g.frameBorderRight + 1;
+  const titleTabWidth = g.title
+    ? measureTextWithFont(g.title.replace(/\s+/g, " "), "14px") +
+      8 +
+      FRAME_TAB_CUT
+    : 0;
+  const viewWidth = Math.max(
+    g.width + contentLeftMargin + padding + g.frameBorderRight + 1,
+    Math.ceil(titleTabWidth) + 2,
+  );
   const viewHeight = g.height + padding * 2 + headerH - 1; // -1 to match HTML CSS border-box visual height
 
   const parts: string[] = [];
@@ -231,21 +242,29 @@ function composeSvg(g: DiagramGeometry, options?: RenderOptions): RenderResult {
     `<rect class="frame-border-outer" x="0" y="0" width="${viewWidth}" height="${viewHeight}" rx="${r}" fill="#666"/>`,
     `<rect class="frame-border-inner" x="1" y="1" width="${viewWidth - 2}" height="${viewHeight - 2}" rx="${Math.max(0, r - 1)}" fill="#fff"/>`,
   ].join("\n");
-  const headerLineY = 1 + DIAGRAM_HEADER_HEIGHT; // Outer frame border + shared header layout.
-  const headerLineDrawY = headerLineY - 0.5; // 33.5 — half-pixel for crisp 1px line at pixel row 33, matching HTML header border-bottom
-  const headerLineSvg = `<line class="frame-header-line" x1="1" y1="${headerLineDrawY}" x2="${viewWidth - 1}" y2="${headerLineDrawY}"/>`;
+  const contentTop = 1 + DIAGRAM_HEADER_HEIGHT;
   const titleSvg = g.title
-    ? `<text x="5" y="${headerLineDrawY / 2}" dominant-baseline="central" class="frame-title">${esc(g.title)}</text>`
+    ? renderFrameTab(
+        1,
+        1,
+        titleTabWidth,
+        DIAGRAM_HEADER_HEIGHT,
+        "frame-header-bg",
+        "frame-header-line",
+        Math.max(0, r - 1),
+      ) +
+      `<text x="5" y="${(contentTop - 0.5) / 2}" dominant-baseline="central" class="frame-title">${esc(g.title)}</text>`
     : "";
 
   const viewBox = `0 0 ${viewWidth} ${viewHeight}`;
 
   const defs = `<defs>\n  <style>${buildThemeStyles(resolveSvgPalette(options))}</style>\n</defs>`;
-  const frame = `${frameSvg}\n${headerLineSvg}\n${titleSvg}`;
-  const content = `<g transform="translate(${contentLeftMargin}, ${headerLineY})">\n${parts.join("\n")}\n</g>`;
-  const backing = options?.backingColor !== undefined
-    ? `<rect class="export-backing" x="0" y="0" width="${viewWidth}" height="${viewHeight}" style="fill: ${normaliseBackingColor(options.backingColor)} !important"/>`
-    : "";
+  const frame = `${frameSvg}\n${titleSvg}`;
+  const content = `<g transform="translate(${contentLeftMargin}, ${contentTop})">\n${parts.join("\n")}\n</g>`;
+  const backing =
+    options?.backingColor !== undefined
+      ? `<rect class="export-backing" x="0" y="0" width="${viewWidth}" height="${viewHeight}" style="fill: ${normaliseBackingColor(options.backingColor)} !important"/>`
+      : "";
   const background =
     surface.backgroundColor !== "transparent"
       ? `<rect class="canvas-background" x="0" y="0" width="${viewWidth}" height="${viewHeight}" fill="${surface.backgroundColor}"/>`

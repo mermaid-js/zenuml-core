@@ -1,4 +1,8 @@
-import { FRAGMENT_MIN_WIDTH, FRAGMENT_PADDING_X } from "./Constants";
+import {
+  FRAGMENT_MIN_WIDTH,
+  FRAGMENT_PADDING_X,
+  FRAME_TAB_CUT,
+} from "./Constants";
 import { fragmentGuardKeyword, fragmentGuardWidth } from "./FragmentGuardWidth";
 import type { Coordinates } from "./Coordinates";
 import FrameBuilder from "@/parser/FrameBuilder";
@@ -20,13 +24,21 @@ export const fragmentHeaderLabel = (kind: string): string => {
   return labels[kind] ?? kind.charAt(0).toUpperCase() + kind.slice(1);
 };
 
-/** Padding, icon column and title spacing, plus room for the number-to-icon gap. */
+export const fragmentTabWidth = (label: string, numberInset: number) =>
+  26 +
+  numberInset +
+  measureTextWithFont(label, "14px", "all-small-caps") +
+  4 +
+  FRAME_TAB_CUT;
+
+// The two frame borders and the space a DOM collapse control needs past the tab.
 export const fragmentHeaderWidth = (label: string, number?: string) =>
   Math.ceil(
-    32 +
-      measureTextWithFont(label, "14px", "all-small-caps") * 1.1 +
-      (number ? measureTextWithFont(number, "12px") + 15 : 0),
-  );
+    fragmentTabWidth(
+      label,
+      number ? measureTextWithFont(number, "12px") + 14 : 0,
+    ),
+  ) + 8;
 
 /** Minimum span of a fragment, including the titles and guards of its descendants. */
 export const fragmentMinimumWidth = (

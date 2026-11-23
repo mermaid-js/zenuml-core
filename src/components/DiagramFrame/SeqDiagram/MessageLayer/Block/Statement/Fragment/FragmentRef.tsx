@@ -50,7 +50,7 @@ export const FragmentRef = (props: {
             {/* The ref box has no header band: its label sits on the frame. */}
             <div className="polygon-content bg-skin-frame text-skin-fragment relative m-px flex items-center justify-center">
               <span
-                className={`flex items-center justify-center gap-0.5 whitespace-nowrap px-1 h-8 font-normal ${props.commentObj?.messageClassNames || ""}`}
+                className={`flex items-center justify-center gap-0.5 whitespace-nowrap pl-1 pr-3.5 h-8 font-normal ${props.commentObj?.messageClassNames || ""}`}
                 style={props.commentObj?.messageStyle}
               >
                 <FragmentNumbering number={props.number} onFrame />

@@ -45,6 +45,7 @@ export interface DiagramPalette {
   frameBg?: string;
   frameBorder?: string;
   titleText?: string;
+  titleBg?: string;
   participantBg?: string;
   participantBorder?: string;
   participantText?: string;
@@ -55,6 +56,7 @@ export interface DiagramPalette {
   occurrenceBorder?: string;
   fragmentBorder?: string;
   fragmentHeaderBg?: string;
+  fragmentHeaderRule?: string;
   fragmentHeaderText?: string;
   fragmentText?: string;
   fragmentSeparator?: string;
