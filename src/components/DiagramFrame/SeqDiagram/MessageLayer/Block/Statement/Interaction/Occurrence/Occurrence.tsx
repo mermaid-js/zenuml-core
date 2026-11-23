@@ -13,6 +13,7 @@ import {
   selectedMessageAtom,
 } from "@/store/Store";
 import { useCan } from "@/store/interaction/useCan";
+import { useIdentityKey } from "@/store/useIdentityKey";
 import { Message } from "../../Message/Message";
 import { clientToLocal, rectToLocal } from "@/utils/diagramCoords";
 import { syncMessageNormalizer } from "@/utils/messageNormalizers";
@@ -64,9 +65,12 @@ export const Occurrence = (props: {
     setCollapsed(!collapsed);
   };
 
+  // Expand again only when the message becomes another element, not on every
+  // parse: each parse creates a new context, the identity key survives it.
+  const identityKey = useIdentityKey(props.context);
   useEffect(() => {
     setCollapsed(false);
-  }, [props.context]);
+  }, [identityKey]);
 
   const assigneeData = useMemo(() => {
     // Check if context has Assignment function (works for both CreationContext and MessageContext)
