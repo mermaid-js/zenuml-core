@@ -51,6 +51,11 @@
     for (const ch of s) { if (ch === '"') q = !q; else if (!q && ch === '(') d++; else if (!q && ch === ')') d--; }
     return d;
   };
+  const hasOpenBrace = (s) => {
+    let q = false;
+    for (const ch of s) { if (ch === '"') q = !q; else if (!q && ch === '{') return true; }
+    return false;
+  };
   const KEYWORDS = ['if', 'else', 'while', 'for', 'foreach', 'forEach', 'loop', 'section', 'frame', 'critical', 'opt', 'par', 'try', 'catch', 'finally', 'group', 'ref', 'new', 'return', 'title'];
   const keywordPrefix = (s) => s.length > 0 && KEYWORDS.some((k) => k !== s && k.startsWith(s));
 
@@ -82,7 +87,8 @@
     }
     if (LOOP_HEAD.test(s)) {
       const c = closeParens(s);
-      return pass(/\{$/.test(c) ? c : c + ' {');
+      // A head like `if(ok) { }` already has its block; a second `{` becomes an unnamed SECTION.
+      return pass(hasOpenBrace(c) ? c : c + ' {');
     }
     if (/^ref\s*\(/.test(s)) return pass(closeParens(s));
     if (BLOCK_BARE.test(s)) return hold('keyword');
