@@ -19,6 +19,7 @@ export const INTERACTION_KINDS = [
   "gapMenu",
   "createDrag",
   "reorderDrag",
+  "writingHeld",
 ] as const;
 export type InteractionKind = (typeof INTERACTION_KINDS)[number];
 
@@ -28,7 +29,8 @@ export type InteractionState =
   | { kind: "messageMenu"; start: number; end: number }
   | { kind: "gapMenu"; id: string }
   | { kind: "createDrag"; source: string }
-  | { kind: "reorderDrag"; key: string };
+  | { kind: "reorderDrag"; key: string }
+  | { kind: "writingHeld" };
 
 /** The primary states that are stored, not derived (P2): open menus. */
 export type MenuState = Extract<
@@ -72,6 +74,9 @@ export const POLICY: Record<InteractionKind, Row> = {
   // Each drag keeps its own capability so the drag can complete.
   createDrag: row("createMessage"),
   reorderDrag: row("reorder"),
+  // ADR 0009: the diagram draws gated text, so its token offsets do not match
+  // the document. Nothing may write code; collapse only changes the view.
+  writingHeld: row("collapse"),
 };
 
 /**
