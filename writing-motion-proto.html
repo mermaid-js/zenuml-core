@@ -1,0 +1,274 @@
+<!doctype html>
+<!--
+  Prototype only (ADR 0009 motion): a growing arrow and a pen-drawn fragment,
+  played on a real rendered diagram. Not wired into the renderer.
+  Dev server only: `bun dev`, then http://localhost:14000/writing-motion-proto.html.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Motion Prototype</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --line: #d3d8de;
+        --muted: #5d6670;
+        --accent: #1f4fd8;
+        font:
+          14px/1.5 -apple-system,
+          "Segoe UI",
+          sans-serif;
+        color: #1b2026;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: var(--bg);
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      button {
+        font: inherit;
+        padding: 5px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      #stage {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        display: inline-block;
+        min-width: 320px;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <button id="arrows">Play arrows</button>
+      <button id="frags">Play fragments</button>
+      <button id="all">Play all, in order</button>
+      <label
+        >Speed
+        <select id="speed">
+          <option value="1">1×</option>
+          <option value="2">½×</option>
+          <option value="4">¼×</option>
+        </select></label
+      >
+      <span class="muted"
+        >D = 240 ms. Arrow: the line grows from the sender, the head rides on
+        its tip, then the label appears. Fragment: a pen traces the rectangle,
+        then the header fills from left to right.</span
+      >
+    </div>
+    <div id="stage"><div id="diagram"></div></div>
+
+    <script type="module">
+      import ZenUml from "./src/core.tsx";
+
+      const CODE = `title Motion prototype
+A.m() {
+  if(amount > 0) {
+    B.charge(card)
+    return receipt
+  } else {
+    B.reject()
+  }
+}
+B->A: done`;
+
+      const D = 240;
+      const $ = (id) => document.getElementById(id);
+      const slow = () => Number($("speed").value);
+      const root = () => $("diagram").querySelector(".zenuml") || $("diagram");
+      let running = [];
+
+      const zen = new ZenUml($("diagram"));
+      await zen.render(CODE, {});
+
+      function stopAll() {
+        running.forEach((a) => a.finish?.());
+        running = [];
+        $("stage")
+          .querySelectorAll("[data-proto-stroke]")
+          .forEach((n) => n.remove());
+      }
+      const anim = (el, frames, opts) => {
+        const a = el.animate(frames, { fill: "backwards", ...opts });
+        running.push(a);
+        return a;
+      };
+
+      /** Arrow: the line grows from the sender; the head rides on its tip. */
+      function playArrow(msg, start) {
+        const k = slow();
+        const [line, head] = msg.querySelectorAll(":scope > svg");
+        if (!line || !head) return start;
+        const toRight = head.classList.contains("right-0");
+        const width = msg.getBoundingClientRect().width;
+        const grow = D * k;
+        anim(
+          line,
+          [
+            {
+              clipPath: toRight ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)",
+            },
+            { clipPath: "inset(0 0 0 0)" },
+          ],
+          { duration: grow, delay: start, easing: "ease-out" },
+        );
+        const from = toRight ? -(width - 8) : width - 8;
+        anim(
+          head,
+          [
+            { transform: `translateX(${from}px)`, opacity: 0, offset: 0 },
+            {
+              transform: `translateX(${from * 0.9}px)`,
+              opacity: 1,
+              offset: 0.1,
+            },
+            { transform: "translateX(0)", opacity: 1 },
+          ],
+          { duration: grow, delay: start, easing: "ease-out" },
+        );
+        const label = msg.querySelector(":scope > .name");
+        if (label) {
+          anim(
+            label,
+            [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }],
+            {
+              duration: 0.6 * grow,
+              delay: start + 0.5 * grow,
+              easing: "linear",
+            },
+          );
+        }
+        const number = msg.querySelector(":scope > .message-number");
+        if (number) {
+          anim(number, [{ opacity: 0 }, { opacity: 1 }], {
+            duration: 0.4 * grow,
+            delay: start,
+          });
+        }
+        return start + 1.1 * grow;
+      }
+
+      /** Fragment: a pen traces the rectangle, then the header fills in. */
+      function playFragment(frag, start) {
+        const k = slow();
+        const trace = 1.5 * D * k;
+        const css = getComputedStyle(frag);
+        const width = parseFloat(css.borderTopWidth) || 1;
+        const color = css.borderTopColor;
+        const radius = parseFloat(css.borderTopLeftRadius) || 0;
+        // Pen strokes live in #stage, the positioned box around the diagram.
+        const host = $("stage");
+        const o = host.getBoundingClientRect();
+        const r = frag.getBoundingClientRect();
+        const NS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(NS, "svg");
+        svg.setAttribute("data-proto-stroke", "");
+        Object.assign(svg.style, {
+          position: "absolute",
+          left: `${r.left - o.left - host.clientLeft}px`,
+          top: `${r.top - o.top - host.clientTop}px`,
+          width: `${r.width}px`,
+          height: `${r.height}px`,
+          overflow: "visible",
+          pointerEvents: "none",
+          zIndex: "50",
+        });
+        const rect = document.createElementNS(NS, "rect");
+        const half = width / 2;
+        for (const [k2, v] of Object.entries({
+          x: half,
+          y: half,
+          width: Math.max(0, r.width - width),
+          height: Math.max(0, r.height - width),
+          rx: radius,
+          fill: "none",
+          stroke: color,
+          "stroke-width": width,
+          pathLength: 1,
+          "stroke-dasharray": 1,
+          "stroke-dashoffset": 1,
+        }))
+          rect.setAttribute(k2, String(v));
+        svg.appendChild(rect);
+        host.appendChild(svg);
+        const pen = anim(
+          rect,
+          [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
+          { duration: trace, delay: start, easing: "ease-in-out" },
+        );
+        pen.onfinish = () => svg.remove();
+        pen.oncancel = () => svg.remove();
+        anim(
+          frag,
+          [{ borderColor: "transparent" }, { borderColor: "transparent" }],
+          { duration: trace, delay: start },
+        );
+        const fill = D * k;
+        const header = frag.querySelector(":scope > .header");
+        if (header) {
+          anim(
+            header,
+            [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }],
+            { duration: fill, delay: start + trace, easing: "ease-out" },
+          );
+        }
+        // Else-branch rules and labels appear with the header.
+        frag
+          .querySelectorAll(
+            ":scope > .segment > .text-skin-fragment, :scope .else-label",
+          )
+          .forEach((n) =>
+            anim(n, [{ opacity: 0 }, { opacity: 1 }], {
+              duration: fill,
+              delay: start + trace,
+            }),
+          );
+        return start + trace + fill;
+      }
+
+      const messages = () => [...root().querySelectorAll(".message")];
+      const fragments = () => [...root().querySelectorAll(".fragment")];
+
+      $("arrows").addEventListener("click", () => {
+        stopAll();
+        let t = 0;
+        for (const m of messages()) t = playArrow(m, t);
+      });
+      $("frags").addEventListener("click", () => {
+        stopAll();
+        let t = 0;
+        for (const f of fragments()) t = playFragment(f, t);
+      });
+      $("all").addEventListener("click", () => {
+        stopAll();
+        // Document order: each fragment draws before the messages inside it.
+        const items = [...root().querySelectorAll(".message, .fragment")];
+        let t = 0;
+        for (const el of items) {
+          t = el.classList.contains("fragment")
+            ? playFragment(el, t)
+            : playArrow(el, t);
+        }
+      });
+    </script>
+  </body>
+</html>
