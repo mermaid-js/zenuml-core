@@ -257,6 +257,43 @@ describe("a trailing dot before a line that starts a new statement (#671)", () =
   });
 });
 
+describe("a dot right before a closing paren", () => {
+  // `name.` then `)` is never valid: the dot needs a method name after it.
+  // While `br.readLine()` is being typed inside a condition, the dot must not
+  // cut the condition and draw `br.` as a message to a new participant.
+  it.each([
+    ["while((line = br.)) {\n}", "while((line = br)) {\n}"],
+    ["if(a.) {\n}", "if(a) {\n}"],
+    [
+      "A.m() {\n  while((line = br.)) {\n  }\n}",
+      "A.m() {\n  while((line = br)) {\n  }\n}",
+    ],
+    ["A.b(x.)", "A.b(x)"],
+  ])("%j draws what %j draws", (typing, plain) => {
+    expect(statements(typing)).toEqual(statements(plain));
+    expect(RootContext(typing).block().stat()).toHaveLength(
+      RootContext(plain).block().stat().length,
+    );
+  });
+
+  it("reports the dot", () => {
+    const result = parse("if(a.) {\n}");
+    expect(result.pass).toBe(false);
+    expect(result.errorDetails).toContainEqual({
+      line: 1,
+      column: 4,
+      msg: "extraneous '.' before ')'",
+    });
+  });
+
+  it("keeps a call that follows the dot", () => {
+    expect(statements("while(br.readLine()) {\n}")).toEqual(
+      statements("while(br.readLine()) {\n}"),
+    );
+    expect(parse("A.b(x.y())").pass).toBe(true);
+  });
+});
+
 describe("an emoji typed after the target dot, before the method name", () => {
   // `methodName` is `emoji? name`: an emoji with no name after it is never
   // valid. While it is being typed it must draw what `A.` draws, not a second
