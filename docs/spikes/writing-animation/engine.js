@@ -69,7 +69,11 @@
       : { text: t ? indent + t : '', reason };
     if (!s || s.startsWith('//')) return pass(s);
     if (oddQuotes(s)) {
-      if (s.indexOf('"') > 0 && /[.(]/.test(s.slice(0, s.lastIndexOf('"')))) return pass(closeParens(s + '"'));
+      const open = s.lastIndexOf('"');
+      if (open > 0 && /[.(]/.test(s.slice(0, open))) return pass(closeParens(s + '"'));
+      // `"a b"->"c` : keep what the complete prefix draws instead of blanking the line.
+      const prefix = s.slice(0, open).trimEnd();
+      if (prefix) return gateLine(indent + prefix, ctx);
       return hold('string');
     }
     if (/^group\b/.test(s) && !/[{}]$/.test(s)) return hold('keyword');
