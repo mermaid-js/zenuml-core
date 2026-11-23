@@ -14,6 +14,7 @@ import {
 import { FRAGMENT_MIN_WIDTH } from "@/positioning/Constants";
 import { useEffect, useMemo, useState } from "react";
 import { walkStatements } from "@/svg/walkStatements";
+import { useIdentityKey } from "@/store/useIdentityKey";
 
 import { depthOnParticipant } from "@/parser/depthOnParticipant";
 import Anchor2 from "@/positioning/Anchor2";
@@ -102,9 +103,12 @@ export const useFragmentData = (
     setCollapsed((prev) => !prev);
   };
 
+  // Expand again only when the fragment becomes another element, not on every
+  // parse: each parse creates a new context, the identity key survives it.
+  const identityKey = useIdentityKey(context);
   useEffect(() => {
     setCollapsed(false);
-  }, [context]);
+  }, [identityKey]);
 
   const allParticipants = coordinates.orderedParticipantNames();
   const localParticipants = getLocalParticipantNames(context);
