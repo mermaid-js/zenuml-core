@@ -2,10 +2,12 @@ import { atom, type Atom } from "jotai";
 import {
   createMessageDragAtom,
   enableParticipantStyleEditingAtom,
+  enableWritingAnimationAtom,
   messageReorderDragAtom,
   messageReorderDropAtom,
   messageReorderPendingAtom,
   modeAtom,
+  renderCodeAtom,
   RenderMode,
   selectedAtom,
   textEditingAtom,
@@ -51,6 +53,10 @@ export const exitMenuAtom = atom(null, (get, set, menu: MenuRef) => {
  * drags win over selection.
  */
 export const derivedInteractionAtom = atom<InteractionState | null>((get) => {
+  // ADR 0009: while the diagram draws gated text, editing is off.
+  if (get(enableWritingAnimationAtom) && get(renderCodeAtom) !== null) {
+    return { kind: "writingHeld" };
+  }
   const createDrag = get(createMessageDragAtom);
   if (createDrag) return { kind: "createDrag", source: createDrag.source };
 

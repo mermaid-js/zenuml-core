@@ -1,6 +1,11 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback } from "react";
-import { codeAtom, onContentChangeAtom, onEventEmitAtom } from "./Store";
+import {
+  codeAtom,
+  onContentChangeAtom,
+  onEventEmitAtom,
+  renderCodeAtom,
+} from "./Store";
 import { trackEvent, type TrackedEdit } from "./trackEvent";
 
 /**
@@ -16,14 +21,17 @@ export const useCommitCode = (): ((
   edit?: TrackedEdit,
 ) => void) => {
   const setCode = useSetAtom(codeAtom);
+  const setRenderCode = useSetAtom(renderCodeAtom);
   const onContentChange = useAtomValue(onContentChangeAtom);
   const onEventEmit = useAtomValue(onEventEmitAtom);
   return useCallback(
     (next: string, edit?: TrackedEdit) => {
       setCode(next);
+      // An in-diagram edit is raw text: the diagram draws it as is.
+      setRenderCode(null);
       onContentChange(next);
       if (edit) trackEvent(onEventEmit, edit);
     },
-    [setCode, onContentChange, onEventEmit],
+    [setCode, setRenderCode, onContentChange, onEventEmit],
   );
 };

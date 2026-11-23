@@ -76,6 +76,11 @@ export class WritingGate {
     if (this.edit.removed || this.edit.bulk) this.removedSinceCommit = true;
   }
 
+  /** The last edit was a paste of two or more lines: it is not gated. */
+  get bulk(): boolean {
+    return this.edit.bulk;
+  }
+
   /** After this time the raw text is rendered unconditionally. */
   get idleAt(): number {
     return this.lastInput + IDLE_FLUSH_MS;

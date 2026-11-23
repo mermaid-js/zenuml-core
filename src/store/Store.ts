@@ -37,8 +37,23 @@ export const codeAtom = atom("");
 /** A monotonically increasing request id observed after React commits. */
 export const renderRevisionAtom = atom(0);
 
+/**
+ * `enableWritingAnimation` (ADR 0009). Experimental, off by default. While
+ * on, `render()` gates incomplete text before the diagram parses it.
+ */
+export const enableWritingAnimationAtom = atom(false);
+
+/**
+ * The gated text the diagram draws while it differs from `codeAtom`; `null`
+ * when the diagram draws the raw text. Only `rootContextAtom` reads it, and
+ * only while the option is on: editing controls, `onContentChange`,
+ * `parse()` and `renderToSvg` keep the raw text.
+ */
+export const renderCodeAtom = atom<string | null>(null);
+
 export const rootContextAtom = atom((get) => {
-  const code = get(codeAtom);
+  const gated = get(enableWritingAnimationAtom) ? get(renderCodeAtom) : null;
+  const code = gated ?? get(codeAtom);
   if (!code.trim()) return null;
   return RootContext(code);
 });

@@ -61,6 +61,11 @@ describe("POLICY table", () => {
     expect(allowed).toEqual([]);
   });
 
+  it("allows only collapse while the writing gate holds a line (ADR 0009)", () => {
+    const allowed = CAPABILITIES.filter((cap) => POLICY.writingHeld[cap]);
+    expect(allowed).toEqual(["collapse"]);
+  });
+
   it("allows only select, reorder and text edit while the message menu is open", () => {
     const allowed = CAPABILITIES.filter((cap) => POLICY.messageMenu[cap]);
     expect(allowed).toEqual(["select", "reorder", "textEdit"]);

@@ -9,6 +9,7 @@ import {
   enableParticipantInsertionAtom,
   enableParticipantStyleEditingAtom,
   enableScopedThemingAtom,
+  enableWritingAnimationAtom,
   lifelineReadyAtom,
   modeAtom,
   paletteAtom,
@@ -16,6 +17,7 @@ import {
   onEventEmitAtom,
   onThemeChangeAtom,
   RenderMode,
+  renderCodeAtom,
   renderRevisionAtom,
   stickyOffsetAtom,
   themeAtom,
@@ -24,6 +26,8 @@ import { DiagramFrame } from "./components/DiagramFrame/DiagramFrame";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { VERSION } from "./version.ts";
 import Parser from "./parser/index";
+import { WritingGate } from "./writing/WritingGate";
+import { shownOf } from "./writing/shown";
 import colorString from "color-string";
 
 import "./assets/tailwind.css";
@@ -181,6 +185,18 @@ export interface Config {
    * editing flag above.
    */
   enableMessageReorder?: boolean;
+  /**
+   * Experimental, off by default (ADR 0009). While typing, the diagram does
+   * not draw a line until it is complete enough to parse as intended; after
+   * 1,200 ms without a new `render()` it draws the text as is. Diagram
+   * editing is off while a line is held. `await render()` resolves only when
+   * the diagram shows the text that was passed. No motion yet.
+   *
+   * Written in `render()` itself. Keeps its value when `undefined`. Has no
+   * effect in `RenderMode.Static`, on the first render, or for a paste of two
+   * or more lines.
+   */
+  enableWritingAnimation?: boolean;
 }
 
 type Absent = (config: Config, key: keyof Config) => boolean;
@@ -323,6 +339,13 @@ const CONFIG_BINDINGS = [
     isAbsent: isUndefined,
     onAbsent: "keep",
   }),
+  bind({
+    key: "enableWritingAnimation",
+    atom: enableWritingAnimationAtom,
+    appliedIn: "render",
+    isAbsent: isUndefined,
+    onAbsent: "keep",
+  }),
 ];
 
 export interface ParseResult {
@@ -369,6 +392,10 @@ export default class ZenUml implements IZenUml {
     resolve: (value: IZenUml) => void;
     reject: (reason: unknown) => void;
   }[] = [];
+  /** ADR 0009: the gate's state. `_currentTimeout` stays the one timer. */
+  private readonly writingGate = new WritingGate((text) =>
+    shownOf(text.trim() ? Parser.RootContext(text) : null),
+  );
   constructor(
     el: HTMLElement | string,
     naked: boolean = false,
@@ -427,6 +454,7 @@ export default class ZenUml implements IZenUml {
   ): Promise<IZenUml> {
     if (this._currentTimeout) {
       clearTimeout(this._currentTimeout);
+      this._currentTimeout = undefined;
     }
     const revision = ++this.revision;
     this._code = code === undefined ? this._code : code;
@@ -438,18 +466,36 @@ export default class ZenUml implements IZenUml {
     const result = new Promise<IZenUml>((resolve, reject) => {
       this.pendingRenders.push({ resolve, reject });
     });
+
+    // ADR 0009: the gate sees every call, before the debounce merges them.
+    const raw = this._code || "";
+    let gated =
+      this.store.get(enableWritingAnimationAtom) &&
+      this.store.get(modeAtom) === RenderMode.Dynamic &&
+      !this.initialRender &&
+      code !== undefined;
+    if (gated) {
+      this.writingGate.input(raw, performance.now());
+      gated = !this.writingGate.bulk;
+    }
+    if (!gated) this.writingGate.reset(raw);
+
+    if (gated) {
+      this._currentTimeout = setTimeout(
+        () => this.writingStep("frame", config, revision),
+        this.calculateDebounceMilliseconds(),
+      );
+      return result;
+    }
+
     const run = () => {
-      void this.doRender(config, revision).then(
+      void this.doRender(config, revision, raw).then(
         () => {
           if (revision !== this.revision) return;
-          for (const pending of this.pendingRenders.splice(0))
-            pending.resolve(this);
+          this.writingGate.committed(raw);
+          this.settleRenders();
         },
-        (error) => {
-          if (revision !== this.revision) return;
-          for (const pending of this.pendingRenders.splice(0))
-            pending.reject(error);
-        },
+        (error) => this.failRenders(revision, error),
       );
     };
     if (this.initialRender) {
@@ -462,6 +508,59 @@ export default class ZenUml implements IZenUml {
       );
     }
     return result;
+  }
+
+  private settleRenders() {
+    for (const pending of this.pendingRenders.splice(0)) pending.resolve(this);
+  }
+
+  private failRenders(revision: number, error: unknown) {
+    if (revision !== this.revision) return;
+    for (const pending of this.pendingRenders.splice(0)) pending.reject(error);
+  }
+
+  /**
+   * One step of the writing gate (ADR 0009, Decision 2): the first frame
+   * after the debounce, then dwell, loss-hold and idle-flush steps. Each step
+   * arms at most one timer, `_currentTimeout`; a new `render()` clears it.
+   */
+  private writingStep(
+    step: "frame" | "settle",
+    config: Config | undefined,
+    revision: number,
+  ) {
+    this._currentTimeout = undefined;
+    if (revision !== this.revision) return;
+    const now = performance.now();
+    const gate = this.writingGate;
+    const res =
+      step === "frame"
+        ? gate.frame(now)
+        : gate.lossExpired(now)
+          ? gate.force(now)
+          : gate.settle(now);
+    const later = (wait: number | null) => {
+      const at = Math.min(wait === null ? Infinity : now + wait, gate.idleAt);
+      this._currentTimeout = setTimeout(
+        () => this.writingStep("settle", config, this.revision),
+        Math.max(0, at - now),
+      );
+    };
+    if (res.text === null) {
+      later(res.wait);
+      return;
+    }
+    const text = res.text;
+    const frameRevision = step === "frame" ? revision : ++this.revision;
+    void this.doRender(config, frameRevision, text).then(
+      () => {
+        if (frameRevision !== this.revision) return;
+        gate.committed(text);
+        if (gate.settled) this.settleRenders();
+        else later(res.wait);
+      },
+      (error) => this.failRenders(frameRevision, error),
+    );
   }
 
   /** Copies the options of one phase into the store; see CONFIG_BINDINGS. */
@@ -480,18 +579,31 @@ export default class ZenUml implements IZenUml {
     }
   }
 
-  async doRender(config: Config | undefined, revision = this.revision) {
+  /**
+   * Renders `text`: the raw code, or the gated text while
+   * `enableWritingAnimation` holds a line. `codeAtom` always gets the raw code.
+   */
+  async doRender(
+    config: Config | undefined,
+    revision = this.revision,
+    text = this._code || "",
+  ) {
     // Text is measured during render; the face must be available first.
     await ensureDiagramFontsLoaded();
     if (revision !== this.revision) return;
     const start = getStartTime();
     clearCache();
     this.applyConfig(config, "doRender");
-    const changed = this._code !== this.store.get(codeAtom);
+    const raw = this._code || "";
+    const renderCode = text === raw ? null : text;
+    const changed =
+      raw !== this.store.get(codeAtom) ||
+      renderCode !== this.store.get(renderCodeAtom);
     const beginRender = () =>
       flushSync(() => {
         if (changed) this.store.set(lifelineReadyAtom, []);
-        if (changed) this.store.set(codeAtom, this._code || "");
+        if (changed) this.store.set(codeAtom, raw);
+        if (changed) this.store.set(renderCodeAtom, renderCode);
         this.store.set(renderRevisionAtom, revision);
       });
     const ready = changed
