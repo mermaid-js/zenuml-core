@@ -188,7 +188,13 @@ export function gateLine(line: string, ctx: GateContext): GatedLine {
     if (!arrow[2] || !arrow[3]) return hold("arrow");
     return ctx.names.has(arrow[3]) ? pass(closeParens(s)) : hold("target");
   }
-  if (/[.({}:]/.test(s) || s.includes("->") || /^return\b/.test(s))
+  // Punctuation inside quotes is part of a name: `"a:b"` alone is bare.
+  const unquoted = s.replace(/"[^"]*"/g, '""');
+  if (
+    /[.({}:]/.test(unquoted) ||
+    unquoted.includes("->") ||
+    /^return\b/.test(s)
+  )
     return pass(closeParens(s));
   return hold("bare");
 }

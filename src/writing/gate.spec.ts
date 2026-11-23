@@ -73,6 +73,21 @@ describe("incomplete lines from the ADR", () => {
     expect(gateLine("Bo", ctx(false))).toEqual({ text: "", reason: "bare" });
   });
 
+  // G4, demo1-smoke: `"ret:CreatAndAssign"` alone drew a self-call that the
+  // next key removed. Punctuation inside quotes is part of a name.
+  it("holds a bare quoted name, even with punctuation inside the quotes", () => {
+    expect(gateLine('  "ret:CreatAndAssign"', ctx(false))).toEqual({
+      text: "",
+      reason: "bare",
+    });
+    expect(gateLine('"a.b(c)"', ctx(false)).reason).toBe("bare");
+    expect(gateLine('"a b".m', ctx(false))).toEqual({
+      text: '"a b".m',
+      reason: null,
+    });
+    expect(gateLine('"ret:C".m(a', ctx(false)).text).toBe('"ret:C".m(a)');
+  });
+
   it("holds a keyword prefix, even after the dwell", () => {
     expect(gateLine("re", ctx(true))).toEqual({ text: "", reason: "keyword" });
   });
