@@ -26,7 +26,7 @@ import ToCollector from "@/parser/ToCollector";
 import { fragmentOf } from "@/parser/fragmentOf";
 import { reconcileByName, reconcileList, type Signed } from "./reconcile";
 
-interface IdNode extends Signed {
+export interface IdNode extends Signed {
   ctx: object;
   children: IdNode[];
 }
@@ -130,6 +130,10 @@ const headNodes = (head: any) => {
   }
   return { groups, participants };
 };
+
+/** The statement tree of a parse: kind, header label and nested statements. */
+export const statementTree = (root: any): IdNode[] =>
+  root ? statNodes(root.block?.()) : [];
 
 interface Snapshot {
   root: object;
