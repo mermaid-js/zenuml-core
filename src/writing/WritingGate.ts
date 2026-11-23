@@ -50,7 +50,8 @@ export interface Frame {
 export class WritingGate {
   private raw = "";
   private edit: Edit = { line: 0, inserted: "", removed: "", bulk: true };
-  private shown: Shown = { names: new Set(), statements: [] };
+  /** Parsed lazily: with the option off, nothing reads it. */
+  private shownCache: Shown | null = null;
   private shownText: string | null = null;
   private lossSince: number | null = null;
   private removedSinceCommit = false;
@@ -113,10 +114,15 @@ export class WritingGate {
 
   /** The frame for `text` committed. */
   committed(text: string) {
-    this.shown = this.shownFor(text);
+    if (text !== this.shownText) this.shownCache = null;
     this.shownText = text;
     this.lossSince = null;
     this.removedSinceCommit = false;
+  }
+
+  private get shown(): Shown {
+    this.shownCache ??= this.shownFor(this.shownText ?? "");
+    return this.shownCache;
   }
 
   private offer(now: number, dwell: boolean, force: boolean): Frame {

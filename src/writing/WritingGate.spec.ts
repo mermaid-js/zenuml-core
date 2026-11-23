@@ -22,6 +22,18 @@ describe("Tempo", () => {
 });
 
 describe("WritingGate", () => {
+  it("does not parse on commit (the option-off path only commits)", () => {
+    let parses = 0;
+    const g = new WritingGate(() => {
+      parses++;
+      return { names: new Set(), statements: [] };
+    });
+    g.reset("A.m()");
+    g.committed("A.m()");
+    g.committed("A.m()\nB.n()");
+    expect(parses).toBe(0);
+  });
+
   it("renders a complete line as typed", () => {
     const g = make("A.m()");
     g.input("A.m()\nB.n()", 100);
