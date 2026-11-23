@@ -65,6 +65,16 @@ describe("WritingGate", () => {
     expect(g.frame(200).text).toBe("group x {a}\n");
   });
 
+  // Trial feedback: in arm C a finished title line stayed hidden until a
+  // third line was typed, because a title alone counted as an empty frame.
+  it("leaves the empty frame once a finished title line draws", () => {
+    const g = make("");
+    g.input("title Order checkout\n", 100);
+    expect(g.frame(200).text).toBe("title Order checkout\n");
+    g.input("title Order checkout\n@Actor Cus", 300);
+    expect(g.frame(400).text).not.toBeNull();
+  });
+
   it("leaves the empty frame at the idle flush", () => {
     const g = make("");
     g.input("Production.", 100);

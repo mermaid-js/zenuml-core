@@ -42,7 +42,9 @@ export class Tempo {
 }
 
 const isEmpty = (shown: Shown) =>
-  shown.names.size === 0 && shown.statements.length === 0;
+  shown.names.size === 0 &&
+  shown.statements.length === 0 &&
+  !shown.title?.trim();
 
 export interface Frame {
   /** The text to render, or `null` to keep the frame on screen. */
