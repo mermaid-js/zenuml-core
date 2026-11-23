@@ -53,12 +53,27 @@ export interface RepairError {
  */
 export function repairIncompleteCalls(stream: Token): RepairError[] {
   stream.fill();
-  const visible: Token[] = stream.tokens.filter(
-    (t: Token) => t.channel === DEFAULT_CHANNEL,
-  );
-
   const errors: RepairError[] = [];
   const toRemove = new Set<Token>();
+
+  // An emoji begun after a dot but not followed by its method name yet
+  // (`A.[`, `A.[lo`, `A.[lock]`) is dropped, so the message draws as `A.`.
+  // The other passes then see the tokens the parser will see.
+  const all: Token[] = stream.tokens.filter(
+    (t: Token) => t.channel === DEFAULT_CHANNEL,
+  );
+  all.forEach((_token, index) => {
+    const emoji = incompleteEmojiAfterDot(all, index);
+    if (!emoji) return;
+    emoji.forEach((t) => toRemove.add(t));
+    errors.push({
+      line: emoji[0].line,
+      column: emoji[0].column,
+      msg: "incomplete emoji: the method name is missing",
+    });
+  });
+  const visible = all.filter((t) => !toRemove.has(t));
+
   const toCloseAfter: Token[] = [];
   const toTerminateAfter: Token[] = [];
 
@@ -105,12 +120,44 @@ export function repairIncompleteCalls(stream: Token): RepairError[] {
 
   if (errors.length === 0) return errors;
 
-  stream.tokens = rebuild(stream.tokens, toCloseAfter, toRemove, toTerminateAfter);
+  stream.tokens = rebuild(
+    stream.tokens,
+    toCloseAfter,
+    toRemove,
+    toTerminateAfter,
+  );
   stream.tokens.forEach((t: Token, i: number) => {
     t.tokenIndex = i;
   });
   errors.sort((a, b) => a.line - b.line || a.column - b.column);
   return errors;
+}
+
+/**
+ * The tokens `[`, `[ name` or `[ name ]` that follow the `.` at `index` and end
+ * their line: an emoji with no method name after it. `methodName` is
+ * `emoji? name`, so this is never valid; left alone, the grammar reads it as a
+ * new statement from an emoji participant.
+ */
+function incompleteEmojiAfterDot(
+  visible: Token[],
+  index: number,
+): Token[] | null {
+  const open = visible[index + 1];
+  if (visible[index].type !== P.DOT || open?.type !== P.LBRACKET) return null;
+  const emoji = [open];
+  const sameLine = (t: Token | undefined) =>
+    t !== undefined && t.type !== P.EOF && t.line === open.line;
+  let next = visible[index + 2];
+  if (sameLine(next) && NAMES.has(next.type)) {
+    emoji.push(next);
+    next = visible[index + 3];
+    if (sameLine(next) && next.type === P.RBRACKET) {
+      emoji.push(next);
+      next = visible[index + 4];
+    }
+  }
+  return sameLine(next) ? null : emoji;
 }
 
 /** Indexes into `visible` of the call parens that have no `)`. */
