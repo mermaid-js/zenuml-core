@@ -1,7 +1,7 @@
 # 0009 — Writing-time draw animation in the product renderer
 
 Date: 2026-11-23
-Status: Proposed on 2026-11-23. Not accepted. Nothing is implemented.
+Status: Accepted by the maintainer on 2026-11-23. Implementation starts with G7 (identity keys); writing-time animation stays off until G1, G4, G5 and G6 pass.
 
 Mechanics (atoms, timers, keys, motion steps) are in the design note
 [`docs/writing-animation-design.md`](../writing-animation-design.md). This ADR holds the decisions and the gates.
@@ -59,7 +59,7 @@ The product path differs from the spike in four ways that the spike did not meas
    message shafts and arrow heads. The spike's motion steps tween SVG `x`/`y` attributes, which do not exist
    there.
 
-## Decision (proposed)
+## Decision
 
 The interim state stands until every gate below passes: **no animation while typing; replay only.**
 
@@ -149,7 +149,7 @@ per new participant), that definition is fixed and written down **before** the n
 | G4 | G1–G3 re-measured on the React path (`ZenUml.render()` with the real debounce, gated in `render()`) | same thresholds | not run |
 | G5 | Real keystroke recordings replace the synthetic streams for G1–G4 | at least the trial's recordings | none exist |
 | G6 | Human trial as specified on the prototype page: 8–12 people, A/B/C in Latin-square order, 3 copy tasks | C vs A: WPM drop ≤ 2%, error rate not higher, change detection not lower | not run |
-| G7 | Identity keys (Decision 3) land with zero snapshot change | 0 changed snapshots | not started |
+| G7 | Identity keys (Decision 3) land with zero snapshot change | 0 changed snapshots | in progress, separate change |
 
 Evidence that would change the verdict: G1 and G4 pass on recorded keystrokes, and G6 passes. Anything less
 keeps the interim state. If G6 is unclear because the sample is small, the next step is the same option behind
@@ -157,7 +157,7 @@ a feature flag in one embedder, watching close rate and complaints, before it is
 
 ## Consequences
 
-- If accepted, the first implementation step is G7 (identity keys) and the parser fixes behind the 16 shrink and
+- The first implementation step is G7 (identity keys) and the parser fixes behind the 16 shrink and
   grow-back lines. Both are worth doing without animation.
 - The renderer gains a second text atom and a scheduler. Every reader of `codeAtom` stays on raw text.
 - An embedder that turns the option on gets a diagram that can lag the editor on one line until the next keystroke or

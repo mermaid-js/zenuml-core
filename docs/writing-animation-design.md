@@ -1,7 +1,8 @@
 # Writing-time draw animation — design note
 
-Companion to [ADR 0009](adr/0009-writing-time-draw-animation.md) (status: Proposed). Nothing here is
-implemented. The ADR's gates decide whether any of it is built.
+Companion to [ADR 0009](adr/0009-writing-time-draw-animation.md) (status: Accepted on 2026-11-23).
+Section 3 (identity keys, gate G7) is in progress. Everything else here is not implemented; writing-time
+animation stays off until G1, G4, G5 and G6 pass.
 
 Source of the mechanisms: the spike on branch `claude/animation-improvement-spike-a9009f`, commit `0c42d0b6`,
 `docs/spikes/writing-animation/engine.js` (`gate`, `reconcile`, `Feed`, `Stage`, `Session`).
