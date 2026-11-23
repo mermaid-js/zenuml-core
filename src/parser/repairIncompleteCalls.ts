@@ -87,6 +87,17 @@ export function repairIncompleteCalls(stream: Token): RepairError[] {
     }
   });
 
+  visible.forEach((token, index) => {
+    if (isDotBeforeCloseParen(visible, index)) {
+      toRemove.add(token);
+      errors.push({
+        line: token.line,
+        column: token.column,
+        msg: "extraneous '.' before ')'",
+      });
+    }
+  });
+
   let depth = 0;
   visible.forEach((token, index) => {
     if (token.type === P.OPAR) depth++;
@@ -105,7 +116,12 @@ export function repairIncompleteCalls(stream: Token): RepairError[] {
 
   if (errors.length === 0) return errors;
 
-  stream.tokens = rebuild(stream.tokens, toCloseAfter, toRemove, toTerminateAfter);
+  stream.tokens = rebuild(
+    stream.tokens,
+    toCloseAfter,
+    toRemove,
+    toTerminateAfter,
+  );
   stream.tokens.forEach((t: Token, i: number) => {
     t.tokenIndex = i;
   });
@@ -171,6 +187,19 @@ function isDanglingChainDot(visible: Token[], index: number): boolean {
     NAMES.has(next.type) &&
     (NEW_STATEMENT_AFTER_NAME.has(visible[index + 2]?.type) ||
       startsNextLineWithDot(visible, index))
+  );
+}
+
+/**
+ * The `.` in `(br.)`: a name, then a dot with `)` right after it. The dot needs
+ * a method name, so this is never valid; left alone, it cuts the enclosing
+ * condition or call and `br.` becomes a message of its own.
+ */
+function isDotBeforeCloseParen(visible: Token[], index: number): boolean {
+  return (
+    visible[index].type === P.DOT &&
+    NAMES.has(visible[index - 1]?.type) &&
+    visible[index + 1]?.type === P.CPAR
   );
 }
 

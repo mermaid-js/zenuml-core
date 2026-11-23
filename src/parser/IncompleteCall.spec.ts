@@ -257,6 +257,43 @@ describe("a trailing dot before a line that starts a new statement (#671)", () =
   });
 });
 
+describe("a dot right before a closing paren", () => {
+  // `name.` then `)` is never valid: the dot needs a method name after it.
+  // While `br.readLine()` is being typed inside a condition, the dot must not
+  // cut the condition and draw `br.` as a message to a new participant.
+  it.each([
+    ["while((line = br.)) {\n}", "while((line = br)) {\n}"],
+    ["if(a.) {\n}", "if(a) {\n}"],
+    [
+      "A.m() {\n  while((line = br.)) {\n  }\n}",
+      "A.m() {\n  while((line = br)) {\n  }\n}",
+    ],
+    ["A.b(x.)", "A.b(x)"],
+  ])("%j draws what %j draws", (typing, plain) => {
+    expect(statements(typing)).toEqual(statements(plain));
+    expect(RootContext(typing).block().stat()).toHaveLength(
+      RootContext(plain).block().stat().length,
+    );
+  });
+
+  it("reports the dot", () => {
+    const result = parse("if(a.) {\n}");
+    expect(result.pass).toBe(false);
+    expect(result.errorDetails).toContainEqual({
+      line: 1,
+      column: 4,
+      msg: "extraneous '.' before ')'",
+    });
+  });
+
+  it("keeps a call that follows the dot", () => {
+    expect(statements("while(br.readLine()) {\n}")).toEqual(
+      statements("while(br.readLine()) {\n}"),
+    );
+    expect(parse("A.b(x.y())").pass).toBe(true);
+  });
+});
+
 describe("valid multi-line DSL is unchanged (#671)", () => {
   it.each([
     // Multi-line argument lists.
@@ -322,7 +359,10 @@ describe("valid multi-line DSL is unchanged (#671)", () => {
       const plain = createPlainParser(code);
       plain.prog();
       if (plain._syntaxErrors > 0) return false;
-      return repairIncompleteCalls(createPlainParser(code).getTokenStream()).length > 0;
+      return (
+        repairIncompleteCalls(createPlainParser(code).getTokenStream()).length >
+        0
+      );
     });
     expect(repaired.map(([id]) => id)).toEqual([]);
   });
