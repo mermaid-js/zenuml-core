@@ -51,6 +51,24 @@ export const enableWritingAnimationAtom = atom(false);
  */
 export const renderCodeAtom = atom<string | null>(null);
 
+/**
+ * Writing-time motion (ADR 0009, Decision 4). Internal and off: it is not a
+ * `Config` option. Only the prototype and trial pages set it, until gates G5
+ * and G6 pass. It plays only while `enableWritingAnimation` is on.
+ */
+export const writingMotionAtom = atom(false);
+
+/** Whether writing-time motion plays now: on, gated, and in Dynamic mode. */
+export const writingMotionActiveAtom = atom(
+  (get) =>
+    get(writingMotionAtom) &&
+    get(enableWritingAnimationAtom) &&
+    get(modeAtom) === RenderMode.Dynamic,
+);
+
+/** Stroke time D in ms, from the typing tempo (ADR 0009, Decision 4). */
+export const writingStrokeAtom = atom(240);
+
 export const rootContextAtom = atom((get) => {
   const gated = get(enableWritingAnimationAtom) ? get(renderCodeAtom) : null;
   const code = gated ?? get(codeAtom);

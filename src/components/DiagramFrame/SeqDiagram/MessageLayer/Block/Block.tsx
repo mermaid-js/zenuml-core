@@ -11,6 +11,7 @@ import {
   messageReorderPendingAtom,
   selectedAtom,
   selectedMessageAtom,
+  writingMotionActiveAtom,
 } from "@/store/Store";
 import { useCan } from "@/store/interaction/useCan";
 import {
@@ -34,6 +35,7 @@ export const Block = (props: {
 }) => {
   const statements: any[] = props.context?.stat() || [];
   const identityKeys = useAtomValue(identityKeysAtom);
+  const motion = useAtomValue(writingMotionActiveAtom);
   const enableGapHandles = props.enableGapHandles ?? false;
   const dragKey = useAtomValue(messageReorderDragAtom);
   const [pendingDrag, setPendingDrag] = useAtom(messageReorderPendingAtom);
@@ -112,6 +114,7 @@ export const Block = (props: {
               )}
               data-origin={props.origin}
               data-statement-key={statementKey}
+              data-identity={motion ? identityKeys.get(stat) : undefined}
               data-reorder-state={reorderState}
               data-hover-reveal={hoverReveal ? undefined : "off"}
               onPointerDown={(event) => {
