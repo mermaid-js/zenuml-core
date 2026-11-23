@@ -2,3 +2,4 @@ node_modules
 dist
 generated-parser
 pnpm-lcok.yaml
+scripts/writing-animation/engine.js
