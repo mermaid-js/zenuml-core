@@ -51,6 +51,7 @@ const STATEMENT_END = new Set([
  */
 export function repairLooseTokens(stream: Token): RepairError[] {
   readDotColonAsArrow(stream);
+  readInAsName(stream);
   const visible = visibleTokens(stream);
   const errors: RepairError[] = [];
 
@@ -92,6 +93,34 @@ export function readDotColonAsArrow(stream: Token): void {
       token.text = "->";
     }
   });
+}
+
+/**
+ * `in` is a keyword only in a fragment condition (`forEach(x in xs)`), where
+ * the condition's `(` follows a keyword. Anywhere else (a call argument such as
+ * `read(in)`, a method or participant name) it is an ordinary name, which the
+ * grammar cannot read while the lexer types it `IN`. Valid DSL either way, so
+ * like `readDotColonAsArrow` this runs on every document and reports nothing.
+ * Idempotent.
+ */
+export function readInAsName(stream: Token): void {
+  // For each open paren: does it belong to a call (its `(` follows a name,
+  // or it sits inside a call)?
+  const open: boolean[] = [];
+  let previous: Token | undefined;
+  for (const token of visibleTokens(stream)) {
+    if (token.type === P.OPAR) {
+      open.push(
+        (previous !== undefined && NAMES.has(previous.type)) ||
+          open.some(Boolean),
+      );
+    } else if (token.type === P.CPAR) {
+      open.pop();
+    } else if (token.type === P.IN && (open.length === 0 || open.at(-1))) {
+      token.type = P.ID;
+    }
+    previous = token;
+  }
 }
 
 /**
