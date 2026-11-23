@@ -54,6 +54,60 @@
         min-width: 320px;
         position: relative;
       }
+
+      /*
+       * Prototype override layer: UML frame tabs. The diagram title and each
+       * fragment header shrink to their text and lose the bottom-right corner
+       * (a pentagon tab, as in the UML spec). Colours come from the theme at
+       * run time (--tab-rule, --tab-title, --tab-frag on #diagram).
+       */
+      .uml-tabs .frame > div > .header,
+      .uml-tabs .fragment > .header {
+        --cut: 7px; /* distance from the corner to the cut: legs of about 10px */
+        width: max-content;
+        max-width: 100%;
+        padding-right: 18px;
+        border-bottom: 0 !important;
+        border-bottom-right-radius: 0;
+        background-color: transparent !important;
+        background-repeat: no-repeat;
+        background-image:
+          linear-gradient(
+            315deg,
+            transparent calc(var(--cut) - 0.5px),
+            var(--tab-rule) calc(var(--cut) - 0.5px),
+            var(--tab-rule) calc(var(--cut) + 0.5px),
+            transparent calc(var(--cut) + 0.5px)
+          ),
+          linear-gradient(var(--tab-rule), var(--tab-rule)),
+          linear-gradient(var(--tab-rule), var(--tab-rule)),
+          linear-gradient(
+            315deg,
+            transparent var(--cut),
+            var(--tab-fill) var(--cut)
+          );
+        background-size:
+          100% 100%,
+          1px calc(100% - 10px),
+          calc(100% - 10px) 1px,
+          100% 100%;
+        background-position:
+          0 0,
+          right top,
+          left bottom,
+          0 0;
+      }
+      .uml-tabs .frame > div > .header {
+        --tab-fill: var(--tab-title);
+      }
+      .uml-tabs .fragment > .header {
+        --tab-fill: var(--tab-frag);
+        --tab-rule: var(--tab-rule-frag);
+        border-top-right-radius: 0;
+      }
+      .uml-tabs .fragment > .header .name {
+        border-bottom: 0 !important;
+      }
     </style>
   </head>
   <body>
@@ -61,6 +115,7 @@
       <button id="arrows">Play arrows</button>
       <button id="frags">Play fragments</button>
       <button id="all">Play all, in order</button>
+      <label><input type="checkbox" id="tabs" checked /> UML frame tabs</label>
       <label
         >Speed
         <select id="speed">
@@ -99,6 +154,33 @@ B->A: done`;
 
       const zen = new ZenUml($("diagram"));
       await zen.render(CODE, {});
+
+      // Read the theme's colours once, before the tab layer hides them.
+      {
+        const d = $("diagram");
+        const title = d.querySelector(".frame > div > .header");
+        const frag = d.querySelector(".fragment > .header");
+        const fragFrame = d.querySelector(".fragment");
+        if (title) {
+          const css = getComputedStyle(title);
+          d.style.setProperty("--tab-rule", css.borderBottomColor);
+          d.style.setProperty("--tab-title", css.backgroundColor);
+        }
+        if (frag)
+          d.style.setProperty(
+            "--tab-frag",
+            getComputedStyle(frag).backgroundColor,
+          );
+        if (fragFrame)
+          d.style.setProperty(
+            "--tab-rule-frag",
+            getComputedStyle(fragFrame).borderTopColor,
+          );
+      }
+      const applyTabs = () =>
+        $("diagram").classList.toggle("uml-tabs", $("tabs").checked);
+      $("tabs").addEventListener("change", applyTabs);
+      applyTabs();
 
       function stopAll() {
         running.forEach((a) => a.finish?.());
