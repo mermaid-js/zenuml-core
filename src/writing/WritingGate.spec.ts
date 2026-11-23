@@ -75,6 +75,19 @@ describe("WritingGate", () => {
     expect(g.frame(400).text).not.toBeNull();
   });
 
+  // Trial feedback: once the title keyword is typed, the title should grow
+  // with each character, not wait for the line to end.
+  it("shows a title as it is typed, one character at a time", () => {
+    const g = make("");
+    g.input("title O", 100);
+    expect(g.frame(150).text).toBe("title O");
+    g.input("title Or", 200);
+    expect(g.frame(250).text).toBe("title Or");
+    const h = make("A.m()\n");
+    h.input("title Ord\nA.m()\n", 100);
+    expect(h.frame(150).text).toBe("title Ord\nA.m()\n");
+  });
+
   it("leaves the empty frame at the idle flush", () => {
     const g = make("");
     g.input("Production.", 100);
