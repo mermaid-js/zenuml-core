@@ -102,6 +102,17 @@ export function repairIncompleteCalls(stream: Token): RepairError[] {
     }
   });
 
+  visible.forEach((_token, index) => {
+    const emoji = incompleteEmojiInCondition(visible, index);
+    if (!emoji) return;
+    emoji.forEach((t) => toRemove.add(t));
+    errors.push({
+      line: emoji[0].line,
+      column: emoji[0].column,
+      msg: "incomplete emoji in the condition",
+    });
+  });
+
   visible.forEach((token, index) => {
     if (isDotBeforeCloseParen(visible, index)) {
       toRemove.add(token);
@@ -142,6 +153,33 @@ export function repairIncompleteCalls(stream: Token): RepairError[] {
   });
   errors.sort((a, b) => a.line - b.line || a.column - b.column);
   return errors;
+}
+
+/**
+ * `[` or `[ name` between a condition's `(` and its `)`: an emoji still being
+ * typed (`critical([war)`). A condition's `(` follows a keyword, not a name.
+ * Left alone, the `[` ends the condition and the rest parses as a section
+ * fragment or a self-call.
+ */
+function incompleteEmojiInCondition(
+  visible: Token[],
+  index: number,
+): Token[] | null {
+  const open = visible[index];
+  const bracket = visible[index + 1];
+  if (
+    open.type !== P.OPAR ||
+    NAMES.has(visible[index - 1]?.type) ||
+    bracket?.type !== P.LBRACKET
+  ) {
+    return null;
+  }
+  const name = visible[index + 2];
+  if (name?.type === P.CPAR) return [bracket];
+  if (NAMES.has(name?.type) && visible[index + 3]?.type === P.CPAR) {
+    return [bracket, name];
+  }
+  return null;
 }
 
 /**
