@@ -33,6 +33,7 @@
     "changeset:version": "changeset version",
     "release": "bun run build:release && changeset publish",
     "test": "bun test src test/unit",
+    "writing:g4": "node scripts/writing-animation/g4.mjs",
     "typecheck": "tsc -b",
     "check:surfaces": "node scripts/check-surfaces.mjs",
     "check:tokens": "node scripts/check-zu-tokens.mjs",
