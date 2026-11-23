@@ -17,13 +17,15 @@
         --muted: #5d6670;
         --line: #d3d8de;
         --accent: #1f4fd8;
+        color: var(--ink);
+      }
+      body {
+        /* The page font is set on body, not :root: the renderer sizes its
+           spacing in rem, so the root must stay at the browser default. */
         font:
           15px/1.5 -apple-system,
           "Segoe UI",
           sans-serif;
-        color: var(--ink);
-      }
-      body {
         margin: 0;
         padding: 16px;
         background: var(--bg);
