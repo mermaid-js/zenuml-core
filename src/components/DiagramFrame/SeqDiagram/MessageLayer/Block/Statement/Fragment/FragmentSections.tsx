@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { useAtomValue } from "jotai";
+import { identityKeysAtom } from "@/store/Store";
 import type { FragmentSection } from "@/parser/fragmentOf";
 import { blockLength } from "@/utils/Numbering";
 import { Block } from "../../Block";
@@ -51,6 +53,7 @@ export const FragmentSections = (props: {
   layout: FragmentFrameLayout;
 }) => {
   const { sections, number, layout } = props;
+  const identityKeys = useAtomValue(identityKeysAtom);
   const firstIndexes = useMemo(() => {
     let next = 1;
     return sections.map((section) => {
@@ -70,7 +73,7 @@ export const FragmentSections = (props: {
         }
         return (
           <div
-            key={index}
+            key={identityKeys.get(section.context) ?? `index-${index}`}
             className={isLeading ? "segment" : `segment ${SEPARATOR}`}
           >
             <SectionGuard section={section} />

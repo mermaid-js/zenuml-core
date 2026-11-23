@@ -5,6 +5,7 @@ import { createStatementKey } from "@/positioning/vertical/StatementIdentifier";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   enableMessageReorderAtom,
+  identityKeysAtom,
   messageReorderDragAtom,
   messageReorderDropAtom,
   messageReorderPendingAtom,
@@ -32,6 +33,7 @@ export const Block = (props: {
   isRoot?: boolean;
 }) => {
   const statements: any[] = props.context?.stat() || [];
+  const identityKeys = useAtomValue(identityKeysAtom);
   const enableGapHandles = props.enableGapHandles ?? false;
   const dragKey = useAtomValue(messageReorderDragAtom);
   const [pendingDrag, setPendingDrag] = useAtom(messageReorderPendingAtom);
@@ -91,7 +93,7 @@ export const Block = (props: {
           interactionKind === "messageMenu" ||
           reorderState !== "idle";
         return (
-          <Fragment key={index}>
+          <Fragment key={identityKeys.get(stat) ?? `index-${index}`}>
             {enableGapHandles && (
               <GapHandleZone
                 insertIndex={index}
