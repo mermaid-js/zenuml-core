@@ -143,7 +143,7 @@ per new participant), that definition is fixed and written down **before** the n
 
 | # | Gate | Threshold | Today |
 |---|---|---|---|
-| G1 | Lines with 1+ width reversal, arm C (definition below) | 0 | old rule (2+ jumps): 19 — **fails**; new rule: not yet measured |
+| G1 | Lines with 1+ width reversal, arm C (definition below) | 0 | new rule: 0 (5 creation-label lines exempt), renderToSvg only, measured on 4.15.2 — passes |
 | G2 | Elements alive under 500 ms, arm C | 0 | 0 — passes on `renderToSvg` only |
 | G3 | Final frame equals static render | 150/150 | 150/150 — on `renderToSvg` only |
 | G4 | G1–G3 re-measured on the React path (`ZenUml.render()` with the real debounce, gated in `render()`) | same thresholds | not run |
