@@ -35,6 +35,9 @@ export class Tempo {
   }
 }
 
+const isEmpty = (shown: Shown) =>
+  shown.names.size === 0 && shown.statements.length === 0;
+
 export interface Frame {
   /** The text to render, or `null` to keep the frame on screen. */
   text: string | null;
@@ -125,11 +128,23 @@ export class WritingGate {
     return this.shownCache;
   }
 
+  /** Whether `code` draws anything with the edited line left out. */
+  private drawsOffEditLine(code: string): boolean {
+    const lines = code.split("\n");
+    if (this.edit.line < lines.length) lines[this.edit.line] = "";
+    return !isEmpty(this.shownFor(lines.join("\n")));
+  }
+
   private offer(now: number, dwell: boolean, force: boolean): Frame {
     if (now >= this.idleAt || this.edit.bulk) {
       return { text: this.raw, wait: null };
     }
     const g = gate(this.raw, this.edit, { names: this.shown.names, dwell });
+    // An empty diagram is wider than a small one: keep it until a line
+    // other than the one being typed draws, or until the idle flush.
+    if (isEmpty(this.shown) && !this.drawsOffEditLine(g.code)) {
+      return { text: null, wait: null };
+    }
     if (!force && !this.removedSinceCommit) {
       const lost = lostElements(this.shown, this.shownFor(g.code));
       if (lost > 0) {

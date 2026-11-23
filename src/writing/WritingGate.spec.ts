@@ -34,6 +34,31 @@ describe("WritingGate", () => {
     expect(parses).toBe(0);
   });
 
+  // G4: an empty diagram is wider than a small one, so a partial first line
+  // made the width fall, then grow (ADR 0009, G1).
+  it("keeps the empty frame while the only drawn line is the one being typed", () => {
+    const g = make("");
+    g.input("group x {", 100);
+    expect(g.frame(200)).toEqual({ text: null, wait: null });
+    g.input("Production.", 300);
+    expect(g.frame(400).text).toBeNull();
+    expect(g.settle(900).text).toBeNull();
+    g.input("// a note\nA.", 1000);
+    expect(g.frame(1100).text).toBeNull();
+  });
+
+  it("leaves the empty frame once a finished line draws", () => {
+    const g = make("");
+    g.input("group x {a}\n", 100);
+    expect(g.frame(200).text).toBe("group x {a}\n");
+  });
+
+  it("leaves the empty frame at the idle flush", () => {
+    const g = make("");
+    g.input("Production.", 100);
+    expect(g.frame(100 + IDLE_FLUSH_MS).text).toBe("Production.");
+  });
+
   it("renders a complete line as typed", () => {
     const g = make("A.m()");
     g.input("A.m()\nB.n()", 100);
