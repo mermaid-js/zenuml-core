@@ -2,7 +2,11 @@ import antlr4 from "antlr4";
 import { default as sequenceLexer } from "../generated-parser/sequenceLexer";
 import { default as sequenceParser } from "../generated-parser/sequenceParser";
 import { repairIncompleteCalls } from "./repairIncompleteCalls";
-import { readDotColonAsArrow, repairLooseTokens } from "./repairLooseTokens";
+import {
+  readDotColonAsArrow,
+  readInAsName,
+  repairLooseTokens,
+} from "./repairLooseTokens";
 import { HeaderRecoveringLexer } from "./HeaderRecoveringLexer";
 import ToCollector from "./ToCollector";
 import "./TitleContext";
@@ -113,7 +117,10 @@ class StrayTokenListener extends CollectingErrorListener {
       offendingSymbol.type !== antlr4.Token.EOF &&
       (isTopLevelBlock(ctx) || (e && ctx instanceof sequenceParser.ProgContext))
     ) {
-      this.strays.push({ token: offendingSymbol, error: { line, column, msg } });
+      this.strays.push({
+        token: offendingSymbol,
+        error: { line, column, msg },
+      });
     }
   }
 }
@@ -127,6 +134,7 @@ function byPosition(a: ErrorDetail, b: ErrorDetail) {
 // aborts on the first syntax error. Returns null for invalid input.
 function parseWithSll(tokens: Ctx) {
   readDotColonAsArrow(tokens);
+  readInAsName(tokens);
   tokens.seek(0);
   const parser: Ctx = new sequenceParser(tokens);
   parser.removeErrorListeners();
@@ -237,7 +245,9 @@ function rootContext(code: string) {
   for (const { line, column, msg } of errors) {
     console.error(`line ${line}:${column} ${msg}`);
   }
-  errorDetails.push(...[...lexerListener.errorDetails, ...errors].sort(byPosition));
+  errorDetails.push(
+    ...[...lexerListener.errorDetails, ...errors].sort(byPosition),
+  );
   return tree;
 }
 
@@ -269,7 +279,9 @@ augment<ParserRuleContextAugmented>(antlr4.ParserRuleContext, {
       tokenIndex = this.stop.tokenIndex;
     }
     const stream = this.parser.getTokenStream();
-    const comments = [...(stream.getHiddenTokensToLeft(tokenIndex, channel) ?? [])];
+    const comments = [
+      ...(stream.getHiddenTokensToLeft(tokenIndex, channel) ?? []),
+    ];
     // ADR 0005: `@return` may stand on the line above its message. A comment
     // between the annotation and the message belongs to this statement too (#713).
     const ret =
@@ -282,7 +294,10 @@ augment<ParserRuleContextAugmented>(antlr4.ParserRuleContext, {
     const annotation: any = ret?.ANNOTATION_RET?.();
     if (annotation) {
       comments.push(
-        ...(stream.getHiddenTokensToRight(annotation.symbol.tokenIndex, channel) ?? []),
+        ...(stream.getHiddenTokensToRight(
+          annotation.symbol.tokenIndex,
+          channel,
+        ) ?? []),
       );
     }
     if (comments.length === 0) return null as unknown as undefined;
