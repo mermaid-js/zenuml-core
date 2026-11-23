@@ -67,6 +67,9 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px;
       }
+      .pane[hidden] {
+        display: none;
+      }
       .pane {
         background: var(--panel);
         border: 1px solid var(--line);
@@ -85,7 +88,7 @@
       }
       @media (max-width: 900px) {
         .panes {
-          grid-template-columns: 1fr;
+          grid-template-columns: 1fr !important;
         }
       }
     </style>
@@ -98,6 +101,10 @@
       <button class="primary" data-wpm="120">120</button>
       <button id="stop">Stop</button>
       <span id="state" class="muted"></span>
+      <span class="muted">Show</span>
+      <label><input type="checkbox" data-show="A" checked /> A</label>
+      <label><input type="checkbox" data-show="B" checked /> B</label>
+      <label><input type="checkbox" data-show="C" checked /> C</label>
     </div>
     <textarea
       id="code"
@@ -107,15 +114,15 @@
       placeholder="Pick a speed to start typing, or type here yourself"
     ></textarea>
     <div class="panes">
-      <div class="pane">
+      <div class="pane" id="pane-A">
         <h2>A <span class="muted">no gate, no motion</span></h2>
         <div id="A"></div>
       </div>
-      <div class="pane">
+      <div class="pane" id="pane-B">
         <h2>B <span class="muted">raw motion</span></h2>
         <div id="B"></div>
       </div>
-      <div class="pane">
+      <div class="pane" id="pane-C">
         <h2>C <span class="muted">gate and motion</span></h2>
         <div id="C"></div>
       </div>
@@ -190,6 +197,35 @@
           b.addEventListener("click", () => type(Number(b.dataset.wpm))),
         );
       $("stop").addEventListener("click", stop);
+
+      // Hide any arm; the remaining panes share the width.
+      const boxes = [...document.querySelectorAll("[data-show]")];
+      const layout = () => {
+        let shown = 0;
+        for (const box of boxes) {
+          $("pane-" + box.dataset.show).hidden = !box.checked;
+          if (box.checked) shown++;
+        }
+        document.querySelector(".panes").style.gridTemplateColumns =
+          `repeat(${Math.max(1, shown)}, minmax(0, 1fr))`;
+        try {
+          localStorage.setItem(
+            "writing-compare-show",
+            boxes
+              .filter((b) => b.checked)
+              .map((b) => b.dataset.show)
+              .join(""),
+          );
+        } catch {}
+      };
+      try {
+        const saved = localStorage.getItem("writing-compare-show");
+        if (saved !== null)
+          for (const box of boxes)
+            box.checked = saved.includes(box.dataset.show);
+      } catch {}
+      boxes.forEach((box) => box.addEventListener("change", layout));
+      layout();
       code.addEventListener("input", () => {
         stop();
         show(code.value);
