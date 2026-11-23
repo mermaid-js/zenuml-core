@@ -64,8 +64,6 @@ export function planMotion(
   next: ReadonlyMap<string, Box>,
   stroke: number,
 ): MotionPlan {
-  if (prev.size === 0) return NONE;
-
   const born = [...next.keys()].filter((key) => !prev.has(key));
   if (born.length > BATCH_MAX) return NONE;
 

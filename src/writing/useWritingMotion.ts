@@ -123,11 +123,16 @@ export function useWritingMotion(
   const active = useAtomValue(writingMotionActiveAtom);
   const stroke = useAtomValue(writingStrokeAtom);
   const last = useRef<Measured>(empty());
+  // The first frame after mount (or after motion turns on) is measured only:
+  // a diagram that loads is not written. An empty frame after it is real, so
+  // what appears on an empty diagram is revealed.
+  const primed = useRef(false);
 
   useLayoutEffect(() => {
     const el = root.current;
     if (!active || !el) {
       last.current = empty();
+      primed.current = false;
       return;
     }
     // A new frame ends any motion in progress at its final state.
@@ -138,7 +143,11 @@ export function useWritingMotion(
       g.remove(),
     );
     const next = measure(el);
-    if (!reducedMotion() && typeof el.animate === "function") {
+    if (
+      primed.current &&
+      !reducedMotion() &&
+      typeof el.animate === "function"
+    ) {
       play(
         planMotion(last.current.boxes, next.boxes, stroke),
         next.elements,
@@ -147,6 +156,7 @@ export function useWritingMotion(
       );
     }
     last.current = next;
+    primed.current = true;
     // `frame` is the parse the diagram draws: one plan per committed frame.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [frame, active]);
