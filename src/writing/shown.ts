@@ -1,22 +1,33 @@
 import { Participants } from "@/parser";
 import { statementTree, type IdNode } from "@/parser/identity/identityKeys";
-import { reconcileList } from "@/parser/identity/reconcile";
+import { reconcileList, type Signed } from "@/parser/identity/reconcile";
+
+/** A statement as the loss guard sees it: plain data, no parse context. */
+export interface ShownNode extends Signed {
+  children: ShownNode[];
+}
+
+const plain = (n: IdNode): ShownNode => ({
+  kind: n.kind,
+  label: n.label,
+  children: n.children.map(plain),
+});
 
 /** What one committed frame draws, as the loss guard compares it. */
 export interface Shown {
   /** Participant names; the gate holds a message to any other name. */
   names: ReadonlySet<string>;
-  statements: IdNode[];
+  statements: ShownNode[];
 }
 
 export const shownOf = (root: any): Shown => ({
   names: new Set(root ? Participants(root).Names() : []),
-  statements: statementTree(root),
+  statements: statementTree(root).map(plain),
 });
 
-const countGone = (olds: IdNode[], news: IdNode[]): number => {
+const countGone = (olds: ShownNode[], news: ShownNode[]): number => {
   const { pairs, gone } = reconcileList(olds, news);
-  const size = (n: IdNode): number =>
+  const size = (n: ShownNode): number =>
     1 + n.children.reduce((sum, c) => sum + size(c), 0);
   return (
     gone.reduce((sum, n) => sum + size(n), 0) +

@@ -11,6 +11,14 @@ describe("shownOf", () => {
     );
   });
 
+  it("holds plain data, not parse contexts", () => {
+    // A ZenUml instance holds this; hosts serialize the instance that
+    // `render()` resolves with (Playwright's page.evaluate does).
+    const plain = shownOf(RootContext("A.m() {\n  if(x) {\n    B.n()\n  }\n}"));
+    expect(() => JSON.stringify(plain.statements)).not.toThrow();
+    expect(JSON.stringify(plain.statements)).not.toContain("ctx");
+  });
+
   it("is empty for no diagram", () => {
     expect(shownOf(null).names.size).toBe(0);
   });
