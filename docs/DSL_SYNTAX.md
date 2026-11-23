@@ -597,6 +597,17 @@ Annotations start with `@` and serve multiple purposes:
 
 Any other `@Name` token is treated as a participant type annotation.
 
+An annotation can stand on the same line as the element it modifies or on its own line above it, as in Java and .NET. Both forms render the same:
+
+```zenuml
+@Actor
+Alice
+@return
+Bob->Alice: reply
+```
+
+See [ADR 0005](adr/0005-annotation-on-the-line-above.md).
+
 ---
 
 ## Unicode and Emoji
