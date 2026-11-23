@@ -18,11 +18,14 @@ export interface Shown {
   /** Participant names; the gate holds a message to any other name. */
   names: ReadonlySet<string>;
   statements: ShownNode[];
+  /** The diagram title; a title alone is a drawn frame, not an empty one. */
+  title?: string;
 }
 
 export const shownOf = (root: any): Shown => ({
   names: new Set(root ? Participants(root).Names() : []),
   statements: statementTree(root).map(plain),
+  title: String(root?.title?.()?.content?.() ?? ""),
 });
 
 const countGone = (olds: ShownNode[], news: ShownNode[]): number => {

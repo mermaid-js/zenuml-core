@@ -5,6 +5,80 @@ import { planMotion, type Box, type MotionPlan } from "./motion";
 
 /** FLIP: a kept element eases from its old place in this many ms. */
 const GLIDE_MS = 110;
+/** A new participant's label is written over this share of D ... */
+const LABEL_SHARE = 0.6;
+/** ... then a pen traces its border, starting at this share of D, for D. */
+const STROKE_AT = 0.4;
+
+const SVG = "http://www.w3.org/2000/svg";
+
+/**
+ * Traces `el`'s border with a pen stroke over the new frame, then removes the
+ * stroke. The real border is hidden from `start` until the stroke ends.
+ */
+function trace(
+  el: HTMLElement,
+  root: HTMLElement,
+  start: number,
+  delay: number,
+  duration: number,
+) {
+  const css = getComputedStyle(el);
+  const width = parseFloat(css.borderTopWidth) || 1;
+  const color = css.borderTopColor || "currentColor";
+  const radius = parseFloat(css.borderTopLeftRadius) || 0;
+  const origin = root.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("data-writing-stroke", "");
+  svg.setAttribute("data-writing-ghost", "");
+  svg.setAttribute("width", String(r.width));
+  svg.setAttribute("height", String(r.height));
+  Object.assign(svg.style, {
+    position: "absolute",
+    left: `${r.left - origin.left}px`,
+    top: `${r.top - origin.top}px`,
+    overflow: "visible",
+    pointerEvents: "none",
+    // Above the participant layer, which would hide the stroke's edges.
+    zIndex: "50",
+  });
+  const rect = document.createElementNS(SVG, "rect");
+  const half = width / 2;
+  rect.setAttribute("x", String(half));
+  rect.setAttribute("y", String(half));
+  rect.setAttribute("width", String(Math.max(0, r.width - width)));
+  rect.setAttribute("height", String(Math.max(0, r.height - width)));
+  rect.setAttribute("rx", String(radius));
+  rect.setAttribute("fill", "none");
+  rect.setAttribute("stroke", color);
+  rect.setAttribute("stroke-width", String(width));
+  rect.setAttribute("pathLength", "1");
+  rect.setAttribute("stroke-dasharray", "1");
+  rect.setAttribute("stroke-dashoffset", "1");
+  svg.appendChild(rect);
+  root.appendChild(svg);
+  const end = delay + duration;
+  el.animate([{ borderColor: "transparent" }, { borderColor: "transparent" }], {
+    duration: end - start,
+    delay: start,
+    fill: "backwards",
+  });
+  const pen =
+    typeof rect.animate === "function"
+      ? rect.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], {
+          duration,
+          delay,
+          easing: "ease-in-out",
+          fill: "backwards",
+        })
+      : null;
+  const drop = () => svg.remove();
+  if (pen) {
+    pen.onfinish = drop;
+    pen.oncancel = drop;
+  } else drop();
+}
 
 const PARTICIPANT = "[data-participant-id]";
 const STATEMENT = "[data-identity]";
@@ -82,21 +156,58 @@ export function play(
     fade.onfinish = drop;
     fade.oncancel = drop;
   }
+  const linesOf = (key: string) => {
+    const name = key.slice(2);
+    const lines: Element[] = [];
+    if (!key.startsWith("p:")) return lines;
+    root.querySelectorAll<HTMLElement>("[data-lifeline-id]").forEach((life) => {
+      if (life.dataset.lifelineId === name) {
+        lines.push(...life.querySelectorAll(".line"));
+      }
+    });
+    return lines;
+  };
   for (const { key, dx, dy } of plan.moves) {
-    elements
-      .get(key)
-      ?.animate(
+    // A participant's lifeline is a separate element: it glides with the box.
+    for (const el of [elements.get(key), ...linesOf(key)]) {
+      el?.animate(
         [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
         { duration: GLIDE_MS, easing: "ease-out" },
       );
+    }
   }
+  const wipe = (
+    el: Element | null | undefined,
+    delay: number,
+    duration: number,
+  ) =>
+    el?.animate(
+      [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }],
+      { duration, delay, easing: "linear", fill: "backwards" },
+    );
   for (const { key, delay, duration } of plan.reveals) {
-    elements
-      .get(key)
-      ?.animate(
-        [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }],
-        { duration, delay, easing: "linear", fill: "backwards" },
+    const el = elements.get(key);
+    if (!key.startsWith("p:")) {
+      wipe(el, delay, duration);
+      continue;
+    }
+    // Like handwriting: the name is written first, then a pen draws the
+    // border around it. The label is the box's last child.
+    wipe(el?.lastElementChild, delay, Math.round(LABEL_SHARE * duration));
+    const strokeAt = delay + Math.round(STROKE_AT * duration);
+    if (el) trace(el, root, delay, strokeAt, duration);
+    // The lifeline draws down from the box once the border is closed.
+    for (const line of linesOf(key)) {
+      line.animate(
+        [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }],
+        {
+          duration,
+          delay: strokeAt + duration,
+          easing: "ease-out",
+          fill: "backwards",
+        },
       );
+    }
   }
 }
 
@@ -123,22 +234,31 @@ export function useWritingMotion(
   const active = useAtomValue(writingMotionActiveAtom);
   const stroke = useAtomValue(writingStrokeAtom);
   const last = useRef<Measured>(empty());
+  // The first frame after mount (or after motion turns on) is measured only:
+  // a diagram that loads is not written. An empty frame after it is real, so
+  // what appears on an empty diagram is revealed.
+  const primed = useRef(false);
 
   useLayoutEffect(() => {
     const el = root.current;
     if (!active || !el) {
       last.current = empty();
+      primed.current = false;
       return;
     }
     // A new frame ends any motion in progress at its final state.
     for (const node of last.current.elements.values()) {
-      node.getAnimations?.().forEach((a) => a.finish());
+      node.getAnimations?.({ subtree: true }).forEach((a) => a.finish());
     }
     el.querySelectorAll<HTMLElement>("[data-writing-ghost]").forEach((g) =>
       g.remove(),
     );
     const next = measure(el);
-    if (!reducedMotion() && typeof el.animate === "function") {
+    if (
+      primed.current &&
+      !reducedMotion() &&
+      typeof el.animate === "function"
+    ) {
       play(
         planMotion(last.current.boxes, next.boxes, stroke),
         next.elements,
@@ -147,6 +267,7 @@ export function useWritingMotion(
       );
     }
     last.current = next;
+    primed.current = true;
     // `frame` is the parse the diagram draws: one plan per committed frame.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [frame, active]);

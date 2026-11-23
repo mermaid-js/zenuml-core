@@ -1,0 +1,236 @@
+<!doctype html>
+<!--
+  ADR 0009: arms A, B and C side by side, driven by the same synthetic typing.
+  Dev server only: `bun dev`, then http://localhost:14000/writing-compare.html.
+  Each pane is the real renderer; the typing comes from scripts/writing-animation/engine.js.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Writing Compare</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --panel: #fff;
+        --ink: #1b2026;
+        --muted: #5d6670;
+        --line: #d3d8de;
+        --accent: #1f4fd8;
+        font:
+          14px/1.5 -apple-system,
+          "Segoe UI",
+          sans-serif;
+        color: var(--ink);
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: var(--bg);
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      button,
+      select {
+        font: inherit;
+        padding: 5px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--accent);
+        background: #fff;
+        color: var(--accent);
+        cursor: pointer;
+      }
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        height: 140px;
+        font:
+          13px/1.5 ui-monospace,
+          Menlo,
+          monospace;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px;
+        margin-bottom: 12px;
+      }
+      .panes {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .pane[hidden] {
+        display: none;
+      }
+      .pane {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px;
+        overflow: auto;
+        min-height: 420px;
+      }
+      .pane h2 {
+        font-size: 14px;
+        margin: 0 0 6px;
+      }
+      .muted {
+        color: var(--muted);
+        font-weight: normal;
+      }
+      @media (max-width: 900px) {
+        .panes {
+          grid-template-columns: 1fr !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <select id="scene" aria-label="Scene"></select>
+      <button class="primary" data-wpm="40">Type at 40 WPM</button>
+      <button class="primary" data-wpm="80">80</button>
+      <button class="primary" data-wpm="120">120</button>
+      <button id="stop">Stop</button>
+      <span id="state" class="muted"></span>
+      <span class="muted">Show</span>
+      <label><input type="checkbox" data-show="A" checked /> A</label>
+      <label><input type="checkbox" data-show="B" checked /> B</label>
+      <label><input type="checkbox" data-show="C" checked /> C</label>
+    </div>
+    <textarea
+      id="code"
+      spellcheck="false"
+      autocomplete="off"
+      autocapitalize="off"
+      placeholder="Pick a speed to start typing, or type here yourself"
+    ></textarea>
+    <div class="panes">
+      <div class="pane" id="pane-A">
+        <h2>A <span class="muted">no gate, no motion</span></h2>
+        <div id="A"></div>
+      </div>
+      <div class="pane" id="pane-B">
+        <h2>B <span class="muted">raw motion</span></h2>
+        <div id="B"></div>
+      </div>
+      <div class="pane" id="pane-C">
+        <h2>C <span class="muted">gate and motion</span></h2>
+        <div id="C"></div>
+      </div>
+    </div>
+
+    <script src="./scripts/writing-animation/engine.js"></script>
+    <script type="module">
+      import ZenUml from "./src/core.tsx";
+      import { armSettings, TASKS } from "./src/writing/trial.ts";
+
+      const $ = (id) => document.getElementById(id);
+      const code = $("code");
+      const zens = {};
+      let timers = [];
+
+      for (const t of TASKS) {
+        const o = document.createElement("option");
+        o.value = t.id;
+        o.textContent = t.text.split("\n")[0];
+        $("scene").appendChild(o);
+      }
+
+      async function reset() {
+        for (const arm of ["A", "B", "C"]) {
+          const { gate, motion } = armSettings(arm);
+          $(arm).innerHTML = "";
+          const zen = new ZenUml($(arm));
+          await zen.render("", { enableWritingAnimation: gate });
+          zen._setWritingMotion(motion);
+          zens[arm] = zen;
+        }
+      }
+
+      const show = (text) => {
+        for (const zen of Object.values(zens)) zen.render(text, {});
+      };
+
+      function stop() {
+        timers.forEach(clearTimeout);
+        timers = [];
+        $("state").textContent = "";
+      }
+
+      async function type(wpm) {
+        stop();
+        code.value = "";
+        await reset();
+        const task = TASKS.find((t) => t.id === $("scene").value);
+        const stream = window.ZmlInk.typeStream(
+          "",
+          task.text,
+          "",
+          wpm,
+          Math.floor(Math.random() * 1e6),
+        );
+        $("state").textContent = `Typing at ${wpm} WPM…`;
+        stream.slice(1).forEach((ev, i, all) => {
+          timers.push(
+            setTimeout(() => {
+              code.value = ev.code;
+              code.scrollTop = code.scrollHeight;
+              show(ev.code);
+              if (i === all.length - 1) $("state").textContent = "Done";
+            }, ev.t),
+          );
+        });
+      }
+
+      document
+        .querySelectorAll("[data-wpm]")
+        .forEach((b) =>
+          b.addEventListener("click", () => type(Number(b.dataset.wpm))),
+        );
+      $("stop").addEventListener("click", stop);
+
+      // Hide any arm; the remaining panes share the width.
+      const boxes = [...document.querySelectorAll("[data-show]")];
+      const layout = () => {
+        let shown = 0;
+        for (const box of boxes) {
+          $("pane-" + box.dataset.show).hidden = !box.checked;
+          if (box.checked) shown++;
+        }
+        document.querySelector(".panes").style.gridTemplateColumns =
+          `repeat(${Math.max(1, shown)}, minmax(0, 1fr))`;
+        try {
+          localStorage.setItem(
+            "writing-compare-show",
+            boxes
+              .filter((b) => b.checked)
+              .map((b) => b.dataset.show)
+              .join(""),
+          );
+        } catch {}
+      };
+      try {
+        const saved = localStorage.getItem("writing-compare-show");
+        if (saved !== null)
+          for (const box of boxes)
+            box.checked = saved.includes(box.dataset.show);
+      } catch {}
+      boxes.forEach((box) => box.addEventListener("change", layout));
+      layout();
+      code.addEventListener("input", () => {
+        stop();
+        show(code.value);
+      });
+      reset();
+    </script>
+  </body>
+</html>

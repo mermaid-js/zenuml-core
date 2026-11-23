@@ -21,11 +21,20 @@ describe("strokeMs", () => {
 });
 
 describe("planMotion", () => {
-  it("plans nothing for the first frame", () => {
-    const next = frame([["A", box("participant", 0, 0)]]);
+  // Trial feedback: on an empty diagram the first participant popped in
+  // without motion. The hook skips only the initial render; an empty frame
+  // before content is a real frame.
+  it("reveals everything that appears on an empty diagram", () => {
+    const next = frame([
+      ["A", box("participant", 0, 0)],
+      ["m", box("statement", 0, 50)],
+    ]);
     expect(planMotion(new Map(), next, 160)).toEqual({
       moves: [],
-      reveals: [],
+      reveals: [
+        { key: "A", delay: 0, duration: 160 },
+        { key: "m", delay: 48, duration: 160 },
+      ],
       removals: [],
     });
   });

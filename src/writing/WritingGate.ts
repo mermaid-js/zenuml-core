@@ -6,6 +6,8 @@ import { lostElements, type Shown } from "./shown";
 export const LOSS_HOLD_MS = 1200;
 /** With no new `render()` for this long, the raw text is rendered as is. */
 export const IDLE_FLUSH_MS = 1200;
+/** A title line with at least one character after the keyword. */
+const TITLE_TYPING = /^\s*title\s+\S/;
 
 const EMA_ALPHA = 0.3;
 const EMA_START = 180;
@@ -42,7 +44,9 @@ export class Tempo {
 }
 
 const isEmpty = (shown: Shown) =>
-  shown.names.size === 0 && shown.statements.length === 0;
+  shown.names.size === 0 &&
+  shown.statements.length === 0 &&
+  !shown.title?.trim();
 
 export interface Frame {
   /** The text to render, or `null` to keep the frame on screen. */
@@ -148,6 +152,11 @@ export class WritingGate {
 
   private offer(now: number, dwell: boolean, force: boolean): Frame {
     if (now >= this.idleAt || this.edit.bulk) {
+      return { text: this.raw, wait: null };
+    }
+    // A title is plain text: once its keyword is typed, show it as it grows.
+    const editLine = this.raw.split("\n")[this.edit.line] ?? "";
+    if (TITLE_TYPING.test(editLine)) {
       return { text: this.raw, wait: null };
     }
     const g = gate(this.raw, this.edit, { names: this.shown.names, dwell });
