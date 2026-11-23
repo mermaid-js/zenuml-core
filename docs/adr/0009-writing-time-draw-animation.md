@@ -143,13 +143,23 @@ per new participant), that definition is fixed and written down **before** the n
 
 | # | Gate | Threshold | Today |
 |---|---|---|---|
-| G1 | Lines with 2+ width jumps of 20 px or more, arm C | 0 | 31 — **fails** |
+| G1 | Lines with 1+ width reversal, arm C (definition below) | 0 | old rule (2+ jumps): 19 — **fails**; new rule: not yet measured |
 | G2 | Elements alive under 500 ms, arm C | 0 | 0 — passes on `renderToSvg` only |
 | G3 | Final frame equals static render | 150/150 | 150/150 — on `renderToSvg` only |
 | G4 | G1–G3 re-measured on the React path (`ZenUml.render()` with the real debounce, gated in `render()`) | same thresholds | not run |
 | G5 | Real keystroke recordings replace the synthetic streams for G1–G4 | at least the trial's recordings | none exist |
 | G6 | Human trial as specified on the prototype page: 8–12 people, A/B/C in Latin-square order, 3 copy tasks | C vs A: WPM drop ≤ 2%, error rate not higher, change detection not lower | not run |
 | G7 | Identity keys (Decision 3) land with zero snapshot change | 0 changed snapshots | in progress, separate change |
+
+**G1 definition (changed 2026-11-23, before re-measurement).** A **reversal** is a diagram width change of
+20 px or more that undoes an earlier change of 20 px or more on the same line: widen then narrow, or narrow
+then widen. G1 counts the lines with one or more reversals. Lines that only grow are not counted, for example a
+line that adds a new participant or a fragment header. Lines that type a creation label (`new X(`, where the
+label shows «create» and then the argument) are exempt, because the maintainer keeps that label.
+
+The maintainer approved this rule on 2026-11-23. It replaces the earlier rule, "lines with 2+ width jumps of
+20 px or more", and was fixed before G1 was measured again. Under the earlier rule G1 failed: 31 lines in the
+spike measurement, and 19 lines after the parser fixes released in 4.15.2.
 
 Evidence that would change the verdict: G1 and G4 pass on recorded keystrokes, and G6 passes. Anything less
 keeps the interim state. If G6 is unclear because the sample is small, the next step is the same option behind
