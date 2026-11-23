@@ -1,13 +1,22 @@
 import { useCommitCode } from "@/store/useCommitCode";
-import { codeAtom, modeAtom, RenderMode } from "@/store/Store";
+import {
+  codeAtom,
+  enableWritingAnimationAtom,
+  modeAtom,
+  RenderMode,
+} from "@/store/Store";
 import { useAtomValue } from "jotai";
 
 export const EmptyDiagramPrompt = () => {
   const mode = useAtomValue(modeAtom);
   const code = useAtomValue(codeAtom);
+  const writing = useAtomValue(enableWritingAnimationAtom);
   const commitCode = useCommitCode();
 
   if (mode !== RenderMode.Dynamic) return null;
+  // ADR 0009: the prompt is wider than a small diagram, so the first diagram
+  // typed would make the width fall, then grow. The writer is typing anyway.
+  if (writing) return null;
 
   const handleClick = () => {
     const nextCode = code.trim() ? `${code.trim()}\nA` : "A";
