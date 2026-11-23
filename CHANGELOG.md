@@ -1,5 +1,17 @@
 # @zenuml/core
 
+## 4.15.2
+
+### Patch Changes
+
+- [#734](https://github.com/mermaid-js/zenuml-core/pull/734) [`cc1260b`](https://github.com/mermaid-js/zenuml-core/commit/cc1260b870d66875d890dcea324ff84d26d966ee) Thanks [@MrCoder](https://github.com/MrCoder)! - While you type a call inside a condition (`while((line = br.` on the way to `br.readLine()`), the diagram no longer draws `br.` as a separate message to a new participant `br`.
+
+- [#732](https://github.com/mermaid-js/zenuml-core/pull/732) [`96807ff`](https://github.com/mermaid-js/zenuml-core/commit/96807ffb40a8a9bd508a60b5f868ef25d8d2b290) Thanks [@MrCoder](https://github.com/MrCoder)! - While you type an emoji before a method name (`A.[lo`), the diagram no longer shows an extra `[` participant and a second message; it draws `A.` until the method name follows.
+
+- [#735](https://github.com/mermaid-js/zenuml-core/pull/735) [`5f2d7b6`](https://github.com/mermaid-js/zenuml-core/commit/5f2d7b645928cdcf66cd661b6693abcc7b38eab9) Thanks [@MrCoder](https://github.com/MrCoder)! - While you type an emoji in a fragment condition (`critical([war`), the diagram no longer shows a spurious Section fragment or a stray self-call; it draws the empty condition until the emoji is closed.
+
+- [#733](https://github.com/mermaid-js/zenuml-core/pull/733) [`70020af`](https://github.com/mermaid-js/zenuml-core/commit/70020af202e366cbc507f79c4bcd164bfaa7bea1) Thanks [@MrCoder](https://github.com/MrCoder)! - `in` works as an ordinary name outside a loop condition: `X.read(in)` draws one call with the argument `in`, not an empty message and a separate `read(in)`. `forEach(x in xs)` is unchanged.
+
 ## 4.15.1
 
 ### Patch Changes
