@@ -5,10 +5,80 @@ import { planMotion, type Box, type MotionPlan } from "./motion";
 
 /** FLIP: a kept element eases from its old place in this many ms. */
 const GLIDE_MS = 110;
-/** A new participant's border draws over this share of D ... */
-const BORDER_SHARE = 0.55;
-/** ... and its label starts at this share of D. */
-const LABEL_AT = 0.45;
+/** A new participant's label is written over this share of D ... */
+const LABEL_SHARE = 0.6;
+/** ... then a pen traces its border, starting at this share of D, for D. */
+const STROKE_AT = 0.4;
+
+const SVG = "http://www.w3.org/2000/svg";
+
+/**
+ * Traces `el`'s border with a pen stroke over the new frame, then removes the
+ * stroke. The real border is hidden from `start` until the stroke ends.
+ */
+function trace(
+  el: HTMLElement,
+  root: HTMLElement,
+  start: number,
+  delay: number,
+  duration: number,
+) {
+  const css = getComputedStyle(el);
+  const width = parseFloat(css.borderTopWidth) || 1;
+  const color = css.borderTopColor || "currentColor";
+  const radius = parseFloat(css.borderTopLeftRadius) || 0;
+  const origin = root.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("data-writing-stroke", "");
+  svg.setAttribute("data-writing-ghost", "");
+  svg.setAttribute("width", String(r.width));
+  svg.setAttribute("height", String(r.height));
+  Object.assign(svg.style, {
+    position: "absolute",
+    left: `${r.left - origin.left}px`,
+    top: `${r.top - origin.top}px`,
+    overflow: "visible",
+    pointerEvents: "none",
+    // Above the participant layer, which would hide the stroke's edges.
+    zIndex: "50",
+  });
+  const rect = document.createElementNS(SVG, "rect");
+  const half = width / 2;
+  rect.setAttribute("x", String(half));
+  rect.setAttribute("y", String(half));
+  rect.setAttribute("width", String(Math.max(0, r.width - width)));
+  rect.setAttribute("height", String(Math.max(0, r.height - width)));
+  rect.setAttribute("rx", String(radius));
+  rect.setAttribute("fill", "none");
+  rect.setAttribute("stroke", color);
+  rect.setAttribute("stroke-width", String(width));
+  rect.setAttribute("pathLength", "1");
+  rect.setAttribute("stroke-dasharray", "1");
+  rect.setAttribute("stroke-dashoffset", "1");
+  svg.appendChild(rect);
+  root.appendChild(svg);
+  const end = delay + duration;
+  el.animate([{ borderColor: "transparent" }, { borderColor: "transparent" }], {
+    duration: end - start,
+    delay: start,
+    fill: "backwards",
+  });
+  const pen =
+    typeof rect.animate === "function"
+      ? rect.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], {
+          duration,
+          delay,
+          easing: "ease-in-out",
+          fill: "backwards",
+        })
+      : null;
+  const drop = () => svg.remove();
+  if (pen) {
+    pen.onfinish = drop;
+    pen.oncancel = drop;
+  } else drop();
+}
 
 const PARTICIPANT = "[data-participant-id]";
 const STATEMENT = "[data-identity]";
@@ -109,12 +179,17 @@ export function play(
       wipe(el, delay, duration);
       continue;
     }
-    // Design note, section 4: the border draws over 0-55% of D, then the
-    // label wipes in over 45-100%. The label is the box's last child.
-    const border = Math.round(BORDER_SHARE * duration);
-    const labelAt = Math.round(LABEL_AT * duration);
-    wipe(el, delay, border);
-    wipe(el?.lastElementChild, delay + labelAt, duration - labelAt);
+    // Like handwriting: the name is written first, then a pen draws the
+    // border around it. The label is the box's last child.
+    wipe(el?.lastElementChild, delay, Math.round(LABEL_SHARE * duration));
+    if (el)
+      trace(
+        el,
+        root,
+        delay,
+        delay + Math.round(STROKE_AT * duration),
+        duration,
+      );
   }
 }
 

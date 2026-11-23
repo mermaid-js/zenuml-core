@@ -25,17 +25,21 @@ describe("measure", () => {
   });
 });
 
-// Trial feedback: a whole-box wipe did not read as drawing the participant.
-// Design note, section 4: the border draws over 0-55% of D, then the label
-// wipes in over 45-100%.
+// Trial feedback: a new participant should read like handwriting: the name
+// is written first, then a pen draws the border around it.
 describe("play", () => {
-  it("draws a new participant's border first, then its label", () => {
+  it("writes a new participant's label, then traces its border", () => {
     const root = document.createElement("div");
-    root.innerHTML = `<div data-participant-id="A"><div class="label">A</div></div>`;
+    document.body.appendChild(root);
+    root.innerHTML = `<div data-participant-id="A" style="border: 2px solid rgb(10, 20, 30); border-radius: 4px"><div class="label">A</div></div>`;
     const box = root.firstElementChild as HTMLElement;
     const label = box.firstElementChild as HTMLElement;
     box.animate = vi.fn() as never;
     label.animate = vi.fn() as never;
+    // happy-dom has no SVG animations; a stand-in keeps the stroke alive.
+    const original = Element.prototype.animate;
+    const svgAnimate = vi.fn(() => ({}) as Animation);
+    Element.prototype.animate = svgAnimate as never;
     const { elements } = measure(root);
     play(
       {
@@ -47,13 +51,25 @@ describe("play", () => {
       root,
       measure(document.createElement("div")),
     );
-    expect(box.animate).toHaveBeenCalledWith(
-      [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }],
-      { duration: 110, delay: 20, easing: "linear", fill: "backwards" },
-    );
+    // The label is written over the first 60% of D.
     expect(label.animate).toHaveBeenCalledWith(
       [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }],
-      { duration: 110, delay: 110, easing: "linear", fill: "backwards" },
+      { duration: 120, delay: 20, easing: "linear", fill: "backwards" },
     );
+    // The real border stays hidden until the pen stroke ends.
+    const [frames, timing] = (box.animate as ReturnType<typeof vi.fn>).mock
+      .calls[0];
+    expect(frames[0]).toMatchObject({ borderColor: "transparent" });
+    expect(timing).toMatchObject({ delay: 20, duration: 280 });
+    // A pen stroke traces the border from 40% to 140% of D, then goes away.
+    const stroke = root.querySelector("[data-writing-stroke] rect");
+    expect(stroke).not.toBeNull();
+    expect(stroke!.getAttribute("stroke")).toBe("rgb(10, 20, 30)");
+    expect(svgAnimate).toHaveBeenCalledWith(
+      [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
+      { duration: 200, delay: 100, easing: "ease-in-out", fill: "backwards" },
+    );
+    Element.prototype.animate = original;
+    root.remove();
   });
 });
