@@ -146,7 +146,7 @@ per new participant), that definition is fixed and written down **before** the n
 | G1 | Lines with 1+ width reversal, arm C (definition below) | 0 | new rule: 0 (5 creation-label lines exempt), renderToSvg only, measured on 4.15.2 — passes |
 | G2 | Elements alive under 500 ms, arm C | 0 | 0 — passes on `renderToSvg` only |
 | G3 | Final frame equals static render | 150/150 | 150/150 — on `renderToSvg` only |
-| G4 | G1–G3 re-measured on the React path (`ZenUml.render()` with the real debounce, gated in `render()`) | same thresholds | not run |
+| G4 | G1–G3 re-measured on the React path (`ZenUml.render()` with the real debounce, gated in `render()`) | same thresholds | **fails** (#737 at `2f7e81d4`, option on, 150 cases, 80 WPM, seed 3): G1 9 lines by DOM width, 0 by SVG width; G2 1; G3 150/150. See note below |
 | G5 | Real keystroke recordings replace the synthetic streams for G1–G4 | at least the trial's recordings | none exist |
 | G6 | Human trial as specified on the prototype page: 8–12 people, A/B/C in Latin-square order, 3 copy tasks | C vs A: WPM drop ≤ 2%, error rate not higher, change detection not lower | not run |
 | G7 | Identity keys (Decision 3) land with zero snapshot change | 0 changed snapshots | in progress, separate change |
@@ -160,6 +160,12 @@ label shows «create» and then the argument) are exempt, because the maintainer
 The maintainer approved this rule on 2026-11-23. It replaces the earlier rule, "lines with 2+ width jumps of
 20 px or more", and was fixed before G1 was measured again. Under the earlier rule G1 failed: 31 lines in the
 spike measurement, and 19 lines after the parser fixes released in 4.15.2.
+
+**G4 note (measured 2026-11-23).** All 9 G1 lines are the first line of a document typed from empty: the DOM
+renderer draws an empty diagram 294 px wide, wider than a first small diagram, so the width falls and then grows.
+With the option off, the same 9 cases show the same first-line pattern and 16 lines in all. The G2 element is a
+return self-call (`CreatAndAssign`, case `demo1-smoke`) alive under 500 ms. G3 compares the final DOM with a
+fresh render, ignoring attribute order. In every case the last committed frame is the raw text.
 
 Evidence that would change the verdict: G1 and G4 pass on recorded keystrokes, and G6 passes. Anything less
 keeps the interim state. If G6 is unclear because the sample is small, the next step is the same option behind
