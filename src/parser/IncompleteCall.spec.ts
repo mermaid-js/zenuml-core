@@ -257,6 +257,41 @@ describe("a trailing dot before a line that starts a new statement (#671)", () =
   });
 });
 
+describe("an emoji begun in a fragment condition", () => {
+  // `[` or `[name` with `)` right after it is an emoji still being typed.
+  // It must draw what the empty condition draws, not a spurious section
+  // fragment or a self-call (ADR 0009 width-jump gate).
+  const shape = (code: string) =>
+    RootContext(code).toStringTree(RootContext(code).parser.ruleNames);
+
+  it.each([
+    ["critical([) {\n}", "critical() {\n}"],
+    ["critical([w) {\n}", "critical() {\n}"],
+    ["if([) {\n  A.b()\n}", "if() {\n  A.b()\n}"],
+    ["loop([war) {\n  A.b()\n}", "loop() {\n  A.b()\n}"],
+  ])("%j parses like %j", (typing, plain) => {
+    expect(shape(typing)).toEqual(shape(plain));
+  });
+
+  it("reports the incomplete emoji", () => {
+    const result = parse("critical([w) {\n}");
+    expect(result.pass).toBe(false);
+    expect(result.errorDetails).toContainEqual({
+      line: 1,
+      column: 9,
+      msg: "incomplete emoji in the condition",
+    });
+  });
+
+  it.each(["critical([warning]) {\n}", "critical([warning] x) {\n}"])(
+    "keeps a complete emoji in %j",
+    (code) => {
+      expect(parse(code).pass).toBe(true);
+      expect(shape(code)).toContain("emoji");
+    },
+  );
+});
+
 describe("valid multi-line DSL is unchanged (#671)", () => {
   it.each([
     // Multi-line argument lists.
@@ -322,7 +357,10 @@ describe("valid multi-line DSL is unchanged (#671)", () => {
       const plain = createPlainParser(code);
       plain.prog();
       if (plain._syntaxErrors > 0) return false;
-      return repairIncompleteCalls(createPlainParser(code).getTokenStream()).length > 0;
+      return (
+        repairIncompleteCalls(createPlainParser(code).getTokenStream()).length >
+        0
+      );
     });
     expect(repaired.map(([id]) => id)).toEqual([]);
   });
