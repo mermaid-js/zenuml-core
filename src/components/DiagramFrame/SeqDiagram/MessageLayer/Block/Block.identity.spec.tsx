@@ -25,7 +25,7 @@ const mount = (code: string, motion = false) => {
   const store = createStore();
   store.set(codeAtom, code);
   store.set(enableWritingAnimationAtom, motion);
-  store.set(writingMotionAtom, motion);
+  store.set(writingMotionAtom, motion ? "gated" : false);
   const view = render(
     <Provider store={store}>
       <RootBlock />

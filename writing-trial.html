@@ -1,0 +1,349 @@
+<!doctype html>
+<!--
+  ADR 0009 typing trial (gates G5 and G6). Dev server only: `bun dev`, then
+  http://localhost:14000/writing-trial.html. Not part of the site build.
+  Recordings stay in this page until downloaded. Use the copy tasks only.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Writing Trial</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --panel: #fff;
+        --ink: #1b2026;
+        --muted: #5d6670;
+        --line: #d3d8de;
+        --accent: #1f4fd8;
+        font:
+          15px/1.5 -apple-system,
+          "Segoe UI",
+          sans-serif;
+        color: var(--ink);
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: var(--bg);
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 12px;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.2fr) minmax(
+            320px,
+            2fr
+          );
+        gap: 12px;
+        align-items: start;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        position: relative;
+        min-height: 420px;
+      }
+      pre,
+      textarea {
+        font:
+          14px/1.5 ui-monospace,
+          Menlo,
+          monospace;
+        margin: 0;
+      }
+      textarea {
+        width: 100%;
+        min-height: 420px;
+        box-sizing: border-box;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px;
+        resize: vertical;
+      }
+      button {
+        font: inherit;
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #fff;
+        color: var(--accent);
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      #cover {
+        position: absolute;
+        inset: 0;
+        background: var(--panel);
+        border-radius: 8px;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        padding: 24px;
+      }
+      #cover input {
+        font: inherit;
+        padding: 6px;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      td,
+      th {
+        border: 1px solid var(--line);
+        padding: 4px 8px;
+        text-align: left;
+      }
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Writing trial</h1>
+    <div class="bar">
+      <label
+        >Participant number
+        <input id="pid" type="number" min="1" value="1" style="width: 5em"
+      /></label>
+      <span id="order" class="muted"></span>
+      <span id="status"></span>
+    </div>
+    <div class="bar">
+      <button id="start">Start task 1</button>
+      <button id="done" class="secondary" disabled>Done</button>
+      <span id="clock" class="muted"></span>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <div class="muted">Copy this text</div>
+        <pre id="task"></pre>
+      </div>
+      <div class="panel">
+        <textarea
+          id="editor"
+          spellcheck="false"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          disabled
+          placeholder="Press Start, then type the text on the left"
+        ></textarea>
+      </div>
+      <div class="panel">
+        <div id="diagram" style="overflow: auto"></div>
+        <div id="cover">
+          <b>What was just added to the diagram?</b>
+          <input id="answer" autocomplete="off" />
+          <button id="submit">Continue</button>
+        </div>
+      </div>
+    </div>
+    <h2 style="font-size: 16px">Results</h2>
+    <table id="results">
+      <tr>
+        <th>Task</th>
+        <th>Arm</th>
+        <th>WPM</th>
+        <th>Deletion share</th>
+        <th>Seconds</th>
+        <th></th>
+      </tr>
+    </table>
+    <p class="muted">
+      The recordings hold only what you typed here. They leave this page only
+      when you download them.
+    </p>
+
+    <script type="module">
+      import ZenUml from "./src/core.tsx";
+      import {
+        armOrder,
+        armSettings,
+        Recorder,
+        TASKS,
+        typingMetrics,
+      } from "./src/writing/trial.ts";
+
+      const LIMIT_MS = 3 * 60 * 1000;
+      const $ = (id) => document.getElementById(id);
+      const editor = $("editor");
+      let step = 0;
+      let session = null;
+      const probes = [];
+
+      const participant = () => Math.max(1, Number($("pid").value) || 1);
+      const showOrder = () => {
+        $("order").textContent =
+          "Arm order: " + armOrder(participant()).join(" → ");
+      };
+      $("pid").addEventListener("input", showOrder);
+      showOrder();
+
+      async function start() {
+        const n = participant();
+        const arm = armOrder(n)[step];
+        const task = TASKS[step];
+        const { gate, motion } = armSettings(arm);
+        $("pid").disabled = true;
+        $("task").textContent = task.text;
+        $("diagram").innerHTML = "";
+        const zen = new ZenUml($("diagram"));
+        await zen.render("", { enableWritingAnimation: gate });
+        zen._setWritingMotion(motion);
+        editor.value = "";
+        editor.disabled = false;
+        editor.focus();
+        const t0 = performance.now();
+        session = {
+          arm,
+          task,
+          zen,
+          recorder: new Recorder(
+            "",
+            { task: task.id, arm, participant: n },
+            t0,
+          ),
+          t0,
+          // Two change-detection questions per task, at random times.
+          probeAt: [
+            30000 + Math.random() * 40000,
+            90000 + Math.random() * 50000,
+          ],
+        };
+        $("start").disabled = true;
+        $("done").disabled = false;
+        $("status").textContent = `Task ${step + 1} of 3`;
+        // An interval, not requestAnimationFrame: the limit holds in a hidden tab too.
+        session.timer = setInterval(tick, 200);
+        tick();
+      }
+
+      function tick() {
+        if (!session) return;
+        const elapsed = performance.now() - session.t0;
+        $("clock").textContent =
+          Math.max(0, Math.ceil((LIMIT_MS - elapsed) / 1000)) + " s left";
+        if (elapsed >= LIMIT_MS) return finish();
+        if (
+          session.probeAt.length &&
+          elapsed >= session.probeAt[0] &&
+          $("cover").style.display !== "flex"
+        ) {
+          session.probeAt.shift();
+          ask(elapsed);
+        }
+      }
+
+      function ask(elapsed) {
+        const lines = editor.value.split("\n");
+        const caretLine =
+          editor.value.slice(0, editor.selectionStart).split("\n").length - 1;
+        session.pendingProbe = {
+          t: Math.round(elapsed),
+          text: editor.value,
+          caretLine,
+          lastLines: lines.slice(Math.max(0, caretLine - 2), caretLine + 1),
+        };
+        $("cover").style.display = "flex";
+        editor.disabled = true;
+        $("answer").value = "";
+        $("answer").focus();
+      }
+
+      $("submit").addEventListener("click", () => {
+        probes.push({
+          participant: participant(),
+          task: session.task.id,
+          arm: session.arm,
+          ...session.pendingProbe,
+          answer: $("answer").value,
+        });
+        $("cover").style.display = "none";
+        editor.disabled = false;
+        editor.focus();
+      });
+
+      editor.addEventListener("input", () => {
+        if (!session) return;
+        session.recorder.input(editor.value, performance.now());
+        session.zen.render(editor.value, {});
+      });
+
+      function download(name, text) {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(
+          new Blob([text], { type: "application/json" }),
+        );
+        a.download = name;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function finish() {
+        if (!session) return;
+        const s = session;
+        clearInterval(s.timer);
+        session = null;
+        editor.disabled = true;
+        $("cover").style.display = "none";
+        const jsonl = s.recorder.toJsonl();
+        const m = typingMetrics(jsonl);
+        const name = `p${participant()}-${s.task.id}-${s.arm}.jsonl`;
+        const row = $("results").insertRow();
+        row.innerHTML = `<td>${s.task.id}</td><td>${s.arm}</td><td>${m.wpm}</td><td>${(m.deletionShare * 100).toFixed(1)}%</td><td>${m.seconds.toFixed(0)}</td><td></td>`;
+        const save = document.createElement("button");
+        save.className = "secondary";
+        save.textContent = "Download " + name;
+        save.addEventListener("click", () => download(name, jsonl));
+        row.cells[5].appendChild(save);
+        step++;
+        $("done").disabled = true;
+        $("clock").textContent = "";
+        if (step < 3) {
+          $("start").disabled = false;
+          $("start").textContent = `Start task ${step + 1}`;
+        } else {
+          $("status").textContent = "All three tasks done";
+          const answers = document.createElement("button");
+          answers.className = "secondary";
+          answers.textContent = "Download change-detection answers";
+          answers.addEventListener("click", () =>
+            download(
+              `p${participant()}-probes.json`,
+              JSON.stringify(probes, null, 1),
+            ),
+          );
+          $("status").after(answers);
+        }
+      }
+
+      $("start").addEventListener("click", start);
+      $("done").addEventListener("click", finish);
+    </script>
+  </body>
+</html>

@@ -142,15 +142,24 @@ describe("writing-time motion (internal)", () => {
     expect(store.get(writingMotionAtom)).toBe(false);
     expect(el.querySelector("[data-identity]")).toBeNull();
 
-    zenUml._setWritingMotion(true);
+    zenUml._setWritingMotion("gated");
     await zenUml.render("A.m()\nA.n()\n", {});
     expect(el.querySelector("[data-identity]")).not.toBeNull();
   });
 
-  it("does not play while enableWritingAnimation is off", async () => {
+  it("gated motion does not play while enableWritingAnimation is off", async () => {
     const { el, zenUml } = mount();
-    zenUml._setWritingMotion(true);
+    zenUml._setWritingMotion("gated");
     await zenUml.render("A.m()\nA.n()", {});
     expect(el.querySelector("[data-identity]")).toBeNull();
+  });
+
+  it("raw motion plays without the gate (trial arm B)", async () => {
+    const { el, zenUml, store } = mount();
+    await zenUml.render("A.m()", {});
+    zenUml._setWritingMotion("raw");
+    await zenUml.render("A.m()\nA.n()", {});
+    expect(store.get(enableWritingAnimationAtom)).toBe(false);
+    expect(el.querySelector("[data-identity]")).not.toBeNull();
   });
 });
