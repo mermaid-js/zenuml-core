@@ -31,8 +31,9 @@ off, `renderCodeAtom` is never written and the render path is the one in `src/co
 |---|---|---|
 | `render()` call | clear timeout, set `min(cost, 2000)` ms | same, plus run the gate synchronously and keep the edit |
 | Several calls inside the debounce | last text wins | last gated text wins; the gate already saw each edit |
-| Gate holds a line (`reason` set) | — | timer = `max(debounce, dwell)`; on fire, `settle` closes the line or keeps it held |
+| Gate holds a line (`reason` set) | — | timer = `max(debounce, dwell)`; on fire, `settle` closes the line or keeps it held (`keyword`, `string`) |
 | Loss guard holds | — | timer = remaining hold; at 1,200 ms the frame is forced |
+| No `render()` call for 1,200 ms while render text ≠ raw text | — | **idle flush** (new, not in the spike): render raw text unconditionally |
 | Edit removes text, or is bulk (2+ lines) | — | no gate, no loss guard |
 | `await render()` | resolves on commit of the latest revision | resolves on commit of the frame whose render text equals raw text |
 
@@ -103,7 +104,7 @@ Rules carried over from the prototype's motion spec:
 
 1. Build the library with the option on.
 2. Drive `ZenUml.render()` in Playwright with the spike's streams (150 compare-cases, 80 WPM, seed 3), with
-   real timers so the debounce merges keys as it would in an editor.
+   real timers so the debounce merges keys as it would in an editor and the idle flush fires on long gaps.
 3. After each React commit, record the root width and the keyed elements, then run the spike's
    `measureFrames` rules unchanged (20 px width jump, 500 ms short-lived element).
 4. Repeat with recorded keystrokes once they exist (G5).

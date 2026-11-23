@@ -97,6 +97,13 @@ The gate runs synchronously inside `render()`, before the debounce timeout, so i
 renders merge. One scheduler owns the debounce, the gate's dwell timer (250–500 ms) and the loss-guard hold
 (1,200 ms); there are never two pending timers for one diagram.
 
+**Idle flush (new, not in the spike).** In the spike, a line held for `keyword` or `string` (for example `re`, or
+an open `"`) stays out of the diagram until the next keystroke, with no time limit. The product version adds one
+rule: when no new `render()` call arrives for 1,200 ms, the scheduler renders the raw text unconditionally. That
+bounds every hold, ends the editing-off state below, and lets `await render()` resolve. After a pause, the user
+can therefore see the raw parse of an incomplete line. Gates G4 and G5 must run with this rule; the synthetic
+streams end on complete text, so G3 (150/150) does not exercise it.
+
 ### 3. Element identity does not come from position
 
 Before any motion ships, statements, fragments and participants get identity keys from a data-level reconcile
@@ -121,8 +128,9 @@ key without animation. Deletions fade in 90 ms.
 | `RenderMode.Static` | off | off |
 | First render, `reset`, paste of 2+ lines | gate skipped | none, or the 240 ms batch |
 
-The option follows the existing `enable*` editing flags in `src/core.tsx`: written after the debounce
-(`appliedIn: "doRender"`), keeps its value when `undefined`. Embedders turn it on per surface by passing it to
+The option is written in `render()` itself (`appliedIn: "render"`), not after the debounce like the `enable*`
+editing flags, because the gate runs in `render()` and must know the option on the same call. Like those
+flags, it keeps its value when `undefined`. Embedders turn it on per surface by passing it to
 `render()`, and off by passing `false`. Nothing changes for an embedder that does not pass it. This ADR does not
 claim how each embedder (Confluence app, web-sequence, Mermaid) calls `render()` today; each one decides in its
 own repo after this ships.
@@ -152,8 +160,8 @@ a feature flag in one embedder, watching close rate and complaints, before it is
 - If accepted, the first implementation step is G7 (identity keys) and the parser fixes behind the 16 shrink and
   grow-back lines. Both are worth doing without animation.
 - The renderer gains a second text atom and a scheduler. Every reader of `codeAtom` stays on raw text.
-- An embedder that turns the option on gets a diagram that can lag the editor by up to 1.2 s on one line, and
-  diagram editing that is off while a line is held back.
+- An embedder that turns the option on gets a diagram that can lag the editor on one line until the next keystroke or
+  the 1.2 s idle flush, and diagram editing that is off for that time.
 - The spike README mentions a `_STARTER_` loss-guard exemption in `engine.js`. `engine.js` at `0c42d0b6` has no
   such code; `_STARTER_` appears only in the page's list of parser observations. The product version adds no
   `_STARTER_` special case.
