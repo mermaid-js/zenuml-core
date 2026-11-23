@@ -257,6 +257,44 @@ describe("a trailing dot before a line that starts a new statement (#671)", () =
   });
 });
 
+describe("an emoji typed after the target dot, before the method name", () => {
+  // `methodName` is `emoji? name`: an emoji with no name after it is never
+  // valid. While it is being typed it must draw what `A.` draws, not a second
+  // statement from an `[` participant (ADR 0009 width-jump gate).
+  it.each([
+    ["A.[", "A."],
+    ["A.[lo", "A."],
+    ["A.[lock", "A."],
+    ["A.[lock]", "A."],
+    ["A->B.[", "A->B."],
+    ["A->B.[lock]", "A->B."],
+    ["[rocket]A.[", "[rocket]A."],
+    ["A.[lo\nB.c()", "A.\nB.c()"],
+    ["A.b().[lo", "A.b()."],
+  ])("%j draws what %j draws", (typing, plain) => {
+    expect(statements(typing)).toEqual(statements(plain));
+  });
+
+  it("reports the incomplete emoji", () => {
+    const result = parse("A.[lo");
+    expect(result.pass).toBe(false);
+    expect(result.errorDetails).toContainEqual({
+      line: 1,
+      column: 2,
+      msg: "incomplete emoji: the method name is missing",
+    });
+  });
+
+  it.each(["A.[lock]v()", "A->B.[lock]v()", "A.[lock]v() {\n  B.c()\n}"])(
+    "keeps the emoji of a method name in %j",
+    (code) => {
+      const stat = RootContext(code).block().stat()[0];
+      expect(stat.getText()).toContain("[lock]v");
+      expect(RootContext(code).block().stat()).toHaveLength(1);
+    },
+  );
+});
+
 describe("valid multi-line DSL is unchanged (#671)", () => {
   it.each([
     // Multi-line argument lists.
@@ -322,7 +360,10 @@ describe("valid multi-line DSL is unchanged (#671)", () => {
       const plain = createPlainParser(code);
       plain.prog();
       if (plain._syntaxErrors > 0) return false;
-      return repairIncompleteCalls(createPlainParser(code).getTokenStream()).length > 0;
+      return (
+        repairIncompleteCalls(createPlainParser(code).getTokenStream()).length >
+        0
+      );
     });
     expect(repaired.map(([id]) => id)).toEqual([]);
   });
