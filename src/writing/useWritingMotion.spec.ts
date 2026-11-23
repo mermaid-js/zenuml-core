@@ -72,4 +72,56 @@ describe("play", () => {
     Element.prototype.animate = original;
     root.remove();
   });
+
+  // Visual review: a new lifeline stood at full length under a blank box.
+  // It now draws down from the box once the border is closed.
+  it("draws a new participant's lifeline down after its border", () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    root.innerHTML = `<div data-participant-id="A"><div>A</div></div><div data-lifeline-id="A"><div class="line"></div></div>`;
+    const line = root.querySelector<HTMLElement>(".line")!;
+    line.animate = vi.fn() as never;
+    const original = Element.prototype.animate;
+    Element.prototype.animate = vi.fn(() => ({}) as Animation) as never;
+    const { elements } = measure(root);
+    play(
+      {
+        moves: [],
+        reveals: [{ key: "p:A", delay: 20, duration: 200 }],
+        removals: [],
+      },
+      elements,
+      root,
+      measure(document.createElement("div")),
+    );
+    expect(line.animate).toHaveBeenCalledWith(
+      [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }],
+      { duration: 200, delay: 300, easing: "ease-out", fill: "backwards" },
+    );
+    Element.prototype.animate = original;
+    root.remove();
+  });
+
+  // Visual review: a moved participant glided, but its lifeline jumped.
+  it("glides a moved participant's lifeline with its box", () => {
+    const root = document.createElement("div");
+    root.innerHTML = `<div data-participant-id="A"><div>A</div></div><div data-lifeline-id="A"><div class="line"></div></div>`;
+    const box = root.querySelector<HTMLElement>("[data-participant-id]")!;
+    const line = root.querySelector<HTMLElement>(".line")!;
+    box.animate = vi.fn() as never;
+    line.animate = vi.fn() as never;
+    const { elements } = measure(root);
+    play(
+      { moves: [{ key: "p:A", dx: -40, dy: 0 }], reveals: [], removals: [] },
+      elements,
+      root,
+      measure(document.createElement("div")),
+    );
+    const glide = [
+      [{ transform: "translate(-40px, 0px)" }, { transform: "none" }],
+      { duration: 110, easing: "ease-out" },
+    ];
+    expect(box.animate).toHaveBeenCalledWith(...glide);
+    expect(line.animate).toHaveBeenCalledWith(...glide);
+  });
 });

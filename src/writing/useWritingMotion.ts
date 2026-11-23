@@ -156,13 +156,25 @@ export function play(
     fade.onfinish = drop;
     fade.oncancel = drop;
   }
+  const linesOf = (key: string) => {
+    const name = key.slice(2);
+    const lines: Element[] = [];
+    if (!key.startsWith("p:")) return lines;
+    root.querySelectorAll<HTMLElement>("[data-lifeline-id]").forEach((life) => {
+      if (life.dataset.lifelineId === name) {
+        lines.push(...life.querySelectorAll(".line"));
+      }
+    });
+    return lines;
+  };
   for (const { key, dx, dy } of plan.moves) {
-    elements
-      .get(key)
-      ?.animate(
+    // A participant's lifeline is a separate element: it glides with the box.
+    for (const el of [elements.get(key), ...linesOf(key)]) {
+      el?.animate(
         [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
         { duration: GLIDE_MS, easing: "ease-out" },
       );
+    }
   }
   const wipe = (
     el: Element | null | undefined,
@@ -182,14 +194,20 @@ export function play(
     // Like handwriting: the name is written first, then a pen draws the
     // border around it. The label is the box's last child.
     wipe(el?.lastElementChild, delay, Math.round(LABEL_SHARE * duration));
-    if (el)
-      trace(
-        el,
-        root,
-        delay,
-        delay + Math.round(STROKE_AT * duration),
-        duration,
+    const strokeAt = delay + Math.round(STROKE_AT * duration);
+    if (el) trace(el, root, delay, strokeAt, duration);
+    // The lifeline draws down from the box once the border is closed.
+    for (const line of linesOf(key)) {
+      line.animate(
+        [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0 0)" }],
+        {
+          duration,
+          delay: strokeAt + duration,
+          easing: "ease-out",
+          fill: "backwards",
+        },
       );
+    }
   }
 }
 
