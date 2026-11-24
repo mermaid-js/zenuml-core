@@ -95,7 +95,29 @@ Report.export(range) {
 export interface RecordingMeta {
   task: string;
   arm: Arm;
-  participant: number;
+  /** Set by the researcher page. The public flow leaves it out. */
+  participant?: number;
+}
+
+/** One change-detection answer, scored when it was given. */
+export interface DetectAnswer {
+  q: string;
+  answer: string;
+  correct: boolean;
+}
+
+/**
+ * Header fields that are only known when a task ends. The collector accepts
+ * exactly these (`workers/writing-trial/src/handler.ts`): `paste` is true if
+ * any paste or drop reached the editor, `hiddenMs` is the total time the tab
+ * was hidden and `durationMs` the time from start to submit, both whole
+ * numbers.
+ */
+export interface RecordingExtras {
+  paste: boolean;
+  hiddenMs: number;
+  durationMs: number;
+  detect: DetectAnswer[];
 }
 
 /**
@@ -104,16 +126,19 @@ export interface RecordingMeta {
  * brackets or quotes (fixed before any recording is measured).
  */
 export class Recorder {
-  private readonly lines: string[];
+  private readonly header: Record<string, unknown>;
+  private readonly lines: string[] = [];
   private code: string;
 
+  /** `editor` is "textarea" for the copy tasks and "smart" for the warm-up. */
   constructor(
     start: string,
     meta: RecordingMeta,
     private readonly t0: number,
+    editor: "textarea" | "smart" = "textarea",
   ) {
     this.code = start;
-    this.lines = [JSON.stringify({ start, ...meta, editor: "textarea" })];
+    this.header = { start, ...meta, editor };
   }
 
   input(code: string, now: number) {
@@ -138,8 +163,18 @@ export class Recorder {
     this.code = code;
   }
 
-  toJsonl(): string {
-    return this.lines.join("\n") + "\n";
+  /** The header is written here, so `extras` can hold late facts. */
+  toJsonl(extras?: RecordingExtras): string {
+    const header = extras
+      ? {
+          ...this.header,
+          paste: extras.paste,
+          hiddenMs: Math.round(extras.hiddenMs),
+          durationMs: Math.round(extras.durationMs),
+          detect: extras.detect,
+        }
+      : this.header;
+    return [JSON.stringify(header), ...this.lines].join("\n") + "\n";
   }
 }
 
