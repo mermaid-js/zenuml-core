@@ -1,0 +1,297 @@
+<!doctype html>
+<!--
+  ADR 0009 public typing trial (gates G5 and G6). Dev server only: `bun dev`,
+  then http://localhost:14000/trial.html. Not part of the site build. The
+  collector Worker (wrangler.trial.toml, PR #748) must be running for the
+  recordings to leave the page: see the PR for the local commands.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZenUML typing trial</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --panel: #fff;
+        --ink: #1b2026;
+        --muted: #5d6670;
+        --line: #d3d8de;
+        --accent: #1f4fd8;
+        color: var(--ink);
+      }
+      [hidden] {
+        display: none !important;
+      }
+      body {
+        /* The page font is set on body, not :root: the renderer sizes its
+           spacing in rem, so the root must stay at the browser default. */
+        font:
+          15px/1.5 -apple-system,
+          "Segoe UI",
+          sans-serif;
+        margin: 0;
+        padding: 16px;
+        background: var(--bg);
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 20px 0 6px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px 20px;
+        max-width: 680px;
+      }
+      .card ul {
+        margin: 4px 0 0;
+        padding-left: 20px;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.2fr) minmax(
+            320px,
+            2fr
+          );
+        gap: 12px;
+        align-items: start;
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.4fr);
+        gap: 12px;
+        align-items: start;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        position: relative;
+        min-height: 420px;
+      }
+      pre,
+      textarea,
+      code {
+        font:
+          14px/1.5 ui-monospace,
+          Menlo,
+          monospace;
+        margin: 0;
+      }
+      textarea {
+        width: 100%;
+        min-height: 420px;
+        box-sizing: border-box;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px;
+        resize: vertical;
+      }
+      #weditor {
+        height: 360px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      button {
+        font: inherit;
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #fff;
+        color: var(--accent);
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      #probe-bar {
+        background: #fff4d6;
+        border: 1px solid #e0b84a;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      .panel.asking {
+        outline: 3px solid #e0b84a;
+        cursor: crosshair;
+      }
+      .big {
+        font-size: 40px;
+        font-weight: 600;
+        line-height: 1.1;
+      }
+      #uploads {
+        margin-top: 12px;
+      }
+      #fallback button {
+        margin: 4px 8px 4px 0;
+      }
+      @media (max-width: 900px) {
+        .grid,
+        .grid2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="ts-box"></div>
+
+      <section id="screen-consent" hidden>
+        <h1>ZenUML typing trial</h1>
+        <div class="card">
+          <p>
+            We are testing a change to ZenUML: while you type a sequence
+            diagram, the diagram draws new arrows and boxes with a short
+            animation. We want to check that this does not slow people down or
+            make changes harder to notice. The trial takes about 15 minutes. You
+            need a computer with a keyboard.
+          </p>
+          <h2>What you will do</h2>
+          <ul>
+            <li>A free warm-up in an editor with suggestions.</li>
+            <li>
+              Three short typing tasks: copy a text, with a 3-minute limit each,
+              and answer two quick questions about the diagram.
+            </li>
+          </ul>
+          <h2>What is recorded</h2>
+          <ul>
+            <li>
+              What you type in the editors on this page, with the time of each
+              edit.
+            </li>
+            <li>
+              Which version of the animation you saw, in which order, and
+              whether the device has a keyboard or is touch-only.
+            </li>
+            <li>
+              Whether you pasted text, how long the tab was hidden, how long
+              each task took, and your answers to the questions.
+            </li>
+            <li>A random session code. It is not linked to you.</li>
+          </ul>
+          <h2>What is not recorded</h2>
+          <ul>
+            <li>No IP address, no name, no email address.</li>
+          </ul>
+          <h2>How long it is kept</h2>
+          <p>The data is deleted after 90 days.</p>
+          <h2>What it is used for</h2>
+          <p>
+            Only to decide whether the animation is released. Results will be
+            published as numbers, not as individual recordings.
+          </p>
+          <p>
+            <label>
+              <input id="agree" type="checkbox" />
+              I have read this and I agree to take part.
+            </label>
+          </p>
+          <button id="begin" disabled>Start</button>
+        </div>
+      </section>
+
+      <section id="screen-warmup" hidden>
+        <h1>Warm-up</h1>
+        <div class="bar">
+          <span class="muted"
+            >Write any sequence diagram you like, for example
+            <code>Alice.greet()</code>. Press the keys you want: suggestions
+            appear as you type. Press Continue when you are ready.</span
+          >
+          <button id="wdone" disabled>Continue</button>
+        </div>
+        <div class="grid2">
+          <div class="panel"><div id="weditor"></div></div>
+          <div class="panel">
+            <div id="wdiagram" style="overflow: auto"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-task" hidden>
+        <h1 id="tnum"></h1>
+        <div class="bar">
+          <button id="tstart">Start task 1</button>
+          <button id="tdone" class="secondary" disabled>Done</button>
+          <span id="tclock" class="muted"></span>
+          <span class="muted"
+            >Type the text on the left into the box in the middle. Press Done
+            when you have typed it all.</span
+          >
+        </div>
+        <div id="probe-bar" hidden>
+          Typing is paused. In the diagram on the right, click the element that
+          appeared most recently. You have 10 seconds.
+        </div>
+        <div class="grid">
+          <div class="panel">
+            <div class="muted">Copy this text</div>
+            <pre id="ttask"></pre>
+          </div>
+          <div class="panel">
+            <textarea
+              id="teditor"
+              spellcheck="false"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              disabled
+              placeholder="Press Start, then type the text on the left"
+            ></textarea>
+          </div>
+          <div class="panel" id="tpanel">
+            <div id="tdiagram" style="overflow: auto"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-thanks" hidden>
+        <h1>Thank you</h1>
+        <div class="card">
+          <div id="thanks-full">
+            <p>Your typing speed in the three tasks:</p>
+            <p><span class="big" id="wpm"></span> words per minute</p>
+            <p id="wpm-list" class="muted"></p>
+          </div>
+          <div id="thanks-touch" hidden>
+            <p>
+              Thank you for the warm-up. The typing tasks need a computer with a
+              keyboard. If you can, open this page again on a computer.
+            </p>
+          </div>
+          <div id="uploads" class="muted"></div>
+          <div id="fallback" hidden></div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/writing/trial-page.ts"></script>
+  </body>
+</html>
