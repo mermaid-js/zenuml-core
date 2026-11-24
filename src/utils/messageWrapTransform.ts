@@ -1,3 +1,5 @@
+import { getIndent } from "@/utils/StringUtil";
+
 export type WrapFragmentType = "alt" | "loop" | "opt" | "par";
 
 type WrapMessageInput = {
@@ -37,7 +39,7 @@ export const wrapMessageInFragment = ({
   lineHead,
   type,
 }: WrapMessageInput) => {
-  const indent = line.match(/^\s*/)?.[0] ?? "";
+  const indent = getIndent(line);
   const trimmed = line.trimStart();
   const header = wrapHeader(type);
   const innerIndent = `${indent}  `;

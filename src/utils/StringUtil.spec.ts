@@ -1,6 +1,9 @@
 import {
   formatText,
+  getIndent,
+  getLineEnd,
   getLineHead,
+  getLineTail,
   getPrevLine,
   getPrevLineHead,
 } from "./StringUtil";
@@ -133,5 +136,54 @@ describe("getPrevLine", () => {
     const expectedPrevLine = "";
     const actualPrevLine = getPrevLine(code, position);
     expect(actualPrevLine).toBe(expectedPrevLine);
+  });
+});
+
+describe("getLineTail", () => {
+  it("returns the index just past the newline that ends the line", () => {
+    expect(getLineTail("A.m\nB.n\n", 1)).toBe(4);
+    expect(getLineTail("A.m\nB.n\n", 4)).toBe(8);
+  });
+
+  it("returns the end of the code on a last line without a newline", () => {
+    expect(getLineTail("A.m\nB.n", 5)).toBe(7);
+  });
+
+  it("returns 0 for empty code", () => {
+    expect(getLineTail("", 0)).toBe(0);
+  });
+
+  it("keeps a CRLF line's carriage return inside the line", () => {
+    expect(getLineTail("A.m\r\nB.n", 0)).toBe(5);
+  });
+});
+
+describe("getLineEnd", () => {
+  it("returns the index of the newline that ends the line", () => {
+    expect(getLineEnd("A.m\nB.n\n", 1)).toBe(3);
+  });
+
+  it("returns the end of the code on a last line without a newline", () => {
+    expect(getLineEnd("A.m\nB.n", 5)).toBe(7);
+  });
+
+  it("returns 0 for empty code", () => {
+    expect(getLineEnd("", 0)).toBe(0);
+  });
+
+  it("stops at the newline of a CRLF line, after its carriage return", () => {
+    expect(getLineEnd("A.m\r\nB.n", 0)).toBe(4);
+  });
+});
+
+describe("getIndent", () => {
+  it("returns the leading whitespace of a line", () => {
+    expect(getIndent("    A.m")).toBe("    ");
+    expect(getIndent("\t A.m")).toBe("\t ");
+  });
+
+  it("returns an empty string for a line without indent or an empty line", () => {
+    expect(getIndent("A.m")).toBe("");
+    expect(getIndent("")).toBe("");
   });
 });
