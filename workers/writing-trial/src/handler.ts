@@ -45,7 +45,19 @@ const TASK_IDS = ["warmup", "t1", "t2", "t3"];
 const ARMS = ["A", "B", "C"];
 const DEVICES = ["desktop", "touch"];
 const SESSION_ID = /^[A-Za-z0-9_-]{16,64}$/;
-const HEADER_KEYS = ["start", "task", "arm", "participant", "editor"];
+const HEADER_KEYS = [
+  "start",
+  "task",
+  "arm",
+  "participant",
+  "editor",
+  "paste",
+  "hiddenMs",
+  "durationMs",
+  "detect",
+];
+const DETECT_KEYS = ["answer", "correct", "q"];
+const MAX_DETECT = 4;
 const ROW_KEYS = ["del", "ins", "pos", "t"];
 
 const defaultDeps: CollectorDeps = {
@@ -92,6 +104,27 @@ function checkJsonl(jsonl: string, taskId: string, arm: string): string | null {
     return "jsonl header participant must be a non-negative integer";
   if (header.editor !== undefined && typeof header.editor !== "string")
     return "jsonl header editor must be a string";
+  if (header.paste !== undefined && typeof header.paste !== "boolean")
+    return "jsonl header paste must be a boolean";
+  if (header.hiddenMs !== undefined && !isNonNegInt(header.hiddenMs))
+    return "jsonl header hiddenMs must be a non-negative integer";
+  if (header.durationMs !== undefined && !isNonNegInt(header.durationMs))
+    return "jsonl header durationMs must be a non-negative integer";
+  if (header.detect !== undefined) {
+    const d = header.detect;
+    if (!Array.isArray(d) || d.length > MAX_DETECT)
+      return `jsonl header detect must be an array of at most ${MAX_DETECT}`;
+    for (const item of d) {
+      if (
+        !isObject(item) ||
+        Object.keys(item).sort().join() !== DETECT_KEYS.join() ||
+        typeof item.q !== "string" ||
+        typeof item.answer !== "string" ||
+        typeof item.correct !== "boolean"
+      )
+        return "jsonl header detect items need { q, answer, correct }";
+    }
+  }
   let last = 0;
   for (let i = 1; i < lines.length; i++) {
     let row: unknown;

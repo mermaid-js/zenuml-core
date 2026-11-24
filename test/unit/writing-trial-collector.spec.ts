@@ -195,6 +195,75 @@ describe("writing trial collector", () => {
     );
   });
 
+  it("accepts the exclusion and change-detection header fields", async () => {
+    const detect = [
+      { q: "Did a box appear?", answer: "yes", correct: true },
+      { q: "Did a line move?", answer: "no", correct: false },
+    ];
+    const { bucket, deps, env } = setup();
+    const res = await handleRequest(
+      post(
+        payload({
+          jsonl: jsonl({
+            paste: false,
+            hiddenMs: 0,
+            durationMs: 61234,
+            detect,
+          }),
+        }),
+      ),
+      env,
+      deps,
+    );
+    expect(res.status).toBe(201);
+    expect(bucket.objects.size).toBe(1);
+    // An empty detect list and four entries are both fine.
+    for (const d of [[], [...detect, ...detect]]) {
+      const s = setup();
+      const r = await handleRequest(
+        post(payload({ jsonl: jsonl({ detect: d }) })),
+        s.env,
+        s.deps,
+      );
+      expect(r.status, JSON.stringify(d).slice(0, 40)).toBe(201);
+    }
+  });
+
+  it("rejects malformed exclusion and change-detection header fields", async () => {
+    const ok = { q: "q", answer: "a", correct: true };
+    const bad: Record<string, unknown>[] = [
+      { paste: "yes" },
+      { paste: 1 },
+      { hiddenMs: -1 },
+      { hiddenMs: 1.5 },
+      { hiddenMs: "10" },
+      { durationMs: -5 },
+      { durationMs: 2.2 },
+      { durationMs: null },
+      { detect: "yes" },
+      { detect: {} },
+      { detect: [ok, ok, ok, ok, ok] },
+      { detect: [{ q: "q", answer: "a" }] },
+      { detect: [{ q: 1, answer: "a", correct: true }] },
+      { detect: [{ q: "q", answer: 2, correct: true }] },
+      { detect: [{ q: "q", answer: "a", correct: "true" }] },
+      { detect: [{ ...ok, extra: "x" }] },
+      { detect: [null] },
+      { detect: ["q"] },
+      { detect: [[ok]] },
+    ];
+    for (const extra of bad) {
+      const { bucket, deps, env } = setup();
+      const res = await handleRequest(
+        post(payload({ jsonl: jsonl(extra) })),
+        env,
+        deps,
+      );
+      expect(res.status, JSON.stringify(extra).slice(0, 80)).toBe(400);
+      expect(bucket.objects.size).toBe(0);
+    }
+  });
+
   it("rejects oversize bodies", async () => {
     const { bucket, deps, env } = setup();
     const row = JSON.stringify({
