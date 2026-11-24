@@ -148,7 +148,7 @@ per new participant), that definition is fixed and written down **before** the n
 | G3 | Final frame equals static render | 150/150 | 150/150 — on `renderToSvg` only |
 | G4 | G1–G3 re-measured on the React path (`ZenUml.render()` with the real debounce, gated in `render()`) | same thresholds | 0 / 0 / 150/150 — passes (#737 at `e794b96f`, option on, 150 cases, 80 WPM, seed 3): G1 0 lines by DOM width and by SVG width (4 creation-label lines exempt); G2 0; G3 150/150. Failed at `2f7e81d4`; see note below |
 | G5 | Real keystroke recordings replace the synthetic streams for G1–G4 | at least the trial's recordings | none exist |
-| G6 | Human trial as specified on the prototype page: 8–12 people, A/B/C in Latin-square order, 3 copy tasks | C vs A: WPM drop ≤ 2%, error rate not higher, change detection not lower | not run |
+| G6 | Human trial: A/B/C in Latin-square order, 3 copy tasks. Run online and unsupervised (definition below) | C vs A: WPM drop ≤ 2%, error rate not higher, change detection not lower | not run |
 | G7 | Identity keys (Decision 3) land with zero snapshot change | 0 changed snapshots | in progress, separate change |
 
 **G1 definition (changed 2026-11-23, before re-measurement).** A **reversal** is a diagram width change of
@@ -176,6 +176,27 @@ with a failing test first, and no gate definition changed:
 The re-run at `e794b96f` (42.2 min, 16,288 keys, 12,449 frames) passes: G1 0 by DOM and by SVG width, G2 0, G3
 150/150. G3 compares the final DOM with a fresh render, ignoring attribute order. In every case the last committed
 frame is the raw text.
+
+**G5 and G6 trial definition (changed 2026-11-24, before any recording exists).** The trial runs as a public
+page, announced on social media, without a person watching. The maintainer approved this on 2026-11-24. It
+replaces "8–12 people as specified on the prototype page". The thresholds above do not change. Everything below
+is fixed before the first participant starts, and is not changed after data arrives.
+
+| Item | Rule |
+|---|---|
+| Flow | Consent, then a free-write warm-up, then the 3 copy tasks in the arm order of `armOrder(n)`, each with its 2 change-detection questions |
+| Change detection | Twice per copy task, when 25–45% and then 55–75% of the target text is typed (the share is drawn at random per task), typing pauses and the person clicks, on the visible diagram, the element that appeared most recently. A click inside that element's box (participant, message arrow or label, fragment header) is correct. Any other click, or no click within 10 s, is wrong. The diagram is never covered. A multiple-choice question was rejected because the right answer is in the person's own typed text |
+| Editor in copy tasks | The plain `textarea` of `Recorder` in all three arms: no completion, no auto-closing brackets or quotes. Completion would insert whole words and make arms differ by more than the animation |
+| Editor in the warm-up | The smart editor (Langium completion, hover, diagnostics). Warm-up data counts for G5 only, never for G6 |
+| Device | Desktop with a physical keyboard. A touch-only device gets the warm-up only |
+| Complete participant | Consent given, all 3 copy tasks submitted, each within the 3-minute limit |
+| Exclusions, per participant | Any copy task with a paste event, with the tab hidden for more than 10 s, under 15 s long, or under 5 WPM. An excluded participant is dropped from G6 as a whole |
+| Sample | At least 4 complete, non-excluded participants for each of the 3 arm orders, 12 in total. Each session draws its order uniformly at random from the 3 rows of the Latin square (the collector keeps no counter, so rotation by arrival is not possible). Collection continues until every order has 4 |
+| G6 statistics | Per person, C against A. WPM: median of `(wpm_C − wpm_A) / wpm_A` ≥ −2%. Error rate: median of `deletionShare_C − deletionShare_A` ≤ 0. Change detection: total correct answers in C ≥ total in A |
+| G5 | Every copy-task and warm-up recording from a complete participant replays through `g4.mjs --recordings`, and G1–G3 must hold on them |
+| Data kept | Editor text and timings, arm, order, coarse device class, a random session id. No IP address, no name, no email. Deleted after 90 days |
+| Analytics | Microsoft Clarity loads only after consent, with input masking on; it is used for drop-off only, never as G5 or G6 data |
+| Time limit | If 12 complete participants do not exist 30 days after launch, G6 stays "not run" and the interim state stands |
 
 Evidence that would change the verdict: G1 and G4 pass on recorded keystrokes, and G6 passes. Anything less
 keeps the interim state. If G6 is unclear because the sample is small, the next step is the same option behind
