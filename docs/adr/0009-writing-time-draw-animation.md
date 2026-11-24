@@ -185,6 +185,7 @@ is fixed before the first participant starts, and is not changed after data arri
 | Item | Rule |
 |---|---|
 | Flow | Consent, then a free-write warm-up, then the 3 copy tasks in the arm order of `armOrder(n)`, each with its 2 change-detection questions |
+| Change detection | Twice per copy task, when 25–45% and then 55–75% of the target text is typed (the share is drawn at random per task), typing pauses and the person clicks, on the visible diagram, the element that appeared most recently. A click inside that element's box (participant, message arrow or label, fragment header) is correct. Any other click, or no click within 10 s, is wrong. The diagram is never covered. A multiple-choice question was rejected because the right answer is in the person's own typed text |
 | Editor in copy tasks | The plain `textarea` of `Recorder` in all three arms: no completion, no auto-closing brackets or quotes. Completion would insert whole words and make arms differ by more than the animation |
 | Editor in the warm-up | The smart editor (Langium completion, hover, diagnostics). Warm-up data counts for G5 only, never for G6 |
 | Device | Desktop with a physical keyboard. A touch-only device gets the warm-up only |
