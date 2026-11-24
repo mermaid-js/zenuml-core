@@ -12,6 +12,23 @@ const STROKE_AT = 0.4;
 
 const SVG = "http://www.w3.org/2000/svg";
 
+/** Each pen stroke's traced element, so a later frame can follow it. */
+const traced = new WeakMap<Element, HTMLElement>();
+
+/** Places a pen stroke over `el`, relative to `root`. */
+function place(svg: SVGElement, el: HTMLElement, root: HTMLElement) {
+  const origin = root.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  svg.setAttribute("width", String(r.width));
+  svg.setAttribute("height", String(r.height));
+  svg.style.left = `${r.left - origin.left}px`;
+  svg.style.top = `${r.top - origin.top}px`;
+  const rect = svg.querySelector("rect");
+  const stroke = Number(rect?.getAttribute("stroke-width")) || 1;
+  rect?.setAttribute("width", String(Math.max(0, r.width - stroke)));
+  rect?.setAttribute("height", String(Math.max(0, r.height - stroke)));
+}
+
 /**
  * Traces `el`'s border with a pen stroke over the new frame, then removes the
  * stroke. The real border is hidden from `start` until the stroke ends.
@@ -28,17 +45,12 @@ function trace(
   const width = parseFloat(css.borderTopWidth) || 1;
   const color = css.borderTopColor || "currentColor";
   const radius = parseFloat(css.borderTopLeftRadius) || 0;
-  const origin = root.getBoundingClientRect();
-  const r = el.getBoundingClientRect();
   const svg = document.createElementNS(SVG, "svg");
-  // Tagged with its participant, so a later frame can move it (followStrokes).
+  // Tagged with its key, so a later frame can move it (followStrokes).
   svg.setAttribute("data-writing-stroke", key);
-  svg.setAttribute("width", String(r.width));
-  svg.setAttribute("height", String(r.height));
+  traced.set(svg, el);
   Object.assign(svg.style, {
     position: "absolute",
-    left: `${r.left - origin.left}px`,
-    top: `${r.top - origin.top}px`,
     overflow: "visible",
     pointerEvents: "none",
     // Above the participant layer, which would hide the stroke's edges.
@@ -48,8 +60,6 @@ function trace(
   const half = width / 2;
   rect.setAttribute("x", String(half));
   rect.setAttribute("y", String(half));
-  rect.setAttribute("width", String(Math.max(0, r.width - width)));
-  rect.setAttribute("height", String(Math.max(0, r.height - width)));
   rect.setAttribute("rx", String(radius));
   rect.setAttribute("fill", "none");
   rect.setAttribute("stroke", color);
@@ -58,6 +68,7 @@ function trace(
   rect.setAttribute("stroke-dasharray", "1");
   rect.setAttribute("stroke-dashoffset", "1");
   svg.appendChild(rect);
+  place(svg, el, root);
   root.appendChild(svg);
   const end = delay + duration;
   el.animate([{ borderColor: "transparent" }, { borderColor: "transparent" }], {
@@ -189,7 +200,15 @@ export function play(
   for (const { key, delay, duration } of plan.reveals) {
     const el = elements.get(key);
     if (!key.startsWith("p:")) {
-      wipe(el, delay, duration);
+      if (
+        !el ||
+        !(
+          drawArrow(el, delay, duration) ||
+          drawFragment(key, el, root, delay, duration)
+        )
+      ) {
+        wipe(el, delay, duration);
+      }
       continue;
     }
     // Like handwriting: the name is written first, then a pen draws the
@@ -210,6 +229,125 @@ export function play(
       );
     }
   }
+}
+
+const clipFrom = (side: "left" | "right" | "top") => ({
+  clipPath:
+    side === "left"
+      ? "inset(0 100% 0 0)"
+      : side === "right"
+        ? "inset(0 0 0 100%)"
+        : "inset(0 0 100% 0)",
+});
+const CLIP_NONE = { clipPath: "inset(0 0 0 0)" };
+
+/** Share of D after which a new message's label starts to be written. */
+const LABEL_AT = 0.5;
+/** Share of D after which the rest of a new interaction fades in. */
+const ARRIVE_AT = 0.8;
+/** A fragment's pen stroke runs this many times D, after the header. */
+const FRAME_TRACE = 1.5;
+
+/**
+ * A new message: the line grows from the sender over D and the head rides on
+ * its tip; the label is written from half way, and the rest of the
+ * interaction (its occurrence, its nested statements) appears as the arrow
+ * arrives. The head moves with `translate`, not `transform`, so `settle`
+ * does not take it for a glide. Returns false when `el` is not a message.
+ */
+function drawArrow(el: HTMLElement, delay: number, duration: number) {
+  const message = el.querySelector<HTMLElement>(
+    ":scope > .interaction > .message",
+  );
+  const [line, head] = message
+    ? [...message.querySelectorAll<SVGElement>(":scope > svg")]
+    : [];
+  if (!message || !line || !head) return false;
+  const toRight = head.classList.contains("right-0");
+  const reach = Math.max(0, message.getBoundingClientRect().width - 8);
+  const from = toRight ? -reach : reach;
+  line.animate([clipFrom(toRight ? "left" : "right"), CLIP_NONE], {
+    duration,
+    delay,
+    easing: "ease-out",
+    fill: "backwards",
+  });
+  head.animate(
+    [
+      { translate: `${from}px 0px`, opacity: 0, offset: 0 },
+      { translate: `${from * 0.9}px 0px`, opacity: 1, offset: 0.1 },
+      { translate: "0px 0px", opacity: 1 },
+    ],
+    { duration, delay, easing: "ease-out", fill: "backwards" },
+  );
+  message
+    .querySelector(":scope > .name")
+    ?.animate([clipFrom("left"), CLIP_NONE], {
+      duration: Math.round(LABEL_SHARE * duration),
+      delay: delay + Math.round(LABEL_AT * duration),
+      easing: "linear",
+      fill: "backwards",
+    });
+  message
+    .querySelector(":scope > .message-number")
+    ?.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: Math.round(0.4 * duration),
+      delay,
+      easing: "linear",
+      fill: "backwards",
+    });
+  message.parentElement
+    ?.querySelectorAll(":scope > :not(.message)")
+    .forEach((rest) =>
+      rest.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: Math.round(0.4 * duration),
+        delay: delay + Math.round(ARRIVE_AT * duration),
+        easing: "linear",
+        fill: "backwards",
+      }),
+    );
+  return true;
+}
+
+/**
+ * A new fragment: its header fills from left to right over D, then a pen
+ * traces the border over 1.5 D. Its contents appear with the pen. Returns
+ * false when `el` is not a fragment.
+ */
+function drawFragment(
+  key: string,
+  el: HTMLElement,
+  root: HTMLElement,
+  delay: number,
+  duration: number,
+) {
+  const frag = el.querySelector<HTMLElement>(":scope > .fragment");
+  if (!frag) return false;
+  frag
+    .querySelector(":scope > .header")
+    ?.animate([clipFrom("left"), CLIP_NONE], {
+      duration,
+      delay,
+      easing: "ease-out",
+      fill: "backwards",
+    });
+  frag.querySelectorAll(":scope > :not(.header)").forEach((rest) =>
+    rest.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration,
+      delay: delay + duration,
+      easing: "linear",
+      fill: "backwards",
+    }),
+  );
+  trace(
+    key,
+    frag,
+    root,
+    delay,
+    delay + duration,
+    Math.round(FRAME_TRACE * duration),
+  );
+  return true;
 }
 
 const isGlide = (a: Animation) =>
@@ -249,6 +387,14 @@ export function followStrokes(
     const box = boxes.get(key);
     if (!box || !elements.has(key)) {
       svg.remove();
+      return;
+    }
+    // A fragment's stroke traces the fragment inside its statement: follow
+    // that element, size included, while it is still on the page.
+    const target = traced.get(svg);
+    if (target && key.startsWith("s:")) {
+      if (target.isConnected) place(svg, target, root);
+      else svg.remove();
       return;
     }
     svg.style.left = `${box.x}px`;
