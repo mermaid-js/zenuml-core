@@ -145,8 +145,10 @@ test("the full desktop flow stores four recordings in the local R2 bucket", asyn
   await page.locator("#wdone").click();
   await expect(body).toHaveAttribute("data-screen", "task");
 
-  // Three copy tasks, with two questions each.
-  const picks: boolean[] = [];
+  // Three copy tasks, with two click-the-newest questions each. First
+  // question: a click on the newest element. Second: a timeout in task 1 (10 s,
+  // the ADR limit), a click on empty space in tasks 2 and 3.
+  const bar = page.locator("#probe-bar");
   for (let n = 0; n < 3; n++) {
     await expect(page.locator("#tnum")).toHaveText(`Task ${n + 1} of 3`);
     const text = (await page.locator("#ttask").textContent())!;
@@ -158,24 +160,30 @@ test("the full desktop flow stores four recordings in the local R2 bucket", asyn
       await page.keyboard.type(text.slice(typed, upTo), { delay: 2 });
       typed = upTo;
       if (share === 1) break;
-      await expect(page.locator("#cover")).toBeVisible();
-      const last = text
-        .slice(0, typed)
-        .split("\n")
-        .map((l) => l.trim())
-        .filter((l) => l.length >= 4)
-        .pop()!;
-      const labels = page.locator("#probe-options label");
-      await expect(labels).toHaveCount(4);
-      // First question: the right line. Second: a wrong one.
-      const wantRight = share === 0.3;
-      const idx = (await labels.locator("code").allTextContents()).findIndex(
-        (t) => (t === last) === wantRight,
-      );
-      await labels.nth(idx).locator("input").check();
-      picks.push(wantRight);
-      await page.locator("#probe-go").click();
-      await expect(page.locator("#cover")).toBeHidden();
+      // Typing pauses, and the diagram is not covered.
+      await expect(bar).toBeVisible();
+      await expect(page.locator("#teditor")).toBeDisabled();
+      await expect(page.locator("#tdiagram")).toBeVisible();
+      if (share === 0.3) {
+        // Let the diagram settle, then click the last message drawn: the
+        // newest element, by an oracle that does not use the page's tracker.
+        const last = page.locator("#tdiagram .message").last();
+        await expect(last).toBeVisible({ timeout: 10_000 });
+        await page.waitForTimeout(1800);
+        const box = (await last.boundingBox())!;
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+      } else if (n === 0) {
+        // No click: the question times out after 10 s.
+        await expect(bar).toBeHidden({ timeout: 15_000 });
+      } else {
+        const panel = (await page.locator("#tpanel").boundingBox())!;
+        await page.mouse.click(
+          panel.x + panel.width - 12,
+          panel.y + panel.height - 12,
+        );
+      }
+      await expect(bar).toBeHidden();
+      await expect(page.locator("#teditor")).toBeEnabled();
     }
     await expect(page.locator("#tdone")).toBeEnabled();
     await page.locator("#tdone").click();
@@ -243,7 +251,6 @@ test("the full desktop flow stores four recordings in the local R2 bucket", asyn
   });
   expect(warm.code).toContain("Alice.greet()");
   const tasks = ["t1", "t2", "t3"];
-  const correct: boolean[] = [];
   for (const [i, id] of tasks.entries()) {
     const r = stored[id];
     expect(r.head.editor).toBe("textarea");
@@ -254,10 +261,15 @@ test("the full desktop flow stores four recordings in the local R2 bucket", asyn
     expect(Number.isInteger(r.head.durationMs)).toBe(true);
     expect(r.head.durationMs).toBeGreaterThan(0);
     expect(r.head.detect).toHaveLength(2);
-    for (const d of r.head.detect) correct.push(d.correct);
     expect(r.code.length).toBeGreaterThan(100);
   }
-  expect(correct).toEqual(picks);
+  // One correct click then a miss in each task; the miss answers "none".
+  for (const id of tasks) {
+    const [hit, miss] = stored[id].head.detect;
+    expect(hit).toMatchObject({ q: "click-newest", correct: true });
+    expect(hit.answer).not.toBe("none");
+    expect(miss).toEqual({ q: "click-newest", answer: "none", correct: false });
+  }
 });
 
 test("a touch-only visitor gets the warm-up only, marked device touch", async ({

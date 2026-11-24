@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildProbe,
+  CLICK_LIMIT_MS,
+  CLICK_NEWEST,
+  collectCandidates,
   classifyDevice,
   DeviceDetector,
   drawArmOrder,
@@ -9,9 +11,11 @@ import {
   maskForClarity,
   newSessionId,
   orderCode,
-  PROBE_QUESTION,
+  judgeClick,
+  NewestTracker,
+  timeoutAnswer,
 } from "./trial-flow";
-import { Recorder, TASKS, armOrder } from "./trial";
+import { Recorder, armOrder } from "./trial";
 
 // A tiny seeded generator, so a distribution test is repeatable.
 const lcg = (seed: number) => () => {
@@ -194,39 +198,142 @@ describe("Recorder header", () => {
   });
 });
 
-describe("buildProbe", () => {
-  const task = TASKS[0].text;
-  const typed = "title Order checkout\n@Actor Customer\nShop.checkout(cart) {";
+describe("newest-element tracker", () => {
+  const c = (key: string, label = key) => ({ key, label });
 
-  it("asks about the last typed line, with the line among four options", () => {
-    const p = buildProbe(typed, task, lcg(1))!;
-    expect(p.q).toBe(PROBE_QUESTION);
-    expect(p.options).toHaveLength(4);
-    expect(new Set(p.options).size).toBe(4);
-    expect(p.options[p.correctIndex]).toBe("Shop.checkout(cart) {");
+  it("calls the elements of the latest frame that added something the newest", () => {
+    const t = new NewestTracker();
+    t.observe([c("p:A")]);
+    expect(t.newest()).toEqual(["p:A"]);
+    t.observe([c("p:A"), c("m:go#0")]);
+    expect(t.newest()).toEqual(["m:go#0"]);
+    t.observe([c("p:A"), c("m:go#0")]);
+    expect(t.newest()).toEqual(["m:go#0"]);
   });
 
-  it("takes the distractors from the task text", () => {
-    const lines = task.split("\n").map((l) => l.trim());
-    const p = buildProbe(typed, task, lcg(2))!;
-    for (const o of p.options) expect(lines).toContain(o);
+  it("keeps all elements that appeared together", () => {
+    const t = new NewestTracker();
+    t.observe([c("p:A")]);
+    t.observe([c("p:A"), c("p:B"), c("m:x#0")]);
+    expect(t.newest().sort()).toEqual(["m:x#0", "p:B"]);
   });
 
-  it("moves the right option around", () => {
-    const seen = new Set<number>();
-    for (let s = 1; s < 60; s++)
-      seen.add(buildProbe(typed, task, lcg(s))!.correctIndex);
-    expect(seen.size).toBeGreaterThan(1);
+  it("a changed label is a new element: the line being typed is the newest", () => {
+    const t = new NewestTracker();
+    t.observe([c("p:A"), c("m:go(c#0")]);
+    t.observe([c("p:A"), c("m:go(ca#0")]);
+    expect(t.newest()).toEqual(["m:go(ca#0"]);
   });
 
-  it("ignores trailing blank lines and indentation", () => {
-    const p = buildProbe("title X\n    Cart.total() {\n\n  \n", task, lcg(3))!;
-    expect(p.options[p.correctIndex]).toBe("Cart.total() {");
+  it("an element that goes away and comes back is new again", () => {
+    const t = new NewestTracker();
+    t.observe([c("p:A"), c("p:B")]);
+    t.observe([c("p:A")]);
+    expect(t.newest()).toEqual(["p:A"]);
+    t.observe([c("p:A"), c("p:B")]);
+    expect(t.newest()).toEqual(["p:B"]);
   });
 
-  it("returns null while nothing has been typed", () => {
-    expect(buildProbe("", task, lcg(1))).toBeNull();
-    expect(buildProbe(" \n\n", task, lcg(1))).toBeNull();
+  it("has no newest element on an empty diagram", () => {
+    const t = new NewestTracker();
+    t.observe([]);
+    expect(t.newest()).toEqual([]);
+    expect(t.hasElements()).toBe(false);
+  });
+});
+
+describe("collectCandidates", () => {
+  it("finds participants, messages and fragment headers, with labels and keys", () => {
+    const root = document.createElement("div");
+    root.innerHTML = `
+      <div class="participant" data-participant-id="Shop">Shop</div>
+      <div class="participant" data-participant-id="Cart">Cart</div>
+      <div class="message">checkout(cart)1</div>
+      <div class="message">total()1.1</div>
+      <div class="message">total()1.1</div>
+      <div class="message">1.1.1return amount</div>
+      <div class="fragment fragment-alt"><div class="header">1.2Alt</div><div class="name">1.2Alt</div></div>`;
+    const found = collectCandidates(root);
+    expect(found.map((f) => f.key)).toEqual([
+      "p:Shop",
+      "p:Cart",
+      "m:checkout(cart)#0",
+      "m:total()#0",
+      "m:total()#1",
+      "m:return amount#0",
+      "f:Alt#0",
+    ]);
+    expect(found.map((f) => f.label)).toEqual([
+      "Shop",
+      "Cart",
+      "checkout(cart)",
+      "total()",
+      "total()",
+      "return amount",
+      "Alt",
+    ]);
+    expect(found.every((f) => f.el instanceof Element)).toBe(true);
+  });
+
+  it("returns nothing for an empty diagram", () => {
+    expect(collectCandidates(document.createElement("div"))).toEqual([]);
+  });
+});
+
+describe("judgeClick", () => {
+  const box = (l: number, t: number, r: number, b: number) => ({
+    left: l,
+    top: t,
+    right: r,
+    bottom: b,
+  });
+  const hits = [
+    { label: "Shop", newest: false, box: box(0, 0, 80, 40) },
+    { label: "go()", newest: true, box: box(100, 100, 300, 116) },
+    { label: "Alt", newest: false, box: box(90, 90, 400, 200) },
+  ];
+
+  it("is correct for a click inside the newest element's box", () => {
+    expect(judgeClick(150, 108, hits)).toEqual({
+      q: CLICK_NEWEST,
+      answer: "go()",
+      correct: true,
+    });
+  });
+
+  it("is correct on the box edge", () => {
+    expect(judgeClick(100, 100, hits).correct).toBe(true);
+    expect(judgeClick(300, 116, hits).correct).toBe(true);
+  });
+
+  it("is wrong for a click on another element, and names it", () => {
+    expect(judgeClick(10, 10, hits)).toEqual({
+      q: CLICK_NEWEST,
+      answer: "Shop",
+      correct: false,
+    });
+    // Inside the fragment but outside the newest message: the fragment.
+    expect(judgeClick(350, 150, hits).answer).toBe("Alt");
+  });
+
+  it("is wrong, answer none, for a click on empty space", () => {
+    expect(judgeClick(500, 500, hits)).toEqual({
+      q: CLICK_NEWEST,
+      answer: "none",
+      correct: false,
+    });
+  });
+
+  it("is wrong, answer none, for a timeout", () => {
+    expect(timeoutAnswer()).toEqual({
+      q: CLICK_NEWEST,
+      answer: "none",
+      correct: false,
+    });
+  });
+
+  it("the probe time limit is 10 s", () => {
+    expect(CLICK_LIMIT_MS).toBe(10_000);
   });
 });
 

@@ -77,53 +77,146 @@ export class HiddenTimer {
   }
 }
 
-export const PROBE_QUESTION = "What was just added to the diagram?";
+/** `q` of every change-detection entry in the header `detect`. */
+export const CLICK_NEWEST = "click-newest";
 
-export interface Probe {
-  q: string;
-  options: string[];
-  correctIndex: number;
+/** No click within this time is a wrong answer. */
+export const CLICK_LIMIT_MS = 10_000;
+
+export interface Candidate {
+  /** Identity of a drawn element within one frame, see `collectCandidates`. */
+  key: string;
+  label: string;
 }
-
-const shuffle = <T>(items: T[], random: () => number): T[] => {
-  const out = items.slice();
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-};
 
 /**
- * A scorable change-detection question. The right option is the last line
- * with content that the person has typed (a bare `}` does not count). The
- * three others are other lines of the copy task. Returns null while there is
- * no such line yet. ADR 0009 does not fix this rule: it is the trial's own.
+ * Tells which drawn elements appeared most recently. Feed it every frame's
+ * list of elements. An element is new when its key was not in the previous
+ * frame. The newest elements are those first seen in the latest frame that
+ * added any: a participant and its first message that appear together are
+ * both newest, because no single one of them came last. An element that
+ * disappears and returns is new again.
  */
-export function buildProbe(
-  typed: string,
-  taskText: string,
-  random: () => number,
-): Probe | null {
-  const lines = typed
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length >= 4);
-  const answer = lines[lines.length - 1];
-  if (!answer) return null;
-  const pool = [
-    ...new Set(
-      taskText
-        .split("\n")
-        .map((l) => l.trim())
-        .filter((l) => l.length >= 4 && l !== answer),
-    ),
-  ];
-  const options = shuffle(pool, random).slice(0, 3);
-  const correctIndex = Math.floor(random() * 4);
-  options.splice(correctIndex, 0, answer);
-  return { q: PROBE_QUESTION, options, correctIndex };
+export class NewestTracker {
+  private seen = new Map<string, number>();
+  private frame = 0;
+  private latest = 0;
+
+  observe(candidates: Candidate[]) {
+    const present = new Map<string, number>();
+    let added = false;
+    this.frame++;
+    for (const { key } of candidates) {
+      const first = this.seen.get(key);
+      if (first === undefined) {
+        added = true;
+        present.set(key, this.frame);
+      } else present.set(key, first);
+    }
+    this.seen = present;
+    if (added) this.latest = this.frame;
+  }
+
+  hasElements(): boolean {
+    return this.seen.size > 0;
+  }
+
+  /** Keys first seen in the latest frame that added elements, still drawn. */
+  newest(): string[] {
+    return [...this.seen].filter(([, f]) => f === this.latest).map(([k]) => k);
+  }
 }
+
+const label = (el: Element) =>
+  (el.textContent ?? "").replace(/\s+/g, " ").trim();
+
+/**
+ * The elements a person can point at, in document order: a participant box,
+ * a message (its arrow and label) and a fragment header. Keys carry the
+ * label and the count of earlier elements with the same label.
+ */
+export function collectCandidates(
+  root: ParentNode,
+): (Candidate & { el: Element })[] {
+  const out: (Candidate & { el: Element })[] = [];
+  const counts = new Map<string, number>();
+  const add = (prefix: string, text: string, el: Element) => {
+    const base = `${prefix}:${text}`;
+    const n = counts.get(base) ?? 0;
+    counts.set(base, n + 1);
+    out.push({
+      key: prefix === "p" ? base : `${base}#${n}`,
+      label: text,
+      el,
+    });
+  };
+  const nodes = root.querySelectorAll(
+    "[data-participant-id], .message, .fragment",
+  );
+  for (const el of nodes) {
+    if (el.hasAttribute("data-participant-id")) {
+      add("p", el.getAttribute("data-participant-id") ?? "", el);
+    } else if (el.classList.contains("message")) {
+      // The sequence number is drawn after the text ("total()1.1"), or before it
+      // on a return ("1.1.1return amount").
+      add(
+        "m",
+        label(el)
+          .replace(/^\d+(\.\d+)*/, "")
+          .replace(/\d+(\.\d+)*$/, ""),
+        el,
+      );
+    } else {
+      const header = el.querySelector(":scope > .header");
+      if (header) add("f", label(header).replace(/^\d+(\.\d+)*/, ""), header);
+    }
+  }
+  return out;
+}
+
+export interface Box {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+export interface ClickAnswer {
+  q: typeof CLICK_NEWEST;
+  answer: string;
+  correct: boolean;
+}
+
+const inside = (x: number, y: number, b: Box) =>
+  x >= b.left && x <= b.right && y >= b.top && y <= b.bottom;
+
+/**
+ * Scores a click. Correct when it lands inside the box of a newest element
+ * (edges count). The answer is the label of the element hit: the newest one
+ * when correct, otherwise the smallest element under the click, or "none".
+ */
+export function judgeClick(
+  x: number,
+  y: number,
+  hits: { label: string; newest: boolean; box: Box }[],
+): ClickAnswer {
+  const under = hits.filter((h) => inside(x, y, h.box));
+  const right = under.find((h) => h.newest);
+  if (right) return { q: CLICK_NEWEST, answer: right.label, correct: true };
+  const area = (b: Box) => (b.right - b.left) * (b.bottom - b.top);
+  under.sort((a, b) => area(a.box) - area(b.box));
+  return {
+    q: CLICK_NEWEST,
+    answer: under[0]?.label || "none",
+    correct: false,
+  };
+}
+
+export const timeoutAnswer = (): ClickAnswer => ({
+  q: CLICK_NEWEST,
+  answer: "none",
+  correct: false,
+});
 
 const CLARITY_ID = /^[a-z0-9]{6,16}$/i;
 

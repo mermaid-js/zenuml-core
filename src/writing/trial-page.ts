@@ -9,7 +9,8 @@ import ZenUml from "@/core";
 import { createSmartEditor, type SmartEditor } from "@/editor/smart";
 import { readConfig } from "./trial-config";
 import {
-  buildProbe,
+  CLICK_LIMIT_MS,
+  collectCandidates,
   DeviceDetector,
   drawArmOrder,
   HiddenTimer,
@@ -17,7 +18,9 @@ import {
   maskForClarity,
   newSessionId,
   orderCode,
-  type Probe,
+  judgeClick,
+  NewestTracker,
+  timeoutAnswer,
 } from "./trial-flow";
 import { createSender, turnstileTokens, type SendPayload } from "./trial-send";
 import {
@@ -270,7 +273,10 @@ interface TaskSession {
   recorder: Recorder;
   timer: number;
   probeAt: number[];
-  probe: Probe | null;
+  /** Set while a click-the-newest question is open. */
+  probe: { timer: number } | null;
+  tracker: NewestTracker;
+  observer: MutationObserver;
   detect: DetectAnswer[];
 }
 let session: TaskSession | null = null;
@@ -301,6 +307,23 @@ $("tstart").addEventListener("click", async () => {
   editor.disabled = false;
   editor.focus();
   capture = new Capture();
+  // The diagram's own DOM tells what is newest: watch every frame it draws.
+  const tracker = new NewestTracker();
+  const refresh = () => tracker.observe(collectCandidates($("tdiagram")));
+  let queued = false;
+  const observer = new MutationObserver(() => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      refresh();
+    });
+  });
+  observer.observe($("tdiagram"), {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
   const [a, b] = cfg.probeAt ?? [
     0.25 + Math.random() * 0.2,
     0.55 + Math.random() * 0.2,
@@ -311,6 +334,8 @@ $("tstart").addEventListener("click", async () => {
     recorder: new Recorder("", { task: task.id, arm }, capture.t0),
     probeAt: [a, b],
     probe: null,
+    tracker,
+    observer,
     detect: [],
     // An interval, not requestAnimationFrame: the limit holds in a hidden tab too.
     timer: window.setInterval(tick, 200),
@@ -344,51 +369,77 @@ editor.addEventListener("input", (e) => {
     ask();
 });
 
+const panel = $("tpanel");
+const stopWhileAsking = (e: Event) => {
+  if (session?.probe) e.stopPropagation();
+};
+for (const type of ["pointerdown", "mousedown", "mouseup", "click"])
+  panel.addEventListener(type, stopWhileAsking, true);
+panel.addEventListener(
+  "click",
+  (e) => {
+    if (!session?.probe) return;
+    const s = session;
+    // Bring the tracker up to date with what is on screen right now.
+    const found = collectCandidates($("tdiagram"));
+    s.tracker.observe(found);
+    const newest = new Set(s.tracker.newest());
+    answerProbe(
+      judgeClick(
+        e.clientX,
+        e.clientY,
+        found.map((f) => ({
+          label: f.label,
+          newest: newest.has(f.key),
+          box: f.el.getBoundingClientRect(),
+        })),
+      ),
+    );
+  },
+  true,
+);
+
+/** Pause typing and ask for a click on the newest element of the diagram. */
+let askRetry = 0;
 function ask() {
   if (!session) return;
-  const probe = buildProbe(editor.value, TASKS[step].text, Math.random);
-  if (!probe) return;
+  // Nothing drawn yet (the gate may still hold the first lines): look again soon.
+  if (!session.tracker.hasElements()) {
+    if (!askRetry)
+      askRetry = window.setTimeout(() => {
+        askRetry = 0;
+        if (session && !session.probe && session.probeAt.length) ask();
+      }, 300);
+    return;
+  }
   session.probeAt.shift();
-  session.probe = probe;
+  session.probe = {
+    timer: window.setTimeout(
+      () => answerProbe(timeoutAnswer()),
+      CLICK_LIMIT_MS,
+    ),
+  };
   editor.disabled = true;
-  $("probe-q").textContent = probe.q;
-  const options = $("probe-options");
-  options.replaceChildren();
-  probe.options.forEach((text, i) => {
-    const label = document.createElement("label");
-    const radio = document.createElement("input");
-    radio.type = "radio";
-    radio.name = "probe";
-    radio.value = String(i);
-    radio.addEventListener("change", () => {
-      $<HTMLButtonElement>("probe-go").disabled = false;
-    });
-    const code = document.createElement("code");
-    code.textContent = text;
-    label.append(radio, code);
-    options.append(label);
-  });
-  $<HTMLButtonElement>("probe-go").disabled = true;
-  $("cover").hidden = false;
+  panel.classList.add("asking");
+  $("probe-bar").hidden = false;
+  document.body.dataset.probe = "open";
 }
 
-$("probe-go").addEventListener("click", () => {
+function closeProbe() {
+  if (session?.probe) clearTimeout(session.probe.timer);
+  if (session) session.probe = null;
+  $("probe-bar").hidden = true;
+  panel.classList.remove("asking");
+  delete document.body.dataset.probe;
+}
+
+function answerProbe(answer: DetectAnswer) {
   if (!session?.probe) return;
-  const picked = document.querySelector<HTMLInputElement>(
-    "input[name=probe]:checked",
-  );
-  if (!picked) return;
-  const i = Number(picked.value);
-  session.detect.push({
-    q: session.probe.q,
-    answer: session.probe.options[i],
-    correct: i === session.probe.correctIndex,
-  });
-  session.probe = null;
-  $("cover").hidden = true;
+  session.detect.push(answer);
+  closeProbe();
   editor.disabled = false;
   editor.focus();
-});
+}
 
 $("tdone").addEventListener("click", () => finishTask());
 
@@ -397,10 +448,11 @@ function finishTask() {
   const s = session;
   const cap = capture;
   clearInterval(s.timer);
+  closeProbe();
   session = null;
   capture = null;
   editor.disabled = true;
-  $("cover").hidden = true;
+  s.observer.disconnect();
   $<HTMLButtonElement>("tdone").disabled = true;
   $("tclock").textContent = "";
   // A question still open at the limit counts as never asked.

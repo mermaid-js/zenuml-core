@@ -127,21 +127,17 @@
       .muted {
         color: var(--muted);
       }
-      #cover {
-        position: absolute;
-        inset: 0;
-        background: var(--panel);
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 24px;
+      #probe-bar {
+        background: #fff4d6;
+        border: 1px solid #e0b84a;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-weight: 600;
+        margin-bottom: 12px;
       }
-      #probe-options label {
-        display: flex;
-        gap: 8px;
-        align-items: baseline;
-        padding: 4px 0;
+      .panel.asking {
+        outline: 3px solid #e0b84a;
+        cursor: crosshair;
       }
       .big {
         font-size: 40px;
@@ -250,6 +246,10 @@
             when you have typed it all.</span
           >
         </div>
+        <div id="probe-bar" hidden>
+          Typing is paused. In the diagram on the right, click the element that
+          appeared most recently. You have 10 seconds.
+        </div>
         <div class="grid">
           <div class="panel">
             <div class="muted">Copy this text</div>
@@ -266,13 +266,8 @@
               placeholder="Press Start, then type the text on the left"
             ></textarea>
           </div>
-          <div class="panel">
+          <div class="panel" id="tpanel">
             <div id="tdiagram" style="overflow: auto"></div>
-            <div id="cover" hidden>
-              <b id="probe-q"></b>
-              <div id="probe-options"></div>
-              <button id="probe-go" disabled>Continue</button>
-            </div>
           </div>
         </div>
       </section>
