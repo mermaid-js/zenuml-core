@@ -1,0 +1,169 @@
+<!doctype html>
+<!--
+  Smart editor demo. Dev server only: `bun dev`, then
+  http://localhost:14000/smart-editor.html. Not part of the site build.
+  Completion, hover and diagnostics come from the Langium language server in a
+  Web Worker.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Smart Editor</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --panel: #fff;
+        --ink: #1b2026;
+        --muted: #5d6670;
+        --line: #d3d8de;
+        --accent: #1f4fd8;
+        color: var(--ink);
+      }
+      body {
+        /* Set on body, not :root: the renderer sizes its spacing in rem. */
+        font:
+          15px/1.5 -apple-system,
+          "Segoe UI",
+          sans-serif;
+        margin: 0;
+        padding: 16px;
+        background: var(--bg);
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 12px;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.4fr);
+        gap: 12px;
+        align-items: start;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+      }
+      #editor {
+        height: 360px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      select {
+        font: inherit;
+        padding: 4px 8px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      details {
+        margin-top: 12px;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+      #cheat {
+        border-collapse: collapse;
+        margin-top: 8px;
+        width: 100%;
+      }
+      #cheat td {
+        border-top: 1px solid var(--line);
+        padding: 4px 8px 4px 0;
+        vertical-align: top;
+      }
+      #cheat pre {
+        margin: 0;
+        font:
+          13px/1.4 ui-monospace,
+          Menlo,
+          monospace;
+      }
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Smart editor</h1>
+    <div class="bar">
+      <label
+        >Examples
+        <select id="examples"></select>
+      </label>
+      <span class="muted"
+        >Type <code>A.</code> or a word such as <code>if</code>,
+        <code>loop</code> or <code>try</code> to see suggestions. Hover a word
+        for help.</span
+      >
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <div id="editor"></div>
+        <details>
+          <summary>Syntax cheat-sheet</summary>
+          <table id="cheat"></table>
+        </details>
+      </div>
+      <div class="panel">
+        <div id="diagram" style="overflow: auto"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import ZenUml from "./src/core.tsx";
+      import {
+        CHEAT_SHEET,
+        EXAMPLES,
+        createSmartEditor,
+      } from "./src/editor/smart/index.ts";
+
+      const $ = (id) => document.getElementById(id);
+      const zen = new ZenUml($("diagram"));
+      zen.render("", {});
+
+      const editor = createSmartEditor($("editor"), {
+        doc: "",
+        onChange: (doc) => zen.render(doc, {}),
+      });
+      editor.ready.then(() => {
+        document.body.dataset.smartReady = "1";
+      });
+
+      const select = $("examples");
+      select.append(new Option("Pick an example…", ""));
+      EXAMPLES.forEach((e, i) => select.append(new Option(e.name, String(i))));
+      select.addEventListener("change", () => {
+        if (select.value === "") return;
+        editor.setDoc(EXAMPLES[Number(select.value)].doc);
+        select.value = "";
+        editor.view.focus();
+      });
+
+      for (const row of CHEAT_SHEET) {
+        const tr = document.createElement("tr");
+        const what = document.createElement("td");
+        what.textContent = row.what;
+        const syntax = document.createElement("td");
+        const pre = document.createElement("pre");
+        pre.textContent = row.syntax;
+        syntax.append(pre);
+        tr.append(what, syntax);
+        $("cheat").append(tr);
+      }
+    </script>
+  </body>
+</html>
