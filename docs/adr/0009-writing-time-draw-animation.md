@@ -190,7 +190,7 @@ is fixed before the first participant starts, and is not changed after data arri
 | Device | Desktop with a physical keyboard. A touch-only device gets the warm-up only |
 | Complete participant | Consent given, all 3 copy tasks submitted, each within the 3-minute limit |
 | Exclusions, per participant | Any copy task with a paste event, with the tab hidden for more than 10 s, under 15 s long, or under 5 WPM. An excluded participant is dropped from G6 as a whole |
-| Sample | At least 4 complete, non-excluded participants for each of the 3 arm orders, 12 in total. Assignment rotates by arrival; incomplete sessions do not consume an order slot |
+| Sample | At least 4 complete, non-excluded participants for each of the 3 arm orders, 12 in total. Each session draws its order uniformly at random from the 3 rows of the Latin square (the collector keeps no counter, so rotation by arrival is not possible). Collection continues until every order has 4 |
 | G6 statistics | Per person, C against A. WPM: median of `(wpm_C − wpm_A) / wpm_A` ≥ −2%. Error rate: median of `deletionShare_C − deletionShare_A` ≤ 0. Change detection: total correct answers in C ≥ total in A |
 | G5 | Every copy-task and warm-up recording from a complete participant replays through `g4.mjs --recordings`, and G1–G3 must hold on them |
 | Data kept | Editor text and timings, arm, order, coarse device class, a random session id. No IP address, no name, no email. Deleted after 90 days |
