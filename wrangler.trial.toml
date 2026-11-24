@@ -1,0 +1,23 @@
+# Collector for the public typing trial (ADR 0009, G5/G6).
+# Separate from wrangler.toml (zenuml-web-renderer) and wrangler.website.toml.
+# NOT deployed by CI. Run locally: bunx wrangler dev -c wrangler.trial.toml --local
+#
+# The R2 bucket, the Turnstile widget, the TURNSTILE_SECRET secret and any
+# route or subdomain are created later, only after the maintainer approves the
+# Cloudflare changes. See workers/writing-trial/README.md.
+
+name = "zenuml-writing-trial"
+main = "workers/writing-trial/src/index.ts"
+compatibility_date = "2026-05-01"
+
+[vars]
+# The one origin that may post recordings. Replace with the trial page origin
+# before deploy. Local dev: the Vite dev server.
+ALLOWED_ORIGIN = "http://localhost:14000"
+
+[[r2_buckets]]
+binding = "RECORDINGS"
+bucket_name = "zenuml-writing-trial"
+
+# TURNSTILE_SECRET is a secret, not a var. It is never written in this file.
+# Local dev: put it in .dev.vars (git-ignored), see README.

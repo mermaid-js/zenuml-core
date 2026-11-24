@@ -65,3 +65,7 @@ storybook-static
 # Harness coordination files
 docs/harness/
 /theme-contrast/
+
+# Cloudflare local dev secrets
+.dev.vars
+.wrangler/
