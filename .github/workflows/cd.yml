@@ -353,20 +353,35 @@ jobs:
           name: site-dist
           path: dist/
 
+      # Runs from forks and Dependabot get no repository secrets. Their staging
+      # deploy is skipped with a warning instead of failing the run. Production
+      # (main) has no such check, so a missing secret there fails loudly.
+      - name: Check deploy token
+        id: token
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Workbench not deployed::Secret CLOUDFLARE_API_TOKEN is not available to this run."
+          fi
+
       - name: Deploy to Cloudflare Workers (Production)
         if: github.ref == 'refs/heads/main'
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ vars.CLOUDFLARE_API_TOKEN }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy --env production
 
       - name: Deploy to Cloudflare Workers (Staging)
         id: deploy_staging # Add an ID to reference this step
-        if: github.ref != 'refs/heads/main'
+        if: github.ref != 'refs/heads/main' && steps.token.outputs.present == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ vars.CLOUDFLARE_API_TOKEN }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy --env staging
 
