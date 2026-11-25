@@ -25,9 +25,6 @@ export function TotalWidth(ctx: any, coordinates: Coordinates) {
     rightParticipant,
     coordinates,
   );
-  // if (leftParticipant === "" || rightParticipant === "") {
-  //   return 0;
-  // }
   const participantWidth =
     coordinates.distance(leftParticipant, rightParticipant) +
     coordinates.half(leftParticipant) +

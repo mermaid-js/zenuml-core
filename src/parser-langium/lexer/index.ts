@@ -1,5 +1,6 @@
 /**
- * Chevrotain lexer entry point for the ANTLR-parity token stream (Stage 1).
+ * Chevrotain lexer entry point for the ANTLR-parity token stream used by the
+ * Langium LSP / editor side-car.
  *
  * `lexWithLangium(code)` runs the Chevrotain Lexer over the ordered token
  * list from ./tokens and merges main-channel tokens with all grouped

@@ -22,7 +22,6 @@ import { useActiveSurface, useCan } from "@/store/interaction/useCan";
 import { ParticipantLabel } from "./ParticipantLabel";
 import { AsyncIcon } from "../../Tutorial/AsyncIcon";
 import { hasIconFor } from "../../Tutorial/IconKeys";
-// import iconPath from "../../Tutorial/Icons"; // Removed eager import
 
 const INTERSECTION_ERROR_MARGIN = 10;
 // Read on first use, not at module load: this module is reachable from the

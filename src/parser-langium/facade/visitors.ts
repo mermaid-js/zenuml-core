@@ -1,6 +1,6 @@
 /**
- * Stage-4 visitor rewrites of the four ANTLR listener walks, running over the
- * Stage-3 facade (docs/langium-migration/04 §2, 07 §R11).
+ * Visitor ports of the four ANTLR listener walks, running over the Langium
+ * compatibility facade (docs/langium-migration/04 §2, 07 §R11).
  *
  * All four are RE-ENTRANT: no module-level mutable state (the ANTLR
  * ToCollector/ChildFragmentDetector singletons are a documented do-not-port).
@@ -51,7 +51,7 @@ import {
 } from "./nodes";
 
 /* ------------------------------------------------------------------ */
-/* ToCollector — participants collection (src/parser/ToCollector.js)    */
+/* ToCollector — participants collection (src/parser/ToCollector.ts)    */
 /* ------------------------------------------------------------------ */
 
 function onStarterExp(ctx: StarterExpContext, state: CollectState): void {

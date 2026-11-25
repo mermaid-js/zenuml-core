@@ -36,7 +36,7 @@ ProgContext (ANTLR parse tree)
 | `src/parser/repairLooseTokens.ts` | Token-stream repairs before parsing (#672): `C.b: x` is read as `C->b: x` (also for a document that parses); a `@return` with no message is hidden, and `@return x` is read as `return x`, so neither takes the next token. |
 | `src/parser/index.ts` | Entry point. `RootContext(code)` → `ProgContext`. Adds prototype methods: `getFormattedText()`, `getComment()`. Collects errors via `SeqErrorListener`. |
 | `src/parser/Participants.ts` | `Participant` model + `Participants` collection (Map). Tracks name, type, stereotype, label, color, emoji, width, groupId, positions. |
-| `src/parser/ToCollector.js` | ANTLR listener. Walks parse tree → populates `Participants` from declarations, from/to mentions, `new` constructors, `ref` targets. |
+| `src/parser/ToCollector.ts` | ANTLR listener. Walks parse tree → populates `Participants` from declarations, from/to mentions, `new` constructors, `ref` targets. |
 | `src/parser/MessageCollector.ts` | ANTLR listener → `OwnableMessage[]` (from, to, signature, type enum). Used by horizontal coordinate solver. |
 | `src/parser/FrameBuilder.ts` | ANTLR listener → nested `Frame` tree for fragments. Each frame: `{ type, left, right, children }`. Used to draw fragment borders. |
 | `src/parser/OrderedParticipants.ts` | `OrderedParticipants(rootContext)` → `IParticipantModel[]` in insertion order. Injects `_STARTER_` when needed. |

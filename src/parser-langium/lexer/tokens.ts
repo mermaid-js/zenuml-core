@@ -1,14 +1,14 @@
 /**
  * Chevrotain token list reproducing the ANTLR `sequenceLexer` token stream
- * EXACTLY (Stage 1 of the ANTLR4 → Langium migration).
+ * EXACTLY, for the Langium LSP / editor side-car parser.
  *
  * Design sources (binding):
  * - docs/langium-migration/01-lexer-analysis.md §7 (workarounds) and §8 (order)
  * - docs/langium-migration/07-risk-map.md gaps G1/G2/G3/G5/G6
  * - test/unit/parity/__golden__/lexer/ — the committed goldens are the truth.
  *
- * IMPORTANT: this module must NOT import `langium`. In Stage 2 a Langium
- * TokenBuilder will consume this same ordered list.
+ * IMPORTANT: this module must NOT import `langium`. The Langium TokenBuilder
+ * (../token-builder.ts) consumes this same ordered list.
  *
  * Key semantics ported from ANTLR:
  * - Chevrotain is first-match; ANTLR is maximal-munch. The list below is

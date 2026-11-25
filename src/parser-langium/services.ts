@@ -1,5 +1,8 @@
 /**
- * Langium service wiring + synchronous parse entry point — Stage 2.
+ * Langium service wiring + synchronous parse entry point.
+ *
+ * Langium is the LSP / editor-autocomplete side-car; ANTLR remains the
+ * production parser. See docs/langium-migration/14-dual-parser-architecture.md.
  *
  * Imports ONLY from 'langium' (never 'langium/lsp') so no
  * vscode-languageserver code can reach a browser bundle (07-risk-map B3/R11).

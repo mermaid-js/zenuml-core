@@ -1,5 +1,6 @@
 /**
- * Langium-backed equivalents of the `@/parser` public surface (Stage 3+4).
+ * Langium-backed equivalents of the `@/parser` public surface, used by
+ * the LSP / editor side-car (ANTLR remains the production parser).
  *
  * Mirrors src/parser/index.ts exactly:
  *  - RootContext(code) -> facade ProgContext (a partial tree is ALWAYS
@@ -7,8 +8,7 @@
  *    error recovery keeps half-typed DSL renderable);
  *  - ErrorDetails is a LIVE module-level array that accumulates one entry
  *    per syntax error across parses and is cleared by core.tsx via
- *    `.length = 0` (07 §R12/G5 — the live-reference import shape is contract
- *    until Stage 6);
+ *    `.length = 0` (07 §R12/G5 — the live-reference import shape is contract);
  *  - Participants / class exports keep today's signatures;
  *  - sub-rule fixture entries are rebuilt on parseZen(code, { rule }).
  */
