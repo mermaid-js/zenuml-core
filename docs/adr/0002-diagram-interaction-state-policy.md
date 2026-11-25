@@ -416,6 +416,11 @@ coarse`) shows handles without hover and is unchanged.
   - **Touch reorder handles** are always visible on coarse pointers and do
     not follow `hoverAffordance`.
 
+  `docs/tla/InteractionPolicy.tla` models this ADR. Its
+  `InteractionPolicyGaps.cfg` states the overlay-start gap as properties: a
+  create drag ended by a text edit keeps the participant it selected, so the
+  participant editor opens when the edit ends (`docs/tla/README.md`).
+
 ## Consequences
 
 - While the participant editor is open, gap handles, the divider menu,
