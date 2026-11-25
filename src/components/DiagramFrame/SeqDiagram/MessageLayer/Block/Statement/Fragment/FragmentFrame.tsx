@@ -66,11 +66,11 @@ export const FragmentFrame = (props: {
       )}
       <div
         className={cn(
-          "header bg-skin-fragment-header text-skin-fragment-header leading-4",
+          "header text-skin-fragment-header leading-4",
           props.headerClassName ?? "rounded-t relative",
         )}
       >
-        <div className="name font-normal p-1 border-b border-skin-fragment-header-rule">
+        <div className="name frame-tab font-normal w-max pl-1 pt-1 pb-[5px]">
           <label className="p-0 flex items-center gap-0.5 whitespace-nowrap">
             <FragmentNumbering number={props.number} />
             <Icon name={props.icon} />

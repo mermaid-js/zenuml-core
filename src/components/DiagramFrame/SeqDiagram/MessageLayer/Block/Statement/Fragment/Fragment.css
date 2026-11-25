@@ -14,21 +14,31 @@
   pointer-events: none;
 }
 
-.fragment-critical .header::before {
-  position: absolute;
-  content: "";
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  border-bottom: 2px solid;
-  pointer-events: none;
+.fragment > .header > .frame-tab {
+  --tab-fill: var(
+    --color-bg-fragment-header,
+    var(--color-bg-frame, var(--color-bg-base, var(--color-backup-white, #fff)))
+  );
+  --tab-rule: var(
+    --color-border-fragment-header-rule,
+    var(--color-border-fragment-separator, #e5e7eb)
+  );
+}
+
+.fragment > .rounded-t > .frame-tab {
+  border-top-left-radius: 3px;
 }
 
 /* The ref label: a pentagon (cut bottom-right corner) drawn as two stacked
    clipped boxes. The outer one is the border, the inner one the fill. */
 .fragment-ref .polygon-border {
-  clip-path: polygon(0% 0%, 100% 0%, 100% 66%, 80% 100%, 0% 100%);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%
+  );
   background-color: var(
     --color-border-fragment,
     var(--color-border-frame, var(--color-border-base, #000))
@@ -37,5 +47,11 @@
 
 .fragment-ref .polygon-content {
   /* The inner box is inset by the border thickness (m-px). */
-  clip-path: polygon(0% 0%, 100% 0%, 100% 66%, 80% 100%, 0% 100%);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 9px),
+    calc(100% - 9px) 100%,
+    0 100%
+  );
 }

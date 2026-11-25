@@ -130,10 +130,12 @@ export const DiagramFrame = ({
       <div className="frame text-skin-base bg-skin-frame border-skin-frame relative m-1 origin-top-left whitespace-nowrap border rounded">
         <div>
           <div
-            className="header text-skin-title bg-skin-title border-skin-frame border-b p-1 flex items-center justify-between rounded-t"
+            className="header flex"
             style={{ minHeight: DIAGRAM_HEADER_HEIGHT }}
           >
-            <div className="left hide-export">{children}</div>
+            {children && (
+              <div className="left hide-export p-1 self-center">{children}</div>
+            )}
             <div className="right flex-grow flex justify-between">
               <DiagramTitle context={title} />
             </div>

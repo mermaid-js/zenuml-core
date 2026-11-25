@@ -1,3 +1,4 @@
+import "../FrameTab.css";
 import { resolveEmojiInText } from "@/emoji/resolveEmoji";
 import { EditableSpan } from "@/components/common/EditableSpan";
 import { codeAtom, modeAtom, RenderMode } from "@/store/Store";
@@ -52,7 +53,7 @@ export const DiagramTitle = (props: { context: any }) => {
 
   return (
     <div
-      className={`title text-skin-title text-sm font-normal${!hasTitle && isEditable ? " group min-w-[8rem]" : ""}`}
+      className={`title flex items-center pb-px pl-1 text-skin-title text-sm font-normal${hasTitle ? " frame-tab" : isEditable ? " group min-w-[8rem]" : ""}`}
     >
       {isEditable ? (
         <EditableSpan

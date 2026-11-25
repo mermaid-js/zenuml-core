@@ -23,17 +23,16 @@ const parse = (geometry: FragmentGeometry) => {
 };
 
 describe("SVG fragment header numbering", () => {
-  it("preserves the square opt header while rounding other fragment headers", () => {
-    expect(
-      parse({ ...fragment, kind: "opt", number: undefined })
-        .querySelector(".fragment-header")
-        ?.getAttribute("style"),
-    ).toBeNull();
-    expect(
-      parse({ ...fragment, kind: "alt", number: undefined })
-        .querySelector(".fragment-header")
-        ?.getAttribute("style"),
-    ).toContain("4px 4px 0 0");
+  it("draws a compact header tab with a 45-degree cut", () => {
+    const header = parse(fragment).querySelector(".fragment-header-rule")!;
+    const path = header.getAttribute("d")!;
+    const [right, top, cutStart, cutEnd, bottom] = path
+      .match(/[-\d.]+/g)!
+      .map(Number);
+    expect(right).toBeLessThan(fragment.x + fragment.width);
+    expect(right - cutEnd).toBe(10);
+    expect(bottom - cutStart).toBe(10);
+    expect(cutStart).toBeGreaterThan(top);
   });
   it("keeps the number inside the header, before the icon and type", () => {
     const view = parse(fragment);
@@ -73,10 +72,9 @@ describe("SVG fragment header numbering", () => {
       width: 100,
       number: "12.12.12.12.12.12.12.12",
     });
-    const header = view.querySelector(".fragment-header")!;
+    const rule = view.querySelector(".fragment-header-rule")!;
     const label = view.querySelector(".fragment-label")!;
-    const headerRight =
-      Number(header.getAttribute("x")) + Number(header.getAttribute("width"));
+    const headerRight = Number(rule.getAttribute("d")!.split(" ")[1]);
     expect(headerRight).toBeGreaterThan(Number(label.getAttribute("x")) + 28);
   });
 

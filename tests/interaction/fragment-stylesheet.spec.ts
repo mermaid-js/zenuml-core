@@ -39,3 +39,74 @@ test("ref label keeps its pentagon corner and frame-coloured border", async ({
   // The border pentagon reaches below the fill, so its bottom edge shows.
   expect(result.borderBottom).toBeGreaterThan(result.contentBottom);
 });
+
+test("title and fragment tabs fit their content in both renderers", async ({
+  page,
+}) => {
+  await page.goto("/e2e/tools/stroke-examples.html");
+  await page.waitForFunction(() => (window as any).__strokeExamples?.ready);
+  const code =
+    "title Order checkout\nif (hasItems) {\nCheckout->Payments: authorize\n}";
+  const sizes = await page.evaluate(async (code) => {
+    const { default: ZenUml } = await import("/src/core.tsx");
+    const { renderToSvg } = await import("/src/svg/renderToSvg.ts");
+    const dom = document.createElement("div");
+    dom.id = "frame-tabs-dom";
+    const svg = document.createElement("div");
+    document.body.append(dom, svg);
+    await new ZenUml(dom).render(code, { theme: "theme-dark" });
+    await document.fonts.ready;
+    svg.innerHTML = renderToSvg(code, { theme: "theme-dark" }).svg;
+
+    const title = dom.querySelector(".title.frame-tab")!;
+    const tab = dom.querySelector(".fragment-alt > .header > .name.frame-tab")!;
+    const size = (element: Element) => element.getBoundingClientRect().width;
+    return {
+      titleWidth: size(title),
+      fragmentTabWidth: size(tab),
+      frameWidth: size(dom.querySelector(".frame")!),
+      fragmentWidth: size(dom.querySelector(".fragment-alt")!),
+      titlePadding: getComputedStyle(title).paddingRight,
+      fragmentPadding: getComputedStyle(tab).paddingRight,
+      fragmentFill: getComputedStyle(tab).getPropertyValue("--tab-fill").trim(),
+      ruleColor: getComputedStyle(tab).getPropertyValue("--tab-rule").trim(),
+      svgTitleWidth: size(svg.querySelector(".frame-header-bg")!),
+      svgFragmentWidth: size(svg.querySelector(".fragment-header")!),
+      svgRuleColor: getComputedStyle(
+        svg.querySelector(".fragment-header-rule")!,
+      ).stroke,
+    };
+  }, code);
+  expect(sizes.titleWidth).toBeLessThan(sizes.frameWidth);
+  expect(sizes.fragmentTabWidth).toBeLessThan(sizes.fragmentWidth);
+  expect(sizes.titlePadding).toBe("14px");
+  expect(sizes.fragmentPadding).toBe("14px");
+  expect(sizes.fragmentFill).toBe("#e9e9e9");
+  expect(sizes.ruleColor).toBe("#000000");
+  expect(sizes.svgRuleColor).toBe("rgb(0, 0, 0)");
+  expect(Math.abs(sizes.titleWidth - sizes.svgTitleWidth)).toBeLessThan(1);
+  expect(
+    Math.abs(sizes.fragmentTabWidth - sizes.svgFragmentWidth),
+  ).toBeLessThan(1);
+
+  const fragment = page.locator("#frame-tabs-dom .fragment-alt");
+  await fragment.locator(":scope > .header").hover();
+  await fragment.locator(".collapse-button").click();
+  await expect(fragment.locator(":scope > .hidden")).toHaveCount(1);
+  const collapsedTab = await fragment
+    .locator(":scope > .header > .frame-tab")
+    .boundingBox();
+  expect(collapsedTab?.width).toBe(sizes.fragmentTabWidth);
+
+  await page.emulateMedia({ forcedColors: "active" });
+  const title = page.locator("#frame-tabs-dom .title.frame-tab");
+  await expect(title).toHaveCSS("forced-color-adjust", "none");
+  await expect(fragment.locator(":scope > .header > .frame-tab")).toHaveCSS(
+    "forced-color-adjust",
+    "none",
+  );
+  await expect(title.locator(":scope > span")).toHaveCSS(
+    "forced-color-adjust",
+    "auto",
+  );
+});

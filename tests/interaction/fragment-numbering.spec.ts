@@ -72,7 +72,7 @@ A -> B.load() {
           svgIconOffset:
             Number(
               svgHost.querySelector(".fragment > svg")!.getAttribute("x"),
-            ) - Number(svgHeader.getAttribute("x")),
+            ) - (svgHeader as SVGGraphicsElement).getBBox().x,
           messagePositions: [...host.querySelectorAll(".interaction")].map(
             (element) => ({
               width: (element as HTMLElement).style.width,

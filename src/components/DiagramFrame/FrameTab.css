@@ -1,0 +1,48 @@
+/* The cut runs 10px along both edges. The gradient measures the
+   perpendicular distance from the corner (10px / sqrt(2)). */
+.zenuml .frame-tab {
+  --tab-cut: 10px;
+  --tab-diagonal: 7.071px;
+  --tab-edge-color: var(--tab-rule);
+  --tab-background-color: var(--tab-fill);
+  padding-right: calc(4px + var(--tab-cut));
+  background:
+    linear-gradient(
+      315deg,
+      transparent calc(var(--tab-diagonal) - 0.5px),
+      var(--tab-edge-color) calc(var(--tab-diagonal) - 0.5px)
+        calc(var(--tab-diagonal) + 0.5px),
+      transparent calc(var(--tab-diagonal) + 0.5px)
+    ),
+    linear-gradient(var(--tab-edge-color), var(--tab-edge-color)) right top /
+      1px calc(100% - var(--tab-cut)) no-repeat,
+    linear-gradient(var(--tab-edge-color), var(--tab-edge-color)) left bottom /
+      calc(100% - var(--tab-cut)) 1px no-repeat,
+    linear-gradient(
+      315deg,
+      transparent var(--tab-diagonal),
+      var(--tab-background-color) var(--tab-diagonal)
+    );
+}
+
+.title.frame-tab {
+  --tab-fill: var(
+    --color-bg-title,
+    var(--color-bg-frame, var(--color-bg-base, var(--color-backup-white, #fff)))
+  );
+  --tab-rule: var(--color-border-frame, var(--color-border-base, #666));
+  border-top-left-radius: 3px;
+}
+
+@media (forced-colors: active) {
+  .zenuml .frame-tab {
+    /* Keep the shape drawn by the gradients, using the system palette. */
+    --tab-edge-color: CanvasText;
+    --tab-background-color: Canvas;
+    forced-color-adjust: none;
+  }
+
+  .zenuml .frame-tab > * {
+    forced-color-adjust: auto;
+  }
+}

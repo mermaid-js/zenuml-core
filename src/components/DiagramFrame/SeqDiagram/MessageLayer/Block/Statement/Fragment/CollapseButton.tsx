@@ -18,10 +18,7 @@ export const CollapseButton = (props: {
   } = useCapClick("collapse", props.onClick);
   return (
     <div
-      className={cn(
-        "collapsible-header flex w-full justify-between",
-        props.className,
-      )}
+      className={cn("collapsible-header flex", props.className)}
       style={props.style}
       {...pressProps}
     >
@@ -33,14 +30,17 @@ export const CollapseButton = (props: {
       {props.collapsed ? (
         <Icon
           name="collapse-unexpanded"
-          className={cn("w-4 h-4", canCollapse && "cursor-pointer")}
+          className={cn(
+            "absolute right-1 top-1 w-4 h-4 text-skin-fragment",
+            canCollapse && "cursor-pointer",
+          )}
           onClick={onClick}
         />
       ) : (
         <Icon
           name="collapse-expanded"
           className={cn(
-            "w-4 h-4 collapse-button cursor-pointer hidden",
+            "absolute right-1 top-1 w-4 h-4 text-skin-fragment collapse-button cursor-pointer hidden",
             canCollapse && "group-[.fragment]:group-hover:inline-block",
             props.collapsed && "inline-block",
           )}

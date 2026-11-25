@@ -102,6 +102,22 @@ describe("renderToSvg", () => {
     const result = renderToSvg("title My Diagram\nA -> B: hello");
     expect(result.svg).toContain("My Diagram");
     expect(result.svg).toContain("frame-title");
+    expect(result.svg).toContain('class="frame-header-bg" d="M');
+    expect(result.svg).toContain('class="frame-header-line" d="M');
+  });
+
+  it("leaves the title tab out when no title is given", () => {
+    const { innerSvg } = renderToSvg("A -> B: hello");
+    expect(innerSvg).not.toContain('class="frame-header-bg"');
+    expect(innerSvg).not.toContain('class="frame-header-line"');
+  });
+
+  it("widens the outer frame to fit a long title tab", () => {
+    const code = "A -> A: hi";
+    const title = "Long checkout title ".repeat(20);
+    expect(renderToSvg(`title ${title}\n${code}`).width).toBeGreaterThan(
+      renderToSvg(code).width,
+    );
   });
 
   it("renders valid SVG with viewBox", () => {

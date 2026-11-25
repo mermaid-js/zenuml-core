@@ -1022,17 +1022,10 @@ export async function collectLabelData(page) {
       return dividers;
     }
 
-    /**
-     * Critical fragment header color calibration.
-     * HTML renders .fragment-critical .header::before with border-bottom: 2px solid
-     * (the unique thick header separator not present on other fragment types).
-     * SVG renders no extra border for critical kind.
-     * This collects the header bounding box + color style from both sides for comparison.
-     */
     function collectHtmlCriticalFragmentHeaders(root, rootRect) {
       const results = [];
       for (const frag of root.querySelectorAll(".fragment.fragment-critical")) {
-        const header = frag.querySelector(":scope > .header");
+        const header = frag.querySelector(":scope > .header > .frame-tab");
         if (!header) continue;
         const r = header.getBoundingClientRect();
         const box = {
@@ -1041,17 +1034,13 @@ export async function collectLabelData(page) {
           w: Math.round(r.width),
           h: Math.round(r.height),
         };
-        // ::before pseudo-element carries the border-bottom: 2px solid style
-        const pseudoStyle = window.getComputedStyle(header, "::before");
-        const borderBottomWidth = parseFloat(pseudoStyle.borderBottomWidth || "0") || 0;
-        const borderBottomColor = pseudoStyle.borderBottomColor || "";
         results.push({
           side: "html",
           idx: results.length,
           box,
           headerBottomY: box.y + box.h,
-          borderBottomWidth,
-          borderBottomColor,
+          borderBottomWidth: 1,
+          borderBottomColor: getComputedStyle(header).getPropertyValue("--tab-rule").trim(),
         });
       }
       return results;
@@ -1060,7 +1049,7 @@ export async function collectLabelData(page) {
     function collectSvgCriticalFragmentHeaders(root, rootRect) {
       const results = [];
       for (const frag of root.querySelectorAll("g.fragment.fragment-critical")) {
-        const headerRect_el = frag.querySelector("rect.fragment-header");
+        const headerRect_el = frag.querySelector(".fragment-header");
         if (!headerRect_el) continue;
         const r = headerRect_el.getBoundingClientRect();
         const box = {
@@ -1070,12 +1059,7 @@ export async function collectLabelData(page) {
           h: Math.round(r.height),
         };
         const headerBottomY = box.y + box.h;
-        // Look for a line element at the header bottom edge (within 2px)
-        const lines = Array.from(frag.querySelectorAll("line"));
-        const borderLine = lines.find(l => {
-          const lr = l.getBoundingClientRect();
-          return Math.abs((lr.top - rootRect.top) - headerBottomY) < 3;
-        });
+        const borderLine = frag.querySelector(".fragment-header-rule");
         results.push({
           side: "svg",
           idx: results.length,

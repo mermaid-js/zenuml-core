@@ -17,14 +17,14 @@ export function walkDiagram(spec) {
     (el) => !el.parentElement || !el.parentElement.closest(rootSel),
   );
   // The theme's surfaces, as the page paints them (first instance of each).
-  const surfaceOf = (sel) => {
+  const surfaceOf = (sel, property = "background-color") => {
     const el = document.querySelector(sel);
-    return el ? getComputedStyle(el).backgroundColor : null;
+    return el ? getComputedStyle(el).getPropertyValue(property).trim() : null;
   };
   const surfaces = {
     frame: surfaceOf(".frame") || surfaceOf(".frame-border-inner"),
     occurrence: surfaceOf(".occurrence"),
-    header: surfaceOf(".fragment:not(.fragment-ref) > .header"),
+    header: surfaceOf(".fragment > .header > .frame-tab", "--tab-fill"),
     dividerBox: surfaceOf(".divider .name"),
   };
   if (spec.mode === "svg") {
@@ -115,8 +115,15 @@ export function walkDiagram(spec) {
         const hasFill = fill && fill !== "none" && (tag === "rect" || tag === "polygon" || tag === "path" || tag === "circle" || tag === "ellipse");
         const rr = rectOf(r);
         if (hasStroke) {
+          const tabRule = el.matches(".fragment-header-rule, path.frame-header-line");
+          // A tab rule has a vertical and a diagonal edge too. Sample its
+          // horizontal edge against the tab fill above it, like the DOM rule.
+          const ruleRect = tabRule ? rectOf(el.previousElementSibling.getBoundingClientRect()) : rr;
+          const role = el.matches(".fragment-header-rule")
+            ? "fragment-header-rule"
+            : tabRule ? "header-rule" : "svg-line";
           items.push({
-            kind: "line", role: "svg-line", host, path: cssPath(el, svg), rect: rr, edge: "svg",
+            kind: "line", role, host, path: cssPath(el, svg), rect: ruleRect, edge: tabRule ? "bottom" : "svg",
             color: stroke, opacity: effectiveOpacity(el, svg) * (parseFloat(cs.strokeOpacity) || 1),
             strokeWidth: parseFloat(cs.strokeWidth) || 1,
           });
@@ -170,7 +177,7 @@ export function walkDiagram(spec) {
         let width = 1;
         if (lr.edge === "left") width = parseFloat(cs.borderLeftWidth) || 0;
         if (lr.edge === "top") width = parseFloat(cs.borderTopWidth) || 0;
-        if (lr.edge === "bottom") width = parseFloat(cs.borderBottomWidth) || 0;
+        if (lr.edge === "bottom" && lr.colorProp !== "--tab-rule") width = parseFloat(cs.borderBottomWidth) || 0;
         if (lr.edge === "svg") width = parseFloat(cs.strokeWidth) || 1;
         if (lr.edge === "row") width = r.height;
         if (lr.edge === "column") width = r.width;
@@ -180,6 +187,11 @@ export function walkDiagram(spec) {
           color = m ? m[1] : cs.borderLeftColor;
         }
         if (lr.edge !== "row" && lr.edge !== "column" && lr.edge !== "svg" && width === 0) continue;
+        if (lr.colorProp === "--tab-rule" && cs.forcedColorAdjust === "none") {
+          // The gradient uses CanvasText in forced colours. Text inside the
+          // tab still follows the system palette and resolves it to RGB.
+          color = getComputedStyle(el.firstElementChild).color;
+        }
         if (color === "currentcolor") color = cs.color;
         const opacity = effectiveOpacity(el, root);
         if (opacity < 0.05) continue;
@@ -200,12 +212,13 @@ export function walkDiagram(spec) {
         const cs = getComputedStyle(el);
         const opacity = effectiveOpacity(el, root);
         if (opacity < 0.05) continue;
+        const color = cs.getPropertyValue(fr.colorProp ?? "background-color").trim();
         // An unpainted background is not a fill (theme-dark drops the number
         // badge and code span fills this way).
-        if (/^rgba\(.*,\s*0\)$/.test(cs.backgroundColor) || cs.backgroundColor === "transparent") continue;
+        if (!color || /^rgba\(.*,\s*0\)$/.test(color) || color === "transparent") continue;
         items.push({
           kind: "fill", role: fr.role, host, path: cssPath(el, root), rect: rectOf(r),
-          color: cs.backgroundColor, opacity, gate: fr.gate !== false, userStyled: userStyled(el, root),
+          color, opacity, gate: fr.gate !== false, userStyled: userStyled(el, root),
         });
       }
     }

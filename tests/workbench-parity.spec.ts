@@ -169,11 +169,9 @@ for (const [name, code] of Object.entries(cases)) {
             document.querySelectorAll("#svg-container .fragment-label")[index],
           ),
           icon: box(
-            document
-              .querySelectorAll("#svg-container .fragment-header")
-              [
-                index
-              ].nextElementSibling!.nextElementSibling!.nextElementSibling!.querySelector("path")!,
+            document.querySelectorAll("#svg-container .fragment-icon > path")[
+              index
+            ],
           ),
           badge: box(
             document.querySelectorAll("#svg-container .fragment-number-bg")[

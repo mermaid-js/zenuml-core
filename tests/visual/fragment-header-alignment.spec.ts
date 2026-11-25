@@ -30,7 +30,7 @@ function inkCenter(
   const x1 = Math.ceil((part.x + part.width + pad) * dpr);
   const y0 = Math.round(header.y * dpr);
   const y1 = Math.round((header.y + HEADER_INNER_HEIGHT) * dpr);
-  // Background = the most common colour of the header band.
+  // Background = the most common colour of the tab.
   const histogram = new Map<number, number>();
   for (let y = y0; y < y1; y++) {
     for (
@@ -129,7 +129,7 @@ test.describe("fragment header alignment", () => {
             const b = el.getBoundingClientRect();
             return { x: b.x, y: b.y, width: b.width, height: b.height };
           };
-          return [...document.querySelectorAll(".fragment > .header")].map(
+          return [...document.querySelectorAll(".fragment > .header > .frame-tab")].map(
             (header) => {
               const title = header.querySelector(
                 ".collapsible-header > label",
@@ -183,7 +183,7 @@ test.describe("fragment header alignment", () => {
             const b = el.getBoundingClientRect();
             return { x: b.x, y: b.y, width: b.width, height: b.height };
           };
-          return [...document.querySelectorAll("rect.fragment-header")].map(
+          return [...document.querySelectorAll(".fragment-header")].map(
             (header) => {
               const parts: Part[] = [];
               let label = "";

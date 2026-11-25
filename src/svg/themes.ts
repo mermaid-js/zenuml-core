@@ -32,6 +32,7 @@ export interface SvgPalette {
   frameBg: string;
   /** Diagram title text. */
   titleText: string;
+  titleBg?: string;
   participantBg: string;
   /** Participant box outline and icon stroke. */
   participantBorder: string;
@@ -47,6 +48,7 @@ export interface SvgPalette {
   occurrenceBorder: string;
   fragmentBorder: string;
   fragmentHeaderBg: string;
+  fragmentHeaderRule?: string;
   /** `.fragment-header` fill-opacity — 0.498 when the CSS colour carries alpha. */
   fragmentHeaderOpacity: string;
   /** Fragment label inside the header band. */
@@ -131,6 +133,7 @@ const DARK_PALETTE: SvgPalette = {
   fragmentHeaderBg: "#e9e9e9",
   fragmentHeaderOpacity: "1",
   fragmentHeaderText: "#000000",
+  fragmentHeaderRule: "#000000",
   fragmentText: "#d4d4d4",
   guardOpacity: "1",
   fragmentSeparator: "#9f9f9f",
@@ -250,8 +253,8 @@ export function buildThemeStyles(p: SvgPalette): string {
   ${IBM_PLEX_SANS_FONT_FACE_CSS}
   .frame-border-outer { fill: ${p.frameBorder}; }
   .frame-border-inner { fill: ${p.frameBg}; }
-  .frame-header-bg { fill: ${p.frameBg}; }
-  .frame-header-line { stroke: ${p.frameBorder}; stroke-width: 1; shape-rendering: crispEdges; }
+  .frame-header-bg { fill: ${p.titleBg ?? p.frameBg}; }
+  .frame-header-line { fill: none; stroke: ${p.frameBorder}; stroke-width: 1; }
   .frame-title { font-family: ${p.fontFamily}; font-size: 14px; font-weight: 400; fill: ${p.titleText}; }
   .participant-box { fill: ${p.participantBg}; stroke: ${p.participantBorder}; stroke-width: 1; }
   .participant-label { font-family: ${p.fontFamily}; font-size: 14px; fill: ${p.participantText}; }
@@ -265,7 +268,8 @@ export function buildThemeStyles(p: SvgPalette): string {
   .self-call-line { stroke: ${p.messageArrow}; stroke-width: 1; fill: none; }
   .occurrence { fill: ${p.occurrenceBg}; stroke: ${p.occurrenceBorder}; stroke-width: 1; shape-rendering: crispEdges; }
   .fragment-border { fill: none; stroke: ${p.fragmentBorder}; stroke-width: 1; }
-  .fragment-header { fill: ${p.fragmentHeaderBg}; fill-opacity: ${p.fragmentHeaderOpacity}; stroke: none; shape-rendering: crispEdges; }
+  .fragment-header { fill: ${p.fragmentHeaderBg}; fill-opacity: ${p.fragmentHeaderOpacity}; stroke: none; }
+  .fragment-header-rule { fill: none; stroke: ${p.fragmentHeaderRule ?? p.fragmentSeparator}; stroke-width: 1; }
   .fragment-number-bg { fill: ${p.numberBg}; fill-opacity: ${p.numberBgOpacity}; stroke: none; }
   .message-number-bg { fill: ${p.numberBg}; fill-opacity: ${p.numberBgOpacity}; stroke: none; }
   .fragment-label { font-family: ${p.fontFamily}; font-size: 14px; font-weight: 400; font-variant-caps: all-small-caps; fill: ${p.fragmentHeaderText}; }
