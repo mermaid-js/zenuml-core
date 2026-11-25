@@ -13,7 +13,9 @@ import { useCan } from "@/store/interaction/useCan";
 import { elementScale, rectToLocal } from "@/utils/diagramCoords";
 import { insertMessageInDsl } from "@/utils/insertMessageInDsl";
 import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
-import { useEffect, useId, useMemo, useRef } from "react";
+import { swallowFollowUps } from "@/store/interaction/swallowFollowUps";
+import { useCallback, useEffect, useId, useMemo, useRef } from "react";
+import { MessageTargetPicker } from "./MessageTargetPicker";
 
 const DRAG_THRESHOLD = 6;
 
@@ -44,6 +46,10 @@ export const MessageCreateControls = () => {
       ),
     [rootContext],
   );
+  const participantNames = useMemo(
+    () => participants.map((participant) => participant.name),
+    [participants],
+  );
 
   useEffect(() => {
     dragStateRef.current = dragState;
@@ -66,8 +72,115 @@ export const MessageCreateControls = () => {
     };
   }, [canCreate, diagramElement, enabled, isCreatingMessage]);
 
+  // Insert the message the draft describes, sync by default, and open its
+  // label for editing.
+  const createTo = useCallback(
+    (draft: NonNullable<typeof dragState>, target: string) => {
+      const next = insertMessageInDsl({
+        code,
+        from: draft.source,
+        to: target,
+        blockContext: draft.blockContext,
+        hostContext: draft.hostContext,
+        insertIndex: draft.insertIndex,
+      });
+      commitCode(next.code, { action: "message_inserted" });
+      setPendingEditableRange({
+        start: next.labelPosition[0],
+        end: next.labelPosition[1],
+        token: Date.now(),
+      });
+    },
+    [code, commitCode, setPendingEditableRange],
+  );
+
+  const closePicker = useCallback(
+    (restoreFocus: boolean) => {
+      const returnFocus = store.get(createMessageDragAtom)?.returnFocus;
+      setDragState(null);
+      setSelectedParticipants([]);
+      if (restoreFocus) returnFocus?.focus();
+    },
+    [setDragState, setSelectedParticipants, store],
+  );
+
+  const pickTarget = useCallback(
+    (target: string) => {
+      const draft = store.get(createMessageDragAtom);
+      if (!draft) return;
+      createTo(draft, target);
+      setDragState(null);
+      setSelectedParticipants([]);
+    },
+    [createTo, setDragState, setSelectedParticipants, store],
+  );
+
+  // Picking: a press on a participant chooses it, a press in the picker is
+  // the picker's own, and any other press cancels; inside the diagram that
+  // press is consumed. Window capture runs before the InteractionController's
+  // document listener.
   useEffect(() => {
-    if (!dragState || !diagramElement || !canCreate) {
+    if (!dragState?.picking || !diagramElement || !canCreate) return;
+    const participantAt = (target: EventTarget | null) => {
+      const element =
+        target instanceof Element
+          ? target.closest<HTMLElement>("[data-participant-id]")
+          : null;
+      if (!element || !diagramElement.contains(element)) return null;
+      const name = element.dataset.participantId;
+      return name && participants.some((p) => p.name === name) ? name : null;
+    };
+    // The preview stays on the last participant pointed at, or on the
+    // picker's active option, when the pointer leaves the participants.
+    const onPointerMove = (event: PointerEvent) => {
+      const target = participantAt(event.target);
+      if (!target) return;
+      setDragState((prev) =>
+        prev && prev.pointedTarget !== target
+          ? { ...prev, hoverTarget: target, pointedTarget: target }
+          : prev,
+      );
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      if (
+        event.target instanceof Element &&
+        event.target.closest('[data-interaction-surface="createDrag"]')
+      )
+        return;
+      // Outside the diagram the press belongs to the host: cancel and let it
+      // act, as the InteractionController does for menus (ADR 0002, R2).
+      if (
+        !(event.target instanceof Node) ||
+        !diagramElement.contains(event.target)
+      ) {
+        closePicker(false);
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      swallowFollowUps();
+      const target = participantAt(event.target);
+      if (target) pickTarget(target);
+      else closePicker(false);
+    };
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerdown", onPointerDown, true);
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerdown", onPointerDown, true);
+    };
+  }, [
+    canCreate,
+    closePicker,
+    diagramElement,
+    dragState?.picking,
+    participants,
+    pickTarget,
+    setDragState,
+  ]);
+
+  useEffect(() => {
+    if (!dragState || dragState.picking || !diagramElement || !canCreate) {
       dragHandledRef.current = false;
       participantScreenXRef.current = new Map();
       return;
@@ -178,23 +291,16 @@ export const MessageCreateControls = () => {
         ? findTarget(event.clientX, event.clientY, current.source)
         : null;
       if (target) {
-        const next = insertMessageInDsl({
-          code,
-          from: current.source,
-          to: target,
-          blockContext: current.blockContext,
-          hostContext: current.hostContext,
-          insertIndex: current.insertIndex,
-        });
-        commitCode(next.code, { action: "message_inserted" });
-        setPendingEditableRange({
-          start: next.labelPosition[0],
-          end: next.labelPosition[1],
-          token: Date.now(),
-        });
+        createTo(current, target);
+        setDragState(null);
+        setSelectedParticipants([]);
+        return;
       }
-      setDragState(null);
-      setSelectedParticipants([]);
+      // A click, or a release away from any participant, keeps the draft
+      // and asks for the target: the design never guesses one.
+      setDragState((prev) =>
+        prev ? { ...prev, picking: true, hoverTarget: null } : prev,
+      );
     };
 
     // Escape cancels through the interaction state (ADR 0002, P3): clearing
@@ -206,12 +312,10 @@ export const MessageCreateControls = () => {
       window.removeEventListener("pointerup", onPointerUp);
     };
   }, [
-    code,
+    createTo,
     diagramElement,
     dragState,
     participants,
-    commitCode,
-    setPendingEditableRange,
     setDragState,
     setSelectedParticipants,
     store,
@@ -283,17 +387,19 @@ export const MessageCreateControls = () => {
                 />
               </marker>
             </defs>
-            <line
-              data-testid="message-create-preview-line"
-              x1={dragState.sourceX - offsetX}
-              y1={dragState.sourceY - offsetY}
-              x2={targetX ?? dragState.pointerX - offsetX}
-              y2={dragState.sourceY - offsetY}
-              stroke="#2563eb"
-              strokeWidth="1"
-              shapeRendering="crispEdges"
-              markerEnd={`url(#${arrowId})`}
-            />
+            {(!dragState.picking || targetX !== null) && (
+              <line
+                data-testid="message-create-preview-line"
+                x1={dragState.sourceX - offsetX}
+                y1={dragState.sourceY - offsetY}
+                x2={targetX ?? dragState.pointerX - offsetX}
+                y2={dragState.sourceY - offsetY}
+                stroke="#2563eb"
+                strokeWidth="1"
+                shapeRendering="crispEdges"
+                markerEnd={`url(#${arrowId})`}
+              />
+            )}
           </svg>
           <div
             data-testid="message-create-source-dot"
@@ -338,7 +444,25 @@ export const MessageCreateControls = () => {
             />
           );
         })}
-      {dragState && targetRect && (
+      {dragState?.picking && (
+        <MessageTargetPicker
+          source={dragState.source}
+          participants={participantNames}
+          hovered={dragState.pointedTarget ?? null}
+          left={dragState.sourceX - offsetX}
+          top={dragState.sourceY - offsetY}
+          onHover={(target: string | null) =>
+            setDragState((prev) =>
+              prev && prev.hoverTarget !== target
+                ? { ...prev, hoverTarget: target }
+                : prev,
+            )
+          }
+          onPick={pickTarget}
+          onCancel={() => closePicker(true)}
+        />
+      )}
+      {dragState && !dragState.picking && targetRect && (
         <div
           data-testid="message-create-release-tooltip"
           className="absolute z-40 -translate-x-1/2 -translate-y-full rounded-zu-sm bg-gray-900 px-2 py-1 text-[11px] leading-4 text-white shadow-zu-sm pointer-events-none"

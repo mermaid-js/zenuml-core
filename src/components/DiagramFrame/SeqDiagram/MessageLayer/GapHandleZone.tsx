@@ -284,8 +284,56 @@ export const GapHandleZone = (props: {
     openMenu(event.clientX, event.currentTarget);
   };
 
+  // Keyboard start (design §6.2): the gap's own sender is the source, and the
+  // target is always chosen in the picker. An unnamed starter is not a sender
+  // the user chose, so those gaps offer no keyboard start.
+  const keyboardSource =
+    canCreateMessage &&
+    participants.some((participant) => participant.name === props.origin)
+      ? props.origin
+      : null;
+
+  const startPicking = (currentTarget: HTMLDivElement) => {
+    if (!keyboardSource || !diagramElement) return;
+    const zone = rectToLocal(
+      diagramElement,
+      currentTarget.getBoundingClientRect(),
+    );
+    const sourceX = zone.x + centerOf(coordinates, keyboardSource);
+    setSelectedMessage(null);
+    setSelectedParticipants([]);
+    setCreateDrag({
+      source: keyboardSource,
+      sourceX,
+      sourceY: zone.centerY,
+      pointerX: sourceX,
+      pointerY: zone.centerY,
+      hoverTarget: null,
+      insertIndex: props.insertIndex,
+      blockContext: props.blockContext,
+      picking: true,
+      returnFocus: currentTarget,
+    });
+  };
+
+  const zoneFocusable = Boolean(keyboardSource) || canInsertDivider || menuOpen;
+  const zoneLabel = keyboardSource
+    ? `Add a message from ${keyboardSource}`
+    : canInsertDivider || menuOpen
+      ? "Insertion options"
+      : undefined;
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (menuOpen && event.key === "Escape") {
+    if (
+      !menuOpen &&
+      keyboardSource &&
+      event.target === event.currentTarget &&
+      (event.key === "Enter" || event.key === " ")
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      startPicking(event.currentTarget);
+    } else if (menuOpen && event.key === "Escape") {
       event.preventDefault();
       event.stopPropagation();
       closeMenu();
@@ -410,10 +458,8 @@ export const GapHandleZone = (props: {
         onPointerLeave={handlePointerLeave}
         onContextMenu={handleContextMenu}
         onKeyDown={handleKeyDown}
-        tabIndex={canInsertDivider || menuOpen ? 0 : undefined}
-        aria-label={
-          canInsertDivider || menuOpen ? "Insertion options" : undefined
-        }
+        tabIndex={zoneFocusable ? 0 : undefined}
+        aria-label={zoneLabel}
       >
         {renderHandles()}
       </div>
@@ -453,10 +499,8 @@ export const GapHandleZone = (props: {
         onPointerLeave={handlePointerLeave}
         onContextMenu={handleContextMenu}
         onKeyDown={handleKeyDown}
-        tabIndex={canInsertDivider || menuOpen ? 0 : undefined}
-        aria-label={
-          canInsertDivider || menuOpen ? "Insertion options" : undefined
-        }
+        tabIndex={zoneFocusable ? 0 : undefined}
+        aria-label={zoneLabel}
       >
         {renderHandles()}
       </div>
