@@ -12,7 +12,7 @@ import {
   MESSAGE_HEIGHT,
   SELF_MESSAGE_HEIGHT,
 } from "@/positioning/vertical/LayoutMetrics";
-import Anchor2 from "@/positioning/Anchor2";
+import Anchor from "@/positioning/Anchor";
 import type {
   MessageGeometry,
   SelfCallGeometry,
@@ -58,11 +58,11 @@ export function buildCallGeometry(
   const messageY = coord.top + adjust + msgCommentHeight + messageHeight - 0.5;
 
   // D4: When sender has an active occurrence, arrow starts from its near edge.
-  // Same wall arithmetic the HTML path runs through Anchor2:
+  // Same wall arithmetic the HTML path runs through Anchor:
   // LTR → rightEdgeOfRightWall (position + side*depth);
   // RTL → leftEdgeOfRightWall  (position + side*(depth-1) - side).
   if (info.senderOccurrenceDepth >= 1 && !info.isSelf) {
-    const senderAnchor = new Anchor2(fromX, info.senderOccurrenceDepth);
+    const senderAnchor = new Anchor(fromX, info.senderOccurrenceDepth);
     const isLTR = fromX < toX;
     fromX = isLTR
       ? senderAnchor.rightEdgeOfRightWall()
@@ -83,9 +83,9 @@ export function buildCallGeometry(
     const selfWidth = isAsync ? 28 : OCCURRENCE_WIDTH;
     // For self-calls inside an occurrence, the HTML component renders
     // inside the occurrence div — starting at the occurrence's right edge,
-    // i.e. Anchor2's rightEdgeOfRightWall (position + side*depth), which
+    // i.e. Anchor's rightEdgeOfRightWall (position + side*depth), which
     // degenerates to the bare lifeline position at depth 0.
-    const selfX = new Anchor2(
+    const selfX = new Anchor(
       fromX,
       info.senderOccurrenceDepth,
     ).rightEdgeOfRightWall();
@@ -196,7 +196,7 @@ export function buildCallGeometry(
           ? toX - OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset + 1
           : toX + OCCURRENCE_BAR_SIDE_WIDTH + nestingOffset + 1;
         // Sender's fromX is D4-adjusted for its occurrence edge.
-        // For bare lifelines (no occurrences), adjust to match HTML Anchor2's
+        // For bare lifelines (no occurrences), adjust to match HTML Anchor's
         // edge offset. HTML places the return endpoint at:
         //   rightEdgeOfRightWall + LIFELINE_WIDTH + 1 (LTR message → RTL return)
         //   position + LIFELINE_WIDTH (RTL message → LTR return)

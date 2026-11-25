@@ -1,6 +1,6 @@
 import sequenceParser from "@/generated-parser/sequenceParser";
 import { centerOf, distance2 } from "./utils";
-import Anchor2 from "@/positioning/Anchor2";
+import Anchor from "@/positioning/Anchor";
 import { coordinatesAtom } from "@/store/Store";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
@@ -45,17 +45,17 @@ export const useArrow = ({
 
     const targetLayers = depthOnParticipant4Stat(context, target);
 
-    const anchor2Origin = new Anchor2(
+    const anchor2Origin = new Anchor(
       centerOf(coordinates, origin),
       originLayers,
     );
 
-    const anchor2Source = new Anchor2(
+    const anchor2Source = new Anchor(
       centerOf(coordinates, source),
       sourceLayers,
     );
 
-    const anchor2Target = new Anchor2(
+    const anchor2Target = new Anchor(
       centerOf(coordinates, target),
       targetLayers,
     );

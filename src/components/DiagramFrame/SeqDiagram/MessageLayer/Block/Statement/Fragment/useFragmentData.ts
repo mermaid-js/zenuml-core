@@ -17,7 +17,7 @@ import { walkStatements } from "@/svg/walkStatements";
 import { useIdentityKey } from "@/store/useIdentityKey";
 
 import { depthOnParticipant } from "@/parser/depthOnParticipant";
-import Anchor2 from "@/positioning/Anchor2";
+import Anchor from "@/positioning/Anchor";
 import { centerOf } from "../utils";
 import { createStore, useAtomValue, useStore } from "jotai";
 
@@ -50,11 +50,11 @@ export const getOffsetX = (store: Store, context: any, origin: string) => {
   const originLayers = depthOnParticipant(context, origin);
 
   // Create anchors for both participants to calculate accurate distance
-  const anchor2Origin = new Anchor2(
+  const anchor2Origin = new Anchor(
     centerOf(coordinates, origin),
     originLayers,
   );
-  const anchor2LeftParticipant = new Anchor2(
+  const anchor2LeftParticipant = new Anchor(
     centerOf(coordinates, leftParticipant),
     0,
   );
