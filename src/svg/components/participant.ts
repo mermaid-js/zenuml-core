@@ -34,17 +34,14 @@ interface ParticipantRowLayout {
 }
 
 /**
- * Horizontal layout of the participant label row, shared by the top and bottom
- * boxes. `withIcon` reserves the type-icon slot ahead of the emoji and label.
+ * Horizontal layout of the participant label row. A type icon reserves its slot
+ * ahead of the emoji and label.
  *
  * Without an icon or an emoji the label is centred on the participant.
  */
-function layoutParticipantRow(
-  p: ParticipantGeometry,
-  { withIcon }: { withIcon: boolean },
-): ParticipantRowLayout {
+function layoutParticipantRow(p: ParticipantGeometry): ParticipantRowLayout {
   const textWidth = p.labelWidth ?? 0;
-  if (withIcon) {
+  if (getIcon(p.type)) {
     // HTML centers the whole icon+label row. The label glyphs sit inside a span
     // with 8px left/right inline padding, so SVG needs to place text from the
     // padded glyph origin rather than the visual center of the participant box.
@@ -130,9 +127,7 @@ export function renderParticipant(p: ParticipantGeometry): string {
   const textY = p.y + p.height / 2 - 0.25;
   const labelY = p.stereotype ? textY + STEREOTYPE_VERTICAL_OFFSET : textY;
 
-  const { iconX, emojiX, textX, textAnchor } = layoutParticipantRow(p, {
-    withIcon: !!icon,
-  });
+  const { iconX, emojiX, textX, textAnchor } = layoutParticipantRow(p);
   if (icon && iconX != null) {
     const iconType = p.type?.toLowerCase();
     const iconY =
@@ -176,37 +171,6 @@ export function renderParticipant(p: ParticipantGeometry): string {
   ${emojiIconSvg}
   ${stereotypeSvg}
   <text x="${textX}" y="${labelY}" text-anchor="${textAnchor}" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
-</g>`;
-}
-
-export function renderParticipantBottom(
-  p: ParticipantGeometry,
-  bottomY: number,
-): string {
-  if (!p.showBottom || p.isStarter) return "";
-  const rx = 4 - HALF_STROKE;
-  const x = p.x - p.width / 2 + HALF_STROKE;
-  const rectY = bottomY + HALF_STROKE;
-  const rectW = p.width - STROKE_WIDTH;
-  const rectH = p.height - STROKE_WIDTH;
-  const textY = bottomY + p.height / 2 - 0.25;
-
-  const textLengthAttr = labelTextLengthAttr(p);
-  const { fillStyle, textStyle } = colorAttrs(p.color);
-
-  // The bottom box draws no type icon and no stereotype. It reserves the icon
-  // slot only when an emoji follows it, so a plain-icon label stays centred.
-  const { emojiX, textX, textAnchor } = layoutParticipantRow(p, {
-    withIcon: !!getIcon(p.type) && !!p.emoji,
-  });
-  const emojiSvg =
-    p.emoji && emojiX != null
-      ? `\n  ${renderEmojiText(emojiX, textY, p.emoji)}`
-      : "";
-
-  return `<g class="participant participant-bottom" data-participant="${esc(p.name)}">
-  <rect x="${x}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rx}" class="participant-box"${fillStyle}/>${emojiSvg}
-  <text x="${textX}" y="${textY}" text-anchor="${textAnchor}" dominant-baseline="central" class="participant-label"${textLengthAttr}${textStyle}>${esc(p.label)}</text>
 </g>`;
 }
 

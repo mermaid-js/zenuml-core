@@ -15,8 +15,6 @@ export interface ParticipantGeometry {
   width: number;
   height: number;
   isStarter: boolean;
-  /** Duplicate at diagram bottom for long diagrams */
-  showBottom: boolean;
   /** Measured glyph-only label width (for textLength adjustment on aliased labels) */
   labelWidth?: number;
   /** Icon type (e.g., "aws", "database") if participant has an icon */

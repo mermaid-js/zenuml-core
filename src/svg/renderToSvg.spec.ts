@@ -277,18 +277,6 @@ describe("renderToSvg", () => {
     expect(result.svg).toContain("<path");
   });
 
-  it("does not render starter at bottom of diagram", () => {
-    const result = renderToSvg("A.method()");
-    // Starter should not appear in bottom participants
-    const bottomGroups = [
-      ...result.svg.matchAll(
-        /class="participant participant-bottom"[^>]*data-participant="([^"]+)"/g,
-      ),
-    ];
-    const starterAtBottom = bottomGroups.some((m) => m[1] === "_STARTER_");
-    expect(starterAtBottom).toBe(false);
-  });
-
   // --- Comment tests ---
 
   it("renders inline comment text in SVG", () => {

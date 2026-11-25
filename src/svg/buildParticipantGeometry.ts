@@ -96,7 +96,6 @@ export function buildParticipants(
       width,
       height: PARTICIPANT_VISUAL_HEIGHT,
       isStarter,
-      showBottom: creationTop == null && !isStarter,
       labelWidth: measuredTextWidth,
       type: m.type,
       stereotype: m.stereotype,
