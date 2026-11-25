@@ -48,6 +48,44 @@ test.describe("theme-dark", () => {
     });
   }
 
+  test("keyboard focus ring keeps a frame-coloured gap and a ring that clears 3:1", async ({
+    page,
+  }) => {
+    // --zu-focus-ring is a gap (--zu-page) inside a ring (--zu-ring-focus).
+    // On theme-dark the gap must be the frame, not a white halo, and the ring
+    // must then carry the WCAG 2 non-text floor (3:1) against the frame alone.
+    await page.goto("/e2e/fixtures/insert-participant.html?theme=theme-dark");
+    const participant = page.locator(".participant").first();
+    const name = participant.locator(".editable-span-base");
+    for (let i = 0; i < 12; i += 1) {
+      if (await participant.evaluate((element) => element === document.activeElement)) break;
+      await page.keyboard.press("Tab");
+    }
+    await expect(participant).toBeFocused();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Tab");
+    await expect(name).toBeFocused();
+
+    const { frame, shadow } = await name.evaluate((element) => ({
+      frame: getComputedStyle(element.closest(".frame")!).backgroundColor,
+      shadow: getComputedStyle(element).boxShadow,
+    }));
+    const colours = shadow.match(/rgba?\([^)]*\)/g) ?? [];
+    expect(colours.length).toBe(3);
+    expect(frame).toBe("rgb(31, 31, 31)");
+    expect(colours[0]).toBe(frame);
+
+    const luminance = (rgb: string) => {
+      const [r, g, b] = rgb.match(/[\d.]+/g)!.slice(0, 3).map((v) => {
+        const c = Number(v) / 255;
+        return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const [hi, lo] = [luminance(colours[1]), luminance(frame)].sort((a, b) => b - a);
+    expect((hi + 0.05) / (lo + 0.05)).toBeGreaterThanOrEqual(3);
+  });
+
   test("theme-clean-dark and theme-darcula render as theme-dark", async ({ page }) => {
     // The aliases set the same custom properties, so the composited frame
     // colours match; a screenshot per alias would only duplicate the baseline.
